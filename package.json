@@ -1,0 +1,15 @@
+{
+  "name": "understoria",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Understoria — a federated, privacy-first mutual aid timebank",
+  "license": "AGPL-3.0-or-later",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm --workspace @understoria/web run dev",
+    "build": "npm --workspace @understoria/web run build",
+    "preview": "npm --workspace @understoria/web run preview",
+    "test": "npm --workspace @understoria/web run test",
+    "typecheck": "npm --workspace @understoria/web run typecheck"
+  }
+}

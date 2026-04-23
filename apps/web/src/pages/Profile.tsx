@@ -1,0 +1,369 @@
+import { useMemo, useState } from "react";
+import { useApp } from "@/state/AppContext";
+import { balanceFor, transactionHistory } from "@/lib/timebank";
+import { AchievementBadge } from "@/components/AchievementBadge";
+import { CategoryBadge } from "@/components/CategoryBadge";
+import {
+  formatHours,
+  formatRelativeTime,
+  formatSignedHours,
+  shortKey,
+} from "@/lib/format";
+import { updateMemberProfile } from "@/db/actions";
+import { db } from "@/db/database";
+import type { AchievementType, Member } from "@/types";
+
+export default function ProfilePage() {
+  const { currentMember, members, exchanges, achievements, setCurrentMember } =
+    useApp();
+
+  if (!currentMember) return null;
+
+  const balance = useMemo(
+    () => balanceFor(currentMember, exchanges),
+    [currentMember, exchanges],
+  );
+  const history = useMemo(
+    () => transactionHistory(currentMember.publicKey, exchanges),
+    [currentMember, exchanges],
+  );
+  const memberMap = useMemo(
+    () => new Map(members.map((m) => [m.publicKey, m])),
+    [members],
+  );
+  const myAchievements = useMemo(
+    () =>
+      achievements
+        .filter((a) => a.memberKey === currentMember.publicKey)
+        .sort((a, b) => b.earnedAt - a.earnedAt),
+    [achievements, currentMember.publicKey],
+  );
+
+  return (
+    <div className="px-4 pb-8 pt-4">
+      <header className="mb-4">
+        <h1 className="text-2xl font-bold tracking-tight">Your profile</h1>
+        <p className="text-xs text-moss-500 dark:text-moss-400">
+          Identity: {shortKey(currentMember.publicKey)}
+        </p>
+      </header>
+
+      <BalanceCard balance={balance} seed={currentMember.seedBalance} />
+
+      <ProfileEditor member={currentMember} />
+
+      <section className="card mb-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
+          Community roles earned
+        </h2>
+        {myAchievements.length === 0 ? (
+          <p className="text-sm text-moss-600 dark:text-moss-300">
+            You haven't earned any community roles yet. They show up as you
+            participate — not as trophies, but as ways of naming the shapes
+            your contributions take.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {myAchievements.map((a) => (
+              <li key={a.id}>
+                <AchievementBadge
+                  type={a.achievementType as AchievementType}
+                  earnedAt={a.earnedAt}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="card mb-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
+          Your exchange history
+        </h2>
+        {history.length === 0 ? (
+          <p className="text-sm text-moss-600 dark:text-moss-300">
+            Nothing here yet. When you give or receive help, each exchange
+            shows up with a signed record you can verify.
+          </p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
+            {history.map(({ exchange, delta, counterparty }) => {
+              const other = memberMap.get(counterparty);
+              return (
+                <li
+                  key={exchange.id}
+                  className="flex items-center gap-3 py-3"
+                >
+                  <CategoryBadge category={exchange.category} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm">
+                      {delta > 0 ? "Helped" : "Received help from"}{" "}
+                      <span className="font-medium">
+                        {other?.displayName ?? "a member"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-moss-500">
+                      {formatRelativeTime(exchange.completedAt)}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-sm font-semibold ${
+                      delta > 0
+                        ? "text-canopy-700 dark:text-canopy-300"
+                        : "text-moss-600 dark:text-moss-300"
+                    }`}
+                  >
+                    {formatSignedHours(delta)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      <MemberSwitcher
+        members={members}
+        currentMember={currentMember}
+        onSwitch={setCurrentMember}
+      />
+
+      <section className="card">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
+          Data & privacy
+        </h2>
+        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+          Everything you see is stored locally on this device. No server. No
+          analytics. No account to sign up for.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="btn-secondary"
+            onClick={() => exportData()}
+            type="button"
+          >
+            Export my data
+          </button>
+          <button
+            className="btn bg-rose-600 text-white hover:bg-rose-700"
+            onClick={() => purgeLocalData()}
+            type="button"
+          >
+            Wipe local data
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function BalanceCard({
+  balance,
+  seed,
+}: {
+  balance: number;
+  seed: number;
+}) {
+  const tone =
+    balance > seed
+      ? "surplus"
+      : balance === seed
+        ? "neutral"
+        : "receiving";
+  const message =
+    tone === "surplus"
+      ? "You've given more than you've received lately. Thank you."
+      : tone === "neutral"
+        ? "Your balance is right at your starting seed. That's a fine place to be."
+        : "You've been receiving — that's what seed credits are for. Ask for what you need.";
+  return (
+    <section className="card mb-4">
+      <div className="flex items-end justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-wide text-moss-500">
+            Your balance
+          </div>
+          <div className="mt-1 text-4xl font-bold text-canopy-700 dark:text-canopy-300">
+            {formatHours(balance)}
+          </div>
+        </div>
+        <div className="text-right text-xs text-moss-500">
+          <div>Seed: {formatHours(seed)}</div>
+          <div>Balances can go negative — asking is never gated.</div>
+        </div>
+      </div>
+      <p className="mt-3 text-sm text-moss-600 dark:text-moss-300">{message}</p>
+    </section>
+  );
+}
+
+function ProfileEditor({ member }: { member: Member }) {
+  const [name, setName] = useState(member.displayName);
+  const [skills, setSkills] = useState(member.skills.join(", "));
+  const [availability, setAvailability] = useState(member.availability);
+  const [zone, setZone] = useState(member.locationZone);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await updateMemberProfile(member.publicKey, {
+        displayName: name.trim() || member.displayName,
+        skills: skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        availability: availability.trim(),
+        locationZone: zone.trim(),
+      });
+      setSavedAt(Date.now());
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        About you
+      </h2>
+      <form className="flex flex-col gap-3" onSubmit={handleSave}>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Display name (pseudonym is fine)</span>
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={60}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Skills (comma-separated)</span>
+          <input
+            className="input"
+            placeholder="cooking, listening, spanish"
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Availability</span>
+          <input
+            className="input"
+            placeholder="e.g. Evenings and weekends"
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Area (neighborhood, not address)</span>
+          <input
+            className="input"
+            placeholder="e.g. North neighborhood"
+            value={zone}
+            onChange={(e) => setZone(e.target.value)}
+          />
+        </label>
+        <div className="flex items-center gap-3">
+          <button type="submit" className="btn-primary" disabled={saving}>
+            {saving ? "Saving..." : "Save"}
+          </button>
+          {savedAt && (
+            <span className="text-xs text-canopy-700 dark:text-canopy-300">
+              Saved {formatRelativeTime(savedAt)}
+            </span>
+          )}
+        </div>
+      </form>
+    </section>
+  );
+}
+
+function MemberSwitcher({
+  members,
+  currentMember,
+  onSwitch,
+}: {
+  members: Member[];
+  currentMember: Member;
+  onSwitch: (publicKey: string) => void;
+}) {
+  if (members.length <= 1) return null;
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        Switch member (local dev)
+      </h2>
+      <p className="mb-3 text-xs text-moss-500">
+        In a real deployment each device holds one identity. This switcher
+        exists so you can walk through the full exchange flow yourself while
+        testing.
+      </p>
+      <ul className="flex flex-col gap-2">
+        {members.map((m) => (
+          <li key={m.publicKey}>
+            <button
+              type="button"
+              onClick={() => onSwitch(m.publicKey)}
+              className={`w-full rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
+                m.publicKey === currentMember.publicKey
+                  ? "border-canopy-600 bg-canopy-50 text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100"
+                  : "border-moss-200 hover:bg-moss-50 dark:border-moss-800 dark:hover:bg-moss-900"
+              }`}
+            >
+              <div className="font-medium">{m.displayName}</div>
+              <div className="text-xs text-moss-500">
+                {shortKey(m.publicKey)} · {m.locationZone || "no area set"}
+              </div>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+async function exportData() {
+  const [members, posts, exchanges, achievements, settings] = await Promise.all(
+    [
+      db.members.toArray(),
+      db.posts.toArray(),
+      db.exchanges.toArray(),
+      db.achievements.toArray(),
+      db.settings.toArray(),
+    ],
+  );
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    schemaVersion: 1,
+    data: { members, posts, exchanges, achievements, settings },
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `understoria-export-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function purgeLocalData() {
+  const confirmed = window.confirm(
+    "Wipe all local data on this device? This is not reversible. Exported data is not affected.",
+  );
+  if (!confirmed) return;
+  await Promise.all([
+    db.posts.clear(),
+    db.exchanges.clear(),
+    db.achievements.clear(),
+    db.members.clear(),
+    db.settings.clear(),
+  ]);
+  window.location.reload();
+}
