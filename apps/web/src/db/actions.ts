@@ -1,0 +1,246 @@
+import { db } from "./database";
+import { diffAchievements } from "@/lib/achievements";
+import { placeholderSignature, uuid } from "@/lib/id";
+import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
+
+export interface CreatePostInput {
+  type: PostType;
+  category: Category;
+  title: string;
+  description: string;
+  estimatedHours: number;
+  urgency: Urgency;
+  expiresAt: number | null;
+}
+
+export async function createPost(
+  memberKey: string,
+  locationZone: string,
+  input: CreatePostInput,
+): Promise<Post> {
+  const post: Post = {
+    id: uuid(),
+    type: input.type,
+    category: input.category,
+    title: input.title.trim(),
+    description: input.description.trim(),
+    estimatedHours: input.estimatedHours,
+    urgency: input.urgency,
+    postedBy: memberKey,
+    claimedBy: null,
+    status: "open",
+    createdAt: Date.now(),
+    expiresAt: input.expiresAt,
+    locationZone,
+    confirmedBy: [],
+  };
+  await db.posts.put(post);
+  return post;
+}
+
+export async function claimPost(
+  postId: string,
+  memberKey: string,
+): Promise<Post> {
+  return db.transaction("rw", db.posts, async () => {
+    const post = await db.posts.get(postId);
+    if (!post) throw new Error("Post not found");
+    if (post.status !== "open") throw new Error("Post is no longer open");
+    if (post.postedBy === memberKey)
+      throw new Error("You can't claim your own post");
+    const updated: Post = {
+      ...post,
+      claimedBy: memberKey,
+      status: "claimed",
+    };
+    await db.posts.put(updated);
+    return updated;
+  });
+}
+
+export async function unclaimPost(
+  postId: string,
+  memberKey: string,
+): Promise<Post> {
+  return db.transaction("rw", db.posts, async () => {
+    const post = await db.posts.get(postId);
+    if (!post) throw new Error("Post not found");
+    if (post.claimedBy !== memberKey)
+      throw new Error("Only the claimer can release this post");
+    if (post.status !== "claimed")
+      throw new Error("Post cannot be unclaimed from its current state");
+    const updated: Post = {
+      ...post,
+      claimedBy: null,
+      status: "open",
+      confirmedBy: [],
+    };
+    await db.posts.put(updated);
+    return updated;
+  });
+}
+
+export async function cancelPost(
+  postId: string,
+  memberKey: string,
+): Promise<Post> {
+  return db.transaction("rw", db.posts, async () => {
+    const post = await db.posts.get(postId);
+    if (!post) throw new Error("Post not found");
+    if (post.postedBy !== memberKey)
+      throw new Error("Only the poster can cancel a post");
+    if (post.status === "completed")
+      throw new Error("A completed exchange cannot be cancelled");
+    const updated: Post = { ...post, status: "cancelled" };
+    await db.posts.put(updated);
+    return updated;
+  });
+}
+
+export interface ConfirmResult {
+  post: Post;
+  exchange: Exchange | null;
+  newAchievements: Achievement[];
+}
+
+/**
+ * Records a member's confirmation that an exchange is complete. Once both
+ * the helper and the helped party confirm, an Exchange record is signed and
+ * credits transfer. This follows the "signed by both parties" model so the
+ * record can be federated and independently verified (Agent 2/3).
+ */
+export async function confirmExchange(
+  postId: string,
+  memberKey: string,
+  nodeId: string,
+): Promise<ConfirmResult> {
+  return db.transaction(
+    "rw",
+    db.posts,
+    db.exchanges,
+    db.achievements,
+    async () => {
+      const post = await db.posts.get(postId);
+      if (!post) throw new Error("Post not found");
+      if (post.status === "completed")
+        throw new Error("Already completed");
+      if (post.status !== "claimed" && post.status !== "awaiting_confirmation")
+        throw new Error("Post is not ready for completion");
+      if (!post.claimedBy)
+        throw new Error("Post must be claimed before confirming completion");
+      if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
+        throw new Error("Only the two parties can confirm this exchange");
+
+      const confirmedBy = Array.from(
+        new Set([...post.confirmedBy, memberKey]),
+      );
+      const bothConfirmed =
+        confirmedBy.includes(post.postedBy) &&
+        confirmedBy.includes(post.claimedBy);
+
+      if (!bothConfirmed) {
+        const updated: Post = {
+          ...post,
+          status: "awaiting_confirmation",
+          confirmedBy,
+        };
+        await db.posts.put(updated);
+        return { post: updated, exchange: null, newAchievements: [] };
+      }
+
+      // Determine who helped whom based on post type.
+      const helperKey =
+        post.type === "NEED" ? post.claimedBy : post.postedBy;
+      const helpedKey =
+        post.type === "NEED" ? post.postedBy : post.claimedBy;
+
+      const now = Date.now();
+      const payload = JSON.stringify({
+        postId: post.id,
+        helperKey,
+        helpedKey,
+        hours: post.estimatedHours,
+        category: post.category,
+        completedAt: now,
+      });
+
+      const exchange: Exchange = {
+        id: uuid(),
+        postId: post.id,
+        helperKey,
+        helpedKey,
+        hoursExchanged: post.estimatedHours,
+        helperSignature: placeholderSignature(payload, helperKey),
+        helpedSignature: placeholderSignature(payload, helpedKey),
+        completedAt: now,
+        category: post.category,
+        nodeId,
+      };
+      await db.exchanges.put(exchange);
+
+      const updatedPost: Post = {
+        ...post,
+        status: "completed",
+        confirmedBy,
+      };
+      await db.posts.put(updatedPost);
+
+      // Award new achievements for both parties.
+      const allExchanges = await db.exchanges.toArray();
+      const newAchievements: Achievement[] = [];
+      for (const key of [helperKey, helpedKey]) {
+        const existing = await db.achievements
+          .where("memberKey")
+          .equals(key)
+          .toArray();
+        const previouslyFilledCategories = new Set(
+          allExchanges
+            .filter((x) => x.id !== exchange.id)
+            .map((x) => x.category),
+        );
+        const diff = diffAchievements(
+          key,
+          existing.map((a) => a.achievementType),
+          allExchanges,
+          { previouslyFilledCategories },
+          now,
+        );
+        if (diff.length > 0) {
+          await db.achievements.bulkPut(diff);
+          newAchievements.push(...diff);
+        }
+      }
+
+      return { post: updatedPost, exchange, newAchievements };
+    },
+  );
+}
+
+export async function disputeExchange(
+  postId: string,
+  memberKey: string,
+): Promise<Post> {
+  return db.transaction("rw", db.posts, async () => {
+    const post = await db.posts.get(postId);
+    if (!post) throw new Error("Post not found");
+    if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
+      throw new Error("Only the two parties can dispute this exchange");
+    const updated: Post = { ...post, status: "disputed" };
+    await db.posts.put(updated);
+    return updated;
+  });
+}
+
+export async function updateMemberProfile(
+  memberKey: string,
+  updates: {
+    displayName?: string;
+    skills?: string[];
+    availability?: string;
+    locationZone?: string;
+  },
+): Promise<void> {
+  const member = await db.members.get(memberKey);
+  if (!member) throw new Error("Member not found");
+  await db.members.put({ ...member, ...updates });
+}
