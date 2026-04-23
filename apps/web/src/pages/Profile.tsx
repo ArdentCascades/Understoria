@@ -326,6 +326,9 @@ function MemberSwitcher({
 }
 
 async function exportData() {
+  // NOTE: db.secretKeys is deliberately excluded — private keys never leave
+  // the device via export. Key backup/recovery will be a separate, explicit
+  // passphrase-wrapped flow (Agent 2).
   const [members, posts, exchanges, achievements, settings] = await Promise.all(
     [
       db.members.toArray(),
@@ -364,6 +367,7 @@ async function purgeLocalData() {
     db.achievements.clear(),
     db.members.clear(),
     db.settings.clear(),
+    db.secretKeys.clear(),
   ]);
   window.location.reload();
 }
