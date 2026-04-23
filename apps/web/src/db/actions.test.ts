@@ -166,6 +166,64 @@ describe("exchange flow (integration)", () => {
     await expect(cancelPost(post2.id, a.publicKey)).rejects.toThrow();
   });
 
+  it("enforces the daily helper limit on the 4th exchange", async () => {
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const recipients = await Promise.all(
+      Array.from({ length: 4 }, (_, i) =>
+        createMember({ displayName: `R${i}` }, NODE),
+      ),
+    );
+
+    async function runExchange(recipient: {
+      publicKey: string;
+    }): Promise<void> {
+      // Helper posts an OFFER so helper is the helper.
+      const post = await createPost(helper.publicKey, "", {
+        type: "OFFER",
+        category: "other",
+        title: "help",
+        description: "",
+        estimatedHours: 1,
+        urgency: "low",
+        expiresAt: null,
+      });
+      await claimPost(post.id, recipient.publicKey);
+      await confirmExchange(post.id, helper.publicKey, NODE);
+      await confirmExchange(post.id, recipient.publicKey, NODE);
+    }
+
+    await runExchange(recipients[0]);
+    await runExchange(recipients[1]);
+    await runExchange(recipients[2]);
+
+    await expect(runExchange(recipients[3])).rejects.toThrow(
+      /exchanges today/,
+    );
+
+    // Three exchanges recorded; the fourth was rejected.
+    expect(await db.exchanges.count()).toBe(3);
+  });
+
+  it("flags a very short exchange for community review", async () => {
+    const a = await createMember({ displayName: "A" }, NODE);
+    const b = await createMember({ displayName: "B" }, NODE);
+    const post = await createPost(a.publicKey, "", {
+      type: "NEED",
+      category: "emotional_support",
+      title: "quick check-in",
+      description: "",
+      estimatedHours: 0.1,
+      urgency: "low",
+      expiresAt: null,
+    });
+    await claimPost(post.id, b.publicKey);
+    await confirmExchange(post.id, a.publicKey, NODE);
+    await confirmExchange(post.id, b.publicKey, NODE);
+    const [exchange] = await db.exchanges.toArray();
+    expect(exchange.flaggedForReview).toBe(true);
+    expect(exchange.flagReason).toBe("short_duration");
+  });
+
   it("flags disputed exchanges without transferring credit", async () => {
     const a = await createMember({ displayName: "A" }, NODE);
     const b = await createMember({ displayName: "B" }, NODE);

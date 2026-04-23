@@ -3,6 +3,7 @@ import { useApp } from "@/state/AppContext";
 import { balanceFor, transactionHistory } from "@/lib/timebank";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import {
   formatHours,
   formatRelativeTime,
@@ -11,7 +12,20 @@ import {
 } from "@/lib/format";
 import { updateMemberProfile } from "@/db/actions";
 import { db } from "@/db/database";
-import type { AchievementType, Member } from "@/types";
+import type { AchievementType, FlagReason, Member } from "@/types";
+
+function flagReasonLabel(reason: FlagReason | undefined): string {
+  switch (reason) {
+    case "short_duration":
+      return "Very short exchange — surfaced for community review.";
+    case "reciprocal_pattern":
+      return "Repeated reciprocal exchange with the same person — surfaced for community review.";
+    case "daily_limit_warning":
+      return "Near the daily exchange limit.";
+    default:
+      return "Flagged for community review.";
+  }
+}
 
 export default function ProfilePage() {
   const { currentMember, members, exchanges, achievements, setCurrentMember } =
@@ -102,8 +116,16 @@ export default function ProfilePage() {
                         {other?.displayName ?? "a member"}
                       </span>
                     </div>
-                    <div className="text-xs text-moss-500">
-                      {formatRelativeTime(exchange.completedAt)}
+                    <div className="flex items-center gap-2 text-xs text-moss-500">
+                      <span>{formatRelativeTime(exchange.completedAt)}</span>
+                      {exchange.flaggedForReview && (
+                        <span
+                          title={flagReasonLabel(exchange.flagReason)}
+                          className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+                        >
+                          flagged for review
+                        </span>
+                      )}
                     </div>
                   </div>
                   <span
@@ -128,7 +150,7 @@ export default function ProfilePage() {
         onSwitch={setCurrentMember}
       />
 
-      <section className="card">
+      <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           Data & privacy
         </h2>
@@ -144,16 +166,106 @@ export default function ProfilePage() {
           >
             Export my data
           </button>
-          <button
-            className="btn bg-rose-600 text-white hover:bg-rose-700"
-            onClick={() => purgeLocalData()}
-            type="button"
-          >
-            Wipe local data
-          </button>
         </div>
       </section>
+
+      <EmergencySection />
     </div>
+  );
+}
+
+function EmergencySection() {
+  const [confirming, setConfirming] = useState<null | "soft" | "hard">(null);
+  const [status, setStatus] = useState<string | null>(null);
+
+  async function handleConfirm() {
+    if (!confirming) return;
+    try {
+      const { softPurge, hardPurge } = await import("@/lib/panic");
+      const result =
+        confirming === "soft" ? await softPurge() : await hardPurge();
+      setStatus(
+        `${result.mode === "soft" ? "Soft" : "Hard"} purge complete in ${Math.round(
+          result.durationMs,
+        )}ms.`,
+      );
+      if (confirming === "hard") {
+        setTimeout(() => window.location.reload(), 500);
+      }
+    } catch (err) {
+      setStatus((err as Error).message);
+    } finally {
+      setConfirming(null);
+    }
+  }
+
+  return (
+    <>
+      <section className="card border-rose-200 bg-rose-50/30 dark:border-rose-900/50 dark:bg-rose-950/10">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+          Emergency
+        </h2>
+        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+          Two panic options for when a device is at risk. Neither contacts a
+          server; both happen entirely on this device.
+        </p>
+        <ul className="mb-4 space-y-3 text-sm">
+          <li>
+            <strong>Soft purge</strong> — strips every identifying text field
+            (names, descriptions, areas, skills) while keeping the signed
+            exchange ledger and your keypair. Useful if a device will briefly
+            be handled by a hostile party.
+          </li>
+          <li>
+            <strong>Hard purge</strong> — wipes every table including private
+            keys, rotates to a fresh node identity. Unrecoverable. The page
+            will reload afterward.
+          </li>
+        </ul>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setConfirming("soft")}
+          >
+            Soft purge (anonymize)
+          </button>
+          <button
+            type="button"
+            className="btn bg-rose-600 text-white hover:bg-rose-700"
+            onClick={() => setConfirming("hard")}
+          >
+            Hard purge (delete everything)
+          </button>
+        </div>
+        {status && (
+          <p
+            role="status"
+            className="mt-3 text-xs text-moss-600 dark:text-moss-300"
+          >
+            {status}
+          </p>
+        )}
+      </section>
+      <ConfirmDialog
+        open={confirming === "soft"}
+        tone="caution"
+        title="Run soft purge?"
+        description="Identifying text on every member and post will be blanked out. Signed exchange records and your keypair will be preserved. This is not reversible."
+        confirmLabel="Yes, anonymize"
+        onCancel={() => setConfirming(null)}
+        onConfirm={handleConfirm}
+      />
+      <ConfirmDialog
+        open={confirming === "hard"}
+        tone="caution"
+        title="Run hard purge?"
+        description="Every table will be wiped — including your private keys. A fresh node identity will be generated and the app will reload. There is no undo."
+        confirmLabel="Yes, wipe everything"
+        onCancel={() => setConfirming(null)}
+        onConfirm={handleConfirm}
+      />
+    </>
   );
 }
 
@@ -356,18 +468,3 @@ async function exportData() {
   URL.revokeObjectURL(url);
 }
 
-async function purgeLocalData() {
-  const confirmed = window.confirm(
-    "Wipe all local data on this device? This is not reversible. Exported data is not affected.",
-  );
-  if (!confirmed) return;
-  await Promise.all([
-    db.posts.clear(),
-    db.exchanges.clear(),
-    db.achievements.clear(),
-    db.members.clear(),
-    db.settings.clear(),
-    db.secretKeys.clear(),
-  ]);
-  window.location.reload();
-}

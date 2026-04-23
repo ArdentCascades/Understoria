@@ -60,13 +60,27 @@ export interface Exchange {
   helperKey: string;
   helpedKey: string;
   hoursExchanged: number;
-  /** Placeholder signatures — Agent 2 will replace with real Ed25519 signatures. */
+  /** Ed25519 detached signatures over the canonical payload. */
   helperSignature: string;
   helpedSignature: string;
   completedAt: number;
   category: Category;
   nodeId: string;
+  /**
+   * Set by the anti-gaming safeguards (Agent 6 task 6) when an exchange
+   * matches a pattern worth a community conversation — very short
+   * duration, or a tight reciprocal loop between the same two members.
+   * This is advisory; the community, not the code, decides what to do
+   * about it.
+   */
+  flaggedForReview?: boolean;
+  flagReason?: FlagReason;
 }
+
+export type FlagReason =
+  | "short_duration"
+  | "reciprocal_pattern"
+  | "daily_limit_warning";
 
 export type AchievementType =
   | "first_exchange"

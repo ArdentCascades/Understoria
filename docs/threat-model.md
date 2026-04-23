@@ -112,8 +112,13 @@ We are not trying to protect against:
 - **No zero-knowledge exchange counts.** Selective disclosure is v1
   "signed summary from your own node" — a trusted-third-party model.
   True ZK is deferred.
-- **Panic button not yet implemented.** Local data wipe exists from the
-  Profile page; node-level purge is pending.
+- **Panic button (local): IMPLEMENTED.** Soft purge (anonymize all
+  linkable text while preserving the signed exchange ledger and
+  keypair) and hard purge (wipe every table, rotate to a fresh node
+  identity) are both available in Profile → Emergency. Tested with
+  a 50-member, 200-post fixture: completes in ~500 ms, well under the
+  60-second acceptance target. Node-level purge and dead-man's-switch
+  are still pending.
 - **No CSP / HSTS / certificate pinning yet** — these are trivial
   hardening items that must ship before any real pilot.
 

@@ -2,6 +2,10 @@ import { db } from "./database";
 import { diffAchievements } from "@/lib/achievements";
 import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
+import {
+  assertWithinDailyLimit,
+  evaluateSafeguards,
+} from "@/lib/safeguards";
 import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
 
 /**
@@ -186,6 +190,20 @@ export async function confirmExchange(
         post.type === "NEED" ? post.postedBy : post.claimedBy;
 
       const now = Date.now();
+
+      // Anti-gaming safeguards (Agent 6 task 6).
+      const existingExchanges = await db.exchanges.toArray();
+      assertWithinDailyLimit(helperKey, existingExchanges, now);
+      const flag = evaluateSafeguards(
+        {
+          helperKey,
+          helpedKey,
+          hoursExchanged: post.estimatedHours,
+          completedAt: now,
+        },
+        existingExchanges,
+      );
+
       const payload = canonicalExchangePayload({
         postId: post.id,
         helperKey,
@@ -213,6 +231,12 @@ export async function confirmExchange(
         completedAt: now,
         category: post.category,
         nodeId,
+        ...(flag.flaggedForReview
+          ? {
+              flaggedForReview: true,
+              flagReason: flag.flagReason,
+            }
+          : {}),
       };
       await db.exchanges.put(exchange);
 
