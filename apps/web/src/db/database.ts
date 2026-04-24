@@ -5,6 +5,7 @@ import type {
   Member,
   Post,
 } from "@/types";
+import type { SignedVouch } from "@/lib/vouch";
 
 export interface AppSetting {
   key: string;
@@ -23,6 +24,25 @@ export interface SecretKeyRow {
   secretKey: string;
 }
 
+/**
+ * Persisted state for invite tokens that this node has issued. The
+ * signed blob lives in `signed` so re-issuing an already-shared link
+ * is a no-op. Redemption is tracked by flipping `status` so the same
+ * token cannot be consumed twice.
+ */
+export interface InviteRow {
+  token: string;
+  inviterKey: string;
+  nodeId: string;
+  createdAt: number;
+  expiresAt: number;
+  status: "open" | "redeemed" | "revoked" | "expired";
+  redeemedBy: string | null;
+  redeemedAt: number | null;
+  /** URL-encoded token string (base64url of the signed invite JSON). */
+  encoded: string;
+}
+
 export class UnderstoriaDB extends Dexie {
   members!: Table<Member, string>;
   posts!: Table<Post, string>;
@@ -30,6 +50,8 @@ export class UnderstoriaDB extends Dexie {
   achievements!: Table<Achievement, string>;
   settings!: Table<AppSetting, string>;
   secretKeys!: Table<SecretKeyRow, string>;
+  invites!: Table<InviteRow, string>;
+  vouches!: Table<SignedVouch, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -45,6 +67,10 @@ export class UnderstoriaDB extends Dexie {
     });
     this.version(2).stores({
       secretKeys: "publicKey",
+    });
+    this.version(3).stores({
+      invites: "token, inviterKey, status, createdAt",
+      vouches: "id, voucherKey, voucheeKey, createdAt, [voucherKey+voucheeKey]",
     });
   }
 }

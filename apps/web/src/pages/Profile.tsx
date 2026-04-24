@@ -12,6 +12,13 @@ import {
 } from "@/lib/format";
 import { updateMemberProfile } from "@/db/actions";
 import { db } from "@/db/database";
+import type { InviteRow } from "@/db/database";
+import {
+  issueInvite,
+  revokeInvite,
+} from "@/db/invites";
+import { trustStatusWithInvites } from "@/lib/vouch";
+import { TrustChip } from "@/components/TrustChip";
 import type { AchievementType, FlagReason, Member } from "@/types";
 
 function flagReasonLabel(reason: FlagReason | undefined): string {
@@ -28,10 +35,26 @@ function flagReasonLabel(reason: FlagReason | undefined): string {
 }
 
 export default function ProfilePage() {
-  const { currentMember, members, exchanges, achievements, setCurrentMember } =
-    useApp();
+  const {
+    currentMember,
+    members,
+    exchanges,
+    achievements,
+    invites,
+    vouches,
+    nodeId,
+    setCurrentMember,
+  } = useApp();
 
   if (!currentMember) return null;
+
+  const trust = trustStatusWithInvites(currentMember.publicKey, {
+    vouches,
+    invites,
+  });
+  const myInvites = invites.filter(
+    (inv) => inv.inviterKey === currentMember.publicKey,
+  );
 
   const balance = useMemo(
     () => balanceFor(currentMember, exchanges),
@@ -55,16 +78,25 @@ export default function ProfilePage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">Your profile</h1>
-        <p className="text-xs text-moss-500 dark:text-moss-400">
-          Identity: {shortKey(currentMember.publicKey)}
-        </p>
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Your profile</h1>
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            Identity: {shortKey(currentMember.publicKey)}
+          </p>
+        </div>
+        <TrustChip status={trust} />
       </header>
 
       <BalanceCard balance={balance} seed={currentMember.seedBalance} />
 
       <ProfileEditor member={currentMember} />
+
+      <InvitesSection
+        member={currentMember}
+        nodeId={nodeId}
+        invites={myInvites}
+      />
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
@@ -466,5 +498,158 @@ async function exportData() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function InvitesSection({
+  member,
+  nodeId,
+  invites,
+}: {
+  member: Member;
+  nodeId: string;
+  invites: InviteRow[];
+}) {
+  const [issuing, setIssuing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleIssue() {
+    setError(null);
+    setIssuing(true);
+    try {
+      const { shareUrl: url } = await issueInvite({
+        inviterKey: member.publicKey,
+        inviterName: member.displayName,
+        nodeId,
+      });
+      setShareUrl(url);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setIssuing(false);
+    }
+  }
+
+  async function handleCopy(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyStatus("Copied. Share it over Signal, in person, or on paper.");
+      setTimeout(() => setCopyStatus(null), 3000);
+    } catch {
+      setCopyStatus(
+        "Couldn't access the clipboard — select the link above and copy manually.",
+      );
+    }
+  }
+
+  async function handleRevoke(token: string) {
+    setError(null);
+    try {
+      await revokeInvite(member.publicKey, token);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        Invites you've issued
+      </h2>
+      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+        A new member needs two vouches to become trusted. Your invite counts
+        as the first — someone else will need to vouch for them after they
+        join.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={handleIssue}
+          disabled={issuing}
+        >
+          {issuing ? "Generating…" : "Generate invite link"}
+        </button>
+      </div>
+
+      {shareUrl && (
+        <div className="mt-3 rounded-xl border border-canopy-200 bg-canopy-50 p-3 dark:border-canopy-900/50 dark:bg-canopy-950/20">
+          <p className="text-xs font-semibold uppercase tracking-wide text-canopy-800 dark:text-canopy-200">
+            Share this link with one person
+          </p>
+          <code className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs dark:bg-moss-900">
+            {shareUrl}
+          </code>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <button
+              type="button"
+              className="btn-secondary text-xs"
+              onClick={() => handleCopy(shareUrl)}
+            >
+              Copy link
+            </button>
+            {copyStatus && (
+              <span className="text-canopy-800 dark:text-canopy-200">
+                {copyStatus}
+              </span>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+            The link is single-use and expires in 14 days. If it leaks before
+            redemption, revoke it below.
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
+
+      {invites.length > 0 && (
+        <ul className="mt-4 flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
+          {invites.map((inv) => (
+            <li
+              key={inv.token}
+              className="flex items-center justify-between gap-3 py-2"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium capitalize">
+                  {inv.status.replace("_", " ")}
+                </div>
+                <div className="text-xs text-moss-500">
+                  {inv.status === "redeemed"
+                    ? `Redeemed ${formatRelativeTime(inv.redeemedAt ?? 0)}`
+                    : `Expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                </div>
+              </div>
+              {inv.status === "open" && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs"
+                    onClick={() =>
+                      handleCopy(`${window.location.origin}/invite#${inv.encoded}`)
+                    }
+                  >
+                    Copy
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
+                    onClick={() => handleRevoke(inv.token)}
+                  >
+                    Revoke
+                  </button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
 }
 

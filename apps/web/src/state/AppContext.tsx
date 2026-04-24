@@ -16,6 +16,8 @@ import {
 } from "@/db/database";
 import { ensureNodeId, seedDemoCommunityIfEmpty } from "@/db/seed";
 import type { Achievement, Exchange, Member, Post } from "@/types";
+import type { InviteRow } from "@/db/database";
+import type { SignedVouch } from "@/lib/vouch";
 
 export interface AppContextValue {
   ready: boolean;
@@ -26,6 +28,8 @@ export interface AppContextValue {
   posts: Post[];
   exchanges: Exchange[];
   achievements: Achievement[];
+  invites: InviteRow[];
+  vouches: SignedVouch[];
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -69,6 +73,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as Achievement[],
   );
+  const invites = useLiveQuery(
+    () => db.invites.orderBy("createdAt").reverse().toArray(),
+    [],
+    [] as InviteRow[],
+  );
+  const vouches = useLiveQuery(
+    () => db.vouches.toArray(),
+    [],
+    [] as SignedVouch[],
+  );
 
   const currentMember = useMemo(
     () => members?.find((m) => m.publicKey === currentMemberKey) ?? null,
@@ -90,6 +104,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       posts: posts ?? [],
       exchanges: exchanges ?? [],
       achievements: achievements ?? [],
+      invites: invites ?? [],
+      vouches: vouches ?? [],
     }),
     [
       ready,
@@ -100,6 +116,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       posts,
       exchanges,
       achievements,
+      invites,
+      vouches,
     ],
   );
 

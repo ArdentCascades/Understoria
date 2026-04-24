@@ -95,8 +95,14 @@ We are not trying to protect against:
   grant the others. (Agent 4, task 5)
 - **Panic button / data purge.** Admin-triggered wipe with soft
   (anonymize) and hard (delete) modes. Dead-man's-switch variant. (Agent 4, task 3)
-- **Web of trust onboarding.** Two vouches to become a "trusted" member;
-  compromised invite chains can be revoked downstream. (Agent 2, task 3)
+- **Web of trust onboarding: IMPLEMENTED.** Signed single-use invite
+  tokens (Ed25519), 14-day default expiry, revocable by the issuer
+  pre-redemption. Redeeming a valid invite counts as the inviter's
+  implicit vouch; a second manual vouch promotes the new member from
+  `pending_trust` to `trusted`. Members below two vouches can still
+  post needs and offers (solidarity-first onboarding) but are visibly
+  flagged so the community can extend verification at its own pace.
+  (Agent 2, tasks 2 and 3.)
 
 ## 7. Known gaps (tracked work)
 
