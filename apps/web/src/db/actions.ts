@@ -6,12 +6,15 @@ import {
   assertWithinDailyLimit,
   evaluateSafeguards,
 } from "@/lib/safeguards";
+import { getSecretKey } from "./secrets";
 import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
 
 /**
- * Looks up the secret keys for the two parties that need to sign the
- * exchange tied to `postId`. Called outside any transaction so the
- * signing table can remain off the transaction scope.
+ * Resolve the secret keys for the two parties that need to sign the
+ * exchange tied to `postId`. Goes through the session-aware
+ * getSecretKey() so a locked device refuses to sign. Called outside any
+ * transaction so the signing table (and any passphrase unwrap) can
+ * remain off the transaction scope.
  */
 async function preloadSignerKeys(
   postId: string,
@@ -25,8 +28,11 @@ async function preloadSignerKeys(
   parties.add(memberKey);
   const entries = await Promise.all(
     Array.from(parties).map(async (pk) => {
-      const row = await db.secretKeys.get(pk);
-      return row ? ([pk, row.secretKey] as const) : null;
+      try {
+        return [pk, await getSecretKey(pk)] as const;
+      } catch {
+        return null;
+      }
     }),
   );
   return new Map(entries.filter((e): e is readonly [string, string] => !!e));

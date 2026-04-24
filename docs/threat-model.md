@@ -106,10 +106,15 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
-- **Private-key storage is not yet passphrase-wrapped.** Today keys sit
-  in IndexedDB in plaintext. Dropping a passphrase-derived key wrapper
-  (PBKDF2/argon2 + XSalsa20-Poly1305) is the immediate Agent 2 next
-  step.
+- **Private-key storage: IMPLEMENTED.** Secret keys on a device can be
+  wrapped with a passphrase-derived master key (PBKDF2-HMAC-SHA256 at
+  600,000 iterations + NaCl secretbox / XSalsa20-Poly1305). The master
+  key is held in session memory only; a tab close or explicit "Lock
+  now" returns the device to a locked state. Enabling / changing /
+  disabling protection lives in Profile → Security. Forgotten
+  passphrases are unrecoverable by design — this is documented in the
+  UI and on the lock screen. Argon2id remains a viable future
+  migration; the blob format carries a `kdf` field for that.
 - **No E2E messaging yet.** Direct messages are specified (X25519 +
   XSalsa20-Poly1305, NaCl box) but not implemented.
 - **Metadata leakage via federation.** Broadcast of need/offer to peers

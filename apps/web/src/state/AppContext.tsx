@@ -18,6 +18,12 @@ import { ensureNodeId, seedDemoCommunityIfEmpty } from "@/db/seed";
 import type { Achievement, Exchange, Member, Post } from "@/types";
 import type { InviteRow } from "@/db/database";
 import type { SignedVouch } from "@/lib/vouch";
+import {
+  currentLockState,
+  lockSession,
+  unlockSession,
+  type LockState,
+} from "@/db/secrets";
 
 export interface AppContextValue {
   ready: boolean;
@@ -30,6 +36,12 @@ export interface AppContextValue {
   achievements: Achievement[];
   invites: InviteRow[];
   vouches: SignedVouch[];
+  lockState: LockState;
+  unlock: (
+    passphrase: string,
+  ) => Promise<"unlocked" | "wrong_passphrase" | "nothing_to_unlock">;
+  lock: () => void;
+  refreshLockState: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -40,21 +52,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentMemberKey, setCurrentMemberKey] = useState<string | null>(
     null,
   );
+  const [lockState, setLockState] = useState<LockState>("unprotected");
+
+  const refreshLockState = useCallback(async () => {
+    const next = await currentLockState();
+    setLockState(next);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const node = await ensureNodeId();
-      const member = await seedDemoCommunityIfEmpty();
-      const storedKey = await getSetting(SETTING_KEYS.currentMember);
+      const initialLock = await currentLockState();
       if (cancelled) return;
+      setLockState(initialLock);
+      // Only seed the demo community when the node isn't locked. Seeding
+      // writes plaintext secret keys for demo members, which we don't want
+      // to run while a user's real wrapped keys are present but sealed.
+      if (initialLock !== "locked") {
+        const member = await seedDemoCommunityIfEmpty();
+        const storedKey = await getSetting(SETTING_KEYS.currentMember);
+        if (cancelled) return;
+        setCurrentMemberKey(storedKey ?? member.publicKey);
+      } else {
+        const storedKey = await getSetting(SETTING_KEYS.currentMember);
+        if (cancelled) return;
+        setCurrentMemberKey(storedKey ?? null);
+      }
       setNodeId(node);
-      setCurrentMemberKey(storedKey ?? member.publicKey);
       setReady(true);
     })();
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  const unlock = useCallback(
+    async (passphrase: string) => {
+      const result = await unlockSession(passphrase);
+      if (result === "unlocked") {
+        await refreshLockState();
+      }
+      return result;
+    },
+    [refreshLockState],
+  );
+
+  const lock = useCallback(() => {
+    lockSession();
+    setLockState("locked");
   }, []);
 
   const members = useLiveQuery(() => db.members.toArray(), [], [] as Member[]);
@@ -106,6 +152,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       achievements: achievements ?? [],
       invites: invites ?? [],
       vouches: vouches ?? [],
+      lockState,
+      unlock,
+      lock,
+      refreshLockState,
     }),
     [
       ready,
@@ -118,6 +168,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       achievements,
       invites,
       vouches,
+      lockState,
+      unlock,
+      lock,
+      refreshLockState,
     ],
   );
 

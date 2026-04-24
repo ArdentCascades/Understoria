@@ -17,6 +17,11 @@ import {
   issueInvite,
   revokeInvite,
 } from "@/db/invites";
+import {
+  changePassphrase,
+  disablePassphrase,
+  enablePassphrase,
+} from "@/db/secrets";
 import { trustStatusWithInvites } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
 import type { AchievementType, FlagReason, Member } from "@/types";
@@ -201,8 +206,222 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      <SecuritySection />
+
       <EmergencySection />
     </div>
+  );
+}
+
+function SecuritySection() {
+  const { lockState, lock, refreshLockState } = useApp();
+  const [mode, setMode] = useState<"idle" | "enable" | "change" | "disable">(
+    "idle",
+  );
+  const [pass1, setPass1] = useState("");
+  const [pass2, setPass2] = useState("");
+  const [current, setCurrent] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  function reset() {
+    setMode("idle");
+    setPass1("");
+    setPass2("");
+    setCurrent("");
+    setError(null);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setBusy(true);
+    try {
+      if (mode === "enable") {
+        if (pass1 !== pass2) throw new Error("The two passphrases didn't match.");
+        await enablePassphrase(pass1);
+        setSuccess(
+          "Passphrase protection enabled. Write your passphrase down somewhere safe — it can't be recovered.",
+        );
+      } else if (mode === "change") {
+        if (pass1 !== pass2) throw new Error("The two new passphrases didn't match.");
+        await changePassphrase(current, pass1);
+        setSuccess("Passphrase changed. Use the new one next time you unlock.");
+      } else if (mode === "disable") {
+        await disablePassphrase();
+        setSuccess(
+          "Passphrase protection disabled. Secret keys are stored in plaintext on this device again.",
+        );
+      }
+      await refreshLockState();
+      reset();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const protectionOn = lockState !== "unprotected";
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        Security
+      </h2>
+      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+        {protectionOn ? (
+          <>
+            Your secret keys on this device are wrapped with a passphrase-
+            derived key. Unlock is required at every launch.
+          </>
+        ) : (
+          <>
+            Your secret keys are stored in plaintext on this device. Enable
+            passphrase protection before leaving the device alone in any
+            hostile environment.
+          </>
+        )}
+      </p>
+
+      {success && (
+        <p
+          role="status"
+          className="mb-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100"
+        >
+          {success}
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {!protectionOn && (
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              reset();
+              setMode("enable");
+              setSuccess(null);
+            }}
+          >
+            Enable passphrase protection
+          </button>
+        )}
+        {protectionOn && (
+          <>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                reset();
+                setMode("change");
+                setSuccess(null);
+              }}
+            >
+              Change passphrase
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                reset();
+                setMode("disable");
+                setSuccess(null);
+              }}
+            >
+              Disable protection
+            </button>
+            <button
+              type="button"
+              className="btn bg-rose-600 text-white hover:bg-rose-700"
+              onClick={() => lock()}
+            >
+              Lock now
+            </button>
+          </>
+        )}
+      </div>
+
+      {mode !== "idle" && (
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+          {mode === "change" && (
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Current passphrase</span>
+              <input
+                className="input"
+                type="password"
+                autoComplete="current-password"
+                value={current}
+                onChange={(e) => setCurrent(e.target.value)}
+                required
+              />
+            </label>
+          )}
+          {mode !== "disable" && (
+            <>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="font-medium">
+                  {mode === "change" ? "New passphrase" : "Passphrase"}
+                </span>
+                <input
+                  className="input"
+                  type="password"
+                  autoComplete="new-password"
+                  value={pass1}
+                  onChange={(e) => setPass1(e.target.value)}
+                  minLength={8}
+                  required
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="font-medium">Repeat it</span>
+                <input
+                  className="input"
+                  type="password"
+                  autoComplete="new-password"
+                  value={pass2}
+                  onChange={(e) => setPass2(e.target.value)}
+                  minLength={8}
+                  required
+                />
+              </label>
+              <p className="text-xs text-moss-500 dark:text-moss-400">
+                At least 8 characters. A four-word pass-phrase from a
+                password manager is ideal. There is no recovery — we cannot
+                get this back for you.
+              </p>
+            </>
+          )}
+          {mode === "disable" && (
+            <p className="text-sm text-moss-600 dark:text-moss-300">
+              This will rewrite your wrapped secret keys as plaintext on
+              this device. Only do this if you're sure the device is safe.
+            </p>
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+              {error}
+            </p>
+          )}
+          <div className="flex flex-wrap justify-end gap-2">
+            <button type="button" className="btn-secondary" onClick={reset}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" disabled={busy}>
+              {busy
+                ? "Working…"
+                : mode === "enable"
+                  ? "Enable"
+                  : mode === "change"
+                    ? "Change"
+                    : "Disable"}
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
   );
 }
 

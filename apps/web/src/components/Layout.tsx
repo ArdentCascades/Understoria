@@ -1,15 +1,23 @@
 import { Outlet } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
+import { LockScreen } from "./LockScreen";
 import { useApp } from "@/state/AppContext";
 
 export function Layout() {
-  const { ready } = useApp();
+  const { ready, lockState } = useApp();
+  const locked = lockState === "locked";
   return (
     <div className="mx-auto flex min-h-dvh max-w-screen-md flex-col">
       <main className="flex-1 pb-20">
-        {ready ? <Outlet /> : <Splash />}
+        {!ready ? (
+          <Splash />
+        ) : locked ? (
+          <LockScreen />
+        ) : (
+          <Outlet />
+        )}
       </main>
-      <BottomNav />
+      {!locked && <BottomNav />}
     </div>
   );
 }

@@ -13,15 +13,18 @@ export interface AppSetting {
 }
 
 /**
- * Local-only secret key storage. Agent 2 will wrap this in a passphrase-
- * derived key (Web Crypto + PBKDF2 or Argon2); today it's stored as a
- * base64 blob in a dedicated table keyed by public key. This table must
- * NEVER be synced, exported, or federated — it's explicitly excluded from
- * the data-export flow in Profile.tsx.
+ * Local-only secret key storage. A row holds EITHER plaintext
+ * (`secretKey`, base64) OR a passphrase-wrapped blob (`wrapped`). Never
+ * both. Plaintext rows only exist on nodes the user has chosen not to
+ * passphrase-protect; enabling passphrase protection from Profile
+ * rewrites every row in-place. This table must NEVER be synced,
+ * exported, or federated — it's explicitly excluded from the data-export
+ * flow in Profile.tsx.
  */
 export interface SecretKeyRow {
   publicKey: string;
-  secretKey: string;
+  secretKey?: string;
+  wrapped?: import("@/lib/passphrase").WrappedBlob;
 }
 
 /**

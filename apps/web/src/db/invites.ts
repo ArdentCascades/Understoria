@@ -6,6 +6,7 @@ import {
   decodeAndVerifyInvite,
   encodeInviteToken,
 } from "@/lib/invite";
+import { getSecretKey } from "./secrets";
 import type { Member } from "@/types";
 
 export interface IssueInviteInput {
@@ -30,15 +31,18 @@ export async function issueInvite(
     ? window.location.origin
     : "",
 ): Promise<IssuedInvite> {
-  const secret = await db.secretKeys.get(input.inviterKey);
-  if (!secret) {
+  let secretKey: string;
+  try {
+    secretKey = await getSecretKey(input.inviterKey);
+  } catch (err) {
     throw new Error(
-      "You can only issue invites from a device that holds your secret key.",
+      (err as Error).message ??
+        "You can only issue invites from a device that holds your secret key.",
     );
   }
   const signed = createInvite({
     inviterKey: input.inviterKey,
-    inviterSecretKey: secret.secretKey,
+    inviterSecretKey: secretKey,
     inviterName: input.inviterName,
     nodeId: input.nodeId,
     expiresInMs: input.expiresInMs,

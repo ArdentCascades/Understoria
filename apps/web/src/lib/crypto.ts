@@ -1,60 +1,20 @@
 import nacl from "tweetnacl";
+import { b64decode, b64encode, utf8encode } from "./bytes";
 import type { Category, Exchange } from "@/types";
 
 /**
  * Identity primitives — Ed25519 key pairs, detached signatures.
  *
- * This module is intentionally thin and framework-free. Agent 2 will layer
- * on passphrase-encrypted private-key storage, key backup/recovery, and
- * invite/vouching flows. The data shapes here (base64 public keys, base64
- * detached signatures over a canonicalized JSON payload) are the long-term
- * shapes — additional key material will be opaque to consumers.
+ * This module is intentionally thin and framework-free. Passphrase
+ * wrapping of secret keys is handled in lib/passphrase.ts and
+ * db/secrets.ts. Data shapes here (base64 public keys, base64 detached
+ * signatures over a canonicalized JSON payload) are the long-term shapes.
  */
 
 export interface KeyPair {
   publicKey: string;
   secretKey: string;
 }
-
-const b64encode = (bytes: Uint8Array): string => {
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++)
-    binary += String.fromCharCode(bytes[i]);
-  if (typeof btoa !== "undefined") return btoa(binary);
-  // Node fallback for tests.
-  return Buffer.from(bytes).toString("base64");
-};
-
-/**
- * Return a freshly-allocated Uint8Array from this realm so tweetnacl's
- * strict `instanceof Uint8Array` check passes reliably across jsdom / Node
- * realm boundaries.
- */
-const freshBytes = (length: number): Uint8Array => new Uint8Array(length);
-
-const b64decode = (s: string): Uint8Array => {
-  let binary: string;
-  if (typeof atob !== "undefined") {
-    binary = atob(s);
-  } else {
-    binary = Buffer.from(s, "base64").toString("binary");
-  }
-  const out = freshBytes(binary.length);
-  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
-  return out;
-};
-
-const utf8encode = (s: string): Uint8Array => {
-  let source: ArrayLike<number>;
-  if (typeof TextEncoder !== "undefined") {
-    source = new TextEncoder().encode(s);
-  } else {
-    source = Buffer.from(s, "utf8");
-  }
-  const out = freshBytes(source.length);
-  for (let i = 0; i < source.length; i++) out[i] = source[i];
-  return out;
-};
 
 export function generateKeyPair(): KeyPair {
   const kp = nacl.sign.keyPair();

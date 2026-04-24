@@ -1,0 +1,228 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { db } from "./database";
+import { createMember } from "./seed";
+import {
+  __resetSessionForTests,
+  changePassphrase,
+  currentLockState,
+  disablePassphrase,
+  enablePassphrase,
+  getSecretKey,
+  isUnlocked,
+  lockSession,
+  unlockSession,
+} from "./secrets";
+import {
+  claimPost,
+  confirmExchange,
+  createPost,
+} from "./actions";
+
+const NODE = "node_pass";
+
+async function reset() {
+  __resetSessionForTests();
+  await Promise.all([
+    db.members.clear(),
+    db.posts.clear(),
+    db.exchanges.clear(),
+    db.achievements.clear(),
+    db.settings.clear(),
+    db.secretKeys.clear(),
+    db.invites.clear(),
+    db.vouches.clear(),
+  ]);
+}
+
+describe("currentLockState", () => {
+  beforeEach(reset);
+
+  it("reports unprotected when no row is wrapped", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    expect(await currentLockState()).toBe("unprotected");
+  });
+
+  it("reports unlocked after enablePassphrase + unlockSession", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("correct-horse-battery");
+    expect(await currentLockState()).toBe("unlocked");
+    lockSession();
+    expect(await currentLockState()).toBe("locked");
+    await unlockSession("correct-horse-battery");
+    expect(await currentLockState()).toBe("unlocked");
+  });
+});
+
+describe("getSecretKey", () => {
+  beforeEach(reset);
+
+  it("returns plaintext for unprotected rows", async () => {
+    const m = await createMember({ displayName: "A" }, NODE);
+    const row = await db.secretKeys.get(m.publicKey);
+    expect(row?.secretKey).toBeTruthy();
+    const fetched = await getSecretKey(m.publicKey);
+    expect(fetched).toBe(row?.secretKey);
+  });
+
+  it("refuses to return secrets while locked", async () => {
+    const m = await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("passphrase-one");
+    lockSession();
+    await expect(getSecretKey(m.publicKey)).rejects.toThrow(/locked/);
+  });
+
+  it("returns the same plaintext before and after a wrap / unwrap cycle", async () => {
+    const m = await createMember({ displayName: "A" }, NODE);
+    const before = await getSecretKey(m.publicKey);
+    await enablePassphrase("passphrase-one");
+    const duringUnlocked = await getSecretKey(m.publicKey);
+    lockSession();
+    await unlockSession("passphrase-one");
+    const afterReUnlock = await getSecretKey(m.publicKey);
+    expect(duringUnlocked).toBe(before);
+    expect(afterReUnlock).toBe(before);
+  });
+});
+
+describe("unlockSession", () => {
+  beforeEach(reset);
+
+  it("rejects the wrong passphrase without establishing a session", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("real-passphrase");
+    lockSession();
+    const result = await unlockSession("wrong-passphrase");
+    expect(result).toBe("wrong_passphrase");
+    expect(isUnlocked()).toBe(false);
+  });
+
+  it("returns nothing_to_unlock when no wrapped rows exist", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    const result = await unlockSession("any");
+    expect(result).toBe("nothing_to_unlock");
+  });
+});
+
+describe("enablePassphrase", () => {
+  beforeEach(reset);
+
+  it("rejects passphrases that fail validation", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await expect(enablePassphrase("short")).rejects.toThrow(/at least/);
+  });
+
+  it("wraps every plaintext row in a single call", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await createMember({ displayName: "B" }, NODE);
+    await enablePassphrase("pass-one");
+    const rows = await db.secretKeys.toArray();
+    expect(rows).toHaveLength(2);
+    for (const r of rows) {
+      expect(r.wrapped).toBeTruthy();
+      expect(r.secretKey).toBeUndefined();
+    }
+  });
+});
+
+describe("changePassphrase", () => {
+  beforeEach(reset);
+
+  it("rejects the wrong current passphrase", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("original");
+    lockSession();
+    await expect(
+      changePassphrase("wrong", "new-passphrase"),
+    ).rejects.toThrow(/didn't match/);
+  });
+
+  it("re-wraps under the new passphrase and invalidates the old", async () => {
+    const m = await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("original");
+    await changePassphrase("original", "brand-new-one");
+    lockSession();
+    const wrong = await unlockSession("original");
+    expect(wrong).toBe("wrong_passphrase");
+    const right = await unlockSession("brand-new-one");
+    expect(right).toBe("unlocked");
+    const plaintext = await getSecretKey(m.publicKey);
+    expect(plaintext).toBeTruthy();
+  });
+});
+
+describe("disablePassphrase", () => {
+  beforeEach(reset);
+
+  it("requires the session to be unlocked", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("some-passphrase");
+    lockSession();
+    await expect(disablePassphrase()).rejects.toThrow(/Unlock the session/);
+  });
+
+  it("rewrites every wrapped row as plaintext when unlocked", async () => {
+    await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("some-passphrase");
+    await disablePassphrase();
+    const rows = await db.secretKeys.toArray();
+    for (const r of rows) {
+      expect(r.secretKey).toBeTruthy();
+      expect(r.wrapped).toBeUndefined();
+    }
+    expect(await currentLockState()).toBe("unprotected");
+  });
+});
+
+describe("signing flows with passphrase protection", () => {
+  beforeEach(reset);
+
+  it("still signs an exchange after enable → lock → unlock cycle", async () => {
+    const poster = await createMember({ displayName: "A" }, NODE);
+    const claimer = await createMember({ displayName: "B" }, NODE);
+
+    await enablePassphrase("shared-passphrase");
+
+    const post = await createPost(poster.publicKey, "", {
+      type: "NEED",
+      category: "other",
+      title: "help",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      expiresAt: null,
+    });
+    await claimPost(post.id, claimer.publicKey);
+
+    // Poster's first confirmation doesn't require a signature — no block.
+    await confirmExchange(post.id, poster.publicKey, NODE);
+
+    // Now the second confirmation would sign. A locked session must
+    // refuse at that step.
+    lockSession();
+    await expect(
+      confirmExchange(post.id, claimer.publicKey, NODE),
+    ).rejects.toThrow(/secret key/);
+
+    await unlockSession("shared-passphrase");
+    const result = await confirmExchange(
+      post.id,
+      claimer.publicKey,
+      NODE,
+    );
+    expect(result.exchange).not.toBeNull();
+  });
+
+  it("refuses to issue an invite while locked", async () => {
+    const m = await createMember({ displayName: "A" }, NODE);
+    await enablePassphrase("shared-passphrase");
+    lockSession();
+    const { issueInvite } = await import("./invites");
+    await expect(
+      issueInvite({
+        inviterKey: m.publicKey,
+        inviterName: m.displayName,
+        nodeId: NODE,
+      }),
+    ).rejects.toThrow(/locked/);
+  });
+});

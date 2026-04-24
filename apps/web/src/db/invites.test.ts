@@ -189,10 +189,10 @@ describe("full onboarding loop", () => {
     ).toBe("pending_trust");
 
     // Marcus manually vouches. Now we have 2 distinct voucher keys.
-    const marcusSecret = (await db.secretKeys.get(marcus.publicKey))!;
+    const { getSecretKey } = await import("./secrets");
     const manualVouch = createVouch({
       voucherKey: marcus.publicKey,
-      voucherSecretKey: marcusSecret.secretKey,
+      voucherSecretKey: await getSecretKey(marcus.publicKey),
       voucheeKey: newcomerKey,
       kind: "manual",
     });
