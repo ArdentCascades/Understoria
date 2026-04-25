@@ -10,6 +10,6 @@
     "build": "npm --workspace @understoria/web run build",
     "preview": "npm --workspace @understoria/web run preview",
     "test": "npm --workspace @understoria/web run test",
-    "typecheck": "npm --workspace @understoria/web run typecheck"
+    "typecheck": "npm --workspaces --if-present run typecheck"
   }
 }

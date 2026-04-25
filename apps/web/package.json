@@ -14,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@understoria/shared": "*",
     "dexie": "^4.0.10",
     "dexie-react-hooks": "^1.1.7",
     "i18next": "^23.16.4",
