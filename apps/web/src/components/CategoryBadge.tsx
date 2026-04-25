@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CATEGORY_META } from "@/lib/categories";
 import type { Category } from "@/types";
 
@@ -8,6 +9,7 @@ export function CategoryBadge({
   category: Category;
   size?: "sm" | "md";
 }) {
+  const { t } = useTranslation();
   const meta = CATEGORY_META[category];
   const base =
     "inline-flex items-center gap-1.5 rounded-full bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100";
@@ -18,7 +20,7 @@ export function CategoryBadge({
   return (
     <span className={`${base} ${sizes[size]}`}>
       <span aria-hidden="true">{meta.emoji}</span>
-      <span>{meta.label}</span>
+      <span>{t(`categories.${category}`)}</span>
     </span>
   );
 }

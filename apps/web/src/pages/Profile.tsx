@@ -24,6 +24,7 @@ import {
 } from "@/db/secrets";
 import { trustStatusWithInvites } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
+import { LanguageSection } from "@/components/LanguageSection";
 import type { AchievementType, FlagReason, Member } from "@/types";
 
 function flagReasonLabel(reason: FlagReason | undefined): string {
@@ -205,6 +206,8 @@ export default function ProfilePage() {
           </button>
         </div>
       </section>
+
+      <LanguageSection />
 
       <SecuritySection />
 

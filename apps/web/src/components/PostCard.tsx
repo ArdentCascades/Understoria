@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import { CategoryBadge } from "./CategoryBadge";
@@ -13,7 +14,9 @@ export function PostCard({
   posterName: string;
   isCurrentMember: boolean;
 }) {
-  const typeLabel = post.type === "NEED" ? "needs help" : "offers";
+  const { t } = useTranslation();
+  const typeLabel =
+    post.type === "NEED" ? t("postCard.needs") : t("postCard.offers");
   return (
     <Link
       to={`/post/${post.id}`}
@@ -34,7 +37,7 @@ export function PostCard({
       <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
         <span>
           <span className="font-medium">
-            {isCurrentMember ? "You" : posterName}
+            {isCurrentMember ? t("common.you") : posterName}
           </span>{" "}
           {typeLabel}{" "}
           <span className="font-medium">
@@ -48,17 +51,10 @@ export function PostCard({
 }
 
 function StatusChip({ status }: { status: Post["status"] }) {
-  const map: Record<Post["status"], string> = {
-    open: "Open",
-    claimed: "Claimed",
-    awaiting_confirmation: "Awaiting confirmation",
-    completed: "Completed",
-    cancelled: "Cancelled",
-    disputed: "Flagged for review",
-  };
+  const { t } = useTranslation();
   return (
     <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-      {map[status]}
+      {t(`postStatus.${status}`)}
     </span>
   );
 }

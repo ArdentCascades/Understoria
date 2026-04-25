@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Cultivando tu comunidad...",
+    "you": "Tú"
+  },
+  "nav": {
+    "board": "Tablero",
+    "dashboard": "Panel",
+    "profile": "Perfil"
+  },
+  "urgency": {
+    "low": "Cuando puedas",
+    "medium": "Pronto",
+    "high": "Urgente",
+    "ariaLabel": "Urgencia: {{label}}"
+  },
+  "categories": {
+    "transport": "Transporte",
+    "food": "Comida",
+    "childcare": "Cuidado de niñes",
+    "skilled_labor": "Trabajo especializado",
+    "emotional_support": "Apoyo emocional",
+    "education": "Educación",
+    "housing": "Vivienda",
+    "tech": "Tecnología",
+    "other": "Otro"
+  },
+  "postStatus": {
+    "open": "Abierto",
+    "claimed": "Tomado",
+    "awaiting_confirmation": "Esperando confirmación",
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "disputed": "Señalado para revisión"
+  },
+  "postCard": {
+    "needs": "necesita ayuda",
+    "offers": "ofrece"
+  },
+  "format": {
+    "justNow": "ahora mismo",
+    "minutesAgo": "hace {{count}} min",
+    "hoursAgo": "hace {{count}} h",
+    "daysAgo": "hace {{count}} d",
+    "weeksAgo": "hace {{count}} sem",
+    "monthsAgo": "hace {{count}} mes",
+    "yearsAgo": "hace {{count}} año",
+    "inMinutes": "en {{count}} min",
+    "inHours": "en {{count}} h",
+    "inDays": "en {{count}} d"
+  },
+  "board": {
+    "title": "Tablero comunitario",
+    "tagline": "Publica lo que necesitas. Ofrece lo que puedas.",
+    "tabs": {
+      "needs": "Necesidades",
+      "offers": "Ofertas",
+      "ariaLabel": "Tipos de publicación"
+    },
+    "openCount": "({{count}})",
+    "filters": {
+      "categoryAriaLabel": "Filtrar por categoría",
+      "urgencyAriaLabel": "Filtrar por urgencia",
+      "allCategories": "Todas las categorías",
+      "allUrgencies": "Todas las urgencias"
+    },
+    "search": {
+      "placeholder": "Buscar en títulos y descripciones",
+      "ariaLabel": "Buscar publicaciones"
+    },
+    "fab": {
+      "postNeed": "Publicar una necesidad",
+      "postOffer": "Publicar una oferta"
+    },
+    "empty": {
+      "needs": "Aún no hay necesidades que coincidan con estos filtros. Si necesitas ayuda, publícalo — pedir nunca tiene barreras en un banco de tiempo.",
+      "offers": "Aún no hay ofertas que coincidan con estos filtros. ¿Qué podrías compartir con tu comunidad esta semana?"
+    }
+  },
+  "profile": {
+    "language": {
+      "title": "Idioma",
+      "intro": "Elige cómo Understoria te habla en este dispositivo. Pronto vendrán más idiomas y traducciones del resto de la aplicación."
+    }
+  }
+}

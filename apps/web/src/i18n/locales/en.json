@@ -1,0 +1,86 @@
+{
+  "common": {
+    "loading": "Growing your community...",
+    "you": "You"
+  },
+  "nav": {
+    "board": "Board",
+    "dashboard": "Dashboard",
+    "profile": "Profile"
+  },
+  "urgency": {
+    "low": "When you can",
+    "medium": "Soon",
+    "high": "Urgent",
+    "ariaLabel": "Urgency: {{label}}"
+  },
+  "categories": {
+    "transport": "Transport",
+    "food": "Food",
+    "childcare": "Childcare",
+    "skilled_labor": "Skilled labor",
+    "emotional_support": "Emotional support",
+    "education": "Education",
+    "housing": "Housing",
+    "tech": "Tech",
+    "other": "Other"
+  },
+  "postStatus": {
+    "open": "Open",
+    "claimed": "Claimed",
+    "awaiting_confirmation": "Awaiting confirmation",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "disputed": "Flagged for review"
+  },
+  "postCard": {
+    "needs": "needs help",
+    "offers": "offers"
+  },
+  "format": {
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "weeksAgo": "{{count}}w ago",
+    "monthsAgo": "{{count}}mo ago",
+    "yearsAgo": "{{count}}y ago",
+    "inMinutes": "in {{count}}m",
+    "inHours": "in {{count}}h",
+    "inDays": "in {{count}}d"
+  },
+  "board": {
+    "title": "Community board",
+    "tagline": "Post what you need. Offer what you can.",
+    "tabs": {
+      "needs": "Needs",
+      "offers": "Offers",
+      "ariaLabel": "Post types"
+    },
+    "openCount": "({{count}})",
+    "filters": {
+      "categoryAriaLabel": "Filter by category",
+      "urgencyAriaLabel": "Filter by urgency",
+      "allCategories": "All categories",
+      "allUrgencies": "All urgencies"
+    },
+    "search": {
+      "placeholder": "Search titles and descriptions",
+      "ariaLabel": "Search posts"
+    },
+    "fab": {
+      "postNeed": "Post a need",
+      "postOffer": "Post an offer"
+    },
+    "empty": {
+      "needs": "No needs match these filters yet. If you need help, post something — asking is never gated in a timebank.",
+      "offers": "No offers match these filters yet. What could you share with your community this week?"
+    }
+  },
+  "profile": {
+    "language": {
+      "title": "Language",
+      "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."
+    }
+  }
+}

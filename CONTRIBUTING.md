@@ -127,10 +127,68 @@ If any of those is hard to answer, clarify in the PR description.
 
 ## Translations
 
-Translations are especially welcome. Today, strings are embedded in
-source — we're adding an i18n layer (Agent 9 task 6). If you want to
-contribute a translation and the scaffolding isn't there yet, open
-an issue so we can prioritize it.
+Translations are especially welcome.
+
+### How the i18n layer works
+
+- The framework is `i18next` + `react-i18next`. Setup lives in
+  `apps/web/src/i18n/index.ts`.
+- All user-visible strings live in `apps/web/src/i18n/locales/<lang>.json`.
+- React components call `t("key.path")` after `const { t } = useTranslation()`.
+- Pure modules (`lib/format.ts` and friends) call `i18n.t(...)` from
+  the `@/i18n` import directly.
+- The active language is auto-detected from the browser on first
+  launch and persisted in `localStorage` under
+  `understoria.language`. Members can change it from
+  Profile → Language.
+
+### Adding a new key
+
+1. Add it to **every** locale file in `src/i18n/locales/`.
+2. Use it in your component via `t("…")`.
+3. Run `npm test` — the parity test in
+   `src/i18n/parity.test.ts` will fail if any locale is missing the
+   new key, by design.
+
+### Adding a new language
+
+1. Create `src/i18n/locales/<code>.json`. Mirror the structure of
+   `en.json` exactly.
+2. Register the new language in `src/i18n/index.ts` — extend
+   `SUPPORTED_LANGUAGES` and `LANGUAGE_LABELS` (with the language's
+   own native form for the label, e.g. `"Português"` not
+   `"Portuguese"`).
+3. Verify the key-parity test passes before submitting.
+
+### Translation quality and review
+
+The initial Spanish translation in this repo was bootstrapped without
+a native-speaker review. Native speakers should expect to see things
+they want to revise. Open a PR — translation revisions are exactly
+the kind of small, valuable contribution we welcome.
+
+When reviewing or contributing translations:
+
+- **Match the voice**, not just the literal meaning. Understoria's
+  English uses solidarity-tone, plainspoken language. Don't
+  formalize it.
+- **Keep gender inclusivity**. For Spanish, this currently means using
+  inclusive forms like "niñes" rather than "niños/as." If your
+  community has a different convention, propose it in an issue
+  first — consistency matters.
+- **Stretch interpolated values** like `{{name}}` and `{{count}}`
+  carry through unchanged. Don't translate or rename them.
+- **HTML inside translations** (e.g. `<strong>`) is rendered with
+  React's `Trans` component on the React side. Keep the tags
+  identical.
+
+### Ongoing migration
+
+The current build has migrated the high-traffic surface (board, nav,
+post cards, urgency / category badges, relative-time formatting,
+language switcher). Profile, Dashboard, PostDetail, PostForm, and
+InviteAccept are still English-only. Migrating those is incremental
+and welcome — each PR can take one page at a time.
 
 ## What not to contribute
 

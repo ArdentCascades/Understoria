@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { PostCard } from "@/components/PostCard";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
@@ -7,15 +8,11 @@ import type { Category, PostType, Urgency } from "@/types";
 
 type Tab = PostType;
 
-const URGENCY_OPTIONS: Array<{ value: "" | Urgency; label: string }> = [
-  { value: "", label: "All urgencies" },
-  { value: "high", label: "Urgent" },
-  { value: "medium", label: "Soon" },
-  { value: "low", label: "When you can" },
-];
+const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
 
 export default function BoardPage() {
   const { posts, members, currentMember } = useApp();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("NEED");
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
   const [urgencyFilter, setUrgencyFilter] = useState<Urgency | "">("");
@@ -55,32 +52,32 @@ export default function BoardPage() {
   return (
     <div className="px-4 pb-32 pt-4">
       <header className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">Community board</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("board.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
-          Post what you need. Offer what you can.
+          {t("board.tagline")}
         </p>
       </header>
 
       <div
         role="tablist"
-        aria-label="Post types"
+        aria-label={t("board.tabs.ariaLabel")}
         className="mb-4 grid grid-cols-2 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
       >
-        {(["NEED", "OFFER"] as const).map((t) => (
+        {(["NEED", "OFFER"] as const).map((tt) => (
           <button
-            key={t}
+            key={tt}
             role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
+            aria-selected={tab === tt}
+            onClick={() => setTab(tt)}
             className={`touch-target rounded-full text-sm font-semibold transition-colors ${
-              tab === t
+              tab === tt
                 ? "bg-white text-canopy-800 shadow-sm dark:bg-moss-950 dark:text-canopy-200"
                 : "text-moss-700 dark:text-moss-300"
             }`}
           >
-            {t === "NEED" ? "Needs" : "Offers"}
+            {tt === "NEED" ? t("board.tabs.needs") : t("board.tabs.offers")}
             <span className="ml-1 text-xs text-moss-500 dark:text-moss-400">
-              ({openCount[t]})
+              {t("board.openCount", { count: openCount[tt] })}
             </span>
           </button>
         ))}
@@ -88,7 +85,7 @@ export default function BoardPage() {
 
       <div className="mb-4 grid gap-2 sm:grid-cols-2">
         <label className="sr-only" htmlFor="category-filter">
-          Filter by category
+          {t("board.filters.categoryAriaLabel")}
         </label>
         <select
           id="category-filter"
@@ -98,15 +95,15 @@ export default function BoardPage() {
             setCategoryFilter(e.target.value as Category | "")
           }
         >
-          <option value="">All categories</option>
+          <option value="">{t("board.filters.allCategories")}</option>
           {ALL_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {CATEGORY_META[c].emoji} {CATEGORY_META[c].label}
+              {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
             </option>
           ))}
         </select>
         <label className="sr-only" htmlFor="urgency-filter">
-          Filter by urgency
+          {t("board.filters.urgencyAriaLabel")}
         </label>
         <select
           id="urgency-filter"
@@ -116,9 +113,11 @@ export default function BoardPage() {
             setUrgencyFilter(e.target.value as Urgency | "")
           }
         >
-          {URGENCY_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
+          {URGENCY_VALUES.map((value) => (
+            <option key={value} value={value}>
+              {value === ""
+                ? t("board.filters.allUrgencies")
+                : t(`urgency.${value}`)}
             </option>
           ))}
         </select>
@@ -126,13 +125,13 @@ export default function BoardPage() {
 
       <div className="mb-4">
         <label htmlFor="board-search" className="sr-only">
-          Search posts
+          {t("board.search.ariaLabel")}
         </label>
         <input
           id="board-search"
           type="search"
           className="input"
-          placeholder="Search titles and descriptions"
+          placeholder={t("board.search.placeholder")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -146,7 +145,7 @@ export default function BoardPage() {
             <li key={p.id}>
               <PostCard
                 post={p}
-                posterName={memberName.get(p.postedBy) ?? "Member"}
+                posterName={memberName.get(p.postedBy) ?? ""}
                 isCurrentMember={p.postedBy === currentMember?.publicKey}
               />
             </li>
@@ -161,14 +160,15 @@ export default function BoardPage() {
             className="btn-secondary"
             onClick={() => navigate(`/post/new?type=NEED`)}
           >
-            <span aria-hidden="true">{"➕"}</span> Post a need
+            <span aria-hidden="true">{"➕"}</span> {t("board.fab.postNeed")}
           </button>
           <button
             type="button"
             className="btn-primary"
             onClick={() => navigate(`/post/new?type=OFFER`)}
           >
-            <span aria-hidden="true">{"\u{1F91D}"}</span> Post an offer
+            <span aria-hidden="true">{"\u{1F91D}"}</span>{" "}
+            {t("board.fab.postOffer")}
           </button>
         </div>
       </div>
@@ -177,10 +177,9 @@ export default function BoardPage() {
 }
 
 function EmptyState({ tab }: { tab: Tab }) {
+  const { t } = useTranslation();
   const message =
-    tab === "NEED"
-      ? "No needs match these filters yet. If you need help, post something — asking is never gated in a timebank."
-      : "No offers match these filters yet. What could you share with your community this week?";
+    tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers");
   return (
     <div className="card flex flex-col items-center gap-2 py-10 text-center">
       <div className="text-4xl" aria-hidden="true">

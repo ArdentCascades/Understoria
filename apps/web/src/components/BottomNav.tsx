@@ -1,21 +1,23 @@
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: "nav.board" | "nav.dashboard" | "nav.profile";
   icon: string;
 }
 
 const ITEMS: NavItem[] = [
-  { to: "/", label: "Board", icon: "\u{1F333}" }, // deciduous tree
-  { to: "/dashboard", label: "Dashboard", icon: "\u{1F331}" }, // seedling
-  { to: "/profile", label: "Profile", icon: "\u{1F33F}" }, // herb
+  { to: "/", labelKey: "nav.board", icon: "\u{1F333}" },
+  { to: "/dashboard", labelKey: "nav.dashboard", icon: "\u{1F331}" },
+  { to: "/profile", labelKey: "nav.profile", icon: "\u{1F33F}" },
 ];
 
 export function BottomNav() {
+  const { t } = useTranslation();
   return (
     <nav
-      aria-label="Main navigation"
+      aria-label={t("nav.board")}
       className="sticky bottom-0 z-30 border-t border-moss-200 bg-white/95
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95"
@@ -38,7 +40,7 @@ export function BottomNav() {
               <span aria-hidden="true" className="text-xl leading-none">
                 {item.icon}
               </span>
-              <span>{item.label}</span>
+              <span>{t(item.labelKey)}</span>
             </NavLink>
           </li>
         ))}
