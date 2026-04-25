@@ -1,6 +1,10 @@
 node_modules/
 dist/
 build/
+*.db
+*.db-shm
+*.db-wal
+.npm/
 .cache/
 .turbo/
 coverage/

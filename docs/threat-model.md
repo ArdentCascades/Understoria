@@ -130,8 +130,13 @@ We are not trying to protect against:
   a 50-member, 200-post fixture: completes in ~500 ms, well under the
   60-second acceptance target. Node-level purge and dead-man's-switch
   are still pending.
-- **No CSP / HSTS / certificate pinning yet** — these are trivial
-  hardening items that must ship before any real pilot.
+- **CSP / HSTS / cert pinning: PARTIALLY IMPLEMENTED.** The Fastify
+  community node ships with helmet middleware (CSP with self-only
+  defaults, HSTS, X-Frame-Options DENY-equivalent, Referrer-Policy
+  no-referrer) and a non-reversible bucket id for rate-limit keying
+  so client IPs never reach memory or logs. The PWA-only deployment
+  path documents the matching Caddy header config. Certificate
+  pinning in the PWA is still not implemented; tracked.
 
 ## 8. Guidance for reviewers
 

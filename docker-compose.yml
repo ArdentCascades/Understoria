@@ -1,0 +1,39 @@
+services:
+  understoria:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    image: understoria/server:0.1.0
+    container_name: understoria
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8787"
+      DATABASE_PATH: "/data/understoria.db"
+      # Set this to the URL of your hosted PWA in production.
+      CORS_ORIGIN: "*"
+      RATE_LIMIT_MAX: "60"
+      LOG_LEVEL: "info"
+      LOG_REQUEST_PATHS: "false"
+    volumes:
+      - understoria-data:/data
+    # Drop every Linux capability we don't need. better-sqlite3 + Node
+    # don't bind privileged ports inside the container.
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  understoria-data:

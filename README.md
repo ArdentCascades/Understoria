@@ -216,11 +216,13 @@ We make decisions through modified consensus. Major decisions go through a commu
 - [x] Member guide and operator guide drafts
 - [ ] End-to-end encrypted messaging
 
-### Phase 3: Federation
-- [ ] Community node server with Docker deployment
+### Phase 3: Federation *(active)*
+- [x] Community node server with Docker deployment
+- [x] Signed-exchange verification on the server
+- [x] Spanish translation
 - [ ] Federation protocol and cross-node exchanges
+- [ ] Posts / vouches / invites endpoints on the server
 - [ ] Organizing module: campaigns, power mapping, meeting tools
-- [ ] Spanish translation
 
 ### Phase 4: Launch
 - [ ] Pilot deployment with 3 communities

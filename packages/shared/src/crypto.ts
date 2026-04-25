@@ -1,6 +1,6 @@
 import nacl from "tweetnacl";
-import { b64decode, b64encode, utf8encode } from "./bytes";
-import type { Category, Exchange } from "./types";
+import { b64decode, b64encode, utf8encode } from "./bytes.js";
+import type { Category, Exchange } from "./types.js";
 
 /**
  * Identity primitives — Ed25519 key pairs, detached signatures.

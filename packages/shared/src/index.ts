@@ -6,6 +6,6 @@
  * happy. This barrel exists for one-shot scripts.
  */
 
-export * from "./types";
-export * from "./bytes";
-export * from "./crypto";
+export * from "./types.js";
+export * from "./bytes.js";
+export * from "./crypto.js";

@@ -6,10 +6,14 @@
   "license": "AGPL-3.0-or-later",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "npm --workspace @understoria/web run dev",
-    "build": "npm --workspace @understoria/web run build",
+    "shared:build": "npm --workspace @understoria/shared run build",
+    "dev": "npm run shared:build && npm --workspace @understoria/web run dev",
+    "dev:server": "npm run shared:build && npm --workspace @understoria/server run dev",
+    "build": "npm run shared:build && npm --workspace @understoria/web run build",
+    "build:server": "npm run shared:build && npm --workspace @understoria/server run build",
     "preview": "npm --workspace @understoria/web run preview",
-    "test": "npm --workspace @understoria/web run test",
-    "typecheck": "npm --workspaces --if-present run typecheck"
+    "test": "npm run shared:build && npm --workspaces --if-present run test",
+    "typecheck": "npm run shared:build && npm --workspaces --if-present run typecheck",
+    "postinstall": "npm run shared:build"
   }
 }
