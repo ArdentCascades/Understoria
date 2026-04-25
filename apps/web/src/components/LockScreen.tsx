@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { shortKey } from "@/lib/format";
 
 export function LockScreen() {
   const { currentMember, unlock } = useApp();
+  const { t } = useTranslation();
   const [passphrase, setPassphrase] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -15,11 +17,9 @@ export function LockScreen() {
     try {
       const result = await unlock(passphrase);
       if (result === "wrong_passphrase") {
-        setError("That passphrase didn't match. Try again.");
+        setError(t("lockScreen.wrongPassphrase"));
       } else if (result === "nothing_to_unlock") {
-        setError(
-          "No wrapped keys on this device — nothing to unlock. (If you're seeing this, reload the page.)",
-        );
+        setError(t("lockScreen.nothingToUnlock"));
       } else {
         setPassphrase("");
       }
@@ -38,26 +38,28 @@ export function LockScreen() {
             {"\u{1F512}"}
           </span>
           <h1 className="text-xl font-bold tracking-tight">
-            This device is locked
+            {t("lockScreen.title")}
           </h1>
         </div>
         <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
           {currentMember ? (
             <>
-              Enter your passphrase to unlock{" "}
-              <span className="font-medium">{currentMember.displayName}</span>'s
-              identity on this device.{" "}
+              {t("lockScreen.introWith", { name: currentMember.displayName })}
               <span className="block text-xs text-moss-500 dark:text-moss-400">
-                Key: {shortKey(currentMember.publicKey)}
+                {t("lockScreen.keyLine", {
+                  key: shortKey(currentMember.publicKey),
+                })}
               </span>
             </>
           ) : (
-            <>Enter your passphrase to unlock this device.</>
+            t("lockScreen.introNone")
           )}
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Passphrase</span>
+            <span className="text-sm font-medium">
+              {t("lockScreen.passphraseLabel")}
+            </span>
             <input
               type="password"
               autoFocus
@@ -78,13 +80,11 @@ export function LockScreen() {
             className="btn-primary"
             disabled={submitting || passphrase.length === 0}
           >
-            {submitting ? "Unlocking…" : "Unlock"}
+            {submitting ? t("lockScreen.submitting") : t("lockScreen.submit")}
           </button>
         </form>
         <p className="mt-4 text-xs text-moss-500 dark:text-moss-400">
-          Forgotten passphrases cannot be recovered — by design. If you've
-          lost yours, the only path is Profile → Emergency → Hard purge and
-          starting over with a fresh identity.
+          {t("lockScreen.noRecoveryNote")}
         </p>
       </div>
     </div>

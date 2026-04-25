@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { decodeAndVerifyInvite } from "@/lib/invite";
 import { redeemInvite, type RedeemError } from "@/db/invites";
@@ -7,6 +8,7 @@ import { shortKey } from "@/lib/format";
 
 export default function InviteAcceptPage() {
   const { nodeId, setCurrentMember } = useApp();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const encoded = useMemo(() => {
@@ -36,7 +38,7 @@ export default function InviteAcceptPage() {
     e.preventDefault();
     if (!encoded) return;
     if (!displayName.trim()) {
-      setSubmitError("Choose a display name or pseudonym to continue.");
+      setSubmitError(t("invite.displayNameRequired"));
       return;
     }
     setStatus("submitting");
@@ -55,7 +57,7 @@ export default function InviteAcceptPage() {
   if (!parseResult) {
     return (
       <div className="px-4 pt-6 text-sm text-moss-600 dark:text-moss-300">
-        Reading invite…
+        {t("invite.reading")}
       </div>
     );
   }
@@ -63,16 +65,16 @@ export default function InviteAcceptPage() {
   if (!parseResult.ok) {
     return (
       <div className="px-4 pt-6">
-        <h1 className="text-xl font-bold">This invite can't be used.</h1>
+        <h1 className="text-xl font-bold">{t("invite.cantUse")}</h1>
         <p className="mt-2 text-sm text-moss-600 dark:text-moss-300">
-          {inviteErrorMessage(parseResult.error)}
+          {t(`invite.errors.${parseResult.error}`)}
         </p>
         <button
           type="button"
           className="btn-secondary mt-4"
           onClick={() => navigate("/")}
         >
-          Continue to the board
+          {t("invite.continueToBoard")}
         </button>
       </div>
     );
@@ -84,16 +86,15 @@ export default function InviteAcceptPage() {
     <div className="px-4 pb-8 pt-6">
       <div className="card">
         <h1 className="text-2xl font-bold tracking-tight">
-          You've been invited
+          {t("invite.youInvited")}
         </h1>
         <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
-          <span className="font-medium">{invite.inviterName}</span> wants you in
-          their mutual aid network.
+          {t("invite.wantsYou", { name: invite.inviterName })}
         </p>
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div>
             <dt className="text-xs uppercase tracking-wide text-moss-500">
-              Inviter key
+              {t("invite.inviterKey")}
             </dt>
             <dd className="mt-0.5 font-mono text-xs">
               {shortKey(invite.inviterKey)}
@@ -101,30 +102,27 @@ export default function InviteAcceptPage() {
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-moss-500">
-              Expires
+              {t("invite.expires")}
             </dt>
             <dd className="mt-0.5">
-              {new Date(invite.expiresAt).toLocaleString()}
+              {new Date(invite.expiresAt).toLocaleString(i18n.resolvedLanguage)}
             </dd>
           </div>
         </dl>
 
         <p className="mt-4 rounded-xl bg-moss-50 p-3 text-xs text-moss-600 dark:bg-moss-900 dark:text-moss-300">
-          Before accepting: confirm that the inviter-key fingerprint above
-          matches what {invite.inviterName} shared with you in person or over
-          a secure channel. A link that reached you via untrusted email is
-          worth a double-check.
+          {t("invite.fingerprintReminder", { name: invite.inviterName })}
         </p>
 
         {status === "done" ? (
           <p className="mt-4 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-            Welcome in. Redirecting to the board…
+            {t("invite.welcome")}
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">
-                Your display name (pseudonyms welcome)
+                {t("invite.displayNameLabel")}
               </span>
               <input
                 className="input"
@@ -142,7 +140,7 @@ export default function InviteAcceptPage() {
             )}
             {status === "error" && error && (
               <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
-                {inviteErrorMessage(error)}
+                {t(`invite.errors.${error}`)}
               </p>
             )}
             <div className="flex flex-wrap justify-end gap-2">
@@ -151,7 +149,7 @@ export default function InviteAcceptPage() {
                 className="btn-secondary"
                 onClick={() => navigate("/")}
               >
-                Not now
+                {t("invite.notNow")}
               </button>
               <button
                 type="submit"
@@ -159,8 +157,8 @@ export default function InviteAcceptPage() {
                 disabled={status === "submitting"}
               >
                 {status === "submitting"
-                  ? "Joining…"
-                  : "Accept invite and join"}
+                  ? t("invite.submitting")
+                  : t("invite.submit")}
               </button>
             </div>
           </form>
@@ -168,21 +166,4 @@ export default function InviteAcceptPage() {
       </div>
     </div>
   );
-}
-
-function inviteErrorMessage(error: RedeemError): string {
-  switch (error) {
-    case "malformed":
-      return "This invite link is missing or damaged. Ask the inviter to send a fresh one.";
-    case "expired":
-      return "This invite has expired. Ask the inviter to issue a new one.";
-    case "bad_signature":
-      return "This invite's signature didn't verify. Do not accept — it may have been tampered with.";
-    case "already_redeemed":
-      return "Someone has already used this invite. Invites are single-use.";
-    case "revoked":
-      return "The inviter revoked this invite.";
-    case "self_redeem":
-      return "You can't redeem an invite you issued yourself. Share the link with someone else.";
-  }
 }

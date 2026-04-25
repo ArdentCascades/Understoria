@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
   cancelPost,
@@ -27,6 +28,7 @@ export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { posts, members, currentMember, nodeId } = useApp();
+  const { t } = useTranslation();
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [error, setError] = useState<string | null>(null);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
@@ -44,14 +46,14 @@ export default function PostDetailPage() {
     return (
       <div className="px-4 pt-6">
         <p className="text-sm text-moss-600 dark:text-moss-300">
-          This post couldn't be found. It may have been cancelled.
+          {t("postDetail.notFound")}
         </p>
         <button
           type="button"
           className="btn-secondary mt-4"
           onClick={() => navigate("/")}
         >
-          Back to board
+          {t("postDetail.backToBoard")}
         </button>
       </div>
     );
@@ -105,7 +107,7 @@ export default function PostDetailPage() {
         className="btn-ghost -ml-2 mb-3 text-sm"
         onClick={() => navigate(-1)}
       >
-        ← Back
+        {t("common.back")}
       </button>
 
       <div className="card mb-4">
@@ -113,7 +115,9 @@ export default function PostDetailPage() {
           <CategoryBadge category={post.category} />
           <UrgencyBadge urgency={post.urgency} />
           <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-            {post.type === "NEED" ? "Need" : "Offer"}
+            {post.type === "NEED"
+              ? t("postDetail.typeNeed")
+              : t("postDetail.typeOffer")}
           </span>
           <StatusLabel status={post.status} />
         </div>
@@ -124,35 +128,45 @@ export default function PostDetailPage() {
           </p>
         )}
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-          <Field label="Estimated hours">
+          <Field label={t("postDetail.fieldEstimatedHours")}>
             {formatHours(post.estimatedHours)}
           </Field>
-          <Field label="Posted">
+          <Field label={t("postDetail.fieldPosted")}>
             {formatRelativeTime(post.createdAt)}
           </Field>
-          <Field label={post.type === "NEED" ? "Posted by" : "Offered by"}>
+          <Field
+            label={
+              post.type === "NEED"
+                ? t("postDetail.fieldPostedBy")
+                : t("postDetail.fieldOfferedBy")
+            }
+          >
             <PersonInline
-              name={poster?.displayName ?? "Member"}
+              name={poster?.displayName ?? t("common.anyMember")}
               publicKey={post.postedBy}
               isYou={isPoster}
             />
           </Field>
           {post.claimedBy && (
             <Field
-              label={post.type === "NEED" ? "Helper" : "Claimed by"}
+              label={
+                post.type === "NEED"
+                  ? t("postDetail.fieldHelper")
+                  : t("postDetail.fieldClaimedBy")
+              }
             >
               <PersonInline
-                name={claimer?.displayName ?? "Member"}
+                name={claimer?.displayName ?? t("common.anyMember")}
                 publicKey={post.claimedBy}
                 isYou={isClaimer}
               />
             </Field>
           )}
           {post.locationZone && (
-            <Field label="Area">{post.locationZone}</Field>
+            <Field label={t("postDetail.fieldArea")}>{post.locationZone}</Field>
           )}
           {post.expiresAt && (
-            <Field label="Expires">
+            <Field label={t("postDetail.fieldExpires")}>
               {new Date(post.expiresAt).toLocaleDateString()}
             </Field>
           )}
@@ -182,7 +196,7 @@ export default function PostDetailPage() {
       {newAchievements.length > 0 && (
         <div className="mt-5">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
-            New community roles earned
+            {t("postDetail.newRolesEarned")}
           </h2>
           <ul className="flex flex-col gap-2">
             {newAchievements.map((a) => (
@@ -199,24 +213,22 @@ export default function PostDetailPage() {
 
       <ConfirmDialog
         open={dialog?.type === "claim"}
-        title="Claim this post?"
-        description={
-          post.type === "NEED" ? (
-            <p>
-              You're offering to help with{" "}
-              <strong>{formatHours(post.estimatedHours)}</strong> of{" "}
-              {post.category.replace("_", " ")}. You'll earn credit once both
-              of you confirm completion.
-            </p>
-          ) : (
-            <p>
-              You'd like to receive help for{" "}
-              <strong>{formatHours(post.estimatedHours)}</strong>. Credits
-              transfer when both parties confirm.
-            </p>
-          )
+        title={
+          post.type === "NEED"
+            ? t("postDetail.dialogClaimNeedTitle")
+            : t("postDetail.dialogClaimOfferTitle")
         }
-        confirmLabel="Yes, claim it"
+        description={
+          post.type === "NEED"
+            ? t("postDetail.dialogClaimNeedDescription", {
+                hours: formatHours(post.estimatedHours),
+                category: t(`categories.${post.category}`),
+              })
+            : t("postDetail.dialogClaimOfferDescription", {
+                hours: formatHours(post.estimatedHours),
+              })
+        }
+        confirmLabel={t("postDetail.dialogClaimConfirm")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me &&
@@ -226,14 +238,9 @@ export default function PostDetailPage() {
 
       <ConfirmDialog
         open={dialog?.type === "confirm-complete"}
-        title="Mark this exchange complete?"
-        description={
-          <p>
-            Confirm that the help actually happened. Credits transfer once both
-            parties confirm. If something went wrong, you can flag it instead.
-          </p>
-        }
-        confirmLabel="Yes, it's complete"
+        title={t("postDetail.dialogCompleteTitle")}
+        description={t("postDetail.dialogCompleteDescription")}
+        confirmLabel={t("postDetail.dialogCompleteConfirm")}
         onCancel={() => setDialog(null)}
         onConfirm={handleConfirmComplete}
       />
@@ -241,14 +248,9 @@ export default function PostDetailPage() {
       <ConfirmDialog
         open={dialog?.type === "dispute"}
         tone="caution"
-        title="Flag this exchange for community review?"
-        description={
-          <p>
-            The exchange will be flagged and a community mediator can help
-            resolve it. Your credits won't transfer yet.
-          </p>
-        }
-        confirmLabel="Flag it"
+        title={t("postDetail.dialogDisputeTitle")}
+        description={t("postDetail.dialogDisputeDescription")}
+        confirmLabel={t("postDetail.dialogDisputeConfirm")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => disputeExchange(post.id, me.publicKey))
@@ -258,9 +260,9 @@ export default function PostDetailPage() {
       <ConfirmDialog
         open={dialog?.type === "cancel"}
         tone="caution"
-        title="Cancel this post?"
-        description="Cancelled posts stay visible but can't be claimed."
-        confirmLabel="Cancel post"
+        title={t("postDetail.dialogCancelTitle")}
+        description={t("postDetail.dialogCancelDescription")}
+        confirmLabel={t("postDetail.dialogCancelConfirm")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => cancelPost(post.id, me.publicKey))
@@ -269,9 +271,9 @@ export default function PostDetailPage() {
 
       <ConfirmDialog
         open={dialog?.type === "release"}
-        title="Release your claim?"
-        description="This will reopen the post so someone else can step in."
-        confirmLabel="Release claim"
+        title={t("postDetail.dialogReleaseTitle")}
+        description={t("postDetail.dialogReleaseDescription")}
+        confirmLabel={t("postDetail.dialogReleaseConfirm")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => unclaimPost(post.id, me.publicKey))
@@ -302,6 +304,7 @@ function ActionPanel({
   helpedName,
   onOpenDialog,
 }: ActionPanelProps) {
+  const { t } = useTranslation();
   if (post.status === "open") {
     if (isPoster) {
       return (
@@ -310,10 +313,10 @@ function ActionPanel({
             className="btn-secondary"
             onClick={() => onOpenDialog({ type: "cancel" })}
           >
-            Cancel post
+            {t("postDetail.actionsCancelPost")}
           </button>
           <p className="text-xs text-moss-500 dark:text-moss-400">
-            Waiting for someone to claim this.
+            {t("postDetail.actionsWaiting")}
           </p>
         </Actions>
       );
@@ -324,7 +327,9 @@ function ActionPanel({
           className="btn-primary"
           onClick={() => onOpenDialog({ type: "claim" })}
         >
-          {post.type === "NEED" ? "Offer to help" : "Claim this offer"}
+          {post.type === "NEED"
+            ? t("postDetail.actionsOfferToHelp")
+            : t("postDetail.actionsClaimOffer")}
         </button>
       </Actions>
     );
@@ -335,8 +340,10 @@ function ActionPanel({
       return (
         <Actions>
           <p className="text-sm text-moss-600 dark:text-moss-300">
-            This post has been claimed. {helperName ?? "A community member"}{" "}
-            is helping {helpedName ?? "the poster"}.
+            {t("postDetail.actionsClaimedBy", {
+              helper: helperName ?? t("common.anyMember"),
+              helped: helpedName ?? t("common.anyMember"),
+            })}
           </p>
         </Actions>
       );
@@ -344,19 +351,18 @@ function ActionPanel({
     return (
       <Actions>
         <p className="text-sm text-moss-700 dark:text-moss-200">
-          When the help has actually happened, both of you confirm below.
-          Credits transfer once both have confirmed.
+          {t("postDetail.actionsExplain")}
         </p>
         {alreadyConfirmed ? (
           <p className="text-sm font-medium text-canopy-700 dark:text-canopy-300">
-            You've confirmed. Waiting on the other party.
+            {t("postDetail.actionsConfirmed")}
           </p>
         ) : (
           <button
             className="btn-primary"
             onClick={() => onOpenDialog({ type: "confirm-complete" })}
           >
-            Confirm it's complete
+            {t("postDetail.actionsConfirmComplete")}
           </button>
         )}
         <div className="flex flex-wrap gap-2">
@@ -364,7 +370,7 @@ function ActionPanel({
             className="btn-secondary"
             onClick={() => onOpenDialog({ type: "dispute" })}
           >
-            Something's wrong — flag it
+            {t("postDetail.actionsFlag")}
           </button>
           {isClaimer && (
             <button
@@ -372,7 +378,7 @@ function ActionPanel({
               onClick={() => onOpenDialog({ type: "release" })}
               disabled={post.status === "awaiting_confirmation"}
             >
-              Release claim
+              {t("postDetail.actionsRelease")}
             </button>
           )}
         </div>
@@ -384,9 +390,11 @@ function ActionPanel({
     return (
       <Actions>
         <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-          Completed. {formatHours(post.estimatedHours)} of credit flowed from{" "}
-          <strong>{helpedName ?? "the helped party"}</strong> to{" "}
-          <strong>{helperName ?? "the helper"}</strong>. Thank you both.
+          {t("postDetail.actionsCompleted", {
+            hours: formatHours(post.estimatedHours),
+            helper: helperName ?? t("common.anyMember"),
+            helped: helpedName ?? t("common.anyMember"),
+          })}
         </p>
       </Actions>
     );
@@ -396,8 +404,7 @@ function ActionPanel({
     return (
       <Actions>
         <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          This exchange has been flagged for community review. A mediator will
-          follow up.
+          {t("postDetail.actionsDisputed")}
         </p>
       </Actions>
     );
@@ -432,41 +439,28 @@ function PersonInline({
   publicKey: string;
   isYou: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <span>
-      {isYou ? "You" : name}{" "}
+      {isYou ? t("common.you") : name}{" "}
       <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
     </span>
   );
 }
 
 function StatusLabel({ status }: { status: Post["status"] }) {
-  const map: Record<Post["status"], { label: string; cls: string }> = {
-    open: {
-      label: "Open",
-      cls: "bg-canopy-50 text-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100",
-    },
-    claimed: {
-      label: "Claimed",
-      cls: "bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200",
-    },
-    awaiting_confirmation: {
-      label: "Awaiting confirmation",
-      cls: "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-100",
-    },
-    completed: {
-      label: "Completed",
-      cls: "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100",
-    },
-    cancelled: {
-      label: "Cancelled",
-      cls: "bg-moss-100 text-moss-600 dark:bg-moss-900 dark:text-moss-300",
-    },
-    disputed: {
-      label: "Flagged",
-      cls: "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100",
-    },
+  const { t } = useTranslation();
+  const styles: Record<Post["status"], string> = {
+    open: "bg-canopy-50 text-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100",
+    claimed: "bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200",
+    awaiting_confirmation:
+      "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-100",
+    completed:
+      "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100",
+    cancelled: "bg-moss-100 text-moss-600 dark:bg-moss-900 dark:text-moss-300",
+    disputed: "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100",
   };
-  const { label, cls } = map[status];
-  return <span className={`chip ${cls}`}>{label}</span>;
+  return (
+    <span className={`chip ${styles[status]}`}>{t(`postStatus.${status}`)}</span>
+  );
 }
