@@ -1,7 +1,18 @@
 {
   "common": {
     "loading": "Growing your community...",
-    "you": "You"
+    "you": "You",
+    "back": "← Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "savedAt": "Saved {{when}}",
+    "tryAgain": "Try again",
+    "copy": "Copy",
+    "copied": "Copied. Share it over Signal, in person, or on paper.",
+    "copyFailed": "Couldn't access the clipboard — select the link above and copy manually.",
+    "memberFallback": "a member",
+    "anyMember": "Member"
   },
   "nav": {
     "board": "Board",
@@ -49,6 +60,39 @@
     "inHours": "in {{count}}h",
     "inDays": "in {{count}}d"
   },
+  "trust": {
+    "trusted": "Trusted",
+    "trustedTooltip": "This member has at least two valid vouches.",
+    "pending": "Pending trust",
+    "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers."
+  },
+  "achievement": {
+    "first_exchange": {
+      "label": "First Exchange",
+      "description": "You completed your first exchange — giving or receiving."
+    },
+    "connector_5": {
+      "label": "Connector",
+      "description": "You've helped 5 different people in our community."
+    },
+    "regular_4weeks": {
+      "label": "Regular",
+      "description": "You've been active for 4 consecutive weeks — at least one exchange each week."
+    },
+    "bridge_builder": {
+      "label": "Bridge Builder",
+      "description": "You fulfilled a need in a category no one had filled before."
+    },
+    "seed_planter": {
+      "label": "Seed Planter",
+      "description": "3 people you invited have each completed an exchange."
+    },
+    "listener": {
+      "label": "Listener",
+      "description": "You've completed 3 exchanges supporting someone emotionally."
+    },
+    "earnedDate": "Earned {{date}}"
+  },
   "board": {
     "title": "Community board",
     "tagline": "Post what you need. Offer what you can.",
@@ -77,10 +121,146 @@
       "offers": "No offers match these filters yet. What could you share with your community this week?"
     }
   },
+  "dashboard": {
+    "title": "Community dashboard",
+    "tagline": "The unit of progress is us, not me.",
+    "totalHoursLabel": "Total hours exchanged",
+    "totalExchangesOne": "across {{count}} exchange",
+    "totalExchangesOther": "across {{count}} exchanges",
+    "stats": {
+      "activeWeek": "Active this week",
+      "activeMonth": "Active this month",
+      "ofMembers": "of {{count}} members",
+      "streak": "Solidarity streak",
+      "streakUnitOne": "day",
+      "streakUnitOther": "days in a row",
+      "needsMet": "Needs met this week",
+      "andCounting": "and counting"
+    },
+    "milestones": {
+      "title": "Collective milestones",
+      "hours": "Hours of mutual aid",
+      "exchanges": "Exchanges completed",
+      "members": "Members strong",
+      "topReached": " — top milestone reached",
+      "valueOf": "{{value}} / {{next}}",
+      "lastReached": "Last reached: {{label}}",
+      "celebration": "We reached a milestone"
+    },
+    "categoryBreakdown": {
+      "title": "Where help is flowing",
+      "empty": "No exchanges yet. Once the first one happens, you'll see the mix of care, labor, and support flowing through the community."
+    },
+    "rolesThisMonth": {
+      "title": "Community roles earned this month",
+      "lineOne": "{{count}} member earned {{role}}",
+      "lineOther": "{{count}} members earned {{role}}"
+    }
+  },
   "profile": {
+    "title": "Your profile",
+    "identity": "Identity: {{key}}",
+    "balance": {
+      "label": "Your balance",
+      "seed": "Seed: {{hours}}",
+      "footerNote": "Balances can go negative — asking is never gated.",
+      "surplus": "You've given more than you've received lately. Thank you.",
+      "neutral": "Your balance is right at your starting seed. That's a fine place to be.",
+      "receiving": "You've been receiving — that's what seed credits are for. Ask for what you need."
+    },
+    "about": {
+      "title": "About you",
+      "name": "Display name (pseudonym is fine)",
+      "skills": "Skills (comma-separated)",
+      "skillsPlaceholder": "cooking, listening, spanish",
+      "availability": "Availability",
+      "availabilityPlaceholder": "e.g. Evenings and weekends",
+      "area": "Area (neighborhood, not address)",
+      "areaPlaceholder": "e.g. North neighborhood"
+    },
+    "rolesEarned": {
+      "title": "Community roles earned",
+      "empty": "You haven't earned any community roles yet. They show up as you participate — not as trophies, but as ways of naming the shapes your contributions take."
+    },
+    "history": {
+      "title": "Your exchange history",
+      "empty": "Nothing here yet. When you give or receive help, each exchange shows up with a signed record you can verify.",
+      "helped": "Helped",
+      "received": "Received help from",
+      "flag": "flagged for review",
+      "flagShort": "Very short exchange — surfaced for community review.",
+      "flagReciprocal": "Repeated reciprocal exchange with the same person — surfaced for community review.",
+      "flagDailyLimit": "Near the daily exchange limit.",
+      "flagDefault": "Flagged for community review."
+    },
+    "memberSwitcher": {
+      "title": "Switch member (local dev)",
+      "note": "In a real deployment each device holds one identity. This switcher exists so you can walk through the full exchange flow yourself while testing.",
+      "noAreaSet": "no area set"
+    },
+    "data": {
+      "title": "Data & privacy",
+      "intro": "Everything you see is stored locally on this device. No server. No analytics. No account to sign up for.",
+      "export": "Export my data"
+    },
     "language": {
       "title": "Language",
       "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."
+    },
+    "invites": {
+      "title": "Invites you've issued",
+      "intro": "A new member needs two vouches to become trusted. Your invite counts as the first — someone else will need to vouch for them after they join.",
+      "generate": "Generate invite link",
+      "generating": "Generating…",
+      "shareTitle": "Share this link with one person",
+      "shareNote": "The link is single-use and expires in 14 days. If it leaks before redemption, revoke it below.",
+      "redeemed": "Redeemed {{when}}",
+      "expires": "Expires {{date}}",
+      "revoke": "Revoke",
+      "statusOpen": "Open",
+      "statusRedeemed": "Redeemed",
+      "statusRevoked": "Revoked",
+      "statusExpired": "Expired"
+    },
+    "security": {
+      "title": "Security",
+      "summaryProtected": "Your secret keys on this device are wrapped with a passphrase-derived key. Unlock is required at every launch.",
+      "summaryUnprotected": "Your secret keys are stored in plaintext on this device. Enable passphrase protection before leaving the device alone in any hostile environment.",
+      "enable": "Enable passphrase protection",
+      "change": "Change passphrase",
+      "disable": "Disable protection",
+      "lockNow": "Lock now",
+      "currentPassphrase": "Current passphrase",
+      "newPassphrase": "New passphrase",
+      "passphrase": "Passphrase",
+      "repeat": "Repeat it",
+      "passphraseHint": "At least 8 characters. A four-word pass-phrase from a password manager is ideal. There is no recovery — we cannot get this back for you.",
+      "disableWarn": "This will rewrite your wrapped secret keys as plaintext on this device. Only do this if you're sure the device is safe.",
+      "submitEnable": "Enable",
+      "submitChange": "Change",
+      "submitDisable": "Disable",
+      "working": "Working…",
+      "successEnable": "Passphrase protection enabled. Write your passphrase down somewhere safe — it can't be recovered.",
+      "successChange": "Passphrase changed. Use the new one next time you unlock.",
+      "successDisable": "Passphrase protection disabled. Secret keys are stored in plaintext on this device again.",
+      "errorMismatch": "The two passphrases didn't match.",
+      "errorMismatchNew": "The two new passphrases didn't match."
+    },
+    "emergency": {
+      "title": "Emergency",
+      "intro": "Two panic options for when a device is at risk. Neither contacts a server; both happen entirely on this device.",
+      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger and your keypair. Useful if a device will briefly be handled by a hostile party.",
+      "hardBullet": "Hard purge — wipes every table including private keys, rotates to a fresh node identity. Unrecoverable. The page will reload afterward.",
+      "softButton": "Soft purge (anonymize)",
+      "hardButton": "Hard purge (delete everything)",
+      "softTitle": "Run soft purge?",
+      "softConfirmDescription": "Identifying text on every member and post will be blanked out. Signed exchange records and your keypair will be preserved. This is not reversible.",
+      "softConfirm": "Yes, anonymize",
+      "hardTitle": "Run hard purge?",
+      "hardConfirmDescription": "Every table will be wiped — including your private keys. A fresh node identity will be generated and the app will reload. There is no undo.",
+      "hardConfirm": "Yes, wipe everything",
+      "completedSoft": "Soft purge complete in {{ms}}ms.",
+      "completedHard": "Hard purge complete in {{ms}}ms."
     }
   }
 }

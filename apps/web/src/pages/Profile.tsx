@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { balanceFor, transactionHistory } from "@/lib/timebank";
 import { AchievementBadge } from "@/components/AchievementBadge";
@@ -27,18 +28,25 @@ import { TrustChip } from "@/components/TrustChip";
 import { LanguageSection } from "@/components/LanguageSection";
 import type { AchievementType, FlagReason, Member } from "@/types";
 
-function flagReasonLabel(reason: FlagReason | undefined): string {
+function flagReasonKey(reason: FlagReason | undefined): string {
   switch (reason) {
     case "short_duration":
-      return "Very short exchange — surfaced for community review.";
+      return "profile.history.flagShort";
     case "reciprocal_pattern":
-      return "Repeated reciprocal exchange with the same person — surfaced for community review.";
+      return "profile.history.flagReciprocal";
     case "daily_limit_warning":
-      return "Near the daily exchange limit.";
+      return "profile.history.flagDailyLimit";
     default:
-      return "Flagged for community review.";
+      return "profile.history.flagDefault";
   }
 }
+
+const INVITE_STATUS_KEY: Record<InviteRow["status"], string> = {
+  open: "profile.invites.statusOpen",
+  redeemed: "profile.invites.statusRedeemed",
+  revoked: "profile.invites.statusRevoked",
+  expired: "profile.invites.statusExpired",
+};
 
 export default function ProfilePage() {
   const {
@@ -51,6 +59,7 @@ export default function ProfilePage() {
     nodeId,
     setCurrentMember,
   } = useApp();
+  const { t } = useTranslation();
 
   if (!currentMember) return null;
 
@@ -86,9 +95,11 @@ export default function ProfilePage() {
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Your profile</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t("profile.title")}
+          </h1>
           <p className="text-xs text-moss-500 dark:text-moss-400">
-            Identity: {shortKey(currentMember.publicKey)}
+            {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
           </p>
         </div>
         <TrustChip status={trust} />
@@ -106,13 +117,11 @@ export default function ProfilePage() {
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          Community roles earned
+          {t("profile.rolesEarned.title")}
         </h2>
         {myAchievements.length === 0 ? (
           <p className="text-sm text-moss-600 dark:text-moss-300">
-            You haven't earned any community roles yet. They show up as you
-            participate — not as trophies, but as ways of naming the shapes
-            your contributions take.
+            {t("profile.rolesEarned.empty")}
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -130,12 +139,11 @@ export default function ProfilePage() {
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          Your exchange history
+          {t("profile.history.title")}
         </h2>
         {history.length === 0 ? (
           <p className="text-sm text-moss-600 dark:text-moss-300">
-            Nothing here yet. When you give or receive help, each exchange
-            shows up with a signed record you can verify.
+            {t("profile.history.empty")}
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
@@ -149,19 +157,21 @@ export default function ProfilePage() {
                   <CategoryBadge category={exchange.category} size="sm" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm">
-                      {delta > 0 ? "Helped" : "Received help from"}{" "}
+                      {delta > 0
+                        ? t("profile.history.helped")
+                        : t("profile.history.received")}{" "}
                       <span className="font-medium">
-                        {other?.displayName ?? "a member"}
+                        {other?.displayName ?? t("common.memberFallback")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-moss-500">
                       <span>{formatRelativeTime(exchange.completedAt)}</span>
                       {exchange.flaggedForReview && (
                         <span
-                          title={flagReasonLabel(exchange.flagReason)}
+                          title={t(flagReasonKey(exchange.flagReason))}
                           className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
                         >
-                          flagged for review
+                          {t("profile.history.flag")}
                         </span>
                       )}
                     </div>
@@ -190,11 +200,10 @@ export default function ProfilePage() {
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          Data & privacy
+          {t("profile.data.title")}
         </h2>
         <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-          Everything you see is stored locally on this device. No server. No
-          analytics. No account to sign up for.
+          {t("profile.data.intro")}
         </p>
         <div className="flex flex-wrap gap-2">
           <button
@@ -202,7 +211,7 @@ export default function ProfilePage() {
             onClick={() => exportData()}
             type="button"
           >
-            Export my data
+            {t("profile.data.export")}
           </button>
         </div>
       </section>
@@ -218,6 +227,7 @@ export default function ProfilePage() {
 
 function SecuritySection() {
   const { lockState, lock, refreshLockState } = useApp();
+  const { t } = useTranslation();
   const [mode, setMode] = useState<"idle" | "enable" | "change" | "disable">(
     "idle",
   );
@@ -243,20 +253,18 @@ function SecuritySection() {
     setBusy(true);
     try {
       if (mode === "enable") {
-        if (pass1 !== pass2) throw new Error("The two passphrases didn't match.");
+        if (pass1 !== pass2)
+          throw new Error(t("profile.security.errorMismatch"));
         await enablePassphrase(pass1);
-        setSuccess(
-          "Passphrase protection enabled. Write your passphrase down somewhere safe — it can't be recovered.",
-        );
+        setSuccess(t("profile.security.successEnable"));
       } else if (mode === "change") {
-        if (pass1 !== pass2) throw new Error("The two new passphrases didn't match.");
+        if (pass1 !== pass2)
+          throw new Error(t("profile.security.errorMismatchNew"));
         await changePassphrase(current, pass1);
-        setSuccess("Passphrase changed. Use the new one next time you unlock.");
+        setSuccess(t("profile.security.successChange"));
       } else if (mode === "disable") {
         await disablePassphrase();
-        setSuccess(
-          "Passphrase protection disabled. Secret keys are stored in plaintext on this device again.",
-        );
+        setSuccess(t("profile.security.successDisable"));
       }
       await refreshLockState();
       reset();
@@ -272,21 +280,12 @@ function SecuritySection() {
   return (
     <section className="card mb-4">
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
-        Security
+        {t("profile.security.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-        {protectionOn ? (
-          <>
-            Your secret keys on this device are wrapped with a passphrase-
-            derived key. Unlock is required at every launch.
-          </>
-        ) : (
-          <>
-            Your secret keys are stored in plaintext on this device. Enable
-            passphrase protection before leaving the device alone in any
-            hostile environment.
-          </>
-        )}
+        {protectionOn
+          ? t("profile.security.summaryProtected")
+          : t("profile.security.summaryUnprotected")}
       </p>
 
       {success && (
@@ -309,7 +308,7 @@ function SecuritySection() {
               setSuccess(null);
             }}
           >
-            Enable passphrase protection
+            {t("profile.security.enable")}
           </button>
         )}
         {protectionOn && (
@@ -323,7 +322,7 @@ function SecuritySection() {
                 setSuccess(null);
               }}
             >
-              Change passphrase
+              {t("profile.security.change")}
             </button>
             <button
               type="button"
@@ -334,14 +333,14 @@ function SecuritySection() {
                 setSuccess(null);
               }}
             >
-              Disable protection
+              {t("profile.security.disable")}
             </button>
             <button
               type="button"
               className="btn bg-rose-600 text-white hover:bg-rose-700"
               onClick={() => lock()}
             >
-              Lock now
+              {t("profile.security.lockNow")}
             </button>
           </>
         )}
@@ -351,7 +350,9 @@ function SecuritySection() {
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
           {mode === "change" && (
             <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium">Current passphrase</span>
+              <span className="font-medium">
+                {t("profile.security.currentPassphrase")}
+              </span>
               <input
                 className="input"
                 type="password"
@@ -366,7 +367,9 @@ function SecuritySection() {
             <>
               <label className="flex flex-col gap-1 text-sm">
                 <span className="font-medium">
-                  {mode === "change" ? "New passphrase" : "Passphrase"}
+                  {mode === "change"
+                    ? t("profile.security.newPassphrase")
+                    : t("profile.security.passphrase")}
                 </span>
                 <input
                   className="input"
@@ -379,7 +382,9 @@ function SecuritySection() {
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                <span className="font-medium">Repeat it</span>
+                <span className="font-medium">
+                  {t("profile.security.repeat")}
+                </span>
                 <input
                   className="input"
                   type="password"
@@ -391,16 +396,13 @@ function SecuritySection() {
                 />
               </label>
               <p className="text-xs text-moss-500 dark:text-moss-400">
-                At least 8 characters. A four-word pass-phrase from a
-                password manager is ideal. There is no recovery — we cannot
-                get this back for you.
+                {t("profile.security.passphraseHint")}
               </p>
             </>
           )}
           {mode === "disable" && (
             <p className="text-sm text-moss-600 dark:text-moss-300">
-              This will rewrite your wrapped secret keys as plaintext on
-              this device. Only do this if you're sure the device is safe.
+              {t("profile.security.disableWarn")}
             </p>
           )}
           {error && (
@@ -410,16 +412,16 @@ function SecuritySection() {
           )}
           <div className="flex flex-wrap justify-end gap-2">
             <button type="button" className="btn-secondary" onClick={reset}>
-              Cancel
+              {t("common.cancel")}
             </button>
             <button type="submit" className="btn-primary" disabled={busy}>
               {busy
-                ? "Working…"
+                ? t("profile.security.working")
                 : mode === "enable"
-                  ? "Enable"
+                  ? t("profile.security.submitEnable")
                   : mode === "change"
-                    ? "Change"
-                    : "Disable"}
+                    ? t("profile.security.submitChange")
+                    : t("profile.security.submitDisable")}
             </button>
           </div>
         </form>
@@ -429,6 +431,7 @@ function SecuritySection() {
 }
 
 function EmergencySection() {
+  const { t } = useTranslation();
   const [confirming, setConfirming] = useState<null | "soft" | "hard">(null);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -438,10 +441,11 @@ function EmergencySection() {
       const { softPurge, hardPurge } = await import("@/lib/panic");
       const result =
         confirming === "soft" ? await softPurge() : await hardPurge();
+      const ms = Math.round(result.durationMs);
       setStatus(
-        `${result.mode === "soft" ? "Soft" : "Hard"} purge complete in ${Math.round(
-          result.durationMs,
-        )}ms.`,
+        result.mode === "soft"
+          ? t("profile.emergency.completedSoft", { ms })
+          : t("profile.emergency.completedHard", { ms }),
       );
       if (confirming === "hard") {
         setTimeout(() => window.location.reload(), 500);
@@ -457,24 +461,14 @@ function EmergencySection() {
     <>
       <section className="card border-rose-200 bg-rose-50/30 dark:border-rose-900/50 dark:bg-rose-950/10">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
-          Emergency
+          {t("profile.emergency.title")}
         </h2>
         <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-          Two panic options for when a device is at risk. Neither contacts a
-          server; both happen entirely on this device.
+          {t("profile.emergency.intro")}
         </p>
         <ul className="mb-4 space-y-3 text-sm">
-          <li>
-            <strong>Soft purge</strong> — strips every identifying text field
-            (names, descriptions, areas, skills) while keeping the signed
-            exchange ledger and your keypair. Useful if a device will briefly
-            be handled by a hostile party.
-          </li>
-          <li>
-            <strong>Hard purge</strong> — wipes every table including private
-            keys, rotates to a fresh node identity. Unrecoverable. The page
-            will reload afterward.
-          </li>
+          <li>{t("profile.emergency.softBullet")}</li>
+          <li>{t("profile.emergency.hardBullet")}</li>
         </ul>
         <div className="flex flex-wrap gap-2">
           <button
@@ -482,14 +476,14 @@ function EmergencySection() {
             className="btn-secondary"
             onClick={() => setConfirming("soft")}
           >
-            Soft purge (anonymize)
+            {t("profile.emergency.softButton")}
           </button>
           <button
             type="button"
             className="btn bg-rose-600 text-white hover:bg-rose-700"
             onClick={() => setConfirming("hard")}
           >
-            Hard purge (delete everything)
+            {t("profile.emergency.hardButton")}
           </button>
         </div>
         {status && (
@@ -504,18 +498,18 @@ function EmergencySection() {
       <ConfirmDialog
         open={confirming === "soft"}
         tone="caution"
-        title="Run soft purge?"
-        description="Identifying text on every member and post will be blanked out. Signed exchange records and your keypair will be preserved. This is not reversible."
-        confirmLabel="Yes, anonymize"
+        title={t("profile.emergency.softTitle")}
+        description={t("profile.emergency.softConfirmDescription")}
+        confirmLabel={t("profile.emergency.softConfirm")}
         onCancel={() => setConfirming(null)}
         onConfirm={handleConfirm}
       />
       <ConfirmDialog
         open={confirming === "hard"}
         tone="caution"
-        title="Run hard purge?"
-        description="Every table will be wiped — including your private keys. A fresh node identity will be generated and the app will reload. There is no undo."
-        confirmLabel="Yes, wipe everything"
+        title={t("profile.emergency.hardTitle")}
+        description={t("profile.emergency.hardConfirmDescription")}
+        confirmLabel={t("profile.emergency.hardConfirm")}
         onCancel={() => setConfirming(null)}
         onConfirm={handleConfirm}
       />
@@ -530,40 +524,39 @@ function BalanceCard({
   balance: number;
   seed: number;
 }) {
+  const { t } = useTranslation();
   const tone =
     balance > seed
       ? "surplus"
       : balance === seed
         ? "neutral"
         : "receiving";
-  const message =
-    tone === "surplus"
-      ? "You've given more than you've received lately. Thank you."
-      : tone === "neutral"
-        ? "Your balance is right at your starting seed. That's a fine place to be."
-        : "You've been receiving — that's what seed credits are for. Ask for what you need.";
+  const messageKey = `profile.balance.${tone}`;
   return (
     <section className="card mb-4">
       <div className="flex items-end justify-between">
         <div>
           <div className="text-xs uppercase tracking-wide text-moss-500">
-            Your balance
+            {t("profile.balance.label")}
           </div>
           <div className="mt-1 text-4xl font-bold text-canopy-700 dark:text-canopy-300">
             {formatHours(balance)}
           </div>
         </div>
         <div className="text-right text-xs text-moss-500">
-          <div>Seed: {formatHours(seed)}</div>
-          <div>Balances can go negative — asking is never gated.</div>
+          <div>{t("profile.balance.seed", { hours: formatHours(seed) })}</div>
+          <div>{t("profile.balance.footerNote")}</div>
         </div>
       </div>
-      <p className="mt-3 text-sm text-moss-600 dark:text-moss-300">{message}</p>
+      <p className="mt-3 text-sm text-moss-600 dark:text-moss-300">
+        {t(messageKey)}
+      </p>
     </section>
   );
 }
 
 function ProfileEditor({ member }: { member: Member }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(member.displayName);
   const [skills, setSkills] = useState(member.skills.join(", "));
   const [availability, setAvailability] = useState(member.availability);
@@ -593,11 +586,11 @@ function ProfileEditor({ member }: { member: Member }) {
   return (
     <section className="card mb-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-        About you
+        {t("profile.about.title")}
       </h2>
       <form className="flex flex-col gap-3" onSubmit={handleSave}>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Display name (pseudonym is fine)</span>
+          <span className="font-medium">{t("profile.about.name")}</span>
           <input
             className="input"
             value={name}
@@ -606,39 +599,39 @@ function ProfileEditor({ member }: { member: Member }) {
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Skills (comma-separated)</span>
+          <span className="font-medium">{t("profile.about.skills")}</span>
           <input
             className="input"
-            placeholder="cooking, listening, spanish"
+            placeholder={t("profile.about.skillsPlaceholder")}
             value={skills}
             onChange={(e) => setSkills(e.target.value)}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Availability</span>
+          <span className="font-medium">{t("profile.about.availability")}</span>
           <input
             className="input"
-            placeholder="e.g. Evenings and weekends"
+            placeholder={t("profile.about.availabilityPlaceholder")}
             value={availability}
             onChange={(e) => setAvailability(e.target.value)}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Area (neighborhood, not address)</span>
+          <span className="font-medium">{t("profile.about.area")}</span>
           <input
             className="input"
-            placeholder="e.g. North neighborhood"
+            placeholder={t("profile.about.areaPlaceholder")}
             value={zone}
             onChange={(e) => setZone(e.target.value)}
           />
         </label>
         <div className="flex items-center gap-3">
           <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("common.saving") : t("common.save")}
           </button>
           {savedAt && (
             <span className="text-xs text-canopy-700 dark:text-canopy-300">
-              Saved {formatRelativeTime(savedAt)}
+              {t("common.savedAt", { when: formatRelativeTime(savedAt) })}
             </span>
           )}
         </div>
@@ -656,16 +649,15 @@ function MemberSwitcher({
   currentMember: Member;
   onSwitch: (publicKey: string) => void;
 }) {
+  const { t } = useTranslation();
   if (members.length <= 1) return null;
   return (
     <section className="card mb-4">
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
-        Switch member (local dev)
+        {t("profile.memberSwitcher.title")}
       </h2>
       <p className="mb-3 text-xs text-moss-500">
-        In a real deployment each device holds one identity. This switcher
-        exists so you can walk through the full exchange flow yourself while
-        testing.
+        {t("profile.memberSwitcher.note")}
       </p>
       <ul className="flex flex-col gap-2">
         {members.map((m) => (
@@ -681,7 +673,8 @@ function MemberSwitcher({
             >
               <div className="font-medium">{m.displayName}</div>
               <div className="text-xs text-moss-500">
-                {shortKey(m.publicKey)} · {m.locationZone || "no area set"}
+                {shortKey(m.publicKey)} ·{" "}
+                {m.locationZone || t("profile.memberSwitcher.noAreaSet")}
               </div>
             </button>
           </li>
@@ -731,6 +724,7 @@ function InvitesSection({
   nodeId: string;
   invites: InviteRow[];
 }) {
+  const { t, i18n } = useTranslation();
   const [issuing, setIssuing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
@@ -756,12 +750,10 @@ function InvitesSection({
   async function handleCopy(url: string) {
     try {
       await navigator.clipboard.writeText(url);
-      setCopyStatus("Copied. Share it over Signal, in person, or on paper.");
+      setCopyStatus(t("common.copied"));
       setTimeout(() => setCopyStatus(null), 3000);
     } catch {
-      setCopyStatus(
-        "Couldn't access the clipboard — select the link above and copy manually.",
-      );
+      setCopyStatus(t("common.copyFailed"));
     }
   }
 
@@ -777,12 +769,10 @@ function InvitesSection({
   return (
     <section className="card mb-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-        Invites you've issued
+        {t("profile.invites.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-        A new member needs two vouches to become trusted. Your invite counts
-        as the first — someone else will need to vouch for them after they
-        join.
+        {t("profile.invites.intro")}
       </p>
       <div className="flex flex-wrap gap-2">
         <button
@@ -791,14 +781,16 @@ function InvitesSection({
           onClick={handleIssue}
           disabled={issuing}
         >
-          {issuing ? "Generating…" : "Generate invite link"}
+          {issuing
+            ? t("profile.invites.generating")
+            : t("profile.invites.generate")}
         </button>
       </div>
 
       {shareUrl && (
         <div className="mt-3 rounded-xl border border-canopy-200 bg-canopy-50 p-3 dark:border-canopy-900/50 dark:bg-canopy-950/20">
           <p className="text-xs font-semibold uppercase tracking-wide text-canopy-800 dark:text-canopy-200">
-            Share this link with one person
+            {t("profile.invites.shareTitle")}
           </p>
           <code className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs dark:bg-moss-900">
             {shareUrl}
@@ -809,7 +801,7 @@ function InvitesSection({
               className="btn-secondary text-xs"
               onClick={() => handleCopy(shareUrl)}
             >
-              Copy link
+              {t("common.copy")}
             </button>
             {copyStatus && (
               <span className="text-canopy-800 dark:text-canopy-200">
@@ -818,8 +810,7 @@ function InvitesSection({
             )}
           </div>
           <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
-            The link is single-use and expires in 14 days. If it leaks before
-            redemption, revoke it below.
+            {t("profile.invites.shareNote")}
           </p>
         </div>
       )}
@@ -838,13 +829,19 @@ function InvitesSection({
               className="flex items-center justify-between gap-3 py-2"
             >
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium capitalize">
-                  {inv.status.replace("_", " ")}
+                <div className="text-sm font-medium">
+                  {t(INVITE_STATUS_KEY[inv.status])}
                 </div>
                 <div className="text-xs text-moss-500">
                   {inv.status === "redeemed"
-                    ? `Redeemed ${formatRelativeTime(inv.redeemedAt ?? 0)}`
-                    : `Expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                    ? t("profile.invites.redeemed", {
+                        when: formatRelativeTime(inv.redeemedAt ?? 0),
+                      })
+                    : t("profile.invites.expires", {
+                        date: new Date(inv.expiresAt).toLocaleDateString(
+                          i18n.resolvedLanguage,
+                        ),
+                      })}
                 </div>
               </div>
               {inv.status === "open" && (
@@ -856,14 +853,14 @@ function InvitesSection({
                       handleCopy(`${window.location.origin}/invite#${inv.encoded}`)
                     }
                   >
-                    Copy
+                    {t("common.copy")}
                   </button>
                   <button
                     type="button"
                     className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
                     onClick={() => handleRevoke(inv.token)}
                   >
-                    Revoke
+                    {t("profile.invites.revoke")}
                   </button>
                 </div>
               )}
@@ -874,4 +871,3 @@ function InvitesSection({
     </section>
   );
 }
-
