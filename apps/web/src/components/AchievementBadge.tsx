@@ -1,4 +1,4 @@
-import { ACHIEVEMENT_DEFINITIONS } from "@/lib/achievements";
+import { useTranslation } from "react-i18next";
 import type { AchievementType } from "@/types";
 
 const ICONS: Record<AchievementType, string> = {
@@ -17,7 +17,10 @@ export function AchievementBadge({
   type: AchievementType;
   earnedAt?: number;
 }) {
-  const def = ACHIEVEMENT_DEFINITIONS[type];
+  const { t, i18n } = useTranslation();
+  const formattedDate = earnedAt
+    ? new Date(earnedAt).toLocaleDateString(i18n.resolvedLanguage)
+    : null;
   return (
     <div className="flex items-start gap-3 rounded-xl bg-moss-50 p-3 dark:bg-moss-900/50">
       <div
@@ -27,13 +30,13 @@ export function AchievementBadge({
         {ICONS[type]}
       </div>
       <div>
-        <div className="text-sm font-semibold">{def.label}</div>
+        <div className="text-sm font-semibold">{t(`achievement.${type}.label`)}</div>
         <div className="text-xs text-moss-600 dark:text-moss-300">
-          {def.description}
+          {t(`achievement.${type}.description`)}
         </div>
-        {earnedAt && (
+        {formattedDate && (
           <div className="mt-1 text-[11px] text-moss-500 dark:text-moss-400">
-            Earned {new Date(earnedAt).toLocaleDateString()}
+            {t("achievement.earnedDate", { date: formattedDate })}
           </div>
         )}
       </div>

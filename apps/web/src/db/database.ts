@@ -5,10 +5,45 @@ import type {
   Member,
   Post,
 } from "@/types";
+import type { SignedVouch } from "@/lib/vouch";
 
 export interface AppSetting {
   key: string;
   value: string;
+}
+
+/**
+ * Local-only secret key storage. A row holds EITHER plaintext
+ * (`secretKey`, base64) OR a passphrase-wrapped blob (`wrapped`). Never
+ * both. Plaintext rows only exist on nodes the user has chosen not to
+ * passphrase-protect; enabling passphrase protection from Profile
+ * rewrites every row in-place. This table must NEVER be synced,
+ * exported, or federated — it's explicitly excluded from the data-export
+ * flow in Profile.tsx.
+ */
+export interface SecretKeyRow {
+  publicKey: string;
+  secretKey?: string;
+  wrapped?: import("@/lib/passphrase").WrappedBlob;
+}
+
+/**
+ * Persisted state for invite tokens that this node has issued. The
+ * signed blob lives in `signed` so re-issuing an already-shared link
+ * is a no-op. Redemption is tracked by flipping `status` so the same
+ * token cannot be consumed twice.
+ */
+export interface InviteRow {
+  token: string;
+  inviterKey: string;
+  nodeId: string;
+  createdAt: number;
+  expiresAt: number;
+  status: "open" | "redeemed" | "revoked" | "expired";
+  redeemedBy: string | null;
+  redeemedAt: number | null;
+  /** URL-encoded token string (base64url of the signed invite JSON). */
+  encoded: string;
 }
 
 export class UnderstoriaDB extends Dexie {
@@ -17,6 +52,9 @@ export class UnderstoriaDB extends Dexie {
   exchanges!: Table<Exchange, string>;
   achievements!: Table<Achievement, string>;
   settings!: Table<AppSetting, string>;
+  secretKeys!: Table<SecretKeyRow, string>;
+  invites!: Table<InviteRow, string>;
+  vouches!: Table<SignedVouch, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -29,6 +67,13 @@ export class UnderstoriaDB extends Dexie {
       achievements:
         "id, memberKey, achievementType, earnedAt, [memberKey+achievementType]",
       settings: "key",
+    });
+    this.version(2).stores({
+      secretKeys: "publicKey",
+    });
+    this.version(3).stores({
+      invites: "token, inviterKey, status, createdAt",
+      vouches: "id, voucherKey, voucheeKey, createdAt, [voucherKey+voucheeKey]",
     });
   }
 }

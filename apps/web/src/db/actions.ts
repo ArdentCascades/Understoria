@@ -1,7 +1,42 @@
 import { db } from "./database";
 import { diffAchievements } from "@/lib/achievements";
-import { placeholderSignature, uuid } from "@/lib/id";
+import { uuid } from "@/lib/id";
+import { canonicalExchangePayload, sign } from "@/lib/crypto";
+import {
+  assertWithinDailyLimit,
+  evaluateSafeguards,
+} from "@/lib/safeguards";
+import { getSecretKey } from "./secrets";
 import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
+
+/**
+ * Resolve the secret keys for the two parties that need to sign the
+ * exchange tied to `postId`. Goes through the session-aware
+ * getSecretKey() so a locked device refuses to sign. Called outside any
+ * transaction so the signing table (and any passphrase unwrap) can
+ * remain off the transaction scope.
+ */
+async function preloadSignerKeys(
+  postId: string,
+  memberKey: string,
+): Promise<Map<string, string>> {
+  const post = await db.posts.get(postId);
+  if (!post) return new Map();
+  const parties = new Set<string>();
+  parties.add(post.postedBy);
+  if (post.claimedBy) parties.add(post.claimedBy);
+  parties.add(memberKey);
+  const entries = await Promise.all(
+    Array.from(parties).map(async (pk) => {
+      try {
+        return [pk, await getSecretKey(pk)] as const;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return new Map(entries.filter((e): e is readonly [string, string] => !!e));
+}
 
 export interface CreatePostInput {
   type: PostType;
@@ -114,6 +149,12 @@ export async function confirmExchange(
   memberKey: string,
   nodeId: string,
 ): Promise<ConfirmResult> {
+  // Pre-load both secret keys before opening the transaction so the
+  // signing step can happen synchronously inside it. The secretKeys table
+  // is intentionally excluded from the write transaction — secrets are
+  // device-local and never participate in the exchange record.
+  const preflight = await preloadSignerKeys(postId, memberKey);
+
   return db.transaction(
     "rw",
     db.posts,
@@ -155,7 +196,21 @@ export async function confirmExchange(
         post.type === "NEED" ? post.postedBy : post.claimedBy;
 
       const now = Date.now();
-      const payload = JSON.stringify({
+
+      // Anti-gaming safeguards (Agent 6 task 6).
+      const existingExchanges = await db.exchanges.toArray();
+      assertWithinDailyLimit(helperKey, existingExchanges, now);
+      const flag = evaluateSafeguards(
+        {
+          helperKey,
+          helpedKey,
+          hoursExchanged: post.estimatedHours,
+          completedAt: now,
+        },
+        existingExchanges,
+      );
+
+      const payload = canonicalExchangePayload({
         postId: post.id,
         helperKey,
         helpedKey,
@@ -164,17 +219,30 @@ export async function confirmExchange(
         completedAt: now,
       });
 
+      const helperSecret = preflight.get(helperKey);
+      const helpedSecret = preflight.get(helpedKey);
+      if (!helperSecret || !helpedSecret)
+        throw new Error(
+          "Missing a secret key on this device — cannot sign the exchange.",
+        );
+
       const exchange: Exchange = {
         id: uuid(),
         postId: post.id,
         helperKey,
         helpedKey,
         hoursExchanged: post.estimatedHours,
-        helperSignature: placeholderSignature(payload, helperKey),
-        helpedSignature: placeholderSignature(payload, helpedKey),
+        helperSignature: sign(payload, helperSecret),
+        helpedSignature: sign(payload, helpedSecret),
         completedAt: now,
         category: post.category,
         nodeId,
+        ...(flag.flaggedForReview
+          ? {
+              flaggedForReview: true,
+              flagReason: flag.flagReason,
+            }
+          : {}),
       };
       await db.exchanges.put(exchange);
 

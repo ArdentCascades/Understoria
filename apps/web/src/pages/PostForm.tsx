@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { createPost } from "@/db/actions";
@@ -7,6 +8,7 @@ import type { Category, PostType, Urgency } from "@/types";
 
 export default function PostFormPage() {
   const { currentMember } = useApp();
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const initialType: PostType =
@@ -28,12 +30,12 @@ export default function PostFormPage() {
     e.preventDefault();
     setError(null);
     if (!title.trim()) {
-      setError("Give your post a short title so people know what it's about.");
+      setError(t("postForm.errorNeedTitle"));
       return;
     }
     const parsedHours = Number.parseFloat(hours);
     if (!Number.isFinite(parsedHours) || parsedHours <= 0) {
-      setError("Estimated hours must be a positive number.");
+      setError(t("postForm.errorHoursPositive"));
       return;
     }
     const days = expiresInDays ? Number.parseInt(expiresInDays, 10) : null;
@@ -68,50 +70,50 @@ export default function PostFormPage() {
           className="btn-ghost -ml-2 text-sm"
           onClick={() => navigate(-1)}
         >
-          ← Back
+          {t("common.back")}
         </button>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
-          {type === "NEED" ? "Post a need" : "Post an offer"}
+          {type === "NEED" ? t("postForm.titleNeed") : t("postForm.titleOffer")}
         </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {type === "NEED"
-            ? "What would support look like right now?"
-            : "What can you share with the community?"}
+            ? t("postForm.subtitleNeed")
+            : t("postForm.subtitleOffer")}
         </p>
       </header>
 
       <div
         role="tablist"
-        aria-label="Post type"
+        aria-label={t("postForm.tabAriaLabel")}
         className="mb-5 grid grid-cols-2 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
       >
-        {(["NEED", "OFFER"] as const).map((t) => (
+        {(["NEED", "OFFER"] as const).map((tt) => (
           <button
-            key={t}
+            key={tt}
             type="button"
             role="tab"
-            aria-selected={type === t}
-            onClick={() => setType(t)}
+            aria-selected={type === tt}
+            onClick={() => setType(tt)}
             className={`touch-target rounded-full text-sm font-semibold transition-colors ${
-              type === t
+              type === tt
                 ? "bg-white text-canopy-800 shadow-sm dark:bg-moss-950 dark:text-canopy-200"
                 : "text-moss-700 dark:text-moss-300"
             }`}
           >
-            {t === "NEED" ? "Need" : "Offer"}
+            {tt === "NEED" ? t("postForm.tabNeed") : t("postForm.tabOffer")}
           </button>
         ))}
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Title</span>
+          <span className="text-sm font-medium">{t("postForm.fieldTitle")}</span>
           <input
             className="input"
             placeholder={
               type === "NEED"
-                ? "e.g. Ride to clinic Thursday"
-                : "e.g. Extra soup and bread this week"
+                ? t("postForm.placeholderTitleNeed")
+                : t("postForm.placeholderTitleOffer")
             }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -121,10 +123,12 @@ export default function PostFormPage() {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Description</span>
+          <span className="text-sm font-medium">
+            {t("postForm.fieldDescription")}
+          </span>
           <textarea
             className="input min-h-28"
-            placeholder="Add any helpful details — timing, location zone, accessibility, etc."
+            placeholder={t("postForm.placeholderDescription")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={1000}
@@ -132,7 +136,9 @@ export default function PostFormPage() {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Category</span>
+          <span className="text-sm font-medium">
+            {t("postForm.fieldCategory")}
+          </span>
           <select
             className="input"
             value={category}
@@ -140,8 +146,11 @@ export default function PostFormPage() {
           >
             {ALL_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {CATEGORY_META[c].emoji} {CATEGORY_META[c].label} —{" "}
-                {CATEGORY_META[c].description}
+                {t("postForm.categoryOption", {
+                  emoji: CATEGORY_META[c].emoji,
+                  label: t(`categories.${c}`),
+                  description: CATEGORY_META[c].description,
+                })}
               </option>
             ))}
           </select>
@@ -149,7 +158,7 @@ export default function PostFormPage() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Estimated hours</span>
+            <span className="text-sm font-medium">{t("postForm.fieldHours")}</span>
             <input
               type="number"
               inputMode="decimal"
@@ -161,26 +170,28 @@ export default function PostFormPage() {
               required
             />
             <span className="text-xs text-moss-500 dark:text-moss-400">
-              One hour of help = one hour of credit, whatever the work.
+              {t("postForm.fieldHoursHint")}
             </span>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Urgency</span>
+            <span className="text-sm font-medium">
+              {t("postForm.fieldUrgency")}
+            </span>
             <select
               className="input"
               value={urgency}
               onChange={(e) => setUrgency(e.target.value as Urgency)}
             >
-              <option value="low">When you can</option>
-              <option value="medium">Soon</option>
-              <option value="high">Urgent</option>
+              <option value="low">{t("urgency.low")}</option>
+              <option value="medium">{t("urgency.medium")}</option>
+              <option value="high">{t("urgency.high")}</option>
             </select>
           </label>
         </div>
 
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">
-            Expires in (days, optional)
+            {t("postForm.fieldExpiresInDays")}
           </span>
           <input
             type="number"
@@ -188,7 +199,7 @@ export default function PostFormPage() {
             min="1"
             step="1"
             className="input"
-            placeholder="Leave blank to keep open"
+            placeholder={t("postForm.expiresPlaceholder")}
             value={expiresInDays}
             onChange={(e) => setExpiresInDays(e.target.value)}
           />
@@ -206,14 +217,14 @@ export default function PostFormPage() {
             className="btn-secondary"
             onClick={() => navigate(-1)}
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             type="submit"
             className="btn-primary"
             disabled={submitting}
           >
-            {submitting ? "Posting..." : "Post to the board"}
+            {submitting ? t("postForm.submitting") : t("postForm.submit")}
           </button>
         </div>
       </form>

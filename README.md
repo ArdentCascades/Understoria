@@ -59,7 +59,7 @@ The software is built around a few core beliefs:
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/understoria.git
+git clone https://github.com/ardentcascades/understoria.git
 cd understoria
 
 # Install dependencies
@@ -69,16 +69,21 @@ npm install
 npm run dev
 ```
 
-The app runs at `http://localhost:5173`. No backend required for local development — data is stored in IndexedDB.
+The app runs at `http://localhost:5173`. No backend required — every
+member's data lives in their own browser's IndexedDB. Run
+`npm test` to execute the full vitest suite and `npm run build` to
+produce the static bundle that a community node serves.
 
 ### Deploy a community node
 
-```bash
-# Using Docker
-docker-compose up -d
-```
+The current release is a client-side PWA; serving the built `dist/`
+over HTTPS from any static host is enough to run a pilot. A Caddy
+config, VPS notes, and Raspberry Pi walk-through are in the
+[Node Operator Guide](docs/operator-guide.md).
 
-See the [Node Operator Guide](docs/operator-guide.md) for full deployment instructions, including Raspberry Pi setup, TLS configuration, and federation peering.
+The Node.js server with federation, cross-node exchanges, and
+Docker deployment is the next major workstream
+(Agent 3 on the roadmap).
 
 ## Architecture
 
@@ -150,41 +155,36 @@ understoria/
 └── README.md
 ```
 
+## Documentation
+
+| For | Read |
+|-----|------|
+| Members using the app | [Member Guide](docs/member-guide.md) |
+| People introducing the app to a group | [Organizer's Guide](docs/organizer-guide.md) |
+| Operators deploying a node | [Node Operator Guide](docs/operator-guide.md) |
+| Anyone — staying safe while using Understoria | [Opsec Guide](docs/opsec-guide.md) |
+| Developers and contributors | [Developer Guide](docs/developer-guide.md), [Contributing](CONTRIBUTING.md) |
+| Understanding the security posture | [Threat Model](docs/threat-model.md) |
+| Governance and decision-making | [Governance](GOVERNANCE.md), [Code of Conduct](CODE_OF_CONDUCT.md) |
+| Study groups and political grounding | [Political Education](docs/political-education/) |
+| Trademark and brand use | [Trademark Policy](TRADEMARK.md) |
+
 ## Contributing
 
-Understoria is built by and for organizing communities. We welcome contributions from anyone who shares the project's values.
+Understoria is built by and for organizing communities. Contributions
+are welcome from anyone who shares the project's values. Start with
+[CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Developer Guide](docs/developer-guide.md).
 
-### Before you start
-
-1. Read the [Code of Conduct](CODE_OF_CONDUCT.md)
-2. Check [open issues](https://github.com/your-org/understoria/issues) for something that interests you
-3. For larger changes, open an issue first to discuss the approach
-
-### Development workflow
-
-```bash
-# Create a branch
-git checkout -b feature/your-feature
-
-# Make your changes, then run tests
-npm test
-
-# Submit a pull request
-```
-
-All contributions are made under the [Developer Certificate of Origin (DCO)](https://developercertificate.org/). By submitting a pull request, you certify that you wrote the code (or have the right to submit it) and that you're licensing it under the project's AGPL-3.0-or-later license.
-
-Sign off your commits:
-
-```bash
-git commit -s -m "Add solidarity streak animation"
-```
+All contributions are made under the
+[Developer Certificate of Origin (DCO)](https://developercertificate.org/).
+Sign off every commit with `git commit -s`.
 
 ### Areas where help is needed
 
 - **Frontend development** — React, TypeScript, accessibility, responsive design
 - **Cryptography review** — Audit the identity and encryption implementations
-- **Federation protocol** — Design and test node-to-node communication
+- **Federation protocol** — Design and test node-to-node communication (Agent 3)
 - **Documentation** — Guides, tutorials, and translations (especially Spanish)
 - **Community testing** — If you're part of a mutual aid network or organizing group and want to pilot Understoria, we want to hear from you
 - **Design** — UI/UX, illustrations, iconography that signals solidarity without being cheesy
@@ -199,23 +199,30 @@ We make decisions through modified consensus. Major decisions go through a commu
 
 ## Roadmap
 
-### Phase 1: Foundations *(active)*
+### Phase 1: Foundations
 - [x] Project plan and architecture
-- [ ] Core PWA with community board, exchange flow, and credits
-- [ ] Threat model and security hardening
+- [x] Core PWA with community board, exchange flow, and credits
+- [x] Threat model and security hardening plan
+- [x] Code of Conduct and governance draft
 - [ ] Paper prototype testing with pilot communities
 
-### Phase 2: Hardening
-- [ ] Key-pair identity and signed transactions
+### Phase 2: Hardening *(active)*
+- [x] Ed25519 key-pair identity and signed exchange transactions
+- [x] Cryptographic invites + web-of-trust vouching
+- [x] Passphrase-wrapped private keys
+- [x] Panic button (soft + hard purge)
+- [x] Anti-gaming safeguards
+- [x] Milestones, achievements, solidarity streaks
+- [x] Member guide and operator guide drafts
 - [ ] End-to-end encrypted messaging
-- [ ] Gamification: milestones, achievements, solidarity streaks
-- [ ] Member guide and operator guide
 
-### Phase 3: Federation
-- [ ] Community node server with Docker deployment
+### Phase 3: Federation *(active)*
+- [x] Community node server with Docker deployment
+- [x] Signed-exchange verification on the server
+- [x] Spanish translation
 - [ ] Federation protocol and cross-node exchanges
+- [ ] Posts / vouches / invites endpoints on the server
 - [ ] Organizing module: campaigns, power mapping, meeting tools
-- [ ] Spanish translation
 
 ### Phase 4: Launch
 - [ ] Pilot deployment with 3 communities

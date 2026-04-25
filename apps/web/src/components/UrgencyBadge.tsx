@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Urgency } from "@/types";
 
 const STYLES: Record<Urgency, string> = {
@@ -7,20 +8,16 @@ const STYLES: Record<Urgency, string> = {
   high: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200",
 };
 
-const LABELS: Record<Urgency, string> = {
-  low: "When you can",
-  medium: "Soon",
-  high: "Urgent",
-};
-
 export function UrgencyBadge({ urgency }: { urgency: Urgency }) {
+  const { t } = useTranslation();
+  const label = t(`urgency.${urgency}`);
   return (
     <span
       className={`chip ${STYLES[urgency]}`}
       role="status"
-      aria-label={`Urgency: ${LABELS[urgency]}`}
+      aria-label={t("urgency.ariaLabel", { label })}
     >
-      {LABELS[urgency]}
+      {label}
     </span>
   );
 }

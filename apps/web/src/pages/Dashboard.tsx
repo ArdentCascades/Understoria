@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats } from "@/lib/stats";
 import { milestoneProgress } from "@/lib/milestones";
 import { CATEGORY_META } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
-import type { Category, Milestone } from "@/types";
+import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
   const { exchanges, members, posts, achievements } = useApp();
+  const { t } = useTranslation();
   const stats = useMemo(
     () => computeCommunityStats(exchanges, members, posts),
     [exchanges, members, posts],
@@ -48,9 +50,11 @@ export default function DashboardPage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">Community dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {t("dashboard.title")}
+        </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
-          The unit of progress is <em>us</em>, not me.
+          <em>{t("dashboard.tagline")}</em>
         </p>
       </header>
 
@@ -60,49 +64,55 @@ export default function DashboardPage() {
 
       <section className="card mb-4 text-center">
         <div className="text-xs uppercase tracking-wide text-moss-500">
-          Total hours exchanged
+          {t("dashboard.totalHoursLabel")}
         </div>
         <div className="my-1 text-5xl font-extrabold text-canopy-700 dark:text-canopy-300">
           {formatHours(stats.totalHoursExchanged)}
         </div>
         <div className="text-sm text-moss-600 dark:text-moss-300">
-          across {stats.totalExchanges} exchange
-          {stats.totalExchanges === 1 ? "" : "s"}
+          {t(
+            stats.totalExchanges === 1
+              ? "dashboard.totalExchangesOne"
+              : "dashboard.totalExchangesOther",
+            { count: stats.totalExchanges },
+          )}
         </div>
       </section>
 
       <div className="mb-4 grid grid-cols-2 gap-3">
         <StatCard
-          label="Active this week"
+          label={t("dashboard.stats.activeWeek")}
           value={stats.activeMembersThisWeek}
-          sublabel={`of ${members.length} members`}
+          sublabel={t("dashboard.stats.ofMembers", { count: members.length })}
         />
         <StatCard
-          label="Active this month"
+          label={t("dashboard.stats.activeMonth")}
           value={stats.activeMembersThisMonth}
-          sublabel={`of ${members.length} members`}
+          sublabel={t("dashboard.stats.ofMembers", { count: members.length })}
         />
         <StatCard
-          label="Solidarity streak"
+          label={t("dashboard.stats.streak")}
           value={stats.solidarityStreakDays}
-          sublabel={
-            stats.solidarityStreakDays === 1 ? "day" : "days in a row"
-          }
+          sublabel={t(
+            stats.solidarityStreakDays === 1
+              ? "dashboard.stats.streakUnitOne"
+              : "dashboard.stats.streakUnitOther",
+          )}
         />
         <StatCard
-          label="Needs met this week"
+          label={t("dashboard.stats.needsMet")}
           value={stats.needsFulfilledThisWeek}
-          sublabel="and counting"
+          sublabel={t("dashboard.stats.andCounting")}
         />
       </div>
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          Collective milestones
+          {t("dashboard.milestones.title")}
         </h2>
         <MilestoneBar
-          icon="\u{23F3}"
-          label="Hours of mutual aid"
+          icon={"\u{23F3}"}
+          label={t("dashboard.milestones.hours")}
           value={stats.totalHoursExchanged}
           valueDisplay={formatHours(stats.totalHoursExchanged)}
           current={hoursProgress.current}
@@ -110,8 +120,8 @@ export default function DashboardPage() {
           progress={hoursProgress.progress}
         />
         <MilestoneBar
-          icon="\u{1F91D}"
-          label="Exchanges completed"
+          icon={"\u{1F91D}"}
+          label={t("dashboard.milestones.exchanges")}
           value={stats.totalExchanges}
           valueDisplay={`${stats.totalExchanges}`}
           current={exchangeProgress.current}
@@ -119,8 +129,8 @@ export default function DashboardPage() {
           progress={exchangeProgress.progress}
         />
         <MilestoneBar
-          icon="\u{1F331}"
-          label="Members strong"
+          icon={"\u{1F331}"}
+          label={t("dashboard.milestones.members")}
           value={members.length}
           valueDisplay={`${members.length}`}
           current={memberProgress.current}
@@ -131,12 +141,11 @@ export default function DashboardPage() {
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          Where help is flowing
+          {t("dashboard.categoryBreakdown.title")}
         </h2>
         {totalCategoryHours === 0 ? (
           <p className="text-sm text-moss-600 dark:text-moss-300">
-            No exchanges yet. Once the first one happens, you'll see the mix of
-            care, labor, and support flowing through the community.
+            {t("dashboard.categoryBreakdown.empty")}
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -149,7 +158,7 @@ export default function DashboardPage() {
                     <span aria-hidden="true" className="mr-1">
                       {meta.emoji}
                     </span>
-                    {meta.label}
+                    {t(`categories.${cat}`)}
                   </span>
                   <div
                     className="h-2 flex-1 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
@@ -173,17 +182,21 @@ export default function DashboardPage() {
       {achievementsThisMonth.size > 0 && (
         <section className="card">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-            Community roles earned this month
+            {t("dashboard.rolesThisMonth.title")}
           </h2>
           <ul className="flex flex-col gap-2 text-sm">
             {Array.from(achievementsThisMonth.entries()).map(
               ([type, count]) => (
                 <li key={type}>
-                  <span className="font-medium">{count}</span> member
-                  {count === 1 ? "" : "s"} earned{" "}
-                  <span className="font-medium">
-                    {labelForAchievement(type)}
-                  </span>
+                  {t(
+                    count === 1
+                      ? "dashboard.rolesThisMonth.lineOne"
+                      : "dashboard.rolesThisMonth.lineOther",
+                    {
+                      count,
+                      role: t(`achievement.${type as AchievementType}.label`),
+                    },
+                  )}
                 </li>
               ),
             )}
@@ -230,6 +243,7 @@ function MilestoneBar({
   next: Milestone | null;
   progress: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mb-3 last:mb-0">
       <div className="flex items-center justify-between text-sm">
@@ -240,8 +254,12 @@ function MilestoneBar({
           {label}
         </span>
         <span className="text-xs text-moss-500">
-          {valueDisplay}
-          {next ? ` / ${next.threshold}` : " — top milestone reached"}
+          {next
+            ? t("dashboard.milestones.valueOf", {
+                value: valueDisplay,
+                next: next.threshold,
+              })
+            : `${valueDisplay}${t("dashboard.milestones.topReached")}`}
         </span>
       </div>
       <div
@@ -257,36 +275,27 @@ function MilestoneBar({
         />
       </div>
       <div className="mt-1 text-xs text-moss-500">
-        Last reached: {current.label}
+        {t("dashboard.milestones.lastReached", { label: current.label })}
       </div>
     </div>
   );
 }
 
 function MilestoneCelebration({ milestone }: { milestone: Milestone }) {
+  const { t } = useTranslation();
   return (
     <div className="mb-3 flex animate-milestone-pop items-center gap-3 rounded-2xl bg-canopy-50 p-4 text-canopy-900 shadow-sm dark:bg-canopy-950/40 dark:text-canopy-100">
       <div aria-hidden="true" className="text-3xl">
         {"\u{1F389}"}
       </div>
       <div>
-        <div className="text-sm font-semibold">We reached a milestone</div>
+        <div className="text-sm font-semibold">
+          {t("dashboard.milestones.celebration")}
+        </div>
         <div className="text-base">{milestone.label}</div>
       </div>
     </div>
   );
-}
-
-function labelForAchievement(type: string): string {
-  const map: Record<string, string> = {
-    first_exchange: "First Exchange",
-    connector_5: "Connector",
-    regular_4weeks: "Regular",
-    bridge_builder: "Bridge Builder",
-    seed_planter: "Seed Planter",
-    listener: "Listener",
-  };
-  return map[type] ?? type;
 }
 
 function useNewlyReachedMilestones(reached: Milestone[]) {

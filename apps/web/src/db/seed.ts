@@ -1,5 +1,6 @@
 import { db, SETTING_KEYS, setSetting, getSetting } from "./database";
-import { placeholderPublicKey, uuid } from "@/lib/id";
+import { uuid } from "@/lib/id";
+import { generateKeyPair } from "@/lib/crypto";
 import type { Member, Post } from "@/types";
 
 const DEFAULT_SEED_BALANCE = 5;
@@ -12,12 +13,24 @@ export async function ensureNodeId(): Promise<string> {
   return nodeId;
 }
 
+/**
+ * Creates a member with a real Ed25519 keypair. The private key is stored
+ * locally in the `secretKeys` table — Agent 2 will wrap this in
+ * passphrase-derived encryption. For now, data-export explicitly omits
+ * this table.
+ */
 export async function createMember(
   partial: Partial<Member> & { displayName: string },
   nodeId: string,
 ): Promise<Member> {
+  let publicKey = partial.publicKey;
+  if (!publicKey) {
+    const kp = generateKeyPair();
+    publicKey = kp.publicKey;
+    await db.secretKeys.put({ publicKey, secretKey: kp.secretKey });
+  }
   const member: Member = {
-    publicKey: partial.publicKey ?? placeholderPublicKey(),
+    publicKey,
     displayName: partial.displayName,
     skills: partial.skills ?? [],
     availability: partial.availability ?? "",

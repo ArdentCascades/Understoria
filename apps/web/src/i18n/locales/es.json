@@ -1,0 +1,372 @@
+{
+  "common": {
+    "loading": "Cultivando tu comunidad...",
+    "you": "Tú",
+    "back": "← Atrás",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "savedAt": "Guardado {{when}}",
+    "tryAgain": "Volver a intentar",
+    "copy": "Copiar",
+    "copied": "Copiado. Compártelo por Signal, en persona o en papel.",
+    "copyFailed": "No se pudo acceder al portapapeles — selecciona el enlace de arriba y cópialo manualmente.",
+    "memberFallback": "alguien de la comunidad",
+    "anyMember": "Alguien"
+  },
+  "nav": {
+    "board": "Tablero",
+    "dashboard": "Panel",
+    "profile": "Perfil"
+  },
+  "urgency": {
+    "low": "Cuando puedas",
+    "medium": "Pronto",
+    "high": "Urgente",
+    "ariaLabel": "Urgencia: {{label}}"
+  },
+  "categories": {
+    "transport": "Transporte",
+    "food": "Comida",
+    "childcare": "Cuidado de niñes",
+    "skilled_labor": "Trabajo especializado",
+    "emotional_support": "Apoyo emocional",
+    "education": "Educación",
+    "housing": "Vivienda",
+    "tech": "Tecnología",
+    "other": "Otro"
+  },
+  "postStatus": {
+    "open": "Abierto",
+    "claimed": "Tomado",
+    "awaiting_confirmation": "Esperando confirmación",
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "disputed": "Señalado para revisión"
+  },
+  "postCard": {
+    "needs": "necesita ayuda",
+    "offers": "ofrece"
+  },
+  "postForm": {
+    "titleNeed": "Publicar una necesidad",
+    "titleOffer": "Publicar una oferta",
+    "subtitleNeed": "¿Cómo se vería el apoyo en este momento?",
+    "subtitleOffer": "¿Qué puedes compartir con la comunidad?",
+    "tabAriaLabel": "Tipo de publicación",
+    "tabNeed": "Necesidad",
+    "tabOffer": "Oferta",
+    "fieldTitle": "Título",
+    "fieldDescription": "Descripción",
+    "fieldCategory": "Categoría",
+    "fieldHours": "Horas estimadas",
+    "fieldHoursHint": "Una hora de ayuda = una hora de crédito, sea cual sea el trabajo.",
+    "fieldUrgency": "Urgencia",
+    "fieldExpiresInDays": "Caduca en (días, opcional)",
+    "expiresPlaceholder": "Déjalo en blanco para mantenerla abierta",
+    "placeholderTitleNeed": "p. ej. Llevar al centro de salud el jueves",
+    "placeholderTitleOffer": "p. ej. Sopa y pan de sobra esta semana",
+    "placeholderDescription": "Añade detalles útiles — horario, zona, accesibilidad, etc.",
+    "submit": "Publicar en el tablero",
+    "submitting": "Publicando...",
+    "categoryOption": "{{emoji}} {{label}} — {{description}}",
+    "errorNeedTitle": "Dale un título corto a tu publicación para que la gente sepa de qué se trata.",
+    "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo."
+  },
+  "postDetail": {
+    "notFound": "No se encontró esta publicación. Puede que haya sido cancelada.",
+    "backToBoard": "Volver al tablero",
+    "typeNeed": "Necesidad",
+    "typeOffer": "Oferta",
+    "fieldEstimatedHours": "Horas estimadas",
+    "fieldPosted": "Publicada",
+    "fieldPostedBy": "Publicada por",
+    "fieldOfferedBy": "Ofrecida por",
+    "fieldHelper": "Quien ayuda",
+    "fieldClaimedBy": "Tomada por",
+    "fieldArea": "Zona",
+    "fieldExpires": "Caduca",
+    "personLine": "{{name}} ({{key}})",
+    "actionsCancelPost": "Cancelar publicación",
+    "actionsWaiting": "Esperando que alguien la tome.",
+    "actionsClaimOffer": "Tomar esta oferta",
+    "actionsOfferToHelp": "Ofrecerme a ayudar",
+    "actionsExplain": "Cuando la ayuda haya ocurrido, ambas personas confirman aquí. Los créditos se transfieren cuando ambas hayan confirmado.",
+    "actionsConfirmed": "Has confirmado. Esperando a la otra persona.",
+    "actionsConfirmComplete": "Confirmar que está hecho",
+    "actionsFlag": "Algo no va bien — señalar",
+    "actionsRelease": "Soltar mi compromiso",
+    "actionsClaimedBy": "Esta publicación ya está tomada. {{helper}} está ayudando a {{helped}}.",
+    "actionsCompleted": "Completado. {{hours}} de crédito fluyeron de {{helped}} a {{helper}}. Gracias a las dos personas.",
+    "actionsDisputed": "Este intercambio ha sido señalado para revisión comunitaria. Una persona mediadora dará seguimiento.",
+    "dialogClaimNeedTitle": "¿Tomar esta publicación?",
+    "dialogClaimNeedDescription": "Te estás ofreciendo para ayudar con {{hours}} de {{category}}. Ganarás crédito cuando ambas personas confirmen que está hecho.",
+    "dialogClaimOfferTitle": "¿Tomar esta oferta?",
+    "dialogClaimOfferDescription": "Vas a recibir ayuda por {{hours}}. Los créditos se transfieren cuando ambas personas confirman.",
+    "dialogClaimConfirm": "Sí, tomarla",
+    "dialogCompleteTitle": "¿Marcar este intercambio como completo?",
+    "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. Los créditos se transfieren cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
+    "dialogCompleteConfirm": "Sí, está completo",
+    "dialogDisputeTitle": "¿Señalar este intercambio para revisión comunitaria?",
+    "dialogDisputeDescription": "El intercambio se señalará y una persona mediadora puede ayudar a resolverlo. Tus créditos aún no se transferirán.",
+    "dialogDisputeConfirm": "Señalar",
+    "dialogCancelTitle": "¿Cancelar esta publicación?",
+    "dialogCancelDescription": "Las publicaciones canceladas siguen visibles pero ya no pueden tomarse.",
+    "dialogCancelConfirm": "Cancelar publicación",
+    "dialogReleaseTitle": "¿Soltar tu compromiso?",
+    "dialogReleaseDescription": "Esto reabrirá la publicación para que alguien más pueda tomarla.",
+    "dialogReleaseConfirm": "Soltar",
+    "newRolesEarned": "Nuevos roles comunitarios obtenidos"
+  },
+  "lockScreen": {
+    "title": "Este dispositivo está bloqueado",
+    "introWith": "Introduce tu frase para desbloquear la identidad de {{name}} en este dispositivo.",
+    "introNone": "Introduce tu frase para desbloquear este dispositivo.",
+    "keyLine": "Clave: {{key}}",
+    "passphraseLabel": "Frase",
+    "submit": "Desbloquear",
+    "submitting": "Desbloqueando…",
+    "wrongPassphrase": "Esa frase no coincidió. Inténtalo de nuevo.",
+    "nothingToUnlock": "No hay claves envueltas en este dispositivo — no hay nada que desbloquear. (Si estás viendo esto, recarga la página.)",
+    "noRecoveryNote": "Las frases olvidadas no se pueden recuperar — por diseño. Si has perdido la tuya, el único camino es Perfil → Emergencia → Borrado duro y empezar de cero con una identidad nueva."
+  },
+  "invite": {
+    "reading": "Leyendo invitación…",
+    "cantUse": "Esta invitación no se puede usar.",
+    "continueToBoard": "Ir al tablero",
+    "youInvited": "Has sido invitada",
+    "wantsYou": "{{name}} te quiere en su red de apoyo mutuo.",
+    "inviterKey": "Clave de quien invita",
+    "expires": "Caduca",
+    "fingerprintReminder": "Antes de aceptar: confirma que la huella de la clave de quien invita coincide con la que {{name}} te compartió en persona o por un canal seguro. Un enlace que llegó por correo no confiable merece una doble verificación.",
+    "welcome": "Bienvenida. Redirigiendo al tablero…",
+    "displayNameLabel": "Tu nombre visible (los seudónimos son bienvenidos)",
+    "displayNameRequired": "Elige un nombre visible o seudónimo para continuar.",
+    "notNow": "Ahora no",
+    "submit": "Aceptar invitación y unirme",
+    "submitting": "Uniéndome…",
+    "errors": {
+      "malformed": "Este enlace de invitación falta o está dañado. Pídele a quien te invitó que envíe uno nuevo.",
+      "expired": "Esta invitación ha caducado. Pídele a quien te invitó que emita una nueva.",
+      "bad_signature": "La firma de esta invitación no se verificó. No la aceptes — puede haber sido manipulada.",
+      "already_redeemed": "Alguien ya usó esta invitación. Las invitaciones son de un solo uso.",
+      "revoked": "Quien te invitó revocó esta invitación.",
+      "self_redeem": "No puedes canjear una invitación que tú misma emitiste. Comparte el enlace con alguien más."
+    }
+  },
+  "format": {
+    "justNow": "ahora mismo",
+    "minutesAgo": "hace {{count}} min",
+    "hoursAgo": "hace {{count}} h",
+    "daysAgo": "hace {{count}} d",
+    "weeksAgo": "hace {{count}} sem",
+    "monthsAgo": "hace {{count}} mes",
+    "yearsAgo": "hace {{count}} año",
+    "inMinutes": "en {{count}} min",
+    "inHours": "en {{count}} h",
+    "inDays": "en {{count}} d"
+  },
+  "trust": {
+    "trusted": "Persona de confianza",
+    "trustedTooltip": "Esta persona tiene al menos dos avales válidos.",
+    "pending": "Confianza en proceso",
+    "pendingTooltip": "Aún tiene menos de dos avales. Puede publicar necesidades y ofertas igualmente."
+  },
+  "achievement": {
+    "first_exchange": {
+      "label": "Primer intercambio",
+      "description": "Completaste tu primer intercambio — dando o recibiendo."
+    },
+    "connector_5": {
+      "label": "Tejedora",
+      "description": "Has ayudado a 5 personas distintas en nuestra comunidad."
+    },
+    "regular_4weeks": {
+      "label": "Constante",
+      "description": "Has estado activa durante 4 semanas seguidas — al menos un intercambio cada semana."
+    },
+    "bridge_builder": {
+      "label": "Constructora de puentes",
+      "description": "Cubriste una necesidad en una categoría que nadie había cubierto antes."
+    },
+    "seed_planter": {
+      "label": "Sembradora",
+      "description": "3 personas que invitaste han completado un intercambio cada una."
+    },
+    "listener": {
+      "label": "Escucha",
+      "description": "Has completado 3 intercambios apoyando emocionalmente a alguien."
+    },
+    "earnedDate": "Obtenido el {{date}}"
+  },
+  "board": {
+    "title": "Tablero comunitario",
+    "tagline": "Publica lo que necesitas. Ofrece lo que puedas.",
+    "tabs": {
+      "needs": "Necesidades",
+      "offers": "Ofertas",
+      "ariaLabel": "Tipos de publicación"
+    },
+    "openCount": "({{count}})",
+    "filters": {
+      "categoryAriaLabel": "Filtrar por categoría",
+      "urgencyAriaLabel": "Filtrar por urgencia",
+      "allCategories": "Todas las categorías",
+      "allUrgencies": "Todas las urgencias"
+    },
+    "search": {
+      "placeholder": "Buscar en títulos y descripciones",
+      "ariaLabel": "Buscar publicaciones"
+    },
+    "fab": {
+      "postNeed": "Publicar una necesidad",
+      "postOffer": "Publicar una oferta"
+    },
+    "empty": {
+      "needs": "Aún no hay necesidades que coincidan con estos filtros. Si necesitas ayuda, publícalo — pedir nunca tiene barreras en un banco de tiempo.",
+      "offers": "Aún no hay ofertas que coincidan con estos filtros. ¿Qué podrías compartir con tu comunidad esta semana?"
+    }
+  },
+  "dashboard": {
+    "title": "Panel comunitario",
+    "tagline": "La unidad de progreso somos nosotres, no yo.",
+    "totalHoursLabel": "Total de horas intercambiadas",
+    "totalExchangesOne": "en {{count}} intercambio",
+    "totalExchangesOther": "en {{count}} intercambios",
+    "stats": {
+      "activeWeek": "Activas esta semana",
+      "activeMonth": "Activas este mes",
+      "ofMembers": "de {{count}} integrantes",
+      "streak": "Racha de solidaridad",
+      "streakUnitOne": "día",
+      "streakUnitOther": "días seguidos",
+      "needsMet": "Necesidades cubiertas esta semana",
+      "andCounting": "y contando"
+    },
+    "milestones": {
+      "title": "Hitos colectivos",
+      "hours": "Horas de apoyo mutuo",
+      "exchanges": "Intercambios completados",
+      "members": "Integrantes activas",
+      "topReached": " — máximo hito alcanzado",
+      "valueOf": "{{value}} / {{next}}",
+      "lastReached": "Último alcanzado: {{label}}",
+      "celebration": "Alcanzamos un hito"
+    },
+    "categoryBreakdown": {
+      "title": "Por dónde fluye el apoyo",
+      "empty": "Aún no hay intercambios. Cuando ocurra el primero, verás la mezcla de cuidados, trabajo y apoyo fluyendo por la comunidad."
+    },
+    "rolesThisMonth": {
+      "title": "Roles comunitarios obtenidos este mes",
+      "lineOne": "{{count}} persona obtuvo {{role}}",
+      "lineOther": "{{count}} personas obtuvieron {{role}}"
+    }
+  },
+  "profile": {
+    "title": "Tu perfil",
+    "identity": "Identidad: {{key}}",
+    "balance": {
+      "label": "Tu saldo",
+      "seed": "Semilla: {{hours}}",
+      "footerNote": "Los saldos pueden ir en negativo — pedir nunca tiene barreras.",
+      "surplus": "Has dado más de lo que has recibido últimamente. Gracias.",
+      "neutral": "Tu saldo está justo en tu semilla inicial. Es un buen lugar para estar.",
+      "receiving": "Has estado recibiendo — para eso son los créditos de semilla. Pide lo que necesites."
+    },
+    "about": {
+      "title": "Sobre ti",
+      "name": "Nombre visible (un seudónimo está bien)",
+      "skills": "Habilidades (separadas por comas)",
+      "skillsPlaceholder": "cocinar, escuchar, español",
+      "availability": "Disponibilidad",
+      "availabilityPlaceholder": "p. ej. tardes y fines de semana",
+      "area": "Zona (vecindario, no dirección exacta)",
+      "areaPlaceholder": "p. ej. zona norte"
+    },
+    "rolesEarned": {
+      "title": "Roles comunitarios obtenidos",
+      "empty": "Aún no has obtenido roles comunitarios. Aparecen a medida que participas — no como trofeos, sino como formas de nombrar la huella que dejas."
+    },
+    "history": {
+      "title": "Tu historial de intercambios",
+      "empty": "Aún no hay nada aquí. Cuando des o recibas ayuda, cada intercambio aparecerá con un registro firmado que podrás verificar.",
+      "helped": "Ayudaste a",
+      "received": "Recibiste ayuda de",
+      "flag": "señalado para revisión",
+      "flagShort": "Intercambio muy corto — surge para revisión comunitaria.",
+      "flagReciprocal": "Intercambio recíproco repetido con la misma persona — surge para revisión comunitaria.",
+      "flagDailyLimit": "Cerca del límite diario de intercambios.",
+      "flagDefault": "Señalado para revisión comunitaria."
+    },
+    "memberSwitcher": {
+      "title": "Cambiar de integrante (modo desarrollo local)",
+      "note": "En un despliegue real cada dispositivo tiene una sola identidad. Este selector existe para que puedas recorrer el flujo completo de intercambio mientras pruebas.",
+      "noAreaSet": "sin zona definida"
+    },
+    "data": {
+      "title": "Datos y privacidad",
+      "intro": "Todo lo que ves se guarda localmente en este dispositivo. Sin servidor. Sin analíticas. Sin cuenta que crear.",
+      "export": "Exportar mis datos"
+    },
+    "language": {
+      "title": "Idioma",
+      "intro": "Elige cómo Understoria te habla en este dispositivo. Pronto vendrán más idiomas y traducciones del resto de la aplicación."
+    },
+    "invites": {
+      "title": "Invitaciones que has emitido",
+      "intro": "Una nueva persona necesita dos avales para volverse de confianza. Tu invitación cuenta como el primero — alguien más tendrá que avalarle después de unirse.",
+      "generate": "Generar enlace de invitación",
+      "generating": "Generando…",
+      "shareTitle": "Comparte este enlace con una sola persona",
+      "shareNote": "El enlace es de un solo uso y caduca en 14 días. Si se filtra antes de canjearse, revócalo abajo.",
+      "redeemed": "Canjeado {{when}}",
+      "expires": "Caduca {{date}}",
+      "revoke": "Revocar",
+      "statusOpen": "Abierta",
+      "statusRedeemed": "Canjeada",
+      "statusRevoked": "Revocada",
+      "statusExpired": "Caducada"
+    },
+    "security": {
+      "title": "Seguridad",
+      "summaryProtected": "Tus claves secretas en este dispositivo están protegidas con una clave derivada de tu frase. Se requiere desbloqueo en cada inicio.",
+      "summaryUnprotected": "Tus claves secretas se guardan en texto plano en este dispositivo. Activa la protección con frase antes de dejar el dispositivo solo en cualquier entorno hostil.",
+      "enable": "Activar protección con frase",
+      "change": "Cambiar frase",
+      "disable": "Desactivar protección",
+      "lockNow": "Bloquear ahora",
+      "currentPassphrase": "Frase actual",
+      "newPassphrase": "Nueva frase",
+      "passphrase": "Frase",
+      "repeat": "Repítela",
+      "passphraseHint": "Al menos 8 caracteres. Una frase de cuatro palabras desde un gestor de contraseñas es ideal. No hay recuperación — no podemos devolverte esto.",
+      "disableWarn": "Esto reescribirá tus claves secretas envueltas como texto plano en este dispositivo. Hazlo solo si estás segura de que el dispositivo es seguro.",
+      "submitEnable": "Activar",
+      "submitChange": "Cambiar",
+      "submitDisable": "Desactivar",
+      "working": "Trabajando…",
+      "successEnable": "Protección con frase activada. Apunta tu frase en un lugar seguro — no se puede recuperar.",
+      "successChange": "Frase cambiada. Usa la nueva la próxima vez que desbloquees.",
+      "successDisable": "Protección con frase desactivada. Las claves secretas vuelven a guardarse en texto plano en este dispositivo.",
+      "errorMismatch": "Las dos frases no coincidieron.",
+      "errorMismatchNew": "Las dos nuevas frases no coincidieron."
+    },
+    "emergency": {
+      "title": "Emergencia",
+      "intro": "Dos opciones de pánico para cuando un dispositivo está en riesgo. Ninguna contacta a un servidor; ambas ocurren completamente en este dispositivo.",
+      "softBullet": "Borrado suave — vacía cada campo de texto identificable (nombres, descripciones, zonas, habilidades) manteniendo el registro firmado de intercambios y tu par de claves. Útil si un dispositivo va a estar brevemente en manos hostiles.",
+      "hardBullet": "Borrado duro — vacía cada tabla incluyendo las claves privadas, rota a una identidad de nodo nueva. Irrecuperable. La página se recargará después.",
+      "softButton": "Borrado suave (anonimizar)",
+      "hardButton": "Borrado duro (eliminar todo)",
+      "softTitle": "¿Ejecutar borrado suave?",
+      "softConfirmDescription": "El texto identificable de cada integrante y publicación quedará en blanco. Los registros firmados de intercambios y tu par de claves se conservarán. Esto no es reversible.",
+      "softConfirm": "Sí, anonimizar",
+      "hardTitle": "¿Ejecutar borrado duro?",
+      "hardConfirmDescription": "Cada tabla será vaciada — incluyendo tus claves privadas. Se generará una nueva identidad de nodo y la aplicación se recargará. No hay vuelta atrás.",
+      "hardConfirm": "Sí, eliminar todo",
+      "completedSoft": "Borrado suave completado en {{ms}}ms.",
+      "completedHard": "Borrado duro completado en {{ms}}ms."
+    }
+  }
+}
