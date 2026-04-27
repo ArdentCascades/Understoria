@@ -155,7 +155,7 @@ export async function confirmExchange(
   // device-local and never participate in the exchange record.
   const preflight = await preloadSignerKeys(postId, memberKey);
 
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     db.posts,
     db.exchanges,
@@ -282,6 +282,30 @@ export async function confirmExchange(
       return { post: updatedPost, exchange, newAchievements };
     },
   );
+
+  // Fire-and-forget mirror to the configured community node, if any.
+  // Best-effort by design — a node that's slow or down must not block the
+  // user's confirmation. The submit helper records its own outcome to
+  // settings, which the Profile NodeSection surfaces.
+  if (result.exchange) {
+    void mirrorToCommunityNode(result.exchange);
+  }
+
+  return result;
+}
+
+async function mirrorToCommunityNode(exchange: Exchange): Promise<void> {
+  try {
+    const { readSubmitConfig, submitExchangeToNode } = await import(
+      "@/lib/nodeSubmit"
+    );
+    const cfg = await readSubmitConfig();
+    if (!cfg.enabled || !cfg.url.trim()) return;
+    await submitExchangeToNode(exchange, cfg);
+  } catch {
+    // submitExchangeToNode never throws; this catch only covers the
+    // dynamic import itself. Either way: best-effort.
+  }
 }
 
 export async function disputeExchange(

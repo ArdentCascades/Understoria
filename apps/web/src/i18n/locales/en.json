@@ -313,6 +313,19 @@
       "title": "Language",
       "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."
     },
+    "node": {
+      "title": "Community node",
+      "intro": "Optionally mirror your finalized exchanges to a community node so they show up in the community-wide ledger. The node verifies every signature; it never stores your private key.",
+      "urlLabel": "Node URL",
+      "urlPlaceholder": "https://aid.our-union.example/api",
+      "enableLabel": "Mirror finalized exchanges to this node",
+      "save": "Save",
+      "saved": "Saved",
+      "disabledNote": "Mirroring is off. Exchanges stay only on your device.",
+      "lastSuccess": "Last success: {{when}}",
+      "lastError": "Last error: {{message}}",
+      "noActivity": "No mirroring activity yet."
+    },
     "invites": {
       "title": "Invites you've issued",
       "intro": "A new member needs two vouches to become trusted. Your invite counts as the first — someone else will need to vouch for them after they join.",

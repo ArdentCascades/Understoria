@@ -85,6 +85,15 @@ export const SETTING_KEYS = {
   nodeId: "nodeId",
   celebratedMilestones: "celebratedMilestones",
   onboarded: "onboarded",
+  /** Base URL of the community node to mirror finalized exchanges to.
+   *  Empty / unset means "do not mirror." */
+  communityNodeUrl: "communityNodeUrl",
+  /** "1" if exchange mirroring is enabled, "0" or absent otherwise. */
+  communityNodeEnabled: "communityNodeEnabled",
+  /** ISO timestamp of the last successful POST. Display-only. */
+  communityNodeLastSuccess: "communityNodeLastSuccess",
+  /** Last error message from a submission attempt. Display-only. */
+  communityNodeLastError: "communityNodeLastError",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
