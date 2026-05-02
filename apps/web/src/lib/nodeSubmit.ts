@@ -47,10 +47,15 @@ export async function readSubmitConfig(): Promise<SubmitConfig> {
 }
 
 export async function writeSubmitConfig(cfg: SubmitConfig): Promise<void> {
-  await Promise.all([
-    setSetting(SETTING_KEYS.communityNodeUrl, cfg.url),
-    setSetting(SETTING_KEYS.communityNodeEnabled, cfg.enabled ? "1" : "0"),
-  ]);
+  // Atomic so a partial failure never leaves URL set with a stale enabled
+  // flag (or vice versa). Either both fields land or neither does.
+  await db.transaction("rw", db.settings, async () => {
+    await setSetting(SETTING_KEYS.communityNodeUrl, cfg.url);
+    await setSetting(
+      SETTING_KEYS.communityNodeEnabled,
+      cfg.enabled ? "1" : "0",
+    );
+  });
 }
 
 export interface SubmitDeps {
@@ -146,7 +151,3 @@ export async function readSubmitStatus(): Promise<{
     lastError: e || undefined,
   };
 }
-
-// Re-export the underlying db so tests can clear settings between cases
-// without each test importing the singleton separately.
-export { db };

@@ -321,7 +321,6 @@
       "enableLabel": "Mirror finalized exchanges to this node",
       "save": "Save",
       "saved": "Saved",
-      "disabledNote": "Mirroring is off. Exchanges stay only on your device.",
       "lastSuccess": "Last success: {{when}}",
       "lastError": "Last error: {{message}}",
       "noActivity": "No mirroring activity yet."

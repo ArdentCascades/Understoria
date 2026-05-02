@@ -106,7 +106,7 @@ function Telemetry({
   lastSuccess: string | undefined;
   lastError: string | undefined;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const haveSuccess = !!lastSuccess && lastSuccess.length > 0;
   const haveError = !!lastError && lastError.length > 0;
 
@@ -123,7 +123,7 @@ function Telemetry({
       {haveSuccess && (
         <span className="chip bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100">
           {t("profile.node.lastSuccess", {
-            when: new Date(lastSuccess!).toLocaleString(),
+            when: new Date(lastSuccess!).toLocaleString(i18n.resolvedLanguage),
           })}
         </span>
       )}

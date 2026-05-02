@@ -321,7 +321,6 @@
       "enableLabel": "Reflejar los intercambios finalizados en este nodo",
       "save": "Guardar",
       "saved": "Guardado",
-      "disabledNote": "El reflejo está desactivado. Los intercambios permanecen sólo en tu dispositivo.",
       "lastSuccess": "Último éxito: {{when}}",
       "lastError": "Último error: {{message}}",
       "noActivity": "Aún no hay actividad de reflejo."
