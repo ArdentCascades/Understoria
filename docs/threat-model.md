@@ -138,6 +138,26 @@ We are not trying to protect against:
   path documents the matching Caddy header config. Certificate
   pinning in the PWA is still not implemented; tracked.
 
+- **Configurable node URL can leak counterparty public keys.** When a
+  member enables exchange mirroring in Profile → Community node and
+  points at a URL, every exchange they participate in is POSTed to
+  that URL — including the counterparty's public key, signature,
+  category, hours, and timestamp. The counterparty has no veto over
+  which destination receives the record.
+  In practice the keys are already on the wire when the exchange
+  happens (both parties hold the signed record), but a member can
+  deliberately or accidentally leak the community's trust graph to a
+  hostile observer at a chosen URL. A misconfigured operator could
+  also point a whole community at an adversarial node by social
+  engineering ("paste this URL into Profile → Community node").
+  Mitigations not yet implemented: a community-blessed allowlist of
+  node URLs, with the PWA refusing or warning on URLs outside the
+  list; surfacing each member's configured mirror URL in their
+  profile so moderators can review. The current safeguard is
+  organizational: mirroring is off by default, and the URL field
+  sits below an explanatory note that reminds members what gets
+  sent. Tracked work.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

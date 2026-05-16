@@ -302,9 +302,15 @@ async function mirrorToCommunityNode(exchange: Exchange): Promise<void> {
     const cfg = await readSubmitConfig();
     if (!cfg.enabled || !cfg.url.trim()) return;
     await submitExchangeToNode(exchange, cfg);
-  } catch {
-    // submitExchangeToNode never throws; this catch only covers the
-    // dynamic import itself. Either way: best-effort.
+  } catch (err) {
+    // submitExchangeToNode is documented to never throw; this catch
+    // really only covers the dynamic import itself plus any future
+    // regression that smuggles a throw past it. Log so developers see
+    // it during triage — production deployments don't ship a logger,
+    // so this affects only the dev console.
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn("[understoria] community-node mirror crashed", err);
+    }
   }
 }
 

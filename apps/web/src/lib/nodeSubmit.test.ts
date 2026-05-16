@@ -108,6 +108,48 @@ describe("submitExchangeToNode (network)", () => {
     expect(calls[0][0]).toBe("https://node.example/api/exchanges");
   });
 
+  it("strips a query string from the configured url before joining", async () => {
+    // Prior naive string-concat produced `…/api?foo=1/exchanges` here,
+    // which is not a valid URL. The URL-parsing implementation drops
+    // the query (federation roots don't carry query state).
+    const fetchImpl = vi.fn(async () =>
+      new Response("{}", { status: 200 }),
+    );
+    await submitExchangeToNode(
+      fakeExchange(),
+      { url: "https://node.example/api?foo=1", enabled: true },
+      { fetchImpl: fetchImpl as unknown as typeof fetch },
+    );
+    const calls = fetchImpl.mock.calls as unknown as Array<[string]>;
+    expect(calls[0][0]).toBe("https://node.example/api/exchanges");
+  });
+
+  it("strips a fragment from the configured url before joining", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response("{}", { status: 200 }),
+    );
+    await submitExchangeToNode(
+      fakeExchange(),
+      { url: "https://node.example/api#section", enabled: true },
+      { fetchImpl: fetchImpl as unknown as typeof fetch },
+    );
+    const calls = fetchImpl.mock.calls as unknown as Array<[string]>;
+    expect(calls[0][0]).toBe("https://node.example/api/exchanges");
+  });
+
+  it("handles a host-only base url (no pathname)", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response("{}", { status: 200 }),
+    );
+    await submitExchangeToNode(
+      fakeExchange(),
+      { url: "https://node.example", enabled: true },
+      { fetchImpl: fetchImpl as unknown as typeof fetch },
+    );
+    const calls = fetchImpl.mock.calls as unknown as Array<[string]>;
+    expect(calls[0][0]).toBe("https://node.example/exchanges");
+  });
+
   it("treats 4xx/5xx as failures and records the body", async () => {
     const fetchImpl = vi.fn(async () =>
       new Response('{"error":"bad_signature"}', { status: 422 }),

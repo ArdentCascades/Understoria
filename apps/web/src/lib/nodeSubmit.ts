@@ -111,9 +111,32 @@ export async function submitExchangeToNode(
   return { ok: false, status: res.status, error };
 }
 
+/**
+ * Compose a target URL by appending `path` to `base`. The base is
+ * expected to be a clean federation root (protocol + host + optional
+ * pathname). Any query string or fragment on the base is dropped —
+ * those don't make sense for a federation root, and the prior naive
+ * string-concat produced invalid URLs in their presence
+ * (e.g. `…/api?foo=1/exchanges`).
+ *
+ * Falls back to the string-concat behavior if the base doesn't parse
+ * as an absolute URL, so a misconfigured base still produces a
+ * predictable string for the fetch call to fail on cleanly.
+ */
 function joinUrl(base: string, path: string): string {
-  const trimmed = base.endsWith("/") ? base.slice(0, -1) : base;
-  return `${trimmed}${path.startsWith("/") ? path : `/${path}`}`;
+  let parsed: URL;
+  try {
+    parsed = new URL(base);
+  } catch {
+    const trimmed = base.endsWith("/") ? base.slice(0, -1) : base;
+    return `${trimmed}${path.startsWith("/") ? path : `/${path}`}`;
+  }
+  parsed.search = "";
+  parsed.hash = "";
+  const basePath = parsed.pathname.replace(/\/+$/, "");
+  const suffix = path.startsWith("/") ? path : `/${path}`;
+  parsed.pathname = `${basePath}${suffix}`;
+  return parsed.toString();
 }
 
 async function recordOutcome(result: SubmitResult): Promise<void> {
