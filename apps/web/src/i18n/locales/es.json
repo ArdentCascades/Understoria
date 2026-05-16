@@ -313,6 +313,18 @@
       "title": "Idioma",
       "intro": "Elige cómo Understoria te habla en este dispositivo. Pronto vendrán más idiomas y traducciones del resto de la aplicación."
     },
+    "node": {
+      "title": "Nodo comunitario",
+      "intro": "Opcionalmente refleja tus intercambios finalizados en un nodo comunitario para que aparezcan en el registro de toda la comunidad. El nodo verifica cada firma; nunca guarda tu clave privada.",
+      "urlLabel": "URL del nodo",
+      "urlPlaceholder": "https://ayuda.nuestro-sindicato.example/api",
+      "enableLabel": "Reflejar los intercambios finalizados en este nodo",
+      "save": "Guardar",
+      "saved": "Guardado",
+      "lastSuccess": "Último éxito: {{when}}",
+      "lastError": "Último error: {{message}}",
+      "noActivity": "Aún no hay actividad de reflejo."
+    },
     "invites": {
       "title": "Invitaciones que has emitido",
       "intro": "Una nueva persona necesita dos avales para volverse de confianza. Tu invitación cuenta como el primero — alguien más tendrá que avalarle después de unirse.",

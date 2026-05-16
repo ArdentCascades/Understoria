@@ -155,7 +155,7 @@ export async function confirmExchange(
   // device-local and never participate in the exchange record.
   const preflight = await preloadSignerKeys(postId, memberKey);
 
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     db.posts,
     db.exchanges,
@@ -282,6 +282,36 @@ export async function confirmExchange(
       return { post: updatedPost, exchange, newAchievements };
     },
   );
+
+  // Fire-and-forget mirror to the configured community node, if any.
+  // Best-effort by design — a node that's slow or down must not block the
+  // user's confirmation. The submit helper records its own outcome to
+  // settings, which the Profile NodeSection surfaces.
+  if (result.exchange) {
+    void mirrorToCommunityNode(result.exchange);
+  }
+
+  return result;
+}
+
+async function mirrorToCommunityNode(exchange: Exchange): Promise<void> {
+  try {
+    const { readSubmitConfig, submitExchangeToNode } = await import(
+      "@/lib/nodeSubmit"
+    );
+    const cfg = await readSubmitConfig();
+    if (!cfg.enabled || !cfg.url.trim()) return;
+    await submitExchangeToNode(exchange, cfg);
+  } catch (err) {
+    // submitExchangeToNode is documented to never throw; this catch
+    // really only covers the dynamic import itself plus any future
+    // regression that smuggles a throw past it. Log so developers see
+    // it during triage — production deployments don't ship a logger,
+    // so this affects only the dev console.
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn("[understoria] community-node mirror crashed", err);
+    }
+  }
 }
 
 export async function disputeExchange(

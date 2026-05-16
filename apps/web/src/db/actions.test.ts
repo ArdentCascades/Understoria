@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cancelPost,
   claimPost,
@@ -8,6 +8,7 @@ import {
 } from "./actions";
 import { db } from "./database";
 import { createMember } from "./seed";
+import { writeSubmitConfig } from "@/lib/nodeSubmit";
 import { balanceFor } from "@/lib/timebank";
 import { verifyExchange } from "@/lib/crypto";
 
@@ -241,5 +242,123 @@ describe("exchange flow (integration)", () => {
     expect(disputed.status).toBe("disputed");
     const exchanges = await db.exchanges.toArray();
     expect(exchanges).toHaveLength(0);
+  });
+});
+
+describe("community-node mirroring on confirmExchange", () => {
+  let originalFetch: typeof fetch | undefined;
+
+  beforeEach(async () => {
+    await reset();
+    originalFetch = globalThis.fetch;
+  });
+  afterEach(() => {
+    if (originalFetch) globalThis.fetch = originalFetch;
+    vi.restoreAllMocks();
+  });
+
+  async function runFullExchange() {
+    const a = await createMember({ displayName: "A" }, NODE);
+    const b = await createMember({ displayName: "B" }, NODE);
+    const post = await createPost(a.publicKey, "", {
+      type: "NEED",
+      category: "other",
+      title: "help",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      expiresAt: null,
+    });
+    await claimPost(post.id, b.publicKey);
+    await confirmExchange(post.id, a.publicKey, NODE);
+    return confirmExchange(post.id, b.publicKey, NODE);
+  }
+
+  /**
+   * The mirror fires inside `confirmExchange` via `void mirrorToCommunityNode`,
+   * which dynamically imports nodeSubmit and then awaits the POST. We can't
+   * await that promise from outside, so we wait for fetch to be invoked
+   * before asserting. 50ms is generous on a fast CI box.
+   */
+  function waitForFetch(spy: ReturnType<typeof vi.fn>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const tick = () => {
+        if (spy.mock.calls.length > 0) return resolve();
+        if (Date.now() - start > 1000)
+          return reject(new Error("fetch was not called within 1s"));
+        setTimeout(tick, 5);
+      };
+      tick();
+    });
+  }
+
+  it("does NOT call fetch when no community node is configured", async () => {
+    const fetchSpy = vi.fn(async () =>
+      new Response("{}", { status: 200 }),
+    );
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    const result = await runFullExchange();
+    expect(result.exchange).not.toBeNull();
+    // Give any background promise a tick to run, then assert no calls.
+    await new Promise((r) => setTimeout(r, 50));
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("does NOT call fetch when the node URL is set but mirroring is disabled", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: false,
+    });
+    const fetchSpy = vi.fn(async () =>
+      new Response("{}", { status: 200 }),
+    );
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await runFullExchange();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("posts the finalized exchange to <url>/exchanges when configured", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const fetchSpy = vi.fn(async () =>
+      new Response('{"stored":true}', { status: 201 }),
+    );
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    const result = await runFullExchange();
+    await waitForFetch(fetchSpy);
+
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const calls = fetchSpy.mock.calls as unknown as Array<[string, RequestInit]>;
+    const [url, init] = calls[0];
+    expect(url).toBe("https://node.example/api/exchanges");
+    expect(init.method).toBe("POST");
+    const body = JSON.parse(init.body as string);
+    expect(body.id).toBe(result.exchange!.id);
+    expect(body.helperSignature).toBe(result.exchange!.helperSignature);
+  });
+
+  it("does not throw when the node returns an error — failure is best-effort", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const fetchSpy = vi.fn(async () => {
+      throw new Error("connect ECONNREFUSED");
+    });
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    // The user's confirmExchange call must succeed even though the
+    // background mirror will fail.
+    const result = await runFullExchange();
+    expect(result.exchange).not.toBeNull();
+    await waitForFetch(fetchSpy);
+    expect(fetchSpy).toHaveBeenCalled();
   });
 });
