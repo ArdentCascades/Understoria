@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -53,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     null,
   );
   const [lockState, setLockState] = useState<LockState>("unprotected");
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
     const next = await currentLockState();
@@ -86,6 +88,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  // Start the outbox worker once the app is ready. Stops on unmount /
+  // hot reload so tests and dev environments don't accumulate stray
+  // timers. Locked-state startup is fine — the worker honors the
+  // disabled flag and lock state via readSubmitConfig + getSecretKey
+  // at flush time.
+  useEffect(() => {
+    if (!ready) return;
+    let cancelled = false;
+    void import("@/lib/outbox").then(({ startOutboxWorker, stopOutboxWorker }) => {
+      if (cancelled) return;
+      startOutboxWorker();
+      // Stash a cleanup target so the effect's return can invoke it.
+      cleanupRef.current = stopOutboxWorker;
+    });
+    return () => {
+      cancelled = true;
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+    };
+  }, [ready]);
 
   const unlock = useCallback(
     async (passphrase: string) => {

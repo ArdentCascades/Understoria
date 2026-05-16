@@ -18,6 +18,9 @@ async function reset() {
     db.achievements.clear(),
     db.settings.clear(),
     db.secretKeys.clear(),
+    db.invites.clear(),
+    db.vouches.clear(),
+    db.outbox.clear(),
   ]);
 }
 

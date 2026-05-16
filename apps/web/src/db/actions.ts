@@ -7,6 +7,7 @@ import {
   evaluateSafeguards,
 } from "@/lib/safeguards";
 import { getSecretKey } from "./secrets";
+import { enqueueExchangeOutbox, flushOutboxNow } from "@/lib/outbox";
 import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
 
 /**
@@ -157,9 +158,7 @@ export async function confirmExchange(
 
   const result = await db.transaction(
     "rw",
-    db.posts,
-    db.exchanges,
-    db.achievements,
+    [db.posts, db.exchanges, db.achievements, db.outbox, db.settings],
     async () => {
       const post = await db.posts.get(postId);
       if (!post) throw new Error("Post not found");
@@ -246,6 +245,11 @@ export async function confirmExchange(
       };
       await db.exchanges.put(exchange);
 
+      // Atomic enqueue: the outbox row and the exchange land in the
+      // same transaction, so we can never have an exchange recorded
+      // without its mirror enqueued (or vice versa) on a crash.
+      await enqueueExchangeOutbox(exchange);
+
       const updatedPost: Post = {
         ...post,
         status: "completed",
@@ -283,35 +287,20 @@ export async function confirmExchange(
     },
   );
 
-  // Fire-and-forget mirror to the configured community node, if any.
-  // Best-effort by design — a node that's slow or down must not block the
-  // user's confirmation. The submit helper records its own outcome to
-  // settings, which the Profile NodeSection surfaces.
+  // Kick the outbox worker to flush the row we just enqueued. The
+  // worker handles retries with backoff (see lib/outbox.ts); this
+  // call only triggers an immediate attempt for the common case
+  // where the node is reachable and the user can see the row deliver
+  // before they leave Profile.
   if (result.exchange) {
-    void mirrorToCommunityNode(result.exchange);
+    void flushOutboxNow().catch((err) => {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[understoria] outbox flush kick crashed", err);
+      }
+    });
   }
 
   return result;
-}
-
-async function mirrorToCommunityNode(exchange: Exchange): Promise<void> {
-  try {
-    const { readSubmitConfig, submitExchangeToNode } = await import(
-      "@/lib/nodeSubmit"
-    );
-    const cfg = await readSubmitConfig();
-    if (!cfg.enabled || !cfg.url.trim()) return;
-    await submitExchangeToNode(exchange, cfg);
-  } catch (err) {
-    // submitExchangeToNode is documented to never throw; this catch
-    // really only covers the dynamic import itself plus any future
-    // regression that smuggles a throw past it. Log so developers see
-    // it during triage — production deployments don't ship a logger,
-    // so this affects only the dev console.
-    if (typeof console !== "undefined" && console.warn) {
-      console.warn("[understoria] community-node mirror crashed", err);
-    }
-  }
 }
 
 export async function disputeExchange(
