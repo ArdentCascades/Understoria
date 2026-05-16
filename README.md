@@ -186,6 +186,7 @@ understoria/
 
 | For | Read |
 |-----|------|
+| First-time setup on a Debian / Ubuntu VM | [Quickstart](docs/quickstart.md) |
 | Members using the app | [Member Guide](docs/member-guide.md) |
 | People introducing the app to a group | [Organizer's Guide](docs/organizer-guide.md) |
 | Operators deploying a node | [Node Operator Guide](docs/operator-guide.md) |
