@@ -82,6 +82,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     "members",
     "secretKeys",
     "settings",
+    "invites",
+    "vouches",
+    "outbox",
   ];
 
   await Promise.all([
@@ -91,6 +94,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     db.members.clear(),
     db.secretKeys.clear(),
     db.settings.clear(),
+    db.invites.clear(),
+    db.vouches.clear(),
+    db.outbox.clear(),
   ]);
 
   // Rotate to a fresh node identity so the post-purge node is

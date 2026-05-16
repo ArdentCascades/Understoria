@@ -323,7 +323,11 @@
       "saved": "Guardado",
       "lastSuccess": "Último éxito: {{when}}",
       "lastError": "Último error: {{message}}",
-      "noActivity": "Aún no hay actividad de reflejo."
+      "noActivity": "Aún no hay actividad de reflejo.",
+      "pending": "{{count}} pendientes en la cola",
+      "poisoned": "{{count}} señalados para revisión",
+      "retryNow": "Reintentar ahora",
+      "retrying": "Reintentando…"
     },
     "invites": {
       "title": "Invitaciones que has emitido",

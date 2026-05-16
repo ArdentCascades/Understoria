@@ -7,6 +7,7 @@ import {
   writeSubmitConfig,
   type SubmitConfig,
 } from "@/lib/nodeSubmit";
+import { flushOutboxNow } from "@/lib/outbox";
 
 export function NodeSection() {
   const { t } = useTranslation();
@@ -95,7 +96,62 @@ export function NodeSection() {
       </form>
 
       <Telemetry lastSuccess={lastSuccess?.value} lastError={lastError?.value} />
+
+      <OutboxControls />
     </section>
+  );
+}
+
+function OutboxControls() {
+  const { t } = useTranslation();
+  const pending = useLiveQuery(
+    () => db.outbox.where("status").equals("pending").count(),
+    [],
+    0,
+  );
+  const poisoned = useLiveQuery(
+    () => db.outbox.where("status").equals("poisoned").count(),
+    [],
+    0,
+  );
+  const [retrying, setRetrying] = useState(false);
+
+  const havePending = pending > 0;
+  const havePoisoned = poisoned > 0;
+  if (!havePending && !havePoisoned) return null;
+
+  async function handleRetry() {
+    setRetrying(true);
+    try {
+      await flushOutboxNow();
+    } finally {
+      setRetrying(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+      {havePending && (
+        <span className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+          {t("profile.node.pending", { count: pending })}
+        </span>
+      )}
+      {havePoisoned && (
+        <span className="chip bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">
+          {t("profile.node.poisoned", { count: poisoned })}
+        </span>
+      )}
+      {havePending && (
+        <button
+          type="button"
+          className="btn-ghost text-xs"
+          onClick={handleRetry}
+          disabled={retrying}
+        >
+          {retrying ? t("profile.node.retrying") : t("profile.node.retryNow")}
+        </button>
+      )}
+    </div>
   );
 }
 

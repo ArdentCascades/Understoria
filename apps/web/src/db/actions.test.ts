@@ -22,6 +22,7 @@ async function reset() {
     db.achievements.clear(),
     db.settings.clear(),
     db.secretKeys.clear(),
+    db.outbox.clear(),
   ]);
 }
 
@@ -275,10 +276,10 @@ describe("community-node mirroring on confirmExchange", () => {
   }
 
   /**
-   * The mirror fires inside `confirmExchange` via `void mirrorToCommunityNode`,
-   * which dynamically imports nodeSubmit and then awaits the POST. We can't
-   * await that promise from outside, so we wait for fetch to be invoked
-   * before asserting. 50ms is generous on a fast CI box.
+   * confirmExchange enqueues an outbox row inside its transaction, then
+   * fires `void flushOutboxNow()` to deliver the row immediately. We
+   * can't await that background promise from outside, so we poll for the
+   * fetch call (or for an outbox status change) before asserting.
    */
   function waitForFetch(spy: ReturnType<typeof vi.fn>): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -360,5 +361,44 @@ describe("community-node mirroring on confirmExchange", () => {
     expect(result.exchange).not.toBeNull();
     await waitForFetch(fetchSpy);
     expect(fetchSpy).toHaveBeenCalled();
+  });
+
+  it("does NOT enqueue an outbox row when no node URL is configured", async () => {
+    await runFullExchange();
+    expect(await db.outbox.count()).toBe(0);
+  });
+
+  it("DOES enqueue an outbox row when a URL is set (even if disabled)", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: false,
+    });
+    const result = await runFullExchange();
+    const rows = await db.outbox.toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].recordId).toBe(result.exchange!.id);
+    expect(rows[0].status).toBe("pending");
+    // Disabled means the row sits there until the user enables; a
+    // later flushOutboxOnce with the config flipped would deliver it.
+  });
+
+  it("marks the outbox row delivered after a successful mirror", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const fetchSpy = vi.fn(async () =>
+      new Response('{"stored":true}', { status: 201 }),
+    );
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await runFullExchange();
+    await waitForFetch(fetchSpy);
+    // Give the post-flush update a tick to land in IndexedDB.
+    await new Promise((r) => setTimeout(r, 50));
+
+    const rows = await db.outbox.toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].status).toBe("delivered");
   });
 });

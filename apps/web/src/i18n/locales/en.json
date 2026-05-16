@@ -323,7 +323,11 @@
       "saved": "Saved",
       "lastSuccess": "Last success: {{when}}",
       "lastError": "Last error: {{message}}",
-      "noActivity": "No mirroring activity yet."
+      "noActivity": "No mirroring activity yet.",
+      "pending": "{{count}} pending in outbox",
+      "poisoned": "{{count}} flagged for review",
+      "retryNow": "Retry now",
+      "retrying": "Retrying…"
     },
     "invites": {
       "title": "Invites you've issued",

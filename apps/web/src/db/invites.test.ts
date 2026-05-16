@@ -23,6 +23,7 @@ async function reset() {
     db.secretKeys.clear(),
     db.invites.clear(),
     db.vouches.clear(),
+    db.outbox.clear(),
   ]);
 }
 
