@@ -72,6 +72,33 @@ npm run build
 The output goes to `apps/web/dist/` — five files and some hashed
 assets, about 400 KB total. That's what you serve.
 
+### First-time install on a fresh Debian / Ubuntu host
+
+If you're starting from a stock Debian 13 / Ubuntu 24.04 VM, the
+above `npm install` will fail with cryptic `node-gyp` errors —
+`better-sqlite3` (used by the optional community node, §6) needs a
+C++ toolchain to build its native binding. Install it first:
+
+```sh
+sudo apt-get update
+sudo apt-get install -y build-essential python3 git curl
+```
+
+Then install Node from the official NodeSource repo (Debian's stock
+Node is too old for some workspace tooling):
+
+```sh
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+Verify with `node --version` (should be ≥ 20). Then re-run
+`npm install`.
+
+If you only intend to run the PWA-only path and never the node
+server, you can skip `build-essential` / `python3` — the native
+module sits in the server workspace and won't try to compile.
+
 ### Verify before you publish
 
 ```sh
@@ -186,6 +213,33 @@ npm run dev:server
 This rebuilds `@understoria/shared` and starts the server with
 `tsx watch` on port 8787. Hit `http://localhost:8787/health` to
 confirm.
+
+### Wiring the PWA to your node (test setup on a single host)
+
+If you're running both the PWA (`npm run dev`, port 5173) and the
+node (`npm run dev:server`, port 8787) on the same machine for a
+test pilot:
+
+1. Open the PWA at <http://localhost:5173>.
+2. Go to **Profile → Community node**, paste
+   `http://localhost:8787` into the URL field, tick "Mirror
+   finalized exchanges to this node", and Save.
+3. Use the dev member-switcher to walk through a full claim →
+   confirm → confirm cycle. After the second confirm, the chip
+   under "Community node" should turn from "1 pending in outbox" to
+   "Last success: …".
+4. `curl http://localhost:8787/exchanges` should return the row.
+
+Two things to know:
+
+- **The dev server doesn't enforce CSP**, so the cross-origin POST
+  works. In production behind Caddy, the `connect-src` directive
+  on the PWA's CSP must include the node's origin (the §6 Caddy
+  example serves both from the same origin under `/api/`, which
+  works without any CSP relaxation).
+- **CORS** on the node is permissive by default (`CORS_ORIGIN=*`).
+  For production, set `CORS_ORIGIN` to your PWA origin so a hostile
+  page can't make members' browsers POST to your node.
 
 ### Configuration (env vars)
 

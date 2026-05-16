@@ -9,21 +9,36 @@ FROM node:22-bookworm-slim AS build
 
 WORKDIR /workspace
 
-# Install OS deps for native module compilation.
+# Install OS deps for native module compilation. better-sqlite3 needs
+# python3 + a C++ toolchain to build its native binding from source.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 make g++ ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy lockfile + workspace manifests for a cacheable install.
-COPY package.json package-lock.json ./
+# Copy lockfile + workspace manifests. We also copy packages/shared
+# in full BEFORE `npm ci` so the root postinstall (`shared:build`) has
+# source files to compile against. Otherwise `npm ci` would either
+# fail, or — with `--ignore-scripts` — succeed but leave better-sqlite3
+# without its native binding.
+COPY package.json package-lock.json .npmrc ./
 COPY apps/server/package.json apps/server/
-COPY packages/shared/package.json packages/shared/
+COPY packages/shared packages/shared
+
+# Install with all workspaces. Lifecycle scripts run:
+#   - root postinstall → builds packages/shared → packages/shared/dist
+#   - better-sqlite3 install → compiles native binding
 RUN npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
-# Copy source for both workspaces and build the server.
-COPY packages/shared packages/shared
+# Copy the server source and build it. Server's tsc resolves
+# @understoria/shared types from the dist produced above.
 COPY apps/server apps/server
 RUN npm --workspace @understoria/server run build
+
+# Drop dev dependencies so the runtime stage doesn't carry vitest,
+# jsdom, vite, tailwind, etc. `npm prune --omit=dev` works on
+# workspace installs and removes anything tagged devDependency in any
+# manifest. Saves ~300MB+ on the final image.
+RUN npm prune --workspaces --include-workspace-root --omit=dev
 
 
 FROM node:22-bookworm-slim AS runtime
@@ -42,11 +57,14 @@ RUN groupadd --system --gid 10001 understoria \
 
 WORKDIR /app
 
-# Copy production dependencies + built server + shared package.
+# Copy production dependencies + built server + shared package's dist.
+# Note: only packages/shared/dist (and its package.json) are needed at
+# runtime — the source/tsconfig stay behind in the build stage.
 COPY --from=build --chown=understoria:understoria /workspace/node_modules ./node_modules
 COPY --from=build --chown=understoria:understoria /workspace/apps/server/dist ./dist
 COPY --from=build --chown=understoria:understoria /workspace/apps/server/package.json ./package.json
-COPY --from=build --chown=understoria:understoria /workspace/packages/shared ./node_modules/@understoria/shared
+COPY --from=build --chown=understoria:understoria /workspace/packages/shared/package.json ./node_modules/@understoria/shared/package.json
+COPY --from=build --chown=understoria:understoria /workspace/packages/shared/dist ./node_modules/@understoria/shared/dist
 
 USER understoria
 

@@ -57,6 +57,12 @@ The software is built around a few core beliefs:
 
 ### Run locally (development)
 
+Requires Node 20+. On a fresh Debian/Ubuntu host you may also need
+`build-essential` and `python3` so the optional community-node
+workspace can compile its native SQLite binding — see
+[Operator Guide §3](docs/operator-guide.md#3-build-from-source) for
+the apt-get one-liner.
+
 ```bash
 # Clone the repo
 git clone https://github.com/ardentcascades/understoria.git
@@ -65,20 +71,41 @@ cd understoria
 # Install dependencies
 npm install
 
-# Start the development server
+# Start the PWA dev server (port 5173)
 npm run dev
 ```
 
-The app runs at `http://localhost:5173`. No backend required — every
-member's data lives in their own browser's IndexedDB. Run
-`npm test` to execute the full vitest suite and `npm run build` to
-produce the static bundle that a community node serves.
+The PWA runs at `http://localhost:5173`. No backend required for the
+PWA itself — every member's data lives in their browser's IndexedDB.
+
+To also run the optional community node (Fastify + SQLite, port 8787):
+
+```bash
+# In a separate terminal
+npm run dev:server
+```
+
+Then in the PWA, **Profile → Community node** → paste
+`http://localhost:8787` and tick "Mirror finalized exchanges to this
+node." Finalized exchanges mirror to the node and the outbox status
+chip shows delivery progress.
+
+`npm test` runs the full vitest suite across all workspaces.
+`npm run build` produces the PWA static bundle that a community node
+serves.
 
 ### Deploy a community node
 
-The current release is a client-side PWA; serving the built `dist/`
-over HTTPS from any static host is enough to run a pilot. A Caddy
-config, VPS notes, and Raspberry Pi walk-through are in the
+Two paths, both supported:
+
+- **PWA-only** — serve the built `dist/` over HTTPS from any static
+  host. Members' data stays on their devices.
+- **PWA + Fastify node** — run the multi-stage Dockerfile via
+  `docker compose up -d` from the repo root. Adds a community-wide
+  ledger of signed exchanges; the foundation for federation.
+
+A Caddy reverse-proxy config, VPS notes, Raspberry Pi walk-through,
+and full env-var reference are in the
 [Node Operator Guide](docs/operator-guide.md).
 
 The Node.js server with federation, cross-node exchanges, and
