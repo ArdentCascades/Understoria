@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs when a new commit lands on the same PR/branch.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Typecheck, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      # ubuntu-latest already ships build-essential + python3, which
+      # better-sqlite3 needs to compile its native binding. Listed
+      # explicitly so a future runner image change doesn't silently
+      # break the build.
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential python3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck across workspaces
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build PWA
+        run: npm run build
+
+      - name: Build server
+        run: npm run build:server
+
+  audit:
+    name: npm audit (informational)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      # Fail only on high+ severity advisories. Lower-severity
+      # findings are surfaced as a warning step; the job overall is
+      # set continue-on-error so an advisory does not block PRs.
+      - run: npm audit --audit-level=high
+
+  dco:
+    name: DCO sign-off check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so we can iterate every commit on the PR.
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Verify Signed-off-by on every PR commit
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          missing=()
+          while IFS= read -r sha; do
+            if ! git log -1 --format=%B "$sha" | grep -qE '^Signed-off-by: .+ <.+@.+>$'; then
+              missing+=("$sha")
+            fi
+          done < <(git rev-list --no-merges "$base..$head")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::The following commits are missing a Signed-off-by line:"
+            for sha in "${missing[@]}"; do
+              subject=$(git log -1 --format=%s "$sha")
+              echo "  - $sha  $subject"
+            done
+            echo ""
+            echo "Add sign-off with 'git rebase --signoff main' or"
+            echo "'git commit --amend -s --no-edit' for the most recent commit."
+            echo "See CONTRIBUTING.md for the full guide."
+            exit 1
+          fi
+          echo "All PR commits have valid DCO sign-offs. ✓"

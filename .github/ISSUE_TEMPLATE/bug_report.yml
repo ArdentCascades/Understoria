@@ -1,0 +1,92 @@
+name: Bug report
+description: Something doesn't work the way the docs say it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. If your report is
+        about a **security vulnerability**, please stop and read
+        [SECURITY.md](https://github.com/ardentcascades/understoria/blob/main/SECURITY.md)
+        first — security reports should not be filed as public issues.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: A clear, short description of what you saw.
+      placeholder: |
+        e.g. After confirming an exchange, the credits didn't transfer.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: What did you think would happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Number the steps so we can follow along.
+      placeholder: |
+        1. Open the PWA.
+        2. Post a need with category "transport", 2 hours.
+        3. Switch to another member.
+        4. Claim the post.
+        5. ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: |
+        Output of `git rev-parse --short HEAD` from your checkout,
+        or the release tag.
+      placeholder: e.g. v0.1.0 or a8a635c
+    validations:
+      required: false
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which part of the app?
+      multiple: true
+      options:
+        - PWA (browser)
+        - Community node (Fastify server)
+        - Docker deployment
+        - Documentation
+        - i18n / translations
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: |
+        Browser + version, OS, Node version (if running the dev
+        server), Docker version (if applicable).
+      placeholder: |
+        Firefox 132 on Debian 13; Node 22.22; Docker 27.x
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Logs / screenshots
+      description: |
+        Paste relevant terminal output, browser console errors, or
+        screenshots. Please redact any member identifiers or
+        community-specific data.
+    validations:
+      required: false

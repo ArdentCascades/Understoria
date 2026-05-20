@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+#
+# commit-msg hook: ensure the commit message carries a DCO
+# Signed-off-by line. Append one automatically if it's missing
+# and `user.name` + `user.email` are configured, otherwise
+# refuse the commit with a pointer to the docs.
+#
+# Enable hooks for this clone once with:
+#   git config core.hooksPath .githooks
+
+set -euo pipefail
+
+msg_file="${1:?commit-msg file path missing}"
+
+# Skip merge / squash / amend rewordings where the message
+# already exists and was authored by git itself.
+if grep -qE '^(Merge|Revert|fixup!|squash!)' "$msg_file"; then
+  exit 0
+fi
+
+if grep -qE '^Signed-off-by: .+ <.+@.+>$' "$msg_file"; then
+  exit 0
+fi
+
+name=$(git config user.name || true)
+email=$(git config user.email || true)
+
+if [[ -z "$name" || -z "$email" ]]; then
+  cat >&2 <<'EOF'
+
+  ✗ This commit is missing a Signed-off-by line, and your git
+    identity isn't configured. Set it once:
+
+        git config --global user.name  "Your Name"
+        git config --global user.email "you@example.org"
+
+    Then re-commit with `-s`:
+
+        git commit -s
+
+  See CONTRIBUTING.md (Sign-off and the DCO) for the full guide.
+EOF
+  exit 1
+fi
+
+# Trailing newline + Signed-off-by, preserving any existing trailer block.
+printf '\nSigned-off-by: %s <%s>\n' "$name" "$email" >> "$msg_file"
+
+# Print a hint the first time we auto-append, so contributors learn
+# to add `-s` themselves.
+cat >&2 <<EOF
+
+  ℹ  Appended Signed-off-by: $name <$email>
+     Pass -s to git commit next time to skip this message.
+     See CONTRIBUTING.md for the DCO guide.
+
+EOF
