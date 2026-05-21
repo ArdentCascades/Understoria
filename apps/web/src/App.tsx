@@ -26,6 +26,8 @@ import ProfilePage from "@/pages/Profile";
 import PostFormPage from "@/pages/PostForm";
 import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
+import ProjectNewPage from "@/pages/ProjectNew";
+import ProjectDetailPage from "@/pages/ProjectDetail";
 
 export default function App() {
   return (
@@ -36,6 +38,8 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/post/new" element={<PostFormPage />} />
         <Route path="/post/:id" element={<PostDetailPage />} />
+        <Route path="/project/new" element={<ProjectNewPage />} />
+        <Route path="/project/:id" element={<ProjectDetailPage />} />
         <Route path="/invite" element={<InviteAcceptPage />} />
         <Route path="*" element={<BoardPage />} />
       </Route>

@@ -81,6 +81,34 @@ export async function softPurge(): Promise<PurgeResult> {
     tables.push("posts");
   });
 
+  await db.transaction("rw", db.projects, async () => {
+    const projects = await db.projects.toArray();
+    for (const p of projects) {
+      await db.projects.put({
+        ...p,
+        title: "",
+        description: "",
+        locationZone: "",
+        tags: [],
+        pauseNote: null,
+      });
+    }
+    tables.push("projects");
+  });
+
+  await db.transaction("rw", db.projectTasks, async () => {
+    const tasks = await db.projectTasks.toArray();
+    for (const t of tasks) {
+      await db.projectTasks.put({
+        ...t,
+        title: "",
+        description: "",
+        requiredSkills: [],
+      });
+    }
+    tables.push("projectTasks");
+  });
+
   // Settings that could leak identity are rewritten; the node identity
   // and celebrated-milestones cache survive so the UI doesn't behave
   // erratically afterward.
@@ -105,6 +133,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     "invites",
     "vouches",
     "outbox",
+    "projects",
+    "projectTasks",
+    "projectActivity",
   ];
 
   await Promise.all([
@@ -117,6 +148,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     db.invites.clear(),
     db.vouches.clear(),
     db.outbox.clear(),
+    db.projects.clear(),
+    db.projectTasks.clear(),
+    db.projectActivity.clear(),
   ]);
 
   // Rotate to a fresh node identity so the post-purge node is

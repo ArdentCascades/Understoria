@@ -136,3 +136,101 @@ export interface Milestone {
   threshold: number;
   label: string;
 }
+
+// ---------------------------------------------------------------------------
+// Agent 10 — Community Projects & Momentum
+// ---------------------------------------------------------------------------
+
+export const PROJECT_CATEGORIES = [
+  ...CATEGORIES,
+  "infrastructure",
+  "organizing",
+  "mutual_aid_drive",
+] as const;
+
+export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
+
+export type ProjectStatus =
+  | "planning"
+  | "active"
+  | "paused"
+  | "completed"
+  | "archived";
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  category: ProjectCategory;
+  organizerKey: string;
+  status: ProjectStatus;
+  /** Total estimated hours to complete the project. */
+  targetHours: number;
+  /** Sum of completed task hours — materialized; recomputed on every
+   *  task completion / unclaim cycle. */
+  contributedHours: number;
+  /** Optional ms-epoch deadline. */
+  deadline: number | null;
+  createdAt: number;
+  /** Set when status transitions to "completed". */
+  completedAt: number | null;
+  /** Note from the organizer when status transitions to "paused". */
+  pauseNote: string | null;
+  locationZone: string;
+  tags: string[];
+  nodeId: string;
+}
+
+export type ProjectTaskStatus =
+  | "open"
+  | "claimed"
+  | "awaiting_confirmation"
+  | "completed"
+  | "blocked";
+
+export interface ProjectTask {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string;
+  category: ProjectCategory;
+  estimatedHours: number;
+  urgency: Urgency;
+  /** Optional list of skills the organizer suggests for this task. */
+  requiredSkills: string[];
+  /** Public key of the member who has claimed the task. */
+  assignedTo: string | null;
+  status: ProjectTaskStatus;
+  /** Other task IDs that should complete before this is workable.
+   *  Advisory; the UI shows "blocked" but does not enforce. */
+  dependencies: string[];
+  createdAt: number;
+  completedAt: number | null;
+  /** Set when the task transitions to awaiting_confirmation. */
+  completedBy: string | null;
+  /** Set on confirmation. Mirrors the Exchange record's id. */
+  exchangeId: string | null;
+}
+
+export type ProjectActivityType =
+  | "project_created"
+  | "task_added"
+  | "task_claimed"
+  | "task_unclaimed"
+  | "task_completed"
+  | "task_confirmed"
+  | "project_paused"
+  | "project_resumed"
+  | "project_completed"
+  | "milestone_reached";
+
+export interface ProjectActivity {
+  id: string;
+  projectId: string;
+  type: ProjectActivityType;
+  actorKey: string;
+  /** Type-specific extras: { taskId? , milestone? , note? }. */
+  data: Record<string, unknown>;
+  createdAt: number;
+  nodeId: string;
+}

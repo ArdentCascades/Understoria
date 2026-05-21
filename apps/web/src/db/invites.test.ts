@@ -44,6 +44,9 @@ async function reset() {
     db.invites.clear(),
     db.vouches.clear(),
     db.outbox.clear(),
+    db.projects.clear(),
+    db.projectTasks.clear(),
+    db.projectActivity.clear(),
   ]);
 }
 

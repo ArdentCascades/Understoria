@@ -43,6 +43,9 @@ async function reset() {
     db.settings.clear(),
     db.secretKeys.clear(),
     db.outbox.clear(),
+    db.projects.clear(),
+    db.projectTasks.clear(),
+    db.projectActivity.clear(),
   ]);
 }
 

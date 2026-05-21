@@ -36,7 +36,14 @@ import {
   setSetting,
 } from "@/db/database";
 import { ensureNodeId, seedDemoCommunityIfEmpty } from "@/db/seed";
-import type { Achievement, Exchange, Member, Post } from "@/types";
+import type {
+  Achievement,
+  Exchange,
+  Member,
+  Post,
+  Project,
+  ProjectTask,
+} from "@/types";
 import type { InviteRow } from "@/db/database";
 import type { SignedVouch } from "@/lib/vouch";
 import {
@@ -57,6 +64,8 @@ export interface AppContextValue {
   achievements: Achievement[];
   invites: InviteRow[];
   vouches: SignedVouch[];
+  projects: Project[];
+  projectTasks: ProjectTask[];
   lockState: LockState;
   unlock: (
     passphrase: string,
@@ -172,6 +181,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as SignedVouch[],
   );
+  const projects = useLiveQuery(
+    () => db.projects.orderBy("createdAt").reverse().toArray(),
+    [],
+    [] as Project[],
+  );
+  const projectTasks = useLiveQuery(
+    () => db.projectTasks.toArray(),
+    [],
+    [] as ProjectTask[],
+  );
 
   const currentMember = useMemo(
     () => members?.find((m) => m.publicKey === currentMemberKey) ?? null,
@@ -195,6 +214,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       achievements: achievements ?? [],
       invites: invites ?? [],
       vouches: vouches ?? [],
+      projects: projects ?? [],
+      projectTasks: projectTasks ?? [],
       lockState,
       unlock,
       lock,
@@ -211,6 +232,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       achievements,
       invites,
       vouches,
+      projects,
+      projectTasks,
       lockState,
       unlock,
       lock,

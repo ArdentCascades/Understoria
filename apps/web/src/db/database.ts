@@ -24,6 +24,9 @@ import type {
   Exchange,
   Member,
   Post,
+  Project,
+  ProjectActivity,
+  ProjectTask,
 } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
 
@@ -106,6 +109,9 @@ export class UnderstoriaDB extends Dexie {
   invites!: Table<InviteRow, string>;
   vouches!: Table<SignedVouch, string>;
   outbox!: Table<OutboxRow, string>;
+  projects!: Table<Project, string>;
+  projectTasks!: Table<ProjectTask, string>;
+  projectActivity!: Table<ProjectActivity, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -128,6 +134,14 @@ export class UnderstoriaDB extends Dexie {
     });
     this.version(4).stores({
       outbox: "id, kind, status, nextAttemptAt, recordId, [status+nextAttemptAt]",
+    });
+    this.version(5).stores({
+      projects:
+        "id, organizerKey, status, category, createdAt, [status+createdAt]",
+      projectTasks:
+        "id, projectId, status, assignedTo, createdAt, [projectId+status]",
+      projectActivity:
+        "id, projectId, type, actorKey, createdAt, [projectId+createdAt]",
     });
   }
 }
