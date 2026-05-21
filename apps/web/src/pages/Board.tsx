@@ -1,17 +1,38 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { PostCard } from "@/components/PostCard";
+import { ProjectCard } from "@/components/ProjectCard";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import type { Category, PostType, Urgency } from "@/types";
 
-type Tab = PostType;
+type Tab = PostType | "PROJECTS";
 
 const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
 
 export default function BoardPage() {
-  const { posts, members, currentMember } = useApp();
+  const { posts, members, currentMember, projects, projectTasks } = useApp();
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("NEED");
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
@@ -61,9 +82,9 @@ export default function BoardPage() {
       <div
         role="tablist"
         aria-label={t("board.tabs.ariaLabel")}
-        className="mb-4 grid grid-cols-2 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
+        className="mb-4 grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
       >
-        {(["NEED", "OFFER"] as const).map((tt) => (
+        {(["NEED", "OFFER", "PROJECTS"] as const).map((tt) => (
           <button
             key={tt}
             role="tab"
@@ -75,14 +96,22 @@ export default function BoardPage() {
                 : "text-moss-700 dark:text-moss-300"
             }`}
           >
-            {tt === "NEED" ? t("board.tabs.needs") : t("board.tabs.offers")}
-            <span className="ml-1 text-xs text-moss-500 dark:text-moss-400">
-              {t("board.openCount", { count: openCount[tt] })}
-            </span>
+            {tt === "NEED"
+              ? t("board.tabs.needs")
+              : tt === "OFFER"
+                ? t("board.tabs.offers")
+                : t("projects.tab")}
+            {tt !== "PROJECTS" && (
+              <span className="ml-1 text-xs text-moss-500 dark:text-moss-400">
+                {t("board.openCount", { count: openCount[tt] })}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
+      {tab !== "PROJECTS" && (
+      <>
       <div className="mb-4 grid gap-2 sm:grid-cols-2">
         <label className="sr-only" htmlFor="category-filter">
           {t("board.filters.categoryAriaLabel")}
@@ -138,7 +167,7 @@ export default function BoardPage() {
       </div>
 
       {visiblePosts.length === 0 ? (
-        <EmptyState tab={tab} />
+        <EmptyState tab={tab as PostType} />
       ) : (
         <ul className="flex flex-col gap-3">
           {visiblePosts.map((p) => (
@@ -152,31 +181,109 @@ export default function BoardPage() {
           ))}
         </ul>
       )}
+      </>
+      )}
+
+      {tab === "PROJECTS" && (
+        <ProjectList
+          projects={projects}
+          projectTasks={projectTasks}
+          memberName={memberName}
+        />
+      )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-white/90 p-1 shadow-lg backdrop-blur dark:bg-moss-900/95">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => navigate(`/post/new?type=NEED`)}
-          >
-            <span aria-hidden="true">{"➕"}</span> {t("board.fab.postNeed")}
-          </button>
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => navigate(`/post/new?type=OFFER`)}
-          >
-            <span aria-hidden="true">{"\u{1F91D}"}</span>{" "}
-            {t("board.fab.postOffer")}
-          </button>
+          {tab === "PROJECTS" ? (
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => navigate("/project/new")}
+            >
+              <span aria-hidden="true">{"\u{1F331}"}</span>{" "}
+              {t("projects.fab")}
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => navigate(`/post/new?type=NEED`)}
+              >
+                <span aria-hidden="true">{"➕"}</span> {t("board.fab.postNeed")}
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => navigate(`/post/new?type=OFFER`)}
+              >
+                <span aria-hidden="true">{"\u{1F91D}"}</span>{" "}
+                {t("board.fab.postOffer")}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function EmptyState({ tab }: { tab: Tab }) {
+function ProjectList({
+  projects,
+  projectTasks,
+  memberName,
+}: {
+  projects: import("@/types").Project[];
+  projectTasks: import("@/types").ProjectTask[];
+  memberName: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const tasksByProject = useMemo(() => {
+    const map = new Map<string, { total: number; open: number }>();
+    for (const task of projectTasks) {
+      const counts = map.get(task.projectId) ?? { total: 0, open: 0 };
+      counts.total += 1;
+      if (task.status === "open") counts.open += 1;
+      map.set(task.projectId, counts);
+    }
+    return map;
+  }, [projectTasks]);
+
+  const visible = projects.filter((p) => p.status !== "archived");
+
+  if (visible.length === 0) {
+    return (
+      <div className="card flex flex-col items-center gap-2 py-10 text-center">
+        <div className="text-4xl" aria-hidden="true">
+          {"\u{1F331}"}
+        </div>
+        <p className="max-w-sm text-sm text-moss-600 dark:text-moss-300">
+          {t("projects.empty")}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="flex flex-col gap-3">
+      {visible.map((p) => {
+        const counts = tasksByProject.get(p.id) ?? { total: 0, open: 0 };
+        return (
+          <li key={p.id}>
+            <ProjectCard
+              project={p}
+              organizerName={memberName.get(p.organizerKey) ?? "Member"}
+              taskCount={counts.total}
+              openTaskCount={counts.open}
+            />
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function EmptyState({ tab }: { tab: PostType }) {
   const { t } = useTranslation();
   const message =
     tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers");

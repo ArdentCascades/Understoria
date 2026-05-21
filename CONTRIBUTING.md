@@ -52,12 +52,76 @@ baseline as of this writing:
 CI runs `npm run typecheck`, `npm test`, and `npm run build`. All
 three must pass.
 
+## Sign-off and the DCO
+
+Every commit must include a **Developer Certificate of Origin
+(DCO) sign-off**. By signing off you assert that you wrote (or
+have the right to submit) the code, and that you're licensing it
+under AGPL-3.0-or-later. Full DCO text lives in the `DCO` file at
+the repo root. We use the DCO instead of a CLA because the DCO
+doesn't grant any central entity special rights over your code —
+each contributor retains copyright.
+
+### How to sign off a new commit
+
+Add `-s` to your commit command. Git will append a
+`Signed-off-by:` line that uses your configured `user.name` and
+`user.email`:
+
+```sh
+git commit -s -m "feat(board): add neighborhood filter"
+```
+
+The resulting commit message ends with:
+
+```
+Signed-off-by: Jane Organizer <jane@example.org>
+```
+
+If you've configured `git config --global commit.gpgsign true`,
+the sign-off is independent of GPG signing — both can apply.
+
+### Forgot to sign off?
+
+**On your most recent commit:**
+```sh
+git commit --amend -s --no-edit
+```
+
+**On the last N commits (e.g. last 3):**
+```sh
+git rebase --signoff HEAD~3
+```
+
+**On all commits in your branch since `main` diverged:**
+```sh
+git rebase --signoff main
+```
+
+Force-push afterward if you've already pushed
+(`git push --force-with-lease`).
+
+### Optional: the `commit-msg` hook
+
+The repo ships a hook template at `.githooks/commit-msg` that
+reminds you to sign off if you forget. Enable hooks once per
+clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+### CI enforcement
+
+The CI workflow (`.github/workflows/ci.yml`) checks every PR for
+proper sign-off. PRs without sign-off on every commit will fail
+the `dco` job and cannot merge until corrected. A future install
+of the [DCO GitHub App](https://github.com/apps/dco) can replace
+this check; the workflow version exists so the rule is enforced
+without requiring repo-admin install action.
+
 ## Commit style
 
-- **Sign your work with `-s`.** Every commit must carry a DCO
-  sign-off (Developer Certificate of Origin, `Signed-off-by:` line).
-  By adding it you assert you wrote the code and are submitting it
-  under AGPL-3.0-or-later.
 - **Conventional-ish subjects.** `feat:`, `fix:`, `docs:`, `test:`,
   `refactor:`, `chore:`. A scope is nice if the change is tightly
   contained: `feat(crypto): …`.
@@ -66,6 +130,7 @@ three must pass.
 - **Keep PRs scoped.** Refactors should land separately from
   behavior changes. Large renames as their own PR. No drive-by
   unrelated changes.
+
 
 ## Code style
 

@@ -1,0 +1,78 @@
+name: Community proposal
+description: |
+  Propose a change to community process, governance, code of
+  conduct, or a major architectural direction. Goes through the
+  modified-consensus process described in GOVERNANCE.md.
+labels: ["governance", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for changes that affect **how we make
+        decisions** rather than what the code does. Examples:
+        amending the Code of Conduct, changing the moderation
+        process, adopting a legal structure, federating with a
+        particular community, sunsetting a feature on principle.
+
+        Per [GOVERNANCE.md](https://github.com/ardentcascades/understoria/blob/main/GOVERNANCE.md),
+        community proposals follow a **discussion → decision
+        meeting → consent check** sequence. The discussion period
+        is at least 7 days — please don't expect immediate action.
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What are you proposing, in one or two sentences?
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why now
+      description: |
+        What problem or opportunity is this responding to? What
+        changes if we don't decide on this?
+    validations:
+      required: true
+
+  - type: textarea
+    id: changes
+    attributes:
+      label: What changes
+      description: |
+        Files, sections, processes, or commitments that would be
+        added / removed / modified.
+    validations:
+      required: true
+
+  - type: textarea
+    id: stays
+    attributes:
+      label: What stays the same
+      description: |
+        Equally important. What is explicitly *not* changing under
+        this proposal?
+    validations:
+      required: true
+
+  - type: textarea
+    id: who-affected
+    attributes:
+      label: Who is affected and how
+      description: |
+        Be specific. Existing members? Future members? Operators?
+        Particular roles? Whose consent matters?
+    validations:
+      required: true
+
+  - type: textarea
+    id: dissent
+    attributes:
+      label: Reasons someone might block this
+      description: |
+        Honest brainstorm — what objections do you anticipate, and
+        how would you respond to each?
+    validations:
+      required: false

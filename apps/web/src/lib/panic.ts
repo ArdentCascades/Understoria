@@ -1,3 +1,23 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 import { db, SETTING_KEYS, setSetting } from "@/db/database";
 import { generateKeyPair } from "./crypto";
 
@@ -61,6 +81,34 @@ export async function softPurge(): Promise<PurgeResult> {
     tables.push("posts");
   });
 
+  await db.transaction("rw", db.projects, async () => {
+    const projects = await db.projects.toArray();
+    for (const p of projects) {
+      await db.projects.put({
+        ...p,
+        title: "",
+        description: "",
+        locationZone: "",
+        tags: [],
+        pauseNote: null,
+      });
+    }
+    tables.push("projects");
+  });
+
+  await db.transaction("rw", db.projectTasks, async () => {
+    const tasks = await db.projectTasks.toArray();
+    for (const t of tasks) {
+      await db.projectTasks.put({
+        ...t,
+        title: "",
+        description: "",
+        requiredSkills: [],
+      });
+    }
+    tables.push("projectTasks");
+  });
+
   // Settings that could leak identity are rewritten; the node identity
   // and celebrated-milestones cache survive so the UI doesn't behave
   // erratically afterward.
@@ -85,6 +133,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     "invites",
     "vouches",
     "outbox",
+    "projects",
+    "projectTasks",
+    "projectActivity",
   ];
 
   await Promise.all([
@@ -97,6 +148,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     db.invites.clear(),
     db.vouches.clear(),
     db.outbox.clear(),
+    db.projects.clear(),
+    db.projectTasks.clear(),
+    db.projectActivity.clear(),
   ]);
 
   // Rotate to a fresh node identity so the post-purge node is

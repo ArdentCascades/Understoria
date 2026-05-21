@@ -1,0 +1,16 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/ardentcascades/understoria/blob/main/SECURITY.md
+    about: |
+      Security reports should NOT be filed as public issues.
+      See SECURITY.md for the encrypted reporting channel and
+      response timeline.
+  - name: Member / operator / organizer questions
+    url: https://github.com/ardentcascades/understoria/tree/main/docs
+    about: |
+      Most questions are already answered in the member, operator,
+      and organizer guides under docs/.
+  - name: Real-time discussion
+    url: https://matrix.to/#/#understoria:matrix.org
+    about: Matrix room for community chat (encrypted by default).
