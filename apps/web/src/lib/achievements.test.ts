@@ -20,7 +20,12 @@
  */
 import { describe, expect, it } from "vitest";
 import { diffAchievements, evaluateAchievements } from "./achievements";
-import type { Category, Exchange } from "@/types";
+import type {
+  Category,
+  Exchange,
+  Project,
+  ProjectTask,
+} from "@/types";
 
 const nodeId = "node_test";
 const WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -147,6 +152,159 @@ describe("evaluateAchievements", () => {
   it("does not award weaver when zoneReach is not computed", () => {
     const list = evaluateAchievements("a", [], {}, now);
     expect(list).not.toContain("weaver");
+  });
+});
+
+describe("project achievements", () => {
+  const now = 100 * WEEK;
+  const nodeId = "node_proj_ach";
+
+  function proj(overrides: Partial<Project> = {}): Project {
+    return {
+      id: "p1",
+      title: "P",
+      description: "",
+      category: "infrastructure",
+      organizerKey: "org",
+      status: "active",
+      targetHours: 10,
+      contributedHours: 0,
+      deadline: null,
+      createdAt: 0,
+      completedAt: null,
+      pauseNote: null,
+      locationZone: "",
+      tags: [],
+      nodeId,
+      ...overrides,
+    };
+  }
+
+  function task(overrides: Partial<ProjectTask>): ProjectTask {
+    return {
+      id: "t1",
+      projectId: "p1",
+      title: "t",
+      description: "",
+      category: "infrastructure",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      assignedTo: null,
+      status: "open",
+      dependencies: [],
+      createdAt: 0,
+      completedAt: null,
+      completedBy: null,
+      exchangeId: null,
+      ...overrides,
+    };
+  }
+
+  it("awards groundbreaker when an organizer's project drew a contributor", () => {
+    const list = evaluateAchievements(
+      "org",
+      [],
+      {
+        organizedProjects: [proj()],
+        organizedProjectTasks: [task({ completedBy: "helper" })],
+      },
+      now,
+    );
+    expect(list).toContain("groundbreaker");
+  });
+
+  it("does not award groundbreaker when no one but the organizer touched a task", () => {
+    const list = evaluateAchievements(
+      "org",
+      [],
+      {
+        organizedProjects: [proj()],
+        organizedProjectTasks: [task({ completedBy: "org" })],
+      },
+      now,
+    );
+    expect(list).not.toContain("groundbreaker");
+  });
+
+  it("does not award groundbreaker for projects still in planning", () => {
+    const list = evaluateAchievements(
+      "org",
+      [],
+      {
+        organizedProjects: [proj({ status: "planning" })],
+        organizedProjectTasks: [task({ completedBy: "helper" })],
+      },
+      now,
+    );
+    expect(list).not.toContain("groundbreaker");
+  });
+
+  it("awards momentum_maker when a project crosses 50% of target", () => {
+    const list = evaluateAchievements(
+      "org",
+      [],
+      {
+        organizedProjects: [proj({ contributedHours: 5, targetHours: 10 })],
+        organizedProjectTasks: [],
+      },
+      now,
+    );
+    expect(list).toContain("momentum_maker");
+  });
+
+  it("does not award momentum_maker below 50%", () => {
+    const list = evaluateAchievements(
+      "org",
+      [],
+      {
+        organizedProjects: [proj({ contributedHours: 4, targetHours: 10 })],
+        organizedProjectTasks: [],
+      },
+      now,
+    );
+    expect(list).not.toContain("momentum_maker");
+  });
+
+  it("awards keystone for any completed organized project", () => {
+    const list = evaluateAchievements(
+      "org",
+      [],
+      {
+        organizedProjects: [proj({ status: "completed" })],
+        organizedProjectTasks: [],
+      },
+      now,
+    );
+    expect(list).toContain("keystone");
+  });
+
+  it("awards crew_member at 3 completed project tasks", () => {
+    const list = evaluateAchievements(
+      "helper",
+      [],
+      { completedProjectTasks: 3 },
+      now,
+    );
+    expect(list).toContain("crew_member");
+  });
+
+  it("does not award crew_member below 3", () => {
+    const list = evaluateAchievements(
+      "helper",
+      [],
+      { completedProjectTasks: 2 },
+      now,
+    );
+    expect(list).not.toContain("crew_member");
+  });
+
+  it("skips every project achievement when no project context is supplied", () => {
+    const list = evaluateAchievements("anyone", [], {}, now);
+    expect(list).not.toContain("groundbreaker");
+    expect(list).not.toContain("momentum_maker");
+    expect(list).not.toContain("keystone");
+    expect(list).not.toContain("crew_member");
   });
 });
 

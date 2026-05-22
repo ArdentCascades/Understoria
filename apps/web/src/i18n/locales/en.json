@@ -25,6 +25,20 @@
     "empty": "No active projects yet. A project is a collective goal — multiple tasks, multiple contributors. The first one is always the hardest to start.",
     "byOrganizer": "Organized by {{name}}",
     "progressLabel": "{{contributed}} of {{target}} ({{percent}}%)",
+    "sparkline": {
+      "label": "Project contributions over the last {{days}} days; {{hours}} hours total.",
+      "caption": "Last {{days}} days · {{hours}}h contributed"
+    },
+    "momentum": {
+      "humming": "Humming",
+      "active": "Active",
+      "stalled": "Stalled",
+      "completed": "Completed",
+      "paused": "Paused",
+      "planning": "Planning",
+      "archived": "Archived",
+      "last7Days": "{{hours}}h this week"
+    },
     "statusPlanning": "Planning",
     "statusActive": "Active",
     "statusPaused": "Paused",
@@ -273,6 +287,22 @@
     "weaver": {
       "label": "Weaver",
       "description": "Your exchanges have connected members across 3 or more areas of our community."
+    },
+    "groundbreaker": {
+      "label": "Groundbreaker",
+      "description": "You launched a community project that drew at least one contributor."
+    },
+    "crew_member": {
+      "label": "Crew Member",
+      "description": "You completed 3 or more confirmed tasks across community projects."
+    },
+    "momentum_maker": {
+      "label": "Momentum Maker",
+      "description": "A project you organized reached the halfway mark of its target hours."
+    },
+    "keystone": {
+      "label": "Keystone",
+      "description": "A project you organized was completed."
     },
     "earnedDate": "Earned {{date}}"
   },

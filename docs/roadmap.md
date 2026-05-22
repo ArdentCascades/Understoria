@@ -39,7 +39,7 @@ a maintenance owner.
 | 7 | Organizing Integration | not started | Campaigns, power mapping, meeting tools |
 | 8 | (reserved) | — | — |
 | 9 | Documentation & i18n | partial | Member/operator/organizer/developer/quickstart guides, political-education, English + Spanish |
-| 10 | Community Projects & Momentum | partial | Project + task lifecycle, signed task-completion exchanges, milestones. **Pending:** Phase 3 — momentum tracking, sparklines, four project achievements |
+| 10 | Community Projects & Momentum | partial | Project + task lifecycle, signed task-completion exchanges, milestones, momentum tracking, project sparkline, four project achievements (Groundbreaker, Crew Member, Momentum Maker, Keystone). **Still pending from the original Phase 3 plan:** custom milestones beyond auto-25/50/75/100, federation of cross-node task claims, 48-hour auto-confirm, dependency enforcement |
 
 Agents 6 and 8 are intentional gaps — they were placeholders that
 collapsed into adjacent agents during scoping. Numbering is preserved

@@ -23,6 +23,7 @@ import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
 import { enqueueExchangeOutbox, flushOutboxNow } from "@/lib/outbox";
+import { diffAchievements } from "@/lib/achievements";
 import type {
   Exchange,
   Project,
@@ -52,14 +53,14 @@ import type {
  *     credits transfer
  *   - Activity log for every state transition
  *
- * Phase 3 (deferred):
- *   - Momentum metrics, sparklines, dashboard "projects with momentum"
- *   - Custom milestones beyond auto-25/50/75/100
+ * Phase 3 (in flight):
+ *   - Momentum metrics, project sparkline (shipped)
  *   - 4 project achievements (Groundbreaker, Crew Member, Momentum
- *     Maker, Keystone)
- *   - Federation: cross-node task claims
- *   - 48-hour auto-confirm when organizer is the completer
- *   - Task dependencies enforcement (currently a UI hint only)
+ *     Maker, Keystone) — shipped
+ *   - Custom milestones beyond auto-25/50/75/100 — still deferred
+ *   - Federation: cross-node task claims — still deferred
+ *   - 48-hour auto-confirm when organizer is the completer — still deferred
+ *   - Task dependencies enforcement (currently a UI hint only) — still deferred
  */
 
 // -- Project lifecycle ------------------------------------------------------
@@ -172,15 +173,16 @@ export async function completeProject(
 ): Promise<Project> {
   return db.transaction(
     "rw",
-    [db.projects, db.projectActivity],
+    [db.projects, db.projectTasks, db.projectActivity, db.achievements, db.exchanges],
     async () => {
       const p = await requireOrganizer(projectId, organizerKey);
       if (p.status !== "active" && p.status !== "paused")
         throw new Error("Only active / paused projects can be completed.");
+      const now = Date.now();
       const updated: Project = {
         ...p,
         status: "completed",
-        completedAt: Date.now(),
+        completedAt: now,
       };
       await db.projects.put(updated);
       await logActivity(
@@ -190,6 +192,34 @@ export async function completeProject(
         { contributedHours: p.contributedHours, targetHours: p.targetHours },
         p.nodeId,
       );
+
+      // Keystone achievement fires here for the organizer. Use the
+      // freshly-updated project list so the just-completed project is
+      // visible to the evaluator.
+      const allProjectsNow = (await db.projects.toArray()).map((proj) =>
+        proj.id === updated.id ? updated : proj,
+      );
+      const allTasksNow = await db.projectTasks.toArray();
+      const existing = await db.achievements
+        .where("memberKey")
+        .equals(organizerKey)
+        .toArray();
+      const organizedProjects = allProjectsNow.filter(
+        (proj) => proj.organizerKey === organizerKey,
+      );
+      const organizedProjectIds = new Set(organizedProjects.map((p) => p.id));
+      const organizedProjectTasks = allTasksNow.filter((t) =>
+        organizedProjectIds.has(t.projectId),
+      );
+      const diff = diffAchievements(
+        organizerKey,
+        existing.map((a) => a.achievementType),
+        await db.exchanges.toArray(),
+        { organizedProjects, organizedProjectTasks },
+        now,
+      );
+      if (diff.length > 0) await db.achievements.bulkPut(diff);
+
       return updated;
     },
   );
@@ -437,6 +467,7 @@ export async function confirmProjectTaskCompletion(
       db.exchanges,
       db.outbox,
       db.settings,
+      db.achievements,
     ],
     async () => {
       const now = Date.now();
@@ -505,6 +536,49 @@ export async function confirmProjectTaskCompletion(
           { milestone: m },
           project.nodeId,
         );
+      }
+
+      // Award any newly-earned achievements for both the helper (who
+      // can earn First Exchange, Connector, etc. from a project task
+      // just as from a board exchange — it's a real signed Exchange)
+      // and the organizer (Groundbreaker / Momentum Maker for project
+      // achievements). Keystone fires from completeProject; not here.
+      const allExchangesNow = await db.exchanges.toArray();
+      const allProjectsNow = await db.projects.toArray();
+      const allTasksNow = await db.projectTasks.toArray();
+      for (const memberKey of [helperKey, organizerKey]) {
+        const existing = await db.achievements
+          .where("memberKey")
+          .equals(memberKey)
+          .toArray();
+        const organizedProjects = allProjectsNow.filter(
+          (p) => p.organizerKey === memberKey,
+        );
+        const organizedProjectIds = new Set(organizedProjects.map((p) => p.id));
+        const organizedProjectTasks = allTasksNow.filter((t) =>
+          organizedProjectIds.has(t.projectId),
+        );
+        const completedProjectTasks = allTasksNow.filter(
+          (t) => t.status === "completed" && t.completedBy === memberKey,
+        ).length;
+        const previouslyFilledCategories = new Set(
+          allExchangesNow
+            .filter((x) => x.id !== exchange.id)
+            .map((x) => x.category),
+        );
+        const diff = diffAchievements(
+          memberKey,
+          existing.map((a) => a.achievementType),
+          allExchangesNow,
+          {
+            previouslyFilledCategories,
+            organizedProjects,
+            organizedProjectTasks,
+            completedProjectTasks,
+          },
+          now,
+        );
+        if (diff.length > 0) await db.achievements.bulkPut(diff);
       }
 
       return {

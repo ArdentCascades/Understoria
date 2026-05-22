@@ -29,6 +29,10 @@ const ICONS: Record<AchievementType, string> = {
   seed_planter: "\u{1F33E}",
   listener: "\u{1F442}",
   weaver: "\u{1F578}",
+  groundbreaker: "\u{1FAB4}",
+  crew_member: "\u{1F91D}",
+  momentum_maker: "\u{1F30A}",
+  keystone: "\u{1F511}",
 };
 
 export function AchievementBadge({

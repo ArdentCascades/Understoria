@@ -26,6 +26,9 @@ import {
 } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { formatHours, formatRelativeTime } from "@/lib/format";
+import { computeProjectMomentum } from "@/lib/projectMomentum";
+import { ProjectSparkline } from "@/components/ProjectSparkline";
+import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import type {
   Project,
   ProjectCategory,
@@ -36,7 +39,14 @@ import type {
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { projects, projectTasks, members, currentMember, nodeId } = useApp();
+  const {
+    projects,
+    projectTasks,
+    members,
+    currentMember,
+    nodeId,
+    exchanges,
+  } = useApp();
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
 
@@ -81,6 +91,11 @@ export default function ProjectDetailPage() {
           Math.round((project.contributedHours / project.targetHours) * 100),
         )
       : 0;
+  const momentum = computeProjectMomentum({
+    project,
+    tasks,
+    exchanges,
+  });
   const contributors = new Set(
     tasks
       .filter((task) => task.status === "completed" && task.completedBy)
@@ -115,6 +130,10 @@ export default function ProjectDetailPage() {
           <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
             {project.category.replace(/_/g, " ")}
           </span>
+          <ProjectMomentumChip
+            state={momentum.state}
+            hoursLast7Days={momentum.hoursLast7Days}
+          />
         </div>
         <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
         {project.description && (
@@ -142,6 +161,9 @@ export default function ProjectDetailPage() {
               percent,
             })}
           </p>
+          <div className="mt-3 text-canopy-700 dark:text-canopy-300">
+            <ProjectSparkline daily={momentum.daily} />
+          </div>
         </div>
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <Field

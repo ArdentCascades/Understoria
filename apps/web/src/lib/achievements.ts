@@ -23,6 +23,8 @@ import type {
   AchievementType,
   Category,
   Exchange,
+  Project,
+  ProjectTask,
 } from "@/types";
 import { uuid } from "./id";
 
@@ -73,6 +75,30 @@ export const ACHIEVEMENT_DEFINITIONS: Record<
     description:
       "Your exchanges have connected members across 3 or more areas of our community.",
   },
+  groundbreaker: {
+    type: "groundbreaker",
+    label: "Groundbreaker",
+    description:
+      "You launched a community project that drew at least one contributor.",
+  },
+  crew_member: {
+    type: "crew_member",
+    label: "Crew Member",
+    description:
+      "You completed 3 or more confirmed tasks across community projects.",
+  },
+  momentum_maker: {
+    type: "momentum_maker",
+    label: "Momentum Maker",
+    description:
+      "A project you organized reached the halfway mark of its target hours.",
+  },
+  keystone: {
+    type: "keystone",
+    label: "Keystone",
+    description:
+      "A project you organized was completed.",
+  },
 };
 
 export interface MemberRelationContext {
@@ -86,6 +112,15 @@ export interface MemberRelationContext {
    *  doesn't itself receive). Undefined means "not computed" — the
    *  Weaver achievement is skipped rather than incorrectly awarded. */
   zoneReach?: number;
+  /** All projects this member organizes. Used to evaluate the
+   *  Groundbreaker / Momentum Maker / Keystone project achievements. */
+  organizedProjects?: readonly Project[];
+  /** All tasks across the organized projects above; used by the same
+   *  achievements to detect "drew a contributor." */
+  organizedProjectTasks?: readonly ProjectTask[];
+  /** Count of confirmed project tasks this member has completed across
+   *  the community. Drives the Crew Member achievement. */
+  completedProjectTasks?: number;
 }
 
 /**
@@ -137,6 +172,43 @@ export function evaluateAchievements(
   if (emotionalHelped >= 3) earned.add("listener");
 
   if ((context.zoneReach ?? 0) >= 3) earned.add("weaver");
+
+  // Project achievements (Agent 10 Phase 3). Each derives purely from
+  // the supplied project context — when the context is omitted, the
+  // check is skipped rather than incorrectly satisfied.
+  const organized = context.organizedProjects ?? [];
+  const organizedTasks = context.organizedProjectTasks ?? [];
+
+  // Groundbreaker: launched a project that drew at least one
+  // contributor (someone claimed or completed a task who isn't the
+  // organizer themselves).
+  const drewContributor = organized.some((p) => {
+    if (p.status === "planning") return false;
+    return organizedTasks.some(
+      (t) =>
+        t.projectId === p.id &&
+        ((t.assignedTo !== null && t.assignedTo !== p.organizerKey) ||
+          (t.completedBy !== null && t.completedBy !== p.organizerKey)),
+    );
+  });
+  if (drewContributor) earned.add("groundbreaker");
+
+  // Momentum Maker: an organized project crossed the halfway mark.
+  const halfwayCrossed = organized.some(
+    (p) =>
+      p.targetHours > 0 && p.contributedHours / p.targetHours >= 0.5,
+  );
+  if (halfwayCrossed) earned.add("momentum_maker");
+
+  // Keystone: an organized project actually completed.
+  const completedAProject = organized.some(
+    (p) => p.status === "completed",
+  );
+  if (completedAProject) earned.add("keystone");
+
+  // Crew Member: helped complete 3+ confirmed tasks across community
+  // projects (project-side equivalent of the original Connector).
+  if ((context.completedProjectTasks ?? 0) >= 3) earned.add("crew_member");
 
   return Array.from(earned);
 }

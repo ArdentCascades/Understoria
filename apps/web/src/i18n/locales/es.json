@@ -25,6 +25,20 @@
     "empty": "Aún no hay proyectos activos. Un proyecto es una meta colectiva — varias tareas, varias personas. El primero siempre es el más difícil de empezar.",
     "byOrganizer": "Organizado por {{name}}",
     "progressLabel": "{{contributed}} de {{target}} ({{percent}}%)",
+    "sparkline": {
+      "label": "Contribuciones al proyecto durante los últimos {{days}} días; {{hours}} horas en total.",
+      "caption": "Últimos {{days}} días · {{hours}}h contribuidas"
+    },
+    "momentum": {
+      "humming": "En marcha",
+      "active": "Activo",
+      "stalled": "Estancado",
+      "completed": "Completado",
+      "paused": "En pausa",
+      "planning": "En planeación",
+      "archived": "Archivado",
+      "last7Days": "{{hours}}h esta semana"
+    },
     "statusPlanning": "En planeación",
     "statusActive": "Activo",
     "statusPaused": "En pausa",
@@ -273,6 +287,22 @@
     "weaver": {
       "label": "Tejedora",
       "description": "Tus intercambios han conectado a integrantes de 3 o más zonas de nuestra comunidad."
+    },
+    "groundbreaker": {
+      "label": "Iniciadora",
+      "description": "Lanzaste un proyecto comunitario que atrajo al menos a una persona contribuyente."
+    },
+    "crew_member": {
+      "label": "Tripulante",
+      "description": "Has completado 3 o más tareas confirmadas en proyectos comunitarios."
+    },
+    "momentum_maker": {
+      "label": "Impulsora",
+      "description": "Un proyecto que organizaste alcanzó la mitad de sus horas objetivo."
+    },
+    "keystone": {
+      "label": "Clave de bóveda",
+      "description": "Un proyecto que organizaste fue completado."
     },
     "earnedDate": "Obtenido el {{date}}"
   },

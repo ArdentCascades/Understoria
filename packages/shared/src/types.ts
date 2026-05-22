@@ -155,7 +155,11 @@ export type AchievementType =
   | "bridge_builder"
   | "seed_planter"
   | "listener"
-  | "weaver";
+  | "weaver"
+  | "groundbreaker"
+  | "crew_member"
+  | "momentum_maker"
+  | "keystone";
 
 export interface Achievement {
   id: string;
