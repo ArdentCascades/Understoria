@@ -36,6 +36,10 @@ import {
   setSetting,
 } from "@/db/database";
 import { ensureNodeId, seedDemoCommunityIfEmpty } from "@/db/seed";
+import {
+  backfillOnboardedForExistingUsers,
+  isOnboarded,
+} from "@/db/onboarding";
 import type {
   Achievement,
   Exchange,
@@ -72,6 +76,8 @@ export interface AppContextValue {
   ) => Promise<"unlocked" | "wrong_passphrase" | "nothing_to_unlock">;
   lock: () => void;
   refreshLockState: () => Promise<void>;
+  onboarded: boolean;
+  refreshOnboarded: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -83,11 +89,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     null,
   );
   const [lockState, setLockState] = useState<LockState>("unprotected");
+  const [onboarded, setOnboarded] = useState<boolean>(false);
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
     const next = await currentLockState();
     setLockState(next);
+  }, []);
+
+  const refreshOnboarded = useCallback(async () => {
+    setOnboarded(await isOnboarded());
   }, []);
 
   useEffect(() => {
@@ -110,6 +121,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         setCurrentMemberKey(storedKey ?? null);
       }
+      // Devices that have used Understoria before Agent 16 had members
+      // but never set the onboarded flag — backfill so they don't see
+      // a welcome flow for software they already know.
+      await backfillOnboardedForExistingUsers();
+      if (cancelled) return;
+      setOnboarded(await isOnboarded());
       setNodeId(node);
       setReady(true);
     })();
@@ -220,6 +237,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unlock,
       lock,
       refreshLockState,
+      onboarded,
+      refreshOnboarded,
     }),
     [
       ready,
@@ -238,6 +257,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unlock,
       lock,
       refreshLockState,
+      onboarded,
+      refreshOnboarded,
     ],
   );
 

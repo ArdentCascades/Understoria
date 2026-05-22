@@ -382,6 +382,15 @@
       "intro": "Everything you see is stored locally on this device. No server. No analytics. No account to sign up for.",
       "export": "Export my data"
     },
+    "learn": {
+      "title": "Learn",
+      "intro": "The welcome flow, a condensed member guide, and prompts for study groups. Everything here works offline.",
+      "revisitWelcome": "Revisit the welcome",
+      "memberGuide": "Member guide",
+      "studyPrompts": "Study group prompts",
+      "promptCopy": "Copy for a meeting",
+      "promptCopied": "Copied"
+    },
     "language": {
       "title": "Language",
       "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."
@@ -456,6 +465,33 @@
       "hardConfirm": "Yes, wipe everything",
       "completedSoft": "Soft purge complete in {{ms}}ms.",
       "completedHard": "Hard purge complete in {{ms}}ms."
+    }
+  },
+  "welcome": {
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Open the board",
+    "screens": {
+      "timebank": {
+        "title": "This is a timebank",
+        "body1": "Help is tracked in hours. One hour of your help equals one hour of anyone else's — whether you're fixing a sink or listening to someone through a hard day.",
+        "body2": "There is no pricing. There is no rating. The work that markets undervalue gets the same weight as the work they overvalue."
+      },
+      "credit": {
+        "title": "You start with credit",
+        "body1": "Every new member begins with 5 hours of seed balance. You can ask for help before you've given any.",
+        "body2": "Asking is not debt. It's how the network comes alive — and how it stays alive when it's your turn to need something."
+      },
+      "identity": {
+        "title": "Your identity is a key, not an account",
+        "body1": "There is no email, no phone number, no password. You are a cryptographic key pair. Your display name is a label you choose; you can change it.",
+        "body2": "No company owns your identity. No one can lock you out. That also means no one can rescue you if you lose your keys — there's a passphrase option in Profile if that worries you."
+      },
+      "community": {
+        "title": "The community is the authority",
+        "body1": "There are no admins. Decisions are made together — on whatever channel your community uses today, and in-app as Understoria grows.",
+        "body2": "If something goes wrong, the response starts with conversation, not bans. Moderation, when it exists, is rotating, transparent, and accountable."
+      }
     }
   }
 }

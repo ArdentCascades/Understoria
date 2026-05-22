@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 16 — Onboarding & political literacy.** Four-screen
+  welcome flow at `/welcome` shown once on first launch, marked
+  via `SETTING_KEYS.onboarded` (which existed in the schema since
+  v0.1.0 but was never read or written). Screens cover: timebank
+  semantics, seed credit, cryptographic identity, community
+  authority. New "Learn" section in Profile with three actions:
+  revisit the welcome flow, expand an in-app condensed member
+  guide, expand the 13 study-group prompts mirrored from
+  `docs/political-education/README.md` with copy-for-meeting
+  support. Existing pilot devices (any device with members already
+  in IndexedDB) are silently backfilled as onboarded so they don't
+  see a welcome flow for software they already know. `/invite` is
+  allow-listed pre-onboarding so invited members can still land
+  on the redemption screen first. UI strings i18n'd in English and
+  Spanish (8 new keys × 2 locales = 16; parity test passes). The
+  member guide and study prompts live as TS content files rather
+  than i18n locales per the roadmap's i18n-debt failure mode:
+  long-form prose translation is a separate workstream from UI
+  string translation.
 - This `CHANGELOG.md`, the `DCO` file (Developer Certificate of
   Origin v1.1), `SECURITY.md` (vulnerability disclosure policy),
   GitHub issue and pull-request templates, a CI workflow, and a
