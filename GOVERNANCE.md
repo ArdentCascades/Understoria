@@ -4,6 +4,16 @@
 > ratified once the founding members have signed it and is amended by
 > community process thereafter. It describes how decisions get made —
 > not what decisions get made.
+>
+> The processes here are deliberately platform-agnostic — proposals,
+> moderation reviews, and disputes can be run on any channel a
+> community uses today (a meeting, a thread, a shared doc). Phase 5
+> of the roadmap layers in-app surfaces over the same processes
+> (per-node configuration, a moderation queue, a shared "Decisions"
+> surface for proposals and disputes, per-peer federation agreements).
+> The surfaces are tools for the process described here; they don't
+> replace it. See [`docs/roadmap.md`](docs/roadmap.md) for the
+> agent-by-agent plan.
 
 ---
 
@@ -173,6 +183,13 @@ needs and offers, not a shared political body.
 
 A decision about whether to federate with a specific community is a
 modified-consensus decision.
+
+Roadmap note: Phase 5 / Agent 15 adds *federation agreements* — a
+per-peer record of what each community has agreed to share with the
+other (categories of posts, whether vouches cross, whether sanctions
+on one node are advisory on the other). This does not change the
+principle above; each agreement is itself a modified-consensus
+decision on our side, and the other community decides for theirs.
 
 ## 8. Legal structure
 

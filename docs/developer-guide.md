@@ -71,7 +71,7 @@ user's own.
 | `vouch.ts` | Signed vouches, `trustStatusWithInvites` (composes vouches + redeemed invites) |
 | `timebank.ts` | `balanceFor`, `transactionHistory` — event-sourced credit logic |
 | `achievements.ts` | `evaluateAchievements`, `diffAchievements` — pure from an exchange log |
-| `safeguards.ts` | `assertWithinDailyLimit`, `evaluateSafeguards` (anti-gaming) |
+| `safeguards.ts` | `assertWithinDailyLimit`, `evaluateSafeguards` (anti-gaming). The thresholds here are currently module-level constants; Phase 5 / Agent 11 moves them to per-node config — see [`docs/roadmap.md`](roadmap.md) |
 | `panic.ts` | `softPurge`, `hardPurge` (Agent 4 emergency tooling) |
 | `milestones.ts` | Threshold table + progress calculation |
 | `stats.ts` | Community-level metrics from the exchange log |

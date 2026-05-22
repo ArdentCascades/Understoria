@@ -138,6 +138,19 @@ We are not trying to protect against:
   path documents the matching Caddy header config. Certificate
   pinning in the PWA is still not implemented; tracked.
 
+- **Safeguard thresholds and moderation workflow are not yet
+  community-configurable.** Daily helper limits, short-exchange
+  flags, and reciprocal-pair flags currently live as module-level
+  constants in `apps/web/src/lib/safeguards.ts`. There is also no
+  in-app surface for moderators to review flagged exchanges — the
+  "surfacing each member's configured mirror URL in their profile so
+  moderators can review" wording elsewhere in this document
+  presupposes a queue we have not built. Phase 5 / Agent 11 moves
+  the thresholds to per-node config; Phase 5 / Agent 12 adds the
+  moderation queue and the action log it writes to. Until those
+  ship, communities that need different thresholds or a moderation
+  workflow must coordinate out-of-band per `GOVERNANCE.md` §5.
+
 - **Configurable node URL can leak counterparty public keys.** When a
   member enables exchange mirroring in Profile → Community node and
   points at a URL, every exchange they participate in is POSTed to
