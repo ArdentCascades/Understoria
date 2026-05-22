@@ -20,6 +20,10 @@ we review carefully and value small, focused PRs over large ones.
 3. Check that your idea fits one of the agent workstreams in
    [`docs/roadmap.md`](docs/roadmap.md). Work outside those agents is
    fine, but name it clearly so reviewers know what they're looking at.
+4. Skim the [Failure modes](docs/roadmap.md#failure-modes-to-watch-for)
+   section of the roadmap. Reviewers will cite items from it by name
+   (e.g. "this is a parallel-mini-implementation," "default-off
+   blind spot"). Pre-empting those notes saves a review round.
 
 ## Development setup
 

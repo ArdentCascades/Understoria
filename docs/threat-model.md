@@ -183,6 +183,11 @@ When reviewing a pull request, ask:
    actively is it maintained?
 4. Does this create a new privileged role? Is it rotatable? Revocable?
 5. Does this undermine any core mitigation listed in §6?
+6. Does this expose a new relational surface (who-helps-whom,
+   who-operates-this-node, who-flagged-what)? If yes: is there a §7
+   entry, is the default off, and has the exposure been gated through
+   the Phase 5 governance / proposal process per
+   [`docs/roadmap.md`](roadmap.md#privacy--threat-surface)?
 
 If any answer is unclear, ask. The defaults favor the adversary.
 
