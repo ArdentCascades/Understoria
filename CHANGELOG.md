@@ -23,6 +23,17 @@ include breaking changes.
   (grounded in issue #6), then finish Agent 3, then 13 + 14 as one
   surface, then 12 once telemetry exists, then 15 once peers
   federate in practice.
+- Roadmap revision integrating a "Beyond Ostrom" proposal (Kerala,
+  Zapatista, potlatch, Mondragon, Haudenosaunee, Cooperation Jackson
+  traditions). Result: two new standalone agents (**Agent 16 —
+  onboarding & political literacy**, **Agent 18a — breadth +
+  reciprocity Dashboard**); reversibility tiers + impact reflection
+  + operator transparency folded into Agents 13 and 11 respectively;
+  co-organizer support routed through Agent 10 Phase 3; organizer
+  recall + pool allocations routed through the Agent 13 Decisions
+  surface; community web graph (18b), balance cap + community pool
+  (19), and federation mutual aid fund (21) deferred behind explicit
+  gates documented in the roadmap.
 
 ## [0.1.0] — 2026-05-16
 

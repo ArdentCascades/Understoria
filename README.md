@@ -264,16 +264,21 @@ The phase view below is a public summary.
 
 ### Phase 5: Commons governance *(planned)*
 
-Five staged additions based on Elinor Ostrom's design principles for
-governing the commons. See [`docs/roadmap.md`](docs/roadmap.md#agents-11--15-ostrom-commons-extension)
-for the full breakdown and ordering rationale.
+Staged additions based on Elinor Ostrom's design principles for
+governing the commons, plus standalone additions drawn from the
+Kerala model and the potlatch tradition. See
+[`docs/roadmap.md`](docs/roadmap.md#agents-11--15-ostrom-commons-extension)
+for the full breakdown, the items that were absorbed into existing
+agents, and the items that are deferred behind explicit gates.
 
-- [ ] Per-node configuration replacing hardcoded safeguard constants (Agent 11)
-- [ ] Shared "Decisions" surface for proposals and disputes (Agents 13 + 14)
+- [ ] Per-node configuration + operator transparency (Agent 11)
+- [ ] In-app onboarding & political literacy (Agent 16)
+- [ ] Breadth & reciprocity Dashboard additions (Agent 18a)
+- [ ] Shared "Decisions" surface for proposals, disputes, and recall (Agents 13 + 14, with reversibility tiers folded in)
 - [ ] Moderation queue and graduated sanctions (Agent 12)
 - [ ] Per-peer federation agreements (Agent 15)
 
-Phase 5 does not block Phase 4 — a v1.0 pilot can ship with Agent 11 alone.
+Phase 5 does not block Phase 4 — a v1.0 pilot can ship with Agents 11 and 16 only.
 
 ## Ethical Use
 
