@@ -21,6 +21,7 @@
 import { db } from "./database";
 import { diffAchievements } from "@/lib/achievements";
 import { computeZoneReachForHelper } from "@/lib/flow";
+import { getNodeConfig } from "./nodeConfig";
 import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import {
@@ -176,6 +177,11 @@ export async function confirmExchange(
   // is intentionally excluded from the write transaction — secrets are
   // device-local and never participate in the exchange record.
   const preflight = await preloadSignerKeys(postId, memberKey);
+  // Read node config before opening the rw transaction so the safeguard
+  // thresholds match the values an operator most recently configured.
+  // Reading inside the transaction would also work but adds nodeConfig
+  // to the rw scope unnecessarily.
+  const nodeConfig = await getNodeConfig(nodeId);
 
   const result = await db.transaction(
     "rw",
@@ -224,9 +230,10 @@ export async function confirmExchange(
 
       const now = Date.now();
 
-      // Anti-gaming safeguards (Agent 6 task 6).
+      // Anti-gaming safeguards. Thresholds come from per-node config
+      // (Agent 11); falls back to shipped defaults when nothing's set.
       const existingExchanges = await db.exchanges.toArray();
-      assertWithinDailyLimit(helperKey, existingExchanges, now);
+      assertWithinDailyLimit(helperKey, existingExchanges, now, nodeConfig);
       const flag = evaluateSafeguards(
         {
           helperKey,
@@ -235,6 +242,7 @@ export async function confirmExchange(
           completedAt: now,
         },
         existingExchanges,
+        nodeConfig,
       );
 
       const payload = canonicalExchangePayload({

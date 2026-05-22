@@ -412,6 +412,25 @@
       "promptCopy": "Copy for a meeting",
       "promptCopied": "Copied"
     },
+    "communitySettings": {
+      "title": "Community settings",
+      "intro": "Thresholds the community can tune to fit its own context. Defaults work for most groups.",
+      "bootstrapNote": "These changes take effect immediately for everyone on this device. Once the in-app proposal system ships, edits here will route through a community vote instead.",
+      "dailyLimit": {
+        "label": "Daily helper limit",
+        "hint": "The most exchanges any single helper can complete in 24 hours. A hard stop, not a guideline."
+      },
+      "shortExchange": {
+        "label": "Short-exchange flag threshold (hours)",
+        "hint": "Exchanges shorter than this get an advisory flag for community review. Not blocked, not punished — just surfaced."
+      },
+      "reciprocal": {
+        "label": "Reciprocal-pattern threshold",
+        "hint": "When the same two members exchange this many times in 30 days, the latest exchange gets an advisory flag."
+      },
+      "save": "Save settings",
+      "reset": "Reset to defaults"
+    },
     "language": {
       "title": "Language",
       "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."

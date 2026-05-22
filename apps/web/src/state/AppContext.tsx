@@ -40,10 +40,13 @@ import {
   backfillOnboardedForExistingUsers,
   isOnboarded,
 } from "@/db/onboarding";
+import { getNodeConfig } from "@/db/nodeConfig";
+import { DEFAULT_NODE_CONFIG } from "@/types";
 import type {
   Achievement,
   Exchange,
   Member,
+  NodeConfig,
   Post,
   Project,
   ProjectTask,
@@ -78,6 +81,8 @@ export interface AppContextValue {
   refreshLockState: () => Promise<void>;
   onboarded: boolean;
   refreshOnboarded: () => Promise<void>;
+  nodeConfig: NodeConfig;
+  refreshNodeConfig: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -90,6 +95,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [lockState, setLockState] = useState<LockState>("unprotected");
   const [onboarded, setOnboarded] = useState<boolean>(false);
+  const [nodeConfig, setNodeConfig] = useState<NodeConfig>(DEFAULT_NODE_CONFIG);
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
@@ -100,6 +106,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refreshOnboarded = useCallback(async () => {
     setOnboarded(await isOnboarded());
   }, []);
+
+  const refreshNodeConfig = useCallback(async () => {
+    setNodeConfig(await getNodeConfig(nodeId));
+  }, [nodeId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,6 +137,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await backfillOnboardedForExistingUsers();
       if (cancelled) return;
       setOnboarded(await isOnboarded());
+      setNodeConfig(await getNodeConfig(node));
       setNodeId(node);
       setReady(true);
     })();
@@ -239,6 +250,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshLockState,
       onboarded,
       refreshOnboarded,
+      nodeConfig,
+      refreshNodeConfig,
     }),
     [
       ready,
@@ -259,6 +272,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshLockState,
       onboarded,
       refreshOnboarded,
+      nodeConfig,
+      refreshNodeConfig,
     ],
   );
 

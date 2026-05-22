@@ -46,6 +46,7 @@ import {
 import { trustStatusWithInvites } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
 import { LanguageSection } from "@/components/LanguageSection";
+import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { LearnSection } from "@/components/LearnSection";
 import { NodeSection } from "@/components/NodeSection";
 import type { AchievementType, FlagReason, Member } from "@/types";
@@ -239,6 +240,8 @@ export default function ProfilePage() {
       </section>
 
       <LearnSection />
+
+      <CommunitySettingsSection />
 
       <LanguageSection />
 

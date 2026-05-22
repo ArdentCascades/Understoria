@@ -47,6 +47,16 @@ export interface Config {
    * model's minimal-logging policy.
    */
   logRequestPaths: boolean;
+  /**
+   * Operator / hosting transparency block — folded into Agent 11 from
+   * the original "Beyond Ostrom" Agent 21. Optional: when none of the
+   * three env vars are set, `GET /config` omits the `operator` section
+   * rather than returning empty strings. An operator who chose not to
+   * identify themselves publicly should not have to.
+   */
+  operatorName: string | null;
+  operatorFundingNote: string | null;
+  operatorContact: string | null;
 }
 
 function asInt(name: string, raw: string | undefined, fallback: number): number {
@@ -81,5 +91,13 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     nodeId: env.NODE_ID ?? "node_local",
     logLevel: logLevelRaw as Config["logLevel"],
     logRequestPaths: asBool(env.LOG_REQUEST_PATHS, false),
+    operatorName: nonEmpty(env.OPERATOR_NAME),
+    operatorFundingNote: nonEmpty(env.OPERATOR_FUNDING_NOTE),
+    operatorContact: nonEmpty(env.OPERATOR_CONTACT),
   };
+}
+
+function nonEmpty(raw: string | undefined): string | null {
+  if (raw === undefined || raw.trim() === "") return null;
+  return raw;
 }

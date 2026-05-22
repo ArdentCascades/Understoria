@@ -10,6 +10,30 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 11 — Node configuration & local rules.** First proper
+  stage of the Ostrom track. The three safeguard thresholds that
+  used to live as constants in `apps/web/src/lib/safeguards.ts`
+  (`dailyHelperLimit`, `shortExchangeHours`, `reciprocalPairThreshold`)
+  are now read from a per-node `NodeConfig` persisted in a new
+  Dexie table (schema v6, single row keyed by `nodeId`). Defaults
+  match the pre-Agent-11 PWA exactly, so behaviour is unchanged
+  for a community that never opens settings. New "Community
+  settings" section on Profile with input + validation (range
+  checks live in `db/nodeConfig.ts`, not the component, so the
+  same rules apply to any future caller — governance proposals,
+  peer sync) and a "Reset to defaults" action. The UI carries an
+  explicit yellow note that the affordance is a bootstrap measure
+  until Agent 13 (in-app governance) routes edits through a
+  proposal. `assertWithinDailyLimit()` and `evaluateSafeguards()`
+  now take an optional `NodeConfig` parameter and fall back to
+  `DEFAULT_NODE_CONFIG` — every existing call site continues to
+  work; the `confirmExchange` flow passes the live config through.
+  Server-side: new `GET /config` endpoint returns an
+  operator/hosting transparency block (`name`, `fundingNote`,
+  `contact`) when any of the new `OPERATOR_*` env vars are set,
+  or `{}` otherwise. The folded-in transparency block from the
+  original "Beyond Ostrom" Agent 21; deliberately a small surface
+  (no member counts, no node id, no operational config).
 - **Agent 18a — Breadth & reciprocity Dashboard.** Two new sections
   on the Dashboard, both rendered without external charting
   libraries: a *breadth bar* listing members by how many distinct

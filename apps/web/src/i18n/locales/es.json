@@ -412,6 +412,25 @@
       "promptCopy": "Copiar para una reunión",
       "promptCopied": "Copiado"
     },
+    "communitySettings": {
+      "title": "Configuración comunitaria",
+      "intro": "Umbrales que la comunidad puede ajustar a su propio contexto. Los valores predeterminados funcionan para la mayoría de los grupos.",
+      "bootstrapNote": "Estos cambios entran en efecto de inmediato para todas las personas en este dispositivo. Cuando llegue el sistema de propuestas en la aplicación, las ediciones aquí pasarán por una votación comunitaria.",
+      "dailyLimit": {
+        "label": "Límite diario de ayudante",
+        "hint": "El máximo de intercambios que una sola persona ayudante puede completar en 24 horas. Tope estricto, no una sugerencia."
+      },
+      "shortExchange": {
+        "label": "Umbral de intercambio corto (horas)",
+        "hint": "Los intercambios más cortos que esto reciben una marca de revisión comunitaria. No se bloquean ni se castigan — solo se hacen visibles."
+      },
+      "reciprocal": {
+        "label": "Umbral de patrón recíproco",
+        "hint": "Cuando dos mismas integrantes intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
+      },
+      "save": "Guardar configuración",
+      "reset": "Restaurar valores predeterminados"
+    },
     "language": {
       "title": "Idioma",
       "intro": "Elige cómo Understoria te habla en este dispositivo. Pronto vendrán más idiomas y traducciones del resto de la aplicación."
