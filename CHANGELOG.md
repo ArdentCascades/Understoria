@@ -10,6 +10,27 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 10 Phase 3 — Project momentum + four project achievements.**
+  Closes a workstream that's been pending since Agent 10 Phase 2
+  landed. New pure `lib/projectMomentum.ts` computes a 14-day daily
+  histogram of project contributions plus a coarse momentum state
+  (`humming` / `active` / `stalled` / `completed` / `paused` /
+  `planning` / `archived`). Per-project surface on ProjectDetail:
+  inline SVG sparkline below the progress bar and a small momentum
+  chip beside the status. No external charting library; works
+  offline. Four new achievements — **Groundbreaker** (launched a
+  project that drew a contributor), **Crew Member** (3+ confirmed
+  task completions across community projects), **Momentum Maker**
+  (organized a project that crossed 50% of target hours), and
+  **Keystone** (organized a project that completed). Achievements
+  fire from inside `confirmProjectTaskCompletion` and
+  `completeProject` — the project flow now also runs the standard
+  achievement evaluator for both parties, so a helper who only ever
+  does project tasks finally gets credit for First Exchange,
+  Connector, etc. (previously they never would have, since project
+  exchanges bypassed `confirmExchange`). UI strings i18n'd in en +
+  es; parity test passes. Spanish is bootstrap-quality; joins the
+  native-speaker-review queue.
 - **Agent 3 task 2 — Federation pull loop.** Server-to-server
   replication of the signed exchange ledger. Nodes can now be
   configured (via comma-separated `PEER_NODE_URLS`) to periodically
