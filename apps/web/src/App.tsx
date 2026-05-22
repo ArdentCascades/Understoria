@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import BoardPage from "@/pages/Board";
 import DashboardPage from "@/pages/Dashboard";
@@ -28,21 +28,41 @@ import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
+import WelcomePage from "@/pages/Welcome";
+import { useApp } from "@/state/AppContext";
+
+// Paths a brand-new device is allowed to reach without going through
+// the welcome flow first. `/invite` matters because an invited member
+// may land on the redemption screen before they've seen anything else.
+const PRE_ONBOARDING_PATHS = new Set<string>(["/welcome", "/invite"]);
+
+function OnboardingGate({ children }: { children: React.ReactNode }) {
+  const { ready, onboarded } = useApp();
+  const location = useLocation();
+  if (!ready) return <>{children}</>;
+  if (!onboarded && !PRE_ONBOARDING_PATHS.has(location.pathname)) {
+    return <Navigate to="/welcome" replace />;
+  }
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<BoardPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/post/new" element={<PostFormPage />} />
-        <Route path="/post/:id" element={<PostDetailPage />} />
-        <Route path="/project/new" element={<ProjectNewPage />} />
-        <Route path="/project/:id" element={<ProjectDetailPage />} />
-        <Route path="/invite" element={<InviteAcceptPage />} />
-        <Route path="*" element={<BoardPage />} />
-      </Route>
-    </Routes>
+    <OnboardingGate>
+      <Routes>
+        <Route path="/welcome" element={<WelcomePage />} />
+        <Route element={<Layout />}>
+          <Route index element={<BoardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/post/new" element={<PostFormPage />} />
+          <Route path="/post/:id" element={<PostDetailPage />} />
+          <Route path="/project/new" element={<ProjectNewPage />} />
+          <Route path="/project/:id" element={<ProjectDetailPage />} />
+          <Route path="/invite" element={<InviteAcceptPage />} />
+          <Route path="*" element={<BoardPage />} />
+        </Route>
+      </Routes>
+    </OnboardingGate>
   );
 }

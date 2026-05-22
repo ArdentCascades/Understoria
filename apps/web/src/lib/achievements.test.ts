@@ -133,6 +133,21 @@ describe("evaluateAchievements", () => {
     );
     expect(list).toContain("seed_planter");
   });
+
+  it("awards weaver when zoneReach reaches 3", () => {
+    const list = evaluateAchievements("a", [], { zoneReach: 3 }, now);
+    expect(list).toContain("weaver");
+  });
+
+  it("does not award weaver below the threshold", () => {
+    const list = evaluateAchievements("a", [], { zoneReach: 2 }, now);
+    expect(list).not.toContain("weaver");
+  });
+
+  it("does not award weaver when zoneReach is not computed", () => {
+    const list = evaluateAchievements("a", [], {}, now);
+    expect(list).not.toContain("weaver");
+  });
 });
 
 describe("diffAchievements", () => {

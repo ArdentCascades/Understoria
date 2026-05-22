@@ -20,6 +20,7 @@
  */
 import { db } from "./database";
 import { diffAchievements } from "@/lib/achievements";
+import { computeZoneReachForHelper } from "@/lib/flow";
 import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import {
@@ -178,7 +179,14 @@ export async function confirmExchange(
 
   const result = await db.transaction(
     "rw",
-    [db.posts, db.exchanges, db.achievements, db.outbox, db.settings],
+    [
+      db.posts,
+      db.exchanges,
+      db.achievements,
+      db.outbox,
+      db.settings,
+      db.members,
+    ],
     async () => {
       const post = await db.posts.get(postId);
       if (!post) throw new Error("Post not found");
@@ -279,6 +287,7 @@ export async function confirmExchange(
 
       // Award new achievements for both parties.
       const allExchanges = await db.exchanges.toArray();
+      const allMembers = await db.members.toArray();
       const newAchievements: Achievement[] = [];
       for (const key of [helperKey, helpedKey]) {
         const existing = await db.achievements
@@ -290,11 +299,16 @@ export async function confirmExchange(
             .filter((x) => x.id !== exchange.id)
             .map((x) => x.category),
         );
+        const zoneReach = computeZoneReachForHelper(
+          key,
+          allExchanges,
+          allMembers,
+        );
         const diff = diffAchievements(
           key,
           existing.map((a) => a.achievementType),
           allExchanges,
-          { previouslyFilledCategories },
+          { previouslyFilledCategories, zoneReach },
           now,
         );
         if (diff.length > 0) {

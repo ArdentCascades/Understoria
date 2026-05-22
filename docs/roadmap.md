@@ -104,10 +104,10 @@ Two of the six agents in the "Beyond Ostrom" draft stand on their own
 and have no cross-cutting dependencies. They're listed here as
 first-class Phase 5 work rather than absorbed into existing agents.
 
-| # | Agent | Source tradition | Owns |
-|---|-------|-----------------|------|
-| 16 | Onboarding & Political Literacy | Kerala model | Four-screen welcome flow, in-app member/opsec guides, contextual first-time hints. Activates the existing-but-unused `SETTING_KEYS.onboarded` |
-| 18a | Breadth & Reciprocity Dashboard | Potlatch tradition (the safe half) | Breadth bar (members ranked by *unique* people helped, not hours) + reciprocity pulse (% of connections that flow both ways). New "Weaver" achievement for spanning 3+ zones |
+| # | Agent | Source tradition | Status | Owns |
+|---|-------|-----------------|--------|------|
+| 16 | Onboarding & Political Literacy | Kerala model | partial | Four-screen welcome flow + Learn section in Profile (member guide + study prompts) shipped. **Pending:** in-app opsec guide; contextual first-time hints on Board / balance / invite |
+| 18a | Breadth & Reciprocity Dashboard | Potlatch tradition (the safe half) | shipped | Breadth bar (members ranked by *unique* people helped, not hours) + reciprocity pulse (% of connections that flow both ways). New "Weaver" achievement for spanning 3+ zones |
 
 **Agent 18 is intentionally split.** The original Agent 18 also
 proposed a force-directed community web graph showing who-helps-whom.

@@ -270,6 +270,10 @@
       "label": "Escucha",
       "description": "Has completado 3 intercambios apoyando emocionalmente a alguien."
     },
+    "weaver": {
+      "label": "Tejedora",
+      "description": "Tus intercambios han conectado a integrantes de 3 o más zonas de nuestra comunidad."
+    },
     "earnedDate": "Obtenido el {{date}}"
   },
   "board": {
@@ -330,6 +334,23 @@
       "title": "Por dónde fluye el apoyo",
       "empty": "Aún no hay intercambios. Cuando ocurra el primero, verás la mezcla de cuidados, trabajo y apoyo fluyendo por la comunidad."
     },
+    "breadth": {
+      "title": "Amplitud, no profundidad",
+      "intro": "Integrantes según la cantidad de personas distintas a las que han ayudado — generosidad repartida, no acumulada.",
+      "empty": "Aún no hay intercambios. El primero iniciará el patrón.",
+      "rowLabel": "{{name}} ha ayudado a {{count}} personas distintas",
+      "moreNote": "{{count}} {{noun}} más han llegado al menos a una persona — si listáramos a toda la comunidad, cada nombre estaría aquí.",
+      "personSingular": "integrante",
+      "personPlural": "integrantes"
+    },
+    "reciprocity": {
+      "title": "Reciprocidad",
+      "intro": "Conexiones que fluyen en ambos sentidos — A ha ayudado a B y B ha ayudado a A.",
+      "rate": "{{percent}}% de las conexiones son recíprocas",
+      "ratio": "{{reciprocal}} de {{total}} pares",
+      "empty": "Aún no hay reciprocidad que medir.",
+      "footnote": "No es una puntuación. Solo una ventana a la forma de la ayuda en la comunidad."
+    },
     "rolesThisMonth": {
       "title": "Roles comunitarios obtenidos este mes",
       "lineOne": "{{count}} persona obtuvo {{role}}",
@@ -381,6 +402,15 @@
       "title": "Datos y privacidad",
       "intro": "Todo lo que ves se guarda localmente en este dispositivo. Sin servidor. Sin analíticas. Sin cuenta que crear.",
       "export": "Exportar mis datos"
+    },
+    "learn": {
+      "title": "Aprender",
+      "intro": "La bienvenida, una guía breve para miembros, y preguntas para grupos de estudio. Todo funciona sin conexión.",
+      "revisitWelcome": "Volver a ver la bienvenida",
+      "memberGuide": "Guía de miembros",
+      "studyPrompts": "Preguntas para grupos de estudio",
+      "promptCopy": "Copiar para una reunión",
+      "promptCopied": "Copiado"
     },
     "language": {
       "title": "Idioma",
@@ -456,6 +486,33 @@
       "hardConfirm": "Sí, eliminar todo",
       "completedSoft": "Borrado suave completado en {{ms}}ms.",
       "completedHard": "Borrado duro completado en {{ms}}ms."
+    }
+  },
+  "welcome": {
+    "skip": "Saltar",
+    "next": "Siguiente",
+    "start": "Abrir el tablero",
+    "screens": {
+      "timebank": {
+        "title": "Esto es un banco de tiempo",
+        "body1": "La ayuda se mide en horas. Una hora de tu ayuda equivale a una hora de la ayuda de cualquier otra persona — sea arreglar un grifo o acompañar a alguien en un día difícil.",
+        "body2": "No hay precios. No hay calificaciones. El trabajo que el mercado infravalora pesa lo mismo que el que sobrevalora."
+      },
+      "credit": {
+        "title": "Empiezas con crédito",
+        "body1": "Cada integrante nueva comienza con 5 horas de saldo inicial. Puedes pedir ayuda antes de haber dado ninguna.",
+        "body2": "Pedir no es una deuda. Es cómo la red cobra vida — y cómo sigue viva cuando te toca a ti necesitar algo."
+      },
+      "identity": {
+        "title": "Tu identidad es una llave, no una cuenta",
+        "body1": "No hay correo electrónico, ni teléfono, ni contraseña. Eres un par de claves criptográficas. Tu nombre visible es una etiqueta que tú eliges; puedes cambiarla.",
+        "body2": "Ninguna empresa es dueña de tu identidad. Nadie puede bloquearte. Eso también significa que nadie puede rescatarte si pierdes tus claves — hay una opción de frase de paso en Perfil si eso te preocupa."
+      },
+      "community": {
+        "title": "La comunidad es la autoridad",
+        "body1": "No hay administradores. Las decisiones se toman en conjunto — en el canal que tu comunidad use hoy, y dentro de la aplicación a medida que Understoria crezca.",
+        "body2": "Si algo sale mal, la respuesta empieza con conversación, no con bloqueos. La moderación, cuando existe, es rotativa, transparente y responde a la comunidad."
+      }
     }
   }
 }

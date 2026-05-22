@@ -28,6 +28,7 @@ const ICONS: Record<AchievementType, string> = {
   bridge_builder: "\u{1F309}",
   seed_planter: "\u{1F33E}",
   listener: "\u{1F442}",
+  weaver: "\u{1F578}",
 };
 
 export function AchievementBadge({

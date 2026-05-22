@@ -10,6 +10,42 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 18a — Breadth & reciprocity Dashboard.** Two new sections
+  on the Dashboard, both rendered without external charting
+  libraries: a *breadth bar* listing members by how many distinct
+  people they've helped (rewards distribution, not volume — never
+  shows hours per person), and a *reciprocity pulse* showing what
+  fraction of community connections flow both ways. Both sections
+  include empty states and a footnote making clear that this is a
+  window into the shape of help, not a score. New "Weaver"
+  achievement awarded when a member's exchanges span 3+ distinct
+  location zones (the counterparty's `locationZone`); computed at
+  exchange-confirmation time. New pure `lib/flow.ts` module
+  separated from `lib/stats.ts` because it answers a different
+  question (relational distribution vs. aggregate totals). All UI
+  strings i18n'd in en + es; parity test passes. The community web
+  graph (original Agent 18b) is *not* shipped — it remains gated
+  on a threat-model §7 entry and a governance opt-in per the
+  roadmap.
+- **Agent 16 — Onboarding & political literacy.** Four-screen
+  welcome flow at `/welcome` shown once on first launch, marked
+  via `SETTING_KEYS.onboarded` (which existed in the schema since
+  v0.1.0 but was never read or written). Screens cover: timebank
+  semantics, seed credit, cryptographic identity, community
+  authority. New "Learn" section in Profile with three actions:
+  revisit the welcome flow, expand an in-app condensed member
+  guide, expand the 13 study-group prompts mirrored from
+  `docs/political-education/README.md` with copy-for-meeting
+  support. Existing pilot devices (any device with members already
+  in IndexedDB) are silently backfilled as onboarded so they don't
+  see a welcome flow for software they already know. `/invite` is
+  allow-listed pre-onboarding so invited members can still land
+  on the redemption screen first. UI strings i18n'd in English and
+  Spanish (8 new keys × 2 locales = 16; parity test passes). The
+  member guide and study prompts live as TS content files rather
+  than i18n locales per the roadmap's i18n-debt failure mode:
+  long-form prose translation is a separate workstream from UI
+  string translation.
 - This `CHANGELOG.md`, the `DCO` file (Developer Certificate of
   Origin v1.1), `SECURITY.md` (vulnerability disclosure policy),
   GitHub issue and pull-request templates, a CI workflow, and a

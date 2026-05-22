@@ -67,6 +67,12 @@ export const ACHIEVEMENT_DEFINITIONS: Record<
     label: "Listener",
     description: "You've completed 3 exchanges supporting someone emotionally.",
   },
+  weaver: {
+    type: "weaver",
+    label: "Weaver",
+    description:
+      "Your exchanges have connected members across 3 or more areas of our community.",
+  },
 };
 
 export interface MemberRelationContext {
@@ -74,6 +80,12 @@ export interface MemberRelationContext {
   activeInviteeKeys?: string[];
   /** Categories that had been filled by any prior exchange before this log. */
   previouslyFilledCategories?: Set<Category>;
+  /** How many distinct location zones this member has reached via the
+   *  counterparties of exchanges where they were the helper. Computed
+   *  by the caller (it needs Member records, which evaluateAchievements
+   *  doesn't itself receive). Undefined means "not computed" — the
+   *  Weaver achievement is skipped rather than incorrectly awarded. */
+  zoneReach?: number;
 }
 
 /**
@@ -123,6 +135,8 @@ export function evaluateAchievements(
     (x) => x.helperKey === memberKey && x.category === "emotional_support",
   ).length;
   if (emotionalHelped >= 3) earned.add("listener");
+
+  if ((context.zoneReach ?? 0) >= 3) earned.add("weaver");
 
   return Array.from(earned);
 }
