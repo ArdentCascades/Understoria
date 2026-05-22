@@ -15,6 +15,14 @@ include breaking changes.
   GitHub issue and pull-request templates, a CI workflow, and a
   commit-msg hook template. AGPL-3.0-or-later header on every
   source file.
+- `docs/roadmap.md` — canonical agent-by-agent work plan, including
+  the new **Phase 5 (Commons governance)** built on Elinor Ostrom's
+  design principles. Adds Agents 11 – 15 (node configuration,
+  moderation & sanctions, in-app proposals, dispute resolution,
+  federation governance) with a staged ordering: Agent 11 first
+  (grounded in issue #6), then finish Agent 3, then 13 + 14 as one
+  surface, then 12 once telemetry exists, then 15 once peers
+  federate in practice.
 
 ## [0.1.0] — 2026-05-16
 

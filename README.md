@@ -194,6 +194,7 @@ understoria/
 | Developers and contributors | [Developer Guide](docs/developer-guide.md), [Contributing](CONTRIBUTING.md) |
 | Understanding the security posture | [Threat Model](docs/threat-model.md) |
 | Governance and decision-making | [Governance](GOVERNANCE.md), [Code of Conduct](CODE_OF_CONDUCT.md) |
+| Where the work is heading | [Roadmap](docs/roadmap.md) |
 | Study groups and political grounding | [Political Education](docs/political-education/) |
 | Trademark and brand use | [Trademark Policy](TRADEMARK.md) |
 
@@ -227,6 +228,10 @@ We make decisions through modified consensus. Major decisions go through a commu
 
 ## Roadmap
 
+The full agent-by-agent decomposition, including ordering rationale
+and open design questions, lives in [`docs/roadmap.md`](docs/roadmap.md).
+The phase view below is a public summary.
+
 ### Phase 1: Foundations
 - [x] Project plan and architecture
 - [x] Core PWA with community board, exchange flow, and credits
@@ -256,6 +261,19 @@ We make decisions through modified consensus. Major decisions go through a commu
 - [ ] Pilot deployment with 3 communities
 - [ ] Workshop curriculum and training sessions
 - [ ] v1.0 release
+
+### Phase 5: Commons governance *(planned)*
+
+Five staged additions based on Elinor Ostrom's design principles for
+governing the commons. See [`docs/roadmap.md`](docs/roadmap.md#agents-11--15-ostrom-commons-extension)
+for the full breakdown and ordering rationale.
+
+- [ ] Per-node configuration replacing hardcoded safeguard constants (Agent 11)
+- [ ] Shared "Decisions" surface for proposals and disputes (Agents 13 + 14)
+- [ ] Moderation queue and graduated sanctions (Agent 12)
+- [ ] Per-peer federation agreements (Agent 15)
+
+Phase 5 does not block Phase 4 — a v1.0 pilot can ship with Agent 11 alone.
 
 ## Ethical Use
 
