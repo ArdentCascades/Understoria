@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 3 task 2 — Federation pull loop.** Server-to-server
+  replication of the signed exchange ledger. Nodes can now be
+  configured (via comma-separated `PEER_NODE_URLS`) to periodically
+  pull `GET /exchanges?since=` from peers. Each pulled row goes
+  through the same `verifyExchange` check as the POST endpoint
+  (a peer cannot inject anything unsigned) and is deduped by id.
+  Pulled rows retain their original `nodeId` — federation is
+  replication of a signed ledger, not re-attribution. New
+  per-peer state table (server schema v2) tracks `lastPulledAt`,
+  `lastSuccessAt`, `lastCompletedAt`, `lastError`, and
+  `lastPulledCount` for observability via the new public
+  `GET /peers` endpoint (peer URLs are inherently public; no
+  member counts or operational config). The pull worker is a thin
+  shell over `pullFromPeer()` — the pure function takes an
+  injectable `fetcher`, making the whole flow testable without
+  network. Default pull interval 5 minutes, configurable via
+  `PEER_PULL_INTERVAL_MS`. Agent 15 (federation governance) will
+  replace env-var peer config with signed federation agreements
+  per the roadmap.
 - **Agent 11 — Node configuration & local rules.** First proper
   stage of the Ostrom track. The three safeguard thresholds that
   used to live as constants in `apps/web/src/lib/safeguards.ts`

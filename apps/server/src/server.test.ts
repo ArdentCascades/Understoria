@@ -253,6 +253,62 @@ describe("GET /config", () => {
   });
 });
 
+describe("GET /peers", () => {
+  it("returns an empty list when no peers are configured", async () => {
+    const res = await app.inject({ method: "GET", url: "/peers" });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ peers: [] });
+  });
+});
+
+describe("GET /peers with configured peers", () => {
+  let withPeers: FastifyInstance;
+  let withPeersDb: DatabaseType;
+
+  beforeEach(async () => {
+    withPeersDb = openDatabase(":memory:");
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      NODE_ID: "node_test",
+      PEER_NODE_URLS:
+        "https://peer-a.example, https://peer-b.example/",
+    } as NodeJS.ProcessEnv);
+    const built = await buildServer({ config, database: withPeersDb });
+    withPeers = built.app;
+    await withPeers.ready();
+  });
+
+  afterEach(async () => {
+    await withPeers.close();
+    withPeersDb.close();
+  });
+
+  it("lists every configured peer with empty pull state", async () => {
+    const res = await withPeers.inject({ method: "GET", url: "/peers" });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as {
+      peers: Array<{ url: string; lastPulledAt: number | null }>;
+    };
+    expect(body.peers).toHaveLength(2);
+    expect(body.peers.map((p) => p.url)).toEqual([
+      "https://peer-a.example",
+      "https://peer-b.example",
+    ]);
+    for (const p of body.peers) {
+      expect(p.lastPulledAt).toBeNull();
+    }
+  });
+
+  it("rejects invalid PEER_NODE_URLS at startup", () => {
+    expect(() =>
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        PEER_NODE_URLS: "ftp://nope.example",
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/http\(s\)/);
+  });
+});
+
 describe("GET /config with operator info", () => {
   let withOperator: FastifyInstance;
   let withOperatorDb: DatabaseType;

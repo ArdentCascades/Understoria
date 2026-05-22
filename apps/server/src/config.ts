@@ -57,6 +57,18 @@ export interface Config {
   operatorName: string | null;
   operatorFundingNote: string | null;
   operatorContact: string | null;
+  /**
+   * Federation peers this node pulls from. Comma-separated base URLs
+   * (no path, no trailing slash; the worker appends `/exchanges`).
+   * Read from PEER_NODE_URLS at startup; Agent 15 (federation
+   * governance) will replace this with signed federation agreements.
+   * Empty means "this node does not federate."
+   */
+  peerNodeUrls: readonly string[];
+  /** How often the pull worker hits each peer, in milliseconds.
+   *  Default 5 minutes — small enough to feel live, large enough not
+   *  to hammer a peer running on a Raspberry Pi. */
+  peerPullIntervalMs: number;
 }
 
 function asInt(name: string, raw: string | undefined, fallback: number): number {
@@ -94,10 +106,40 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     operatorName: nonEmpty(env.OPERATOR_NAME),
     operatorFundingNote: nonEmpty(env.OPERATOR_FUNDING_NOTE),
     operatorContact: nonEmpty(env.OPERATOR_CONTACT),
+    peerNodeUrls: parsePeerUrls(env.PEER_NODE_URLS),
+    peerPullIntervalMs: asInt(
+      "PEER_PULL_INTERVAL_MS",
+      env.PEER_PULL_INTERVAL_MS,
+      5 * 60 * 1000,
+    ),
   };
 }
 
 function nonEmpty(raw: string | undefined): string | null {
   if (raw === undefined || raw.trim() === "") return null;
   return raw;
+}
+
+function parsePeerUrls(raw: string | undefined): readonly string[] {
+  if (raw === undefined || raw.trim() === "") return [];
+  const urls: string[] = [];
+  for (const candidate of raw.split(",")) {
+    const trimmed = candidate.trim().replace(/\/+$/, "");
+    if (trimmed === "") continue;
+    let parsed: URL;
+    try {
+      parsed = new URL(trimmed);
+    } catch {
+      throw new Error(
+        `PEER_NODE_URLS entry ${JSON.stringify(trimmed)} is not a valid URL`,
+      );
+    }
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error(
+        `PEER_NODE_URLS entry ${JSON.stringify(trimmed)} must be http(s)`,
+      );
+    }
+    urls.push(trimmed);
+  }
+  return urls;
 }
