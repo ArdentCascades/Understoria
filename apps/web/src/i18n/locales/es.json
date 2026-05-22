@@ -270,6 +270,10 @@
       "label": "Escucha",
       "description": "Has completado 3 intercambios apoyando emocionalmente a alguien."
     },
+    "weaver": {
+      "label": "Tejedora",
+      "description": "Tus intercambios han conectado a integrantes de 3 o más zonas de nuestra comunidad."
+    },
     "earnedDate": "Obtenido el {{date}}"
   },
   "board": {
@@ -329,6 +333,23 @@
     "categoryBreakdown": {
       "title": "Por dónde fluye el apoyo",
       "empty": "Aún no hay intercambios. Cuando ocurra el primero, verás la mezcla de cuidados, trabajo y apoyo fluyendo por la comunidad."
+    },
+    "breadth": {
+      "title": "Amplitud, no profundidad",
+      "intro": "Integrantes según la cantidad de personas distintas a las que han ayudado — generosidad repartida, no acumulada.",
+      "empty": "Aún no hay intercambios. El primero iniciará el patrón.",
+      "rowLabel": "{{name}} ha ayudado a {{count}} personas distintas",
+      "moreNote": "{{count}} {{noun}} más han llegado al menos a una persona — si listáramos a toda la comunidad, cada nombre estaría aquí.",
+      "personSingular": "integrante",
+      "personPlural": "integrantes"
+    },
+    "reciprocity": {
+      "title": "Reciprocidad",
+      "intro": "Conexiones que fluyen en ambos sentidos — A ha ayudado a B y B ha ayudado a A.",
+      "rate": "{{percent}}% de las conexiones son recíprocas",
+      "ratio": "{{reciprocal}} de {{total}} pares",
+      "empty": "Aún no hay reciprocidad que medir.",
+      "footnote": "No es una puntuación. Solo una ventana a la forma de la ayuda en la comunidad."
     },
     "rolesThisMonth": {
       "title": "Roles comunitarios obtenidos este mes",

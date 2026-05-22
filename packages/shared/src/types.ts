@@ -108,7 +108,8 @@ export type AchievementType =
   | "regular_4weeks"
   | "bridge_builder"
   | "seed_planter"
-  | "listener";
+  | "listener"
+  | "weaver";
 
 export interface Achievement {
   id: string;

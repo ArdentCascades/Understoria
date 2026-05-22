@@ -22,10 +22,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats } from "@/lib/stats";
+import { computeFlowStats } from "@/lib/flow";
 import { milestoneProgress } from "@/lib/milestones";
 import { CATEGORY_META } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
+import { BreadthBar } from "@/components/BreadthBar";
+import { ReciprocityPulse } from "@/components/ReciprocityPulse";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -34,6 +37,10 @@ export default function DashboardPage() {
   const stats = useMemo(
     () => computeCommunityStats(exchanges, members, posts),
     [exchanges, members, posts],
+  );
+  const flow = useMemo(
+    () => computeFlowStats(exchanges, members),
+    [exchanges, members],
   );
 
   const hoursProgress = milestoneProgress("hours", stats.totalHoursExchanged);
@@ -198,6 +205,13 @@ export default function DashboardPage() {
           </ul>
         )}
       </section>
+
+      <BreadthBar entries={flow.breadth} members={members} />
+
+      <ReciprocityPulse
+        reciprocalPairs={flow.reciprocalPairs}
+        totalPairs={flow.totalPairs}
+      />
 
       {achievementsThisMonth.size > 0 && (
         <section className="card">
