@@ -253,10 +253,28 @@ Two things to know:
 | `LOG_LEVEL` | `info` | One of fatal/error/warn/info/debug/trace |
 | `LOG_REQUEST_PATHS` | `false` | Set to `true` ONLY during triage |
 | `NODE_ID` | `node_local` | Stable identifier for federation |
+| `OPERATOR_NAME` | unset | Operator display name shown on `GET /config`. Omitted entirely if unset |
+| `OPERATOR_FUNDING_NOTE` | unset | Free-form note about hosting funding (e.g. "donated since 2026-01") |
+| `OPERATOR_CONTACT` | unset | Preferred operator contact (Matrix room, email, URL) |
+| `PEER_NODE_URLS` | unset | Comma-separated base URLs of nodes to pull from. Each must be `http://` or `https://`; trailing slashes are stripped |
+| `PEER_PULL_INTERVAL_MS` | `300000` (5 min) | How often the pull worker hits each peer |
 
 The rate limiter uses a non-reversible bucket id (FNV-1a hash of the
 IP, modulo 1024) so client IPs never reach memory or logs even
 transiently. There are no IP fields in any log line by default.
+
+### Federation pull (optional)
+
+If `PEER_NODE_URLS` is set, the node periodically fetches
+`GET /exchanges?since=<last>` from each peer, verifies every
+signature, and stores the new rows. Pulled rows keep their original
+`nodeId` — federation is replication of a signed ledger, not
+re-attribution. State (last pulled, last success, last error,
+count) is visible via the public `GET /peers` endpoint. Peering is
+unilateral: configuring peer B does not require B to configure you
+back. Today, peer config is operator-managed via env vars; Agent 15
+on the roadmap (federation governance) will replace this with
+signed federation agreements.
 
 ### Reverse proxy
 

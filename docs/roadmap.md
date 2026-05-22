@@ -32,7 +32,7 @@ a maintenance owner.
 |---|-------|--------|------|
 | 1 | Core PWA | shipped | Board, exchange flow, credits, dashboard, achievements, profile, PWA shell |
 | 2 | Crypto & Identity | partial | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. **Pending:** E2E messaging (task 5) |
-| 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror. **Pending:** pull loop, posts/vouches/invites endpoints |
+| 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, **federation pull loop** (server-to-server), `GET /peers`. **Pending:** posts/vouches/invites endpoints, PWA-side surfacing of cross-node exchanges |
 | 4 | Security & Opsec | partial | Threat model, opsec guide, panic button, anti-gaming safeguards. **Pending:** ongoing per-PR review |
 | 5 | Governance & Coop | partial | Code of Conduct, GOVERNANCE.md, trademark policy |
 | 6 | (reserved) | — | — |

@@ -20,14 +20,42 @@
  */
 import { readConfigFromEnv } from "./config.js";
 import { buildServer } from "./server.js";
+import {
+  createExchangeStore,
+  createPeerPullStore,
+} from "./db.js";
+import { startPeerPullWorker } from "./peerPull.js";
 
 async function main(): Promise<void> {
   const config = readConfigFromEnv();
-  const { app } = await buildServer({ config });
+  const { app, database } = await buildServer({ config });
+
+  // Start the federation pull worker after the server is built so it
+  // shares the same database. Without configured peers this is a
+  // no-op and unref'd timers won't keep the process alive on their own.
+  const worker = startPeerPullWorker({
+    peerUrls: config.peerNodeUrls,
+    intervalMs: config.peerPullIntervalMs,
+    store: createExchangeStore(database),
+    pullStore: createPeerPullStore(database),
+    onError: (peerUrl, err) =>
+      app.log.warn({ peerUrl, err }, "peer pull failed"),
+    onPull: (result) =>
+      app.log.info(
+        {
+          peerUrl: result.peerUrl,
+          insertedCount: result.insertedCount,
+          duplicateCount: result.duplicateCount,
+          rejectedCount: result.rejectedCount,
+        },
+        "peer pull completed",
+      ),
+  });
 
   const stop = async (signal: string) => {
     app.log.info(`received ${signal}, closing`);
     try {
+      worker.stop();
       await app.close();
     } catch (err) {
       app.log.error({ err }, "error during close");

@@ -23,10 +23,15 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
-import { createExchangeStore, openDatabase } from "./db.js";
+import {
+  createExchangeStore,
+  createPeerPullStore,
+  openDatabase,
+} from "./db.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerExchangeRoutes } from "./routes/exchanges.js";
 import { registerConfigRoutes } from "./routes/config.js";
+import { registerPeersRoutes } from "./routes/peers.js";
 
 export interface BuildOptions {
   config: Config;
@@ -125,10 +130,15 @@ export async function buildServer({
 
   const db = database ?? openDatabase(config.databasePath);
   const store = createExchangeStore(db);
+  const pullStore = createPeerPullStore(db);
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });
   await registerConfigRoutes(app, { config });
+  await registerPeersRoutes(app, {
+    pullStore,
+    configuredPeers: config.peerNodeUrls,
+  });
 
   return { app, database: db };
 }
