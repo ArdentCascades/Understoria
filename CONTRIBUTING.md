@@ -17,9 +17,13 @@ we review carefully and value small, focused PRs over large ones.
    encryption, leaderboards, external services) are out of scope for
    the project regardless of code quality; a quick issue saves you
    from writing code that can't merge.
-3. Check that your idea fits one of the nine agent workstreams
-   described in the project plan. Work outside those agents is fine,
-   but name it clearly so reviewers know what they're looking at.
+3. Check that your idea fits one of the agent workstreams in
+   [`docs/roadmap.md`](docs/roadmap.md). Work outside those agents is
+   fine, but name it clearly so reviewers know what they're looking at.
+4. Skim the [Failure modes](docs/roadmap.md#failure-modes-to-watch-for)
+   section of the roadmap. Reviewers will cite items from it by name
+   (e.g. "this is a parallel-mini-implementation," "default-off
+   blind spot"). Pre-empting those notes saves a review round.
 
 ## Development setup
 

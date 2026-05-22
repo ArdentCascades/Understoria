@@ -71,7 +71,7 @@ user's own.
 | `vouch.ts` | Signed vouches, `trustStatusWithInvites` (composes vouches + redeemed invites) |
 | `timebank.ts` | `balanceFor`, `transactionHistory` — event-sourced credit logic |
 | `achievements.ts` | `evaluateAchievements`, `diffAchievements` — pure from an exchange log |
-| `safeguards.ts` | `assertWithinDailyLimit`, `evaluateSafeguards` (anti-gaming) |
+| `safeguards.ts` | `assertWithinDailyLimit`, `evaluateSafeguards` (anti-gaming). The thresholds here are currently module-level constants; Phase 5 / Agent 11 moves them to per-node config — see [`docs/roadmap.md`](roadmap.md) |
 | `panic.ts` | `softPurge`, `hardPurge` (Agent 4 emergency tooling) |
 | `milestones.ts` | Threshold table + progress calculation |
 | `stats.ts` | Community-level metrics from the exchange log |
@@ -171,15 +171,24 @@ Adding a test:
 
 ## 6. Extending the data model
 
-1. Add the type to `src/types/index.ts`.
+1. Add the type to `packages/shared/src/types.ts` so the server and
+   PWA share one source of truth. `apps/web/src/types/index.ts` is a
+   re-export shim — don't add types there.
 2. Add a new Dexie version in `database.ts` (never modify an
-   existing version).
-3. Add an action in `db/actions.ts` — never write to a table from a
+   existing version). If existing rows need new fields populated,
+   include a Dexie `upgrade()` callback that backfills defaults —
+   even for array-typed fields (`undefined` is not `[]`).
+3. **Coordinate Dexie version numbers between parallel branches.**
+   The next free version is reserved by the first PR to land; a
+   second PR targeting the same version must rebase onto the next.
+   See [Failure modes — data model & migrations](roadmap.md#data-model--migrations)
+   in the roadmap.
+4. Add an action in `db/actions.ts` — never write to a table from a
    component.
-4. If the change is security-sensitive (signatures, trust,
+5. If the change is security-sensitive (signatures, trust,
    balances), add it to the canonical payload function and write a
    verification test. Also update the Threat Model.
-5. Expose via `AppContext` if pages need reactive access.
+6. Expose via `AppContext` if pages need reactive access.
 
 ## 7. Federation readiness
 
