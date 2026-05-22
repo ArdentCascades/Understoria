@@ -18,27 +18,34 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, FlagReason } from "@/types";
+import type { Exchange, FlagReason, NodeConfig } from "@/types";
+import { DEFAULT_NODE_CONFIG } from "@/types";
 
 /**
- * Anti-gaming safeguards — Agent 6 task 6.
+ * Anti-gaming safeguards.
  *
- * The plan explicitly says: "Community discussion if patterns emerge,
- * not automated punishment." So these safeguards fall into two tiers:
+ * Two tiers, per the plan ("Community discussion if patterns emerge,
+ * not automated punishment"):
  *
- * - Tier 1 (hard stop): a daily exchange limit per helper. This is the
- *   one genuinely punitive rule and it's configurable per-node.
+ * - Tier 1 (hard stop): a daily exchange limit per helper. The one
+ *   genuinely punitive rule.
  * - Tier 2 (soft flag): mark suspicious patterns for community review.
  *   No credits are withheld; no member is muted; the flag just surfaces
- *   in moderation workflows (Agent 5).
+ *   in moderation workflows.
+ *
+ * Thresholds come from `NodeConfig` (Agent 11). Defaults live in
+ * `DEFAULT_NODE_CONFIG` in `packages/shared/src/types.ts`. Both
+ * functions accept an optional config so call sites that haven't
+ * loaded it yet (initial render, tests) behave identically to the
+ * pre-Agent-11 PWA.
  */
 
-export const DEFAULT_DAILY_HELPER_LIMIT = 3;
-const SHORT_EXCHANGE_HOURS = 0.25;
 const RECIPROCAL_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
-const RECIPROCAL_PAIR_THRESHOLD = 3;
-
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+// Re-exported for callers that compared against a constant directly
+// (mostly tests). New code should read from NodeConfig.
+export const DEFAULT_DAILY_HELPER_LIMIT = DEFAULT_NODE_CONFIG.dailyHelperLimit;
 
 export class DailyLimitExceededError extends Error {
   readonly code = "DAILY_LIMIT_EXCEEDED";
@@ -58,8 +65,9 @@ export function assertWithinDailyLimit(
   helperKey: string,
   existingExchanges: readonly Exchange[],
   now: number,
-  limit = DEFAULT_DAILY_HELPER_LIMIT,
+  config: NodeConfig = DEFAULT_NODE_CONFIG,
 ): void {
+  const limit = config.dailyHelperLimit;
   const dayStart = Math.floor(now / MS_PER_DAY) * MS_PER_DAY;
   const count = existingExchanges.filter(
     (x) =>
@@ -89,8 +97,9 @@ export function evaluateSafeguards(
     completedAt: number;
   },
   existingExchanges: readonly Exchange[],
+  config: NodeConfig = DEFAULT_NODE_CONFIG,
 ): SafeguardEvaluation {
-  if (pendingExchange.hoursExchanged < SHORT_EXCHANGE_HOURS) {
+  if (pendingExchange.hoursExchanged < config.shortExchangeHours) {
     return { flaggedForReview: true, flagReason: "short_duration" };
   }
 
@@ -103,7 +112,7 @@ export function evaluateSafeguards(
         (x.helperKey === pendingExchange.helpedKey &&
           x.helpedKey === pendingExchange.helperKey)),
   ).length;
-  if (reciprocalCount + 1 >= RECIPROCAL_PAIR_THRESHOLD) {
+  if (reciprocalCount + 1 >= config.reciprocalPairThreshold) {
     return { flaggedForReview: true, flagReason: "reciprocal_pattern" };
   }
 

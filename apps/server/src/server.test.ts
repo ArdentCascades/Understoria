@@ -244,3 +244,47 @@ describe("Persistence sanity", () => {
     expect(createExchangeStore(db).count()).toBe(1);
   });
 });
+
+describe("GET /config", () => {
+  it("returns an empty object when no operator info is configured", async () => {
+    const res = await app.inject({ method: "GET", url: "/config" });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({});
+  });
+});
+
+describe("GET /config with operator info", () => {
+  let withOperator: FastifyInstance;
+  let withOperatorDb: DatabaseType;
+
+  beforeEach(async () => {
+    withOperatorDb = openDatabase(":memory:");
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      NODE_ID: "node_test",
+      OPERATOR_NAME: "Marcus",
+      OPERATOR_FUNDING_NOTE: "Hosting donated since 2026-01",
+      OPERATOR_CONTACT: "#aid:matrix.example",
+    } as NodeJS.ProcessEnv);
+    const built = await buildServer({ config, database: withOperatorDb });
+    withOperator = built.app;
+    await withOperator.ready();
+  });
+
+  afterEach(async () => {
+    await withOperator.close();
+    withOperatorDb.close();
+  });
+
+  it("returns the operator block when env vars are set", async () => {
+    const res = await withOperator.inject({ method: "GET", url: "/config" });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({
+      operator: {
+        name: "Marcus",
+        fundingNote: "Hosting donated since 2026-01",
+        contact: "#aid:matrix.example",
+      },
+    });
+  });
+});

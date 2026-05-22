@@ -59,13 +59,13 @@ They are deliberately *not* a single "Governance" agent — the surfaces
 (local config, moderation, proposals, disputes, federation) have
 distinct trust models and shouldn't share code or UI prematurely.
 
-| # | Agent | Ostrom principle(s) | Owns |
-|---|-------|---------------------|------|
-| 11 | Node Configuration & Local Rules | 2 (rules fit local conditions) | Per-node config table replacing the hardcoded constants in `safeguards.ts`; operator-facing config UI. **Folds in:** operator-info / hosting transparency block from the original Agent 21 |
-| 12 | Moderation & Graduated Sanctions | 4, 5 (monitoring, graduated sanctions) | Moderation queue, action log, escalation policy. Requires real safeguard-flag telemetry first |
-| 13 | In-App Governance & Proposals | 3 (collective-choice arenas) | Proposal lifecycle, voting / consensus signalling, decision archive. **Folds in:** reversibility tiers + impact reflection + welfare flag (the structural pieces of the original Agent 20) |
-| 14 | Dispute Resolution & Mediation | 6 (low-cost conflict resolution) | Two-party dispute lifecycle, mediator assignment, outcome log |
-| 15 | Federation Governance & Nested Boundaries | 1, 8 (clear boundaries, nested enterprises) | Per-peer federation agreements, negotiable vs. protocol-invariant policy split |
+| # | Agent | Ostrom principle(s) | Status | Owns |
+|---|-------|---------------------|--------|------|
+| 11 | Node Configuration & Local Rules | 2 (rules fit local conditions) | shipped | Per-node `NodeConfig` table (Dexie v6) replacing the hardcoded safeguard constants in `lib/safeguards.ts`; "Community settings" section on Profile with validation, save, reset, and a bootstrap-mode note. Server-side `GET /config` returns the folded-in operator / hosting transparency block (`OPERATOR_*` env vars; empty object when unset) |
+| 12 | Moderation & Graduated Sanctions | 4, 5 (monitoring, graduated sanctions) | not started | Moderation queue, action log, escalation policy. Requires real safeguard-flag telemetry first |
+| 13 | In-App Governance & Proposals | 3 (collective-choice arenas) | not started | Proposal lifecycle, voting / consensus signalling, decision archive. **Folds in:** reversibility tiers + impact reflection + welfare flag (the structural pieces of the original Agent 20) |
+| 14 | Dispute Resolution & Mediation | 6 (low-cost conflict resolution) | not started | Two-party dispute lifecycle, mediator assignment, outcome log |
+| 15 | Federation Governance & Nested Boundaries | 1, 8 (clear boundaries, nested enterprises) | not started | Per-peer federation agreements, negotiable vs. protocol-invariant policy split |
 
 ### Why Agent 13 and Agent 14 ship as one surface
 

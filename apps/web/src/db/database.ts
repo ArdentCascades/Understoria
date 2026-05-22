@@ -23,12 +23,24 @@ import type {
   Achievement,
   Exchange,
   Member,
+  NodeConfig,
   Post,
   Project,
   ProjectActivity,
   ProjectTask,
 } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
+
+/**
+ * Persisted node configuration row. Single-row table keyed by `nodeId`
+ * — each node has exactly one config. Holds the safeguard thresholds
+ * (and, in later agents, any other per-node settings that today live
+ * as constants in the codebase). Mutated only through `db/nodeConfig.ts`
+ * helpers, never directly from a component.
+ */
+export interface NodeConfigRow extends NodeConfig {
+  nodeId: string;
+}
 
 export interface AppSetting {
   key: string;
@@ -112,6 +124,7 @@ export class UnderstoriaDB extends Dexie {
   projects!: Table<Project, string>;
   projectTasks!: Table<ProjectTask, string>;
   projectActivity!: Table<ProjectActivity, string>;
+  nodeConfig!: Table<NodeConfigRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -142,6 +155,11 @@ export class UnderstoriaDB extends Dexie {
         "id, projectId, status, assignedTo, createdAt, [projectId+status]",
       projectActivity:
         "id, projectId, type, actorKey, createdAt, [projectId+createdAt]",
+    });
+    // Version 6 — Agent 11: per-node configuration replaces the
+    // hardcoded safeguard constants in lib/safeguards.ts.
+    this.version(6).stores({
+      nodeConfig: "nodeId",
     });
   }
 }

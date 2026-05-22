@@ -26,6 +26,7 @@ import type { Config } from "./config.js";
 import { createExchangeStore, openDatabase } from "./db.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerExchangeRoutes } from "./routes/exchanges.js";
+import { registerConfigRoutes } from "./routes/config.js";
 
 export interface BuildOptions {
   config: Config;
@@ -127,6 +128,7 @@ export async function buildServer({
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });
+  await registerConfigRoutes(app, { config });
 
   return { app, database: db };
 }

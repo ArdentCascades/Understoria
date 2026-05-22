@@ -97,6 +97,52 @@ export interface Exchange {
   flagReason?: FlagReason;
 }
 
+/**
+ * Per-node configuration — replaces the hardcoded safeguard constants
+ * in the PWA so a community can tune them to local conditions
+ * (Ostrom principle 2: rules fit local conditions).
+ *
+ * Defaults match what the PWA shipped with before this type existed,
+ * so a community that never touches their config gets the exact same
+ * behaviour as before.
+ */
+export interface NodeConfig {
+  /** Maximum exchanges a single helper can complete in a 24-hour window.
+   *  Hard stop — exceeding this is the one genuinely punitive rule. */
+  dailyHelperLimit: number;
+  /** Exchanges shorter than this (in hours) get an advisory flag for
+   *  community review. Not blocked, not punished — just surfaced. */
+  shortExchangeHours: number;
+  /** When the same (helper, helped) pair completes this many exchanges
+   *  in 30 days, the latest one gets a reciprocal-pattern advisory flag. */
+  reciprocalPairThreshold: number;
+}
+
+export const DEFAULT_NODE_CONFIG: NodeConfig = {
+  dailyHelperLimit: 3,
+  shortExchangeHours: 0.25,
+  reciprocalPairThreshold: 3,
+};
+
+/**
+ * Public-facing operator / hosting info for a community node. Set by the
+ * operator at deploy time via environment variables; served from
+ * `GET /config` so members and peer nodes can see who runs the node and
+ * how it's sustained. Folded into Agent 11 from the original "Beyond
+ * Ostrom" Agent 21 (infrastructure transparency).
+ *
+ * Defaults to `null` — a node operator who hasn't configured any of this
+ * is treated as "unspecified," not as a default.
+ */
+export interface NodeOperatorInfo {
+  /** Display name(s) of the operator(s). */
+  name: string;
+  /** Free-form note about hosting — donated, dues-funded, grant, etc. */
+  fundingNote: string;
+  /** Operator's preferred contact channel — Matrix room, email, URL. */
+  contact: string;
+}
+
 export type FlagReason =
   | "short_duration"
   | "reciprocal_pattern"
