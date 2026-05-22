@@ -38,7 +38,13 @@ If you have time for **a book**, pick one:
 - Black Panther Party survival programs (free breakfast, free
   clinics, sickle-cell screening).
 - Young Lords' community health programs.
-- Zapatista caracoles and community self-governance.
+- Zapatista *caracoles* and the principle of *mandar obedeciendo*
+  ("to lead by obeying"). The Zapatistas' own *Escuelita* (little
+  school) materials, published in 2013, are the most direct source
+  in their own voice. Raúl Zibechi's writing on Latin American
+  social movements — including *Dispersing Power* (2010) — provides
+  outside synthesis. Phase 5 Agent 13's recall and rotation
+  mechanics draw on this tradition.
 - Disability justice frameworks — Mia Mingus, Leah Lakshmi
   Piepzna-Samarasinha — on interdependence as a precondition,
   not a fallback.
@@ -55,6 +61,28 @@ If you have time for **a book**, pick one:
   ways that devalue caregiving and community work. Understoria
   inherits this directly.
 - TimeBanks USA's practical guides to operating a time bank.
+
+### Gift economies
+
+A different lineage than timebanking, but feeding the same intuition:
+that value can circulate without being priced.
+
+- Marcel Mauss, *Essai sur le don* (1925, translated as *The Gift*).
+  The foundational anthropological text. Mauss argues the gift
+  carries an obligation to receive and to give in turn — it builds
+  relationship, where the market dissolves it.
+- Lewis Hyde, *The Gift: Imagination and the Erotic Life of Property*
+  (1983). A book about how gift-circulation works in artistic
+  communities and beyond. Slow, beautiful, and worth the time.
+- Pacific Northwest potlatch traditions (Kwakwaka'wakw, Haida,
+  Tlingit, and others) — public ceremonies where status derives
+  from giving, not accumulating. When you cite these, look for
+  contemporary Indigenous scholars writing in their own voice
+  rather than 19th-century anthropological accounts; the
+  ceremonies were criminalized by Canadian and U.S. governments
+  precisely because they constituted a working alternative to
+  market economics. Phase 5 Agent 18's Dashboard additions
+  (breadth, reciprocity) draw on this tradition.
 
 ### Labor organizing
 
@@ -74,6 +102,59 @@ If you have time for **a book**, pick one:
   structure is happening whether you name it or not.
 - Sociocracy and modified consensus literature — Sociocracy for
   All, the Seeds for Change guides.
+- Elinor Ostrom, *Governing the Commons: The Evolution of
+  Institutions for Collective Action* (1990). The eight design
+  principles that Phase 5 of the roadmap is built around. Dense
+  but readable; the Hardin-rebuttal framing in the early chapters
+  alone is worth the read.
+- The Mondragón cooperative complex (Basque Country, Spain,
+  founded 1956). Often cited as the largest worker-cooperative
+  network in the world. Read both the Mondragón Corporation's own
+  publications *and* Sharryn Kasmir's *The Myth of Mondragón*
+  (1996), a critical ethnography that documents the tensions
+  between cooperative ideals and the pressures of competing in a
+  capitalist market. Phase 5's discussion of balance caps and
+  collective surplus draws on this tradition; Kasmir's critique
+  is the reason it isn't on the immediate roadmap.
+- The Haudenosaunee (Iroquois) Confederacy and the Great Law of
+  Peace. The Confederacy's own governance documents are the
+  primary source; for outside synthesis, look to Barbara Alice
+  Mann's scholarship on Haudenosaunee political tradition. The
+  relationship between the Great Law and the U.S. Constitution is
+  contested and worth reading the debate on rather than accepting
+  any single account. Phase 5 Agent 13's reversibility tiers and
+  structured impact reflection draw on the Haudenosaunee
+  principle of evaluating decisions across multiple generations.
+- Kali Akuno and Ajamu Nangwaya (eds.), *Jackson Rising: The
+  Struggle for Economic Democracy and Black Self-Determination
+  in Jackson, Mississippi* (Daraja Press, 2017). A contemporary
+  working example of solidarity economy built on Black
+  self-determination — cooperative businesses, community land
+  trusts, participatory governance. The "Cooperation Jackson"
+  project shows what a federated network of cooperatives looks
+  like in practice. The roadmap's federation-mutual-aid-fund
+  thinking (deferred) draws on this model.
+
+### Democratic literacy as infrastructure
+
+The premise that political participation requires literacy and
+political education as preconditions, not afterthoughts.
+
+- Amartya Sen's writing on Kerala, especially in *Development as
+  Freedom* (1999). Sen treats Kerala's investment in literacy,
+  health, and women's education as the substrate that makes
+  democratic participation real rather than nominal.
+- The Kerala Sastra Sahitya Parishad (KSSP, "People's Science
+  Movement"), founded 1962. A mass-based science-and-literacy
+  movement that has been central to Kerala's social transformation.
+  Their model — popular education as collective practice, not
+  individual credentialing — is the closest historical analog to
+  what Phase 5 Agent 16 (in-app onboarding and political
+  literacy) is trying to do at small scale.
+- Critiques from dalit and adivasi perspectives are essential
+  here. The "Kerala model" has real limits, especially around
+  caste and Indigenous land rights; reading the celebrations
+  without the critiques produces a flattened picture.
 
 ### Digital commons and privacy
 
@@ -129,6 +210,25 @@ If you have time for **a book**, pick one:
     corporation rather than a cooperative, what would be different
     about its features? Write down three.
 
+### On non-Western and Indigenous traditions
+
+11. Mauss and Hyde frame the gift as carrying an obligation — to
+    receive, to give in turn — that the market specifically
+    erases. Where in your community is the gift logic still
+    intact, and where has it been replaced with transactional
+    framing? Does it matter?
+12. The Haudenosaunee principle of evaluating decisions across
+    multiple generations is structurally hard for a project
+    optimized around weekly metrics. Pick a recent decision your
+    community made. How would it look reconsidered with a five-
+    or seven-generation horizon?
+13. The Zapatistas' *mandar obedeciendo* — to lead by obeying —
+    is not a metaphor; it's a structural commitment with
+    consequences for who holds coordinating roles and for how
+    long. Who in your community holds informal coordinating
+    authority? What would it cost to formalize it under
+    *mandar obedeciendo*?
+
 ## Workshop outline (90 minutes)
 
 For communities onboarding Understoria:
@@ -167,3 +267,13 @@ Indigenous, disability-justice, and feminist frameworks have been
 doing mutual aid theory for much longer than it's been called that
 in English-language academia. When you add to this list, center
 those voices where you can.
+
+The Phase 5 additions to this list (gift economies, Haudenosaunee
+governance, Zapatista autonomy, Mondragón cooperatives, Kerala's
+democratic literacy work, and Cooperation Jackson) came from
+exactly that direction — the structural ideas in Phase 5 are
+drawn from these traditions, and the readings here are an attempt
+to credit the lineages rather than launder them through Western
+political theory. If your community includes members from any of
+these traditions, their knowledge belongs above any written
+summary, including this one.
