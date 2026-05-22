@@ -285,6 +285,165 @@ a prior decision (see "Deferred / gated" above).
 | Whether achievement progress should be private-by-default | not yet filed | Agent 1 maintenance |
 | Whether the federation protocol should be ActivityPub-shaped or bespoke | not yet filed | Agent 3, Agent 15 |
 
+## Failure modes to watch for
+
+The planning work so far has surfaced a set of recurring antipatterns
+worth capturing explicitly. Each one is named so it can be cited in
+review (e.g. "this is a parallel-mini-implementation"); each has a
+concrete check that catches it before it ships.
+
+### Planning & scoping
+
+- **Plan growth outpacing shipping.** Every accepted proposal adds
+  agents to the queue; what closes them is code landing on `main`.
+  *Check:* before accepting a new agent, identify which existing
+  agent it blocks or which currently-open agent it fits inside.
+  Prefer "fold into" over "add to queue."
+
+- **Parallel mini-implementation.** Building a stub of a mechanism
+  (mini-vote, two-member co-sign, ad-hoc recall) "to ship now, merge
+  with Agent 13 later." The merge cost is real and usually larger
+  than waiting. *Check:* if a proposal includes the phrase "if
+  Agent X isn't done, use a simpler flow," that's the antipattern.
+  Either wait for Agent X or rescope the proposal to not need it.
+
+- **Bolting structural decisions onto already-shipped agents.**
+  Reversibility tiers tacked onto Agent 13 after it ships means
+  rewriting the state machine. *Check:* if a change modifies a core
+  type's required fields or a state-machine transition, it belongs
+  in the agent that owns that type — not in a follow-up agent.
+
+- **Bundling unrelated work under one agent.** Original Agent 21
+  bundled small infra-transparency (low risk, no deps) with a large
+  federation fund (high risk, many deps). Hides the effort
+  asymmetry and blocks the easy piece on the hard one. *Check:* an
+  agent should have one user-facing surface and one trust model.
+  If it has two, split it.
+
+- **Treating governance norms as code design choices.** The
+  moderator welfare flag changes who has standing authority to
+  delay decisions — that's a `GOVERNANCE.md` amendment, not a
+  feature flag. *Check:* if a feature would change "who can do what
+  to whom," ratify the norm before writing the code.
+
+### Privacy & threat surface
+
+- **New exposure surface without a `docs/threat-model.md` §7
+  entry.** Every feature that exposes who-helps-whom, who-operates-
+  this-node, who-talked-to-whom, or who-flagged-what is a new
+  surface. *Check:* the §7 entry comes *before* the implementation
+  PR, not after.
+
+- **Default-on social-graph rendering.** Agent 18b's force-directed
+  community web is the canonical example. Display names instead of
+  public keys don't help — *structure* is the leak, and a rendered
+  graph is screenshottable. *Check:* social-graph visualisations
+  default off, behind a governance proposal, with an explicit
+  opt-in. Never ship one whose default is "on for everyone."
+
+- **Cross-node consequence transfer.** Sanctions, trust scores, or
+  fund disbursements that travel across federation undermine local
+  autonomy (Ostrom principle 1). *Check:* federation is technical
+  peering, not political union. Consequences travel by reputation,
+  not by protocol.
+
+- **Skipping default-off thinking.** "Could be configured to be
+  private" is not the same as "private by default." *Check:* for
+  every new data exposure, the question to answer is "what does a
+  fresh install show?" — not "what's the most restrictive setting?"
+
+### Data model & migrations
+
+- **Optional-then-required field creep.** "Ship the field as
+  optional in agent A, make it required in agent B." Risky if
+  agent A ships and the optional version ossifies, or if agent B
+  is delayed indefinitely. *Check:* if a field will be required,
+  introduce it as required with a backfill in the same Dexie
+  migration. If it might be required, make that decision before
+  the first agent ships.
+
+- **Dexie migration ordering between parallel branches.** Two
+  agents both targeting "version 9" merge-conflict on the schema.
+  *Check:* the next free Dexie version is *reserved* by the first
+  PR to land. The second PR rebases onto the next version.
+  `docs/roadmap.md` "Migration strategy" tracks the reservation.
+
+- **Function signature changes without exhaustive call-site
+  updates.** `balanceFor()` gaining two new parameters touches
+  every page that displays a balance. *Check:* `grep -rn` the
+  function name before merging; CI's typecheck catches most but
+  not all (default parameters can mask missed updates).
+
+- **Invariants broken by new record types.** Correction exchanges
+  with negative hours break the `hoursExchanged > 0` assumption in
+  `stats.ts` and `achievements.ts`. *Check:* introduce a
+  discriminator (`correction: boolean`) and update every consumer
+  in the same PR, not "in a follow-up."
+
+- **New nullable fields on existing rows.** Adding
+  `coOrganizerKeys` to `Project` leaves existing rows with
+  `undefined`. *Check:* every schema-extending migration includes
+  a Dexie `upgrade()` callback that backfills defaults on existing
+  rows — even when the field is array-typed.
+
+### Governance & values
+
+- **Reputation-score creep.** Any feature that ranks members ("who
+  has helped the most people," "who has the highest streak") is
+  one design discussion away from a leaderboard. *Check:* the
+  Phase 5 non-goals list `Reputation scores or member ratings` —
+  cite it in review. The breadth bar (Agent 18a) is on the right
+  side of this line because it rewards distribution, not volume,
+  and shows reach without scoring.
+
+- **Mandatory anything.** Mandatory mediation, mandatory governance
+  participation, mandatory federation. *Check:* low-cost exit
+  (Ostrom 1) must remain real. A member should always be able to
+  decline the system and take their keys with them.
+
+- **Veto mechanisms with soft framing.** "It doesn't block, it just
+  delays until you respond" is still a power asymmetry. *Check:*
+  if the mechanism gives a specific role standing authority to
+  affect a process the rest of the community is in, it's a
+  governance change. See "treating governance norms as code design
+  choices" above.
+
+- **Adversarial-actor blind spots.** The threat model contemplates
+  surveillance, retaliation, infrastructure compromise. It does
+  *not* yet contemplate adversarial federation actors draining a
+  mutual aid fund or capturing a moderation queue. *Check:* every
+  new shared resource (federation fund, mutual moderation,
+  cross-node reputation) needs a §3 adversary entry before the
+  implementation lands.
+
+### Operational
+
+- **i18n debt compounding.** Every new agent adds locale keys. The
+  Spanish translation is already flagged for native-speaker review;
+  shipping more keys before that review compounds the debt.
+  *Check:* before any Phase 5 agent that adds >20 locale keys, a
+  Spanish review pass on existing keys lands first.
+
+- **Building enforcement on untested signal.** Graduated sanctions
+  on top of safeguard flags that have no false-positive
+  measurement risks codifying punishment for noise. *Check:*
+  Agent 12 ships the queue first, gathers data from a real
+  deployment, then designs the sanction ladder against measured
+  rates.
+
+- **Performance assumptions from pilot scale.** O(members ×
+  exchanges) is fine at 200 members and 10k exchanges; not fine at
+  10k members and 1M exchanges. *Check:* new computations on the
+  exchange log declare their complexity in a comment and a test.
+  Cache to the server only when the test demonstrates the need.
+
+- **Federation features without federation experience.** Per-peer
+  agreements, cross-node disputes, and cross-node funds all
+  presuppose at least one peering operating in practice.
+  *Check:* anything that touches `peerNodes` waits until Agent 3's
+  pull loop has run between two distinct hosts for at least one
+  week.
+
 ## Political-education additions (docs-only)
 
 The "Beyond Ostrom" plan proposed six reading-list additions to
