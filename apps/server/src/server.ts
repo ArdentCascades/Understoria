@@ -26,12 +26,14 @@ import type { Config } from "./config.js";
 import {
   createExchangeStore,
   createPeerPullStore,
+  createVouchStore,
   openDatabase,
 } from "./db.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerExchangeRoutes } from "./routes/exchanges.js";
 import { registerConfigRoutes } from "./routes/config.js";
 import { registerPeersRoutes } from "./routes/peers.js";
+import { registerVouchRoutes } from "./routes/vouches.js";
 
 export interface BuildOptions {
   config: Config;
@@ -130,10 +132,12 @@ export async function buildServer({
 
   const db = database ?? openDatabase(config.databasePath);
   const store = createExchangeStore(db);
+  const vouchStore = createVouchStore(db);
   const pullStore = createPeerPullStore(db);
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });
+  await registerVouchRoutes(app, { store: vouchStore });
   await registerConfigRoutes(app, { config });
   await registerPeersRoutes(app, {
     pullStore,

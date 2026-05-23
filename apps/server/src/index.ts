@@ -23,6 +23,7 @@ import { buildServer } from "./server.js";
 import {
   createExchangeStore,
   createPeerPullStore,
+  createVouchStore,
 } from "./db.js";
 import { startPeerPullWorker } from "./peerPull.js";
 
@@ -37,6 +38,7 @@ async function main(): Promise<void> {
     peerUrls: config.peerNodeUrls,
     intervalMs: config.peerPullIntervalMs,
     store: createExchangeStore(database),
+    vouchStore: createVouchStore(database),
     pullStore: createPeerPullStore(database),
     onError: (peerUrl, err) =>
       app.log.warn({ peerUrl, err }, "peer pull failed"),
@@ -44,6 +46,7 @@ async function main(): Promise<void> {
       app.log.info(
         {
           peerUrl: result.peerUrl,
+          kind: result.kind,
           insertedCount: result.insertedCount,
           duplicateCount: result.duplicateCount,
           rejectedCount: result.rejectedCount,

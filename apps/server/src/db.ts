@@ -20,7 +20,11 @@
  */
 import Database from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";
-import type { Exchange, FlagReason } from "@understoria/shared/types";
+import type {
+  Exchange,
+  FlagReason,
+  SignedVouch,
+} from "@understoria/shared/types";
 
 /**
  * SQLite layer. Synchronous (better-sqlite3) by design — every endpoint
@@ -44,27 +48,57 @@ export interface ExchangeStore {
 }
 
 /**
+ * Storage for signed vouches. Parallels ExchangeStore exactly — the
+ * pull worker treats both as `kind: "exchange" | "vouch"` slots over
+ * a common store interface, with the only kind-specific bit being
+ * the cursor field (`completedAt` for exchanges, `createdAt` for
+ * vouches).
+ */
+export interface VouchStore {
+  insert(vouch: SignedVouch): void;
+  list(opts?: { since?: number; limit?: number }): SignedVouch[];
+  count(): number;
+  has(id: string): boolean;
+}
+
+/**
  * Per-peer pull state. Persisted so a server restart resumes pulling
  * from where it left off rather than re-fetching every record (which
  * would still be correct via `store.has(id)` dedup, but wasteful at
  * scale).
+ */
+/**
+ * Per-peer pull cursor. Tracks the high-water mark for *each* record
+ * kind we pull from a peer, so on restart the worker resumes from
+ * where it left off rather than re-fetching the whole ledger.
+ *
+ * Cursor semantics:
+ * - `lastCompletedAt` — used as `since=` on the next `/exchanges` pull
+ * - `lastVouchCreatedAt` — used as `since=` on the next `/vouches` pull
+ *
+ * Both default to NULL ("never pulled this kind"), which the worker
+ * interprets as "request everything" on first run.
  */
 export interface PeerPullStateRow {
   peerUrl: string;
   lastPulledAt: number | null;
   lastSuccessAt: number | null;
   lastCompletedAt: number | null;
+  lastVouchCreatedAt: number | null;
   lastError: string | null;
   lastPulledCount: number;
 }
+
+export type PullRecordKind = "exchange" | "vouch";
 
 export interface PeerPullStore {
   get(peerUrl: string): PeerPullStateRow | null;
   list(): PeerPullStateRow[];
   recordSuccess(opts: {
     peerUrl: string;
+    kind: PullRecordKind;
     at: number;
-    latestCompletedAt: number | null;
+    latestSeenAt: number | null;
     pulledCount: number;
   }): void;
   recordFailure(opts: { peerUrl: string; at: number; error: string }): void;
@@ -136,6 +170,33 @@ function migrate(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '2')",
     ).run();
   }
+
+  // Schema v3 — vouches federation. New `vouches` table mirrors the
+  // exchanges table's shape and indexes. The `peer_pull_state` table
+  // grows a `last_vouch_created_at` column so the per-kind cursors
+  // share a single row per peer (denormalized but simple — adding a
+  // third or fourth record kind later is just another column).
+  if (current < 3) {
+    db.exec(`
+      CREATE TABLE vouches (
+        id TEXT PRIMARY KEY,
+        voucher_key TEXT NOT NULL,
+        vouchee_key TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        kind TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX vouches_created_at_idx ON vouches (created_at DESC);
+      CREATE INDEX vouches_voucher_idx ON vouches (voucher_key);
+      CREATE INDEX vouches_vouchee_idx ON vouches (vouchee_key);
+
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_vouch_created_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '3')",
+    ).run();
+  }
 }
 
 export function createExchangeStore(db: DatabaseType): ExchangeStore {
@@ -201,25 +262,116 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
   };
 }
 
+export function createVouchStore(db: DatabaseType): VouchStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO vouches (
+      id, voucher_key, vouchee_key, created_at, kind, signature
+    ) VALUES (
+      @id, @voucherKey, @voucheeKey, @createdAt, @kind, @signature
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM vouches WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM vouches");
+
+  return {
+    insert(vouch) {
+      insertStmt.run({
+        id: vouch.id,
+        voucherKey: vouch.voucherKey,
+        voucheeKey: vouch.voucheeKey,
+        createdAt: vouch.createdAt,
+        kind: vouch.kind,
+        signature: vouch.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM vouches WHERE created_at > ?
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM vouches
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as VouchRow[]).map(rowToVouch);
+    },
+    count() {
+      const r = countStmt.get() as { n: number };
+      return r.n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+  };
+}
+
+interface VouchRow {
+  id: string;
+  voucher_key: string;
+  vouchee_key: string;
+  created_at: number;
+  kind: string;
+  signature: string;
+}
+
+function rowToVouch(r: VouchRow): SignedVouch {
+  return {
+    id: r.id,
+    voucherKey: r.voucher_key,
+    voucheeKey: r.vouchee_key,
+    createdAt: r.created_at,
+    kind: r.kind as SignedVouch["kind"],
+    signature: r.signature,
+  };
+}
+
 export function createPeerPullStore(db: DatabaseType): PeerPullStore {
   const getStmt = db.prepare("SELECT * FROM peer_pull_state WHERE peer_url = ?");
   const listStmt = db.prepare(
     "SELECT * FROM peer_pull_state ORDER BY peer_url",
   );
-  // Use COALESCE so a success update preserves an existing
-  // last_completed_at when the pull returned no new rows.
-  const successStmt = db.prepare(`
+  // Two parameterized success statements — one per kind. Each
+  // updates the matching cursor column via COALESCE so a pull that
+  // returned no new rows preserves the existing high-water mark.
+  //
+  // Note: success deliberately does NOT clear `last_error`. The two
+  // pulls (exchange + vouch) for the same peer run in parallel each
+  // tick, and clearing `last_error` on success would race with a
+  // concurrent failure update, hiding the failure. The accepted
+  // trade is that `last_error` may hold a stale message after a
+  // peer recovers; operators can read `last_success_at` vs.
+  // `last_pulled_at` to tell whether the most recent attempt
+  // succeeded. Per-kind error columns are a future refinement.
+  const successExchangeStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_success_at, last_completed_at,
-      last_error, last_pulled_count
+      last_pulled_count
     ) VALUES (
-      @peerUrl, @at, @at, @latestCompletedAt, NULL, @pulledCount
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
     )
     ON CONFLICT(peer_url) DO UPDATE SET
       last_pulled_at = @at,
       last_success_at = @at,
-      last_completed_at = COALESCE(@latestCompletedAt, last_completed_at),
-      last_error = NULL,
+      last_completed_at = COALESCE(@latestSeenAt, last_completed_at),
+      last_pulled_count = @pulledCount
+  `);
+  const successVouchStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at, last_vouch_created_at,
+      last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_vouch_created_at = COALESCE(@latestSeenAt, last_vouch_created_at),
       last_pulled_count = @pulledCount
   `);
   const failureStmt = db.prepare(`
@@ -241,8 +393,9 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       const rows = listStmt.all() as PeerPullStateRowSqlite[];
       return rows.map(toState);
     },
-    recordSuccess({ peerUrl, at, latestCompletedAt, pulledCount }) {
-      successStmt.run({ peerUrl, at, latestCompletedAt, pulledCount });
+    recordSuccess({ peerUrl, kind, at, latestSeenAt, pulledCount }) {
+      const stmt = kind === "exchange" ? successExchangeStmt : successVouchStmt;
+      stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
       failureStmt.run({ peerUrl, at, error });
@@ -255,6 +408,7 @@ interface PeerPullStateRowSqlite {
   last_pulled_at: number | null;
   last_success_at: number | null;
   last_completed_at: number | null;
+  last_vouch_created_at: number | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -265,6 +419,7 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
     lastPulledAt: r.last_pulled_at,
     lastSuccessAt: r.last_success_at,
     lastCompletedAt: r.last_completed_at,
+    lastVouchCreatedAt: r.last_vouch_created_at,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };

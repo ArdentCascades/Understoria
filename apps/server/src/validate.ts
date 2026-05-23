@@ -23,13 +23,14 @@ import {
   type Category,
   type Exchange,
   type FlagReason,
+  type SignedVouch,
 } from "@understoria/shared/types";
 
 /**
- * Shape-level validation for an incoming POST /exchanges body. The
- * cryptographic check happens separately via `verifyExchange()` from
- * @understoria/shared/crypto — this guard only ensures we have an object
- * with the right shape before we hand it to the verifier.
+ * Shape-level validation for incoming POST bodies. Cryptographic
+ * checks happen separately via `verifyExchange()` / `verifyVouch()`
+ * from @understoria/shared/crypto — these guards only ensure we have
+ * an object with the right shape before we hand it to the verifier.
  *
  * Returning a typed error rather than throwing keeps the route handler
  * pure and lets the response shape stay structured.
@@ -37,6 +38,65 @@ import {
 export type ParseResult =
   | { ok: true; value: Exchange }
   | { ok: false; error: string };
+
+export type ParseVouchResult =
+  | { ok: true; value: SignedVouch }
+  | { ok: false; error: string };
+
+const VOUCH_KINDS: ReadonlySet<SignedVouch["kind"]> = new Set([
+  "invite",
+  "manual",
+]);
+
+const VOUCH_STRING_FIELDS = [
+  "id",
+  "voucherKey",
+  "voucheeKey",
+  "signature",
+] as const;
+
+export function parseVouch(input: unknown): ParseVouchResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of VOUCH_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (
+    typeof r.kind !== "string" ||
+    !VOUCH_KINDS.has(r.kind as SignedVouch["kind"])
+  ) {
+    return { ok: false, error: "kind must be 'invite' or 'manual'" };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.createdAt as number) > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      voucherKey: r.voucherKey as string,
+      voucheeKey: r.voucheeKey as string,
+      createdAt: r.createdAt as number,
+      kind: r.kind as SignedVouch["kind"],
+      signature: r.signature as string,
+    },
+  };
+}
 
 const FLAG_REASONS: ReadonlySet<FlagReason> = new Set([
   "short_duration",
