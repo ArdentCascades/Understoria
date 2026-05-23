@@ -32,6 +32,12 @@
     "restore": "Continue draft",
     "discard": "Start fresh"
   },
+  "profileNudge": {
+    "label": "Profile completion",
+    "message": "Members can find you for in-person help if you add a neighborhood or a skill or two. Optional, but it helps.",
+    "cta": "Add some details",
+    "dismiss": "Not now"
+  },
   "nav": {
     "board": "Board",
     "dashboard": "Dashboard",

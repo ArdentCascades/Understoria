@@ -32,6 +32,12 @@
     "restore": "Continuar borrador",
     "discard": "Empezar de nuevo"
   },
+  "profileNudge": {
+    "label": "Completar perfil",
+    "message": "Otras personas pueden encontrarte para ayudar en persona si agregas un vecindario o alguna habilidad. Opcional, pero ayuda.",
+    "cta": "Agregar detalles",
+    "dismiss": "Ahora no"
+  },
   "nav": {
     "board": "Tablero",
     "dashboard": "Panel",

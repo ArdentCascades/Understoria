@@ -215,6 +215,11 @@ export const SETTING_KEYS = {
   communityNodeLastSuccess: "communityNodeLastSuccess",
   /** Last error message from a submission attempt. Display-only. */
   communityNodeLastError: "communityNodeLastError",
+  /** "1" once the member has dismissed the profile-completion nudge.
+   *  The nudge naturally stops showing once the profile is filled
+   *  out, so this only matters for members who actively want to
+   *  ignore it forever. */
+  profileNudgeDismissed: "profileNudgeDismissed",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
