@@ -14,17 +14,26 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { markOnboarded } from "@/db/onboarding";
+import { updateMemberProfile } from "@/db/actions";
 import { useApp } from "@/state/AppContext";
 
-interface ScreenSpec {
-  key: string;
-  icon: string;
-  titleKey: string;
-  bodyKeys: readonly string[];
-}
+// Per-step shape. `concept` screens are static intros; the
+// `profileSetup` step is interactive — same chrome, form fields
+// in place of body paragraphs. New step kinds (a future "tour
+// highlight" step, say) plug in here.
+type Step =
+  | {
+      kind: "concept";
+      key: string;
+      icon: string;
+      titleKey: string;
+      bodyKeys: readonly string[];
+    }
+  | { kind: "profileSetup"; key: "profileSetup"; icon: string };
 
-const SCREENS: readonly ScreenSpec[] = [
+const STEPS: readonly Step[] = [
   {
+    kind: "concept",
     key: "timebank",
     icon: "\u{23F3}",
     titleKey: "welcome.screens.timebank.title",
@@ -34,6 +43,7 @@ const SCREENS: readonly ScreenSpec[] = [
     ],
   },
   {
+    kind: "concept",
     key: "credit",
     icon: "\u{1F33E}",
     titleKey: "welcome.screens.credit.title",
@@ -43,6 +53,7 @@ const SCREENS: readonly ScreenSpec[] = [
     ],
   },
   {
+    kind: "concept",
     key: "identity",
     icon: "\u{1F511}",
     titleKey: "welcome.screens.identity.title",
@@ -52,6 +63,7 @@ const SCREENS: readonly ScreenSpec[] = [
     ],
   },
   {
+    kind: "concept",
     key: "community",
     icon: "\u{1F33F}",
     titleKey: "welcome.screens.community.title",
@@ -60,13 +72,32 @@ const SCREENS: readonly ScreenSpec[] = [
       "welcome.screens.community.body2",
     ],
   },
+  {
+    kind: "profileSetup",
+    key: "profileSetup",
+    icon: "\u{1F331}",
+  },
 ];
 
 export default function WelcomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { refreshOnboarded } = useApp();
+  const { currentMember, refreshOnboarded } = useApp();
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Profile-setup state lives here (not in the step component) so
+  // typing it and stepping Back to a concept screen doesn't lose
+  // what was entered. Initialized from the current member so a
+  // returning user who re-opens /welcome via the LearnSection link
+  // sees their existing values, not empty fields.
+  const [zone, setZone] = useState(currentMember?.locationZone ?? "");
+  const [skills, setSkills] = useState(
+    (currentMember?.skills ?? []).join(", "),
+  );
+  const [availability, setAvailability] = useState(
+    currentMember?.availability ?? "",
+  );
+  const [saving, setSaving] = useState(false);
 
   async function finish() {
     await markOnboarded();
@@ -74,26 +105,120 @@ export default function WelcomePage() {
     navigate("/", { replace: true });
   }
 
-  const screen = SCREENS[stepIndex];
-  const isLast = stepIndex === SCREENS.length - 1;
+  async function saveProfileAndFinish() {
+    if (!currentMember) {
+      await finish();
+      return;
+    }
+    const updates: Parameters<typeof updateMemberProfile>[1] = {};
+    const trimmedZone = zone.trim();
+    const parsedSkills = skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const trimmedAvail = availability.trim();
+    if (trimmedZone) updates.locationZone = trimmedZone;
+    if (parsedSkills.length > 0) updates.skills = parsedSkills;
+    if (trimmedAvail) updates.availability = trimmedAvail;
 
+    if (Object.keys(updates).length > 0) {
+      setSaving(true);
+      try {
+        await updateMemberProfile(currentMember.publicKey, updates);
+      } finally {
+        setSaving(false);
+      }
+    }
+    await finish();
+  }
+
+  const step = STEPS[stepIndex];
+  const isLast = stepIndex === STEPS.length - 1;
+  const onBack = stepIndex === 0 ? null : () => setStepIndex(stepIndex - 1);
+
+  if (step.kind === "concept") {
+    return (
+      <OnboardingScreen
+        icon={step.icon}
+        title={t(step.titleKey)}
+        body={step.bodyKeys.map((k) => (
+          <p key={k}>{t(k)}</p>
+        ))}
+        stepIndex={stepIndex}
+        stepCount={STEPS.length}
+        onBack={onBack}
+        onNext={() => {
+          if (isLast) {
+            void finish();
+          } else {
+            setStepIndex(stepIndex + 1);
+          }
+        }}
+        onSkip={() => void finish()}
+        nextLabel={isLast ? t("welcome.start") : t("welcome.next")}
+      />
+    );
+  }
+
+  // profileSetup
   return (
     <OnboardingScreen
-      icon={screen.icon}
-      title={t(screen.titleKey)}
-      body={screen.bodyKeys.map((k) => t(k))}
+      icon={step.icon}
+      title={t("welcome.profileSetup.title")}
+      body={
+        <div className="space-y-4 text-left">
+          <p className="text-center text-sm text-moss-600 dark:text-moss-300">
+            {t("welcome.profileSetup.intro")}
+          </p>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{t("profile.about.area")}</span>
+            <input
+              className="input"
+              value={zone}
+              onChange={(e) => setZone(e.target.value)}
+              placeholder={t("profile.about.areaPlaceholder")}
+              maxLength={80}
+              disabled={saving}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              {t("profile.about.skills")}
+            </span>
+            <input
+              className="input"
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder={t("profile.about.skillsPlaceholder")}
+              maxLength={200}
+              disabled={saving}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              {t("profile.about.availability")}
+            </span>
+            <input
+              className="input"
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+              placeholder={t("profile.about.availabilityPlaceholder")}
+              maxLength={120}
+              disabled={saving}
+            />
+          </label>
+          <p className="text-center text-xs text-moss-500 dark:text-moss-400">
+            {t("welcome.profileSetup.hint")}
+          </p>
+        </div>
+      }
       stepIndex={stepIndex}
-      stepCount={SCREENS.length}
-      onBack={stepIndex === 0 ? null : () => setStepIndex(stepIndex - 1)}
-      onNext={() => {
-        if (isLast) {
-          void finish();
-        } else {
-          setStepIndex(stepIndex + 1);
-        }
-      }}
+      stepCount={STEPS.length}
+      onBack={onBack}
+      onNext={() => void saveProfileAndFinish()}
       onSkip={() => void finish()}
-      nextLabel={isLast ? t("welcome.start") : t("welcome.next")}
+      nextLabel={saving ? t("common.working") : t("welcome.start")}
+      busy={saving}
     />
   );
 }

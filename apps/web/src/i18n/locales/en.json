@@ -612,6 +612,11 @@
         "body1": "There are no admins. Decisions are made together — on whatever channel your community uses today, and in-app as Understoria grows.",
         "body2": "If something goes wrong, the response starts with conversation, not bans. Moderation, when it exists, is rotating, transparent, and accountable."
       }
+    },
+    "profileSetup": {
+      "title": "A little about you",
+      "intro": "All optional — these help others find you when they need someone nearby or with a particular skill. You can change any of it later in Profile.",
+      "hint": "Nothing here is private to the network — only share what you'd share with a neighbor."
     }
   }
 }
