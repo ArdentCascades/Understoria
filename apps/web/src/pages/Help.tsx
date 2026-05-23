@@ -1,0 +1,90 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { FAQ_SECTIONS } from "@/content/faq";
+
+// Task-oriented FAQ page. Each entry's id becomes a URL fragment
+// (`/help#confirm-exchange`) so members can share specific
+// answers. On mount we honour the fragment by scrolling the
+// matching <section> into view.
+
+export default function HelpPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.slice(1);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
+
+  return (
+    <div className="px-4 pb-8 pt-4">
+      <header className="mb-6">
+        <button
+          type="button"
+          className="btn-ghost -ml-2 text-sm"
+          onClick={() => navigate(-1)}
+        >
+          {t("common.back")}
+        </button>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight">
+          {t("help.title")}
+        </h1>
+        <p className="text-sm text-moss-600 dark:text-moss-300">
+          {t("help.subtitle")}
+        </p>
+      </header>
+
+      <div className="space-y-6">
+        {FAQ_SECTIONS.map((section) => (
+          <section key={section.id} className="card" aria-labelledby={`faq-section-${section.id}`}>
+            <h2
+              id={`faq-section-${section.id}`}
+              className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500"
+            >
+              {section.title}
+            </h2>
+            <div className="space-y-5">
+              {section.entries.map((entry) => (
+                <article
+                  key={entry.id}
+                  id={entry.id}
+                  className="scroll-mt-4"
+                >
+                  <h3 className="mb-2 text-base font-semibold text-moss-800 dark:text-moss-100">
+                    {entry.question}
+                  </h3>
+                  <div className="space-y-2 text-sm text-moss-700 dark:text-moss-200">
+                    {entry.answer.map((paragraph, i) => (
+                      <p key={i}>{paragraph}</p>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <p className="mt-6 text-sm text-moss-600 dark:text-moss-300">
+        {t("help.footer")}
+      </p>
+    </div>
+  );
+}

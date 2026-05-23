@@ -495,8 +495,9 @@
     },
     "learn": {
       "title": "Aprender",
-      "intro": "La bienvenida, una guía breve para miembros, y preguntas para grupos de estudio. Todo funciona sin conexión.",
+      "intro": "La bienvenida, preguntas frecuentes, una guía breve para miembros, y preguntas para grupos de estudio. Todo funciona sin conexión.",
       "revisitWelcome": "Volver a ver la bienvenida",
+      "helpFaq": "Preguntas frecuentes",
       "memberGuide": "Guía de miembros",
       "studyPrompts": "Preguntas para grupos de estudio",
       "promptCopy": "Copiar para una reunión",
@@ -597,6 +598,11 @@
       "completedSoft": "Borrado suave completado en {{ms}}ms.",
       "completedHard": "Borrado duro completado en {{ms}}ms."
     }
+  },
+  "help": {
+    "title": "Preguntas frecuentes",
+    "subtitle": "Respuestas rápidas a las cosas que aparecen al usar la app. ¿Buscas el panorama más amplio? Mira la guía de miembros o vuelve a ver la bienvenida desde tu perfil.",
+    "footer": "¿No encontraste tu pregunta? Casi todo lo que no está aquí es una conversación de comunidad, no una función de la app — habla con alguien de confianza."
   },
   "welcome": {
     "skip": "Saltar",

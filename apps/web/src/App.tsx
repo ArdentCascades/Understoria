@@ -29,6 +29,7 @@ import InviteAcceptPage from "@/pages/InviteAccept";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import MemberDetailPage from "@/pages/MemberDetail";
+import HelpPage from "@/pages/Help";
 import WelcomePage from "@/pages/Welcome";
 import { useApp } from "@/state/AppContext";
 
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route path="/member/:publicKey" element={<MemberDetailPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/invite" element={<InviteAcceptPage />} />
           <Route path="*" element={<BoardPage />} />
         </Route>

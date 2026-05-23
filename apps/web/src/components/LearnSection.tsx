@@ -48,6 +48,9 @@ export function LearnSection() {
         <Link to="/welcome" className="btn-secondary">
           {t("profile.learn.revisitWelcome")}
         </Link>
+        <Link to="/help" className="btn-secondary">
+          {t("profile.learn.helpFaq")}
+        </Link>
         <button
           type="button"
           onClick={() => setPanel(panel === "guide" ? "none" : "guide")}

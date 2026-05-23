@@ -495,8 +495,9 @@
     },
     "learn": {
       "title": "Learn",
-      "intro": "The welcome flow, a condensed member guide, and prompts for study groups. Everything here works offline.",
+      "intro": "The welcome flow, common questions, a condensed member guide, and prompts for study groups. Everything here works offline.",
       "revisitWelcome": "Revisit the welcome",
+      "helpFaq": "Common questions",
       "memberGuide": "Member guide",
       "studyPrompts": "Study group prompts",
       "promptCopy": "Copy for a meeting",
@@ -597,6 +598,11 @@
       "completedSoft": "Soft purge complete in {{ms}}ms.",
       "completedHard": "Hard purge complete in {{ms}}ms."
     }
+  },
+  "help": {
+    "title": "Common questions",
+    "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide or revisit the welcome from your profile.",
+    "footer": "Didn't find your question? Most of what isn't here is a community conversation, not an app feature — talk to a member you trust."
   },
   "welcome": {
     "skip": "Skip",

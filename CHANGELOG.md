@@ -55,6 +55,46 @@ include breaking changes.
   and existing tests still cover the underlying actions).
   Locale parity passes (reuses the pre-existing
   `common.tryAgain` string). Lint, typecheck, build clean.
+- **Help / FAQ surface at `/help`.** Task-oriented Q→A
+  reference that complements the existing conceptual MEMBER_GUIDE.
+  Members hit this when they have a specific "how do I…" or
+  "what if…" question; the guide is for "what is this and why
+  does it work this way."
+  - **`apps/web/src/content/faq.ts`** — 14 entries across four
+    sections (Posts and exchanges, Balance and credits, Your
+    identity and devices, Community and invites). English-only
+    for now, same convention as `member-guide.ts` (long-form
+    prose translation is a separate workstream from UI
+    strings, per the i18n debt note in `docs/roadmap.md`).
+  - **Each entry has a stable `id`** that becomes a URL
+    fragment — `/help#confirm-exchange`, `/help#lost-passphrase`,
+    etc. Members can share specific answers. On mount the Help
+    page reads `location.hash` and scroll-targets the matching
+    `<article>`.
+  - **`apps/web/src/pages/Help.tsx`** — sectioned card layout
+    matching the rest of the app's surfaces. `scroll-mt-4` on
+    each article keeps the deep-linked entry visible below the
+    sticky header.
+  - **New route** `/help` in `App.tsx` (gated behind onboarding
+    same as the other authenticated routes; reachable via a new
+    "Common questions" button in `LearnSection`).
+  - **`LearnSection` updated** — three buttons before (Revisit
+    welcome, Member guide, Study prompts), four now. The new
+    button is a `<Link to="/help">` so deep-linkable URLs
+    survive the round-trip.
+  - **Title-level i18n** for `help.*` in en + es (page title,
+    subtitle, footer). FAQ content itself stays English-only.
+
+  Anti-engagement-bait note: no telemetry on which questions
+  members open; no "was this helpful?" prompts; no follow-up
+  suggestions designed to keep readers scrolling. The footer
+  ends with "Most of what isn't here is a community
+  conversation, not an app feature — talk to a member you
+  trust." That's the stance.
+
+  Tests: 320 passing (unchanged — the change is content +
+  structural, and locale parity already covers the new
+  `help.*` keys). Lint, typecheck, build clean.
 
 - **First-action nudge on Board.** One-time orientation banner
   for brand-new members who haven't posted or claimed anything
