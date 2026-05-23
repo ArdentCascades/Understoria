@@ -24,7 +24,7 @@ export function ToastContainer() {
 
   const tone =
     toast.tone === "success"
-      ? "bg-canopy-700 text-canopy-50 dark:bg-canopy-600 dark:text-canopy-50"
+      ? "bg-canopy-700 text-canopy-50 dark:bg-canopy-700 dark:text-canopy-50"
       : "bg-moss-700 text-moss-50 dark:bg-moss-700 dark:text-moss-50";
 
   return (

@@ -14,6 +14,11 @@ import type { DailyContribution } from "@/lib/projectMomentum";
 
 // Inline SVG sparkline. No external charting library — same reasoning
 // as the breadth bar: keeps the bundle small and works offline.
+//
+// Accessibility: the SVG gets an aria-label summary, but the curve
+// itself is not navigable by screen readers. A visually-hidden
+// <table> sibling carries the per-day breakdown for screen reader
+// users who want the detail behind the curve.
 
 interface ProjectSparklineProps {
   daily: readonly DailyContribution[];
@@ -23,12 +28,19 @@ interface ProjectSparklineProps {
   height?: number;
 }
 
+function formatDay(dayStart: number, locale: string): string {
+  return new Date(dayStart).toLocaleDateString(locale, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function ProjectSparkline({
   daily,
   width = 240,
   height = 48,
 }: ProjectSparklineProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (daily.length === 0) return null;
 
   const max = Math.max(1, ...daily.map((d) => d.hours));
@@ -92,6 +104,25 @@ export function ProjectSparkline({
           hours: totalInWindow,
         })}
       </p>
+      <table className="sr-only">
+        <caption>
+          {t("projects.sparkline.tableCaption", { days: daily.length })}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{t("projects.sparkline.tableHeaderDay")}</th>
+            <th scope="col">{t("projects.sparkline.tableHeaderHours")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {daily.map((d) => (
+            <tr key={d.dayStart}>
+              <th scope="row">{formatDay(d.dayStart, i18n.language)}</th>
+              <td>{Math.round(d.hours * 10) / 10}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

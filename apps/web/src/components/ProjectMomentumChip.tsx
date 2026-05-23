@@ -35,7 +35,7 @@ const COLORS: Record<MomentumState, string> = {
   planning:
     "bg-moss-50 text-moss-600 dark:bg-moss-900/40 dark:text-moss-300",
   archived:
-    "bg-moss-50 text-moss-500 dark:bg-moss-900/40 dark:text-moss-400",
+    "bg-moss-50 text-moss-600 dark:bg-moss-900/40 dark:text-moss-300",
 };
 
 export function ProjectMomentumChip({

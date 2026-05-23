@@ -39,7 +39,10 @@
     "progressLabel": "{{contributed}} de {{target}} ({{percent}}%)",
     "sparkline": {
       "label": "Contribuciones al proyecto durante los últimos {{days}} días; {{hours}} horas en total.",
-      "caption": "Últimos {{days}} días · {{hours}}h contribuidas"
+      "caption": "Últimos {{days}} días · {{hours}}h contribuidas",
+      "tableCaption": "Contribuciones por día, últimos {{days}} días",
+      "tableHeaderDay": "Día",
+      "tableHeaderHours": "Horas"
     },
     "momentum": {
       "humming": "En marcha",

@@ -10,6 +10,55 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 22 PR 22.4 — color-contrast verification + sparkline
+  per-day detail.** Closes two of the four remaining items in
+  `docs/accessibility.md` §6 (Known gaps).
+  - **WCAG contrast primitives** in `apps/web/src/lib/a11y/`:
+    `contrast.ts` exports `parseHex`, `relativeLuminance`,
+    `contrastRatio`, and `composite` (alpha-compositing for
+    translucent backgrounds), plus the `AA_NORMAL` / `AA_LARGE`
+    constants. Pure functions following WCAG 2.1 SC 1.4.3.
+    15 unit tests cover known anchor pairings (black/white,
+    same-color → 1:1, symmetry, alpha clamping).
+  - **Programmatic palette audit** in `palette-contrast.test.ts`.
+    Asserts every chip / badge color pairing in the codebase —
+    light mode (15 pairings) and dark mode (15 pairings,
+    translucent backgrounds composited over `moss-900`) —
+    clears AA 4.5:1. New chip pairings must be mirrored into
+    this test before merge.
+  - **Three failures caught and fixed** by the new audit:
+    - `ProjectMomentumChip` archived variant in light mode used
+      `text-moss-500` on `bg-moss-50` (3.79:1) and in dark mode
+      used `text-moss-400` on a `bg-moss-900/40` composite
+      (4.28:1). Both now use the same shades as the paused /
+      planning variants (`text-moss-600` light, `text-moss-300`
+      dark) — clears AA in both modes.
+    - `ToastContainer` success tone in dark mode used
+      `dark:bg-canopy-600` on `dark:text-canopy-50` (3.15:1).
+      Now uses `dark:bg-canopy-700` to match the light-mode
+      background (~6.2:1).
+  - **`ProjectSparkline` per-day detail.** The SVG curve already
+    had an `aria-label` summary; it now also renders a
+    visually-hidden `<table>` (Tailwind `sr-only`) with one
+    row per day (`Day` / `Hours`). Screen reader users get
+    both the summary and the day-by-day breakdown; sighted
+    users see only the curve. Day labels use
+    `Date.toLocaleDateString` with the current i18n language,
+    so the table localizes the same way the rest of the app
+    does. New i18n keys `projects.sparkline.tableCaption` /
+    `tableHeaderDay` / `tableHeaderHours` added to `en` and `es`.
+
+  `docs/accessibility.md` updated — color-contrast verification
+  and sparkline per-day detail move from §6 (Known gaps) into
+  §5 (Current state). A new known gap is added: a broader
+  body-text contrast survey on white card backgrounds
+  (especially `text-moss-500`) that the chip-only audit
+  doesn't cover. Remaining gaps after 22.4 are that body-text
+  survey, screen-reader testing, and the formal audit.
+
+  Tests: 293 web passing (248 → 293; +45 from `contrast.test.ts`
+  15 + `palette-contrast.test.ts` 30). Lint, typecheck, build
+  all clean.
 - **Agent 22 PR 22.3 — first batch of accessibility surface fixes.**
   Uses the primitives shipped in 22.2.
   - **`ConfirmDialog`** now wires `useFocusTrap` to the dialog
