@@ -10,6 +10,65 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Community-visible Disputes surface at `/disputes`.** First slice
+  of the governance workstream (Agent 12 in `docs/roadmap.md`).
+  The dispute-flag flow already wrote a `"disputed"` status onto
+  posts, but nothing surfaced it to anyone except the two parties
+  on the original post detail page — flags landed in a dead drop.
+  Now there's a community-visible list so members can see what's
+  been flagged and ground real cases for the resolution lifecycle
+  that follows.
+  - **View-only is intentional for v1.** Resolution still happens
+    out-of-band (talk to both parties, take it to the community's
+    usual decision-making channel). In-app proposal / resolution
+    tooling is Agent 13 on the roadmap; this PR's job is to
+    surface the signal, not to design the response without real
+    cases to design against.
+  - **`apps/web/src/lib/disputes.ts`** — pure `listDisputes(posts,
+    members)` that filters to `status === "disputed"`, maps
+    helper/recipient by post type (NEED → claimer helps poster;
+    OFFER → poster helps claimer), and sorts newest-first.
+    Defensive against malformed rows (skips disputes with no
+    claimer). 8 tests cover empty, mixed-status, NEED vs OFFER
+    direction, missing names, defensive skip, sort order, and
+    field preservation.
+  - **`apps/web/src/pages/Disputes.tsx`** — sectioned card list
+    matching the rest of the app's surfaces. Each entry shows
+    flagged chip + type + category + hours + both parties (with
+    short keys for verification) + when the post was originally
+    posted, plus a link to the underlying post for the full
+    context.
+  - **New `/disputes` route** in `App.tsx`, gated behind onboarding
+    the same as other authenticated routes.
+  - **`DisputesSection` component** added to Profile (above
+    CommunitySettingsSection) — small entry card with a live
+    count chip so members can see "N exchanges flagged for
+    community review" at a glance.
+  - **No role-gating.** Per `GOVERNANCE.md`: no admins. Every
+    member of the node can see the list. The two parties already
+    see the flag on the underlying post; this surface makes it
+    findable for the rest of the community.
+  - **Privacy posture**: the post itself is already visible to
+    the community node; "this is disputed" is already on the
+    post detail page. Disputes surface introduces no new
+    information disclosure — it just makes existing public
+    state easier to find.
+  - **i18n**: new `disputes.*` namespace in en + es covers the
+    page chrome, list labels, footer, and Profile entry card
+    pluralization.
+
+  Future PRs:
+  - Persist a `disputedAt` timestamp so sort can use recency of
+    flag rather than recency of original post.
+  - Resolution lifecycle (Agent 13): mark resolved with a
+    co-signed outcome, transition out of disputed state.
+  - "Why was this flagged?" — currently the flag carries no
+    reason; adding an optional note from the flagger would
+    sharpen the signal.
+
+  Tests: 360 passing (352 → 360; +8 in `disputes.test.ts`).
+  Locale parity passes. Lint, typecheck, build clean.
+
 - **Time-formatting consistency sweep.** Date / time rendering
   used to mix three patterns (the canonical `formatRelativeTime`
   helper, raw `toLocaleString()` / `toLocaleDateString()` with
