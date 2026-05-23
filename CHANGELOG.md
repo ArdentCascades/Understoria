@@ -95,6 +95,55 @@ include breaking changes.
   Tests: 320 passing (unchanged — the change is content +
   structural, and locale parity already covers the new
   `help.*` keys). Lint, typecheck, build clean.
+- **Inline form validation across `PostForm`, `ProjectNew`, and
+  `InviteAccept`.** Validation used to fire only on submit and
+  surface as a single error message at the bottom of the form.
+  Now each validated field surfaces its own error next to the
+  field, shown only after the member has interacted with it
+  (or attempted to submit).
+  - **Validator primitives** at `apps/web/src/lib/validation.ts`:
+    `required`, `positiveNumber`, `positiveInteger`, `optional`
+    (a combinator that lets through empty strings — for fields
+    like "deadline in days, blank = no deadline"), `combine`
+    (run validators left-to-right, return first error). Each
+    returns `null` (valid) or a `FieldError` carrying an i18n
+    key and optional interpolation values. 15 tests cover the
+    boundaries (empty, whitespace, non-numeric, zero, negative,
+    fractional).
+  - **`useFieldValidation` hook** tracks per-field touched state.
+    `onBlur(field)` marks one as touched (so we hold off
+    showing errors until interaction). `markAllTouched()` is
+    called from `handleSubmit` so untouched-but-invalid fields
+    surface their errors before the submit handler runs.
+    `shouldShowError(field)` returns `touched && hasError`.
+  - **No `<Field>` wrapper component** — the three forms have
+    varied layouts (labels with hints, two-column grids,
+    selects), and forcing them all through a wrapper would
+    have ballooned the diff. The hook gives the state; each
+    form renders it the way that fits.
+  - **Accessibility**: each invalid field gets
+    `aria-invalid="true"` and an `aria-describedby` pointing to
+    the error `<p role="alert">`. Hint text (where present)
+    moves to a separate id so it doesn't fight the error for
+    `aria-describedby`. `noValidate` on the `<form>` keeps
+    browser-default validation out of the way — our hook is
+    the source of truth.
+  - **Submit button stays enabled** even when errors exist.
+    Clicking submit calls `markAllTouched`, which surfaces the
+    errors visibly; this is gentler than disabling the button
+    (which leaves users wondering why nothing happens).
+  - **Existing form-level error display** stays in place for
+    submission failures (network errors, db errors). Field
+    validation errors no longer appear there — they're inline
+    where they belong.
+  - **Two new i18n keys** added: `postForm.errorExpiresInDays`
+    and `projects.create.errorDeadlineDays` (both en + es).
+    Other error keys (title required, hours positive,
+    displayName required) were already in i18n and got
+    repointed at the validators.
+
+  Tests: 335 passing (320 → 335; +15 in `validation.test.ts`).
+  Locale parity passes. Lint, typecheck, build clean.
 
 - **First-action nudge on Board.** One-time orientation banner
   for brand-new members who haven't posted or claimed anything

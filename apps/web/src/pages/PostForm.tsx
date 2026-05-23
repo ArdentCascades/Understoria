@@ -29,6 +29,15 @@ import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
+import {
+  combine,
+  optional,
+  positiveInteger,
+  positiveNumber,
+  required,
+  useFieldValidation,
+  type Validator,
+} from "@/lib/validation";
 import type { Category, PostType, Urgency } from "@/types";
 
 const DRAFT_KEY = "post-new";
@@ -42,6 +51,17 @@ interface PostDraftPayload {
   urgency: Urgency;
   expiresInDays: string;
 }
+
+type FieldName = "title" | "hours" | "expiresInDays";
+
+const VALIDATORS: Record<FieldName, Validator> = {
+  title: required("postForm.errorNeedTitle"),
+  hours: combine(
+    required("postForm.errorHoursPositive"),
+    positiveNumber("postForm.errorHoursPositive"),
+  ),
+  expiresInDays: optional(positiveInteger("postForm.errorExpiresInDays")),
+};
 
 export default function PostFormPage() {
   const { currentMember, nodeId } = useApp();
@@ -63,6 +83,11 @@ export default function PostFormPage() {
   const [submitting, setSubmitting] = useState(false);
   const [pendingDraft, setPendingDraft] =
     useState<Draft<PostDraftPayload> | null>(null);
+
+  const validation = useFieldValidation<FieldName>(
+    { title, hours, expiresInDays },
+    VALIDATORS,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -108,15 +133,9 @@ export default function PostFormPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!title.trim()) {
-      setError(t("postForm.errorNeedTitle"));
-      return;
-    }
+    validation.markAllTouched();
+    if (validation.hasErrors) return;
     const parsedHours = Number.parseFloat(hours);
-    if (!Number.isFinite(parsedHours) || parsedHours <= 0) {
-      setError(t("postForm.errorHoursPositive"));
-      return;
-    }
     const days = expiresInDays ? Number.parseInt(expiresInDays, 10) : null;
     const expiresAt =
       days && Number.isFinite(days) && days > 0
@@ -201,7 +220,7 @@ export default function PostFormPage() {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">{t("postForm.fieldTitle")}</span>
           <input
@@ -213,9 +232,23 @@ export default function PostFormPage() {
             }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => validation.onBlur("title")}
+            aria-invalid={validation.shouldShowError("title") || undefined}
+            aria-describedby={
+              validation.shouldShowError("title") ? "title-error" : undefined
+            }
             maxLength={120}
             required
           />
+          {validation.shouldShowError("title") && (
+            <p
+              id="title-error"
+              role="alert"
+              className="text-xs text-rose-700 dark:text-rose-300"
+            >
+              {t(validation.errors.title!.key)}
+            </p>
+          )}
         </label>
 
         <label className="flex flex-col gap-1">
@@ -263,11 +296,31 @@ export default function PostFormPage() {
               className="input"
               value={hours}
               onChange={(e) => setHours(e.target.value)}
+              onBlur={() => validation.onBlur("hours")}
+              aria-invalid={validation.shouldShowError("hours") || undefined}
+              aria-describedby={
+                validation.shouldShowError("hours")
+                  ? "hours-error"
+                  : "hours-hint"
+              }
               required
             />
-            <span className="text-xs text-moss-500 dark:text-moss-400">
-              {t("postForm.fieldHoursHint")}
-            </span>
+            {validation.shouldShowError("hours") ? (
+              <p
+                id="hours-error"
+                role="alert"
+                className="text-xs text-rose-700 dark:text-rose-300"
+              >
+                {t(validation.errors.hours!.key)}
+              </p>
+            ) : (
+              <span
+                id="hours-hint"
+                className="text-xs text-moss-500 dark:text-moss-400"
+              >
+                {t("postForm.fieldHoursHint")}
+              </span>
+            )}
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">
@@ -298,7 +351,25 @@ export default function PostFormPage() {
             placeholder={t("postForm.expiresPlaceholder")}
             value={expiresInDays}
             onChange={(e) => setExpiresInDays(e.target.value)}
+            onBlur={() => validation.onBlur("expiresInDays")}
+            aria-invalid={
+              validation.shouldShowError("expiresInDays") || undefined
+            }
+            aria-describedby={
+              validation.shouldShowError("expiresInDays")
+                ? "expiresInDays-error"
+                : undefined
+            }
           />
+          {validation.shouldShowError("expiresInDays") && (
+            <p
+              id="expiresInDays-error"
+              role="alert"
+              className="text-xs text-rose-700 dark:text-rose-300"
+            >
+              {t(validation.errors.expiresInDays!.key)}
+            </p>
+          )}
         </label>
 
         {error && (

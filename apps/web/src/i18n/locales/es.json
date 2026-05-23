@@ -91,7 +91,8 @@
       "submit": "Crear borrador",
       "submitting": "Creando…",
       "errorTitle": "Dale al proyecto un título corto.",
-      "errorHours": "Las horas objetivo tienen que ser un número positivo."
+      "errorHours": "Las horas objetivo tienen que ser un número positivo.",
+      "errorDeadlineDays": "Los días deben ser un número entero mayor que 0, o en blanco para no tener fecha límite."
     },
     "detail": {
       "back": "← Volver a proyectos",
@@ -191,7 +192,8 @@
     "submitting": "Publicando...",
     "categoryOption": "{{emoji}} {{label}} — {{description}}",
     "errorNeedTitle": "Dale un título corto a tu publicación para que la gente sepa de qué se trata.",
-    "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo."
+    "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
+    "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar."
   },
   "postDetail": {
     "notFound": "No se encontró esta publicación. Puede que haya sido cancelada.",
