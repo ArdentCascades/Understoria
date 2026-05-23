@@ -10,6 +10,45 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 22 PR 22.2 — lint + reusable a11y patterns.** Toolchain
+  + primitives, no surface fixes yet (those start in PR 22.3).
+  Adds `eslint-plugin-jsx-a11y` scoped to a11y rules only (the
+  project still relies on `tsc --noEmit` for type checking; no
+  general code-style enforcement). Lint runs in CI as a required
+  step alongside typecheck. First run found 6 real findings —
+  two ConfirmDialog backdrop-click patterns and one InviteAccept
+  `autoFocus`; the dialog ones are documented with TODOs
+  referencing PR 22.3 (they'll be fixed alongside the focus
+  trap), the InviteAccept `autoFocus` was removed outright (it
+  pulled keyboard users past explanatory text). The LockScreen
+  `autoFocus` stays — the entire surface is "enter your
+  passphrase" and there's nothing else to do on the view.
+
+  New reusable primitives in `apps/web/src/lib/a11y/`:
+  - `getFocusableElements(container)` + `nextFocusable(...)` —
+    pure DOM helpers, 13 tests covering button / link / input /
+    select / textarea / disabled / hidden / tabindex variants
+    and forward / backward / wrap cases.
+  - `useFocusTrap(ref, isOpen)` hook — keyboard Tab/Shift+Tab
+    containment within the open container, initial focus on
+    first focusable element, focus restoration on close.
+  - `useReducedMotion()` hook — wraps
+    `prefers-reduced-motion: reduce`; updates live if the user
+    toggles the OS preference while the app is open.
+
+  New `SkipLink` component rendered at the top of `Layout`,
+  visually hidden until focused (first Tab on any page).
+  `<main id="main" tabIndex={-1}>` becomes the jump target.
+  WCAG SC 2.4.1.
+
+  Global `prefers-reduced-motion` media query in `index.css`
+  collapses all transitions / animations to 0.01ms when the
+  user has reduced-motion on. Floor for any future animation
+  the codebase adds.
+
+  Tests: 248 web passing (was 235; +13 for `focusable.test.ts`).
+  Locale parity passes (en + es get one new key for the skip
+  link).
 - **`docs/accessibility.md` + Agent 22 (Accessibility & Inclusive
   Design) roadmap entry.** Names accessibility as a sustained
   cross-cutting workstream modelled on Agent 4 (Security &

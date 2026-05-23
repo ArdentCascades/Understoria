@@ -83,6 +83,10 @@ export function LockScreen() {
             </span>
             <input
               type="password"
+              // The entire lock-screen surface is "enter your
+              // passphrase" — autofocus is the right default here
+              // since there is nothing else to do on this view.
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               className="input"
               autoComplete="current-password"

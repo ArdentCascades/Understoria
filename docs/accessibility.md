@@ -125,8 +125,27 @@ formal audit; the formal audit is one of the items in §6.
   surfaces have it. A few don't.
 - **Semantic landmarks** — `<header>`, `<main>`, `<section>`,
   `<footer>` used in most pages. The bottom nav is a `<nav>`.
-- **Reduced-motion preference** — not currently respected. The
-  toast slide-in animation runs unconditionally.
+  `<main>` now has `id="main"` and `tabIndex={-1}` so it can
+  be the target of the skip-to-content link.
+- **Skip-to-content link** — `<SkipLink>` lives at the top of
+  every layout. Visually hidden until it receives focus (first
+  Tab on any page). WCAG SC 2.4.1.
+- **`:focus-visible` baseline** — `index.css` gives every
+  keyboard-focused element a 2px canopy-600 outline at 2px
+  offset, in both light and dark mode.
+- **Reduced-motion preference** — `index.css` has a
+  `prefers-reduced-motion: reduce` media query that collapses
+  every transition and animation to 0.01ms. Components that
+  need JS-level awareness use the `useReducedMotion()` hook in
+  `src/lib/a11y/`.
+- **Lint coverage** — `eslint-plugin-jsx-a11y` runs in CI as a
+  required step, scoped to a11y rules only. Findings block the
+  build the same way type errors do. The plugin is scoped to
+  the web workspace; the server has no JSX.
+- **Reusable primitives** — `src/lib/a11y/` exports
+  `getFocusableElements`, `nextFocusable`, `useFocusTrap`, and
+  `useReducedMotion`. PR 22.3 will wire `useFocusTrap` into
+  `ConfirmDialog`.
 
 ## 6. Known gaps (tracked work)
 
@@ -136,9 +155,13 @@ address. Each maps to a focused PR or a small bundle.
 - **`ConfirmDialog` focus trap.** The dialog component renders
   without managing focus. A keyboard user opening the dialog stays
   at the trigger button; Tab continues to background content
-  rather than moving inside the dialog; Esc doesn't always close.
-  Fix: focus trap helper, autofocus on the destructive action,
-  restore focus on close.
+  rather than moving inside the dialog. (Esc *does* close — that
+  handler is wired in the component.) The backdrop's
+  click-to-dismiss is currently keyboard-inaccessible (the lint
+  plugin catches it; the findings are documented with TODOs
+  referencing this work). Fix in PR 22.3: wire `useFocusTrap`,
+  autofocus on the destructive action, restore focus on close,
+  convert the backdrop to a proper close affordance.
 - **`BottomNav` keyboard navigation.** Tab moves between links
   but arrow-key navigation between tabs (a common screen reader
   expectation for `role="navigation"` with a small set of
@@ -155,17 +178,6 @@ address. Each maps to a focused PR or a small bundle.
   text-amber-800` (stalled state, post statuses, etc.) needs
   verification against 4.5:1 in light and dark mode. Same for
   the moss / canopy 50/100/700/800 pairings used widely.
-- **Focus indicators.** Default browser focus rings are present
-  but we haven't set a project-wide `:focus-visible` style.
-  Custom buttons in dark mode may show focus poorly.
-- **Skip-to-content link.** No "skip nav" link before the
-  bottom nav for keyboard users on long-scroll pages.
-- **Reduced-motion.** Toast animation, sparkline transitions,
-  any future animations should respect
-  `prefers-reduced-motion: reduce`.
-- **Lint coverage.** `eslint-plugin-jsx-a11y` isn't in the
-  toolchain. CI doesn't catch obvious a11y mistakes (missing
-  `alt`, missing button names, etc.).
 - **Screen reader testing.** No one has driven the app with
   NVDA, VoiceOver, or TalkBack end-to-end. This is the gap most
   likely to surface things this audit missed.
@@ -173,26 +185,35 @@ address. Each maps to a focused PR or a small bundle.
   page with axe-core (or similar) and a screen reader,
   recording findings, is on the list.
 
-## 7. Reusable patterns (planned)
+## 7. Reusable patterns
 
-The first PR after this one (PR 22.2 on the roadmap) introduces
-the primitives below. They live in `apps/web/src/lib/a11y/`.
+Shipped in PR 22.2 — these live in `apps/web/src/lib/a11y/` and
+`apps/web/src/components/SkipLink.tsx`.
 
-- **`useFocusTrap(ref, isOpen)`** — for `ConfirmDialog` and any
-  future modal. Restores focus to the previously-focused element
-  on close.
-- **`useAnnouncer()`** — programmatic alternative to inlining
-  `aria-live` regions, for cases where the announcement needs to
-  come from a non-rendered handler (e.g. confirming a task that
-  navigates away). The toast system already half-does this; the
-  announcer is the dedicated text-only counterpart.
-- **Skip-to-content component** — `<SkipLink href="#main">`
-  rendered above the layout.
-- **`:focus-visible` defaults** — a small global CSS layer that
-  ensures every interactive surface has a visible focus ring in
-  both modes.
-- **`prefers-reduced-motion` helper** — a `useReducedMotion()`
-  hook for animations to consult.
+- **`getFocusableElements(container)`** and **`nextFocusable(current,
+  all, direction)`** — pure DOM helpers. The tab-cycle math is in
+  one place so the hook stays small and the math is testable.
+- **`useFocusTrap(ref, isOpen)`** — Tab/Shift+Tab containment
+  inside the open container, initial focus on first focusable
+  child, focus restoration on close. Esc handling is intentionally
+  the caller's responsibility — different modals dismiss
+  differently.
+- **`useReducedMotion()`** — `prefers-reduced-motion: reduce`
+  with live updates if the OS preference toggles.
+- **`<SkipLink targetId="main" />`** — visually hidden until
+  focused, becomes a real link that jumps past the layout chrome.
+- **Global CSS floor in `index.css`** — a `:focus-visible`
+  outline (already shipped pre-22.2) and a
+  `prefers-reduced-motion: reduce` block that collapses every
+  transition / animation to 0.01ms.
+
+Still planned for future PRs:
+
+- **`useAnnouncer()`** — for cases where an announcement needs
+  to come from a non-rendered handler (e.g. confirming a task
+  that navigates away). The toast system covers most needs; the
+  announcer would be the dedicated text-only counterpart. Only
+  add when a concrete use case appears that doesn't fit toasts.
 
 ## 8. Guidance for reviewers
 

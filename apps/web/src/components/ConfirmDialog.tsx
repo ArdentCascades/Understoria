@@ -59,6 +59,12 @@ export function ConfirmDialog({
   if (!open) return null;
 
   return (
+    // TODO(a11y, PR 22.3): backdrop click-to-dismiss is a UX nicety
+    // on top of the Esc handler above. Keyboard users dismiss via
+    // Esc; the backdrop click is mouse/touch only. Splitting this
+    // into a proper <button>-backed close affordance is part of
+    // the ConfirmDialog focus-trap work in PR 22.3.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <div
       role="dialog"
       aria-modal="true"
@@ -66,6 +72,7 @@ export function ConfirmDialog({
       className="fixed inset-0 z-50 flex items-end justify-center bg-moss-950/40 p-4 sm:items-center"
       onClick={onCancel}
     >
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- stopPropagation prevents backdrop-click from firing when the user clicks inside the card; not an interactive surface itself. Revisit during PR 22.3 focus-trap work. */}
       <div
         className="card w-full max-w-md animate-fade-in"
         onClick={(e) => e.stopPropagation()}
