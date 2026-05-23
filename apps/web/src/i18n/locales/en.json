@@ -519,6 +519,7 @@
       "title": "Community settings",
       "intro": "Thresholds the community can tune to fit its own context. Defaults work for most groups.",
       "bootstrapNote": "These changes take effect immediately for everyone on this device. Once the in-app proposal system ships, edits here will route through a community vote instead.",
+      "proposeLink": "Or propose a change for the community to discuss →",
       "dailyLimit": {
         "label": "Daily helper limit",
         "hint": "The most exchanges any single helper can complete in 24 hours. A hard stop, not a guideline."
@@ -634,6 +635,84 @@
       "descriptionOne": "{{count}} exchange has been flagged for community review.",
       "descriptionOther": "{{count}} exchanges have been flagged for community review.",
       "open": "Open"
+    }
+  },
+  "proposals": {
+    "title": "Proposals",
+    "subtitle": "Community decisions in progress. Anyone can start one; anyone can record an outcome once the community has agreed. Voting in-app comes later — for now this surface tracks the decisions you made elsewhere.",
+    "filterAriaLabel": "Filter by status",
+    "filter": {
+      "open": "Open",
+      "all": "All",
+      "passed": "Passed",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    },
+    "startNew": "Start a proposal",
+    "emptyOpen": "No open proposals right now.",
+    "emptyFiltered": "No proposals match this filter.",
+    "footer": "Voting and automatic close are still to come. For now the community reaches decisions on whatever channel it uses, and any member can record the outcome here so the historical record reflects reality.",
+    "proposerLabel": "Proposed by",
+    "proposedLabel": "Started",
+    "closedLabel": "Closed",
+    "outcomeReasonLabel": "Why",
+    "outcomeReasonPlaceholder": "A short note about how the community got here.",
+    "recordOutcomeHint": "Community decided already? Record the outcome:",
+    "outcomePassed": "Passed",
+    "outcomeRejected": "Rejected",
+    "outcomeWithdrawn": "Withdrawn",
+    "confirmClose": {
+      "passed": "Mark passed",
+      "rejected": "Mark rejected",
+      "withdrawn": "Withdraw"
+    },
+    "payloadHeader": "Proposed config",
+    "status": {
+      "open": "Open",
+      "passed": "Passed",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    },
+    "category": {
+      "config_change": "Config change"
+    },
+    "reversibility": {
+      "easy": "Easy to reverse",
+      "easyTooltip": "Another proposal can undo this. Most config tweaks land here.",
+      "easyHint": "Another proposal can undo this. Most config tweaks land here.",
+      "moderate": "Moderate",
+      "moderateTooltip": "Takes effort to reverse. Worth a pause before passing.",
+      "moderateHint": "Takes effort to reverse. Worth a pause before passing.",
+      "hard": "Hard to reverse",
+      "hardTooltip": "Reversal would require rebuilding something. Impact reflection encouraged.",
+      "hardHint": "Reversal would require rebuilding something. Impact reflection is encouraged for hard-tier proposals."
+    },
+    "entry": {
+      "title": "Community proposals",
+      "descriptionNone": "No open proposals right now.",
+      "descriptionOne": "{{count}} proposal open for the community to discuss.",
+      "descriptionOther": "{{count}} proposals open for the community to discuss.",
+      "open": "Open"
+    },
+    "errorTitleRequired": "Give the proposal a short title.",
+    "errorPositiveInteger": "Must be a whole number greater than 0.",
+    "toast": {
+      "created": "Proposal started. Share it with your community on your usual channel."
+    },
+    "new": {
+      "title": "Start a proposal",
+      "subtitle": "Propose a change to your community's node configuration. The proposal stays open until someone records the outcome — that step is manual for now while we get a feel for what proposals actually look like.",
+      "fieldTitle": "Title",
+      "fieldDescription": "Why this change?",
+      "descriptionPlaceholder": "What problem does this solve? Any concerns? How should the community weigh in?",
+      "configHeader": "Proposed values",
+      "configIntro": "Edit any of the three thresholds. Unchanged fields stay at their current value.",
+      "currentValue": "Currently: {{value}}",
+      "unchanged": "Unchanged",
+      "tierHeader": "Reversibility",
+      "tierIntro": "How hard would this be to undo? Defaults to easy because config can be changed back by another proposal — bump to moderate or hard if the cultural impact is bigger than the technical reversal.",
+      "submit": "Start the proposal",
+      "submitting": "Starting…"
     }
   },
   "welcome": {

@@ -31,6 +31,8 @@ import ProjectDetailPage from "@/pages/ProjectDetail";
 import MemberDetailPage from "@/pages/MemberDetail";
 import HelpPage from "@/pages/Help";
 import DisputesPage from "@/pages/Disputes";
+import ProposalsPage from "@/pages/Proposals";
+import ProposalNewPage from "@/pages/ProposalNew";
 import WelcomePage from "@/pages/Welcome";
 import { useApp } from "@/state/AppContext";
 
@@ -65,6 +67,8 @@ export default function App() {
           <Route path="/member/:publicKey" element={<MemberDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/disputes" element={<DisputesPage />} />
+          <Route path="/proposals" element={<ProposalsPage />} />
+          <Route path="/proposals/new" element={<ProposalNewPage />} />
           <Route path="/invite" element={<InviteAcceptPage />} />
           <Route path="*" element={<BoardPage />} />
         </Route>

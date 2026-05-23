@@ -51,6 +51,7 @@ import { TrustChip } from "@/components/TrustChip";
 import { LanguageSection } from "@/components/LanguageSection";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { DisputesSection } from "@/components/DisputesSection";
+import { ProposalsSection } from "@/components/ProposalsSection";
 import { LearnSection } from "@/components/LearnSection";
 import { NodeSection } from "@/components/NodeSection";
 import type { AchievementType, FlagReason, Member } from "@/types";
@@ -255,6 +256,8 @@ export default function ProfilePage() {
       <LearnSection />
 
       <DisputesSection />
+
+      <ProposalsSection />
 
       <CommunitySettingsSection />
 

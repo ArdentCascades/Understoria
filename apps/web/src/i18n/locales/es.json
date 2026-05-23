@@ -519,6 +519,7 @@
       "title": "Configuración comunitaria",
       "intro": "Umbrales que la comunidad puede ajustar a su propio contexto. Los valores predeterminados funcionan para la mayoría de los grupos.",
       "bootstrapNote": "Estos cambios entran en efecto de inmediato para todas las personas en este dispositivo. Cuando llegue el sistema de propuestas en la aplicación, las ediciones aquí pasarán por una votación comunitaria.",
+      "proposeLink": "O propón un cambio para que la comunidad lo discuta →",
       "dailyLimit": {
         "label": "Límite diario de ayudante",
         "hint": "El máximo de intercambios que una sola persona ayudante puede completar en 24 horas. Tope estricto, no una sugerencia."
@@ -634,6 +635,84 @@
       "descriptionOne": "{{count}} intercambio ha sido señalado para revisión comunitaria.",
       "descriptionOther": "{{count}} intercambios han sido señalados para revisión comunitaria.",
       "open": "Abrir"
+    }
+  },
+  "proposals": {
+    "title": "Propuestas",
+    "subtitle": "Decisiones comunitarias en curso. Cualquier persona puede iniciar una; cualquiera puede registrar un resultado una vez que la comunidad lo haya acordado. La votación dentro de la app llegará después — por ahora esta vista lleva el registro de las decisiones que tomaron en otro lado.",
+    "filterAriaLabel": "Filtrar por estado",
+    "filter": {
+      "open": "Abiertas",
+      "all": "Todas",
+      "passed": "Aprobadas",
+      "rejected": "Rechazadas",
+      "withdrawn": "Retiradas"
+    },
+    "startNew": "Iniciar una propuesta",
+    "emptyOpen": "No hay propuestas abiertas ahora mismo.",
+    "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
+    "footer": "La votación y el cierre automático aún están por venir. Por ahora la comunidad toma decisiones en su canal habitual, y cualquier integrante puede registrar el resultado aquí para que el registro histórico refleje la realidad.",
+    "proposerLabel": "Propuesta por",
+    "proposedLabel": "Iniciada",
+    "closedLabel": "Cerrada",
+    "outcomeReasonLabel": "Por qué",
+    "outcomeReasonPlaceholder": "Una nota corta sobre cómo llegó aquí la comunidad.",
+    "recordOutcomeHint": "¿La comunidad ya decidió? Registra el resultado:",
+    "outcomePassed": "Aprobada",
+    "outcomeRejected": "Rechazada",
+    "outcomeWithdrawn": "Retirada",
+    "confirmClose": {
+      "passed": "Marcar aprobada",
+      "rejected": "Marcar rechazada",
+      "withdrawn": "Retirar"
+    },
+    "payloadHeader": "Configuración propuesta",
+    "status": {
+      "open": "Abierta",
+      "passed": "Aprobada",
+      "rejected": "Rechazada",
+      "withdrawn": "Retirada"
+    },
+    "category": {
+      "config_change": "Cambio de configuración"
+    },
+    "reversibility": {
+      "easy": "Fácil de revertir",
+      "easyTooltip": "Otra propuesta puede deshacer esto. La mayoría de los ajustes de config caen aquí.",
+      "easyHint": "Otra propuesta puede deshacer esto. La mayoría de los ajustes de config caen aquí.",
+      "moderate": "Moderada",
+      "moderateTooltip": "Cuesta esfuerzo revertir. Vale la pena pausar antes de aprobar.",
+      "moderateHint": "Cuesta esfuerzo revertir. Vale la pena pausar antes de aprobar.",
+      "hard": "Difícil de revertir",
+      "hardTooltip": "Revertir requeriría reconstruir algo. Se recomienda reflexión de impacto.",
+      "hardHint": "Revertir requeriría reconstruir algo. Se recomienda reflexión de impacto para propuestas de tier difícil."
+    },
+    "entry": {
+      "title": "Propuestas comunitarias",
+      "descriptionNone": "No hay propuestas abiertas ahora mismo.",
+      "descriptionOne": "{{count}} propuesta abierta para que la comunidad discuta.",
+      "descriptionOther": "{{count}} propuestas abiertas para que la comunidad discuta.",
+      "open": "Abrir"
+    },
+    "errorTitleRequired": "Dale a la propuesta un título corto.",
+    "errorPositiveInteger": "Debe ser un número entero mayor que 0.",
+    "toast": {
+      "created": "Propuesta iniciada. Compártela con tu comunidad en su canal habitual."
+    },
+    "new": {
+      "title": "Iniciar una propuesta",
+      "subtitle": "Propón un cambio a la configuración del nodo de tu comunidad. La propuesta queda abierta hasta que alguien registre el resultado — ese paso es manual por ahora mientras vemos cómo se ven las propuestas reales.",
+      "fieldTitle": "Título",
+      "fieldDescription": "¿Por qué este cambio?",
+      "descriptionPlaceholder": "¿Qué problema resuelve? ¿Hay preocupaciones? ¿Cómo debería opinar la comunidad?",
+      "configHeader": "Valores propuestos",
+      "configIntro": "Edita cualquiera de los tres umbrales. Los campos sin cambios mantienen su valor actual.",
+      "currentValue": "Actual: {{value}}",
+      "unchanged": "Sin cambio",
+      "tierHeader": "Reversibilidad",
+      "tierIntro": "¿Qué tan difícil sería deshacer esto? El default es fácil porque la config puede revertirse con otra propuesta — sube a moderada o difícil si el impacto cultural es mayor que la reversión técnica.",
+      "submit": "Iniciar la propuesta",
+      "submitting": "Iniciando…"
     }
   },
   "welcome": {

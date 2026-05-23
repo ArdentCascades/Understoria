@@ -10,6 +10,68 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 13 — Proposals MVP at `/proposals`.** First slice of
+  the Decisions surface that the roadmap (`docs/roadmap.md`)
+  describes. v1 is `config_change` proposals only, no voting,
+  no impact-reflection form — but the data model carries every
+  field the future kinds and the moderate / hard tiers will
+  need, so follow-up PRs add behavior without rewriting
+  storage.
+  - **`Proposal` type** in `packages/shared/src/types.ts` with
+    `kind: "proposal"` (the dispute kind folds in later per
+    the roadmap's "Decisions" plan), `category: "config_change"`
+    (recall / policy land later), `reversibilityTier:
+    "easy" | "moderate" | "hard"`, `status: "open" | "passed"
+    | "rejected" | "withdrawn"`, JSON-string `payload`, and a
+    pre-existing `impactReflection` slot for the `hard`-tier
+    structural pause that ships in a follow-up.
+  - **Schema v9** adds a `proposals` table indexed on `status`,
+    `category`, `createdAt`, and `[status+createdAt]`.
+  - **`db/proposals.ts`** — `createProposal`, `listProposals`,
+    `getProposal`, `closeProposal` helpers. v1 closure is
+    manual: the community reaches a decision out-of-band
+    (their usual channel) and any member records the outcome
+    + reason here. 13 tests cover create / list (with status
+    filter + newest-first sort) / close (with the
+    refuse-double-close + missing-row paths) / get.
+  - **`/proposals` page** lists proposals with a status filter
+    (open/all/passed/rejected/withdrawn). Each card shows
+    status / reversibility / category chips, the proposed
+    config diff (parsed from the JSON payload), proposer +
+    timestamps, and an inline "record outcome" affordance for
+    open proposals (passed / rejected / withdrawn with an
+    optional reason note).
+  - **`/proposals/new` form** scoped to `config_change` for v1.
+    Editing any of the three NodeConfig thresholds (daily
+    helper limit, short-exchange hours, reciprocal-pair
+    threshold) shows the current value as a hint so the
+    proposer sees what they're changing. Reversibility-tier
+    picker defaults to easy.
+  - **`ProposalsSection` entry card on Profile** mirrors
+    `DisputesSection` — live count of open proposals + link to
+    the page.
+  - **`CommunitySettingsSection` bootstrap note** now links to
+    `/proposals/new` as the alternative to direct edit. Direct
+    edit stays in place for v1 (still the only path that
+    actually applies the change); once voting lands in a
+    follow-up, the direct-edit path will route through the
+    proposal flow.
+  - **`AppContext` loads proposals** via a live Dexie query so
+    every surface that needs them stays in sync.
+  - **i18n**: new `proposals.*` namespace in en + es covering
+    page chrome, list labels, status / reversibility / category
+    labels, the outcome dialog, error messages, and the
+    Profile entry card pluralization.
+
+  What's intentionally *not* in here: voting, automatic close,
+  impact-reflection form, dispute migration into the same
+  table, moderate/hard categories beyond label/tier (no
+  recall, no policy yet). Each is a separate slice once the
+  surface has real proposals to design against.
+
+  Tests: 379 passing (366 → 379; +13 in `proposals.test.ts`).
+  Locale parity passes. Lint, typecheck, build clean.
+
 - **Trust visualization across the app.** Vouches existed in the
   backend (`lib/vouch.ts`) and the binary `TrustChip` was rendered
   on Profile / MemberDetail, but: the chip showed no count, no
