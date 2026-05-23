@@ -10,6 +10,37 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Outgoing vouch history on Profile.** Personal record of "who
+  you've vouched for" — the inverse of the trusted-by list shipped
+  in the previous PR. Lives in a new section on Profile, between
+  the invites form and the roles-earned card.
+  - **`outgoingVouchesFor(voucherKey, ctx)`** in `lib/vouch.ts`
+    returns the distinct vouchee set as a `VoucheeRef[]` already
+    sorted (manual vouches newest-first, then invite vouches).
+    Same manual-beats-invite dedup as `vouchersFor`: if you both
+    invited someone and later signed a manual vouch, the manual
+    kind wins.
+  - **`OutgoingVouchList` component** mirrors `TrustedByList` —
+    name + short key + kind chip (Vouched / Invited) + relative
+    timestamp for manual vouches. Each name links to that
+    member's MemberDetail page. Empty state when you haven't
+    vouched for anyone yet.
+  - **`outgoingVouches.*` i18n** in en + es with the inverse
+    framing ("People you've vouched for" rather than "Vouched for
+    by").
+  - **6 new tests** in `vouch.test.ts` covering the empty case,
+    manual-only, invite-only, open / revoked / other-people's
+    invites being ignored, manual-beats-invite dedup, and the
+    sort order (manual newest-first, invites trailing).
+
+  Why this matters: members can see their own role in the
+  community trust web, double-check before vouching for someone
+  twice, and have a record of who they've sponsored — especially
+  useful for members issuing invites regularly.
+
+  Tests: 372 passing (366 → 372; +6). Locale parity passes.
+  Lint, typecheck, build clean.
+
 - **Trust visualization across the app.** Vouches existed in the
   backend (`lib/vouch.ts`) and the binary `TrustChip` was rendered
   on Profile / MemberDetail, but: the chip showed no count, no

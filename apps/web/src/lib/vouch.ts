@@ -182,3 +182,60 @@ export function vouchCountFor(
 ): number {
   return vouchersFor(memberKey, ctx).size;
 }
+
+export interface VoucheeRef {
+  voucheeKey: string;
+  /** `invite` when this vouch is implicit (the voucher invited the
+   *  vouchee and the invite was redeemed); `manual` when the voucher
+   *  signed a manual vouch directly. */
+  kind: "invite" | "manual";
+  /** When the vouch was made. For invites, this is when redemption
+   *  happened, not when the invite was issued — but
+   *  `RedeemedInviteLike` doesn't carry that timestamp, so invites
+   *  come back as 0 here. */
+  createdAt: number;
+}
+
+/**
+ * Inverse of `vouchersFor`: who has THIS member vouched for? Returns
+ * the distinct vouchee set with `kind` and `createdAt` per entry.
+ *
+ * Same dedup rule as `vouchersFor`: if `voucherKey` both invited
+ * someone and later signed a manual vouch for them, the manual one
+ * wins (stronger signal).
+ *
+ * Used by the outgoing-vouch list on Profile so a member can see
+ * who they've vouched for — both as a personal record and as a
+ * sanity check against accidentally vouching for someone twice.
+ */
+export function outgoingVouchesFor(
+  voucherKey: string,
+  ctx: TrustContext,
+): VoucheeRef[] {
+  const map = new Map<string, VoucheeRef>();
+  for (const inv of ctx.invites) {
+    if (inv.status !== "redeemed") continue;
+    if (inv.inviterKey !== voucherKey) continue;
+    if (inv.redeemedBy === null) continue;
+    map.set(inv.redeemedBy, {
+      voucheeKey: inv.redeemedBy,
+      kind: "invite",
+      createdAt: 0,
+    });
+  }
+  for (const v of ctx.vouches) {
+    if (v.voucherKey !== voucherKey) continue;
+    if (!verifyVouch(v)) continue;
+    map.set(v.voucheeKey, {
+      voucheeKey: v.voucheeKey,
+      kind: "manual",
+      createdAt: v.createdAt,
+    });
+  }
+  // Manual vouches newest-first, then invite vouches (no useful
+  // timestamp on invites so they fall to the end).
+  return Array.from(map.values()).sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === "manual" ? -1 : 1;
+    return b.createdAt - a.createdAt;
+  });
+}

@@ -304,6 +304,13 @@
     "kindManual": "Vouched",
     "kindInvite": "Invited"
   },
+  "outgoingVouches": {
+    "title": "People you've vouched for",
+    "intro": "Members you've signed a vouch for or invited into the community. Keeping your own record helps you remember and avoids accidentally vouching twice.",
+    "empty": "You haven't vouched for anyone yet. Invites count too — when someone redeems an invite you sent, it shows up here.",
+    "kindManual": "Vouched",
+    "kindInvite": "Invited"
+  },
   "achievement": {
     "first_exchange": {
       "label": "First Exchange",
