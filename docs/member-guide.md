@@ -13,7 +13,24 @@ This guide walks through the main things you'll do.
 
 ---
 
-## 1. Getting in
+## 1. First time you open the app
+
+The first time you open Understoria on a device, you'll see a short
+**welcome** — four screens that explain what the app is and isn't:
+
+1. **"This is a timebank."** One hour of help equals one hour of help.
+2. **"You start with credit."** New members begin with 5 hours of
+   seed balance.
+3. **"Your identity is a key, not an account."** No email, no password.
+4. **"The community is the authority."** Decisions are made together,
+   not by admins.
+
+You can tap **Skip** at any point if a coordinator has already
+explained the basics in person. The welcome only shows once per
+device — if you want to read it again later, **Profile → Learn →
+Revisit the welcome** will bring it back.
+
+## 2. Getting in
 
 Someone in the community sends you an **invite link**. It looks like
 `https://our-community.example/invite#...` and is good for 14 days.
@@ -30,7 +47,7 @@ Someone in the community sends you an **invite link**. It looks like
 That's it. You're a member. The app stores your identity locally on
 this device. There is no username or password.
 
-## 2. Your starting credits
+## 3. Your starting credits
 
 Every new member starts with **5 hours** of time credits. This means
 you can ask for help before you've given any. That's on purpose:
@@ -40,12 +57,14 @@ Your balance shows on your **Profile** page. It can go below zero —
 the app does not stop you from asking when you're low. The community
 decides how far the collective should stretch, not the software.
 
-## 3. The board
+## 4. The board
 
-Tap **Board** at the bottom of the screen. You'll see two tabs:
+Tap **Board** at the bottom of the screen. You'll see three tabs:
 
 - **Needs** — things people are asking for.
 - **Offers** — things people are offering.
+- **Projects** — bigger collective efforts that take more than one
+  person and more than one task. See §9.
 
 Each post card shows what the post is, who posted it, about how many
 hours it'll take, and how urgent it is. Tap any card to see the full
@@ -57,7 +76,7 @@ Use the dropdowns at the top of the board to narrow down by
 **category** (food, transport, childcare, emotional support, and so on)
 or **urgency**. The search box searches titles and descriptions.
 
-## 4. Posting a need
+## 5. Posting a need
 
 Near the bottom of the board, tap **Post a need**.
 
@@ -76,7 +95,7 @@ Fill in:
 
 Tap **Post to the board**. Your need is live.
 
-## 5. Posting an offer
+## 6. Posting an offer
 
 Same flow, but tap **Post an offer** instead. Use this when you have
 something you can share — an afternoon to help with childcare, extra
@@ -85,7 +104,7 @@ soup you cooked, a skill you're willing to teach.
 Don't over-promise. If your week fills up, you can cancel an offer
 from the post detail page.
 
-## 6. Claiming a post
+## 7. Claiming a post
 
 When you see a need you can help with, tap the post to open it, then
 tap **Offer to help**. A confirmation asks you to be sure.
@@ -97,7 +116,7 @@ the thing. Figure out how you'll coordinate — many people use the
 messaging app they already share with the other person (Signal is a
 good choice).
 
-## 7. Confirming an exchange
+## 8. Confirming an exchange
 
 After the help has actually happened, both of you confirm it:
 
@@ -112,24 +131,105 @@ If something went wrong — you didn't receive what was promised, or the
 other person didn't show — tap **Something's wrong — flag it**
 instead. A community mediator will reach out.
 
-## 8. Your Profile page
+## 9. Projects
+
+A **project** is a collective effort with multiple tasks and (usually)
+multiple contributors — building raised beds for a community garden,
+running a winter coat drive, fixing up a member's porch. They live on
+the third tab of the Board.
+
+Open a project to see:
+
+- **Target hours** and **contributed hours**, with a progress bar.
+- A **momentum chip** beside the status — "Humming," "Active,"
+  "Stalled," or one of the terminal states. It summarises the
+  project's pace, not any single person's contribution.
+- A **sparkline** under the progress bar showing the last 14 days of
+  contributions. Useful for seeing whether the project is gathering
+  steam or losing it.
+- A list of **tasks** — each one with an estimated number of hours,
+  an urgency, and who (if anyone) is currently working on it.
+
+### Joining a project
+
+Open the project, find a task with "Open" status, and tap **Claim
+this task**. Coordinate with the organizer the same way you would
+for a board post. When the task is done, you mark it complete; the
+organizer confirms; the hours move into your balance just like any
+other exchange.
+
+If you finish three confirmed project tasks, you earn the **Crew
+Member** role. If you organize a project that draws contributors,
+that's **Groundbreaker**; halfway to the target is **Momentum
+Maker**; finished is **Keystone**.
+
+### Starting a project
+
+Tap **Start a project** from the Projects tab. Give it a title,
+description, target hours, area, and optional deadline. Once it's
+created, you can add tasks and switch the project from "Planning"
+to "Active" so others can claim tasks.
+
+## 10. The Dashboard
+
+Tap **Dashboard** at the bottom of the screen. This is the
+community-level view, not your personal stats. Highlights:
+
+- **Total hours exchanged**, **active members this week**, and the
+  **solidarity streak** (consecutive days with at least one exchange
+  in the community).
+- **Milestones** — community thresholds the group has crossed (first
+  10 hours, first 25, etc.).
+- **Where help is flowing** — a category breakdown showing the mix
+  of care, labor, and support moving through the community.
+- **Breadth, not depth** — members ranked by how many *distinct
+  people* they've helped, not by total hours. Generosity spread
+  widely, not piled deep.
+- **Reciprocity** — the percentage of community connections that
+  flow both ways. High reciprocity means most relationships are
+  mutual; low reciprocity is worth a community conversation, not an
+  automated response.
+- **Community roles earned this month** — a count of how many
+  members earned each role recently.
+
+Both the breadth bar and the reciprocity pulse are windows into the
+shape of help, not scores. They're there so the community can see
+itself, not so members can compete.
+
+## 11. Your Profile page
 
 Tap **Profile** to see:
 
 - **Your balance** and a note about what it means.
 - **About you** — display name, skills, availability, neighborhood
   area. You can edit any of these any time.
+- **Community roles** you've earned — things like "First Exchange,"
+  "Connector," "Listener," "Weaver," "Groundbreaker," "Crew Member,"
+  "Momentum Maker," "Keystone." These are ways of naming what you've
+  done, not a ranking.
+- **Your exchange history** — every give or receive, with who and when.
 - **Invites you've issued** — once you've been in the community a
   while, you can generate invite links for people you want to bring
-  in. (See §9.)
-- **Community roles** you've earned — things like "First Exchange,"
-  "Connector," "Listener." These are ways of naming what you've done,
-  not a ranking.
-- **Your exchange history** — every give or receive, with who and when.
-- **Security** — turn on a passphrase for your identity (§10).
-- **Emergency** — panic buttons in case a device is at risk (§11).
+  in. (See §12.)
+- **Learn** — revisit the welcome flow any time, expand the in-app
+  member guide (a shorter version of this document, available
+  offline), or open the study-group prompts and copy one to share
+  in a meeting.
+- **Community settings** — three safeguard thresholds the community
+  can tune to fit its own context: daily helper limit (a hard
+  per-day cap), short-exchange threshold (exchanges shorter than
+  this get flagged for community review, not blocked), and
+  reciprocal-pattern threshold (after this many exchanges between
+  the same two members in 30 days, the next one gets flagged). A
+  yellow note explains these are bootstrap-mode — once in-app
+  governance ships, changes here will route through a proposal.
+- **Language** — switch between English and Spanish.
+- **Community node** — optional mirror of your finalized exchanges
+  to a community-wide ledger; off by default.
+- **Security** — turn on a passphrase for your identity (§13).
+- **Emergency** — panic buttons in case a device is at risk (§14).
 
-## 9. Inviting someone new
+## 12. Inviting someone new
 
 Two vouches turn a new member into a **trusted** member. Your invite
 counts as the first; someone else will need to vouch for them after
@@ -146,7 +246,7 @@ they join.
 You can revoke an unredeemed invite from the same page if you change
 your mind.
 
-## 10. Setting a passphrase
+## 13. Setting a passphrase
 
 If your phone has full-disk encryption on and a strong lock screen,
 you're already in decent shape. Setting a passphrase on top of that
@@ -165,7 +265,7 @@ You can **Change** or **Disable** protection from the same page. There
 is also a **Lock now** button if you need to hand the device to
 someone briefly.
 
-## 11. If the device is at risk
+## 14. If the device is at risk
 
 **Profile → Emergency** has two panic buttons.
 
@@ -177,7 +277,7 @@ someone briefly.
 
 Both happen entirely on this device. Neither contacts a server.
 
-## 12. FAQ
+## 15. FAQ
 
 **What if nobody responds to my post?** Bump it. Repost with more
 detail. Tell a coordinator. Nobody gets everything they need, but if
@@ -198,6 +298,14 @@ conflict-resolution process.
 **What if I give a lot and never receive?** That's a community
 conversation too. The dashboard is designed to surface whether aid is
 really reaching everyone. If it isn't, we adjust.
+
+**How do I see the welcome screens again?** Profile → Learn →
+Revisit the welcome. The welcome only auto-shows once per device.
+
+**Why does my project show "Stalled"?** A project the community has
+launched but where no tasks have been completed in the last 7 days
+gets a "Stalled" momentum chip. It's not a judgment — it's a signal
+the community might want to bump it, regroup, or pause it.
 
 **Where does my data live?** On your device, in the browser's
 storage. Nothing leaves this device without you knowing — the only
