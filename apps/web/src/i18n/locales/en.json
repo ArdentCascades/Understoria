@@ -606,6 +606,26 @@
     "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide or revisit the welcome from your profile.",
     "footer": "Didn't find your question? Most of what isn't here is a community conversation, not an app feature — talk to a member you trust."
   },
+  "disputes": {
+    "title": "Disputes",
+    "subtitle": "Exchanges someone has flagged for the community to review. Anyone can see this list — there are no admins. The two parties already see the flag on the post itself; this is where it surfaces to everyone else.",
+    "empty": "Nothing flagged right now. When someone flags an exchange, it shows here so the community can see and respond.",
+    "flagChip": "Flagged",
+    "typeNeed": "Need",
+    "typeOffer": "Offer",
+    "helperLabel": "Helper",
+    "recipientLabel": "Recipient",
+    "postedLabel": "Originally posted",
+    "viewPost": "Open the post",
+    "footer": "Resolution happens outside the app for now — talk to both parties, or take it to your community's usual decision-making space. In-app proposal and resolution tooling is on the roadmap.",
+    "entry": {
+      "title": "Community disputes",
+      "descriptionNone": "No exchanges are flagged right now.",
+      "descriptionOne": "{{count}} exchange has been flagged for community review.",
+      "descriptionOther": "{{count}} exchanges have been flagged for community review.",
+      "open": "Open"
+    }
+  },
   "welcome": {
     "skip": "Skip",
     "next": "Next",

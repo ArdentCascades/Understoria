@@ -606,6 +606,26 @@
     "subtitle": "Respuestas rápidas a las cosas que aparecen al usar la app. ¿Buscas el panorama más amplio? Mira la guía de miembros o vuelve a ver la bienvenida desde tu perfil.",
     "footer": "¿No encontraste tu pregunta? Casi todo lo que no está aquí es una conversación de comunidad, no una función de la app — habla con alguien de confianza."
   },
+  "disputes": {
+    "title": "Disputas",
+    "subtitle": "Intercambios que alguien señaló para que la comunidad los revise. Cualquier persona puede ver esta lista — no hay administradores. Las dos partes ya ven la marca en la publicación misma; aquí es donde aparece para el resto.",
+    "empty": "Nada está señalado ahora mismo. Cuando alguien señale un intercambio, aparecerá aquí para que la comunidad pueda verlo y responder.",
+    "flagChip": "Señalado",
+    "typeNeed": "Necesidad",
+    "typeOffer": "Oferta",
+    "helperLabel": "Ayudante",
+    "recipientLabel": "Quien recibe",
+    "postedLabel": "Publicado originalmente",
+    "viewPost": "Abrir la publicación",
+    "footer": "Por ahora la resolución sucede fuera de la app — habla con ambas partes o llévalo al espacio de decisión habitual de tu comunidad. Las herramientas de propuesta y resolución dentro de la app están en la hoja de ruta.",
+    "entry": {
+      "title": "Disputas de la comunidad",
+      "descriptionNone": "Ningún intercambio está señalado ahora mismo.",
+      "descriptionOne": "{{count}} intercambio ha sido señalado para revisión comunitaria.",
+      "descriptionOther": "{{count}} intercambios han sido señalados para revisión comunitaria.",
+      "open": "Abrir"
+    }
+  },
   "welcome": {
     "skip": "Saltar",
     "next": "Siguiente",
