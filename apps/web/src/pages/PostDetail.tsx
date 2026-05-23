@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
@@ -460,9 +460,22 @@ function PersonInline({
   isYou: boolean;
 }) {
   const { t } = useTranslation();
+  if (isYou) {
+    return (
+      <span>
+        {t("common.you")}{" "}
+        <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
+      </span>
+    );
+  }
   return (
     <span>
-      {isYou ? t("common.you") : name}{" "}
+      <Link
+        to={`/member/${encodeURIComponent(publicKey)}`}
+        className="underline-offset-2 hover:underline"
+      >
+        {name}
+      </Link>{" "}
       <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
     </span>
   );

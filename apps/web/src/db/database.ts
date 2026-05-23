@@ -64,22 +64,24 @@ export interface SecretKeyRow {
 
 /**
  * Persisted outbox row for community-node mirroring. Each row represents
- * one signed record (today: an Exchange) that needs to be POSTed to the
- * configured community node. The worker in lib/outbox.ts owns this table
- * — it picks up `pending` rows whose `nextAttemptAt` is in the past,
- * POSTs them, and updates the row's status / backoff.
+ * one signed record (Exchange or SignedVouch today; posts/invites later)
+ * that needs to be POSTed to the configured community node. The worker
+ * in lib/outbox.ts owns this table — it picks up `pending` rows whose
+ * `nextAttemptAt` is in the past, POSTs them, and updates the row's
+ * status / backoff.
  *
  * Why persist it rather than fire-and-forget: a community node down for
  * 30 seconds when a member confirms an exchange should not drop that
  * exchange from the community-wide ledger. The outbox is the durable
- * boundary between "this exchange happened on my device" and "this
- * exchange is visible to the community."
+ * boundary between "this record happened on my device" and "this record
+ * is visible to the community."
  */
 export interface OutboxRow {
   /** UUID for this outbox row. Distinct from the wrapped record's id. */
   id: string;
-  /** Discriminator for future expansion (posts / vouches / invites). */
-  kind: "exchange";
+  /** Discriminator. New kinds slot in here as more record types
+   *  federate; the worker dispatches to the matching submitter. */
+  kind: "exchange" | "vouch";
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
   /** Id of the wrapped record; lets us avoid double-enqueue on retry. */

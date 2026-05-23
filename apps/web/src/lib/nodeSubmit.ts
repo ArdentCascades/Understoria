@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange } from "@/types";
+import type { Exchange, SignedVouch } from "@/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
 /**
@@ -87,6 +87,29 @@ export async function submitExchangeToNode(
   config: SubmitConfig,
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
+  return postSignedRecord("/exchanges", exchange, config, deps);
+}
+
+/**
+ * Mirror a signed vouch to the configured community node. Same
+ * best-effort semantics as `submitExchangeToNode` — failures resolve
+ * with `error` set, never thrown. Vouches federate via the same
+ * outbox pattern as exchanges (Agent 3 task 2 continued).
+ */
+export async function submitVouchToNode(
+  vouch: SignedVouch,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/vouches", vouch, config, deps);
+}
+
+async function postSignedRecord(
+  path: string,
+  record: unknown,
+  config: SubmitConfig,
+  deps: SubmitDeps,
+): Promise<SubmitResult> {
   if (!config.enabled || !config.url.trim()) {
     return { ok: false, error: "disabled" };
   }
@@ -96,13 +119,13 @@ export async function submitExchangeToNode(
     return { ok: false, error: "fetch_not_available" };
   }
 
-  const endpoint = joinUrl(config.url.trim(), "/exchanges");
+  const endpoint = joinUrl(config.url.trim(), path);
   let res: Response;
   try {
     res = await fetchImpl(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(exchange),
+      body: JSON.stringify(record),
       // Browsers default credentials to "same-origin" — we want explicit
       // omit since the node is cross-origin and signatures are the
       // authentication.
