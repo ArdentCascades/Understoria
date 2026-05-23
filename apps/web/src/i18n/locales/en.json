@@ -38,6 +38,11 @@
     "cta": "Add some details",
     "dismiss": "Not now"
   },
+  "firstActionNudge": {
+    "label": "Getting started",
+    "message": "Two ways in: tap any post that catches your eye to see how exchange works, or share something you need or can offer. No pressure to post first — lurking is welcome too.",
+    "dismiss": "Got it"
+  },
   "nav": {
     "board": "Board",
     "dashboard": "Dashboard",
