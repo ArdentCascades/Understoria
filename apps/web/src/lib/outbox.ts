@@ -23,9 +23,10 @@ import { uuid } from "@/lib/id";
 import {
   readSubmitConfig,
   submitExchangeToNode,
+  submitVouchToNode,
   type SubmitResult,
 } from "@/lib/nodeSubmit";
-import type { Exchange } from "@/types";
+import type { Exchange, SignedVouch } from "@/types";
 
 /**
  * Durable outbox + retry worker for community-node mirroring.
@@ -93,23 +94,43 @@ const worker: WorkerHandle = {
 export async function enqueueExchangeOutbox(
   exchange: Exchange,
 ): Promise<OutboxRow | null> {
+  return enqueueOutbox("exchange", exchange.id, exchange);
+}
+
+/**
+ * Insert an outbox row for a newly-created vouch. Same shape and
+ * semantics as enqueueExchangeOutbox — designed to be called inside
+ * the same transaction that wrote the vouch, with `db.outbox` and
+ * `db.settings` in the transaction's scope.
+ */
+export async function enqueueVouchOutbox(
+  vouch: SignedVouch,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("vouch", vouch.id, vouch);
+}
+
+async function enqueueOutbox(
+  kind: OutboxRow["kind"],
+  recordId: string,
+  payload: unknown,
+): Promise<OutboxRow | null> {
   const urlRow = await db.settings.get("communityNodeUrl");
   if (!urlRow?.value?.trim()) return null;
 
-  // Dedup: if an exchange with this id is already in the outbox,
+  // Dedup: if a row with this recordId is already in the outbox,
   // leave it alone. Re-enqueuing would clobber retry state.
   const existing = await db.outbox
     .where("recordId")
-    .equals(exchange.id)
+    .equals(recordId)
     .first();
   if (existing) return existing;
 
   const now = Date.now();
   const row: OutboxRow = {
     id: uuid(),
-    kind: "exchange",
-    payload: JSON.stringify(exchange),
-    recordId: exchange.id,
+    kind,
+    payload: JSON.stringify(payload),
+    recordId,
     createdAt: now,
     attempts: 0,
     nextAttemptAt: now,
@@ -198,9 +219,9 @@ export async function flushOutboxOnce(
   let retried = 0;
 
   for (const row of due) {
-    let exchange: Exchange;
+    let payload: Exchange | SignedVouch;
     try {
-      exchange = JSON.parse(row.payload) as Exchange;
+      payload = JSON.parse(row.payload) as Exchange | SignedVouch;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -211,9 +232,14 @@ export async function flushOutboxOnce(
       continue;
     }
 
-    const result = await submitExchangeToNode(exchange, cfg, {
-      fetchImpl: options.fetchImpl,
-    });
+    const result =
+      row.kind === "exchange"
+        ? await submitExchangeToNode(payload as Exchange, cfg, {
+            fetchImpl: options.fetchImpl,
+          })
+        : await submitVouchToNode(payload as SignedVouch, cfg, {
+            fetchImpl: options.fetchImpl,
+          });
 
     if (result.ok) {
       await db.outbox.update(row.id, {

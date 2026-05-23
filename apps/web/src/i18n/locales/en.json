@@ -387,6 +387,25 @@
       "lineOther": "{{count}} members earned {{role}}"
     }
   },
+  "member": {
+    "notFound": "Member not found on this device.",
+    "aboutTitle": "About",
+    "skills": "Skills",
+    "availability": "Availability",
+    "area": "Area",
+    "exchanges": "Exchanges (helper + helped)",
+    "none": "—",
+    "vouchTitle": "Vouch",
+    "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) move a member from pending-trust to trusted.",
+    "vouchButton": "Vouch for this member",
+    "vouching": "Vouching…",
+    "vouchedJustNow": "Vouched. Your signed statement is in the local ledger and (if a community node is configured) on its way there.",
+    "cannotVouchSelf": "You can't vouch for yourself.",
+    "cannotVouchUntilTrusted": "Vouching is enabled once you're trusted yourself. Your inviter's vouch is one; another community member can vouch for you to make it two.",
+    "alreadyFullyTrusted": "This member is already trusted. Another vouch wouldn't change anything.",
+    "alreadyVouchedByYou": "You've already vouched for this member.",
+    "backToBoard": "Back to board"
+  },
   "profile": {
     "title": "Your profile",
     "identity": "Identity: {{key}}",

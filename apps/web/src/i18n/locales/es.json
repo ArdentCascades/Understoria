@@ -387,6 +387,25 @@
       "lineOther": "{{count}} personas obtuvieron {{role}}"
     }
   },
+  "member": {
+    "notFound": "No se encontró a esta persona en este dispositivo.",
+    "aboutTitle": "Sobre",
+    "skills": "Habilidades",
+    "availability": "Disponibilidad",
+    "area": "Zona",
+    "exchanges": "Intercambios (ayudante + ayudada)",
+    "none": "—",
+    "vouchTitle": "Avalar",
+    "vouchIntro": "Avalar es una declaración firmada de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) llevan a una persona de pendiente-de-confianza a confiable.",
+    "vouchButton": "Avalar a esta persona",
+    "vouching": "Avalando…",
+    "vouchedJustNow": "Avalado. Tu declaración firmada está en el registro local y (si hay un nodo comunitario configurado) en camino allí.",
+    "cannotVouchSelf": "No puedes avalarte a ti misma.",
+    "cannotVouchUntilTrusted": "Podrás avalar cuando tú misma seas confiable. El aval de quien te invitó cuenta como uno; otra persona de la comunidad puede avalarte para sumar el segundo.",
+    "alreadyFullyTrusted": "Esta persona ya es confiable. Otro aval no cambiaría nada.",
+    "alreadyVouchedByYou": "Ya has avalado a esta persona.",
+    "backToBoard": "Volver al tablero"
+  },
   "profile": {
     "title": "Tu perfil",
     "identity": "Identidad: {{key}}",

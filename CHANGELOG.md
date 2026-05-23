@@ -9,6 +9,35 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Manual vouching UI + outbox push.** Closes a real gap: the
+  `db.vouches` table was read by Profile for trust computation but
+  had no production write path — `createVouch` was exported but
+  only called by tests, so members could never reach the "trusted"
+  state past their inviter's implicit vouch. This release adds:
+  - A `/member/:publicKey` page (`pages/MemberDetail.tsx`) showing
+    a member's display name, key fingerprint, trust chip, profile
+    fields, and exchange count. Reachable from PostDetail (the
+    poster name is now a link).
+  - A "Vouch for this member" button on that page, gated to: not
+    self, current member is trusted, target is not already trusted,
+    no prior vouch from the current member exists.
+  - `db/vouches.ts` with `addManualVouch()` — signs, persists, and
+    enqueues to the outbox in a single transaction. Validates
+    `VouchValidationError("self_vouch" | "duplicate" | "signing_failed")`.
+  - Outbox extended: `OutboxRow.kind` is now `"exchange" | "vouch"`.
+    `enqueueVouchOutbox()` mirrors the exchange helper.
+    `flushOutboxOnce` dispatches on `kind` to either
+    `submitExchangeToNode` or the new `submitVouchToNode`.
+  - `lib/nodeSubmit.ts` refactor: the shared POST + record-outcome
+    logic extracted into `postSignedRecord(path, record, ...)`;
+    `submitExchangeToNode` and `submitVouchToNode` are thin
+    wrappers. Behaviour for exchanges unchanged.
+  - 5 new tests in `db/vouches.test.ts` covering persistence,
+    self-vouch rejection, duplicate rejection, outbox enqueue when
+    a community node is configured, and the no-enqueue path when
+    it isn't. Full web suite: 215 (was 210).
+
 ## [0.2.0] — 2026-05-22
 
 Second development release. Pilot-ready surface: in-app onboarding,
