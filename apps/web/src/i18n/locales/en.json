@@ -28,7 +28,8 @@
   "nav": {
     "board": "Board",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "primaryNav": "Primary navigation"
   },
   "projects": {
     "tab": "Projects",

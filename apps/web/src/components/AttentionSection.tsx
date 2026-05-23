@@ -50,7 +50,11 @@ export function AttentionSection() {
       <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
         {t("attention.intro")}
       </p>
-      <ul className="flex flex-col gap-2">
+      <ul
+        className="flex flex-col gap-2"
+        aria-live="polite"
+        aria-relevant="additions text"
+      >
         {items.map((item) => {
           if (item.kind === "confirm_exchange") {
             return (

@@ -10,6 +10,37 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 22 PR 22.3 — first batch of accessibility surface fixes.**
+  Uses the primitives shipped in 22.2.
+  - **`ConfirmDialog`** now wires `useFocusTrap` to the dialog
+    card. Tab/Shift+Tab cycle within the dialog; the confirm
+    button remains the autofocus target; focus restores on close.
+    The backdrop became visual-only — click-outside-to-dismiss
+    was removed because it had no keyboard equivalent (Esc and
+    the visible Cancel button cover everyone). The two TODO
+    `eslint-disable` comments from PR 22.2 are gone.
+  - **`BottomNav`** gains arrow-key navigation. Tab still moves
+    into and out of the nav as a unit; once inside,
+    ArrowRight / ArrowLeft / Home / End move focus between items
+    without re-traversing the document. The `<nav>`'s
+    `aria-label` is now the localized "Primary navigation"
+    string instead of one of the items' labels (small but real
+    fix — screen readers were announcing the nav as "Board",
+    same as the first link).
+  - **`AttentionSection`** items list is now `aria-live="polite"`
+    + `aria-relevant="additions text"`. New items get announced
+    when they appear (a task you organize gets marked complete,
+    an exchange is awaiting your confirmation) without
+    interrupting whatever the screen reader is doing.
+
+  `docs/accessibility.md` updated — the three items move from §6
+  (Known gaps) into §5 (Current state). The remaining known gaps
+  are the sparkline detail, color-contrast verification across
+  chip variants, screen-reader testing, and the formal audit.
+
+  Tests: 248 web passing (unchanged — the primitives' tests from
+  22.2 already cover the focusable-elements math). Lint, typecheck,
+  build all clean.
 - **Agent 22 PR 22.2 — lint + reusable a11y patterns.** Toolchain
   + primitives, no surface fixes yet (those start in PR 22.3).
   Adds `eslint-plugin-jsx-a11y` scoped to a11y rules only (the

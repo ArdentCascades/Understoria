@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useRef, type ReactNode } from "react";
+import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -41,7 +42,15 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
+
+  // Trap Tab/Shift+Tab focus inside the card while open. The hook
+  // moves focus to the first focusable element on mount; we override
+  // that immediately below with the confirm button as the autofocus
+  // target — matches the previous behaviour and keeps the destructive
+  // action one keypress away.
+  useFocusTrap(cardRef, open);
 
   useEffect(() => {
     if (open) confirmRef.current?.focus();
@@ -58,24 +67,20 @@ export function ConfirmDialog({
 
   if (!open) return null;
 
+  // Backdrop is intentionally non-interactive — visual scrim only.
+  // The dismiss paths are Esc (keyboard) and the Cancel button
+  // (everyone). Click-outside-to-close was removed in PR 22.3
+  // because it had no keyboard equivalent.
   return (
-    // TODO(a11y, PR 22.3): backdrop click-to-dismiss is a UX nicety
-    // on top of the Esc handler above. Keyboard users dismiss via
-    // Esc; the backdrop click is mouse/touch only. Splitting this
-    // into a proper <button>-backed close affordance is part of
-    // the ConfirmDialog focus-trap work in PR 22.3.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
       className="fixed inset-0 z-50 flex items-end justify-center bg-moss-950/40 p-4 sm:items-center"
-      onClick={onCancel}
     >
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- stopPropagation prevents backdrop-click from firing when the user clicks inside the card; not an interactive surface itself. Revisit during PR 22.3 focus-trap work. */}
       <div
+        ref={cardRef}
         className="card w-full max-w-md animate-fade-in"
-        onClick={(e) => e.stopPropagation()}
       >
         <h2 id="confirm-dialog-title" className="text-lg font-semibold">
           {title}

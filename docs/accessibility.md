@@ -144,33 +144,30 @@ formal audit; the formal audit is one of the items in §6.
   the web workspace; the server has no JSX.
 - **Reusable primitives** — `src/lib/a11y/` exports
   `getFocusableElements`, `nextFocusable`, `useFocusTrap`, and
-  `useReducedMotion`. PR 22.3 will wire `useFocusTrap` into
-  `ConfirmDialog`.
+  `useReducedMotion`.
+- **`ConfirmDialog` focus management** — `useFocusTrap` wired in.
+  Tab/Shift+Tab cycle within the dialog. The destructive action
+  is the autofocus target on open. Focus restores to the
+  previously-focused element on close. Esc dismisses (handler
+  already existed). The backdrop is now visual-only — the
+  dismiss paths are Esc and the Cancel button.
+- **`BottomNav` keyboard navigation** — Tab moves into the nav
+  as a unit; once inside, ArrowRight / ArrowLeft / Home / End
+  move focus between items without re-traversing the document.
+  The `aria-label` on the `<nav>` is the localized "Primary
+  navigation" string rather than one of the items' labels.
+- **`AttentionSection` `aria-live`** — the items list is
+  `aria-live="polite"` + `aria-relevant="additions text"`. New
+  items (a task you organize gets marked complete, an exchange
+  is awaiting your confirmation) are announced when they
+  appear, without interrupting whatever the screen reader is
+  doing.
 
 ## 6. Known gaps (tracked work)
 
 These are the items the first wave of Agent 22 surface PRs will
 address. Each maps to a focused PR or a small bundle.
 
-- **`ConfirmDialog` focus trap.** The dialog component renders
-  without managing focus. A keyboard user opening the dialog stays
-  at the trigger button; Tab continues to background content
-  rather than moving inside the dialog. (Esc *does* close — that
-  handler is wired in the component.) The backdrop's
-  click-to-dismiss is currently keyboard-inaccessible (the lint
-  plugin catches it; the findings are documented with TODOs
-  referencing this work). Fix in PR 22.3: wire `useFocusTrap`,
-  autofocus on the destructive action, restore focus on close,
-  convert the backdrop to a proper close affordance.
-- **`BottomNav` keyboard navigation.** Tab moves between links
-  but arrow-key navigation between tabs (a common screen reader
-  expectation for `role="navigation"` with a small set of
-  destinations) doesn't exist. Less critical than the dialog
-  focus trap but worth a pattern.
-- **`AttentionSection` `aria-live`.** When new items appear (a
-  task gets confirmed elsewhere, an exchange comes due), screen
-  readers don't announce it. Adding `aria-live="polite"` on the
-  list surface would.
 - **Sparkline on project detail** has an `aria-label` describing
   totals but no fallback table or per-day breakdown for screen
   readers who want detail. AA-compliant; not yet ideal.

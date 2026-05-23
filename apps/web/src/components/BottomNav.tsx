@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import type { KeyboardEvent } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -33,11 +34,39 @@ const ITEMS: NavItem[] = [
   { to: "/profile", labelKey: "nav.profile", icon: "\u{1F33F}" },
 ];
 
+// Keyboard navigation inside the bottom nav. Tab still moves into
+// and out of the nav as a unit; once inside, ArrowRight/Left (and
+// Home/End) move focus between items without re-traversing the
+// whole document. Standard pattern for nav menubars.
+function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
+  const key = e.key;
+  if (
+    key !== "ArrowRight" &&
+    key !== "ArrowLeft" &&
+    key !== "Home" &&
+    key !== "End"
+  ) {
+    return;
+  }
+  const list = e.currentTarget.closest("ul");
+  if (!list) return;
+  const links = Array.from(list.querySelectorAll<HTMLAnchorElement>("a"));
+  if (links.length === 0) return;
+  const idx = links.indexOf(e.currentTarget);
+  e.preventDefault();
+  let next: HTMLAnchorElement;
+  if (key === "Home") next = links[0];
+  else if (key === "End") next = links[links.length - 1];
+  else if (key === "ArrowRight") next = links[(idx + 1) % links.length];
+  else next = links[(idx - 1 + links.length) % links.length];
+  next.focus();
+}
+
 export function BottomNav() {
   const { t } = useTranslation();
   return (
     <nav
-      aria-label={t("nav.board")}
+      aria-label={t("nav.primaryNav")}
       className="sticky bottom-0 z-30 border-t border-moss-200 bg-white/95
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95"
@@ -48,6 +77,7 @@ export function BottomNav() {
             <NavLink
               to={item.to}
               end={item.to === "/"}
+              onKeyDown={handleArrowNav}
               className={({ isActive }) =>
                 [
                   "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors",
