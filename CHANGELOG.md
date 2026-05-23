@@ -10,6 +10,52 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Error-recovery toasts with Retry.** When a task / project /
+  post action fails (claim a task, confirm an exchange, launch
+  a project, etc.), an inline error appeared somewhere on the
+  page — but the dialog had just closed, the page may have
+  scrolled, and the in-row button that triggered the action
+  often was no longer visible. Recovery was "find the button
+  again." Now those failures also surface as a persistent
+  error toast with a Retry button that re-runs the original
+  action.
+  - **`ToastTone` gains `"error"`.** Success / info auto-dismiss
+    after 4s (the action they acknowledge already happened);
+    error toasts persist until dismissed or Retry is tapped.
+  - **`ToastState.action`** — optional `{ label, onAction }`.
+    The Retry button calls `onAction()` then dismisses the
+    toast. Caller decides what Retry means.
+  - **`showToast` signature** stays backward-compatible:
+    `showToast("msg")` still works, `showToast("msg", "info")`
+    still works (the 2nd arg can be a string tone for the
+    common case). New shape: `showToast("msg", { tone, action })`.
+  - **`ToastContainer` layout** branches by tone. Success/info
+    keep the single-tap pill. Errors and toasts-with-actions
+    render a richer row: message + Retry + explicit X
+    dismiss. Errors use `role="alert"` + `aria-live="assertive"`;
+    success/info stay `polite`.
+  - **PostDetail's `run()` wrapper** captures the closure and
+    re-runs it on Retry. The inline error display stays in
+    place too — both surfaces are reliable, and the toast just
+    catches the user wherever they happened to look.
+  - **ProjectDetail's `run()` wrapper** gets the same treatment.
+    Task actions (claim, mark done, release, confirm) and
+    project status actions (launch, pause, complete, resume)
+    all route through this wrapper, so a single change covers
+    all of them.
+
+  Not done here, by design: form submissions (PostForm,
+  ProjectNew, Profile edit) still use inline-error-only. The
+  form preserves state, the submit button is still visible,
+  and toasting on top of that would be redundant noise. Retry
+  toasts are specifically for action buttons where the
+  trigger is ephemeral.
+
+  Tests: 320 passing (unchanged — the change is layout + flow,
+  and existing tests still cover the underlying actions).
+  Locale parity passes (reuses the pre-existing
+  `common.tryAgain` string). Lint, typecheck, build clean.
+
 - **First-action nudge on Board.** One-time orientation banner
   for brand-new members who haven't posted or claimed anything
   yet: "Two ways in: tap any post that catches your eye to see

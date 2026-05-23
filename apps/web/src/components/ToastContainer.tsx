@@ -13,19 +13,67 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "@/state/ToastContext";
 
 // Renders the current toast (if any) in a fixed position above the
-// bottom nav. ARIA polite so screen readers hear it once without
-// interrupting whatever they're doing. Tap or Esc to dismiss
-// (Esc handler lives in ToastContext).
+// bottom nav.
+//
+// Success / info toasts use polite live region and a rounded-pill
+// shape — single tap dismisses. Error toasts use role="alert" (so
+// screen readers prioritize them), render with rose tone, persist
+// until dismissed, and optionally show a Retry button next to the
+// message + an explicit Dismiss control.
+
+const TONE_CLASSES: Record<"success" | "info" | "error", string> = {
+  success: "bg-canopy-700 text-canopy-50 dark:bg-canopy-700 dark:text-canopy-50",
+  info: "bg-moss-700 text-moss-50 dark:bg-moss-700 dark:text-moss-50",
+  error: "bg-rose-700 text-rose-50 dark:bg-rose-800 dark:text-rose-50",
+};
 
 export function ToastContainer() {
   const { toast, dismissToast } = useToast();
   const { t } = useTranslation();
   if (!toast) return null;
 
-  const tone =
-    toast.tone === "success"
-      ? "bg-canopy-700 text-canopy-50 dark:bg-canopy-700 dark:text-canopy-50"
-      : "bg-moss-700 text-moss-50 dark:bg-moss-700 dark:text-moss-50";
+  const tone = TONE_CLASSES[toast.tone];
+  const isError = toast.tone === "error";
+
+  // Error toasts use a richer layout (message + action + dismiss)
+  // so plain-tap-to-dismiss isn't viable — they need explicit
+  // buttons. Success/info keep the single-button-pill shape so a
+  // mistaken touch still dismisses cleanly.
+  if (isError || toast.action) {
+    return (
+      <div
+        className="pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4"
+        role={isError ? "alert" : "status"}
+        aria-live={isError ? "assertive" : "polite"}
+      >
+        <div
+          className={`pointer-events-auto flex max-w-md items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium shadow-lg ${tone}`}
+        >
+          <span className="flex-1">{toast.message}</span>
+          {toast.action && (
+            <button
+              type="button"
+              onClick={() => {
+                toast.action!.onAction();
+                dismissToast();
+              }}
+              className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold hover:bg-white/25"
+            >
+              {toast.action.label}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={dismissToast}
+            aria-label={t("toast.dismiss")}
+            className="rounded-full bg-white/15 px-2 py-1 text-xs font-bold hover:bg-white/25"
+          >
+            {"×"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

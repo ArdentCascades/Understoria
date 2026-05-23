@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { useToast } from "@/state/ToastContext";
 import {
   addProjectTask,
   claimProjectTask,
@@ -51,6 +52,7 @@ export default function ProjectDetailPage() {
     exchanges,
   } = useApp();
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
   const project = useMemo(
@@ -110,7 +112,22 @@ export default function ProjectDetailPage() {
       setError(null);
       return await action();
     } catch (err) {
-      setError(humanizeError(err));
+      const message = humanizeError(err);
+      setError(message);
+      // Project actions (claim task, confirm completion, launch,
+      // etc.) often happen via small in-row buttons that scroll
+      // out of view. Surface the failure as an error toast with
+      // Retry so the user can recover without finding the button
+      // again.
+      showToast(message, {
+        tone: "error",
+        action: {
+          label: t("common.tryAgain"),
+          onAction: () => {
+            void run(action);
+          },
+        },
+      });
       return null;
     }
   }
