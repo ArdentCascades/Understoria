@@ -29,6 +29,7 @@ import type {
   ProjectActivity,
   ProjectTask,
   Proposal,
+  Vote,
 } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
 
@@ -142,6 +143,7 @@ export class UnderstoriaDB extends Dexie {
   nodeConfig!: Table<NodeConfigRow, string>;
   drafts!: Table<DraftRow, string>;
   proposals!: Table<Proposal, string>;
+  votes!: Table<Vote, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -204,6 +206,13 @@ export class UnderstoriaDB extends Dexie {
     // separate — only `kind: "proposal"` rows live here for now.
     this.version(9).stores({
       proposals: "id, status, category, createdAt, [status+createdAt]",
+    });
+    // Version 10 — Agent 13 voting. Votes have a deterministic
+    // `${proposalId}|${voterKey}` id so re-casting is just a put;
+    // the composite index lets the tally helper pull all votes
+    // for a proposal in one query.
+    this.version(10).stores({
+      votes: "id, proposalId, voterKey, createdAt, [proposalId+voterKey]",
     });
   }
 }
