@@ -10,6 +10,34 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Trust chips on `AttentionSection`.** When the Board surfaces
+  an exchange waiting on your confirmation or a project task
+  waiting on your sign-off, the counterparty's trust state is now
+  shown inline as a compact chip — same trust pill that lives on
+  PostCards and member profiles, just in the attention list. So
+  the trust signal is visible at the moment of confirmation, not
+  one navigation away.
+  - **`AttentionItem` shape gains `counterpartyKey` /
+    `completerKey`** alongside the existing display-name field.
+    The keys let consumers (AttentionSection) compose trust
+    lookups on top without recomputing the whole attention
+    list. Pure-function layer stays focused on "what needs
+    attention"; trust composition happens in the component.
+  - **`AttentionSection`** computes a `Map<key, TrustStatus>`
+    scoped to just the keys appearing in the current list
+    (usually a handful) so the same member showing up twice
+    doesn't trigger repeat signature verification.
+  - **Two test fixtures updated** in `attention.test.ts` to
+    assert the new key fields are populated (`counterpartyKey:
+    "bob"`, `completerKey: "bob"`). Existing tests still pass
+    unchanged because the assertions used `toMatchObject`,
+    which is permissive about extra fields.
+
+  Tests: 372 passing (unchanged — assertions tightened in
+  place). Locale parity passes (no new strings; reuses the
+  `trust.*` namespace from earlier PRs). Lint, typecheck,
+  build clean.
+
 - **Outgoing vouch history on Profile.** Personal record of "who
   you've vouched for" — the inverse of the trusted-by list shipped
   in the previous PR. Lives in a new section on Profile, between
