@@ -532,6 +532,14 @@
         "label": "Reciprocal-pattern threshold",
         "hint": "When the same two members exchange this many times in 30 days, the latest exchange gets an advisory flag."
       },
+      "deliberationDays": {
+        "label": "Proposal deliberation period (days)",
+        "hint": "Minimum days a proposal must stay open before it can auto-pass on consensus. Prevents rush votes."
+      },
+      "minAffirms": {
+        "label": "Minimum affirm votes",
+        "hint": "Distinct affirm votes required for a proposal to auto-pass. Even with deliberation done, a proposal that only one person has affirmed shouldn't pass silently."
+      },
       "save": "Save settings",
       "reset": "Reset to defaults"
     },
@@ -696,6 +704,11 @@
     },
     "errorTitleRequired": "Give the proposal a short title.",
     "errorPositiveInteger": "Must be a whole number greater than 0.",
+    "eligibility": {
+      "waitDeliberation": "Auto-passes {{when}} if no blocks land before then.",
+      "waitAffirms": "Needs {{need}} affirms to auto-pass on consensus; has {{have}} so far.",
+      "blocked": "Held by {{count}} block — needs to be resolved before this can move forward."
+    },
     "vote": {
       "headingNone": "No votes cast yet",
       "headingOne": "{{count}} member has weighed in",

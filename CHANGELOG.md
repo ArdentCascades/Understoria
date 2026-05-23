@@ -10,6 +10,70 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Automatic close on consensus.** Builds on the voting layer
+  from the previous PR. A proposal now auto-passes when:
+  - the **deliberation period** has elapsed
+    (`proposalDeliberationDays`, default 3),
+  - there are **zero remaining blocks**, and
+  - there are at least **`proposalMinAffirms` distinct affirm
+    votes** (default 2 — same threshold the vouch system uses
+    for "trusted").
+
+  Auto-reject is intentionally NOT implemented. A stalled
+  proposal stays open until someone manually withdraws it or
+  the community agrees out-of-band that it's dead. The
+  "supermajority fallback" `GOVERNANCE.md` describes is left
+  for a more contentious mechanism in a future PR.
+  - **Two new `NodeConfig` fields** —
+    `proposalDeliberationDays` (default 3) and
+    `proposalMinAffirms` (default 2). Old config rows that
+    pre-date these fields read them as the defaults; no
+    schema migration needed because the reader
+    (`getNodeConfig`) already null-coalesces.
+  - **`autoCloseProposals.ts`** — pure decision logic:
+    `autoCloseEligibility(proposal, votes, config, now)`
+    returns a tagged result (`passes` / `wait_deliberation`
+    / `wait_affirms` / `blocked` / `not_open`). The page-
+    level effect uses `pickProposalsToAutoPass` to find every
+    eligible proposal in one pass and close it via the
+    existing `closeProposal` helper (with a "Auto-passed on
+    consensus" reason for the historical record).
+    **10 tests** cover the five eligibility branches +
+    cross-proposal vote isolation + the boundary cases (exact
+    deliberation cutoff, abstains-don't-count, configurable
+    thresholds).
+  - **Eligibility banner on every open proposal card** —
+    surfaces the current state inline:
+    - `"Auto-passes {{when}} if no blocks land before then."`
+      (amber tone, deliberation window still ticking)
+    - `"Needs N affirms to auto-pass on consensus; has M so
+      far."` (amber tone, deliberation done but undervoted)
+    - `"Held by 1 block — needs to be resolved before this
+      can move forward."` (rose tone)
+    The `passes` state doesn't render — by the time the
+    component re-renders the auto-close effect has already
+    flipped the proposal to closed.
+  - **The auto-close effect** runs on every render of
+    `/proposals`, so the moment the last condition is
+    satisfied (deliberation done, min affirms, no blocks)
+    the proposal closes. Race-safe — `closeProposal` rejects
+    on already-closed rows, and the effect swallows that
+    error so two tabs visiting the page simultaneously
+    don't trip each other.
+  - **CommunitySettingsSection** now exposes the two new
+    thresholds alongside the existing three, so a community
+    can tune deliberation period + minimum affirms to local
+    cadence (per Ostrom principle 2: rules fit local
+    conditions).
+  - **i18n**: new `proposals.eligibility.*` (wait-deliberation,
+    wait-affirms, blocked) and
+    `profile.communitySettings.deliberationDays.*` /
+    `profile.communitySettings.minAffirms.*` in en + es.
+
+  Tests: 407 passing (397 → 407; +10 in
+  `autoCloseProposals.test.ts`). Locale parity passes. Lint,
+  typecheck, build clean.
+
 - **Voting on proposals.** Builds on the Proposals MVP from the
   previous PR. Members can now affirm / block / abstain on any
   open proposal directly from `/proposals`. Each card shows the

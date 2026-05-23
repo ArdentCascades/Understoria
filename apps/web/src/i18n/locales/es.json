@@ -532,6 +532,14 @@
         "label": "Umbral de patrón recíproco",
         "hint": "Cuando dos mismas integrantes intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
       },
+      "deliberationDays": {
+        "label": "Periodo de deliberación de propuestas (días)",
+        "hint": "Días mínimos que una propuesta debe permanecer abierta antes de aprobarse automáticamente por consenso. Evita votaciones apresuradas."
+      },
+      "minAffirms": {
+        "label": "Votos a favor mínimos",
+        "hint": "Votos a favor distintos necesarios para que una propuesta se apruebe automáticamente. Incluso con la deliberación completa, una propuesta que solo una persona ha avalado no debería pasar en silencio."
+      },
       "save": "Guardar configuración",
       "reset": "Restaurar valores predeterminados"
     },
@@ -696,6 +704,11 @@
     },
     "errorTitleRequired": "Dale a la propuesta un título corto.",
     "errorPositiveInteger": "Debe ser un número entero mayor que 0.",
+    "eligibility": {
+      "waitDeliberation": "Se aprueba automáticamente {{when}} si no llegan bloqueos antes.",
+      "waitAffirms": "Necesita {{need}} votos a favor para aprobarse por consenso; lleva {{have}} hasta ahora.",
+      "blocked": "Detenida por {{count}} bloqueo — debe resolverse antes de avanzar."
+    },
     "vote": {
       "headingNone": "Aún nadie ha opinado",
       "headingOne": "{{count}} persona ha opinado",
