@@ -26,6 +26,7 @@ import { humanizeError } from "@/lib/humanizeError";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyState } from "@/components/EmptyState";
 import {
   formatHours,
   formatRelativeTime,
@@ -144,9 +145,11 @@ export default function ProfilePage() {
           {t("profile.rolesEarned.title")}
         </h2>
         {myAchievements.length === 0 ? (
-          <p className="text-sm text-moss-600 dark:text-moss-300">
-            {t("profile.rolesEarned.empty")}
-          </p>
+          <EmptyState
+            icon={"\u{1F343}"}
+            variant="inset"
+            message={t("profile.rolesEarned.empty")}
+          />
         ) : (
           <ul className="flex flex-col gap-2">
             {myAchievements.map((a) => (
@@ -166,9 +169,12 @@ export default function ProfilePage() {
           {t("profile.history.title")}
         </h2>
         {history.length === 0 ? (
-          <p className="text-sm text-moss-600 dark:text-moss-300">
-            {t("profile.history.empty")}
-          </p>
+          <EmptyState
+            icon={"\u{1F33F}"}
+            variant="inset"
+            message={t("profile.history.empty")}
+            action={{ label: t("nav.board"), to: "/" }}
+          />
         ) : (
           <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
             {history.map(({ exchange, delta, counterparty }) => {
@@ -856,9 +862,11 @@ function InvitesSection({
       )}
 
       {invites.length === 0 ? (
-        <p className="mt-4 text-sm text-moss-600 dark:text-moss-300">
-          {t("profile.invites.empty")}
-        </p>
+        <EmptyState
+          icon={"\u{2709}\u{FE0F}"}
+          variant="inset"
+          message={t("profile.invites.empty")}
+        />
       ) : (
         <ul className="mt-4 flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
           {invites.map((inv) => (

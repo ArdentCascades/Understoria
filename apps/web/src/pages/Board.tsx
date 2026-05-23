@@ -25,6 +25,7 @@ import { useApp } from "@/state/AppContext";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
 import { AttentionSection } from "@/components/AttentionSection";
+import { EmptyState } from "@/components/EmptyState";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import type { Category, PostType, Urgency } from "@/types";
 
@@ -170,7 +171,18 @@ export default function BoardPage() {
       </div>
 
       {visiblePosts.length === 0 ? (
-        <EmptyState tab={tab as PostType} />
+        <EmptyState
+          message={
+            tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
+          }
+          action={{
+            label:
+              tab === "NEED"
+                ? t("board.fab.postNeed")
+                : t("board.fab.postOffer"),
+            to: `/post/new?type=${tab}`,
+          }}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {visiblePosts.map((p) => (
@@ -256,14 +268,10 @@ function ProjectList({
 
   if (visible.length === 0) {
     return (
-      <div className="card flex flex-col items-center gap-2 py-10 text-center">
-        <div className="text-4xl" aria-hidden="true">
-          {"\u{1F331}"}
-        </div>
-        <p className="max-w-sm text-sm text-moss-600 dark:text-moss-300">
-          {t("projects.empty")}
-        </p>
-      </div>
+      <EmptyState
+        message={t("projects.empty")}
+        action={{ label: t("projects.fab"), to: "/project/new" }}
+      />
     );
   }
 
@@ -286,18 +294,3 @@ function ProjectList({
   );
 }
 
-function EmptyState({ tab }: { tab: PostType }) {
-  const { t } = useTranslation();
-  const message =
-    tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers");
-  return (
-    <div className="card flex flex-col items-center gap-2 py-10 text-center">
-      <div className="text-4xl" aria-hidden="true">
-        {"\u{1F331}"}
-      </div>
-      <p className="max-w-sm text-sm text-moss-600 dark:text-moss-300">
-        {message}
-      </p>
-    </div>
-  );
-}
