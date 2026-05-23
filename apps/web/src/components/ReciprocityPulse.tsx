@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
+import { EmptyState } from "@/components/EmptyState";
 
 interface ReciprocityPulseProps {
   reciprocalPairs: number;
@@ -36,9 +37,11 @@ export function ReciprocityPulse({
         {t("dashboard.reciprocity.intro")}
       </p>
       {totalPairs === 0 ? (
-        <p className="text-sm text-moss-600 dark:text-moss-300">
-          {t("dashboard.reciprocity.empty")}
-        </p>
+        <EmptyState
+          icon={"\u{1F333}"}
+          variant="inset"
+          message={t("dashboard.reciprocity.empty")}
+        />
       ) : (
         <div>
           <div className="flex items-baseline gap-3">

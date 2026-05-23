@@ -12,6 +12,7 @@
 import { useTranslation } from "react-i18next";
 import type { BreadthEntry } from "@/lib/flow";
 import type { Member } from "@/types";
+import { EmptyState } from "@/components/EmptyState";
 
 interface BreadthBarProps {
   entries: readonly BreadthEntry[];
@@ -30,9 +31,11 @@ export function BreadthBar({ entries, members, topN = 5 }: BreadthBarProps) {
     return (
       <section className="card mb-4" aria-labelledby="breadth-title">
         <Header />
-        <p className="text-sm text-moss-600 dark:text-moss-300">
-          {t("dashboard.breadth.empty")}
-        </p>
+        <EmptyState
+          icon={"\u{1F33F}"}
+          variant="inset"
+          message={t("dashboard.breadth.empty")}
+        />
       </section>
     );
   }

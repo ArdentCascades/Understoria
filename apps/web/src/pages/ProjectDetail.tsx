@@ -30,6 +30,7 @@ import { formatHours, formatRelativeTime } from "@/lib/format";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
+import { EmptyState } from "@/components/EmptyState";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type {
   Project,
@@ -225,9 +226,13 @@ export default function ProjectDetailPage() {
           {t("projects.detail.tasks")}
         </h2>
         {tasks.length === 0 ? (
-          <p className="card text-sm text-moss-600 dark:text-moss-300">
-            {t("projects.detail.noTasks")}
-          </p>
+          <div className="card">
+            <EmptyState
+              icon={"\u{1F33F}"}
+              variant="inset"
+              message={t("projects.detail.noTasks")}
+            />
+          </div>
         ) : (
           <ul className="flex flex-col gap-2">
             {tasks.map((task) => (

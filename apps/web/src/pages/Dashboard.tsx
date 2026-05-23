@@ -29,6 +29,7 @@ import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { BreadthBar } from "@/components/BreadthBar";
 import { ReciprocityPulse } from "@/components/ReciprocityPulse";
+import { EmptyState } from "@/components/EmptyState";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -171,9 +172,11 @@ export default function DashboardPage() {
           {t("dashboard.categoryBreakdown.title")}
         </h2>
         {totalCategoryHours === 0 ? (
-          <p className="text-sm text-moss-600 dark:text-moss-300">
-            {t("dashboard.categoryBreakdown.empty")}
-          </p>
+          <EmptyState
+            icon={"\u{1F333}"}
+            variant="inset"
+            message={t("dashboard.categoryBreakdown.empty")}
+          />
         ) : (
           <ul className="flex flex-col gap-2">
             {topCategories.map(([cat, h]) => {

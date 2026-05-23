@@ -10,6 +10,36 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Shared `EmptyState` component + empty-state pass.** The Board's
+  inline empty-state pattern (icon + message) graduated into
+  `apps/web/src/components/EmptyState.tsx`, which adds an optional
+  call-to-action link and two layout variants: `"card"` (stands as
+  its own card) and `"inset"` (slots inside an existing card or
+  section). Applied to every list surface a first-time member is
+  likely to land on while it's still empty:
+  - **Board → Needs / Offers** — now shows a "Post a need" /
+    "Post an offer" CTA in addition to the existing copy.
+  - **Board → Projects** — same pattern, with a "Start a project"
+    CTA.
+  - **Profile → Roles earned / Transaction history / Issued
+    invites** — promoted from bare paragraph text into the shared
+    empty-state layout. Transaction history gets a "Go to the
+    Board" CTA (the action that would generate history); roles
+    and invites are passive / form-driven, so no CTA.
+  - **Dashboard → Category breakdown / Breadth / Reciprocity** —
+    same promotion. No CTAs (community-wide stats, not personal
+    actions).
+  - **ProjectDetail → Tasks** — same promotion. No CTA (the
+    organizer's add-task form is already on the page).
+
+  All existing i18n strings (the warm "be the first" copy) are
+  preserved. No new copy was written — the change is purely
+  visual: every empty surface now reads as deliberate rather
+  than as a half-loaded page.
+
+  Tests: 293 passing (unchanged — the surfaces touched have no
+  unit tests; the swap is structural). Lint, typecheck, build
+  all clean.
 - **Pending-action feedback across confirm dialogs + project task
   buttons.** Between tap and resolution, several action buttons
   used to sit idle — no spinner, no disable, no label change —
