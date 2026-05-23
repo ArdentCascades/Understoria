@@ -118,6 +118,42 @@ screenshottable. The graph is deferred to **18b** (gated below)
 pending a threat-model entry and a governance vote on whether to
 enable it by default.
 
+## Agent 22 — Accessibility & Inclusive Design
+
+A sustained cross-cutting workstream modelled on Agent 4 (Security
+& Opsec). Not a feature to ship and forget — every PR touches its
+review surface, the same way every PR touches the threat-model
+surface.
+
+The full framing lives in [`docs/accessibility.md`](accessibility.md):
+who the work serves (blind / low-vision, motor-impaired,
+cognitive-disability, hearing-impaired members), the WCAG 2.1 AA
+standards floor, current state inventory, known gaps, per-PR
+reviewer questions, and review cadence. The political-education
+docs already cite Mia Mingus and Leah Lakshmi
+Piepzna-Samarasinha on interdependence as a precondition; this
+agent is the engineering operationalisation of that.
+
+Planned PR shape:
+
+- **22.1 — Documentation foundation.** `docs/accessibility.md`,
+  this roadmap update, CONTRIBUTING addition. No code. *(This is
+  the PR adding this section to the roadmap.)*
+- **22.2 — Lint + reusable patterns.** `eslint-plugin-jsx-a11y`
+  in CI. New `lib/a11y/` with `useFocusTrap`, `useAnnouncer`,
+  `useReducedMotion`, a `<SkipLink>` component, a global
+  `:focus-visible` style layer. No surface changes yet — these
+  are the primitives the later PRs use.
+- **22.3 — First batch of surface fixes.** `ConfirmDialog` focus
+  trap. `BottomNav` keyboard navigation. `AttentionSection`
+  `aria-live`. Each demonstrates the pattern.
+- **22.4+ — Continued surface fixes.** As small focused PRs.
+
+Cadence-wise, Agent 22 doesn't "finish" — there's always
+another surface, another assistive-tech pass, another regression
+to catch. Like Agent 4, the "done" signal is reduced gap-count
+in the doc, not a checkbox.
+
 ## Absorbed into existing agents
 
 Pieces of the "Beyond Ostrom" plan that fit cleanly inside an

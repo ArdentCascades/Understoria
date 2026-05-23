@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **`docs/accessibility.md` + Agent 22 (Accessibility & Inclusive
+  Design) roadmap entry.** Names accessibility as a sustained
+  cross-cutting workstream modelled on Agent 4 (Security &
+  Opsec) rather than a one-shot pass. WCAG 2.1 AA as the
+  standards floor. Disability-justice framing carried forward
+  from `docs/political-education/README.md` (Mingus,
+  Piepzna-Samarasinha; "interdependence as precondition, not a
+  fallback"). Includes a current-state inventory, a list of
+  known gaps (ConfirmDialog focus trap, BottomNav keyboard
+  nav, AttentionSection aria-live, color contrast verification,
+  reduced-motion, lint coverage, screen-reader testing, formal
+  audit), planned PR sequence (22.2 lint + patterns,
+  22.3 first surface fixes, 22.4+ continued), per-PR reviewer
+  questions, and a review cadence. `CONTRIBUTING.md` now points
+  contributors at the doc alongside the threat model. Docs-only;
+  no code touched.
 - **Inline action feedback (toast system).** Small global toast
   surface for ephemeral success messages. Single toast at a time
   (new replaces older — no queue, no pile-up), auto-dismisses

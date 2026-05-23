@@ -8,10 +8,14 @@ we review carefully and value small, focused PRs over large ones.
 
 ## Before you start
 
-1. Read the [Code of Conduct](CODE_OF_CONDUCT.md) and the
-   [Threat Model](docs/threat-model.md). If a change would undermine
-   any mitigation in the threat model, it needs separate discussion
-   first.
+1. Read the [Code of Conduct](CODE_OF_CONDUCT.md), the
+   [Threat Model](docs/threat-model.md), and the
+   [Accessibility doc](docs/accessibility.md). If a change would
+   undermine a threat-model mitigation, or would regress against
+   the WCAG 2.1 AA standards floor, it needs separate discussion
+   first. Both docs have a "Guidance for reviewers" section listing
+   the per-PR questions; pre-empting those notes saves a review
+   round.
 2. For anything larger than a one-file fix, **open an issue or
    discussion first.** Some proposals (adding tracking, removing
    encryption, leaderboards, external services) are out of scope for
