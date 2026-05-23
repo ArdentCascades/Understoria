@@ -91,7 +91,8 @@
       "submit": "Create draft",
       "submitting": "Creating…",
       "errorTitle": "Give the project a short title.",
-      "errorHours": "Target hours must be a positive number."
+      "errorHours": "Target hours must be a positive number.",
+      "errorDeadlineDays": "Days must be a whole number greater than 0, or blank for no deadline."
     },
     "detail": {
       "back": "← Back to projects",
@@ -191,7 +192,8 @@
     "submitting": "Posting...",
     "categoryOption": "{{emoji}} {{label}} — {{description}}",
     "errorNeedTitle": "Give your post a short title so people know what it's about.",
-    "errorHoursPositive": "Estimated hours must be a positive number."
+    "errorHoursPositive": "Estimated hours must be a positive number.",
+    "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire."
   },
   "postDetail": {
     "notFound": "This post couldn't be found. It may have been cancelled.",

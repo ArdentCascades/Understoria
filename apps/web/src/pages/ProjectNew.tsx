@@ -20,6 +20,15 @@ import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
+import {
+  combine,
+  optional,
+  positiveInteger,
+  positiveNumber,
+  required,
+  useFieldValidation,
+  type Validator,
+} from "@/lib/validation";
 import type { ProjectCategory } from "@/types";
 
 const DRAFT_KEY = "project-new";
@@ -33,6 +42,19 @@ interface ProjectDraftPayload {
   area: string;
   tags: string;
 }
+
+type FieldName = "title" | "targetHours" | "deadlineDays";
+
+const VALIDATORS: Record<FieldName, Validator> = {
+  title: required("projects.create.errorTitle"),
+  targetHours: combine(
+    required("projects.create.errorHours"),
+    positiveNumber("projects.create.errorHours"),
+  ),
+  deadlineDays: optional(
+    positiveInteger("projects.create.errorDeadlineDays"),
+  ),
+};
 
 export default function ProjectNewPage() {
   const { currentMember, nodeId } = useApp();
@@ -50,6 +72,11 @@ export default function ProjectNewPage() {
   const [error, setError] = useState<string | null>(null);
   const [pendingDraft, setPendingDraft] =
     useState<Draft<ProjectDraftPayload> | null>(null);
+
+  const validation = useFieldValidation<FieldName>(
+    { title, targetHours, deadlineDays },
+    VALIDATORS,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -99,15 +126,9 @@ export default function ProjectNewPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!title.trim()) {
-      setError(t("projects.create.errorTitle"));
-      return;
-    }
+    validation.markAllTouched();
+    if (validation.hasErrors) return;
     const hours = Number.parseFloat(targetHours);
-    if (!Number.isFinite(hours) || hours <= 0) {
-      setError(t("projects.create.errorHours"));
-      return;
-    }
     const days = deadlineDays ? Number.parseInt(deadlineDays, 10) : null;
     const deadline =
       days && Number.isFinite(days) && days > 0
@@ -164,7 +185,7 @@ export default function ProjectNewPage() {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">
             {t("projects.create.fieldTitle")}
@@ -173,9 +194,23 @@ export default function ProjectNewPage() {
             className="input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => validation.onBlur("title")}
+            aria-invalid={validation.shouldShowError("title") || undefined}
+            aria-describedby={
+              validation.shouldShowError("title") ? "title-error" : undefined
+            }
             maxLength={120}
             required
           />
+          {validation.shouldShowError("title") && (
+            <p
+              id="title-error"
+              role="alert"
+              className="text-xs text-rose-700 dark:text-rose-300"
+            >
+              {t(validation.errors.title!.key)}
+            </p>
+          )}
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">
@@ -220,11 +255,33 @@ export default function ProjectNewPage() {
               className="input"
               value={targetHours}
               onChange={(e) => setTargetHours(e.target.value)}
+              onBlur={() => validation.onBlur("targetHours")}
+              aria-invalid={
+                validation.shouldShowError("targetHours") || undefined
+              }
+              aria-describedby={
+                validation.shouldShowError("targetHours")
+                  ? "targetHours-error"
+                  : "targetHours-hint"
+              }
               required
             />
-            <span className="text-xs text-moss-500 dark:text-moss-400">
-              {t("projects.create.fieldTargetHoursHint")}
-            </span>
+            {validation.shouldShowError("targetHours") ? (
+              <p
+                id="targetHours-error"
+                role="alert"
+                className="text-xs text-rose-700 dark:text-rose-300"
+              >
+                {t(validation.errors.targetHours!.key)}
+              </p>
+            ) : (
+              <span
+                id="targetHours-hint"
+                className="text-xs text-moss-500 dark:text-moss-400"
+              >
+                {t("projects.create.fieldTargetHoursHint")}
+              </span>
+            )}
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">
@@ -238,7 +295,25 @@ export default function ProjectNewPage() {
               className="input"
               value={deadlineDays}
               onChange={(e) => setDeadlineDays(e.target.value)}
+              onBlur={() => validation.onBlur("deadlineDays")}
+              aria-invalid={
+                validation.shouldShowError("deadlineDays") || undefined
+              }
+              aria-describedby={
+                validation.shouldShowError("deadlineDays")
+                  ? "deadlineDays-error"
+                  : undefined
+              }
             />
+            {validation.shouldShowError("deadlineDays") && (
+              <p
+                id="deadlineDays-error"
+                role="alert"
+                className="text-xs text-rose-700 dark:text-rose-300"
+              >
+                {t(validation.errors.deadlineDays!.key)}
+              </p>
+            )}
           </label>
         </div>
         <label className="flex flex-col gap-1">

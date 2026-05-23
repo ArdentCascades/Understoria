@@ -25,6 +25,17 @@ import { useApp } from "@/state/AppContext";
 import { decodeAndVerifyInvite } from "@/lib/invite";
 import { redeemInvite, type RedeemError } from "@/db/invites";
 import { shortKey } from "@/lib/format";
+import {
+  required,
+  useFieldValidation,
+  type Validator,
+} from "@/lib/validation";
+
+type FieldName = "displayName";
+
+const VALIDATORS: Record<FieldName, Validator> = {
+  displayName: required("invite.displayNameRequired"),
+};
 
 export default function InviteAcceptPage() {
   const { nodeId, setCurrentMember } = useApp();
@@ -44,7 +55,11 @@ export default function InviteAcceptPage() {
     "idle" | "submitting" | "error" | "done"
   >("idle");
   const [error, setError] = useState<RedeemError | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const validation = useFieldValidation<FieldName>(
+    { displayName },
+    VALIDATORS,
+  );
 
   useEffect(() => {
     if (!encoded) {
@@ -57,12 +72,9 @@ export default function InviteAcceptPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!encoded) return;
-    if (!displayName.trim()) {
-      setSubmitError(t("invite.displayNameRequired"));
-      return;
-    }
+    validation.markAllTouched();
+    if (validation.hasErrors) return;
     setStatus("submitting");
-    setSubmitError(null);
     const result = await redeemInvite(encoded, displayName.trim(), nodeId);
     if (!result.ok) {
       setStatus("error");
@@ -139,7 +151,11 @@ export default function InviteAcceptPage() {
             {t("invite.welcome")}
           </p>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-5 flex flex-col gap-3"
+            noValidate
+          >
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">
                 {t("invite.displayNameLabel")}
@@ -148,15 +164,28 @@ export default function InviteAcceptPage() {
                 className="input"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
+                onBlur={() => validation.onBlur("displayName")}
+                aria-invalid={
+                  validation.shouldShowError("displayName") || undefined
+                }
+                aria-describedby={
+                  validation.shouldShowError("displayName")
+                    ? "displayName-error"
+                    : undefined
+                }
                 maxLength={60}
                 required
               />
+              {validation.shouldShowError("displayName") && (
+                <p
+                  id="displayName-error"
+                  role="alert"
+                  className="text-xs text-rose-700 dark:text-rose-300"
+                >
+                  {t(validation.errors.displayName!.key)}
+                </p>
+              )}
             </label>
-            {submitError && (
-              <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
-                {submitError}
-              </p>
-            )}
             {status === "error" && error && (
               <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
                 {t(`invite.errors.${error}`)}
