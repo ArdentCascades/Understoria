@@ -106,7 +106,21 @@ export default function PostDetailPage() {
       setError(null);
       return await action();
     } catch (err) {
-      setError(humanizeError(err));
+      const message = humanizeError(err);
+      setError(message);
+      // Also surface as an error toast with Retry — the inline
+      // <p role="alert"> below is reliable, but the action dialog
+      // just closed and the page might have scrolled past it. The
+      // toast catches the user wherever they are.
+      showToast(message, {
+        tone: "error",
+        action: {
+          label: t("common.tryAgain"),
+          onAction: () => {
+            void run(action);
+          },
+        },
+      });
       return null;
     } finally {
       setDialog(null);

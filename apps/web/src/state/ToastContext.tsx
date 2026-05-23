@@ -20,28 +20,52 @@ import {
   type ReactNode,
 } from "react";
 
-// Tiny toast system: ephemeral success / info feedback for actions
-// that previously navigated away silently (post, claim, confirm).
+// Tiny toast system: ephemeral feedback for actions that previously
+// navigated away silently (post, claim, confirm), and persistent
+// error feedback with a Retry affordance when an action fails.
 //
 // Design constraints, per the project's anti-engagement guidelines:
 // - One toast at a time. New toasts replace older ones (no queue,
 //   no stacking pile-up).
-// - Auto-dismiss after a short window. Default 4s.
+// - Success / info toasts auto-dismiss after a short window
+//   (default 4s) — the action they acknowledge already happened.
+// - Error toasts persist until dismissed. Missing the message
+//   could leave a user wondering why nothing changed; the dismiss
+//   is one tap away (Esc, the X, or the Retry button).
 // - Click / Esc to dismiss. No close-button-only patterns.
-// - ARIA polite. Screen readers hear it once, no interruption.
+// - Polite live region for success/info; alert for errors —
+//   screen readers prioritize error announcements over polite
+//   updates without being interrupting.
 // - No badges, no counters, no "you've seen N toasts" telemetry.
 
-export type ToastTone = "success" | "info";
+export type ToastTone = "success" | "info" | "error";
+
+export interface ToastAction {
+  label: string;
+  onAction: () => void;
+}
 
 export interface ToastState {
   id: number;
   message: string;
   tone: ToastTone;
+  action: ToastAction | null;
+}
+
+export interface ShowToastOptions {
+  tone?: ToastTone;
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
   toast: ToastState | null;
-  showToast: (message: string, tone?: ToastTone) => void;
+  /** Backward-compatible: `showToast("msg")` defaults to a success
+   *  toast that auto-dismisses. For error toasts with retry, pass
+   *  `{ tone: "error", action: { label, onAction } }`. */
+  showToast: (
+    message: string,
+    optionsOrTone?: ShowToastOptions | ToastTone,
+  ) => void;
   dismissToast: () => void;
 }
 
@@ -69,14 +93,29 @@ export function ToastProvider({
   }, []);
 
   const showToast = useCallback(
-    (message: string, tone: ToastTone = "success") => {
+    (
+      message: string,
+      optionsOrTone: ShowToastOptions | ToastTone = "success",
+    ) => {
+      const options: ShowToastOptions =
+        typeof optionsOrTone === "string"
+          ? { tone: optionsOrTone }
+          : optionsOrTone;
+      const tone = options.tone ?? "success";
+      const action = options.action ?? null;
       counterRef.current += 1;
-      setToast({ id: counterRef.current, message, tone });
+      setToast({ id: counterRef.current, message, tone, action });
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        setToast(null);
+      // Errors persist until dismissed or the Retry button is
+      // tapped. Success / info auto-dismiss after dismissMs.
+      if (tone === "error") {
         timerRef.current = null;
-      }, dismissMs);
+      } else {
+        timerRef.current = setTimeout(() => {
+          setToast(null);
+          timerRef.current = null;
+        }, dismissMs);
+      }
     },
     [dismissMs],
   );
