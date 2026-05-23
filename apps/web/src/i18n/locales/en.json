@@ -26,6 +26,12 @@
     "memberFallback": "a member",
     "anyMember": "Member"
   },
+  "drafts": {
+    "bannerLabel": "Unsaved draft",
+    "bannerMessage": "You started one of these {{when}}. Continue where you left off, or start fresh?",
+    "restore": "Continue draft",
+    "discard": "Start fresh"
+  },
   "nav": {
     "board": "Board",
     "dashboard": "Dashboard",

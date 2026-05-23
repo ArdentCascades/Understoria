@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -26,7 +26,22 @@ import { useToast } from "@/state/ToastContext";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { createPost } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
+import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
+import { useDraftAutosave } from "@/lib/useDraftAutosave";
+import { DraftBanner } from "@/components/DraftBanner";
 import type { Category, PostType, Urgency } from "@/types";
+
+const DRAFT_KEY = "post-new";
+
+interface PostDraftPayload {
+  type: PostType;
+  title: string;
+  description: string;
+  category: Category;
+  hours: string;
+  urgency: Urgency;
+  expiresInDays: string;
+}
 
 export default function PostFormPage() {
   const { currentMember, nodeId } = useApp();
@@ -46,6 +61,47 @@ export default function PostFormPage() {
   const [expiresInDays, setExpiresInDays] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingDraft, setPendingDraft] =
+    useState<Draft<PostDraftPayload> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadDraft<PostDraftPayload>(DRAFT_KEY).then((draft) => {
+      if (!cancelled && draft) setPendingDraft(draft);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Treat "user has typed something meaningful" as dirty. The
+  // defaults (category=other, hours=1, urgency=low) match a fresh
+  // form so we only autosave once the user has actually contributed
+  // a title or description.
+  const isDirty = title.trim() !== "" || description.trim() !== "";
+  useDraftAutosave<PostDraftPayload>(
+    DRAFT_KEY,
+    { type, title, description, category, hours, urgency, expiresInDays },
+    { enabled: pendingDraft === null && isDirty && !submitting },
+  );
+
+  function handleRestoreDraft() {
+    if (!pendingDraft) return;
+    const p = pendingDraft.payload;
+    setType(p.type);
+    setTitle(p.title);
+    setDescription(p.description);
+    setCategory(p.category);
+    setHours(p.hours);
+    setUrgency(p.urgency);
+    setExpiresInDays(p.expiresInDays);
+    setPendingDraft(null);
+  }
+
+  async function handleDiscardDraft() {
+    await clearDraft(DRAFT_KEY);
+    setPendingDraft(null);
+  }
 
   if (!currentMember) return null;
 
@@ -82,6 +138,7 @@ export default function PostFormPage() {
         },
         nodeId,
       );
+      await clearDraft(DRAFT_KEY);
       showToast(
         t(type === "NEED" ? "toast.needPosted" : "toast.offerPosted"),
       );
@@ -135,6 +192,14 @@ export default function PostFormPage() {
           </button>
         ))}
       </div>
+
+      {pendingDraft && (
+        <DraftBanner
+          updatedAt={pendingDraft.updatedAt}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
