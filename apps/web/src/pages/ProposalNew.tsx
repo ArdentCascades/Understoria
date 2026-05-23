@@ -24,6 +24,7 @@ import {
   type Validator,
 } from "@/lib/validation";
 import type {
+  ImpactReflection,
   NodeConfigProposalPayload,
   ReversibilityTier,
 } from "@/types";
@@ -63,6 +64,13 @@ export default function ProposalNewPage() {
   const [reciprocalPairThreshold, setReciprocalPairThreshold] = useState(
     String(nodeConfig.reciprocalPairThreshold),
   );
+  // Impact reflection — only relevant when reversibilityTier is
+  // "hard", but the state lives at the form level so flipping the
+  // tier back and forth doesn't lose what was typed.
+  const [yearOne, setYearOne] = useState("");
+  const [fiveYear, setFiveYear] = useState("");
+  const [reversalPath, setReversalPath] = useState("");
+  const [vulnerableImpact, setVulnerableImpact] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,6 +97,26 @@ export default function ProposalNewPage() {
       reciprocalPairThreshold: Number.parseInt(reciprocalPairThreshold, 10),
     };
 
+    // Impact reflection is only carried on `hard`-tier proposals
+    // (the structural pause is the form's existence; submission
+    // doesn't require all fields to be filled — per roadmap,
+    // "structural pause, not gatekeeping").
+    let impactReflection: ImpactReflection | null = null;
+    if (reversibilityTier === "hard") {
+      const trimmed = {
+        yearOne: yearOne.trim(),
+        fiveYear: fiveYear.trim(),
+        reversalPath: reversalPath.trim(),
+        vulnerableImpact: vulnerableImpact.trim(),
+      };
+      const anyFilled =
+        trimmed.yearOne.length > 0 ||
+        trimmed.fiveYear.length > 0 ||
+        trimmed.reversalPath.length > 0 ||
+        trimmed.vulnerableImpact.length > 0;
+      if (anyFilled) impactReflection = trimmed;
+    }
+
     try {
       setSubmitting(true);
       await createProposal({
@@ -99,6 +127,7 @@ export default function ProposalNewPage() {
         payload: JSON.stringify(proposedConfig),
         proposerKey: currentMember!.publicKey,
         nodeId,
+        impactReflection,
       });
       showToast(t("proposals.toast.created"));
       navigate("/proposals");
@@ -244,6 +273,48 @@ export default function ProposalNewPage() {
           </div>
         </fieldset>
 
+        {reversibilityTier === "hard" && (
+          <fieldset className="rounded-xl border border-rose-200 bg-rose-50/40 p-3 dark:border-rose-900 dark:bg-rose-950/20">
+            <legend className="px-1 text-xs uppercase tracking-wide text-rose-700 dark:text-rose-300">
+              {t("proposals.new.impactHeader")}
+            </legend>
+            <p className="mb-3 text-xs text-rose-700 dark:text-rose-200">
+              {t("proposals.new.impactIntro")}
+            </p>
+            <div className="flex flex-col gap-3">
+              <ImpactField
+                label={t("proposals.new.impact.yearOneLabel")}
+                placeholder={t("proposals.new.impact.yearOnePlaceholder")}
+                value={yearOne}
+                onChange={setYearOne}
+              />
+              <ImpactField
+                label={t("proposals.new.impact.fiveYearLabel")}
+                placeholder={t("proposals.new.impact.fiveYearPlaceholder")}
+                value={fiveYear}
+                onChange={setFiveYear}
+              />
+              <ImpactField
+                label={t("proposals.new.impact.reversalPathLabel")}
+                placeholder={t("proposals.new.impact.reversalPathPlaceholder")}
+                value={reversalPath}
+                onChange={setReversalPath}
+              />
+              <ImpactField
+                label={t("proposals.new.impact.vulnerableImpactLabel")}
+                placeholder={t(
+                  "proposals.new.impact.vulnerableImpactPlaceholder",
+                )}
+                value={vulnerableImpact}
+                onChange={setVulnerableImpact}
+              />
+            </div>
+            <p className="mt-3 text-xs text-rose-700 dark:text-rose-300">
+              {t("proposals.new.impactFooter")}
+            </p>
+          </fieldset>
+        )}
+
         {error && (
           <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
             {error}
@@ -322,6 +393,33 @@ function ConfigField({
           {error}
         </p>
       )}
+    </label>
+  );
+}
+
+function ImpactField({
+  label,
+  placeholder,
+  value,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-sm">
+      <span className="font-medium text-rose-900 dark:text-rose-100">
+        {label}
+      </span>
+      <textarea
+        className="input min-h-16"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        maxLength={500}
+      />
     </label>
   );
 }

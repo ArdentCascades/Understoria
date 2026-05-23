@@ -747,8 +747,28 @@
       "unchanged": "Sin cambio",
       "tierHeader": "Reversibilidad",
       "tierIntro": "¿Qué tan difícil sería deshacer esto? El default es fácil porque la config puede revertirse con otra propuesta — sube a moderada o difícil si el impacto cultural es mayor que la reversión técnica.",
+      "impactHeader": "Reflexión de impacto",
+      "impactIntro": "Las decisiones difíciles de revertir merecen una pausa. Llena lo que puedas — nada es obligatorio y puedes enviar con estos campos en blanco, pero escribirlas es una forma de bajar el ritmo antes de algo más difícil de deshacer.",
+      "impactFooter": "Estas notas serán visibles para tu comunidad junto a la propuesta.",
+      "impact": {
+        "yearOneLabel": "¿Qué cambia en el primer año?",
+        "yearOnePlaceholder": "Efectos concretos que ya puedes prever.",
+        "fiveYearLabel": "¿Qué cambia en cinco años?",
+        "fiveYearPlaceholder": "¿Cómo se ve esto una vez que se ha asentado?",
+        "reversalPathLabel": "¿Cómo se desharía si resulta equivocado?",
+        "reversalPathPlaceholder": "¿Cuál es el camino de vuelta? ¿Quién tendría que estar de acuerdo?",
+        "vulnerableImpactLabel": "¿A quién afecta más — especialmente a las personas más vulnerables?",
+        "vulnerableImpactPlaceholder": "¿Quién carga con el peso si esto sale mal?"
+      },
       "submit": "Iniciar la propuesta",
       "submitting": "Iniciando…"
+    },
+    "impact": {
+      "heading": "Reflexión de impacto",
+      "yearOne": "Primer año",
+      "fiveYear": "Cinco años",
+      "reversalPath": "Camino de reversión",
+      "vulnerableImpact": "Impacto en personas vulnerables"
     }
   },
   "welcome": {
