@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { useToast } from "@/state/ToastContext";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { createPost } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
@@ -29,6 +30,7 @@ import type { Category, PostType, Urgency } from "@/types";
 
 export default function PostFormPage() {
   const { currentMember, nodeId } = useApp();
+  const { showToast } = useToast();
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -79,6 +81,9 @@ export default function PostFormPage() {
           expiresAt,
         },
         nodeId,
+      );
+      showToast(
+        t(type === "NEED" ? "toast.needPosted" : "toast.offerPosted"),
       );
       navigate("/");
     } catch (err) {

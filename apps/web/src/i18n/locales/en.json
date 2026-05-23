@@ -1,4 +1,12 @@
 {
+  "toast": {
+    "dismiss": "Dismiss",
+    "needPosted": "Posted. Your need is live on the board.",
+    "offerPosted": "Posted. Your offer is live on the board.",
+    "projectCreated": "Project created. Add tasks and launch it when you're ready.",
+    "exchangeConfirmedPending": "Confirmed. Waiting for the other person to confirm too.",
+    "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you."
+  },
   "common": {
     "loading": "Growing your community...",
     "you": "You",

@@ -26,6 +26,19 @@ include breaking changes.
   questions, and a review cadence. `CONTRIBUTING.md` now points
   contributors at the doc alongside the threat model. Docs-only;
   no code touched.
+- **Inline action feedback (toast system).** Small global toast
+  surface for ephemeral success messages. Single toast at a time
+  (new replaces older — no queue, no pile-up), auto-dismisses
+  after 4 seconds, tap or Esc to dismiss earlier, ARIA polite so
+  screen readers hear it once without interruption. No badges, no
+  counters, no telemetry — closes the loop on actions that
+  previously navigated away silently. Wired into four sites:
+  PostForm (needPosted / offerPosted), ProjectNew
+  (projectCreated), and PostDetail's confirm-exchange action
+  (exchangeConfirmedPending vs exchangeConfirmedComplete depending
+  on whether the second party still needs to confirm). New
+  `ToastProvider` + `useToast` hook + `ToastContainer` component;
+  six new i18n keys × en + es; parity passes.
 - **UX polish round 1 — humane errors + Profile invites empty state.**
   Smaller piece following the attention-surface work, same "make
   the app talk to humans" theme. New `lib/humanizeError.ts` maps
