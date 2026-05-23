@@ -10,6 +10,54 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Form draft autosave for `PostForm` + `ProjectNew`.** Losing
+  half a request because you tabbed away or accidentally
+  navigated back is one of those small-but-painful failures —
+  this PR plugs the gap.
+  - **`drafts` IndexedDB table** (DB version 8). One row per
+    form, keyed by a stable string (`"post-new"`,
+    `"project-new"`); payload is a JSON string the form
+    serializes / revives itself. The store is intentionally
+    schema-agnostic so adding new draftable forms later is
+    one-line work.
+  - **Helpers** in `apps/web/src/db/drafts.ts` —
+    `saveDraft / loadDraft / clearDraft / purgeExpiredDrafts`.
+    Drafts older than 7 days (`DRAFT_MAX_AGE_MS`) are dropped
+    lazily on read; corrupt JSON is treated as missing and
+    deleted. 10 tests cover the lifecycle.
+  - **`useDraftAutosave` hook** at
+    `apps/web/src/lib/useDraftAutosave.ts` — debounced writes
+    (600ms) whenever the form value changes. Caller passes an
+    `enabled` flag so autosave is paused while the restore
+    banner is pending (otherwise it'd overwrite the draft we
+    just offered back) or while a submit is in flight.
+  - **`DraftBanner` component** — visually understated
+    canopy-50 banner above the form: "You started one of these
+    {{when}}. Continue where you left off, or start fresh?"
+    Two buttons: "Continue draft" (populates the form) and
+    "Start fresh" (deletes the draft).
+  - **Lifecycle**: on form mount, load any existing draft and
+    stash it as `pendingDraft`. The banner renders until the
+    user picks one of the two actions. Autosave is suppressed
+    while `pendingDraft !== null` and while the form is at
+    untouched defaults. Successful submit clears the draft.
+  - **i18n**: new `drafts` namespace in `en` + `es` covers the
+    banner copy. The relative timestamp ("3 hours ago") reuses
+    `formatRelativeTime` so it speaks the rest of the app's
+    voice.
+
+  Not done here, by design: draft autosave for inline forms
+  inside ProjectDetail (add-task, pause-note) or the Profile
+  edit form. Those are short, in-context forms where losing
+  state is less painful — the big wins are PostForm and
+  ProjectNew because those are the ones with multi-line
+  descriptions you don't want to retype.
+
+  Tests: 303 web passing (293 → 303; +10 in `drafts.test.ts`
+  covering round-trip / overwrite / key isolation / 7-day
+  expiry / corrupt-JSON recovery / clear / purge). Locale parity
+  passes. Lint, typecheck, build all clean.
+
 - **Shared `EmptyState` component + empty-state pass.** The Board's
   inline empty-state pattern (icon + message) graduated into
   `apps/web/src/components/EmptyState.tsx`, which adds an optional

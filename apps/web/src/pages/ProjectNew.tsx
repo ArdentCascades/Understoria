@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -17,7 +17,22 @@ import { useToast } from "@/state/ToastContext";
 import { createProject } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
+import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
+import { useDraftAutosave } from "@/lib/useDraftAutosave";
+import { DraftBanner } from "@/components/DraftBanner";
 import type { ProjectCategory } from "@/types";
+
+const DRAFT_KEY = "project-new";
+
+interface ProjectDraftPayload {
+  title: string;
+  description: string;
+  category: ProjectCategory;
+  targetHours: string;
+  deadlineDays: string;
+  area: string;
+  tags: string;
+}
 
 export default function ProjectNewPage() {
   const { currentMember, nodeId } = useApp();
@@ -33,6 +48,51 @@ export default function ProjectNewPage() {
   const [tags, setTags] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDraft, setPendingDraft] =
+    useState<Draft<ProjectDraftPayload> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadDraft<ProjectDraftPayload>(DRAFT_KEY).then((draft) => {
+      if (!cancelled && draft) setPendingDraft(draft);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const isDirty = title.trim() !== "" || description.trim() !== "";
+  useDraftAutosave<ProjectDraftPayload>(
+    DRAFT_KEY,
+    {
+      title,
+      description,
+      category,
+      targetHours,
+      deadlineDays,
+      area,
+      tags,
+    },
+    { enabled: pendingDraft === null && isDirty && !submitting },
+  );
+
+  function handleRestoreDraft() {
+    if (!pendingDraft) return;
+    const p = pendingDraft.payload;
+    setTitle(p.title);
+    setDescription(p.description);
+    setCategory(p.category);
+    setTargetHours(p.targetHours);
+    setDeadlineDays(p.deadlineDays);
+    setArea(p.area);
+    setTags(p.tags);
+    setPendingDraft(null);
+  }
+
+  async function handleDiscardDraft() {
+    await clearDraft(DRAFT_KEY);
+    setPendingDraft(null);
+  }
 
   if (!currentMember) return null;
 
@@ -68,6 +128,7 @@ export default function ProjectNewPage() {
         },
         nodeId,
       );
+      await clearDraft(DRAFT_KEY);
       showToast(t("toast.projectCreated"));
       navigate(`/project/${project.id}`);
     } catch (err) {
@@ -94,6 +155,14 @@ export default function ProjectNewPage() {
           {t("projects.create.subtitle")}
         </p>
       </header>
+
+      {pendingDraft && (
+        <DraftBanner
+          updatedAt={pendingDraft.updatedAt}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">

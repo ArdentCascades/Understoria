@@ -26,6 +26,12 @@
     "memberFallback": "alguien de la comunidad",
     "anyMember": "Alguien"
   },
+  "drafts": {
+    "bannerLabel": "Borrador sin guardar",
+    "bannerMessage": "Empezaste uno de estos {{when}}. ¿Continúas desde donde lo dejaste o empiezas de nuevo?",
+    "restore": "Continuar borrador",
+    "discard": "Empezar de nuevo"
+  },
   "nav": {
     "board": "Tablero",
     "dashboard": "Panel",

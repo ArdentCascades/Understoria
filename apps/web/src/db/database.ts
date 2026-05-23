@@ -113,6 +113,18 @@ export interface InviteRow {
   encoded: string;
 }
 
+/**
+ * A persisted draft of a form's state. One row per form (keyed by a
+ * stable string like "post-new" or "project-new") so the form can
+ * offer "continue your draft?" on a fresh load. Payload is a JSON
+ * string — opaque to the store; the caller knows the schema.
+ */
+export interface DraftRow {
+  key: string;
+  payload: string;
+  updatedAt: number;
+}
+
 export class UnderstoriaDB extends Dexie {
   members!: Table<Member, string>;
   posts!: Table<Post, string>;
@@ -127,6 +139,7 @@ export class UnderstoriaDB extends Dexie {
   projectTasks!: Table<ProjectTask, string>;
   projectActivity!: Table<ProjectActivity, string>;
   nodeConfig!: Table<NodeConfigRow, string>;
+  drafts!: Table<DraftRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -178,6 +191,10 @@ export class UnderstoriaDB extends Dexie {
         if (r.nodeId === undefined) r.nodeId = localNodeId;
         if (r.signature === undefined) r.signature = "";
       });
+    });
+    // Version 8 — form draft autosave (PostForm + ProjectNew).
+    this.version(8).stores({
+      drafts: "key, updatedAt",
     });
   }
 }
