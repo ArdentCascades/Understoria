@@ -18,6 +18,7 @@ import { TrustChip } from "@/components/TrustChip";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
+import { humanizeError } from "@/lib/humanizeError";
 
 export default function MemberDetailPage() {
   const { publicKey } = useParams<{ publicKey: string }>();
@@ -120,11 +121,11 @@ export default function MemberDetailPage() {
         // Outbox is best-effort; the row is persisted regardless.
       });
     } catch (err) {
-      if (err instanceof VouchValidationError) {
-        setError(err.message);
-      } else {
-        setError((err as Error).message ?? "vouch_failed");
-      }
+      // VouchValidationError messages are already humane; pass them
+      // straight through. Anything else gets the humanize fallback.
+      setError(
+        err instanceof VouchValidationError ? err.message : humanizeError(err),
+      );
     } finally {
       setPending(false);
     }

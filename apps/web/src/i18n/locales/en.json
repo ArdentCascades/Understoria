@@ -511,6 +511,7 @@
     "invites": {
       "title": "Invites you've issued",
       "intro": "A new member needs two vouches to become trusted. Your invite counts as the first — someone else will need to vouch for them after they join.",
+      "empty": "You haven't invited anyone yet. When you do, the invite link will show up here so you can re-share it or revoke it.",
       "generate": "Generate invite link",
       "generating": "Generating…",
       "shareTitle": "Share this link with one person",

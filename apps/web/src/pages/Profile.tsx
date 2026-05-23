@@ -22,6 +22,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { balanceFor, transactionHistory } from "@/lib/timebank";
+import { humanizeError } from "@/lib/humanizeError";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -298,7 +299,7 @@ function SecuritySection() {
       await refreshLockState();
       reset();
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
     } finally {
       setBusy(false);
     }
@@ -480,7 +481,7 @@ function EmergencySection() {
         setTimeout(() => window.location.reload(), 500);
       }
     } catch (err) {
-      setStatus((err as Error).message);
+      setStatus(humanizeError(err));
     } finally {
       setConfirming(null);
     }
@@ -770,7 +771,7 @@ function InvitesSection({
       });
       setShareUrl(url);
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
     } finally {
       setIssuing(false);
     }
@@ -791,7 +792,7 @@ function InvitesSection({
     try {
       await revokeInvite(member.publicKey, token);
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
     }
   }
 
@@ -850,7 +851,11 @@ function InvitesSection({
         </p>
       )}
 
-      {invites.length > 0 && (
+      {invites.length === 0 ? (
+        <p className="mt-4 text-sm text-moss-600 dark:text-moss-300">
+          {t("profile.invites.empty")}
+        </p>
+      ) : (
         <ul className="mt-4 flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
           {invites.map((inv) => (
             <li

@@ -511,6 +511,7 @@
     "invites": {
       "title": "Invitaciones que has emitido",
       "intro": "Una nueva persona necesita dos avales para volverse de confianza. Tu invitación cuenta como el primero — alguien más tendrá que avalarle después de unirse.",
+      "empty": "Aún no has invitado a nadie. Cuando lo hagas, el enlace aparecerá aquí para que puedas volver a compartirlo o revocarlo.",
       "generate": "Generar enlace de invitación",
       "generating": "Generando…",
       "shareTitle": "Comparte este enlace con una sola persona",

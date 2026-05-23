@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **UX polish round 1 — humane errors + Profile invites empty state.**
+  Smaller piece following the attention-surface work, same "make
+  the app talk to humans" theme. New `lib/humanizeError.ts` maps
+  thrown errors to user-facing strings: humane sentences pass
+  through; `SCREAMING_CASE` codes, `snake_case` codes, and
+  `http_<status>` fallbacks get replaced with a generic friendly
+  fallback. Applied to every component that previously surfaced
+  `(err as Error).message` directly — PostDetail, ProjectDetail,
+  ProjectNew, PostForm, MemberDetail, LockScreen, Profile (four
+  sites: profile edit, data export, security flows, invite issue).
+  Members can no longer see a raw `http_422` or
+  `fetch_not_available` on screen. 10 new tests covering the full
+  classifier. Also added the missing empty state to Profile →
+  Invites you've issued (previously showed nothing when no invites
+  had been issued — now a brief welcoming explanation).
 - **"Needs your attention" surface on the Board.** A small section
   at the top of the Board that surfaces things waiting on the
   current member's action — exchanges in `awaiting_confirmation`

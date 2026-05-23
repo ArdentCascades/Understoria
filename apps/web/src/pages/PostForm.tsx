@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { createPost } from "@/db/actions";
+import { humanizeError } from "@/lib/humanizeError";
 import type { Category, PostType, Urgency } from "@/types";
 
 export default function PostFormPage() {
@@ -81,7 +82,7 @@ export default function PostFormPage() {
       );
       navigate("/");
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
     } finally {
       setSubmitting(false);
     }
