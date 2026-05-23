@@ -636,7 +636,8 @@
     "recipientLabel": "Quien recibe",
     "postedLabel": "Publicado originalmente",
     "viewPost": "Abrir la publicación",
-    "footer": "Por ahora la resolución sucede fuera de la app — habla con ambas partes o llévalo al espacio de decisión habitual de tu comunidad. Las herramientas de propuesta y resolución dentro de la app están en la hoja de ruta.",
+    "openInDecisions": "Abrir en Decisiones",
+    "footer": "Cada disputa también aparece en Decisiones, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
     "entry": {
       "title": "Disputas de la comunidad",
       "descriptionNone": "Ningún intercambio está señalado ahora mismo.",
@@ -682,7 +683,8 @@
       "withdrawn": "Retirada"
     },
     "category": {
-      "config_change": "Cambio de configuración"
+      "config_change": "Cambio de configuración",
+      "dispute": "Disputa"
     },
     "reversibility": {
       "easy": "Fácil de revertir",

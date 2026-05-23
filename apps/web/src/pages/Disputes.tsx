@@ -13,28 +13,38 @@ import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { listDisputes } from "@/lib/disputes";
-import { formatHours, formatRelativeTime, shortKey } from "@/lib/format";
-import { CategoryBadge } from "@/components/CategoryBadge";
+import {
+  formatHours,
+  formatRelativeTime,
+  shortKey,
+} from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
+import type { DisputePayload, Proposal } from "@/types";
 
-// Community-visible list of exchanges that someone has flagged for
-// review. Read-only for v1: a place to see what's been flagged so
-// the community can talk about it (on whatever channel they use)
-// and so we can ground the Agent 12 sanction-ladder design against
-// real cases before building the resolution lifecycle.
+// Agent 13 + 14 unified Decisions surface: disputes are now
+// stored as Proposal rows with `kind: "dispute"`. This page keeps
+// the same URL (`/disputes`) and the same card layout for
+// continuity, but reads from `proposals` instead of mapping
+// dispute state on `posts`. The post-level
+// `status === "disputed"` field stays — it's still the source of
+// truth for the exchange lifecycle.
 //
-// Per GOVERNANCE.md: no admins, no role-gated access. Every member
-// of this node can see what's been flagged. The two parties already
-// see it on the post detail page; this surface just makes it
-// findable.
+// Once we have a single Decisions URL that handles both kinds via
+// a filter, this page can redirect there. For now it's the
+// dispute-only slice.
 
 export default function DisputesPage() {
-  const { posts, members } = useApp();
+  const { proposals } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const disputes = useMemo(() => listDisputes(posts, members), [posts, members]);
+  const disputes = useMemo(
+    () =>
+      proposals
+        .filter((p) => p.kind === "dispute")
+        .sort((a, b) => b.createdAt - a.createdAt),
+    [proposals],
+  );
 
   return (
     <div className="px-4 pb-8 pt-4">
@@ -55,67 +65,12 @@ export default function DisputesPage() {
       </header>
 
       {disputes.length === 0 ? (
-        <EmptyState
-          icon={"\u{1F33F}"}
-          message={t("disputes.empty")}
-        />
+        <EmptyState icon={"\u{1F33F}"} message={t("disputes.empty")} />
       ) : (
         <ul className="flex flex-col gap-3">
           {disputes.map((d) => (
-            <li key={d.postId}>
-              <article className="card">
-                <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="chip bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
-                    {t("disputes.flagChip")}
-                  </span>
-                  <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-                    {d.postType === "NEED"
-                      ? t("disputes.typeNeed")
-                      : t("disputes.typeOffer")}
-                  </span>
-                  <CategoryBadge category={d.category} />
-                  <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-                    {formatHours(d.hours)}
-                  </span>
-                </div>
-                <h2 className="text-lg font-semibold leading-snug">
-                  {d.postTitle}
-                </h2>
-                <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-moss-500">
-                      {t("disputes.helperLabel")}
-                    </dt>
-                    <dd className="mt-0.5">
-                      {d.helperName
-                        ? `${d.helperName} (${shortKey(d.helperKey!)})`
-                        : t("common.memberFallback")}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-moss-500">
-                      {t("disputes.recipientLabel")}
-                    </dt>
-                    <dd className="mt-0.5">
-                      {`${d.recipientName} (${shortKey(d.recipientKey)})`}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-moss-500">
-                      {t("disputes.postedLabel")}
-                    </dt>
-                    <dd className="mt-0.5">{formatRelativeTime(d.createdAt)}</dd>
-                  </div>
-                </dl>
-                <div className="mt-4 flex justify-end">
-                  <Link
-                    to={`/post/${d.postId}`}
-                    className="btn-secondary text-sm"
-                  >
-                    {t("disputes.viewPost")}
-                  </Link>
-                </div>
-              </article>
+            <li key={d.id}>
+              <DisputeCard proposal={d} />
             </li>
           ))}
         </ul>
@@ -125,5 +80,97 @@ export default function DisputesPage() {
         {t("disputes.footer")}
       </p>
     </div>
+  );
+}
+
+function DisputeCard({ proposal }: { proposal: Proposal }) {
+  const { t } = useTranslation();
+  const { members } = useApp();
+  const nameByKey = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const m of members) map.set(m.publicKey, m.displayName);
+    return map;
+  }, [members]);
+
+  let payload: DisputePayload | null = null;
+  try {
+    payload = JSON.parse(proposal.payload) as DisputePayload;
+  } catch {
+    payload = null;
+  }
+  if (!payload) return null;
+
+  const helperName = payload.helperKey
+    ? (nameByKey.get(payload.helperKey) ?? null)
+    : null;
+  const recipientName =
+    nameByKey.get(payload.recipientKey) ?? null;
+  return (
+    <article className="card">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <span className="chip bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+          {t("disputes.flagChip")}
+        </span>
+        <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+          {payload.postType === "NEED"
+            ? t("disputes.typeNeed")
+            : t("disputes.typeOffer")}
+        </span>
+        <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+          {formatHours(payload.hours)}
+        </span>
+      </div>
+      <h2 className="text-lg font-semibold leading-snug">
+        {payload.postTitle}
+      </h2>
+      {proposal.description && (
+        <blockquote className="mt-3 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
+          {proposal.description}
+        </blockquote>
+      )}
+      <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-moss-500">
+            {t("disputes.helperLabel")}
+          </dt>
+          <dd className="mt-0.5">
+            {helperName && payload.helperKey
+              ? `${helperName} (${shortKey(payload.helperKey)})`
+              : t("common.memberFallback")}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-moss-500">
+            {t("disputes.recipientLabel")}
+          </dt>
+          <dd className="mt-0.5">
+            {recipientName
+              ? `${recipientName} (${shortKey(payload.recipientKey)})`
+              : t("common.memberFallback")}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-moss-500">
+            {t("disputes.postedLabel")}
+          </dt>
+          <dd className="mt-0.5">
+            {formatRelativeTime(payload.postCreatedAt)}
+          </dd>
+        </div>
+      </dl>
+      <div className="mt-4 flex justify-end gap-2">
+        {proposal.disputePostId && (
+          <Link
+            to={`/post/${proposal.disputePostId}`}
+            className="btn-secondary text-sm"
+          >
+            {t("disputes.viewPost")}
+          </Link>
+        )}
+        <Link to="/proposals" className="btn-primary text-sm">
+          {t("disputes.openInDecisions")}
+        </Link>
+      </div>
+    </article>
   );
 }

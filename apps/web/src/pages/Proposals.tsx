@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { formatRelativeTime, shortKey } from "@/lib/format";
+import { formatHours, formatRelativeTime, shortKey } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 import { closeProposal } from "@/db/proposals";
 import { castVote } from "@/db/votes";
@@ -25,6 +25,7 @@ import {
 } from "@/lib/autoCloseProposals";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type {
+  DisputePayload,
   ImpactReflection,
   Proposal,
   ProposalStatus,
@@ -253,6 +254,13 @@ function ProposalCard({
       {proposal.category === "config_change" && (
         <ConfigChangePayload payload={proposal.payload} />
       )}
+      {proposal.kind === "dispute" && proposal.disputePostId && (
+        <DisputePayloadView
+          payload={proposal.payload}
+          postId={proposal.disputePostId}
+          nameByKey={nameByKey}
+        />
+      )}
       {proposal.impactReflection && (
         <ImpactReflectionDisplay raw={proposal.impactReflection} />
       )}
@@ -421,10 +429,18 @@ function ReversibilityChip({
   );
 }
 
-function CategoryChip({ category }: { category: "config_change" }) {
+function CategoryChip({
+  category,
+}: {
+  category: Proposal["category"];
+}) {
   const { t } = useTranslation();
+  const cls =
+    category === "dispute"
+      ? "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100"
+      : "bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100";
   return (
-    <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+    <span className={`chip ${cls}`}>
       {t(`proposals.category.${category}`)}
     </span>
   );
@@ -724,6 +740,57 @@ function ConfigChangePayload({ payload }: { payload: string }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function DisputePayloadView({
+  payload,
+  postId,
+  nameByKey,
+}: {
+  payload: string;
+  postId: string;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  let parsed: DisputePayload | null = null;
+  try {
+    parsed = JSON.parse(payload) as DisputePayload;
+  } catch {
+    return null;
+  }
+  const helperName = parsed.helperKey
+    ? (nameByKey.get(parsed.helperKey) ?? t("common.memberFallback"))
+    : t("common.memberFallback");
+  const recipientName =
+    nameByKey.get(parsed.recipientKey) ?? t("common.memberFallback");
+  return (
+    <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/40 px-3 py-2 text-xs dark:border-rose-900 dark:bg-rose-950/20">
+      <div className="mb-1 flex flex-wrap items-center gap-2 text-rose-900 dark:text-rose-100">
+        <span className="font-semibold">
+          {parsed.postType === "NEED"
+            ? t("disputes.typeNeed")
+            : t("disputes.typeOffer")}
+        </span>
+        <span>·</span>
+        <span>{formatHours(parsed.hours)}</span>
+        <span>·</span>
+        <Link
+          to={`/post/${postId}`}
+          className="underline-offset-2 hover:underline"
+        >
+          {t("disputes.viewPost")}
+        </Link>
+      </div>
+      <div className="text-rose-800 dark:text-rose-200">
+        {t("disputes.helperLabel")}:{" "}
+        {parsed.helperKey
+          ? `${helperName} (${shortKey(parsed.helperKey)})`
+          : t("common.memberFallback")}
+        {" — "}
+        {t("disputes.recipientLabel")}: {`${recipientName} (${shortKey(parsed.recipientKey)})`}
+      </div>
     </div>
   );
 }
