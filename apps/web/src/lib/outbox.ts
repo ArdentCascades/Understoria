@@ -23,10 +23,11 @@ import { uuid } from "@/lib/id";
 import {
   readSubmitConfig,
   submitExchangeToNode,
+  submitPostToNode,
   submitVouchToNode,
   type SubmitResult,
 } from "@/lib/nodeSubmit";
-import type { Exchange, SignedVouch } from "@/types";
+import type { Exchange, Post, SignedVouch } from "@/types";
 
 /**
  * Durable outbox + retry worker for community-node mirroring.
@@ -107,6 +108,37 @@ export async function enqueueVouchOutbox(
   vouch: SignedVouch,
 ): Promise<OutboxRow | null> {
   return enqueueOutbox("vouch", vouch.id, vouch);
+}
+
+/**
+ * Insert an outbox row for a newly-created post. The mutable
+ * lifecycle fields (status, claimedBy, confirmedBy) are stripped
+ * before serializing — the wire shape is the immutable signed
+ * subset, so a peer node can verify the signature exactly.
+ */
+export async function enqueuePostOutbox(
+  post: Post,
+): Promise<OutboxRow | null> {
+  // Legacy posts (signature === "") created before Agent 3 posts
+  // federation can't be federated — their signatures are missing.
+  // Refusing to enqueue here keeps the outbox honest.
+  if (!post.signature) return null;
+  const wire = {
+    id: post.id,
+    type: post.type,
+    category: post.category,
+    title: post.title,
+    description: post.description,
+    estimatedHours: post.estimatedHours,
+    urgency: post.urgency,
+    postedBy: post.postedBy,
+    createdAt: post.createdAt,
+    expiresAt: post.expiresAt,
+    locationZone: post.locationZone,
+    nodeId: post.nodeId,
+    signature: post.signature,
+  };
+  return enqueueOutbox("post", post.id, wire);
 }
 
 async function enqueueOutbox(
@@ -219,9 +251,9 @@ export async function flushOutboxOnce(
   let retried = 0;
 
   for (const row of due) {
-    let payload: Exchange | SignedVouch;
+    let payload: Exchange | SignedVouch | Post;
     try {
-      payload = JSON.parse(row.payload) as Exchange | SignedVouch;
+      payload = JSON.parse(row.payload) as Exchange | SignedVouch | Post;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -232,14 +264,20 @@ export async function flushOutboxOnce(
       continue;
     }
 
-    const result =
-      row.kind === "exchange"
-        ? await submitExchangeToNode(payload as Exchange, cfg, {
-            fetchImpl: options.fetchImpl,
-          })
-        : await submitVouchToNode(payload as SignedVouch, cfg, {
-            fetchImpl: options.fetchImpl,
-          });
+    let result: SubmitResult;
+    if (row.kind === "exchange") {
+      result = await submitExchangeToNode(payload as Exchange, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    } else if (row.kind === "vouch") {
+      result = await submitVouchToNode(payload as SignedVouch, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    } else {
+      result = await submitPostToNode(payload as Post, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    }
 
     if (result.ok) {
       await db.outbox.update(row.id, {

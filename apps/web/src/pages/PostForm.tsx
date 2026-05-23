@@ -27,7 +27,7 @@ import { createPost } from "@/db/actions";
 import type { Category, PostType, Urgency } from "@/types";
 
 export default function PostFormPage() {
-  const { currentMember } = useApp();
+  const { currentMember, nodeId } = useApp();
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -65,15 +65,20 @@ export default function PostFormPage() {
         : null;
     try {
       setSubmitting(true);
-      await createPost(currentMember!.publicKey, currentMember!.locationZone, {
-        type,
-        category,
-        title,
-        description,
-        estimatedHours: parsedHours,
-        urgency,
-        expiresAt,
-      });
+      await createPost(
+        currentMember!.publicKey,
+        currentMember!.locationZone,
+        {
+          type,
+          category,
+          title,
+          description,
+          estimatedHours: parsedHours,
+          urgency,
+          expiresAt,
+        },
+        nodeId,
+      );
       navigate("/");
     } catch (err) {
       setError((err as Error).message);

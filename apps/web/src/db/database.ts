@@ -81,7 +81,7 @@ export interface OutboxRow {
   id: string;
   /** Discriminator. New kinds slot in here as more record types
    *  federate; the worker dispatches to the matching submitter. */
-  kind: "exchange" | "vouch";
+  kind: "exchange" | "vouch" | "post";
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
   /** Id of the wrapped record; lets us avoid double-enqueue on retry. */
@@ -162,6 +162,22 @@ export class UnderstoriaDB extends Dexie {
     // hardcoded safeguard constants in lib/safeguards.ts.
     this.version(6).stores({
       nodeConfig: "nodeId",
+    });
+    // Version 7 — Agent 3: posts federation. Adds nodeId + signature
+    // to every Post row. The schema string itself doesn't change (no
+    // new index), but existing rows are missing the two new typed
+    // fields — the upgrade backfills nodeId from `nodeId` setting and
+    // signature to "" (empty = "legacy, not federable").
+    this.version(7).stores({}).upgrade(async (tx) => {
+      const settingsTable = tx.table<AppSetting, string>("settings");
+      const nodeIdRow = await settingsTable.get("nodeId");
+      const localNodeId = nodeIdRow?.value ?? "node_local";
+      const posts = tx.table<Post, string>("posts");
+      await posts.toCollection().modify((row) => {
+        const r = row as Post & { nodeId?: string; signature?: string };
+        if (r.nodeId === undefined) r.nodeId = localNodeId;
+        if (r.signature === undefined) r.signature = "";
+      });
     });
   }
 }

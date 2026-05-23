@@ -22,11 +22,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Database from "better-sqlite3";
 import {
   canonicalExchangePayload,
+  canonicalPostPayload,
   canonicalVouchPayload,
   generateKeyPair,
   sign,
 } from "@understoria/shared/crypto";
 import type { Exchange, SignedVouch } from "@understoria/shared/types";
+import type { PostRecord } from "./db.js";
 import { buildServer } from "./server.js";
 import { readConfigFromEnv } from "./config.js";
 import { createExchangeStore, openDatabase } from "./db.js";
@@ -94,6 +96,28 @@ function makeSignedVouch(now = Date.now()): SignedVouch {
     id: `v_${now}`,
     ...payload,
     signature: sign(canonicalVouchPayload(payload), voucher.secretKey),
+  };
+}
+
+function makeSignedPost(now = Date.now()): PostRecord {
+  const poster = generateKeyPair();
+  const immutable = {
+    id: `p_${now}_${Math.random().toString(36).slice(2)}`,
+    type: "NEED" as const,
+    category: "transport" as const,
+    title: "Help getting to clinic",
+    description: "Tuesday morning, downtown.",
+    estimatedHours: 1.5,
+    urgency: "medium" as const,
+    postedBy: poster.publicKey,
+    createdAt: now,
+    expiresAt: null,
+    locationZone: "north",
+    nodeId: "node_test",
+  };
+  return {
+    ...immutable,
+    signature: sign(canonicalPostPayload(immutable), poster.secretKey),
   };
 }
 
@@ -338,6 +362,77 @@ describe("GET /vouches", () => {
     });
     expect(since.json().count).toBe(1);
     expect((since.json().vouches as SignedVouch[])[0].id).toBe(later.id);
+  });
+});
+
+describe("POST /posts", () => {
+  it("accepts a well-signed post and returns 201", async () => {
+    const post = makeSignedPost();
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: post,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json()).toEqual({ stored: true, id: post.id });
+  });
+
+  it("is idempotent on re-POST of the same post id", async () => {
+    const post = makeSignedPost();
+    await app.inject({ method: "POST", url: "/posts", payload: post });
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: post,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ stored: false, id: post.id });
+  });
+
+  it("rejects a post whose signature does not verify", async () => {
+    const post = { ...makeSignedPost(), signature: "abc" };
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: post,
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it("rejects a malformed body", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: { id: "" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects unknown post type", async () => {
+    const p = makeSignedPost();
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: { ...p, type: "REQUEST" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("GET /posts", () => {
+  it("returns stored posts with since= filter respected", async () => {
+    const earlier = makeSignedPost(1_000);
+    const later = makeSignedPost(2_000);
+    await app.inject({ method: "POST", url: "/posts", payload: earlier });
+    await app.inject({ method: "POST", url: "/posts", payload: later });
+    const all = await app.inject({ method: "GET", url: "/posts" });
+    expect(all.json().count).toBe(2);
+    const since = await app.inject({
+      method: "GET",
+      url: "/posts?since=1500",
+    });
+    expect(since.json().count).toBe(1);
+    expect((since.json().posts as PostRecord[])[0].id).toBe(later.id);
   });
 });
 

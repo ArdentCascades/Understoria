@@ -9,11 +9,17 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { verifyExchange, verifyVouch } from "@understoria/shared/crypto";
-import { parseExchange, parseVouch } from "./validate.js";
+import {
+  verifyExchange,
+  verifyPost,
+  verifyVouch,
+} from "@understoria/shared/crypto";
+import type { Post } from "@understoria/shared/types";
+import { parseExchange, parsePost, parseVouch } from "./validate.js";
 import type {
   ExchangeStore,
   PeerPullStore,
+  PostStore,
   PullRecordKind,
   VouchStore,
 } from "./db.js";
@@ -185,9 +191,72 @@ export async function pullVouchesFromPeer(opts: {
   };
 }
 
+/** Post-flavoured sibling. Same shape as pullFromPeer /
+ *  pullVouchesFromPeer; verifies signatures via verifyPost and
+ *  rejects anything that fails. Cursor field is `createdAt`. */
+export async function pullPostsFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: PostStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "posts", since, maxRows);
+  const rows = await fetchAndExtract(fetcher, url, peerUrl, "posts");
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestCreatedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parsePost(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const record = parsed.value;
+    // verifyPost takes a full Post; synthesize lifecycle placeholders.
+    const forVerify: Post = {
+      ...record,
+      claimedBy: null,
+      status: "open",
+      confirmedBy: [],
+    };
+    if (!verifyPost(forVerify)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(record.id)) {
+      duplicateCount += 1;
+      if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
+        latestCreatedAt = record.createdAt;
+      }
+      continue;
+    }
+    store.insert(record);
+    insertedCount += 1;
+    if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
+      latestCreatedAt = record.createdAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "post",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestCreatedAt,
+  };
+}
+
 function buildUrl(
   peerUrl: string,
-  path: "exchanges" | "vouches",
+  path: "exchanges" | "vouches" | "posts",
   since: number | null,
   limit: number,
 ): string {
@@ -204,7 +273,7 @@ async function fetchAndExtract(
   fetcher: Fetcher,
   url: string,
   peerUrl: string,
-  arrayKey: "exchanges" | "vouches",
+  arrayKey: "exchanges" | "vouches" | "posts",
 ): Promise<unknown[]> {
   const response = await fetcher(url);
   if (!response.ok) {
@@ -236,6 +305,7 @@ export interface PullWorkerOptions {
   intervalMs: number;
   store: ExchangeStore;
   vouchStore: VouchStore;
+  postStore: PostStore;
   pullStore: PeerPullStore;
   fetcher?: Fetcher;
   /** Called for unexpected errors (one peer failing doesn't stop the
@@ -251,6 +321,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     intervalMs,
     store,
     vouchStore,
+    postStore,
     pullStore,
     fetcher = (url) => fetch(url),
     onError = (peerUrl, err) =>
@@ -267,17 +338,26 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     const since =
       kind === "exchange"
         ? state?.lastCompletedAt ?? null
-        : state?.lastVouchCreatedAt ?? null;
+        : kind === "vouch"
+          ? state?.lastVouchCreatedAt ?? null
+          : state?.lastPostCreatedAt ?? null;
     try {
       const result =
         kind === "exchange"
           ? await pullFromPeer({ peerUrl, since, fetcher, store })
-          : await pullVouchesFromPeer({
-              peerUrl,
-              since,
-              fetcher,
-              store: vouchStore,
-            });
+          : kind === "vouch"
+            ? await pullVouchesFromPeer({
+                peerUrl,
+                since,
+                fetcher,
+                store: vouchStore,
+              })
+            : await pullPostsFromPeer({
+                peerUrl,
+                since,
+                fetcher,
+                store: postStore,
+              });
       pullStore.recordSuccess({
         peerUrl,
         kind,
@@ -300,11 +380,12 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   }
 
   async function pullAllOnce(): Promise<PullResult[]> {
-    // Run both kinds for each peer in parallel. One kind failing
-    // doesn't prevent the other from succeeding.
+    // Run all three kinds for each peer in parallel. One kind
+    // failing doesn't prevent the others from succeeding.
     const tasks = peerUrls.flatMap((url) => [
       pullKind(url, "exchange"),
       pullKind(url, "vouch"),
+      pullKind(url, "post"),
     ]);
     const results = await Promise.all(tasks);
     return results.filter((r): r is PullResult => r !== null);

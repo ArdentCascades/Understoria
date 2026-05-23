@@ -10,6 +10,65 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Posts federation (Agent 3 task 2, continued).** Posts now sign,
+  store, and federate the same way exchanges and vouches do. The
+  longest-standing missing piece of Phase 3 federation.
+
+  Type changes:
+  - `Post` in `@understoria/shared` gains two required fields:
+    `nodeId` (which node originated this post) and `signature` (Ed25519
+    signature over the immutable subset). Lifecycle fields (`status`,
+    `claimedBy`, `confirmedBy`) deliberately stay outside the signed
+    payload — they're local mutations, not part of the post's
+    federation identity.
+  - New `PostPayload` interface for the canonical signed subset.
+  - New `canonicalPostPayload` and `verifyPost` helpers in
+    `@understoria/shared/crypto`, parallel to the exchange and vouch
+    pair.
+
+  PWA:
+  - Dexie schema v7 with an `upgrade()` callback that backfills
+    `nodeId` from the local `nodeId` setting and `signature = ""` on
+    every existing post. Empty signature == legacy/not-federable,
+    treated explicitly throughout.
+  - `createPost` now signs the post at creation time. Takes a new
+    `nodeId` parameter; pre-loads the poster's secret key outside the
+    write transaction (so a locked session throws cleanly rather than
+    producing an unsigned post). Enqueues a post outbox row in the
+    same transaction as the post itself.
+  - `OutboxRow.kind` extended to `"exchange" | "vouch" | "post"`.
+    `enqueuePostOutbox` strips the lifecycle fields before
+    serializing — the wire shape is exactly what the canonical
+    payload signs.
+  - `submitPostToNode` mirrors `submitExchangeToNode` /
+    `submitVouchToNode` via the shared `postSignedRecord` helper.
+  - Seed posts are now real signed records (the demo flow exposes
+    each demo member's secret key during seeding so the canonical
+    payload + signature round-trips through `verifyPost()` correctly).
+
+  Server:
+  - Schema v4: new `posts` table (immutable wire shape only — no
+    lifecycle fields). `peer_pull_state` grows a
+    `last_post_created_at` cursor.
+  - `POST /posts` verifies the signature via `verifyPost` and stores
+    if novel; `GET /posts?since=&limit=` returns the most recent
+    posts newer than the cursor.
+  - `pullPostsFromPeer` mirrors the exchange / vouch puller; the
+    worker now pulls all three kinds per peer per tick in parallel.
+
+  Smoke-tested live two-server: signed a post in Node, POSTed it to
+  the peer at :8921, watched the puller at :8922 fetch it within
+  one interval. `/peers` reflected the per-kind cursors correctly.
+
+  **Not in this slice** (separate PRs):
+  - PWA-side display of federated posts on the Board (cross-node
+    visibility requires the PWA to pull from its configured node,
+    which is its own architectural shift).
+  - Cross-community claiming of federated posts — federated posts
+    are read-only on peer nodes by design. A peer member sees the
+    need/offer for awareness and reaches out via whatever channel
+    the communities already share.
+- **Manual vouching UI + outbox push.** Closes a real gap: the
 - **Manual vouching UI + outbox push.** Closes a real gap: the
   `db.vouches` table was read by Profile for trust computation but
   had no production write path — `createVouch` was exported but

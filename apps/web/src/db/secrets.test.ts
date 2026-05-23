@@ -214,7 +214,7 @@ describe("signing flows with passphrase protection", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post.id, claimer.publicKey);
 
     // Poster's first confirmation doesn't require a signature — no block.

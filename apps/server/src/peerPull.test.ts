@@ -12,6 +12,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   canonicalExchangePayload,
+  canonicalPostPayload,
   canonicalVouchPayload,
   generateKeyPair,
   sign,
@@ -21,11 +22,14 @@ import type { Database as DatabaseType } from "better-sqlite3";
 import {
   createExchangeStore,
   createPeerPullStore,
+  createPostStore,
   createVouchStore,
   openDatabase,
+  type PostRecord,
 } from "./db.js";
 import {
   pullFromPeer,
+  pullPostsFromPeer,
   pullVouchesFromPeer,
   startPeerPullWorker,
   type Fetcher,
@@ -77,14 +81,19 @@ function jsonResponse(body: unknown, status = 200): ReturnType<Fetcher> {
   });
 }
 
-/** Wrap a fetcher so requests against `/vouches?` get an empty list.
- *  Lets the exchange-focused tests stay readable while the worker now
- *  also calls the vouches endpoint per peer. */
+/** Wrap a fetcher so requests against `/vouches?` and `/posts?` get
+ *  empty lists. Lets the exchange-focused tests stay readable while
+ *  the worker now calls vouches and posts endpoints per peer too. */
 function exchangeOnly(inner: Fetcher): Fetcher {
-  return (url) =>
-    /\/vouches\b/.test(url)
-      ? jsonResponse({ count: 0, vouches: [] })
-      : inner(url);
+  return (url) => {
+    if (/\/vouches\b/.test(url)) {
+      return jsonResponse({ count: 0, vouches: [] });
+    }
+    if (/\/posts\b/.test(url)) {
+      return jsonResponse({ count: 0, posts: [] });
+    }
+    return inner(url);
+  };
 }
 
 function makeSignedVouch(overrides: Partial<SignedVouch> = {}): SignedVouch {
@@ -100,6 +109,30 @@ function makeSignedVouch(overrides: Partial<SignedVouch> = {}): SignedVouch {
     ...base,
     signature: sign(canonicalVouchPayload(base), voucher.secretKey),
     ...overrides,
+  };
+}
+
+function makeSignedPost(overrides: Partial<PostRecord> = {}): PostRecord {
+  const poster = generateKeyPair();
+  const immutable = {
+    id: overrides.id ?? `p_${Math.random().toString(36).slice(2)}`,
+    type: (overrides.type ?? "NEED") as PostRecord["type"],
+    category: (overrides.category ?? "other") as PostRecord["category"],
+    title: overrides.title ?? "Test post",
+    description: overrides.description ?? "",
+    estimatedHours: overrides.estimatedHours ?? 1,
+    urgency: (overrides.urgency ?? "low") as PostRecord["urgency"],
+    postedBy: overrides.postedBy ?? poster.publicKey,
+    createdAt: overrides.createdAt ?? Date.now(),
+    expiresAt: overrides.expiresAt ?? null,
+    locationZone: overrides.locationZone ?? "test zone",
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  return {
+    ...immutable,
+    signature:
+      overrides.signature ??
+      sign(canonicalPostPayload(immutable), poster.secretKey),
   };
 }
 
@@ -235,6 +268,7 @@ describe("startPeerPullWorker", () => {
   it("does nothing when no peers are configured", async () => {
     const store = createExchangeStore(db);
     const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
     const pullStore = createPeerPullStore(db);
     const fetcher = vi.fn<Fetcher>();
     const worker = startPeerPullWorker({
@@ -242,6 +276,7 @@ describe("startPeerPullWorker", () => {
       intervalMs: 1000,
       store,
       vouchStore,
+      postStore,
       pullStore,
       fetcher,
     });
@@ -254,6 +289,7 @@ describe("startPeerPullWorker", () => {
   it("records success state per peer after a successful pull", async () => {
     const store = createExchangeStore(db);
     const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
     const pullStore = createPeerPullStore(db);
     const exchange = makeSignedExchange({ completedAt: 555 });
     const fetcher = exchangeOnly(() =>
@@ -264,6 +300,7 @@ describe("startPeerPullWorker", () => {
       intervalMs: 60_000,
       store,
       vouchStore,
+      postStore,
       pullStore,
       fetcher,
     });
@@ -280,6 +317,7 @@ describe("startPeerPullWorker", () => {
   it("records failure state and keeps the loop alive when a peer errors", async () => {
     const store = createExchangeStore(db);
     const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
     const pullStore = createPeerPullStore(db);
     const fetcher: Fetcher = () => jsonResponse({ error: "x" }, 500);
     const errors: Array<{ url: string; msg: string }> = [];
@@ -288,6 +326,7 @@ describe("startPeerPullWorker", () => {
       intervalMs: 60_000,
       store,
       vouchStore,
+      postStore,
       pullStore,
       fetcher,
       onError: (url, err) => errors.push({ url, msg: err.message }),
@@ -304,6 +343,7 @@ describe("startPeerPullWorker", () => {
   it("uses each peer's stored since for the next call", async () => {
     const store = createExchangeStore(db);
     const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
     const pullStore = createPeerPullStore(db);
     const exchange = makeSignedExchange({ completedAt: 999 });
     let exchangeCallCount = 0;
@@ -320,6 +360,7 @@ describe("startPeerPullWorker", () => {
       intervalMs: 60_000,
       store,
       vouchStore,
+      postStore,
       pullStore,
       fetcher,
     });
@@ -390,26 +431,34 @@ describe("startPeerPullWorker — vouches", () => {
   it("pulls both kinds per peer and updates the per-kind cursors", async () => {
     const store = createExchangeStore(db);
     const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
     const pullStore = createPeerPullStore(db);
     const exchange = makeSignedExchange({ completedAt: 111 });
     const vouch = makeSignedVouch({ createdAt: 222 });
-    const fetcher: Fetcher = (url) =>
-      /\/vouches\b/.test(url)
-        ? jsonResponse({ count: 1, vouches: [vouch] })
-        : jsonResponse({ count: 1, exchanges: [exchange] });
+    const fetcher: Fetcher = (url) => {
+      if (/\/vouches\b/.test(url))
+        return jsonResponse({ count: 1, vouches: [vouch] });
+      if (/\/posts\b/.test(url))
+        return jsonResponse({ count: 0, posts: [] });
+      return jsonResponse({ count: 1, exchanges: [exchange] });
+    };
     const worker = startPeerPullWorker({
       peerUrls: ["https://peer.example"],
       intervalMs: 60_000,
       store,
       vouchStore,
+      postStore,
       pullStore,
       fetcher,
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    expect(results).toHaveLength(2);
+    // Three kinds attempted; posts returned empty so it's still a
+    // successful pull with no insertions.
+    expect(results).toHaveLength(3);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "exchange",
+      "post",
       "vouch",
     ]);
     const state = pullStore.get("https://peer.example");
@@ -421,27 +470,146 @@ describe("startPeerPullWorker — vouches", () => {
   it("a vouch pull failure does not poison the exchange cursor", async () => {
     const store = createExchangeStore(db);
     const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
     const pullStore = createPeerPullStore(db);
     const exchange = makeSignedExchange({ completedAt: 555 });
-    const fetcher: Fetcher = (url) =>
-      /\/vouches\b/.test(url)
-        ? jsonResponse({ error: "x" }, 500)
-        : jsonResponse({ count: 1, exchanges: [exchange] });
+    const fetcher: Fetcher = (url) => {
+      if (/\/vouches\b/.test(url))
+        return jsonResponse({ error: "x" }, 500);
+      if (/\/posts\b/.test(url))
+        return jsonResponse({ count: 0, posts: [] });
+      return jsonResponse({ count: 1, exchanges: [exchange] });
+    };
     const worker = startPeerPullWorker({
       peerUrls: ["https://peer.example"],
       intervalMs: 60_000,
       store,
       vouchStore,
+      postStore,
       pullStore,
       fetcher,
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    // Exchange pull succeeded; vouch pull failed; both reported.
+    // Exchange + post pulls succeeded; vouch pull failed; all
+    // reported in results.
     const exchangeResult = results.find((r) => r.kind === "exchange");
     expect(exchangeResult?.insertedCount).toBe(1);
     const state = pullStore.get("https://peer.example");
     expect(state!.lastCompletedAt).toBe(555);
     expect(state!.lastError).toMatch(/vouch.*500/);
+  });
+});
+
+describe("pullPostsFromPeer", () => {
+  it("inserts every well-signed post the peer returns", async () => {
+    const store = createPostStore(db);
+    const posts = [
+      makeSignedPost({ createdAt: 1000 }),
+      makeSignedPost({ createdAt: 2000 }),
+    ];
+    const fetcher: Fetcher = () => jsonResponse({ count: 2, posts });
+    const result = await pullPostsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.kind).toBe("post");
+    expect(result.insertedCount).toBe(2);
+    expect(result.latestCompletedAt).toBe(2000);
+    expect(store.count()).toBe(2);
+  });
+
+  it("skips a post whose signature does not verify", async () => {
+    const store = createPostStore(db);
+    const good = makeSignedPost();
+    const bad: PostRecord = { ...good, id: "p_bad", signature: "0" };
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, posts: [good, bad] });
+    const result = await pullPostsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(1);
+    expect(store.count()).toBe(1);
+  });
+
+  it("hits the /posts path with since=", async () => {
+    const store = createPostStore(db);
+    const seen: string[] = [];
+    const fetcher: Fetcher = (url) => {
+      seen.push(url);
+      return jsonResponse({ count: 0, posts: [] });
+    };
+    await pullPostsFromPeer({
+      peerUrl: "https://peer.example",
+      since: 4242,
+      fetcher,
+      store,
+    });
+    expect(seen[0]).toMatch(/\/posts\?/);
+    expect(seen[0]).toContain("since=4242");
+  });
+
+  it("treats already-stored rows as duplicates", async () => {
+    const store = createPostStore(db);
+    const post = makeSignedPost();
+    store.insert(post);
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 1, posts: [post] });
+    const result = await pullPostsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.duplicateCount).toBe(1);
+    expect(store.count()).toBe(1);
+  });
+});
+
+describe("startPeerPullWorker — posts", () => {
+  it("pulls all three kinds per peer and updates the per-kind cursors", async () => {
+    const store = createExchangeStore(db);
+    const vouchStore = createVouchStore(db);
+    const postStore = createPostStore(db);
+    const pullStore = createPeerPullStore(db);
+    const exchange = makeSignedExchange({ completedAt: 100 });
+    const vouch = makeSignedVouch({ createdAt: 200 });
+    const post = makeSignedPost({ createdAt: 300 });
+    const fetcher: Fetcher = (url) => {
+      if (/\/vouches\b/.test(url))
+        return jsonResponse({ count: 1, vouches: [vouch] });
+      if (/\/posts\b/.test(url))
+        return jsonResponse({ count: 1, posts: [post] });
+      return jsonResponse({ count: 1, exchanges: [exchange] });
+    };
+    const worker = startPeerPullWorker({
+      peerUrls: ["https://peer.example"],
+      intervalMs: 60_000,
+      store,
+      vouchStore,
+      postStore,
+      pullStore,
+      fetcher,
+    });
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    expect(results).toHaveLength(3);
+    expect(results.map((r) => r.kind).sort()).toEqual([
+      "exchange",
+      "post",
+      "vouch",
+    ]);
+    const state = pullStore.get("https://peer.example");
+    expect(state!.lastCompletedAt).toBe(100);
+    expect(state!.lastVouchCreatedAt).toBe(200);
+    expect(state!.lastPostCreatedAt).toBe(300);
+    expect(state!.lastError).toBeNull();
   });
 });

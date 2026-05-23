@@ -72,7 +72,7 @@ async function populate(memberCount: number, postCount: number) {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
   }
   return members;
 }
@@ -91,7 +91,7 @@ describe("softPurge", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post.id, b.publicKey);
     await confirmExchange(post.id, a.publicKey, NODE);
     await confirmExchange(post.id, b.publicKey, NODE);

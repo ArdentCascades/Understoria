@@ -20,7 +20,14 @@
  */
 import nacl from "tweetnacl";
 import { b64decode, b64encode, utf8encode } from "./bytes.js";
-import type { Category, Exchange, SignedVouch, VouchPayload } from "./types.js";
+import type {
+  Category,
+  Exchange,
+  Post,
+  PostPayload,
+  SignedVouch,
+  VouchPayload,
+} from "./types.js";
 
 /**
  * Identity primitives — Ed25519 key pairs, detached signatures.
@@ -140,4 +147,55 @@ export function verifyVouch(vouch: SignedVouch): boolean {
     kind: vouch.kind,
   });
   return verify(payload, vouch.signature, vouch.voucherKey);
+}
+
+/**
+ * Canonical, stable serialization of a post — the immutable subset
+ * a poster's secret key signs at creation. Same field-order
+ * discipline as canonicalExchangePayload / canonicalVouchPayload.
+ *
+ * Lifecycle fields (`status`, `claimedBy`, `confirmedBy`) are
+ * deliberately excluded — they are local mutations that don't
+ * federate. Including them in the signature would require re-signing
+ * on every state change, which is the wrong model for this slice.
+ */
+export function canonicalPostPayload(p: PostPayload): string {
+  return JSON.stringify({
+    id: p.id,
+    type: p.type,
+    category: p.category,
+    title: p.title,
+    description: p.description,
+    estimatedHours: p.estimatedHours,
+    urgency: p.urgency,
+    postedBy: p.postedBy,
+    createdAt: p.createdAt,
+    expiresAt: p.expiresAt,
+    locationZone: p.locationZone,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Verify a post's signature against the poster's public key. Returns
+ * false for legacy posts with an empty signature — those exist on
+ * pre-v7 schemas and are not federable.
+ */
+export function verifyPost(post: Post): boolean {
+  if (!post.signature) return false;
+  const payload = canonicalPostPayload({
+    id: post.id,
+    type: post.type,
+    category: post.category,
+    title: post.title,
+    description: post.description,
+    estimatedHours: post.estimatedHours,
+    urgency: post.urgency,
+    postedBy: post.postedBy,
+    createdAt: post.createdAt,
+    expiresAt: post.expiresAt,
+    locationZone: post.locationZone,
+    nodeId: post.nodeId,
+  });
+  return verify(payload, post.signature, post.postedBy);
 }
