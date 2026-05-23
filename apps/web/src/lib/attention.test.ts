@@ -139,6 +139,7 @@ describe("computeAttentionItems", () => {
     expect(items[0]).toMatchObject({
       kind: "confirm_exchange",
       postId: p.id,
+      counterpartyKey: "bob",
       counterpartyName: "Bob",
     });
   });
@@ -198,6 +199,7 @@ describe("computeAttentionItems", () => {
       projectId: proj.id,
       taskId: t.id,
       taskTitle: "Haul soil",
+      completerKey: "bob",
       completerName: "Bob",
     });
   });

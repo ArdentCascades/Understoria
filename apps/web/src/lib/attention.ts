@@ -37,6 +37,7 @@ export type AttentionItem =
       kind: "confirm_exchange";
       postId: string;
       postTitle: string;
+      counterpartyKey: string | null;
       counterpartyName: string;
       createdAt: number;
     }
@@ -46,6 +47,7 @@ export type AttentionItem =
       taskId: string;
       projectTitle: string;
       taskTitle: string;
+      completerKey: string | null;
       completerName: string;
       createdAt: number;
     };
@@ -91,6 +93,7 @@ export function computeAttentionItems(
       kind: "confirm_exchange",
       postId: p.id,
       postTitle: p.title,
+      counterpartyKey: counterpartyKey ?? null,
       counterpartyName,
       createdAt: p.createdAt,
     });
@@ -122,6 +125,7 @@ export function computeAttentionItems(
       taskId: t.id,
       projectTitle: project.title,
       taskTitle: t.title,
+      completerKey: t.completedBy ?? null,
       completerName,
       createdAt: t.createdAt,
     });
