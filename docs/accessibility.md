@@ -162,19 +162,32 @@ formal audit; the formal audit is one of the items in §6.
   is awaiting your confirmation) are announced when they
   appear, without interrupting whatever the screen reader is
   doing.
+- **Color contrast on chip variants** — every chip / badge color
+  pairing in the codebase (canopy / moss / amber / rose, light
+  and dark, including translucent backgrounds composited over
+  the card) is asserted against WCAG 2.1 AA 4.5:1 by
+  `src/lib/a11y/palette-contrast.test.ts`. The audit shipped in
+  PR 22.4 caught three failing pairings (archived chip light
+  and dark, success toast dark) and they were fixed at the
+  same time. New chip pairings must be added to that test
+  before merge.
+- **Sparkline per-day detail** — `ProjectSparkline` now renders
+  a visually-hidden `<table>` with one row per day in the
+  window (`Day` / `Hours`). Screen readers see both the summary
+  (`aria-label` on the SVG) and the table; sighted users see
+  only the curve. The table is wrapped in Tailwind's `sr-only`
+  utility so it does not affect layout.
 
 ## 6. Known gaps (tracked work)
 
-These are the items the first wave of Agent 22 surface PRs will
+These are the items the next wave of Agent 22 surface PRs will
 address. Each maps to a focused PR or a small bundle.
 
-- **Sparkline on project detail** has an `aria-label` describing
-  totals but no fallback table or per-day breakdown for screen
-  readers who want detail. AA-compliant; not yet ideal.
-- **Color contrast on chip variants** — `bg-amber-50
-  text-amber-800` (stalled state, post statuses, etc.) needs
-  verification against 4.5:1 in light and dark mode. Same for
-  the moss / canopy 50/100/700/800 pairings used widely.
+- **Body-text contrast survey** — the chip / badge audit covers
+  pill backgrounds. A broader survey of body-text pairings on
+  white card backgrounds (especially `text-moss-500`, which is
+  used widely for secondary labels) against 4.5:1 has not yet
+  been done.
 - **Screen reader testing.** No one has driven the app with
   NVDA, VoiceOver, or TalkBack end-to-end. This is the gap most
   likely to surface things this audit missed.
