@@ -306,6 +306,14 @@
     },
     "earnedDate": "Earned {{date}}"
   },
+  "attention": {
+    "title": "Needs your attention",
+    "intro": "A few things are waiting on you. Tap to handle them when you have a moment.",
+    "exchangeLine": "{{name}} marked “{{title}}” complete — confirm it happened.",
+    "taskLine": "{{name}} finished “{{task}}” for the {{project}} project — confirm.",
+    "tapToConfirm": "Tap to confirm and release the credits.",
+    "tapToConfirmTask": "Tap to confirm and credit the helper."
+  },
   "board": {
     "title": "Community board",
     "tagline": "Post what you need. Offer what you can.",

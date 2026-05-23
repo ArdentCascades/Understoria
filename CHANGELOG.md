@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **"Needs your attention" surface on the Board.** A small section
+  at the top of the Board that surfaces things waiting on the
+  current member's action — exchanges in `awaiting_confirmation`
+  where they haven't signed yet, and project tasks an organizer
+  needs to confirm. Pure utility: information you already need but
+  currently have to dig for, with humane copy
+  ("Bob marked 'Ride to clinic' complete — confirm it happened.")
+  instead of technical status codes. Renders null when nothing is
+  waiting — no "you have 0 things to do" framing. No badges, no
+  push, no time-on-app metric. New pure `lib/attention.ts` with
+  10 tests covering the conditions for each kind of item plus
+  ordering and unknown-counterparty fallback. UI strings i18n'd
+  in en + es; locale parity passes.
 - **Posts federation (Agent 3 task 2, continued).** Posts now sign,
   store, and federate the same way exchanges and vouches do. The
   longest-standing missing piece of Phase 3 federation.

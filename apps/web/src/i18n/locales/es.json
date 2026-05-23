@@ -306,6 +306,14 @@
     },
     "earnedDate": "Obtenido el {{date}}"
   },
+  "attention": {
+    "title": "Te toca a ti",
+    "intro": "Algunas cosas están esperando por ti. Tócalas para resolverlas cuando puedas.",
+    "exchangeLine": "{{name}} marcó “{{title}}” como completado — confirma que ocurrió.",
+    "taskLine": "{{name}} terminó “{{task}}” del proyecto {{project}} — confirma.",
+    "tapToConfirm": "Toca para confirmar y liberar los créditos.",
+    "tapToConfirmTask": "Toca para confirmar y dar crédito a quien ayudó."
+  },
   "board": {
     "title": "Tablero comunitario",
     "tagline": "Publica lo que necesitas. Ofrece lo que puedas.",
