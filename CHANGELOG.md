@@ -10,6 +10,41 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Profile-completion nudge on Board.** Pairs with the onboarding
+  profile-setup step (previous PR): for members who Skipped that
+  step, or who joined before it existed, a small dismissible
+  banner appears above the Board content offering to take them
+  to Profile to fill in their area / skills / availability.
+  - **Trigger** is purely state-based: render iff the current
+    member has all three fields empty AND the dismiss flag isn't
+    set. Filling any one of the fields (or dismissing) makes
+    the banner stop showing on its own — no second nag.
+  - **`profileIsBare(member)` + `dismissProfileNudge()` /
+    `isProfileNudgeDismissed()`** helpers in
+    `apps/web/src/lib/profileNudge.ts`. Pure-ish module, 9 tests
+    cover the null-member case, each individual field as a
+    de-bare-er, whitespace-only handling, and the dismiss
+    sentinel.
+  - **`profileNudgeDismissed` setting key** added to
+    `SETTING_KEYS`. Same shape as the existing `onboarded`
+    sentinel — "1" means dismissed, anything else means undismissed.
+  - **`ProfileNudge` component** renders the canopy-50 banner;
+    matches `DraftBanner`'s visual language so the two read as
+    the same "informational sidecar" pattern. Two actions —
+    "Add some details" (navigates to /profile) and "Not now"
+    (writes the dismiss setting).
+  - **Mounted in Board** above `AttentionSection` so it's the
+    first thing a returning bare-profile member sees, but below
+    the page title so it doesn't shout.
+
+  Anti-engagement-bait note: this is a one-time, dismiss-forever
+  nudge with informative (not urgent) copy. It is not a
+  notification, doesn't count completion percentages, and
+  cannot reappear once dismissed.
+
+  Tests: 312 passing (303 → 312; +9 in `profileNudge.test.ts`).
+  Locale parity passes. Lint, typecheck, build clean.
+
 - **Onboarding: profile-setup step.** The welcome flow used to drop
   members on the Board with a default profile (no location zone,
   no skills, no availability). It now ends with a fifth screen
