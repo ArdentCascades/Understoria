@@ -787,8 +787,28 @@
       "unchanged": "Unchanged",
       "tierHeader": "Reversibility",
       "tierIntro": "How hard would this be to undo? Defaults to easy because config can be changed back by another proposal — bump to moderate or hard if the cultural impact is bigger than the technical reversal.",
+      "impactHeader": "Impact reflection",
+      "impactIntro": "Hard-to-reverse decisions deserve a pause. Fill in what you can — none of these are required, and you can submit with them blank, but writing them out is a way to slow down before something that's harder to take back.",
+      "impactFooter": "These notes will be visible to your community alongside the proposal.",
+      "impact": {
+        "yearOneLabel": "What changes in the first year?",
+        "yearOnePlaceholder": "Concrete effects you can already see.",
+        "fiveYearLabel": "What changes in five years?",
+        "fiveYearPlaceholder": "What does this look like once it's settled in?",
+        "reversalPathLabel": "How would this be undone if it's wrong?",
+        "reversalPathPlaceholder": "What's the path back? Who'd have to agree?",
+        "vulnerableImpactLabel": "Who's most affected — especially the most vulnerable members?",
+        "vulnerableImpactPlaceholder": "Who carries the weight if this goes badly?"
+      },
       "submit": "Start the proposal",
       "submitting": "Starting…"
+    },
+    "impact": {
+      "heading": "Impact reflection",
+      "yearOne": "Year one",
+      "fiveYear": "Five years",
+      "reversalPath": "Reversal path",
+      "vulnerableImpact": "Vulnerable impact"
     }
   },
   "welcome": {

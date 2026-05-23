@@ -23,7 +23,13 @@ import {
   type AutoCloseEligibility,
 } from "@/lib/autoCloseProposals";
 import { usePendingAction } from "@/lib/usePendingAction";
-import type { Proposal, ProposalStatus, Vote, VoteChoice } from "@/types";
+import type {
+  ImpactReflection,
+  Proposal,
+  ProposalStatus,
+  Vote,
+  VoteChoice,
+} from "@/types";
 
 // Agent 13 task 1 — Decisions surface (proposals only for v1; the
 // dispute table will fold in here once the resolution lifecycle
@@ -220,6 +226,9 @@ function ProposalCard({
       )}
       {proposal.category === "config_change" && (
         <ConfigChangePayload payload={proposal.payload} />
+      )}
+      {proposal.impactReflection && (
+        <ImpactReflectionDisplay raw={proposal.impactReflection} />
       )}
       <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
@@ -721,6 +730,46 @@ function ConfigChangePayload({ payload }: { payload: string }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function ImpactReflectionDisplay({ raw }: { raw: string }) {
+  const { t } = useTranslation();
+  let parsed: ImpactReflection | null = null;
+  try {
+    parsed = JSON.parse(raw) as ImpactReflection;
+  } catch {
+    return null;
+  }
+  const fields: Array<{ key: keyof ImpactReflection; labelKey: string }> = [
+    { key: "yearOne", labelKey: "proposals.impact.yearOne" },
+    { key: "fiveYear", labelKey: "proposals.impact.fiveYear" },
+    { key: "reversalPath", labelKey: "proposals.impact.reversalPath" },
+    {
+      key: "vulnerableImpact",
+      labelKey: "proposals.impact.vulnerableImpact",
+    },
+  ];
+  const filled = fields.filter((f) => parsed![f.key]?.trim().length > 0);
+  if (filled.length === 0) return null;
+  return (
+    <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/40 p-3 text-xs dark:border-rose-900 dark:bg-rose-950/20">
+      <div className="mb-2 font-semibold text-rose-900 dark:text-rose-100">
+        {t("proposals.impact.heading")}
+      </div>
+      <dl className="space-y-2">
+        {filled.map((f) => (
+          <div key={f.key}>
+            <dt className="text-xs uppercase tracking-wide text-rose-700 dark:text-rose-300">
+              {t(f.labelKey)}
+            </dt>
+            <dd className="mt-0.5 text-rose-900 dark:text-rose-100">
+              {parsed![f.key]}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

@@ -10,6 +10,42 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Impact reflection form for hard-tier proposals.** The
+  `impactReflection` slot was already in the `Proposal` data
+  model (from the Proposals MVP PR); this PR wires the form on
+  ProposalNew and the display on Proposals.
+  - **Structural pause, not gatekeeping.** Per the roadmap:
+    when the proposer picks `hard` reversibility tier, four
+    textareas appear — year-one impact, five-year impact,
+    reversal path, vulnerable impact — but NONE are required.
+    Submitting with all blank is fine. The form's existence is
+    the pause; gatekeeping would just push the friction into
+    bypass behaviour.
+  - **`ProposalNew`** conditionally renders an `ImpactReflectionForm`
+    fieldset (rose-tinted to match the hard-tier framing) when
+    `reversibilityTier === "hard"`. Fields persist across tier
+    toggles so flipping back from hard → moderate → hard
+    doesn't lose what was typed. Submit serializes the four
+    fields to JSON (only if at least one is non-empty;
+    all-blank → `null`).
+  - **`Proposals` page** renders an `ImpactReflectionDisplay`
+    card on any proposal with a populated reflection. Same
+    rose tone, formatted as a definition list with one
+    section per non-empty field. Empty fields are skipped so
+    a partial reflection still reads cleanly.
+  - **i18n**: new `proposals.new.impact.*` + `impactHeader`
+    + `impactIntro` + `impactFooter` for the form, plus
+    `proposals.impact.*` for the display headings, in en + es.
+
+  No new tests — the data path (`createProposal` with
+  `impactReflection: ImpactReflection`) was already covered by
+  `proposals.test.ts:serializes impactReflection to JSON when
+  provided`. The new code is pure UI on top of existing
+  storage.
+
+  Tests: 407 passing (unchanged). Locale parity passes. Lint,
+  typecheck, build clean.
+
 - **Automatic close on consensus.** Builds on the voting layer
   from the previous PR. A proposal now auto-passes when:
   - the **deliberation period** has elapsed
