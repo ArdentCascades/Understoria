@@ -81,7 +81,7 @@ export default function ProposalNewPage() {
 
     const proposedConfig: NodeConfigProposalPayload = {
       // The form only edits the three Agent 11 thresholds; the
-      // other fields (Agent 13 deliberation, task staleness)
+      // other fields (Agent 13 deliberation, task check-in)
       // ride along unchanged from the current config so the
       // payload remains a complete NodeConfig.
       ...nodeConfig,

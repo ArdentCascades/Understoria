@@ -556,16 +556,24 @@
         "hint": "Cuando dos mismas integrantes intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
       },
       "taskCheckInDays": {
-        "label": "Chequeo de tarea (días)",
-        "hint": "Después de tantos días, quien tomó una tarea de proyecto recibe un aviso privado de '¿sigues con esto?' en su lista de pendientes. Puede liberarla sin que nadie lo vea."
+        "label": "Chequeo de tarea (dias)",
+        "hint": "Despues de tantos dias, quien tomo una tarea de proyecto recibe un aviso privado de 'sigues con esto?' en su lista de pendientes. Puede liberarla sin que nadie lo vea."
       },
       "taskNeedsHelpDays": {
-        "label": "Tarea 'le vendrían bien más manos' (días)",
-        "hint": "Después de tantos días, una tarea tomada se marca públicamente como necesitada de más manos. Enmarcado hacia la tarea, no hacia la persona. Debe ser al menos igual al umbral de chequeo."
+        "label": "Tarea 'le vendrian bien mas manos' (dias)",
+        "hint": "Despues de tantos dias, una tarea tomada se marca publicamente como necesitada de mas manos. Enmarcado hacia la tarea, no hacia la persona. Debe ser al menos igual al umbral de chequeo."
       },
       "taskCheckInGraceDays": {
-        "label": "Margen tras el chequeo de tarea (días)",
-        "hint": "Después de que quien tomó la tarea reconozca el aviso privado, suspende el indicador público 'le vendrían bien más manos' durante estos días. Permite que una persona que responde mantenga la tarea fuera de la señal comunitaria. Mantén un valor bajo (1–3) para que el silencio prolongado siga apareciendo."
+        "label": "Margen tras el chequeo de tarea (dias)",
+        "hint": "Despues de que quien tomo la tarea reconozca el aviso privado, suspende el indicador publico 'le vendrian bien mas manos' durante estos dias. Permite que una persona que responde mantenga la tarea fuera de la senal comunitaria. Manten un valor bajo (1-3) para que el silencio prolongado siga apareciendo."
+      },
+      "deliberationDays": {
+        "label": "Periodo de deliberacion de propuestas (dias)",
+        "hint": "Dias minimos que una propuesta debe permanecer abierta antes de aprobarse automaticamente por consenso. Evita votaciones apresuradas."
+      },
+      "minAffirms": {
+        "label": "Votos a favor minimos",
+        "hint": "Votos a favor distintos necesarios para que una propuesta se apruebe automaticamente. Incluso con la deliberacion completa, una propuesta que solo una persona ha avalado no deberia pasar en silencio."
       },
       "save": "Guardar configuración",
       "reset": "Restaurar valores predeterminados"
@@ -731,6 +739,11 @@
     },
     "errorTitleRequired": "Dale a la propuesta un título corto.",
     "errorPositiveInteger": "Debe ser un número entero mayor que 0.",
+    "eligibility": {
+      "waitDeliberation": "Se aprueba automáticamente {{when}} si no llegan bloqueos antes.",
+      "waitAffirms": "Necesita {{need}} votos a favor para aprobarse por consenso; lleva {{have}} hasta ahora.",
+      "blocked": "Detenida por {{count}} bloqueo — debe resolverse antes de avanzar."
+    },
     "vote": {
       "headingNone": "Aún nadie ha opinado",
       "headingOne": "{{count}} persona ha opinado",

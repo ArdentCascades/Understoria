@@ -39,6 +39,11 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
       row.taskNeedsHelpDays ?? DEFAULT_NODE_CONFIG.taskNeedsHelpDays,
     taskCheckInGraceDays:
       row.taskCheckInGraceDays ?? DEFAULT_NODE_CONFIG.taskCheckInGraceDays,
+    proposalDeliberationDays:
+      row.proposalDeliberationDays ??
+      DEFAULT_NODE_CONFIG.proposalDeliberationDays,
+    proposalMinAffirms:
+      row.proposalMinAffirms ?? DEFAULT_NODE_CONFIG.proposalMinAffirms,
   };
 }
 
@@ -105,6 +110,22 @@ function validate(config: NodeConfig): NodeConfig {
   ) {
     throw new InvalidNodeConfigError(
       "Task check-in grace must be a whole number of days >= 0.",
+    );
+  }
+  if (
+    !Number.isInteger(config.proposalDeliberationDays) ||
+    config.proposalDeliberationDays < 1
+  ) {
+    throw new InvalidNodeConfigError(
+      "Proposal deliberation period must be a whole number of days >= 1.",
+    );
+  }
+  if (
+    !Number.isInteger(config.proposalMinAffirms) ||
+    config.proposalMinAffirms < 1
+  ) {
+    throw new InvalidNodeConfigError(
+      "Proposal minimum affirms must be a whole number >= 1.",
     );
   }
   return config;
