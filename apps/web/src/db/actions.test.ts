@@ -64,7 +64,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 2,
       urgency: "medium",
       expiresAt: null,
-    });
+    }, NODE);
 
     await claimPost(post.id, claimer.publicKey);
 
@@ -116,7 +116,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post.id, claimer.publicKey);
     await confirmExchange(post.id, poster.publicKey, NODE);
     await confirmExchange(post.id, claimer.publicKey, NODE);
@@ -137,7 +137,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post.id, b.publicKey);
     await confirmExchange(post.id, a.publicKey, NODE);
     const result = await confirmExchange(post.id, b.publicKey, NODE);
@@ -157,7 +157,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await expect(claimPost(post.id, a.publicKey)).rejects.toThrow();
   });
 
@@ -172,7 +172,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     const cancelled = await cancelPost(post.id, a.publicKey);
     expect(cancelled.status).toBe("cancelled");
 
@@ -184,7 +184,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post2.id, b.publicKey);
     await confirmExchange(post2.id, a.publicKey, NODE);
     await confirmExchange(post2.id, b.publicKey, NODE);
@@ -211,7 +211,7 @@ describe("exchange flow (integration)", () => {
         estimatedHours: 1,
         urgency: "low",
         expiresAt: null,
-      });
+      }, NODE);
       await claimPost(post.id, recipient.publicKey);
       await confirmExchange(post.id, helper.publicKey, NODE);
       await confirmExchange(post.id, recipient.publicKey, NODE);
@@ -240,7 +240,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 0.1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post.id, b.publicKey);
     await confirmExchange(post.id, a.publicKey, NODE);
     await confirmExchange(post.id, b.publicKey, NODE);
@@ -260,7 +260,7 @@ describe("exchange flow (integration)", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
     await claimPost(post.id, b.publicKey);
     const disputed = await disputeExchange(post.id, a.publicKey);
     expect(disputed.status).toBe("disputed");
@@ -281,7 +281,9 @@ describe("community-node mirroring on confirmExchange", () => {
     vi.restoreAllMocks();
   });
 
-  async function runFullExchange() {
+  async function runFullExchange(
+    opts: { writeConfigAfterPost?: () => Promise<void> } = {},
+  ) {
     const a = await createMember({ displayName: "A" }, NODE);
     const b = await createMember({ displayName: "B" }, NODE);
     const post = await createPost(a.publicKey, "", {
@@ -292,7 +294,14 @@ describe("community-node mirroring on confirmExchange", () => {
       estimatedHours: 1,
       urgency: "low",
       expiresAt: null,
-    });
+    }, NODE);
+    // Tests that want the mirror to fire only on confirmExchange (not
+    // also on createPost via posts federation) hook in here to write
+    // the community-node URL after the post is created. Callers that
+    // already wrote the config before calling will see TWO outbox
+    // rows (one post, one exchange) — that's the honest behaviour
+    // now that posts federate too.
+    if (opts.writeConfigAfterPost) await opts.writeConfigAfterPost();
     await claimPost(post.id, b.publicKey);
     await confirmExchange(post.id, a.publicKey, NODE);
     return confirmExchange(post.id, b.publicKey, NODE);
@@ -346,16 +355,18 @@ describe("community-node mirroring on confirmExchange", () => {
   });
 
   it("posts the finalized exchange to <url>/exchanges when configured", async () => {
-    await writeSubmitConfig({
-      url: "https://node.example/api",
-      enabled: true,
-    });
     const fetchSpy = vi.fn(async () =>
       new Response('{"stored":true}', { status: 201 }),
     );
     globalThis.fetch = fetchSpy as unknown as typeof fetch;
 
-    const result = await runFullExchange();
+    const result = await runFullExchange({
+      writeConfigAfterPost: () =>
+        writeSubmitConfig({
+          url: "https://node.example/api",
+          enabled: true,
+        }),
+    });
     await waitForFetch(fetchSpy);
 
     expect(fetchSpy).toHaveBeenCalledOnce();
@@ -392,30 +403,35 @@ describe("community-node mirroring on confirmExchange", () => {
   });
 
   it("DOES enqueue an outbox row when a URL is set (even if disabled)", async () => {
-    await writeSubmitConfig({
-      url: "https://node.example/api",
-      enabled: false,
+    const result = await runFullExchange({
+      writeConfigAfterPost: () =>
+        writeSubmitConfig({
+          url: "https://node.example/api",
+          enabled: false,
+        }),
     });
-    const result = await runFullExchange();
     const rows = await db.outbox.toArray();
     expect(rows).toHaveLength(1);
     expect(rows[0].recordId).toBe(result.exchange!.id);
+    expect(rows[0].kind).toBe("exchange");
     expect(rows[0].status).toBe("pending");
     // Disabled means the row sits there until the user enables; a
     // later flushOutboxOnce with the config flipped would deliver it.
   });
 
   it("marks the outbox row delivered after a successful mirror", async () => {
-    await writeSubmitConfig({
-      url: "https://node.example/api",
-      enabled: true,
-    });
     const fetchSpy = vi.fn(async () =>
       new Response('{"stored":true}', { status: 201 }),
     );
     globalThis.fetch = fetchSpy as unknown as typeof fetch;
 
-    await runFullExchange();
+    await runFullExchange({
+      writeConfigAfterPost: () =>
+        writeSubmitConfig({
+          url: "https://node.example/api",
+          enabled: true,
+        }),
+    });
     await waitForFetch(fetchSpy);
     // Give the post-flush update a tick to land in IndexedDB.
     await new Promise((r) => setTimeout(r, 50));

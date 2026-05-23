@@ -23,6 +23,7 @@ import type { Database as DatabaseType } from "better-sqlite3";
 import type {
   Exchange,
   FlagReason,
+  Post,
   SignedVouch,
 } from "@understoria/shared/types";
 
@@ -62,6 +63,36 @@ export interface VouchStore {
 }
 
 /**
+ * Storage for signed posts. The wire shape is the immutable subset
+ * of Post (lifecycle fields like status/claimedBy/confirmedBy stay
+ * local to each PWA — they don't federate). Same shape pattern as
+ * VouchStore. Cursor field is `createdAt`.
+ */
+export type PostRecord = Pick<
+  Post,
+  | "id"
+  | "type"
+  | "category"
+  | "title"
+  | "description"
+  | "estimatedHours"
+  | "urgency"
+  | "postedBy"
+  | "createdAt"
+  | "expiresAt"
+  | "locationZone"
+  | "nodeId"
+  | "signature"
+>;
+
+export interface PostStore {
+  insert(post: PostRecord): void;
+  list(opts?: { since?: number; limit?: number }): PostRecord[];
+  count(): number;
+  has(id: string): boolean;
+}
+
+/**
  * Per-peer pull state. Persisted so a server restart resumes pulling
  * from where it left off rather than re-fetching every record (which
  * would still be correct via `store.has(id)` dedup, but wasteful at
@@ -85,11 +116,12 @@ export interface PeerPullStateRow {
   lastSuccessAt: number | null;
   lastCompletedAt: number | null;
   lastVouchCreatedAt: number | null;
+  lastPostCreatedAt: number | null;
   lastError: string | null;
   lastPulledCount: number;
 }
 
-export type PullRecordKind = "exchange" | "vouch";
+export type PullRecordKind = "exchange" | "vouch" | "post";
 
 export interface PeerPullStore {
   get(peerUrl: string): PeerPullStateRow | null;
@@ -195,6 +227,38 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '3')",
+    ).run();
+  }
+
+  // Schema v4 — posts federation. New `posts` table stores the
+  // immutable signed subset of a Post (lifecycle fields stay local
+  // to each PWA). `peer_pull_state` gets a fourth per-kind cursor.
+  if (current < 4) {
+    db.exec(`
+      CREATE TABLE posts (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        category TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        estimated_hours REAL NOT NULL,
+        urgency TEXT NOT NULL,
+        posted_by TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER,
+        location_zone TEXT NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX posts_created_at_idx ON posts (created_at DESC);
+      CREATE INDEX posts_posted_by_idx ON posts (posted_by);
+      CREATE INDEX posts_node_id_idx ON posts (node_id);
+
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_post_created_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '4')",
     ).run();
   }
 }
@@ -331,6 +395,98 @@ function rowToVouch(r: VouchRow): SignedVouch {
   };
 }
 
+export function createPostStore(db: DatabaseType): PostStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO posts (
+      id, type, category, title, description, estimated_hours, urgency,
+      posted_by, created_at, expires_at, location_zone, node_id, signature
+    ) VALUES (
+      @id, @type, @category, @title, @description, @estimatedHours, @urgency,
+      @postedBy, @createdAt, @expiresAt, @locationZone, @nodeId, @signature
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM posts WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM posts");
+
+  return {
+    insert(post) {
+      insertStmt.run({
+        id: post.id,
+        type: post.type,
+        category: post.category,
+        title: post.title,
+        description: post.description,
+        estimatedHours: post.estimatedHours,
+        urgency: post.urgency,
+        postedBy: post.postedBy,
+        createdAt: post.createdAt,
+        expiresAt: post.expiresAt,
+        locationZone: post.locationZone,
+        nodeId: post.nodeId,
+        signature: post.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM posts WHERE created_at > ?
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM posts
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as PostRowSqlite[]).map(rowToPost);
+    },
+    count() {
+      const r = countStmt.get() as { n: number };
+      return r.n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+  };
+}
+
+interface PostRowSqlite {
+  id: string;
+  type: string;
+  category: string;
+  title: string;
+  description: string;
+  estimated_hours: number;
+  urgency: string;
+  posted_by: string;
+  created_at: number;
+  expires_at: number | null;
+  location_zone: string;
+  node_id: string;
+  signature: string;
+}
+
+function rowToPost(r: PostRowSqlite): PostRecord {
+  return {
+    id: r.id,
+    type: r.type as PostRecord["type"],
+    category: r.category as PostRecord["category"],
+    title: r.title,
+    description: r.description,
+    estimatedHours: r.estimated_hours,
+    urgency: r.urgency as PostRecord["urgency"],
+    postedBy: r.posted_by,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    locationZone: r.location_zone,
+    nodeId: r.node_id,
+    signature: r.signature,
+  };
+}
+
 export function createPeerPullStore(db: DatabaseType): PeerPullStore {
   const getStmt = db.prepare("SELECT * FROM peer_pull_state WHERE peer_url = ?");
   const listStmt = db.prepare(
@@ -374,6 +530,19 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       last_vouch_created_at = COALESCE(@latestSeenAt, last_vouch_created_at),
       last_pulled_count = @pulledCount
   `);
+  const successPostStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at, last_post_created_at,
+      last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_post_created_at = COALESCE(@latestSeenAt, last_post_created_at),
+      last_pulled_count = @pulledCount
+  `);
   const failureStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_error, last_pulled_count
@@ -394,7 +563,12 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       return rows.map(toState);
     },
     recordSuccess({ peerUrl, kind, at, latestSeenAt, pulledCount }) {
-      const stmt = kind === "exchange" ? successExchangeStmt : successVouchStmt;
+      const stmt =
+        kind === "exchange"
+          ? successExchangeStmt
+          : kind === "vouch"
+            ? successVouchStmt
+            : successPostStmt;
       stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
@@ -409,6 +583,7 @@ interface PeerPullStateRowSqlite {
   last_success_at: number | null;
   last_completed_at: number | null;
   last_vouch_created_at: number | null;
+  last_post_created_at: number | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -420,6 +595,7 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
     lastSuccessAt: r.last_success_at,
     lastCompletedAt: r.last_completed_at,
     lastVouchCreatedAt: r.last_vouch_created_at,
+    lastPostCreatedAt: r.last_post_created_at,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };

@@ -143,6 +143,8 @@ describe("computeCommunityStats", () => {
       expiresAt: null,
       locationZone: "",
       confirmedBy: ["a", "b"],
+      nodeId,
+      signature: "",
     };
     const exchanges: Exchange[] = [
       { ...exchange("1", now - 2 * DAY), postId: "p1" },

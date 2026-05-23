@@ -270,6 +270,8 @@ records from each peer over a small public surface:
 
 - `GET /exchanges?since=<last>` — signed exchange ledger
 - `GET /vouches?since=<last>` — signed web-of-trust vouches
+- `GET /posts?since=<last>` — signed needs and offers (immutable
+  subset only; the lifecycle fields stay local to each node)
 
 Every record's signature is verified before insert. Pulled rows
 keep their original `nodeId` (for exchanges) — federation is

@@ -24,12 +24,17 @@ import { computeZoneReachForHelper } from "@/lib/flow";
 import { getNodeConfig } from "./nodeConfig";
 import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
+import { canonicalPostPayload } from "@understoria/shared/crypto";
 import {
   assertWithinDailyLimit,
   evaluateSafeguards,
 } from "@/lib/safeguards";
 import { getSecretKey } from "./secrets";
-import { enqueueExchangeOutbox, flushOutboxNow } from "@/lib/outbox";
+import {
+  enqueueExchangeOutbox,
+  enqueuePostOutbox,
+  flushOutboxNow,
+} from "@/lib/outbox";
 import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
 
 /**
@@ -75,8 +80,14 @@ export async function createPost(
   memberKey: string,
   locationZone: string,
   input: CreatePostInput,
+  nodeId: string,
 ): Promise<Post> {
-  const post: Post = {
+  // Pre-load the poster's secret key BEFORE opening the write
+  // transaction — same pattern as confirmExchange. A locked session
+  // will throw from getSecretKey rather than producing an unsigned
+  // post or a half-written row.
+  const posterSecret = await getSecretKey(memberKey);
+  const immutable = {
     id: uuid(),
     type: input.type,
     category: input.category,
@@ -85,14 +96,30 @@ export async function createPost(
     estimatedHours: input.estimatedHours,
     urgency: input.urgency,
     postedBy: memberKey,
-    claimedBy: null,
-    status: "open",
     createdAt: Date.now(),
     expiresAt: input.expiresAt,
     locationZone,
-    confirmedBy: [],
+    nodeId,
   };
-  await db.posts.put(post);
+  const signature = sign(canonicalPostPayload(immutable), posterSecret);
+  const post: Post = {
+    ...immutable,
+    claimedBy: null,
+    status: "open",
+    confirmedBy: [],
+    signature,
+  };
+  await db.transaction("rw", [db.posts, db.outbox, db.settings], async () => {
+    await db.posts.put(post);
+    await enqueuePostOutbox(post);
+  });
+  // Kick the outbox worker so a configured node sees this post right
+  // away. Same pattern confirmExchange uses.
+  void flushOutboxNow().catch((err) => {
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn("[understoria] post flush kick crashed", err);
+    }
+  });
   return post;
 }
 

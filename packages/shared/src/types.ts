@@ -72,6 +72,39 @@ export interface Post {
   locationZone: string;
   /** Public keys of members who have confirmed completion. */
   confirmedBy: string[];
+  /** Which node this post originated from. Set by createPost at
+   *  creation time; preserved across federation so peer nodes see
+   *  which community a post came from. Posts created before Agent 3
+   *  posts federation (schema < v7) get backfilled to the local node id. */
+  nodeId: string;
+  /** Ed25519 signature over the canonical immutable payload (see
+   *  `canonicalPostPayload` in `@understoria/shared/crypto`). Empty
+   *  string for legacy posts created before this field existed; the
+   *  federation push and the server-side verify both treat empty as
+   *  "not federable" rather than as an invalid signature. */
+  signature: string;
+}
+
+/**
+ * The immutable, signed subset of a Post. This is what the poster
+ * signs at creation time and what crosses the federation boundary —
+ * status / claimedBy / confirmedBy are mutable lifecycle fields that
+ * stay local to each node (federating lifecycle would require an
+ * event-sourced model; out of scope for this slice).
+ */
+export interface PostPayload {
+  id: string;
+  type: PostType;
+  category: Category;
+  title: string;
+  description: string;
+  estimatedHours: number;
+  urgency: Urgency;
+  postedBy: string;
+  createdAt: number;
+  expiresAt: number | null;
+  locationZone: string;
+  nodeId: string;
 }
 
 export interface Exchange {

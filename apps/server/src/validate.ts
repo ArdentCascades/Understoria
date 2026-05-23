@@ -23,8 +23,10 @@ import {
   type Category,
   type Exchange,
   type FlagReason,
+  type Post,
   type SignedVouch,
 } from "@understoria/shared/types";
+import type { PostRecord } from "./db.js";
 
 /**
  * Shape-level validation for incoming POST bodies. Cryptographic
@@ -41,6 +43,10 @@ export type ParseResult =
 
 export type ParseVouchResult =
   | { ok: true; value: SignedVouch }
+  | { ok: false; error: string };
+
+export type ParsePostResult =
+  | { ok: true; value: PostRecord }
   | { ok: false; error: string };
 
 const VOUCH_KINDS: ReadonlySet<SignedVouch["kind"]> = new Set([
@@ -177,4 +183,110 @@ export function parseExchange(input: unknown): ParseResult {
     if (flagReason) value.flagReason = flagReason;
   }
   return { ok: true, value };
+}
+
+const POST_TYPES: ReadonlySet<Post["type"]> = new Set(["NEED", "OFFER"]);
+const URGENCY_LEVELS: ReadonlySet<Post["urgency"]> = new Set([
+  "low",
+  "medium",
+  "high",
+]);
+
+const POST_STRING_FIELDS = [
+  "id",
+  "title",
+  "postedBy",
+  "locationZone",
+  "nodeId",
+  "signature",
+] as const;
+
+export function parsePost(input: unknown): ParsePostResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+
+  for (const f of POST_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  // `description` is allowed to be the empty string — posts can be
+  // just a title. Required to be a string, not non-empty.
+  if (typeof r.description !== "string") {
+    return { ok: false, error: "description must be a string" };
+  }
+  if (
+    typeof r.estimatedHours !== "number" ||
+    !Number.isFinite(r.estimatedHours) ||
+    r.estimatedHours <= 0
+  ) {
+    return {
+      ok: false,
+      error: "estimatedHours must be a positive finite number",
+    };
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (r.expiresAt !== null) {
+    if (
+      typeof r.expiresAt !== "number" ||
+      !Number.isInteger(r.expiresAt) ||
+      r.expiresAt <= 0
+    ) {
+      return {
+        ok: false,
+        error: "expiresAt must be null or a positive integer (ms epoch)",
+      };
+    }
+  }
+  if (
+    typeof r.type !== "string" ||
+    !POST_TYPES.has(r.type as Post["type"])
+  ) {
+    return { ok: false, error: "type must be 'NEED' or 'OFFER'" };
+  }
+  if (
+    typeof r.urgency !== "string" ||
+    !URGENCY_LEVELS.has(r.urgency as Post["urgency"])
+  ) {
+    return { ok: false, error: "urgency must be low/medium/high" };
+  }
+  if (
+    typeof r.category !== "string" ||
+    !CATEGORY_SET.has(r.category as Category)
+  ) {
+    return { ok: false, error: "category is not a recognized category" };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.createdAt as number) > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      type: r.type as Post["type"],
+      category: r.category as Category,
+      title: r.title as string,
+      description: r.description as string,
+      estimatedHours: r.estimatedHours as number,
+      urgency: r.urgency as Post["urgency"],
+      postedBy: r.postedBy as string,
+      createdAt: r.createdAt as number,
+      expiresAt: r.expiresAt as number | null,
+      locationZone: r.locationZone as string,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
 }

@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, SignedVouch } from "@/types";
+import type { Exchange, Post, SignedVouch } from "@/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
 /**
@@ -102,6 +102,20 @@ export async function submitVouchToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/vouches", vouch, config, deps);
+}
+
+/**
+ * Mirror a signed post to the configured community node. Same
+ * best-effort semantics as `submitExchangeToNode`. The caller passes
+ * the immutable wire shape (lifecycle fields stripped) — see
+ * `enqueuePostOutbox` in `lib/outbox.ts`.
+ */
+export async function submitPostToNode(
+  post: Post,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/posts", post, config, deps);
 }
 
 async function postSignedRecord(
