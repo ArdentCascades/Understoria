@@ -196,6 +196,21 @@ export class UnderstoriaDB extends Dexie {
     this.version(8).stores({
       drafts: "key, updatedAt",
     });
+    // Version 9 — disputedAt + disputeReason on Post. No index
+    // change (we sort in memory) so the schema string stays {};
+    // upgrade backfills both fields to null on every existing row
+    // so the TypeScript shape is honoured.
+    this.version(9).stores({}).upgrade(async (tx) => {
+      const posts = tx.table<Post, string>("posts");
+      await posts.toCollection().modify((row) => {
+        const r = row as Post & {
+          disputedAt?: number | null;
+          disputeReason?: string | null;
+        };
+        if (r.disputedAt === undefined) r.disputedAt = null;
+        if (r.disputeReason === undefined) r.disputeReason = null;
+      });
+    });
   }
 }
 

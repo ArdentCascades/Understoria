@@ -29,7 +29,15 @@ import type { Member, Post } from "@/types";
 // data path consistent with `createPost` so demo posts pass
 // `verifyPost()` and federate the same way real posts do.
 function signSeedPost(
-  immutable: Omit<Post, "claimedBy" | "status" | "confirmedBy" | "signature">,
+  immutable: Omit<
+    Post,
+    | "claimedBy"
+    | "status"
+    | "confirmedBy"
+    | "signature"
+    | "disputedAt"
+    | "disputeReason"
+  >,
   posterSecretKey: string,
 ): Post {
   return {
@@ -38,6 +46,8 @@ function signSeedPost(
     status: "open",
     confirmedBy: [],
     signature: sign(canonicalPostPayload(immutable), posterSecretKey),
+    disputedAt: null,
+    disputeReason: null,
   };
 }
 

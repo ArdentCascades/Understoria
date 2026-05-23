@@ -83,6 +83,15 @@ export interface Post {
    *  federation push and the server-side verify both treat empty as
    *  "not federable" rather than as an invalid signature. */
   signature: string;
+  /** Wall-clock ms-epoch when the dispute was raised. `null` when
+   *  the post isn't disputed, and on legacy disputed rows from
+   *  before the field existed (schema < v9). Lifecycle field,
+   *  stays local to each node like `status` / `claimedBy`. */
+  disputedAt: number | null;
+  /** Optional short note the flagger chose to share. Community-
+   *  visible (matches the rest of the dispute surface). `null` when
+   *  not disputed or when the flagger declined to add a note. */
+  disputeReason: string | null;
 }
 
 /**

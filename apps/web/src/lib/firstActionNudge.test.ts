@@ -39,6 +39,8 @@ function buildPost(overrides: Partial<Post> = {}): Post {
     expiresAt: null,
     locationZone: "",
     signature: "",
+    disputedAt: null,
+    disputeReason: null,
     ...overrides,
   };
 }

@@ -108,6 +108,8 @@ export async function createPost(
     status: "open",
     confirmedBy: [],
     signature,
+    disputedAt: null,
+    disputeReason: null,
   };
   await db.transaction("rw", [db.posts, db.outbox, db.settings], async () => {
     await db.posts.put(post);
@@ -375,13 +377,20 @@ export async function confirmExchange(
 export async function disputeExchange(
   postId: string,
   memberKey: string,
+  reason: string | null = null,
 ): Promise<Post> {
   return db.transaction("rw", db.posts, async () => {
     const post = await db.posts.get(postId);
     if (!post) throw new Error("Post not found");
     if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
       throw new Error("Only the two parties can dispute this exchange");
-    const updated: Post = { ...post, status: "disputed" };
+    const trimmed = reason?.trim() ?? "";
+    const updated: Post = {
+      ...post,
+      status: "disputed",
+      disputedAt: Date.now(),
+      disputeReason: trimmed.length > 0 ? trimmed : null,
+    };
     await db.posts.put(updated);
     return updated;
   });

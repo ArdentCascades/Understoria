@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -58,8 +58,16 @@ export default function PostDetailPage() {
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<DialogKind>(null);
+  const [disputeReason, setDisputeReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+
+  // Reset the optional reason every time the dispute dialog is
+  // (re-)opened so the previous draft doesn't linger if the user
+  // dismissed and came back.
+  useEffect(() => {
+    if (dialog?.type === "dispute") setDisputeReason("");
+  }, [dialog]);
 
   const post = useMemo(
     () => posts.find((p) => p.id === id) ?? null,
@@ -306,12 +314,34 @@ export default function PostDetailPage() {
         open={dialog?.type === "dispute"}
         tone="caution"
         title={t("postDetail.dialogDisputeTitle")}
-        description={t("postDetail.dialogDisputeDescription")}
+        description={
+          <>
+            <p>{t("postDetail.dialogDisputeDescription")}</p>
+            <label className="mt-3 flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("postDetail.dialogDisputeReasonLabel")}
+              </span>
+              <textarea
+                className="input min-h-20"
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+                maxLength={500}
+                placeholder={t("postDetail.dialogDisputeReasonPlaceholder")}
+              />
+              <span className="text-xs text-moss-500 dark:text-moss-400">
+                {t("postDetail.dialogDisputeReasonHint")}
+              </span>
+            </label>
+          </>
+        }
         confirmLabel={t("postDetail.dialogDisputeConfirm")}
         confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
-          me && run(() => disputeExchange(post.id, me.publicKey))
+          me &&
+          run(() =>
+            disputeExchange(post.id, me.publicKey, disputeReason),
+          )
         }
       />
 
@@ -466,6 +496,11 @@ function ActionPanel({
         <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
           {t("postDetail.actionsDisputed")}
         </p>
+        {post.disputeReason && (
+          <blockquote className="mt-2 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
+            {post.disputeReason}
+          </blockquote>
+        )}
       </Actions>
     );
   }
