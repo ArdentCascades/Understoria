@@ -415,3 +415,34 @@ export interface ImpactReflection {
  * `NodeConfig` values. Stored as JSON inside `Proposal.payload`.
  */
 export type NodeConfigProposalPayload = NodeConfig;
+
+/**
+ * Per-`GOVERNANCE.md` decision model. Members express a position on
+ * an open proposal: affirm (consent), block (object — should carry
+ * a reason), or abstain (intentional non-position). Silence is also
+ * valid in lazy consensus, but only the explicit choices are stored.
+ *
+ * Votes are unsigned for v1 because they stay local to the node. When
+ * Agent 15 (federation governance) lands and votes need to cross
+ * peer boundaries, we'll add a signature field alongside.
+ *
+ * Latest vote per (voter, proposal) wins. The `votes` table indexes
+ * on the composite key so replacing a vote is a simple `put` with
+ * the same `id`.
+ */
+export type VoteChoice = "affirm" | "block" | "abstain";
+
+export interface Vote {
+  /** Deterministic id: `${proposalId}|${voterKey}`. One row per
+   *  voter per proposal — re-casting overwrites. */
+  id: string;
+  proposalId: string;
+  voterKey: string;
+  choice: VoteChoice;
+  /** Optional note. Strongly encouraged for `block` (so the
+   *  community can resolve the objection); usually empty for
+   *  affirm / abstain. */
+  reason: string | null;
+  createdAt: number;
+  nodeId: string;
+}

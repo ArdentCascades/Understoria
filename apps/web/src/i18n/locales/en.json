@@ -696,6 +696,29 @@
     },
     "errorTitleRequired": "Give the proposal a short title.",
     "errorPositiveInteger": "Must be a whole number greater than 0.",
+    "vote": {
+      "headingNone": "No votes cast yet",
+      "headingOne": "{{count}} member has weighed in",
+      "headingOther": "{{count}} members have weighed in",
+      "castPrompt": "What do you think?",
+      "changeChoice": "Your current vote: {{choice}}. Change it:",
+      "affirm": "Affirm",
+      "block": "Block",
+      "abstain": "Abstain",
+      "blockReasonLabel": "Why are you blocking?",
+      "blockReasonPlaceholder": "What needs to be resolved before this can move forward?",
+      "confirmBlock": "Record block",
+      "choice": {
+        "affirm": "affirm",
+        "block": "block",
+        "abstain": "abstain"
+      },
+      "tally": {
+        "affirms": "Affirm: {{count}}",
+        "blocks": "Block: {{count}}",
+        "abstains": "Abstain: {{count}}"
+      }
+    },
     "toast": {
       "created": "Proposal started. Share it with your community on your usual channel."
     },

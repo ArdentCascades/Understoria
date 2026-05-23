@@ -16,8 +16,10 @@ import { useApp } from "@/state/AppContext";
 import { formatRelativeTime, shortKey } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 import { closeProposal } from "@/db/proposals";
+import { castVote } from "@/db/votes";
+import { currentMemberVote, tallyVotes, type Tally } from "@/lib/votes";
 import { usePendingAction } from "@/lib/usePendingAction";
-import type { Proposal, ProposalStatus } from "@/types";
+import type { Proposal, ProposalStatus, Vote, VoteChoice } from "@/types";
 
 // Agent 13 task 1 — Decisions surface (proposals only for v1; the
 // dispute table will fold in here once the resolution lifecycle
@@ -38,7 +40,7 @@ const STATUS_FILTERS: Array<ProposalStatus | "all"> = [
 ];
 
 export default function ProposalsPage() {
-  const { proposals, members, currentMember } = useApp();
+  const { proposals, members, currentMember, votes, nodeId } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<ProposalStatus | "all">("open");
@@ -53,6 +55,18 @@ export default function ProposalsPage() {
     for (const m of members) map.set(m.publicKey, m.displayName);
     return map;
   }, [members]);
+
+  // Index votes by proposal so each card can pluck its own slice
+  // in O(1) at render time.
+  const votesByProposal = useMemo(() => {
+    const map = new Map<string, Vote[]>();
+    for (const v of votes) {
+      const arr = map.get(v.proposalId) ?? [];
+      arr.push(v);
+      map.set(v.proposalId, arr);
+    }
+    return map;
+  }, [votes]);
 
   return (
     <div className="px-4 pb-8 pt-4">
@@ -119,6 +133,10 @@ export default function ProposalsPage() {
                 proposal={p}
                 proposerName={nameByKey.get(p.proposerKey) ?? null}
                 canCloseOpen={Boolean(currentMember)}
+                proposalVotes={votesByProposal.get(p.id) ?? []}
+                currentMemberKey={currentMember?.publicKey ?? null}
+                nodeId={nodeId}
+                nameByKey={nameByKey}
               />
             </li>
           ))}
@@ -136,10 +154,18 @@ function ProposalCard({
   proposal,
   proposerName,
   canCloseOpen,
+  proposalVotes,
+  currentMemberKey,
+  nodeId,
+  nameByKey,
 }: {
   proposal: Proposal;
   proposerName: string | null;
   canCloseOpen: boolean;
+  proposalVotes: readonly Vote[];
+  currentMemberKey: string | null;
+  nodeId: string;
+  nameByKey: Map<string, string>;
 }) {
   const { t } = useTranslation();
   const [closing, setClosing] = useState<
@@ -147,6 +173,11 @@ function ProposalCard({
   >(null);
   const [reason, setReason] = useState("");
   const { pending, run } = usePendingAction();
+
+  const tally = useMemo(() => tallyVotes(proposalVotes), [proposalVotes]);
+  const myChoice = currentMemberKey
+    ? currentMemberVote(currentMemberKey, proposalVotes)
+    : null;
 
   async function handleClose() {
     if (!closing) return;
@@ -212,6 +243,17 @@ function ProposalCard({
           </>
         )}
       </dl>
+
+      {proposal.status === "open" && (
+        <VoteSection
+          proposalId={proposal.id}
+          tally={tally}
+          myChoice={myChoice}
+          currentMemberKey={currentMemberKey}
+          nodeId={nodeId}
+          nameByKey={nameByKey}
+        />
+      )}
 
       {proposal.status === "open" && canCloseOpen && (
         <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
@@ -331,6 +373,237 @@ function CategoryChip({ category }: { category: "config_change" }) {
     <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
       {t(`proposals.category.${category}`)}
     </span>
+  );
+}
+
+function VoteSection({
+  proposalId,
+  tally,
+  myChoice,
+  currentMemberKey,
+  nodeId,
+  nameByKey,
+}: {
+  proposalId: string;
+  tally: Tally;
+  myChoice: VoteChoice | null;
+  currentMemberKey: string | null;
+  nodeId: string;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const [pendingBlock, setPendingBlock] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const { pending, run } = usePendingAction();
+
+  async function vote(choice: VoteChoice, reason: string | null = null) {
+    if (!currentMemberKey) return;
+    await run(() =>
+      castVote({
+        proposalId,
+        voterKey: currentMemberKey,
+        choice,
+        reason,
+        nodeId,
+      }),
+    );
+    setPendingBlock(false);
+    setBlockReason("");
+  }
+
+  return (
+    <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500">
+        {t(
+          tally.totalVoters === 0
+            ? "proposals.vote.headingNone"
+            : tally.totalVoters === 1
+              ? "proposals.vote.headingOne"
+              : "proposals.vote.headingOther",
+          { count: tally.totalVoters },
+        )}
+      </h3>
+
+      <TallyDisplay tally={tally} nameByKey={nameByKey} />
+
+      {currentMemberKey && (
+        <div className="mt-3 flex flex-col gap-2">
+          {pendingBlock ? (
+            <div className="flex flex-col gap-2 rounded-lg bg-rose-50 p-2 dark:bg-rose-950/40">
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="font-medium text-rose-900 dark:text-rose-100">
+                  {t("proposals.vote.blockReasonLabel")}
+                </span>
+                <textarea
+                  className="input min-h-16"
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  maxLength={500}
+                  placeholder={t("proposals.vote.blockReasonPlaceholder")}
+                />
+              </label>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="btn-ghost text-xs"
+                  onClick={() => {
+                    setPendingBlock(false);
+                    setBlockReason("");
+                  }}
+                  disabled={pending}
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary text-xs"
+                  onClick={() => void vote("block", blockReason)}
+                  disabled={pending}
+                  aria-busy={pending}
+                >
+                  {pending
+                    ? t("common.working")
+                    : t("proposals.vote.confirmBlock")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-moss-500 dark:text-moss-400">
+                {myChoice
+                  ? t("proposals.vote.changeChoice", {
+                      choice: t(`proposals.vote.choice.${myChoice}`),
+                    })
+                  : t("proposals.vote.castPrompt")}
+              </span>
+              <VoteButton
+                label={t("proposals.vote.affirm")}
+                onClick={() => void vote("affirm")}
+                active={myChoice === "affirm"}
+                disabled={pending}
+                tone="affirm"
+              />
+              <VoteButton
+                label={t("proposals.vote.block")}
+                onClick={() => setPendingBlock(true)}
+                active={myChoice === "block"}
+                disabled={pending}
+                tone="block"
+              />
+              <VoteButton
+                label={t("proposals.vote.abstain")}
+                onClick={() => void vote("abstain")}
+                active={myChoice === "abstain"}
+                disabled={pending}
+                tone="neutral"
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TallyDisplay({
+  tally,
+  nameByKey,
+}: {
+  tally: Tally;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const renderNames = (entries: readonly { voterKey: string }[]) =>
+    entries
+      .map((e) => nameByKey.get(e.voterKey) ?? t("common.memberFallback"))
+      .join(", ");
+  return (
+    <div className="flex flex-col gap-1 text-xs text-moss-700 dark:text-moss-200">
+      <div>
+        <span className="font-semibold">
+          {t("proposals.vote.tally.affirms", {
+            count: tally.affirms.length,
+          })}
+        </span>
+        {tally.affirms.length > 0 && (
+          <span className="ml-1 text-moss-500 dark:text-moss-400">
+            ({renderNames(tally.affirms)})
+          </span>
+        )}
+      </div>
+      <div>
+        <span className="font-semibold text-rose-800 dark:text-rose-200">
+          {t("proposals.vote.tally.blocks", { count: tally.blocks.length })}
+        </span>
+        {tally.blocks.length > 0 && (
+          <span className="ml-1 text-moss-500 dark:text-moss-400">
+            ({renderNames(tally.blocks)})
+          </span>
+        )}
+      </div>
+      {tally.blocks
+        .filter((b) => b.reason)
+        .map((b) => (
+          <blockquote
+            key={b.voterKey}
+            className="ml-3 border-l-2 border-rose-300 pl-2 italic text-rose-800 dark:border-rose-700 dark:text-rose-200"
+          >
+            {nameByKey.get(b.voterKey) ?? t("common.memberFallback")}:{" "}
+            {b.reason}
+          </blockquote>
+        ))}
+      <div>
+        <span className="font-semibold">
+          {t("proposals.vote.tally.abstains", {
+            count: tally.abstains.length,
+          })}
+        </span>
+        {tally.abstains.length > 0 && (
+          <span className="ml-1 text-moss-500 dark:text-moss-400">
+            ({renderNames(tally.abstains)})
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function VoteButton({
+  label,
+  onClick,
+  active,
+  disabled,
+  tone,
+}: {
+  label: string;
+  onClick: () => void;
+  active: boolean;
+  disabled: boolean;
+  tone: "affirm" | "block" | "neutral";
+}) {
+  const base = "rounded-full px-3 py-1 text-xs font-semibold transition-colors";
+  const activeCls =
+    tone === "affirm"
+      ? "bg-canopy-700 text-canopy-50 dark:bg-canopy-600"
+      : tone === "block"
+        ? "bg-rose-700 text-rose-50 dark:bg-rose-800"
+        : "bg-moss-700 text-moss-50";
+  const inactiveCls =
+    tone === "affirm"
+      ? "bg-canopy-50 text-canopy-800 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:text-canopy-100"
+      : tone === "block"
+        ? "bg-rose-50 text-rose-800 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-100"
+        : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={active}
+      className={`${base} ${active ? activeCls : inactiveCls} disabled:opacity-50`}
+    >
+      {label}
+    </button>
   );
 }
 
