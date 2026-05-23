@@ -49,6 +49,8 @@ export function CommunitySettingsSection() {
         dailyHelperLimit: Math.round(draft.dailyHelperLimit),
         shortExchangeHours: draft.shortExchangeHours,
         reciprocalPairThreshold: Math.round(draft.reciprocalPairThreshold),
+        proposalDeliberationDays: Math.round(draft.proposalDeliberationDays),
+        proposalMinAffirms: Math.round(draft.proposalMinAffirms),
       });
       await refreshNodeConfig();
       setSavedAt(Date.now());
@@ -164,6 +166,50 @@ export function CommunitySettingsSection() {
               setDraft({
                 ...draft,
                 reciprocalPairThreshold: Number(e.target.value),
+              })
+            }
+            className="input"
+          />
+        </Field>
+        <Field
+          id="cfg-deliberation"
+          label={t("profile.communitySettings.deliberationDays.label")}
+          hint={t("profile.communitySettings.deliberationDays.hint")}
+        >
+          <input
+            id="cfg-deliberation"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={30}
+            step={1}
+            value={draft.proposalDeliberationDays}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                proposalDeliberationDays: Number(e.target.value),
+              })
+            }
+            className="input"
+          />
+        </Field>
+        <Field
+          id="cfg-min-affirms"
+          label={t("profile.communitySettings.minAffirms.label")}
+          hint={t("profile.communitySettings.minAffirms.hint")}
+        >
+          <input
+            id="cfg-min-affirms"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={20}
+            step={1}
+            value={draft.proposalMinAffirms}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                proposalMinAffirms: Number(e.target.value),
               })
             }
             className="input"

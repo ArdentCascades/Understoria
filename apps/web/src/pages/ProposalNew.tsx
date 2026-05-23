@@ -80,6 +80,10 @@ export default function ProposalNewPage() {
     if (validation.hasErrors) return;
 
     const proposedConfig: NodeConfigProposalPayload = {
+      // The form only edits the three Agent 11 thresholds; the
+      // Agent 13 fields ride along unchanged from the current
+      // config so the payload remains a complete NodeConfig.
+      ...nodeConfig,
       dailyHelperLimit: Number.parseInt(dailyHelperLimit, 10),
       shortExchangeHours: Number.parseFloat(shortExchangeHours),
       reciprocalPairThreshold: Number.parseInt(reciprocalPairThreshold, 10),
