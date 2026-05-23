@@ -9,6 +9,14 @@ include breaking changes.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-22
+
+Second development release. Pilot-ready surface: in-app onboarding,
+configurable safeguards, federation pull loop, project momentum,
+relational dashboard depth, plus a roadmap revision that absorbs
+the Beyond-Ostrom proposal. Reproduced end-to-end on a fresh Debian
+13 VM clone of `main`.
+
 ### Added
 - **Agent 10 Phase 3 — Project momentum + four project achievements.**
   Closes a workstream that's been pending since Agent 10 Phase 2
@@ -134,6 +142,38 @@ include breaking changes.
   surface; community web graph (18b), balance cap + community pool
   (19), and federation mutual aid fund (21) deferred behind explicit
   gates documented in the roadmap.
+
+### Testing
+
+- 210 web + 31 server = **241 vitest tests passing** at v0.2.0
+  (up from 162 at v0.1.0)
+- All three high-severity `npm audit` findings cleared via
+  non-breaking `npm audit fix` (lockfile-only updates); only 5
+  moderate dev-tooling advisories remain
+- Reproduced end-to-end on a fresh Debian 13 VM clone of `main`:
+  install → PWA → node → onboarding flow → community settings →
+  dashboard breadth/reciprocity → project momentum surface
+
+### Known gaps (tracked work)
+
+See `docs/threat-model.md` §7 and `docs/roadmap.md` for the full
+picture. Highlights:
+
+- E2E messaging (Agent 2 task 5)
+- Posts / vouches / invites server endpoints (Phase 3 server-side)
+- PWA-side surfacing of cross-node exchanges (Phase 3 PWA-side)
+- Phase 5 agents 12–15 (moderation, governance, disputes,
+  federation governance), per the staged ordering in the roadmap
+- Agent 7 (organizing integration) not started
+- 5 moderate `npm audit` advisories in dev tooling (esbuild
+  dev-server, brace-expansion, ws, etc.), all gated on a future
+  Vite 8 upgrade
+
+### CI / chore
+
+- GitHub Actions: `actions/checkout` and `actions/setup-node`
+  bumped to v5 for Node 24 compatibility ahead of the
+  2026-09-16 deprecation of Node 20 runners.
 
 ## [0.1.0] — 2026-05-16
 

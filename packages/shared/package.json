@@ -1,6 +1,6 @@
 {
   "name": "@understoria/shared",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "description": "Shared primitives between Understoria web and server: signed-record types, Ed25519 helpers, byte/base64 utilities.",
