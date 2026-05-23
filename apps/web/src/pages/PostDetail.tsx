@@ -22,6 +22,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { useToast } from "@/state/ToastContext";
 import {
   cancelPost,
   claimPost,
@@ -49,6 +50,7 @@ export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { posts, members, currentMember, nodeId } = useApp();
+  const { showToast } = useToast();
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +120,19 @@ export default function PostDetailPage() {
     );
     if (result?.newAchievements.length) {
       setNewAchievements(result.newAchievements);
+    }
+    if (result) {
+      // The result is null if the call threw; only toast on success.
+      // The exchange object is null on the first party's confirmation
+      // (still awaiting the other party) and populated on the second.
+      // Toast differs to match the actual state of credit flow.
+      showToast(
+        t(
+          result.exchange === null
+            ? "toast.exchangeConfirmedPending"
+            : "toast.exchangeConfirmedComplete",
+        ),
+      );
     }
   }
 
