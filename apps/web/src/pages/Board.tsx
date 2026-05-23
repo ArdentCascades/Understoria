@@ -26,6 +26,7 @@ import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
 import { AttentionSection } from "@/components/AttentionSection";
 import { EmptyState } from "@/components/EmptyState";
+import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import type { Category, PostType, Urgency } from "@/types";
@@ -82,6 +83,7 @@ export default function BoardPage() {
         </p>
       </header>
 
+      <FirstActionNudge />
       <ProfileNudge />
 
       <AttentionSection />

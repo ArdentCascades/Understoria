@@ -38,6 +38,11 @@
     "cta": "Agregar detalles",
     "dismiss": "Ahora no"
   },
+  "firstActionNudge": {
+    "label": "Cómo empezar",
+    "message": "Dos caminos: toca cualquier publicación que te llame la atención para ver cómo funciona el intercambio, o comparte algo que necesitas o puedes ofrecer. Sin presión por publicar primero — observar también está bien.",
+    "dismiss": "Entendido"
+  },
   "nav": {
     "board": "Tablero",
     "dashboard": "Panel",

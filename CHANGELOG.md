@@ -10,6 +10,47 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **First-action nudge on Board.** One-time orientation banner
+  for brand-new members who haven't posted or claimed anything
+  yet: "Two ways in: tap any post that catches your eye to see
+  how exchange works, or share something you need or can offer.
+  No pressure to post first — lurking is welcome too." The
+  explicit "lurking is welcome" matters because new members
+  often assume they have to publish before they belong.
+  - **Trigger** is purely state-based: the member has no posts
+    where they're the poster or the claimer, AND the dismiss
+    flag isn't set.
+  - **Self-clearing.** Posting or claiming anything makes the
+    banner stop showing on its own. The dismiss flag only
+    matters for members who want to lurk forever without ever
+    taking action.
+  - **No CTA button.** The Board already has the affordances
+    (tabs, post FAB, tappable cards); the nudge points them out
+    rather than duplicating them.
+  - **Stacks above `ProfileNudge`** on Board. Both can appear
+    for a brand-new bare-profile member, but they're informational
+    sidecars (small, dismissible, no urgency) so the stack is
+    fine. Each dismisses independently.
+  - **`memberHasTakenFirstAction(memberKey, posts)`** +
+    `dismissFirstActionNudge()` / `isFirstActionNudgeDismissed()`
+    helpers in `apps/web/src/lib/firstActionNudge.ts`. 8 tests
+    cover the empty-posts case, posted-but-not-claimed,
+    claimed-but-not-posted, unrelated posts, and the dismiss
+    sentinel.
+  - **`firstActionNudgeDismissed` setting key** added to
+    `SETTING_KEYS`, same shape as `onboarded` and
+    `profileNudgeDismissed`.
+  - **i18n** in en + es. Note the copy explicitly invites
+    lurking — that's the project's stance, not a bug.
+
+  Same anti-engagement-bait posture as the profile nudge:
+  one-time, dismiss-forever, informational not urgent, no
+  telemetry, no completion percentages.
+
+  Tests: 320 passing (312 → 320; +8 in
+  `firstActionNudge.test.ts`). Locale parity passes. Lint,
+  typecheck, build clean.
+
 - **Profile-completion nudge on Board.** Pairs with the onboarding
   profile-setup step (previous PR): for members who Skipped that
   step, or who joined before it existed, a small dismissible

@@ -220,6 +220,11 @@ export const SETTING_KEYS = {
    *  out, so this only matters for members who actively want to
    *  ignore it forever. */
   profileNudgeDismissed: "profileNudgeDismissed",
+  /** "1" once the member has dismissed the first-action nudge.
+   *  Same shape — the nudge stops on its own once the member has
+   *  posted or claimed anything; this flag only matters for the
+   *  "wants to lurk forever without dismissing" case. */
+  firstActionNudgeDismissed: "firstActionNudgeDismissed",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
