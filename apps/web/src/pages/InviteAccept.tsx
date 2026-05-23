@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { decodeAndVerifyInvite } from "@/lib/invite";
 import { redeemInvite, type RedeemError } from "@/db/invites";
-import { shortKey } from "@/lib/format";
+import { formatDeadline, shortKey } from "@/lib/format";
 import {
   required,
   useFieldValidation,
@@ -39,7 +39,7 @@ const VALIDATORS: Record<FieldName, Validator> = {
 
 export default function InviteAcceptPage() {
   const { nodeId, setCurrentMember } = useApp();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const encoded = useMemo(() => {
@@ -137,7 +137,7 @@ export default function InviteAcceptPage() {
               {t("invite.expires")}
             </dt>
             <dd className="mt-0.5">
-              {new Date(invite.expiresAt).toLocaleString(i18n.resolvedLanguage)}
+              {formatDeadline(invite.expiresAt)}
             </dd>
           </div>
         </dl>

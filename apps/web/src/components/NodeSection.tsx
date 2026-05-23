@@ -20,6 +20,7 @@
  */
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatAbsoluteDateTime } from "@/lib/format";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, SETTING_KEYS } from "@/db/database";
 import {
@@ -182,7 +183,7 @@ function Telemetry({
   lastSuccess: string | undefined;
   lastError: string | undefined;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const haveSuccess = !!lastSuccess && lastSuccess.length > 0;
   const haveError = !!lastError && lastError.length > 0;
 
@@ -199,7 +200,9 @@ function Telemetry({
       {haveSuccess && (
         <span className="chip bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100">
           {t("profile.node.lastSuccess", {
-            when: new Date(lastSuccess!).toLocaleString(i18n.resolvedLanguage),
+            when: formatAbsoluteDateTime(
+              new Date(lastSuccess!).getTime(),
+            ),
           })}
         </span>
       )}

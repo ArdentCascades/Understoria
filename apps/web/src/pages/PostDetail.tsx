@@ -35,7 +35,12 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AchievementBadge } from "@/components/AchievementBadge";
-import { formatHours, formatRelativeTime, shortKey } from "@/lib/format";
+import {
+  formatDeadline,
+  formatHours,
+  formatRelativeTime,
+  shortKey,
+} from "@/lib/format";
 import type { Achievement, Post } from "@/types";
 
 type DialogKind =
@@ -217,7 +222,7 @@ export default function PostDetailPage() {
           )}
           {post.expiresAt && (
             <Field label={t("postDetail.fieldExpires")}>
-              {new Date(post.expiresAt).toLocaleDateString()}
+              {formatDeadline(post.expiresAt)}
             </Field>
           )}
         </dl>

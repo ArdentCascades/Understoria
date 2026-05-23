@@ -26,7 +26,7 @@ import type { NodeConfig } from "@/types";
 // the eventual norm.
 
 export function CommunitySettingsSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { nodeId, nodeConfig, refreshNodeConfig } = useApp();
   const [draft, setDraft] = useState<NodeConfig>(nodeConfig);
   const [saving, setSaving] = useState(false);
@@ -184,7 +184,9 @@ export function CommunitySettingsSection() {
           {savedAt && (
             <span className="text-xs text-moss-500">
               {t("common.savedAt", {
-                when: new Date(savedAt).toLocaleTimeString(),
+                when: new Date(savedAt).toLocaleTimeString(
+                  i18n.resolvedLanguage,
+                ),
               })}
             </span>
           )}

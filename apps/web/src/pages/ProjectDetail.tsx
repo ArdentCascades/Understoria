@@ -27,7 +27,7 @@ import {
 } from "@/db/projects";
 import { humanizeError } from "@/lib/humanizeError";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
-import { formatHours, formatRelativeTime } from "@/lib/format";
+import { formatDeadline, formatHours, formatRelativeTime } from "@/lib/format";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
@@ -199,12 +199,8 @@ export default function ProjectDetailPage() {
             </Field>
           )}
           {project.deadline && (
-            <Field
-              label={t("projects.detail.deadline", {
-                date: new Date(project.deadline).toLocaleDateString(),
-              })}
-            >
-              {new Date(project.deadline).toLocaleDateString()}
+            <Field label={t("projects.detail.deadline")}>
+              {formatDeadline(project.deadline)}
             </Field>
           )}
           <Field label={t("projects.detail.contributors", { count: contributors.size })}>
