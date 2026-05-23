@@ -341,3 +341,77 @@ export interface ProjectActivity {
   createdAt: number;
   nodeId: string;
 }
+
+/**
+ * Agent 13 — community Decisions surface.
+ *
+ * A `Proposal` is the unit of community decision-making. The roadmap
+ * (`docs/roadmap.md`) collapses Agent 14 (Disputes) into this same
+ * table — a dispute is structurally a proposal: a question, named
+ * parties, a deliberation period, a binding outcome. The `kind`
+ * discriminator splits the two; v1 only supports `kind === "proposal"`
+ * for `config_change` proposals (replacing the temporary
+ * "anyone can edit community settings" bootstrap).
+ *
+ * Reversibility tiers ship from day one because the roadmap is
+ * explicit that bolting them on later would require rewriting the
+ * proposal lifecycle. v1 only renders `easy` and doesn't enforce
+ * impact-reflection — those structural pauses come with the
+ * `moderate` / `hard` categories in follow-up PRs.
+ */
+export type ProposalKind = "proposal";
+
+export type ProposalCategory = "config_change";
+
+export type ReversibilityTier = "easy" | "moderate" | "hard";
+
+export type ProposalStatus =
+  | "open"
+  | "passed"
+  | "rejected"
+  | "withdrawn";
+
+export interface Proposal {
+  id: string;
+  nodeId: string;
+  kind: ProposalKind;
+  category: ProposalCategory;
+  reversibilityTier: ReversibilityTier;
+  title: string;
+  description: string;
+  /** Category-specific payload as a JSON string. For `config_change`
+   *  this serializes a `NodeConfigProposalPayload` (the proposed
+   *  diff against the current node config). The store is
+   *  intentionally schema-agnostic so future categories (recall,
+   *  policy) can ride the same table. */
+  payload: string;
+  proposerKey: string;
+  status: ProposalStatus;
+  createdAt: number;
+  /** Filled in when the proposal is closed (passed / rejected /
+   *  withdrawn). null while open. */
+  closedAt: number | null;
+  /** Free-form note recorded at close — why this outcome.
+   *  Voting + automatic close come in a follow-up PR. */
+  closedReason: string | null;
+  /**
+   * Impact reflection — 1-year, 5-year, reversal path, vulnerable
+   * impact. Required (by convention, not code) for `hard`-tier
+   * proposals. JSON string of `ImpactReflection` when present.
+   * Null when the proposer skipped or the tier doesn't require it.
+   */
+  impactReflection: string | null;
+}
+
+export interface ImpactReflection {
+  yearOne: string;
+  fiveYear: string;
+  reversalPath: string;
+  vulnerableImpact: string;
+}
+
+/**
+ * Payload shape for `config_change` proposals — the proposed
+ * `NodeConfig` values. Stored as JSON inside `Proposal.payload`.
+ */
+export type NodeConfigProposalPayload = NodeConfig;

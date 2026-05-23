@@ -1,0 +1,246 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { beforeEach, describe, expect, it } from "vitest";
+import { db } from "./database";
+import {
+  closeProposal,
+  createProposal,
+  getProposal,
+  listProposals,
+} from "./proposals";
+
+const NODE = "node_proposals_test";
+const PROPOSER = "proposer_key";
+
+async function reset() {
+  await db.proposals.clear();
+}
+
+describe("createProposal", () => {
+  beforeEach(reset);
+
+  it("creates a proposal with status='open' and stamps createdAt", async () => {
+    const before = Date.now();
+    const proposal = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "Lower the daily helper limit",
+      description: "Drop from 3 to 2 to encourage spread.",
+      payload: JSON.stringify({ dailyHelperLimit: 2 }),
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    expect(proposal.status).toBe("open");
+    expect(proposal.kind).toBe("proposal");
+    expect(proposal.closedAt).toBeNull();
+    expect(proposal.closedReason).toBeNull();
+    expect(proposal.impactReflection).toBeNull();
+    expect(proposal.createdAt).toBeGreaterThanOrEqual(before);
+  });
+
+  it("rejects an empty title", async () => {
+    await expect(
+      createProposal({
+        category: "config_change",
+        reversibilityTier: "easy",
+        title: "   ",
+        description: "",
+        payload: "{}",
+        proposerKey: PROPOSER,
+        nodeId: NODE,
+      }),
+    ).rejects.toThrow(/title/i);
+  });
+
+  it("trims title and description before storing", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "  Title  ",
+      description: "  Body  ",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    expect(p.title).toBe("Title");
+    expect(p.description).toBe("Body");
+  });
+
+  it("serializes impactReflection to JSON when provided", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "hard",
+      title: "Big change",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+      impactReflection: {
+        yearOne: "y1",
+        fiveYear: "5y",
+        reversalPath: "rev",
+        vulnerableImpact: "vi",
+      },
+    });
+    expect(p.impactReflection).toBe(
+      '{"yearOne":"y1","fiveYear":"5y","reversalPath":"rev","vulnerableImpact":"vi"}',
+    );
+  });
+});
+
+describe("listProposals", () => {
+  beforeEach(reset);
+
+  it("returns an empty array when no proposals exist", async () => {
+    expect(await listProposals()).toEqual([]);
+  });
+
+  it("returns all proposals newest-first by createdAt", async () => {
+    const a = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "A",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    // Manually space them so createdAt differs reliably.
+    await db.proposals.update(a.id, { createdAt: 1000 });
+    const b = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "B",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    await db.proposals.update(b.id, { createdAt: 3000 });
+    const c = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "C",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    await db.proposals.update(c.id, { createdAt: 2000 });
+    const result = await listProposals();
+    expect(result.map((p) => p.title)).toEqual(["B", "C", "A"]);
+  });
+
+  it("filters by status when requested", async () => {
+    const a = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "Open one",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    const b = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "Will be closed",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    await closeProposal(b.id, "passed", "Consensus on Tuesday call");
+    const open = await listProposals({ status: "open" });
+    expect(open.map((p) => p.id)).toEqual([a.id]);
+    const passed = await listProposals({ status: "passed" });
+    expect(passed.map((p) => p.id)).toEqual([b.id]);
+  });
+});
+
+describe("closeProposal", () => {
+  beforeEach(reset);
+
+  it("transitions status, stamps closedAt + closedReason", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    const before = Date.now();
+    const closed = await closeProposal(p.id, "passed", "Approved on call");
+    expect(closed.status).toBe("passed");
+    expect(closed.closedReason).toBe("Approved on call");
+    expect(closed.closedAt).toBeGreaterThanOrEqual(before);
+  });
+
+  it("stores closedReason as null when only whitespace", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    const closed = await closeProposal(p.id, "withdrawn", "  ");
+    expect(closed.closedReason).toBeNull();
+  });
+
+  it("refuses to close an already-closed proposal", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    await closeProposal(p.id, "passed", "Done");
+    await expect(closeProposal(p.id, "rejected", "")).rejects.toThrow(
+      /already closed/i,
+    );
+  });
+
+  it("throws when the proposal doesn't exist", async () => {
+    await expect(closeProposal("nope", "passed", "")).rejects.toThrow(
+      /not found/i,
+    );
+  });
+});
+
+describe("getProposal", () => {
+  beforeEach(reset);
+
+  it("returns the proposal by id", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    expect(await getProposal(p.id)).toEqual(p);
+  });
+
+  it("returns null for an unknown id", async () => {
+    expect(await getProposal("missing")).toBeNull();
+  });
+});

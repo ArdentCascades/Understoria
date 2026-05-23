@@ -28,6 +28,7 @@ import type {
   Project,
   ProjectActivity,
   ProjectTask,
+  Proposal,
 } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
 
@@ -140,6 +141,7 @@ export class UnderstoriaDB extends Dexie {
   projectActivity!: Table<ProjectActivity, string>;
   nodeConfig!: Table<NodeConfigRow, string>;
   drafts!: Table<DraftRow, string>;
+  proposals!: Table<Proposal, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -195,6 +197,13 @@ export class UnderstoriaDB extends Dexie {
     // Version 8 — form draft autosave (PostForm + ProjectNew).
     this.version(8).stores({
       drafts: "key, updatedAt",
+    });
+    // Version 9 — Agent 13 Decisions surface (proposals table).
+    // Disputes will eventually migrate into this same table per the
+    // roadmap's "kind discriminator" plan, but v1 keeps them
+    // separate — only `kind: "proposal"` rows live here for now.
+    this.version(9).stores({
+      proposals: "id, status, category, createdAt, [status+createdAt]",
     });
   }
 }

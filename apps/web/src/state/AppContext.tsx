@@ -50,6 +50,7 @@ import type {
   Post,
   Project,
   ProjectTask,
+  Proposal,
 } from "@/types";
 import type { InviteRow } from "@/db/database";
 import type { SignedVouch } from "@/lib/vouch";
@@ -73,6 +74,7 @@ export interface AppContextValue {
   vouches: SignedVouch[];
   projects: Project[];
   projectTasks: ProjectTask[];
+  proposals: Proposal[];
   lockState: LockState;
   unlock: (
     passphrase: string,
@@ -219,6 +221,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as ProjectTask[],
   );
+  const proposals = useLiveQuery(
+    () => db.proposals.orderBy("createdAt").reverse().toArray(),
+    [],
+    [] as Proposal[],
+  );
 
   const currentMember = useMemo(
     () => members?.find((m) => m.publicKey === currentMemberKey) ?? null,
@@ -244,6 +251,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       vouches: vouches ?? [],
       projects: projects ?? [],
       projectTasks: projectTasks ?? [],
+      proposals: proposals ?? [],
       lockState,
       unlock,
       lock,
@@ -266,6 +274,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       vouches,
       projects,
       projectTasks,
+      proposals,
       lockState,
       unlock,
       lock,

@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
@@ -90,7 +91,15 @@ export function CommunitySettingsSection() {
         {t("profile.communitySettings.intro")}
       </p>
       <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100">
-        {t("profile.communitySettings.bootstrapNote")}
+        <p>{t("profile.communitySettings.bootstrapNote")}</p>
+        <p className="mt-2">
+          <Link
+            to="/proposals/new"
+            className="font-medium underline-offset-2 hover:underline"
+          >
+            {t("profile.communitySettings.proposeLink")}
+          </Link>
+        </p>
       </div>
 
       <form onSubmit={save} className="flex flex-col gap-4">
