@@ -107,7 +107,7 @@
       "markComplete": "Mark project complete",
       "completed": "Completed {{when}}",
       "paused": "Paused. {{note}}",
-      "deadline": "Deadline: {{date}}",
+      "deadline": "Deadline",
       "area": "Area: {{area}}",
       "contributors": "Contributors: {{count}}"
     },

@@ -72,6 +72,39 @@ function formatFutureTime(diff: number): string {
   return t("format.inDays", { count: days });
 }
 
+// Single source of truth for "absolute date" rendering. Always
+// uses the current i18n locale — `toLocaleDateString()` with no
+// argument falls back to the browser default, which can mismatch
+// the app's chosen language (Spanish UI, English dates).
+export function formatAbsoluteDate(timestamp: number): string {
+  return new Date(timestamp).toLocaleDateString(i18n.resolvedLanguage);
+}
+
+// Same as formatAbsoluteDate but includes the time of day. For
+// events where the hour-of-day matters (federation sync timestamps,
+// invite redemption moment).
+export function formatAbsoluteDateTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleString(i18n.resolvedLanguage);
+}
+
+// Smart formatter for future-facing events (invite expiries,
+// project deadlines). Reads relative ("in 3 days") when close
+// enough to feel actionable; falls back to absolute ("Mar 5, 2026")
+// when far enough that "in 180 days" is awkward. 7 days is the
+// cutoff — the same week-boundary formatRelativeTime uses for past
+// events ("3 days ago" → "2 weeks ago").
+const DEADLINE_RELATIVE_CUTOFF_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function formatDeadline(
+  timestamp: number,
+  now: number = Date.now(),
+): string {
+  if (Math.abs(timestamp - now) < DEADLINE_RELATIVE_CUTOFF_MS) {
+    return formatRelativeTime(timestamp, now);
+  }
+  return formatAbsoluteDate(timestamp);
+}
+
 export function shortKey(publicKey: string): string {
   if (publicKey.length <= 8) return publicKey;
   return `${publicKey.slice(0, 4)}…${publicKey.slice(-4)}`;

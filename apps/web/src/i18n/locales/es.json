@@ -107,7 +107,7 @@
       "markComplete": "Marcar proyecto como completo",
       "completed": "Completado {{when}}",
       "paused": "En pausa. {{note}}",
-      "deadline": "Fecha límite: {{date}}",
+      "deadline": "Fecha límite",
       "area": "Zona: {{area}}",
       "contributors": "Contribuyentes: {{count}}"
     },

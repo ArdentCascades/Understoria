@@ -28,6 +28,7 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import {
+  formatDeadline,
   formatHours,
   formatRelativeTime,
   formatSignedHours,
@@ -760,7 +761,7 @@ function InvitesSection({
   nodeId: string;
   invites: InviteRow[];
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [issuing, setIssuing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
@@ -884,9 +885,7 @@ function InvitesSection({
                         when: formatRelativeTime(inv.redeemedAt ?? 0),
                       })
                     : t("profile.invites.expires", {
-                        date: new Date(inv.expiresAt).toLocaleDateString(
-                          i18n.resolvedLanguage,
-                        ),
+                        date: formatDeadline(inv.expiresAt),
                       })}
                 </div>
               </div>

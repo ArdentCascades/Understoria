@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
+import { formatAbsoluteDate } from "@/lib/format";
 import type { AchievementType } from "@/types";
 
 const ICONS: Record<AchievementType, string> = {
@@ -42,10 +43,8 @@ export function AchievementBadge({
   type: AchievementType;
   earnedAt?: number;
 }) {
-  const { t, i18n } = useTranslation();
-  const formattedDate = earnedAt
-    ? new Date(earnedAt).toLocaleDateString(i18n.resolvedLanguage)
-    : null;
+  const { t } = useTranslation();
+  const formattedDate = earnedAt ? formatAbsoluteDate(earnedAt) : null;
   return (
     <div className="flex items-start gap-3 rounded-xl bg-moss-50 p-3 dark:bg-moss-900/50">
       <div

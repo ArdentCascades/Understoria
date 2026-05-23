@@ -10,6 +10,60 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Time-formatting consistency sweep.** Date / time rendering
+  used to mix three patterns (the canonical `formatRelativeTime`
+  helper, raw `toLocaleString()` / `toLocaleDateString()` with
+  or without the i18n locale, and a custom compact-date in
+  `ProjectSparkline`). Four sites silently rendered dates in
+  the browser-default locale even when the UI was set to
+  Spanish. Future-facing dates always read absolute, which
+  made nearby deadlines ("expires Mar 5, 2026") read worse
+  than they had to.
+  - **Three new helpers** in `apps/web/src/lib/format.ts`:
+    - `formatAbsoluteDate(timestamp)` — always passes
+      `i18n.resolvedLanguage` to `toLocaleDateString`.
+    - `formatAbsoluteDateTime(timestamp)` — same for
+      `toLocaleString`; for surfaces where the hour-of-day
+      matters (federation sync timestamp, etc.).
+    - `formatDeadline(timestamp, now?)` — smart picker. Uses
+      `formatRelativeTime` when the gap is < 7 days
+      ("in 3 days", "2 days ago"); falls back to
+      `formatAbsoluteDate` otherwise ("Mar 5, 2026"). 7-day
+      cutoff mirrors the same week-boundary
+      `formatRelativeTime` already uses for past events.
+  - **Sites updated** to use the helpers, in order of impact:
+    - `PostDetail` `expiresAt` — was bare
+      `toLocaleDateString()`; now `formatDeadline` so a
+      close-to-expiry post reads "in 2 days" instead of
+      "Mar 5, 2026".
+    - `ProjectDetail` `deadline` — same. Also fixes the
+      label/value duplication that rendered the same date
+      twice ("Deadline: Mar 5" / "Mar 5") — the i18n key
+      `projects.detail.deadline` no longer interpolates the
+      date; the value below carries it.
+    - `Profile` invite expiries and `InviteAccept` —
+      `formatDeadline` for both.
+    - `NodeSection` federation last-success — now
+      `formatAbsoluteDateTime` (always-localized).
+    - `AchievementBadge` earned-at — now `formatAbsoluteDate`.
+    - `CommunitySettingsSection` saved-at time — locale fix
+      (was using browser default).
+  - **`ProjectSparkline`** keeps its custom compact-date
+    formatter — "Mar 5" / "5 mar" is genuinely more useful
+    than a relative time on a per-day axis label.
+  - **`formatHours` and `formatRelativeTime` get test
+    coverage** alongside the new helpers — 17 tests in
+    `format.test.ts` covering the 0h / sub-hour /
+    integer / signed cases plus the 7-day boundary on
+    `formatDeadline`. Locked in a quirk where
+    `formatHours(0.25)` returns "18m" not "15m" (the
+    function rounds to 0.1-hour granularity first then
+    converts) so a future "fix" doesn't silently shift
+    display.
+
+  Tests: 352 passing (335 → 352; +17 in `format.test.ts`).
+  Locale parity passes. Lint, typecheck, build clean.
+
 - **Error-recovery toasts with Retry.** When a task / project /
   post action fails (claim a task, confirm an exchange, launch
   a project, etc.), an inline error appeared somewhere on the
