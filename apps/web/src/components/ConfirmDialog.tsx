@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 
 export interface ConfirmDialogProps {
@@ -26,9 +26,17 @@ export interface ConfirmDialogProps {
   title: string;
   description?: ReactNode;
   confirmLabel?: string;
+  /** Label shown on the confirm button while the action is in flight.
+   *  Only used when `onConfirm` returns a Promise. */
+  confirmingLabel?: string;
   cancelLabel?: string;
   tone?: "neutral" | "caution";
-  onConfirm: () => void;
+  /** May return a Promise. While the Promise is unresolved, both
+   *  buttons are disabled and the confirm button shows
+   *  `confirmingLabel` if provided. Return type is intentionally
+   *  loose because existing callers return `me && run(...)`
+   *  patterns that produce `false | Promise<…>`. */
+  onConfirm: () => unknown;
   onCancel: () => void;
 }
 
@@ -37,6 +45,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel = "Confirm",
+  confirmingLabel,
   cancelLabel = "Cancel",
   tone = "neutral",
   onConfirm,
@@ -44,6 +53,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const [pending, setPending] = useState(false);
 
   // Trap Tab/Shift+Tab focus inside the card while open. The hook
   // moves focus to the first focusable element on mount; we override
@@ -66,6 +76,27 @@ export function ConfirmDialog({
   }, [open, onCancel]);
 
   if (!open) return null;
+
+  // Wraps `onConfirm` so that if it returns a Promise, the dialog
+  // surfaces in-flight state — both buttons disabled, confirm
+  // label optionally swapped to `confirmingLabel`. Synchronous
+  // confirmers (no Promise returned) pass through unchanged.
+  async function handleConfirm() {
+    const result = onConfirm();
+    const isThenable =
+      typeof result === "object" &&
+      result !== null &&
+      "then" in result &&
+      typeof (result as { then: unknown }).then === "function";
+    if (isThenable) {
+      setPending(true);
+      try {
+        await result;
+      } finally {
+        setPending(false);
+      }
+    }
+  }
 
   // Backdrop is intentionally non-interactive — visual scrim only.
   // The dismiss paths are Esc (keyboard) and the Cancel button
@@ -91,7 +122,12 @@ export function ConfirmDialog({
           </div>
         )}
         <div className="mt-5 flex justify-end gap-2">
-          <button type="button" className="btn-secondary" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onCancel}
+            disabled={pending}
+          >
             {cancelLabel}
           </button>
           <button
@@ -102,9 +138,11 @@ export function ConfirmDialog({
                 ? "btn bg-rose-600 text-white hover:bg-rose-700"
                 : "btn-primary"
             }
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={pending}
+            aria-busy={pending}
           >
-            {confirmLabel}
+            {pending && confirmingLabel ? confirmingLabel : confirmLabel}
           </button>
         </div>
       </div>

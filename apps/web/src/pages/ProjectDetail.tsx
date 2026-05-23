@@ -30,6 +30,7 @@ import { formatHours, formatRelativeTime } from "@/lib/format";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
+import { usePendingAction } from "@/lib/usePendingAction";
 import type {
   Project,
   ProjectCategory,
@@ -285,6 +286,9 @@ function OrganizerControls({
   const { t } = useTranslation();
   const [pauseNote, setPauseNote] = useState("");
   const [showPauseForm, setShowPauseForm] = useState(false);
+  const { pending, run: runWithPending } = usePendingAction();
+  const dispatch = <T,>(action: () => Promise<T>) =>
+    runWithPending(() => onRun(action));
 
   return (
     <div className="card mb-4 flex flex-col gap-3">
@@ -293,11 +297,13 @@ function OrganizerControls({
           <button
             type="button"
             className="btn-primary"
+            disabled={pending}
+            aria-busy={pending}
             onClick={() =>
-              onRun(() => launchProject(project.id, project.organizerKey))
+              dispatch(() => launchProject(project.id, project.organizerKey))
             }
           >
-            {t("projects.detail.launch")}
+            {pending ? t("common.working") : t("projects.detail.launch")}
           </button>
           <p className="text-xs text-moss-500 dark:text-moss-400">
             {t("projects.detail.launchHint")}
@@ -309,6 +315,7 @@ function OrganizerControls({
           <button
             type="button"
             className="btn-secondary"
+            disabled={pending}
             onClick={() => setShowPauseForm((v) => !v)}
           >
             {t("projects.detail.pause")}
@@ -316,11 +323,13 @@ function OrganizerControls({
           <button
             type="button"
             className="btn-secondary"
+            disabled={pending}
+            aria-busy={pending}
             onClick={() =>
-              onRun(() => completeProject(project.id, project.organizerKey))
+              dispatch(() => completeProject(project.id, project.organizerKey))
             }
           >
-            {t("projects.detail.markComplete")}
+            {pending ? t("common.working") : t("projects.detail.markComplete")}
           </button>
         </div>
       )}
@@ -328,7 +337,7 @@ function OrganizerControls({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-            const ok = await onRun(() =>
+            const ok = await dispatch(() =>
               pauseProject(project.id, project.organizerKey, pauseNote),
             );
             if (ok) {
@@ -345,8 +354,13 @@ function OrganizerControls({
             onChange={(e) => setPauseNote(e.target.value)}
             maxLength={140}
           />
-          <button type="submit" className="btn-primary self-end">
-            {t("projects.detail.pause")}
+          <button
+            type="submit"
+            className="btn-primary self-end"
+            disabled={pending}
+            aria-busy={pending}
+          >
+            {pending ? t("common.working") : t("projects.detail.pause")}
           </button>
         </form>
       )}
@@ -354,11 +368,13 @@ function OrganizerControls({
         <button
           type="button"
           className="btn-primary"
+          disabled={pending}
+          aria-busy={pending}
           onClick={() =>
-            onRun(() => resumeProject(project.id, project.organizerKey))
+            dispatch(() => resumeProject(project.id, project.organizerKey))
           }
         >
-          {t("projects.detail.resume")}
+          {pending ? t("common.working") : t("projects.detail.resume")}
         </button>
       )}
     </div>
@@ -383,6 +399,9 @@ function TaskRow({
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
   const isCompleter = task.completedBy === currentKey;
+  const { pending, run: runWithPending } = usePendingAction();
+  const dispatch = <T,>(action: () => Promise<T>) =>
+    runWithPending(() => onRun(action));
 
   return (
     <div className="card flex flex-col gap-2">
@@ -419,9 +438,11 @@ function TaskRow({
           <button
             type="button"
             className="btn-primary"
-            onClick={() => onRun(() => claimProjectTask(task.id, currentKey))}
+            disabled={pending}
+            aria-busy={pending}
+            onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
           >
-            {t("projects.task.claim")}
+            {pending ? t("common.working") : t("projects.task.claim")}
           </button>
         )}
         {task.status === "claimed" && isAssignee && (
@@ -429,16 +450,21 @@ function TaskRow({
             <button
               type="button"
               className="btn-primary"
+              disabled={pending}
+              aria-busy={pending}
               onClick={() =>
-                onRun(() => markProjectTaskComplete(task.id, currentKey!))
+                dispatch(() => markProjectTaskComplete(task.id, currentKey!))
               }
             >
-              {t("projects.task.markDone")}
+              {pending ? t("common.working") : t("projects.task.markDone")}
             </button>
             <button
               type="button"
               className="btn-ghost"
-              onClick={() => onRun(() => unclaimProjectTask(task.id, currentKey!))}
+              disabled={pending}
+              onClick={() =>
+                dispatch(() => unclaimProjectTask(task.id, currentKey!))
+              }
             >
               {t("projects.task.release")}
             </button>
@@ -448,13 +474,15 @@ function TaskRow({
           <button
             type="button"
             className="btn-primary"
+            disabled={pending}
+            aria-busy={pending}
             onClick={() =>
-              onRun(() =>
+              dispatch(() =>
                 confirmProjectTaskCompletion(task.id, currentKey!, nodeId),
               )
             }
           >
-            {t("projects.task.confirm")}
+            {pending ? t("common.working") : t("projects.task.confirm")}
           </button>
         )}
         {task.status === "awaiting_confirmation" && !isOrganizer && (

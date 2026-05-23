@@ -10,6 +10,51 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Pending-action feedback across confirm dialogs + project task
+  buttons.** Between tap and resolution, several action buttons
+  used to sit idle — no spinner, no disable, no label change —
+  leaving a window where users could double-tap or wonder if the
+  tap registered. This pass fills the gap.
+  - **`usePendingAction` hook** at `apps/web/src/lib/usePendingAction.ts`.
+    Wraps a Promise-returning action; exposes a `pending` flag and
+    a `run` helper. Single source of truth, mirrors the per-page
+    `run()` wrappers that several pages already invented locally —
+    but only owns pending state, leaving error handling to the
+    caller (toast, inline alert, whatever they already do).
+    Unmount guard with a ref keeps setState-after-unmount tidy.
+  - **`ConfirmDialog` auto-detects Promise return.** When
+    `onConfirm` returns a thenable, the dialog disables both
+    buttons + sets `aria-busy` on confirm + swaps the label to
+    the new `confirmingLabel` prop. Zero extra wiring at the
+    callsite — the existing `() => run(...)` pattern already
+    returns a Promise. Applied to all five PostDetail dialogs
+    (claim / confirm-complete / dispute / cancel / release).
+  - **Project task buttons** in `ProjectDetail` (claim / mark
+    done / release / confirm completion) and **project status
+    buttons** (launch / pause / complete / resume) now disable
+    themselves during the action via per-row / per-panel
+    `usePendingAction`. Visible label flips to "Working…"
+    (`common.working`, also wired into Spanish as "Trabajando…")
+    so the in-flight state is also screen-reader audible via
+    `aria-busy`.
+  - **Profile → Revoke invite** tracks the in-flight token so
+    only the specific row's revoke button disables (siblings
+    stay tappable).
+
+  Existing forms that already had local `submitting` / `saving` /
+  `busy` / `issuing` / `vouching` state (PostForm, ProjectNew,
+  ProjectDetail add-task form, Profile save, Profile security,
+  Profile generate invite, InviteAccept redeem, MemberDetail
+  vouch) are intentionally left alone — they work; refactoring
+  them all to use the hook would balloon the diff for little
+  user-visible gain. New surfaces should use the hook.
+
+  Tests: 293 passing (unchanged — the change is structural and
+  the hook is small enough that adding @testing-library/react
+  just for one hook test wasn't worth a new dev dependency;
+  end-to-end coverage comes from manual exercise of the surfaces).
+  Lint, typecheck, build all clean.
+
 - **Agent 22 PR 22.4 — color-contrast verification + sparkline
   per-day detail.** Closes two of the four remaining items in
   `docs/accessibility.md` §6 (Known gaps).

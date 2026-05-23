@@ -265,6 +265,7 @@ export default function PostDetailPage() {
               })
         }
         confirmLabel={t("postDetail.dialogClaimConfirm")}
+        confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me &&
@@ -277,6 +278,7 @@ export default function PostDetailPage() {
         title={t("postDetail.dialogCompleteTitle")}
         description={t("postDetail.dialogCompleteDescription")}
         confirmLabel={t("postDetail.dialogCompleteConfirm")}
+        confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
         onConfirm={handleConfirmComplete}
       />
@@ -287,6 +289,7 @@ export default function PostDetailPage() {
         title={t("postDetail.dialogDisputeTitle")}
         description={t("postDetail.dialogDisputeDescription")}
         confirmLabel={t("postDetail.dialogDisputeConfirm")}
+        confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => disputeExchange(post.id, me.publicKey))
@@ -299,6 +302,7 @@ export default function PostDetailPage() {
         title={t("postDetail.dialogCancelTitle")}
         description={t("postDetail.dialogCancelDescription")}
         confirmLabel={t("postDetail.dialogCancelConfirm")}
+        confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => cancelPost(post.id, me.publicKey))
@@ -310,6 +314,7 @@ export default function PostDetailPage() {
         title={t("postDetail.dialogReleaseTitle")}
         description={t("postDetail.dialogReleaseDescription")}
         confirmLabel={t("postDetail.dialogReleaseConfirm")}
+        confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => unclaimPost(post.id, me.publicKey))

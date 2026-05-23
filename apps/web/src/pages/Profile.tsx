@@ -759,6 +759,7 @@ function InvitesSection({
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [revokingToken, setRevokingToken] = useState<string | null>(null);
 
   async function handleIssue() {
     setError(null);
@@ -789,10 +790,13 @@ function InvitesSection({
 
   async function handleRevoke(token: string) {
     setError(null);
+    setRevokingToken(token);
     try {
       await revokeInvite(member.publicKey, token);
     } catch (err) {
       setError(humanizeError(err));
+    } finally {
+      setRevokingToken(null);
     }
   }
 
@@ -893,8 +897,12 @@ function InvitesSection({
                     type="button"
                     className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
                     onClick={() => handleRevoke(inv.token)}
+                    disabled={revokingToken === inv.token}
+                    aria-busy={revokingToken === inv.token}
                   >
-                    {t("profile.invites.revoke")}
+                    {revokingToken === inv.token
+                      ? t("common.working")
+                      : t("profile.invites.revoke")}
                   </button>
                 </div>
               )}
