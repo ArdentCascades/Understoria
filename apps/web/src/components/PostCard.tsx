@@ -22,17 +22,25 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
+import type { TrustStatus } from "@/lib/vouch";
 import { CategoryBadge } from "./CategoryBadge";
+import { TrustChip } from "./TrustChip";
 import { UrgencyBadge } from "./UrgencyBadge";
 
 export function PostCard({
   post,
   posterName,
   isCurrentMember,
+  posterTrust,
 }: {
   post: Post;
   posterName: string;
   isCurrentMember: boolean;
+  /** Optional — when present, surfaces the poster's trust state
+   *  inline so members can factor it in without navigating to the
+   *  member profile. Omitted for the current member's own posts
+   *  (you don't need to be told you're pending). */
+  posterTrust?: TrustStatus;
 }) {
   const { t } = useTranslation();
   const typeLabel =
@@ -55,11 +63,14 @@ export function PostCard({
         </p>
       )}
       <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
-        <span>
+        <span className="flex flex-wrap items-center gap-1.5">
           <span className="font-medium">
             {isCurrentMember ? t("common.you") : posterName}
-          </span>{" "}
-          {typeLabel}{" "}
+          </span>
+          {posterTrust && !isCurrentMember && (
+            <TrustChip status={posterTrust} compact />
+          )}
+          <span>{typeLabel}</span>
           <span className="font-medium">
             {formatHours(post.estimatedHours)}
           </span>
