@@ -34,6 +34,7 @@ function proposal(overrides: Partial<Proposal> = {}): Proposal {
     closedAt: null,
     closedReason: null,
     impactReflection: null,
+    disputePostId: null,
     ...overrides,
   };
 }

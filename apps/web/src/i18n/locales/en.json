@@ -671,7 +671,8 @@
     "recipientLabel": "Recipient",
     "postedLabel": "Originally posted",
     "viewPost": "Open the post",
-    "footer": "Resolution happens outside the app for now — talk to both parties, or take it to your community's usual decision-making space. In-app proposal and resolution tooling is on the roadmap.",
+    "openInDecisions": "Open in Decisions",
+    "footer": "Each dispute also shows up in Decisions, where the community can vote on how to respond. Resolution closes the dispute in both places.",
     "entry": {
       "title": "Community disputes",
       "descriptionNone": "No exchanges are flagged right now.",
@@ -696,6 +697,7 @@
     "emptyFiltered": "No proposals match this filter.",
     "footer": "Voting and automatic close are still to come. For now the community reaches decisions on whatever channel it uses, and any member can record the outcome here so the historical record reflects reality.",
     "proposerLabel": "Proposed by",
+    "backfillProposer": "(historical, flagger unknown)",
     "proposedLabel": "Started",
     "closedLabel": "Closed",
     "outcomeReasonLabel": "Why",
@@ -722,7 +724,8 @@
       "withdrawn": "Withdrawn"
     },
     "category": {
-      "config_change": "Config change"
+      "config_change": "Config change",
+      "dispute": "Dispute"
     },
     "reversibility": {
       "easy": "Easy to reverse",

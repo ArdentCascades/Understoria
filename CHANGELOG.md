@@ -10,6 +10,74 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Dispute migration into the unified Decisions table.** Per the
+  roadmap (`docs/roadmap.md`), Agents 13 + 14 ship as one
+  surface. v1 had disputes living in their own data shape (the
+  `posts` row's `status === "disputed"` field); this PR adds a
+  matching `Proposal` row for every flagged exchange so the
+  governance layer is one table.
+  - **`ProposalKind` extended** with `"dispute"`;
+    **`ProposalCategory` extended** with `"dispute"`. New
+    **`disputePostId: string | null`** field on `Proposal`
+    links the governance row back to the underlying post (the
+    source of truth for the exchange lifecycle stays on the
+    post; the proposal is the deliberation view).
+  - **`DisputePayload`** type — JSON shape stored in
+    `Proposal.payload` for dispute kind. Contains a snapshot of
+    the exchange (post title, type, hours, both parties) so the
+    Decisions surface is self-contained even if the post later
+    changes.
+  - **`buildDisputeProposal` / `ensureDisputeProposal`** in
+    `db/proposals.ts`. Builder is pure; the DB-side helper is
+    idempotent — if a proposal already exists for the given
+    `disputePostId`, return it instead of double-creating.
+    **6 new tests** cover the NEED / OFFER helper-recipient
+    mapping, whitespace-only reason trimming, idempotency, and
+    the new `listProposals({ kind })` filter.
+  - **`disputeExchange` extended** to accept an optional reason
+    and to write the linked dispute proposal inside the same
+    transaction. Idempotent guard handles tab races. The reason
+    parameter is forward-compatible with the unmerged
+    "dispute reason" PR (#37) — when that lands, callers can
+    pass it through.
+  - **Schema v11** adds the `kind` and `disputePostId` indexes
+    on `proposals` and runs a one-time backfill: every
+    disputed post gets a matching dispute proposal row (id
+    prefixed `dispute_backfill_`). Old rows where `kind` and
+    `disputePostId` are missing get defaulted to `"proposal"`
+    and `null` respectively so the index is populated.
+  - **`/disputes` page rewritten** to read from `proposals`
+    (filter to `kind === "dispute"`) instead of from
+    `lib/disputes.ts:listDisputes`. Same card layout, same
+    URL — continuity preserved. Adds a small "Open in
+    Decisions" link to bridge to the unified surface.
+  - **`/proposals` page** now renders dispute proposals
+    alongside config-change ones. A new `DisputePayloadView`
+    component shows the exchange snapshot (type, hours, both
+    parties) with a link to the underlying post. The category
+    chip uses the rose tone for dispute kind so it stands out
+    visually.
+  - **`DisputesSection` entry card** on Profile now counts open
+    dispute proposals (same data path the page reads from)
+    instead of dispute posts.
+  - **`lib/disputes.ts:listDisputes`** stays in the codebase but
+    is no longer the dispute UI's data source. Kept for now
+    because it's referenced from one component test fixture
+    and the cost of removing it is more than the cost of
+    leaving it. Future PR can delete.
+
+  Not in scope: deleting `lib/disputes.ts`, redirecting
+  `/disputes` → `/proposals?kind=dispute` (would break existing
+  bookmarks), auto-resolving the post-level
+  `status === "disputed"` when the dispute proposal closes
+  (the resolution lifecycle for "what to do with the credits"
+  is a separate community-policy question).
+
+  Tests: 413 passing (407 → 413; +6 in `proposals.test.ts`).
+  Locale parity passes (new `disputes.openInDecisions` and
+  `proposals.category.dispute` keys in en + es). Lint,
+  typecheck, build clean.
+
 - **Impact reflection form for hard-tier proposals.** The
   `impactReflection` slot was already in the `Proposal` data
   model (from the Proposals MVP PR); this PR wires the form on

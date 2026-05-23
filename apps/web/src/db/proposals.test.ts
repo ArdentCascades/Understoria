@@ -12,11 +12,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "./database";
 import {
+  buildDisputeProposal,
   closeProposal,
   createProposal,
+  ensureDisputeProposal,
   getProposal,
   listProposals,
 } from "./proposals";
+import type { Post } from "@/types";
 
 const NODE = "node_proposals_test";
 const PROPOSER = "proposer_key";
@@ -242,5 +245,131 @@ describe("getProposal", () => {
 
   it("returns null for an unknown id", async () => {
     expect(await getProposal("missing")).toBeNull();
+  });
+});
+
+function disputedPost(overrides: Partial<Post> = {}): Post {
+  return {
+    id: "post-1",
+    nodeId: NODE,
+    type: "NEED",
+    category: "other",
+    title: "Help with bike",
+    description: "broken chain",
+    estimatedHours: 1,
+    urgency: "low",
+    postedBy: "poster",
+    claimedBy: "claimer",
+    status: "disputed",
+    confirmedBy: [],
+    createdAt: 5000,
+    expiresAt: null,
+    locationZone: "",
+    signature: "",
+    ...overrides,
+  };
+}
+
+describe("buildDisputeProposal", () => {
+  it("maps NEED helper/recipient correctly", () => {
+    // NEED: poster needs help, claimer helps.
+    const proposal = buildDisputeProposal({
+      post: disputedPost({ type: "NEED" }),
+      flaggerKey: "claimer",
+      reason: "Didn't show up",
+      now: 12345,
+    });
+    expect(proposal.kind).toBe("dispute");
+    expect(proposal.category).toBe("dispute");
+    expect(proposal.disputePostId).toBe("post-1");
+    expect(proposal.createdAt).toBe(12345);
+    expect(proposal.description).toBe("Didn't show up");
+    expect(proposal.proposerKey).toBe("claimer");
+    const payload = JSON.parse(proposal.payload);
+    expect(payload.helperKey).toBe("claimer");
+    expect(payload.recipientKey).toBe("poster");
+  });
+
+  it("maps OFFER helper/recipient correctly", () => {
+    // OFFER: poster is offering help, claimer accepts.
+    const proposal = buildDisputeProposal({
+      post: disputedPost({ type: "OFFER" }),
+      flaggerKey: "poster",
+      reason: null,
+      now: 0,
+    });
+    const payload = JSON.parse(proposal.payload);
+    expect(payload.helperKey).toBe("poster");
+    expect(payload.recipientKey).toBe("claimer");
+  });
+
+  it("trims whitespace from the reason", () => {
+    const proposal = buildDisputeProposal({
+      post: disputedPost(),
+      flaggerKey: "claimer",
+      reason: "   ",
+      now: 0,
+    });
+    expect(proposal.description).toBe("");
+  });
+});
+
+describe("ensureDisputeProposal", () => {
+  beforeEach(reset);
+
+  it("creates a new dispute proposal when none exists", async () => {
+    const proposal = await ensureDisputeProposal({
+      post: disputedPost(),
+      flaggerKey: "claimer",
+      reason: "Issue",
+      now: 7000,
+    });
+    expect(proposal.kind).toBe("dispute");
+    const stored = await listProposals({ kind: "dispute" });
+    expect(stored).toHaveLength(1);
+  });
+
+  it("is idempotent — returns the existing row on second call", async () => {
+    const first = await ensureDisputeProposal({
+      post: disputedPost({ id: "post-X" }),
+      flaggerKey: "claimer",
+      reason: "First",
+      now: 7000,
+    });
+    const second = await ensureDisputeProposal({
+      post: disputedPost({ id: "post-X" }),
+      flaggerKey: "claimer",
+      reason: "Different",
+      now: 9000,
+    });
+    expect(second.id).toBe(first.id);
+    const stored = await listProposals({ kind: "dispute" });
+    expect(stored).toHaveLength(1);
+    expect(stored[0].description).toBe("First");
+  });
+});
+
+describe("listProposals kind filter", () => {
+  beforeEach(reset);
+
+  it("filters by kind", async () => {
+    await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "config",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    await ensureDisputeProposal({
+      post: disputedPost(),
+      flaggerKey: "claimer",
+      reason: null,
+      now: 0,
+    });
+    expect((await listProposals({ kind: "proposal" })).length).toBe(1);
+    expect((await listProposals({ kind: "dispute" })).length).toBe(1);
+    expect((await listProposals()).length).toBe(2);
   });
 });
