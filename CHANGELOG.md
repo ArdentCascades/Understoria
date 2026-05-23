@@ -10,6 +10,32 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Agent 3 task 2 (continued) — Vouches federation.** Extends the
+  federation pull loop to also replicate signed web-of-trust vouches
+  across peers. New `POST /vouches` and `GET /vouches?since=` server
+  endpoints mirror the exchange pattern; the pull worker now runs
+  both kinds per peer in parallel. Server schema v3 adds a `vouches`
+  table (mirrors the exchanges-table indexes) and a
+  `last_vouch_created_at` column on `peer_pull_state`. The
+  `SignedVouch` type and its `canonicalVouchPayload` / `verifyVouch`
+  helpers moved from `apps/web/src/lib/vouch.ts` to
+  `@understoria/shared` so the server can verify the same way the
+  PWA does. `GET /peers` response shape gains the `lastVouchCreatedAt`
+  cursor alongside the existing exchange cursor — both pulled records
+  resume from their own high-water marks on restart.
+- Per-peer success updates no longer clear `last_error`. When the
+  two pulls (exchange + vouch) run in parallel, the previous
+  behaviour raced — a vouch failure could be silently wiped by a
+  concurrent exchange success. Operators can read `lastSuccessAt`
+  vs. `lastPulledAt` to tell whether the most recent attempt
+  succeeded; per-kind error columns are a future refinement.
+
+### Smoke-tested
+
+Live, two-server end-to-end: POSTed a signed vouch to peer at
+:8901, watched the puller at :8902 fetch it within one interval,
+`/vouches` returned the row, `/peers` reflected the pull.
+
 - **Agent 10 Phase 3 — Project momentum + four project achievements.**
   Closes a workstream that's been pending since Agent 10 Phase 2
   landed. New pure `lib/projectMomentum.ts` computes a 14-day daily

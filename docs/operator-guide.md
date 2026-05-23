@@ -265,16 +265,29 @@ transiently. There are no IP fields in any log line by default.
 
 ### Federation pull (optional)
 
-If `PEER_NODE_URLS` is set, the node periodically fetches
-`GET /exchanges?since=<last>` from each peer, verifies every
-signature, and stores the new rows. Pulled rows keep their original
-`nodeId` — federation is replication of a signed ledger, not
-re-attribution. State (last pulled, last success, last error,
-count) is visible via the public `GET /peers` endpoint. Peering is
-unilateral: configuring peer B does not require B to configure you
-back. Today, peer config is operator-managed via env vars; Agent 15
-on the roadmap (federation governance) will replace this with
-signed federation agreements.
+If `PEER_NODE_URLS` is set, the node periodically fetches signed
+records from each peer over a small public surface:
+
+- `GET /exchanges?since=<last>` — signed exchange ledger
+- `GET /vouches?since=<last>` — signed web-of-trust vouches
+
+Every record's signature is verified before insert. Pulled rows
+keep their original `nodeId` (for exchanges) — federation is
+replication of a signed ledger, not re-attribution. State per peer
+(last pulled, last success, per-kind cursors, last error, count)
+is visible via the public `GET /peers` endpoint.
+
+Peering is unilateral: configuring peer B does not require B to
+configure you back. Today, peer config is operator-managed via
+env vars; Agent 15 on the roadmap (federation governance) will
+replace this with signed federation agreements.
+
+If both pulls for a peer fail at the same time, `lastError`
+records the most recent message; subsequent successes do not
+clear it (this avoids hiding a vouch failure when an exchange
+pull succeeds in the same tick). Use `lastSuccessAt` vs.
+`lastPulledAt` to tell whether the most recent attempt
+succeeded — when those timestamps match, all is well.
 
 ### Reverse proxy
 

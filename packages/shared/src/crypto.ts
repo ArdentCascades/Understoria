@@ -20,7 +20,7 @@
  */
 import nacl from "tweetnacl";
 import { b64decode, b64encode, utf8encode } from "./bytes.js";
-import type { Category, Exchange } from "./types.js";
+import type { Category, Exchange, SignedVouch, VouchPayload } from "./types.js";
 
 /**
  * Identity primitives — Ed25519 key pairs, detached signatures.
@@ -111,4 +111,33 @@ export function verifyExchange(exchange: Exchange): boolean {
     verify(payload, exchange.helperSignature, exchange.helperKey) &&
     verify(payload, exchange.helpedSignature, exchange.helpedKey)
   );
+}
+
+/**
+ * Canonical, stable serialization of a vouch payload — the bytes the
+ * voucher's secret key signs. Field order is fixed for cross-engine
+ * stability, same reasoning as canonicalExchangePayload.
+ */
+export function canonicalVouchPayload(p: VouchPayload): string {
+  return JSON.stringify({
+    voucherKey: p.voucherKey,
+    voucheeKey: p.voucheeKey,
+    createdAt: p.createdAt,
+    kind: p.kind,
+  });
+}
+
+/**
+ * Independently verify a vouch. Any node with the voucher's public key
+ * can call this without contacting a central authority — same
+ * trustless-federation principle as verifyExchange.
+ */
+export function verifyVouch(vouch: SignedVouch): boolean {
+  const payload = canonicalVouchPayload({
+    voucherKey: vouch.voucherKey,
+    voucheeKey: vouch.voucheeKey,
+    createdAt: vouch.createdAt,
+    kind: vouch.kind,
+  });
+  return verify(payload, vouch.signature, vouch.voucherKey);
 }
