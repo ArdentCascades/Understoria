@@ -28,7 +28,8 @@
   "nav": {
     "board": "Tablero",
     "dashboard": "Panel",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "primaryNav": "Navegación principal"
   },
   "projects": {
     "tab": "Proyectos",
