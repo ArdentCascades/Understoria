@@ -18,6 +18,23 @@
     outline-offset: 2px;
     border-radius: 4px;
   }
+
+  /* Respect the OS reduced-motion preference. Components that
+   * still need motion-aware behaviour at the JS level (toast
+   * slide-ins, sparkline transitions when they're added) use
+   * the useReducedMotion hook in src/lib/a11y/. This CSS block
+   * is the floor: every transition is collapsed, every animation
+   * runs at a barely-perceptible speed. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {

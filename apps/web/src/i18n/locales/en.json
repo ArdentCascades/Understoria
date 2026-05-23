@@ -7,6 +7,9 @@
     "exchangeConfirmedPending": "Confirmed. Waiting for the other person to confirm too.",
     "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you."
   },
+  "a11y": {
+    "skipToMain": "Skip to main content"
+  },
   "common": {
     "loading": "Growing your community...",
     "you": "You",

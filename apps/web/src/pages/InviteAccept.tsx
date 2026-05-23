@@ -146,7 +146,6 @@ export default function InviteAcceptPage() {
               </span>
               <input
                 className="input"
-                autoFocus
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 maxLength={60}

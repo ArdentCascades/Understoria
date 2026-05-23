@@ -40,6 +40,9 @@ jobs:
       - name: Typecheck across workspaces
         run: npm run typecheck
 
+      - name: Lint (jsx-a11y)
+        run: npm run lint --workspace=@understoria/web
+
       - name: Run tests
         run: npm test
 
