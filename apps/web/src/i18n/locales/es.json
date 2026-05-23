@@ -612,6 +612,11 @@
         "body1": "No hay administradores. Las decisiones se toman en conjunto — en el canal que tu comunidad use hoy, y dentro de la aplicación a medida que Understoria crezca.",
         "body2": "Si algo sale mal, la respuesta empieza con conversación, no con bloqueos. La moderación, cuando existe, es rotativa, transparente y responde a la comunidad."
       }
+    },
+    "profileSetup": {
+      "title": "Un poco sobre ti",
+      "intro": "Todo es opcional — ayudan a que otras personas te encuentren cuando necesitan a alguien cercano o con una habilidad concreta. Puedes cambiar cualquier cosa más adelante en Perfil.",
+      "hint": "Nada de esto es privado en la red — comparte solo lo que compartirías con una persona vecina."
     }
   }
 }

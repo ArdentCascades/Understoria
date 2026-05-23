@@ -9,18 +9,27 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface OnboardingScreenProps {
   icon: string;
   title: string;
-  body: readonly string[];
+  /** The body content. Pass paragraphs as `<p>` elements (or any
+   *  other ReactNode — the profile-setup step uses form fields).
+   *  Centered + capped width is the screen's responsibility, not
+   *  the caller's. */
+  body: ReactNode;
   stepIndex: number;
   stepCount: number;
   onBack: (() => void) | null;
   onNext: () => void;
   onSkip: () => void;
   nextLabel: string;
+  /** When true, both Next and Skip become disabled + aria-busy.
+   *  Used by the profile-setup step while the async save is
+   *  in flight so the member can't double-tap. */
+  busy?: boolean;
 }
 
 export function OnboardingScreen({
@@ -33,6 +42,7 @@ export function OnboardingScreen({
   onNext,
   onSkip,
   nextLabel,
+  busy = false,
 }: OnboardingScreenProps) {
   const { t } = useTranslation();
   return (
@@ -42,7 +52,8 @@ export function OnboardingScreen({
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+          disabled={busy}
+          className="text-sm text-moss-600 underline-offset-2 hover:underline disabled:opacity-50 dark:text-moss-300"
         >
           {t("welcome.skip")}
         </button>
@@ -55,22 +66,31 @@ export function OnboardingScreen({
         <h1 className="mb-4 text-2xl font-semibold text-moss-800 dark:text-moss-100">
           {title}
         </h1>
-        <div className="space-y-3 text-base text-moss-700 dark:text-moss-200">
-          {body.map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
+        <div className="w-full max-w-md space-y-3 text-base text-moss-700 dark:text-moss-200">
+          {body}
         </div>
       </div>
 
       <footer className="mt-8 flex items-center justify-between gap-3">
         {onBack ? (
-          <button type="button" onClick={onBack} className="btn-secondary">
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={busy}
+            className="btn-secondary"
+          >
             {t("common.back")}
           </button>
         ) : (
           <span aria-hidden="true" />
         )}
-        <button type="button" onClick={onNext} className="btn-primary">
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={busy}
+          aria-busy={busy}
+          className="btn-primary"
+        >
           {nextLabel}
         </button>
       </footer>

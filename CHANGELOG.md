@@ -10,6 +10,40 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Onboarding: profile-setup step.** The welcome flow used to drop
+  members on the Board with a default profile (no location zone,
+  no skills, no availability). It now ends with a fifth screen
+  inviting them to fill those in — all optional, all skippable,
+  all reachable later in Profile.
+  - **`OnboardingScreen` body became a `ReactNode`** (was
+    `readonly string[]`). Concept screens still pass paragraphs;
+    the new step passes form fields. New `busy` prop disables
+    Skip / Back / Next while the async save is in flight.
+  - **New step kind** in `Welcome.tsx` — `{ kind: "profileSetup" }`
+    alongside the existing `{ kind: "concept" }`. Step-machine
+    pattern means future steps (a "tour highlight" step, say)
+    plug in the same way.
+  - **Fields prepopulate from the current member** so a returning
+    user who re-opens `/welcome` via the LearnSection link sees
+    their existing values, not blanks. Empty values aren't
+    written (no clobbering with empty strings).
+  - **Skip still works exactly as before** — marks onboarded,
+    navigates to Board, leaves the profile alone.
+  - **i18n**: `welcome.profileSetup.title / intro / hint` in en
+    and es. Field labels reuse `profile.about.*` so the welcome
+    copy and the Profile page stay in lockstep if either is
+    edited.
+
+  Not done here, by design: pre-filling the display name field is
+  intentionally skipped because invitees already chose one in
+  InviteAccept, and the seed dev-fixture member is fine with its
+  default. If the name-defaulting case becomes a real problem we
+  can add it then.
+
+  Tests: 303 passing (unchanged — the change is structural; the
+  existing onboarding state machine tests still cover the
+  setting). Locale parity passes. Lint, typecheck, build clean.
+
 - **Form draft autosave for `PostForm` + `ProjectNew`.** Losing
   half a request because you tabbed away or accidentally
   navigated back is one of those small-but-painful failures —
