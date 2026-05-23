@@ -22,6 +22,7 @@ import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "./BottomNav";
 import { LockScreen } from "./LockScreen";
+import { ToastContainer } from "./ToastContainer";
 import { useApp } from "@/state/AppContext";
 
 export function Layout() {
@@ -39,6 +40,7 @@ export function Layout() {
         )}
       </main>
       {!locked && <BottomNav />}
+      {!locked && <ToastContainer />}
     </div>
   );
 }

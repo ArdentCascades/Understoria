@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { useToast } from "@/state/ToastContext";
 import { createProject } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
@@ -20,6 +21,7 @@ import type { ProjectCategory } from "@/types";
 
 export default function ProjectNewPage() {
   const { currentMember, nodeId } = useApp();
+  const { showToast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -66,6 +68,7 @@ export default function ProjectNewPage() {
         },
         nodeId,
       );
+      showToast(t("toast.projectCreated"));
       navigate(`/project/${project.id}`);
     } catch (err) {
       setError(humanizeError(err));

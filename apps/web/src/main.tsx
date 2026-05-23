@@ -22,6 +22,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AppProvider } from "@/state/AppContext";
+import { ToastProvider } from "@/state/ToastContext";
 import App from "./App";
 import "./i18n";
 import "./index.css";
@@ -30,7 +31,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AppProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </AppProvider>
     </BrowserRouter>
   </React.StrictMode>,

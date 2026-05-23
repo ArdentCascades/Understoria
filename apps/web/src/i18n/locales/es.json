@@ -1,4 +1,12 @@
 {
+  "toast": {
+    "dismiss": "Cerrar",
+    "needPosted": "Publicado. Tu necesidad está en el tablero.",
+    "offerPosted": "Publicado. Tu oferta está en el tablero.",
+    "projectCreated": "Proyecto creado. Agrega tareas y láncalo cuando estés lista.",
+    "exchangeConfirmedPending": "Confirmado. Esperando a que la otra persona confirme también.",
+    "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes."
+  },
   "common": {
     "loading": "Cultivando tu comunidad...",
     "you": "Tú",
