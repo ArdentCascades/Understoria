@@ -306,6 +306,14 @@
     },
     "earnedDate": "Earned {{date}}"
   },
+  "attention": {
+    "title": "Needs your attention",
+    "intro": "A few things are waiting on you. Tap to handle them when you have a moment.",
+    "exchangeLine": "{{name}} marked “{{title}}” complete — confirm it happened.",
+    "taskLine": "{{name}} finished “{{task}}” for the {{project}} project — confirm.",
+    "tapToConfirm": "Tap to confirm and release the credits.",
+    "tapToConfirmTask": "Tap to confirm and credit the helper."
+  },
   "board": {
     "title": "Community board",
     "tagline": "Post what you need. Offer what you can.",
@@ -503,6 +511,7 @@
     "invites": {
       "title": "Invites you've issued",
       "intro": "A new member needs two vouches to become trusted. Your invite counts as the first — someone else will need to vouch for them after they join.",
+      "empty": "You haven't invited anyone yet. When you do, the invite link will show up here so you can re-share it or revoke it.",
       "generate": "Generate invite link",
       "generating": "Generating…",
       "shareTitle": "Share this link with one person",

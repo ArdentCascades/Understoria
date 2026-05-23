@@ -29,6 +29,7 @@ import {
   disputeExchange,
   unclaimPost,
 } from "@/db/actions";
+import { humanizeError } from "@/lib/humanizeError";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -103,7 +104,7 @@ export default function PostDetailPage() {
       setError(null);
       return await action();
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
       return null;
     } finally {
       setDialog(null);

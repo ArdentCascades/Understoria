@@ -24,6 +24,7 @@ import {
   resumeProject,
   unclaimProjectTask,
 } from "@/db/projects";
+import { humanizeError } from "@/lib/humanizeError";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
@@ -107,7 +108,7 @@ export default function ProjectDetailPage() {
       setError(null);
       return await action();
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
       return null;
     }
   }

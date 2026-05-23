@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { createProject } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import { humanizeError } from "@/lib/humanizeError";
 import type { ProjectCategory } from "@/types";
 
 export default function ProjectNewPage() {
@@ -67,7 +68,7 @@ export default function ProjectNewPage() {
       );
       navigate(`/project/${project.id}`);
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
     } finally {
       setSubmitting(false);
     }

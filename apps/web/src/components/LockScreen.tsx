@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { shortKey } from "@/lib/format";
+import { humanizeError } from "@/lib/humanizeError";
 
 export function LockScreen() {
   const { currentMember, unlock } = useApp();
@@ -44,7 +45,7 @@ export function LockScreen() {
         setPassphrase("");
       }
     } catch (err) {
-      setError((err as Error).message);
+      setError(humanizeError(err));
     } finally {
       setSubmitting(false);
     }

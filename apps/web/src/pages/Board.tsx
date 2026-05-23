@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
+import { AttentionSection } from "@/components/AttentionSection";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import type { Category, PostType, Urgency } from "@/types";
 
@@ -78,6 +79,8 @@ export default function BoardPage() {
           {t("board.tagline")}
         </p>
       </header>
+
+      <AttentionSection />
 
       <div
         role="tablist"
