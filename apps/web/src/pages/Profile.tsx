@@ -46,7 +46,7 @@ import {
   disablePassphrase,
   enablePassphrase,
 } from "@/db/secrets";
-import { trustStatusWithInvites } from "@/lib/vouch";
+import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
 import { LanguageSection } from "@/components/LanguageSection";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
@@ -94,6 +94,10 @@ export default function ProfilePage() {
     vouches,
     invites,
   });
+  const trustCount = vouchCountFor(currentMember.publicKey, {
+    vouches,
+    invites,
+  });
   const myInvites = invites.filter(
     (inv) => inv.inviterKey === currentMember.publicKey,
   );
@@ -129,7 +133,7 @@ export default function ProfilePage() {
             {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
           </p>
         </div>
-        <TrustChip status={trust} />
+        <TrustChip status={trust} count={trustCount} />
       </header>
 
       <BalanceCard balance={balance} seed={currentMember.seedBalance} />

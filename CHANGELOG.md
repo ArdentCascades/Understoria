@@ -10,6 +10,55 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Trust visualization across the app.** Vouches existed in the
+  backend (`lib/vouch.ts`) and the binary `TrustChip` was rendered
+  on Profile / MemberDetail, but: the chip showed no count, no
+  one could see *who* vouched for a member, and the Board feed
+  showed no trust state at all. This PR makes trust visible
+  everywhere it matters.
+  - **`vouchersFor(memberKey, ctx)`** in `lib/vouch.ts` — returns
+    the distinct voucher set as a `Map<voucherKey, VoucherRef>`
+    where each ref carries `kind: "invite" | "manual"` and (for
+    manual vouches) `createdAt`. If a voucher both invited
+    someone and later signed a manual vouch, the manual kind
+    wins — it's the stronger signal. Plus
+    **`vouchCountFor(memberKey, ctx)`** for the common "just
+    give me the number" case.
+  - **`TrustChip`** gains an optional `count` prop and a
+    `compact` size variant. When `count` is supplied, the chip
+    reads "Pending (1/2)" or "Trusted (3 vouches)" instead of
+    the bare binary label. The compact size is for inline use
+    next to a name in a list, where the full chip would feel
+    heavy.
+  - **`TrustedByList` component** — sectioned list on
+    MemberDetail showing every voucher with a chip
+    distinguishing manual vs invite vouches, a link to each
+    voucher's MemberDetail page so trust can be followed
+    transitively ("Rosa vouched for them, I trust Rosa"), and
+    the manual-vouch timestamp where present. Empty state when
+    no one has vouched yet.
+  - **Board PostCards** now surface the poster's trust chip
+    inline (compact variant) so members can see trust state
+    without navigating away. Trust map is computed once at the
+    Board level (`Map<memberKey, TrustStatus>`) and passed
+    down per-card — not per-row recomputation.
+  - **Profile + MemberDetail headers** show the count alongside
+    the chip — same data path, just a richer label.
+  - **6 new tests** in `vouch.test.ts` covering `vouchersFor`
+    (empty / manual-only / invite-only / manual-beats-invite
+    deduplication / invalid-signature filtering) and
+    `vouchCountFor` (distinct counting).
+  - **i18n**: extended `trust.*` with `trustedWithCountOne/
+    Other` and `pendingWithCount`; new `trustedBy.*` namespace
+    for the list section. Both en + es.
+
+  Per `GOVERNANCE.md`: trust is a community property, not an
+  admin grant. Making vouches transparent is part of how the
+  community holds itself accountable for who's in.
+
+  Tests: 366 passing (360 → 366; +6 in `vouch.test.ts`).
+  Locale parity passes. Lint, typecheck, build clean.
+
 - **Community-visible Disputes surface at `/disputes`.** First slice
   of the governance workstream (Agent 12 in `docs/roadmap.md`).
   The dispute-flag flow already wrote a `"disputed"` status onto

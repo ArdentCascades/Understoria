@@ -19,32 +19,65 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import type { TrustStatus } from "@/lib/vouch";
+import { MINIMUM_VOUCHES_FOR_TRUST, type TrustStatus } from "@/lib/vouch";
 
-export function TrustChip({ status }: { status: TrustStatus }) {
+interface TrustChipProps {
+  status: TrustStatus;
+  /** Optional distinct-voucher count. When present, the chip shows
+   *  "Pending (1/2)" or "Trusted (3 vouches)" instead of just the
+   *  label, which is more useful when the chip appears next to a
+   *  name in a list (Board, AttentionSection) than the bare binary
+   *  state. */
+  count?: number;
+  /** Smaller variant for inline use next to a name in a list, where
+   *  the full chip would feel heavy. Defaults to false (regular
+   *  chip size). */
+  compact?: boolean;
+}
+
+export function TrustChip({ status, count, compact = false }: TrustChipProps) {
   const { t } = useTranslation();
+  const sizeClass = compact
+    ? "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[10px] font-medium"
+    : "chip";
   if (status === "trusted") {
+    const label =
+      count !== undefined
+        ? t(
+            count === 1
+              ? "trust.trustedWithCountOne"
+              : "trust.trustedWithCountOther",
+            { count },
+          )
+        : t("trust.trusted");
     return (
       <span
-        className="chip bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100"
+        className={`${sizeClass} bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100`}
         title={t("trust.trustedTooltip")}
       >
         <span aria-hidden="true" className="mr-1">
           {"\u{2714}"}
         </span>
-        {t("trust.trusted")}
+        {label}
       </span>
     );
   }
+  const label =
+    count !== undefined
+      ? t("trust.pendingWithCount", {
+          have: count,
+          need: MINIMUM_VOUCHES_FOR_TRUST,
+        })
+      : t("trust.pending");
   return (
     <span
-      className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+      className={`${sizeClass} bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200`}
       title={t("trust.pendingTooltip")}
     >
       <span aria-hidden="true" className="mr-1">
         {"\u{231B}"}
       </span>
-      {t("trust.pending")}
+      {label}
     </span>
   );
 }

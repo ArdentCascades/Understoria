@@ -290,9 +290,19 @@
   },
   "trust": {
     "trusted": "Persona de confianza",
+    "trustedWithCountOne": "De confianza ({{count}} aval)",
+    "trustedWithCountOther": "De confianza ({{count}} avales)",
     "trustedTooltip": "Esta persona tiene al menos dos avales válidos.",
     "pending": "Confianza en proceso",
+    "pendingWithCount": "En proceso ({{have}}/{{need}})",
     "pendingTooltip": "Aún tiene menos de dos avales. Puede publicar necesidades y ofertas igualmente."
+  },
+  "trustedBy": {
+    "title": "Avalado por",
+    "intro": "Estas personas firmaron un aval (o invitaron a esta persona a la comunidad). Toca un nombre para ver quién es.",
+    "empty": "Nadie ha avalado a esta persona aún.",
+    "kindManual": "Avaló",
+    "kindInvite": "Invitó"
   },
   "achievement": {
     "first_exchange": {

@@ -120,18 +120,65 @@ export function trustStatusWithInvites(
   memberKey: string,
   ctx: TrustContext,
 ): TrustStatus {
-  const voucherKeys = new Set<string>();
-  for (const v of ctx.vouches) {
-    if (v.voucheeKey !== memberKey) continue;
-    if (!verifyVouch(v)) continue;
-    voucherKeys.add(v.voucherKey);
-  }
+  return vouchersFor(memberKey, ctx).size >= MINIMUM_VOUCHES_FOR_TRUST
+    ? "trusted"
+    : "pending_trust";
+}
+
+export interface VoucherRef {
+  voucherKey: string;
+  /** `invite` when the vouch is implicit (the voucher invited this
+   *  member and the invite was redeemed); `manual` when an existing
+   *  trusted member vouched directly. */
+  kind: "invite" | "manual";
+  /** When the vouch was made. For invites, this is when redemption
+   *  happened, not when the invite was issued. */
+  createdAt: number;
+}
+
+/**
+ * The distinct set of voucher keys for `memberKey`, plus what kind of
+ * vouch each one was. Used by the trusted-by list in MemberDetail and
+ * by trust-count displays.
+ *
+ * If a voucher both invited someone AND signed a manual vouch later,
+ * we keep the manual one (it's stronger as a signal: "I still vouch
+ * for them after working with them" beats "I sent them an invite").
+ */
+export function vouchersFor(
+  memberKey: string,
+  ctx: TrustContext,
+): Map<string, VoucherRef> {
+  const map = new Map<string, VoucherRef>();
   for (const inv of ctx.invites) {
     if (inv.status !== "redeemed") continue;
     if (inv.redeemedBy !== memberKey) continue;
-    voucherKeys.add(inv.inviterKey);
+    map.set(inv.inviterKey, {
+      voucherKey: inv.inviterKey,
+      kind: "invite",
+      // RedeemedInviteLike is intentionally minimal and doesn't
+      // carry the redemption timestamp, so we use 0 here. Callers
+      // that care about ordering can sort manual-vouch dates and
+      // append invite-vouchers in any order.
+      createdAt: 0,
+    });
   }
-  return voucherKeys.size >= MINIMUM_VOUCHES_FOR_TRUST
-    ? "trusted"
-    : "pending_trust";
+  for (const v of ctx.vouches) {
+    if (v.voucheeKey !== memberKey) continue;
+    if (!verifyVouch(v)) continue;
+    map.set(v.voucherKey, {
+      voucherKey: v.voucherKey,
+      kind: "manual",
+      createdAt: v.createdAt,
+    });
+  }
+  return map;
+}
+
+/** Convenience: the distinct voucher count for `memberKey`. */
+export function vouchCountFor(
+  memberKey: string,
+  ctx: TrustContext,
+): number {
+  return vouchersFor(memberKey, ctx).size;
 }

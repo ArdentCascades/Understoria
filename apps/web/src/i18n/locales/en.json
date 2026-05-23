@@ -290,9 +290,19 @@
   },
   "trust": {
     "trusted": "Trusted",
+    "trustedWithCountOne": "Trusted ({{count}} vouch)",
+    "trustedWithCountOther": "Trusted ({{count}} vouches)",
     "trustedTooltip": "This member has at least two valid vouches.",
     "pending": "Pending trust",
+    "pendingWithCount": "Pending ({{have}}/{{need}})",
     "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers."
+  },
+  "trustedBy": {
+    "title": "Vouched for by",
+    "intro": "These members signed a vouch (or invited this person into the community). Tap a name to see who they are.",
+    "empty": "No one has vouched for this member yet.",
+    "kindManual": "Vouched",
+    "kindInvite": "Invited"
   },
   "achievement": {
     "first_exchange": {

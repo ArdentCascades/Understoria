@@ -13,8 +13,9 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { trustStatusWithInvites } from "@/lib/vouch";
+import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
+import { TrustedByList } from "@/components/TrustedByList";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
@@ -38,6 +39,13 @@ export default function MemberDetailPage() {
   const member = useMemo(
     () => members.find((m) => m.publicKey === publicKey) ?? null,
     [members, publicKey],
+  );
+  const memberVouchers = useMemo(
+    () =>
+      member
+        ? vouchersFor(member.publicKey, { vouches, invites })
+        : new Map(),
+    [member, vouches, invites],
   );
   const trust = useMemo(
     () =>
@@ -147,7 +155,7 @@ export default function MemberDetailPage() {
           {shortKey(member.publicKey)}
         </p>
         <div className="mt-2">
-          {trust && <TrustChip status={trust} />}
+          {trust && <TrustChip status={trust} count={memberVouchers.size} />}
         </div>
       </header>
 
@@ -185,6 +193,19 @@ export default function MemberDetailPage() {
             <dd>{exchangeCount}</dd>
           </div>
         </dl>
+      </section>
+
+      <section className="card mb-4" aria-labelledby="trusted-by-title">
+        <h2
+          id="trusted-by-title"
+          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        >
+          {t("trustedBy.title")}
+        </h2>
+        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+          {t("trustedBy.intro")}
+        </p>
+        <TrustedByList vouchers={memberVouchers} members={members} />
       </section>
 
       <section className="card mb-4" aria-labelledby="vouch-section-title">

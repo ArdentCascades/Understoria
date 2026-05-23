@@ -25,6 +25,8 @@ import {
   trustStatus,
   trustStatusWithInvites,
   verifyVouch,
+  vouchCountFor,
+  vouchersFor,
   vouchesFor,
 } from "./vouch";
 
@@ -204,5 +206,124 @@ describe("vouchesFor", () => {
     const list = vouchesFor(vouchee.publicKey, [vouchForOther, vouchForMe]);
     expect(list).toHaveLength(1);
     expect(list[0].voucheeKey).toBe(vouchee.publicKey);
+  });
+});
+
+describe("vouchersFor", () => {
+  it("returns an empty map when no vouches and no invites", () => {
+    const vouchee = generateKeyPair();
+    const result = vouchersFor(vouchee.publicKey, { vouches: [], invites: [] });
+    expect(result.size).toBe(0);
+  });
+
+  it("includes manual vouchers with their createdAt", () => {
+    const vouchee = generateKeyPair();
+    const voucher = generateKeyPair();
+    const v = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: vouchee.publicKey,
+      kind: "manual",
+      now: 12345,
+    });
+    const result = vouchersFor(vouchee.publicKey, {
+      vouches: [v],
+      invites: [],
+    });
+    expect(result.size).toBe(1);
+    const entry = result.get(voucher.publicKey);
+    expect(entry).toEqual({
+      voucherKey: voucher.publicKey,
+      kind: "manual",
+      createdAt: 12345,
+    });
+  });
+
+  it("includes redeemed-invite vouchers", () => {
+    const vouchee = generateKeyPair();
+    const inviter = generateKeyPair();
+    const result = vouchersFor(vouchee.publicKey, {
+      vouches: [],
+      invites: [
+        {
+          status: "redeemed",
+          inviterKey: inviter.publicKey,
+          redeemedBy: vouchee.publicKey,
+        },
+      ],
+    });
+    expect(result.size).toBe(1);
+    expect(result.get(inviter.publicKey)?.kind).toBe("invite");
+  });
+
+  it("prefers a manual vouch over the same voucher's invite vouch", () => {
+    // If A invited B and later signed a manual vouch for B too, the
+    // manual one is the stronger signal so we keep that kind.
+    const vouchee = generateKeyPair();
+    const voucher = generateKeyPair();
+    const v = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: vouchee.publicKey,
+      kind: "manual",
+    });
+    const result = vouchersFor(vouchee.publicKey, {
+      vouches: [v],
+      invites: [
+        {
+          status: "redeemed",
+          inviterKey: voucher.publicKey,
+          redeemedBy: vouchee.publicKey,
+        },
+      ],
+    });
+    expect(result.size).toBe(1);
+    expect(result.get(voucher.publicKey)?.kind).toBe("manual");
+  });
+
+  it("ignores invalid signatures, open invites, and other vouchees", () => {
+    const vouchee = generateKeyPair();
+    const other = generateKeyPair();
+    const voucher = generateKeyPair();
+    const goodForOther = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: other.publicKey,
+      kind: "manual",
+    });
+    const result = vouchersFor(vouchee.publicKey, {
+      vouches: [goodForOther],
+      invites: [
+        {
+          status: "open",
+          inviterKey: voucher.publicKey,
+          redeemedBy: null,
+        },
+      ],
+    });
+    expect(result.size).toBe(0);
+  });
+});
+
+describe("vouchCountFor", () => {
+  it("returns the distinct voucher count", () => {
+    const vouchee = generateKeyPair();
+    const voucher1 = generateKeyPair();
+    const voucher2 = generateKeyPair();
+    const v1 = createVouch({
+      voucherKey: voucher1.publicKey,
+      voucherSecretKey: voucher1.secretKey,
+      voucheeKey: vouchee.publicKey,
+      kind: "manual",
+    });
+    const v2 = createVouch({
+      voucherKey: voucher2.publicKey,
+      voucherSecretKey: voucher2.secretKey,
+      voucheeKey: vouchee.publicKey,
+      kind: "manual",
+    });
+    expect(
+      vouchCountFor(vouchee.publicKey, { vouches: [v1, v2], invites: [] }),
+    ).toBe(2);
   });
 });

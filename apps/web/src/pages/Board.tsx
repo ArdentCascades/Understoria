@@ -22,6 +22,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { trustStatusWithInvites, type TrustStatus } from "@/lib/vouch";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
 import { AttentionSection } from "@/components/AttentionSection";
@@ -36,7 +37,15 @@ type Tab = PostType | "PROJECTS";
 const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
 
 export default function BoardPage() {
-  const { posts, members, currentMember, projects, projectTasks } = useApp();
+  const {
+    posts,
+    members,
+    currentMember,
+    projects,
+    projectTasks,
+    vouches,
+    invites,
+  } = useApp();
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("NEED");
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
@@ -49,6 +58,21 @@ export default function BoardPage() {
     for (const m of members) map.set(m.publicKey, m.displayName);
     return map;
   }, [members]);
+
+  // Precompute trust state for every member so each PostCard can
+  // surface its poster's trust state without recomputing per row.
+  // Cheap (one Set per member) but worth doing once at the list
+  // level rather than O(posts × vouches) per scroll.
+  const trustByKey = useMemo(() => {
+    const map = new Map<string, TrustStatus>();
+    for (const m of members) {
+      map.set(
+        m.publicKey,
+        trustStatusWithInvites(m.publicKey, { vouches, invites }),
+      );
+    }
+    return map;
+  }, [members, vouches, invites]);
 
   const visiblePosts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -196,6 +220,7 @@ export default function BoardPage() {
                 post={p}
                 posterName={memberName.get(p.postedBy) ?? ""}
                 isCurrentMember={p.postedBy === currentMember?.publicKey}
+                posterTrust={trustByKey.get(p.postedBy)}
               />
             </li>
           ))}
