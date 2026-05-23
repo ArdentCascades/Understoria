@@ -304,6 +304,13 @@
     "kindManual": "Avaló",
     "kindInvite": "Invitó"
   },
+  "outgoingVouches": {
+    "title": "Personas a quienes has avalado",
+    "intro": "Personas a las que firmaste un aval o invitaste a la comunidad. Llevar tu propio registro te ayuda a recordar y a no avalar a alguien dos veces sin querer.",
+    "empty": "Aún no has avalado a nadie. Las invitaciones también cuentan — cuando alguien redime una invitación tuya, aparecerá aquí.",
+    "kindManual": "Avalada",
+    "kindInvite": "Invitada"
+  },
   "achievement": {
     "first_exchange": {
       "label": "Primer intercambio",

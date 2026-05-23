@@ -46,8 +46,13 @@ import {
   disablePassphrase,
   enablePassphrase,
 } from "@/db/secrets";
-import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
+import {
+  outgoingVouchesFor,
+  trustStatusWithInvites,
+  vouchCountFor,
+} from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
+import { OutgoingVouchList } from "@/components/OutgoingVouchList";
 import { LanguageSection } from "@/components/LanguageSection";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { DisputesSection } from "@/components/DisputesSection";
@@ -98,6 +103,10 @@ export default function ProfilePage() {
     vouches,
     invites,
   });
+  const outgoingVouches = outgoingVouchesFor(currentMember.publicKey, {
+    vouches,
+    invites,
+  });
   const myInvites = invites.filter(
     (inv) => inv.inviterKey === currentMember.publicKey,
   );
@@ -145,6 +154,19 @@ export default function ProfilePage() {
         nodeId={nodeId}
         invites={myInvites}
       />
+
+      <section className="card mb-4" aria-labelledby="outgoing-vouches-title">
+        <h2
+          id="outgoing-vouches-title"
+          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        >
+          {t("outgoingVouches.title")}
+        </h2>
+        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+          {t("outgoingVouches.intro")}
+        </p>
+        <OutgoingVouchList vouchees={outgoingVouches} members={members} />
+      </section>
 
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">

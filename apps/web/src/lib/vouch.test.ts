@@ -22,6 +22,7 @@ import { describe, expect, it } from "vitest";
 import { generateKeyPair } from "./crypto";
 import {
   createVouch,
+  outgoingVouchesFor,
   trustStatus,
   trustStatusWithInvites,
   verifyVouch,
@@ -325,5 +326,136 @@ describe("vouchCountFor", () => {
     expect(
       vouchCountFor(vouchee.publicKey, { vouches: [v1, v2], invites: [] }),
     ).toBe(2);
+  });
+});
+
+describe("outgoingVouchesFor", () => {
+  it("returns empty when this member has vouched for no one", () => {
+    const voucher = generateKeyPair();
+    expect(
+      outgoingVouchesFor(voucher.publicKey, { vouches: [], invites: [] }),
+    ).toEqual([]);
+  });
+
+  it("returns manual vouches this member made", () => {
+    const voucher = generateKeyPair();
+    const vouchee = generateKeyPair();
+    const v = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: vouchee.publicKey,
+      kind: "manual",
+      now: 555,
+    });
+    const result = outgoingVouchesFor(voucher.publicKey, {
+      vouches: [v],
+      invites: [],
+    });
+    expect(result).toEqual([
+      { voucheeKey: vouchee.publicKey, kind: "manual", createdAt: 555 },
+    ]);
+  });
+
+  it("returns redeemed invites this member sent", () => {
+    const voucher = generateKeyPair();
+    const vouchee = generateKeyPair();
+    const result = outgoingVouchesFor(voucher.publicKey, {
+      vouches: [],
+      invites: [
+        {
+          status: "redeemed",
+          inviterKey: voucher.publicKey,
+          redeemedBy: vouchee.publicKey,
+        },
+      ],
+    });
+    expect(result).toEqual([
+      { voucheeKey: vouchee.publicKey, kind: "invite", createdAt: 0 },
+    ]);
+  });
+
+  it("ignores open / revoked invites and invites from others", () => {
+    const voucher = generateKeyPair();
+    const other = generateKeyPair();
+    const vouchee = generateKeyPair();
+    const result = outgoingVouchesFor(voucher.publicKey, {
+      vouches: [],
+      invites: [
+        // Open invite — not redeemed yet, doesn't count.
+        {
+          status: "open",
+          inviterKey: voucher.publicKey,
+          redeemedBy: null,
+        },
+        // Someone else's redeemed invite — not ours.
+        {
+          status: "redeemed",
+          inviterKey: other.publicKey,
+          redeemedBy: vouchee.publicKey,
+        },
+      ],
+    });
+    expect(result).toEqual([]);
+  });
+
+  it("prefers a manual vouch over the same pair's invite vouch", () => {
+    // Voucher invited vouchee AND later signed a manual vouch —
+    // the outgoing list should show the manual kind, not the invite.
+    const voucher = generateKeyPair();
+    const vouchee = generateKeyPair();
+    const v = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: vouchee.publicKey,
+      kind: "manual",
+    });
+    const result = outgoingVouchesFor(voucher.publicKey, {
+      vouches: [v],
+      invites: [
+        {
+          status: "redeemed",
+          inviterKey: voucher.publicKey,
+          redeemedBy: vouchee.publicKey,
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].kind).toBe("manual");
+  });
+
+  it("sorts manual vouches newest-first, invites after", () => {
+    const voucher = generateKeyPair();
+    const oldee = generateKeyPair();
+    const newee = generateKeyPair();
+    const inviteeKey = generateKeyPair().publicKey;
+    const old = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: oldee.publicKey,
+      kind: "manual",
+      now: 100,
+    });
+    const fresh = createVouch({
+      voucherKey: voucher.publicKey,
+      voucherSecretKey: voucher.secretKey,
+      voucheeKey: newee.publicKey,
+      kind: "manual",
+      now: 200,
+    });
+    const result = outgoingVouchesFor(voucher.publicKey, {
+      vouches: [old, fresh],
+      invites: [
+        {
+          status: "redeemed",
+          inviterKey: voucher.publicKey,
+          redeemedBy: inviteeKey,
+        },
+      ],
+    });
+    expect(result.map((r) => r.voucheeKey)).toEqual([
+      newee.publicKey,
+      oldee.publicKey,
+      inviteeKey,
+    ]);
   });
 });
