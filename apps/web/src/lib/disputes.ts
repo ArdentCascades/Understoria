@@ -34,10 +34,16 @@ export interface DisputeListing {
   helperName: string | null;
   recipientKey: string;
   recipientName: string;
-  /** Post creation timestamp. We don't currently persist a separate
-   *  "flagged at" timestamp; adding one would be a small follow-up
-   *  if the cadence of disputes makes recency-of-flag useful. */
+  /** Post creation timestamp. Carried alongside `disputedAt` for
+   *  context (when the original exchange started). */
   createdAt: number;
+  /** When the flag was raised. `null` for legacy disputes from
+   *  before schema v9 — in that case `createdAt` is the only
+   *  reliable cursor we have. */
+  disputedAt: number | null;
+  /** Optional short note the flagger chose to share. Community-
+   *  visible. `null` when the flagger declined to add one. */
+  disputeReason: string | null;
 }
 
 export function listDisputes(
@@ -68,10 +74,17 @@ export function listDisputes(
       recipientKey,
       recipientName: nameByKey.get(recipientKey) ?? "—",
       createdAt: p.createdAt,
+      disputedAt: p.disputedAt,
+      disputeReason: p.disputeReason,
     });
   }
-  // Newest disputes first. Once "flaggedAt" is persisted, sort by
-  // that instead.
-  out.sort((a, b) => b.createdAt - a.createdAt);
+  // Newest disputes first. Sort by `disputedAt` (when the flag
+  // happened), falling back to `createdAt` for legacy rows where
+  // `disputedAt` is null (pre-v9 disputes).
+  out.sort((a, b) => {
+    const aKey = a.disputedAt ?? a.createdAt;
+    const bKey = b.disputedAt ?? b.createdAt;
+    return bKey - aKey;
+  });
   return out;
 }

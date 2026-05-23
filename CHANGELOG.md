@@ -10,6 +10,50 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Dispute reason + flag timestamp.** Builds on the disputes
+  surface (previous PR). The flag flow now captures two new
+  pieces of context that sharpen what the community sees:
+  - **`disputedAt: number | null`** stamped on the post when
+    the flag is raised. The disputes list sorts by this (falling
+    back to post `createdAt` for legacy rows that pre-date the
+    field). Schema bumped to v9; the migration backfills both
+    new fields to `null` on every existing row.
+  - **`disputeReason: string | null`** — an optional short note
+    the flagger can add. Community-visible (consistent with the
+    rest of the disputes surface), explicitly labelled as such
+    in the dialog ("Visible to your whole community"). Skipping
+    the note still works — a bare flag is still a valid flag.
+  - **`disputeExchange(postId, memberKey, reason?)`** now takes
+    an optional reason argument. Whitespace-only input is
+    treated as no reason. Existing call sites that didn't pass
+    a reason keep working unchanged (default `null`).
+  - **PostDetail dispute dialog** gains a textarea with the
+    explicit visibility hint. The reason resets on every
+    re-open so a previous draft doesn't linger.
+  - **Disputes page** renders the reason inline as a rose-tinted
+    blockquote when present, and shows "Flagged {when}" using
+    `disputedAt` (or "Earlier (exact time not recorded)" for
+    legacy rows).
+  - **PostDetail dispute panel** also shows the reason to the
+    two parties on the post itself — same blockquote style as
+    the disputes page, so the framing reads consistently
+    whether you found the flag via /disputes or via the post.
+  - **4 new tests** in `disputes.test.ts` covering the
+    `disputedAt`-based sort, legacy-row fallback to `createdAt`,
+    mixed sort keys, and reason pass-through (with-note and
+    without-note paths).
+
+  Privacy posture: the reason is stored in plain text on the
+  post row, alongside the (already public) post body. No
+  encryption, no role-gating — same posture as the post itself.
+  The dialog's visibility hint makes the public nature explicit
+  before the flagger commits.
+
+  Tests: 364 passing (360 → 364; +4 in `disputes.test.ts`).
+  Locale parity passes (new `disputes.flagged*` and
+  `postDetail.dialogDisputeReason*` keys in en + es). Lint,
+  typecheck, build clean.
+
 - **Community-visible Disputes surface at `/disputes`.** First slice
   of the governance workstream (Agent 12 in `docs/roadmap.md`).
   The dispute-flag flow already wrote a `"disputed"` status onto

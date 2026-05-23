@@ -47,6 +47,8 @@ function post(overrides: Partial<Post> = {}): Post {
     confirmedBy: [],
     nodeId,
     signature: "",
+    disputedAt: null,
+    disputeReason: null,
     ...overrides,
   };
 }

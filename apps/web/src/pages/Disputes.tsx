@@ -81,6 +81,11 @@ export default function DisputesPage() {
                 <h2 className="text-lg font-semibold leading-snug">
                   {d.postTitle}
                 </h2>
+                {d.disputeReason && (
+                  <blockquote className="mt-3 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
+                    {d.disputeReason}
+                  </blockquote>
+                )}
                 <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                   <div>
                     <dt className="text-xs uppercase tracking-wide text-moss-500">
@@ -98,6 +103,16 @@ export default function DisputesPage() {
                     </dt>
                     <dd className="mt-0.5">
                       {`${d.recipientName} (${shortKey(d.recipientKey)})`}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs uppercase tracking-wide text-moss-500">
+                      {t("disputes.flaggedLabel")}
+                    </dt>
+                    <dd className="mt-0.5">
+                      {d.disputedAt
+                        ? formatRelativeTime(d.disputedAt)
+                        : t("disputes.flaggedUnknown")}
                     </dd>
                   </div>
                   <div>

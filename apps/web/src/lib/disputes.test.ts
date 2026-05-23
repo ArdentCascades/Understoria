@@ -46,6 +46,8 @@ function buildPost(overrides: Partial<Post>): Post {
     expiresAt: null,
     locationZone: "",
     signature: "",
+    disputedAt: null,
+    disputeReason: null,
     ...overrides,
   };
 }
@@ -120,14 +122,51 @@ describe("listDisputes", () => {
     expect(result.map((r) => r.postId)).toEqual(["good"]);
   });
 
-  it("sorts newest-first by createdAt", () => {
+  it("sorts newest-first by disputedAt when present", () => {
     const posts = [
-      buildPost({ id: "old", createdAt: 100 }),
-      buildPost({ id: "new", createdAt: 300 }),
-      buildPost({ id: "mid", createdAt: 200 }),
+      buildPost({ id: "old", createdAt: 100, disputedAt: 1000 }),
+      buildPost({ id: "new", createdAt: 50, disputedAt: 3000 }),
+      buildPost({ id: "mid", createdAt: 200, disputedAt: 2000 }),
     ];
     const result = listDisputes(posts, [POSTER, CLAIMER]);
     expect(result.map((r) => r.postId)).toEqual(["new", "mid", "old"]);
+  });
+
+  it("falls back to createdAt when disputedAt is null (legacy rows)", () => {
+    const posts = [
+      buildPost({ id: "old", createdAt: 100, disputedAt: null }),
+      buildPost({ id: "new", createdAt: 300, disputedAt: null }),
+      buildPost({ id: "mid", createdAt: 200, disputedAt: null }),
+    ];
+    const result = listDisputes(posts, [POSTER, CLAIMER]);
+    expect(result.map((r) => r.postId)).toEqual(["new", "mid", "old"]);
+  });
+
+  it("mixes disputedAt + createdAt cleanly when only some rows have disputedAt", () => {
+    const posts = [
+      // Legacy row, sort key = createdAt = 5000.
+      buildPost({ id: "legacy", createdAt: 5000, disputedAt: null }),
+      // Modern row, sort key = disputedAt = 4000.
+      buildPost({ id: "modern", createdAt: 100, disputedAt: 4000 }),
+    ];
+    const result = listDisputes(posts, [POSTER, CLAIMER]);
+    expect(result.map((r) => r.postId)).toEqual(["legacy", "modern"]);
+  });
+
+  it("carries the disputeReason through to the listing", () => {
+    const posts = [
+      buildPost({ disputeReason: "Help was offered but not delivered." }),
+    ];
+    const result = listDisputes(posts, [POSTER, CLAIMER]);
+    expect(result[0].disputeReason).toBe(
+      "Help was offered but not delivered.",
+    );
+  });
+
+  it("carries null disputeReason when the flagger declined to add one", () => {
+    const posts = [buildPost({ disputeReason: null })];
+    const result = listDisputes(posts, [POSTER, CLAIMER]);
+    expect(result[0].disputeReason).toBeNull();
   });
 
   it("preserves the post type, category, and hours fields", () => {

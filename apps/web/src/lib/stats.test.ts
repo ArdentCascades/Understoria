@@ -145,6 +145,8 @@ describe("computeCommunityStats", () => {
       confirmedBy: ["a", "b"],
       nodeId,
       signature: "",
+      disputedAt: null,
+      disputeReason: null,
     };
     const exchanges: Exchange[] = [
       { ...exchange("1", now - 2 * DAY), postId: "p1" },
