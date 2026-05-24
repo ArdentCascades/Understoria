@@ -368,6 +368,8 @@
       "ariaLabel": "Post types"
     },
     "openCount": "({{count}})",
+    "showClaimed": "Show {{count}} claimed",
+    "hideClaimed": "Hide claimed",
     "filters": {
       "categoryAriaLabel": "Filter by category",
       "urgencyAriaLabel": "Filter by urgency",
@@ -401,7 +403,10 @@
       "streakUnitOne": "day",
       "streakUnitOther": "days in a row",
       "needsMet": "Needs met this week",
-      "andCounting": "and counting"
+      "andCounting": "and counting",
+      "needsAnswered": "Needs answered this week",
+      "ofPosted": "of {{count}} posted this week",
+      "noNeedsPosted": "no needs posted this week"
     },
     "milestones": {
       "title": "Collective milestones",
