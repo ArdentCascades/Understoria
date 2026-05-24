@@ -301,6 +301,8 @@ export async function addProjectTask(
         completedAt: null,
         completedBy: null,
         exchangeId: null,
+        claimedAt: null,
+        checkInAcknowledgedAt: null,
       };
       await db.projectTasks.put(task);
       await logActivity(
@@ -335,6 +337,11 @@ export async function claimProjectTask(
         ...task,
         status: "claimed",
         assignedTo: memberKey,
+        // Stamp the claim time so staleness can be computed from
+        // this point. Clear any prior ack — re-claim resets the
+        // private-nudge clock too.
+        claimedAt: Date.now(),
+        checkInAcknowledgedAt: null,
       };
       await db.projectTasks.put(updated);
       await logActivity(
@@ -367,6 +374,11 @@ export async function unclaimProjectTask(
         ...task,
         status: "open",
         assignedTo: null,
+        // Defensive cleanup: clearing the claim metadata too so a
+        // re-claim starts fresh and the prompts don't fire on
+        // stale timestamps.
+        claimedAt: null,
+        checkInAcknowledgedAt: null,
       };
       await db.projectTasks.put(updated);
       const project = await db.projects.get(task.projectId);
@@ -380,6 +392,36 @@ export async function unclaimProjectTask(
       return updated;
     },
   );
+}
+
+/**
+ * Claimer dismisses the private "still on it?" nudge. Stamps
+ * `checkInAcknowledgedAt`, which resets the private-prompt clock
+ * for another `taskCheckInDays`. Doesn't affect the public
+ * "could use more hands" chip — that's tied to `claimedAt`
+ * directly so the community signal is harder to silence.
+ */
+export async function acknowledgeTaskCheckIn(
+  taskId: string,
+  memberKey: string,
+): Promise<ProjectTask> {
+  return db.transaction("rw", [db.projectTasks], async () => {
+    const task = await db.projectTasks.get(taskId);
+    if (!task) throw new Error("Task not found.");
+    if (task.assignedTo !== memberKey)
+      throw new Error("Only the claimer can acknowledge the check-in.");
+    if (task.status !== "claimed") {
+      throw new Error(
+        "Check-in only applies to tasks currently in the claimed state.",
+      );
+    }
+    const updated: ProjectTask = {
+      ...task,
+      checkInAcknowledgedAt: Date.now(),
+    };
+    await db.projectTasks.put(updated);
+    return updated;
+  });
 }
 
 export async function markProjectTaskComplete(

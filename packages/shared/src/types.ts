@@ -149,12 +149,24 @@ export interface NodeConfig {
   /** When the same (helper, helped) pair completes this many exchanges
    *  in 30 days, the latest one gets a reciprocal-pattern advisory flag. */
   reciprocalPairThreshold: number;
+  /** Days after claim before the claimer gets a private "still on
+   *  it?" nudge in their AttentionSection. Lets a claimer release
+   *  without the community ever seeing they were behind. Default
+   *  7 — a week feels generous without becoming silent indefinitely. */
+  taskCheckInDays: number;
+  /** Days after claim before a task is community-visibly marked
+   *  "could use more hands." Framed at the task, not the person.
+   *  Default 14 — long enough to follow the private nudge by a
+   *  similar window. */
+  taskNeedsHelpDays: number;
 }
 
 export const DEFAULT_NODE_CONFIG: NodeConfig = {
   dailyHelperLimit: 3,
   shortExchangeHours: 0.25,
   reciprocalPairThreshold: 3,
+  taskCheckInDays: 7,
+  taskNeedsHelpDays: 14,
 };
 
 /**
@@ -327,6 +339,16 @@ export interface ProjectTask {
   completedBy: string | null;
   /** Set on confirmation. Mirrors the Exchange record's id. */
   exchangeId: string | null;
+  /** When the current claim happened. Stamped by
+   *  `claimProjectTask`, cleared by release/completion.
+   *  Backfilled to `now()` for pre-existing claimed tasks in the
+   *  v12 migration so the "could use more hands" prompts don't all
+   *  fire at once on first load. */
+  claimedAt: number | null;
+  /** When the claimer last said "yes, still on it" to the private
+   *  staleness nudge. Lets the private clock reset without losing
+   *  the original `claimedAt`. Null until first ack. */
+  checkInAcknowledgedAt: number | null;
 }
 
 export type ProjectActivityType =

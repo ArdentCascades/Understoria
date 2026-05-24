@@ -10,6 +10,61 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Two-tier stalled-task handling for project tasks.** Per the
+  project ethos — never frame missed delivery as "stalled" /
+  "overdue" / "failed." Two paired affordances surface a task
+  that's been claimed a while without acting on it, both
+  framed at the task (not the person):
+  - **Private "still on it?" nudge for the claimer**, after a
+    configurable `taskCheckInDays` (default 7). Surfaces in
+    AttentionSection — visible only to the claimer. Two
+    buttons: *Still on it* (resets the clock for another N
+    days) and *Release it for someone else* (un-claims with
+    no record kept). Hint copy: "Capacity changes — release
+    it if you need to. No record kept."
+  - **Public "could use more hands" chip** on the project task
+    row, after a configurable `taskNeedsHelpDays` (default
+    14). Framed at the task. The original claimer's name
+    stays; the community sees the signal without seeing
+    "this person is behind." Tooltip explains the timing.
+  - **Pure helper module** `lib/taskStaleness.ts` —
+    `taskStaleness(task, config, now)` returns a tagged result
+    (`fresh` / `check_in_due` / `needs_more_hands`). Acking
+    the private nudge resets the private clock; the public
+    chip is keyed off `claimedAt` directly so the community
+    signal is harder to silence. 15 tests cover branches,
+    boundaries, and configurable thresholds.
+  - **`ProjectTask`** gains `claimedAt` + `checkInAcknowledgedAt`
+    fields. Schema v10 migration backfills `claimedAt = now()`
+    for any currently-claimed task so the prompts don't all
+    fire at once on first load. `claimProjectTask` stamps
+    `claimedAt`; `unclaimProjectTask` clears both; new
+    `acknowledgeTaskCheckIn` action stamps
+    `checkInAcknowledgedAt`.
+  - **`NodeConfig`** gains `taskCheckInDays` + `taskNeedsHelpDays`
+    (defaults 7 / 14). Surfaced in CommunitySettingsSection so
+    a community can tune the cadence to their own rhythm —
+    short for fast-moving groups, long for slow-cooking
+    projects. Validator ensures `needsHelpDays >= checkInDays`.
+  - **New AttentionItem kind** `task_check_in` joins
+    `confirm_exchange` and `confirm_task`. The component
+    renders inline action buttons (not a Link wrapper) because
+    the actions live on the prompt itself; the project name
+    stays tappable as a deep-link.
+  - **i18n**: new `attention.taskCheckIn.*`,
+    `projects.task.needsMoreHands*`, and
+    `profile.communitySettings.taskCheckInDays.*` /
+    `taskNeedsHelpDays.*` in en + es.
+
+  Not in scope: co-helpers / helpers list (raises questions
+  about exchange-credit splitting), per-project threshold
+  override, auto-release after some long N (would feel
+  punitive even if quiet).
+
+  Tests: 395 passing (380 → 395; +15 in
+  `taskStaleness.test.ts`). Locale parity passes. Lint,
+  typecheck, build clean.
+
 - **Board hides claimed posts by default + "needs answered this
   week" stat.** Two paired changes — both keep the Board
   action-oriented and surface community responsiveness as a
