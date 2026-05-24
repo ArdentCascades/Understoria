@@ -152,4 +152,61 @@ describe("computeCommunityStats", () => {
     const stats = computeCommunityStats(exchanges, [member("a")], [post], now);
     expect(stats.needsFulfilledThisWeek).toBe(1);
   });
+
+  it("reports needs answered and posted this week", () => {
+    function need(
+      id: string,
+      ageDays: number,
+      claimedBy: string | null,
+    ): Post {
+      return {
+        id,
+        type: "NEED",
+        category: "other",
+        title: "n",
+        description: "",
+        estimatedHours: 1,
+        urgency: "low",
+        postedBy: "a",
+        claimedBy,
+        status: claimedBy ? "claimed" : "open",
+        createdAt: now - ageDays * DAY,
+        expiresAt: null,
+        locationZone: "",
+        confirmedBy: [],
+        nodeId,
+        signature: "",
+      };
+    }
+    const posts: Post[] = [
+      need("recent-claimed-1", 1, "b"),
+      need("recent-claimed-2", 3, "c"),
+      need("recent-open", 2, null),
+      // Older than a week — out of window:
+      need("old-claimed", 9, "b"),
+      need("old-open", 10, null),
+      // An OFFER doesn't count, even if claimed + recent:
+      {
+        id: "offer-recent",
+        type: "OFFER",
+        category: "other",
+        title: "o",
+        description: "",
+        estimatedHours: 1,
+        urgency: "low",
+        postedBy: "a",
+        claimedBy: "b",
+        status: "claimed",
+        createdAt: now - 1 * DAY,
+        expiresAt: null,
+        locationZone: "",
+        confirmedBy: [],
+        nodeId,
+        signature: "",
+      },
+    ];
+    const stats = computeCommunityStats([], [member("a")], posts, now);
+    expect(stats.needsPostedThisWeek).toBe(3);
+    expect(stats.needsAnsweredThisWeek).toBe(2);
+  });
 });

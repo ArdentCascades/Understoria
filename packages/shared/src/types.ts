@@ -232,6 +232,16 @@ export interface CommunityStats {
   activeMembersThisMonth: number;
   solidarityStreakDays: number;
   needsFulfilledThisWeek: number;
+  /** Needs posted in the last 7 days that have a claimer.
+   *  Captures community responsiveness — "of what came up this
+   *  week, someone has stepped up for X." We use the post's
+   *  `createdAt` as the time window because we don't persist a
+   *  separate "claimed at" timestamp. */
+  needsAnsweredThisWeek: number;
+  /** Needs posted in the last 7 days, period. The pair
+   *  (answered, posted) lets the UI render a ratio without the
+   *  caller recomputing. */
+  needsPostedThisWeek: number;
   categoryBreakdown: Partial<Record<Category, number>>;
   milestonesReached: Milestone[];
 }

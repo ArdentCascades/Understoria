@@ -51,6 +51,12 @@ export default function BoardPage() {
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
   const [urgencyFilter, setUrgencyFilter] = useState<Urgency | "">("");
   const [query, setQuery] = useState("");
+  // Hide claimed posts by default — the Board is action-oriented
+  // ("what can I help with now?") and a claimed post isn't
+  // actionable for a new helper. Toggle persists for the session
+  // (not across reloads); a member who wants always-on can flip
+  // it each session.
+  const [showClaimed, setShowClaimed] = useState(false);
   const navigate = useNavigate();
 
   const memberName = useMemo(() => {
@@ -74,7 +80,11 @@ export default function BoardPage() {
     return map;
   }, [members, vouches, invites]);
 
-  const visiblePosts = useMemo(() => {
+  // Two-stage filter: `matchingPosts` is everything in scope for
+  // the current tab + category + urgency + query. From there, the
+  // default view hides any post that already has a claimer; the
+  // "Show N claimed" toggle adds them back in.
+  const matchingPosts = useMemo(() => {
     const q = query.trim().toLowerCase();
     return posts.filter((p) => {
       if (p.type !== tab) return false;
@@ -88,6 +98,19 @@ export default function BoardPage() {
       return true;
     });
   }, [posts, tab, categoryFilter, urgencyFilter, query]);
+
+  const claimedInScope = useMemo(
+    () => matchingPosts.filter((p) => p.claimedBy !== null).length,
+    [matchingPosts],
+  );
+
+  const visiblePosts = useMemo(
+    () =>
+      showClaimed
+        ? matchingPosts
+        : matchingPosts.filter((p) => p.claimedBy === null),
+    [matchingPosts, showClaimed],
+  );
 
   const openCount = useMemo(() => {
     return {
@@ -198,6 +221,21 @@ export default function BoardPage() {
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
+
+      {claimedInScope > 0 && (
+        <div className="mb-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowClaimed((v) => !v)}
+            aria-pressed={showClaimed}
+            className="rounded-full bg-moss-100 px-3 py-1 text-xs font-medium text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+          >
+            {showClaimed
+              ? t("board.hideClaimed", { count: claimedInScope })
+              : t("board.showClaimed", { count: claimedInScope })}
+          </button>
+        </div>
+      )}
 
       {visiblePosts.length === 0 ? (
         <EmptyState

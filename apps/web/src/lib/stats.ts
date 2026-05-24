@@ -73,6 +73,18 @@ export function computeCommunityStats(
       ),
   ).length;
 
+  // Community-responsiveness signal: of the needs that came up
+  // this week, how many already have someone stepping up. We use
+  // post `createdAt` as the time window because there's no
+  // `claimedAt` field on Post.
+  const needsThisWeek = posts.filter(
+    (p) => p.type === "NEED" && p.createdAt >= oneWeekAgo,
+  );
+  const needsPostedThisWeek = needsThisWeek.length;
+  const needsAnsweredThisWeek = needsThisWeek.filter(
+    (p) => p.claimedBy !== null,
+  ).length;
+
   const hoursMilestones = reachedMilestones("hours", totalHoursExchanged);
   const exchangeMilestones = reachedMilestones("exchanges", totalExchanges);
   const memberMilestones = reachedMilestones("members", members.length);
@@ -84,6 +96,8 @@ export function computeCommunityStats(
     activeMembersThisMonth: activeMonth.size,
     solidarityStreakDays: computeSolidarityStreak(exchanges, now),
     needsFulfilledThisWeek,
+    needsAnsweredThisWeek,
+    needsPostedThisWeek,
     categoryBreakdown,
     milestonesReached: [
       ...hoursMilestones,

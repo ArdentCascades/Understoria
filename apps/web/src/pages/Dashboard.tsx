@@ -132,6 +132,17 @@ export default function DashboardPage() {
           value={stats.needsFulfilledThisWeek}
           sublabel={t("dashboard.stats.andCounting")}
         />
+        <StatCard
+          label={t("dashboard.stats.needsAnswered")}
+          value={stats.needsAnsweredThisWeek}
+          sublabel={
+            stats.needsPostedThisWeek > 0
+              ? t("dashboard.stats.ofPosted", {
+                  count: stats.needsPostedThisWeek,
+                })
+              : t("dashboard.stats.noNeedsPosted")
+          }
+        />
       </div>
 
       <section className="card mb-4">

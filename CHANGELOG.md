@@ -64,6 +64,44 @@ include breaking changes.
   and `db/votes.test.ts`). Locale parity passes. Lint,
   typecheck, build clean.
 
+- **Board hides claimed posts by default + "needs answered this
+  week" stat.** Two paired changes — both keep the Board
+  action-oriented and surface community responsiveness as a
+  collective signal (not a personal score).
+  - **`Board`** now filters out posts where `claimedBy !== null`
+    by default. A small pill at the top of the list ("Show 3
+    claimed") toggles them back in. The pill only renders when
+    claimed posts exist in the current tab + filter scope, so
+    members who don't have any claimed posts in view never see
+    the affordance. State is session-local — flips back to
+    hide-claimed on reload, which matches the action-oriented
+    framing every time someone returns to the Board.
+  - **`CommunityStats`** gains `needsAnsweredThisWeek` +
+    `needsPostedThisWeek`. "Answered" = a NEED posted in the
+    last 7 days that has a claimer. The pair lets the Dashboard
+    render a ratio ("12 of 18 posted this week") without the
+    caller doing the math.
+  - **`Dashboard`** gets a 5th `StatCard`: "Needs answered this
+    week — 12 / of 18 posted this week." Sublabel handles the
+    "no needs posted this week" case so the card stays
+    grammatical when the community is quiet.
+  - **Anti-engagement-bait note**: deliberately stays
+    community-level. No per-member "you've answered N needs"
+    surface — that tips into leaderboard energy. The Achievement
+    system already covers individual recognition by "naming
+    the shapes your contributions take," not by scoring.
+  - **+1 test** in `stats.test.ts` covers the new fields
+    (window enforcement, OFFER posts don't count toward NEED
+    stats, claimed vs unclaimed within window).
+
+  i18n: `board.showClaimed` / `board.hideClaimed`,
+  `dashboard.stats.needsAnswered` / `ofPosted` /
+  `noNeedsPosted` in en + es.
+
+  Tests: 380 passing (379 → 380) before rebase; rebased onto
+  the voting layer for a combined 398 passing. Locale parity
+  passes. Lint, typecheck, build clean.
+
 - **Agent 13 — Proposals MVP at `/proposals`.** First slice of
   the Decisions surface that the roadmap (`docs/roadmap.md`)
   describes. v1 is `config_change` proposals only, no voting,

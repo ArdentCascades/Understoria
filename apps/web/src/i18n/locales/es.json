@@ -368,6 +368,8 @@
       "ariaLabel": "Tipos de publicación"
     },
     "openCount": "({{count}})",
+    "showClaimed": "Mostrar {{count}} tomadas",
+    "hideClaimed": "Ocultar tomadas",
     "filters": {
       "categoryAriaLabel": "Filtrar por categoría",
       "urgencyAriaLabel": "Filtrar por urgencia",
@@ -401,7 +403,10 @@
       "streakUnitOne": "día",
       "streakUnitOther": "días seguidos",
       "needsMet": "Necesidades cubiertas esta semana",
-      "andCounting": "y contando"
+      "andCounting": "y contando",
+      "needsAnswered": "Necesidades atendidas esta semana",
+      "ofPosted": "de {{count}} publicadas esta semana",
+      "noNeedsPosted": "ninguna necesidad publicada esta semana"
     },
     "milestones": {
       "title": "Hitos colectivos",
