@@ -9,7 +9,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Member, Post, Project, ProjectTask } from "@/types";
+import type { Member, NodeConfig, Post, Project, ProjectTask } from "@/types";
+import {
+  daysSinceClaim as daysSinceClaimHelper,
+  taskStaleness,
+} from "./taskStaleness";
 
 // "Needs your attention" — things waiting on the current member to
 // act. Pure utility surface: information you already need but
@@ -48,6 +52,17 @@ export type AttentionItem =
       taskTitle: string;
       completerName: string;
       createdAt: number;
+    }
+  | {
+      kind: "task_check_in";
+      projectId: string;
+      taskId: string;
+      projectTitle: string;
+      taskTitle: string;
+      daysSinceClaim: number;
+      /** Cursor for sort — the moment the prompt became due
+       *  (claim time or last ack, whichever's later). */
+      createdAt: number;
     };
 
 export interface AttentionInput {
@@ -56,6 +71,11 @@ export interface AttentionInput {
   projects: readonly Project[];
   projectTasks: readonly ProjectTask[];
   members: readonly Member[];
+  /** Per-node thresholds for the private "still on it?" nudge.
+   *  Optional so the `task_check_in` items just don't surface
+   *  when the caller can't supply config (tests, edge cases). */
+  config?: Pick<NodeConfig, "taskCheckInDays" | "taskNeedsHelpDays">;
+  now?: number;
 }
 
 export function computeAttentionItems(
@@ -127,7 +147,38 @@ export function computeAttentionItems(
     });
   }
 
-  // Newest items first. createdAt is the right cursor because both
+  // Private "still on it?" nudge — only surfaces to the claimer
+  // when the task is `check_in_due` (past the private threshold
+  // but not yet at the public "could use more hands" point). At
+  // `needs_more_hands` the community-visible chip on the project
+  // page is doing the work, so we don't double-up here.
+  if (input.config) {
+    for (const t of projectTasks) {
+      if (t.assignedTo !== currentMember.publicKey) continue;
+      const staleness = taskStaleness(t, input.config, input.now);
+      if (staleness !== "check_in_due") continue;
+      const project = projectByKey.get(t.projectId);
+      if (!project) continue;
+      // Use the moment the prompt actually became due (claim or
+      // last ack, whichever's later) as the sort cursor so the
+      // oldest-pending-nudge surfaces first.
+      const anchor = Math.max(
+        t.claimedAt ?? 0,
+        t.checkInAcknowledgedAt ?? 0,
+      );
+      items.push({
+        kind: "task_check_in",
+        projectId: project.id,
+        taskId: t.id,
+        projectTitle: project.title,
+        taskTitle: t.title,
+        daysSinceClaim: daysSinceClaimHelper(t, input.now),
+        createdAt: anchor,
+      });
+    }
+  }
+
+  // Newest items first. createdAt is the right cursor because all
   // record types use it for ordering elsewhere; using "moment the
   // first confirmation happened" would be more accurate but we
   // don't persist that timestamp.

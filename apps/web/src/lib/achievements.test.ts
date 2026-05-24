@@ -197,6 +197,8 @@ describe("project achievements", () => {
       completedAt: null,
       completedBy: null,
       exchangeId: null,
+      claimedAt: null,
+      checkInAcknowledgedAt: null,
       ...overrides,
     };
   }

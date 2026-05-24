@@ -124,6 +124,8 @@
       "statusAwaiting": "Awaiting confirmation",
       "statusCompleted": "Completed",
       "statusBlocked": "Blocked",
+      "needsMoreHands": "Could use more hands",
+      "needsMoreHandsTooltip": "Claimed for {{days}} days. Anyone could reach out to help, or the claimer can release it.",
       "hours": "{{hours}}",
       "addTask": {
         "fieldTitle": "Task title",
@@ -357,7 +359,14 @@
     "exchangeLine": "{{name}} marked “{{title}}” complete — confirm it happened.",
     "taskLine": "{{name}} finished “{{task}}” for the {{project}} project — confirm.",
     "tapToConfirm": "Tap to confirm and release the credits.",
-    "tapToConfirmTask": "Tap to confirm and credit the helper."
+    "tapToConfirmTask": "Tap to confirm and credit the helper.",
+    "taskCheckIn": {
+      "line": "Still on “{{task}}” for {{project}}? It's been {{days}} days.",
+      "hint": "Capacity changes — release it if you need to. No record kept.",
+      "stillOn": "Still on it",
+      "release": "Release it for someone else",
+      "openProject": "Open project"
+    }
   },
   "board": {
     "title": "Community board",
@@ -536,6 +545,14 @@
       "reciprocal": {
         "label": "Reciprocal-pattern threshold",
         "hint": "When the same two members exchange this many times in 30 days, the latest exchange gets an advisory flag."
+      },
+      "taskCheckInDays": {
+        "label": "Task check-in (days)",
+        "hint": "After this many days, the claimer of a project task gets a private 'still on it?' prompt in their attention list. They can release without anyone seeing."
+      },
+      "taskNeedsHelpDays": {
+        "label": "Task 'could use more hands' (days)",
+        "hint": "After this many days, a claimed task is publicly marked as needing more hands. Framed at the task, not the person. Must be at least the check-in threshold."
       },
       "save": "Save settings",
       "reset": "Reset to defaults"
