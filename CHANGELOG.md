@@ -10,6 +10,60 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Voting on proposals.** Builds on the Proposals MVP from the
+  previous PR. Members can now affirm / block / abstain on any
+  open proposal directly from `/proposals`. Each card shows the
+  running tally + a list of blockers with their reasons.
+  - **`Vote` type** in `packages/shared/src/types.ts`:
+    `choice: "affirm" | "block" | "abstain"`, optional `reason`
+    (strongly encouraged for blocks, so the community can
+    resolve the objection), `voterKey`, `proposalId`,
+    `createdAt`. Deterministic id `${proposalId}|${voterKey}`
+    so a re-cast vote overwrites the prior row in place.
+    Unsigned for v1 because votes stay local — federation
+    governance (Agent 15) will add a signature field.
+  - **Schema v10** adds a `votes` table indexed on `proposalId`,
+    `voterKey`, `createdAt`, and `[proposalId+voterKey]`.
+  - **`lib/votes.ts`** — pure `tallyVotes(votes)` returns
+    `{ affirms, blocks, abstains, totalVoters }` with each
+    bucket sorted newest-first, plus `currentMemberVote(key,
+    votes)` and `voteId(proposalId, voterKey)`. **11 tests**
+    cover empty / by-choice grouping / latest-per-voter dedup /
+    out-of-order rows / sort order / distinct-voter count, plus
+    the current-member-vote and id-composition helpers.
+  - **`db/votes.ts`** — `castVote`, `listVotesFor`,
+    `getMemberVote`. Reason is trimmed and whitespace-only
+    becomes null. Re-casting overwrites in place (one row per
+    voter per proposal). **7 tests** cover the lifecycle.
+  - **Inline voting UI on each open proposal** — three pill
+    buttons (Affirm / Block / Abstain) with the member's current
+    choice highlighted via `aria-pressed`. Tapping Block opens a
+    reason textarea before recording. Tally renders inline:
+    "Affirm: 3 (Alice, Bob, Carol) — Block: 1 (Dave: 'concerned
+    about edge case X') — Abstain: 0".
+  - **Latest-vote-wins**. Changing your mind is one tap away;
+    the tally helper dedups defensively even if multiple rows
+    somehow exist.
+  - **Closure stays manual for v1.** A proposal doesn't
+    automatically pass on N affirms or fail on M blocks —
+    deliberation periods and supermajority thresholds are real
+    community decisions that need pilot input. Voting gives the
+    signal; humans still record the outcome.
+  - **`AppContext` loads votes** via a live Dexie query so
+    every voting surface stays in sync without prop drilling.
+  - **i18n**: extended `proposals.*` with a `vote.*` block
+    (heading pluralization, prompt, choice labels, tally
+    labels, block-reason dialog) in en + es.
+
+  Not in scope: automatic close on consensus/supermajority,
+  signed votes (Agent 15), per-proposal deliberation periods,
+  showing "your block is unresolved" reminders. Each is a
+  separate slice once we see how voting plays in practice.
+
+  Tests: 397 passing (379 → 397; +18 across `votes.test.ts`
+  and `db/votes.test.ts`). Locale parity passes. Lint,
+  typecheck, build clean.
+
 - **Agent 13 — Proposals MVP at `/proposals`.** First slice of
   the Decisions surface that the roadmap (`docs/roadmap.md`)
   describes. v1 is `config_change` proposals only, no voting,

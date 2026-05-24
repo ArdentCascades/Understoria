@@ -696,6 +696,29 @@
     },
     "errorTitleRequired": "Dale a la propuesta un título corto.",
     "errorPositiveInteger": "Debe ser un número entero mayor que 0.",
+    "vote": {
+      "headingNone": "Aún nadie ha opinado",
+      "headingOne": "{{count}} persona ha opinado",
+      "headingOther": "{{count}} personas han opinado",
+      "castPrompt": "¿Qué piensas?",
+      "changeChoice": "Tu voto actual: {{choice}}. Cámbialo:",
+      "affirm": "A favor",
+      "block": "Bloquear",
+      "abstain": "Abstenerse",
+      "blockReasonLabel": "¿Por qué bloqueas?",
+      "blockReasonPlaceholder": "¿Qué hace falta resolver antes de que esto pueda avanzar?",
+      "confirmBlock": "Registrar bloqueo",
+      "choice": {
+        "affirm": "a favor",
+        "block": "bloqueo",
+        "abstain": "abstención"
+      },
+      "tally": {
+        "affirms": "A favor: {{count}}",
+        "blocks": "Bloqueo: {{count}}",
+        "abstains": "Abstención: {{count}}"
+      }
+    },
     "toast": {
       "created": "Propuesta iniciada. Compártela con tu comunidad en su canal habitual."
     },
