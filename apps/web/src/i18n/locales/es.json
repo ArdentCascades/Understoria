@@ -124,6 +124,8 @@
       "statusAwaiting": "Esperando confirmación",
       "statusCompleted": "Completada",
       "statusBlocked": "Bloqueada",
+      "needsMoreHands": "Le vendrían bien más manos",
+      "needsMoreHandsTooltip": "Esta tarea podría aprovechar apoyo adicional. Cualquier persona puede sumarse a ayudar.",
       "hours": "{{hours}}",
       "addTask": {
         "fieldTitle": "Título de la tarea",
@@ -357,7 +359,14 @@
     "exchangeLine": "{{name}} marcó “{{title}}” como completado — confirma que ocurrió.",
     "taskLine": "{{name}} terminó “{{task}}” del proyecto {{project}} — confirma.",
     "tapToConfirm": "Toca para confirmar y liberar los créditos.",
-    "tapToConfirmTask": "Toca para confirmar y dar crédito a quien ayudó."
+    "tapToConfirmTask": "Toca para confirmar y dar crédito a quien ayudó.",
+    "taskCheckIn": {
+      "line": "¿Sigues con “{{task}}” de {{project}}? Han pasado {{days}} días.",
+      "hint": "La capacidad cambia — suéltala si lo necesitas. No queda registro.",
+      "stillOn": "Sigo en ello",
+      "release": "Liberarla para otra persona",
+      "openProject": "Abrir proyecto"
+    }
   },
   "board": {
     "title": "Tablero comunitario",
@@ -368,6 +377,8 @@
       "ariaLabel": "Tipos de publicación"
     },
     "openCount": "({{count}})",
+    "showClaimed": "Mostrar {{count}} tomadas",
+    "hideClaimed": "Ocultar tomadas",
     "filters": {
       "categoryAriaLabel": "Filtrar por categoría",
       "urgencyAriaLabel": "Filtrar por urgencia",
@@ -401,7 +412,10 @@
       "streakUnitOne": "día",
       "streakUnitOther": "días seguidos",
       "needsMet": "Necesidades cubiertas esta semana",
-      "andCounting": "y contando"
+      "andCounting": "y contando",
+      "needsAnswered": "Necesidades atendidas esta semana",
+      "ofPosted": "de {{count}} publicadas esta semana",
+      "noNeedsPosted": "ninguna necesidad publicada esta semana"
     },
     "milestones": {
       "title": "Hitos colectivos",
@@ -531,6 +545,18 @@
       "reciprocal": {
         "label": "Umbral de patrón recíproco",
         "hint": "Cuando dos mismas integrantes intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
+      },
+      "taskCheckInDays": {
+        "label": "Chequeo de tarea (días)",
+        "hint": "Después de tantos días, quien tomó una tarea de proyecto recibe un aviso privado de '¿sigues con esto?' en su lista de pendientes. Puede liberarla sin que nadie lo vea."
+      },
+      "taskNeedsHelpDays": {
+        "label": "Tarea 'le vendrían bien más manos' (días)",
+        "hint": "Después de tantos días, una tarea tomada se marca públicamente como necesitada de más manos. Enmarcado hacia la tarea, no hacia la persona. Debe ser al menos igual al umbral de chequeo."
+      },
+      "taskCheckInGraceDays": {
+        "label": "Margen tras el chequeo de tarea (días)",
+        "hint": "Después de que quien tomó la tarea reconozca el aviso privado, suspende el indicador público 'le vendrían bien más manos' durante estos días. Permite que una persona que responde mantenga la tarea fuera de la señal comunitaria. Mantén un valor bajo (1–3) para que el silencio prolongado siga apareciendo."
       },
       "save": "Guardar configuración",
       "reset": "Restaurar valores predeterminados"

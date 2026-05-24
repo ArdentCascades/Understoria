@@ -64,6 +64,117 @@ include breaking changes.
   and `db/votes.test.ts`). Locale parity passes. Lint,
   typecheck, build clean.
 
+- **Two-tier check-in handling for project tasks.** Per the
+  project ethos — never frame missed delivery as "stalled" /
+  "overdue" / "failed." Two paired affordances surface a task
+  that's been claimed a while without acting on it, both
+  framed at the task (not the person):
+  - **Private "still on it?" nudge for the claimer**, after a
+    configurable `taskCheckInDays` (default 7). Surfaces in
+    AttentionSection — visible only to the claimer. Two
+    buttons: *Still on it* (resets the clock for another N
+    days) and *Release it for someone else* (un-claims with
+    no record kept). Hint copy: "Capacity changes — release
+    it if you need to. No record kept."
+  - **Public "could use more hands" chip** on the project task
+    row, after a configurable `taskNeedsHelpDays` (default
+    14) AND a grace window since the claimer's last
+    acknowledgement. Framed at the task. When the chip
+    fires, the claimer's name is dropped from the public row
+    — the task is community work again, and the claimer's
+    own affordances (private nudge, in-row buttons) remain
+    visible to them. Tooltip carries no day count;
+    framing-at-the-task all the way down. *Solidarity not
+    shame: a member who is engaging — even just to say "yes,
+    still on it" — should never appear in a community-
+    visible signal.*
+  - **Pure helper module** `lib/taskStaleness.ts` —
+    `taskStaleness(task, config, now)` returns a tagged result
+    (`fresh` / `check_in_due` / `needs_more_hands`). The
+    public chip requires BOTH (a) the task has been claimed
+    for at least `taskNeedsHelpDays` AND (b) the claimer has
+    been silent for at least `taskCheckInDays +
+    taskCheckInGraceDays` since their most recent ack (or
+    since the claim if they've never acked). Each ack buys
+    grace; sustained silence is what surfaces the public
+    chip. 21 tests cover branches, boundaries, and
+    configurable thresholds — including the grace-window
+    transitions.
+  - **`ProjectTask`** gains `claimedAt` + `checkInAcknowledgedAt`
+    fields. Schema v11 migration backfills `claimedAt = now()`
+    for any currently-claimed task so the prompts don't all
+    fire at once on first load. `claimProjectTask` stamps
+    `claimedAt`; `unclaimProjectTask` clears both; new
+    `acknowledgeTaskCheckIn` action stamps
+    `checkInAcknowledgedAt`.
+  - **`NodeConfig`** gains `taskCheckInDays` + `taskNeedsHelpDays`
+    + `taskCheckInGraceDays` (defaults 7 / 14 / 2). Surfaced
+    in CommunitySettingsSection so a community can tune the
+    cadence to their own rhythm — short for fast-moving
+    groups, long for slow-cooking projects. Validators
+    ensure `needsHelpDays >= checkInDays` and
+    `taskCheckInGraceDays >= 0`. A grace of 0 means the
+    public chip fires the moment the claim floor is met
+    (the previous behaviour).
+  - **New AttentionItem kind** `task_check_in` joins
+    `confirm_exchange` and `confirm_task`. The component
+    renders inline action buttons (not a Link wrapper) because
+    the actions live on the prompt itself; the project name
+    stays tappable as a deep-link.
+  - **i18n**: new `attention.taskCheckIn.*`,
+    `projects.task.needsMoreHands*`, and
+    `profile.communitySettings.taskCheckInDays.*` /
+    `taskNeedsHelpDays.*` in en + es.
+
+  Not in scope: co-helpers / helpers list (raises questions
+  about exchange-credit splitting), per-project threshold
+  override, auto-release after some long N (would feel
+  punitive even if quiet).
+
+  Tests: 419 passing (398 after rebase onto voting + board-hide,
+  +21 in `taskStaleness.test.ts` covering the grace-window
+  transitions, +2 in `nodeConfig.test.ts` covering the new
+  validator). Locale parity passes. Lint, typecheck, build
+  clean.
+
+- **Board hides claimed posts by default + "needs answered this
+  week" stat.** Two paired changes — both keep the Board
+  action-oriented and surface community responsiveness as a
+  collective signal (not a personal score).
+  - **`Board`** now filters out posts where `claimedBy !== null`
+    by default. A small pill at the top of the list ("Show 3
+    claimed") toggles them back in. The pill only renders when
+    claimed posts exist in the current tab + filter scope, so
+    members who don't have any claimed posts in view never see
+    the affordance. State is session-local — flips back to
+    hide-claimed on reload, which matches the action-oriented
+    framing every time someone returns to the Board.
+  - **`CommunityStats`** gains `needsAnsweredThisWeek` +
+    `needsPostedThisWeek`. "Answered" = a NEED posted in the
+    last 7 days that has a claimer. The pair lets the Dashboard
+    render a ratio ("12 of 18 posted this week") without the
+    caller doing the math.
+  - **`Dashboard`** gets a 5th `StatCard`: "Needs answered this
+    week — 12 / of 18 posted this week." Sublabel handles the
+    "no needs posted this week" case so the card stays
+    grammatical when the community is quiet.
+  - **Anti-engagement-bait note**: deliberately stays
+    community-level. No per-member "you've answered N needs"
+    surface — that tips into leaderboard energy. The Achievement
+    system already covers individual recognition by "naming
+    the shapes your contributions take," not by scoring.
+  - **+1 test** in `stats.test.ts` covers the new fields
+    (window enforcement, OFFER posts don't count toward NEED
+    stats, claimed vs unclaimed within window).
+
+  i18n: `board.showClaimed` / `board.hideClaimed`,
+  `dashboard.stats.needsAnswered` / `ofPosted` /
+  `noNeedsPosted` in en + es.
+
+  Tests: 380 passing (379 → 380) before rebase; rebased onto
+  the voting layer for a combined 398 passing. Locale parity
+  passes. Lint, typecheck, build clean.
+
 - **Agent 13 — Proposals MVP at `/proposals`.** First slice of
   the Decisions surface that the roadmap (`docs/roadmap.md`)
   describes. v1 is `config_change` proposals only, no voting,

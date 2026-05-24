@@ -89,6 +89,8 @@ function task(overrides: Partial<ProjectTask>): ProjectTask {
     completedAt: null,
     completedBy: null,
     exchangeId: null,
+    claimedAt: null,
+    checkInAcknowledgedAt: null,
     ...overrides,
   };
 }

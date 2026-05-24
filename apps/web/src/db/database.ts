@@ -214,6 +214,29 @@ export class UnderstoriaDB extends Dexie {
     this.version(10).stores({
       votes: "id, proposalId, voterKey, createdAt, [proposalId+voterKey]",
     });
+    // Version 11 — task check-in tracking (two-tier check-in
+    // handling). Adds `claimedAt` + `checkInAcknowledgedAt` to
+    // every ProjectTask. Backfills `claimedAt = now()` for any
+    // currently-claimed task so the "could use more hands"
+    // prompts don't fire en masse on first load after upgrade.
+    // No new index — check-in state is computed in memory against
+    // node config, never queried directly.
+    this.version(11).stores({}).upgrade(async (tx) => {
+      const now = Date.now();
+      const tasks = tx.table<ProjectTask, string>("projectTasks");
+      await tasks.toCollection().modify((row) => {
+        const r = row as ProjectTask & {
+          claimedAt?: number | null;
+          checkInAcknowledgedAt?: number | null;
+        };
+        if (r.claimedAt === undefined) {
+          r.claimedAt = r.status === "claimed" ? now : null;
+        }
+        if (r.checkInAcknowledgedAt === undefined) {
+          r.checkInAcknowledgedAt = null;
+        }
+      });
+    });
   }
 }
 

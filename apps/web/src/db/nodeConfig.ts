@@ -33,6 +33,12 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
       row.shortExchangeHours ?? DEFAULT_NODE_CONFIG.shortExchangeHours,
     reciprocalPairThreshold:
       row.reciprocalPairThreshold ?? DEFAULT_NODE_CONFIG.reciprocalPairThreshold,
+    taskCheckInDays:
+      row.taskCheckInDays ?? DEFAULT_NODE_CONFIG.taskCheckInDays,
+    taskNeedsHelpDays:
+      row.taskNeedsHelpDays ?? DEFAULT_NODE_CONFIG.taskNeedsHelpDays,
+    taskCheckInGraceDays:
+      row.taskCheckInGraceDays ?? DEFAULT_NODE_CONFIG.taskCheckInGraceDays,
   };
 }
 
@@ -75,6 +81,30 @@ function validate(config: NodeConfig): NodeConfig {
   ) {
     throw new InvalidNodeConfigError(
       "Reciprocal-pair threshold must be at least 2 (one exchange isn't a pattern).",
+    );
+  }
+  if (
+    !Number.isInteger(config.taskCheckInDays) ||
+    config.taskCheckInDays < 1
+  ) {
+    throw new InvalidNodeConfigError(
+      "Task check-in threshold must be a whole number of days >= 1.",
+    );
+  }
+  if (
+    !Number.isInteger(config.taskNeedsHelpDays) ||
+    config.taskNeedsHelpDays < config.taskCheckInDays
+  ) {
+    throw new InvalidNodeConfigError(
+      "Task 'needs more hands' threshold must be a whole number of days >= the check-in threshold.",
+    );
+  }
+  if (
+    !Number.isInteger(config.taskCheckInGraceDays) ||
+    config.taskCheckInGraceDays < 0
+  ) {
+    throw new InvalidNodeConfigError(
+      "Task check-in grace must be a whole number of days >= 0.",
     );
   }
   return config;

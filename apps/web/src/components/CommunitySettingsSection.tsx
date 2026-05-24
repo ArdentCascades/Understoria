@@ -49,6 +49,9 @@ export function CommunitySettingsSection() {
         dailyHelperLimit: Math.round(draft.dailyHelperLimit),
         shortExchangeHours: draft.shortExchangeHours,
         reciprocalPairThreshold: Math.round(draft.reciprocalPairThreshold),
+        taskCheckInDays: Math.round(draft.taskCheckInDays),
+        taskNeedsHelpDays: Math.round(draft.taskNeedsHelpDays),
+        taskCheckInGraceDays: Math.round(draft.taskCheckInGraceDays),
       });
       await refreshNodeConfig();
       setSavedAt(Date.now());
@@ -164,6 +167,72 @@ export function CommunitySettingsSection() {
               setDraft({
                 ...draft,
                 reciprocalPairThreshold: Number(e.target.value),
+              })
+            }
+            className="input"
+          />
+        </Field>
+        <Field
+          id="cfg-task-checkin"
+          label={t("profile.communitySettings.taskCheckInDays.label")}
+          hint={t("profile.communitySettings.taskCheckInDays.hint")}
+        >
+          <input
+            id="cfg-task-checkin"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={60}
+            step={1}
+            value={draft.taskCheckInDays}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                taskCheckInDays: Number(e.target.value),
+              })
+            }
+            className="input"
+          />
+        </Field>
+        <Field
+          id="cfg-task-needs-help"
+          label={t("profile.communitySettings.taskNeedsHelpDays.label")}
+          hint={t("profile.communitySettings.taskNeedsHelpDays.hint")}
+        >
+          <input
+            id="cfg-task-needs-help"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={120}
+            step={1}
+            value={draft.taskNeedsHelpDays}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                taskNeedsHelpDays: Number(e.target.value),
+              })
+            }
+            className="input"
+          />
+        </Field>
+        <Field
+          id="cfg-task-grace"
+          label={t("profile.communitySettings.taskCheckInGraceDays.label")}
+          hint={t("profile.communitySettings.taskCheckInGraceDays.hint")}
+        >
+          <input
+            id="cfg-task-grace"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={30}
+            step={1}
+            value={draft.taskCheckInGraceDays}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                taskCheckInGraceDays: Number(e.target.value),
               })
             }
             className="input"

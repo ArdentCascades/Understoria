@@ -149,12 +149,37 @@ export interface NodeConfig {
   /** When the same (helper, helped) pair completes this many exchanges
    *  in 30 days, the latest one gets a reciprocal-pattern advisory flag. */
   reciprocalPairThreshold: number;
+  /** Days after claim before the claimer gets a private "still on
+   *  it?" nudge in their AttentionSection. Lets a claimer release
+   *  without the community ever seeing they were behind. Default
+   *  7 — a week feels generous without becoming silent indefinitely. */
+  taskCheckInDays: number;
+  /** Days after claim before a task can be community-visibly
+   *  marked "could use more hands." Framed at the task, not the
+   *  person. Default 14 — long enough to follow the private
+   *  nudge by a similar window. */
+  taskNeedsHelpDays: number;
+  /** Grace window (in days) after the claimer acknowledges the
+   *  private nudge during which the public "could use more
+   *  hands" chip stays suppressed, even if `taskNeedsHelpDays`
+   *  is past. Lets a claimer who is engaging — even just to say
+   *  "yes, still on it" — keep the task out of community
+   *  signalling. The chip only fires when the claimer has gone
+   *  silent for this long after the private window has lapsed.
+   *  Default 2 — short, so prolonged silence still surfaces, but
+   *  long enough that one ack buys real quiet. Solidarity-not-
+   *  shame: a member who is responsive shouldn't ever appear in
+   *  a community-visible signal. */
+  taskCheckInGraceDays: number;
 }
 
 export const DEFAULT_NODE_CONFIG: NodeConfig = {
   dailyHelperLimit: 3,
   shortExchangeHours: 0.25,
   reciprocalPairThreshold: 3,
+  taskCheckInDays: 7,
+  taskNeedsHelpDays: 14,
+  taskCheckInGraceDays: 2,
 };
 
 /**
@@ -232,6 +257,16 @@ export interface CommunityStats {
   activeMembersThisMonth: number;
   solidarityStreakDays: number;
   needsFulfilledThisWeek: number;
+  /** Needs posted in the last 7 days that have a claimer.
+   *  Captures community responsiveness — "of what came up this
+   *  week, someone has stepped up for X." We use the post's
+   *  `createdAt` as the time window because we don't persist a
+   *  separate "claimed at" timestamp. */
+  needsAnsweredThisWeek: number;
+  /** Needs posted in the last 7 days, period. The pair
+   *  (answered, posted) lets the UI render a ratio without the
+   *  caller recomputing. */
+  needsPostedThisWeek: number;
   categoryBreakdown: Partial<Record<Category, number>>;
   milestonesReached: Milestone[];
 }
@@ -317,6 +352,16 @@ export interface ProjectTask {
   completedBy: string | null;
   /** Set on confirmation. Mirrors the Exchange record's id. */
   exchangeId: string | null;
+  /** When the current claim happened. Stamped by
+   *  `claimProjectTask`, cleared by release/completion.
+   *  Backfilled to `now()` for pre-existing claimed tasks in the
+   *  v12 migration so the "could use more hands" prompts don't all
+   *  fire at once on first load. */
+  claimedAt: number | null;
+  /** When the claimer last said "yes, still on it" to the private
+   *  staleness nudge. Lets the private clock reset without losing
+   *  the original `claimedAt`. Null until first ack. */
+  checkInAcknowledgedAt: number | null;
 }
 
 export type ProjectActivityType =

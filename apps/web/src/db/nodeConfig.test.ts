@@ -36,6 +36,7 @@ describe("getNodeConfig", () => {
   it("returns the stored values when a row exists", async () => {
     await db.nodeConfig.put({
       nodeId: NODE,
+      ...DEFAULT_NODE_CONFIG,
       dailyHelperLimit: 5,
       shortExchangeHours: 0.5,
       reciprocalPairThreshold: 4,
@@ -48,6 +49,7 @@ describe("getNodeConfig", () => {
 
   it("scopes by nodeId — a different node's config does not leak", async () => {
     await putNodeConfig("node_a", {
+      ...DEFAULT_NODE_CONFIG,
       dailyHelperLimit: 7,
       shortExchangeHours: 0.1,
       reciprocalPairThreshold: 5,
@@ -62,6 +64,7 @@ describe("putNodeConfig", () => {
 
   it("persists the new values and returns them", async () => {
     const next = {
+      ...DEFAULT_NODE_CONFIG,
       dailyHelperLimit: 6,
       shortExchangeHours: 0.4,
       reciprocalPairThreshold: 4,
@@ -107,6 +110,24 @@ describe("putNodeConfig", () => {
       }),
     ).rejects.toBeInstanceOf(InvalidNodeConfigError);
   });
+
+  it("rejects a negative task check-in grace", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        taskCheckInGraceDays: -1,
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("accepts a zero grace (chip fires the moment the floor is met)", async () => {
+    const next = {
+      ...DEFAULT_NODE_CONFIG,
+      taskCheckInGraceDays: 0,
+    };
+    const written = await putNodeConfig(NODE, next);
+    expect(written.taskCheckInGraceDays).toBe(0);
+  });
 });
 
 describe("resetNodeConfig", () => {
@@ -114,6 +135,7 @@ describe("resetNodeConfig", () => {
 
   it("rewrites the row with the shipped defaults", async () => {
     await putNodeConfig(NODE, {
+      ...DEFAULT_NODE_CONFIG,
       dailyHelperLimit: 10,
       shortExchangeHours: 1,
       reciprocalPairThreshold: 5,

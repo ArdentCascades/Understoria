@@ -28,6 +28,7 @@ import {
 import { humanizeError } from "@/lib/humanizeError";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { formatDeadline, formatHours, formatRelativeTime } from "@/lib/format";
+import { taskStaleness } from "@/lib/taskStaleness";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
@@ -49,6 +50,7 @@ export default function ProjectDetailPage() {
     members,
     currentMember,
     nodeId,
+    nodeConfig,
     exchanges,
   } = useApp();
   const { t } = useTranslation();
@@ -248,18 +250,22 @@ export default function ProjectDetailPage() {
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
-            {tasks.map((task) => (
-              <li key={task.id}>
-                <TaskRow
-                  task={task}
-                  isOrganizer={isOrganizer}
-                  currentKey={currentMember?.publicKey}
-                  memberMap={memberMap}
-                  nodeId={nodeId}
-                  onRun={run}
-                />
-              </li>
-            ))}
+            {tasks.map((task) => {
+              const staleness = taskStaleness(task, nodeConfig);
+              return (
+                <li key={task.id}>
+                  <TaskRow
+                    task={task}
+                    isOrganizer={isOrganizer}
+                    currentKey={currentMember?.publicKey}
+                    memberMap={memberMap}
+                    nodeId={nodeId}
+                    onRun={run}
+                    needsMoreHands={staleness === "needs_more_hands"}
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
@@ -406,6 +412,7 @@ function TaskRow({
   memberMap,
   nodeId,
   onRun,
+  needsMoreHands,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -413,6 +420,7 @@ function TaskRow({
   memberMap: Map<string, string>;
   nodeId: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+  needsMoreHands: boolean;
 }) {
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
@@ -433,6 +441,17 @@ function TaskRow({
         <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
           {formatHours(task.estimatedHours)}
         </span>
+        {needsMoreHands && (
+          <span
+            className="chip bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+            title={t("projects.task.needsMoreHandsTooltip")}
+          >
+            <span aria-hidden="true" className="mr-1">
+              {"\u{1F91D}"}
+            </span>
+            {t("projects.task.needsMoreHands")}
+          </span>
+        )}
       </div>
       <h3 className="text-base font-semibold leading-snug">{task.title}</h3>
       {task.description && (
@@ -440,17 +459,26 @@ function TaskRow({
           {task.description}
         </p>
       )}
-      {task.assignedTo && (
-        <p className="text-xs text-moss-500 dark:text-moss-400">
-          {task.status === "awaiting_confirmation"
-            ? t("projects.task.completedBy", {
-                name: memberMap.get(task.completedBy ?? "") ?? "—",
-              })
-            : t("projects.task.claimedBy", {
-                name: memberMap.get(task.assignedTo) ?? "—",
-              })}
-        </p>
-      )}
+      {task.assignedTo &&
+        (task.status === "awaiting_confirmation" ? (
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("projects.task.completedBy", {
+              name: memberMap.get(task.completedBy ?? "") ?? "—",
+            })}
+          </p>
+        ) : !needsMoreHands ? (
+          // Solidarity-not-shame: once a task is community-visibly
+          // marked "could use more hands," the original claimer's
+          // name is dropped from the public row. The task is
+          // community work again; the claimer's own actions are
+          // still surfaced to them via their AttentionSection and
+          // the in-row buttons below.
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("projects.task.claimedBy", {
+              name: memberMap.get(task.assignedTo) ?? "—",
+            })}
+          </p>
+        ) : null)}
       <div className="flex flex-wrap gap-2">
         {task.status === "open" && currentKey && !isOrganizer && (
           <button
