@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db } from "./database";
+import { buildDisputeProposal } from "./proposals";
 import { diffAchievements } from "@/lib/achievements";
 import { computeZoneReachForHelper } from "@/lib/flow";
 import { getNodeConfig } from "./nodeConfig";
@@ -375,14 +376,34 @@ export async function confirmExchange(
 export async function disputeExchange(
   postId: string,
   memberKey: string,
+  reason: string | null = null,
 ): Promise<Post> {
-  return db.transaction("rw", db.posts, async () => {
+  return db.transaction("rw", db.posts, db.proposals, async () => {
     const post = await db.posts.get(postId);
     if (!post) throw new Error("Post not found");
     if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
       throw new Error("Only the two parties can dispute this exchange");
     const updated: Post = { ...post, status: "disputed" };
     await db.posts.put(updated);
+    // Agent 13 dispute migration — every flagged exchange gets a
+    // matching governance-layer Proposal so the Decisions surface
+    // can show it alongside config-change proposals. Idempotent:
+    // if a tab racing with this one already wrote the proposal
+    // row, we leave it alone.
+    const existing = await db.proposals
+      .where("disputePostId")
+      .equals(updated.id)
+      .first();
+    if (!existing) {
+      await db.proposals.put(
+        buildDisputeProposal({
+          post: updated,
+          flaggerKey: memberKey,
+          reason,
+          now: Date.now(),
+        }),
+      );
+    }
     return updated;
   });
 }

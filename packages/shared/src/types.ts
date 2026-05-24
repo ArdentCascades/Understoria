@@ -372,9 +372,16 @@ export interface ProjectActivity {
  * impact-reflection — those structural pauses come with the
  * `moderate` / `hard` categories in follow-up PRs.
  */
-export type ProposalKind = "proposal";
+export type ProposalKind = "proposal" | "dispute";
 
-export type ProposalCategory = "config_change";
+/**
+ * `config_change` proposals carry a NodeConfig payload (Agent 13).
+ * `dispute` decisions link back to a flagged exchange via
+ * `Proposal.disputePostId` and carry a JSON snapshot of the
+ * exchange details so the governance row is self-contained even
+ * if the underlying post is later modified.
+ */
+export type ProposalCategory = "config_change" | "dispute";
 
 export type ReversibilityTier = "easy" | "moderate" | "hard";
 
@@ -414,6 +421,13 @@ export interface Proposal {
    * Null when the proposer skipped or the tier doesn't require it.
    */
   impactReflection: string | null;
+  /**
+   * For `kind: "dispute"` rows, the id of the underlying post
+   * (the flagged exchange). `null` for `kind: "proposal"` rows.
+   * Lets the governance row link back to the exchange truth
+   * without duplicating the post lifecycle.
+   */
+  disputePostId: string | null;
 }
 
 export interface ImpactReflection {
@@ -428,6 +442,27 @@ export interface ImpactReflection {
  * `NodeConfig` values. Stored as JSON inside `Proposal.payload`.
  */
 export type NodeConfigProposalPayload = NodeConfig;
+
+/**
+ * Payload shape for `dispute` proposals — a snapshot of the
+ * flagged exchange. Persisted in `Proposal.payload` (as JSON) so
+ * the governance row is self-contained even if the underlying
+ * post later changes. The full Post row is still the source of
+ * truth for the exchange lifecycle (status, confirmedBy, etc.);
+ * the snapshot is for read-only display on the Decisions surface.
+ */
+export interface DisputePayload {
+  postType: PostType;
+  postTitle: string;
+  category: Category;
+  hours: number;
+  /** The helper key — whoever was offering the work. */
+  helperKey: string | null;
+  /** The recipient key — whoever was receiving help. */
+  recipientKey: string;
+  /** When the original post was created. */
+  postCreatedAt: number;
+}
 
 /**
  * Per-`GOVERNANCE.md` decision model. Members express a position on

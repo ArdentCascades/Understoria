@@ -13,20 +13,25 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { listDisputes } from "@/lib/disputes";
 
 // Small Profile-level entry card linking to /disputes. Lives
 // alongside CommunitySettingsSection because both are
 // community-level concerns. The chip shows a live count so a
 // member can tell at a glance whether anything needs the
 // community's attention without opening the page.
+//
+// Counts open dispute proposals (kind: "dispute", status: "open"),
+// matching the data shape the disputes page now reads.
 
 export function DisputesSection() {
-  const { posts, members } = useApp();
+  const { proposals } = useApp();
   const { t } = useTranslation();
   const count = useMemo(
-    () => listDisputes(posts, members).length,
-    [posts, members],
+    () =>
+      proposals.filter(
+        (p) => p.kind === "dispute" && p.status === "open",
+      ).length,
+    [proposals],
   );
 
   return (

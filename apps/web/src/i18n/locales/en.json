@@ -636,7 +636,8 @@
     "recipientLabel": "Recipient",
     "postedLabel": "Originally posted",
     "viewPost": "Open the post",
-    "footer": "Resolution happens outside the app for now — talk to both parties, or take it to your community's usual decision-making space. In-app proposal and resolution tooling is on the roadmap.",
+    "openInDecisions": "Open in Decisions",
+    "footer": "Each dispute also shows up in Decisions, where the community can vote on how to respond. Resolution closes the dispute in both places.",
     "entry": {
       "title": "Community disputes",
       "descriptionNone": "No exchanges are flagged right now.",
@@ -682,7 +683,8 @@
       "withdrawn": "Withdrawn"
     },
     "category": {
-      "config_change": "Config change"
+      "config_change": "Config change",
+      "dispute": "Dispute"
     },
     "reversibility": {
       "easy": "Easy to reverse",
