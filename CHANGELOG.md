@@ -78,16 +78,28 @@ include breaking changes.
     it if you need to. No record kept."
   - **Public "could use more hands" chip** on the project task
     row, after a configurable `taskNeedsHelpDays` (default
-    14). Framed at the task. The original claimer's name
-    stays; the community sees the signal without seeing
-    "this person is behind." Tooltip explains the timing.
+    14) AND a grace window since the claimer's last
+    acknowledgement. Framed at the task. When the chip
+    fires, the claimer's name is dropped from the public row
+    — the task is community work again, and the claimer's
+    own affordances (private nudge, in-row buttons) remain
+    visible to them. Tooltip carries no day count;
+    framing-at-the-task all the way down. *Solidarity not
+    shame: a member who is engaging — even just to say "yes,
+    still on it" — should never appear in a community-
+    visible signal.*
   - **Pure helper module** `lib/taskStaleness.ts` —
     `taskStaleness(task, config, now)` returns a tagged result
-    (`fresh` / `check_in_due` / `needs_more_hands`). Acking
-    the private nudge resets the private clock; the public
-    chip is keyed off `claimedAt` directly so the community
-    signal is harder to silence. 15 tests cover branches,
-    boundaries, and configurable thresholds.
+    (`fresh` / `check_in_due` / `needs_more_hands`). The
+    public chip requires BOTH (a) the task has been claimed
+    for at least `taskNeedsHelpDays` AND (b) the claimer has
+    been silent for at least `taskCheckInDays +
+    taskCheckInGraceDays` since their most recent ack (or
+    since the claim if they've never acked). Each ack buys
+    grace; sustained silence is what surfaces the public
+    chip. 21 tests cover branches, boundaries, and
+    configurable thresholds — including the grace-window
+    transitions.
   - **`ProjectTask`** gains `claimedAt` + `checkInAcknowledgedAt`
     fields. Schema v11 migration backfills `claimedAt = now()`
     for any currently-claimed task so the prompts don't all
@@ -96,10 +108,14 @@ include breaking changes.
     `acknowledgeTaskCheckIn` action stamps
     `checkInAcknowledgedAt`.
   - **`NodeConfig`** gains `taskCheckInDays` + `taskNeedsHelpDays`
-    (defaults 7 / 14). Surfaced in CommunitySettingsSection so
-    a community can tune the cadence to their own rhythm —
-    short for fast-moving groups, long for slow-cooking
-    projects. Validator ensures `needsHelpDays >= checkInDays`.
+    + `taskCheckInGraceDays` (defaults 7 / 14 / 2). Surfaced
+    in CommunitySettingsSection so a community can tune the
+    cadence to their own rhythm — short for fast-moving
+    groups, long for slow-cooking projects. Validators
+    ensure `needsHelpDays >= checkInDays` and
+    `taskCheckInGraceDays >= 0`. A grace of 0 means the
+    public chip fires the moment the claim floor is met
+    (the previous behaviour).
   - **New AttentionItem kind** `task_check_in` joins
     `confirm_exchange` and `confirm_task`. The component
     renders inline action buttons (not a Link wrapper) because
@@ -115,10 +131,11 @@ include breaking changes.
   override, auto-release after some long N (would feel
   punitive even if quiet).
 
-  Tests: 395 passing (380 → 395; +15 in
-  `taskStaleness.test.ts`) before rebase; the rebased stack
-  layers on the voting + board-hide work for a combined total.
-  Locale parity passes. Lint, typecheck, build clean.
+  Tests: 419 passing (398 after rebase onto voting + board-hide,
+  +21 in `taskStaleness.test.ts` covering the grace-window
+  transitions, +2 in `nodeConfig.test.ts` covering the new
+  validator). Locale parity passes. Lint, typecheck, build
+  clean.
 
 - **Board hides claimed posts by default + "needs answered this
   week" stat.** Two paired changes — both keep the Board

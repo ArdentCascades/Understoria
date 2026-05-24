@@ -125,7 +125,7 @@
       "statusCompleted": "Completada",
       "statusBlocked": "Bloqueada",
       "needsMoreHands": "Le vendrían bien más manos",
-      "needsMoreHandsTooltip": "Tomada hace {{days}} días. Cualquier persona puede ofrecerse a ayudar, o quien la tomó puede liberarla.",
+      "needsMoreHandsTooltip": "Esta tarea podría aprovechar apoyo adicional. Cualquier persona puede sumarse a ayudar.",
       "hours": "{{hours}}",
       "addTask": {
         "fieldTitle": "Título de la tarea",
@@ -553,6 +553,10 @@
       "taskNeedsHelpDays": {
         "label": "Tarea 'le vendrían bien más manos' (días)",
         "hint": "Después de tantos días, una tarea tomada se marca públicamente como necesitada de más manos. Enmarcado hacia la tarea, no hacia la persona. Debe ser al menos igual al umbral de chequeo."
+      },
+      "taskCheckInGraceDays": {
+        "label": "Margen tras el chequeo de tarea (días)",
+        "hint": "Después de que quien tomó la tarea reconozca el aviso privado, suspende el indicador público 'le vendrían bien más manos' durante estos días. Permite que una persona que responde mantenga la tarea fuera de la señal comunitaria. Mantén un valor bajo (1–3) para que el silencio prolongado siga apareciendo."
       },
       "save": "Guardar configuración",
       "reset": "Restaurar valores predeterminados"

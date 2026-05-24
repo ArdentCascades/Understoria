@@ -37,6 +37,8 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
       row.taskCheckInDays ?? DEFAULT_NODE_CONFIG.taskCheckInDays,
     taskNeedsHelpDays:
       row.taskNeedsHelpDays ?? DEFAULT_NODE_CONFIG.taskNeedsHelpDays,
+    taskCheckInGraceDays:
+      row.taskCheckInGraceDays ?? DEFAULT_NODE_CONFIG.taskCheckInGraceDays,
   };
 }
 
@@ -95,6 +97,14 @@ function validate(config: NodeConfig): NodeConfig {
   ) {
     throw new InvalidNodeConfigError(
       "Task 'needs more hands' threshold must be a whole number of days >= the check-in threshold.",
+    );
+  }
+  if (
+    !Number.isInteger(config.taskCheckInGraceDays) ||
+    config.taskCheckInGraceDays < 0
+  ) {
+    throw new InvalidNodeConfigError(
+      "Task check-in grace must be a whole number of days >= 0.",
     );
   }
   return config;

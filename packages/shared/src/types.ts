@@ -154,11 +154,23 @@ export interface NodeConfig {
    *  without the community ever seeing they were behind. Default
    *  7 — a week feels generous without becoming silent indefinitely. */
   taskCheckInDays: number;
-  /** Days after claim before a task is community-visibly marked
-   *  "could use more hands." Framed at the task, not the person.
-   *  Default 14 — long enough to follow the private nudge by a
-   *  similar window. */
+  /** Days after claim before a task can be community-visibly
+   *  marked "could use more hands." Framed at the task, not the
+   *  person. Default 14 — long enough to follow the private
+   *  nudge by a similar window. */
   taskNeedsHelpDays: number;
+  /** Grace window (in days) after the claimer acknowledges the
+   *  private nudge during which the public "could use more
+   *  hands" chip stays suppressed, even if `taskNeedsHelpDays`
+   *  is past. Lets a claimer who is engaging — even just to say
+   *  "yes, still on it" — keep the task out of community
+   *  signalling. The chip only fires when the claimer has gone
+   *  silent for this long after the private window has lapsed.
+   *  Default 2 — short, so prolonged silence still surfaces, but
+   *  long enough that one ack buys real quiet. Solidarity-not-
+   *  shame: a member who is responsive shouldn't ever appear in
+   *  a community-visible signal. */
+  taskCheckInGraceDays: number;
 }
 
 export const DEFAULT_NODE_CONFIG: NodeConfig = {
@@ -167,6 +179,7 @@ export const DEFAULT_NODE_CONFIG: NodeConfig = {
   reciprocalPairThreshold: 3,
   taskCheckInDays: 7,
   taskNeedsHelpDays: 14,
+  taskCheckInGraceDays: 2,
 };
 
 /**

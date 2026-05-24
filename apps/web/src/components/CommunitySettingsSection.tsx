@@ -51,6 +51,7 @@ export function CommunitySettingsSection() {
         reciprocalPairThreshold: Math.round(draft.reciprocalPairThreshold),
         taskCheckInDays: Math.round(draft.taskCheckInDays),
         taskNeedsHelpDays: Math.round(draft.taskNeedsHelpDays),
+        taskCheckInGraceDays: Math.round(draft.taskCheckInGraceDays),
       });
       await refreshNodeConfig();
       setSavedAt(Date.now());
@@ -210,6 +211,28 @@ export function CommunitySettingsSection() {
               setDraft({
                 ...draft,
                 taskNeedsHelpDays: Number(e.target.value),
+              })
+            }
+            className="input"
+          />
+        </Field>
+        <Field
+          id="cfg-task-grace"
+          label={t("profile.communitySettings.taskCheckInGraceDays.label")}
+          hint={t("profile.communitySettings.taskCheckInGraceDays.hint")}
+        >
+          <input
+            id="cfg-task-grace"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={30}
+            step={1}
+            value={draft.taskCheckInGraceDays}
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                taskCheckInGraceDays: Number(e.target.value),
               })
             }
             className="input"

@@ -28,7 +28,7 @@ import {
 import { humanizeError } from "@/lib/humanizeError";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { formatDeadline, formatHours, formatRelativeTime } from "@/lib/format";
-import { daysSinceClaim, taskStaleness } from "@/lib/taskStaleness";
+import { taskStaleness } from "@/lib/taskStaleness";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
@@ -262,7 +262,6 @@ export default function ProjectDetailPage() {
                     nodeId={nodeId}
                     onRun={run}
                     needsMoreHands={staleness === "needs_more_hands"}
-                    daysClaimed={daysSinceClaim(task)}
                   />
                 </li>
               );
@@ -414,7 +413,6 @@ function TaskRow({
   nodeId,
   onRun,
   needsMoreHands,
-  daysClaimed,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -423,7 +421,6 @@ function TaskRow({
   nodeId: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
   needsMoreHands: boolean;
-  daysClaimed: number;
 }) {
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
@@ -447,9 +444,7 @@ function TaskRow({
         {needsMoreHands && (
           <span
             className="chip bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
-            title={t("projects.task.needsMoreHandsTooltip", {
-              days: daysClaimed,
-            })}
+            title={t("projects.task.needsMoreHandsTooltip")}
           >
             <span aria-hidden="true" className="mr-1">
               {"\u{1F91D}"}
@@ -464,17 +459,26 @@ function TaskRow({
           {task.description}
         </p>
       )}
-      {task.assignedTo && (
-        <p className="text-xs text-moss-500 dark:text-moss-400">
-          {task.status === "awaiting_confirmation"
-            ? t("projects.task.completedBy", {
-                name: memberMap.get(task.completedBy ?? "") ?? "—",
-              })
-            : t("projects.task.claimedBy", {
-                name: memberMap.get(task.assignedTo) ?? "—",
-              })}
-        </p>
-      )}
+      {task.assignedTo &&
+        (task.status === "awaiting_confirmation" ? (
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("projects.task.completedBy", {
+              name: memberMap.get(task.completedBy ?? "") ?? "—",
+            })}
+          </p>
+        ) : !needsMoreHands ? (
+          // Solidarity-not-shame: once a task is community-visibly
+          // marked "could use more hands," the original claimer's
+          // name is dropped from the public row. The task is
+          // community work again; the claimer's own actions are
+          // still surfaced to them via their AttentionSection and
+          // the in-row buttons below.
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("projects.task.claimedBy", {
+              name: memberMap.get(task.assignedTo) ?? "—",
+            })}
+          </p>
+        ) : null)}
       <div className="flex flex-wrap gap-2">
         {task.status === "open" && currentKey && !isOrganizer && (
           <button

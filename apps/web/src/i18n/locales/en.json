@@ -125,7 +125,7 @@
       "statusCompleted": "Completed",
       "statusBlocked": "Blocked",
       "needsMoreHands": "Could use more hands",
-      "needsMoreHandsTooltip": "Claimed for {{days}} days. Anyone could reach out to help, or the claimer can release it.",
+      "needsMoreHandsTooltip": "This task could use additional support. Anyone can step in to help.",
       "hours": "{{hours}}",
       "addTask": {
         "fieldTitle": "Task title",
@@ -553,6 +553,10 @@
       "taskNeedsHelpDays": {
         "label": "Task 'could use more hands' (days)",
         "hint": "After this many days, a claimed task is publicly marked as needing more hands. Framed at the task, not the person. Must be at least the check-in threshold."
+      },
+      "taskCheckInGraceDays": {
+        "label": "Task check-in grace (days)",
+        "hint": "After the claimer acknowledges the private nudge, suppress the public 'could use more hands' chip for this many days. Lets a responsive claimer keep the task out of community signalling. Keep small (1–3) so prolonged silence still surfaces."
       },
       "save": "Save settings",
       "reset": "Reset to defaults"

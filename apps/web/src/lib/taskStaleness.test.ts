@@ -19,7 +19,11 @@ import type { ProjectTask } from "@/types";
 
 const DAY = 24 * 60 * 60 * 1000;
 const NOW = new Date("2026-05-23T12:00:00Z").getTime();
-const CONFIG = { taskCheckInDays: 7, taskNeedsHelpDays: 14 };
+const CONFIG = {
+  taskCheckInDays: 7,
+  taskNeedsHelpDays: 14,
+  taskCheckInGraceDays: 2,
+};
 
 function task(overrides: Partial<ProjectTask> = {}): ProjectTask {
   return {
@@ -87,17 +91,65 @@ describe("taskStaleness", () => {
     ).toBe("fresh");
   });
 
-  it("returns 'needs_more_hands' past the public threshold (regardless of ack)", () => {
+  it("returns 'needs_more_hands' once claim floor + grace have both lapsed with no ack", () => {
     expect(
       taskStaleness(
         task({
-          claimedAt: NOW - 15 * DAY,
-          checkInAcknowledgedAt: NOW - 1 * DAY,
+          claimedAt: NOW - 20 * DAY,
+          checkInAcknowledgedAt: null,
         }),
         CONFIG,
         NOW,
       ),
     ).toBe("needs_more_hands");
+  });
+
+  it("a recent ack suppresses the public chip even past the claim floor", () => {
+    // Claim is 20 days old (well past needsHelpDays=14), but the
+    // claimer acknowledged 1 day ago — under the grace window
+    // (graceDays=2) the public signal stays suppressed and the
+    // private nudge re-shows.
+    expect(
+      taskStaleness(
+        task({
+          claimedAt: NOW - 20 * DAY,
+          checkInAcknowledgedAt: NOW - 1 * DAY,
+        }),
+        CONFIG,
+        NOW,
+      ),
+    ).toBe("fresh");
+  });
+
+  it("an old ack stops suppressing once the grace window has lapsed", () => {
+    // Claim 20 days ago, last ack 10 days ago. Last ack +
+    // checkInDays + graceDays = 10 - 7 - 2 = past. Public fires.
+    expect(
+      taskStaleness(
+        task({
+          claimedAt: NOW - 20 * DAY,
+          checkInAcknowledgedAt: NOW - 10 * DAY,
+        }),
+        CONFIG,
+        NOW,
+      ),
+    ).toBe("needs_more_hands");
+  });
+
+  it("past private window but inside grace stays 'check_in_due' (private nudge only)", () => {
+    // Claim 20 days ago, ack 8 days ago. Private clock has rolled
+    // again (8 > checkInDays=7), so private nudge re-shows. But
+    // 8 < checkInDays + graceDays (9), so no public chip yet.
+    expect(
+      taskStaleness(
+        task({
+          claimedAt: NOW - 20 * DAY,
+          checkInAcknowledgedAt: NOW - 8 * DAY,
+        }),
+        CONFIG,
+        NOW,
+      ),
+    ).toBe("check_in_due");
   });
 
   it("treats the check-in boundary as inclusive (>= triggers)", () => {
@@ -106,9 +158,33 @@ describe("taskStaleness", () => {
     ).toBe("check_in_due");
   });
 
-  it("treats the needs-help boundary as inclusive (>= triggers)", () => {
+  it("stays 'check_in_due' at needsHelpDays if the claimer acked within grace", () => {
+    // 14 days post-claim, but the claimer acked 1 day ago.
+    // Silence-since-ack = 1 day < (checkInDays=7 + graceDays=2).
+    // Public chip suppressed; private nudge stays.
     expect(
-      taskStaleness(task({ claimedAt: NOW - 14 * DAY }), CONFIG, NOW),
+      taskStaleness(
+        task({
+          claimedAt: NOW - 14 * DAY,
+          checkInAcknowledgedAt: NOW - 1 * DAY,
+        }),
+        CONFIG,
+        NOW,
+      ),
+    ).toBe("fresh");
+  });
+
+  it("fires the public chip at the combined inclusive boundary", () => {
+    // With no ack, silence = days-since-claim. Needs both:
+    //   days-since-claim >= taskNeedsHelpDays (14), AND
+    //   days-since-claim >= taskCheckInDays + taskCheckInGraceDays (9)
+    // The former is the binding constraint, so 16 days fires.
+    expect(
+      taskStaleness(
+        task({ claimedAt: NOW - 16 * DAY, checkInAcknowledgedAt: null }),
+        CONFIG,
+        NOW,
+      ),
     ).toBe("needs_more_hands");
   });
 
@@ -116,7 +192,7 @@ describe("taskStaleness", () => {
     expect(
       taskStaleness(
         task({ claimedAt: NOW - 5 * DAY }),
-        { taskCheckInDays: 3, taskNeedsHelpDays: 7 },
+        { taskCheckInDays: 3, taskNeedsHelpDays: 7, taskCheckInGraceDays: 1 },
         NOW,
       ),
     ).toBe("check_in_due");

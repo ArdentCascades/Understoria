@@ -74,7 +74,10 @@ export interface AttentionInput {
   /** Per-node thresholds for the private "still on it?" nudge.
    *  Optional so the `task_check_in` items just don't surface
    *  when the caller can't supply config (tests, edge cases). */
-  config?: Pick<NodeConfig, "taskCheckInDays" | "taskNeedsHelpDays">;
+  config?: Pick<
+    NodeConfig,
+    "taskCheckInDays" | "taskNeedsHelpDays" | "taskCheckInGraceDays"
+  >;
   now?: number;
 }
 

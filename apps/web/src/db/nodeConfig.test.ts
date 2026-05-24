@@ -110,6 +110,24 @@ describe("putNodeConfig", () => {
       }),
     ).rejects.toBeInstanceOf(InvalidNodeConfigError);
   });
+
+  it("rejects a negative task check-in grace", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        taskCheckInGraceDays: -1,
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("accepts a zero grace (chip fires the moment the floor is met)", async () => {
+    const next = {
+      ...DEFAULT_NODE_CONFIG,
+      taskCheckInGraceDays: 0,
+    };
+    const written = await putNodeConfig(NODE, next);
+    expect(written.taskCheckInGraceDays).toBe(0);
+  });
 });
 
 describe("resetNodeConfig", () => {
