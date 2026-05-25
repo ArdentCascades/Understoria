@@ -12,11 +12,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { DESIGN_PRINCIPLES } from "@/content/design-principles";
 import { MEMBER_GUIDE } from "@/content/member-guide";
 import { OPSEC_GUIDE } from "@/content/opsec-guide";
 import { promptShareText, STUDY_PROMPTS } from "@/content/study-prompts";
 
-type Panel = "none" | "guide" | "opsec" | "prompts";
+type Panel = "none" | "guide" | "opsec" | "principles" | "prompts";
 
 export function LearnSection() {
   const { t } = useTranslation();
@@ -70,6 +71,14 @@ export function LearnSection() {
         </button>
         <button
           type="button"
+          onClick={() => setPanel(panel === "principles" ? "none" : "principles")}
+          className="btn-secondary"
+          aria-expanded={panel === "principles"}
+        >
+          {t("profile.learn.designPrinciples")}
+        </button>
+        <button
+          type="button"
           onClick={() => setPanel(panel === "prompts" ? "none" : "prompts")}
           className="btn-secondary"
           aria-expanded={panel === "prompts"}
@@ -110,6 +119,30 @@ export function LearnSection() {
                   <p key={i}>{paragraph}</p>
                 ))}
               </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {panel === "principles" && (
+        <div
+          id="design-principles"
+          className="mt-4 space-y-4 border-t border-moss-200 pt-4 dark:border-moss-800"
+        >
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("profile.learn.principlesIntro")}
+          </p>
+          {DESIGN_PRINCIPLES.map((p) => (
+            <article key={p.id} id={`principle-${p.id}`}>
+              <h3 className="mb-1 text-base font-semibold text-moss-800 dark:text-moss-100">
+                {p.title}
+              </h3>
+              <p className="text-sm font-medium text-moss-700 dark:text-moss-200">
+                {p.statement}
+              </p>
+              <p className="mt-1 text-sm italic text-moss-600 dark:text-moss-300">
+                {p.example}
+              </p>
             </article>
           ))}
         </div>

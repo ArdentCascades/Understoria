@@ -27,6 +27,10 @@
     "anyMember": "Member",
     "gotIt": "Got it"
   },
+  "why": {
+    "trigger": "(why?)",
+    "readMore": "Read more"
+  },
   "drafts": {
     "bannerLabel": "Unsaved draft",
     "bannerMessage": "You started one of these {{when}}. Continue where you left off, or start fresh?",
@@ -559,6 +563,8 @@
       "memberGuide": "Member guide",
       "opsecGuide": "Staying safe",
       "opsecIntro": "Mutual aid work carries real risks. This short guide covers the basics of keeping yourself and your community safe. Read it once; come back when something changes.",
+      "designPrinciples": "Design principles",
+      "principlesIntro": "Every design choice in Understoria has a reason. These principles explain why the app works the way it does, with examples of what happened when other projects tried it differently.",
       "studyPrompts": "Study group prompts",
       "promptCopy": "Copy for a meeting",
       "promptCopied": "Copied"

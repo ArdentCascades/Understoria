@@ -21,6 +21,7 @@ import {
 } from "@/db/projects";
 import { humanizeError } from "@/lib/humanizeError";
 import { usePendingAction } from "@/lib/usePendingAction";
+import { WhyTooltip } from "@/components/WhyTooltip";
 
 // "Needs your attention" — see lib/attention.ts for what counts.
 // Renders null when nothing is waiting, so members never see "you
@@ -80,6 +81,7 @@ export function AttentionSection() {
       </h2>
       <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
         {t("attention.intro")}
+        <WhyTooltip principleId="no-notifications" />
       </p>
       <ul
         className="flex flex-col gap-2"

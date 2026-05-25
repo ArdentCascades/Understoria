@@ -28,6 +28,7 @@ import type {
   NodeConfigProposalPayload,
   ReversibilityTier,
 } from "@/types";
+import { WhyTooltip } from "@/components/WhyTooltip";
 
 // Agent 13 — v1 only supports config_change proposals. Other
 // categories (recall, policy) come in follow-up PRs. Reversibility
@@ -242,6 +243,7 @@ export default function ProposalNewPage() {
           </legend>
           <p className="mb-3 text-xs text-moss-500 dark:text-moss-400">
             {t("proposals.new.tierIntro")}
+            <WhyTooltip principleId="deliberation-over-speed" />
           </p>
           <div className="flex flex-col gap-2">
             {(["easy", "moderate", "hard"] as const).map((tier) => (

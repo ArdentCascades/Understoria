@@ -118,6 +118,14 @@ export async function submitPostToNode(
   return postSignedRecord("/posts", post, config, deps);
 }
 
+export async function submitClaimToNode(
+  claim: { postId: string; claimerKey: string; claimedAt: number; nodeId: string },
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/claims", claim, config, deps);
+}
+
 async function postSignedRecord(
   path: string,
   record: unknown,

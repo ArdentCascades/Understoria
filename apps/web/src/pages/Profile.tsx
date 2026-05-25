@@ -27,6 +27,7 @@ import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ContextualHint } from "@/components/ContextualHint";
+import { WhyTooltip } from "@/components/WhyTooltip";
 import { EmptyState } from "@/components/EmptyState";
 import {
   formatDeadline,
@@ -596,6 +597,7 @@ function BalanceCard({
         <div>
           <div className="text-xs uppercase tracking-wide text-moss-500">
             {t("profile.balance.label")}
+            <WhyTooltip principleId="equal-time" />
           </div>
           <div className="mt-1 text-4xl font-bold text-canopy-700 dark:text-canopy-300">
             {formatHours(balance)}

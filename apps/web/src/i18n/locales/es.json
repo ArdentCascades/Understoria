@@ -27,6 +27,10 @@
     "anyMember": "Alguien",
     "gotIt": "Entendido"
   },
+  "why": {
+    "trigger": "(por que?)",
+    "readMore": "Leer mas"
+  },
   "drafts": {
     "bannerLabel": "Borrador sin guardar",
     "bannerMessage": "Empezaste uno de estos {{when}}. ¿Continúas desde donde lo dejaste o empiezas de nuevo?",
@@ -559,6 +563,8 @@
       "memberGuide": "Guia de miembros",
       "opsecGuide": "Mantenerse seguro",
       "opsecIntro": "El trabajo de ayuda mutua conlleva riesgos reales. Esta guia breve cubre lo basico para protegerte a ti y a tu comunidad. Leela una vez; vuelve cuando algo cambie.",
+      "designPrinciples": "Principios de diseno",
+      "principlesIntro": "Cada decision de diseno en Understoria tiene una razon. Estos principios explican por que la aplicacion funciona como funciona, con ejemplos de lo que ocurrio cuando otros proyectos lo intentaron de otra manera.",
       "studyPrompts": "Preguntas para grupos de estudio",
       "promptCopy": "Copiar para una reunión",
       "promptCopied": "Copiado"

@@ -282,6 +282,19 @@ export interface SignedInvite extends InvitePayload {
   signature: string;
 }
 
+/**
+ * Lightweight claim notification — pushed to the outbox when a member
+ * claims a cross-node post so the poster's node learns about it.
+ * Unsigned for v1 (the exchange itself is the authoritative signed
+ * record; this is just a heads-up).
+ */
+export interface ClaimRecord {
+  postId: string;
+  claimerKey: string;
+  claimedAt: number;
+  nodeId: string;
+}
+
 export interface CommunityStats {
   totalHoursExchanged: number;
   totalExchanges: number;

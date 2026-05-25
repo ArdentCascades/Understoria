@@ -26,6 +26,7 @@ import { getNodeConfig } from "./nodeConfig";
 import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import { canonicalPostPayload } from "@understoria/shared/crypto";
+import { enqueueClaimOutbox } from "@/lib/outbox";
 import {
   assertWithinDailyLimit,
   evaluateSafeguards,
@@ -127,8 +128,9 @@ export async function createPost(
 export async function claimPost(
   postId: string,
   memberKey: string,
+  localNodeId?: string,
 ): Promise<Post> {
-  return db.transaction("rw", db.posts, async () => {
+  return db.transaction("rw", [db.posts, db.outbox, db.settings], async () => {
     const post = await db.posts.get(postId);
     if (!post) throw new Error("Post not found");
     if (post.status !== "open") throw new Error("Post is no longer open");
@@ -140,6 +142,14 @@ export async function claimPost(
       status: "claimed",
     };
     await db.posts.put(updated);
+    if (localNodeId && post.nodeId !== localNodeId && post.nodeId !== "") {
+      await enqueueClaimOutbox({
+        postId: post.id,
+        claimerKey: memberKey,
+        claimedAt: Date.now(),
+        nodeId: localNodeId,
+      });
+    }
     return updated;
   });
 }

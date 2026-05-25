@@ -30,6 +30,7 @@ import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { BreadthBar } from "@/components/BreadthBar";
 import { ReciprocityPulse } from "@/components/ReciprocityPulse";
 import { EmptyState } from "@/components/EmptyState";
+import { WhyTooltip } from "@/components/WhyTooltip";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -83,6 +84,7 @@ export default function DashboardPage() {
         </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           <em>{t("dashboard.tagline")}</em>
+          <WhyTooltip principleId="no-leaderboards" />
         </p>
       </header>
 
