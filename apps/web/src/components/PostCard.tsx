@@ -32,15 +32,13 @@ export function PostCard({
   posterName,
   isCurrentMember,
   posterTrust,
+  isCrossNode,
 }: {
   post: Post;
   posterName: string;
   isCurrentMember: boolean;
-  /** Optional — when present, surfaces the poster's trust state
-   *  inline so members can factor it in without navigating to the
-   *  member profile. Omitted for the current member's own posts
-   *  (you don't need to be told you're pending). */
   posterTrust?: TrustStatus;
+  isCrossNode?: boolean;
 }) {
   const { t } = useTranslation();
   const typeLabel =
@@ -55,6 +53,11 @@ export function PostCard({
         <CategoryBadge category={post.category} size="sm" />
         <UrgencyBadge urgency={post.urgency} />
         {post.status !== "open" && <StatusChip status={post.status} />}
+        {isCrossNode && (
+          <span className="chip bg-indigo-50 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+            {t("postCard.peerCommunity")}
+          </span>
+        )}
       </div>
       <h3 className="text-base font-semibold leading-snug">{post.title}</h3>
       {post.description && (
