@@ -73,11 +73,17 @@ export default function ProposalNewPage() {
   const [vulnerableImpact, setVulnerableImpact] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showImpactErrors, setShowImpactErrors] = useState(false);
 
   const validation = useFieldValidation<FieldName>(
     { title, dailyHelperLimit },
     VALIDATORS,
   );
+
+  const impactFields = { yearOne, fiveYear, reversalPath, vulnerableImpact };
+  const impactIncomplete =
+    reversibilityTier === "hard" &&
+    Object.values(impactFields).some((v) => v.trim().length === 0);
 
   if (!currentMember) return null;
 
@@ -85,37 +91,24 @@ export default function ProposalNewPage() {
     e.preventDefault();
     setError(null);
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (reversibilityTier === "hard") setShowImpactErrors(true);
+    if (validation.hasErrors || impactIncomplete) return;
 
     const proposedConfig: NodeConfigProposalPayload = {
-      // The form only edits the three Agent 11 thresholds; the
-      // other fields (Agent 13 deliberation, task check-in)
-      // ride along unchanged from the current config so the
-      // payload remains a complete NodeConfig.
       ...nodeConfig,
       dailyHelperLimit: Number.parseInt(dailyHelperLimit, 10),
       shortExchangeHours: Number.parseFloat(shortExchangeHours),
       reciprocalPairThreshold: Number.parseInt(reciprocalPairThreshold, 10),
     };
 
-    // Impact reflection is only carried on `hard`-tier proposals
-    // (the structural pause is the form's existence; submission
-    // doesn't require all fields to be filled — per roadmap,
-    // "structural pause, not gatekeeping").
     let impactReflection: ImpactReflection | null = null;
     if (reversibilityTier === "hard") {
-      const trimmed = {
+      impactReflection = {
         yearOne: yearOne.trim(),
         fiveYear: fiveYear.trim(),
         reversalPath: reversalPath.trim(),
         vulnerableImpact: vulnerableImpact.trim(),
       };
-      const anyFilled =
-        trimmed.yearOne.length > 0 ||
-        trimmed.fiveYear.length > 0 ||
-        trimmed.reversalPath.length > 0 ||
-        trimmed.vulnerableImpact.length > 0;
-      if (anyFilled) impactReflection = trimmed;
     }
 
     try {
@@ -288,18 +281,33 @@ export default function ProposalNewPage() {
                 placeholder={t("proposals.new.impact.yearOnePlaceholder")}
                 value={yearOne}
                 onChange={setYearOne}
+                error={
+                  showImpactErrors && yearOne.trim().length === 0
+                    ? t("proposals.new.impact.required")
+                    : null
+                }
               />
               <ImpactField
                 label={t("proposals.new.impact.fiveYearLabel")}
                 placeholder={t("proposals.new.impact.fiveYearPlaceholder")}
                 value={fiveYear}
                 onChange={setFiveYear}
+                error={
+                  showImpactErrors && fiveYear.trim().length === 0
+                    ? t("proposals.new.impact.required")
+                    : null
+                }
               />
               <ImpactField
                 label={t("proposals.new.impact.reversalPathLabel")}
                 placeholder={t("proposals.new.impact.reversalPathPlaceholder")}
                 value={reversalPath}
                 onChange={setReversalPath}
+                error={
+                  showImpactErrors && reversalPath.trim().length === 0
+                    ? t("proposals.new.impact.required")
+                    : null
+                }
               />
               <ImpactField
                 label={t("proposals.new.impact.vulnerableImpactLabel")}
@@ -308,6 +316,11 @@ export default function ProposalNewPage() {
                 )}
                 value={vulnerableImpact}
                 onChange={setVulnerableImpact}
+                error={
+                  showImpactErrors && vulnerableImpact.trim().length === 0
+                    ? t("proposals.new.impact.required")
+                    : null
+                }
               />
             </div>
             <p className="mt-3 text-xs text-rose-700 dark:text-rose-300">
@@ -403,11 +416,13 @@ function ImpactField({
   placeholder,
   value,
   onChange,
+  error,
 }: {
   label: string;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
+  error?: string | null;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -420,7 +435,13 @@ function ImpactField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={500}
+        aria-invalid={Boolean(error) || undefined}
       />
+      {error && (
+        <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
     </label>
   );
 }
