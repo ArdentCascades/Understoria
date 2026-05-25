@@ -366,6 +366,15 @@
       "stillOn": "Still on it",
       "release": "Release it for someone else",
       "openProject": "Open project"
+    },
+    "postClaimed": {
+      "needLine": "{{name}} picked up your need: {{title}}",
+      "offerLine": "{{name}} accepted your offer: {{title}}",
+      "hint": "A helper is on the way. Tap to see the post."
+    },
+    "vouchReceived": {
+      "line": "{{name}} vouched for you.",
+      "hint": "Each vouch brings you closer to trusted status."
     }
   },
   "board": {

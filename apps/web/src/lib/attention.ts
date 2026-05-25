@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { Member, NodeConfig, Post, Project, ProjectTask } from "@/types";
+import type { SignedVouch } from "@/lib/vouch";
 import {
   daysSinceClaim as daysSinceClaimHelper,
   taskStaleness,
@@ -21,20 +22,17 @@ import {
 // When the list is empty the UI hides the section entirely so
 // there's never a "you're not doing enough" feeling.
 //
-// In scope right now (kept tight on purpose):
+// In scope:
 // - Exchanges in `awaiting_confirmation` state where you haven't
 //   added your signature yet. Without confirming, credits don't
 //   transfer.
 // - Project tasks an organizer needs to confirm. Without
 //   confirmation, the contributing member's task stays in limbo.
-//
-// Out of scope for the first slice (each could be added later as
-// its own kind):
-// - "Your post got claimed" (informational only — doesn't block).
-// - "A project you organize is stalled" (we already surface this
-//   on the project detail page via the momentum chip).
-// - "You claimed this task days ago" (would need a staleness
-//   threshold, which is a UX judgment to make with pilot input).
+// - Private "still on it?" nudge for tasks you've claimed.
+// - Informational: "your post was claimed" — not blocking, but
+//   you'd want to know a helper is incoming.
+// - Informational: "someone vouched for you" — actionable
+//   because vouch count determines trust status.
 
 export type AttentionItem =
   | {
@@ -63,6 +61,19 @@ export type AttentionItem =
       /** Cursor for sort — the moment the prompt became due
        *  (claim time or last ack, whichever's later). */
       createdAt: number;
+    }
+  | {
+      kind: "post_claimed";
+      postId: string;
+      postTitle: string;
+      postType: "NEED" | "OFFER";
+      claimerName: string;
+      createdAt: number;
+    }
+  | {
+      kind: "vouch_received";
+      voucherName: string;
+      createdAt: number;
     };
 
 export interface AttentionInput {
@@ -71,6 +82,7 @@ export interface AttentionInput {
   projects: readonly Project[];
   projectTasks: readonly ProjectTask[];
   members: readonly Member[];
+  vouches?: readonly SignedVouch[];
   /** Per-node thresholds for the private "still on it?" nudge.
    *  Optional so the `task_check_in` items just don't surface
    *  when the caller can't supply config (tests, edge cases). */
@@ -177,6 +189,49 @@ export function computeAttentionItems(
         taskTitle: t.title,
         daysSinceClaim: daysSinceClaimHelper(t, input.now),
         createdAt: anchor,
+      });
+    }
+  }
+
+  // Your post was claimed — a helper is incoming (NEED) or someone
+  // accepted your offer (OFFER). Informational, not blocking.
+  // Shows until the exchange progresses past "claimed" status.
+  for (const p of posts) {
+    if (p.status !== "claimed") continue;
+    if (p.postedBy !== currentMember.publicKey) continue;
+    if (p.claimedBy === currentMember.publicKey) continue;
+
+    const claimerName =
+      (p.claimedBy && nameByKey.get(p.claimedBy)) ??
+      "another community member";
+
+    items.push({
+      kind: "post_claimed",
+      postId: p.id,
+      postTitle: p.title,
+      postType: p.type,
+      claimerName,
+      createdAt: p.createdAt,
+    });
+  }
+
+  // Someone vouched for you — actionable because vouch count
+  // determines trust status (2 vouches = trusted). Time-boxed to
+  // the last 7 days since there's no natural "progress" event
+  // that would dismiss it (unlike post_claimed which clears when
+  // the exchange moves forward).
+  if (input.vouches) {
+    const now = input.now ?? Date.now();
+    const VOUCH_WINDOW = 7 * 24 * 60 * 60 * 1000;
+    for (const v of input.vouches) {
+      if (v.voucheeKey !== currentMember.publicKey) continue;
+      if (now - v.createdAt > VOUCH_WINDOW) continue;
+      const voucherName =
+        nameByKey.get(v.voucherKey) ?? "another community member";
+      items.push({
+        kind: "vouch_received",
+        voucherName,
+        createdAt: v.createdAt,
       });
     }
   }

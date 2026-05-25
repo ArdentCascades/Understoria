@@ -27,8 +27,9 @@ import { usePendingAction } from "@/lib/usePendingAction";
 // have 0 things to do." Lives at the top of the Board.
 
 export function AttentionSection() {
-  const { currentMember, posts, projects, projectTasks, members, nodeConfig } =
-    useApp();
+  const {
+    currentMember, posts, projects, projectTasks, members, vouches, nodeConfig,
+  } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { pending, run } = usePendingAction();
@@ -40,9 +41,10 @@ export function AttentionSection() {
         projects,
         projectTasks,
         members,
+        vouches,
         config: nodeConfig,
       }),
-    [currentMember, posts, projects, projectTasks, members, nodeConfig],
+    [currentMember, posts, projects, projectTasks, members, vouches, nodeConfig],
   );
 
   if (items.length === 0) return null;
@@ -121,6 +123,50 @@ export function AttentionSection() {
                   </span>
                   <span className="text-xs text-moss-500">
                     {t("attention.tapToConfirmTask")}
+                  </span>
+                </Link>
+              </li>
+            );
+          }
+          if (item.kind === "post_claimed") {
+            return (
+              <li key={`claimed_${item.postId}`}>
+                <Link
+                  to={`/post/${item.postId}`}
+                  className="block rounded-lg bg-canopy-50 px-3 py-2 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                >
+                  <span className="block text-sm font-medium">
+                    {item.postType === "NEED"
+                      ? t("attention.postClaimed.needLine", {
+                          name: item.claimerName,
+                          title: item.postTitle,
+                        })
+                      : t("attention.postClaimed.offerLine", {
+                          name: item.claimerName,
+                          title: item.postTitle,
+                        })}
+                  </span>
+                  <span className="text-xs text-moss-500">
+                    {t("attention.postClaimed.hint")}
+                  </span>
+                </Link>
+              </li>
+            );
+          }
+          if (item.kind === "vouch_received") {
+            return (
+              <li key={`vouch_${item.voucherName}_${item.createdAt}`}>
+                <Link
+                  to="/profile"
+                  className="block rounded-lg bg-canopy-50 px-3 py-2 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                >
+                  <span className="block text-sm font-medium">
+                    {t("attention.vouchReceived.line", {
+                      name: item.voucherName,
+                    })}
+                  </span>
+                  <span className="text-xs text-moss-500">
+                    {t("attention.vouchReceived.hint")}
                   </span>
                 </Link>
               </li>
