@@ -28,7 +28,7 @@ import {
 import { humanizeError } from "@/lib/humanizeError";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { formatDeadline, formatHours, formatRelativeTime } from "@/lib/format";
-import { taskStaleness } from "@/lib/taskStaleness";
+import { taskCheckInState } from "@/lib/taskCheckInState";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
@@ -251,7 +251,7 @@ export default function ProjectDetailPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {tasks.map((task) => {
-              const staleness = taskStaleness(task, nodeConfig);
+              const checkInState = taskCheckInState(task, nodeConfig);
               return (
                 <li key={task.id}>
                   <TaskRow
@@ -261,7 +261,7 @@ export default function ProjectDetailPage() {
                     memberMap={memberMap}
                     nodeId={nodeId}
                     onRun={run}
-                    needsMoreHands={staleness === "needs_more_hands"}
+                    needsMoreHands={checkInState === "needs_more_hands"}
                   />
                 </li>
               );

@@ -13,8 +13,8 @@ import type { Member, NodeConfig, Post, Project, ProjectTask } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
 import {
   daysSinceClaim as daysSinceClaimHelper,
-  taskStaleness,
-} from "./taskStaleness";
+  taskCheckInState,
+} from "./taskCheckInState";
 
 // "Needs your attention" — things waiting on the current member to
 // act. Pure utility surface: information you already need but
@@ -170,8 +170,8 @@ export function computeAttentionItems(
   if (input.config) {
     for (const t of projectTasks) {
       if (t.assignedTo !== currentMember.publicKey) continue;
-      const staleness = taskStaleness(t, input.config, input.now);
-      if (staleness !== "check_in_due") continue;
+      const checkInState = taskCheckInState(t, input.config, input.now);
+      if (checkInState !== "check_in_due") continue;
       const project = projectByKey.get(t.projectId);
       if (!project) continue;
       // Use the moment the prompt actually became due (claim or
