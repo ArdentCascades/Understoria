@@ -26,6 +26,7 @@ import { humanizeError } from "@/lib/humanizeError";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ContextualHint } from "@/components/ContextualHint";
 import { EmptyState } from "@/components/EmptyState";
 import {
   formatDeadline,
@@ -138,9 +139,19 @@ export default function ProfilePage() {
       </header>
 
       <BalanceCard balance={balance} seed={currentMember.seedBalance} />
+      <ContextualHint
+        settingKey="balanceHintDismissed"
+        ariaLabel={t("hints.balance.label")}
+        message={t("hints.balance.message")}
+      />
 
       <ProfileEditor member={currentMember} />
 
+      <ContextualHint
+        settingKey="inviteHintDismissed"
+        ariaLabel={t("hints.invite.label")}
+        message={t("hints.invite.message")}
+      />
       <InvitesSection
         member={currentMember}
         nodeId={nodeId}
