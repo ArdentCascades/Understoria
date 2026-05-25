@@ -100,6 +100,19 @@ export interface InviteStore {
   has(token: string): boolean;
 }
 
+export interface ClaimRecord {
+  postId: string;
+  claimerKey: string;
+  claimedAt: number;
+  nodeId: string;
+}
+
+export interface ClaimStore {
+  insert(claim: ClaimRecord): void;
+  list(opts?: { since?: number; limit?: number }): ClaimRecord[];
+  has(postId: string): boolean;
+}
+
 /**
  * Per-peer pull state. Persisted so a server restart resumes pulling
  * from where it left off rather than re-fetching every record (which
@@ -301,6 +314,22 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '6')",
+    ).run();
+  }
+
+  // Schema v7 — claim notifications for cross-node posts.
+  if (current < 7) {
+    db.exec(`
+      CREATE TABLE claims (
+        post_id TEXT PRIMARY KEY,
+        claimer_key TEXT NOT NULL,
+        claimed_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL
+      );
+      CREATE INDEX claims_claimed_at_idx ON claims (claimed_at DESC);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '7')",
     ).run();
   }
 }
@@ -769,5 +798,59 @@ function rowToInvite(r: InviteRow): SignedInvite {
     createdAt: r.created_at,
     expiresAt: r.expires_at,
     signature: r.signature,
+  };
+}
+
+export function createClaimStore(db: DatabaseType): ClaimStore {
+  const insertStmt = db.prepare(`
+    INSERT OR IGNORE INTO claims (post_id, claimer_key, claimed_at, node_id)
+    VALUES (@postId, @claimerKey, @claimedAt, @nodeId)
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM claims WHERE post_id = ?");
+
+  return {
+    insert(claim) {
+      insertStmt.run({
+        postId: claim.postId,
+        claimerKey: claim.claimerKey,
+        claimedAt: claim.claimedAt,
+        nodeId: claim.nodeId,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM claims WHERE claimed_at > ?
+               ORDER BY claimed_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM claims ORDER BY claimed_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as ClaimRow[]).map(rowToClaim);
+    },
+    has(postId) {
+      return hasStmt.get(postId) !== undefined;
+    },
+  };
+}
+
+interface ClaimRow {
+  post_id: string;
+  claimer_key: string;
+  claimed_at: number;
+  node_id: string;
+}
+
+function rowToClaim(r: ClaimRow): ClaimRecord {
+  return {
+    postId: r.post_id,
+    claimerKey: r.claimer_key,
+    claimedAt: r.claimed_at,
+    nodeId: r.node_id,
   };
 }

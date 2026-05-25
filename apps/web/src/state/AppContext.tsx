@@ -177,9 +177,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // node is unreachable the Board just shows local posts.
   useEffect(() => {
     if (!ready) return;
-    void import("@/lib/federationSync").then(({ pullFederatedPosts }) => {
-      void pullFederatedPosts();
-    });
+    void import("@/lib/federationSync").then(
+      ({ pullFederatedPosts, pullFederatedClaims }) => {
+        void pullFederatedPosts();
+        void pullFederatedClaims();
+      },
+    );
   }, [ready]);
 
   const unlock = useCallback(

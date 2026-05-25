@@ -22,11 +22,13 @@ import { db, type OutboxRow } from "@/db/database";
 import { uuid } from "@/lib/id";
 import {
   readSubmitConfig,
+  submitClaimToNode,
   submitExchangeToNode,
   submitPostToNode,
   submitVouchToNode,
   type SubmitResult,
 } from "@/lib/nodeSubmit";
+import type { ClaimRecord } from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch } from "@/types";
 
 /**
@@ -139,6 +141,21 @@ export async function enqueuePostOutbox(
     signature: post.signature,
   };
   return enqueueOutbox("post", post.id, wire);
+}
+
+/**
+ * Insert an outbox row for a cross-node claim notification. Pushed
+ * when a member claims a post that originated from another node,
+ * so the poster's community server learns about the claim and can
+ * propagate it to the poster's PWA.
+ */
+export async function enqueueClaimOutbox(claim: {
+  postId: string;
+  claimerKey: string;
+  claimedAt: number;
+  nodeId: string;
+}): Promise<OutboxRow | null> {
+  return enqueueOutbox("claim", `claim_${claim.postId}`, claim);
 }
 
 async function enqueueOutbox(
@@ -271,6 +288,10 @@ export async function flushOutboxOnce(
       });
     } else if (row.kind === "vouch") {
       result = await submitVouchToNode(payload as SignedVouch, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    } else if (row.kind === "claim") {
+      result = await submitClaimToNode(payload as unknown as ClaimRecord, cfg, {
         fetchImpl: options.fetchImpl,
       });
     } else {

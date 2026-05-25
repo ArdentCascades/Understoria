@@ -24,6 +24,7 @@ import rateLimit from "@fastify/rate-limit";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
 import {
+  createClaimStore,
   createExchangeStore,
   createInviteStore,
   createPeerPullStore,
@@ -36,6 +37,7 @@ import { registerExchangeRoutes } from "./routes/exchanges.js";
 import { registerConfigRoutes } from "./routes/config.js";
 import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
+import { registerClaimRoutes } from "./routes/claims.js";
 import { registerInviteRoutes } from "./routes/invites.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 
@@ -139,6 +141,7 @@ export async function buildServer({
   const vouchStore = createVouchStore(db);
   const postStore = createPostStore(db);
   const inviteStore = createInviteStore(db);
+  const claimStore = createClaimStore(db);
   const pullStore = createPeerPullStore(db);
 
   await registerHealthRoutes(app);
@@ -146,6 +149,7 @@ export async function buildServer({
   await registerVouchRoutes(app, { store: vouchStore });
   await registerPostRoutes(app, { store: postStore });
   await registerInviteRoutes(app, { store: inviteStore });
+  await registerClaimRoutes(app, { store: claimStore });
   await registerConfigRoutes(app, { config });
   await registerPeersRoutes(app, {
     pullStore,

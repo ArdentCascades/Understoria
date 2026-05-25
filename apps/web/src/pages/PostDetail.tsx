@@ -288,7 +288,7 @@ export default function PostDetailPage() {
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me &&
-          run(() => claimPost(post.id, me.publicKey))
+          run(() => claimPost(post.id, me.publicKey, nodeId))
         }
       />
 
