@@ -46,6 +46,7 @@ export default function BoardPage() {
     projectTasks,
     vouches,
     invites,
+    nodeId,
   } = useApp();
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("NEED");
@@ -265,6 +266,7 @@ export default function BoardPage() {
                 posterName={memberName.get(p.postedBy) ?? ""}
                 isCurrentMember={p.postedBy === currentMember?.publicKey}
                 posterTrust={trustByKey.get(p.postedBy)}
+                isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
               />
             </li>
           ))}

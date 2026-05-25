@@ -191,7 +191,8 @@
   },
   "postCard": {
     "needs": "needs help",
-    "offers": "offers"
+    "offers": "offers",
+    "peerCommunity": "Peer community"
   },
   "postForm": {
     "titleNeed": "Post a need",

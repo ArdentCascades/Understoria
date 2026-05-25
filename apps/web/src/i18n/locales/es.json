@@ -191,7 +191,8 @@
   },
   "postCard": {
     "needs": "necesita ayuda",
-    "offers": "ofrece"
+    "offers": "ofrece",
+    "peerCommunity": "Comunidad vecina"
   },
   "postForm": {
     "titleNeed": "Publicar una necesidad",

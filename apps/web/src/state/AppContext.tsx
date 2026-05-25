@@ -171,6 +171,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [ready]);
 
+  // Federation sync — pull cross-node posts from the community
+  // node on startup. Runs once; subsequent syncs happen on
+  // manual refresh or next app load. Silent failure — if the
+  // node is unreachable the Board just shows local posts.
+  useEffect(() => {
+    if (!ready) return;
+    void import("@/lib/federationSync").then(({ pullFederatedPosts }) => {
+      void pullFederatedPosts();
+    });
+  }, [ready]);
+
   const unlock = useCallback(
     async (passphrase: string) => {
       const result = await unlockSession(passphrase);
