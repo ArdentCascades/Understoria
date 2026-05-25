@@ -18,6 +18,10 @@ import { EmptyState } from "@/components/EmptyState";
 import { closeProposal } from "@/db/proposals";
 import { castVote } from "@/db/votes";
 import { currentMemberVote, tallyVotes, type Tally } from "@/lib/votes";
+import {
+  autoCloseEligibility,
+  type AutoCloseEligibility,
+} from "@/lib/autoCloseProposals";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Proposal, ProposalStatus, Vote, VoteChoice } from "@/types";
 
@@ -40,7 +44,8 @@ const STATUS_FILTERS: Array<ProposalStatus | "all"> = [
 ];
 
 export default function ProposalsPage() {
-  const { proposals, members, currentMember, votes, nodeId } = useApp();
+  const { proposals, members, currentMember, votes, nodeId, nodeConfig } =
+    useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<ProposalStatus | "all">("open");
@@ -127,19 +132,28 @@ export default function ProposalsPage() {
         />
       ) : (
         <ul className="flex flex-col gap-3">
-          {filtered.map((p) => (
-            <li key={p.id}>
-              <ProposalCard
-                proposal={p}
-                proposerName={nameByKey.get(p.proposerKey) ?? null}
-                canCloseOpen={Boolean(currentMember)}
-                proposalVotes={votesByProposal.get(p.id) ?? []}
-                currentMemberKey={currentMember?.publicKey ?? null}
-                nodeId={nodeId}
-                nameByKey={nameByKey}
-              />
-            </li>
-          ))}
+          {filtered.map((p) => {
+            const proposalVotes = votesByProposal.get(p.id) ?? [];
+            const eligibility = autoCloseEligibility({
+              proposal: p,
+              votes: proposalVotes,
+              config: nodeConfig,
+            });
+            return (
+              <li key={p.id}>
+                <ProposalCard
+                  proposal={p}
+                  proposerName={nameByKey.get(p.proposerKey) ?? null}
+                  canCloseOpen={Boolean(currentMember)}
+                  proposalVotes={proposalVotes}
+                  currentMemberKey={currentMember?.publicKey ?? null}
+                  nodeId={nodeId}
+                  nameByKey={nameByKey}
+                  eligibility={eligibility}
+                />
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -158,6 +172,7 @@ function ProposalCard({
   currentMemberKey,
   nodeId,
   nameByKey,
+  eligibility,
 }: {
   proposal: Proposal;
   proposerName: string | null;
@@ -166,6 +181,7 @@ function ProposalCard({
   currentMemberKey: string | null;
   nodeId: string;
   nameByKey: Map<string, string>;
+  eligibility: AutoCloseEligibility;
 }) {
   const { t } = useTranslation();
   const [closing, setClosing] = useState<
@@ -198,6 +214,9 @@ function ProposalCard({
         <p className="mt-1 text-sm text-moss-700 dark:text-moss-200">
           {proposal.description}
         </p>
+      )}
+      {proposal.status === "open" && (
+        <EligibilityBanner eligibility={eligibility} />
       )}
       {proposal.category === "config_change" && (
         <ConfigChangePayload payload={proposal.payload} />
@@ -254,6 +273,38 @@ function ProposalCard({
           nameByKey={nameByKey}
         />
       )}
+
+      {proposal.status === "open" &&
+        canCloseOpen &&
+        eligibility.kind === "passes" && (
+          <div className="mt-4 rounded-xl border border-canopy-200 bg-canopy-50/60 p-3 dark:border-canopy-800 dark:bg-canopy-950/30">
+            <p className="mb-2 text-sm font-medium text-canopy-900 dark:text-canopy-100">
+              {t("proposals.consensusReached", {
+                affirms: tally.affirms.length,
+                blocks: tally.blocks.length,
+              })}
+            </p>
+            <button
+              type="button"
+              className="btn-primary text-sm"
+              disabled={pending}
+              aria-busy={pending}
+              onClick={() =>
+                void run(() =>
+                  closeProposal(
+                    proposal.id,
+                    "passed",
+                    t("proposals.closedReason.consensus"),
+                  ),
+                )
+              }
+            >
+              {pending
+                ? t("common.working")
+                : t("proposals.closeAsPassed")}
+            </button>
+          </div>
+        )}
 
       {proposal.status === "open" && canCloseOpen && (
         <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
@@ -373,6 +424,46 @@ function CategoryChip({ category }: { category: "config_change" }) {
     <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
       {t(`proposals.category.${category}`)}
     </span>
+  );
+}
+
+function EligibilityBanner({
+  eligibility,
+}: {
+  eligibility: AutoCloseEligibility;
+}) {
+  const { t } = useTranslation();
+  if (eligibility.kind === "not_open" || eligibility.kind === "passes") {
+    // "passes" disappears as soon as the auto-close effect runs;
+    // showing it would just blink before the status flips.
+    return null;
+  }
+  const cls =
+    eligibility.kind === "blocked"
+      ? "border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100"
+      : "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100";
+  let message: string;
+  if (eligibility.kind === "blocked") {
+    message = t("proposals.eligibility.blocked", {
+      count: eligibility.blockCount,
+    });
+  } else if (eligibility.kind === "wait_deliberation") {
+    message = t("proposals.eligibility.waitDeliberation", {
+      when: formatRelativeTime(eligibility.readyAt),
+    });
+  } else {
+    message = t("proposals.eligibility.waitAffirms", {
+      have: eligibility.have,
+      need: eligibility.need,
+    });
+  }
+  return (
+    <div
+      className={`mt-3 rounded-lg border px-3 py-2 text-xs ${cls}`}
+      role="status"
+    >
+      {message}
+    </div>
   );
 }
 

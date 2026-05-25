@@ -171,6 +171,17 @@ export interface NodeConfig {
    *  shame: a member who is responsive shouldn't ever appear in
    *  a community-visible signal. */
   taskCheckInGraceDays: number;
+  /** Agent 13 — minimum days a proposal must stay open before it
+   *  can auto-pass on consensus. Prevents rush votes; gives time
+   *  for the community to weigh in. Default 3 — matches the
+   *  "modified consensus over a few days" cadence in `GOVERNANCE.md`. */
+  proposalDeliberationDays: number;
+  /** Agent 13 — minimum distinct affirm votes required for a
+   *  proposal to auto-pass on consensus. Even with the deliberation
+   *  window satisfied, a proposal that only one person has affirmed
+   *  shouldn't pass silently. Default 2 — same threshold the
+   *  vouch system uses for "trusted" status. */
+  proposalMinAffirms: number;
 }
 
 export const DEFAULT_NODE_CONFIG: NodeConfig = {
@@ -180,6 +191,8 @@ export const DEFAULT_NODE_CONFIG: NodeConfig = {
   taskCheckInDays: 7,
   taskNeedsHelpDays: 14,
   taskCheckInGraceDays: 2,
+  proposalDeliberationDays: 3,
+  proposalMinAffirms: 2,
 };
 
 /**
