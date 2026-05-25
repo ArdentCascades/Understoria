@@ -13,7 +13,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { formatRelativeTime, shortKey } from "@/lib/format";
+import { formatHours, formatRelativeTime, shortKey } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 import { closeProposal } from "@/db/proposals";
 import { castVote } from "@/db/votes";
@@ -23,7 +23,14 @@ import {
   type AutoCloseEligibility,
 } from "@/lib/autoCloseProposals";
 import { usePendingAction } from "@/lib/usePendingAction";
-import type { Proposal, ProposalStatus, Vote, VoteChoice } from "@/types";
+import type {
+  DisputePayload,
+  ImpactReflection,
+  Proposal,
+  ProposalStatus,
+  Vote,
+  VoteChoice,
+} from "@/types";
 
 // Agent 13 task 1 — Decisions surface (proposals only for v1; the
 // dispute table will fold in here once the resolution lifecycle
@@ -221,16 +228,34 @@ function ProposalCard({
       {proposal.category === "config_change" && (
         <ConfigChangePayload payload={proposal.payload} />
       )}
+      {proposal.kind === "dispute" && proposal.disputePostId && (
+        <DisputePayloadView
+          payload={proposal.payload}
+          postId={proposal.disputePostId}
+          nameByKey={nameByKey}
+        />
+      )}
+      {proposal.impactReflection && (
+        <ImpactReflectionDisplay raw={proposal.impactReflection} />
+      )}
       <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-xs uppercase tracking-wide text-moss-500">
             {t("proposals.proposerLabel")}
           </dt>
           <dd className="mt-0.5">
-            {proposerName ?? t("common.memberFallback")}{" "}
-            <span className="font-mono text-xs text-moss-500">
-              ({shortKey(proposal.proposerKey)})
-            </span>
+            {proposal.proposerKey === "system_backfill" ? (
+              <span className="italic text-moss-500">
+                {t("proposals.backfillProposer")}
+              </span>
+            ) : (
+              <>
+                {proposerName ?? t("common.memberFallback")}{" "}
+                <span className="font-mono text-xs text-moss-500">
+                  ({shortKey(proposal.proposerKey)})
+                </span>
+              </>
+            )}
           </dd>
         </div>
         <div>
@@ -418,10 +443,18 @@ function ReversibilityChip({
   );
 }
 
-function CategoryChip({ category }: { category: "config_change" }) {
+function CategoryChip({
+  category,
+}: {
+  category: Proposal["category"];
+}) {
   const { t } = useTranslation();
+  const cls =
+    category === "dispute"
+      ? "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100"
+      : "bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100";
   return (
-    <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+    <span className={`chip ${cls}`}>
       {t(`proposals.category.${category}`)}
     </span>
   );
@@ -721,6 +754,97 @@ function ConfigChangePayload({ payload }: { payload: string }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function DisputePayloadView({
+  payload,
+  postId,
+  nameByKey,
+}: {
+  payload: string;
+  postId: string;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  let parsed: DisputePayload | null = null;
+  try {
+    parsed = JSON.parse(payload) as DisputePayload;
+  } catch {
+    return null;
+  }
+  const helperName = parsed.helperKey
+    ? (nameByKey.get(parsed.helperKey) ?? t("common.memberFallback"))
+    : t("common.memberFallback");
+  const recipientName =
+    nameByKey.get(parsed.recipientKey) ?? t("common.memberFallback");
+  return (
+    <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/40 px-3 py-2 text-xs dark:border-rose-900 dark:bg-rose-950/20">
+      <div className="mb-1 flex flex-wrap items-center gap-2 text-rose-900 dark:text-rose-100">
+        <span className="font-semibold">
+          {parsed.postType === "NEED"
+            ? t("disputes.typeNeed")
+            : t("disputes.typeOffer")}
+        </span>
+        <span>·</span>
+        <span>{formatHours(parsed.hours)}</span>
+        <span>·</span>
+        <Link
+          to={`/post/${postId}`}
+          className="underline-offset-2 hover:underline"
+        >
+          {t("disputes.viewPost")}
+        </Link>
+      </div>
+      <div className="text-rose-800 dark:text-rose-200">
+        {t("disputes.helperLabel")}:{" "}
+        {parsed.helperKey
+          ? `${helperName} (${shortKey(parsed.helperKey)})`
+          : t("common.memberFallback")}
+        {" — "}
+        {t("disputes.recipientLabel")}: {`${recipientName} (${shortKey(parsed.recipientKey)})`}
+      </div>
+    </div>
+  );
+}
+
+function ImpactReflectionDisplay({ raw }: { raw: string }) {
+  const { t } = useTranslation();
+  let parsed: ImpactReflection | null = null;
+  try {
+    parsed = JSON.parse(raw) as ImpactReflection;
+  } catch {
+    return null;
+  }
+  const fields: Array<{ key: keyof ImpactReflection; labelKey: string }> = [
+    { key: "yearOne", labelKey: "proposals.impact.yearOne" },
+    { key: "fiveYear", labelKey: "proposals.impact.fiveYear" },
+    { key: "reversalPath", labelKey: "proposals.impact.reversalPath" },
+    {
+      key: "vulnerableImpact",
+      labelKey: "proposals.impact.vulnerableImpact",
+    },
+  ];
+  const filled = fields.filter((f) => parsed![f.key]?.trim().length > 0);
+  if (filled.length === 0) return null;
+  return (
+    <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/40 p-3 text-xs dark:border-rose-900 dark:bg-rose-950/20">
+      <div className="mb-2 font-semibold text-rose-900 dark:text-rose-100">
+        {t("proposals.impact.heading")}
+      </div>
+      <dl className="space-y-2">
+        {filled.map((f) => (
+          <div key={f.key}>
+            <dt className="text-xs uppercase tracking-wide text-rose-700 dark:text-rose-300">
+              {t(f.labelKey)}
+            </dt>
+            <dd className="mt-0.5 text-rose-900 dark:text-rose-100">
+              {parsed![f.key]}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

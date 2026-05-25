@@ -671,7 +671,8 @@
     "recipientLabel": "Recipient",
     "postedLabel": "Originally posted",
     "viewPost": "Open the post",
-    "footer": "Resolution happens outside the app for now — talk to both parties, or take it to your community's usual decision-making space. In-app proposal and resolution tooling is on the roadmap.",
+    "openInDecisions": "Open in Decisions",
+    "footer": "Each dispute also shows up in Decisions, where the community can vote on how to respond. Resolution closes the dispute in both places.",
     "entry": {
       "title": "Community disputes",
       "descriptionNone": "No exchanges are flagged right now.",
@@ -696,6 +697,7 @@
     "emptyFiltered": "No proposals match this filter.",
     "footer": "Voting and automatic close are still to come. For now the community reaches decisions on whatever channel it uses, and any member can record the outcome here so the historical record reflects reality.",
     "proposerLabel": "Proposed by",
+    "backfillProposer": "(historical, flagger unknown)",
     "proposedLabel": "Started",
     "closedLabel": "Closed",
     "outcomeReasonLabel": "Why",
@@ -722,7 +724,8 @@
       "withdrawn": "Withdrawn"
     },
     "category": {
-      "config_change": "Config change"
+      "config_change": "Config change",
+      "dispute": "Dispute"
     },
     "reversibility": {
       "easy": "Easy to reverse",
@@ -787,8 +790,28 @@
       "unchanged": "Unchanged",
       "tierHeader": "Reversibility",
       "tierIntro": "How hard would this be to undo? Defaults to easy because config can be changed back by another proposal — bump to moderate or hard if the cultural impact is bigger than the technical reversal.",
+      "impactHeader": "Impact reflection",
+      "impactIntro": "Hard-to-reverse decisions deserve a pause. Fill in what you can — none of these are required, and you can submit with them blank, but writing them out is a way to slow down before something that's harder to take back.",
+      "impactFooter": "These notes will be visible to your community alongside the proposal.",
+      "impact": {
+        "yearOneLabel": "What changes in the first year?",
+        "yearOnePlaceholder": "Concrete effects you can already see.",
+        "fiveYearLabel": "What changes in five years?",
+        "fiveYearPlaceholder": "What does this look like once it's settled in?",
+        "reversalPathLabel": "How would this be undone if it's wrong?",
+        "reversalPathPlaceholder": "What's the path back? Who'd have to agree?",
+        "vulnerableImpactLabel": "Who's most affected — especially the most vulnerable members?",
+        "vulnerableImpactPlaceholder": "Who carries the weight if this goes badly?"
+      },
       "submit": "Start the proposal",
       "submitting": "Starting…"
+    },
+    "impact": {
+      "heading": "Impact reflection",
+      "yearOne": "Year one",
+      "fiveYear": "Five years",
+      "reversalPath": "Reversal path",
+      "vulnerableImpact": "Vulnerable impact"
     }
   },
   "welcome": {

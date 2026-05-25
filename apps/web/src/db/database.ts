@@ -237,6 +237,90 @@ export class UnderstoriaDB extends Dexie {
         }
       });
     });
+    // Version 12 — disputes fold into proposals (Agents 13 + 14
+    // unified Decisions surface per docs/roadmap.md). Adds a
+    // `kind` index so the Decisions UI can filter; adds the
+    // `disputePostId` index so ensureDisputeProposal can quickly
+    // check whether a dispute proposal already exists for a post.
+    // Backfill walks every disputed post and writes a matching
+    // proposal row. The post-level `status === "disputed"` field
+    // stays — it's still the source of truth for the exchange
+    // lifecycle. The proposal is the governance-layer view.
+    this.version(12)
+      .stores({
+        proposals:
+          "id, status, category, kind, createdAt, disputePostId, [status+createdAt], [kind+status]",
+      })
+      .upgrade(async (tx) => {
+        const proposals = tx.table<Proposal, string>("proposals");
+        // Existing proposal rows pre-date the kind / disputePostId
+        // fields. Backfill them to the "proposal" kind so the new
+        // index is populated correctly.
+        await proposals.toCollection().modify((row) => {
+          const r = row as Proposal & {
+            kind?: Proposal["kind"];
+            disputePostId?: string | null;
+          };
+          if (r.kind === undefined) r.kind = "proposal";
+          if (r.disputePostId === undefined) r.disputePostId = null;
+        });
+        // Backfill: every existing disputed post gets a
+        // governance-layer dispute proposal. Helper / recipient
+        // direction follows the same rule as listDisputes (NEED →
+        // claimer helps poster, OFFER reverse).
+        const posts = tx.table<Post, string>("posts");
+        const disputedPosts = await posts
+          .where("status")
+          .equals("disputed")
+          .toArray();
+        for (const post of disputedPosts) {
+          const existing = await proposals
+            .where("disputePostId")
+            .equals(post.id)
+            .first();
+          if (existing) continue;
+          const helperKey =
+            post.type === "NEED" ? post.claimedBy : post.postedBy;
+          const recipientKey =
+            post.type === "NEED" ? post.postedBy : post.claimedBy;
+          const snapshot = {
+            postType: post.type,
+            postTitle: post.title,
+            category: post.category,
+            hours: post.estimatedHours,
+            helperKey,
+            recipientKey: recipientKey ?? "",
+            postCreatedAt: post.createdAt,
+          };
+          const legacyPost = post as Post & {
+            disputeReason?: string | null;
+            disputedAt?: number | null;
+          };
+          const row: Proposal = {
+            id: `dispute_backfill_${post.id}`,
+            nodeId: post.nodeId,
+            kind: "dispute",
+            category: "dispute",
+            reversibilityTier: "easy",
+            title: post.title,
+            description: legacyPost.disputeReason ?? "",
+            payload: JSON.stringify(snapshot),
+            // Sentinel: we don't know who flagged on legacy rows.
+            // Using the post author would make the disputed party
+            // appear as the proposer of the dispute against
+            // themselves. The UI renders this as "(historical,
+            // flagger unknown)" instead of a member name.
+            proposerKey: "system_backfill",
+            status: "open",
+            createdAt: legacyPost.disputedAt ?? post.createdAt,
+            closedAt: null,
+            closedReason: null,
+            impactReflection: null,
+            disputePostId: post.id,
+          };
+          await proposals.put(row);
+        }
+      });
   }
 }
 

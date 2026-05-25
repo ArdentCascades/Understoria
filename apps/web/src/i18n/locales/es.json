@@ -671,7 +671,8 @@
     "recipientLabel": "Quien recibe",
     "postedLabel": "Publicado originalmente",
     "viewPost": "Abrir la publicación",
-    "footer": "Por ahora la resolución sucede fuera de la app — habla con ambas partes o llévalo al espacio de decisión habitual de tu comunidad. Las herramientas de propuesta y resolución dentro de la app están en la hoja de ruta.",
+    "openInDecisions": "Abrir en Decisiones",
+    "footer": "Cada disputa también aparece en Decisiones, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
     "entry": {
       "title": "Disputas de la comunidad",
       "descriptionNone": "Ningún intercambio está señalado ahora mismo.",
@@ -696,6 +697,7 @@
     "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
     "footer": "La votación y el cierre automático aún están por venir. Por ahora la comunidad toma decisiones en su canal habitual, y cualquier integrante puede registrar el resultado aquí para que el registro histórico refleje la realidad.",
     "proposerLabel": "Propuesta por",
+    "backfillProposer": "(historica, persona que reporto desconocida)",
     "proposedLabel": "Iniciada",
     "closedLabel": "Cerrada",
     "outcomeReasonLabel": "Por qué",
@@ -722,7 +724,8 @@
       "withdrawn": "Retirada"
     },
     "category": {
-      "config_change": "Cambio de configuración"
+      "config_change": "Cambio de configuración",
+      "dispute": "Disputa"
     },
     "reversibility": {
       "easy": "Fácil de revertir",
@@ -787,8 +790,28 @@
       "unchanged": "Sin cambio",
       "tierHeader": "Reversibilidad",
       "tierIntro": "¿Qué tan difícil sería deshacer esto? El default es fácil porque la config puede revertirse con otra propuesta — sube a moderada o difícil si el impacto cultural es mayor que la reversión técnica.",
+      "impactHeader": "Reflexión de impacto",
+      "impactIntro": "Las decisiones difíciles de revertir merecen una pausa. Llena lo que puedas — nada es obligatorio y puedes enviar con estos campos en blanco, pero escribirlas es una forma de bajar el ritmo antes de algo más difícil de deshacer.",
+      "impactFooter": "Estas notas serán visibles para tu comunidad junto a la propuesta.",
+      "impact": {
+        "yearOneLabel": "¿Qué cambia en el primer año?",
+        "yearOnePlaceholder": "Efectos concretos que ya puedes prever.",
+        "fiveYearLabel": "¿Qué cambia en cinco años?",
+        "fiveYearPlaceholder": "¿Cómo se ve esto una vez que se ha asentado?",
+        "reversalPathLabel": "¿Cómo se desharía si resulta equivocado?",
+        "reversalPathPlaceholder": "¿Cuál es el camino de vuelta? ¿Quién tendría que estar de acuerdo?",
+        "vulnerableImpactLabel": "¿A quién afecta más — especialmente a las personas más vulnerables?",
+        "vulnerableImpactPlaceholder": "¿Quién carga con el peso si esto sale mal?"
+      },
       "submit": "Iniciar la propuesta",
       "submitting": "Iniciando…"
+    },
+    "impact": {
+      "heading": "Reflexión de impacto",
+      "yearOne": "Primer año",
+      "fiveYear": "Cinco años",
+      "reversalPath": "Camino de reversión",
+      "vulnerableImpact": "Impacto en personas vulnerables"
     }
   },
   "welcome": {
