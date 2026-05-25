@@ -22,6 +22,7 @@ import type { Database as DatabaseType } from "better-sqlite3";
 import {
   createExchangeStore,
   createPeerPullStore,
+  createInviteStore,
   createPostStore,
   createVouchStore,
   openDatabase,
@@ -91,6 +92,9 @@ function exchangeOnly(inner: Fetcher): Fetcher {
     }
     if (/\/posts\b/.test(url)) {
       return jsonResponse({ count: 0, posts: [] });
+    }
+    if (/\/invites\b/.test(url)) {
+      return jsonResponse({ count: 0, invites: [] });
     }
     return inner(url);
   };
@@ -277,6 +281,7 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
     });
@@ -301,6 +306,7 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
     });
@@ -327,6 +333,7 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
       onError: (url, err) => errors.push({ url, msg: err.message }),
@@ -361,6 +368,7 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
     });
@@ -440,6 +448,8 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 1, vouches: [vouch] });
       if (/\/posts\b/.test(url))
         return jsonResponse({ count: 0, posts: [] });
+      if (/\/invites\b/.test(url))
+        return jsonResponse({ count: 0, invites: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -448,6 +458,7 @@ describe("startPeerPullWorker — vouches", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
     });
@@ -455,9 +466,10 @@ describe("startPeerPullWorker — vouches", () => {
     worker.stop();
     // Three kinds attempted; posts returned empty so it's still a
     // successful pull with no insertions.
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(4);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "exchange",
+      "invite",
       "post",
       "vouch",
     ]);
@@ -478,6 +490,8 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ error: "x" }, 500);
       if (/\/posts\b/.test(url))
         return jsonResponse({ count: 0, posts: [] });
+      if (/\/invites\b/.test(url))
+        return jsonResponse({ count: 0, invites: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -486,6 +500,7 @@ describe("startPeerPullWorker — vouches", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
     });
@@ -587,6 +602,8 @@ describe("startPeerPullWorker — posts", () => {
         return jsonResponse({ count: 1, vouches: [vouch] });
       if (/\/posts\b/.test(url))
         return jsonResponse({ count: 1, posts: [post] });
+      if (/\/invites\b/.test(url))
+        return jsonResponse({ count: 0, invites: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -595,14 +612,16 @@ describe("startPeerPullWorker — posts", () => {
       store,
       vouchStore,
       postStore,
+      inviteStore: createInviteStore(db),
       pullStore,
       fetcher,
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(4);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "exchange",
+      "invite",
       "post",
       "vouch",
     ]);
