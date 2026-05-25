@@ -13,8 +13,8 @@ import { describe, expect, it } from "vitest";
 import {
   daysSinceClaim,
   daysUntilCheckIn,
-  taskStaleness,
-} from "./taskStaleness";
+  taskCheckInState,
+} from "./taskCheckInState";
 import type { ProjectTask } from "@/types";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -48,7 +48,7 @@ function task(overrides: Partial<ProjectTask> = {}): ProjectTask {
   };
 }
 
-describe("taskStaleness", () => {
+describe("taskCheckInState", () => {
   it("returns 'fresh' for non-claimed statuses", () => {
     for (const status of [
       "open",
@@ -56,31 +56,31 @@ describe("taskStaleness", () => {
       "completed",
       "blocked",
     ] as const) {
-      expect(taskStaleness(task({ status }), CONFIG, NOW)).toBe("fresh");
+      expect(taskCheckInState(task({ status }), CONFIG, NOW)).toBe("fresh");
     }
   });
 
   it("returns 'fresh' when claimedAt is null (legacy row)", () => {
-    expect(taskStaleness(task({ claimedAt: null }), CONFIG, NOW)).toBe(
+    expect(taskCheckInState(task({ claimedAt: null }), CONFIG, NOW)).toBe(
       "fresh",
     );
   });
 
   it("returns 'fresh' inside the check-in window", () => {
-    expect(taskStaleness(task({ claimedAt: NOW - 3 * DAY }), CONFIG, NOW)).toBe(
+    expect(taskCheckInState(task({ claimedAt: NOW - 3 * DAY }), CONFIG, NOW)).toBe(
       "fresh",
     );
   });
 
   it("returns 'check_in_due' between check-in and needs-help windows", () => {
-    expect(taskStaleness(task({ claimedAt: NOW - 8 * DAY }), CONFIG, NOW)).toBe(
+    expect(taskCheckInState(task({ claimedAt: NOW - 8 * DAY }), CONFIG, NOW)).toBe(
       "check_in_due",
     );
   });
 
   it("acknowledging within the window resets the private clock", () => {
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({
           claimedAt: NOW - 10 * DAY,
           checkInAcknowledgedAt: NOW - 1 * DAY,
@@ -93,7 +93,7 @@ describe("taskStaleness", () => {
 
   it("returns 'needs_more_hands' once claim floor + grace have both lapsed with no ack", () => {
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({
           claimedAt: NOW - 20 * DAY,
           checkInAcknowledgedAt: null,
@@ -110,7 +110,7 @@ describe("taskStaleness", () => {
     // (graceDays=2) the public signal stays suppressed and the
     // private nudge re-shows.
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({
           claimedAt: NOW - 20 * DAY,
           checkInAcknowledgedAt: NOW - 1 * DAY,
@@ -125,7 +125,7 @@ describe("taskStaleness", () => {
     // Claim 20 days ago, last ack 10 days ago. Last ack +
     // checkInDays + graceDays = 10 - 7 - 2 = past. Public fires.
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({
           claimedAt: NOW - 20 * DAY,
           checkInAcknowledgedAt: NOW - 10 * DAY,
@@ -141,7 +141,7 @@ describe("taskStaleness", () => {
     // again (8 > checkInDays=7), so private nudge re-shows. But
     // 8 < checkInDays + graceDays (9), so no public chip yet.
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({
           claimedAt: NOW - 20 * DAY,
           checkInAcknowledgedAt: NOW - 8 * DAY,
@@ -154,7 +154,7 @@ describe("taskStaleness", () => {
 
   it("treats the check-in boundary as inclusive (>= triggers)", () => {
     expect(
-      taskStaleness(task({ claimedAt: NOW - 7 * DAY }), CONFIG, NOW),
+      taskCheckInState(task({ claimedAt: NOW - 7 * DAY }), CONFIG, NOW),
     ).toBe("check_in_due");
   });
 
@@ -163,7 +163,7 @@ describe("taskStaleness", () => {
     // Silence-since-ack = 1 day < (checkInDays=7 + graceDays=2).
     // Public chip suppressed; private nudge stays.
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({
           claimedAt: NOW - 14 * DAY,
           checkInAcknowledgedAt: NOW - 1 * DAY,
@@ -180,7 +180,7 @@ describe("taskStaleness", () => {
     //   days-since-claim >= taskCheckInDays + taskCheckInGraceDays (9)
     // The former is the binding constraint, so 16 days fires.
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({ claimedAt: NOW - 16 * DAY, checkInAcknowledgedAt: null }),
         CONFIG,
         NOW,
@@ -190,7 +190,7 @@ describe("taskStaleness", () => {
 
   it("respects configured thresholds", () => {
     expect(
-      taskStaleness(
+      taskCheckInState(
         task({ claimedAt: NOW - 5 * DAY }),
         { taskCheckInDays: 3, taskNeedsHelpDays: 7, taskCheckInGraceDays: 1 },
         NOW,

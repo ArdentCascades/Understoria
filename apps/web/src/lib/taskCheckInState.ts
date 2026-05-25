@@ -36,19 +36,19 @@ import type { NodeConfig, ProjectTask } from "@/types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export type TaskStaleness =
+export type TaskCheckInState =
   | "fresh"
   | "check_in_due"
   | "needs_more_hands";
 
-export function taskStaleness(
+export function taskCheckInState(
   task: ProjectTask,
   config: Pick<
     NodeConfig,
     "taskCheckInDays" | "taskNeedsHelpDays" | "taskCheckInGraceDays"
   >,
   now: number = Date.now(),
-): TaskStaleness {
+): TaskCheckInState {
   // Only claimed tasks have a check-in state. awaiting_confirmation
   // / completed / blocked / open are out of scope.
   if (task.status !== "claimed") return "fresh";
