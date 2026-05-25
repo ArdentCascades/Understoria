@@ -709,6 +709,11 @@
       "rejected": "Marcar rechazada",
       "withdrawn": "Retirar"
     },
+    "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier persona puede cerrar esta propuesta.",
+    "closeAsPassed": "Cerrar como aprobada",
+    "closedReason": {
+      "consensus": "Cerrada por accion de integrante despues de cumplir las condiciones de consenso."
+    },
     "payloadHeader": "Configuración propuesta",
     "status": {
       "open": "Abierta",

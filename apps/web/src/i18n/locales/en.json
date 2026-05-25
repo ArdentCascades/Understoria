@@ -709,6 +709,11 @@
       "rejected": "Mark rejected",
       "withdrawn": "Withdraw"
     },
+    "consensusReached": "Consensus reached: {{affirms}} affirm, {{blocks}} blocks. Any member can close this proposal.",
+    "closeAsPassed": "Close as passed",
+    "closedReason": {
+      "consensus": "Closed by member action after consensus conditions were met."
+    },
     "payloadHeader": "Proposed config",
     "status": {
       "open": "Open",

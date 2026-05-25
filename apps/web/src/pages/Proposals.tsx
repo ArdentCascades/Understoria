@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -20,7 +20,6 @@ import { castVote } from "@/db/votes";
 import { currentMemberVote, tallyVotes, type Tally } from "@/lib/votes";
 import {
   autoCloseEligibility,
-  pickProposalsToAutoPass,
   type AutoCloseEligibility,
 } from "@/lib/autoCloseProposals";
 import { usePendingAction } from "@/lib/usePendingAction";
@@ -73,31 +72,6 @@ export default function ProposalsPage() {
     }
     return map;
   }, [votes]);
-
-  // Auto-close on consensus. Runs every time the live-query for
-  // proposals + votes settles, so the moment the last condition is
-  // satisfied (deliberation done, min affirms, no blocks), the
-  // proposal closes. Closure record names "consensus" so the
-  // historical log makes the cause clear.
-  useEffect(() => {
-    const eligible = pickProposalsToAutoPass(proposals, votes, nodeConfig);
-    if (eligible.length === 0) return;
-    let cancelled = false;
-    void (async () => {
-      for (const p of eligible) {
-        if (cancelled) return;
-        try {
-          await closeProposal(p.id, "passed", "Auto-passed on consensus");
-        } catch {
-          // Race with another tab / another invocation — fine to
-          // ignore. The "already closed" path is benign.
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [proposals, votes, nodeConfig]);
 
   return (
     <div className="px-4 pb-8 pt-4">
@@ -299,6 +273,38 @@ function ProposalCard({
           nameByKey={nameByKey}
         />
       )}
+
+      {proposal.status === "open" &&
+        canCloseOpen &&
+        eligibility.kind === "passes" && (
+          <div className="mt-4 rounded-xl border border-canopy-200 bg-canopy-50/60 p-3 dark:border-canopy-800 dark:bg-canopy-950/30">
+            <p className="mb-2 text-sm font-medium text-canopy-900 dark:text-canopy-100">
+              {t("proposals.consensusReached", {
+                affirms: tally.affirms.length,
+                blocks: tally.blocks.length,
+              })}
+            </p>
+            <button
+              type="button"
+              className="btn-primary text-sm"
+              disabled={pending}
+              aria-busy={pending}
+              onClick={() =>
+                void run(() =>
+                  closeProposal(
+                    proposal.id,
+                    "passed",
+                    t("proposals.closedReason.consensus"),
+                  ),
+                )
+              }
+            >
+              {pending
+                ? t("common.working")
+                : t("proposals.closeAsPassed")}
+            </button>
+          </div>
+        )}
 
       {proposal.status === "open" && canCloseOpen && (
         <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">

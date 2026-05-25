@@ -76,24 +76,3 @@ export function autoCloseEligibility(
   return { kind: "passes" };
 }
 
-/**
- * Convenience for "given this batch of proposals + votes + config,
- * which proposals should auto-pass right now?" Used by the page-
- * level effect that closes anything eligible on each render. Pure;
- * no side effects.
- */
-export function pickProposalsToAutoPass(
-  proposals: readonly Proposal[],
-  votes: readonly Vote[],
-  config: Pick<
-    NodeConfig,
-    "proposalDeliberationDays" | "proposalMinAffirms"
-  >,
-  now: number = Date.now(),
-): Proposal[] {
-  return proposals.filter(
-    (p) =>
-      autoCloseEligibility({ proposal: p, votes, config, now }).kind ===
-      "passes",
-  );
-}

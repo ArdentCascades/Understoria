@@ -10,10 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { describe, expect, it } from "vitest";
-import {
-  autoCloseEligibility,
-  pickProposalsToAutoPass,
-} from "./autoCloseProposals";
+import { autoCloseEligibility } from "./autoCloseProposals";
 import type { Proposal, Vote, VoteChoice } from "@/types";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -163,34 +160,5 @@ describe("autoCloseEligibility", () => {
       now: NOW,
     });
     expect(result.kind).toBe("passes");
-  });
-});
-
-describe("pickProposalsToAutoPass", () => {
-  it("returns only the proposals that meet the auto-pass criteria", () => {
-    const ready = proposal({ id: "ready", createdAt: NOW - 5 * DAY });
-    const young = proposal({ id: "young", createdAt: NOW - 1 * DAY });
-    const blocked = proposal({ id: "blocked", createdAt: NOW - 5 * DAY });
-    const closed = proposal({
-      id: "closed",
-      createdAt: NOW - 5 * DAY,
-      status: "passed",
-    });
-    const votes: Vote[] = [
-      vote("a", "affirm", "ready"),
-      vote("b", "affirm", "ready"),
-      vote("a", "affirm", "young"),
-      vote("b", "affirm", "young"),
-      vote("a", "affirm", "blocked"),
-      vote("b", "affirm", "blocked"),
-      vote("c", "block", "blocked"),
-    ];
-    const result = pickProposalsToAutoPass(
-      [ready, young, blocked, closed],
-      votes,
-      CONFIG,
-      NOW,
-    );
-    expect(result.map((p) => p.id)).toEqual(["ready"]);
   });
 });
