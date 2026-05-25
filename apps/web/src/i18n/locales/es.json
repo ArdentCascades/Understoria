@@ -24,7 +24,8 @@
     "copied": "Copiado. Compártelo por Signal, en persona o en papel.",
     "copyFailed": "No se pudo acceder al portapapeles — selecciona el enlace de arriba y cópialo manualmente.",
     "memberFallback": "alguien de la comunidad",
-    "anyMember": "Alguien"
+    "anyMember": "Alguien",
+    "gotIt": "Entendido"
   },
   "drafts": {
     "bannerLabel": "Borrador sin guardar",
@@ -42,6 +43,20 @@
     "label": "Cómo empezar",
     "message": "Dos caminos: toca cualquier publicación que te llame la atención para ver cómo funciona el intercambio, o comparte algo que necesitas o puedes ofrecer. Sin presión por publicar primero — observar también está bien.",
     "dismiss": "Entendido"
+  },
+  "hints": {
+    "board": {
+      "label": "Orientacion del tablero",
+      "message": "El tablero tiene tres pestanas: Necesidades (lo que la gente pide), Ofertas (lo que la gente puede compartir) y Proyectos (metas colectivas). Toca cualquier publicacion para ver detalles o tomarla. Las publicaciones tomadas se ocultan por defecto para que veas lo que aun necesita ayuda."
+    },
+    "balance": {
+      "label": "Entendiendo tu saldo",
+      "message": "Tu saldo son creditos de tiempo. Cada nueva persona empieza con creditos semilla para que pedir ayuda nunca tenga barreras. Una hora de ayuda siempre equivale a una hora de credito, sin importar el tipo de trabajo. Da y recibe a tu propio ritmo."
+    },
+    "invite": {
+      "label": "Hacer crecer la comunidad",
+      "message": "Las comunidades crecen a traves de la confianza. Cada invitacion crea un enlace criptografico — cuando alguien la usa, se une con tu aval. Una persona necesita dos avales para alcanzar el estatus de confianza. Comparte invitaciones con personas que conoces y en quienes confias."
+    }
   },
   "nav": {
     "board": "Tablero",
@@ -533,7 +548,9 @@
       "intro": "La bienvenida, preguntas frecuentes, una guía breve para miembros, y preguntas para grupos de estudio. Todo funciona sin conexión.",
       "revisitWelcome": "Volver a ver la bienvenida",
       "helpFaq": "Preguntas frecuentes",
-      "memberGuide": "Guía de miembros",
+      "memberGuide": "Guia de miembros",
+      "opsecGuide": "Mantenerse seguro",
+      "opsecIntro": "El trabajo de ayuda mutua conlleva riesgos reales. Esta guia breve cubre lo basico para protegerte a ti y a tu comunidad. Leela una vez; vuelve cuando algo cambie.",
       "studyPrompts": "Preguntas para grupos de estudio",
       "promptCopy": "Copiar para una reunión",
       "promptCopied": "Copiado"

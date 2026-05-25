@@ -24,7 +24,8 @@
     "copied": "Copied. Share it over Signal, in person, or on paper.",
     "copyFailed": "Couldn't access the clipboard — select the link above and copy manually.",
     "memberFallback": "a member",
-    "anyMember": "Member"
+    "anyMember": "Member",
+    "gotIt": "Got it"
   },
   "drafts": {
     "bannerLabel": "Unsaved draft",
@@ -42,6 +43,20 @@
     "label": "Getting started",
     "message": "Two ways in: tap any post that catches your eye to see how exchange works, or share something you need or can offer. No pressure to post first — lurking is welcome too.",
     "dismiss": "Got it"
+  },
+  "hints": {
+    "board": {
+      "label": "Board orientation",
+      "message": "The Board has three tabs: Needs (what people are asking for), Offers (what people can share), and Projects (collective goals). Tap any post to see details or claim it. Claimed posts are hidden by default so you see what still needs help."
+    },
+    "balance": {
+      "label": "Understanding your balance",
+      "message": "Your balance is time credits. Every new member starts with seed credits so asking for help is never gated. One hour of help always equals one hour of credit, regardless of the type of work. Give and receive at your own pace."
+    },
+    "invite": {
+      "label": "Growing the community",
+      "message": "Communities grow through trust. Each invite creates a cryptographic link — when someone redeems it, they join with your vouch. A member needs two vouches to reach trusted status. Share invites with people you know and trust."
+    }
   },
   "nav": {
     "board": "Board",
@@ -534,6 +549,8 @@
       "revisitWelcome": "Revisit the welcome",
       "helpFaq": "Common questions",
       "memberGuide": "Member guide",
+      "opsecGuide": "Staying safe",
+      "opsecIntro": "Mutual aid work carries real risks. This short guide covers the basics of keeping yourself and your community safe. Read it once; come back when something changes.",
       "studyPrompts": "Study group prompts",
       "promptCopy": "Copy for a meeting",
       "promptCopied": "Copied"

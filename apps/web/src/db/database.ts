@@ -350,6 +350,9 @@ export const SETTING_KEYS = {
    *  posted or claimed anything; this flag only matters for the
    *  "wants to lurk forever without dismissing" case. */
   firstActionNudgeDismissed: "firstActionNudgeDismissed",
+  boardHintDismissed: "boardHintDismissed",
+  balanceHintDismissed: "balanceHintDismissed",
+  inviteHintDismissed: "inviteHintDismissed",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

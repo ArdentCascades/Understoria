@@ -13,9 +13,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { MEMBER_GUIDE } from "@/content/member-guide";
+import { OPSEC_GUIDE } from "@/content/opsec-guide";
 import { promptShareText, STUDY_PROMPTS } from "@/content/study-prompts";
 
-type Panel = "none" | "guide" | "prompts";
+type Panel = "none" | "guide" | "opsec" | "prompts";
 
 export function LearnSection() {
   const { t } = useTranslation();
@@ -61,6 +62,14 @@ export function LearnSection() {
         </button>
         <button
           type="button"
+          onClick={() => setPanel(panel === "opsec" ? "none" : "opsec")}
+          className="btn-secondary"
+          aria-expanded={panel === "opsec"}
+        >
+          {t("profile.learn.opsecGuide")}
+        </button>
+        <button
+          type="button"
           onClick={() => setPanel(panel === "prompts" ? "none" : "prompts")}
           className="btn-secondary"
           aria-expanded={panel === "prompts"}
@@ -72,6 +81,26 @@ export function LearnSection() {
       {panel === "guide" && (
         <div className="mt-4 space-y-4 border-t border-moss-200 pt-4 dark:border-moss-800">
           {MEMBER_GUIDE.map((section) => (
+            <article key={section.id}>
+              <h3 className="mb-1 text-base font-semibold text-moss-800 dark:text-moss-100">
+                {section.title}
+              </h3>
+              <div className="space-y-2 text-sm text-moss-700 dark:text-moss-200">
+                {section.body.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {panel === "opsec" && (
+        <div className="mt-4 space-y-4 border-t border-moss-200 pt-4 dark:border-moss-800">
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("profile.learn.opsecIntro")}
+          </p>
+          {OPSEC_GUIDE.map((section) => (
             <article key={section.id}>
               <h3 className="mb-1 text-base font-semibold text-moss-800 dark:text-moss-100">
                 {section.title}
