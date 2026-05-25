@@ -15,13 +15,16 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import {
+  addCoOrganizer,
   addProjectTask,
   claimProjectTask,
   completeProject,
   confirmProjectTaskCompletion,
+  isOrganizer,
   launchProject,
   markProjectTaskComplete,
   pauseProject,
+  removeCoOrganizer,
   resumeProject,
   unclaimProjectTask,
 } from "@/db/projects";
@@ -35,6 +38,7 @@ import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type {
+  Member,
   Project,
   ProjectCategory,
   ProjectTask,
@@ -90,7 +94,8 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const isOrganizer = currentMember?.publicKey === project.organizerKey;
+  const isOrg = currentMember ? isOrganizer(project, currentMember.publicKey) : false;
+  const isPrimaryOrganizer = currentMember?.publicKey === project.organizerKey;
   const percent =
     project.targetHours > 0
       ? Math.min(
@@ -223,8 +228,18 @@ export default function ProjectDetailPage() {
         )}
       </div>
 
-      {isOrganizer && (
+      {isOrg && (
         <OrganizerControls project={project} onRun={run} />
+      )}
+
+      {isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived" && (
+        <CoOrganizerSection
+          project={project}
+          members={members}
+          currentKey={currentMember!.publicKey}
+          memberMap={memberMap}
+          onRun={run}
+        />
       )}
 
       {error && (
@@ -256,7 +271,7 @@ export default function ProjectDetailPage() {
                 <li key={task.id}>
                   <TaskRow
                     task={task}
-                    isOrganizer={isOrganizer}
+                    isOrganizer={isOrg}
                     currentKey={currentMember?.publicKey}
                     memberMap={memberMap}
                     nodeId={nodeId}
@@ -270,7 +285,7 @@ export default function ProjectDetailPage() {
         )}
       </section>
 
-      {isOrganizer &&
+      {isOrg &&
         project.status !== "completed" &&
         project.status !== "archived" && (
           <AddTaskForm project={project} onRun={run} />
@@ -697,6 +712,99 @@ function AddTaskForm({
             : t("projects.task.addTask.submit")}
         </button>
       </form>
+    </section>
+  );
+}
+
+function CoOrganizerSection({
+  project,
+  members,
+  currentKey,
+  memberMap,
+  onRun,
+}: {
+  project: Project;
+  members: readonly Member[];
+  currentKey: string;
+  memberMap: Map<string, string>;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+}) {
+  const { t } = useTranslation();
+  const [selectedKey, setSelectedKey] = useState("");
+  const { pending, run: runWithPending } = usePendingAction();
+
+  const eligible = members.filter(
+    (m) =>
+      m.publicKey !== project.organizerKey &&
+      !project.coOrganizerKeys.includes(m.publicKey),
+  );
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        {t("projects.coOrganizers.title")}
+      </h2>
+      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
+        {t("projects.coOrganizers.intro")}
+      </p>
+      {project.coOrganizerKeys.length > 0 && (
+        <ul className="mb-3 flex flex-col gap-1">
+          {project.coOrganizerKeys.map((key) => (
+            <li
+              key={key}
+              className="flex items-center justify-between rounded-lg bg-moss-50 px-3 py-1.5 text-sm dark:bg-moss-900/40"
+            >
+              <span>{memberMap.get(key) ?? key}</span>
+              <button
+                type="button"
+                className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
+                disabled={pending}
+                onClick={() =>
+                  void runWithPending(() =>
+                    onRun(() => removeCoOrganizer(project.id, currentKey, key)),
+                  )
+                }
+              >
+                {t("projects.coOrganizers.remove")}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {eligible.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <select
+            className="input flex-1"
+            value={selectedKey}
+            onChange={(e) => setSelectedKey(e.target.value)}
+          >
+            <option value="">
+              {t("projects.coOrganizers.selectPlaceholder")}
+            </option>
+            {eligible.map((m) => (
+              <option key={m.publicKey} value={m.publicKey}>
+                {m.displayName}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={pending || !selectedKey}
+            onClick={() => {
+              if (!selectedKey) return;
+              void runWithPending(() =>
+                onRun(() =>
+                  addCoOrganizer(project.id, currentKey, selectedKey),
+                ),
+              );
+              setSelectedKey("");
+            }}
+          >
+            {t("projects.coOrganizers.add")}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

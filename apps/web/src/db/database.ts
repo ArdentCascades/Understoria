@@ -321,6 +321,17 @@ export class UnderstoriaDB extends Dexie {
           await proposals.put(row);
         }
       });
+    // Version 13 — Agent 10 Phase 3: co-organizer support.
+    // Adds `coOrganizerKeys` to every Project. Backfills
+    // existing rows to an empty array so the field is never
+    // undefined at runtime.
+    this.version(13).stores({}).upgrade(async (tx) => {
+      const projects = tx.table<Project, string>("projects");
+      await projects.toCollection().modify((row) => {
+        const r = row as Project & { coOrganizerKeys?: string[] };
+        if (r.coOrganizerKeys === undefined) r.coOrganizerKeys = [];
+      });
+    });
   }
 }
 

@@ -166,6 +166,7 @@ describe("project achievements", () => {
       description: "",
       category: "infrastructure",
       organizerKey: "org",
+      coOrganizerKeys: [],
       status: "active",
       targetHours: 10,
       contributedHours: 0,

@@ -87,6 +87,7 @@ export async function createProject(
     description: input.description.trim(),
     category: input.category,
     organizerKey,
+    coOrganizerKeys: [],
     status: "planning",
     targetHours: input.targetHours,
     contributedHours: 0,
@@ -248,15 +249,62 @@ async function updateProjectStatus(
   );
 }
 
+export function isOrganizer(project: Project, memberKey: string): boolean {
+  return (
+    project.organizerKey === memberKey ||
+    project.coOrganizerKeys.includes(memberKey)
+  );
+}
+
 async function requireOrganizer(
   projectId: string,
   organizerKey: string,
 ): Promise<Project> {
   const p = await db.projects.get(projectId);
   if (!p) throw new Error("Project not found.");
-  if (p.organizerKey !== organizerKey)
-    throw new Error("Only the project organizer can do that.");
+  if (!isOrganizer(p, organizerKey))
+    throw new Error("Only project organizers can do that.");
   return p;
+}
+
+export async function addCoOrganizer(
+  projectId: string,
+  callerKey: string,
+  newCoOrgKey: string,
+): Promise<Project> {
+  return db.transaction("rw", db.projects, async () => {
+    const p = await db.projects.get(projectId);
+    if (!p) throw new Error("Project not found.");
+    if (p.organizerKey !== callerKey)
+      throw new Error("Only the primary organizer can add co-organizers.");
+    if (p.coOrganizerKeys.includes(newCoOrgKey)) return p;
+    if (newCoOrgKey === p.organizerKey) return p;
+    const updated: Project = {
+      ...p,
+      coOrganizerKeys: [...p.coOrganizerKeys, newCoOrgKey],
+    };
+    await db.projects.put(updated);
+    return updated;
+  });
+}
+
+export async function removeCoOrganizer(
+  projectId: string,
+  callerKey: string,
+  coOrgKey: string,
+): Promise<Project> {
+  return db.transaction("rw", db.projects, async () => {
+    const p = await db.projects.get(projectId);
+    if (!p) throw new Error("Project not found.");
+    if (p.organizerKey !== callerKey)
+      throw new Error("Only the primary organizer can remove co-organizers.");
+    const updated: Project = {
+      ...p,
+      coOrganizerKeys: p.coOrganizerKeys.filter((k) => k !== coOrgKey),
+    };
+    await db.projects.put(updated);
+    return updated;
+  });
 }
 
 // -- Task lifecycle ---------------------------------------------------------

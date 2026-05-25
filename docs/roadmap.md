@@ -61,10 +61,10 @@ distinct trust models and shouldn't share code or UI prematurely.
 
 | # | Agent | Ostrom principle(s) | Status | Owns |
 |---|-------|---------------------|--------|------|
-| 11 | Node Configuration & Local Rules | 2 (rules fit local conditions) | shipped | Per-node `NodeConfig` table (Dexie v6) replacing the hardcoded safeguard constants in `lib/safeguards.ts`; "Community settings" section on Profile with validation, save, reset, and a bootstrap-mode note. Server-side `GET /config` returns the folded-in operator / hosting transparency block (`OPERATOR_*` env vars; empty object when unset) |
+| 11 | Node Configuration & Local Rules | 2 (rules fit local conditions) | shipped | Per-node `NodeConfig` table (Dexie v6) with 8 fields: 3 safeguard thresholds (`dailyHelperLimit`, `shortExchangeHours`, `reciprocalPairThreshold`), 3 task-check-in thresholds (`taskCheckInDays`, `taskNeedsHelpDays`, `taskCheckInGraceDays`), 2 proposal-consensus thresholds (`proposalDeliberationDays`, `proposalMinAffirms`). "Community settings" section on Profile with validation, save, reset, and a bootstrap-mode note. Server-side `GET /config` returns the folded-in operator / hosting transparency block (`OPERATOR_*` env vars; empty object when unset) |
 | 12 | Moderation & Graduated Sanctions | 4, 5 (monitoring, graduated sanctions) | not started | Moderation queue, action log, escalation policy. Requires real safeguard-flag telemetry first |
-| 13 | In-App Governance & Proposals | 3 (collective-choice arenas) | not started | Proposal lifecycle, voting / consensus signalling, decision archive. **Folds in:** reversibility tiers + impact reflection + welfare flag (the structural pieces of the original Agent 20) |
-| 14 | Dispute Resolution & Mediation | 6 (low-cost conflict resolution) | not started | Two-party dispute lifecycle, mediator assignment, outcome log |
+| 13 | In-App Governance & Proposals | 3 (collective-choice arenas) | shipped | Unified Decisions surface at `/proposals`: proposal lifecycle with `config_change` + `dispute` kinds, voting (affirm / block / abstain with latest-vote-wins), manual "Close as passed" button when consensus conditions are met (deliberation period + min affirms + no blocks), reversibility tiers (`easy` / `moderate` / `hard`), required impact-reflection form for hard-tier proposals, configurable `proposalDeliberationDays` + `proposalMinAffirms` in NodeConfig. Dispute migration (schema v12): every disputed post gets a governance-layer proposal row; `/disputes` page reads from proposals. **Folds in:** reversibility tiers + impact reflection (from original Agent 20). Welfare flag deferred to `GOVERNANCE.md` ratification |
+| 14 | Dispute Resolution & Mediation | 6 (low-cost conflict resolution) | partial | Disputes live in the proposals table (`kind: "dispute"`) with voting and consensus close. **Pending:** structured mediation flow, mediator assignment, "what happens to the credits" resolution, outcome log beyond manual close |
 | 15 | Federation Governance & Nested Boundaries | 1, 8 (clear boundaries, nested enterprises) | not started | Per-peer federation agreements, negotiable vs. protocol-invariant policy split |
 
 ### Why Agent 13 and Agent 14 ship as one surface
@@ -90,8 +90,10 @@ lifecycle. Therefore:
   of Agent 13's `Proposal` type from day one. Each `ProposalCategory`
   has a default tier; proposers can override.
 - **Impact reflection** is a required form for `hard` proposals
-  (1-year, 5-year, reversal path, vulnerable impact). Not enforced
-  programmatically — structural pause, not gatekeeping.
+  (1-year, 5-year, reversal path, vulnerable impact). All four
+  fields are enforced programmatically — submission is blocked until
+  each is filled. The structural pause is the form's existence and
+  the requirement to engage with each prompt.
 - **Welfare flag** is *not* shipped with Agent 13. It's a governance
   policy choice (does the moderation committee get standing authority
   to delay decisions?) that belongs in `GOVERNANCE.md` first, as a
@@ -106,7 +108,7 @@ first-class Phase 5 work rather than absorbed into existing agents.
 
 | # | Agent | Source tradition | Status | Owns |
 |---|-------|-----------------|--------|------|
-| 16 | Onboarding & Political Literacy | Kerala model | partial | Four-screen welcome flow + Learn section in Profile (member guide + study prompts) shipped. **Pending:** in-app opsec guide; contextual first-time hints on Board / balance / invite |
+| 16 | Onboarding & Political Literacy | Kerala model | shipped | Four-screen welcome flow, Learn section in Profile (member guide + study prompts + in-app opsec guide), contextual first-time hints on Board / balance / invite (generic `ContextualHint` component, setting-key based persistent dismissal) |
 | 18a | Breadth & Reciprocity Dashboard | Potlatch tradition (the safe half) | shipped | Breadth bar (members ranked by *unique* people helped, not hours) + reciprocity pulse (% of connections that flow both ways). New "Weaver" achievement for spanning 3+ zones |
 
 **Agent 18 is intentionally split.** The original Agent 18 also
@@ -188,95 +190,75 @@ main Ostrom track.
 
 ```
                  ┌─────────────────────────────────────────────┐
-   now           │ A. Agent 11 (config) — minimal scope        │
-                 │    replace constants in safeguards.ts only  │
-                 │    folds in: operator-info transparency     │
-                 │    grounding use case: issue #6             │
+   DONE          │ A. Agent 11 (config) — SHIPPED              │
+                 │ B. Agent 13 + 14 unified Decisions — SHIPPED│
+                 │    (proposals, voting, consensus close,     │
+                 │     impact reflection, dispute migration)   │
+                 │ C. Agent 16 (onboarding) — SHIPPED          │
+                 │ D. Agent 18a (breadth + reciprocity) — DONE │
                  └────────────┬────────────────────────────────┘
                               │
-   in parallel ◄──────────────┼──────────────►  Agent 16 (Kerala onboarding)
-   any time                   │                  Agent 18a (Breadth + reciprocity)
-                              │                  political-education docs additions
                               ▼
                  ┌─────────────────────────────────────────────┐
-   next          │ B. Finish Agent 3 (federation pull loop)    │
+   now           │ E. Pilot deployment with real users         │
+                 │    validate governance defaults, surface    │
+                 │    real disputes, measure safeguard flags   │
+                 └────────────┬────────────────────────────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────────────────────────┐
+   next          │ F. Finish Agent 3 (federation pull loop)    │
                  │    and the missing server endpoints         │
                  │    Agent 15 is meaningless without this     │
                  └────────────┬────────────────────────────────┘
                               │
                               ▼
                  ┌─────────────────────────────────────────────┐
-   then          │ C. Agent 13 + 14 as one "Decisions" surface │
-                 │    proposal & dispute share a table         │
-                 │    folds in: reversibility tiers, impact    │
-                 │    reflection, recall (from Agent 17),      │
-                 │    pool allocations (from Agent 19)         │
-                 │    folds in: co-organizer support           │
-                 │    via Agent 10 Phase 3 (parallel track)    │
+   then          │ G. Agent 14 lifecycle (mediation, outcome)  │
+                 │    + Agent 12 (moderation + sanctions)      │
+                 │    both require pilot telemetry             │
                  └────────────┬────────────────────────────────┘
                               │
                               ▼
                  ┌─────────────────────────────────────────────┐
-   later         │ D. Agent 12 (moderation + sanctions)        │
-                 │    requires real telemetry from a deployed  │
-                 │    node — false-positive rate, triage load  │
-                 └────────────┬────────────────────────────────┘
-                              │
-                              ▼
-                 ┌─────────────────────────────────────────────┐
-   last          │ E. Agent 15 (federation governance)         │
+   last          │ H. Agent 15 (federation governance)         │
                  │    requires 2+ peers actually federating    │
                  └─────────────────────────────────────────────┘
 ```
 
 ### Rationale per stage
 
-**A. Agent 11 first, scoped tightly.**
-The smallest of the structural agents, and the only one that
-*replaces* existing hardcoded values rather than adding net-new
-surface. Scope is limited to: a `nodeConfig` table, three fields
-(`dailyHelperLimit`, `shortExchangeHours`, `reciprocalPairThreshold`)
-that today live as constants in `apps/web/src/lib/safeguards.ts`, an
-operator-facing config screen, and one extra block of operator/
-hosting transparency on `GET /config` (folded in from the original
-Agent 21). The grounding use case is community proposal issue #6 —
-that proposal's resolution likely becomes a fourth config field,
-which validates the abstraction against a real decision.
+**A–D (DONE).** Agents 11, 13, 16, and 18a have shipped. NodeConfig
+carries 8 fields (3 safeguard thresholds, 3 task-check-in thresholds,
+2 proposal-consensus thresholds). The unified Decisions surface handles
+both `proposal` and `dispute` kinds with voting, consensus close,
+reversibility tiers, and required impact reflection for hard tier.
+Onboarding is complete (welcome flow, opsec guide, contextual hints).
+Schema is at v12; 441 tests pass.
 
-**Agents 16 and 18a can ship any time.**
-Neither depends on the rest. Agent 16 (onboarding) replaces dead code
-(`SETTING_KEYS.onboarded` already exists and is unused) and closes a
-real gap (member-guide.md is unreachable from the PWA). Agent 18a
-(breadth + reciprocity) is a small Dashboard addition that uses only
-data already in the exchange ledger. Both are good "between bigger
-agents" work.
+**E. Pilot deployment next.**
+Every remaining agent needs input that only real use provides:
+governance defaults (3-day deliberation? 2 affirms? 7-day check-in?)
+are guesses until a community uses them; moderation (Agent 12) needs
+false-positive rates from real safeguard flags; dispute mediation
+(Agent 14) needs to know what a real dispute looks like. The pilot is
+now the critical path, not more code.
 
-**B. Agent 3 before any new governance work.**
+**F. Agent 3 before any new governance work.**
 Federation governance (Agent 15) makes no sense without working
 federation. End-to-end messaging (Agent 2 task 5) is also Phase 3
 work that members are asking for. The Ostrom additions do not justify
 deferring Phase 3.
 
-**C. Agent 13 + 14 as one surface, absorbing recall and allocation.**
-A "Decisions" table with `kind: proposal | dispute | recall` is
-closer to the truth than three separate features. Building it once
-absorbs the parallel mini-proposal mechanisms that the "Beyond
-Ostrom" plan otherwise would have spun up for organizer recall
-(Agent 17) and pool allocation (Agent 19). Reversibility tiers and
-impact reflection (Agent 20) ship as part of this state machine from
-day one. Co-organizer support from Agent 17 can ship in parallel as
-**Agent 10 Phase 3** — it doesn't need the Decisions surface, just
-the broadened organizer check.
+**G. Agent 14 lifecycle + Agent 12 after pilot telemetry.**
+Agent 14's remaining work (mediation flow, credit resolution) and
+Agent 12 (moderation queue + graduated sanctions) both presuppose
+operational experience. The dispute migration is done (disputes live
+in proposals), so Agent 14's lifecycle can build on that foundation
+once real disputes surface patterns worth codifying. Agent 12's
+sanction ladder needs measured false-positive rates, not guesses.
 
-**D. Agent 12 after operational telemetry exists.**
-Graduated sanctions presuppose detection that is accurate enough to
-act on. Today we have safeguard flags but no moderation queue, no
-false-positive measurement, no moderator workflow. Codifying
-sanctions on top of an untested signal risks punishing noise. Ship
-the queue first (probably as part of Agent 12 task 1), gather real
-data, then design the sanction ladder against it.
-
-**E. Agent 15 last.**
+**H. Agent 15 last.**
 Per-peer federation agreements are powerful and a great way to
 fragment the network into incompatible dialects. We need the
 discipline of having peered in practice — and surfacing real
@@ -403,6 +385,8 @@ concrete check that catches it before it ships.
   *Check:* the next free Dexie version is *reserved* by the first
   PR to land. The second PR rebases onto the next version.
   `docs/roadmap.md` "Migration strategy" tracks the reservation.
+  Current state: v10 = votes, v11 = task check-in, v12 = dispute
+  migration. Next free version: **13**.
 
 - **Function signature changes without exhaustive call-site
   updates.** `balanceFor()` gaining two new parameters touches
@@ -501,5 +485,8 @@ The phase view in `README.md` maps onto these agents roughly as:
 - **Phase 4 — Launch:** pilot deployment, v1.0
 - **Phase 5 — Commons governance:** Agents 11 → 15 (Ostrom core) + 16 + 18a, staged as above
 
-Phase 5 does not block Phase 4: a v1.0 pilot can ship with Agent 11
-and Agent 16 only.
+Phase 5 does not block Phase 4. Agents 11, 13, 16, and 18a have
+shipped — a v1.0 pilot can proceed now with the full governance
+surface, onboarding, and breadth/reciprocity dashboard. Agents 12,
+14 (lifecycle), and 15 are gated on pilot telemetry and federation
+experience respectively.

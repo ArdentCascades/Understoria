@@ -144,7 +144,11 @@ export function computeAttentionItems(
     if (t.status !== "awaiting_confirmation") continue;
     const project = projectByKey.get(t.projectId);
     if (!project) continue;
-    if (project.organizerKey !== currentMember.publicKey) continue;
+    if (
+      project.organizerKey !== currentMember.publicKey &&
+      !project.coOrganizerKeys.includes(currentMember.publicKey)
+    )
+      continue;
     if (t.completedBy === currentMember.publicKey) continue;
 
     const completerName =
