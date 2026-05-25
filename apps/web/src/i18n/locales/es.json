@@ -366,6 +366,15 @@
       "stillOn": "Sigo en ello",
       "release": "Liberarla para otra persona",
       "openProject": "Abrir proyecto"
+    },
+    "postClaimed": {
+      "needLine": "{{name}} se ofrece a tu necesidad: {{title}}",
+      "offerLine": "{{name}} acepta tu oferta: {{title}}",
+      "hint": "Alguien viene a ayudar. Toca para ver la publicacion."
+    },
+    "vouchReceived": {
+      "line": "{{name}} respondio por ti.",
+      "hint": "Cada aval te acerca al estatus de confianza."
     }
   },
   "board": {

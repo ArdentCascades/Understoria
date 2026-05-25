@@ -12,6 +12,7 @@
 import { describe, expect, it } from "vitest";
 import { computeAttentionItems } from "./attention";
 import type { Member, Post, Project, ProjectTask } from "@/types";
+import type { SignedVouch } from "@/lib/vouch";
 
 const nodeId = "node_attn";
 
@@ -292,5 +293,154 @@ describe("computeAttentionItems", () => {
     if (items[0].kind === "confirm_exchange") {
       expect(items[0].counterpartyName).toBe("another community member");
     }
+  });
+
+  it("surfaces 'post_claimed' when a NEED the member posted is claimed", () => {
+    const p = post({
+      postedBy: "alice",
+      claimedBy: "bob",
+      status: "claimed",
+      type: "NEED",
+      title: "Fix fence",
+    });
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [p],
+      projects: [],
+      projectTasks: [],
+      members: [alice, bob],
+    });
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      kind: "post_claimed",
+      postType: "NEED",
+      claimerName: "Bob",
+      postTitle: "Fix fence",
+    });
+  });
+
+  it("surfaces 'post_claimed' when an OFFER the member posted is accepted", () => {
+    const p = post({
+      postedBy: "alice",
+      claimedBy: "carmen",
+      status: "claimed",
+      type: "OFFER",
+      title: "Spanish tutoring",
+    });
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [p],
+      projects: [],
+      projectTasks: [],
+      members: [alice, carmen],
+    });
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      kind: "post_claimed",
+      postType: "OFFER",
+      claimerName: "Carmen",
+    });
+  });
+
+  it("does NOT surface 'post_claimed' for posts the member didn't author", () => {
+    const p = post({
+      postedBy: "bob",
+      claimedBy: "carmen",
+      status: "claimed",
+    });
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [p],
+      projects: [],
+      projectTasks: [],
+      members: [alice, bob, carmen],
+    });
+    expect(items).toEqual([]);
+  });
+
+  it("does NOT surface 'post_claimed' when the poster claimed their own post", () => {
+    const p = post({
+      postedBy: "alice",
+      claimedBy: "alice",
+      status: "claimed",
+    });
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [p],
+      projects: [],
+      projectTasks: [],
+      members: [alice],
+    });
+    expect(items).toEqual([]);
+  });
+
+  it("surfaces 'vouch_received' for vouches within the 7-day window", () => {
+    const now = 1_000_000;
+    const vouch: SignedVouch = {
+      id: "v1",
+      voucherKey: "bob",
+      voucheeKey: "alice",
+      kind: "manual",
+      createdAt: now - 2 * 24 * 60 * 60 * 1000, // 2 days ago
+      signature: "sig",
+    };
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [],
+      projects: [],
+      projectTasks: [],
+      members: [alice, bob],
+      vouches: [vouch],
+      now,
+    });
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      kind: "vouch_received",
+      voucherName: "Bob",
+    });
+  });
+
+  it("does NOT surface vouches older than 7 days", () => {
+    const now = 1_000_000;
+    const vouch: SignedVouch = {
+      id: "v1",
+      voucherKey: "bob",
+      voucheeKey: "alice",
+      kind: "manual",
+      createdAt: now - 8 * 24 * 60 * 60 * 1000, // 8 days ago
+      signature: "sig",
+    };
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [],
+      projects: [],
+      projectTasks: [],
+      members: [alice, bob],
+      vouches: [vouch],
+      now,
+    });
+    expect(items).toEqual([]);
+  });
+
+  it("does NOT surface vouches for other members", () => {
+    const now = 1_000_000;
+    const vouch: SignedVouch = {
+      id: "v1",
+      voucherKey: "alice",
+      voucheeKey: "carmen",
+      kind: "manual",
+      createdAt: now - 1 * 24 * 60 * 60 * 1000,
+      signature: "sig",
+    };
+    const items = computeAttentionItems({
+      currentMember: alice,
+      posts: [],
+      projects: [],
+      projectTasks: [],
+      members: [alice, carmen],
+      vouches: [vouch],
+      now,
+    });
+    expect(items).toEqual([]);
   });
 });
