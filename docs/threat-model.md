@@ -171,6 +171,39 @@ We are not trying to protect against:
   sits below an explanatory note that reminds members what gets
   sent. Tracked work.
 
+- **Public task check-in chip reveals claim duration.** When a
+  claimed task crosses both the `taskNeedsHelpDays` floor and
+  the `taskCheckInGraceDays` silence window, a community-visible
+  "could use more hands" chip appears on the task row. This is a
+  new exposure surface: any member viewing the project page can
+  infer that *some* member claimed this task a while ago and has
+  been unresponsive to private check-in prompts.
+  Mitigations already in place: the claimer's name is dropped
+  from the public row once the chip fires (the task is
+  "community work again"); the tooltip is non-numeric (no day
+  count); the grace window means a claimer who is responding to
+  private nudges will never trigger the public chip. The
+  remaining exposure is structural: a task's *existence* on the
+  "needs more hands" list is itself a signal about the claim
+  lifecycle. This is deemed acceptable because the alternative
+  (no community signal) leaves tasks silently stuck. Communities
+  can tune or effectively disable the chip by setting
+  `taskNeedsHelpDays` very high.
+
+- **Proposal close button reveals closer timing.** When a member
+  presses "Close as passed" on a proposal that has met consensus
+  conditions, their action writes a `closedAt` timestamp.
+  Federated peer nodes pulling proposals can observe this
+  timestamp. The previous design (auto-close via `useEffect`)
+  was worse: it fired on the first browser to load the page,
+  leaking who-is-online-when by accident. The current design
+  makes closing an intentional governance act — the member
+  choosing to close is performing a visible community function,
+  analogous to a meeting facilitator calling a consensus vote
+  done. The `closedBy` field does not exist (no identity is
+  recorded), so the exposure is limited to timing. Risk is low
+  but worth noting for federation threat modeling.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
