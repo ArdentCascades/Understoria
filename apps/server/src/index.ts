@@ -22,6 +22,7 @@ import { readConfigFromEnv } from "./config.js";
 import { buildServer } from "./server.js";
 import {
   createExchangeStore,
+  createInviteStore,
   createPeerPullStore,
   createPostStore,
   createVouchStore,
@@ -41,6 +42,7 @@ async function main(): Promise<void> {
     store: createExchangeStore(database),
     vouchStore: createVouchStore(database),
     postStore: createPostStore(database),
+    inviteStore: createInviteStore(database),
     pullStore: createPeerPullStore(database),
     onError: (peerUrl, err) =>
       app.log.warn({ peerUrl, err }, "peer pull failed"),

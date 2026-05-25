@@ -11,13 +11,15 @@
  */
 import {
   verifyExchange,
+  verifyInvite,
   verifyPost,
   verifyVouch,
 } from "@understoria/shared/crypto";
 import type { Post } from "@understoria/shared/types";
-import { parseExchange, parsePost, parseVouch } from "./validate.js";
+import { parseExchange, parseInvite, parsePost, parseVouch } from "./validate.js";
 import type {
   ExchangeStore,
+  InviteStore,
   PeerPullStore,
   PostStore,
   PullRecordKind,
@@ -254,9 +256,62 @@ export async function pullPostsFromPeer(opts: {
   };
 }
 
+export async function pullInvitesFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: InviteStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "invites", since, maxRows);
+  const rows = await fetchAndExtract(fetcher, url, peerUrl, "invites");
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestCreatedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseInvite(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const invite = parsed.value;
+    if (!verifyInvite(invite)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(invite.token)) {
+      duplicateCount += 1;
+      if (latestCreatedAt === null || invite.createdAt > latestCreatedAt) {
+        latestCreatedAt = invite.createdAt;
+      }
+      continue;
+    }
+    store.insert(invite);
+    insertedCount += 1;
+    if (latestCreatedAt === null || invite.createdAt > latestCreatedAt) {
+      latestCreatedAt = invite.createdAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "invite",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestCreatedAt,
+  };
+}
+
 function buildUrl(
   peerUrl: string,
-  path: "exchanges" | "vouches" | "posts",
+  path: "exchanges" | "vouches" | "posts" | "invites",
   since: number | null,
   limit: number,
 ): string {
@@ -273,7 +328,7 @@ async function fetchAndExtract(
   fetcher: Fetcher,
   url: string,
   peerUrl: string,
-  arrayKey: "exchanges" | "vouches" | "posts",
+  arrayKey: "exchanges" | "vouches" | "posts" | "invites",
 ): Promise<unknown[]> {
   const response = await fetcher(url);
   if (!response.ok) {
@@ -306,6 +361,7 @@ export interface PullWorkerOptions {
   store: ExchangeStore;
   vouchStore: VouchStore;
   postStore: PostStore;
+  inviteStore: InviteStore;
   pullStore: PeerPullStore;
   fetcher?: Fetcher;
   /** Called for unexpected errors (one peer failing doesn't stop the
@@ -322,6 +378,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     store,
     vouchStore,
     postStore,
+    inviteStore,
     pullStore,
     fetcher = (url) => fetch(url),
     onError = (peerUrl, err) =>
@@ -340,7 +397,9 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         ? state?.lastCompletedAt ?? null
         : kind === "vouch"
           ? state?.lastVouchCreatedAt ?? null
-          : state?.lastPostCreatedAt ?? null;
+          : kind === "post"
+            ? state?.lastPostCreatedAt ?? null
+            : state?.lastInviteCreatedAt ?? null;
     try {
       const result =
         kind === "exchange"
@@ -352,12 +411,19 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
                 fetcher,
                 store: vouchStore,
               })
-            : await pullPostsFromPeer({
-                peerUrl,
-                since,
-                fetcher,
-                store: postStore,
-              });
+            : kind === "post"
+              ? await pullPostsFromPeer({
+                  peerUrl,
+                  since,
+                  fetcher,
+                  store: postStore,
+                })
+              : await pullInvitesFromPeer({
+                  peerUrl,
+                  since,
+                  fetcher,
+                  store: inviteStore,
+                });
       pullStore.recordSuccess({
         peerUrl,
         kind,
@@ -386,6 +452,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
       pullKind(url, "exchange"),
       pullKind(url, "vouch"),
       pullKind(url, "post"),
+      pullKind(url, "invite"),
     ]);
     const results = await Promise.all(tasks);
     return results.filter((r): r is PullResult => r !== null);

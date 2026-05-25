@@ -125,11 +125,12 @@ export interface PeerPullStateRow {
   lastCompletedAt: number | null;
   lastVouchCreatedAt: number | null;
   lastPostCreatedAt: number | null;
+  lastInviteCreatedAt: number | null;
   lastError: string | null;
   lastPulledCount: number;
 }
 
-export type PullRecordKind = "exchange" | "vouch" | "post";
+export type PullRecordKind = "exchange" | "vouch" | "post" | "invite";
 
 export interface PeerPullStore {
   get(peerUrl: string): PeerPullStateRow | null;
@@ -288,6 +289,18 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '5')",
+    ).run();
+  }
+
+  // Schema v6 — invite pull cursor. Adds per-kind cursor column for
+  // invite pull state, same pattern as vouches/posts.
+  if (current < 6) {
+    db.exec(`
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_invite_created_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '6')",
     ).run();
   }
 }
@@ -572,6 +585,19 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       last_post_created_at = COALESCE(@latestSeenAt, last_post_created_at),
       last_pulled_count = @pulledCount
   `);
+  const successInviteStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at, last_invite_created_at,
+      last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_invite_created_at = COALESCE(@latestSeenAt, last_invite_created_at),
+      last_pulled_count = @pulledCount
+  `);
   const failureStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_error, last_pulled_count
@@ -597,7 +623,9 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
           ? successExchangeStmt
           : kind === "vouch"
             ? successVouchStmt
-            : successPostStmt;
+            : kind === "post"
+              ? successPostStmt
+              : successInviteStmt;
       stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
@@ -613,6 +641,7 @@ interface PeerPullStateRowSqlite {
   last_completed_at: number | null;
   last_vouch_created_at: number | null;
   last_post_created_at: number | null;
+  last_invite_created_at: number | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -625,6 +654,7 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
     lastCompletedAt: r.last_completed_at,
     lastVouchCreatedAt: r.last_vouch_created_at,
     lastPostCreatedAt: r.last_post_created_at,
+    lastInviteCreatedAt: r.last_invite_created_at,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };
