@@ -263,6 +263,25 @@ export interface SignedVouch extends VouchPayload {
   signature: string;
 }
 
+/**
+ * Cryptographic invite — a signed, single-use token shared out-of-band
+ * (Signal, paper, in-person) that lets a new member join with the
+ * inviter's vouch. Federated to the community node so peer nodes can
+ * discover and verify cross-node invites.
+ */
+export interface InvitePayload {
+  token: string;
+  inviterKey: string;
+  inviterName: string;
+  nodeId: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
+export interface SignedInvite extends InvitePayload {
+  signature: string;
+}
+
 export interface CommunityStats {
   totalHoursExchanged: number;
   totalExchanges: number;

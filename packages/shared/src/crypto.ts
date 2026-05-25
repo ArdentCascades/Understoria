@@ -23,8 +23,10 @@ import { b64decode, b64encode, utf8encode } from "./bytes.js";
 import type {
   Category,
   Exchange,
+  InvitePayload,
   Post,
   PostPayload,
+  SignedInvite,
   SignedVouch,
   VouchPayload,
 } from "./types.js";
@@ -198,4 +200,20 @@ export function verifyPost(post: Post): boolean {
     nodeId: post.nodeId,
   });
   return verify(payload, post.signature, post.postedBy);
+}
+
+export function canonicalInvitePayload(p: InvitePayload): string {
+  return JSON.stringify({
+    token: p.token,
+    inviterKey: p.inviterKey,
+    inviterName: p.inviterName,
+    nodeId: p.nodeId,
+    createdAt: p.createdAt,
+    expiresAt: p.expiresAt,
+  });
+}
+
+export function verifyInvite(invite: SignedInvite): boolean {
+  const payload = canonicalInvitePayload(invite);
+  return verify(payload, invite.signature, invite.inviterKey);
 }

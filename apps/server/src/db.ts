@@ -24,6 +24,7 @@ import type {
   Exchange,
   FlagReason,
   Post,
+  SignedInvite,
   SignedVouch,
 } from "@understoria/shared/types";
 
@@ -90,6 +91,13 @@ export interface PostStore {
   list(opts?: { since?: number; limit?: number }): PostRecord[];
   count(): number;
   has(id: string): boolean;
+}
+
+export interface InviteStore {
+  insert(invite: SignedInvite): void;
+  list(opts?: { since?: number; limit?: number }): SignedInvite[];
+  count(): number;
+  has(token: string): boolean;
 }
 
 /**
@@ -259,6 +267,27 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '4')",
+    ).run();
+  }
+
+  // Schema v5 — invites federation. Stores signed invites so peer
+  // nodes can discover cross-node invite availability.
+  if (current < 5) {
+    db.exec(`
+      CREATE TABLE invites (
+        token TEXT PRIMARY KEY,
+        inviter_key TEXT NOT NULL,
+        inviter_name TEXT NOT NULL,
+        node_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX invites_created_at_idx ON invites (created_at DESC);
+      CREATE INDEX invites_inviter_idx ON invites (inviter_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '5')",
     ).run();
   }
 }
@@ -634,4 +663,81 @@ function rowToExchange(r: ExchangeRow): Exchange {
     if (r.flag_reason) out.flagReason = r.flag_reason as FlagReason;
   }
   return out;
+}
+
+export function createInviteStore(db: DatabaseType): InviteStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO invites (
+      token, inviter_key, inviter_name, node_id,
+      created_at, expires_at, signature
+    ) VALUES (
+      @token, @inviterKey, @inviterName, @nodeId,
+      @createdAt, @expiresAt, @signature
+    )
+  `);
+
+  const hasStmt = db.prepare("SELECT 1 FROM invites WHERE token = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM invites");
+
+  return {
+    insert(invite) {
+      insertStmt.run({
+        token: invite.token,
+        inviterKey: invite.inviterKey,
+        inviterName: invite.inviterName,
+        nodeId: invite.nodeId,
+        createdAt: invite.createdAt,
+        expiresAt: invite.expiresAt,
+        signature: invite.signature,
+      });
+    },
+
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM invites WHERE created_at > ?
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM invites
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as InviteRow[]).map(rowToInvite);
+    },
+
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+
+    has(token) {
+      return hasStmt.get(token) !== undefined;
+    },
+  };
+}
+
+interface InviteRow {
+  token: string;
+  inviter_key: string;
+  inviter_name: string;
+  node_id: string;
+  created_at: number;
+  expires_at: number;
+  signature: string;
+}
+
+function rowToInvite(r: InviteRow): SignedInvite {
+  return {
+    token: r.token,
+    inviterKey: r.inviter_key,
+    inviterName: r.inviter_name,
+    nodeId: r.node_id,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    signature: r.signature,
+  };
 }

@@ -40,23 +40,13 @@ import { uuid } from "./id";
  * downstream vouches can be re-evaluated in follow-up work.
  */
 
-export interface InvitePayload {
-  /** Unique single-use token (UUID). */
-  token: string;
-  /** Inviter's Ed25519 public key (base64). */
-  inviterKey: string;
-  /** Human-readable inviter label (pseudonym). Not authoritative — the
-   * redeeming node should also show the inviter's key hash. */
-  inviterName: string;
-  /** Node that issued the invite. Advisory only. */
-  nodeId: string;
-  createdAt: number;
-  expiresAt: number;
-}
-
-export interface SignedInvite extends InvitePayload {
-  signature: string;
-}
+import type {
+  InvitePayload,
+  SignedInvite,
+} from "@understoria/shared/types";
+import { canonicalInvitePayload } from "@understoria/shared/crypto";
+export type { InvitePayload, SignedInvite };
+export { canonicalInvitePayload };
 
 const DEFAULT_EXPIRY_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 
@@ -67,17 +57,6 @@ export interface CreateInviteInput {
   nodeId: string;
   expiresInMs?: number;
   now?: number;
-}
-
-export function canonicalInvitePayload(p: InvitePayload): string {
-  return JSON.stringify({
-    token: p.token,
-    inviterKey: p.inviterKey,
-    inviterName: p.inviterName,
-    nodeId: p.nodeId,
-    createdAt: p.createdAt,
-    expiresAt: p.expiresAt,
-  });
 }
 
 export function createInvite(input: CreateInviteInput): SignedInvite {
