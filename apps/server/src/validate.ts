@@ -24,6 +24,7 @@ import {
   type Exchange,
   type FlagReason,
   type Post,
+  type SignedInvite,
   type SignedVouch,
 } from "@understoria/shared/types";
 import type { PostRecord } from "./db.js";
@@ -47,6 +48,10 @@ export type ParseVouchResult =
 
 export type ParsePostResult =
   | { ok: true; value: PostRecord }
+  | { ok: false; error: string };
+
+export type ParseInviteResult =
+  | { ok: true; value: SignedInvite }
   | { ok: false; error: string };
 
 const VOUCH_KINDS: ReadonlySet<SignedVouch["kind"]> = new Set([
@@ -286,6 +291,62 @@ export function parsePost(input: unknown): ParsePostResult {
       expiresAt: r.expiresAt as number | null,
       locationZone: r.locationZone as string,
       nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+const INVITE_STRING_FIELDS = [
+  "token",
+  "inviterKey",
+  "inviterName",
+  "nodeId",
+  "signature",
+] as const;
+
+export function parseInvite(input: unknown): ParseInviteResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of INVITE_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (
+    typeof r.expiresAt !== "number" ||
+    !Number.isInteger(r.expiresAt) ||
+    r.expiresAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "expiresAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.createdAt as number) > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      token: r.token as string,
+      inviterKey: r.inviterKey as string,
+      inviterName: r.inviterName as string,
+      nodeId: r.nodeId as string,
+      createdAt: r.createdAt as number,
+      expiresAt: r.expiresAt as number,
       signature: r.signature as string,
     },
   };

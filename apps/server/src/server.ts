@@ -25,6 +25,7 @@ import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
 import {
   createExchangeStore,
+  createInviteStore,
   createPeerPullStore,
   createPostStore,
   createVouchStore,
@@ -35,6 +36,7 @@ import { registerExchangeRoutes } from "./routes/exchanges.js";
 import { registerConfigRoutes } from "./routes/config.js";
 import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
+import { registerInviteRoutes } from "./routes/invites.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 
 export interface BuildOptions {
@@ -136,12 +138,14 @@ export async function buildServer({
   const store = createExchangeStore(db);
   const vouchStore = createVouchStore(db);
   const postStore = createPostStore(db);
+  const inviteStore = createInviteStore(db);
   const pullStore = createPeerPullStore(db);
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });
   await registerVouchRoutes(app, { store: vouchStore });
   await registerPostRoutes(app, { store: postStore });
+  await registerInviteRoutes(app, { store: inviteStore });
   await registerConfigRoutes(app, { config });
   await registerPeersRoutes(app, {
     pullStore,
