@@ -253,8 +253,8 @@ The phase view below is a public summary.
 - [x] Community node server with Docker deployment
 - [x] Signed-exchange verification on the server
 - [x] Spanish translation
-- [ ] Federation protocol and cross-node exchanges
-- [ ] Posts / vouches / invites endpoints on the server
+- [x] Federation protocol and cross-node exchanges (server endpoints, pull loop, PWA surfacing done; full lifecycle sync pending)
+- [x] Posts / vouches / invites endpoints on the server
 - [ ] Organizing module: campaigns, power mapping, meeting tools
 
 ### Phase 4: Launch
@@ -274,7 +274,7 @@ agents, and the items that are deferred behind explicit gates.
 - [ ] Per-node configuration + operator transparency (Agent 11)
 - [ ] In-app onboarding & political literacy (Agent 16)
 - [ ] Breadth & reciprocity Dashboard additions (Agent 18a)
-- [ ] Shared "Decisions" surface for proposals, disputes, and recall (Agents 13 + 14, with reversibility tiers folded in)
+- [x] Shared "Decisions" surface for proposals, disputes, and recall (Agents 13 + 14, with reversibility tiers folded in)
 - [ ] Moderation queue and graduated sanctions (Agent 12)
 - [ ] Per-peer federation agreements (Agent 15)
 

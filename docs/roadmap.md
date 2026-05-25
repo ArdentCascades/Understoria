@@ -32,14 +32,14 @@ a maintenance owner.
 |---|-------|--------|------|
 | 1 | Core PWA | shipped | Board, exchange flow, credits, dashboard, achievements, profile, PWA shell |
 | 2 | Crypto & Identity | partial | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. **Pending:** E2E messaging (task 5) |
-| 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`. **Pending:** invites endpoint, PWA-side surfacing of cross-node records on the Board / Dashboard |
+| 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`, invites endpoint, invite pull loop, PWA-side cross-node post surfacing on the Board. **Pending:** cross-node exchange notification lifecycle sync, Dashboard cross-node stat aggregation |
 | 4 | Security & Opsec | partial | Threat model, opsec guide, panic button, anti-gaming safeguards. **Pending:** ongoing per-PR review |
 | 5 | Governance & Coop | partial | Code of Conduct, GOVERNANCE.md, trademark policy |
 | 6 | (reserved) | — | — |
 | 7 | Organizing Integration | not started | Campaigns, power mapping, meeting tools |
 | 8 | (reserved) | — | — |
 | 9 | Documentation & i18n | partial | Member/operator/organizer/developer/quickstart guides, political-education, English + Spanish |
-| 10 | Community Projects & Momentum | partial | Project + task lifecycle, signed task-completion exchanges, milestones, momentum tracking, project sparkline, four project achievements (Groundbreaker, Crew Member, Momentum Maker, Keystone). **Still pending from the original Phase 3 plan:** custom milestones beyond auto-25/50/75/100, federation of cross-node task claims, 48-hour auto-confirm, dependency enforcement |
+| 10 | Community Projects & Momentum | partial | Project + task lifecycle, signed task-completion exchanges, milestones, momentum tracking, project sparkline, four project achievements (Groundbreaker, Crew Member, Momentum Maker, Keystone). Co-organizer support shipped (Agent 10 Phase 3, schema v13): `coOrganizerKeys`, `isOrganizer()`, `addCoOrganizer()`/`removeCoOrganizer()`, co-organizer UI. **Still pending from the original Phase 3 plan:** custom milestones beyond auto-25/50/75/100, federation of cross-node task claims, 48-hour auto-confirm, dependency enforcement |
 
 Agents 6 and 8 are intentional gaps — they were placeholders that
 collapsed into adjacent agents during scoping. Numbering is preserved
@@ -207,8 +207,10 @@ main Ostrom track.
                               │
                               ▼
                  ┌─────────────────────────────────────────────┐
-   next          │ F. Finish Agent 3 (federation pull loop)    │
-                 │    and the missing server endpoints         │
+   next          │ F. Agent 3 core scope DONE (pull loop,      │
+                 │    invites endpoint, PWA surfacing).        │
+                 │    Remaining: cross-node lifecycle sync +   │
+                 │    dashboard aggregation.                   │
                  │    Agent 15 is meaningless without this     │
                  └────────────┬────────────────────────────────┘
                               │
@@ -385,8 +387,9 @@ concrete check that catches it before it ships.
   *Check:* the next free Dexie version is *reserved* by the first
   PR to land. The second PR rebases onto the next version.
   `docs/roadmap.md` "Migration strategy" tracks the reservation.
-  Current state: v10 = votes, v11 = task check-in, v12 = dispute
-  migration. Next free version: **13**.
+  Current state: PWA v10 = votes, v11 = task check-in, v12 = dispute
+  migration, v13 = co-organizer support. Server is at v7. Next free
+  PWA version: **14**. Next free server version: **8**.
 
 - **Function signature changes without exhaustive call-site
   updates.** `balanceFor()` gaining two new parameters touches

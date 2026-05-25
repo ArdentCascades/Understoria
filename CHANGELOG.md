@@ -10,6 +10,101 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Design principles with contextual "(why?)" tooltips.** Eight
+  design principles (equal time, no leaderboards, no notifications,
+  solidarity not shame, community authority, asking never gated,
+  privacy precondition, deliberation over speed) each paired with a
+  historical example. New `WhyTooltip` component placed at six
+  points (balance card, dashboard, attention section, community
+  settings, proposal tier, task chip). "Design principles" panel
+  in Profile > Learn section. Content lives in
+  `content/design-principles.ts`.
+
+- **Cross-node claim notifications.** When a member claims a
+  cross-node post, a lightweight claim record is pushed to the
+  outbox so the poster's node learns about it. New `ClaimRecord`
+  type (unsigned). Server: `POST /claims` + `GET /claims`
+  endpoints, schema v7. PWA: `pullFederatedClaims()` applies
+  incoming claims to local posts, triggering the existing
+  `post_claimed` attention item.
+
+- **PWA pulls and surfaces cross-node posts (Agent 3 completion).**
+  New `lib/federationSync.ts` fetches `GET /posts` from the
+  community node on startup, inserts into local IndexedDB with
+  lifecycle defaults. `PostCard` gains `isCrossNode` prop showing
+  an indigo "Peer community" badge. Cross-node posts are fully
+  interactive (claimable + exchangeable).
+
+- **Federation: invite pull in peer worker.** Extended
+  `peerPull.ts` to pull `/invites` from peers (fourth record
+  kind). Server schema v6 adds `last_invite_created_at` cursor
+  column.
+
+- **Federation: invites endpoint on community server.**
+  `POST /invites` + `GET /invites`. `InvitePayload` +
+  `SignedInvite` types moved to shared package.
+  `verifyInvite()` + `canonicalInvitePayload()` added to shared
+  crypto. Server schema v5 adds `invites` table.
+
+- **Co-organizer support (Agent 10 Phase 3).**
+  `Project.coOrganizerKeys: string[]`. `isOrganizer()` helper.
+  `addCoOrganizer()` / `removeCoOrganizer()` (primary-only).
+  Co-organizers can confirm tasks, add tasks, launch / pause /
+  resume / complete. `CoOrganizerSection` UI on ProjectDetail.
+  Schema v13 migration backfills `coOrganizerKeys: []`. Attention
+  items for task confirmation surface for co-organizers.
+
+- **Duplicate "Start a project" button removed.** EmptyState CTA
+  on Projects tab removed since the FAB already serves as the
+  call-to-action.
+
+- **Agent 16 completed — opsec guide + contextual hints.** In-app
+  opsec guide (6 sections from `docs/opsec-guide.md`) in
+  Profile > Learn. Three contextual first-time hints: Board
+  orientation, balance explanation, invite explanation. Generic
+  `ContextualHint` component.
+
+- **Impact reflection fields required for hard-tier proposals.**
+  All four fields (1-year, 5-year, reversal path, vulnerable
+  impact) are now enforced programmatically when tier is "hard".
+  Inline validation errors on submit.
+
+- **Roadmap updated for shipped agents.** Agent 13 → shipped,
+  Agent 16 → shipped, ordering diagram redrawn, schema version
+  tracking updated.
+
+- **Threat model §7 entries.** Two new entries: public task
+  check-in chip exposure + proposal close button timing channel.
+
+- **Rename TaskStaleness → TaskCheckInState.** Type, function,
+  files, and local variables renamed for ethos consistency.
+
+- **Auto-close replaced with manual consensus button.** The
+  `useEffect` that auto-closed proposals is removed. New
+  "Close as passed" button visible when consensus conditions are
+  met. `closedReason` is now localized. `pickProposalsToAutoPass`
+  removed (dead code).
+
+- **Post-claimed + vouch-received attention items.** Two new
+  `AttentionItem` kinds in the pull-based attention surface.
+  `post_claimed` shows until the exchange progresses.
+  `vouch_received` time-boxed to 7 days.
+
+- **Solidarity-not-shame fixes for the public task chip.**
+  Claimer's name hidden from public row when "could use more
+  hands" fires. New `taskCheckInGraceDays` config field
+  (default 2) — public chip requires both claim-age floor AND
+  silence since last ack. Tooltip made non-numeric.
+
+- **Board hides claimed posts + needs-answered stat.** Claimed
+  posts hidden by default with "Show N claimed" toggle. Dashboard
+  gains "Needs answered this week" stat card.
+
+- **Voting on proposals + consensus config.** Affirm / block /
+  abstain on proposals. `proposalDeliberationDays` +
+  `proposalMinAffirms` config fields. Manual "Close as passed"
+  button.
+
 - **Dispute migration into the unified Decisions table.** Per the
   roadmap (`docs/roadmap.md`), Agents 13 + 14 ship as one
   surface. v1 had disputes living in their own data shape (the
