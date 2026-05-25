@@ -155,6 +155,13 @@
     },
     "milestone": {
       "reached": "🎉 {{percent}}% of the way there!"
+    },
+    "coOrganizers": {
+      "title": "Co-organizers",
+      "intro": "Co-organizers can confirm tasks, add tasks, and pause or resume the project. Only the primary organizer can add or remove co-organizers.",
+      "add": "Add",
+      "remove": "Remove",
+      "selectPlaceholder": "Choose a member..."
     }
   },
   "urgency": {

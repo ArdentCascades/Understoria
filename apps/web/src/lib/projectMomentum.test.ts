@@ -23,6 +23,7 @@ function project(overrides: Partial<Project> = {}): Project {
     description: "",
     category: "infrastructure",
     organizerKey: "org",
+    coOrganizerKeys: [],
     status: "active",
     targetHours: 10,
     contributedHours: 0,

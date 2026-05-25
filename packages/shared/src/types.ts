@@ -318,6 +318,7 @@ export interface Project {
   description: string;
   category: ProjectCategory;
   organizerKey: string;
+  coOrganizerKeys: string[];
   status: ProjectStatus;
   /** Total estimated hours to complete the project. */
   targetHours: number;
