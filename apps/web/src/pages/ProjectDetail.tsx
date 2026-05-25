@@ -37,6 +37,7 @@ import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
 import { usePendingAction } from "@/lib/usePendingAction";
+import { WhyTooltip } from "@/components/WhyTooltip";
 import type {
   Member,
   Project,
@@ -465,6 +466,7 @@ function TaskRow({
               {"\u{1F91D}"}
             </span>
             {t("projects.task.needsMoreHands")}
+            <WhyTooltip principleId="solidarity-not-shame" />
           </span>
         )}
       </div>

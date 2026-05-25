@@ -19,6 +19,7 @@ import {
   resetNodeConfig,
 } from "@/db/nodeConfig";
 import type { NodeConfig } from "@/types";
+import { WhyTooltip } from "@/components/WhyTooltip";
 
 // Per the roadmap (Agent 11 stage A), this UI is a bootstrap measure:
 // any member can edit until Agent 13 (in-app governance) ships and
@@ -94,6 +95,7 @@ export function CommunitySettingsSection() {
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
         {t("profile.communitySettings.intro")}
+        <WhyTooltip principleId="community-authority" />
       </p>
       <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100">
         <p>{t("profile.communitySettings.bootstrapNote")}</p>
