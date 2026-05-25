@@ -344,7 +344,6 @@ function ProjectList({
     return (
       <EmptyState
         message={t("projects.empty")}
-        action={{ label: t("projects.fab"), to: "/project/new" }}
       />
     );
   }
