@@ -10,6 +10,28 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Task editing, project attention items, contributor
+  acknowledgment, and project cloning (Agent 10 continuation).**
+  Four organizer-facing features shipped together, extending the
+  co-organizer and project-management surface from Agent 10.
+  - **Task editing** — organizers can edit unclaimed tasks (title,
+    description, hours, urgency) via `editProjectTask()` in
+    `projects.ts`. Inline edit form on `TaskRow`.
+  - **Project attention items** — two new `AttentionItem` kinds:
+    `project_deadline_approaching` (fires 3 days before deadline)
+    and `project_paused_long` (fires after 7 days paused). Both
+    surface in the pull-based `AttentionSection` for organizers
+    and co-organizers.
+  - **Contributor acknowledgment** — optional thank-you note when
+    confirming a task completion. `confirmProjectTaskCompletion`
+    gains an optional 4th parameter; the note is stored in the
+    `task_confirmed` activity data.
+  - **Project cloning** — `cloneProject()` copies project metadata
+    and all tasks into a new draft. "Clone project" button in
+    `OrganizerControls`.
+
+  Tests: 498 passing. No schema bump. Lint, typecheck, build clean.
+
 - **Organizer handoff, project announcements, and bulk task
   quick-add (Agent 10 continuation).** Three organizer-facing
   features shipped together, all building on the co-organizer

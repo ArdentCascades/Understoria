@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { Member, NodeConfig, Post, Project, ProjectTask } from "@/types";
+import { canClaimTask } from "@/db/projects";
 import type { SignedVouch } from "@/lib/vouch";
 import {
   daysSinceClaim as daysSinceClaimHelper,
@@ -188,6 +189,12 @@ export function computeAttentionItems(
   if (input.config) {
     for (const t of projectTasks) {
       if (t.assignedTo !== currentMember.publicKey) continue;
+      if (t.dependencies.length > 0) {
+        const projectTasksForDep = projectTasks.filter(
+          (pt) => pt.projectId === t.projectId,
+        );
+        if (!canClaimTask(t, projectTasksForDep)) continue;
+      }
       const checkInState = taskCheckInState(t, input.config, input.now);
       if (checkInState !== "check_in_due") continue;
       const project = projectByKey.get(t.projectId);

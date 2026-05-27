@@ -28,6 +28,7 @@ import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
+import ProjectArchivePage from "@/pages/ProjectArchive";
 import MemberDetailPage from "@/pages/MemberDetail";
 import HelpPage from "@/pages/Help";
 import DisputesPage from "@/pages/Disputes";
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
+          <Route path="/projects/archive" element={<ProjectArchivePage />} />
           <Route path="/member/:publicKey" element={<MemberDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/disputes" element={<DisputesPage />} />

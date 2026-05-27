@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, type TrustStatus } from "@/lib/vouch";
@@ -276,11 +276,19 @@ export default function BoardPage() {
       )}
 
       {tab === "PROJECTS" && (
-        <ProjectList
-          projects={projects}
-          projectTasks={projectTasks}
-          memberName={memberName}
-        />
+        <>
+          <ProjectList
+            projects={projects}
+            projectTasks={projectTasks}
+            memberName={memberName}
+          />
+          <Link
+            to="/projects/archive"
+            className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          >
+            {t("projects.archive.viewArchive")}
+          </Link>
+        </>
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">

@@ -15,17 +15,23 @@ import { createMember } from "./seed";
 import {
   addCoOrganizer,
   addProjectTask,
+  archiveProject,
+  canClaimTask,
   claimProjectTask,
   completeProject,
   confirmProjectTaskCompletion,
   createProject,
+  detectCycle,
   handoffOrganizer,
   launchProject,
   markProjectTaskComplete,
   pauseProject,
   resumeProject,
+  setTaskDependencies,
+  unarchiveProject,
   unclaimProjectTask,
 } from "./projects";
+import type { ProjectTask } from "@/types";
 import { balanceFor } from "@/lib/timebank";
 import { verifyExchange } from "@/lib/crypto";
 
@@ -374,5 +380,239 @@ describe("handoffOrganizer", () => {
     await expect(
       handoffOrganizer(p.id, alice.publicKey, bob.publicKey),
     ).rejects.toThrow(/completed or archived/i);
+  });
+});
+
+// -- Task follows (dependencies) ---------------------------------------------
+
+function fakeTask(overrides: Partial<ProjectTask> & { id: string }): ProjectTask {
+  return {
+    projectId: "p1",
+    title: overrides.id,
+    description: "",
+    category: "other",
+    estimatedHours: 1,
+    urgency: "low",
+    requiredSkills: [],
+    assignedTo: null,
+    status: "open",
+    dependencies: [],
+    createdAt: Date.now(),
+    completedAt: null,
+    completedBy: null,
+    exchangeId: null,
+    claimedAt: null,
+    checkInAcknowledgedAt: null,
+    ...overrides,
+  };
+}
+
+describe("canClaimTask", () => {
+  it("returns true when a task has no dependencies", () => {
+    const task = fakeTask({ id: "a" });
+    expect(canClaimTask(task, [task])).toBe(true);
+  });
+
+  it("returns true when all dependencies are completed", () => {
+    const dep = fakeTask({ id: "dep", status: "completed" });
+    const task = fakeTask({ id: "a", dependencies: ["dep"] });
+    expect(canClaimTask(task, [dep, task])).toBe(true);
+  });
+
+  it("returns false when a dependency is still open", () => {
+    const dep = fakeTask({ id: "dep", status: "open" });
+    const task = fakeTask({ id: "a", dependencies: ["dep"] });
+    expect(canClaimTask(task, [dep, task])).toBe(false);
+  });
+
+  it("returns false when a dependency is claimed but not completed", () => {
+    const dep = fakeTask({ id: "dep", status: "claimed" });
+    const task = fakeTask({ id: "a", dependencies: ["dep"] });
+    expect(canClaimTask(task, [dep, task])).toBe(false);
+  });
+
+  it("returns false when any one of several dependencies is incomplete", () => {
+    const dep1 = fakeTask({ id: "dep1", status: "completed" });
+    const dep2 = fakeTask({ id: "dep2", status: "open" });
+    const task = fakeTask({ id: "a", dependencies: ["dep1", "dep2"] });
+    expect(canClaimTask(task, [dep1, dep2, task])).toBe(false);
+  });
+
+  it("returns false when a dependency id is not found in allTasks", () => {
+    const task = fakeTask({ id: "a", dependencies: ["nonexistent"] });
+    expect(canClaimTask(task, [task])).toBe(false);
+  });
+});
+
+describe("detectCycle", () => {
+  it("returns false for an empty dependency list", () => {
+    const a = fakeTask({ id: "a" });
+    expect(detectCycle("a", [], [a])).toBe(false);
+  });
+
+  it("returns true for a direct self-cycle", () => {
+    const a = fakeTask({ id: "a" });
+    expect(detectCycle("a", ["a"], [a])).toBe(true);
+  });
+
+  it("returns true for A → B → A", () => {
+    const a = fakeTask({ id: "a", dependencies: [] });
+    const b = fakeTask({ id: "b", dependencies: ["a"] });
+    // Proposing that A depends on B would create A → B → A
+    expect(detectCycle("a", ["b"], [a, b])).toBe(true);
+  });
+
+  it("returns false for a valid chain A → B → C (no cycle)", () => {
+    const c = fakeTask({ id: "c", dependencies: [] });
+    const b = fakeTask({ id: "b", dependencies: ["c"] });
+    const a = fakeTask({ id: "a", dependencies: [] });
+    // Proposing A depends on B: A → B → C — no cycle
+    expect(detectCycle("a", ["b"], [a, b, c])).toBe(false);
+  });
+
+  it("returns true for a longer cycle A → B → C → A", () => {
+    const a = fakeTask({ id: "a", dependencies: [] });
+    const b = fakeTask({ id: "b", dependencies: ["a"] });
+    const c = fakeTask({ id: "c", dependencies: ["b"] });
+    // Proposing A depends on C: A → C → B → A
+    expect(detectCycle("a", ["c"], [a, b, c])).toBe(true);
+  });
+
+  it("returns false when the dependency target does not exist", () => {
+    const a = fakeTask({ id: "a" });
+    expect(detectCycle("a", ["ghost"], [a])).toBe(false);
+  });
+});
+
+describe("setTaskDependencies", () => {
+  beforeEach(reset);
+
+  it("sets dependencies on an open task", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const t1 = await addProjectTask(p.id, org.publicKey, {
+      title: "First",
+      description: "",
+      category: "other",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    const t2 = await addProjectTask(p.id, org.publicKey, {
+      title: "Second",
+      description: "",
+      category: "other",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    const updated = await setTaskDependencies(
+      t2.id,
+      org.publicKey,
+      [t1.id],
+    );
+    expect(updated.dependencies).toEqual([t1.id]);
+  });
+
+  it("rejects a cycle", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const t1 = await addProjectTask(p.id, org.publicKey, {
+      title: "First",
+      description: "",
+      category: "other",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await setTaskDependencies(t1.id, org.publicKey, []);
+    // Self-cycle via setTaskDependencies
+    await expect(
+      setTaskDependencies(t1.id, org.publicKey, [t1.id]),
+    ).rejects.toThrow(/cycle/i);
+  });
+
+  it("prevents claiming a task with unmet dependencies", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    const t1 = await addProjectTask(p.id, org.publicKey, {
+      title: "First",
+      description: "",
+      category: "other",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    const t2 = await addProjectTask(p.id, org.publicKey, {
+      title: "Second",
+      description: "",
+      category: "other",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await setTaskDependencies(t2.id, org.publicKey, [t1.id]);
+    await expect(
+      claimProjectTask(t2.id, helper.publicKey),
+    ).rejects.toThrow(/follows/i);
+  });
+});
+
+describe("archive lifecycle", () => {
+  beforeEach(reset);
+
+  it("happy path: create + launch + complete + archive → status === archived", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    await completeProject(p.id, org.publicKey);
+    const archived = await archiveProject(p.id, org.publicKey);
+    expect(archived.status).toBe("archived");
+    const activity = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "project_archived",
+    );
+    expect(activity).toHaveLength(1);
+  });
+
+  it("rejects non-primary organizer (co-organizer tries to archive)", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
+    const p = await aProject(org);
+    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await launchProject(p.id, org.publicKey);
+    await completeProject(p.id, org.publicKey);
+    await expect(archiveProject(p.id, coOrg.publicKey)).rejects.toThrow(
+      /primary organizer/i,
+    );
+  });
+
+  it("rejects non-completed project (active project)", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    await expect(archiveProject(p.id, org.publicKey)).rejects.toThrow(
+      /completed/i,
+    );
+  });
+
+  it("unarchive: archive then unarchive → status === completed", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    await completeProject(p.id, org.publicKey);
+    await archiveProject(p.id, org.publicKey);
+    const restored = await unarchiveProject(p.id, org.publicKey);
+    expect(restored.status).toBe("completed");
+    const activity = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "project_unarchived",
+    );
+    expect(activity).toHaveLength(1);
   });
 });

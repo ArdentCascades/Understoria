@@ -420,6 +420,8 @@ export type ProjectActivityType =
   | "project_paused"
   | "project_resumed"
   | "project_completed"
+  | "project_archived"
+  | "project_unarchived"
   | "milestone_reached"
   | "organizer_handoff"
   | "announcement";
