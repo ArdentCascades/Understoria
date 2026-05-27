@@ -60,6 +60,10 @@ export function utf8encode(s: string): Uint8Array {
   return out;
 }
 
+export function utf8decode(bytes: Uint8Array): string {
+  return new TextDecoder().decode(bytes);
+}
+
 export function randomBytes(n: number): Uint8Array {
   const out = freshBytes(n);
   if (typeof crypto !== "undefined" && crypto.getRandomValues) {

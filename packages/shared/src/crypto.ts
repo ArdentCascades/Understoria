@@ -19,7 +19,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import nacl from "tweetnacl";
-import { b64decode, b64encode, utf8encode } from "./bytes.js";
+import ed2curve from "ed2curve";
+import { b64decode, b64encode, utf8decode, utf8encode } from "./bytes.js";
 import type {
   Category,
   Exchange,
@@ -216,4 +217,65 @@ export function canonicalInvitePayload(p: InvitePayload): string {
 export function verifyInvite(invite: SignedInvite): boolean {
   const payload = canonicalInvitePayload(invite);
   return verify(payload, invite.signature, invite.inviterKey);
+}
+
+// -- E2E messaging (Agent 2 task 5) ----------------------------------------
+
+export interface EncryptedMessage {
+  nonce: string;
+  ciphertext: string;
+}
+
+export function deriveEncryptionKeyPair(ed25519SecretKeyB64: string): {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
+} {
+  const edSk = b64decode(ed25519SecretKeyB64);
+  const x25519Sk = ed2curve.convertSecretKey(edSk);
+  const edPk = edSk.subarray(32);
+  const x25519Pk = ed2curve.convertPublicKey(edPk);
+  if (!x25519Pk) throw new Error("Failed to convert Ed25519 public key to X25519");
+  return { publicKey: x25519Pk, secretKey: x25519Sk };
+}
+
+export function ed25519PkToX25519(ed25519PublicKeyB64: string): Uint8Array {
+  const edPk = b64decode(ed25519PublicKeyB64);
+  const x25519Pk = ed2curve.convertPublicKey(edPk);
+  if (!x25519Pk) throw new Error("Failed to convert Ed25519 public key to X25519");
+  return x25519Pk;
+}
+
+export function encryptMessage(
+  plaintext: string,
+  senderEd25519SecretKeyB64: string,
+  recipientEd25519PublicKeyB64: string,
+): EncryptedMessage {
+  const senderKp = deriveEncryptionKeyPair(senderEd25519SecretKeyB64);
+  const recipientX25519Pk = ed25519PkToX25519(recipientEd25519PublicKeyB64);
+  const nonce = nacl.randomBytes(nacl.box.nonceLength);
+  const messageBytes = utf8encode(plaintext);
+  const ciphertext = nacl.box(messageBytes, nonce, recipientX25519Pk, senderKp.secretKey);
+  if (!ciphertext) throw new Error("Encryption failed");
+  return {
+    nonce: b64encode(nonce),
+    ciphertext: b64encode(ciphertext),
+  };
+}
+
+export function decryptMessage(
+  encrypted: EncryptedMessage,
+  recipientEd25519SecretKeyB64: string,
+  senderEd25519PublicKeyB64: string,
+): string | null {
+  const recipientKp = deriveEncryptionKeyPair(recipientEd25519SecretKeyB64);
+  const senderX25519Pk = ed25519PkToX25519(senderEd25519PublicKeyB64);
+  const nonce = b64decode(encrypted.nonce);
+  const ciphertext = b64decode(encrypted.ciphertext);
+  const plaintext = nacl.box.open(ciphertext, nonce, senderX25519Pk, recipientKp.secretKey);
+  if (!plaintext) return null;
+  return utf8decode(plaintext);
+}
+
+export function conversationId(keyA: string, keyB: string): string {
+  return keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
 }
