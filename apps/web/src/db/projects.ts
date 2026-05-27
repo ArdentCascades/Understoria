@@ -226,6 +226,62 @@ export async function completeProject(
   );
 }
 
+export async function archiveProject(
+  projectId: string,
+  organizerKey: string,
+): Promise<Project> {
+  return db.transaction(
+    "rw",
+    [db.projects, db.projectActivity],
+    async () => {
+      const p = await db.projects.get(projectId);
+      if (!p) throw new Error("Project not found.");
+      if (p.organizerKey !== organizerKey)
+        throw new Error("Only the primary organizer can archive.");
+      if (p.status !== "completed")
+        throw new Error("Only completed projects can be archived.");
+      const updated: Project = { ...p, status: "archived" };
+      await db.projects.put(updated);
+      await logActivity(
+        projectId,
+        "project_archived",
+        organizerKey,
+        {},
+        p.nodeId,
+      );
+      return updated;
+    },
+  );
+}
+
+export async function unarchiveProject(
+  projectId: string,
+  organizerKey: string,
+): Promise<Project> {
+  return db.transaction(
+    "rw",
+    [db.projects, db.projectActivity],
+    async () => {
+      const p = await db.projects.get(projectId);
+      if (!p) throw new Error("Project not found.");
+      if (p.organizerKey !== organizerKey)
+        throw new Error("Only the primary organizer can unarchive.");
+      if (p.status !== "archived")
+        throw new Error("Only archived projects can be unarchived.");
+      const updated: Project = { ...p, status: "completed" };
+      await db.projects.put(updated);
+      await logActivity(
+        projectId,
+        "project_unarchived",
+        organizerKey,
+        {},
+        p.nodeId,
+      );
+      return updated;
+    },
+  );
+}
+
 async function updateProjectStatus(
   projectId: string,
   organizerKey: string,

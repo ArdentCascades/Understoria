@@ -208,6 +208,34 @@
       "titlePlaceholder": "Title for the new copy",
       "submit": "Create clone",
       "submitting": "Cloning..."
+    },
+    "archive": {
+      "button": "Archive project",
+      "unarchive": "Unarchive",
+      "title": "Project archive",
+      "subtitle": "Completed and archived projects",
+      "empty": "No archived projects yet.",
+      "viewArchive": "View archive"
+    },
+    "history": {
+      "title": "History"
+    },
+    "activityType": {
+      "project_created": "Project created",
+      "task_added": "Task added",
+      "task_claimed": "Task claimed",
+      "task_unclaimed": "Task released",
+      "task_completed": "Task marked complete",
+      "task_confirmed": "Task confirmed",
+      "project_launched": "Project launched",
+      "project_paused": "Project paused",
+      "project_resumed": "Project resumed",
+      "project_completed": "Project completed",
+      "project_archived": "Project archived",
+      "project_unarchived": "Project unarchived",
+      "milestone_reached": "Milestone reached",
+      "organizer_handoff": "Organizer handoff",
+      "announcement": "Update posted"
     }
   },
   "urgency": {

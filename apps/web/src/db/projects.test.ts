@@ -15,6 +15,7 @@ import { createMember } from "./seed";
 import {
   addCoOrganizer,
   addProjectTask,
+  archiveProject,
   canClaimTask,
   claimProjectTask,
   completeProject,
@@ -27,6 +28,7 @@ import {
   pauseProject,
   resumeProject,
   setTaskDependencies,
+  unarchiveProject,
   unclaimProjectTask,
 } from "./projects";
 import type { ProjectTask } from "@/types";
@@ -560,5 +562,57 @@ describe("setTaskDependencies", () => {
     await expect(
       claimProjectTask(t2.id, helper.publicKey),
     ).rejects.toThrow(/follows/i);
+  });
+});
+
+describe("archive lifecycle", () => {
+  beforeEach(reset);
+
+  it("happy path: create + launch + complete + archive → status === archived", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    await completeProject(p.id, org.publicKey);
+    const archived = await archiveProject(p.id, org.publicKey);
+    expect(archived.status).toBe("archived");
+    const activity = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "project_archived",
+    );
+    expect(activity).toHaveLength(1);
+  });
+
+  it("rejects non-primary organizer (co-organizer tries to archive)", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
+    const p = await aProject(org);
+    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await launchProject(p.id, org.publicKey);
+    await completeProject(p.id, org.publicKey);
+    await expect(archiveProject(p.id, coOrg.publicKey)).rejects.toThrow(
+      /primary organizer/i,
+    );
+  });
+
+  it("rejects non-completed project (active project)", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    await expect(archiveProject(p.id, org.publicKey)).rejects.toThrow(
+      /completed/i,
+    );
+  });
+
+  it("unarchive: archive then unarchive → status === completed", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    await completeProject(p.id, org.publicKey);
+    await archiveProject(p.id, org.publicKey);
+    const restored = await unarchiveProject(p.id, org.publicKey);
+    expect(restored.status).toBe("completed");
+    const activity = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "project_unarchived",
+    );
+    expect(activity).toHaveLength(1);
   });
 });

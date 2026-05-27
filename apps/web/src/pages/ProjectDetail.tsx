@@ -18,6 +18,7 @@ import { useToast } from "@/state/ToastContext";
 import {
   addCoOrganizer,
   addProjectTask,
+  archiveProject,
   bulkAddTasks,
   canClaimTask,
   claimProjectTask,
@@ -28,12 +29,14 @@ import {
   handoffOrganizer,
   isOrganizer,
   launchProject,
+  listActivityForProject,
   listAnnouncements,
   markProjectTaskComplete,
   pauseProject,
   postAnnouncement,
   removeCoOrganizer,
   resumeProject,
+  unarchiveProject,
   unclaimProjectTask,
 } from "@/db/projects";
 import { humanizeError } from "@/lib/humanizeError";
@@ -323,6 +326,10 @@ export default function ProjectDetailPage() {
         project.status !== "archived" && (
           <BulkTaskForm project={project} nodeId={nodeId} onRun={run} />
         )}
+
+      {(project.status === "archived" || project.status === "completed") && (
+        <HistoryTimeline projectId={project.id} memberMap={memberMap} />
+      )}
     </div>
   );
 }
@@ -503,6 +510,26 @@ function OrganizerControls({
               : t("projects.clone.submit")}
           </button>
         </form>
+      )}
+      {project.status === "completed" && currentMember?.publicKey === project.organizerKey && (
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={pending}
+          onClick={() => dispatch(() => archiveProject(project.id, project.organizerKey))}
+        >
+          {pending ? t("common.working") : t("projects.archive.button")}
+        </button>
+      )}
+      {project.status === "archived" && currentMember?.publicKey === project.organizerKey && (
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={pending}
+          onClick={() => dispatch(() => unarchiveProject(project.id, project.organizerKey))}
+        >
+          {pending ? t("common.working") : t("projects.archive.unarchive")}
+        </button>
       )}
     </div>
   );
@@ -1300,6 +1327,50 @@ function BulkTaskForm({
           </button>
         </div>
       </form>
+    </section>
+  );
+}
+
+function HistoryTimeline({
+  projectId,
+  memberMap,
+}: {
+  projectId: string;
+  memberMap: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const activities = useLiveQuery(
+    () => listActivityForProject(projectId),
+    [projectId],
+    [],
+  );
+  if (activities.length === 0) return null;
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        {t("projects.history.title")}
+      </h2>
+      <ul className="flex flex-col gap-2">
+        {activities.map((a) => (
+          <li key={a.id} className="flex items-start gap-2 text-sm">
+            <span className="shrink-0 text-xs text-moss-500">
+              {formatRelativeTime(a.createdAt)}
+            </span>
+            <span className="text-moss-700 dark:text-moss-200">
+              <span className="font-medium">
+                {memberMap.get(a.actorKey) ?? t("common.memberFallback")}
+              </span>
+              {" — "}
+              {t(`projects.activityType.${a.type}` as "projects.activityType.project_created")}
+              {a.type === "announcement" && (a.data as { body?: string }).body && (
+                <span className="ml-1 italic text-moss-500">
+                  {`"${((a.data as { body?: string }).body ?? "").slice(0, 80)}${((a.data as { body?: string }).body ?? "").length > 80 ? "..." : ""}"`}
+                </span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

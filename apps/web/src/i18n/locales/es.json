@@ -208,6 +208,34 @@
       "titlePlaceholder": "Titulo para la nueva copia",
       "submit": "Crear copia",
       "submitting": "Clonando..."
+    },
+    "archive": {
+      "button": "Archivar proyecto",
+      "unarchive": "Desarchivar",
+      "title": "Archivo de proyectos",
+      "subtitle": "Proyectos completados y archivados",
+      "empty": "Aun no hay proyectos archivados.",
+      "viewArchive": "Ver archivo"
+    },
+    "history": {
+      "title": "Historial"
+    },
+    "activityType": {
+      "project_created": "Proyecto creado",
+      "task_added": "Tarea agregada",
+      "task_claimed": "Tarea tomada",
+      "task_unclaimed": "Tarea liberada",
+      "task_completed": "Tarea marcada como completa",
+      "task_confirmed": "Tarea confirmada",
+      "project_launched": "Proyecto lanzado",
+      "project_paused": "Proyecto pausado",
+      "project_resumed": "Proyecto reanudado",
+      "project_completed": "Proyecto completado",
+      "project_archived": "Proyecto archivado",
+      "project_unarchived": "Proyecto desarchivado",
+      "milestone_reached": "Hito alcanzado",
+      "organizer_handoff": "Traspaso de organizador",
+      "announcement": "Novedad publicada"
     }
   },
   "urgency": {
