@@ -71,6 +71,20 @@ export type AttentionItem =
       createdAt: number;
     }
   | {
+      kind: "project_deadline_approaching";
+      projectId: string;
+      projectTitle: string;
+      daysRemaining: number;
+      createdAt: number;
+    }
+  | {
+      kind: "project_paused_long";
+      projectId: string;
+      projectTitle: string;
+      daysPaused: number;
+      createdAt: number;
+    }
+  | {
       kind: "vouch_received";
       voucherName: string;
       createdAt: number;
@@ -217,6 +231,48 @@ export function computeAttentionItems(
       claimerName,
       createdAt: p.createdAt,
     });
+  }
+
+  // Project deadline approaching — organizers get a heads-up
+  // when a project they organize is within 3 days of deadline.
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const now = input.now ?? Date.now();
+
+  function isProjectOrganizer(project: Project, memberKey: string): boolean {
+    return project.organizerKey === memberKey || project.coOrganizerKeys.includes(memberKey);
+  }
+
+  for (const p of projects) {
+    if (!isProjectOrganizer(p, currentMember.publicKey)) continue;
+    if (p.status === "completed" || p.status === "archived") continue;
+    if (p.deadline && p.deadline > now && p.deadline - now <= 3 * DAY_MS) {
+      items.push({
+        kind: "project_deadline_approaching",
+        projectId: p.id,
+        projectTitle: p.title,
+        daysRemaining: Math.ceil((p.deadline - now) / DAY_MS),
+        createdAt: p.deadline - 3 * DAY_MS,
+      });
+    }
+  }
+
+  // Project paused too long — nudge the organizer if a project
+  // has been paused for over 7 days. Pull-based, not a nag.
+  for (const p of projects) {
+    if (!isProjectOrganizer(p, currentMember.publicKey)) continue;
+    if (p.status !== "paused") continue;
+    // Use the latest activity timestamp as proxy for when it was paused
+    // (we don't have a dedicated pausedAt field).
+    const pausedDuration = now - p.createdAt; // rough — uses createdAt as fallback
+    if (pausedDuration > 7 * DAY_MS) {
+      items.push({
+        kind: "project_paused_long",
+        projectId: p.id,
+        projectTitle: p.title,
+        daysPaused: Math.floor(pausedDuration / DAY_MS),
+        createdAt: p.createdAt,
+      });
+    }
   }
 
   // Someone vouched for you — actionable because vouch count

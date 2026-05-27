@@ -523,6 +523,7 @@ export async function confirmProjectTaskCompletion(
   taskId: string,
   organizerKey: string,
   nodeId: string,
+  acknowledgment?: string,
 ): Promise<ConfirmTaskResult> {
   // Pre-load secrets outside the transaction so the signing keys don't
   // pull `secretKeys` into the transaction scope.
@@ -606,16 +607,20 @@ export async function confirmProjectTaskCompletion(
       };
       await db.projects.put(updatedProject);
 
+      const confirmActivityData: Record<string, unknown> = {
+        taskId: task.id,
+        exchangeId: exchange.id,
+        helperKey,
+        hours: task.estimatedHours,
+      };
+      if (acknowledgment?.trim()) {
+        confirmActivityData.acknowledgment = acknowledgment.trim();
+      }
       await logActivity(
         project.id,
         "task_confirmed",
         organizerKey,
-        {
-          taskId: task.id,
-          exchangeId: exchange.id,
-          helperKey,
-          hours: task.estimatedHours,
-        },
+        confirmActivityData,
         project.nodeId,
       );
       for (const m of milestones) {
@@ -824,6 +829,47 @@ export async function listActivityForProject(
     .toArray();
 }
 
+
+// -- Task editing -----------------------------------------------------------
+
+export async function editProjectTask(
+  taskId: string,
+  organizerKey: string,
+  updates: {
+    title?: string;
+    description?: string;
+    estimatedHours?: number;
+    urgency?: Urgency;
+  },
+): Promise<ProjectTask> {
+  return db.transaction(
+    "rw",
+    [db.projects, db.projectTasks, db.projectActivity],
+    async () => {
+      const task = await db.projectTasks.get(taskId);
+      if (!task) throw new Error("Task not found.");
+      if (task.status !== "open")
+        throw new Error("Only open tasks can be edited.");
+      await requireOrganizer(task.projectId, organizerKey);
+      const updated: ProjectTask = {
+        ...task,
+        title: updates.title?.trim() || task.title,
+        description: updates.description?.trim() ?? task.description,
+        estimatedHours: updates.estimatedHours ?? task.estimatedHours,
+        urgency: updates.urgency ?? task.urgency,
+      };
+      await db.projectTasks.put(updated);
+      const project = await db.projects.get(task.projectId);
+      await logActivity(task.projectId, "task_added", organizerKey, {
+        taskId: task.id,
+        taskTitle: updated.title,
+        edited: true,
+      }, project?.nodeId ?? "");
+      return updated;
+    },
+  );
+}
+
 // -- Bulk task quick-add ----------------------------------------------------
 
 export async function bulkAddTasks(
@@ -874,4 +920,72 @@ export async function bulkAddTasks(
       return tasks;
     },
   );
+}
+
+export async function cloneProject(
+  sourceProjectId: string,
+  organizerKey: string,
+  newTitle: string,
+  nodeId: string,
+): Promise<Project> {
+  const source = await db.projects.get(sourceProjectId);
+  if (!source) throw new Error("Source project not found.");
+  const sourceTasks = await db.projectTasks
+    .where("projectId")
+    .equals(sourceProjectId)
+    .toArray();
+
+  const now = Date.now();
+  const project: Project = {
+    id: uuid(),
+    title: newTitle.trim() || `${source.title} (copy)`,
+    description: source.description,
+    category: source.category,
+    organizerKey,
+    coOrganizerKeys: [],
+    status: "planning",
+    targetHours: source.targetHours,
+    contributedHours: 0,
+    deadline: null,
+    createdAt: now,
+    completedAt: null,
+    pauseNote: null,
+    locationZone: source.locationZone,
+    tags: [...source.tags],
+    nodeId,
+  };
+
+  await db.transaction(
+    "rw",
+    [db.projects, db.projectTasks, db.projectActivity],
+    async () => {
+      await db.projects.put(project);
+      await logActivity(project.id, "project_created", organizerKey, {
+        clonedFrom: sourceProjectId,
+      }, nodeId);
+      for (const t of sourceTasks) {
+        const task: ProjectTask = {
+          id: uuid(),
+          projectId: project.id,
+          title: t.title,
+          description: t.description,
+          category: t.category,
+          estimatedHours: t.estimatedHours,
+          urgency: t.urgency,
+          requiredSkills: [...t.requiredSkills],
+          assignedTo: null,
+          status: "open",
+          dependencies: [],
+          createdAt: now,
+          completedAt: null,
+          completedBy: null,
+          exchangeId: null,
+          claimedAt: null,
+          checkInAcknowledgedAt: null,
+        };
+        await db.projectTasks.put(task);
+      }
+    },
+  );
+  return project;
 }
