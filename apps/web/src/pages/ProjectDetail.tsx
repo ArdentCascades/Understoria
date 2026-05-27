@@ -20,6 +20,7 @@ import {
   addProjectTask,
   bulkAddTasks,
   claimProjectTask,
+  cloneProject,
   completeProject,
   confirmProjectTaskCompletion,
   editProjectTask,
@@ -353,8 +354,12 @@ function OrganizerControls({
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { currentMember, nodeId } = useApp();
   const [pauseNote, setPauseNote] = useState("");
   const [showPauseForm, setShowPauseForm] = useState(false);
+  const [showCloneForm, setShowCloneForm] = useState(false);
+  const [cloneTitle, setCloneTitle] = useState("");
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
@@ -445,6 +450,57 @@ function OrganizerControls({
         >
           {pending ? t("common.working") : t("projects.detail.resume")}
         </button>
+      )}
+      {(project.status === "active" || project.status === "paused" || project.status === "completed") && (
+        <>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={pending}
+            onClick={() => setShowCloneForm(!showCloneForm)}
+          >
+            {t("projects.clone.button")}
+          </button>
+        </>
+      )}
+      {showCloneForm && currentMember && (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const result = await dispatch(() =>
+              cloneProject(
+                project.id,
+                currentMember.publicKey,
+                cloneTitle,
+                nodeId,
+              ),
+            );
+            if (result) {
+              setShowCloneForm(false);
+              setCloneTitle("");
+              navigate(`/project/${result.id}`);
+            }
+          }}
+          className="flex flex-col gap-2"
+        >
+          <input
+            className="input"
+            placeholder={t("projects.clone.titlePlaceholder")}
+            value={cloneTitle}
+            onChange={(e) => setCloneTitle(e.target.value)}
+            maxLength={120}
+          />
+          <button
+            type="submit"
+            className="btn-primary self-end"
+            disabled={pending}
+            aria-busy={pending}
+          >
+            {pending
+              ? t("projects.clone.submitting")
+              : t("projects.clone.submit")}
+          </button>
+        </form>
       )}
     </div>
   );
