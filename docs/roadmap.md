@@ -39,7 +39,7 @@ a maintenance owner.
 | 7 | Organizing Integration | not started | Campaigns, power mapping, meeting tools |
 | 8 | (reserved) | — | — |
 | 9 | Documentation & i18n | partial | Member/operator/organizer/developer/quickstart guides, political-education, English + Spanish |
-| 10 | Community Projects & Momentum | partial | Project + task lifecycle, signed task-completion exchanges, milestones, momentum tracking, project sparkline, four project achievements (Groundbreaker, Crew Member, Momentum Maker, Keystone). Co-organizer support shipped (Agent 10 Phase 3, schema v13): `coOrganizerKeys`, `isOrganizer()`, `addCoOrganizer()`/`removeCoOrganizer()`, co-organizer UI. **Still pending from the original Phase 3 plan:** custom milestones beyond auto-25/50/75/100, federation of cross-node task claims, 48-hour auto-confirm, dependency enforcement |
+| 10 | Community Projects & Momentum | partial | Project + task lifecycle, signed task-completion exchanges, milestones, momentum tracking, project sparkline, four project achievements (Groundbreaker, Crew Member, Momentum Maker, Keystone). Co-organizer support shipped (Agent 10 Phase 3, schema v13): `coOrganizerKeys`, `isOrganizer()`, `addCoOrganizer()`/`removeCoOrganizer()`, co-organizer UI. Organizer handoff shipped: `handoffOrganizer()`, `HandoffSection`, `organizer_handoff` activity type. Project announcements shipped: `AnnouncementSection`, `"announcement"` type on `ProjectActivity`, max 2 000 chars. Bulk task quick-add shipped: `bulkAddTasks()`, `BulkTaskForm`, cap 50 tasks. **Still pending from the original Phase 3 plan:** custom milestones beyond auto-25/50/75/100, federation of cross-node task claims, 48-hour auto-confirm, dependency enforcement |
 
 Agents 6 and 8 are intentional gaps — they were placeholders that
 collapsed into adjacent agents during scoping. Numbering is preserved
@@ -163,7 +163,7 @@ already-planned agent, rather than warranting a new agent:
 
 | Original proposal | Lands in | Notes |
 |-------------------|----------|-------|
-| Agent 17 — co-organizer roles + rotation | **Agent 10 Phase 3** | Existing `requireOrganizer()` broadens to `isOrganizer()`; Project gains `coOrganizerKeys`, `lastRotatedAt`, `rotationIntervalMs`. Rotation reminders are advisory, matching GOVERNANCE.md §4 |
+| Agent 17 — co-organizer roles + rotation + handoff | **Agent 10 Phase 3** | Existing `requireOrganizer()` broadens to `isOrganizer()`; Project gains `coOrganizerKeys`, `lastRotatedAt`, `rotationIntervalMs`. Rotation reminders are advisory, matching GOVERNANCE.md §4. **Handoff shipped:** `handoffOrganizer()` transfers primary role to a co-organizer; old primary stays as co-organizer |
 | Agent 17 — organizer recall | **Agent 13** | Recall is a `Proposal` with `kind: "recall"` scoped to project contributors. No parallel mini-proposal mechanism |
 | Agent 19 — pool allocation flow | **Agent 13** | Allocation is a `Proposal` with `category: "config_change"`. No parallel "two members co-sign" bootstrap |
 | Agent 20 — reversibility tiers + impact reflection | **Agent 13** | See "What Agent 13 absorbs" above |
