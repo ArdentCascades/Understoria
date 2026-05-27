@@ -160,12 +160,34 @@
     "milestone": {
       "reached": "🎉 ¡{{percent}}% del camino recorrido!"
     },
+    "announcements": {
+      "title": "Novedades",
+      "placeholder": "Comparte una novedad con la comunidad...",
+      "submit": "Publicar novedad",
+      "submitting": "Publicando...",
+      "postedBy": "{{name}} · {{when}}"
+    },
     "coOrganizers": {
       "title": "Co-organizadores",
       "intro": "Los co-organizadores pueden confirmar tareas, agregar tareas y pausar o reanudar el proyecto. Solo quien organiza originalmente puede agregar o quitar co-organizadores.",
       "add": "Agregar",
       "remove": "Quitar",
       "selectPlaceholder": "Elegir una persona..."
+    },
+    "handoff": {
+      "title": "Pasar la antorcha",
+      "intro": "Transfiere tu rol principal a un co-organizador. Seguiras como co-organizador.",
+      "select": "Elegir un co-organizador...",
+      "submit": "Transferir rol principal",
+      "submitting": "Transfiriendo..."
+    },
+    "bulkTask": {
+      "toggle": "Agregar varias",
+      "placeholder": "Una tarea por linea",
+      "hint": "Cada linea se convierte en una tarea con valores predeterminados. Edita individualmente despues.",
+      "submit": "Agregar todas",
+      "submitting": "Agregando...",
+      "success": "Se agregaron {{count}} tareas."
     }
   },
   "urgency": {
