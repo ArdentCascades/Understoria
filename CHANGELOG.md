@@ -10,6 +10,46 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Task "follows" dependencies (Agent 10 continuation).** Tasks can
+  now declare they "follow" other tasks — a positive framing (no
+  "blocked" language) that communicates sequencing without implying
+  failure. Unmet dependencies hide the claim button and show a
+  "Follows: [task names]" chip on the task row.
+  - **`canClaimTask()`** — pure predicate that checks whether all
+    declared dependencies are complete before allowing a claim.
+  - **`detectCycle()`** — prevents circular dependency chains at
+    write time.
+  - **`setTaskDependencies()`** — sets the dependency list for a
+    task, with cycle detection.
+  - **`claimProjectTask`** rejects claims on tasks with unmet
+    dependencies.
+  - **`editProjectTask`** extended to support dependency updates.
+  - **Attention system** skips `task_check_in` for tasks with unmet
+    dependencies (no nudges for work that can't start yet).
+
+  Tests: 15 new tests covering dependency enforcement, cycle
+  detection, claim rejection, and attention filtering.
+
+- **Project archive + history view (Agent 10 continuation).** Primary
+  organizer can archive completed projects, and completed/archived
+  projects display a full activity history.
+  - **`archiveProject()` / `unarchiveProject()`** in `projects.ts`
+    for lifecycle management.
+  - **`"project_archived"` / `"project_unarchived"`** activity types
+    in `ProjectActivity`.
+  - **New `/projects/archive` page** listing completed and archived
+    projects.
+  - **`HistoryTimeline` component** on completed/archived project
+    detail pages showing the full activity log with human-readable
+    labels for all 13 activity types.
+  - **"View archive" link** on Board for discovering past projects.
+
+  Tests: 4 new tests covering archive/unarchive lifecycle and
+  activity recording.
+
+  Combined with "follows" dependencies: 517 tests passing. Lint,
+  typecheck, build clean.
+
 - **Task editing, project attention items, contributor
   acknowledgment, and project cloning (Agent 10 continuation).**
   Four organizer-facing features shipped together, extending the
