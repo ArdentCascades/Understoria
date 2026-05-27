@@ -34,9 +34,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "ed2curve": "^0.3.0",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "@types/ed2curve": "^0.2.4",
     "typescript": "^5.6.3"
   }
 }

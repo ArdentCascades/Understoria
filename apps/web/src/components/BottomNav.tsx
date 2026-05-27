@@ -24,13 +24,14 @@ import { useTranslation } from "react-i18next";
 
 interface NavItem {
   to: string;
-  labelKey: "nav.board" | "nav.dashboard" | "nav.profile";
+  labelKey: "nav.board" | "nav.dashboard" | "nav.messages" | "nav.profile";
   icon: string;
 }
 
 const ITEMS: NavItem[] = [
   { to: "/", labelKey: "nav.board", icon: "\u{1F333}" },
   { to: "/dashboard", labelKey: "nav.dashboard", icon: "\u{1F331}" },
+  { to: "/messages", labelKey: "nav.messages", icon: "\u{1F4AC}" },
   { to: "/profile", labelKey: "nav.profile", icon: "\u{1F33F}" },
 ];
 

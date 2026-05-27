@@ -65,8 +65,22 @@
   "nav": {
     "board": "Board",
     "dashboard": "Dashboard",
+    "messages": "Messages",
     "profile": "Profile",
     "primaryNav": "Primary navigation"
+  },
+  "messages": {
+    "title": "Messages",
+    "empty": "No messages yet. Start a conversation from any post or member profile.",
+    "sendMessage": "Message",
+    "messageButton": "Message",
+    "inputPlaceholder": "Type a message...",
+    "send": "Send",
+    "sending": "Sending...",
+    "decryptionFailed": "(could not decrypt)",
+    "lockedError": "Unlock your session to send messages.",
+    "sendError": "Message could not be sent. Try again.",
+    "conversationWith": "{{name}}"
   },
   "projects": {
     "tab": "Projects",

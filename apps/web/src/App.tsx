@@ -29,6 +29,8 @@ import InviteAcceptPage from "@/pages/InviteAccept";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
+import MessagesPage from "@/pages/Messages";
+import ConversationPage from "@/pages/Conversation";
 import MemberDetailPage from "@/pages/MemberDetail";
 import HelpPage from "@/pages/Help";
 import DisputesPage from "@/pages/Disputes";
@@ -66,6 +68,8 @@ export default function App() {
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/messages/:memberKey" element={<ConversationPage />} />
           <Route path="/member/:publicKey" element={<MemberDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/disputes" element={<DisputesPage />} />

@@ -576,3 +576,17 @@ export interface Vote {
   createdAt: number;
   nodeId: string;
 }
+
+// ---------------------------------------------------------------------------
+// Agent 2 task 5 — E2E encrypted direct messages
+// ---------------------------------------------------------------------------
+
+export interface DirectMessage {
+  id: string;
+  conversationId: string;
+  senderKey: string;
+  recipientKey: string;
+  nonce: string;
+  ciphertext: string;
+  createdAt: number;
+}
