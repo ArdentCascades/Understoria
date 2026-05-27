@@ -377,6 +377,10 @@ export async function claimProjectTask(
       if (!task) throw new Error("Task not found.");
       if (task.status !== "open")
         throw new Error("This task isn't available to claim.");
+      const allTasks = await db.projectTasks
+        .where("projectId").equals(task.projectId).toArray();
+      if (!canClaimTask(task, allTasks))
+        throw new Error("This task follows other tasks that aren't completed yet.");
       const project = await db.projects.get(task.projectId);
       if (!project) throw new Error("Parent project not found.");
       if (project.status !== "active")
@@ -840,6 +844,7 @@ export async function editProjectTask(
     description?: string;
     estimatedHours?: number;
     urgency?: Urgency;
+    dependencies?: string[];
   },
 ): Promise<ProjectTask> {
   return db.transaction(
@@ -858,6 +863,17 @@ export async function editProjectTask(
         estimatedHours: updates.estimatedHours ?? task.estimatedHours,
         urgency: updates.urgency ?? task.urgency,
       };
+      if (updates.dependencies !== undefined) {
+        const allTasks = await db.projectTasks
+          .where("projectId").equals(task.projectId).toArray();
+        if (detectCycle(task.id, updates.dependencies, allTasks))
+          throw new Error("Adding these dependencies would create a cycle.");
+        for (const depId of updates.dependencies) {
+          if (!allTasks.some((t) => t.id === depId))
+            throw new Error("Dependency not found in this project.");
+        }
+        updated.dependencies = updates.dependencies;
+      }
       await db.projectTasks.put(updated);
       const project = await db.projects.get(task.projectId);
       await logActivity(task.projectId, "task_added", organizerKey, {
@@ -918,6 +934,65 @@ export async function bulkAddTasks(
         tasks.push(task);
       }
       return tasks;
+    },
+  );
+}
+
+export function canClaimTask(
+  task: ProjectTask,
+  allTasks: readonly ProjectTask[],
+): boolean {
+  if (task.dependencies.length === 0) return true;
+  return task.dependencies.every((depId) => {
+    const dep = allTasks.find((t) => t.id === depId);
+    return dep?.status === "completed";
+  });
+}
+
+export function detectCycle(
+  taskId: string,
+  proposedDeps: string[],
+  allTasks: readonly ProjectTask[],
+): boolean {
+  const visited = new Set<string>();
+  function dfs(current: string): boolean {
+    if (current === taskId) return true;
+    if (visited.has(current)) return false;
+    visited.add(current);
+    const task = allTasks.find((t) => t.id === current);
+    if (!task) return false;
+    return task.dependencies.some((depId) => dfs(depId));
+  }
+  return proposedDeps.some((depId) => dfs(depId));
+}
+
+export async function setTaskDependencies(
+  taskId: string,
+  organizerKey: string,
+  dependencyIds: string[],
+): Promise<ProjectTask> {
+  return db.transaction(
+    "rw",
+    [db.projects, db.projectTasks],
+    async () => {
+      const task = await db.projectTasks.get(taskId);
+      if (!task) throw new Error("Task not found.");
+      if (task.status !== "open")
+        throw new Error("Only open tasks can have dependencies changed.");
+      await requireOrganizer(task.projectId, organizerKey);
+      const allTasks = await db.projectTasks
+        .where("projectId")
+        .equals(task.projectId)
+        .toArray();
+      for (const depId of dependencyIds) {
+        if (!allTasks.some((t) => t.id === depId))
+          throw new Error("Dependency not found in this project.");
+      }
+      if (detectCycle(taskId, dependencyIds, allTasks))
+        throw new Error("Adding these dependencies would create a cycle.");
+      const updated: ProjectTask = { ...task, dependencies: dependencyIds };
+      await db.projectTasks.put(updated);
+      return updated;
     },
   );
 }

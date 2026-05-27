@@ -19,6 +19,7 @@ import {
   addCoOrganizer,
   addProjectTask,
   bulkAddTasks,
+  canClaimTask,
   claimProjectTask,
   cloneProject,
   completeProject,
@@ -302,6 +303,7 @@ export default function ProjectDetailPage() {
                     nodeId={nodeId}
                     onRun={run}
                     needsMoreHands={checkInState === "needs_more_hands"}
+                    allTasks={tasks}
                   />
                 </li>
               );
@@ -514,6 +516,7 @@ function TaskRow({
   nodeId,
   onRun,
   needsMoreHands,
+  allTasks,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -522,6 +525,7 @@ function TaskRow({
   nodeId: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
   needsMoreHands: boolean;
+  allTasks: readonly ProjectTask[];
 }) {
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
@@ -537,6 +541,12 @@ function TaskRow({
   const [editDescription, setEditDescription] = useState(task.description);
   const [editHours, setEditHours] = useState(String(task.estimatedHours));
   const [editUrgency, setEditUrgency] = useState<Urgency>(task.urgency);
+
+  const hasUnmetDeps = task.dependencies.length > 0 && !canClaimTask(task, allTasks);
+  const depNames = task.dependencies
+    .map((id) => allTasks.find((t) => t.id === id)?.title)
+    .filter(Boolean)
+    .join(", ");
 
   if (editing) {
     return (
@@ -646,7 +656,7 @@ function TaskRow({
         <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
           {formatHours(task.estimatedHours)}
         </span>
-        {needsMoreHands && (
+        {needsMoreHands && !hasUnmetDeps && (
           <span
             className="chip bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
             title={t("projects.task.needsMoreHandsTooltip")}
@@ -656,6 +666,14 @@ function TaskRow({
             </span>
             {t("projects.task.needsMoreHands")}
             <WhyTooltip principleId="solidarity-not-shame" />
+          </span>
+        )}
+        {hasUnmetDeps && (
+          <span
+            className="chip bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+            title={t("projects.task.followsHint")}
+          >
+            {t("projects.task.follows", { tasks: depNames })}
           </span>
         )}
       </div>
@@ -686,7 +704,7 @@ function TaskRow({
           </p>
         ) : null)}
       <div className="flex flex-wrap gap-2">
-        {task.status === "open" && currentKey && !isOrganizer && (
+        {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && (
           <button
             type="button"
             className="btn-primary"

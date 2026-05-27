@@ -165,7 +165,11 @@
         "toggle": "Add a note for the contributor",
         "placeholder": "Thanks for...",
         "hint": "Optional. Visible to the community on the project page."
-      }
+      },
+      "follows": "Follows: {{tasks}}",
+      "followsHint": "This task is ready after the tasks it follows are completed.",
+      "addDependency": "Follows...",
+      "noDependencies": "No dependencies"
     },
     "milestone": {
       "reached": "🎉 {{percent}}% of the way there!"
