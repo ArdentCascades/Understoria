@@ -31,7 +31,7 @@ a maintenance owner.
 | # | Agent | Status | Owns |
 |---|-------|--------|------|
 | 1 | Core PWA | shipped | Board, exchange flow, credits, dashboard, achievements, profile, PWA shell |
-| 2 | Crypto & Identity | partial | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. **Pending:** E2E messaging (task 5) |
+| 2 | Crypto & Identity | shipped | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. E2E direct messaging shipped (NaCl box, X25519 via ed2curve, schema v14). All five original tasks complete |
 | 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`, invites endpoint, invite pull loop, PWA-side cross-node post surfacing on the Board. **Pending:** cross-node exchange notification lifecycle sync, Dashboard cross-node stat aggregation |
 | 4 | Security & Opsec | partial | Threat model, opsec guide, panic button, anti-gaming safeguards. **Pending:** ongoing per-PR review |
 | 5 | Governance & Coop | partial | Code of Conduct, GOVERNANCE.md, trademark policy |
@@ -248,9 +248,9 @@ now the critical path, not more code.
 
 **F. Agent 3 before any new governance work.**
 Federation governance (Agent 15) makes no sense without working
-federation. End-to-end messaging (Agent 2 task 5) is also Phase 3
-work that members are asking for. The Ostrom additions do not justify
-deferring Phase 3.
+federation. End-to-end messaging (Agent 2 task 5) has shipped
+(schema v14). The Ostrom additions do not justify deferring
+Phase 3.
 
 **G. Agent 14 lifecycle + Agent 12 after pilot telemetry.**
 Agent 14's remaining work (mediation flow, credit resolution) and
@@ -388,8 +388,9 @@ concrete check that catches it before it ships.
   PR to land. The second PR rebases onto the next version.
   `docs/roadmap.md` "Migration strategy" tracks the reservation.
   Current state: PWA v10 = votes, v11 = task check-in, v12 = dispute
-  migration, v13 = co-organizer support. Server is at v7. Next free
-  PWA version: **14**. Next free server version: **8**.
+  migration, v13 = co-organizer support, v14 = E2E messages. Server
+  is at v7. Next free PWA version: **15**. Next free server
+  version: **8**.
 
 - **Function signature changes without exhaustive call-site
   updates.** `balanceFor()` gaining two new parameters touches

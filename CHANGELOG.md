@@ -10,6 +10,47 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **E2E encrypted direct messaging between members (Agent 2,
+  task 5).** Members on the same node can exchange private messages,
+  encrypted end-to-end with NaCl box (X25519 + XSalsa20-Poly1305).
+  Local-only — no server relay, no federation.
+
+  **Crypto layer:**
+  - `deriveEncryptionKeyPair()` converts an Ed25519 signing key to
+    an X25519 encryption key pair via **ed2curve** (0.3.0, ~2 KB,
+    depends only on tweetnacl).
+  - `ed25519PkToX25519()` converts a recipient's Ed25519 public key
+    for encryption.
+  - `encryptMessage()` seals plaintext with NaCl box and a random
+    24-byte nonce (CSPRNG).
+  - `decryptMessage()` opens the box on read.
+  - `conversationId()` derives a deterministic conversation
+    identifier from two public keys.
+
+  **UI layer:**
+  - `/messages` — conversation list (all threads for the current
+    member).
+  - `/messages/:memberKey` — thread view with the selected member.
+  - `BottomNav` gains a Messages tab (speech-bubble icon).
+  - "Message" link on `PostDetail` for non-self members (entry
+    point from the Board).
+
+  **Storage & schema:**
+  - Schema v14 adds a `messages` table in IndexedDB.
+  - Messages stored encrypted at rest; decrypted on read.
+  - DB helpers: `sendMessage()`, `getConversation()`,
+    `listConversations()`.
+
+  **Privacy design (deliberate omissions):**
+  - No read receipts, no typing indicators, no delivery
+    confirmation — these are metadata leaks.
+  - Locked session blocks sending.
+  - Messages are not recoverable if the secret key is lost.
+
+  i18n: `nav.messages` + `messages.*` namespace in en + es.
+
+  Tests: lint, typecheck, build clean.
+
 - **Task "follows" dependencies (Agent 10 continuation).** Tasks can
   now declare they "follow" other tasks — a positive framing (no
   "blocked" language) that communicates sequencing without implying

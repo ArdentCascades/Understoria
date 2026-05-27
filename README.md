@@ -247,7 +247,7 @@ The phase view below is a public summary.
 - [x] Anti-gaming safeguards
 - [x] Milestones, achievements, solidarity streaks
 - [x] Member guide and operator guide drafts
-- [ ] End-to-end encrypted messaging
+- [x] End-to-end encrypted messaging
 
 ### Phase 3: Federation *(active)*
 - [x] Community node server with Docker deployment
