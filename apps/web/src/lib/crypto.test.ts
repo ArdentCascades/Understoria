@@ -21,6 +21,10 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalExchangePayload,
+  conversationId,
+  decryptMessage,
+  deriveEncryptionKeyPair,
+  encryptMessage,
   generateKeyPair,
   sign,
   verify,
@@ -166,5 +170,92 @@ describe("verifyExchange", () => {
       nodeId: "node_x",
     };
     expect(verifyExchange(exchange)).toBe(false);
+  });
+});
+
+describe("E2E messaging", () => {
+  // Generate three keypairs for testing
+  const alice = generateKeyPair();
+  const bob = generateKeyPair();
+  const carol = generateKeyPair();
+
+  describe("encryptMessage / decryptMessage roundtrip", () => {
+    it("encrypts and decrypts a message between two parties", () => {
+      const encrypted = encryptMessage("hello bob", alice.secretKey, bob.publicKey);
+      expect(encrypted.nonce).toBeTruthy();
+      expect(encrypted.ciphertext).toBeTruthy();
+      expect(encrypted.ciphertext).not.toBe("hello bob");
+      const plain = decryptMessage(encrypted, bob.secretKey, alice.publicKey);
+      expect(plain).toBe("hello bob");
+    });
+
+    it("sender can also decrypt their own message", () => {
+      const encrypted = encryptMessage("hello bob", alice.secretKey, bob.publicKey);
+      const plain = decryptMessage(encrypted, alice.secretKey, bob.publicKey);
+      expect(plain).toBe("hello bob");
+    });
+  });
+
+  it("returns null when decrypting with the wrong key", () => {
+    const encrypted = encryptMessage("secret", alice.secretKey, bob.publicKey);
+    const plain = decryptMessage(encrypted, carol.secretKey, alice.publicKey);
+    expect(plain).toBeNull();
+  });
+
+  it("returns null when ciphertext is tampered", () => {
+    const encrypted = encryptMessage("secret", alice.secretKey, bob.publicKey);
+    // Flip one character in the base64 ciphertext
+    const tampered = {
+      ...encrypted,
+      ciphertext: encrypted.ciphertext.slice(0, -2) + "AA",
+    };
+    const plain = decryptMessage(tampered, bob.secretKey, alice.publicKey);
+    expect(plain).toBeNull();
+  });
+
+  it("returns null when nonce is tampered", () => {
+    const encrypted = encryptMessage("secret", alice.secretKey, bob.publicKey);
+    const tampered = {
+      ...encrypted,
+      nonce: encrypted.nonce.slice(0, -2) + "AA",
+    };
+    const plain = decryptMessage(tampered, bob.secretKey, alice.publicKey);
+    expect(plain).toBeNull();
+  });
+
+  it("handles Unicode content (emoji, CJK)", () => {
+    const text = "Solidarity forever! ✊🌿 互助";
+    const encrypted = encryptMessage(text, alice.secretKey, bob.publicKey);
+    const plain = decryptMessage(encrypted, bob.secretKey, alice.publicKey);
+    expect(plain).toBe(text);
+  });
+
+  it("handles empty string", () => {
+    const encrypted = encryptMessage("", alice.secretKey, bob.publicKey);
+    const plain = decryptMessage(encrypted, bob.secretKey, alice.publicKey);
+    expect(plain).toBe("");
+  });
+
+  describe("deriveEncryptionKeyPair", () => {
+    it("returns 32-byte keys", () => {
+      const kp = deriveEncryptionKeyPair(alice.secretKey);
+      expect(kp.publicKey.length).toBe(32);
+      expect(kp.secretKey.length).toBe(32);
+    });
+  });
+
+  describe("conversationId", () => {
+    it("is deterministic and order-independent", () => {
+      const ab = conversationId(alice.publicKey, bob.publicKey);
+      const ba = conversationId(bob.publicKey, alice.publicKey);
+      expect(ab).toBe(ba);
+      expect(ab).toContain("|");
+    });
+
+    it("differs for different pairs", () => {
+      const ab = conversationId(alice.publicKey, bob.publicKey);
+      const ac = conversationId(alice.publicKey, carol.publicKey);
+      expect(ab).not.toBe(ac);
+    });
   });
 });
