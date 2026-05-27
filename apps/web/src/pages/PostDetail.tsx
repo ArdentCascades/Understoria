@@ -517,6 +517,13 @@ function PersonInline({
         {name}
       </Link>{" "}
       <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
+      {" "}
+      <Link
+        to={`/messages/${encodeURIComponent(publicKey)}`}
+        className="text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+      >
+        {t("messages.messageButton")}
+      </Link>
     </span>
   );
 }

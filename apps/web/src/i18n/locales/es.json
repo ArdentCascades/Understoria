@@ -65,8 +65,22 @@
   "nav": {
     "board": "Tablero",
     "dashboard": "Panel",
+    "messages": "Mensajes",
     "profile": "Perfil",
     "primaryNav": "Navegación principal"
+  },
+  "messages": {
+    "title": "Mensajes",
+    "empty": "Aun no hay mensajes. Inicia una conversacion desde cualquier publicacion o perfil.",
+    "sendMessage": "Mensaje",
+    "messageButton": "Mensaje",
+    "inputPlaceholder": "Escribe un mensaje...",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "decryptionFailed": "(no se pudo descifrar)",
+    "lockedError": "Desbloquea tu sesion para enviar mensajes.",
+    "sendError": "No se pudo enviar el mensaje. Intenta de nuevo.",
+    "conversationWith": "{{name}}"
   },
   "projects": {
     "tab": "Proyectos",

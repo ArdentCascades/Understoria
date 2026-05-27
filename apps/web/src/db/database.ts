@@ -21,6 +21,7 @@
 import Dexie, { type Table } from "dexie";
 import type {
   Achievement,
+  DirectMessage,
   Exchange,
   Member,
   NodeConfig,
@@ -144,6 +145,7 @@ export class UnderstoriaDB extends Dexie {
   drafts!: Table<DraftRow, string>;
   proposals!: Table<Proposal, string>;
   votes!: Table<Vote, string>;
+  messages!: Table<DirectMessage, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -331,6 +333,12 @@ export class UnderstoriaDB extends Dexie {
         const r = row as Project & { coOrganizerKeys?: string[] };
         if (r.coOrganizerKeys === undefined) r.coOrganizerKeys = [];
       });
+    });
+    // Version 14 — E2E encrypted direct messages (Agent 2 task 5).
+    // Messages are stored encrypted at rest; decrypted on read.
+    // The conversationId is deterministic from the two public keys.
+    this.version(14).stores({
+      messages: "id, conversationId, createdAt, [conversationId+createdAt]",
     });
   }
 }
