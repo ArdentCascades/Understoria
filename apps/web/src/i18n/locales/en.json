@@ -146,6 +146,11 @@
       "needsMoreHands": "Could use more hands",
       "needsMoreHandsTooltip": "This task could use additional support. Anyone can step in to help.",
       "hours": "{{hours}}",
+      "edit": {
+        "button": "Edit",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
       "addTask": {
         "fieldTitle": "Task title",
         "fieldDescription": "What needs doing?",
@@ -155,6 +160,11 @@
         "fieldSkills": "Suggested skills (comma-separated)",
         "submit": "Add task",
         "submitting": "Adding…"
+      },
+      "acknowledgment": {
+        "toggle": "Add a note for the contributor",
+        "placeholder": "Thanks for...",
+        "hint": "Optional. Visible to the community on the project page."
       }
     },
     "milestone": {
@@ -188,6 +198,12 @@
       "submit": "Add all",
       "submitting": "Adding...",
       "success": "Added {{count}} tasks."
+    },
+    "clone": {
+      "button": "Clone project",
+      "titlePlaceholder": "Title for the new copy",
+      "submit": "Create clone",
+      "submitting": "Cloning..."
     }
   },
   "urgency": {
@@ -424,6 +440,14 @@
     "vouchReceived": {
       "line": "{{name}} vouched for you.",
       "hint": "Each vouch brings you closer to trusted status."
+    },
+    "projectDeadline": {
+      "line": "{{project}} — deadline in {{days}} days.",
+      "hint": "Tap to check progress."
+    },
+    "projectPaused": {
+      "line": "{{project}} has been paused for a while.",
+      "hint": "Resume it or mark it complete when ready."
     }
   },
   "board": {

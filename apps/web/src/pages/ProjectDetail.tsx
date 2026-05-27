@@ -20,8 +20,10 @@ import {
   addProjectTask,
   bulkAddTasks,
   claimProjectTask,
+  cloneProject,
   completeProject,
   confirmProjectTaskCompletion,
+  editProjectTask,
   handoffOrganizer,
   isOrganizer,
   launchProject,
@@ -352,8 +354,12 @@ function OrganizerControls({
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { currentMember, nodeId } = useApp();
   const [pauseNote, setPauseNote] = useState("");
   const [showPauseForm, setShowPauseForm] = useState(false);
+  const [showCloneForm, setShowCloneForm] = useState(false);
+  const [cloneTitle, setCloneTitle] = useState("");
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
@@ -445,6 +451,57 @@ function OrganizerControls({
           {pending ? t("common.working") : t("projects.detail.resume")}
         </button>
       )}
+      {(project.status === "active" || project.status === "paused" || project.status === "completed") && (
+        <>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={pending}
+            onClick={() => setShowCloneForm(!showCloneForm)}
+          >
+            {t("projects.clone.button")}
+          </button>
+        </>
+      )}
+      {showCloneForm && currentMember && (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const result = await dispatch(() =>
+              cloneProject(
+                project.id,
+                currentMember.publicKey,
+                cloneTitle,
+                nodeId,
+              ),
+            );
+            if (result) {
+              setShowCloneForm(false);
+              setCloneTitle("");
+              navigate(`/project/${result.id}`);
+            }
+          }}
+          className="flex flex-col gap-2"
+        >
+          <input
+            className="input"
+            placeholder={t("projects.clone.titlePlaceholder")}
+            value={cloneTitle}
+            onChange={(e) => setCloneTitle(e.target.value)}
+            maxLength={120}
+          />
+          <button
+            type="submit"
+            className="btn-primary self-end"
+            disabled={pending}
+            aria-busy={pending}
+          >
+            {pending
+              ? t("projects.clone.submitting")
+              : t("projects.clone.submit")}
+          </button>
+        </form>
+      )}
     </div>
   );
 }
@@ -472,6 +529,110 @@ function TaskRow({
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
+
+  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
+  const [acknowledgmentText, setAcknowledgmentText] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(task.title);
+  const [editDescription, setEditDescription] = useState(task.description);
+  const [editHours, setEditHours] = useState(String(task.estimatedHours));
+  const [editUrgency, setEditUrgency] = useState<Urgency>(task.urgency);
+
+  if (editing) {
+    return (
+      <div className="card flex flex-col gap-2">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">
+            {t("projects.task.addTask.fieldTitle")}
+          </span>
+          <input
+            className="input"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            maxLength={120}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">
+            {t("projects.task.addTask.fieldDescription")}
+          </span>
+          <textarea
+            className="input min-h-20"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            maxLength={1000}
+          />
+        </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">
+              {t("projects.task.addTask.fieldHours")}
+            </span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min="0.25"
+              step="0.25"
+              className="input"
+              value={editHours}
+              onChange={(e) => setEditHours(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">
+              {t("projects.task.addTask.fieldUrgency")}
+            </span>
+            <select
+              className="input"
+              value={editUrgency}
+              onChange={(e) => setEditUrgency(e.target.value as Urgency)}
+            >
+              <option value="low">{t("urgency.low")}</option>
+              <option value="medium">{t("urgency.medium")}</option>
+              <option value="high">{t("urgency.high")}</option>
+            </select>
+          </label>
+        </div>
+        <div className="flex flex-wrap gap-2 self-end">
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={pending}
+            onClick={() => {
+              setEditing(false);
+              setEditTitle(task.title);
+              setEditDescription(task.description);
+              setEditHours(String(task.estimatedHours));
+              setEditUrgency(task.urgency);
+            }}
+          >
+            {t("projects.task.edit.cancel")}
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={pending}
+            aria-busy={pending}
+            onClick={async () => {
+              const h = Number.parseFloat(editHours);
+              if (!Number.isFinite(h) || h <= 0) return;
+              const ok = await dispatch(() =>
+                editProjectTask(task.id, currentKey!, {
+                  title: editTitle,
+                  description: editDescription,
+                  estimatedHours: h,
+                  urgency: editUrgency,
+                }),
+              );
+              if (ok) setEditing(false);
+            }}
+          >
+            {pending ? t("common.working") : t("projects.task.edit.save")}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card flex flex-col gap-2">
@@ -536,6 +697,15 @@ function TaskRow({
             {pending ? t("common.working") : t("projects.task.claim")}
           </button>
         )}
+        {task.status === "open" && isOrganizer && (
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setEditing(true)}
+          >
+            {t("projects.task.edit.button")}
+          </button>
+        )}
         {task.status === "claimed" && isAssignee && (
           <>
             <button
@@ -569,7 +739,7 @@ function TaskRow({
             aria-busy={pending}
             onClick={() =>
               dispatch(() =>
-                confirmProjectTaskCompletion(task.id, currentKey!, nodeId),
+                confirmProjectTaskCompletion(task.id, currentKey!, nodeId, acknowledgmentText),
               )
             }
           >
@@ -582,6 +752,32 @@ function TaskRow({
           </span>
         )}
       </div>
+      {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
+        <>
+          {!showAcknowledgment ? (
+            <button
+              type="button"
+              className="self-start text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+              onClick={() => setShowAcknowledgment(true)}
+            >
+              {t("projects.task.acknowledgment.toggle")}
+            </button>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <textarea
+                className="input min-h-16 text-sm"
+                placeholder={t("projects.task.acknowledgment.placeholder")}
+                value={acknowledgmentText}
+                onChange={(e) => setAcknowledgmentText(e.target.value)}
+                maxLength={500}
+              />
+              <p className="text-xs text-moss-500 dark:text-moss-400">
+                {t("projects.task.acknowledgment.hint")}
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

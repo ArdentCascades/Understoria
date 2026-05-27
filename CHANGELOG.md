@@ -10,6 +10,29 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Organizer handoff, project announcements, and bulk task
+  quick-add (Agent 10 continuation).** Three organizer-facing
+  features shipped together, all building on the co-organizer
+  support from Agent 10 Phase 3.
+  - **Organizer handoff** — primary organizer can transfer the role
+    to any co-organizer via `handoffOrganizer()`. The old primary
+    stays on as a co-organizer. `HandoffSection` UI on
+    ProjectDetail. New `organizer_handoff` activity type in
+    `ProjectActivity`.
+  - **Project announcements** — organizers and co-organizers can
+    post text updates (max 2 000 chars) visible to everyone on the
+    project page. Reuses the existing `ProjectActivity` table with
+    a new `"announcement"` type — no schema bump needed.
+    `AnnouncementSection` UI. Pull-based (no notifications),
+    consistent with the app's attention model.
+  - **Bulk task quick-add** — multi-line textarea, one task per
+    line, capped at 50 tasks. `bulkAddTasks()` applies the
+    project's default category, hours, and urgency to each new
+    task. `BulkTaskForm` UI.
+
+  Tests: 498 passing. No schema bump (reuses `ProjectActivity`
+  table). Lint, typecheck, build clean.
+
 - **Design principles with contextual "(why?)" tooltips.** Eight
   design principles (equal time, no leaderboards, no notifications,
   solidarity not shame, community authority, asking never gated,

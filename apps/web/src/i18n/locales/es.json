@@ -146,6 +146,11 @@
       "needsMoreHands": "Le vendrían bien más manos",
       "needsMoreHandsTooltip": "Esta tarea podría aprovechar apoyo adicional. Cualquier persona puede sumarse a ayudar.",
       "hours": "{{hours}}",
+      "edit": {
+        "button": "Editar",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
       "addTask": {
         "fieldTitle": "Título de la tarea",
         "fieldDescription": "¿Qué se necesita hacer?",
@@ -155,6 +160,11 @@
         "fieldSkills": "Habilidades sugeridas (separadas por comas)",
         "submit": "Agregar tarea",
         "submitting": "Agregando…"
+      },
+      "acknowledgment": {
+        "toggle": "Agregar una nota para quien contribuyo",
+        "placeholder": "Gracias por...",
+        "hint": "Opcional. Visible para la comunidad en la pagina del proyecto."
       }
     },
     "milestone": {
@@ -188,6 +198,12 @@
       "submit": "Agregar todas",
       "submitting": "Agregando...",
       "success": "Se agregaron {{count}} tareas."
+    },
+    "clone": {
+      "button": "Clonar proyecto",
+      "titlePlaceholder": "Titulo para la nueva copia",
+      "submit": "Crear copia",
+      "submitting": "Clonando..."
     }
   },
   "urgency": {
@@ -424,6 +440,14 @@
     "vouchReceived": {
       "line": "{{name}} respondio por ti.",
       "hint": "Cada aval te acerca al estatus de confianza."
+    },
+    "projectDeadline": {
+      "line": "{{project}} — fecha limite en {{days}} dias.",
+      "hint": "Toca para ver el avance."
+    },
+    "projectPaused": {
+      "line": "{{project}} ha estado en pausa por un tiempo.",
+      "hint": "Reanudalo o marcalo como completo cuando estes listo."
     }
   },
   "board": {

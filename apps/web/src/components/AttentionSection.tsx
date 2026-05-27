@@ -174,9 +174,49 @@ export function AttentionSection() {
               </li>
             );
           }
+          if (item.kind === "project_deadline_approaching") {
+            return (
+              <li key={`deadline_${item.projectId}`}>
+                <Link
+                  to={`/project/${item.projectId}`}
+                  className="block rounded-lg bg-amber-50 px-3 py-2 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+                >
+                  <span className="block text-sm font-medium text-amber-900 dark:text-amber-100">
+                    {t("attention.projectDeadline.line", {
+                      project: item.projectTitle,
+                      days: item.daysRemaining,
+                    })}
+                  </span>
+                  <span className="text-xs text-amber-800 dark:text-amber-200">
+                    {t("attention.projectDeadline.hint")}
+                  </span>
+                </Link>
+              </li>
+            );
+          }
+          if (item.kind === "project_paused_long") {
+            return (
+              <li key={`paused_${item.projectId}`}>
+                <Link
+                  to={`/project/${item.projectId}`}
+                  className="block rounded-lg bg-moss-50 px-3 py-2 hover:bg-moss-100 dark:bg-moss-950/40 dark:hover:bg-moss-950/60"
+                >
+                  <span className="block text-sm font-medium text-moss-900 dark:text-moss-100">
+                    {t("attention.projectPaused.line", {
+                      project: item.projectTitle,
+                    })}
+                  </span>
+                  <span className="text-xs text-moss-700 dark:text-moss-300">
+                    {t("attention.projectPaused.hint")}
+                  </span>
+                </Link>
+              </li>
+            );
+          }
           // task_check_in — private nudge, claimer only. Not a
           // Link wrapper because the actions live here; the
           // project name is still tappable as a deep-link.
+          if (item.kind === "task_check_in") {
           return (
             <li
               key={`checkin_${item.taskId}`}
@@ -218,6 +258,8 @@ export function AttentionSection() {
               </div>
             </li>
           );
+          }
+          return null;
         })}
       </ul>
     </section>
