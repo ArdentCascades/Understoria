@@ -115,8 +115,17 @@ We are not trying to protect against:
   passphrases are unrecoverable by design — this is documented in the
   UI and on the lock screen. Argon2id remains a viable future
   migration; the blob format carries a `kdf` field for that.
-- **No E2E messaging yet.** Direct messages are specified (X25519 +
-  XSalsa20-Poly1305, NaCl box) but not implemented.
+- **E2E direct messaging: IMPLEMENTED.** Messages between members on
+  the same node are encrypted with NaCl box (X25519 + XSalsa20-Poly1305).
+  X25519 encryption keys are derived from Ed25519 identity keys via
+  ed2curve (0.3.0, ~2 KB, depends only on tweetnacl). Each message uses
+  a random 24-byte nonce from a CSPRNG. Messages are stored encrypted at
+  rest in IndexedDB and decrypted on read. No server relay, no
+  federation, no read receipts, no typing indicators — each of these
+  would be a metadata leak. Metadata exposure: `conversationId`
+  (deterministic from two public keys) and message timestamps are
+  visible to anyone with device-level IndexedDB access. Messages are
+  not recoverable if the member's secret key is lost.
 - **Metadata leakage via federation.** Broadcast of need/offer to peers
   reveals category, zone, timing. Mitigation: opt-in per post, zone is
   already coarsened to neighborhood, no precise location.
