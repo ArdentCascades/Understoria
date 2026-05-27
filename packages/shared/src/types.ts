@@ -420,7 +420,9 @@ export type ProjectActivityType =
   | "project_paused"
   | "project_resumed"
   | "project_completed"
-  | "milestone_reached";
+  | "milestone_reached"
+  | "organizer_handoff"
+  | "announcement";
 
 export interface ProjectActivity {
   id: string;

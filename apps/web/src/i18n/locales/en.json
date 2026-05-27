@@ -160,12 +160,34 @@
     "milestone": {
       "reached": "🎉 {{percent}}% of the way there!"
     },
+    "announcements": {
+      "title": "Updates",
+      "placeholder": "Share an update with the community...",
+      "submit": "Post update",
+      "submitting": "Posting...",
+      "postedBy": "{{name}} · {{when}}"
+    },
     "coOrganizers": {
       "title": "Co-organizers",
       "intro": "Co-organizers can confirm tasks, add tasks, and pause or resume the project. Only the primary organizer can add or remove co-organizers.",
       "add": "Add",
       "remove": "Remove",
       "selectPlaceholder": "Choose a member..."
+    },
+    "handoff": {
+      "title": "Pass the torch",
+      "intro": "Transfer your primary role to a co-organizer. You'll stay as a co-organizer.",
+      "select": "Choose a co-organizer...",
+      "submit": "Transfer primary role",
+      "submitting": "Transferring..."
+    },
+    "bulkTask": {
+      "toggle": "Quick-add multiple",
+      "placeholder": "One task per line",
+      "hint": "Each line becomes a task with default settings. Edit individually after.",
+      "submit": "Add all",
+      "submitting": "Adding...",
+      "success": "Added {{count}} tasks."
     }
   },
   "urgency": {

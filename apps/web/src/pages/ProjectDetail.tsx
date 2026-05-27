@@ -9,7 +9,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -17,13 +18,17 @@ import { useToast } from "@/state/ToastContext";
 import {
   addCoOrganizer,
   addProjectTask,
+  bulkAddTasks,
   claimProjectTask,
   completeProject,
   confirmProjectTaskCompletion,
+  handoffOrganizer,
   isOrganizer,
   launchProject,
+  listAnnouncements,
   markProjectTaskComplete,
   pauseProject,
+  postAnnouncement,
   removeCoOrganizer,
   resumeProject,
   unclaimProjectTask,
@@ -243,6 +248,15 @@ export default function ProjectDetailPage() {
         />
       )}
 
+      {isPrimaryOrganizer && project.coOrganizerKeys.length > 0 && project.status !== "completed" && project.status !== "archived" && (
+        <HandoffSection
+          project={project}
+          currentKey={currentMember!.publicKey}
+          memberMap={memberMap}
+          onRun={run}
+        />
+      )}
+
       {error && (
         <p
           role="alert"
@@ -251,6 +265,14 @@ export default function ProjectDetailPage() {
           {error}
         </p>
       )}
+
+      <AnnouncementSection
+        project={project}
+        isOrg={isOrg}
+        memberMap={memberMap}
+        nodeId={nodeId}
+        currentKey={currentMember?.publicKey}
+      />
 
       <section className="mb-4">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
@@ -290,6 +312,12 @@ export default function ProjectDetailPage() {
         project.status !== "completed" &&
         project.status !== "archived" && (
           <AddTaskForm project={project} onRun={run} />
+        )}
+
+      {isOrg &&
+        project.status !== "completed" &&
+        project.status !== "archived" && (
+          <BulkTaskForm project={project} nodeId={nodeId} onRun={run} />
         )}
     </div>
   );
@@ -718,6 +746,156 @@ function AddTaskForm({
   );
 }
 
+function HandoffSection({
+  project,
+  currentKey,
+  memberMap,
+  onRun,
+}: {
+  project: Project;
+  currentKey: string;
+  memberMap: Map<string, string>;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+}) {
+  const { t } = useTranslation();
+  const [selectedKey, setSelectedKey] = useState("");
+  const { pending, run: runWithPending } = usePendingAction();
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        {t("projects.handoff.title")}
+      </h2>
+      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
+        {t("projects.handoff.intro")}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <select
+          className="input flex-1"
+          value={selectedKey}
+          onChange={(e) => setSelectedKey(e.target.value)}
+        >
+          <option value="">
+            {t("projects.handoff.select")}
+          </option>
+          {project.coOrganizerKeys.map((key) => (
+            <option key={key} value={key}>
+              {memberMap.get(key) ?? key}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={pending || !selectedKey}
+          aria-busy={pending}
+          onClick={() => {
+            if (!selectedKey) return;
+            void runWithPending(() =>
+              onRun(() =>
+                handoffOrganizer(project.id, currentKey, selectedKey),
+              ),
+            );
+            setSelectedKey("");
+          }}
+        >
+          {pending
+            ? t("projects.handoff.submitting")
+            : t("projects.handoff.submit")}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function AnnouncementSection({
+  project,
+  isOrg,
+  memberMap,
+  nodeId,
+  currentKey,
+}: {
+  project: Project;
+  isOrg: boolean;
+  memberMap: Map<string, string>;
+  nodeId: string;
+  currentKey: string | undefined;
+}) {
+  const { t } = useTranslation();
+  const [body, setBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const announcements = useLiveQuery(
+    () => listAnnouncements(project.id),
+    [project.id],
+    [],
+  );
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!body.trim() || !currentKey) return;
+      setSubmitting(true);
+      try {
+        await postAnnouncement(project.id, currentKey, body, nodeId);
+        setBody("");
+      } catch {
+        // Errors are swallowed here; the user sees the field still filled.
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [body, currentKey, nodeId, project.id],
+  );
+
+  if (!isOrg && announcements.length === 0) return null;
+
+  return (
+    <section className="mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        {t("projects.announcements.title")}
+      </h2>
+      {isOrg && (
+        <form onSubmit={handleSubmit} className="card mb-3 flex flex-col gap-2">
+          <textarea
+            className="input min-h-20"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            maxLength={2000}
+            placeholder={t("projects.announcements.placeholder")}
+          />
+          <button
+            type="submit"
+            className="btn-primary self-end"
+            disabled={submitting || !body.trim()}
+            aria-busy={submitting}
+          >
+            {submitting
+              ? t("projects.announcements.submitting")
+              : t("projects.announcements.submit")}
+          </button>
+        </form>
+      )}
+      {announcements.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {announcements.map((a) => (
+            <li key={a.id} className="card">
+              <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
+                {t("projects.announcements.postedBy", {
+                  name: memberMap.get(a.actorKey) ?? t("common.memberFallback"),
+                  when: formatRelativeTime(a.createdAt),
+                })}
+              </p>
+              <p className="whitespace-pre-wrap text-sm">
+                {(a.data as { body?: string }).body ?? ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function CoOrganizerSection({
   project,
   members,
@@ -807,6 +985,107 @@ function CoOrganizerSection({
           </button>
         </div>
       )}
+    </section>
+  );
+}
+
+function BulkTaskForm({
+  project,
+  nodeId,
+  onRun,
+}: {
+  project: Project;
+  nodeId: string;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+}) {
+  const { t } = useTranslation();
+  const { showToast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const lineCount = text
+    .split("\n")
+    .filter((l) => l.trim().length > 0).length;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (lineCount === 0) return;
+    setSubmitting(true);
+    const ok = await onRun(() =>
+      bulkAddTasks(
+        project.id,
+        project.organizerKey,
+        text.split("\n"),
+        nodeId,
+      ),
+    );
+    setSubmitting(false);
+    if (ok) {
+      showToast(t("projects.bulkTask.success", { count: ok.length }));
+      setText("");
+      setOpen(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <div className="mb-4 text-center">
+        <button
+          type="button"
+          className="text-sm text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+          onClick={() => setOpen(true)}
+        >
+          {t("projects.bulkTask.toggle")}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        {t("projects.bulkTask.toggle")}
+      </h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <textarea
+          className="input min-h-32"
+          placeholder={t("projects.bulkTask.placeholder")}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={5000}
+          rows={6}
+        />
+        <div className="flex items-center justify-between text-xs text-moss-500 dark:text-moss-400">
+          <span>
+            {lineCount > 0
+              ? `${lineCount} ${lineCount === 1 ? "task" : "tasks"}`
+              : ""}
+          </span>
+          <span>{t("projects.bulkTask.hint")}</span>
+        </div>
+        <div className="flex gap-2 self-end">
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={() => {
+              setOpen(false);
+              setText("");
+            }}
+          >
+            {t("common.cancel")}
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={submitting || lineCount === 0 || lineCount > 50}
+          >
+            {submitting
+              ? t("projects.bulkTask.submitting")
+              : t("projects.bulkTask.submit")}
+          </button>
+        </div>
+      </form>
     </section>
   );
 }

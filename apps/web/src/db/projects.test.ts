@@ -13,11 +13,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "./database";
 import { createMember } from "./seed";
 import {
+  addCoOrganizer,
   addProjectTask,
   claimProjectTask,
   completeProject,
   confirmProjectTaskCompletion,
   createProject,
+  handoffOrganizer,
   launchProject,
   markProjectTaskComplete,
   pauseProject,
@@ -311,5 +313,66 @@ describe("task confirmation transfers credit and surfaces milestones", () => {
       (a) => a.type === "milestone_reached",
     );
     expect(milestoneActivity).toHaveLength(4);
+  });
+});
+
+describe("handoffOrganizer", () => {
+  beforeEach(reset);
+
+  it("happy path: swaps organizer and demotes caller to co-organizer, logs activity", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+
+    const updated = await handoffOrganizer(p.id, alice.publicKey, bob.publicKey);
+    expect(updated.organizerKey).toBe(bob.publicKey);
+    expect(updated.coOrganizerKeys).toContain(alice.publicKey);
+    expect(updated.coOrganizerKeys).not.toContain(bob.publicKey);
+
+    const activity = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "organizer_handoff",
+    );
+    expect(activity).toHaveLength(1);
+    expect(activity[0].data).toEqual({
+      fromKey: alice.publicKey,
+      toKey: bob.publicKey,
+    });
+  });
+
+  it("rejects non-primary caller", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const carol = await createMember({ displayName: "Carol" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+
+    await expect(
+      handoffOrganizer(p.id, carol.publicKey, bob.publicKey),
+    ).rejects.toThrow(/primary organizer/i);
+  });
+
+  it("rejects target not in coOrganizerKeys", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const p = await aProject(alice);
+    // bob is NOT a co-organizer
+
+    await expect(
+      handoffOrganizer(p.id, alice.publicKey, bob.publicKey),
+    ).rejects.toThrow(/co-organizer/i);
+  });
+
+  it("rejects completed project", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await launchProject(p.id, alice.publicKey);
+    await completeProject(p.id, alice.publicKey);
+
+    await expect(
+      handoffOrganizer(p.id, alice.publicKey, bob.publicKey),
+    ).rejects.toThrow(/completed or archived/i);
   });
 });

@@ -732,6 +732,69 @@ async function logActivity(
   await db.projectActivity.put(entry);
 }
 
+export async function handoffOrganizer(
+  projectId: string,
+  callerKey: string,
+  newPrimaryKey: string,
+): Promise<Project> {
+  return db.transaction("rw", [db.projects, db.projectActivity], async () => {
+    const p = await db.projects.get(projectId);
+    if (!p) throw new Error("Project not found.");
+    if (p.organizerKey !== callerKey)
+      throw new Error("Only the primary organizer can hand off.");
+    if (!p.coOrganizerKeys.includes(newPrimaryKey))
+      throw new Error("New primary must be a current co-organizer.");
+    if (p.status === "completed" || p.status === "archived")
+      throw new Error("Cannot hand off a completed or archived project.");
+    const updated: Project = {
+      ...p,
+      organizerKey: newPrimaryKey,
+      coOrganizerKeys: [
+        ...p.coOrganizerKeys.filter((k) => k !== newPrimaryKey),
+        callerKey,
+      ],
+    };
+    await db.projects.put(updated);
+    await logActivity(projectId, "organizer_handoff", callerKey, {
+      fromKey: callerKey,
+      toKey: newPrimaryKey,
+    }, p.nodeId);
+    return updated;
+  });
+}
+
+// -- Announcements ----------------------------------------------------------
+
+export async function postAnnouncement(
+  projectId: string,
+  callerKey: string,
+  body: string,
+  nodeId: string,
+): Promise<void> {
+  const trimmed = body.trim();
+  if (!trimmed) throw new Error("Announcement body is required.");
+  if (trimmed.length > 2000)
+    throw new Error("Announcement too long (max 2000 characters).");
+  return db.transaction("rw", [db.projects, db.projectActivity], async () => {
+    const p = await requireOrganizer(projectId, callerKey);
+    if (p.status === "archived")
+      throw new Error("Cannot post to an archived project.");
+    await logActivity(projectId, "announcement", callerKey, { body: trimmed }, nodeId);
+  });
+}
+
+export async function listAnnouncements(
+  projectId: string,
+  limit = 20,
+): Promise<ProjectActivity[]> {
+  const all = await db.projectActivity
+    .where("[projectId+createdAt]")
+    .between([projectId, 0], [projectId, Infinity])
+    .reverse()
+    .toArray();
+  return all.filter((a) => a.type === "announcement").slice(0, limit);
+}
+
 // -- Reads ------------------------------------------------------------------
 
 export async function listProjects(opts: {
@@ -759,4 +822,56 @@ export async function listActivityForProject(
     .reverse()
     .limit(limit)
     .toArray();
+}
+
+// -- Bulk task quick-add ----------------------------------------------------
+
+export async function bulkAddTasks(
+  projectId: string,
+  organizerKey: string,
+  lines: string[],
+  nodeId: string,
+): Promise<ProjectTask[]> {
+  const titles = lines.map((l) => l.trim()).filter(Boolean);
+  if (titles.length === 0) throw new Error("No tasks to add.");
+  if (titles.length > 50) throw new Error("Maximum 50 tasks at a time.");
+
+  return db.transaction(
+    "rw",
+    [db.projects, db.projectTasks, db.projectActivity],
+    async () => {
+      const p = await requireOrganizer(projectId, organizerKey);
+      if (p.status === "completed" || p.status === "archived")
+        throw new Error("Tasks cannot be added to a completed project.");
+      const tasks: ProjectTask[] = [];
+      for (const title of titles) {
+        const task: ProjectTask = {
+          id: uuid(),
+          projectId,
+          title,
+          description: "",
+          category: p.category,
+          estimatedHours: 1,
+          urgency: "low",
+          requiredSkills: [],
+          assignedTo: null,
+          status: "open",
+          dependencies: [],
+          createdAt: Date.now(),
+          completedAt: null,
+          completedBy: null,
+          exchangeId: null,
+          claimedAt: null,
+          checkInAcknowledgedAt: null,
+        };
+        await db.projectTasks.put(task);
+        await logActivity(projectId, "task_added", organizerKey, {
+          taskId: task.id,
+          hours: task.estimatedHours,
+        }, nodeId);
+        tasks.push(task);
+      }
+      return tasks;
+    },
+  );
 }
