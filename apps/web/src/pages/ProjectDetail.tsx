@@ -701,6 +701,7 @@ function TaskRow({
             title={t("projects.task.followsHint")}
           >
             {t("projects.task.follows", { tasks: depNames })}
+            <WhyTooltip principleId="follows-not-blocked" />
           </span>
         )}
       </div>

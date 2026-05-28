@@ -82,4 +82,36 @@ export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
     example:
       "Rapid online votes in cooperatives consistently left night-shift workers, caregivers, and members with limited internet access unheard. A 3-day minimum gives everyone a real chance to weigh in.",
   },
+  {
+    id: "no-post-editing",
+    title: "Why repost instead of edit",
+    statement:
+      "Posts are cryptographically signed at creation. Editing would break the signature that lets any node verify the post independently.",
+    example:
+      "Platforms that allow silent edits to posts create deniability problems — 'I never said that' becomes unresolvable. Immutable signed records plus a repost flow preserves both flexibility and accountability.",
+  },
+  {
+    id: "no-read-receipts",
+    title: "No read receipts on messages",
+    statement:
+      "We don't tell senders when their message was read. Who-talks-to-whom is the relationship graph the threat model protects most.",
+    example:
+      "WhatsApp's blue checkmarks created social pressure to respond immediately and enabled abusive partners to monitor response times. Removing read receipts removes the surveillance affordance entirely.",
+  },
+  {
+    id: "no-activity-search",
+    title: "No member search by activity",
+    statement:
+      "You can't search for 'who's been most active' or 'who helped the most.' Activity patterns are surveillance data.",
+    example:
+      "When Strava published aggregate activity heatmaps, they accidentally revealed the locations of secret military bases. Individual activity patterns are even more revealing — they show who is organizing, when, and with whom.",
+  },
+  {
+    id: "follows-not-blocked",
+    title: "Tasks 'follow' — they're never 'blocked'",
+    statement:
+      "A task waiting on another task is sequenced, not stuck. The framing shapes how people feel about the work.",
+    example:
+      "Project management tools that label tasks 'blocked' create a blame dynamic — someone is 'blocking' someone else. 'Follows' frames the same dependency as a natural sequence, removing the interpersonal friction.",
+  },
 ];

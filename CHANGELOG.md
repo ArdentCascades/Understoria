@@ -10,6 +10,31 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Help-seeker UX improvements (PRs #66–#67).** Six features
+  improving the experience for members seeking or browsing help
+  on the Board.
+  - **Repost with changes** — "Repost with changes" button on
+    unclaimed posts pre-fills PostForm with the original post's
+    data and auto-cancels the original on submit, so a poster
+    can refine without losing context.
+  - **Expiry visibility** — `ExpiryChip` on `PostCard` with
+    color-coded urgency: amber when ≤3 days remain, rose when
+    ≤24 hours, muted when expired.
+  - **Category descriptions** — PostForm category selector
+    changed from a plain `<select>` to a radio-button fieldset
+    showing emoji + label + description for each category.
+  - **Exchange confirmation guidance** — inline status-specific
+    text on PostDetail at each exchange stage, so both parties
+    know what to do next.
+  - **Location-zone filtering** — zone dropdown on Board
+    alongside the existing category and urgency filters,
+    with zone list derived from posts.
+  - **"Still looking" gentle prompt** — soft hint on PostDetail
+    when a poster views their own unclaimed post that is 3+
+    days old, encouraging them to repost or adjust.
+
+  Tests: 527 passing. Lint, typecheck, build clean.
+
 - **E2E encrypted direct messaging between members (Agent 2,
   task 5).** Members on the same node can exchange private messages,
   encrypted end-to-end with NaCl box (X25519 + XSalsa20-Poly1305).
