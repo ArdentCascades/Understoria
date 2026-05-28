@@ -315,7 +315,8 @@
     "errorNeedTitle": "Give your post a short title so people know what it's about.",
     "errorHoursPositive": "Estimated hours must be a positive number.",
     "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire.",
-    "repostBanner": "Editing a copy — the original post will be cancelled when you submit."
+    "repostBanner": "Editing a copy — the original post will be cancelled when you submit.",
+    "matchingNeeds": "{{count}} active needs in this category — see them"
   },
   "postDetail": {
     "notFound": "This post couldn't be found. It may have been cancelled.",
@@ -363,6 +364,8 @@
     "repost": "Repost with changes",
     "repostHint": "This will cancel the original and create a fresh post.",
     "stillLooking": "Still looking? Adding more detail or adjusting the hours estimate can help the right person find this. You can repost with changes below.",
+    "stillOffering": "Still available? Adjusting the timing or details can help match you with someone who needs this.",
+    "postAgain": "Post this again",
     "guidance": {
       "claimed": "Your helper is on it. When the work is done, one of you marks it complete and the other confirms.",
       "awaitingYou": "The other party marked this complete. Review what was done and confirm to release the credits.",

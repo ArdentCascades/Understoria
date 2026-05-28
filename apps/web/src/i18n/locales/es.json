@@ -315,7 +315,8 @@
     "errorNeedTitle": "Dale un título corto a tu publicación para que la gente sepa de qué se trata.",
     "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
     "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar.",
-    "repostBanner": "Editando una copia — la publicacion original se cancelara al enviar."
+    "repostBanner": "Editando una copia — la publicacion original se cancelara al enviar.",
+    "matchingNeeds": "{{count}} necesidades activas en esta categoria — verlas"
   },
   "postDetail": {
     "notFound": "No se encontró esta publicación. Puede que haya sido cancelada.",
@@ -363,6 +364,8 @@
     "repost": "Republicar con cambios",
     "repostHint": "Esto cancelara la original y creara una publicacion nueva.",
     "stillLooking": "Sigues buscando? Agregar mas detalles o ajustar las horas estimadas puede ayudar a que la persona adecuada encuentre esto. Puedes republicar con cambios abajo.",
+    "stillOffering": "Sigues disponible? Ajustar el horario o los detalles puede ayudar a que se conecte con alguien que lo necesita.",
+    "postAgain": "Publicar de nuevo",
     "guidance": {
       "claimed": "Tu ayudante esta en ello. Cuando el trabajo termine, una persona lo marca como completo y la otra confirma.",
       "awaitingYou": "La otra persona marco esto como completo. Revisa lo que se hizo y confirma para liberar los creditos.",

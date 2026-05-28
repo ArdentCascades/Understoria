@@ -10,6 +10,30 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Offer-poster UX improvements (PR #69).** Three features
+  symmetric to the help-seeker improvements (PRs #66–#67),
+  focused on the offer side of the Board.
+  - **"Still offering?" variant** — the 3-day-old gentle prompt
+    on PostDetail now branches on `post.type`. NEEDs see the
+    existing "Still looking" copy; OFFERs see "Still offering?"
+    framing. New i18n key `postDetail.stillOffering`.
+  - **"Post this again"** — button on completed posts navigates
+    to PostForm with `?repost=<id>&again=1`. PostForm recognizes
+    the `again=1` flag and skips the auto-cancel-on-submit
+    behaviour (the original is already completed, not unclaimed),
+    so a poster can re-list a recurring offer or need without
+    disturbing the prior exchange's record. New i18n key
+    `postDetail.postAgain`.
+  - **"Active needs in this category" hint** — on PostForm when
+    posting an OFFER with a category selected, an inline hint
+    shows the count of active NEEDs in that category with a link
+    to the Board filtered to that category. Helps a poster see
+    immediately whether their offer matches an open need. New
+    i18n key `postForm.matchingNeeds`.
+
+  Tests: 527 passing. No schema changes. Lint, typecheck, build
+  clean.
+
 - **Help-seeker UX improvements (PRs #66–#67).** Six features
   improving the experience for members seeking or browsing help
   on the Board.
