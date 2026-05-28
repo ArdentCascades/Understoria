@@ -184,8 +184,9 @@ export default function DashboardPage() {
         </h2>
         {totalCategoryHours === 0 ? (
           <EmptyState
-            icon={"\u{1F333}"}
+            illustration="sapling"
             variant="inset"
+            title={t("dashboard.categoryBreakdown.emptyTitle")}
             message={t("dashboard.categoryBreakdown.empty")}
           />
         ) : (

@@ -270,6 +270,12 @@ export default function BoardPage() {
 
       {visiblePosts.length === 0 ? (
         <EmptyState
+          illustration="sapling"
+          title={
+            tab === "NEED"
+              ? t("board.empty.titleNeeds")
+              : t("board.empty.titleOffers")
+          }
           message={
             tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
           }
@@ -377,6 +383,8 @@ function ProjectList({
   if (visible.length === 0) {
     return (
       <EmptyState
+        illustration="book"
+        title={t("projects.emptyTitle")}
         message={t("projects.empty")}
       />
     );

@@ -32,7 +32,7 @@ export function BreadthBar({ entries, members, topN = 5 }: BreadthBarProps) {
       <section className="card mb-4" aria-labelledby="breadth-title">
         <Header />
         <EmptyState
-          icon={"\u{1F33F}"}
+          illustration="none"
           variant="inset"
           message={t("dashboard.breadth.empty")}
         />

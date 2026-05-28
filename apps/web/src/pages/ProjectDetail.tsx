@@ -287,8 +287,9 @@ export default function ProjectDetailPage() {
         {tasks.length === 0 ? (
           <div className="card">
             <EmptyState
-              icon={"\u{1F33F}"}
+              illustration="book"
               variant="inset"
+              title={t("projects.detail.noTasksTitle")}
               message={t("projects.detail.noTasks")}
             />
           </div>

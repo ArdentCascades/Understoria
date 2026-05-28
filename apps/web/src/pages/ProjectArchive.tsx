@@ -58,7 +58,11 @@ export default function ProjectArchivePage() {
         </p>
       </header>
       {archived.length === 0 ? (
-        <EmptyState message={t("projects.archive.empty")} />
+        <EmptyState
+          illustration="book"
+          title={t("projects.archive.emptyTitle")}
+          message={t("projects.archive.empty")}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {archived.map((p) => {

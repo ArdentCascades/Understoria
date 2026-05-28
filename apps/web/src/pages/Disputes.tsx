@@ -65,7 +65,11 @@ export default function DisputesPage() {
       </header>
 
       {disputes.length === 0 ? (
-        <EmptyState icon={"\u{1F33F}"} message={t("disputes.empty")} />
+        <EmptyState
+          illustration="basket"
+          title={t("disputes.emptyTitle")}
+          message={t("disputes.empty")}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {disputes.map((d) => (

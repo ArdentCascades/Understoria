@@ -163,7 +163,7 @@ export default function ProfilePage() {
         </h2>
         {myAchievements.length === 0 ? (
           <EmptyState
-            icon={"\u{1F343}"}
+            illustration="basket"
             variant="inset"
             message={t("profile.rolesEarned.empty")}
           />
@@ -187,8 +187,9 @@ export default function ProfilePage() {
         </h2>
         {history.length === 0 ? (
           <EmptyState
-            icon={"\u{1F33F}"}
+            illustration="path"
             variant="inset"
+            title={t("profile.history.emptyTitle")}
             message={t("profile.history.empty")}
             action={{ label: t("nav.board"), to: "/" }}
           />
@@ -885,7 +886,7 @@ function InvitesSection({
 
       {invites.length === 0 ? (
         <EmptyState
-          icon={"\u{2709}\u{FE0F}"}
+          illustration="none"
           variant="inset"
           message={t("profile.invites.empty")}
         />

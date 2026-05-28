@@ -130,7 +130,12 @@ export default function ProposalsPage() {
 
       {filtered.length === 0 ? (
         <EmptyState
-          icon={"\u{1F33F}"}
+          illustration="basket"
+          title={t(
+            filter === "open"
+              ? "proposals.emptyTitleOpen"
+              : "proposals.emptyTitleFiltered",
+          )}
           message={t(
             filter === "open"
               ? "proposals.emptyOpen"

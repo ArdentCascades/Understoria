@@ -46,7 +46,11 @@ export default function MessagesPage() {
         <h1 className="page-title">{t("messages.title")}</h1>
       </header>
       {conversations.length === 0 ? (
-        <EmptyState message={t("messages.empty")} />
+        <EmptyState
+          illustration="hands"
+          title={t("messages.emptyTitle")}
+          message={t("messages.empty")}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {conversations.map((c) => (

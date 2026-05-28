@@ -71,6 +71,7 @@
   },
   "messages": {
     "title": "Mensajes",
+    "emptyTitle": "Aún no hay conversaciones",
     "empty": "Aun no hay mensajes. Inicia una conversacion desde cualquier publicacion o perfil.",
     "sendMessage": "Mensaje",
     "messageButton": "Mensaje",
@@ -86,6 +87,7 @@
   "projects": {
     "tab": "Proyectos",
     "fab": "Iniciar un proyecto",
+    "emptyTitle": "Aún no hay proyectos activos",
     "empty": "Aún no hay proyectos activos. Un proyecto es una meta colectiva — varias tareas, varias personas. El primero siempre es el más difícil de empezar.",
     "byOrganizer": "Organizado por {{name}}",
     "progressLabel": "{{contributed}} de {{target}} ({{percent}}%)",
@@ -132,6 +134,7 @@
       "back": "← Volver a proyectos",
       "notFound": "No se encontró este proyecto.",
       "tasks": "Tareas",
+      "noTasksTitle": "Aún no hay tareas",
       "noTasks": "Aún no hay tareas. Quien organiza puede agregar la primera abajo.",
       "addTaskTitle": "Agregar una tarea",
       "launch": "Lanzar proyecto",
@@ -229,6 +232,7 @@
       "unarchive": "Desarchivar",
       "title": "Archivo de proyectos",
       "subtitle": "Proyectos completados y archivados",
+      "emptyTitle": "Aún no hay proyectos completados",
       "empty": "Aun no hay proyectos archivados.",
       "viewArchive": "Ver archivo"
     },
@@ -537,6 +541,8 @@
       "postOffer": "Publicar una oferta"
     },
     "empty": {
+      "titleNeeds": "Aún no crece nada aquí",
+      "titleOffers": "Aún no crece nada aquí",
       "needs": "Aún no hay necesidades que coincidan con estos filtros. Si necesitas ayuda, publícalo — pedir nunca tiene barreras en un banco de tiempo.",
       "offers": "Aún no hay ofertas que coincidan con estos filtros. ¿Qué podrías compartir con tu comunidad esta semana?"
     }
@@ -572,6 +578,7 @@
     },
     "categoryBreakdown": {
       "title": "Por dónde fluye el apoyo",
+      "emptyTitle": "Una nueva understoria",
       "empty": "Aún no hay intercambios. Cuando ocurra el primero, verás la mezcla de cuidados, trabajo y apoyo fluyendo por la comunidad."
     },
     "breadth": {
@@ -588,6 +595,7 @@
       "intro": "Conexiones que fluyen en ambos sentidos — A ha ayudado a B y B ha ayudado a A.",
       "rate": "{{percent}}% de las conexiones son recíprocas",
       "ratio": "{{reciprocal}} de {{total}} pares",
+      "emptyTitle": "El primer intercambio por delante",
       "empty": "Aún no hay reciprocidad que medir.",
       "footnote": "No es una puntuación. Solo una ventana a la forma de la ayuda en la comunidad."
     },
@@ -643,6 +651,7 @@
     },
     "history": {
       "title": "Tu historial de intercambios",
+      "emptyTitle": "Tu historia empieza aquí",
       "empty": "Aún no hay nada aquí. Cuando des o recibas ayuda, cada intercambio aparecerá con un registro firmado que podrás verificar.",
       "helped": "Ayudaste a",
       "received": "Recibiste ayuda de",
@@ -801,6 +810,7 @@
   "disputes": {
     "title": "Disputas",
     "subtitle": "Intercambios que alguien señaló para que la comunidad los revise. Cualquier persona puede ver esta lista — no hay administradores. Las dos partes ya ven la marca en la publicación misma; aquí es donde aparece para el resto.",
+    "emptyTitle": "Nada requiere atención de la comunidad",
     "empty": "Nada está señalado ahora mismo. Cuando alguien señale un intercambio, aparecerá aquí para que la comunidad pueda verlo y responder.",
     "flagChip": "Señalado",
     "typeNeed": "Necesidad",
@@ -831,6 +841,8 @@
       "withdrawn": "Retiradas"
     },
     "startNew": "Iniciar una propuesta",
+    "emptyTitleOpen": "No hay propuestas abiertas",
+    "emptyTitleFiltered": "Nada coincide",
     "emptyOpen": "No hay propuestas abiertas ahora mismo.",
     "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
     "footer": "La votación y el cierre automático aún están por venir. Por ahora la comunidad toma decisiones en su canal habitual, y cualquier integrante puede registrar el resultado aquí para que el registro histórico refleje la realidad.",
