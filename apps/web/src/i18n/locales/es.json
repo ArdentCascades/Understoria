@@ -280,7 +280,10 @@
   "postCard": {
     "needs": "necesita ayuda",
     "offers": "ofrece",
-    "peerCommunity": "Comunidad vecina"
+    "peerCommunity": "Comunidad vecina",
+    "expiresIn": "Expira en {{count}} dias",
+    "expiresToday": "Expira hoy",
+    "expired": "Expirada"
   },
   "postForm": {
     "titleNeed": "Publicar una necesidad",
@@ -306,7 +309,8 @@
     "categoryOption": "{{emoji}} {{label}} — {{description}}",
     "errorNeedTitle": "Dale un título corto a tu publicación para que la gente sepa de qué se trata.",
     "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
-    "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar."
+    "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar.",
+    "repostBanner": "Editando una copia — la publicacion original se cancelara al enviar."
   },
   "postDetail": {
     "notFound": "No se encontró esta publicación. Puede que haya sido cancelada.",
@@ -351,6 +355,13 @@
     "dialogReleaseTitle": "¿Soltar tu compromiso?",
     "dialogReleaseDescription": "Esto reabrirá la publicación para que alguien más pueda tomarla.",
     "dialogReleaseConfirm": "Soltar",
+    "repost": "Republicar con cambios",
+    "repostHint": "Esto cancelara la original y creara una publicacion nueva.",
+    "guidance": {
+      "claimed": "Tu ayudante esta en ello. Cuando el trabajo termine, una persona lo marca como completo y la otra confirma.",
+      "awaitingYou": "La otra persona marco esto como completo. Revisa lo que se hizo y confirma para liberar los creditos.",
+      "completed": "Los creditos se han transferido. Gracias a ambas personas por fortalecer la comunidad."
+    },
     "newRolesEarned": "Nuevos roles comunitarios obtenidos"
   },
   "lockScreen": {

@@ -58,6 +58,7 @@ export function PostCard({
             {t("postCard.peerCommunity")}
           </span>
         )}
+        <ExpiryChip expiresAt={post.expiresAt} />
       </div>
       <h3 className="text-base font-semibold leading-snug">{post.title}</h3>
       {post.description && (
@@ -82,6 +83,33 @@ export function PostCard({
       </div>
     </Link>
   );
+}
+
+function ExpiryChip({ expiresAt }: { expiresAt: number | null }) {
+  const { t } = useTranslation();
+  if (!expiresAt) return null;
+  const now = Date.now();
+  const msRemaining = expiresAt - now;
+  const daysRemaining = Math.ceil(msRemaining / (24 * 60 * 60 * 1000));
+  if (daysRemaining <= 0)
+    return (
+      <span className="chip bg-moss-100 text-moss-600 dark:bg-moss-800 dark:text-moss-300">
+        {t("postCard.expired")}
+      </span>
+    );
+  if (daysRemaining <= 1)
+    return (
+      <span className="chip bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+        {t("postCard.expiresToday")}
+      </span>
+    );
+  if (daysRemaining <= 3)
+    return (
+      <span className="chip bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+        {t("postCard.expiresIn", { count: daysRemaining })}
+      </span>
+    );
+  return null;
 }
 
 function StatusChip({ status }: { status: Post["status"] }) {

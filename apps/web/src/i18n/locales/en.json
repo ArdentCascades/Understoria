@@ -280,7 +280,10 @@
   "postCard": {
     "needs": "needs help",
     "offers": "offers",
-    "peerCommunity": "Peer community"
+    "peerCommunity": "Peer community",
+    "expiresIn": "Expires in {{count}} days",
+    "expiresToday": "Expires today",
+    "expired": "Expired"
   },
   "postForm": {
     "titleNeed": "Post a need",
@@ -306,7 +309,8 @@
     "categoryOption": "{{emoji}} {{label}} — {{description}}",
     "errorNeedTitle": "Give your post a short title so people know what it's about.",
     "errorHoursPositive": "Estimated hours must be a positive number.",
-    "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire."
+    "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire.",
+    "repostBanner": "Editing a copy — the original post will be cancelled when you submit."
   },
   "postDetail": {
     "notFound": "This post couldn't be found. It may have been cancelled.",
@@ -351,6 +355,13 @@
     "dialogReleaseTitle": "Release your claim?",
     "dialogReleaseDescription": "This will reopen the post so someone else can step in.",
     "dialogReleaseConfirm": "Release claim",
+    "repost": "Repost with changes",
+    "repostHint": "This will cancel the original and create a fresh post.",
+    "guidance": {
+      "claimed": "Your helper is on it. When the work is done, one of you marks it complete and the other confirms.",
+      "awaitingYou": "The other party marked this complete. Review what was done and confirm to release the credits.",
+      "completed": "Credits have transferred. Thank you both for strengthening the community."
+    },
     "newRolesEarned": "New community roles earned"
   },
   "lockScreen": {
