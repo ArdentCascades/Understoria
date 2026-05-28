@@ -51,6 +51,36 @@ export default {
           900: "#2c3a28",
           950: "#161f13",
         },
+        // Warm accent. Reserved for reciprocity moments only — a
+        // thank-you, a fulfilled need, an exchange confirmation.
+        // Never used for status, rank, urgency, or judgment.
+        ember: {
+          50: "#fdf6ec",
+          100: "#fae8cf",
+          200: "#f4d3a1",
+          300: "#e9b977",
+          400: "#dc9c4d",
+          500: "#c97f1e",
+          600: "#a96618",
+          700: "#8a5212",
+          800: "#65380c",
+          900: "#4a2c08",
+        },
+        // Warm neutral. Pairs with moss/canopy for body text and
+        // soft borders — keeps the all-green palette from reading
+        // clinical without introducing a second hue.
+        bark: {
+          50: "#f7f4ef",
+          100: "#ede7dc",
+          200: "#d9cfbe",
+          300: "#bfb097",
+          400: "#9a886b",
+          500: "#7a6a52",
+          600: "#5e5040",
+          700: "#473d31",
+          800: "#3a3225",
+          900: "#241f18",
+        },
       },
       fontFamily: {
         sans: [
@@ -61,6 +91,38 @@ export default {
           "Roboto",
           "sans-serif",
         ],
+        // Reserved for page-level titles only. See design/README.md.
+        serif: [
+          "'Source Serif 4 Variable'",
+          "'Source Serif 4'",
+          "Georgia",
+          "Cambria",
+          "serif",
+        ],
+      },
+      // 5-step type scale (1.25 ratio). Use these tokens instead of
+      // raw text-{xl,2xl,…} so hierarchy stays consistent across
+      // pages. See design/README.md for when to use each.
+      fontSize: {
+        display: ["2.25rem", { lineHeight: "1.15", letterSpacing: "-0.02em" }],
+        title: ["1.5rem", { lineHeight: "1.25", letterSpacing: "-0.01em" }],
+        heading: ["1.125rem", { lineHeight: "1.35" }],
+        body: ["1rem", { lineHeight: "1.6" }],
+        caption: ["0.8125rem", { lineHeight: "1.45" }],
+      },
+      // Vertical rhythm tokens. Prefer these over arbitrary
+      // gap-3/mt-4/py-6 so spacing is consistent.
+      spacing: {
+        "stack-xs": "0.5rem",
+        "stack-sm": "0.75rem",
+        "stack-md": "1.25rem",
+        "stack-lg": "2rem",
+        "stack-xl": "3rem",
+      },
+      boxShadow: {
+        // Soft dual-layer shadow tinted with canopy green. Use for
+        // cards instead of shadow-sm; blends with the woodland palette.
+        leaf: "0 1px 2px rgb(20 83 45 / 0.04), 0 4px 12px rgb(20 83 45 / 0.05)",
       },
       animation: {
         "milestone-pop": "milestone-pop 600ms cubic-bezier(0.2, 0.8, 0.2, 1)",
