@@ -10,7 +10,7 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
-- **Density caps on thread surfaces.** Project announcements
+- **Density caps on thread surfaces (PR #76).** Project announcements
   ("Updates") and per-task comment threads now show only the
   newest items inline (5 announcements, 3 comments) with a
   "Show older (N)" toggle to expand. Prevents a long thread or
