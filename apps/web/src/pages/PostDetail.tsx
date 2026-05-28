@@ -373,7 +373,7 @@ function ActionPanel({
         <Actions>
           {Math.floor((Date.now() - post.createdAt) / 86_400_000) >= 3 && (
             <p className="mb-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-              {t("postDetail.stillLooking")}
+              {t(post.type === "OFFER" ? "postDetail.stillOffering" : "postDetail.stillLooking")}
             </p>
           )}
           <div className="flex flex-wrap gap-2">
@@ -489,6 +489,15 @@ function ActionPanel({
         <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
           {t("postDetail.guidance.completed")}
         </p>
+        {post.status === "completed" && isPoster && (
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => navigate(`/post/new?repost=${post.id}&again=1`)}
+          >
+            {t("postDetail.postAgain")}
+          </button>
+        )}
       </Actions>
     );
   }

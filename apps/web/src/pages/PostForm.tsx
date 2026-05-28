@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
@@ -70,6 +70,7 @@ export default function PostFormPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const repostId = params.get("repost");
+  const repostAgain = params.get("again") === "1";
   const initialType: PostType =
     (params.get("type") as PostType) === "OFFER" ? "OFFER" : "NEED";
 
@@ -174,7 +175,7 @@ export default function PostFormPage() {
         },
         nodeId,
       );
-      if (repostId) {
+      if (repostId && !repostAgain) {
         try {
           await cancelPost(repostId, currentMember!.publicKey);
         } catch {
@@ -321,6 +322,23 @@ export default function PostFormPage() {
             ))}
           </div>
         </fieldset>
+
+        {type === "OFFER" && category && (() => {
+          const matching = posts.filter(
+            (p) => p.type === "NEED" && p.category === category && p.status === "open"
+          ).length;
+          if (matching === 0) return null;
+          return (
+            <p className="text-xs text-canopy-700 dark:text-canopy-300">
+              <Link
+                to={`/?tab=NEED&category=${category}`}
+                className="underline-offset-2 hover:underline"
+              >
+                {t("postForm.matchingNeeds", { count: matching })}
+              </Link>
+            </p>
+          );
+        })()}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
