@@ -29,6 +29,7 @@ import type {
   PostPayload,
   SignedInvite,
   SignedVouch,
+  TaskComment,
   VouchPayload,
 } from "./types.js";
 
@@ -278,4 +279,51 @@ export function decryptMessage(
 
 export function conversationId(keyA: string, keyB: string): string {
   return keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
+}
+
+/**
+ * Canonical serialization of a task comment — the immutable subset
+ * signed at creation. The `deletedAt` field is a local mutation
+ * (author may soft-delete later) and is excluded; including it
+ * would require re-signing on delete, which doesn't fit the model.
+ * Same field-order discipline as the other canonical helpers.
+ */
+export interface TaskCommentPayload {
+  id: string;
+  projectId: string;
+  taskId: string;
+  authorKey: string;
+  body: string;
+  createdAt: number;
+  nodeId: string;
+}
+
+export function canonicalTaskCommentPayload(p: TaskCommentPayload): string {
+  return JSON.stringify({
+    id: p.id,
+    projectId: p.projectId,
+    taskId: p.taskId,
+    authorKey: p.authorKey,
+    body: p.body,
+    createdAt: p.createdAt,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Verify a task comment's signature against the author's public
+ * key. Returns false for unsigned (empty-signature) rows.
+ */
+export function verifyTaskComment(comment: TaskComment): boolean {
+  if (!comment.signature) return false;
+  const payload = canonicalTaskCommentPayload({
+    id: comment.id,
+    projectId: comment.projectId,
+    taskId: comment.taskId,
+    authorKey: comment.authorKey,
+    body: comment.body,
+    createdAt: comment.createdAt,
+    nodeId: comment.nodeId,
+  });
+  return verify(payload, comment.signature, comment.authorKey);
 }

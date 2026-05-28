@@ -1,0 +1,202 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLiveQuery } from "dexie-react-hooks";
+import {
+  MAX_COMMENT_LENGTH,
+  deleteTaskComment,
+  listTaskComments,
+  postTaskComment,
+} from "@/db/taskComments";
+import { humanizeError } from "@/lib/humanizeError";
+import { formatRelativeTime } from "@/lib/format";
+
+// Per-task comment thread. Collapsed by default so a project with
+// many tasks doesn't sprawl. The toggle shows the comment count;
+// expanded view shows the thread (oldest → newest) plus a composer.
+//
+// Permission model:
+//   - Anyone with an unlocked session can post a comment.
+//   - Only the author can soft-delete their own comment; tombstones
+//     render as "(comment deleted)" so federated peers converge.
+//   - The toggle is always visible — even with zero comments,
+//     someone may want to start the thread.
+
+interface TaskCommentsProps {
+  projectId: string;
+  taskId: string;
+  currentKey: string | undefined;
+  /** Map from publicKey → displayName for rendering author names. */
+  memberMap: Map<string, string>;
+  nodeId: string;
+}
+
+export function TaskComments({
+  projectId,
+  taskId,
+  currentKey,
+  memberMap,
+  nodeId,
+}: TaskCommentsProps) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const [body, setBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const comments = useLiveQuery(
+    () => listTaskComments(projectId, taskId),
+    [projectId, taskId],
+    [],
+  );
+
+  const count = comments.length;
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!currentKey || !body.trim() || submitting) return;
+      setError(null);
+      setSubmitting(true);
+      try {
+        await postTaskComment(taskId, body, currentKey, nodeId);
+        setBody("");
+      } catch (err) {
+        setError(humanizeError(err));
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [body, currentKey, nodeId, submitting, taskId],
+  );
+
+  const handleDelete = useCallback(
+    async (commentId: string) => {
+      if (!currentKey) return;
+      if (!window.confirm(t("projects.task.comments.deleteConfirm"))) return;
+      try {
+        await deleteTaskComment(commentId, currentKey);
+      } catch (err) {
+        setError(humanizeError(err));
+      }
+    },
+    [currentKey, t],
+  );
+
+  return (
+    <div className="border-t border-bark-200/60 pt-stack-sm dark:border-moss-800">
+      <button
+        type="button"
+        className="text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        {expanded
+          ? t("projects.task.comments.hide")
+          : count === 0
+            ? t("projects.task.comments.startThread")
+            : t(
+                count === 1
+                  ? "projects.task.comments.showOne"
+                  : "projects.task.comments.showOther",
+                { count },
+              )}
+      </button>
+      {expanded && (
+        <div className="mt-stack-sm space-y-stack-sm">
+          {count === 0 && (
+            <p className="text-xs italic text-moss-500 dark:text-moss-400">
+              {t("projects.task.comments.empty")}
+            </p>
+          )}
+          {comments.map((c) => {
+            const isAuthor = currentKey === c.authorKey;
+            const isDeleted = c.deletedAt !== null;
+            return (
+              <article
+                key={c.id}
+                className="rounded-xl border border-bark-200/60 bg-bark-50 p-stack-sm dark:border-moss-800 dark:bg-moss-900/40"
+              >
+                <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
+                  {t("projects.task.comments.postedBy", {
+                    name:
+                      memberMap.get(c.authorKey) ??
+                      t("common.memberFallback"),
+                    when: formatRelativeTime(c.createdAt),
+                  })}
+                </p>
+                {isDeleted ? (
+                  <p className="text-sm italic text-moss-500 dark:text-moss-400">
+                    {t("projects.task.comments.tombstone")}
+                  </p>
+                ) : (
+                  <p className="whitespace-pre-wrap text-sm text-bark-800 dark:text-moss-100">
+                    {c.body}
+                  </p>
+                )}
+                {isAuthor && !isDeleted && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(c.id)}
+                    className="mt-1 text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-400"
+                  >
+                    {t("projects.task.comments.delete")}
+                  </button>
+                )}
+              </article>
+            );
+          })}
+          {currentKey && (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+              <label htmlFor={`comment-${taskId}`} className="sr-only">
+                {t("projects.task.comments.composerLabel")}
+              </label>
+              <textarea
+                id={`comment-${taskId}`}
+                className="input min-h-16"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={MAX_COMMENT_LENGTH}
+                placeholder={t("projects.task.comments.placeholder")}
+              />
+              {error && (
+                <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">
+                  {error}
+                </p>
+              )}
+              <button
+                type="submit"
+                className="btn-secondary self-end"
+                disabled={submitting || !body.trim()}
+                aria-busy={submitting}
+              >
+                {submitting
+                  ? t("projects.task.comments.submitting")
+                  : t("projects.task.comments.submit")}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

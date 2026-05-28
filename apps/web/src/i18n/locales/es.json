@@ -187,7 +187,22 @@
       "follows": "Sigue a: {{tasks}}",
       "followsHint": "Esta tarea estara lista cuando las tareas que sigue se completen.",
       "addDependency": "Sigue a...",
-      "noDependencies": "Sin dependencias"
+      "noDependencies": "Sin dependencias",
+      "comments": {
+        "startThread": "Iniciar un hilo de comentarios",
+        "showOne": "Ver {{count}} comentario",
+        "showOther": "Ver {{count}} comentarios",
+        "hide": "Ocultar comentarios",
+        "empty": "Aún no hay comentarios. Sé la primera persona en decir algo.",
+        "composerLabel": "Comentar sobre esta tarea",
+        "placeholder": "Agrega un comentario sobre esta tarea...",
+        "submit": "Publicar comentario",
+        "submitting": "Publicando...",
+        "postedBy": "{{name}} · {{when}}",
+        "delete": "Eliminar",
+        "deleteConfirm": "¿Eliminar este comentario? No se puede deshacer.",
+        "tombstone": "(comentario eliminado por quien lo escribió)"
+      }
     },
     "milestone": {
       "reached": "🎉 ¡{{percent}}% del camino recorrido!"

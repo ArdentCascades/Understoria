@@ -30,6 +30,7 @@ import type {
   ProjectActivity,
   ProjectTask,
   Proposal,
+  TaskComment,
   Vote,
 } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
@@ -146,6 +147,7 @@ export class UnderstoriaDB extends Dexie {
   proposals!: Table<Proposal, string>;
   votes!: Table<Vote, string>;
   messages!: Table<DirectMessage, string>;
+  taskComments!: Table<TaskComment, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -339,6 +341,15 @@ export class UnderstoriaDB extends Dexie {
     // The conversationId is deterministic from the two public keys.
     this.version(14).stores({
       messages: "id, conversationId, createdAt, [conversationId+createdAt]",
+    });
+    // Version 15 — per-task comment threads. New table only; no
+    // backfill needed since existing data has no comments to migrate.
+    // The composite index supports the per-task chronological fetch
+    // listTaskComments uses. `authorKey` is indexed so a future
+    // "all comments by member" surface can query without a scan.
+    this.version(15).stores({
+      taskComments:
+        "id, projectId, taskId, authorKey, createdAt, [projectId+taskId+createdAt]",
     });
   }
 }

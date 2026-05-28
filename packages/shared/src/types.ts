@@ -590,3 +590,42 @@ export interface DirectMessage {
   ciphertext: string;
   createdAt: number;
 }
+
+// ---------------------------------------------------------------------------
+// Task comments — per-task conversation threads
+// ---------------------------------------------------------------------------
+
+/**
+ * A comment authored on a project task. Anyone with an unlocked
+ * session can post; only the author can soft-delete their own
+ * comment. Tombstones (deletedAt set) are preserved so federated
+ * peers converge cleanly — hard deletes would break peers that
+ * haven't yet seen the original.
+ *
+ * The immutable subset (everything except `deletedAt`) is signed
+ * by the author's secret key at creation time. Federation will
+ * verify the signature when comments cross node boundaries; the
+ * local-only slice stores the signature but doesn't push.
+ */
+export interface TaskComment {
+  id: string;
+  /** Denormalized from the task — lets peers route a comment to
+   *  the right project without first resolving the task. */
+  projectId: string;
+  taskId: string;
+  /** Public key of the author. */
+  authorKey: string;
+  /** Plain-text body, up to 2000 chars. Trimmed. */
+  body: string;
+  createdAt: number;
+  /** Tombstone marker. Null while the comment is live; set to the
+   *  delete timestamp once the author has soft-deleted. The body
+   *  stays in the row so federation converges; the UI renders a
+   *  "(comment deleted)" placeholder. */
+  deletedAt: number | null;
+  /** Origin node id. */
+  nodeId: string;
+  /** Ed25519 signature over the canonical payload. Empty string for
+   *  legacy / unsigned rows (not federable). */
+  signature: string;
+}
