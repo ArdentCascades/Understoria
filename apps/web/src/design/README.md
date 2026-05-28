@@ -89,9 +89,23 @@ These work anywhere Tailwind spacing works: `space-y-stack-md`,
 ## Card chrome
 
 The `.card` component class (defined in `index.css`) is the canonical
-card surface. New PRs may swap `shadow-sm` for `shadow-leaf` (a soft
-canopy-tinted dual-layer shadow) — this is a one-line change in
-`index.css` and gets covered in the typography polish PR.
+card surface. Uses `shadow-leaf` (soft canopy-tinted dual-layer
+shadow) and `border-bark-200/60` for a warmer edge.
+
+## Utility classes
+
+Two component utility classes save you from re-typing the recipe at
+every callsite:
+
+- **`.page-title`** — applied to the single `<h1>` per page.
+  Resolves to `font-serif text-display text-canopy-900` (+ dark-mode
+  swap). Don't use for user content (post titles, project titles,
+  member names) — those stay sans-serif because they're not the
+  page's name, they're user data.
+- **`.section-title`** — applied to section-level headings inside a
+  page. Resolves to `text-title font-semibold tracking-tight` (+
+  dark-mode swap). Use sparingly; many "section" headings are
+  actually card headings (use `text-heading` directly there).
 
 ## What lives here next
 

@@ -203,7 +203,7 @@ export default function PostFormPage() {
         >
           {t("common.back")}
         </button>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">
+        <h1 className="page-title mt-2">
           {type === "NEED" ? t("postForm.titleNeed") : t("postForm.titleOffer")}
         </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">

@@ -63,9 +63,7 @@ export function OnboardingScreen({
         <div className="mb-6 text-6xl" aria-hidden="true">
           {icon}
         </div>
-        <h1 className="mb-4 text-2xl font-semibold text-moss-800 dark:text-moss-100">
-          {title}
-        </h1>
+        <h1 className="page-title mb-4">{title}</h1>
         <div className="w-full max-w-md space-y-3 text-base text-moss-700 dark:text-moss-200">
           {body}
         </div>

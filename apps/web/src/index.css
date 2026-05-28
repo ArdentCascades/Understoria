@@ -44,8 +44,20 @@
   }
 
   .card {
-    @apply rounded-2xl border border-moss-200 bg-white p-4 shadow-sm
+    @apply rounded-2xl border border-bark-200/60 bg-white p-4 shadow-leaf
            dark:border-moss-800 dark:bg-moss-900;
+  }
+
+  /* Page-level title. One per page. Serif anchor + display size
+   * carry hierarchy without needing font-bold. See design/README.md. */
+  .page-title {
+    @apply font-serif text-display text-canopy-900 dark:text-canopy-50;
+  }
+
+  /* Section heading inside a page. */
+  .section-title {
+    @apply text-title font-semibold tracking-tight text-bark-800
+           dark:text-moss-100;
   }
 
   .btn {
