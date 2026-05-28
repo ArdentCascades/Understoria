@@ -357,6 +357,7 @@
     "dialogReleaseConfirm": "Release claim",
     "repost": "Repost with changes",
     "repostHint": "This will cancel the original and create a fresh post.",
+    "stillLooking": "Still looking? Adding more detail or adjusting the hours estimate can help the right person find this. You can repost with changes below.",
     "guidance": {
       "claimed": "Your helper is on it. When the work is done, one of you marks it complete and the other confirms.",
       "awaitingYou": "The other party marked this complete. Review what was done and confirm to release the credits.",
@@ -521,8 +522,10 @@
     "filters": {
       "categoryAriaLabel": "Filter by category",
       "urgencyAriaLabel": "Filter by urgency",
+      "zoneAriaLabel": "Filter by zone",
       "allCategories": "All categories",
-      "allUrgencies": "All urgencies"
+      "allUrgencies": "All urgencies",
+      "allZones": "All zones"
     },
     "search": {
       "placeholder": "Search titles and descriptions",
