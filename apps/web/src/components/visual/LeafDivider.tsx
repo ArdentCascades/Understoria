@@ -43,6 +43,7 @@ export function LeafDivider({
         className ?? "",
       ].join(" ")}
       aria-hidden="true"
+      data-decorative="true"
     >
       <span className={lineClass} />
       <svg

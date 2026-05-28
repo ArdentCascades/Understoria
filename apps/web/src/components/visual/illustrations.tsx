@@ -27,6 +27,7 @@ const SHARED_PROPS = {
   strokeLinejoin: "round" as const,
   "aria-hidden": true as const,
   focusable: false,
+  "data-decorative": "true",
 };
 
 export type IllustrationName =

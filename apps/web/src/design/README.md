@@ -107,11 +107,19 @@ every callsite:
   dark-mode swap). Use sparingly; many "section" headings are
   actually card headings (use `text-heading` directly there).
 
-## What lives here next
+## Accessibility hooks
 
-- Workstream A (botanical identity) adds inline-SVG icon and
-  illustration components under `src/components/visual/`.
-- Workstreams B–D apply these tokens across pages and components.
-  Until those PRs land, the tokens defined here are available but
-  largely unused — that's intentional. Foundation first, application
-  second.
+- **`prefers-reduced-motion`** — every animation collapses to ~0ms.
+  Already in `index.css`. New motion must honor it.
+- **`prefers-contrast: more`** — decorative SVGs (leaf dividers,
+  sprig ornaments, empty-state illustrations) are hidden. They
+  carry no information; the accessible text does. Mark a decorative
+  SVG with `data-decorative="true"` to opt it in.
+
+## Brand lockup pattern
+
+The "Understoria" wordmark appears in serif (`font-serif text-title`)
+flanked by a `<Sprig>` on each side. Used sparingly — currently only
+on `LockScreen` (the only canonical landing surface). Don't add it
+to in-app pages; the page-title hierarchy already names where you
+are.

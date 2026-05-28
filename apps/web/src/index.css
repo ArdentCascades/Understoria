@@ -35,6 +35,18 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* Under prefers-contrast: more, decorative-only SVGs (leaf
+   * dividers, sprig ornaments, empty-state illustrations) are
+   * suppressed. They carry no information — the accessible text
+   * does — so hiding them strengthens the signal-to-noise ratio
+   * for users who explicitly asked for higher contrast. Mark a
+   * decorative SVG with data-decorative="true" to opt it in. */
+  @media (prefers-contrast: more) {
+    [data-decorative="true"] {
+      display: none !important;
+    }
+  }
 }
 
 @layer components {

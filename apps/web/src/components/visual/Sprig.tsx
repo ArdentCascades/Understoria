@@ -33,6 +33,7 @@ export function Sprig({
       strokeLinejoin="round"
       aria-hidden="true"
       focusable={false}
+      data-decorative="true"
       className={className}
     >
       <path d="M16 30V8" />
