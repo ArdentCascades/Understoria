@@ -85,7 +85,7 @@ export interface OutboxRow {
   id: string;
   /** Discriminator. New kinds slot in here as more record types
    *  federate; the worker dispatches to the matching submitter. */
-  kind: "exchange" | "vouch" | "post" | "claim";
+  kind: "exchange" | "vouch" | "post" | "claim" | "task_comment";
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
   /** Id of the wrapped record; lets us avoid double-enqueue on retry. */

@@ -24,6 +24,7 @@ import {
   createPeerPullStore,
   createInviteStore,
   createPostStore,
+  createTaskCommentStore,
   createVouchStore,
   openDatabase,
   type PostRecord,
@@ -82,9 +83,9 @@ function jsonResponse(body: unknown, status = 200): ReturnType<Fetcher> {
   });
 }
 
-/** Wrap a fetcher so requests against `/vouches?` and `/posts?` get
- *  empty lists. Lets the exchange-focused tests stay readable while
- *  the worker now calls vouches and posts endpoints per peer too. */
+/** Wrap a fetcher so requests against the non-exchange endpoints
+ *  get empty lists. Lets the exchange-focused tests stay readable
+ *  while the worker now calls every kind's endpoint per peer. */
 function exchangeOnly(inner: Fetcher): Fetcher {
   return (url) => {
     if (/\/vouches\b/.test(url)) {
@@ -95,6 +96,9 @@ function exchangeOnly(inner: Fetcher): Fetcher {
     }
     if (/\/invites\b/.test(url)) {
       return jsonResponse({ count: 0, invites: [] });
+    }
+    if (/\/task-comments\b/.test(url)) {
+      return jsonResponse({ count: 0, taskComments: [] });
     }
     return inner(url);
   };
@@ -282,6 +286,7 @@ describe("startPeerPullWorker", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
     });
@@ -307,6 +312,7 @@ describe("startPeerPullWorker", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
     });
@@ -334,6 +340,7 @@ describe("startPeerPullWorker", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
       onError: (url, err) => errors.push({ url, msg: err.message }),
@@ -369,6 +376,7 @@ describe("startPeerPullWorker", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
     });
@@ -450,6 +458,8 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 0, posts: [] });
       if (/\/invites\b/.test(url))
         return jsonResponse({ count: 0, invites: [] });
+      if (/\/task-comments\b/.test(url))
+        return jsonResponse({ count: 0, taskComments: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -459,6 +469,7 @@ describe("startPeerPullWorker — vouches", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
     });
@@ -466,11 +477,12 @@ describe("startPeerPullWorker — vouches", () => {
     worker.stop();
     // Three kinds attempted; posts returned empty so it's still a
     // successful pull with no insertions.
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(5);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "exchange",
       "invite",
       "post",
+      "task_comment",
       "vouch",
     ]);
     const state = pullStore.get("https://peer.example");
@@ -492,6 +504,8 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 0, posts: [] });
       if (/\/invites\b/.test(url))
         return jsonResponse({ count: 0, invites: [] });
+      if (/\/task-comments\b/.test(url))
+        return jsonResponse({ count: 0, taskComments: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -501,6 +515,7 @@ describe("startPeerPullWorker — vouches", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
     });
@@ -604,6 +619,8 @@ describe("startPeerPullWorker — posts", () => {
         return jsonResponse({ count: 1, posts: [post] });
       if (/\/invites\b/.test(url))
         return jsonResponse({ count: 0, invites: [] });
+      if (/\/task-comments\b/.test(url))
+        return jsonResponse({ count: 0, taskComments: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -613,16 +630,18 @@ describe("startPeerPullWorker — posts", () => {
       vouchStore,
       postStore,
       inviteStore: createInviteStore(db),
+      taskCommentStore: createTaskCommentStore(db),
       pullStore,
       fetcher,
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(5);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "exchange",
       "invite",
       "post",
+      "task_comment",
       "vouch",
     ]);
     const state = pullStore.get("https://peer.example");

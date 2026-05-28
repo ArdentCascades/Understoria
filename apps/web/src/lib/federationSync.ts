@@ -9,11 +9,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Post } from "@/types";
+import type { Post, TaskComment } from "@/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
+import { verifyTaskComment } from "@/lib/crypto";
 
 const POST_CURSOR_KEY = "federationLastPostPull";
 const CLAIM_CURSOR_KEY = "federationLastClaimPull";
+const TASK_COMMENT_CURSOR_KEY = "federationLastTaskCommentPull";
 
 export interface FederationSyncResult {
   inserted: number;
@@ -167,4 +169,110 @@ export async function pullFederatedClaims(): Promise<number> {
   }
 
   return applied;
+}
+
+/**
+ * Pull task comments from the configured community node. Stores
+ * verified rows locally so cross-node task threads appear alongside
+ * locally-authored ones.
+ *
+ * Tombstone-merge rule (matches the server's logic):
+ *   - incoming row absent locally → insert as-is (with whatever
+ *     `deletedAt` it carries)
+ *   - incoming row present, alive locally, incoming has `deletedAt`
+ *     → set local row's `deletedAt`
+ *   - any other case → no-op (duplicate)
+ *
+ * Once a row is tombstoned locally it never reverts; an incoming row
+ * with `deletedAt = null` against a tombstoned local row is ignored.
+ */
+export async function pullFederatedTaskComments(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(TASK_COMMENT_CURSOR_KEY);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/task-comments?${params.toString()}`;
+  let body: { taskComments?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { taskComments?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.taskComments)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.taskComments) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.projectId !== "string" ||
+      typeof r.taskId !== "string" ||
+      typeof r.authorKey !== "string" ||
+      typeof r.body !== "string" ||
+      typeof r.createdAt !== "number" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const comment: TaskComment = {
+      id: r.id,
+      projectId: r.projectId,
+      taskId: r.taskId,
+      authorKey: r.authorKey,
+      body: r.body,
+      createdAt: r.createdAt,
+      deletedAt: (r.deletedAt as number | null | undefined) ?? null,
+      nodeId: r.nodeId,
+      signature: r.signature,
+    };
+    if (!verifyTaskComment(comment)) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxCreatedAt === null || comment.createdAt > maxCreatedAt) {
+        maxCreatedAt = comment.createdAt;
+      }
+    };
+
+    const existing = await db.taskComments.get(comment.id);
+    if (!existing) {
+      await db.taskComments.put(comment);
+      inserted += 1;
+      advanceCursor();
+      continue;
+    }
+    // Already have it. If incoming carries a tombstone the local row
+    // doesn't, apply the tombstone. Otherwise no-op.
+    if (comment.deletedAt !== null && existing.deletedAt === null) {
+      await db.taskComments.update(comment.id, {
+        deletedAt: comment.deletedAt,
+      });
+      inserted += 1;
+      advanceCursor();
+      continue;
+    }
+    skipped += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(TASK_COMMENT_CURSOR_KEY, String(maxCreatedAt));
+  }
+
+  return { inserted, skipped };
 }

@@ -178,9 +178,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     void import("@/lib/federationSync").then(
-      ({ pullFederatedPosts, pullFederatedClaims }) => {
+      ({
+        pullFederatedPosts,
+        pullFederatedClaims,
+        pullFederatedTaskComments,
+      }) => {
         void pullFederatedPosts();
         void pullFederatedClaims();
+        void pullFederatedTaskComments();
       },
     );
   }, [ready]);

@@ -23,11 +23,16 @@ import Database from "better-sqlite3";
 import {
   canonicalExchangePayload,
   canonicalPostPayload,
+  canonicalTaskCommentPayload,
   canonicalVouchPayload,
   generateKeyPair,
   sign,
 } from "@understoria/shared/crypto";
-import type { Exchange, SignedVouch } from "@understoria/shared/types";
+import type {
+  Exchange,
+  SignedVouch,
+  TaskComment,
+} from "@understoria/shared/types";
 import type { PostRecord } from "./db.js";
 import { buildServer } from "./server.js";
 import { readConfigFromEnv } from "./config.js";
@@ -96,6 +101,33 @@ function makeSignedVouch(now = Date.now()): SignedVouch {
     id: `v_${now}`,
     ...payload,
     signature: sign(canonicalVouchPayload(payload), voucher.secretKey),
+  };
+}
+
+function makeSignedTaskComment(
+  overrides: Partial<TaskComment> = {},
+): TaskComment {
+  const author = generateKeyPair();
+  const now = overrides.createdAt ?? Date.now();
+  const immutable = {
+    id: overrides.id ?? `tc_${now}_${Math.random().toString(36).slice(2)}`,
+    projectId: overrides.projectId ?? "proj_test",
+    taskId: overrides.taskId ?? "task_test",
+    authorKey: overrides.authorKey ?? author.publicKey,
+    body: overrides.body ?? "Looks good!",
+    createdAt: now,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  // When overriding authorKey, we still need the original keypair's
+  // secret to produce a valid signature; tests that hand-pick an
+  // authorKey are passing one whose secret they don't have, so this
+  // helper isn't suitable for those — they should sign manually.
+  return {
+    ...immutable,
+    deletedAt: overrides.deletedAt ?? null,
+    signature:
+      overrides.signature ??
+      sign(canonicalTaskCommentPayload(immutable), author.secretKey),
   };
 }
 
@@ -525,5 +557,134 @@ describe("GET /config with operator info", () => {
         contact: "#aid:matrix.example",
       },
     });
+  });
+});
+
+describe("POST /task-comments", () => {
+  it("accepts a well-signed comment and returns 201", async () => {
+    const c = makeSignedTaskComment();
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: c,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json()).toEqual({ stored: true, id: c.id });
+  });
+
+  it("is idempotent on re-POST of the same comment", async () => {
+    const c = makeSignedTaskComment();
+    await app.inject({ method: "POST", url: "/task-comments", payload: c });
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: c,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ stored: false, id: c.id });
+  });
+
+  it("rejects a comment whose signature does not verify", async () => {
+    const c = { ...makeSignedTaskComment(), signature: "abc" };
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: c,
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it("rejects a malformed body", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: { id: "" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects a body over the max length", async () => {
+    // Sign and submit a row with a 2001-char body. The signature
+    // verifies (we signed the long body), so this must be rejected
+    // by parseTaskComment, not by verify.
+    const author = generateKeyPair();
+    const now = Date.now();
+    const immutable = {
+      id: `tc_long_${Math.random().toString(36).slice(2)}`,
+      projectId: "proj_test",
+      taskId: "task_test",
+      authorKey: author.publicKey,
+      body: "x".repeat(2001),
+      createdAt: now,
+      nodeId: "node_test",
+    };
+    const c: TaskComment = {
+      ...immutable,
+      deletedAt: null,
+      signature: sign(canonicalTaskCommentPayload(immutable), author.secretKey),
+    };
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: c,
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("applies a tombstone on second submission with deletedAt set", async () => {
+    // Author signs the immutable subset, then re-posts the same row
+    // later with deletedAt populated. The signature still verifies
+    // (deletedAt isn't in the canonical payload). Server should
+    // upsertTombstone on the existing row.
+    const c = makeSignedTaskComment();
+    await app.inject({ method: "POST", url: "/task-comments", payload: c });
+    const tombstoned: TaskComment = { ...c, deletedAt: Date.now() };
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: tombstoned,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json()).toEqual({
+      stored: true,
+      id: c.id,
+      tombstoned: true,
+    });
+    // A second tombstone request is a no-op (tombstone-wins keeps the
+    // first deleted_at; from the client's perspective the row is
+    // unchanged).
+    const again = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: { ...c, deletedAt: Date.now() + 1000 },
+    });
+    expect(again.statusCode).toBe(200);
+  });
+});
+
+describe("GET /task-comments", () => {
+  it("returns stored comments with since= filter respected", async () => {
+    const earlier = makeSignedTaskComment({ createdAt: 1_000 });
+    const later = makeSignedTaskComment({ createdAt: 2_000 });
+    await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: earlier,
+    });
+    await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: later,
+    });
+    const all = await app.inject({ method: "GET", url: "/task-comments" });
+    expect(all.json().count).toBe(2);
+    const since = await app.inject({
+      method: "GET",
+      url: "/task-comments?since=1500",
+    });
+    expect(since.json().count).toBe(1);
+    expect(
+      (since.json().taskComments as TaskComment[])[0].id,
+    ).toBe(later.id);
   });
 });

@@ -25,6 +25,7 @@ import {
   createInviteStore,
   createPeerPullStore,
   createPostStore,
+  createTaskCommentStore,
   createVouchStore,
 } from "./db.js";
 import { startPeerPullWorker } from "./peerPull.js";
@@ -43,6 +44,7 @@ async function main(): Promise<void> {
     vouchStore: createVouchStore(database),
     postStore: createPostStore(database),
     inviteStore: createInviteStore(database),
+    taskCommentStore: createTaskCommentStore(database),
     pullStore: createPeerPullStore(database),
     onError: (peerUrl, err) =>
       app.log.warn({ peerUrl, err }, "peer pull failed"),

@@ -29,6 +29,7 @@ import {
   createInviteStore,
   createPeerPullStore,
   createPostStore,
+  createTaskCommentStore,
   createVouchStore,
   openDatabase,
 } from "./db.js";
@@ -39,6 +40,7 @@ import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
 import { registerInviteRoutes } from "./routes/invites.js";
+import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 
 export interface BuildOptions {
@@ -142,6 +144,7 @@ export async function buildServer({
   const postStore = createPostStore(db);
   const inviteStore = createInviteStore(db);
   const claimStore = createClaimStore(db);
+  const taskCommentStore = createTaskCommentStore(db);
   const pullStore = createPeerPullStore(db);
 
   await registerHealthRoutes(app);
@@ -150,6 +153,7 @@ export async function buildServer({
   await registerPostRoutes(app, { store: postStore });
   await registerInviteRoutes(app, { store: inviteStore });
   await registerClaimRoutes(app, { store: claimStore });
+  await registerTaskCommentRoutes(app, { store: taskCommentStore });
   await registerConfigRoutes(app, { config });
   await registerPeersRoutes(app, {
     pullStore,
