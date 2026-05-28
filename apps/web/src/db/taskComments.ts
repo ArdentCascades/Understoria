@@ -22,6 +22,10 @@ import { db } from "./database";
 import { uuid } from "@/lib/id";
 import { canonicalTaskCommentPayload, sign } from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
+import {
+  enqueueTaskCommentOutbox,
+  flushOutboxNow,
+} from "@/lib/outbox";
 import type { TaskComment } from "@/types";
 
 export const MAX_COMMENT_LENGTH = 2000;
@@ -97,6 +101,12 @@ export async function postTaskComment(
   };
 
   await db.taskComments.put(comment);
+  await enqueueTaskCommentOutbox(comment);
+  // Best-effort kick. The worker also runs on its own schedule, so a
+  // disabled / down community node just means the row sits pending.
+  void flushOutboxNow().catch(() => {
+    // Errors surface via the outbox worker's own retry path.
+  });
   return comment;
 }
 
@@ -136,5 +146,14 @@ export async function deleteTaskComment(
   if (comment.authorKey !== callerKey) {
     throw new Error("Only the author can delete this comment.");
   }
-  await db.taskComments.update(commentId, { deletedAt: Date.now() });
+  const deletedAt = Date.now();
+  await db.taskComments.update(commentId, { deletedAt });
+  // Federate the tombstone — re-push the same signed row with
+  // `deletedAt` populated. The signature still verifies because
+  // `deletedAt` is excluded from the canonical payload.
+  const tombstoned: TaskComment = { ...comment, deletedAt };
+  await enqueueTaskCommentOutbox(tombstoned);
+  void flushOutboxNow().catch(() => {
+    // Errors surface via the outbox worker's own retry path.
+  });
 }

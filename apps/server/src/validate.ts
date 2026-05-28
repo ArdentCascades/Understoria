@@ -26,6 +26,7 @@ import {
   type Post,
   type SignedInvite,
   type SignedVouch,
+  type TaskComment,
 } from "@understoria/shared/types";
 import type { PostRecord } from "./db.js";
 
@@ -48,6 +49,10 @@ export type ParseVouchResult =
 
 export type ParsePostResult =
   | { ok: true; value: PostRecord }
+  | { ok: false; error: string };
+
+export type ParseTaskCommentResult =
+  | { ok: true; value: TaskComment }
   | { ok: false; error: string };
 
 export type ParseInviteResult =
@@ -347,6 +352,85 @@ export function parseInvite(input: unknown): ParseInviteResult {
       nodeId: r.nodeId as string,
       createdAt: r.createdAt as number,
       expiresAt: r.expiresAt as number,
+      signature: r.signature as string,
+    },
+  };
+}
+
+const TASK_COMMENT_STRING_FIELDS = [
+  "id",
+  "projectId",
+  "taskId",
+  "authorKey",
+  "nodeId",
+  "signature",
+] as const;
+
+/** Maximum permitted body length on the wire. Matches the local
+ *  validation in apps/web/src/db/taskComments.ts. */
+export const MAX_TASK_COMMENT_BODY = 2000;
+
+export function parseTaskComment(input: unknown): ParseTaskCommentResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+
+  for (const f of TASK_COMMENT_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.body !== "string") {
+    return { ok: false, error: "body must be a string" };
+  }
+  const body = r.body as string;
+  if (body.length === 0) {
+    return { ok: false, error: "body must not be empty" };
+  }
+  if (body.length > MAX_TASK_COMMENT_BODY) {
+    return {
+      ok: false,
+      error: `body exceeds ${MAX_TASK_COMMENT_BODY} characters`,
+    };
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (r.deletedAt !== null) {
+    if (
+      typeof r.deletedAt !== "number" ||
+      !Number.isInteger(r.deletedAt) ||
+      r.deletedAt <= 0
+    ) {
+      return {
+        ok: false,
+        error: "deletedAt must be null or a positive integer (ms epoch)",
+      };
+    }
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.createdAt as number) > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      projectId: r.projectId as string,
+      taskId: r.taskId as string,
+      authorKey: r.authorKey as string,
+      body,
+      createdAt: r.createdAt as number,
+      deletedAt: r.deletedAt as number | null,
+      nodeId: r.nodeId as string,
       signature: r.signature as string,
     },
   };

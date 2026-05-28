@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, Post, SignedVouch } from "@/types";
+import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
 /**
@@ -124,6 +124,20 @@ export async function submitClaimToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/claims", claim, config, deps);
+}
+
+/**
+ * Mirror a signed task comment to the configured community node.
+ * Same best-effort semantics as `submitPostToNode`. The caller passes
+ * the full TaskComment shape, including `deletedAt` — soft deletes
+ * federate by re-pushing the same row with `deletedAt` populated.
+ */
+export async function submitTaskCommentToNode(
+  comment: TaskComment,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/task-comments", comment, config, deps);
 }
 
 async function postSignedRecord(

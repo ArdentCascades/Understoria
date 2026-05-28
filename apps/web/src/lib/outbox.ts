@@ -25,11 +25,12 @@ import {
   submitClaimToNode,
   submitExchangeToNode,
   submitPostToNode,
+  submitTaskCommentToNode,
   submitVouchToNode,
   type SubmitResult,
 } from "@/lib/nodeSubmit";
 import type { ClaimRecord } from "@understoria/shared/types";
-import type { Exchange, Post, SignedVouch } from "@/types";
+import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 
 /**
  * Durable outbox + retry worker for community-node mirroring.
@@ -110,6 +111,20 @@ export async function enqueueVouchOutbox(
   vouch: SignedVouch,
 ): Promise<OutboxRow | null> {
   return enqueueOutbox("vouch", vouch.id, vouch);
+}
+
+/**
+ * Insert an outbox row for a task comment — either a fresh post or a
+ * soft-delete update (the caller re-enqueues the same row with
+ * `deletedAt` set to federate the tombstone). Returns null if the
+ * comment is unsigned, which only happens for legacy rows pre-dating
+ * the federation slice.
+ */
+export async function enqueueTaskCommentOutbox(
+  comment: TaskComment,
+): Promise<OutboxRow | null> {
+  if (!comment.signature) return null;
+  return enqueueOutbox("task_comment", comment.id, comment);
 }
 
 /**
@@ -268,9 +283,13 @@ export async function flushOutboxOnce(
   let retried = 0;
 
   for (const row of due) {
-    let payload: Exchange | SignedVouch | Post;
+    let payload: Exchange | SignedVouch | Post | TaskComment;
     try {
-      payload = JSON.parse(row.payload) as Exchange | SignedVouch | Post;
+      payload = JSON.parse(row.payload) as
+        | Exchange
+        | SignedVouch
+        | Post
+        | TaskComment;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -292,6 +311,10 @@ export async function flushOutboxOnce(
       });
     } else if (row.kind === "claim") {
       result = await submitClaimToNode(payload as unknown as ClaimRecord, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    } else if (row.kind === "task_comment") {
+      result = await submitTaskCommentToNode(payload as TaskComment, cfg, {
         fetchImpl: options.fetchImpl,
       });
     } else {

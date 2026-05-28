@@ -26,6 +26,7 @@ import type {
   Post,
   SignedInvite,
   SignedVouch,
+  TaskComment,
 } from "@understoria/shared/types";
 
 /**
@@ -93,6 +94,27 @@ export interface PostStore {
   has(id: string): boolean;
 }
 
+/**
+ * Storage for signed task comments. Same insert/list/has shape as the
+ * other federated record stores, plus an `upsertTombstone` operation:
+ * once a peer learns the author soft-deleted a comment, we update only
+ * the `deleted_at` column. Tombstone-wins is the merge rule — a row
+ * that arrives with `deletedAt=null` after we've stored it tombstoned
+ * is treated as a duplicate and ignored. This keeps soft delete
+ * monotonic across peers without requiring CRDT machinery.
+ */
+export interface TaskCommentStore {
+  insert(comment: TaskComment): void;
+  /** Set `deleted_at` for an existing row. Returns true if a row was
+   *  updated (i.e. it existed and wasn't already tombstoned). */
+  upsertTombstone(id: string, deletedAt: number): boolean;
+  list(opts?: { since?: number; limit?: number }): TaskComment[];
+  count(): number;
+  has(id: string): boolean;
+  /** Returns the stored row's deleted_at, or undefined if not present. */
+  deletedAt(id: string): number | null | undefined;
+}
+
 export interface InviteStore {
   insert(invite: SignedInvite): void;
   list(opts?: { since?: number; limit?: number }): SignedInvite[];
@@ -139,11 +161,17 @@ export interface PeerPullStateRow {
   lastVouchCreatedAt: number | null;
   lastPostCreatedAt: number | null;
   lastInviteCreatedAt: number | null;
+  lastTaskCommentCreatedAt: number | null;
   lastError: string | null;
   lastPulledCount: number;
 }
 
-export type PullRecordKind = "exchange" | "vouch" | "post" | "invite";
+export type PullRecordKind =
+  | "exchange"
+  | "vouch"
+  | "post"
+  | "invite"
+  | "task_comment";
 
 export interface PeerPullStore {
   get(peerUrl: string): PeerPullStateRow | null;
@@ -330,6 +358,38 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '7')",
+    ).run();
+  }
+
+  // Schema v8 — task-comments federation. Stores signed comments
+  // (immutable subset + mutable `deleted_at` tombstone) so peers can
+  // converge on soft-delete state. `peer_pull_state` gets a fifth
+  // per-kind cursor.
+  if (current < 8) {
+    db.exec(`
+      CREATE TABLE task_comments (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL,
+        task_id TEXT NOT NULL,
+        author_key TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        deleted_at INTEGER,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX task_comments_created_at_idx
+        ON task_comments (created_at DESC);
+      CREATE INDEX task_comments_project_task_idx
+        ON task_comments (project_id, task_id, created_at);
+      CREATE INDEX task_comments_author_idx
+        ON task_comments (author_key);
+
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_task_comment_created_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '8')",
     ).run();
   }
 }
@@ -558,6 +618,105 @@ function rowToPost(r: PostRowSqlite): PostRecord {
   };
 }
 
+export function createTaskCommentStore(db: DatabaseType): TaskCommentStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO task_comments (
+      id, project_id, task_id, author_key, body, created_at,
+      deleted_at, node_id, signature
+    ) VALUES (
+      @id, @projectId, @taskId, @authorKey, @body, @createdAt,
+      @deletedAt, @nodeId, @signature
+    )
+  `);
+  // Tombstone-wins: a row already tombstoned cannot be un-tombstoned.
+  // SQLite's COALESCE keeps any existing non-null deleted_at; the
+  // first non-null timestamp wins (deletes are monotonic).
+  const tombstoneStmt = db.prepare(`
+    UPDATE task_comments
+    SET deleted_at = COALESCE(deleted_at, @deletedAt)
+    WHERE id = @id
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM task_comments WHERE id = ?");
+  const deletedAtStmt = db.prepare(
+    "SELECT deleted_at AS deletedAt FROM task_comments WHERE id = ?",
+  );
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM task_comments");
+
+  return {
+    insert(comment) {
+      insertStmt.run({
+        id: comment.id,
+        projectId: comment.projectId,
+        taskId: comment.taskId,
+        authorKey: comment.authorKey,
+        body: comment.body,
+        createdAt: comment.createdAt,
+        deletedAt: comment.deletedAt,
+        nodeId: comment.nodeId,
+        signature: comment.signature,
+      });
+    },
+    upsertTombstone(id, deletedAt) {
+      const info = tombstoneStmt.run({ id, deletedAt });
+      return info.changes > 0;
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM task_comments WHERE created_at > ?
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM task_comments
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as TaskCommentRowSqlite[]).map(rowToTaskComment);
+    },
+    count() {
+      const r = countStmt.get() as { n: number };
+      return r.n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+    deletedAt(id) {
+      const r = deletedAtStmt.get(id) as { deletedAt: number | null } | undefined;
+      return r ? r.deletedAt : undefined;
+    },
+  };
+}
+
+interface TaskCommentRowSqlite {
+  id: string;
+  project_id: string;
+  task_id: string;
+  author_key: string;
+  body: string;
+  created_at: number;
+  deleted_at: number | null;
+  node_id: string;
+  signature: string;
+}
+
+function rowToTaskComment(r: TaskCommentRowSqlite): TaskComment {
+  return {
+    id: r.id,
+    projectId: r.project_id,
+    taskId: r.task_id,
+    authorKey: r.author_key,
+    body: r.body,
+    createdAt: r.created_at,
+    deletedAt: r.deleted_at,
+    nodeId: r.node_id,
+    signature: r.signature,
+  };
+}
+
 export function createPeerPullStore(db: DatabaseType): PeerPullStore {
   const getStmt = db.prepare("SELECT * FROM peer_pull_state WHERE peer_url = ?");
   const listStmt = db.prepare(
@@ -627,6 +786,20 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       last_invite_created_at = COALESCE(@latestSeenAt, last_invite_created_at),
       last_pulled_count = @pulledCount
   `);
+  const successTaskCommentStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at,
+      last_task_comment_created_at, last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_task_comment_created_at =
+        COALESCE(@latestSeenAt, last_task_comment_created_at),
+      last_pulled_count = @pulledCount
+  `);
   const failureStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_error, last_pulled_count
@@ -654,7 +827,9 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
             ? successVouchStmt
             : kind === "post"
               ? successPostStmt
-              : successInviteStmt;
+              : kind === "invite"
+                ? successInviteStmt
+                : successTaskCommentStmt;
       stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
@@ -671,6 +846,7 @@ interface PeerPullStateRowSqlite {
   last_vouch_created_at: number | null;
   last_post_created_at: number | null;
   last_invite_created_at: number | null;
+  last_task_comment_created_at: number | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -684,6 +860,7 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
     lastVouchCreatedAt: r.last_vouch_created_at,
     lastPostCreatedAt: r.last_post_created_at,
     lastInviteCreatedAt: r.last_invite_created_at,
+    lastTaskCommentCreatedAt: r.last_task_comment_created_at,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };

@@ -13,16 +13,24 @@ import {
   verifyExchange,
   verifyInvite,
   verifyPost,
+  verifyTaskComment,
   verifyVouch,
 } from "@understoria/shared/crypto";
 import type { Post } from "@understoria/shared/types";
-import { parseExchange, parseInvite, parsePost, parseVouch } from "./validate.js";
+import {
+  parseExchange,
+  parseInvite,
+  parsePost,
+  parseTaskComment,
+  parseVouch,
+} from "./validate.js";
 import type {
   ExchangeStore,
   InviteStore,
   PeerPullStore,
   PostStore,
   PullRecordKind,
+  TaskCommentStore,
   VouchStore,
 } from "./db.js";
 
@@ -309,9 +317,82 @@ export async function pullInvitesFromPeer(opts: {
   };
 }
 
+/**
+ * Pull signed task comments from a peer's GET /task-comments endpoint.
+ * Mirrors pullPostsFromPeer with one extra branch: incoming rows that
+ * carry a `deletedAt` and match an existing local row are routed
+ * through `upsertTombstone` rather than `insert`, so soft-delete
+ * federation converges. The duplicate count includes both untouched
+ * duplicates and rows we already had as tombstones.
+ */
+export async function pullTaskCommentsFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: TaskCommentStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "task-comments", since, maxRows);
+  const rows = await fetchAndExtract(fetcher, url, peerUrl, "taskComments");
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestCreatedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseTaskComment(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const comment = parsed.value;
+    if (!verifyTaskComment(comment)) {
+      rejectedCount += 1;
+      continue;
+    }
+    const advanceCursor = () => {
+      if (latestCreatedAt === null || comment.createdAt > latestCreatedAt) {
+        latestCreatedAt = comment.createdAt;
+      }
+    };
+    if (store.has(comment.id)) {
+      // Already have the row. If the incoming carries a tombstone we
+      // didn't have, apply it; otherwise count as duplicate.
+      if (comment.deletedAt !== null) {
+        const local = store.deletedAt(comment.id);
+        if (local === null || local === undefined) {
+          store.upsertTombstone(comment.id, comment.deletedAt);
+          insertedCount += 1;
+          advanceCursor();
+          continue;
+        }
+      }
+      duplicateCount += 1;
+      advanceCursor();
+      continue;
+    }
+    store.insert(comment);
+    insertedCount += 1;
+    advanceCursor();
+  }
+
+  return {
+    peerUrl,
+    kind: "task_comment",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestCreatedAt,
+  };
+}
+
 function buildUrl(
   peerUrl: string,
-  path: "exchanges" | "vouches" | "posts" | "invites",
+  path: "exchanges" | "vouches" | "posts" | "invites" | "task-comments",
   since: number | null,
   limit: number,
 ): string {
@@ -328,7 +409,7 @@ async function fetchAndExtract(
   fetcher: Fetcher,
   url: string,
   peerUrl: string,
-  arrayKey: "exchanges" | "vouches" | "posts" | "invites",
+  arrayKey: "exchanges" | "vouches" | "posts" | "invites" | "taskComments",
 ): Promise<unknown[]> {
   const response = await fetcher(url);
   if (!response.ok) {
@@ -362,6 +443,7 @@ export interface PullWorkerOptions {
   vouchStore: VouchStore;
   postStore: PostStore;
   inviteStore: InviteStore;
+  taskCommentStore: TaskCommentStore;
   pullStore: PeerPullStore;
   fetcher?: Fetcher;
   /** Called for unexpected errors (one peer failing doesn't stop the
@@ -379,6 +461,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     vouchStore,
     postStore,
     inviteStore,
+    taskCommentStore,
     pullStore,
     fetcher = (url) => fetch(url),
     onError = (peerUrl, err) =>
@@ -399,7 +482,9 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
           ? state?.lastVouchCreatedAt ?? null
           : kind === "post"
             ? state?.lastPostCreatedAt ?? null
-            : state?.lastInviteCreatedAt ?? null;
+            : kind === "invite"
+              ? state?.lastInviteCreatedAt ?? null
+              : state?.lastTaskCommentCreatedAt ?? null;
     try {
       const result =
         kind === "exchange"
@@ -418,7 +503,14 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
                   fetcher,
                   store: postStore,
                 })
-              : await pullInvitesFromPeer({
+              : kind === "task_comment"
+                ? await pullTaskCommentsFromPeer({
+                    peerUrl,
+                    since,
+                    fetcher,
+                    store: taskCommentStore,
+                  })
+                : await pullInvitesFromPeer({
                   peerUrl,
                   since,
                   fetcher,
@@ -453,6 +545,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
       pullKind(url, "vouch"),
       pullKind(url, "post"),
       pullKind(url, "invite"),
+      pullKind(url, "task_comment"),
     ]);
     const results = await Promise.all(tasks);
     return results.filter((r): r is PullResult => r !== null);
