@@ -71,6 +71,7 @@
   },
   "messages": {
     "title": "Messages",
+    "emptyTitle": "No conversations yet",
     "empty": "No messages yet. Start a conversation from any post or member profile.",
     "sendMessage": "Message",
     "messageButton": "Message",
@@ -86,6 +87,7 @@
   "projects": {
     "tab": "Projects",
     "fab": "Start a project",
+    "emptyTitle": "No active projects",
     "empty": "No active projects yet. A project is a collective goal — multiple tasks, multiple contributors. The first one is always the hardest to start.",
     "byOrganizer": "Organized by {{name}}",
     "progressLabel": "{{contributed}} of {{target}} ({{percent}}%)",
@@ -132,6 +134,7 @@
       "back": "← Back to projects",
       "notFound": "This project couldn't be found.",
       "tasks": "Tasks",
+      "noTasksTitle": "No tasks yet",
       "noTasks": "No tasks yet. The organizer can add the first one below.",
       "addTaskTitle": "Add a task",
       "launch": "Launch project",
@@ -229,6 +232,7 @@
       "unarchive": "Unarchive",
       "title": "Project archive",
       "subtitle": "Completed and archived projects",
+      "emptyTitle": "No completed projects yet",
       "empty": "No archived projects yet.",
       "viewArchive": "View archive"
     },
@@ -540,6 +544,8 @@
       "postOffer": "Post an offer"
     },
     "empty": {
+      "titleNeeds": "Nothing growing here yet",
+      "titleOffers": "Nothing growing here yet",
       "needs": "No needs match these filters yet. If you need help, post something — asking is never gated in a timebank.",
       "offers": "No offers match these filters yet. What could you share with your community this week?"
     }
@@ -575,6 +581,7 @@
     },
     "categoryBreakdown": {
       "title": "Where help is flowing",
+      "emptyTitle": "A new understoria",
       "empty": "No exchanges yet. Once the first one happens, you'll see the mix of care, labor, and support flowing through the community."
     },
     "breadth": {
@@ -591,6 +598,7 @@
       "intro": "Connections that flow both ways — A has helped B and B has helped A.",
       "rate": "{{percent}}% of connections are reciprocal",
       "ratio": "{{reciprocal}} of {{total}} pairs",
+      "emptyTitle": "First exchange ahead",
       "empty": "No reciprocity to measure yet.",
       "footnote": "Not a score. Just a window into the shape of help across the community."
     },
@@ -646,6 +654,7 @@
     },
     "history": {
       "title": "Your exchange history",
+      "emptyTitle": "Your story starts here",
       "empty": "Nothing here yet. When you give or receive help, each exchange shows up with a signed record you can verify.",
       "helped": "Helped",
       "received": "Received help from",
@@ -804,6 +813,7 @@
   "disputes": {
     "title": "Disputes",
     "subtitle": "Exchanges someone has flagged for the community to review. Anyone can see this list — there are no admins. The two parties already see the flag on the post itself; this is where it surfaces to everyone else.",
+    "emptyTitle": "Nothing needs the community's attention",
     "empty": "Nothing flagged right now. When someone flags an exchange, it shows here so the community can see and respond.",
     "flagChip": "Flagged",
     "typeNeed": "Need",
@@ -834,6 +844,8 @@
       "withdrawn": "Withdrawn"
     },
     "startNew": "Start a proposal",
+    "emptyTitleOpen": "No open proposals",
+    "emptyTitleFiltered": "Nothing matches",
     "emptyOpen": "No open proposals right now.",
     "emptyFiltered": "No proposals match this filter.",
     "footer": "Voting and automatic close are still to come. For now the community reaches decisions on whatever channel it uses, and any member can record the outcome here so the historical record reflects reality.",

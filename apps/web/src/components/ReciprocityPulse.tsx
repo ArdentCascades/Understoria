@@ -38,8 +38,9 @@ export function ReciprocityPulse({
       </p>
       {totalPairs === 0 ? (
         <EmptyState
-          icon={"\u{1F333}"}
+          illustration="hands"
           variant="inset"
+          title={t("dashboard.reciprocity.emptyTitle")}
           message={t("dashboard.reciprocity.empty")}
         />
       ) : (

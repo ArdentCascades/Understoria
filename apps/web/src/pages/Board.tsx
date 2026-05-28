@@ -136,7 +136,7 @@ export default function BoardPage() {
   return (
     <div className="px-4 pb-32 pt-4">
       <header className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">{t("board.title")}</h1>
+        <h1 className="page-title">{t("board.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("board.tagline")}
         </p>
@@ -270,6 +270,12 @@ export default function BoardPage() {
 
       {visiblePosts.length === 0 ? (
         <EmptyState
+          illustration="sapling"
+          title={
+            tab === "NEED"
+              ? t("board.empty.titleNeeds")
+              : t("board.empty.titleOffers")
+          }
           message={
             tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
           }
@@ -377,6 +383,8 @@ function ProjectList({
   if (visible.length === 0) {
     return (
       <EmptyState
+        illustration="book"
+        title={t("projects.emptyTitle")}
         message={t("projects.empty")}
       />
     );

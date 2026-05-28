@@ -25,6 +25,7 @@ import { LockScreen } from "./LockScreen";
 import { SkipLink } from "./SkipLink";
 import { ToastContainer } from "./ToastContainer";
 import { useApp } from "@/state/AppContext";
+import { IllustrationSapling } from "@/components/visual";
 
 export function Layout() {
   const { ready, lockState } = useApp();
@@ -50,10 +51,8 @@ export function Layout() {
 function Splash() {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
-      <div className="text-5xl" aria-hidden="true">
-        {"\u{1F331}"}
-      </div>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-stack-sm px-6 text-center">
+      <IllustrationSapling className="text-canopy-700 dark:text-canopy-300" />
       <p className="text-moss-600 dark:text-moss-300">{t("common.loading")}</p>
     </div>
   );

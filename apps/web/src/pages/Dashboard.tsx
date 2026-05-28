@@ -79,9 +79,7 @@ export default function DashboardPage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("dashboard.title")}
-        </h1>
+        <h1 className="page-title">{t("dashboard.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           <em>{t("dashboard.tagline")}</em>
           <WhyTooltip principleId="no-leaderboards" />
@@ -186,8 +184,9 @@ export default function DashboardPage() {
         </h2>
         {totalCategoryHours === 0 ? (
           <EmptyState
-            icon={"\u{1F333}"}
+            illustration="sapling"
             variant="inset"
+            title={t("dashboard.categoryBreakdown.emptyTitle")}
             message={t("dashboard.categoryBreakdown.empty")}
           />
         ) : (

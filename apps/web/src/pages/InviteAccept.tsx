@@ -117,9 +117,7 @@ export default function InviteAcceptPage() {
   return (
     <div className="px-4 pb-8 pt-6">
       <div className="card">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("invite.youInvited")}
-        </h1>
+        <h1 className="page-title">{t("invite.youInvited")}</h1>
         <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
           {t("invite.wantsYou", { name: invite.inviterName })}
         </p>

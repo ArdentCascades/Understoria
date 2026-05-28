@@ -56,7 +56,7 @@ export default function DisputesPage() {
         >
           {t("common.back")}
         </button>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">
+        <h1 className="page-title mt-2">
           {t("disputes.title")}
         </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
@@ -65,7 +65,11 @@ export default function DisputesPage() {
       </header>
 
       {disputes.length === 0 ? (
-        <EmptyState icon={"\u{1F33F}"} message={t("disputes.empty")} />
+        <EmptyState
+          illustration="basket"
+          title={t("disputes.emptyTitle")}
+          message={t("disputes.empty")}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {disputes.map((d) => (

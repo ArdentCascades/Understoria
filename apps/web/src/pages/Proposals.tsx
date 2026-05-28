@@ -90,7 +90,7 @@ export default function ProposalsPage() {
         >
           {t("common.back")}
         </button>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">
+        <h1 className="page-title mt-2">
           {t("proposals.title")}
         </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
@@ -130,7 +130,12 @@ export default function ProposalsPage() {
 
       {filtered.length === 0 ? (
         <EmptyState
-          icon={"\u{1F33F}"}
+          illustration="basket"
+          title={t(
+            filter === "open"
+              ? "proposals.emptyTitleOpen"
+              : "proposals.emptyTitleFiltered",
+          )}
           message={t(
             filter === "open"
               ? "proposals.emptyOpen"

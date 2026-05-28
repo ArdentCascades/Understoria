@@ -36,6 +36,7 @@ import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { LeafDivider } from "@/components/visual";
 import {
   formatDeadline,
   formatHours,
@@ -477,19 +478,24 @@ function ActionPanel({
   }
 
   if (post.status === "completed") {
+    // Reciprocity moment — the ember accent marks a fulfilled
+    // exchange. Single banner framed by leaf dividers, not two
+    // stacked panels. See design/README.md on ember usage.
     return (
       <Actions>
-        <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-          {t("postDetail.actionsCompleted", {
-            hours: formatHours(post.estimatedHours),
-            helper: helperName ?? t("common.anyMember"),
-            helped: helpedName ?? t("common.anyMember"),
-          })}
-        </p>
-        <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-          {t("postDetail.guidance.completed")}
-        </p>
-        {post.status === "completed" && isPoster && (
+        <LeafDivider variant="short" />
+        <div className="space-y-stack-sm rounded-xl bg-ember-50 p-stack-md text-ember-900 dark:bg-ember-900/30 dark:text-ember-100">
+          <p className="text-sm font-medium">
+            {t("postDetail.actionsCompleted", {
+              hours: formatHours(post.estimatedHours),
+              helper: helperName ?? t("common.anyMember"),
+              helped: helpedName ?? t("common.anyMember"),
+            })}
+          </p>
+          <p className="text-sm">{t("postDetail.guidance.completed")}</p>
+        </div>
+        <LeafDivider variant="short" />
+        {isPoster && (
           <button
             type="button"
             className="btn-secondary"

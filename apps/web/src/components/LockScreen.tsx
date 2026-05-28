@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { shortKey } from "@/lib/format";
 import { humanizeError } from "@/lib/humanizeError";
+import { Sprig } from "@/components/visual";
 
 export function LockScreen() {
   const { currentMember, unlock } = useApp();
@@ -52,13 +53,23 @@ export function LockScreen() {
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] flex-col items-center justify-center gap-stack-md px-4">
+      <div
+        className="flex items-center gap-2 text-canopy-700 dark:text-canopy-300"
+        aria-hidden="true"
+      >
+        <Sprig size={24} />
+        <span className="font-serif text-title tracking-tight">
+          Understoria
+        </span>
+        <Sprig size={24} className="-scale-x-100" />
+      </div>
       <div className="card w-full max-w-md">
         <div className="mb-2 flex items-center gap-3">
           <span aria-hidden="true" className="text-3xl">
             {"\u{1F512}"}
           </span>
-          <h1 className="text-xl font-bold tracking-tight">
+          <h1 className="text-title font-semibold tracking-tight">
             {t("lockScreen.title")}
           </h1>
         </div>

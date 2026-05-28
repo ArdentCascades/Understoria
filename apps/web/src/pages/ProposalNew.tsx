@@ -143,7 +143,7 @@ export default function ProposalNewPage() {
         >
           {t("common.back")}
         </button>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">
+        <h1 className="page-title mt-2">
           {t("proposals.new.title")}
         </h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">

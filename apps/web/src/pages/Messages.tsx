@@ -43,12 +43,14 @@ export default function MessagesPage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("messages.title")}
-        </h1>
+        <h1 className="page-title">{t("messages.title")}</h1>
       </header>
       {conversations.length === 0 ? (
-        <EmptyState message={t("messages.empty")} />
+        <EmptyState
+          illustration="hands"
+          title={t("messages.emptyTitle")}
+          message={t("messages.empty")}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {conversations.map((c) => (
