@@ -25,6 +25,10 @@ import { AppProvider } from "@/state/AppContext";
 import { ToastProvider } from "@/state/ToastContext";
 import App from "./App";
 import "./i18n";
+// Variable serif used for page-level titles only. Browsers load
+// only the unicode-range subsets they need via @font-face rules
+// shipped by @fontsource-variable.
+import "@fontsource-variable/source-serif-4";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
