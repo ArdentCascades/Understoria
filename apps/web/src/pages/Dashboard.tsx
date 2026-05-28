@@ -222,7 +222,12 @@ export default function DashboardPage() {
         )}
       </section>
 
-      <BreadthBar entries={flow.breadth} members={members} />
+      <div className="relative">
+        <BreadthBar entries={flow.breadth} members={members} />
+        <div className="-mt-3 mb-4 flex justify-end">
+          <WhyTooltip principleId="no-activity-search" />
+        </div>
+      </div>
 
       <ReciprocityPulse
         reciprocalPairs={flow.reciprocalPairs}

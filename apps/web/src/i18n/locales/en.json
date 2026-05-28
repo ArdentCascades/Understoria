@@ -80,7 +80,8 @@
     "decryptionFailed": "(could not decrypt)",
     "lockedError": "Unlock your session to send messages.",
     "sendError": "Message could not be sent. Try again.",
-    "conversationWith": "{{name}}"
+    "conversationWith": "{{name}}",
+    "noReadReceipts": "Messages are private. No read receipts."
   },
   "projects": {
     "tab": "Projects",
