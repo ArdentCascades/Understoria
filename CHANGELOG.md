@@ -10,6 +10,13 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Density caps on thread surfaces.** Project announcements
+  ("Updates") and per-task comment threads now show only the
+  newest items inline (5 announcements, 3 comments) with a
+  "Show older (N)" toggle to expand. Prevents a long thread or
+  a long-running project's announcement history from pushing
+  later tasks off-screen. No data model change; pure render
+  logic. New i18n strings in en and es (parity preserved).
 - **Per-task comment threads with community flag-for-review
   (PRs #72–#74).** A new conversation surface on every project task,
   signed and federated like posts, with the existing disputes flow

@@ -204,7 +204,10 @@
         "tombstone": "(comment deleted by author)",
         "flag": "Flag for review",
         "flagPrompt": "Why are you flagging this comment? (Optional — leave blank if you'd rather the community decide without a reason.)",
-        "flaggedChip": "Flagged"
+        "flaggedChip": "Flagged",
+        "showOlderOne": "Show {{count}} older comment",
+        "showOlderOther": "Show {{count}} older comments",
+        "showFewer": "Show fewer comments"
       }
     },
     "milestone": {
@@ -215,7 +218,10 @@
       "placeholder": "Share an update with the community...",
       "submit": "Post update",
       "submitting": "Posting...",
-      "postedBy": "{{name}} · {{when}}"
+      "postedBy": "{{name}} · {{when}}",
+      "showOlderOne": "Show {{count}} older update",
+      "showOlderOther": "Show {{count}} older updates",
+      "showFewer": "Show fewer updates"
     },
     "coOrganizers": {
       "title": "Co-organizers",

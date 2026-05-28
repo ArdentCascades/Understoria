@@ -204,7 +204,10 @@
         "tombstone": "(comentario eliminado por quien lo escribió)",
         "flag": "Señalar para revisión",
         "flagPrompt": "¿Por qué señalas este comentario? (Opcional — déjalo en blanco si prefieres que la comunidad decida sin un motivo.)",
-        "flaggedChip": "Señalado"
+        "flaggedChip": "Señalado",
+        "showOlderOne": "Ver {{count}} comentario anterior",
+        "showOlderOther": "Ver {{count}} comentarios anteriores",
+        "showFewer": "Ver menos comentarios"
       }
     },
     "milestone": {
@@ -215,7 +218,10 @@
       "placeholder": "Comparte una novedad con la comunidad...",
       "submit": "Publicar novedad",
       "submitting": "Publicando...",
-      "postedBy": "{{name}} · {{when}}"
+      "postedBy": "{{name}} · {{when}}",
+      "showOlderOne": "Ver {{count}} novedad anterior",
+      "showOlderOther": "Ver {{count}} novedades anteriores",
+      "showFewer": "Ver menos novedades"
     },
     "coOrganizers": {
       "title": "Co-organizadores",
