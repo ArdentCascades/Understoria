@@ -35,6 +35,7 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AchievementBadge } from "@/components/AchievementBadge";
+import { WhyTooltip } from "@/components/WhyTooltip";
 import {
   formatDeadline,
   formatHours,
@@ -392,6 +393,7 @@ function ActionPanel({
           </div>
           <p className="text-xs text-moss-500 dark:text-moss-400">
             {t("postDetail.repostHint")}
+            <WhyTooltip principleId="no-post-editing" />
           </p>
           <p className="text-xs text-moss-500 dark:text-moss-400">
             {t("postDetail.actionsWaiting")}

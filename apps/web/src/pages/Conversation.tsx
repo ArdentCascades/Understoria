@@ -28,6 +28,7 @@ import {
   type DecryptedMessage,
 } from "@/db/messages";
 import { formatRelativeTime } from "@/lib/format";
+import { WhyTooltip } from "@/components/WhyTooltip";
 
 export default function ConversationPage() {
   const { memberKey } = useParams<{ memberKey: string }>();
@@ -98,6 +99,11 @@ export default function ConversationPage() {
           {t("messages.conversationWith", { name: otherName })}
         </h1>
       </header>
+
+      <p className="mb-2 text-xs text-moss-500 dark:text-moss-400">
+        {t("messages.noReadReceipts")}
+        <WhyTooltip principleId="no-read-receipts" />
+      </p>
 
       <div className="flex-1 overflow-y-auto rounded-xl bg-moss-50 p-3 dark:bg-moss-950/30">
         {messages.length === 0 ? (
