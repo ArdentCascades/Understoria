@@ -19,7 +19,11 @@ import {
   shortKey,
 } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
-import type { DisputePayload, Proposal } from "@/types";
+import type {
+  CommentDisputePayload,
+  DisputePayload,
+  Proposal,
+} from "@/types";
 
 // Agent 13 + 14 unified Decisions surface: disputes are now
 // stored as Proposal rows with `kind: "dispute"`. This page keeps
@@ -88,7 +92,6 @@ export default function DisputesPage() {
 }
 
 function DisputeCard({ proposal }: { proposal: Proposal }) {
-  const { t } = useTranslation();
   const { members } = useApp();
   const nameByKey = useMemo(() => {
     const map = new Map<string, string>();
@@ -96,13 +99,46 @@ function DisputeCard({ proposal }: { proposal: Proposal }) {
     return map;
   }, [members]);
 
-  let payload: DisputePayload | null = null;
+  // Parse once, then discriminate on subjectType. Comment-flag
+  // payloads carry subjectType="task_comment"; legacy exchange-flag
+  // payloads have no subjectType field at all (they pre-date the
+  // discriminator). Either kind dispatches to its own renderer.
+  let parsed: { subjectType?: string } | null = null;
   try {
-    payload = JSON.parse(proposal.payload) as DisputePayload;
+    parsed = JSON.parse(proposal.payload) as { subjectType?: string };
   } catch {
-    payload = null;
+    parsed = null;
   }
-  if (!payload) return null;
+  if (!parsed) return null;
+
+  if (parsed.subjectType === "task_comment") {
+    return (
+      <CommentDisputeCard
+        proposal={proposal}
+        payload={parsed as unknown as CommentDisputePayload}
+        nameByKey={nameByKey}
+      />
+    );
+  }
+  return (
+    <ExchangeDisputeCard
+      proposal={proposal}
+      payload={parsed as unknown as DisputePayload}
+      nameByKey={nameByKey}
+    />
+  );
+}
+
+function ExchangeDisputeCard({
+  proposal,
+  payload,
+  nameByKey,
+}: {
+  proposal: Proposal;
+  payload: DisputePayload;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
 
   const helperName = payload.helperKey
     ? (nameByKey.get(payload.helperKey) ?? null)
@@ -171,6 +207,73 @@ function DisputeCard({ proposal }: { proposal: Proposal }) {
             {t("disputes.viewPost")}
           </Link>
         )}
+        <Link to="/proposals" className="btn-primary text-sm">
+          {t("disputes.openInDecisions")}
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function CommentDisputeCard({
+  proposal,
+  payload,
+  nameByKey,
+}: {
+  proposal: Proposal;
+  payload: CommentDisputePayload;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const authorName = nameByKey.get(payload.authorKey) ?? null;
+  return (
+    <article className="card">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <span className="chip bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+          {t("disputes.flagChip")}
+        </span>
+        <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+          {t("disputes.commentSubjectChip")}
+        </span>
+      </div>
+      <h2 className="text-lg font-semibold leading-snug">
+        {t("disputes.commentTitle")}
+      </h2>
+      <blockquote className="mt-3 border-l-4 border-bark-300 bg-bark-50 px-3 py-2 text-sm italic text-bark-800 dark:border-moss-700 dark:bg-moss-900/40 dark:text-moss-100">
+        {payload.body}
+      </blockquote>
+      {proposal.description && (
+        <blockquote className="mt-3 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
+          {proposal.description}
+        </blockquote>
+      )}
+      <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-moss-500">
+            {t("disputes.commentAuthorLabel")}
+          </dt>
+          <dd className="mt-0.5">
+            {authorName
+              ? `${authorName} (${shortKey(payload.authorKey)})`
+              : t("common.memberFallback")}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-moss-500">
+            {t("disputes.postedLabel")}
+          </dt>
+          <dd className="mt-0.5">
+            {formatRelativeTime(payload.createdAt)}
+          </dd>
+        </div>
+      </dl>
+      <div className="mt-4 flex justify-end gap-2">
+        <Link
+          to={`/project/${payload.projectId}`}
+          className="btn-secondary text-sm"
+        >
+          {t("disputes.viewTask")}
+        </Link>
         <Link to="/proposals" className="btn-primary text-sm">
           {t("disputes.openInDecisions")}
         </Link>

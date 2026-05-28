@@ -201,7 +201,10 @@
         "postedBy": "{{name}} · {{when}}",
         "delete": "Delete",
         "deleteConfirm": "Delete this comment? You can't undo this.",
-        "tombstone": "(comment deleted by author)"
+        "tombstone": "(comment deleted by author)",
+        "flag": "Flag for review",
+        "flagPrompt": "Why are you flagging this comment? (Optional — leave blank if you'd rather the community decide without a reason.)",
+        "flaggedChip": "Flagged"
       }
     },
     "milestone": {
@@ -837,6 +840,10 @@
     "recipientLabel": "Recipient",
     "postedLabel": "Originally posted",
     "viewPost": "Open the post",
+    "viewTask": "Open the project",
+    "commentSubjectChip": "Task comment",
+    "commentTitle": "Flagged comment",
+    "commentAuthorLabel": "Author",
     "openInDecisions": "Open in Decisions",
     "footer": "Each dispute also shows up in Decisions, where the community can vote on how to respond. Resolution closes the dispute in both places.",
     "entry": {

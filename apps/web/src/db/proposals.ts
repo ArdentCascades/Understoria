@@ -12,12 +12,14 @@
 import { uuid } from "@/lib/id";
 import type {
   DisputePayload,
+  CommentDisputePayload,
   ImpactReflection,
   Post,
   ProposalCategory,
   ProposalStatus,
   Proposal,
   ReversibilityTier,
+  TaskComment,
 } from "@/types";
 import { db } from "./database";
 
@@ -156,6 +158,126 @@ export async function ensureDisputeProposal(input: {
   });
   await db.proposals.put(proposal);
   return proposal;
+}
+
+/**
+ * Build a Proposal row that flags a task comment. Mirrors
+ * buildDisputeProposal but the subject is a comment, not a post.
+ * The body / authorKey snapshot inside payload preserves what was
+ * flagged in case the author later soft-deletes the comment.
+ */
+export function buildCommentDisputeProposal(input: {
+  comment: TaskComment;
+  flaggerKey: string;
+  reason: string | null;
+  nodeId: string;
+  now: number;
+}): Proposal {
+  const { comment, flaggerKey, reason, nodeId, now } = input;
+  const snapshot: CommentDisputePayload = {
+    subjectType: "task_comment",
+    commentId: comment.id,
+    projectId: comment.projectId,
+    taskId: comment.taskId,
+    body: comment.body,
+    authorKey: comment.authorKey,
+    createdAt: comment.createdAt,
+  };
+  return {
+    id: uuid(),
+    nodeId,
+    kind: "dispute",
+    category: "dispute",
+    reversibilityTier: "easy",
+    // Title surfaces in the Decisions list; "flagged comment" is the
+    // generic stand-in since the comment body itself can be very
+    // long and unsuitable as a title.
+    title: "Flagged comment",
+    description: reason?.trim() || "",
+    payload: JSON.stringify(snapshot),
+    proposerKey: flaggerKey,
+    status: "open",
+    createdAt: now,
+    closedAt: null,
+    closedReason: null,
+    impactReflection: null,
+    // Comments use payload.commentId for linkage instead of the
+    // typed disputePostId column (which stays null here so the
+    // existing post-dispute index queries don't return comment rows).
+    disputePostId: null,
+  };
+}
+
+/**
+ * Idempotent comment-flag write. Returns the existing open proposal
+ * if one already references this comment id, otherwise writes a new
+ * one. Uses a scan over open dispute proposals + payload parsing
+ * since the comment id lives inside the JSON payload, not in an
+ * indexed column. Pilot-scale (small number of open disputes) — if
+ * scale changes, denormalize commentId onto Proposal.
+ */
+export async function ensureCommentDisputeProposal(input: {
+  comment: TaskComment;
+  flaggerKey: string;
+  reason: string | null;
+  nodeId: string;
+  now?: number;
+}): Promise<Proposal> {
+  const openDisputes = await db.proposals
+    .where("[kind+status]")
+    .equals(["dispute", "open"])
+    .toArray();
+  for (const p of openDisputes) {
+    try {
+      const parsed = JSON.parse(p.payload) as { subjectType?: string; commentId?: string };
+      if (
+        parsed.subjectType === "task_comment" &&
+        parsed.commentId === input.comment.id
+      ) {
+        return p;
+      }
+    } catch {
+      // Skip malformed payloads — they belong to a different shape
+      // and aren't a match for the comment id anyway.
+    }
+  }
+  const proposal = buildCommentDisputeProposal({
+    comment: input.comment,
+    flaggerKey: input.flaggerKey,
+    reason: input.reason,
+    nodeId: input.nodeId,
+    now: input.now ?? Date.now(),
+  });
+  await db.proposals.put(proposal);
+  return proposal;
+}
+
+/**
+ * Returns the set of comment ids with an open dispute proposal.
+ * Used by the UI to render "Flagged" chips on flagged comments and
+ * hide the Flag button (one flag per comment is sufficient — the
+ * dispute surface aggregates community attention).
+ */
+export async function listFlaggedCommentIds(): Promise<Set<string>> {
+  const openDisputes = await db.proposals
+    .where("[kind+status]")
+    .equals(["dispute", "open"])
+    .toArray();
+  const ids = new Set<string>();
+  for (const p of openDisputes) {
+    try {
+      const parsed = JSON.parse(p.payload) as { subjectType?: string; commentId?: string };
+      if (
+        parsed.subjectType === "task_comment" &&
+        typeof parsed.commentId === "string"
+      ) {
+        ids.add(parsed.commentId);
+      }
+    } catch {
+      // Skip.
+    }
+  }
+  return ids;
 }
 
 /** Returns proposals newest-first. Status filter is optional — by

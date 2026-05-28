@@ -22,10 +22,12 @@ import {
 import {
   MAX_COMMENT_LENGTH,
   deleteTaskComment,
+  flagTaskComment,
   listTaskComments,
   postTaskComment,
 } from "./taskComments";
 import { verifyTaskComment } from "@/lib/crypto";
+import type { CommentDisputePayload } from "@/types";
 
 const NODE = "node_taskcomments_test";
 
@@ -44,6 +46,7 @@ async function reset() {
     db.projectTasks.clear(),
     db.projectActivity.clear(),
     db.taskComments.clear(),
+    db.proposals.clear(),
   ]);
 }
 
@@ -189,5 +192,60 @@ describe("taskComments", () => {
     const stranger = await createMember({ displayName: "Stranger" }, NODE);
     const c = await postTaskComment(task.id, "happy to help", stranger.publicKey, NODE);
     expect(c.authorKey).toBe(stranger.publicKey);
+  });
+
+  it("flags a comment by creating a dispute proposal with the body snapshot", async () => {
+    const { org, task } = await setup();
+    const author = await createMember({ displayName: "Author" }, NODE);
+    const c = await postTaskComment(task.id, "Something to flag", author.publicKey, NODE);
+    const proposal = await flagTaskComment(c.id, org.publicKey, "spammy", NODE);
+    expect(proposal.kind).toBe("dispute");
+    expect(proposal.status).toBe("open");
+    expect(proposal.proposerKey).toBe(org.publicKey);
+    expect(proposal.description).toBe("spammy");
+    const payload = JSON.parse(proposal.payload) as CommentDisputePayload;
+    expect(payload.subjectType).toBe("task_comment");
+    expect(payload.commentId).toBe(c.id);
+    expect(payload.body).toBe("Something to flag");
+    expect(payload.authorKey).toBe(author.publicKey);
+  });
+
+  it("refuses to flag your own comment", async () => {
+    const { org, task } = await setup();
+    const c = await postTaskComment(task.id, "self note", org.publicKey, NODE);
+    await expect(
+      flagTaskComment(c.id, org.publicKey, "", NODE),
+    ).rejects.toThrow(/your own/);
+  });
+
+  it("is idempotent — re-flagging returns the existing proposal", async () => {
+    const { org, task } = await setup();
+    const author = await createMember({ displayName: "Author" }, NODE);
+    const c = await postTaskComment(task.id, "x", author.publicKey, NODE);
+    const first = await flagTaskComment(c.id, org.publicKey, "r1", NODE);
+    const second = await flagTaskComment(c.id, org.publicKey, "r2", NODE);
+    expect(second.id).toBe(first.id);
+    expect(second.description).toBe("r1"); // first reason wins
+    // No duplicate proposal was created.
+    const all = await db.proposals.toArray();
+    expect(all).toHaveLength(1);
+  });
+
+  it("preserves the body snapshot in the proposal even after author soft-deletes", async () => {
+    const { org, task } = await setup();
+    const author = await createMember({ displayName: "Author" }, NODE);
+    const c = await postTaskComment(task.id, "incriminating text", author.publicKey, NODE);
+    await flagTaskComment(c.id, org.publicKey, "review me", NODE);
+    await deleteTaskComment(c.id, author.publicKey);
+    const proposal = (await db.proposals.toArray())[0];
+    const payload = JSON.parse(proposal.payload) as CommentDisputePayload;
+    expect(payload.body).toBe("incriminating text");
+  });
+
+  it("rejects flagging a non-existent comment", async () => {
+    const stranger = await createMember({ displayName: "Stranger" }, NODE);
+    await expect(
+      flagTaskComment("no-such-comment", stranger.publicKey, "", NODE),
+    ).rejects.toThrow(/Comment not found/);
   });
 });

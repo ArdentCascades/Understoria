@@ -201,7 +201,10 @@
         "postedBy": "{{name}} · {{when}}",
         "delete": "Eliminar",
         "deleteConfirm": "¿Eliminar este comentario? No se puede deshacer.",
-        "tombstone": "(comentario eliminado por quien lo escribió)"
+        "tombstone": "(comentario eliminado por quien lo escribió)",
+        "flag": "Señalar para revisión",
+        "flagPrompt": "¿Por qué señalas este comentario? (Opcional — déjalo en blanco si prefieres que la comunidad decida sin un motivo.)",
+        "flaggedChip": "Señalado"
       }
     },
     "milestone": {
@@ -837,6 +840,10 @@
     "recipientLabel": "Quien recibe",
     "postedLabel": "Publicado originalmente",
     "viewPost": "Abrir la publicación",
+    "viewTask": "Abrir el proyecto",
+    "commentSubjectChip": "Comentario de tarea",
+    "commentTitle": "Comentario señalado",
+    "commentAuthorLabel": "Autor",
     "openInDecisions": "Abrir en Decisiones",
     "footer": "Cada disputa también aparece en Decisiones, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
     "entry": {

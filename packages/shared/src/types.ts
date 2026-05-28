@@ -596,6 +596,28 @@ export interface DirectMessage {
 // ---------------------------------------------------------------------------
 
 /**
+ * Payload for a `kind: "dispute"` Proposal that flags a task
+ * comment. The `subjectType` field discriminates this payload from
+ * `DisputePayload` (which flags an exchange post and omits
+ * `subjectType` entirely for back-compat with pre-existing rows).
+ *
+ * The body / authorKey / createdAt snapshot is preserved so the
+ * Disputes view still has something to show even if the author
+ * later soft-deletes the underlying comment. That's the whole
+ * point of flagging — community accountability survives author
+ * action.
+ */
+export interface CommentDisputePayload {
+  subjectType: "task_comment";
+  commentId: string;
+  projectId: string;
+  taskId: string;
+  body: string;
+  authorKey: string;
+  createdAt: number;
+}
+
+/**
  * A comment authored on a project task. Anyone with an unlocked
  * session can post; only the author can soft-delete their own
  * comment. Tombstones (deletedAt set) are preserved so federated

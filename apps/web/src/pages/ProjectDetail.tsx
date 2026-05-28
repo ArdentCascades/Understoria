@@ -69,6 +69,7 @@ export default function ProjectDetailPage() {
     nodeId,
     nodeConfig,
     exchanges,
+    proposals,
   } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -85,6 +86,33 @@ export default function ProjectDetailPage() {
         .sort((a, b) => a.createdAt - b.createdAt),
     [projectTasks, id],
   );
+  // Derive the set of comment ids with an open dispute proposal so
+  // TaskComments can render the "Flagged" chip and hide the Flag
+  // button. Computed in memory from the proposals already loaded in
+  // AppContext rather than a separate Dexie query — the proposals
+  // list is small enough that the O(n) scan is cheap.
+  const flaggedCommentIds = useMemo<ReadonlySet<string>>(() => {
+    const ids = new Set<string>();
+    for (const p of proposals) {
+      if (p.kind !== "dispute" || p.status !== "open") continue;
+      try {
+        const payload = JSON.parse(p.payload) as {
+          subjectType?: string;
+          commentId?: string;
+        };
+        if (
+          payload.subjectType === "task_comment" &&
+          typeof payload.commentId === "string"
+        ) {
+          ids.add(payload.commentId);
+        }
+      } catch {
+        // Skip — malformed or wrong-shape payloads aren't matches.
+      }
+    }
+    return ids;
+  }, [proposals]);
+
   const memberMap = useMemo(
     () => new Map(members.map((m) => [m.publicKey, m.displayName])),
     [members],
@@ -309,6 +337,7 @@ export default function ProjectDetailPage() {
                     onRun={run}
                     needsMoreHands={checkInState === "needs_more_hands"}
                     allTasks={tasks}
+                    flaggedCommentIds={flaggedCommentIds}
                   />
                 </li>
               );
@@ -546,6 +575,7 @@ function TaskRow({
   onRun,
   needsMoreHands,
   allTasks,
+  flaggedCommentIds,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -555,6 +585,7 @@ function TaskRow({
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
   needsMoreHands: boolean;
   allTasks: readonly ProjectTask[];
+  flaggedCommentIds: ReadonlySet<string>;
 }) {
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
@@ -832,6 +863,7 @@ function TaskRow({
         currentKey={currentKey}
         memberMap={memberMap}
         nodeId={nodeId}
+        flaggedCommentIds={flaggedCommentIds}
       />
     </div>
   );
