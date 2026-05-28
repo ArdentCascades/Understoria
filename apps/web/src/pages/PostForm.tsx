@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
-import { createPost } from "@/db/actions";
+import { cancelPost, createPost } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
@@ -64,11 +64,12 @@ const VALIDATORS: Record<FieldName, Validator> = {
 };
 
 export default function PostFormPage() {
-  const { currentMember, nodeId } = useApp();
+  const { currentMember, posts, nodeId } = useApp();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const repostId = params.get("repost");
   const initialType: PostType =
     (params.get("type") as PostType) === "OFFER" ? "OFFER" : "NEED";
 
@@ -98,6 +99,22 @@ export default function PostFormPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!repostId || !posts.length) return;
+    const source = posts.find((p) => p.id === repostId);
+    if (!source) return;
+    setType(source.type);
+    setTitle(source.title);
+    setDescription(source.description);
+    setCategory(source.category);
+    setHours(String(source.estimatedHours));
+    setUrgency(source.urgency);
+    if (source.expiresAt) {
+      const daysLeft = Math.max(1, Math.ceil((source.expiresAt - Date.now()) / (24 * 60 * 60 * 1000)));
+      setExpiresInDays(String(daysLeft));
+    }
+  }, [repostId, posts]);
 
   // Treat "user has typed something meaningful" as dirty. The
   // defaults (category=other, hours=1, urgency=low) match a fresh
@@ -157,6 +174,13 @@ export default function PostFormPage() {
         },
         nodeId,
       );
+      if (repostId) {
+        try {
+          await cancelPost(repostId, currentMember!.publicKey);
+        } catch {
+          // Original may already be claimed/cancelled — fine to ignore
+        }
+      }
       await clearDraft(DRAFT_KEY);
       showToast(
         t(type === "NEED" ? "toast.needPosted" : "toast.offerPosted"),
@@ -188,6 +212,12 @@ export default function PostFormPage() {
             : t("postForm.subtitleOffer")}
         </p>
       </header>
+
+      {repostId && (
+        <p className="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          {t("postForm.repostBanner")}
+        </p>
+      )}
 
       <div
         role="tablist"
@@ -264,26 +294,33 @@ export default function PostFormPage() {
           />
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
+        <fieldset className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">
+          <legend className="px-1 text-xs uppercase tracking-wide text-moss-500">
             {t("postForm.fieldCategory")}
-          </span>
-          <select
-            className="input"
-            value={category}
-            onChange={(e) => setCategory(e.target.value as Category)}
-          >
+          </legend>
+          <div className="flex flex-col gap-2">
             {ALL_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {t("postForm.categoryOption", {
-                  emoji: CATEGORY_META[c].emoji,
-                  label: t(`categories.${c}`),
-                  description: CATEGORY_META[c].description,
-                })}
-              </option>
+              <label key={c} className="flex items-start gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="category"
+                  value={c}
+                  checked={category === c}
+                  onChange={() => setCategory(c)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium">
+                    {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+                  </span>{" "}
+                  <span className="text-xs text-moss-500 dark:text-moss-400">
+                    — {CATEGORY_META[c].description}
+                  </span>
+                </span>
+              </label>
             ))}
-          </select>
-        </label>
+          </div>
+        </fieldset>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1">

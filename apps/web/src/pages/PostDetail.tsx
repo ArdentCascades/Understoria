@@ -365,16 +365,29 @@ function ActionPanel({
   onOpenDialog,
 }: ActionPanelProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   if (post.status === "open") {
     if (isPoster) {
       return (
         <Actions>
-          <button
-            className="btn-secondary"
-            onClick={() => onOpenDialog({ type: "cancel" })}
-          >
-            {t("postDetail.actionsCancelPost")}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="btn-secondary"
+              onClick={() => onOpenDialog({ type: "cancel" })}
+            >
+              {t("postDetail.actionsCancelPost")}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => navigate(`/post/new?repost=${post.id}`)}
+            >
+              {t("postDetail.repost")}
+            </button>
+          </div>
+          <p className="text-xs text-moss-500 dark:text-moss-400">
+            {t("postDetail.repostHint")}
+          </p>
           <p className="text-xs text-moss-500 dark:text-moss-400">
             {t("postDetail.actionsWaiting")}
           </p>
@@ -410,6 +423,16 @@ function ActionPanel({
     }
     return (
       <Actions>
+        {post.status === "claimed" && (
+          <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+            {t("postDetail.guidance.claimed")}
+          </p>
+        )}
+        {post.status === "awaiting_confirmation" && !alreadyConfirmed && (
+          <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+            {t("postDetail.guidance.awaitingYou")}
+          </p>
+        )}
         <p className="text-sm text-moss-700 dark:text-moss-200">
           {t("postDetail.actionsExplain")}
         </p>
@@ -455,6 +478,9 @@ function ActionPanel({
             helper: helperName ?? t("common.anyMember"),
             helped: helpedName ?? t("common.anyMember"),
           })}
+        </p>
+        <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+          {t("postDetail.guidance.completed")}
         </p>
       </Actions>
     );
