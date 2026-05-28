@@ -10,6 +10,115 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Per-task comment threads with community flag-for-review
+  (PRs #72–#74).** A new conversation surface on every project task,
+  signed and federated like posts, with the existing disputes flow
+  extended to cover comments — community moderation without
+  admins.
+  - **Local-only foundation (PR #72).** New Dexie table
+    `taskComments` (schema v15), composite index
+    `[projectId+taskId+createdAt]`. Anyone with an unlocked session
+    can post (max 2 000 chars). Only the author can soft-delete
+    their own comment; tombstones render as "(comment deleted by
+    author)" so federation later converges cleanly. `TaskComments`
+    component is collapsed by default under each task, showing the
+    count; expanded view shows the thread + composer. 12 new DB
+    tests cover post / list / delete / scoping / validation.
+  - **Federation (PR #73).** Comments federate exactly like posts:
+    outbox push from the PWA, server endpoint
+    `POST/GET /task-comments`, peer pull worker fetches across
+    nodes, periodic PWA pull from the community node. Server
+    schema v8 adds the `task_comments` table + a
+    `last_task_comment_created_at` cursor on `peer_pull_state`.
+    Soft deletes federate via a re-push of the same signed row
+    with `deletedAt` populated (the signature still verifies —
+    `deletedAt` is excluded from the canonical payload). Single
+    **tombstone-wins merge rule** applied identically in three
+    places (server route, server peer pull, web federationSync):
+    once tombstoned anywhere, tombstoned everywhere; `COALESCE`
+    keeps the first `deletedAt`. 7 new server tests cover accept,
+    idempotent re-post, bad signature, malformed body, body too
+    long, tombstone application, repeat tombstone no-op.
+  - **Flag a comment (PR #74).** Anyone except the author can flag
+    a comment for community review. Flagging creates a `Proposal`
+    row with `kind: "dispute"` carrying a new
+    `CommentDisputePayload` (discriminated by
+    `subjectType: "task_comment"`) that surfaces on the existing
+    `/disputes` page alongside flagged exchanges. **Flagging does
+    not hide or remove the comment** — visibility is the
+    governance signal, per ethos. The payload carries a body
+    snapshot at flag time so the community can still see what was
+    flagged even if the author later soft-deletes the underlying
+    comment; this accountability property is explicitly tested.
+    `DisputeCard` dispatches on `payload.subjectType` to either
+    `ExchangeDisputeCard` (legacy behavior — `subjectType` absent
+    reads as "exchange") or the new `CommentDisputeCard`. 5 new
+    web tests cover the flag flow.
+
+  Federation of comment flags (i.e. proposals) is out of scope
+  here — same constraint as existing exchange disputes. Tracked
+  for a future PR alongside general proposals federation.
+
+  Tests: 491 web (474 + 12 + 5 new), 60 server (53 + 7 new), all
+  passing. i18n parity test passes (7 new strings in en/es).
+
+- **UI polish track — foundation, identity, typography, empty
+  states, polish (PRs #70, #71).** A five-workstream visual
+  redesign that earns "attractive" through craft — typography,
+  whitespace, identity, restraint — without violating project
+  ethos (no leaderboards, no streaks, no color-as-rank, no
+  individual-celebration motion).
+  - **Foundation tokens (PR #70).** `ember-*` warm accent
+    **reserved for reciprocity moments only** (a fulfilled need,
+    an exchange accepted — never status/rank). `bark-*` warm
+    neutral that pairs with moss/canopy without introducing a
+    second hue. `font-serif` → Source Serif 4 Variable,
+    self-hosted, unicode-range-split. 5-step type scale
+    (`text-display` / `text-title` / `text-heading` / `text-body`
+    / `text-caption`). `stack-*` vertical-rhythm spacing tokens.
+    `shadow-leaf` soft canopy-tinted dual-layer card shadow. New
+    `apps/web/src/design/README.md` documents tokens + ethos
+    guardrails.
+  - **Botanical visual identity (PR #71).** New
+    `components/visual/` module: `Icon` base wrapper, 4 line-art
+    nav icons (Board/Dashboard/Messages/Profile), 5 hand-drawn
+    illustrations (Sapling/Hands/Book/Basket/Path), `LeafDivider`
+    (full/short/dotted), `Sprig` ornament. BottomNav rewired to
+    use SVG icons; emoji removed from chrome (user-content emoji
+    on category badges + achievement badges untouched).
+    EmptyState API extended with `illustration` and `title`
+    props.
+  - **Typographic polish (PR #71).** `.page-title`
+    (`font-serif text-display`) and `.section-title` utility
+    classes. 13 site-name page titles converted to the serif
+    display style (user-content titles stay sans-serif because
+    they're user data, not the page's name). `.card` chrome →
+    `shadow-leaf` + warmer `bark-200/60` border.
+  - **Empty states + ember reciprocity debut (PR #71).** Every
+    EmptyState callsite (13 sites) migrated to a bespoke
+    illustration + title per the design plan. 11 new title keys
+    added to both en and es locales. **Ember reciprocity debut:**
+    PostDetail "completed" status — the two stacked canopy-50
+    paragraphs became a single `ember-50` banner framed by
+    `LeafDivider`s. First ember-colored surface in the app,
+    marking a fulfilled exchange as a reciprocity moment (never
+    status/rank).
+  - **Welcome lockup + leaf-divided principles + contrast support
+    (PR #71).** LockScreen shows the serif "Understoria" wordmark
+    flanked by `Sprig` ornaments. Splash swaps the sapling emoji
+    for `IllustrationSapling`. LearnSection design principles
+    separated by short `LeafDivider`s. **`prefers-contrast: more`
+    support** — decorative SVGs (LeafDivider, Sprig, all 5
+    illustrations) carry `data-decorative="true"` and are hidden
+    under high contrast. Per ethos, accessible text does the
+    work; high-contrast users get strengthened signal-to-noise.
+
+  Verified: shared build clean, tsc clean, lint clean, 474/474
+  tests pass (no behavior change), production build succeeds. PWA
+  precache 909 → 917 KiB across the track — bundle impact is the
+  variable serif font (~50 KB Latin subset, lazy-loaded by
+  unicode-range) and the new SVG components.
+
 - **Offer-poster UX improvements (PR #69).** Three features
   symmetric to the help-seeker improvements (PRs #66–#67),
   focused on the offer side of the Board.
