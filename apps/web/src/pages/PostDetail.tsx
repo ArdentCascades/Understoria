@@ -370,6 +370,11 @@ function ActionPanel({
     if (isPoster) {
       return (
         <Actions>
+          {Math.floor((Date.now() - post.createdAt) / 86_400_000) >= 3 && (
+            <p className="mb-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+              {t("postDetail.stillLooking")}
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
             <button
               className="btn-secondary"

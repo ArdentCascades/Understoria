@@ -53,6 +53,7 @@ export default function BoardPage() {
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
   const [urgencyFilter, setUrgencyFilter] = useState<Urgency | "">("");
   const [query, setQuery] = useState("");
+  const [zoneFilter, setZoneFilter] = useState("");
   // Hide claimed posts by default — the Board is action-oriented
   // ("what can I help with now?") and a claimed post isn't
   // actionable for a new helper. Toggle persists for the session
@@ -82,6 +83,14 @@ export default function BoardPage() {
     return map;
   }, [members, vouches, invites]);
 
+  const zones = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of posts) {
+      if (p.locationZone) set.add(p.locationZone);
+    }
+    return [...set].sort();
+  }, [posts]);
+
   // Two-stage filter: `matchingPosts` is everything in scope for
   // the current tab + category + urgency + query. From there, the
   // default view hides any post that already has a claimer; the
@@ -93,13 +102,14 @@ export default function BoardPage() {
       if (p.status === "cancelled") return false;
       if (categoryFilter && p.category !== categoryFilter) return false;
       if (urgencyFilter && p.urgency !== urgencyFilter) return false;
+      if (zoneFilter && p.locationZone !== zoneFilter) return false;
       if (q) {
         const haystack = `${p.title} ${p.description}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [posts, tab, categoryFilter, urgencyFilter, query]);
+  }, [posts, tab, categoryFilter, urgencyFilter, zoneFilter, query]);
 
   const claimedInScope = useMemo(
     () => matchingPosts.filter((p) => p.claimedBy !== null).length,
@@ -175,7 +185,7 @@ export default function BoardPage() {
 
       {tab !== "PROJECTS" && (
       <>
-      <div className="mb-4 grid gap-2 sm:grid-cols-2">
+      <div className="mb-4 grid gap-2 sm:grid-cols-3">
         <label className="sr-only" htmlFor="category-filter">
           {t("board.filters.categoryAriaLabel")}
         </label>
@@ -211,6 +221,20 @@ export default function BoardPage() {
                 ? t("board.filters.allUrgencies")
                 : t(`urgency.${value}`)}
             </option>
+          ))}
+        </select>
+        <label className="sr-only" htmlFor="zone-filter">
+          {t("board.filters.zoneAriaLabel")}
+        </label>
+        <select
+          id="zone-filter"
+          className="input"
+          value={zoneFilter}
+          onChange={(e) => setZoneFilter(e.target.value)}
+        >
+          <option value="">{t("board.filters.allZones")}</option>
+          {zones.map((z) => (
+            <option key={z} value={z}>{z}</option>
           ))}
         </select>
       </div>

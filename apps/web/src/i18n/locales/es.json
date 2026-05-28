@@ -357,6 +357,7 @@
     "dialogReleaseConfirm": "Soltar",
     "repost": "Republicar con cambios",
     "repostHint": "Esto cancelara la original y creara una publicacion nueva.",
+    "stillLooking": "Sigues buscando? Agregar mas detalles o ajustar las horas estimadas puede ayudar a que la persona adecuada encuentre esto. Puedes republicar con cambios abajo.",
     "guidance": {
       "claimed": "Tu ayudante esta en ello. Cuando el trabajo termine, una persona lo marca como completo y la otra confirma.",
       "awaitingYou": "La otra persona marco esto como completo. Revisa lo que se hizo y confirma para liberar los creditos.",
@@ -521,8 +522,10 @@
     "filters": {
       "categoryAriaLabel": "Filtrar por categoría",
       "urgencyAriaLabel": "Filtrar por urgencia",
+      "zoneAriaLabel": "Filtrar por zona",
       "allCategories": "Todas las categorías",
-      "allUrgencies": "Todas las urgencias"
+      "allUrgencies": "Todas las urgencias",
+      "allZones": "Todas las zonas"
     },
     "search": {
       "placeholder": "Buscar en títulos y descripciones",
