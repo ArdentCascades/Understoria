@@ -187,7 +187,22 @@
       "follows": "Follows: {{tasks}}",
       "followsHint": "This task is ready after the tasks it follows are completed.",
       "addDependency": "Follows...",
-      "noDependencies": "No dependencies"
+      "noDependencies": "No dependencies",
+      "comments": {
+        "startThread": "Start a comment thread",
+        "showOne": "Show {{count}} comment",
+        "showOther": "Show {{count}} comments",
+        "hide": "Hide comments",
+        "empty": "No comments yet. Be the first to say something.",
+        "composerLabel": "Comment on this task",
+        "placeholder": "Add a comment about this task...",
+        "submit": "Post comment",
+        "submitting": "Posting...",
+        "postedBy": "{{name}} · {{when}}",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this comment? You can't undo this.",
+        "tombstone": "(comment deleted by author)"
+      }
     },
     "milestone": {
       "reached": "🎉 {{percent}}% of the way there!"

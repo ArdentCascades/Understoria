@@ -49,6 +49,7 @@ import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { TaskComments } from "@/components/TaskComments";
 import type {
   Member,
   Project,
@@ -825,6 +826,13 @@ function TaskRow({
           )}
         </>
       )}
+      <TaskComments
+        projectId={task.projectId}
+        taskId={task.id}
+        currentKey={currentKey}
+        memberMap={memberMap}
+        nodeId={nodeId}
+      />
     </div>
   );
 }
