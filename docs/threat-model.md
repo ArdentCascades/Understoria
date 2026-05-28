@@ -213,6 +213,48 @@ We are not trying to protect against:
   recorded), so the exposure is limited to timing. Risk is low
   but worth noting for federation threat modeling.
 
+- **Federated task comments expose plain-text bodies.** Task
+  comments (PRs #72–#73) federate the same way posts do — a
+  comment authored on node A is signed by the author, POSTed to
+  the community node via the outbox, fetched by peer nodes' pull
+  workers, and surfaced in each peer PWA's local Dexie. The wire
+  shape carries `projectId`, `taskId`, `authorKey`, `body` (up
+  to 2 000 chars), `createdAt`, `deletedAt`, `nodeId`, and
+  `signature`. Bodies are **not encrypted at rest** on the
+  community node or in peer Dexie stores — same exposure model
+  as posts and project announcements. Soft deletes federate via
+  tombstone-wins merge (`deletedAt` is monotonic; once set
+  anywhere, set everywhere — `COALESCE` keeps the first value).
+  Mitigations in place: bodies are author-authored (the author
+  chose to publish), tombstones replace the body in the UI with
+  "(comment deleted by author)" so casual readers don't see the
+  text after deletion. Mitigations *not* in place: encrypted
+  comments (would require deriving a per-task or per-project key
+  and distributing it — out of scope for the pilot), retention
+  bounds (federated peers keep tombstoned bodies indefinitely).
+  Risk: an author posts something sensitive, then realizes and
+  soft-deletes — the row plus body survive on every peer that
+  pulled it before the delete, including the server SQLite. This
+  is documented in the in-app UI by the standard "what gets sent"
+  language on Profile → Community node.
+
+- **Comment flags carry a body snapshot that survives author
+  delete.** Flagging a task comment (PR #74) creates a Proposal
+  row with `kind: "dispute"` whose payload (a
+  `CommentDisputePayload`) carries a snapshot of the comment's
+  body, authorKey, and createdAt at flag time. The snapshot is
+  intentional — community accountability outlasts the author's
+  choice to soft-delete their own comment (otherwise an author
+  could nullify a flag by deleting). Today this exposure is
+  local-only: proposals don't federate. When proposals federation
+  ships (tracked, no PR yet), the snapshot will federate too,
+  and the exposure shape will match the federated-bodies entry
+  above. Mitigation in place: flagging requires the flagger to
+  type a (optional) reason via `window.prompt`, which is a
+  speed-bump against accidental flagging. No anonymous flagging
+  — the `proposerKey` on the proposal row is the flagger's
+  public key.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

@@ -255,6 +255,7 @@ The phase view below is a public summary.
 - [x] Spanish translation
 - [x] Federation protocol and cross-node exchanges (server endpoints, pull loop, PWA surfacing done; full lifecycle sync pending)
 - [x] Posts / vouches / invites endpoints on the server
+- [x] Per-task comment threads + federation (signed, tombstone-merge soft delete) + community flag-for-review via the existing disputes surface
 - [ ] Organizing module: campaigns, power mapping, meeting tools
 
 ### Phase 4: Launch
