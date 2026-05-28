@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { Link } from "react-router-dom";
+import { Illustration, type IllustrationName } from "@/components/visual";
 
 // Shared empty-state surface. Two layout variants:
 //   - "card" — stands as its own card (e.g. an entire tab with no
@@ -20,10 +21,23 @@ import { Link } from "react-router-dom";
 // The optional action is a Link, not a button, because every
 // current use case navigates to a route. If a non-navigation
 // action ever appears, add an onClick branch then.
+//
+// Visual: prefer `illustration` (one of the named line-art SVGs)
+// for new callsites. The legacy `icon` prop accepts an emoji
+// string and remains supported until existing callsites migrate
+// in the empty-states PR (workstream C). Set `illustration="none"`
+// to omit the decorative element entirely.
 
 interface EmptyStateProps {
-  /** Decorative emoji. Default: a sapling. Set to `null` to omit. */
+  /** Named line-art illustration. Default: "sapling". */
+  illustration?: IllustrationName | "none";
+  /**
+   * Legacy emoji icon. Used only when no `illustration` is given.
+   * Prefer `illustration` in new code.
+   */
   icon?: string | null;
+  /** Optional short headline above the message. */
+  title?: string;
   /** Plain-language description of what's empty and (often) why. */
   message: string;
   /** Optional call-to-action that links somewhere actionable. */
@@ -32,21 +46,45 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon = "\u{1F331}",
+  illustration,
+  icon,
+  title,
   message,
   action,
   variant = "card",
 }: EmptyStateProps) {
   const container =
     variant === "card"
-      ? "card flex flex-col items-center gap-2 py-10 text-center"
-      : "flex flex-col items-center gap-2 py-6 text-center";
+      ? "card flex flex-col items-center gap-stack-sm py-10 text-center"
+      : "flex flex-col items-center gap-stack-sm py-6 text-center";
+
+  // Precedence: explicit illustration > legacy icon > default sapling.
+  // illustration="none" suppresses the graphic even if `icon` is set.
+  const resolved: IllustrationName | null =
+    illustration === "none"
+      ? null
+      : illustration
+        ? illustration
+        : icon
+          ? null
+          : "sapling";
+
   return (
     <div className={container}>
-      {icon ? (
+      {resolved ? (
+        <Illustration
+          name={resolved}
+          className="text-canopy-700 dark:text-canopy-300"
+        />
+      ) : icon && illustration !== "none" ? (
         <div className="text-4xl" aria-hidden="true">
           {icon}
         </div>
+      ) : null}
+      {title ? (
+        <h3 className="text-heading font-semibold text-bark-800 dark:text-moss-100">
+          {title}
+        </h3>
       ) : null}
       <p className="max-w-sm text-sm text-moss-600 dark:text-moss-300">
         {message}

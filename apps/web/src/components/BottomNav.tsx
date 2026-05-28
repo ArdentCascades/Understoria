@@ -18,21 +18,28 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { KeyboardEvent } from "react";
+import type { ComponentType, KeyboardEvent } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import {
+  IconBoard,
+  IconDashboard,
+  IconMessages,
+  IconProfile,
+  type IconProps,
+} from "@/components/visual";
 
 interface NavItem {
   to: string;
   labelKey: "nav.board" | "nav.dashboard" | "nav.messages" | "nav.profile";
-  icon: string;
+  Icon: ComponentType<IconProps>;
 }
 
 const ITEMS: NavItem[] = [
-  { to: "/", labelKey: "nav.board", icon: "\u{1F333}" },
-  { to: "/dashboard", labelKey: "nav.dashboard", icon: "\u{1F331}" },
-  { to: "/messages", labelKey: "nav.messages", icon: "\u{1F4AC}" },
-  { to: "/profile", labelKey: "nav.profile", icon: "\u{1F33F}" },
+  { to: "/", labelKey: "nav.board", Icon: IconBoard },
+  { to: "/dashboard", labelKey: "nav.dashboard", Icon: IconDashboard },
+  { to: "/messages", labelKey: "nav.messages", Icon: IconMessages },
+  { to: "/profile", labelKey: "nav.profile", Icon: IconProfile },
 ];
 
 // Keyboard navigation inside the bottom nav. Tab still moves into
@@ -88,9 +95,7 @@ export function BottomNav() {
                 ].join(" ")
               }
             >
-              <span aria-hidden="true" className="text-xl leading-none">
-                {item.icon}
-              </span>
+              <item.Icon size={22} />
               <span>{t(item.labelKey)}</span>
             </NavLink>
           </li>
