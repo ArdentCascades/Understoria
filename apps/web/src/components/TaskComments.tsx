@@ -24,6 +24,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import {
   MAX_COMMENT_LENGTH,
   deleteTaskComment,
+  flagTaskComment,
   listTaskComments,
   postTaskComment,
 } from "@/db/taskComments";
@@ -48,6 +49,11 @@ interface TaskCommentsProps {
   /** Map from publicKey → displayName for rendering author names. */
   memberMap: Map<string, string>;
   nodeId: string;
+  /** Comment ids currently carrying an open dispute proposal. Used
+   *  to render the "Flagged" chip and hide the Flag button (one flag
+   *  is sufficient — the community-visible dispute aggregates the
+   *  signal). Pass an empty set if flag state isn't loaded yet. */
+  flaggedCommentIds: ReadonlySet<string>;
 }
 
 export function TaskComments({
@@ -56,6 +62,7 @@ export function TaskComments({
   currentKey,
   memberMap,
   nodeId,
+  flaggedCommentIds,
 }: TaskCommentsProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -102,6 +109,25 @@ export function TaskComments({
     [currentKey, t],
   );
 
+  const handleFlag = useCallback(
+    async (commentId: string) => {
+      if (!currentKey) return;
+      // window.prompt is the lightest dialog that lets the flagger
+      // optionally include a reason. Empty string / cancel → no
+      // reason, still flags. The dispute surface shows the reason
+      // when present.
+      const reason = window.prompt(t("projects.task.comments.flagPrompt"));
+      // null = user cancelled; empty string = user submitted no reason.
+      if (reason === null) return;
+      try {
+        await flagTaskComment(commentId, currentKey, reason, nodeId);
+      } catch (err) {
+        setError(humanizeError(err));
+      }
+    },
+    [currentKey, nodeId, t],
+  );
+
   return (
     <div className="border-t border-bark-200/60 pt-stack-sm dark:border-moss-800">
       <button
@@ -131,18 +157,26 @@ export function TaskComments({
           {comments.map((c) => {
             const isAuthor = currentKey === c.authorKey;
             const isDeleted = c.deletedAt !== null;
+            const isFlagged = flaggedCommentIds.has(c.id);
             return (
               <article
                 key={c.id}
                 className="rounded-xl border border-bark-200/60 bg-bark-50 p-stack-sm dark:border-moss-800 dark:bg-moss-900/40"
               >
-                <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
-                  {t("projects.task.comments.postedBy", {
-                    name:
-                      memberMap.get(c.authorKey) ??
-                      t("common.memberFallback"),
-                    when: formatRelativeTime(c.createdAt),
-                  })}
+                <p className="mb-1 flex flex-wrap items-center gap-2 text-xs text-moss-500 dark:text-moss-400">
+                  <span>
+                    {t("projects.task.comments.postedBy", {
+                      name:
+                        memberMap.get(c.authorKey) ??
+                        t("common.memberFallback"),
+                      when: formatRelativeTime(c.createdAt),
+                    })}
+                  </span>
+                  {isFlagged && (
+                    <span className="chip bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+                      {t("projects.task.comments.flaggedChip")}
+                    </span>
+                  )}
                 </p>
                 {isDeleted ? (
                   <p className="text-sm italic text-moss-500 dark:text-moss-400">
@@ -153,15 +187,26 @@ export function TaskComments({
                     {c.body}
                   </p>
                 )}
-                {isAuthor && !isDeleted && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(c.id)}
-                    className="mt-1 text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-400"
-                  >
-                    {t("projects.task.comments.delete")}
-                  </button>
-                )}
+                <div className="mt-1 flex flex-wrap gap-3">
+                  {isAuthor && !isDeleted && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c.id)}
+                      className="text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-400"
+                    >
+                      {t("projects.task.comments.delete")}
+                    </button>
+                  )}
+                  {!isAuthor && !isDeleted && !isFlagged && currentKey && (
+                    <button
+                      type="button"
+                      onClick={() => handleFlag(c.id)}
+                      className="text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-400"
+                    >
+                      {t("projects.task.comments.flag")}
+                    </button>
+                  )}
+                </div>
               </article>
             );
           })}

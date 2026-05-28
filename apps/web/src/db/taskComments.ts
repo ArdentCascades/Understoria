@@ -26,7 +26,8 @@ import {
   enqueueTaskCommentOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
-import type { TaskComment } from "@/types";
+import { ensureCommentDisputeProposal } from "./proposals";
+import type { Proposal, TaskComment } from "@/types";
 
 export const MAX_COMMENT_LENGTH = 2000;
 
@@ -148,6 +149,11 @@ export async function deleteTaskComment(
   }
   const deletedAt = Date.now();
   await db.taskComments.update(commentId, { deletedAt });
+  // Note: a flagged-then-deleted comment keeps its open dispute
+  // proposal. That's intentional — the flag's purpose is community
+  // accountability, which survives the author's choice to remove
+  // their own message. The payload carries a body snapshot so the
+  // disputes view still has something to show.
   // Federate the tombstone — re-push the same signed row with
   // `deletedAt` populated. The signature still verifies because
   // `deletedAt` is excluded from the canonical payload.
@@ -155,5 +161,37 @@ export async function deleteTaskComment(
   await enqueueTaskCommentOutbox(tombstoned);
   void flushOutboxNow().catch(() => {
     // Errors surface via the outbox worker's own retry path.
+  });
+}
+
+/**
+ * Flag a task comment for community review. Creates an open dispute
+ * Proposal row referencing the comment. Idempotent — re-flagging the
+ * same comment returns the existing open proposal without writing
+ * another row. The author can't flag their own comment.
+ *
+ * Flagging does NOT hide or remove the comment — visibility is the
+ * governance signal, not enforcement. The community reviews the
+ * flag via the Disputes / Decisions surface; the author can choose
+ * to soft-delete their own comment in response.
+ */
+export async function flagTaskComment(
+  commentId: string,
+  flaggerKey: string,
+  reason: string,
+  nodeId: string,
+): Promise<Proposal> {
+  const comment = await db.taskComments.get(commentId);
+  if (!comment) {
+    throw new Error("Comment not found.");
+  }
+  if (comment.authorKey === flaggerKey) {
+    throw new Error("You can't flag your own comment.");
+  }
+  return ensureCommentDisputeProposal({
+    comment,
+    flaggerKey,
+    reason: reason.trim() || null,
+    nodeId,
   });
 }
