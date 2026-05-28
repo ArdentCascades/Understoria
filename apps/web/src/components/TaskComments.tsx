@@ -31,6 +31,13 @@ import {
 import { humanizeError } from "@/lib/humanizeError";
 import { formatRelativeTime } from "@/lib/format";
 
+// Density cap: once a thread has more than this many comments,
+// the older ones collapse behind a "Show older (N)" toggle so a
+// long-running task can't push later content off-screen. Newest
+// comments stay inline (listTaskComments returns oldest→newest,
+// so we slice from the tail).
+const MAX_VISIBLE_COMMENTS = 3;
+
 // Per-task comment thread. Collapsed by default so a project with
 // many tasks doesn't sprawl. The toggle shows the comment count;
 // expanded view shows the thread (oldest → newest) plus a composer.
@@ -66,6 +73,7 @@ export function TaskComments({
 }: TaskCommentsProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +85,11 @@ export function TaskComments({
   );
 
   const count = comments.length;
+  const hiddenCount = Math.max(0, comments.length - MAX_VISIBLE_COMMENTS);
+  // listTaskComments returns oldest → newest, so the newest live at
+  // the tail. When collapsed, slice from hiddenCount to end keeps
+  // the newest MAX_VISIBLE_COMMENTS visible.
+  const visibleComments = showAll ? comments : comments.slice(hiddenCount);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -154,7 +167,23 @@ export function TaskComments({
               {t("projects.task.comments.empty")}
             </p>
           )}
-          {comments.map((c) => {
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              className="self-start text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+              onClick={() => setShowAll((v) => !v)}
+            >
+              {showAll
+                ? t("projects.task.comments.showFewer")
+                : t(
+                    hiddenCount === 1
+                      ? "projects.task.comments.showOlderOne"
+                      : "projects.task.comments.showOlderOther",
+                    { count: hiddenCount },
+                  )}
+            </button>
+          )}
+          {visibleComments.map((c) => {
             const isAuthor = currentKey === c.authorKey;
             const isDeleted = c.deletedAt !== null;
             const isFlagged = flaggedCommentIds.has(c.id);

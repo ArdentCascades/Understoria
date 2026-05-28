@@ -58,6 +58,12 @@ import type {
   Urgency,
 } from "@/types";
 
+// Density cap on the project "Updates" feed. listAnnouncements
+// returns newest → oldest, so when collapsed we keep the first N.
+// A long-running project's history can't push later sections off
+// screen; "Show older (N)" expands the full set.
+const MAX_VISIBLE_ANNOUNCEMENTS = 5;
+
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -1107,11 +1113,21 @@ function AnnouncementSection({
   const { t } = useTranslation();
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const announcements = useLiveQuery(
     () => listAnnouncements(project.id),
     [project.id],
     [],
   );
+  const hiddenCount = Math.max(
+    0,
+    announcements.length - MAX_VISIBLE_ANNOUNCEMENTS,
+  );
+  // listAnnouncements returns newest → oldest, so slicing from the
+  // head keeps the newest MAX_VISIBLE_ANNOUNCEMENTS visible.
+  const visibleAnnouncements = showAll
+    ? announcements
+    : announcements.slice(0, MAX_VISIBLE_ANNOUNCEMENTS);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -1160,7 +1176,7 @@ function AnnouncementSection({
       )}
       {announcements.length > 0 && (
         <ul className="flex flex-col gap-2">
-          {announcements.map((a) => (
+          {visibleAnnouncements.map((a) => (
             <li key={a.id} className="card">
               <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
                 {t("projects.announcements.postedBy", {
@@ -1174,6 +1190,22 @@ function AnnouncementSection({
             </li>
           ))}
         </ul>
+      )}
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          className="mt-2 text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll
+            ? t("projects.announcements.showFewer")
+            : t(
+                hiddenCount === 1
+                  ? "projects.announcements.showOlderOne"
+                  : "projects.announcements.showOlderOther",
+                { count: hiddenCount },
+              )}
+        </button>
       )}
     </section>
   );
