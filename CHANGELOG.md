@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Duplicate "Post a need / Post an offer" button removed from
+  empty Board states (PR #85).** Pilot-reported visual bug: the
+  EmptyState on the Board's Needs and Offers tabs rendered a
+  static "Post a need" / "Post an offer" button as its
+  `action`, duplicating the floating action button (FAB) that
+  already sits above the Board. The FAB is the canonical post
+  affordance; the duplicate static button looked strange right
+  below the sapling illustration. Removed the EmptyState
+  `action` prop on both tab variants; the FAB still renders.
+  Same fix pattern as the earlier Projects-tab duplicate
+  ("Duplicate 'Start a project' button removed" earlier in
+  this release). 493/493 tests still pass.
+
 - **Co-organizers can now confirm task completions (PR #84).**
   Pilot-reported UX bug: the "Confirm completion" button on a task
   awaiting confirmation rendered for every member with organizer
