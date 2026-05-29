@@ -9,6 +9,39 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Co-organizers can now confirm task completions (PR #84).**
+  Pilot-reported UX bug: the "Confirm completion" button on a task
+  awaiting confirmation rendered for every member with organizer
+  status (including co-organizers), but clicking it failed with
+  "Only the project organizer can confirm completions." The UI
+  gate used `isOrganizer()` (which accepts primary OR co-
+  organizers), while `confirmProjectTaskCompletion` had a stricter
+  inline check requiring the primary specifically.
+
+  Resolution: loosen the server check rather than tighten the UI.
+  Co-organizers exist precisely to share organizer load; primary-
+  only confirmation defeats that. **The credit math holds either
+  way** — the signed `Exchange` records the confirmer as the
+  helped party and is signed with the confirmer's own secret key,
+  so the confirming co-organizer's balance is debited (not the
+  primary's). There's no shared treasury to protect; each
+  confirmation is an individual decision affecting an individual
+  balance. The "confirmer is the helped party" mechanic is also
+  newly asserted in the test suite.
+
+  Existing safeguards preserved: a member cannot confirm their
+  own completed task (the self-confirmation check stays); the
+  exchange is still signed by both helper and helped, still flows
+  through the outbox to federate, still appears in the disputes
+  surface if anyone flags it.
+
+  Tests: existing non-organizer rejection test renamed for
+  clarity (it's testing a member who is neither primary NOR co-
+  organizer); new positive test asserts a co-organizer can
+  confirm and that the confirmer's balance — not the primary's —
+  is debited. 493/493 tests pass.
+
 ### Added
 - **Community dashboard visual upgrade (PR #82).** Two-batch
   warming of the dashboard surface, both shipped together.
