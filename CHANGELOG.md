@@ -9,6 +9,52 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Dark mode toggle in Profile → Appearance.** The codebase already
+  carried ~390 `dark:` Tailwind variants across every component,
+  but no mechanism ever set the `dark` class on `<html>` — the
+  variants were inert. This PR ships the toggle and the activation
+  pipeline.
+  - **Three-state preference**: `system` (default — follows
+    `prefers-color-scheme`), `light`, `dark`. Stored on the
+    `settings` table (no Dexie version bump — kv store).
+  - **No-FOUC**: a tiny synchronous inline script in `index.html`
+    reads `localStorage["understoria.theme"]` and applies the
+    `dark` class before first paint. AppContext mirrors the
+    resolved preference to localStorage on every change so the
+    next page load has the right value cached.
+  - **`lib/theme.ts`** owns the pure resolver, the apply helper,
+    the localStorage cache writer, and the `matchMedia` subscription
+    (active only when pref === `system` — pinned light/dark skips
+    it). AppContext exposes `themePreference` and
+    `setThemePreference`.
+  - **`color-scheme: light` / `html.dark { color-scheme: dark }`**
+    in `index.css` so native form controls and scrollbars track
+    the theme.
+  - **`AppearanceSection`** mirrors the LanguageSection pattern —
+    three radio buttons, `aria-checked`, identical card chrome.
+    Slotted on Profile between Language and Community node.
+  - **8 new tests** in `lib/theme.test.ts` (resolver truth table
+    + `isThemePreference` validator). Existing
+    `palette-contrast.test.ts` already enforces WCAG AA for both
+    light and dark pairings — no new contrast tests needed since
+    this PR adds no new color pairings.
+  - **i18n**: 5 new keys under `profile.appearance.*` in en + es;
+    parity test passes.
+  - **Audit pass**: grepped for `bg-white`, `text-moss-9xx`,
+    `border-moss-{200,300}` etc. without `dark:` siblings — only
+    multi-line-className false positives in `BottomNav` (the
+    `dark:` declaration is on the same className, just wraps to
+    the next line) and intentional white-on-tone chip buttons
+    inside `ToastContainer` (the toast is dark in both modes by
+    design). No leaks found.
+  - **Design README updated** to document the toggle, the
+    no-FOUC mechanism, and the class-based Tailwind mode.
+
+  Tests: 501 passing (493 → 501; +8 in `theme.test.ts`). Lint,
+  typecheck, build clean. PWA precache 917 → 948 KiB (theme
+  module + AppearanceSection + i18n strings + inline script).
+
 ### Fixed
 - **Co-organizers can now confirm task completions (PR #84).**
   Pilot-reported UX bug: the "Confirm completion" button on a task

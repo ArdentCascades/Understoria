@@ -61,6 +61,15 @@ import {
   unlockSession,
   type LockState,
 } from "@/db/secrets";
+import {
+  applyTheme,
+  cacheResolvedTheme,
+  isThemePreference,
+  resolveTheme,
+  subscribeSystemTheme,
+  systemPrefersDark,
+  type ThemePreference,
+} from "@/lib/theme";
 
 export interface AppContextValue {
   ready: boolean;
@@ -87,6 +96,8 @@ export interface AppContextValue {
   refreshOnboarded: () => Promise<void>;
   nodeConfig: NodeConfig;
   refreshNodeConfig: () => Promise<void>;
+  themePreference: ThemePreference;
+  setThemePreference: (pref: ThemePreference) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -100,6 +111,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lockState, setLockState] = useState<LockState>("unprotected");
   const [onboarded, setOnboarded] = useState<boolean>(false);
   const [nodeConfig, setNodeConfig] = useState<NodeConfig>(DEFAULT_NODE_CONFIG);
+  const [themePreference, setThemePreferenceState] =
+    useState<ThemePreference>("system");
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
@@ -122,6 +135,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const initialLock = await currentLockState();
       if (cancelled) return;
       setLockState(initialLock);
+      // Hydrate theme preference from Dexie. The inline script in
+      // index.html already applied the right class on first paint
+      // using the localStorage cache; this read syncs React state
+      // and corrects the class if the cache was stale.
+      const rawTheme = await getSetting(SETTING_KEYS.themePreference);
+      const pref: ThemePreference = isThemePreference(rawTheme)
+        ? rawTheme
+        : "system";
+      if (cancelled) return;
+      setThemePreferenceState(pref);
+      applyTheme(resolveTheme(pref, systemPrefersDark()));
+      cacheResolvedTheme(pref);
       // Only seed the demo community when the node isn't locked. Seeding
       // writes plaintext secret keys for demo members, which we don't want
       // to run while a user's real wrapped keys are present but sealed.
@@ -189,6 +214,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
     );
   }, [ready]);
+
+  // When the preference is "system", repaint on OS theme change.
+  // When the user pins "light" or "dark", the subscription is
+  // pointless (override wins) — skip it so the matchMedia handler
+  // isn't sitting around firing no-ops.
+  useEffect(() => {
+    if (themePreference !== "system") return;
+    return subscribeSystemTheme((dark) => {
+      applyTheme(dark ? "dark" : "light");
+    });
+  }, [themePreference]);
+
+  const setThemePreference = useCallback(async (pref: ThemePreference) => {
+    await setSetting(SETTING_KEYS.themePreference, pref);
+    setThemePreferenceState(pref);
+    applyTheme(resolveTheme(pref, systemPrefersDark()));
+    cacheResolvedTheme(pref);
+  }, []);
 
   const unlock = useCallback(
     async (passphrase: string) => {
@@ -287,6 +330,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshOnboarded,
       nodeConfig,
       refreshNodeConfig,
+      themePreference,
+      setThemePreference,
     }),
     [
       ready,
@@ -311,6 +356,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshOnboarded,
       nodeConfig,
       refreshNodeConfig,
+      themePreference,
+      setThemePreference,
     ],
   );
 

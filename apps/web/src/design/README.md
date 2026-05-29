@@ -46,7 +46,16 @@ Apply to every visual change. These are non-negotiable.
 | `ember-*` | **Reciprocity moments only.** Toast border on an exchange confirmation, "thank you sent" inline feedback, fulfilled-post banner, freshly-reached community milestone leaf in the Dashboard's canopy row (PR #82 — the community's reciprocity moment when a collective threshold is crossed). Never on a button, badge, status indicator, or category label. |
 
 Dark mode: every `*-{50..200}` swaps to `*-{800..950}` and vice
-versa. Verify WCAG AA contrast (4.5:1 body, 3:1 large text).
+versa. Verify WCAG AA contrast (4.5:1 body, 3:1 large text). The
+existing `palette-contrast.test.ts` enforces both directions
+programmatically — extend it when adding a new chip/badge pairing.
+
+The toggle is a three-state preference (`system` / `light` / `dark`,
+default `system`) on the Appearance section of Profile. Resolution
+lives in `lib/theme.ts`; the inline script in `index.html` applies
+the resolved class to `<html>` synchronously before first paint so
+there's no flash of the wrong theme. Tailwind is configured for
+class-based dark mode (`darkMode: "class"`).
 
 ## Type scale
 

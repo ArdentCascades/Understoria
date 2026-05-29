@@ -774,6 +774,13 @@
       "title": "Idioma",
       "intro": "Elige cómo Understoria te habla en este dispositivo. Pronto vendrán más idiomas y traducciones del resto de la aplicación."
     },
+    "appearance": {
+      "title": "Apariencia",
+      "intro": "Claro u oscuro. «Como el sistema» sigue la preferencia de tu dispositivo, útil si has configurado tu sistema para cambiar según la hora del día.",
+      "system": "Como el sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
     "node": {
       "title": "Nodo comunitario",
       "intro": "Opcionalmente refleja tus intercambios finalizados en un nodo comunitario para que aparezcan en el registro de toda la comunidad. El nodo verifica cada firma; nunca guarda tu clave privada.",

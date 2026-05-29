@@ -6,6 +6,14 @@
   html {
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
+    /* Tells the browser to render native form controls + scrollbars
+     * in light. The `.dark` selector below swaps to dark when the
+     * class-based dark mode is active (see lib/theme.ts). */
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {

@@ -394,6 +394,10 @@ export const SETTING_KEYS = {
   boardHintDismissed: "boardHintDismissed",
   balanceHintDismissed: "balanceHintDismissed",
   inviteHintDismissed: "inviteHintDismissed",
+  /** "system" | "light" | "dark". Absent or invalid reads as "system".
+   *  Mirrored to localStorage on every write so the inline script in
+   *  index.html can apply the right theme before first paint. */
+  themePreference: "themePreference",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

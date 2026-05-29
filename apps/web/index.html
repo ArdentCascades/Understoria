@@ -13,6 +13,29 @@
       content="Understoria — a federated, privacy-first mutual aid timebank. One hour of help equals one hour of help."
     />
     <title>Understoria — Mutual Aid Timebank</title>
+    <!--
+      No-FOUC theme application. Runs synchronously during HTML
+      parsing so the dark class is on <html> before the first
+      paint. localStorage is a write-through cache of the Dexie
+      record (the source of truth) — see apps/web/src/lib/theme.ts.
+      Missing / malformed values fall back to "system".
+    -->
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem("understoria.theme");
+          if (pref !== "light" && pref !== "dark") pref = "system";
+          var dark =
+            pref === "dark" ||
+            (pref === "system" &&
+              typeof matchMedia === "function" &&
+              matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {
+          /* private-mode / quota-exceeded — fall back to light */
+        }
+      })();
+    </script>
   </head>
   <body class="bg-moss-50 text-moss-900 dark:bg-moss-950 dark:text-moss-100">
     <div id="root"></div>
