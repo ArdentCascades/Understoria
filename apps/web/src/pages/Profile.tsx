@@ -51,6 +51,7 @@ import {
 import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
 import { LanguageSection } from "@/components/LanguageSection";
+import { AppearanceSection } from "@/components/AppearanceSection";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { DisputesSection } from "@/components/DisputesSection";
 import { ProposalsSection } from "@/components/ProposalsSection";
@@ -281,6 +282,8 @@ export default function ProfilePage() {
       <CommunitySettingsSection />
 
       <LanguageSection />
+
+      <AppearanceSection />
 
       <NodeSection />
 

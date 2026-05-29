@@ -774,6 +774,13 @@
       "title": "Language",
       "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."
     },
+    "appearance": {
+      "title": "Appearance",
+      "intro": "Light or dark. Match system follows your device — useful if you've set your OS to switch by time of day.",
+      "system": "Match system",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "node": {
       "title": "Community node",
       "intro": "Optionally mirror your finalized exchanges to a community node so they show up in the community-wide ledger. The node verifies every signature; it never stores your private key.",
