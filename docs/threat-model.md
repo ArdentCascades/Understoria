@@ -302,6 +302,28 @@ We are not trying to protect against:
     If member federation ships later, chips should be opt-in
     per-member and the pattern-leak analysis above re-applied.
 
+- **Messaging is scoped to coordination context, not a
+  platform-wide social channel.** The "Reach out" button on
+  `PostDetail` (PR #79) is anchored to a specific post — to
+  message someone, you have to interact with a coordination
+  artifact (need, offer) that exists between you. Once a
+  conversation has started, it continues normally via the
+  Messages list; the scoping applies to *initiation*. No
+  Message button on `MemberDetail` (PR #79 added one; PR #80
+  removed it on reflection). No directory search by name. No
+  member-list browsing surface. Rationale: this is a mutual
+  aid platform, not a social network — DMs that aren't
+  anchored to coordination work drift the platform toward
+  generic chat. Phishing/spam mitigation is the immediate
+  threat-model angle: a hostile actor cannot enumerate the
+  member list and DM everyone; they must engage with each
+  member's specific posts. Any future entry point that allows
+  initiating a conversation outside a coordination context
+  (e.g. a "Message any member" search) must justify itself
+  against this principle — propose the addition, weigh the
+  social-drift and spam-vector cost, and only ship with an
+  explicit threat-model entry that supersedes this one.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
