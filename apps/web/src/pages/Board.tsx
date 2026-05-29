@@ -158,6 +158,7 @@ export default function BoardPage() {
         settingKey="boardHintDismissed"
         ariaLabel={t("hints.board.label")}
         message={t("hints.board.message")}
+        technicalDetail={t("hints.board.technical")}
       />
 
       <AttentionSection />
