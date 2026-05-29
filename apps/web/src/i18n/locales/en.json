@@ -83,6 +83,7 @@
     "empty": "No messages yet. Start a conversation from any post or member profile.",
     "sendMessage": "Message",
     "messageButton": "Message",
+    "messageTarget": "Message {{name}}",
     "inputPlaceholder": "Type a message...",
     "send": "Send",
     "sending": "Sending...",

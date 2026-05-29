@@ -37,7 +37,7 @@ import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { WhyTooltip } from "@/components/WhyTooltip";
-import { LeafDivider } from "@/components/visual";
+import { IconMessages, LeafDivider } from "@/components/visual";
 import {
   formatDeadline,
   formatHours,
@@ -108,6 +108,23 @@ export default function PostDetailPage() {
     post.type === "NEED"
       ? poster?.displayName
       : claimer?.displayName;
+
+  // Resolve who the "Reach out" button targets: if the viewer is the
+  // poster, the natural conversation partner is the claimer (if any).
+  // If the viewer is the claimer, it's the poster. For everyone else,
+  // it's the post's author. The button suppresses itself if the target
+  // is the viewer themselves, or if we don't have a local member record
+  // (cross-node author — no usable conversation entry point yet).
+  const reachOutKey: string | null = isPoster
+    ? post.claimedBy ?? null
+    : isClaimer
+      ? post.postedBy
+      : post.postedBy;
+  const reachOutMember = reachOutKey ? memberMap.get(reachOutKey) : null;
+  const showReachOut =
+    !!reachOutKey &&
+    !!reachOutMember &&
+    reachOutKey !== me?.publicKey;
 
   async function run<T>(action: () => Promise<T>): Promise<T | null> {
     try {
@@ -251,6 +268,18 @@ export default function PostDetailPage() {
           )}
         </dl>
       </div>
+
+      {showReachOut && reachOutKey && reachOutMember && (
+        <div className="mb-4">
+          <Link
+            to={`/messages/${encodeURIComponent(reachOutKey)}`}
+            className="btn-secondary inline-flex items-center gap-2"
+          >
+            <IconMessages size={18} />
+            {t("messages.messageTarget", { name: reachOutMember.displayName })}
+          </Link>
+        </div>
+      )}
 
       {error && (
         <p
@@ -587,13 +616,6 @@ function PersonInline({
         {name}
       </Link>{" "}
       <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
-      {" "}
-      <Link
-        to={`/messages/${encodeURIComponent(publicKey)}`}
-        className="text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-      >
-        {t("messages.messageButton")}
-      </Link>
     </span>
   );
 }
