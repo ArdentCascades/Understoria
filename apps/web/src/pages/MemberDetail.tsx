@@ -17,6 +17,7 @@ import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
 import { TrustedByList } from "@/components/TrustedByList";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
+import { IconMessages } from "@/components/visual";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
@@ -159,6 +160,16 @@ export default function MemberDetailPage() {
           {trust && <TrustChip status={trust} count={memberVouchers.size} />}
         </div>
       </header>
+
+      {currentMember && currentMember.publicKey !== member.publicKey && (
+        <Link
+          to={`/messages/${encodeURIComponent(member.publicKey)}`}
+          className="btn-secondary mb-4 inline-flex items-center gap-2"
+        >
+          <IconMessages size={18} />
+          {t("messages.messageTarget", { name: member.displayName })}
+        </Link>
+      )}
 
       <section className="card mb-4">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">

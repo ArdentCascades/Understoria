@@ -83,6 +83,7 @@
     "empty": "Aun no hay mensajes. Inicia una conversacion desde cualquier publicacion o perfil.",
     "sendMessage": "Mensaje",
     "messageButton": "Mensaje",
+    "messageTarget": "Enviar mensaje a {{name}}",
     "inputPlaceholder": "Escribe un mensaje...",
     "send": "Enviar",
     "sending": "Enviando...",
