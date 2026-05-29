@@ -290,13 +290,6 @@ export default function BoardPage() {
           message={
             tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
           }
-          action={{
-            label:
-              tab === "NEED"
-                ? t("board.fab.postNeed")
-                : t("board.fab.postOffer"),
-            to: `/post/new?type=${tab}`,
-          }}
         />
       ) : (
         <ul className="flex flex-col gap-3">
