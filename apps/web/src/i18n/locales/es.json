@@ -1,4 +1,12 @@
 {
+  "availability": {
+    "weekday_days": "Días entre semana",
+    "weekday_evenings": "Tardes entre semana",
+    "weekend_days": "Días de fin de semana",
+    "weekend_evenings": "Tardes de fin de semana",
+    "ask_me": "Pregúntame cuando quieras",
+    "summaryLabel": "Disponibilidad"
+  },
   "toast": {
     "dismiss": "Cerrar",
     "needPosted": "Publicado. Tu necesidad está en el tablero.",
@@ -669,6 +677,9 @@
       "skillsPlaceholder": "cocinar, escuchar, español",
       "availability": "Disponibilidad",
       "availabilityPlaceholder": "p. ej. tardes y fines de semana",
+      "availabilityHeading": "Cuándo sueles tener tiempo",
+      "availabilitySubhead": "Opcional. Elige lo que te quede, o déjalo en blanco — 'Pregúntame cuando quieras' también está bien.",
+      "availabilityNotesLabel": "Notas sobre tu disponibilidad (opcional)",
       "area": "Zona (vecindario, no dirección exacta)",
       "areaPlaceholder": "p. ej. zona norte"
     },

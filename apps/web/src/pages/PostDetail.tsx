@@ -32,6 +32,7 @@ import {
 } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AchievementBadge } from "@/components/AchievementBadge";
@@ -184,6 +185,27 @@ export default function PostDetailPage() {
             {post.description}
           </p>
         )}
+        {post.type === "OFFER" &&
+          poster &&
+          (post.nodeId === nodeId || post.nodeId === "") &&
+          (poster.availabilityChips.length > 0 || poster.availability) && (
+            <section
+              className="mt-3 flex flex-col gap-1"
+              aria-labelledby="post-availability-heading"
+            >
+              <h2 id="post-availability-heading" className="sr-only">
+                {t("profile.about.availabilityHeading")}
+              </h2>
+              {poster.availabilityChips.length > 0 && (
+                <AvailabilityChips chips={poster.availabilityChips} />
+              )}
+              {poster.availability && (
+                <p className="text-sm text-moss-600 dark:text-moss-300">
+                  {poster.availability}
+                </p>
+              )}
+            </section>
+          )}
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <Field label={t("postDetail.fieldEstimatedHours")}>
             {formatHours(post.estimatedHours)}

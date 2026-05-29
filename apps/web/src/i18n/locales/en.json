@@ -1,4 +1,12 @@
 {
+  "availability": {
+    "weekday_days": "Weekday days",
+    "weekday_evenings": "Weekday evenings",
+    "weekend_days": "Weekend days",
+    "weekend_evenings": "Weekend evenings",
+    "ask_me": "Ask me anytime",
+    "summaryLabel": "Availability"
+  },
   "toast": {
     "dismiss": "Dismiss",
     "needPosted": "Posted. Your need is live on the board.",
@@ -669,6 +677,9 @@
       "skillsPlaceholder": "cooking, listening, spanish",
       "availability": "Availability",
       "availabilityPlaceholder": "e.g. Evenings and weekends",
+      "availabilityHeading": "When you usually have time",
+      "availabilitySubhead": "Optional. Pick what fits, or leave empty — 'Ask me anytime' is fine too.",
+      "availabilityNotesLabel": "Notes about your availability (optional)",
       "area": "Area (neighborhood, not address)",
       "areaPlaceholder": "e.g. North neighborhood"
     },

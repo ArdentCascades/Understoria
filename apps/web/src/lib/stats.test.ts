@@ -46,6 +46,7 @@ function member(k: string): Member {
     displayName: k,
     skills: [],
     availability: "",
+    availabilityChips: [],
     seedBalance: 5,
     vouchedBy: [],
     createdAt: 0,

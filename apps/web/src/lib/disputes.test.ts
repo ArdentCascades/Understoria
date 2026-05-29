@@ -20,6 +20,7 @@ function buildMember(overrides: Partial<Member>): Member {
     displayName: "Member",
     skills: [],
     availability: "",
+    availabilityChips: [],
     locationZone: "",
     seedBalance: 5,
     vouchedBy: [],

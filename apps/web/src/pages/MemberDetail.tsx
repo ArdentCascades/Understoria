@@ -16,6 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 import { TrustChip } from "@/components/TrustChip";
 import { TrustedByList } from "@/components/TrustedByList";
+import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
@@ -178,7 +179,15 @@ export default function MemberDetailPage() {
             <dt className="text-xs uppercase tracking-wide text-moss-500">
               {t("member.availability")}
             </dt>
-            <dd>{member.availability || t("member.none")}</dd>
+            <dd>
+              {member.availabilityChips.length > 0 && (
+                <div className="mb-1">
+                  <AvailabilityChips chips={member.availabilityChips} />
+                </div>
+              )}
+              {member.availability ||
+                (member.availabilityChips.length === 0 && t("member.none"))}
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-moss-500">

@@ -21,6 +21,7 @@
 import Dexie, { type Table } from "dexie";
 import type {
   Achievement,
+  AvailabilityChip,
   DirectMessage,
   Exchange,
   Member,
@@ -350,6 +351,16 @@ export class UnderstoriaDB extends Dexie {
     this.version(15).stores({
       taskComments:
         "id, projectId, taskId, authorKey, createdAt, [projectId+taskId+createdAt]",
+    });
+    // Version 16 — optional availability chips on Member.
+    // Backfills existing members with an empty array so the field is
+    // never undefined at runtime. No new index — chips aren't queried.
+    this.version(16).stores({}).upgrade(async (tx) => {
+      const members = tx.table<Member, string>("members");
+      await members.toCollection().modify((row) => {
+        const r = row as Member & { availabilityChips?: AvailabilityChip[] };
+        if (r.availabilityChips === undefined) r.availabilityChips = [];
+      });
     });
   }
 }

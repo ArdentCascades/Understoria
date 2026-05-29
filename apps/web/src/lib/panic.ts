@@ -61,6 +61,7 @@ export async function softPurge(): Promise<PurgeResult> {
         displayName: `Member ${anonLabel(i++)}`,
         skills: [],
         availability: "",
+        availabilityChips: [],
         locationZone: "",
         vouchedBy: [],
       });

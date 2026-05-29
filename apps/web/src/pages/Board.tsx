@@ -68,6 +68,16 @@ export default function BoardPage() {
     return map;
   }, [members]);
 
+  // Map member key → availabilityChips so each OFFER card can surface
+  // its poster's coarse availability without per-row lookups. Empty
+  // chip lists render nothing; cross-node posts skip this entirely
+  // (chips don't federate).
+  const availabilityByKey = useMemo(() => {
+    const map = new Map<string, typeof members[number]["availabilityChips"]>();
+    for (const m of members) map.set(m.publicKey, m.availabilityChips);
+    return map;
+  }, [members]);
+
   // Precompute trust state for every member so each PostCard can
   // surface its poster's trust state without recomputing per row.
   // Cheap (one Set per member) but worth doing once at the list
@@ -297,6 +307,7 @@ export default function BoardPage() {
                 isCurrentMember={p.postedBy === currentMember?.publicKey}
                 posterTrust={trustByKey.get(p.postedBy)}
                 isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
+                posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
               />
             </li>
           ))}

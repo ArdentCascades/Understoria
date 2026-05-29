@@ -24,7 +24,14 @@ export function profileIsBare(member: Member | null): boolean {
   if (!member) return false;
   const noZone = !member.locationZone || member.locationZone.trim() === "";
   const noSkills = !member.skills || member.skills.length === 0;
-  const noAvail = !member.availability || member.availability.trim() === "";
+  const noAvailText =
+    !member.availability || member.availability.trim() === "";
+  const noAvailChips =
+    !member.availabilityChips || member.availabilityChips.length === 0;
+  // Setting either the free-text notes OR any chip satisfies the
+  // "tell us when you're around" piece — chips alone are a complete
+  // answer, including "Ask me anytime".
+  const noAvail = noAvailText && noAvailChips;
   return noZone && noSkills && noAvail;
 }
 

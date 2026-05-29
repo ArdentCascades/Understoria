@@ -22,6 +22,7 @@ function member(publicKey: string, displayName = publicKey.toUpperCase()): Membe
     displayName,
     skills: [],
     availability: "",
+    availabilityChips: [],
     seedBalance: 5,
     vouchedBy: [],
     createdAt: 0,

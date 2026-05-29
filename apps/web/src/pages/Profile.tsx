@@ -56,7 +56,13 @@ import { DisputesSection } from "@/components/DisputesSection";
 import { ProposalsSection } from "@/components/ProposalsSection";
 import { LearnSection } from "@/components/LearnSection";
 import { NodeSection } from "@/components/NodeSection";
-import type { AchievementType, FlagReason, Member } from "@/types";
+import type {
+  AchievementType,
+  AvailabilityChip,
+  FlagReason,
+  Member,
+} from "@/types";
+import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 
 function flagReasonKey(reason: FlagReason | undefined): string {
   switch (reason) {
@@ -619,6 +625,9 @@ function ProfileEditor({ member }: { member: Member }) {
   const [name, setName] = useState(member.displayName);
   const [skills, setSkills] = useState(member.skills.join(", "));
   const [availability, setAvailability] = useState(member.availability);
+  const [availabilityChips, setAvailabilityChips] = useState<
+    AvailabilityChip[]
+  >(member.availabilityChips);
   const [zone, setZone] = useState(member.locationZone);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -634,6 +643,7 @@ function ProfileEditor({ member }: { member: Member }) {
           .map((s) => s.trim())
           .filter(Boolean),
         availability: availability.trim(),
+        availabilityChips,
         locationZone: zone.trim(),
       });
       setSavedAt(Date.now());
@@ -666,15 +676,31 @@ function ProfileEditor({ member }: { member: Member }) {
             onChange={(e) => setSkills(e.target.value)}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{t("profile.about.availability")}</span>
-          <input
-            className="input"
-            placeholder={t("profile.about.availabilityPlaceholder")}
-            value={availability}
-            onChange={(e) => setAvailability(e.target.value)}
+        <div className="flex flex-col gap-2 text-sm">
+          <div>
+            <div className="text-base font-semibold">
+              {t("profile.about.availabilityHeading")}
+            </div>
+            <div className="text-xs text-moss-600 dark:text-moss-300">
+              {t("profile.about.availabilitySubhead")}
+            </div>
+          </div>
+          <AvailabilityChipPicker
+            value={availabilityChips}
+            onChange={setAvailabilityChips}
           />
-        </label>
+          <label className="flex flex-col gap-1">
+            <span className="font-medium">
+              {t("profile.about.availabilityNotesLabel")}
+            </span>
+            <input
+              className="input"
+              placeholder={t("profile.about.availabilityPlaceholder")}
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+            />
+          </label>
+        </div>
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">{t("profile.about.area")}</span>
           <input

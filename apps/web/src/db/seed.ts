@@ -72,6 +72,7 @@ export async function createMember(
     displayName: partial.displayName,
     skills: partial.skills ?? [],
     availability: partial.availability ?? "",
+    availabilityChips: partial.availabilityChips ?? [],
     seedBalance: partial.seedBalance ?? DEFAULT_SEED_BALANCE,
     vouchedBy: partial.vouchedBy ?? [],
     createdAt: partial.createdAt ?? Date.now(),

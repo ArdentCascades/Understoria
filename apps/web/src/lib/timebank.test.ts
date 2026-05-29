@@ -30,6 +30,7 @@ function member(publicKey: string, seedBalance = 5): Member {
     displayName: publicKey,
     skills: [],
     availability: "",
+    availabilityChips: [],
     seedBalance,
     vouchedBy: [],
     createdAt: 0,
