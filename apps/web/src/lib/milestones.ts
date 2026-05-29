@@ -72,3 +72,22 @@ export function reachedMilestones(
 ): Milestone[] {
   return MILESTONES.filter((m) => m.type === type && value >= m.threshold);
 }
+
+export interface MilestoneState {
+  milestone: Milestone;
+  reached: boolean;
+}
+
+/**
+ * Returns every milestone for a given type, in ascending threshold
+ * order, each tagged with whether the community has reached it.
+ * Used by CanopyMilestones to render the leaf row.
+ */
+export function milestonesForType(
+  type: Milestone["type"],
+  value: number,
+): MilestoneState[] {
+  return MILESTONES.filter((m) => m.type === type)
+    .sort((a, b) => a.threshold - b.threshold)
+    .map((milestone) => ({ milestone, reached: value >= milestone.threshold }));
+}

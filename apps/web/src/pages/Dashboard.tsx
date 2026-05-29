@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats } from "@/lib/stats";
 import { computeFlowStats } from "@/lib/flow";
-import { milestoneProgress } from "@/lib/milestones";
 import { CATEGORY_META } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
@@ -32,6 +31,7 @@ import { ReciprocityPulse } from "@/components/ReciprocityPulse";
 import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { LeafDivider, Sprig } from "@/components/visual";
+import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -45,10 +45,6 @@ export default function DashboardPage() {
     () => computeFlowStats(exchanges, members),
     [exchanges, members],
   );
-
-  const hoursProgress = milestoneProgress("hours", stats.totalHoursExchanged);
-  const exchangeProgress = milestoneProgress("exchanges", stats.totalExchanges);
-  const memberProgress = milestoneProgress("members", members.length);
 
   const achievementsThisMonth = useMemo(() => {
     const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
@@ -165,38 +161,12 @@ export default function DashboardPage() {
         <LeafDivider variant="short" />
       </div>
 
-      <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          {t("dashboard.milestones.title")}
-        </h2>
-        <MilestoneBar
-          icon={"\u{23F3}"}
-          label={t("dashboard.milestones.hours")}
-          value={stats.totalHoursExchanged}
-          valueDisplay={formatHours(stats.totalHoursExchanged)}
-          current={hoursProgress.current}
-          next={hoursProgress.next}
-          progress={hoursProgress.progress}
-        />
-        <MilestoneBar
-          icon={"\u{1F91D}"}
-          label={t("dashboard.milestones.exchanges")}
-          value={stats.totalExchanges}
-          valueDisplay={`${stats.totalExchanges}`}
-          current={exchangeProgress.current}
-          next={exchangeProgress.next}
-          progress={exchangeProgress.progress}
-        />
-        <MilestoneBar
-          icon={"\u{1F331}"}
-          label={t("dashboard.milestones.members")}
-          value={members.length}
-          valueDisplay={`${members.length}`}
-          current={memberProgress.current}
-          next={memberProgress.next}
-          progress={memberProgress.progress}
-        />
-      </section>
+      <CanopyMilestones
+        totalHours={stats.totalHoursExchanged}
+        totalExchanges={stats.totalExchanges}
+        totalMembers={members.length}
+        newlyReachedLabels={new Set(newlyReached.map((m) => m.label))}
+      />
 
       <div className="my-2">
         <LeafDivider variant="short" />
@@ -310,60 +280,6 @@ function StatCard({
       </div>
       <div className="mt-1 text-3xl font-bold">{value}</div>
       <div className="text-xs text-moss-600 dark:text-moss-300">{sublabel}</div>
-    </div>
-  );
-}
-
-function MilestoneBar({
-  icon,
-  label,
-  valueDisplay,
-  current,
-  next,
-  progress,
-}: {
-  icon: string;
-  label: string;
-  value: number;
-  valueDisplay: string;
-  current: Milestone;
-  next: Milestone | null;
-  progress: number;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="mb-3 last:mb-0">
-      <div className="flex items-center justify-between text-sm">
-        <span>
-          <span aria-hidden="true" className="mr-1">
-            {icon}
-          </span>
-          {label}
-        </span>
-        <span className="text-xs text-moss-500">
-          {next
-            ? t("dashboard.milestones.valueOf", {
-                value: valueDisplay,
-                next: next.threshold,
-              })
-            : `${valueDisplay}${t("dashboard.milestones.topReached")}`}
-        </span>
-      </div>
-      <div
-        className="mt-1 h-2 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(progress * 100)}
-      >
-        <div
-          className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
-          style={{ width: `${Math.round(progress * 100)}%` }}
-        />
-      </div>
-      <div className="mt-1 text-xs text-moss-500">
-        {t("dashboard.milestones.lastReached", { label: current.label })}
-      </div>
     </div>
   );
 }
