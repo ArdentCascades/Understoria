@@ -10,6 +10,87 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Community dashboard visual upgrade (PR #82).** Two-batch
+  warming of the dashboard surface, both shipped together.
+  - **Botanical visual touches.** `Sprig` ornament flanking the
+    page title (mirrors the LockScreen lockup), `LeafDivider`s
+    (short variant) between major sections so the wall of cards
+    reads with rhythm, per-category bar color on the category-
+    breakdown bars (new `barColorClass` field on `CategoryMeta`,
+    all shades within canopy/moss/bark family — no ranking
+    intent, just visual variation), faint `Sprig` in the top-
+    right corner of the "Total hours" hero card (`opacity-10`,
+    `pointer-events-none`, `data-decorative="true"` so the
+    existing `prefers-contrast: more` rule suppresses it).
+  - **Growing canopy milestone visualization.** Replaces the
+    three `MilestoneBar` rows with a horizontal row of stylized
+    leaves per milestone type (hours / exchanges / members).
+    Filled leaves (`canopy-700`) = milestones reached. Outlined
+    leaves (`moss-300`) = milestones yet to grow. The most-
+    recently-reached leaf gets a one-time `ember-500` fade-in —
+    the one place ember belongs on this surface, marking the
+    community's reciprocity moment. Critical framing: it's the
+    community's growing canopy, not anyone's individual
+    contribution; no "next milestone X" text, no percentage,
+    no member attribution, no count-up animation. New
+    `CanopyMilestones` component + `milestonesForType` helper.
+    Leaves are screen-reader accessible (`role="img"` + the
+    milestone label as `aria-label`) — distinct from purely
+    decorative SVGs (no `data-decorative`).
+  - Design ethos held: no ember on regular dashboard stats
+    (reserved for reciprocity moments); no growth chart; no
+    leaderboards; no animated counters. The single ember use is
+    on the freshly-reached leaf and matches the existing
+    `design/README.md` rule.
+  - 492/492 tests pass; no schema change.
+
+- **Plain "Got it" tips with optional "Learn more" disclosure
+  (PR #81).** Rewrites the 5 dismissible tip surfaces (3
+  `ContextualHint`s + `FirstActionNudge` + `ProfileNudge`) into
+  plain primary copy with a collapsed "Learn more" block
+  underneath that reveals technical depth on tap. Pattern: native
+  HTML `<details>`/`<summary>` styled as a small text-chevron
+  disclosure (▾ collapsed, ▴ open via CSS `::after`) — no React
+  state, no JS event handlers, keyboard accessible (space/enter
+  to toggle), screen readers announce expanded/collapsed
+  automatically. Plain stays as primary; technical detail goes
+  *deeper* than the original copy (specific algorithm names —
+  Ed25519 — file references like `lib/vouch.ts`, exact
+  thresholds like `MINIMUM_VOUCHES_FOR_TRUST = 2`), available to
+  curious members one tap away. The original jargon ("cryptographic
+  link," "redeems," "seed credits") that confused first-touch
+  users is out of the primary message and tucked into the
+  disclosure.
+  - `ContextualHint.tsx` gets a new optional `technicalDetail`
+    prop; renders the disclosure block when provided.
+  - `FirstActionNudge` + `ProfileNudge` get the same disclosure
+    block added inline (kept standalone to avoid refactor churn).
+  - `index.css` suppresses the browser-default disclosure marker
+    (varies across browsers) and adds a clean text chevron via
+    `::after` that flips on `[open]`.
+  - Plain copy rewrites for `hints.board.message`,
+    `hints.balance.message`, `hints.invite.message`. 6 new
+    `.technical` keys plus 1 new `common.learnMore` for the
+    disclosure label. en + es parity preserved.
+
+- **Messaging scope: principle + Member-detail entry removed
+  (PR #80).** Scopes DM initiation to coordination context
+  rather than free-form member-to-member messaging from profile
+  browsing. The "Reach out" button on `PostDetail` (shipped in
+  #79) stays — it's anchored to a specific post. The Message
+  button on `MemberDetail` (also shipped in #79) is removed on
+  reflection: it implied "you can DM anyone whose profile you've
+  reached," which would let a hostile actor enumerate the member
+  list and DM everyone. Already-running conversations continue
+  normally via the Messages list; the scoping applies to
+  *initiation*. New `threat-model §7` entry records the
+  principle as load-bearing — any future entry point that
+  initiates conversations outside a coordination context must
+  justify itself against this principle and supersede the entry
+  with its own threat-model write-up. `messages.messageTarget`
+  i18n key kept in place (still used by PostDetail's Reach-out
+  button).
+
 - **Optional availability chips on member profile + offers (PR #78).**
   Augments the existing `member.availability` free-text field with
   5 optional chips — Weekday days, Weekday evenings, Weekend days,
