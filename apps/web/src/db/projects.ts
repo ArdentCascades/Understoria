@@ -599,8 +599,8 @@ export async function confirmProjectTaskCompletion(
     throw new Error(
       "An organizer who completes a task themselves needs a different project member to confirm.",
     );
-  if (project.organizerKey !== organizerKey)
-    throw new Error("Only the project organizer can confirm completions.");
+  if (!isOrganizer(project, organizerKey))
+    throw new Error("Only project organizers can confirm completions.");
 
   const helperKey = task.completedBy;
   const helpedKey = organizerKey;

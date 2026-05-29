@@ -242,7 +242,7 @@ describe("task confirmation transfers credit and surfaces milestones", () => {
     expect(balanceFor(org, exchanges)).toBe(2); // 5 seed - 3
   });
 
-  it("refuses confirmation by anyone other than the organizer", async () => {
+  it("refuses confirmation by a non-organizer (not primary, not co-organizer)", async () => {
     const org = await createMember({ displayName: "Org" }, NODE);
     const helper = await createMember({ displayName: "Helper" }, NODE);
     const other = await createMember({ displayName: "Other" }, NODE);
@@ -262,6 +262,43 @@ describe("task confirmation transfers credit and surfaces milestones", () => {
     await expect(
       confirmProjectTaskCompletion(task.id, other.publicKey, NODE),
     ).rejects.toThrow();
+  });
+
+  it("allows confirmation by a co-organizer (the confirmer's balance is debited)", async () => {
+    // Co-organizers can confirm task completions just like the primary
+    // organizer. The signed Exchange records the confirmer as the
+    // helped party, so the confirming co-organizer's balance is the
+    // one debited — not the primary's. This distributes the
+    // organizer load (which is the point of co-organizers).
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org);
+    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Carry compost",
+      description: "",
+      category: "transport",
+      estimatedHours: 2,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    await markProjectTaskComplete(task.id, helper.publicKey);
+    const result = await confirmProjectTaskCompletion(
+      task.id,
+      coOrg.publicKey,
+      NODE,
+    );
+    expect(result.exchange).not.toBeNull();
+    const exchanges = await db.exchanges.toArray();
+    // Confirmer (co-organizer) was the helped party — their balance
+    // goes down, not the primary's.
+    expect(balanceFor(helper, exchanges)).toBe(7); // 5 seed + 2
+    expect(balanceFor(coOrg, exchanges)).toBe(3); // 5 seed - 2
+    expect(balanceFor(org, exchanges)).toBe(5); // unchanged — seed only
   });
 
   it("refuses self-confirmation when the organizer is also the completer", async () => {
