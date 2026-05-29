@@ -148,6 +148,7 @@ export default function ProfilePage() {
         settingKey="balanceHintDismissed"
         ariaLabel={t("hints.balance.label")}
         message={t("hints.balance.message")}
+        technicalDetail={t("hints.balance.technical")}
       />
 
       <ProfileEditor member={currentMember} />
@@ -156,6 +157,7 @@ export default function ProfilePage() {
         settingKey="inviteHintDismissed"
         ariaLabel={t("hints.invite.label")}
         message={t("hints.invite.message")}
+        technicalDetail={t("hints.invite.technical")}
       />
       <InvitesSection
         member={currentMember}

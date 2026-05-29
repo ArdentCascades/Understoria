@@ -33,7 +33,8 @@
     "copyFailed": "Couldn't access the clipboard — select the link above and copy manually.",
     "memberFallback": "a member",
     "anyMember": "Member",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "learnMore": "Learn more"
   },
   "why": {
     "trigger": "(why?)",
@@ -49,25 +50,30 @@
     "label": "Profile completion",
     "message": "Members can find you for in-person help if you add a neighborhood or a skill or two. Optional, but it helps.",
     "cta": "Add some details",
-    "dismiss": "Not now"
+    "dismiss": "Not now",
+    "technical": "Profile fields visible on your posts and member detail: skills (free-text comma-separated tokens, no taxonomy), zone (coarsened to neighborhood — never street address — so geographic context doesn't leak past what you explicitly shared), availability free-text notes, availability chips (coarse buckets — weekday days, weekday evenings, weekend days, weekend evenings, ask me anytime). The nudge dismisses when any of these is filled, or on explicit dismissal. Dismissal is per-device, not federated, and clears on hard purge."
   },
   "firstActionNudge": {
     "label": "Getting started",
     "message": "Two ways in: tap any post that catches your eye to see how exchange works, or share something you need or can offer. No pressure to post first — lurking is welcome too.",
-    "dismiss": "Got it"
+    "dismiss": "Got it",
+    "technical": "The nudge appears on the Board until you take a first action — claiming a post, posting your own need or offer, or explicitly dismissing it. Once any of these happens, it stays dismissed per-device. A hard reset (Profile → Emergency → Hard purge) or a fresh install brings the nudge back; the state lives in local IndexedDB, not on the community node."
   },
   "hints": {
     "board": {
       "label": "Board orientation",
-      "message": "The Board has three tabs: Needs (what people are asking for), Offers (what people can share), and Projects (collective goals). Tap any post to see details or claim it. Claimed posts are hidden by default so you see what still needs help."
+      "message": "Three tabs at the top: Needs (what people are asking for), Offers (what people can share), and Projects (group goals). Tap a post to see more or to claim it. The Board hides posts someone's already claimed, so you see what still needs help.",
+      "technical": "Each tab filters the same post stream by intent. Tapping a post opens its detail view where you can claim it, reach out to the poster, or — if you're the claimant — confirm completion to release credits. Claimed posts are filtered from the default Board view to reduce noise; the filter resets each load. Posts from peer communities (federated via the community node) show a small chip and follow the same lifecycle, but credits don't flow between nodes — each community's ledger is sovereign."
     },
     "balance": {
       "label": "Understanding your balance",
-      "message": "Your balance is time credits. Every new member starts with seed credits so asking for help is never gated. One hour of help always equals one hour of credit, regardless of the type of work. Give and receive at your own pace."
+      "message": "Your balance is hours of help. Everyone starts with 5 so you can ask for help right away, even before you've given any. One hour of any kind of help equals one hour. Give and receive at your own pace.",
+      "technical": "Balances are time credits, denominated in hours, kept in your community's local ledger. New members receive a 5-hour seed grant at account creation so participation isn't credit-gated — the 'asking first is fine' principle. Credits flow only on a fully-confirmed exchange: both parties sign the completed-exchange record (Ed25519) and the local node updates both balances atomically. One hour equals one hour regardless of category — childcare, tech support, carpentry, emotional labor all settle at par. Balances do not federate across nodes by design; cross-community exchanges still happen but the credit settles in the helper's home node."
     },
     "invite": {
       "label": "Growing the community",
-      "message": "Communities grow through trust. Each invite creates a cryptographic link — when someone redeems it, they join with your vouch. A member needs two vouches to reach trusted status. Share invites with people you know and trust."
+      "message": "Communities grow through trust. When you invite someone, you're vouching for them — your name backs their join. New members need two vouches before they appear as 'trusted' on the Board. Share invites with people you know.",
+      "technical": "Each invite is a single-use signed token (Ed25519 signature over the invite payload, base64url-encoded) you share out-of-band — Signal, in person, on paper. When the recipient redeems the token, a vouch from you to them is automatically created. Trust thresholds are binary: a member becomes 'trusted' on reaching 2 distinct vouchers (the threshold is a build-time constant — `MINIMUM_VOUCHES_FOR_TRUST` in `lib/vouch.ts`). Vouches are public, signed, immutable — you can issue a manual vouch later but you cannot retract one. If you regret a vouch, the next step is a community conversation, not a code action."
     }
   },
   "nav": {

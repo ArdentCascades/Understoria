@@ -102,4 +102,12 @@
            focus:outline-none focus:ring-2 focus:ring-canopy-600/30
            dark:border-moss-700 dark:bg-moss-900 dark:text-moss-100;
   }
+
+  /* Disclosure indicator for ContextualHint and the standalone nudges.
+   * Suppresses the browser-default marker (varies across browsers) and
+   * adds a clean text chevron that flips on open. */
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::after { content: " \25BE"; }   /* ▾ */
+  details[open] > summary::after { content: " \25B4"; }  /* ▴ */
 }

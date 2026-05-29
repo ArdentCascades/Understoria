@@ -33,7 +33,8 @@
     "copyFailed": "No se pudo acceder al portapapeles — selecciona el enlace de arriba y cópialo manualmente.",
     "memberFallback": "alguien de la comunidad",
     "anyMember": "Alguien",
-    "gotIt": "Entendido"
+    "gotIt": "Entendido",
+    "learnMore": "Leer más"
   },
   "why": {
     "trigger": "(por que?)",
@@ -49,25 +50,30 @@
     "label": "Completar perfil",
     "message": "Otras personas pueden encontrarte para ayudar en persona si agregas un vecindario o alguna habilidad. Opcional, pero ayuda.",
     "cta": "Agregar detalles",
-    "dismiss": "Ahora no"
+    "dismiss": "Ahora no",
+    "technical": "Campos de perfil visibles en tus publicaciones y detalle de persona: habilidades (texto libre separado por comas, sin taxonomía), zona (limitada a vecindario — nunca dirección exacta — para que el contexto geográfico no se filtre más allá de lo que compartiste explícitamente), notas libres de disponibilidad, chips de disponibilidad (bloques amplios — días entre semana, tardes entre semana, días de fin de semana, tardes de fin de semana, pregúntame cuando quieras). El recordatorio se descarta cuando llenas cualquiera de estos, o al descartarlo explícitamente. El descarte es por dispositivo, no se federa, y se borra con un reinicio completo."
   },
   "firstActionNudge": {
     "label": "Cómo empezar",
     "message": "Dos caminos: toca cualquier publicación que te llame la atención para ver cómo funciona el intercambio, o comparte algo que necesitas o puedes ofrecer. Sin presión por publicar primero — observar también está bien.",
-    "dismiss": "Entendido"
+    "dismiss": "Entendido",
+    "technical": "El recordatorio aparece en el tablero hasta que tomas una primera acción — tomar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Una vez que cualquiera de estas pasa, se queda descartado por dispositivo. Un reinicio completo (Perfil → Emergencia → Borrado total) o una instalación nueva trae el recordatorio de vuelta; el estado vive en IndexedDB local, no en el nodo comunitario."
   },
   "hints": {
     "board": {
       "label": "Orientacion del tablero",
-      "message": "El tablero tiene tres pestanas: Necesidades (lo que la gente pide), Ofertas (lo que la gente puede compartir) y Proyectos (metas colectivas). Toca cualquier publicacion para ver detalles o tomarla. Las publicaciones tomadas se ocultan por defecto para que veas lo que aun necesita ayuda."
+      "message": "Tres pestañas arriba: Necesidades (lo que la gente pide), Ofertas (lo que la gente puede compartir) y Proyectos (metas grupales). Toca cualquier publicación para ver más o para tomarla. El tablero oculta las publicaciones que alguien ya tomó, así ves lo que aún necesita ayuda.",
+      "technical": "Cada pestaña filtra el mismo flujo de publicaciones según su intención. Tocar una publicación abre su vista detallada donde puedes tomarla, contactar a quien la publicó o — si eres quien la tomó — confirmar la finalización para liberar créditos. Las publicaciones ya tomadas se filtran de la vista por defecto para reducir ruido; el filtro se reinicia con cada carga. Las publicaciones de comunidades vecinas (federadas vía el nodo comunitario) muestran una pequeña etiqueta y siguen el mismo ciclo, pero los créditos no fluyen entre nodos — el registro de cada comunidad es soberano."
     },
     "balance": {
       "label": "Entendiendo tu saldo",
-      "message": "Tu saldo son creditos de tiempo. Cada nueva persona empieza con creditos semilla para que pedir ayuda nunca tenga barreras. Una hora de ayuda siempre equivale a una hora de credito, sin importar el tipo de trabajo. Da y recibe a tu propio ritmo."
+      "message": "Tu saldo son horas de ayuda. Cada persona empieza con 5, así puedes pedir ayuda desde el primer día, incluso antes de haber dado alguna. Una hora de cualquier tipo de ayuda equivale a una hora. Da y recibe a tu propio ritmo.",
+      "technical": "Los saldos son créditos de tiempo, expresados en horas, guardados en el registro local de tu comunidad. Las personas nuevas reciben una concesión semilla de 5 horas al crear su cuenta para que la participación no esté condicionada por créditos — el principio de 'pedir primero está bien'. Los créditos fluyen solo cuando un intercambio se confirma completamente: ambas partes firman el registro del intercambio (Ed25519) y el nodo local actualiza ambos saldos de forma atómica. Una hora equivale a una hora sin importar la categoría — cuidado infantil, soporte técnico, carpintería, trabajo emocional, todo se liquida a la par. Los saldos no se federan entre nodos por diseño; los intercambios entre comunidades aún ocurren, pero el crédito se liquida en el nodo de origen de quien ayudó."
     },
     "invite": {
       "label": "Hacer crecer la comunidad",
-      "message": "Las comunidades crecen a traves de la confianza. Cada invitacion crea un enlace criptografico — cuando alguien la usa, se une con tu aval. Una persona necesita dos avales para alcanzar el estatus de confianza. Comparte invitaciones con personas que conoces y en quienes confias."
+      "message": "Las comunidades crecen a través de la confianza. Cuando invitas a alguien, estás avalándolo — tu nombre respalda su llegada. Las personas nuevas necesitan dos avales antes de aparecer como 'de confianza' en el tablero. Comparte invitaciones con personas que conoces.",
+      "technical": "Cada invitación es un token firmado de un solo uso (firma Ed25519 sobre la carga útil de la invitación, codificado en base64url) que compartes fuera de banda — por Signal, en persona, en papel. Cuando alguien usa el token, se crea automáticamente un aval tuyo hacia esa persona. Los umbrales de confianza son binarios: una persona se vuelve 'de confianza' al alcanzar 2 avales distintos (el umbral es una constante de compilación — `MINIMUM_VOUCHES_FOR_TRUST` en `lib/vouch.ts`). Los avales son públicos, firmados, inmutables — puedes emitir un aval manual después, pero no puedes retirarlo. Si te arrepientes de un aval, el siguiente paso es una conversación comunitaria, no una acción de código."
     }
   },
   "nav": {

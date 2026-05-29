@@ -65,6 +65,14 @@ export function FirstActionNudge() {
       <p className="text-canopy-900 dark:text-canopy-100">
         {t("firstActionNudge.message")}
       </p>
+      <details className="mt-2">
+        <summary className="cursor-pointer text-xs font-medium text-canopy-700 marker:hidden hover:underline dark:text-canopy-300">
+          {t("common.learnMore")}
+        </summary>
+        <p className="mt-2 whitespace-pre-wrap text-xs text-moss-600 dark:text-moss-300">
+          {t("firstActionNudge.technical")}
+        </p>
+      </details>
       <div className="flex justify-end">
         <button
           type="button"
