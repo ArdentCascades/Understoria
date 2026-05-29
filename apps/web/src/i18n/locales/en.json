@@ -97,7 +97,19 @@
     "lockedError": "Unlock your session to send messages.",
     "sendError": "Message could not be sent. Try again.",
     "conversationWith": "{{name}}",
-    "noReadReceipts": "Messages are private. No read receipts."
+    "noReadReceipts": "Messages are private. No read receipts.",
+    "search": {
+      "placeholder": "Search your messages",
+      "inConversation": "Search this conversation",
+      "locked": "Unlock to search",
+      "noMatches": "No matches in your messages.",
+      "noMatchesShort": "No matches",
+      "matchCount_one": "{{count}} match",
+      "matchCount_other": "{{count}} matches",
+      "matchPosition": "{{current}} of {{total}}",
+      "previous": "Previous match",
+      "next": "Next match"
+    }
   },
   "projects": {
     "tab": "Projects",

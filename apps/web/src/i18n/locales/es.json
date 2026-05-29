@@ -97,7 +97,19 @@
     "lockedError": "Desbloquea tu sesion para enviar mensajes.",
     "sendError": "No se pudo enviar el mensaje. Intenta de nuevo.",
     "conversationWith": "{{name}}",
-    "noReadReceipts": "Los mensajes son privados. Sin confirmacion de lectura."
+    "noReadReceipts": "Los mensajes son privados. Sin confirmacion de lectura.",
+    "search": {
+      "placeholder": "Busca en tus mensajes",
+      "inConversation": "Busca en esta conversación",
+      "locked": "Desbloquea para buscar",
+      "noMatches": "Sin coincidencias en tus mensajes.",
+      "noMatchesShort": "Sin coincidencias",
+      "matchCount_one": "{{count}} coincidencia",
+      "matchCount_other": "{{count}} coincidencias",
+      "matchPosition": "{{current}} de {{total}}",
+      "previous": "Coincidencia anterior",
+      "next": "Coincidencia siguiente"
+    }
   },
   "projects": {
     "tab": "Proyectos",

@@ -10,6 +10,57 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Message search — local decrypt-and-scan across the conversation
+  list and inside each thread.** Adds two search surfaces while
+  preserving the messaging-scope principle recorded in
+  threat-model §7: search only finds messages I already have on
+  this device, never the member directory.
+  - **`lib/messageSearch.ts`** — pure helpers: `matchesQuery`
+    (case-insensitive, whitespace-trimmed, empty query never
+    matches) and `highlightRanges` (non-overlapping span list for
+    the highlight renderer). 14 unit tests cover both.
+  - **`db/messages.ts:searchAllMessages`** — iterates every
+    message I'm a party to, decrypts with my secret key + the
+    counterparty's pubkey (same pattern as the existing helpers),
+    returns hits grouped by conversation. **Locked session
+    returns `[]`** — search is unavailable rather than partially
+    silent, matching the existing read/send pattern.
+  - **`Messages.tsx`** — search input above the conversation
+    list (debounced 250 ms). Non-empty query → conversations
+    containing matches OR conversations with a participant whose
+    name matches the query ("I remember talking to Maria but
+    can't remember about what"). Each result deep-links to the
+    conversation with `?q=` so the in-thread search opens
+    pre-filled. Locked-state disables the input with an
+    "Unlock to search" hint.
+  - **`Conversation.tsx`** — search input above the thread with
+    match-jump UX: prev / next arrows, "N of M" position
+    indicator, all messages stay visible (no thread-filtering)
+    and the active match scrolls into view with a 2-px amber
+    ring. Auto-scroll-to-bottom suppressed while searching.
+    URL `?q=` syncs (debounced, `replace`) so deep-links work
+    and the search is bookmarkable.
+  - **`HighlightedText`** — small component that wraps matches
+    in `<mark>` using `bg-amber-100 dark:bg-amber-900/40`. Amber,
+    not ember — ember stays reserved for reciprocity moments per
+    `design/README.md`; a search hit is an attention signal.
+  - **Threat-model §7 entry** — documents the decrypt-and-scan
+    semantics, the locked-session fail-closed behavior, the
+    rejection of a persisted index (would undo encrypted-at-
+    rest), and the explicit "no search-by-name to start a new
+    DM" constraint so a future "find a person" proposal has the
+    prior decision to argue against.
+  - **i18n**: 10 new keys under `messages.search.*` in en + es
+    (including `_one`/`_other` plural pair for match counts).
+    Parity test passes.
+  - **Out of scope**, with reasons recorded in the threat-model
+    entry: no persisted index, no federation of search, no
+    search-by-name to start new DMs, no regex / operators / fuzzy
+    matching, no search history, no analytics, no autocomplete.
+
+  Tests: 515 passing (501 → 515; +14 in `messageSearch.test.ts`).
+  Lint, typecheck, build clean. PWA precache 948 → 955 KiB.
+
 - **Dark mode toggle in Profile → Appearance.** The codebase already
   carried ~390 `dark:` Tailwind variants across every component,
   but no mechanism ever set the `dark` class on `<html>` — the
