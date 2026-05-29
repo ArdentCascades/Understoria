@@ -31,6 +31,7 @@ import { BreadthBar } from "@/components/BreadthBar";
 import { ReciprocityPulse } from "@/components/ReciprocityPulse";
 import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { LeafDivider, Sprig } from "@/components/visual";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -79,7 +80,11 @@ export default function DashboardPage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <h1 className="page-title">{t("dashboard.title")}</h1>
+        <div className="flex items-center gap-2 text-canopy-700 dark:text-canopy-300">
+          <Sprig size={20} />
+          <h1 className="page-title flex-none">{t("dashboard.title")}</h1>
+          <Sprig size={20} className="-scale-x-100" />
+        </div>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           <em>{t("dashboard.tagline")}</em>
           <WhyTooltip principleId="no-leaderboards" />
@@ -90,7 +95,14 @@ export default function DashboardPage() {
         <MilestoneCelebration key={m.label} milestone={m} />
       ))}
 
-      <section className="card mb-4 text-center">
+      <section className="card relative mb-4 overflow-hidden text-center">
+        <div
+          aria-hidden="true"
+          data-decorative="true"
+          className="pointer-events-none absolute right-3 top-3 text-canopy-700 opacity-10 dark:text-canopy-300"
+        >
+          <Sprig size={48} />
+        </div>
         <div className="text-xs uppercase tracking-wide text-moss-500">
           {t("dashboard.totalHoursLabel")}
         </div>
@@ -106,6 +118,10 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
+
+      <div className="my-2">
+        <LeafDivider variant="short" />
+      </div>
 
       <div className="mb-4 grid grid-cols-2 gap-3">
         <StatCard
@@ -145,6 +161,10 @@ export default function DashboardPage() {
         />
       </div>
 
+      <div className="my-2">
+        <LeafDivider variant="short" />
+      </div>
+
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           {t("dashboard.milestones.title")}
@@ -178,6 +198,10 @@ export default function DashboardPage() {
         />
       </section>
 
+      <div className="my-2">
+        <LeafDivider variant="short" />
+      </div>
+
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           {t("dashboard.categoryBreakdown.title")}
@@ -207,7 +231,7 @@ export default function DashboardPage() {
                     aria-hidden="true"
                   >
                     <div
-                      className="h-full rounded-full bg-canopy-600"
+                      className={`h-full rounded-full ${meta.barColorClass}`}
                       style={{ width: `${Math.max(4, pct)}%` }}
                     />
                   </div>
@@ -220,6 +244,10 @@ export default function DashboardPage() {
           </ul>
         )}
       </section>
+
+      <div className="my-2">
+        <LeafDivider variant="short" />
+      </div>
 
       <div className="relative">
         <BreadthBar entries={flow.breadth} members={members} />
@@ -234,7 +262,11 @@ export default function DashboardPage() {
       />
 
       {achievementsThisMonth.size > 0 && (
-        <section className="card">
+        <>
+          <div className="my-2">
+            <LeafDivider variant="short" />
+          </div>
+          <section className="card">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
             {t("dashboard.rolesThisMonth.title")}
           </h2>
@@ -255,7 +287,8 @@ export default function DashboardPage() {
               ),
             )}
           </ul>
-        </section>
+          </section>
+        </>
       )}
     </div>
   );

@@ -25,6 +25,7 @@ export interface CategoryMeta {
   label: string;
   emoji: string;
   description: string;
+  barColorClass: string;
 }
 
 export const CATEGORY_META: Record<Category, CategoryMeta> = {
@@ -33,54 +34,63 @@ export const CATEGORY_META: Record<Category, CategoryMeta> = {
     label: "Transport",
     emoji: "\u{1F697}", // car
     description: "Rides, carpools, moving help",
+    barColorClass: "bg-canopy-600",
   },
   food: {
     id: "food",
     label: "Food",
     emoji: "\u{1F35E}", // bread
     description: "Meals, groceries, cooking",
+    barColorClass: "bg-canopy-500",
   },
   childcare: {
     id: "childcare",
     label: "Childcare",
     emoji: "\u{1F9F8}", // teddy bear
     description: "Babysitting, school pickups, kid help",
+    barColorClass: "bg-moss-500",
   },
   skilled_labor: {
     id: "skilled_labor",
     label: "Skilled labor",
     emoji: "\u{1F527}", // wrench
     description: "Repairs, trades, hands-on work",
+    barColorClass: "bg-moss-600",
   },
   emotional_support: {
     id: "emotional_support",
     label: "Emotional support",
     emoji: "\u{1FAC2}", // people hugging
     description: "Listening, company, care",
+    barColorClass: "bg-canopy-700",
   },
   education: {
     id: "education",
     label: "Education",
     emoji: "\u{1F4DA}", // books
     description: "Tutoring, teaching, mentoring",
+    barColorClass: "bg-moss-400",
   },
   housing: {
     id: "housing",
     label: "Housing",
     emoji: "\u{1F3E0}", // house
     description: "Shelter, moving, household help",
+    barColorClass: "bg-bark-500",
   },
   tech: {
     id: "tech",
     label: "Tech",
     emoji: "\u{1F4BB}", // laptop
     description: "Computers, phones, setup help",
+    barColorClass: "bg-moss-700",
   },
   other: {
     id: "other",
     label: "Other",
     emoji: "\u{1F33F}", // herb
     description: "Anything else our community needs",
+    barColorClass: "bg-moss-400",
   },
 };
 
