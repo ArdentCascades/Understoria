@@ -43,7 +43,7 @@ Apply to every visual change. These are non-negotiable.
 | `canopy-*` | Primary brand. Buttons, focus rings, page-title text. |
 | `moss-*` | Backgrounds, borders, secondary text. The workhorse. |
 | `bark-*` | Warm neutral. Body text, soft borders, dividers. Pairs with moss/canopy without introducing a second hue. |
-| `ember-*` | **Reciprocity moments only.** Toast border on an exchange confirmation, "thank you sent" inline feedback, fulfilled-post banner. Never on a button, badge, status indicator, or category label. |
+| `ember-*` | **Reciprocity moments only.** Toast border on an exchange confirmation, "thank you sent" inline feedback, fulfilled-post banner, freshly-reached community milestone leaf in the Dashboard's canopy row (PR #82 — the community's reciprocity moment when a collective threshold is crossed). Never on a button, badge, status indicator, or category label. |
 
 Dark mode: every `*-{50..200}` swaps to `*-{800..950}` and vice
 versa. Verify WCAG AA contrast (4.5:1 body, 3:1 large text).
