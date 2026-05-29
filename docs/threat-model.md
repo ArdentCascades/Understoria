@@ -255,6 +255,53 @@ We are not trying to protect against:
   — the `proposerKey` on the proposal row is the flagger's
   public key.
 
+- **Availability chips are local member-preference data
+  (PR #78).** Members can optionally set 0–5 chips
+  (`weekday_days` / `weekday_evenings` / `weekend_days` /
+  `weekend_evenings` / `ask_me`) on their profile. Chips are
+  stored on the `Member` row alongside `availability` free-text
+  and `skills`. Chips render on the member's own offer cards,
+  offer detail, and member detail pages. Exposure model:
+  identical to the existing `availability` free-text field —
+  visible to anyone with the member's local record, NOT
+  federated. Cross-node members have no local Member record so
+  chips never appear on cross-node posts (preserved by the
+  existing `memberMap.get(...)` returning undefined for non-
+  local authors). Soft purge clears chips alongside other
+  identifying preference data. The threat model decision worth
+  recording is what we explicitly chose **not** to build,
+  because the temptation will recur:
+
+  - **No fine-grained time grid** (e.g. 7-day × 30-minute
+    editable windows). Even with no event metadata stored, the
+    pattern of repeated unavailability leaks structural
+    information about a member's life — "unavailable every
+    Tuesday 6:30–8:00 PM for a year" implies therapy;
+    "unavailable every Tuesday & Thursday 7–8 AM" implies AA;
+    "unavailability shifts every week" implies fleeing DV. The
+    coarse-bucket chip set is intentionally too wide for these
+    inferences to land.
+  - **No `.ics` calendar import.** Even stripping titles /
+    descriptions / attendees / locations leaves the busy-block
+    pattern, which is the actual leak. An import that
+    *coarsens* upload data into the chip buckets would be safe;
+    an import that preserves the precise time ranges would
+    reintroduce the inference attack. If we ever ship import,
+    it must coarsen, not preserve.
+  - **No "available now" presence indicator.** Would require
+    tracking when each member is online and broadcasting it.
+    The project has no presence tracking, by design.
+  - **No Board filter by chip set.** Would cross from
+    coordination context into algorithmic ranking; once
+    filterable, "people who don't match the asker's filter"
+    becomes a class. The chips render where they help
+    (pre-conversation context on offer cards) but never gate
+    visibility.
+  - **No federation of chips.** Member data doesn't federate
+    today; chips ride along with that intentional locality.
+    If member federation ships later, chips should be opt-in
+    per-member and the pattern-leak analysis above re-applied.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

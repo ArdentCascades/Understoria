@@ -10,6 +10,40 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Optional availability chips on member profile + offers (PR #78).**
+  Augments the existing `member.availability` free-text field with
+  5 optional chips — Weekday days, Weekday evenings, Weekend days,
+  Weekend evenings, Ask me anytime. Members pick zero, one, or
+  many. Chips surface as quiet metadata on offer cards, offer
+  detail, and member detail pages so an asker has scannable
+  context before reaching out. Coarse-bucket semantics — no times
+  stored, no calendar import, no individual events inferable from
+  the pattern, no presence tracking, no federation. NOT surfaced
+  on needs, in messages, or on project tasks. NOT filterable on
+  the Board (would cross from context into ranking).
+
+  Why this shape and not a weekly time-grid or calendar import:
+  even with maximum metadata stripping, the *shape* of repeated
+  unavailability leaks structural information about a member's
+  life (therapy Tuesdays, AA Tues/Thurs mornings, custody
+  Sundays, methadone clinic Mondays) — a known threat-model
+  concern that scales with federation. Coarse buckets wide
+  enough to wash out individual events are the right resolution
+  for "when to reach me" without becoming a presence-tracking
+  system. The threat-model §7 entry records the design decision
+  so it isn't relitigated.
+
+  Data: shared/types.ts `AvailabilityChip` union + `Member`
+  field; Dexie v16 additive backfill; createMember and
+  updateMemberProfile updated (undefined-is-no-change semantics
+  on chips). New components `AvailabilityChipPicker` (setter)
+  and `AvailabilityChips` (read-only renderer). profileNudge
+  broadened so chips OR free-text satisfies; panic soft purge
+  also clears chips. 9 new i18n strings × 2 locales; parity
+  test passes. 492/492 tests pass (491 + 1 new chips-alone case
+  on profileNudge). Cross-node posts show no chips by intentional
+  preservation of the existing member-data locality model.
+
 - **Density caps on thread surfaces (PR #76).** Project announcements
   ("Updates") and per-task comment threads now show only the
   newest items inline (5 announcements, 3 comments) with a
