@@ -21,6 +21,7 @@ function member(key: string, zone = ""): Member {
     displayName: key.toUpperCase(),
     skills: [],
     availability: "",
+    availabilityChips: [],
     seedBalance: 5,
     vouchedBy: [],
     createdAt: 0,

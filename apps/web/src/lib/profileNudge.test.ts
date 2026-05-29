@@ -25,6 +25,7 @@ function buildMember(overrides: Partial<Member> = {}): Member {
     displayName: "Test",
     skills: [],
     availability: "",
+    availabilityChips: [],
     locationZone: "",
     seedBalance: 5,
     vouchedBy: [],
@@ -56,6 +57,14 @@ describe("profileIsBare", () => {
     expect(profileIsBare(buildMember({ availability: "Evenings" }))).toBe(
       false,
     );
+  });
+
+  it("is false when availability chips are set but free-text is empty", () => {
+    // Chips alone are a complete answer (incl. "Ask me anytime") — the
+    // nudge should not fire just because the notes field is blank.
+    expect(
+      profileIsBare(buildMember({ availabilityChips: ["weekend_days"] })),
+    ).toBe(false);
   });
 
   it("treats whitespace-only zone / availability as empty", () => {

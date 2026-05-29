@@ -37,7 +37,7 @@ import {
   enqueuePostOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
-import type { Achievement, Category, Exchange, Post, PostType, Urgency } from "@/types";
+import type { Achievement, AvailabilityChip, Category, Exchange, Member, Post, PostType, Urgency } from "@/types";
 
 /**
  * Resolve the secret keys for the two parties that need to sign the
@@ -424,10 +424,17 @@ export async function updateMemberProfile(
     displayName?: string;
     skills?: string[];
     availability?: string;
+    availabilityChips?: AvailabilityChip[];
     locationZone?: string;
   },
 ): Promise<void> {
   const member = await db.members.get(memberKey);
   if (!member) throw new Error("Member not found");
-  await db.members.put({ ...member, ...updates });
+  // Treat `undefined` chips as "no change" (don't overwrite); the spread
+  // below would copy `undefined` over the existing array otherwise.
+  const next: Member = { ...member, ...updates };
+  if (updates.availabilityChips === undefined) {
+    next.availabilityChips = member.availabilityChips;
+  }
+  await db.members.put(next);
 }

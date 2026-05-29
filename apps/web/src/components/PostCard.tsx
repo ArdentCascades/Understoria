@@ -20,9 +20,10 @@
  */
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import type { Post } from "@/types";
+import type { AvailabilityChip, Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import type { TrustStatus } from "@/lib/vouch";
+import { AvailabilityChips } from "./AvailabilityChips";
 import { CategoryBadge } from "./CategoryBadge";
 import { TrustChip } from "./TrustChip";
 import { UrgencyBadge } from "./UrgencyBadge";
@@ -33,12 +34,14 @@ export function PostCard({
   isCurrentMember,
   posterTrust,
   isCrossNode,
+  posterAvailabilityChips,
 }: {
   post: Post;
   posterName: string;
   isCurrentMember: boolean;
   posterTrust?: TrustStatus;
   isCrossNode?: boolean;
+  posterAvailabilityChips?: AvailabilityChip[];
 }) {
   const { t } = useTranslation();
   const typeLabel =
@@ -66,6 +69,14 @@ export function PostCard({
           {post.description}
         </p>
       )}
+      {post.type === "OFFER" &&
+        !isCrossNode &&
+        posterAvailabilityChips &&
+        posterAvailabilityChips.length > 0 && (
+          <div className="mt-2">
+            <AvailabilityChips chips={posterAvailabilityChips} compact />
+          </div>
+        )}
       <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="font-medium">

@@ -56,6 +56,7 @@ async function populate(memberCount: number, postCount: number) {
           displayName: `Real Name ${i}`,
           skills: ["secret skill"],
           availability: "Weekday evenings",
+          availabilityChips: ["weekday_evenings", "weekend_days"],
           locationZone: "Specific block",
         },
         NODE,
@@ -109,6 +110,7 @@ describe("softPurge", () => {
       expect(m.displayName.startsWith("Member ")).toBe(true);
       expect(m.skills).toEqual([]);
       expect(m.availability).toBe("");
+      expect(m.availabilityChips).toEqual([]);
       expect(m.locationZone).toBe("");
       expect(m.vouchedBy).toEqual([]);
     }

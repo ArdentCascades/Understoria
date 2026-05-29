@@ -13,9 +13,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
+import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
 import { useApp } from "@/state/AppContext";
+import type { AvailabilityChip } from "@/types";
 
 // Per-step shape. `concept` screens are static intros; the
 // `profileSetup` step is interactive — same chrome, form fields
@@ -97,6 +99,9 @@ export default function WelcomePage() {
   const [availability, setAvailability] = useState(
     currentMember?.availability ?? "",
   );
+  const [availabilityChips, setAvailabilityChips] = useState<
+    AvailabilityChip[]
+  >(currentMember?.availabilityChips ?? []);
   const [saving, setSaving] = useState(false);
 
   async function finish() {
@@ -120,6 +125,9 @@ export default function WelcomePage() {
     if (trimmedZone) updates.locationZone = trimmedZone;
     if (parsedSkills.length > 0) updates.skills = parsedSkills;
     if (trimmedAvail) updates.availability = trimmedAvail;
+    if (availabilityChips.length > 0) {
+      updates.availabilityChips = availabilityChips;
+    }
 
     if (Object.keys(updates).length > 0) {
       setSaving(true);
@@ -194,19 +202,33 @@ export default function WelcomePage() {
               disabled={saving}
             />
           </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">
-              {t("profile.about.availability")}
-            </span>
-            <input
-              className="input"
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value)}
-              placeholder={t("profile.about.availabilityPlaceholder")}
-              maxLength={120}
-              disabled={saving}
+          <div className="flex flex-col gap-2">
+            <div>
+              <div className="text-sm font-semibold">
+                {t("profile.about.availabilityHeading")}
+              </div>
+              <div className="text-xs text-moss-600 dark:text-moss-300">
+                {t("profile.about.availabilitySubhead")}
+              </div>
+            </div>
+            <AvailabilityChipPicker
+              value={availabilityChips}
+              onChange={setAvailabilityChips}
             />
-          </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("profile.about.availabilityNotesLabel")}
+              </span>
+              <input
+                className="input"
+                value={availability}
+                onChange={(e) => setAvailability(e.target.value)}
+                placeholder={t("profile.about.availabilityPlaceholder")}
+                maxLength={120}
+                disabled={saving}
+              />
+            </label>
+          </div>
           <p className="text-center text-xs text-moss-500 dark:text-moss-400">
             {t("welcome.profileSetup.hint")}
           </p>

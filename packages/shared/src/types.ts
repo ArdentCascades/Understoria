@@ -44,11 +44,19 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
+export type AvailabilityChip =
+  | "weekday_days"
+  | "weekday_evenings"
+  | "weekend_days"
+  | "weekend_evenings"
+  | "ask_me";
+
 export interface Member {
   publicKey: string;
   displayName: string;
   skills: string[];
   availability: string;
+  availabilityChips: AvailabilityChip[];
   seedBalance: number;
   vouchedBy: string[];
   createdAt: number;
