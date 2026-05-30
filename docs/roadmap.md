@@ -31,7 +31,7 @@ a maintenance owner.
 | # | Agent | Status | Owns |
 |---|-------|--------|------|
 | 1 | Core PWA | shipped | Board, exchange flow, credits, dashboard, achievements, profile, PWA shell. Help-seeker UX improvements shipped (PRs #66–#67): repost with changes, expiry visibility chip, category descriptions in PostForm, exchange confirmation guidance, location-zone filtering on Board, "still looking" gentle prompt. Offer-poster UX improvements shipped (PR #69): "Still offering?" variant of the 3-day-old prompt (branches on `post.type`, new `postDetail.stillOffering` key), "Post this again" button on completed posts (navigates to PostForm with `?repost=<id>&again=1`; PostForm skips auto-cancel when `again=1`, new `postDetail.postAgain` key), "Active needs in this category" hint on PostForm when posting an OFFER with a category selected (shows count of matching active NEEDs with a link to filtered Board, new `postForm.matchingNeeds` key) |
-| 2 | Crypto & Identity | shipped | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. E2E direct messaging shipped (NaCl box, X25519 via ed2curve, schema v14). Message search shipped (PR #87) — local decrypt-and-scan across the conversation list and inside each thread, no persisted plaintext index, locked session returns no results. Threat-model §7 entry records the rejection of a persisted index and member-directory search. All five original tasks complete |
+| 2 | Crypto & Identity | shipped | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. E2E direct messaging shipped (NaCl box, X25519 via ed2curve, schema v14). Message search shipped (PR #87) — local decrypt-and-scan across the conversation list and inside each thread, no persisted plaintext index, locked session returns no results. Threat-model §7 entry records the rejection of a persisted index and member-directory search. **Invite share affordances shipped (PRs #91–#93):** QR code + Web Share API on the invite share box (lazy-loaded `qrcode` chunk so first-load cost is unchanged); camera-surveillance awareness gate that opens with QR + URL hidden behind a plain-language prompt about screen-readable QR codes, with a "Send the link without showing it" escape hatch that uses `navigator.share` / clipboard so the URL never appears on screen, and pre-flight `canShareUrl()` capability detection that disables the escape hatch when honest about it (false confidence is worse than no path). Re-prompts every share — no persistent dismissal. Threat-model §7 entry records "QR codes are camera-surveillance targets" so future "simplify the share flow" PRs find the prior reasoning. All five original tasks complete |
 | 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`, invites endpoint, invite pull loop, PWA-side cross-node post surfacing on the Board. **Pending:** cross-node exchange notification lifecycle sync, Dashboard cross-node stat aggregation |
 | 4 | Security & Opsec | partial | Threat model, opsec guide, panic button, anti-gaming safeguards. **Pending:** ongoing per-PR review |
 | 5 | Governance & Coop | partial | Code of Conduct, GOVERNANCE.md, trademark policy |
@@ -167,6 +167,25 @@ Planned PR shape:
   `html.text-largest`. Aimed at older members but framed as a
   comfort option for everyone — no separate "accessibility mode"
   per §4 of `docs/accessibility.md`.
+- **22.7 — FAB contrast (PR #90).** Pilot-reported: the floating
+  "Post a need / Post an offer" capsule blended into the post
+  list because the capsule (`bg-white/90`) and the secondary
+  button (`bg-white`) both matched the `.card` background.
+  Capsule moves to brand-tinted `bg-canopy-50` (light) /
+  `bg-moss-800` (dark) with a `ring-canopy-200` /
+  `ring-moss-700` edge and `shadow-xl` for elevation. No
+  ranking semantic — canopy-50 is the same family as the
+  reciprocity ember card, just on the green side.
+- **22.8 — Invite share affordances (PRs #91–#93).** The QR
+  share sheet uses `useFocusTrap`, has Escape + button-only
+  dismiss (no backdrop click — keeps `jsx-a11y` rules happy
+  and matches the rest of the modal pattern), and autofocuses
+  the dismiss button (not the reveal) so a stray Enter doesn't
+  expose the invite. The capability-detection-driven
+  `disabled` state on "Send the link without showing it" uses
+  `aria-describedby` to point at the inline explanation so
+  screen-reader users hear *why* the button is disabled, not
+  just *that* it is.
 - **22.N+ — Continued surface fixes.** As small focused PRs.
 
 Cadence-wise, Agent 22 doesn't "finish" — there's always

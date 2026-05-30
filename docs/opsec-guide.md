@@ -52,6 +52,18 @@ changes.
 - **For in-person conversations that matter, meet in person.** Coffee
   shops, parks, kitchen tables. A ten-minute walk beats a two-hour
   message thread for anything sensitive.
+- **Cameras can read your screen.** Workplace CCTV, doorbell cams,
+  the laptop webcam in a coworking space — modern cameras can
+  decode QR codes from across a room with off-the-shelf vision
+  models, and OCR a URL almost as easily. The invite share sheet
+  prompts you to look around before it shows the QR for a reason.
+  If you're not sure about the cameras in a space, use the
+  **Send the link without showing it** path instead — it ships
+  the invite through Signal or your clipboard without ever
+  putting it on the screen. The same caution applies to anything
+  else sensitive on your screen: passphrases, recovery codes,
+  panic-button confirmations, exchange details. Glance up before
+  you look down.
 
 ## On your social footprint
 

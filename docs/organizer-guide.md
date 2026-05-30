@@ -128,6 +128,13 @@ Recommend:
 - Schedule a **check-in at week 2** and a **retrospective at week 4**.
 - Don't try to enroll everyone at once. Five to ten founders is
   plenty. They set the tone.
+- For the **first invite handoffs**, prefer in-person at a meeting,
+  kitchen-table, or coffee shop. The app generates a QR code that
+  the new member scans with their phone camera — no link to type,
+  no Signal exchange. Glance around for cameras first; the share
+  sheet's "Look around before you show this" prompt is exactly
+  the pause that matters in workplaces, libraries, or anywhere a
+  doorbell cam can see your screen.
 
 ## 6. The first conversations worth having
 
