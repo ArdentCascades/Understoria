@@ -31,7 +31,7 @@ a maintenance owner.
 | # | Agent | Status | Owns |
 |---|-------|--------|------|
 | 1 | Core PWA | shipped | Board, exchange flow, credits, dashboard, achievements, profile, PWA shell. Help-seeker UX improvements shipped (PRs #66–#67): repost with changes, expiry visibility chip, category descriptions in PostForm, exchange confirmation guidance, location-zone filtering on Board, "still looking" gentle prompt. Offer-poster UX improvements shipped (PR #69): "Still offering?" variant of the 3-day-old prompt (branches on `post.type`, new `postDetail.stillOffering` key), "Post this again" button on completed posts (navigates to PostForm with `?repost=<id>&again=1`; PostForm skips auto-cancel when `again=1`, new `postDetail.postAgain` key), "Active needs in this category" hint on PostForm when posting an OFFER with a category selected (shows count of matching active NEEDs with a link to filtered Board, new `postForm.matchingNeeds` key) |
-| 2 | Crypto & Identity | shipped | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. E2E direct messaging shipped (NaCl box, X25519 via ed2curve, schema v14). All five original tasks complete |
+| 2 | Crypto & Identity | shipped | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. E2E direct messaging shipped (NaCl box, X25519 via ed2curve, schema v14). Message search shipped (PR #87) — local decrypt-and-scan across the conversation list and inside each thread, no persisted plaintext index, locked session returns no results. Threat-model §7 entry records the rejection of a persisted index and member-directory search. All five original tasks complete |
 | 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`, invites endpoint, invite pull loop, PWA-side cross-node post surfacing on the Board. **Pending:** cross-node exchange notification lifecycle sync, Dashboard cross-node stat aggregation |
 | 4 | Security & Opsec | partial | Threat model, opsec guide, panic button, anti-gaming safeguards. **Pending:** ongoing per-PR review |
 | 5 | Governance & Coop | partial | Code of Conduct, GOVERNANCE.md, trademark policy |
@@ -149,7 +149,25 @@ Planned PR shape:
 - **22.3 — First batch of surface fixes.** `ConfirmDialog` focus
   trap. `BottomNav` keyboard navigation. `AttentionSection`
   `aria-live`. Each demonstrates the pattern.
-- **22.4+ — Continued surface fixes.** As small focused PRs.
+- **22.4 — Palette contrast audit.** Programmatic WCAG AA assertion
+  for every chip / badge pairing (light + dark, composited
+  translucents over the card). Caught three failing pairings
+  before merge.
+- **22.5 — Dark mode toggle (PR #85).** Three-state preference
+  (`system` / `light` / `dark`) on Profile → Appearance. The 387
+  `dark:` utility variants already in the codebase were dormant
+  until this PR; class-based mechanism + no-FOUC inline script in
+  `index.html`. `lib/theme.ts` owns the resolver + matchMedia
+  subscription.
+- **22.6 — Text-size preference (PR #88).** Three-step comfort
+  setting (Default / Larger / Largest) under Profile → Appearance.
+  `font-size` percentage on `<html>` so every rem-based size
+  scales together; preference multiplies on top of OS Dynamic Type
+  rather than replacing it. Touch-target floor bumps 44→52 under
+  `html.text-largest`. Aimed at older members but framed as a
+  comfort option for everyone — no separate "accessibility mode"
+  per §4 of `docs/accessibility.md`.
+- **22.N+ — Continued surface fixes.** As small focused PRs.
 
 Cadence-wise, Agent 22 doesn't "finish" — there's always
 another surface, another assistive-tech pass, another regression
@@ -388,9 +406,16 @@ concrete check that catches it before it ships.
   PR to land. The second PR rebases onto the next version.
   `docs/roadmap.md` "Migration strategy" tracks the reservation.
   Current state: PWA v10 = votes, v11 = task check-in, v12 = dispute
-  migration, v13 = co-organizer support, v14 = E2E messages. Server
-  is at v7. Next free PWA version: **15**. Next free server
-  version: **8**.
+  migration, v13 = co-organizer support, v14 = E2E messages,
+  v15 = task comments, v16 = availability chips. Server is at v8
+  (task_comments). Next free PWA version: **17**. Next free server
+  version: **9**.
+
+  Settings that don't warrant a Dexie migration live in the existing
+  `settings` kv table (key strings on `SETTING_KEYS` in
+  `db/database.ts`). Theme preference (PR #85), text size (PR #88),
+  and dismissal flags use this pattern — `null` reads as the
+  default, no version bump needed.
 
 - **Function signature changes without exhaustive call-site
   updates.** `balanceFor()` gaining two new parameters touches

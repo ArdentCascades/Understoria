@@ -196,7 +196,37 @@ Both the breadth bar and the reciprocity pulse are windows into the
 shape of help, not scores. They're there so the community can see
 itself, not so members can compete.
 
-## 11. Your Profile page
+## 11. Messages
+
+Tap **Messages** to see private one-on-one conversations with
+other members of your community. Messages are end-to-end
+encrypted on your device — the community node never sees their
+contents, and nobody else can read them even if they get a copy.
+
+A few things worth knowing:
+
+- **Conversations start from a post.** To message someone for the
+  first time, open one of their posts and tap **Reach out**.
+  There's no "search the member list and DM anyone" affordance —
+  by design. Messaging is for coordinating on actual help, not
+  for cold-DMing strangers.
+- **No read receipts, no typing indicators, no online/offline
+  status.** These are metadata leaks the project explicitly does
+  not collect.
+- **Search.** The search box at the top of the Messages tab finds
+  messages you've already received. Tap a result to open the
+  conversation with the search term pre-filled — inside a thread,
+  use the up / down arrows next to the search box to jump between
+  matches. Search is local to your device; it never sees the
+  community node and never sees anyone else's messages.
+- **Locked sessions.** If you've set a passphrase and the session
+  is locked, you can't read or search messages until you unlock —
+  the secret key needed to decrypt them is sealed.
+- **No recovery.** If you lose your secret key (no passphrase
+  backup, device wiped, etc.) the messages are gone. This is the
+  trade-off for end-to-end encryption with no central server.
+
+## 12. Your Profile page
 
 Tap **Profile** to see:
 
@@ -210,7 +240,7 @@ Tap **Profile** to see:
 - **Your exchange history** — every give or receive, with who and when.
 - **Invites you've issued** — once you've been in the community a
   while, you can generate invite links for people you want to bring
-  in. (See §12.)
+  in. (See §13.)
 - **Learn** — revisit the welcome flow any time, expand the in-app
   member guide (a shorter version of this document, available
   offline), or open the study-group prompts and copy one to share
@@ -224,12 +254,21 @@ Tap **Profile** to see:
   yellow note explains these are bootstrap-mode — once in-app
   governance ships, changes here will route through a proposal.
 - **Language** — switch between English and Spanish.
+- **Appearance** — comfort settings that only affect this device.
+  Pick a theme (Match system / Light / Dark — Match system follows
+  whatever your phone or browser is set to, useful if you've told
+  your device to switch by time of day) and a text size (Default
+  / Larger / Largest — the larger options multiply on top of
+  whatever text size you've set on your phone, so they stack
+  rather than replace it). The three text-size buttons render at
+  the sizes they represent so you can see the difference before
+  you pick.
 - **Community node** — optional mirror of your finalized exchanges
   to a community-wide ledger; off by default.
-- **Security** — turn on a passphrase for your identity (§13).
-- **Emergency** — panic buttons in case a device is at risk (§14).
+- **Security** — turn on a passphrase for your identity (§14).
+- **Emergency** — panic buttons in case a device is at risk (§15).
 
-## 12. Inviting someone new
+## 13. Inviting someone new
 
 Two vouches turn a new member into a **trusted** member. Your invite
 counts as the first; someone else will need to vouch for them after
@@ -246,7 +285,7 @@ they join.
 You can revoke an unredeemed invite from the same page if you change
 your mind.
 
-## 13. Setting a passphrase
+## 14. Setting a passphrase
 
 If your phone has full-disk encryption on and a strong lock screen,
 you're already in decent shape. Setting a passphrase on top of that
@@ -265,7 +304,7 @@ You can **Change** or **Disable** protection from the same page. There
 is also a **Lock now** button if you need to hand the device to
 someone briefly.
 
-## 14. If the device is at risk
+## 15. If the device is at risk
 
 **Profile → Emergency** has two panic buttons.
 
@@ -277,7 +316,7 @@ someone briefly.
 
 Both happen entirely on this device. Neither contacts a server.
 
-## 15. FAQ
+## 16. FAQ
 
 **What if nobody responds to my post?** Bump it. Repost with more
 detail. Tell a coordinator. Nobody gets everything they need, but if

@@ -111,8 +111,32 @@ formal audit; the formal audit is one of the items in §6.
 - **Touch targets** — most interactive elements use Tailwind's
   `touch-target` utility (44px). Bottom nav, post / project
   cards, action buttons.
-- **Dark mode** — every UI surface has a `dark:` variant. Whether
-  every variant clears 4.5:1 contrast is unverified.
+- **Dark mode** — every UI surface has a `dark:` variant, and the
+  toggle that activates them shipped in PR #85. Three-state
+  preference (`system` / `light` / `dark`, default `system`) on
+  Profile → Appearance; class-based mechanism with a no-FOUC
+  inline script in `index.html` so there's no flash of the wrong
+  theme on first paint. Contrast for the chip / badge palette is
+  programmatically verified (see the contrast bullet below); the
+  broader body-text survey is still in §6.
+- **Text-size preference** — three-step comfort setting (Default
+  / Larger / Largest) under Profile → Appearance (PR #88). Sets
+  the `<html>` font-size as a percentage so every rem-based size
+  in the app scales together; the preference multiplies on top of
+  the user's OS / browser default (Dynamic Type, browser zoom)
+  rather than replacing it. Each radio button renders at the size
+  it represents, so the choice is self-demonstrating. Touch-target
+  floor bumps from 44×44 to 52×52 under `html.text-largest` so
+  taps stay comfortable relative to the upsized type — WCAG AAA
+  SC 2.5.5 territory.
+- **Click-to-open disclosures, not hover.** `WhyTooltip`,
+  `ContextualHint`, and `FirstActionNudge` / `ProfileNudge` open
+  on tap / click rather than hover — works on touch-only devices
+  and for members who don't use a pointer at all. The "Got it"
+  tips pattern (plain primary copy + `<details>` "Learn more"
+  disclosure) is keyboard-accessible by default (space / enter to
+  toggle) and screen readers announce expanded / collapsed without
+  any extra ARIA.
 - **i18n** — every user-facing string is in `i18n/locales/`,
   so a future right-to-left language drop-in is mechanically
   possible. RTL CSS hasn't been tested.
