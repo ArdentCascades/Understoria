@@ -31,8 +31,13 @@
               typeof matchMedia === "function" &&
               matchMedia("(prefers-color-scheme: dark)").matches);
           if (dark) document.documentElement.classList.add("dark");
+          var size = localStorage.getItem("understoria.text-size");
+          if (size === "larger")
+            document.documentElement.classList.add("text-larger");
+          else if (size === "largest")
+            document.documentElement.classList.add("text-largest");
         } catch (e) {
-          /* private-mode / quota-exceeded — fall back to light */
+          /* private-mode / quota-exceeded — fall back to defaults */
         }
       })();
     </script>

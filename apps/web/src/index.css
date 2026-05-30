@@ -16,6 +16,26 @@
     color-scheme: dark;
   }
 
+  /* Text-size preference. Three steps multiplied on top of the
+   * user's OS / browser default font-size, so anyone who has
+   * already enlarged text system-wide gets a stacked effect. Every
+   * rem-based size in the app scales proportionally; see
+   * lib/textSize.ts. */
+  html.text-larger {
+    font-size: 112.5%;
+  }
+  html.text-largest {
+    font-size: 125%;
+  }
+
+  /* When text is upsized, the 44×44 touch-target floor would feel
+   * small relative to the surrounding type. Bump the floor under
+   * the largest setting so taps stay comfortable. */
+  html.text-largest .touch-target {
+    min-height: 52px;
+    min-width: 52px;
+  }
+
   body {
     min-height: 100vh;
     min-height: 100dvh;

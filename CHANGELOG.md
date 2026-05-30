@@ -10,6 +10,57 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Text-size preference in Profile → Appearance.** Three-step
+  comfort setting (Default / Larger / Largest) that scales every
+  rem-based size in the app — typography, stack-* spacing, button
+  padding — proportionally. Aimed at older members and anyone for
+  whom WCAG-AA-conformant text is technically legible but not
+  comfortable, but framed as a comfort option for everyone (no
+  "accessibility mode" segregation per
+  `docs/accessibility.md` §4).
+  - **Mechanism**: `html.text-larger { font-size: 112.5%; }` and
+    `html.text-largest { font-size: 125%; }` in `index.css`. The
+    percentage **multiplies** on top of the user's OS / browser
+    default font-size, so a member who already set Dynamic Type
+    to large gets a stacked effect — the in-app preference is
+    additive, not a replacement.
+  - **`lib/textSize.ts`**: pure helpers `isTextSize`,
+    `applyTextSize` (toggles the right class on `<html>`, removes
+    any previously-applied class), `cacheTextSize`
+    (localStorage cache for the no-FOUC inline script).
+  - **`AppContext`** loads the preference from Dexie on boot,
+    exposes `textSize` + `setTextSize`. Same pattern as theme.
+  - **No-FOUC**: extends the existing inline `<script>` in
+    `index.html` to also apply the text-size class before first
+    paint. No layout shift on reload.
+  - **`AppearanceSection`** reworked into a single card with two
+    sub-groups (Theme + Text size) separated by a thin divider.
+    Each text-size label renders at the size it represents
+    (`text-base` / `text-lg` / `text-xl`) so the choice is
+    self-demonstrating.
+  - **Touch-target floor bump**: under `html.text-largest`, the
+    `.touch-target` utility floor goes from 44×44 to 52×52 so
+    taps stay comfortable relative to the larger type. WCAG AAA
+    SC 2.5.5 territory.
+  - **Audit pass**: grepped for hardcoded `text-[Npx]` and
+    `fontSize: "Npx"` values that wouldn't scale. Two hits —
+    `TrustChip` compact (`text-[10px]`) and `AchievementBadge`
+    rarity label (`text-[11px]`) — both converted to rem
+    (`text-[0.625rem]` / `text-[0.6875rem]`) so they scale with
+    the preference.
+  - **i18n**: 5 new keys under `profile.appearance.*`
+    (`textSizeTitle`, `textSizeIntro`, `default`, `larger`,
+    `largest`) in en + es. Parity test passes.
+  - **Design README** documents the mechanism + the "don't use
+    `text-[Npx]`" rule + the audit grep.
+  - **No schema bump** (kv setting). **No threat-model entry** —
+    local-only preference, no exposure surface change.
+  - **6 new tests** in `textSize.test.ts` cover `isTextSize`
+    accept/reject and `applyTextSize` add/clear/switch.
+
+  Tests: 522 passing (515 → 522; +7). Lint, typecheck, build
+  clean. PWA precache 955 → 957 KiB.
+
 - **Message search — local decrypt-and-scan across the conversation
   list and inside each thread.** Adds two search surfaces while
   preserving the messaging-scope principle recorded in

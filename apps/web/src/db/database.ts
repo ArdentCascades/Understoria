@@ -398,6 +398,9 @@ export const SETTING_KEYS = {
    *  Mirrored to localStorage on every write so the inline script in
    *  index.html can apply the right theme before first paint. */
   themePreference: "themePreference",
+  /** "default" | "larger" | "largest". Absent or invalid reads as
+   *  "default". Mirrored to localStorage same as themePreference. */
+  textSize: "textSize",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

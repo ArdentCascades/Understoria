@@ -70,6 +70,12 @@ import {
   systemPrefersDark,
   type ThemePreference,
 } from "@/lib/theme";
+import {
+  applyTextSize,
+  cacheTextSize,
+  isTextSize,
+  type TextSize,
+} from "@/lib/textSize";
 
 export interface AppContextValue {
   ready: boolean;
@@ -98,6 +104,8 @@ export interface AppContextValue {
   refreshNodeConfig: () => Promise<void>;
   themePreference: ThemePreference;
   setThemePreference: (pref: ThemePreference) => Promise<void>;
+  textSize: TextSize;
+  setTextSize: (size: TextSize) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -113,6 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [nodeConfig, setNodeConfig] = useState<NodeConfig>(DEFAULT_NODE_CONFIG);
   const [themePreference, setThemePreferenceState] =
     useState<ThemePreference>("system");
+  const [textSize, setTextSizeState] = useState<TextSize>("default");
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
@@ -147,6 +156,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setThemePreferenceState(pref);
       applyTheme(resolveTheme(pref, systemPrefersDark()));
       cacheResolvedTheme(pref);
+      // Same shape for text size — Dexie is the source of truth,
+      // localStorage is the no-FOUC cache.
+      const rawSize = await getSetting(SETTING_KEYS.textSize);
+      const size: TextSize = isTextSize(rawSize) ? rawSize : "default";
+      if (cancelled) return;
+      setTextSizeState(size);
+      applyTextSize(size);
+      cacheTextSize(size);
       // Only seed the demo community when the node isn't locked. Seeding
       // writes plaintext secret keys for demo members, which we don't want
       // to run while a user's real wrapped keys are present but sealed.
@@ -231,6 +248,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemePreferenceState(pref);
     applyTheme(resolveTheme(pref, systemPrefersDark()));
     cacheResolvedTheme(pref);
+  }, []);
+
+  const setTextSize = useCallback(async (size: TextSize) => {
+    await setSetting(SETTING_KEYS.textSize, size);
+    setTextSizeState(size);
+    applyTextSize(size);
+    cacheTextSize(size);
   }, []);
 
   const unlock = useCallback(
@@ -332,6 +356,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshNodeConfig,
       themePreference,
       setThemePreference,
+      textSize,
+      setTextSize,
     }),
     [
       ready,
@@ -358,6 +384,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshNodeConfig,
       themePreference,
       setThemePreference,
+      textSize,
+      setTextSize,
     ],
   );
 

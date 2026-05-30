@@ -57,6 +57,30 @@ the resolved class to `<html>` synchronously before first paint so
 there's no flash of the wrong theme. Tailwind is configured for
 class-based dark mode (`darkMode: "class"`).
 
+## Text size
+
+Three-step member preference (`default` / `larger` / `largest`,
+default `default`) on the same Appearance section. Implemented as
+a percentage on `<html>` font-size (`112.5%` / `125%`), so the
+preference multiplies on top of the user's OS / browser default —
+a member who already enlarged text system-wide gets a stacked
+effect. Lives in `lib/textSize.ts`; the inline script applies the
+class before first paint.
+
+Because every rem-based size in the app scales together, **don't
+use `text-[14px]` or `fontSize: "14px"` in new code**. Use one of
+the five type-scale tokens above, or — for the rare micro-text
+that doesn't fit them — a rem value like `text-[0.6875rem]`. The
+audit grep is:
+
+```
+grep -rE 'text-\[[0-9]+px\]|fontSize:\s*"[0-9]+px"' apps/web/src
+```
+
+Touch targets stay at 44×44 by default; under `html.text-largest`
+the `.touch-target` floor bumps to 52×52 so taps stay comfortable
+relative to the upsized type.
+
 ## Type scale
 
 Five steps. Don't use Tailwind's default `text-xl`/`text-2xl`/etc.
