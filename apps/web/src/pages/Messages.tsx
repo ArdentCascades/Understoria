@@ -32,6 +32,7 @@ import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
 import { EmptyState } from "@/components/EmptyState";
 import { HighlightedText } from "@/components/HighlightedText";
+import { MemberAvatar } from "@/components/MemberAvatar";
 
 interface SearchGroup {
   otherKey: string;
@@ -157,19 +158,24 @@ export default function MessagesPage() {
                 to={`/messages/${encodeURIComponent(c.otherKey)}`}
                 className="card block transition-shadow hover:shadow-md"
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">
-                    {nameByKey.get(c.otherKey) ?? t("common.memberFallback")}
-                  </span>
-                  <span className="text-xs text-moss-500">
-                    {formatRelativeTime(c.lastMessage.createdAt)}
-                  </span>
+                <div className="flex items-start gap-3">
+                  <MemberAvatar publicKey={c.otherKey} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">
+                        {nameByKey.get(c.otherKey) ?? t("common.memberFallback")}
+                      </span>
+                      <span className="text-xs text-moss-500">
+                        {formatRelativeTime(c.lastMessage.createdAt)}
+                      </span>
+                    </div>
+                    <p className="mt-1 line-clamp-1 text-sm text-moss-600 dark:text-moss-300">
+                      {c.lastMessage.plaintext
+                        ? c.lastMessage.plaintext.slice(0, 80)
+                        : t("messages.decryptionFailed")}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-1 line-clamp-1 text-sm text-moss-600 dark:text-moss-300">
-                  {c.lastMessage.plaintext
-                    ? c.lastMessage.plaintext.slice(0, 80)
-                    : t("messages.decryptionFailed")}
-                </p>
               </Link>
             </li>
           ))}
@@ -212,24 +218,29 @@ function SearchResults({
               to={`/messages/${encodeURIComponent(g.otherKey)}?q=${encodeURIComponent(query)}`}
               className="card block transition-shadow hover:shadow-md"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">
-                  <HighlightedText text={name} query={query} />
-                </span>
-                {g.hits.length > 0 && (
-                  <span className="text-xs text-moss-500">
-                    {t("messages.search.matchCount", { count: g.hits.length })}
-                  </span>
-                )}
+              <div className="flex items-center gap-3">
+                <MemberAvatar publicKey={g.otherKey} size={36} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">
+                      <HighlightedText text={name} query={query} />
+                    </span>
+                    {g.hits.length > 0 && (
+                      <span className="text-xs text-moss-500">
+                        {t("messages.search.matchCount", { count: g.hits.length })}
+                      </span>
+                    )}
+                  </div>
+                  {first && first.message.plaintext && (
+                    <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
+                      <HighlightedText
+                        text={first.message.plaintext}
+                        query={query}
+                      />
+                    </p>
+                  )}
+                </div>
               </div>
-              {first && first.message.plaintext && (
-                <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
-                  <HighlightedText
-                    text={first.message.plaintext}
-                    query={query}
-                  />
-                </p>
-              )}
             </Link>
           </li>
         );

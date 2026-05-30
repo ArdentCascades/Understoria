@@ -10,6 +10,57 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Deterministic member avatars derived from public keys.** Each
+  member now has a parametric botanical illustration as their
+  visual identity, drawn deterministically from their Ed25519
+  public key. Same key produces the same plant on every device,
+  every time, forever. The avatar IS the public key in pictorial
+  form — it carries no information the public key didn't already
+  carry, so there is no new exposure surface.
+  - **`lib/avatar.ts`** — pure derivation. Decodes the public
+    key base64, takes the first 8 bytes (Ed25519 keys are
+    cryptographically random by construction; no hashing
+    needed), maps each byte via modulo into small enums:
+    shape (sapling / leaf-cluster / sprig / branch) × leaf
+    count (3–7) × branch angle × primary fill × accent fill ×
+    sprig decoration × leaf shape (round / elongated /
+    scalloped) × rotation. Frozen enum orderings —
+    changing them after ship breaks recognition.
+  - **`components/MemberAvatar.tsx`** — inline-SVG renderer.
+    Four shape sub-components compose primitive `Leaf` shapes.
+    Palette stays strictly within canopy / moss / bark (no
+    ember — would imply status). Always-visible (not marked
+    decorative): the avatar is information, not decoration.
+    `aria-label` is the short-key fingerprint so screen-reader
+    users get the same identification handle sighted users
+    get from the existing `shortKey()` chrome.
+  - **11 new tests** in `avatar.test.ts` — determinism,
+    fallback behavior on empty / malformed / too-short input,
+    distinctness across random keys, byte-position
+    assignments, all-zeros edge case, avalanche on a one-bit
+    flip.
+  - **Six surface wirings**: PostCard, TrustedByList,
+    MemberDetail header (96px), Messages list, Messages
+    search results, Conversation header, Profile "About you"
+    (with explanatory note). **Not** per-message-bubble —
+    would clutter the thread.
+  - **i18n**: 2 new keys (`avatar.label`, `profile.about.avatarNote`)
+    in en + es. Parity passes.
+  - **Design README**: new "Member avatars (frozen algorithm)"
+    section documenting the derivation, the freeze commitment,
+    and the not-decorative / always-visible rule.
+  - **Ethos**: not a "profile photo" (no real-face identity),
+    not customizable (would become a status game), not
+    federated as member data (derived locally from the public
+    key, which already federates), doesn't appear next to
+    numeric counts (would imply ranking), doesn't replace
+    `shortKey()` (both ride together — avatar for fast
+    recognition, short-key for verifiable identity).
+
+  Tests: 552 passing (541 → 552; +11 in `avatar.test.ts`).
+  Lint, typecheck, build clean. PWA precache 957 → 999 KiB.
+
+
 - **Camera-surveillance awareness gate on the invite share
   sheet.** Modern security cameras (workplace CCTV, doorbell
   cams, laptop webcams) can read QR codes from across a room
