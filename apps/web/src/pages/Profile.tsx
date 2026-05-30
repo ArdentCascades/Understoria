@@ -27,6 +27,7 @@ import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ContextualHint } from "@/components/ContextualHint";
+import { InviteShareSheet } from "@/components/InviteShareSheet";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EmptyState } from "@/components/EmptyState";
 import {
@@ -817,6 +818,7 @@ function InvitesSection({
   const { t } = useTranslation();
   const [issuing, setIssuing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
@@ -828,9 +830,14 @@ function InvitesSection({
       const { shareUrl: url } = await issueInvite({
         inviterKey: member.publicKey,
         inviterName: member.displayName,
+        // The post-issuance UX opens the share sheet right away so
+        // the QR is visible the moment the invite exists — that's
+        // when a member is most likely to want to hand it off in
+        // person.
         nodeId,
       });
       setShareUrl(url);
+      setShareSheetOpen(true);
     } catch (err) {
       setError(humanizeError(err));
     } finally {
@@ -896,6 +903,13 @@ function InvitesSection({
               onClick={() => handleCopy(shareUrl)}
             >
               {t("common.copy")}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary text-xs"
+              onClick={() => setShareSheetOpen(true)}
+            >
+              {t("profile.invites.showShareSheet")}
             </button>
             {copyStatus && (
               <span className="text-canopy-800 dark:text-canopy-200">
@@ -970,6 +984,14 @@ function InvitesSection({
           ))}
         </ul>
       )}
+
+      <InviteShareSheet
+        open={shareSheetOpen && shareUrl !== null}
+        url={shareUrl ?? ""}
+        shareTitle={t("profile.invites.shareSheet.shareTitle")}
+        shareText={t("profile.invites.shareSheet.shareText")}
+        onClose={() => setShareSheetOpen(false)}
+      />
     </section>
   );
 }

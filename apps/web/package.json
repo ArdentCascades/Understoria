@@ -21,6 +21,7 @@
     "dexie-react-hooks": "^1.1.7",
     "i18next": "^23.16.4",
     "i18next-browser-languagedetector": "^8.0.0",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.1.1",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@typescript-eslint/parser": "^8.15.0",

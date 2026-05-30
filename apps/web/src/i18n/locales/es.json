@@ -830,7 +830,22 @@
       "statusOpen": "Abierta",
       "statusRedeemed": "Canjeada",
       "statusRevoked": "Revocada",
-      "statusExpired": "Caducada"
+      "statusExpired": "Caducada",
+      "showShareSheet": "Mostrar código QR",
+      "shareSheet": {
+        "title": "Compartir esta invitación",
+        "intro": "Muestra el código QR en persona, o envía el enlace a una persona de confianza. Cualquiera con este enlace puede unirse — compártelo con cuidado.",
+        "qrAriaLabel": "Código QR con el enlace de invitación",
+        "qrFallback": "No se pudo generar el código QR. Usa el enlace de abajo.",
+        "urlLabel": "O copia el enlace",
+        "shareButton": "Abrir menú compartir",
+        "close": "Listo",
+        "shareTitle": "Únete a mi comunidad en Understoria",
+        "shareText": "Te invito a unirte a mi comunidad en Understoria.",
+        "statusShared": "Compartido.",
+        "statusCopied": "Enlace copiado al portapapeles.",
+        "statusFailed": "No se pudo compartir ni copiar. Selecciona el enlace y cópialo a mano."
+      }
     },
     "security": {
       "title": "Seguridad",
