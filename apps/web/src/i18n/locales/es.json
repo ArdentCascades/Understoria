@@ -791,7 +791,12 @@
       "intro": "Claro u oscuro. «Como el sistema» sigue la preferencia de tu dispositivo, útil si has configurado tu sistema para cambiar según la hora del día.",
       "system": "Como el sistema",
       "light": "Claro",
-      "dark": "Oscuro"
+      "dark": "Oscuro",
+      "textSizeTitle": "Tamaño del texto",
+      "textSizeIntro": "Se multiplica con el tamaño de texto de tu dispositivo: si lo has aumentado a nivel del sistema, las opciones de aquí se suman a eso.",
+      "default": "Predeterminado",
+      "larger": "Más grande",
+      "largest": "El más grande"
     },
     "node": {
       "title": "Nodo comunitario",

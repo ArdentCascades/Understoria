@@ -21,10 +21,26 @@
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { THEME_PREFERENCES, type ThemePreference } from "@/lib/theme";
+import { TEXT_SIZES, type TextSize } from "@/lib/textSize";
+
+// Each text-size label renders at the size it represents so the
+// choice is self-demonstrating. text-base = 1rem (default),
+// text-lg = 1.125rem (≈ Larger at 100%), text-xl = 1.25rem
+// (≈ Largest at 100%). Note: these labels stack with whatever
+// text-size class is on <html>, so under "Largest" the "Default"
+// button still appears at 1rem of the upsized base — that's
+// intentional. The relative size order between the three buttons
+// is what makes the affordance work, not absolute pixels.
+const TEXT_SIZE_LABEL_CLASS: Record<TextSize, string> = {
+  default: "text-base",
+  larger: "text-lg",
+  largest: "text-xl",
+};
 
 export function AppearanceSection() {
   const { t } = useTranslation();
-  const { themePreference, setThemePreference } = useApp();
+  const { themePreference, setThemePreference, textSize, setTextSize } =
+    useApp();
   return (
     <section className="card mb-4" aria-labelledby="appearance-section-title">
       <h2
@@ -36,6 +52,7 @@ export function AppearanceSection() {
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
         {t("profile.appearance.intro")}
       </p>
+
       <div
         role="radiogroup"
         aria-labelledby="appearance-section-title"
@@ -55,6 +72,46 @@ export function AppearanceSection() {
               className={selected ? "btn-primary" : "btn-secondary"}
             >
               {t(`profile.appearance.${pref}`)}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        className="my-4 border-t border-bark-200/60 dark:border-moss-800"
+        aria-hidden="true"
+      />
+
+      <h3
+        id="appearance-text-size-title"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+      >
+        {t("profile.appearance.textSizeTitle")}
+      </h3>
+      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+        {t("profile.appearance.textSizeIntro")}
+      </p>
+      <div
+        role="radiogroup"
+        aria-labelledby="appearance-text-size-title"
+        className="flex flex-wrap items-center gap-2"
+      >
+        {TEXT_SIZES.map((size: TextSize) => {
+          const selected = textSize === size;
+          return (
+            <button
+              key={size}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => {
+                void setTextSize(size);
+              }}
+              className={`${
+                selected ? "btn-primary" : "btn-secondary"
+              } ${TEXT_SIZE_LABEL_CLASS[size]}`}
+            >
+              {t(`profile.appearance.${size}`)}
             </button>
           );
         })}

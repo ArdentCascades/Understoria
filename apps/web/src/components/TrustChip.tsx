@@ -38,7 +38,7 @@ interface TrustChipProps {
 export function TrustChip({ status, count, compact = false }: TrustChipProps) {
   const { t } = useTranslation();
   const sizeClass = compact
-    ? "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[10px] font-medium"
+    ? "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[0.625rem] font-medium"
     : "chip";
   if (status === "trusted") {
     const label =
