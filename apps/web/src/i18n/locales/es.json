@@ -1,4 +1,7 @@
 {
+  "avatar": {
+    "label": "Avatar de persona para la clave {{shortKey}}"
+  },
   "availability": {
     "weekday_days": "Días entre semana",
     "weekday_evenings": "Tardes entre semana",
@@ -691,6 +694,7 @@
     },
     "about": {
       "title": "Sobre ti",
+      "avatarNote": "Esta pequeña planta es tu identidad, dibujada a partir de tu clave pública. Quien tenga la misma clave verá la misma planta. No se puede cambiar — así es como las demás personas te reconocen en la aplicación.",
       "name": "Nombre visible (un seudónimo está bien)",
       "skills": "Habilidades (separadas por comas)",
       "skillsPlaceholder": "cocinar, escuchar, español",

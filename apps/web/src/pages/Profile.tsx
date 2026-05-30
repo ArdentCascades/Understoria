@@ -50,6 +50,7 @@ import {
   enablePassphrase,
 } from "@/db/secrets";
 import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
+import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
 import { LanguageSection } from "@/components/LanguageSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
@@ -663,6 +664,12 @@ function ProfileEditor({ member }: { member: Member }) {
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
         {t("profile.about.title")}
       </h2>
+      <div className="mb-3 flex items-center gap-3">
+        <MemberAvatar publicKey={member.publicKey} size={64} />
+        <p className="text-xs text-moss-600 dark:text-moss-300">
+          {t("profile.about.avatarNote")}
+        </p>
+      </div>
       <form className="flex flex-col gap-3" onSubmit={handleSave}>
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">{t("profile.about.name")}</span>

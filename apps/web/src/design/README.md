@@ -156,3 +156,34 @@ flanked by a `<Sprig>` on each side. Used sparingly — currently only
 on `LockScreen` (the only canonical landing surface). Don't add it
 to in-app pages; the page-title hierarchy already names where you
 are.
+
+## Member avatars (frozen algorithm)
+
+`<MemberAvatar publicKey={...} size={...} />` renders a parametric
+botanical illustration deterministically derived from a member's
+Ed25519 public key — the avatar IS the public key in pictorial form.
+Same key → same plant, every device, forever.
+
+Four shape variants (sapling / leaf-cluster / sprig / branch) × leaf
+count (3–7) × tilt × primary fill (canopy/moss/bark 500–700) × accent
+fill × sprig decoration × leaf shape (round/elongated/scalloped) ×
+rotation. Selection is by modulo on the first 8 bytes of the public
+key. Lives in `lib/avatar.ts`.
+
+**The algorithm is frozen.** Changing leaf-count modulo, palette
+order, or shape ordering after members have started recognizing each
+other by avatar breaks recognition trust the same way changing
+display names would. Any future change requires a `docs/threat-model.md`
+§7 entry and explicit governance discussion.
+
+The avatar is information, not decoration: it identifies a member.
+It does NOT carry `data-decorative="true"` and is NOT hidden under
+`prefers-contrast: more`. The `aria-label` is the short-key
+fingerprint (`shortKey()`) so screen-reader users get the same
+identification handle sighted users get from the existing
+`shortKey` chrome.
+
+Display name is deliberately NOT in the derivation input — it's
+mutable, and including it would tie avatar identity to a non-
+canonical handle and would leak display-name entropy into the
+visual. Public key only.
