@@ -32,6 +32,16 @@
               matchMedia("(prefers-color-scheme: dark)").matches);
           if (dark) document.documentElement.classList.add("dark");
           var size = localStorage.getItem("understoria.text-size");
+          // "auto" or missing / unknown resolves via viewport. The
+          // (min-width: 1024px) query mirrors Tailwind's `lg`
+          // breakpoint; see lib/textSize.ts (WIDE_VIEWPORT_QUERY).
+          if (size !== "default" && size !== "larger" && size !== "largest") {
+            size =
+              typeof matchMedia === "function" &&
+              matchMedia("(min-width: 1024px)").matches
+                ? "larger"
+                : "default";
+          }
           if (size === "larger")
             document.documentElement.classList.add("text-larger");
           else if (size === "largest")

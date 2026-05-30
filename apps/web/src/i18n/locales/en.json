@@ -794,6 +794,8 @@
       "dark": "Dark",
       "textSizeTitle": "Text size",
       "textSizeIntro": "Multiplies with your device's text size — if you've made it larger system-wide, the larger options here stack on top.",
+      "auto": "Auto",
+      "autoSublabel": "On this screen, Auto shows {{resolved}}. Resize the window to see it switch.",
       "default": "Default",
       "larger": "Larger",
       "largest": "Largest"

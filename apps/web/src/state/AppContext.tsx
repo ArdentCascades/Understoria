@@ -73,8 +73,12 @@ import {
 import {
   applyTextSize,
   cacheTextSize,
-  isTextSize,
+  isTextSizePreference,
+  isWideViewport,
+  resolveTextSize,
+  subscribeViewportWidth,
   type TextSize,
+  type TextSizePreference,
 } from "@/lib/textSize";
 
 export interface AppContextValue {
@@ -104,8 +108,9 @@ export interface AppContextValue {
   refreshNodeConfig: () => Promise<void>;
   themePreference: ThemePreference;
   setThemePreference: (pref: ThemePreference) => Promise<void>;
+  textSizePreference: TextSizePreference;
   textSize: TextSize;
-  setTextSize: (size: TextSize) => Promise<void>;
+  setTextSizePreference: (pref: TextSizePreference) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -121,6 +126,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [nodeConfig, setNodeConfig] = useState<NodeConfig>(DEFAULT_NODE_CONFIG);
   const [themePreference, setThemePreferenceState] =
     useState<ThemePreference>("system");
+  const [textSizePreference, setTextSizePreferenceState] =
+    useState<TextSizePreference>("auto");
   const [textSize, setTextSizeState] = useState<TextSize>("default");
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -157,13 +164,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       applyTheme(resolveTheme(pref, systemPrefersDark()));
       cacheResolvedTheme(pref);
       // Same shape for text size — Dexie is the source of truth,
-      // localStorage is the no-FOUC cache.
+      // localStorage is the no-FOUC cache. Default preference is
+      // "auto" (larger on desktop, default on phone). Explicit
+      // values from v1 (PR #88) pass isTextSizePreference and are
+      // honored as-is.
       const rawSize = await getSetting(SETTING_KEYS.textSize);
-      const size: TextSize = isTextSize(rawSize) ? rawSize : "default";
+      const sizePref: TextSizePreference = isTextSizePreference(rawSize)
+        ? rawSize
+        : "auto";
+      const resolvedSize = resolveTextSize(sizePref, isWideViewport());
       if (cancelled) return;
-      setTextSizeState(size);
-      applyTextSize(size);
-      cacheTextSize(size);
+      setTextSizePreferenceState(sizePref);
+      setTextSizeState(resolvedSize);
+      applyTextSize(resolvedSize);
+      cacheTextSize(sizePref);
       // Only seed the demo community when the node isn't locked. Seeding
       // writes plaintext secret keys for demo members, which we don't want
       // to run while a user's real wrapped keys are present but sealed.
@@ -250,12 +264,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     cacheResolvedTheme(pref);
   }, []);
 
-  const setTextSize = useCallback(async (size: TextSize) => {
-    await setSetting(SETTING_KEYS.textSize, size);
-    setTextSizeState(size);
-    applyTextSize(size);
-    cacheTextSize(size);
-  }, []);
+  // When the preference is "auto", repaint on viewport-width
+  // change. The three explicit sizes ignore viewport, so skipping
+  // the subscription saves a no-op listener.
+  useEffect(() => {
+    if (textSizePreference !== "auto") return;
+    return subscribeViewportWidth((wide) => {
+      const resolved: TextSize = wide ? "larger" : "default";
+      setTextSizeState(resolved);
+      applyTextSize(resolved);
+    });
+  }, [textSizePreference]);
+
+  const setTextSizePreference = useCallback(
+    async (pref: TextSizePreference) => {
+      await setSetting(SETTING_KEYS.textSize, pref);
+      const resolved = resolveTextSize(pref, isWideViewport());
+      setTextSizePreferenceState(pref);
+      setTextSizeState(resolved);
+      applyTextSize(resolved);
+      cacheTextSize(pref);
+    },
+    [],
+  );
 
   const unlock = useCallback(
     async (passphrase: string) => {
@@ -356,8 +387,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshNodeConfig,
       themePreference,
       setThemePreference,
+      textSizePreference,
       textSize,
-      setTextSize,
+      setTextSizePreference,
     }),
     [
       ready,
@@ -384,8 +416,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshNodeConfig,
       themePreference,
       setThemePreference,
+      textSizePreference,
       textSize,
-      setTextSize,
+      setTextSizePreference,
     ],
   );
 
