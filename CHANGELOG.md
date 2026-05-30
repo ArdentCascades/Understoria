@@ -10,6 +10,45 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Invite share sheet with QR code + Web Share API.** When a
+  member generates an invite link on Profile → Invites, a share
+  sheet opens immediately with three affordances: a scannable
+  QR code (for handing off in person), the URL as selectable
+  text (with Copy), and a "Open share menu" button that uses
+  `navigator.share()` to invoke the native OS share sheet
+  (iOS / Android) with a clipboard fallback on desktop.
+  - **`lib/share.ts`** — wrapper around `navigator.share` that
+    returns a tagged `ShareResult` (`"shared"` | `"cancelled"`
+    | `"copied"` | `"failed"`). User-dismissed sheets return
+    `"cancelled"` silently; other rejections fall through to
+    clipboard so the link doesn't get lost.
+  - **`components/InviteQRCode.tsx`** — lazy-loads the `qrcode`
+    package via dynamic `import()` so its ~24 KB chunk is only
+    fetched when a member opens the share sheet. Always
+    renders black-on-white regardless of dark-mode preference;
+    cheap QR scanners expect maximum contrast and a white
+    quiet zone.
+  - **`components/InviteShareSheet.tsx`** — modal sheet mirroring
+    the `ConfirmDialog` pattern (backdrop click + Escape to
+    close, autofocus on Done so a stray Enter doesn't trigger
+    Share by accident). The sheet auto-opens immediately after
+    invite issuance — that's when a member is most likely to
+    want to hand the link off in person. A "Show QR code"
+    button on the existing share box re-opens the sheet.
+  - **i18n**: 13 new keys under `profile.invites.shareSheet.*`
+    + `profile.invites.showShareSheet` in en + es. Parity test
+    passes.
+  - **Threat model**: no new exposure surface — QR encodes the
+    same URL already displayed as text. Web Share API runs
+    in-OS; no third-party preview generator, no analytics,
+    no telemetry.
+  - **Tests**: 6 new in `share.test.ts` covering the four
+    `ShareResult` branches + the missing-clipboard case +
+    that AbortError doesn't fall through to clipboard.
+
+  PWA main precache stays unchanged; `qrcode` is a separate
+  ~24 KB chunk loaded on demand. No Dexie bump.
+
 - **Text-size preference in Profile → Appearance.** Three-step
   comfort setting (Default / Larger / Largest) that scales every
   rem-based size in the app — typography, stack-* spacing, button

@@ -830,7 +830,22 @@
       "statusOpen": "Open",
       "statusRedeemed": "Redeemed",
       "statusRevoked": "Revoked",
-      "statusExpired": "Expired"
+      "statusExpired": "Expired",
+      "showShareSheet": "Show QR code",
+      "shareSheet": {
+        "title": "Share this invite",
+        "intro": "Show the QR code in person, or send the link with one person you trust. Anyone with this link can join — share it carefully.",
+        "qrAriaLabel": "QR code containing the invite link",
+        "qrFallback": "Couldn't draw the QR code. Use the link below instead.",
+        "urlLabel": "Or copy the link",
+        "shareButton": "Open share menu",
+        "close": "Done",
+        "shareTitle": "Join my community on Understoria",
+        "shareText": "I'm inviting you to join my community on Understoria.",
+        "statusShared": "Shared.",
+        "statusCopied": "Link copied to your clipboard.",
+        "statusFailed": "Couldn't share or copy. Select the link and copy it manually."
+      }
     },
     "security": {
       "title": "Security",
