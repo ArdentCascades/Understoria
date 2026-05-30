@@ -10,6 +10,49 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Camera-surveillance awareness gate on the invite share
+  sheet.** Modern security cameras (workplace CCTV, doorbell
+  cams, laptop webcams) can read QR codes from across a room
+  using off-the-shelf vision models — QR is *designed* for
+  machine-readability. For the populations this app is built
+  for (organizers under employer camera surveillance, tenants
+  on cameras a landlord controls) this is routine, not edge-
+  case. The share sheet (PR #91) now opens with the QR + URL
+  hidden behind a plain-language prompt that names the threat
+  and offers two paths forward.
+  - **Two-state sheet**: gate (pre-reveal) → revealed.
+  - **Gate copy** is concrete and calm, not alarmist:
+    "Look around before you show this. Security cameras and
+    webcams can read QR codes from across a room. Once it's on
+    screen, anyone in camera view can save it and use it to
+    join your community themselves."
+  - **Three options on the gate**: "Show the invite" (primary),
+    "Send the link without showing it" (uses `navigator.share`
+    directly — URL never appears on screen, only routed through
+    the OS share sheet / clipboard), and "Not now" (close).
+  - **Re-prompts every time** the sheet opens (no persistent
+    dismissal). A member's surroundings can change between two
+    shares on the same device — the deliberate pause is per-
+    share, not per-device.
+  - **Autofocus on Cancel**, not on Reveal, so a stray Enter
+    keypress doesn't expose the invite. Keyboard members pay
+    one Tab to proceed; the safe default is the unsafe path
+    requiring active intent.
+  - **`useFocusTrap`** keeps Tab cycling inside the card,
+    matching the rest of the app's modal pattern.
+  - **No camera detection**: the app can't see the room and
+    pretending to would be false confidence. The threat-model
+    §7 entry records this as a deliberate non-feature.
+  - **i18n**: 6 new keys under
+    `profile.invites.shareSheet.cameraGate.*` in en + es;
+    parity test passes.
+  - **Threat model**: new §7 entry — "QR codes are camera-
+    surveillance targets" — documenting the threat, the
+    awareness-gate mitigation, the no-camera-detection
+    decision, and the URL-also-OCR-readable note. Future
+    "let's simplify the share flow" PRs will have prior
+    context to argue against.
+
 - **Invite share sheet with QR code + Web Share API.** When a
   member generates an invite link on Profile → Invites, a share
   sheet opens immediately with three affordances: a scannable

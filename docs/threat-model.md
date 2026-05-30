@@ -345,6 +345,45 @@ We are not trying to protect against:
   social-drift and spam-vector cost, and only ship with an
   explicit threat-model entry that supersedes this one.
 
+- **QR codes are camera-surveillance targets.** The invite share
+  sheet (PR #91) renders the invite URL as a QR code so it can
+  be scanned face-to-face. QR codes are *designed* for
+  machine-readability — high-contrast pattern, error correction,
+  no font rendering needed — which makes them the easiest
+  possible target for off-the-shelf computer vision. Modern
+  consumer cameras (workplace CCTV, doorbell cams, laptop
+  webcams, library / café surveillance) capture at resolutions
+  where a QR on a phone screen is decodable from 3–6 meters
+  with no special hardware. For the populations this app is
+  built for — organizers under camera surveillance by their
+  own employer, tenants on cameras a landlord controls — this
+  is a routine concern, not an edge case.
+  The mitigation shipped on the QR is a deliberate
+  awareness gate: the share sheet opens with the QR + URL
+  *hidden* behind a plain-language prompt naming the threat
+  ("Security cameras and webcams can read QR codes from across
+  a room. Once it's on screen, anyone in camera view can save
+  it…"). The member must explicitly tap "Show the invite" to
+  reveal. The pause itself is the value — the app cannot see
+  the room, so the member is the only one who can assess camera
+  context. The gate re-prompts on every share (no persistent
+  dismissal): the member's surroundings can change between
+  sessions on the same device. An escape hatch ("Send the link
+  without showing it") routes through `navigator.share()` /
+  clipboard directly so the URL never appears on screen for
+  cases where the member is sharing via Signal / Messages and
+  doesn't need the visual at all. Autofocus on the gate sits on
+  the Cancel button so a stray Enter doesn't reveal the invite.
+  The URL is also OCR-readable in principle, just less reliably
+  than the QR; it's behind the same gate.
+  What we explicitly do NOT do: attempt camera-presence
+  detection. The app has no way to see the member's
+  environment, and pretending to would be false confidence
+  worse than the current gate. Any future "auto-hide on
+  inactivity / time-limited display" addition would need its
+  own threat-model entry justifying why it doesn't disadvantage
+  slow scanners and members with motor impairments.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
