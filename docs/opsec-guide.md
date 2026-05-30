@@ -27,6 +27,29 @@ changes.
 - **Lock the app itself** if your device is ever handed around. (In
   settings: enable app lock — coming in a future release; for now use
   your phone's per-app lock if supported.)
+- **Trust the device, or don't open the app.** Understoria runs in
+  the browser, which means it can defend against people who *don't*
+  have access to your device (the threat model is built for that)
+  but it cannot defend against software running on the device
+  itself — malware, browser extensions exfiltrating page content,
+  stalkerware installed by an abusive partner, employer monitoring
+  software, parental-control tools, screen-recording suites. Any of
+  these can read whatever the app shows, including QR codes,
+  passphrases, and messages. **Web apps have no equivalent of
+  Android's `FLAG_SECURE` or iOS's `isSecureCoded` — no API exists
+  to block screenshots or screen recording from a browser, and the
+  project does not pretend otherwise.** Practical checklist before
+  opening the app on a given device: it has been in your physical
+  custody since the last reset or known-clean state; the OS is one
+  you installed yourself and is up to date; no unfamiliar browser
+  extensions are enabled; no remote-management software (MDM, IT
+  remote desktop) is running that you didn't install. If you can't
+  say yes to all four, treat anything you do in Understoria on
+  that device as readable by whoever installed the thing you can't
+  account for. If you suspect a device has been compromised after
+  you used the app on it, use the panic button (Profile →
+  Emergency → Hard purge) to wipe local state and rotate to a
+  fresh identity, then switch devices.
 
 ## On your accounts
 
