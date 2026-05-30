@@ -844,7 +844,15 @@
         "shareText": "I'm inviting you to join my community on Understoria.",
         "statusShared": "Shared.",
         "statusCopied": "Link copied to your clipboard.",
-        "statusFailed": "Couldn't share or copy. Select the link and copy it manually."
+        "statusFailed": "Couldn't share or copy. Select the link and copy it manually.",
+        "cameraGate": {
+          "title": "Look around before you show this",
+          "body": "Security cameras and webcams can read QR codes from across a room. Once it's on screen, anyone in camera view can save it and use it to join your community themselves.",
+          "followup": "This prompt comes up every time — your surroundings can change between one share and the next.",
+          "reveal": "Show the invite",
+          "shareWithoutShowing": "Send the link without showing it",
+          "cancel": "Not now"
+        }
       }
     },
     "security": {

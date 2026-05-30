@@ -844,7 +844,15 @@
         "shareText": "Te invito a unirte a mi comunidad en Understoria.",
         "statusShared": "Compartido.",
         "statusCopied": "Enlace copiado al portapapeles.",
-        "statusFailed": "No se pudo compartir ni copiar. Selecciona el enlace y cópialo a mano."
+        "statusFailed": "No se pudo compartir ni copiar. Selecciona el enlace y cópialo a mano.",
+        "cameraGate": {
+          "title": "Mira a tu alrededor antes de mostrar esto",
+          "body": "Las cámaras de seguridad y las cámaras web pueden leer códigos QR desde el otro lado de una habitación. Una vez en pantalla, cualquiera al alcance de la cámara puede guardarlo y usarlo para unirse a tu comunidad.",
+          "followup": "Este aviso aparece cada vez — tu entorno puede cambiar entre una invitación y la siguiente.",
+          "reveal": "Mostrar la invitación",
+          "shareWithoutShowing": "Enviar el enlace sin mostrarlo",
+          "cancel": "Ahora no"
+        }
       }
     },
     "security": {
