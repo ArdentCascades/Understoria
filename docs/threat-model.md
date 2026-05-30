@@ -302,6 +302,27 @@ We are not trying to protect against:
     If member federation ships later, chips should be opt-in
     per-member and the pattern-leak analysis above re-applied.
 
+- **Message search is local decrypt-and-scan, never an index
+  or a directory.** Members can search inside an individual
+  conversation and across the conversation list on `/messages`.
+  Both operations decrypt-and-scan at query time using the
+  current member's secret key — no plaintext search index is
+  ever persisted to IndexedDB. A locked session disables search
+  entirely (returns `[]` rather than partial results from the
+  cache, so a casual observer can't probe for matches without
+  the passphrase). The search surface only finds messages the
+  member already has on this device — there is no cross-node
+  message search, no federated index, no search across the
+  member list to start a new DM (that would supersede the
+  existing "messaging scoped to coordination context" entry
+  below and require its own write-up). What an attacker with
+  device-level access gains: nothing they didn't already have
+  — once the device is unlocked, every message is decryptable.
+  Pilot-scale (≤ ~5 000 messages) decrypt-and-scan completes
+  in well under 100 ms; if we ever need to scale past that, the
+  right next step is paged iteration, NOT a persisted index
+  (which would undo encrypted-at-rest).
+
 - **Messaging is scoped to coordination context, not a
   platform-wide social channel.** The "Reach out" button on
   `PostDetail` (PR #79) is anchored to a specific post — to
