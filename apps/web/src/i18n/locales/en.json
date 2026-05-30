@@ -851,7 +851,10 @@
           "followup": "This prompt comes up every time — your surroundings can change between one share and the next.",
           "reveal": "Show the invite",
           "shareWithoutShowing": "Send the link without showing it",
-          "cancel": "Not now"
+          "cancel": "Not now",
+          "notAvailable": "Your browser can't share or copy without showing the link. Tap \"Show the invite\" and copy it by hand instead.",
+          "statusCopied": "Link copied to your clipboard. Paste it into Signal, Messages, or wherever you want to send it — the link is not on screen.",
+          "statusFailed": "Your browser blocked the share and the clipboard. Tap \"Show the invite\" to copy it by hand."
         }
       }
     },

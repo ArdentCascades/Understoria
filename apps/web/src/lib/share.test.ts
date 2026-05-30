@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { shareUrl } from "./share";
+import { canShareUrl, shareUrl } from "./share";
 
 type NavigatorShape = {
   share?: (data: ShareData) => Promise<void>;
@@ -88,5 +88,40 @@ describe("share — shareUrl", () => {
     setNavigator({});
     const result = await shareUrl({ url: "https://example.test/x" });
     expect(result).toBe("failed");
+  });
+});
+
+describe("share — canShareUrl", () => {
+  afterEach(() => {
+    Object.defineProperty(globalThis, "navigator", {
+      value: ORIGINAL_NAVIGATOR,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it("returns true when navigator.share exists", () => {
+    setNavigator({ share: vi.fn() });
+    expect(canShareUrl()).toBe(true);
+  });
+
+  it("returns true when only clipboard.writeText exists", () => {
+    setNavigator({ clipboard: { writeText: vi.fn() } });
+    expect(canShareUrl()).toBe(true);
+  });
+
+  it("returns true when both exist", () => {
+    setNavigator({ share: vi.fn(), clipboard: { writeText: vi.fn() } });
+    expect(canShareUrl()).toBe(true);
+  });
+
+  it("returns false when neither exists", () => {
+    setNavigator({});
+    expect(canShareUrl()).toBe(false);
+  });
+
+  it("returns false when clipboard exists but writeText doesn't", () => {
+    setNavigator({ clipboard: {} });
+    expect(canShareUrl()).toBe(false);
   });
 });

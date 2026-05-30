@@ -37,6 +37,23 @@ export interface ShareUrlArgs {
   text?: string;
 }
 
+/** Returns true when the browser supports at least one path that
+ *  ships a URL off-device without rendering it on screen:
+ *  `navigator.share` (native share sheet) or
+ *  `navigator.clipboard.writeText` (silent clipboard write). Used
+ *  by the invite share sheet's camera-awareness gate to decide
+ *  whether the "Send the link without showing it" affordance is
+ *  honest. False = the option is a lie; surface that to the user
+ *  rather than letting them tap into nothing. */
+export function canShareUrl(): boolean {
+  const nav = typeof navigator !== "undefined" ? navigator : undefined;
+  if (!nav) return false;
+  if (typeof nav.share === "function") return true;
+  if (nav.clipboard && typeof nav.clipboard.writeText === "function")
+    return true;
+  return false;
+}
+
 export async function shareUrl(args: ShareUrlArgs): Promise<ShareResult> {
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
   if (nav && typeof nav.share === "function") {
