@@ -327,7 +327,7 @@ export default function BoardPage() {
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
-        <div className="pointer-events-auto flex gap-2 rounded-full bg-white/90 p-1 shadow-lg backdrop-blur dark:bg-moss-900/95">
+        <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (
             <button
               type="button"
