@@ -201,6 +201,18 @@ formal audit; the formal audit is one of the items in §6.
   (`aria-label` on the SVG) and the table; sighted users see
   only the curve. The table is wrapped in Tailwind's `sr-only`
   utility so it does not affect layout.
+- **`InviteShareSheet` modal pattern (PRs #91–#93)** —
+  `useFocusTrap` keeps Tab cycling inside the card. Escape and
+  the explicit Cancel / Done buttons are the only dismiss paths
+  (no backdrop click — the `jsx-a11y/click-events-have-key-events`
+  rule blocks the pattern, and matching the rest of the app's
+  modals is the right tradeoff). Autofocus targets the *dismiss*
+  button, not the primary action, so a stray Enter never reveals
+  the invite. When the "Send the link without showing it"
+  capability isn't available on the browser, the button is
+  `disabled` AND wired with `aria-describedby` pointing at the
+  inline explanation so screen-reader users hear *why* the
+  button is disabled, not just that it is.
 
 ## 6. Known gaps (tracked work)
 

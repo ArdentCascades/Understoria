@@ -276,14 +276,43 @@ they join.
 
 1. Go to **Profile → Invites you've issued**.
 2. Tap **Generate invite link**.
-3. Copy the link and send it to one person over a trusted channel —
-   Signal, in person, or written down. Not email, not plain text
-   message, not a group chat where other people can see.
-4. Tell them what the inviter-key fingerprint looks like (the app
-   shows it) so they can verify when they open the link.
+3. A **share sheet** opens. It will *not* show the QR code or the
+   link right away — you'll see a "Look around before you show
+   this" prompt first. That's deliberate: security cameras and
+   webcams can read QR codes from across a room, and once the code
+   is on screen anyone in camera view can save it. You get to
+   decide when (and if) to reveal it.
 
-You can revoke an unredeemed invite from the same page if you change
-your mind.
+You have three choices:
+
+- **Show the invite** — reveals the QR code and the link. Use this
+  when you're handing the invite off in person and you've checked
+  that no cameras can see your screen. The other person scans
+  the QR with their phone camera; they're in.
+- **Send the link without showing it** — uses your phone's native
+  share menu (Signal, Messages, Mail) or copies the link to your
+  clipboard silently. The link never appears on screen. This is
+  the right choice when you're sending the invite through an
+  encrypted app, and works in any environment.
+- **Not now** — closes the prompt. Generate again later if you
+  change your mind. Generated invites stay in the list below and
+  you can re-open the share sheet from "Show QR code" any time.
+
+A few things worth knowing:
+
+- The prompt **comes up every time** — there's no "don't show
+  this again" option. Your surroundings can change between one
+  share and the next.
+- The link is **single-use** and **expires in 14 days**. If
+  you've shared it and want to undo, tap **Revoke** on the invite
+  row before they redeem it.
+- Tell the person what your inviter-key fingerprint looks like
+  (the app shows it) so they can verify when they open the link.
+- Don't share invites over email, plain SMS, or group chats
+  others can see. Use Signal, in person, or written down.
+
+You can revoke an unredeemed invite from the same page if you
+change your mind.
 
 ## 14. Setting a passphrase
 
