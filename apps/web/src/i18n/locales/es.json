@@ -851,7 +851,10 @@
           "followup": "Este aviso aparece cada vez — tu entorno puede cambiar entre una invitación y la siguiente.",
           "reveal": "Mostrar la invitación",
           "shareWithoutShowing": "Enviar el enlace sin mostrarlo",
-          "cancel": "Ahora no"
+          "cancel": "Ahora no",
+          "notAvailable": "Tu navegador no puede compartir ni copiar sin mostrar el enlace. Toca «Mostrar la invitación» y cópialo a mano.",
+          "statusCopied": "Enlace copiado al portapapeles. Pégalo en Signal, Mensajes, o donde quieras enviarlo — el enlace no está en pantalla.",
+          "statusFailed": "Tu navegador bloqueó la opción de compartir y el portapapeles. Toca «Mostrar la invitación» para copiarlo a mano."
         }
       }
     },

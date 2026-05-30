@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 import { InviteQRCode } from "@/components/InviteQRCode";
-import { shareUrl, type ShareResult } from "@/lib/share";
+import { canShareUrl, shareUrl, type ShareResult } from "@/lib/share";
 
 // Modal sheet for sharing a freshly-generated invite.
 //
@@ -103,7 +103,7 @@ export function InviteShareSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  async function handleShare() {
+  async function handleShare(fromGate: boolean) {
     const result: ShareResult = await shareUrl({
       url,
       title: shareTitle,
@@ -111,15 +111,39 @@ export function InviteShareSheet({
     });
     switch (result) {
       case "shared":
-        setStatus(t("profile.invites.shareSheet.statusShared"));
-        break;
+        // Native share sheet succeeded — the member completed the
+        // handoff outside the app. Close the sheet so they're not
+        // stuck on a now-pointless dialog. (On the revealed view,
+        // we also close, since the QR + URL have served their
+        // purpose by now.)
+        onClose();
+        return;
       case "cancelled":
         break;
       case "copied":
-        setStatus(t("profile.invites.shareSheet.statusCopied"));
+        // Copy: keep the sheet open with a status. From the gate
+        // we need different copy than the revealed view because
+        // "the link" isn't visible — the message should tell
+        // the member what to do next.
+        setStatus(
+          t(
+            fromGate
+              ? "profile.invites.shareSheet.cameraGate.statusCopied"
+              : "profile.invites.shareSheet.statusCopied",
+          ),
+        );
         break;
       case "failed":
-        setStatus(t("profile.invites.shareSheet.statusFailed"));
+        // Failure from the gate: don't tell the member to "select
+        // the link" — it isn't on screen. Suggest the revealed
+        // path instead.
+        setStatus(
+          t(
+            fromGate
+              ? "profile.invites.shareSheet.cameraGate.statusFailed"
+              : "profile.invites.shareSheet.statusFailed",
+          ),
+        );
         break;
     }
   }
@@ -148,7 +172,7 @@ export function InviteShareSheet({
             url={url}
             status={status}
             onCopy={() => void handleCopy()}
-            onShare={() => void handleShare()}
+            onShare={() => void handleShare(false)}
             onClose={onClose}
             doneRef={doneRef}
             t={t}
@@ -156,8 +180,9 @@ export function InviteShareSheet({
         ) : (
           <GateView
             status={status}
+            canShare={canShareUrl()}
             onReveal={() => setRevealed(true)}
-            onShareWithoutShowing={() => void handleShare()}
+            onShareWithoutShowing={() => void handleShare(true)}
             onCancel={onClose}
             cancelRef={cancelRef}
             t={t}
@@ -174,6 +199,7 @@ export function InviteShareSheet({
 // OS share sheet or clipboard).
 function GateView({
   status,
+  canShare,
   onReveal,
   onShareWithoutShowing,
   onCancel,
@@ -181,6 +207,7 @@ function GateView({
   t,
 }: {
   status: string | null;
+  canShare: boolean;
   onReveal: () => void;
   onShareWithoutShowing: () => void;
   onCancel: () => void;
@@ -189,10 +216,23 @@ function GateView({
 }) {
   return (
     <>
-      <h2 id="share-sheet-title" className="text-lg font-semibold">
+      {/* Visual reinforcement of the message. Decorative — the
+       *  heading text already names the topic, so aria-hidden so
+       *  screen readers don't double-announce. Large + centered
+       *  for skim-reading. */}
+      <div
+        aria-hidden="true"
+        className="mb-2 text-center text-4xl leading-none"
+      >
+        📷
+      </div>
+      <h2
+        id="share-sheet-title"
+        className="text-center text-lg font-semibold"
+      >
         {t("profile.invites.shareSheet.cameraGate.title")}
       </h2>
-      <p className="mt-2 text-sm text-moss-700 dark:text-moss-200">
+      <p className="mt-3 text-sm text-moss-700 dark:text-moss-200">
         {t("profile.invites.shareSheet.cameraGate.body")}
       </p>
       <p className="mt-2 text-sm text-moss-600 dark:text-moss-300">
@@ -202,7 +242,7 @@ function GateView({
       {status && (
         <p
           role="status"
-          className="mt-3 text-xs text-canopy-800 dark:text-canopy-200"
+          className="mt-3 rounded-xl bg-canopy-50 px-3 py-2 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100"
         >
           {status}
         </p>
@@ -216,9 +256,21 @@ function GateView({
           type="button"
           className="btn-secondary"
           onClick={onShareWithoutShowing}
+          disabled={!canShare}
+          aria-describedby={
+            !canShare ? "share-without-showing-note" : undefined
+          }
         >
           {t("profile.invites.shareSheet.cameraGate.shareWithoutShowing")}
         </button>
+        {!canShare && (
+          <p
+            id="share-without-showing-note"
+            className="text-xs text-moss-600 dark:text-moss-400"
+          >
+            {t("profile.invites.shareSheet.cameraGate.notAvailable")}
+          </p>
+        )}
         <button
           ref={cancelRef}
           type="button"

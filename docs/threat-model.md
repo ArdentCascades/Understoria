@@ -372,10 +372,18 @@ We are not trying to protect against:
   without showing it") routes through `navigator.share()` /
   clipboard directly so the URL never appears on screen for
   cases where the member is sharing via Signal / Messages and
-  doesn't need the visual at all. Autofocus on the gate sits on
-  the Cancel button so a stray Enter doesn't reveal the invite.
-  The URL is also OCR-readable in principle, just less reliably
-  than the QR; it's behind the same gate.
+  doesn't need the visual at all. The "send without showing"
+  path runs a pre-flight check (`canShareUrl()`) for
+  `navigator.share` OR `navigator.clipboard.writeText`; if
+  neither is available (legacy browser, insecure context like
+  `http://` in some contexts, locked-down permissions), the
+  button is disabled with an inline explanation pointing the
+  member at the manual-copy path instead. False confidence is
+  worse than a clear "your browser can't do this — use the
+  other path." Autofocus on the gate sits on the Cancel button
+  so a stray Enter doesn't reveal the invite. The URL is also
+  OCR-readable in principle, just less reliably than the QR;
+  it's behind the same gate.
   What we explicitly do NOT do: attempt camera-presence
   detection. The app has no way to see the member's
   environment, and pretending to would be false confidence
