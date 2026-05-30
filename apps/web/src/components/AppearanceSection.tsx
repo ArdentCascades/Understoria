@@ -21,17 +21,18 @@
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { THEME_PREFERENCES, type ThemePreference } from "@/lib/theme";
-import { TEXT_SIZES, type TextSize } from "@/lib/textSize";
+import {
+  TEXT_SIZE_PREFERENCES,
+  type TextSize,
+  type TextSizePreference,
+} from "@/lib/textSize";
 
 // Each text-size label renders at the size it represents so the
-// choice is self-demonstrating. text-base = 1rem (default),
-// text-lg = 1.125rem (≈ Larger at 100%), text-xl = 1.25rem
-// (≈ Largest at 100%). Note: these labels stack with whatever
-// text-size class is on <html>, so under "Largest" the "Default"
-// button still appears at 1rem of the upsized base — that's
-// intentional. The relative size order between the three buttons
-// is what makes the affordance work, not absolute pixels.
-const TEXT_SIZE_LABEL_CLASS: Record<TextSize, string> = {
+// choice is self-demonstrating. Auto borrows the currently-resolved
+// size's class so its label visually matches what Auto is doing
+// right now. The relative size order between the buttons is what
+// makes the affordance work, not absolute pixels.
+const RESOLVED_LABEL_CLASS: Record<TextSize, string> = {
   default: "text-base",
   larger: "text-lg",
   largest: "text-xl",
@@ -39,8 +40,13 @@ const TEXT_SIZE_LABEL_CLASS: Record<TextSize, string> = {
 
 export function AppearanceSection() {
   const { t } = useTranslation();
-  const { themePreference, setThemePreference, textSize, setTextSize } =
-    useApp();
+  const {
+    themePreference,
+    setThemePreference,
+    textSizePreference,
+    textSize,
+    setTextSizePreference,
+  } = useApp();
   return (
     <section className="card mb-4" aria-labelledby="appearance-section-title">
       <h2
@@ -96,26 +102,39 @@ export function AppearanceSection() {
         aria-labelledby="appearance-text-size-title"
         className="flex flex-wrap items-center gap-2"
       >
-        {TEXT_SIZES.map((size: TextSize) => {
-          const selected = textSize === size;
+        {TEXT_SIZE_PREFERENCES.map((pref: TextSizePreference) => {
+          const selected = textSizePreference === pref;
+          // For Auto, mirror the resolved size's class so the label
+          // visually matches what Auto is currently doing.
+          const labelClass =
+            pref === "auto"
+              ? RESOLVED_LABEL_CLASS[textSize]
+              : RESOLVED_LABEL_CLASS[pref as TextSize];
           return (
             <button
-              key={size}
+              key={pref}
               type="button"
               role="radio"
               aria-checked={selected}
               onClick={() => {
-                void setTextSize(size);
+                void setTextSizePreference(pref);
               }}
               className={`${
                 selected ? "btn-primary" : "btn-secondary"
-              } ${TEXT_SIZE_LABEL_CLASS[size]}`}
+              } ${labelClass}`}
             >
-              {t(`profile.appearance.${size}`)}
+              {t(`profile.appearance.${pref}`)}
             </button>
           );
         })}
       </div>
+      {textSizePreference === "auto" && (
+        <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
+          {t("profile.appearance.autoSublabel", {
+            resolved: t(`profile.appearance.${textSize}`),
+          })}
+        </p>
+      )}
     </section>
   );
 }

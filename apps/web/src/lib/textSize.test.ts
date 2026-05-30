@@ -5,20 +5,55 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { applyTextSize, isTextSize, TEXT_SIZES } from "./textSize";
+import {
+  applyTextSize,
+  isTextSizePreference,
+  resolveTextSize,
+  TEXT_SIZE_PREFERENCES,
+} from "./textSize";
 
-describe("textSize — isTextSize", () => {
-  it("accepts the three valid values", () => {
-    for (const s of TEXT_SIZES) expect(isTextSize(s)).toBe(true);
+describe("textSize — isTextSizePreference", () => {
+  it("accepts the four valid values", () => {
+    for (const p of TEXT_SIZE_PREFERENCES) {
+      expect(isTextSizePreference(p)).toBe(true);
+    }
   });
   it("rejects everything else", () => {
-    expect(isTextSize("")).toBe(false);
-    expect(isTextSize("small")).toBe(false);
-    expect(isTextSize("large")).toBe(false);
-    expect(isTextSize(undefined)).toBe(false);
-    expect(isTextSize(null)).toBe(false);
-    expect(isTextSize(1)).toBe(false);
-    expect(isTextSize({})).toBe(false);
+    expect(isTextSizePreference("")).toBe(false);
+    expect(isTextSizePreference("small")).toBe(false);
+    expect(isTextSizePreference("medium")).toBe(false);
+    expect(isTextSizePreference("large")).toBe(false);
+    expect(isTextSizePreference(undefined)).toBe(false);
+    expect(isTextSizePreference(null)).toBe(false);
+    expect(isTextSizePreference(1)).toBe(false);
+    expect(isTextSizePreference({})).toBe(false);
+  });
+});
+
+describe("textSize — resolveTextSize", () => {
+  it("auto + wide viewport → larger", () => {
+    expect(resolveTextSize("auto", true)).toBe("larger");
+  });
+  it("auto + narrow viewport → default", () => {
+    expect(resolveTextSize("auto", false)).toBe("default");
+  });
+  it("explicit default ignores viewport (wide)", () => {
+    expect(resolveTextSize("default", true)).toBe("default");
+  });
+  it("explicit default ignores viewport (narrow)", () => {
+    expect(resolveTextSize("default", false)).toBe("default");
+  });
+  it("explicit larger ignores viewport (wide)", () => {
+    expect(resolveTextSize("larger", true)).toBe("larger");
+  });
+  it("explicit larger ignores viewport (narrow)", () => {
+    expect(resolveTextSize("larger", false)).toBe("larger");
+  });
+  it("explicit largest ignores viewport (wide)", () => {
+    expect(resolveTextSize("largest", true)).toBe("largest");
+  });
+  it("explicit largest ignores viewport (narrow)", () => {
+    expect(resolveTextSize("largest", false)).toBe("largest");
   });
 });
 

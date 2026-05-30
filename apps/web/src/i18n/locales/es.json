@@ -794,6 +794,8 @@
       "dark": "Oscuro",
       "textSizeTitle": "Tamaño del texto",
       "textSizeIntro": "Se multiplica con el tamaño de texto de tu dispositivo: si lo has aumentado a nivel del sistema, las opciones de aquí se suman a eso.",
+      "auto": "Automático",
+      "autoSublabel": "En esta pantalla, Automático muestra {{resolved}}. Cambia el tamaño de la ventana para ver el cambio.",
       "default": "Predeterminado",
       "larger": "Más grande",
       "largest": "El más grande"

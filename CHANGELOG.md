@@ -61,6 +61,38 @@ include breaking changes.
   Tests: 522 passing (515 → 522; +7). Lint, typecheck, build
   clean. PWA precache 955 → 957 KiB.
 
+  **Follow-up in the same PR — `auto` preference, larger on
+  desktop by default.** The default text-size for first-time
+  visitors is now `auto`, which resolves to `larger` on viewports
+  ≥1024px (Tailwind's `lg` — desktops + tablet-landscape) and
+  `default` on anything narrower. Members who already explicitly
+  picked Default / Larger / Largest in v1 of the feature keep
+  their pick — `auto` is the new value for the unset case, not
+  an upgrade path.
+  - `TextSizePreference = "auto" | "default" | "larger" | "largest"`
+    is the user pick; `TextSize` stays the resolved value.
+    `resolveTextSize(pref, wide)` is a pure resolver (8 truth-
+    table tests).
+  - `AppContext` subscribes to viewport-width changes via
+    `matchMedia` only while pref === `auto` — switching to an
+    explicit size cancels the subscription (mirrors the theme
+    `system` pattern). A live window resize updates the
+    resolved size without reloading.
+  - The Auto button on Profile → Appearance renders at the
+    currently-resolved size's class (`text-base` on phone,
+    `text-lg` on desktop) and a small sublabel under the
+    radiogroup reads "On this screen, Auto shows {{resolved}}.
+    Resize the window to see it switch."
+  - The no-FOUC inline script in `index.html` was extended to
+    perform the viewport check synchronously before first
+    paint, so a fresh visitor on desktop sees the right size
+    on the first frame.
+  - 2 new i18n keys (`auto`, `autoSublabel`) in en + es;
+    parity test passes.
+  - Tests: 530 passing (522 → 530; +8 in textSize.test.ts
+    covering the resolver truth table + the auto validator
+    case). PWA precache 957 → 959 KiB.
+
 - **Message search — local decrypt-and-scan across the conversation
   list and inside each thread.** Adds two search surfaces while
   preserving the messaging-scope principle recorded in
