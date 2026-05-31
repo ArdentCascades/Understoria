@@ -177,6 +177,24 @@
         "month": " Recurs monthly.",
         "event": " Recurs per event.",
         "cycle": " Recurs each cycle."
+      },
+      "filters": {
+        "search": {
+          "placeholder": "Search templates",
+          "ariaLabel": "Search templates by name or description"
+        },
+        "category": {
+          "ariaLabel": "Filter templates by category",
+          "all": "All categories"
+        },
+        "setupTime": {
+          "ariaLabel": "Filter templates by setup time",
+          "all": "Any setup time",
+          "quick": "Quick (≤10h)",
+          "medium": "Medium (10–25h)",
+          "bigger": "Bigger (25h+)"
+        },
+        "empty": "No templates match. Try clearing a filter, or start from scratch below."
       }
     },
     "detail": {
