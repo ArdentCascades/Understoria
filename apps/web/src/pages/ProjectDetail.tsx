@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -40,6 +40,9 @@ import {
   unclaimProjectTask,
 } from "@/db/projects";
 import { humanizeError } from "@/lib/humanizeError";
+import { matchesQuery } from "@/lib/messageSearch";
+import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
+import { HighlightedText } from "@/components/HighlightedText";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { formatDeadline, formatHours, formatRelativeTime } from "@/lib/format";
 import { taskCheckInState } from "@/lib/taskCheckInState";
@@ -80,6 +83,20 @@ export default function ProjectDetailPage() {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  // Per-project task search + status filter. Both are session-only
+  // (no URL, no Dexie, no localStorage) — opening a project page
+  // always starts with a fresh "All" filter and an empty query.
+  // The 250 ms debounce matches the Board/Messages search pattern;
+  // small enough to feel live, long enough to skip mid-word
+  // re-filters.
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedQuery(query), 250);
+    return () => window.clearTimeout(id);
+  }, [query]);
 
   const project = useMemo(
     () => projects.find((p) => p.id === id) ?? null,
@@ -92,6 +109,22 @@ export default function ProjectDetailPage() {
         .sort((a, b) => a.createdAt - b.createdAt),
     [projectTasks, id],
   );
+  // Compose the status pill with the debounced search. `matchesQuery`
+  // is the shared case-insensitive trimmed substring matcher used
+  // across Board and Messages; the empty-query short-circuit is
+  // hoisted here so unfiltered scrolling stays cheap.
+  const trimmedQuery = debouncedQuery.trim();
+  const visibleTasks = useMemo(() => {
+    return tasks
+      .filter((task) => matchesFilter(task, taskFilter))
+      .filter((task) => {
+        if (trimmedQuery === "") return true;
+        return matchesQuery(
+          `${task.title} ${task.description ?? ""}`,
+          trimmedQuery,
+        );
+      });
+  }, [tasks, taskFilter, trimmedQuery]);
   // Derive the set of comment ids with an open dispute proposal so
   // TaskComments can render the "Flagged" chip and hide the Flag
   // button. Computed in memory from the proposals already loaded in
@@ -333,28 +366,91 @@ export default function ProjectDetailPage() {
             />
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {tasks.map((task) => {
-              const checkInState = taskCheckInState(task, nodeConfig);
-              return (
-                <li key={task.id}>
-                  <TaskRow
-                    task={task}
-                    isOrganizer={isOrg}
-                    acceptingClaims={project.status === "active"}
-                    projectStatus={project.status}
-                    currentKey={currentMember?.publicKey}
-                    memberMap={memberMap}
-                    nodeId={nodeId}
-                    onRun={run}
-                    needsMoreHands={checkInState === "needs_more_hands"}
-                    allTasks={tasks}
-                    flaggedCommentIds={flaggedCommentIds}
-                  />
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            <label className="mb-2 block">
+              <span className="sr-only">
+                {t("projects.detail.taskSearch.ariaLabel")}
+              </span>
+              <input
+                type="search"
+                className="input"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("projects.detail.taskSearch.placeholder")}
+              />
+            </label>
+            <div
+              className="mb-3 flex flex-wrap gap-2"
+              role="group"
+              aria-label={t("projects.detail.taskSearch.ariaLabel")}
+            >
+              {(
+                [
+                  { value: "all", label: t("projects.detail.taskFilter.all") },
+                  { value: "open", label: t("projects.detail.taskFilter.open") },
+                  {
+                    value: "in_progress",
+                    label: t("projects.detail.taskFilter.inProgress"),
+                  },
+                  { value: "done", label: t("projects.detail.taskFilter.done") },
+                ] as { value: TaskFilter; label: string }[]
+              ).map(({ value, label }) => {
+                const active = taskFilter === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setTaskFilter(value)}
+                    aria-pressed={active}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                      active
+                        ? "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100"
+                        : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            {visibleTasks.length === 0 ? (
+              <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+                {trimmedQuery !== ""
+                  ? t("projects.detail.taskFilter.empty.search")
+                  : taskFilter === "open"
+                    ? t("projects.detail.taskFilter.empty.open")
+                    : taskFilter === "in_progress"
+                      ? t("projects.detail.taskFilter.empty.inProgress")
+                      : taskFilter === "done"
+                        ? t("projects.detail.taskFilter.empty.done")
+                        : null}
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {visibleTasks.map((task) => {
+                  const checkInState = taskCheckInState(task, nodeConfig);
+                  return (
+                    <li key={task.id}>
+                      <TaskRow
+                        task={task}
+                        isOrganizer={isOrg}
+                        acceptingClaims={project.status === "active"}
+                        projectStatus={project.status}
+                        currentKey={currentMember?.publicKey}
+                        memberMap={memberMap}
+                        nodeId={nodeId}
+                        onRun={run}
+                        needsMoreHands={checkInState === "needs_more_hands"}
+                        allTasks={tasks}
+                        flaggedCommentIds={flaggedCommentIds}
+                        searchQuery={debouncedQuery}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </>
         )}
       </section>
 
@@ -644,6 +740,7 @@ function TaskRow({
   needsMoreHands,
   allTasks,
   flaggedCommentIds,
+  searchQuery,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -656,6 +753,11 @@ function TaskRow({
   needsMoreHands: boolean;
   allTasks: readonly ProjectTask[];
   flaggedCommentIds: ReadonlySet<string>;
+  /** Optional active search query — when non-empty, every match in the
+   *  task title is wrapped in <mark> via HighlightedText so the member
+   *  sees why this row matched. Description stays plain for v1 — the
+   *  title is enough for finding tasks at a glance. */
+  searchQuery?: string;
 }) {
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
@@ -808,7 +910,13 @@ function TaskRow({
           </span>
         )}
       </div>
-      <h3 className="text-base font-semibold leading-snug">{task.title}</h3>
+      <h3 className="text-base font-semibold leading-snug">
+        {searchQuery && searchQuery.trim() !== "" ? (
+          <HighlightedText text={task.title} query={searchQuery} />
+        ) : (
+          task.title
+        )}
+      </h3>
       {task.description && (
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {task.description}

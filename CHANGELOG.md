@@ -10,6 +10,50 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Per-project task search + four-pill status filter.** Each
+  project's detail page now renders a debounced search input and
+  a four-pill status filter row (`All` / `Open` / `In progress`
+  / `Done`) directly under the "Tasks" heading. The search and
+  the filter compose via AND — typing "fridge" with the `Open`
+  pill selected shows only unclaimed tasks whose title or
+  description contains "fridge." The matched substring is
+  highlighted in each task's title with the project's existing
+  amber `<mark>` style so a member can see at a glance why a row
+  matched.
+  - **Four design decisions, deliberately scoped down for v1.**
+    (1) The controls are always visible when the project has at
+    least one task — no conditional rendering based on task
+    count, because hiding a search input "until you have N
+    tasks" makes the page feel like it shifts under you. (2) The
+    default filter on every page load is `All`, with no
+    personalization by role; an organizer and a member both see
+    the same starting view. (3) State is session-only — opening
+    the page always starts with an empty query and the `All`
+    pill selected, with no URL parameters, no `localStorage`,
+    and no Dexie persistence. (4) The `In progress` pill bundles
+    `claimed` + `awaiting_confirmation` together because they're
+    both "somebody's working on it"; `blocked` stays accessible
+    via `All` and via search, since pilots have a handful of
+    blocked tasks at most.
+  - **Reuses two existing, already-tested primitives.**
+    `matchesQuery` from `apps/web/src/lib/messageSearch.ts`
+    (14 unit tests, case-insensitive, trimmed, empty-query
+    short-circuit) does the matching against
+    `task.title + " " + task.description`; `HighlightedText`
+    from `apps/web/src/components/HighlightedText.tsx` does the
+    `<mark>` wrapping. The new `matchesFilter` helper lives in
+    `apps/web/src/lib/taskFilter.ts` with its own four-branch
+    unit test, so the page component stays declarative.
+  - **Three filter-specific empty states + one search empty
+    state.** When the query matches nothing, the page shows
+    "Nothing matches your search." When a non-`All` pill matches
+    nothing (and the query is empty), the page shows one of
+    "No open tasks right now." / "No tasks in progress." /
+    "No tasks done yet." The existing "this project has no
+    tasks at all" empty state is untouched — that branch keeps
+    its full illustration card. Ten new i18n keys in en + es;
+    the parity test still passes.
+
 - **Search bar on the Community Board.** A new debounced search
   input now sits above the Board's existing filter row. Typing
   narrows the currently-visible tab's list (Needs, Offers, or

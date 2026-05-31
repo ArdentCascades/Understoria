@@ -200,7 +200,23 @@
       "paused": "Paused. {{note}}",
       "deadline": "Deadline",
       "area": "Area: {{area}}",
-      "contributors": "Contributors: {{count}}"
+      "contributors": "Contributors: {{count}}",
+      "taskSearch": {
+        "placeholder": "Search tasks",
+        "ariaLabel": "Search tasks"
+      },
+      "taskFilter": {
+        "all": "All",
+        "open": "Open",
+        "inProgress": "In progress",
+        "done": "Done",
+        "empty": {
+          "search": "Nothing matches your search.",
+          "open": "No open tasks right now.",
+          "inProgress": "No tasks in progress.",
+          "done": "No tasks done yet."
+        }
+      }
     },
     "task": {
       "claim": "Claim this task",
