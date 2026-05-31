@@ -441,6 +441,72 @@ We are not trying to protect against:
   entry and needs to explain how it doesn't create the false-
   confidence problem named above.
 
+- **In-app URLs reveal client-side navigation to corporate MITM
+  proxies, browser history, and address-bar onlookers.** The
+  PWA uses BrowserRouter, so client routes appear in the URL
+  bar — `/?tab=projects`, `/post/<id>`, `/project/<id>`,
+  `/messages/<memberKey>`, `/member/<publicKey>`. **What an
+  on-path observer can see depends sharply on who they are:**
+  - **An ISP or generic network observer** sees the hostname
+    only (DNS + TLS SNI). The URL path and query string are
+    encrypted inside HTTPS — they cannot see `/?tab=projects`
+    or `/messages/<key>` from network observation alone. This
+    is already covered by §4 (Transport) + the HTTPS-everywhere
+    posture.
+  - **A corporate MITM proxy** (employer-installed TLS-
+    intercepting middlebox with its root CA on the device) sees
+    the full URL on the initial page load and on every API
+    request to the community node. They can log
+    `/messages/abc1…2def` and correlate it back to "this member
+    DMed this counterparty." For workplace-organizing pilots
+    this is the highest-impact observer in the URL surface.
+  - **The community-node operator** receives the initial page-
+    load path as a `GET` request. The project's minimal-logging
+    posture (§6, Agent 4 task 4) doesn't log paths, but a node
+    operator who fronts the dist bundle with Cloudflare or a
+    generic Nginx logger may capture them by accident.
+  - **Anyone with device access** (theft, seizure, household
+    member) can read URLs from the browser history database,
+    cached service-worker entries, and browser-sync stores.
+  - **Anyone with screen visibility** (shoulder-surfer, camera,
+    screen-share) reads the address bar in real time — same
+    threat surface as the QR-code camera entry above.
+
+  **What we have not done** and the reasoning:
+  - We have NOT switched to hash-based routing (`/#/messages/…`)
+    even though hash fragments are never sent to the server.
+    The trade-off: hash routing would defend against the node-
+    operator-logging case but doesn't help against MITM,
+    browser history, or address-bar visibility (the harder
+    cases). For tab navigation (`/?tab=projects`) the
+    information content is too low to justify the cost. For
+    member-identifying routes (`/messages/<key>`,
+    `/member/<key>`) the case is real and is tracked as a
+    candidate change — switching just those routes to hash-
+    based would meaningfully shrink the node-operator and
+    casual-onlooker surface. Not blocked, not committed.
+  - We have NOT obscured the path text (e.g. `/?v=a8f3c2`
+    instead of `/?tab=projects`). It doesn't actually defend
+    against any of the observers above: MITM still sees the
+    full URL, browser history still stores it, address bar
+    still shows it. It only costs shareability and break the
+    intuition of the back / forward affordances.
+  - We have NOT removed URL state entirely. The shareability
+    and browser-history semantics are real organizing utility
+    — a Signal handoff "see this post: …/post/abc" is a
+    common pattern.
+
+  **What the actual defense is**: the opsec-guide.md "Trust the
+  device, or don't open the app" item — clean device, no
+  corporate MITM, in physical custody. The panic button purges
+  device-side state. Members worried about address-bar /
+  shoulder-surfing onlookers should treat the URL bar the same
+  way the camera-gate entry above treats the QR code: glance
+  around before navigating to a sensitive route. Future hash-
+  routing work on member-identifying routes (if shipped) gets
+  its own entry that supersedes this paragraph for those
+  specific routes.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
