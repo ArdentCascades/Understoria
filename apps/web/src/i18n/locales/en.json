@@ -180,6 +180,9 @@
     },
     "task": {
       "claim": "Claim this task",
+      "notClaimablePlanning": "This project is still planning — the organizer hasn't launched it yet.",
+      "notClaimablePaused": "This project is paused — no new claims right now.",
+      "notClaimableOther": "This project isn't accepting claims right now.",
       "release": "Release claim",
       "markDone": "Mark complete",
       "confirm": "Confirm completion",

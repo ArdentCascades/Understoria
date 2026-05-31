@@ -180,6 +180,9 @@
     },
     "task": {
       "claim": "Tomar esta tarea",
+      "notClaimablePlanning": "Este proyecto sigue en planificación — quien organiza aún no lo ha lanzado.",
+      "notClaimablePaused": "Este proyecto está en pausa — no acepta nuevas tomas por ahora.",
+      "notClaimableOther": "Este proyecto no acepta tomas en este momento.",
       "release": "Soltar mi compromiso",
       "markDone": "Marcar completada",
       "confirm": "Confirmar completada",

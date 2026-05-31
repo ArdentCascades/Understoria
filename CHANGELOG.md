@@ -9,6 +9,26 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Claim button on planning / paused projects.** Pilot-reported:
+  members viewing a project in planning status saw a Claim button
+  on each open task, but clicking it failed with the unhelpful
+  generic error "Project isn't accepting claims right now." The
+  button checked task-level state (`status === "open"`) and
+  organizer-membership but NOT the project's lifecycle status —
+  so a non-organizer member tapping Claim on a planning project's
+  task got the back-end rejection as a wall instead of an
+  explanation. Now: the Claim button is gated on
+  `project.status === "active"` too, and when the project isn't
+  accepting claims, an inline explanatory chip takes its place
+  — different copy for planning ("This project is still planning
+  — the organizer hasn't launched it yet"), paused ("This project
+  is paused — no new claims right now"), and other ("This project
+  isn't accepting claims right now"). The back-end check stays
+  as a safety net; the UI just stops setting members up to hit
+  it. Organizers see the same launch button they already had in
+  `OrganizerControls`. 3 new i18n keys in en + es; parity passes.
+
 ### Changed
 - **Invite share gate: "Send the link without showing it" is now
   the visually-primary path.** The camera-gate work (PRs #92–93)

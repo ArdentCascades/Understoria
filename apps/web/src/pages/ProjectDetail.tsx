@@ -337,6 +337,8 @@ export default function ProjectDetailPage() {
                   <TaskRow
                     task={task}
                     isOrganizer={isOrg}
+                    acceptingClaims={project.status === "active"}
+                    projectStatus={project.status}
                     currentKey={currentMember?.publicKey}
                     memberMap={memberMap}
                     nodeId={nodeId}
@@ -575,6 +577,8 @@ function OrganizerControls({
 function TaskRow({
   task,
   isOrganizer,
+  acceptingClaims,
+  projectStatus,
   currentKey,
   memberMap,
   nodeId,
@@ -585,6 +589,8 @@ function TaskRow({
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
+  acceptingClaims: boolean;
+  projectStatus: Project["status"];
   currentKey: string | undefined;
   memberMap: Map<string, string>;
   nodeId: string;
@@ -770,8 +776,8 @@ function TaskRow({
             })}
           </p>
         ) : null)}
-      <div className="flex flex-wrap gap-2">
-        {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && (
+      <div className="flex flex-wrap items-center gap-2">
+        {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && acceptingClaims && (
           <button
             type="button"
             className="btn-primary"
@@ -781,6 +787,15 @@ function TaskRow({
           >
             {pending ? t("common.working") : t("projects.task.claim")}
           </button>
+        )}
+        {task.status === "open" && !isOrganizer && !acceptingClaims && (
+          <p className="text-xs text-moss-600 dark:text-moss-300">
+            {projectStatus === "planning"
+              ? t("projects.task.notClaimablePlanning")
+              : projectStatus === "paused"
+                ? t("projects.task.notClaimablePaused")
+                : t("projects.task.notClaimableOther")}
+          </p>
         )}
         {task.status === "open" && isOrganizer && (
           <button
