@@ -9,6 +9,69 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Invite share gate: "Send the link without showing it" is now
+  the visually-primary path.** The camera-gate work (PRs #92–93)
+  shipped with "Show the invite" as the primary call-to-action
+  and the safer share-without-showing path as the secondary peer
+  option. Review of the threat model surfaced a second, related
+  threat: device-level compromise — malware, browser extensions,
+  stalkerware, employer monitoring software — can read whatever
+  the app renders, including the QR code and URL. Web apps have
+  no API to block screenshots or screen recording from the
+  browser (no PWA equivalent of Android `FLAG_SECURE` or iOS
+  `isSecureCoded`), so the only honest defense is to keep the
+  payload off the framebuffer entirely. The share-without-
+  showing path does exactly that; it should therefore be the
+  default.
+  - **Visual hierarchy reversal**: Send-without-showing is
+    `btn-primary` on top; Show-the-invite is `btn-secondary` in
+    the middle; Cancel stays as the ghost button on the bottom.
+    When `canShareUrl()` is false (legacy browser, no
+    clipboard), the disabled state on Send-without-showing stays
+    in the primary visual slot with its explanation, and
+    Show-the-invite gets the primary class so the "do something"
+    affordance is still clear. The visual *order* never changes
+    so the teaching ("the safer path is listed first") is
+    consistent.
+  - **Autofocus tracks the safest available action**:
+    Send-without-showing when available, Cancel when not. A
+    stray Enter ships the link safely or closes the sheet —
+    never reveals.
+
+### Added
+- **Threat-model §7 entry: "Device-level compromise is out of
+  scope."** New bullet making the boundary explicit. Names the
+  threat (malware, browser extensions, stalkerware, employer
+  monitoring, screen-recording suites), states plainly that web
+  apps have no API to defend against an attacker with code
+  execution on the same device, names the alternatives that
+  *don't* work (DRM hacks only block video DRM; flickering
+  defeats accessibility and is trivially bypassed; CSP protects
+  against page-injected scripts but not the user's own OS), and
+  records why we don't ship "screenshot protection" framing —
+  the same "false confidence is worse than honest boundary"
+  principle that informed the camera-presence-detection
+  rejection. Tells the member what to do: clean device, clean
+  OS, no unfamiliar extensions; if compromise is suspected,
+  panic-purge and rotate identity. Any future proposal that
+  would imply otherwise (a "secure share mode," watermark
+  overlay, animated QR, etc.) needs to address the false-
+  confidence problem named in the entry.
+- **`opsec-guide.md` "On your device" — new bullet: "Trust the
+  device, or don't open the app."** Concrete checklist
+  (physical custody since last reset, OS you installed, no
+  unfamiliar extensions, no remote-management software you
+  didn't install). Explicit acknowledgment that PWAs have no
+  equivalent of `FLAG_SECURE` / `isSecureCoded` so members
+  understand the boundary. Practical fallback: panic purge if
+  compromise is suspected.
+- **Threat-model camera-surveillance entry updated** to note
+  the share-without-showing path is now the visually-primary
+  default and the autofocus tracks the safest-available
+  button, so future readers understand the current behavior
+  matches the threat hierarchy.
+
 ### Added
 - **Deterministic member avatars derived from public keys.** Each
   member now has a parametric botanical illustration as their

@@ -372,7 +372,13 @@ We are not trying to protect against:
   without showing it") routes through `navigator.share()` /
   clipboard directly so the URL never appears on screen for
   cases where the member is sharing via Signal / Messages and
-  doesn't need the visual at all. The "send without showing"
+  doesn't need the visual at all. **The "Send the link without
+  showing it" path is the visually-primary action on the gate**
+  (PR after #94) — both the camera threat and the device-
+  compromise threat are minimized when the URL never lands on
+  the framebuffer; the on-screen reveal is the explicit "I
+  trust this device and this room" path, not the default. The
+  "send without showing"
   path runs a pre-flight check (`canShareUrl()`) for
   `navigator.share` OR `navigator.clipboard.writeText`; if
   neither is available (legacy browser, insecure context like
@@ -380,8 +386,10 @@ We are not trying to protect against:
   button is disabled with an inline explanation pointing the
   member at the manual-copy path instead. False confidence is
   worse than a clear "your browser can't do this — use the
-  other path." Autofocus on the gate sits on the Cancel button
-  so a stray Enter doesn't reveal the invite. The URL is also
+  other path." Autofocus targets the safer-available button —
+  the share-without-showing button when it's available, the
+  Cancel button when it isn't — so a stray Enter ships safely
+  or closes, never reveals. The URL is also
   OCR-readable in principle, just less reliably than the QR;
   it's behind the same gate.
   What we explicitly do NOT do: attempt camera-presence
@@ -391,6 +399,47 @@ We are not trying to protect against:
   inactivity / time-limited display" addition would need its
   own threat-model entry justifying why it doesn't disadvantage
   slow scanners and members with motor impairments.
+
+- **Device-level compromise is out of scope.** The camera-gate
+  entry above protects against an *external* observer (CCTV,
+  doorbell cam, line-of-sight surveillance). It does NOT
+  protect against an attacker who already has code execution
+  on the same device: malware, stalkerware, browser extensions
+  exfiltrating page content, employer-installed monitoring
+  software, screen-recording suites, OS-level capture tools.
+  Any of these can read the QR code, the URL, the member's
+  passphrase as it's typed, the messages in clear view, the
+  exchange details, the entire app. The threat is real and
+  routine for the populations we serve — workplace MDM,
+  parental-control software, jealous-partner stalkerware — but
+  **web apps have no API to defend against it.** Native iOS /
+  Android apps can set `FLAG_SECURE` /
+  `UIView.isSecureCoded` to block screenshots and screen
+  recording at the OS level; PWAs in browsers have no
+  equivalent. None of the alternatives work: DRM-style hacks
+  (Encrypted Media Extensions) only block video DRM, not
+  arbitrary content; flickering / rapid redraw defeats
+  accessibility and slow scanners and is trivially bypassed by
+  any malware capable of recording at > 2 FPS; CSP / sandboxing
+  protects against page-injected scripts, not the user's own
+  OS.
+  We do **not** ship "screenshot protection" or "secure mode"
+  framing for this reason. Members who trust such framing would
+  lower other defenses (sharing screens more readily, opening
+  the app on devices they wouldn't otherwise trust). The
+  project's
+  job is to raise costs and be honest about its boundaries, not
+  to promise impossible guarantees. The opsec guide's "Trust
+  the device, or don't open the app" item is the actual
+  mitigation: clean device, clean OS, no unfamiliar
+  extensions, in your physical custody since last reset. The
+  panic-button path (Profile → Emergency → Hard purge) is the
+  response when compromise is suspected, rotating to a fresh
+  identity. Any future
+  proposal that would imply otherwise (a "secure share mode," a
+  watermark overlay, an animated QR, etc.) supersedes this
+  entry and needs to explain how it doesn't create the false-
+  confidence problem named above.
 
 ## 8. Guidance for reviewers
 
