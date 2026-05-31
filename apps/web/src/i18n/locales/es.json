@@ -177,6 +177,24 @@
         "month": " Se repite mensualmente.",
         "event": " Se repite por evento.",
         "cycle": " Se repite cada ciclo."
+      },
+      "filters": {
+        "search": {
+          "placeholder": "Buscar plantillas",
+          "ariaLabel": "Buscar plantillas por nombre o descripción"
+        },
+        "category": {
+          "ariaLabel": "Filtrar plantillas por categoría",
+          "all": "Todas las categorías"
+        },
+        "setupTime": {
+          "ariaLabel": "Filtrar plantillas por tiempo de preparación",
+          "all": "Cualquier tiempo de preparación",
+          "quick": "Rápida (≤10 h)",
+          "medium": "Media (10–25 h)",
+          "bigger": "Mayor (25 h+)"
+        },
+        "empty": "Ninguna plantilla coincide. Prueba quitar un filtro o empieza desde cero a continuación."
       }
     },
     "detail": {

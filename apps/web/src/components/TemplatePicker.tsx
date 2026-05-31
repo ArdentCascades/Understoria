@@ -18,13 +18,18 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import {
   getProjectTemplates,
   type ProjectTemplate,
 } from "@/content/projectTemplates";
-import type { Category } from "@/types";
+import {
+  matchesTemplate,
+  type SetupBucket,
+} from "@/lib/templateFilter";
+import type { Category, ProjectCategory } from "@/types";
 
 interface TemplatePickerProps {
   selectedId: string | null;
@@ -37,10 +42,59 @@ interface TemplatePickerProps {
  * below; "Start from scratch" leaves everything blank. Templates are
  * friendly defaults, not prescriptions — every field is editable
  * before the project is created.
+ *
+ * The filter row (search + category + setup-time) narrows the gallery
+ * in-place. State is session-only — defaults are empty filters, so the
+ * gallery looks unchanged until a member starts narrowing. The
+ * "Start from scratch" card always renders as the last item regardless
+ * of filter state, so members always have an escape hatch.
  */
 export function TemplatePicker({ selectedId, onSelect }: TemplatePickerProps) {
   const { t, i18n } = useTranslation();
-  const templates = getProjectTemplates(i18n.resolvedLanguage ?? "en");
+  const lang = i18n.resolvedLanguage ?? "en";
+  const templates = getProjectTemplates(lang);
+
+  // Filter state. All three default to "no filter"; the gallery looks
+  // unchanged until a member starts narrowing.
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [category, setCategory] = useState<ProjectCategory | "">("");
+  const [setupBucket, setSetupBucket] = useState<SetupBucket | "">("");
+
+  // ~200 ms debounce on the search input — matches the Board's pattern
+  // (small enough to feel live, long enough to skip mid-word refilters).
+  // No reusable hook exists in the codebase, so this stays inline.
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedQuery(query), 200);
+    return () => window.clearTimeout(id);
+  }, [query]);
+
+  // Categories actually present in the current locale's templates,
+  // sorted by their localized label so the dropdown stays member-readable
+  // and grows automatically as new templates land. Recomputes when the
+  // template set changes (locale switch) or when the localized labels
+  // themselves change (also locale switch).
+  const availableCategories = useMemo(() => {
+    const distinct = Array.from(
+      new Set(templates.map((tpl) => tpl.defaultCategory)),
+    );
+    return distinct.sort((a, b) =>
+      categoryLabel(t, a).localeCompare(categoryLabel(t, b), lang),
+    );
+  }, [templates, lang, t]);
+
+  const visibleTemplates = useMemo(
+    () =>
+      templates.filter((tpl) =>
+        matchesTemplate(tpl, {
+          query: debouncedQuery.trim(),
+          category,
+          setupBucket,
+        }),
+      ),
+    [templates, debouncedQuery, category, setupBucket],
+  );
+
   return (
     <section className="mb-6">
       <h2 className="text-heading font-semibold mb-1">
@@ -49,16 +103,70 @@ export function TemplatePicker({ selectedId, onSelect }: TemplatePickerProps) {
       <p className="text-sm text-moss-600 dark:text-moss-300 mb-3">
         {t("projects.templates.intro")}
       </p>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          className="input min-w-[12rem] flex-1"
+          placeholder={t("projects.templates.filters.search.placeholder")}
+          aria-label={t("projects.templates.filters.search.ariaLabel")}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <select
+          className="input"
+          value={category}
+          onChange={(e) =>
+            setCategory(e.target.value as ProjectCategory | "")
+          }
+          aria-label={t("projects.templates.filters.category.ariaLabel")}
+        >
+          <option value="">
+            {t("projects.templates.filters.category.all")}
+          </option>
+          {availableCategories.map((c) => (
+            <option key={c} value={c}>
+              {categoryLabel(t, c)}
+            </option>
+          ))}
+        </select>
+        <select
+          className="input"
+          value={setupBucket}
+          onChange={(e) =>
+            setSetupBucket(e.target.value as SetupBucket | "")
+          }
+          aria-label={t("projects.templates.filters.setupTime.ariaLabel")}
+        >
+          <option value="">
+            {t("projects.templates.filters.setupTime.all")}
+          </option>
+          <option value="quick">
+            {t("projects.templates.filters.setupTime.quick")}
+          </option>
+          <option value="medium">
+            {t("projects.templates.filters.setupTime.medium")}
+          </option>
+          <option value="bigger">
+            {t("projects.templates.filters.setupTime.bigger")}
+          </option>
+        </select>
+      </div>
       <ul className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {templates.map((tpl) => (
-          <li key={tpl.id}>
-            <TemplateCard
-              template={tpl}
-              isSelected={selectedId === tpl.id}
-              onSelect={() => onSelect(tpl.id)}
-            />
+        {visibleTemplates.length === 0 ? (
+          <li className="col-span-full text-sm text-moss-600 dark:text-moss-300">
+            {t("projects.templates.filters.empty")}
           </li>
-        ))}
+        ) : (
+          visibleTemplates.map((tpl) => (
+            <li key={tpl.id}>
+              <TemplateCard
+                template={tpl}
+                isSelected={selectedId === tpl.id}
+                onSelect={() => onSelect(tpl.id)}
+              />
+            </li>
+          ))
+        )}
         <li>
           <ScratchCard
             isSelected={selectedId === null}
@@ -68,6 +176,27 @@ export function TemplatePicker({ selectedId, onSelect }: TemplatePickerProps) {
       </ul>
     </section>
   );
+}
+
+/** Localized label for any ProjectCategory. Base categories use the
+ *  shared `categories.*` namespace; the three project-only extension
+ *  categories (`infrastructure`, `organizing`, `mutual_aid_drive`) have
+ *  no entry in that namespace — they're hardcoded inline in the rest of
+ *  the project UI for the same reason, so we mirror that here. */
+function categoryLabel(
+  t: (key: string) => string,
+  category: ProjectCategory,
+): string {
+  switch (category) {
+    case "infrastructure":
+      return "Infrastructure";
+    case "organizing":
+      return "Organizing";
+    case "mutual_aid_drive":
+      return "Mutual aid drive";
+    default:
+      return t(`categories.${category}`);
+  }
 }
 
 interface TemplateCardProps {

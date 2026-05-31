@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Template gallery filters on the Start-a-project page.** Three new
+  controls inside `TemplatePicker`: a search input (debounced, matches
+  name + purpose + audience + needs), a category dropdown
+  (auto-populated from the loaded templates), and a setup-time dropdown
+  (Quick ≤10h / Medium 10–25h / Bigger 25h+). All three compose via
+  AND. Session-only state, defaults off. The "Start from scratch" card
+  always renders as the escape hatch. New `lib/templateFilter.ts` with
+  `getSetupBucket` and `matchesTemplate` helpers plus unit tests. 10
+  new i18n keys in en + es.
 - **Three new filters on the Community Board's Projects tab:** a
   category dropdown, a status dropdown (Planning / Active / Paused /
   Completed), and an "Only with open tasks" toggle pill. All three
