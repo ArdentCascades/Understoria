@@ -27,6 +27,22 @@ include breaking changes.
   that every project category has a translation.
 
 ### Added
+- **10 more community-project templates ("Set 5").** Toy Library &
+  Play Resource Lending, Food Preservation & Canning Collective,
+  Free Haircut & Personal Grooming Days, Mutual Aid Moving Crew,
+  Disability & Accessibility Support Network, Books to Prisoners &
+  Letter-Writing Program, Community Music & Instrument Program,
+  School Supply & Backpack Program, Legal Aid Clinic & Know Your
+  Rights Program, and Mutual Aid Resource Hub & Dispatch. Added to
+  both `PROJECT_TEMPLATES_EN` and `PROJECT_TEMPLATES_ES`. Two carry
+  safety disclaimers (food-safety / botulism risk on Food
+  Preservation; licensed-attorney scope on Legal Aid Clinic) woven
+  into `whatYoullNeed`. Categories used: `childcare`, `food`,
+  `other`, `transport`, `organizing`, `education`,
+  `mutual_aid_drive`. Cadences applied per the Set 2–4 convention:
+  `session` for "per session," `event` for "per event" / "per move"
+  / "per distribution" (no enum expansion; "per move" wording shifts
+  to the localized event suffix).
 - **10 more community-project templates ("Set 4").** Free Community
   WiFi / Mesh Network, Mental Health Peer Support Circle, Community
   Cleanup & Green Space Restoration, Free Tax Prep & Financial
