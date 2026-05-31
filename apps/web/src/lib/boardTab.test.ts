@@ -13,20 +13,20 @@ import { describe, expect, it } from "vitest";
 import { parseTabParam, tabToParam } from "./boardTab";
 
 describe("parseTabParam", () => {
-  it("returns NEED for null", () => {
-    expect(parseTabParam(null)).toBe("NEED");
+  it("returns PROJECTS for null", () => {
+    expect(parseTabParam(null)).toBe("PROJECTS");
   });
 
-  it("returns NEED for undefined", () => {
-    expect(parseTabParam(undefined)).toBe("NEED");
+  it("returns PROJECTS for undefined", () => {
+    expect(parseTabParam(undefined)).toBe("PROJECTS");
   });
 
-  it("returns NEED for an empty string", () => {
-    expect(parseTabParam("")).toBe("NEED");
+  it("returns PROJECTS for an empty string", () => {
+    expect(parseTabParam("")).toBe("PROJECTS");
   });
 
-  it("returns NEED for an unknown value", () => {
-    expect(parseTabParam("garbage")).toBe("NEED");
+  it("returns PROJECTS for an unknown value", () => {
+    expect(parseTabParam("garbage")).toBe("PROJECTS");
   });
 
   it("returns NEED for 'needs'", () => {
