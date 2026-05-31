@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, type TrustStatus } from "@/lib/vouch";
@@ -32,9 +32,8 @@ import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { matchesQuery } from "@/lib/messageSearch";
-import type { Category, PostType, Urgency } from "@/types";
-
-type Tab = PostType | "PROJECTS";
+import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
+import type { Category, Urgency } from "@/types";
 
 const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
 
@@ -50,7 +49,23 @@ export default function BoardPage() {
     nodeId,
   } = useApp();
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("NEED");
+  // Tab lives in the URL as `?tab=needs|offers|projects` so back-
+  // buttons elsewhere in the app can deep-link to a specific tab
+  // (e.g. ProjectDetail → `/?tab=projects`), browser back/forward
+  // works naturally across tab switches, and Board URLs are
+  // shareable. Other Board state (search query, filters, claimed
+  // toggle) stays local React state — session-only is intentional.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = parseTabParam(searchParams.get("tab"));
+  const setTab = (next: BoardTab) => {
+    // Copy existing params so any future query/filter URL params
+    // aren't blown away on tab change. `replace: true` keeps
+    // browser history clean — switching tabs shouldn't burn
+    // back-button entries.
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", tabToParam(next));
+    setSearchParams(params, { replace: true });
+  };
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
   const [urgencyFilter, setUrgencyFilter] = useState<Urgency | "">("");
   // Live input value (every keystroke) + debounced value (250 ms after
