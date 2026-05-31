@@ -166,7 +166,7 @@ export default function ProjectDetailPage() {
         <button
           type="button"
           className="btn-secondary mt-4"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/?tab=projects")}
         >
           {t("projects.detail.back")}
         </button>
@@ -224,7 +224,7 @@ export default function ProjectDetailPage() {
       <button
         type="button"
         className="btn-ghost -ml-2 mb-3 text-sm"
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/?tab=projects")}
       >
         {t("projects.detail.back")}
       </button>

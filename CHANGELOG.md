@@ -9,6 +9,18 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **"Back to projects" now actually returns to the Projects tab.**
+  Pilot-reported: tapping the "Back to projects" button on a project
+  detail page took the user to the Board's default Needs tab, not the
+  Projects tab they came from. The Board now encodes its active tab
+  in the URL as `?tab=needs|offers|projects`, and the back-to-
+  projects buttons on project detail / new / archive pages navigate
+  to `/?tab=projects` so the destination matches the button's text.
+  Free side benefits: browser back/forward works naturally across
+  tab switches, and Board URLs are shareable (e.g.
+  `/?tab=projects` deep-links to the Projects tab).
+
 ### Added
 - **Per-project task search + four-pill status filter.** Each
   project's detail page now renders a debounced search input and
