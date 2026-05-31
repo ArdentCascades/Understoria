@@ -27,6 +27,22 @@ include breaking changes.
   that every project category has a translation.
 
 ### Added
+- **10 more community-project templates ("Set 3").** Community Meal /
+  People's Kitchen, Seed Library & Seed Swap, Digital Literacy & Device
+  Lending Program, Weatherization & Home Repair Brigade, Pet Food Bank
+  & Pet Care Support, Youth Mentorship & After-School Program, Gleaning
+  Network, Community Mediation & Conflict Resolution Network, Reentry
+  Support Network, and Community Wood Bank / Heating Assistance. Added
+  to both `PROJECT_TEMPLATES_EN` and `PROJECT_TEMPLATES_ES` with
+  parallel content. Five carry safety disclaimers (skilled-trade
+  limits, youth-program responsibilities, mediation scope limits,
+  reentry privacy, chainsaw/splitter operation) woven into
+  `whatYoullNeed`. Categories used: `food`, `education`,
+  `skilled_labor`, `mutual_aid_drive`, `other`, `infrastructure`.
+  Recurring cadences applied per the established Set 2 convention
+  (closest existing cadence; no enum expansion): `session` for "per
+  meal" / "per session", `event` for "per distribution" / "per
+  project" / "per gleaning", `cycle` for "per season".
 - **10 new community-project templates ("Set 2").** Tenant Union &
   Eviction Defense Network, Childcare / Babysitting Collective,
   Community Composting Program, Free Little Library & Book Exchange,
