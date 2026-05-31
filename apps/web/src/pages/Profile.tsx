@@ -664,12 +664,17 @@ function ProfileEditor({ member }: { member: Member }) {
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
         {t("profile.about.title")}
       </h2>
-      <div className="mb-3 flex items-center gap-3">
-        <MemberAvatar publicKey={member.publicKey} size={64} />
-        <p className="text-xs text-moss-600 dark:text-moss-300">
+      <div className="my-4 flex flex-col items-center gap-2 text-center">
+        <MemberAvatar publicKey={member.publicKey} size={128} framed />
+        <p className="text-title font-semibold">{member.displayName}</p>
+        <p className="font-mono text-xs text-moss-500">
+          {shortKey(member.publicKey)}
+        </p>
+        <p className="mt-2 max-w-sm text-xs text-moss-600 dark:text-moss-300">
           {t("profile.about.avatarNote")}
         </p>
       </div>
+      <div className="my-4 border-t border-bark-200/60 dark:border-moss-800" />
       <form className="flex flex-col gap-3" onSubmit={handleSave}>
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">{t("profile.about.name")}</span>

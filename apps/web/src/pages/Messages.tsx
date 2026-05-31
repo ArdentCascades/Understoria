@@ -159,7 +159,7 @@ export default function MessagesPage() {
                 className="card block transition-shadow hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
-                  <MemberAvatar publicKey={c.otherKey} size={36} />
+                  <MemberAvatar publicKey={c.otherKey} size={48} framed />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">
@@ -219,7 +219,7 @@ function SearchResults({
               className="card block transition-shadow hover:shadow-md"
             >
               <div className="flex items-center gap-3">
-                <MemberAvatar publicKey={g.otherKey} size={36} />
+                <MemberAvatar publicKey={g.otherKey} size={48} framed />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">

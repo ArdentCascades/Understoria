@@ -64,35 +64,39 @@ export function PostCard({
         )}
         <ExpiryChip expiresAt={post.expiresAt} />
       </div>
-      <h3 className="text-base font-semibold leading-snug">{post.title}</h3>
-      {post.description && (
-        <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
-          {post.description}
-        </p>
-      )}
-      {post.type === "OFFER" &&
-        !isCrossNode &&
-        posterAvailabilityChips &&
-        posterAvailabilityChips.length > 0 && (
-          <div className="mt-2">
-            <AvailabilityChips chips={posterAvailabilityChips} compact />
-          </div>
-        )}
-      <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
-        <span className="flex flex-wrap items-center gap-1.5">
-          <MemberAvatar publicKey={post.postedBy} size={20} />
-          <span className="font-medium">
-            {isCurrentMember ? t("common.you") : posterName}
-          </span>
-          {posterTrust && !isCurrentMember && (
-            <TrustChip status={posterTrust} compact />
+      <div className="flex items-start gap-3">
+        <MemberAvatar publicKey={post.postedBy} size={40} framed />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-semibold leading-snug">{post.title}</h3>
+          {post.description && (
+            <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
+              {post.description}
+            </p>
           )}
-          <span>{typeLabel}</span>
-          <span className="font-medium">
-            {formatHours(post.estimatedHours)}
-          </span>
-        </span>
-        <span>{formatRelativeTime(post.createdAt)}</span>
+          {post.type === "OFFER" &&
+            !isCrossNode &&
+            posterAvailabilityChips &&
+            posterAvailabilityChips.length > 0 && (
+              <div className="mt-2">
+                <AvailabilityChips chips={posterAvailabilityChips} compact />
+              </div>
+            )}
+          <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
+            <span className="flex flex-wrap items-center gap-1.5">
+              <span className="font-medium">
+                {isCurrentMember ? t("common.you") : posterName}
+              </span>
+              {posterTrust && !isCurrentMember && (
+                <TrustChip status={posterTrust} compact />
+              )}
+              <span>{typeLabel}</span>
+              <span className="font-medium">
+                {formatHours(post.estimatedHours)}
+              </span>
+            </span>
+            <span>{formatRelativeTime(post.createdAt)}</span>
+          </div>
+        </div>
       </div>
     </Link>
   );

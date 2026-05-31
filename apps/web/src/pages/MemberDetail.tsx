@@ -151,8 +151,8 @@ export default function MemberDetailPage() {
         {t("common.back")}
       </button>
 
-      <header className="mb-4 flex items-start gap-4">
-        <MemberAvatar publicKey={member.publicKey} size={96} />
+      <header className="mb-4 flex items-start gap-6">
+        <MemberAvatar publicKey={member.publicKey} size={128} framed />
         <div className="min-w-0 flex-1">
           <h1 className="mb-1 text-2xl font-semibold">{member.displayName}</h1>
           <p className="text-xs font-mono text-moss-500">

@@ -64,7 +64,7 @@ export function TrustedByList({ vouchers, members }: TrustedByListProps) {
             className="flex items-center justify-between gap-3 py-2"
           >
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <MemberAvatar publicKey={entry.voucherKey} size={28} />
+              <MemberAvatar publicKey={entry.voucherKey} size={40} framed />
               <div className="min-w-0">
                 <Link
                   to={`/member/${entry.voucherKey}`}

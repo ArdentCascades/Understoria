@@ -144,7 +144,7 @@ export default function ConversationPage() {
         >
           {t("common.back")}
         </button>
-        {otherKey && <MemberAvatar publicKey={otherKey} size={32} />}
+        {otherKey && <MemberAvatar publicKey={otherKey} size={48} framed />}
         <h1 className="text-lg font-bold">
           {t("messages.conversationWith", { name: otherName })}
         </h1>
