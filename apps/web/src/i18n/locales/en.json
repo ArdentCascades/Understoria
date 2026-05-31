@@ -169,6 +169,11 @@
       "addTaskTitle": "Add a task",
       "launch": "Launch project",
       "launchHint": "Move from draft to active. Members can claim tasks once you launch.",
+      "planningBanner": {
+        "title": "Draft mode",
+        "bodyOrganizer": "This project is being put together. Members can see it but can't claim tasks yet. Launch it when you're ready to invite hands.",
+        "bodyMember": "This project is being put together. Tasks become claimable once the organizer launches it."
+      },
       "pause": "Pause",
       "resume": "Resume",
       "markComplete": "Mark project complete",
@@ -183,6 +188,7 @@
       "notClaimablePlanning": "This project is still planning — the organizer hasn't launched it yet.",
       "notClaimablePaused": "This project is paused — no new claims right now.",
       "notClaimableOther": "This project isn't accepting claims right now.",
+      "claimableAfterLaunch": "Members will be able to claim this once you launch the project.",
       "release": "Release claim",
       "markDone": "Mark complete",
       "confirm": "Confirm completion",

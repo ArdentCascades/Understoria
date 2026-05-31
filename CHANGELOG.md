@@ -9,6 +9,45 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **"Draft mode" banner + organizer-side task hint on planning
+  projects.** Follow-up to PR #103. The previous fix correctly
+  hid the Claim button on non-active projects with an
+  explanatory chip for *non-organizers*, but the organizer
+  themselves still got no on-page guidance about why their
+  members couldn't claim tasks yet — they'd see the small
+  "Launch project" button in `OrganizerControls` (with an
+  even smaller hint underneath) but nothing at the point of
+  expected interaction. Two clarifying additions:
+  - **Persistent canopy-tinted banner at the top of every
+    Planning-status project** (visible to everyone, naturally
+    disappears on launch). "Draft mode. This project is being
+    put together…" with role-specific body copy — organizers
+    see *"Members can see it but can't claim tasks yet. Launch
+    it when you're ready to invite hands."* with an inline
+    Launch button; non-organizers see *"Tasks become claimable
+    once the organizer launches it."* No new launch path —
+    same `launchProject()` call as the existing
+    `OrganizerControls` button.
+  - **Inline hint on each open task row for the organizer**
+    of a Planning project: *"Members will be able to claim
+    this once you launch the project."* — mirrors the
+    non-organizer chip shipped in PR #103. Now the connection
+    is made at the point of action whether or not the
+    organizer noticed the banner.
+  - **4 new i18n keys** (`projects.detail.planningBanner.title`,
+    `bodyOrganizer`, `bodyMember`, `projects.task.claimableAfterLaunch`)
+    in en + es. Parity passes.
+  - **Tone**: canopy-tinted, not amber / rose. Planning isn't
+    an error state, it's a normal stage. Solidarity-not-shame
+    holds.
+  - **No threat-model entry needed** — no new exposure surface
+    (project state was already on the page, just less
+    legibly).
+
+  Tests: 552 passing (unchanged — pure UI clarity work). Lint,
+  typecheck, build clean.
+
 ### Fixed
 - **Claim button on planning / paused projects.** Pilot-reported:
   members viewing a project in planning status saw a Claim button

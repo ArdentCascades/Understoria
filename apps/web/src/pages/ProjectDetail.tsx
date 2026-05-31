@@ -196,6 +196,10 @@ export default function ProjectDetailPage() {
         {t("projects.detail.back")}
       </button>
 
+      {project.status === "planning" && (
+        <PlanningBanner project={project} isOrganizer={isOrg} onRun={run} />
+      )}
+
       <div className="card mb-4">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
@@ -375,6 +379,60 @@ export default function ProjectDetailPage() {
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Persistent banner shown at the top of a project in planning
+// state. Names the state before anyone scrolls to the tasks and
+// gives the organizer a one-click path to launch. Calm canopy
+// tone — this isn't an error, it's a normal stage of a project.
+// Disappears automatically once the project is launched.
+function PlanningBanner({
+  project,
+  isOrganizer,
+  onRun,
+}: {
+  project: Project;
+  isOrganizer: boolean;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+}) {
+  const { t } = useTranslation();
+  const { pending, run: runWithPending } = usePendingAction();
+  const dispatch = <T,>(action: () => Promise<T>) =>
+    runWithPending(() => onRun(action));
+  return (
+    <div
+      role="status"
+      className="mb-4 rounded-2xl border border-canopy-200 bg-canopy-50 p-4 dark:border-canopy-900/50 dark:bg-canopy-950/30"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-canopy-900 dark:text-canopy-100">
+            {t("projects.detail.planningBanner.title")}
+          </p>
+          <p className="mt-1 text-sm text-canopy-800 dark:text-canopy-200">
+            {isOrganizer
+              ? t("projects.detail.planningBanner.bodyOrganizer")
+              : t("projects.detail.planningBanner.bodyMember")}
+          </p>
+        </div>
+        {isOrganizer && (
+          <button
+            type="button"
+            className="btn-primary sm:shrink-0"
+            disabled={pending}
+            aria-busy={pending}
+            onClick={() =>
+              dispatch(() =>
+                launchProject(project.id, project.organizerKey),
+              )
+            }
+          >
+            {pending ? t("common.working") : t("projects.detail.launch")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function Field({
@@ -795,6 +853,11 @@ function TaskRow({
               : projectStatus === "paused"
                 ? t("projects.task.notClaimablePaused")
                 : t("projects.task.notClaimableOther")}
+          </p>
+        )}
+        {task.status === "open" && isOrganizer && projectStatus === "planning" && (
+          <p className="text-xs text-moss-600 dark:text-moss-300">
+            {t("projects.task.claimableAfterLaunch")}
           </p>
         )}
         {task.status === "open" && isOrganizer && (

@@ -169,6 +169,11 @@
       "addTaskTitle": "Agregar una tarea",
       "launch": "Lanzar proyecto",
       "launchHint": "Pasa de borrador a activo. Las personas pueden tomar tareas una vez lanzado.",
+      "planningBanner": {
+        "title": "Modo borrador",
+        "bodyOrganizer": "Este proyecto se está armando. Las personas pueden verlo pero aún no pueden tomar tareas. Lánzalo cuando estés lista para invitar manos.",
+        "bodyMember": "Este proyecto se está armando. Las tareas se pueden tomar cuando quien organiza lo lance."
+      },
       "pause": "Pausar",
       "resume": "Reanudar",
       "markComplete": "Marcar proyecto como completo",
@@ -183,6 +188,7 @@
       "notClaimablePlanning": "Este proyecto sigue en planificación — quien organiza aún no lo ha lanzado.",
       "notClaimablePaused": "Este proyecto está en pausa — no acepta nuevas tomas por ahora.",
       "notClaimableOther": "Este proyecto no acepta tomas en este momento.",
+      "claimableAfterLaunch": "Las personas podrán tomar esta tarea cuando lances el proyecto.",
       "release": "Soltar mi compromiso",
       "markDone": "Marcar completada",
       "confirm": "Confirmar completada",
