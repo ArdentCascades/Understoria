@@ -72,9 +72,24 @@ details.
 
 ### Filters
 
-Use the dropdowns at the top of the board to narrow down by
-**category** (food, transport, childcare, emotional support, and so on)
-or **urgency**. The search box searches titles and descriptions.
+On the **Needs** and **Offers** tabs, use the dropdowns at the top of
+the board to narrow down by **category** (food, transport, childcare,
+emotional support, and so on) or **urgency**. The search box searches
+titles and descriptions.
+
+The **Projects** tab has its own filter row above the project list:
+
+- **Category** — same idea as for posts.
+- **Status** — narrow to *Planning*, *Active*, *Paused*, or
+  *Completed*. (Archived projects aren't here; they live on their own
+  page behind the **View archive** link.)
+- **Only with open tasks** — a toggle that hides projects where every
+  task is already claimed or done. Useful when you're looking for
+  something to pitch in on right now.
+
+All three filters compose with the search box. Nothing is filtered by
+default — you see every non-archived project until you start
+narrowing. Filter selections don't persist between sessions.
 
 ## 5. Posting a need
 
@@ -165,10 +180,30 @@ Maker**; finished is **Keystone**.
 
 ### Starting a project
 
-Tap **Start a project** from the Projects tab. Give it a title,
-description, target hours, area, and optional deadline. Once it's
-created, you can add tasks and switch the project from "Planning"
-to "Active" so others can claim tasks.
+Tap **Start a project** from the Projects tab. The page opens with a
+gallery of **starter templates** — community fridges, coat drives,
+porch repairs, and so on. Each template pre-fills the project form and
+stages a set of tasks so you don't start from a blank page. Templates
+are friendly defaults, not prescriptions; everything is editable
+before the project is created. If nothing fits, pick **Start from
+scratch** at the end of the gallery.
+
+A small filter row sits above the gallery to help you find a fit:
+
+- **Search** matches template name, purpose, who it serves, and what
+  you'll need.
+- **Category** narrows to one focus area (only categories that
+  templates currently use appear in the dropdown).
+- **Setup time** narrows by how much total work the template's tasks
+  add up to: *Quick* (≤10h), *Medium* (10–25h), or *Bigger* (25h+).
+
+**Start from scratch** stays visible at the end of the gallery no
+matter how you filter, so you can always bail out to a blank form.
+
+After picking (or starting blank), fill in title, description, target
+hours, area, and an optional deadline. Once the project is created,
+you can add tasks and switch it from "Planning" to "Active" so others
+can claim tasks.
 
 ## 10. The Dashboard
 
