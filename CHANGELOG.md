@@ -9,6 +9,26 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Threat-model §7 entry: "In-app URLs reveal client-side
+  navigation to corporate MITM proxies, browser history, and
+  address-bar onlookers."** Documents what's actually visible
+  to each observer class in the URL surface — ISPs see only
+  the hostname (HTTPS encrypts paths), corporate MITM proxies
+  see the full URL, node operators receive the initial page-
+  load path, device-access attackers read browser history,
+  shoulder-surfers / cameras / screen-shares read the address
+  bar. Captures the design decisions we deliberately did NOT
+  make: no path-text obscurity (doesn't defend against any
+  real observer, costs shareability), no removal of URL state
+  (Signal-handoff URLs are real organizing utility). Hash-
+  based routing for member-identifying routes (e.g.
+  `/messages/<key>`, `/member/<key>`) is recorded as a
+  candidate future change, not blocked, not committed —
+  flagging the trade-off so a future PR author finds the prior
+  reasoning. Names the actual defense: the opsec-guide
+  "Trust the device, or don't open the app" criterion.
+
 ### Fixed
 - **"Back to projects" now actually returns to the Projects tab.**
   Pilot-reported: tapping the "Back to projects" button on a project
