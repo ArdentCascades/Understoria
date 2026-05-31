@@ -30,6 +30,7 @@ import {
 import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
 import { HighlightedText } from "@/components/HighlightedText";
+import { MemberAvatar } from "@/components/MemberAvatar";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 export default function ConversationPage() {
@@ -143,6 +144,7 @@ export default function ConversationPage() {
         >
           {t("common.back")}
         </button>
+        {otherKey && <MemberAvatar publicKey={otherKey} size={32} />}
         <h1 className="text-lg font-bold">
           {t("messages.conversationWith", { name: otherName })}
         </h1>

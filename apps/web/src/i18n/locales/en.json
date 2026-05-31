@@ -1,4 +1,7 @@
 {
+  "avatar": {
+    "label": "Member avatar for key {{shortKey}}"
+  },
   "availability": {
     "weekday_days": "Weekday days",
     "weekday_evenings": "Weekday evenings",
@@ -691,6 +694,7 @@
     },
     "about": {
       "title": "About you",
+      "avatarNote": "This little plant is your identity, drawn from your public key. Everyone with the same key sees the same plant. It can't be changed — that's how others recognize you across the app.",
       "name": "Display name (pseudonym is fine)",
       "skills": "Skills (comma-separated)",
       "skillsPlaceholder": "cooking, listening, spanish",

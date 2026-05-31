@@ -14,6 +14,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
+import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
 import { TrustedByList } from "@/components/TrustedByList";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
@@ -150,13 +151,16 @@ export default function MemberDetailPage() {
         {t("common.back")}
       </button>
 
-      <header className="mb-4">
-        <h1 className="mb-1 text-2xl font-semibold">{member.displayName}</h1>
-        <p className="text-xs font-mono text-moss-500">
-          {shortKey(member.publicKey)}
-        </p>
-        <div className="mt-2">
-          {trust && <TrustChip status={trust} count={memberVouchers.size} />}
+      <header className="mb-4 flex items-start gap-4">
+        <MemberAvatar publicKey={member.publicKey} size={96} />
+        <div className="min-w-0 flex-1">
+          <h1 className="mb-1 text-2xl font-semibold">{member.displayName}</h1>
+          <p className="text-xs font-mono text-moss-500">
+            {shortKey(member.publicKey)}
+          </p>
+          <div className="mt-2">
+            {trust && <TrustChip status={trust} count={memberVouchers.size} />}
+          </div>
         </div>
       </header>
 

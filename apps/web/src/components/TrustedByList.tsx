@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { formatRelativeTime, shortKey } from "@/lib/format";
 import type { VoucherRef } from "@/lib/vouch";
 import type { Member } from "@/types";
+import { MemberAvatar } from "./MemberAvatar";
 
 // Renders the set of members who have vouched for someone — both the
 // manual signed vouches and the implicit "I invited you" vouches.
@@ -62,16 +63,19 @@ export function TrustedByList({ vouchers, members }: TrustedByListProps) {
             key={entry.voucherKey}
             className="flex items-center justify-between gap-3 py-2"
           >
-            <div className="min-w-0 flex-1">
-              <Link
-                to={`/member/${entry.voucherKey}`}
-                className="text-sm font-medium text-canopy-800 underline-offset-2 hover:underline dark:text-canopy-200"
-              >
-                {name}
-              </Link>
-              <span className="ml-2 font-mono text-xs text-moss-500">
-                ({keyHint})
-              </span>
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <MemberAvatar publicKey={entry.voucherKey} size={28} />
+              <div className="min-w-0">
+                <Link
+                  to={`/member/${entry.voucherKey}`}
+                  className="text-sm font-medium text-canopy-800 underline-offset-2 hover:underline dark:text-canopy-200"
+                >
+                  {name}
+                </Link>
+                <span className="ml-2 font-mono text-xs text-moss-500">
+                  ({keyHint})
+                </span>
+              </div>
             </div>
             <div className="flex flex-col items-end gap-0.5 text-xs text-moss-500 dark:text-moss-400">
               <span
