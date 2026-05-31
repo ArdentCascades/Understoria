@@ -38,10 +38,13 @@ const TAB_TO_PARAM: Record<BoardTab, string> = {
 };
 
 /** Parses a `?tab=` URL search param. Returns the matching board
- *  tab, or "NEED" for any null / undefined / unknown value. */
+ *  tab, or "PROJECTS" for any null / undefined / unknown value —
+ *  Projects is the Board's default landing tab because a community
+ *  project may already address a member's need, so we want members
+ *  to scan projects before posting a one-off Need. */
 export function parseTabParam(value: string | null | undefined): BoardTab {
-  if (!value) return "NEED";
-  return TAB_PARAM_TO_TAB[value.toLowerCase()] ?? "NEED";
+  if (!value) return "PROJECTS";
+  return TAB_PARAM_TO_TAB[value.toLowerCase()] ?? "PROJECTS";
 }
 
 /** Serializes a board tab back into its `?tab=` URL param form. */
