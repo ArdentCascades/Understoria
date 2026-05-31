@@ -41,6 +41,11 @@ export interface MemberAvatarProps {
    *  fraction of size. 0 = sharp corners, 0.5 = circle. Default
    *  0.5 (circle). */
   cornerRadius?: number;
+  /** When true, render a soft inset ring in the avatar's primary
+   *  derived color so the avatar reads as a framed identity
+   *  marker rather than a flat inline glyph. Color comes from the
+   *  same fill the avatar already uses — no new color choice. */
+  framed?: boolean;
   /** Extra className applied to the wrapping SVG (margin, etc.). */
   className?: string;
 }
@@ -49,6 +54,7 @@ export function MemberAvatar({
   publicKey,
   size = 32,
   cornerRadius = 0.5,
+  framed = false,
   className,
 }: MemberAvatarProps) {
   const { t } = useTranslation();
@@ -79,6 +85,20 @@ export function MemberAvatar({
         fill={fill}
         opacity={0.08}
       />
+      {framed && (
+        <rect
+          x={2}
+          y={2}
+          width={60}
+          height={60}
+          rx={(rx * 64) / size}
+          ry={(rx * 64) / size}
+          fill="none"
+          stroke={fill}
+          strokeWidth={2.5}
+          opacity={0.5}
+        />
+      )}
       <g
         transform={`rotate(${spec.rotationOffset} 32 32)`}
       >
