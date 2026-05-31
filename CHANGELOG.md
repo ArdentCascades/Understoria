@@ -40,20 +40,19 @@ include breaking changes.
     never reveals.
 
 ### Added
-- **Avatar layout prominence: framed treatment, larger sizes, Profile hero.**
-  Bumps every `<MemberAvatar>` size up one notch (PostCard 20→40,
-  TrustedByList 28→40, MemberDetail header 96→128, Profile About
-  64→128, Messages 36→48, Conversation header 32→48), adds an
-  optional `framed` prop that renders a soft inset ring in the
-  avatar's primary derived color, and restructures PostCard into
-  an avatar-led row layout (avatar as left anchor for the title
-  + description block, not buried in the meta row) and Profile
-  About-you into a centered hero treatment (avatar + name +
-  short-key as a card header above the form). No artwork or
-  algorithm change — the derivation in `lib/avatar.ts` stays
-  frozen per the recognition-trust commitment in PR #100. No
-  new tests, no new i18n keys. The pure visual reweighting is
-  paired with a parallel artwork-polish PR.
+- **Avatar artwork polish.** Refined SVG drawing primitives for the
+  `MemberAvatar` component — hand-tuned leaf paths (round leaf with
+  apex point, elongated willow-style, lobed maple-style scalloped),
+  per-leaf linear gradients (lighter at the base, primary fill at the
+  tip), tapered `Sapling` stem with a small sprout at the base,
+  rule-of-thirds composition shift for each shape variant, subtle
+  darker stroke on every filled shape for definition, refined
+  `SprigOverlay` as small leaf-buds instead of circles. The
+  derivation algorithm in `lib/avatar.ts` is unchanged — every
+  existing member's avatar still maps to the same spec, just rendered
+  with prettier shapes. No new tests, no new i18n keys, no
+  behavioral changes. Lands on top of the layout-prominence work
+  (PR #101 — framed treatment + larger sizes + Profile hero).
 - **Threat-model §7 entry: "Device-level compromise is out of
   scope."** New bullet making the boundary explicit. Names the
   threat (malware, browser extensions, stalkerware, employer
