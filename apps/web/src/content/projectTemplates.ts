@@ -2316,6 +2316,568 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       },
     ],
   },
+  {
+    id: "toy-library",
+    name: "Toy Library & Play Resource Lending",
+    purpose:
+      "Lend toys, games, and play equipment so families can access variety without buying.",
+    whoItServes:
+      "Families with young children, especially on tight budgets; it also cuts waste and clutter.",
+    whatYoullNeed:
+      "Storage, donated toys, a catalog and checkout, cleaning supplies, and librarians.",
+    setupHours: 19,
+    defaultCategory: "childcare",
+    tasks: [
+      {
+        name: "Find storage and open hours",
+        description:
+          "Secure shelving in a community center, library, or shared space, and set predictable pickup and return hours families can plan around.",
+        hours: 3,
+      },
+      {
+        name: "Collect, clean, and safety-check toys",
+        description:
+          "Gather donations, then clean and inspect each toy. Check for recalls, broken parts, and choking hazards, and set aside anything unsafe for young children.",
+        hours: 5,
+      },
+      {
+        name: "Catalog and bag with all pieces",
+        description:
+          "Log each toy with a photo and age range, and bag multi-piece sets with a count so nothing goes missing. Number items for easy tracking.",
+        hours: 4,
+      },
+      {
+        name: "Write borrowing rules",
+        description:
+          "Set loan length, how many toys at once, and a gentle return/missing-pieces policy. Keep it trust-based and forgiving.",
+        hours: 2,
+      },
+      {
+        name: "Set a sanitation routine",
+        description:
+          "Establish how toys are cleaned and sanitized between borrowers, which matters more with young children. Keep supplies on hand and a checklist at the desk.",
+        hours: 2,
+      },
+      {
+        name: "Set up checkout and train librarians",
+        description:
+          "Create a simple sign-out (name, contact, item, due date) and walk volunteers through the catalog, the cleaning routine, and the rules.",
+        hours: 3,
+      },
+      {
+        name: "Curate by age and grow the collection",
+        description:
+          "Keep a spread of age-appropriate toys, retire worn items, and add the most-requested things over time.",
+        hours: 2,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "food-preservation",
+    name: "Food Preservation & Canning Collective",
+    purpose:
+      "Teach and do group canning and preserving so seasonal surplus lasts and less food is wasted.",
+    whoItServes:
+      "Gardeners, gleaners, and families wanting to stretch food through the year.",
+    whatYoullNeed:
+      "A kitchen, canning and preserving equipment, knowledgeable leads, and produce. Home preservation carries real food-safety risks, including botulism, when done incorrectly — always follow current, tested guidelines from a reputable source and never improvise processing times or methods.",
+    setupHours: 20,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Secure a suitable kitchen",
+        description:
+          "Find a kitchen with stovetops, counter space, and water for processing and cleanup. A church hall, community center, or commercial kitchen works well.",
+        hours: 3,
+      },
+      {
+        name: "Learn safe preservation methods",
+        description:
+          "Have your leads study tested, research-based methods from a recognized source (such as a university extension service). Improper canning can cause serious illness, so always follow tested recipes and processing times exactly.",
+        hours: 5,
+      },
+      {
+        name: "Gather equipment and jars",
+        description:
+          "Collect water-bath and/or pressure canners, jars, lids, and tools through donations or a small budget. Check that pressure canners are in safe working order.",
+        hours: 4,
+      },
+      {
+        name: "Source produce",
+        description:
+          "Bring in seasonal surplus from gleaning, gardens, farms, or bulk buys. Time sessions to when produce is abundant and cheap.",
+        hours: 3,
+      },
+      {
+        name: "Plan group canning sessions",
+        description:
+          "Pick recipes suited to the produce and the group's skill level, and organize stations so the work flows safely and efficiently.",
+        hours: 3,
+      },
+      {
+        name: "Teach and run sessions safely",
+        description:
+          "Lead the group through the process, enforcing safe handling, correct processing times, and proper sealing. Make it a teaching session so skills spread.",
+        hours: 5,
+        recurringCadence: "session",
+      },
+      {
+        name: "Share preserved food and track",
+        description:
+          "Divide the preserved goods among participants and projects like the fridge or pantry. Label every jar with contents and date, and note what worked for next time.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "free-haircut",
+    name: "Free Haircut & Personal Grooming Days",
+    purpose:
+      "Offer free haircuts and grooming to restore dignity, confidence, and a fresh start.",
+    whoItServes:
+      "Unhoused neighbors, job seekers, low-income families, and elders.",
+    whatYoullNeed:
+      "Volunteer licensed stylists and barbers, a space, supplies, and sanitation.",
+    setupHours: 18,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Recruit licensed stylists and barbers",
+        description:
+          "Find professionals willing to volunteer their skills. Licensed practitioners ensure safe, quality service and proper sanitation.",
+        hours: 4,
+      },
+      {
+        name: "Find a space with sanitation",
+        description:
+          "Secure a venue with water access, good lighting, and cleanable surfaces — a community center, salon after hours, or faith site.",
+        hours: 3,
+      },
+      {
+        name: "Source equipment and supplies",
+        description:
+          "Gather clippers, scissors, capes, combs, mirrors, and disposables. Include grooming extras like razors and toiletries to send home.",
+        hours: 3,
+      },
+      {
+        name: "Set up sanitation and licensing compliance",
+        description:
+          "Establish tool sterilization between clients and follow local rules for offering haircuts to the public. Cleanliness protects everyone.",
+        hours: 3,
+      },
+      {
+        name: "Build a sign-up and flow system",
+        description:
+          "Create a simple way to manage the queue so waits are reasonable and people are served in a calm, dignified order.",
+        hours: 2,
+      },
+      {
+        name: "Promote and schedule events",
+        description:
+          "Set recurring dates and let shelters, outreach workers, and neighbors know. Pair with other services (showers, meals) where possible.",
+        hours: 3,
+      },
+      {
+        name: "Run grooming days",
+        description:
+          "Host the event, keep the atmosphere warm and respectful, and treat each person as a valued guest rather than a recipient of charity.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "mutual-aid-moving-crew",
+    name: "Mutual Aid Moving Crew",
+    purpose:
+      "Help people move who can't afford movers — those leaving unsafe situations, facing eviction, or downsizing.",
+    whoItServes:
+      "Low-income neighbors, people fleeing unsafe homes, elders, and disabled neighbors.",
+    whatYoullNeed:
+      "Volunteers with vehicles and strength, moving supplies, and clear safety practices.",
+    setupHours: 18,
+    defaultCategory: "transport",
+    tasks: [
+      {
+        name: "Recruit a crew and vehicles",
+        description:
+          "Gather volunteers able to lift and carry safely, plus access to trucks or vans. Keep a roster with availability so you can assemble a crew quickly.",
+        hours: 4,
+      },
+      {
+        name: "Gather moving supplies",
+        description:
+          "Collect dollies, furniture straps, moving blankets, and reusable boxes through donations. Shared supplies make moves faster and safer.",
+        hours: 3,
+      },
+      {
+        name: "Build a request and assessment system",
+        description:
+          "Create a way to request help and scope each move: how much, stairs or elevator, distance, and timing. This lets you plan crew size and equipment.",
+        hours: 3,
+      },
+      {
+        name: "Sort out safety and liability",
+        description:
+          "Train volunteers in safe lifting, use simple waivers, and check insurance for any vehicles used. Protecting volunteers and clients matters.",
+        hours: 3,
+      },
+      {
+        name: "Set scheduling and dispatch",
+        description:
+          "Match requests to available crews and confirm with everyone the day before. Keep a backup list since moves can't easily be postponed.",
+        hours: 3,
+      },
+      {
+        name: "Define scope and limits",
+        description:
+          "Decide what you'll handle and what you won't (no hazardous materials, pianos, or jobs beyond the crew's safe capacity). Refer those elsewhere.",
+        hours: 2,
+      },
+      {
+        name: "Run moves and follow up",
+        description:
+          "Carry out the move safely and respectfully, then check the person is settled. Connect them to other projects (free store, welcome wagon) as needed.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "disability-support-network",
+    name: "Disability & Accessibility Support Network",
+    purpose:
+      "Organize disabled neighbors and allies for mutual support, accessibility, and advocacy — led by disabled people themselves.",
+    whoItServes: "Disabled and chronically ill neighbors.",
+    whatYoullNeed:
+      "An accessible communication system, peer leaders, and a resource directory.",
+    setupHours: 24,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Center disabled leadership",
+        description:
+          "Ensure disabled members lead and shape the network. \"Nothing about us without us\" is the core principle — allies support, they don't direct.",
+        hours: 3,
+      },
+      {
+        name: "Build an accessible communication system",
+        description:
+          "Offer multiple ways to participate (phone, text, online, in person), use plain language, and ensure materials work with screen readers and varied needs.",
+        hours: 3,
+      },
+      {
+        name: "Map needs and resources",
+        description:
+          "Learn what members need and catalog local resources: accessible transport, equipment sources, services, and benefits help. Identify the biggest gaps.",
+        hours: 5,
+      },
+      {
+        name: "Set up a mutual support exchange",
+        description:
+          "Create a way for members to give and receive help — errands, advocacy buddies for appointments, check-ins — matched to capacity and need.",
+        hours: 3,
+      },
+      {
+        name: "Create an equipment lending pool",
+        description:
+          "Gather and lend mobility aids and assistive equipment, sanitized between users. Many devices sit unused after they're outgrown or no longer needed.",
+        hours: 4,
+      },
+      {
+        name: "Offer advocacy and navigation support",
+        description:
+          "Help members navigate benefits, accommodations, and services. Share information and accompaniment, and refer legal and medical questions to qualified professionals.",
+        hours: 3,
+      },
+      {
+        name: "Set accessibility standards for all program events",
+        description:
+          "Develop a checklist (venue access, seating, interpretation, sensory needs, materials) so every project in your wider program is welcoming to disabled members.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "books-to-prisoners",
+    name: "Books to Prisoners & Letter-Writing Program",
+    purpose:
+      "Send free books and letters to incarcerated people to reduce isolation and support learning.",
+    whoItServes:
+      "Incarcerated people and, through them, their families and communities.",
+    whatYoullNeed:
+      "Donated books, volunteers, postage, and knowledge of each facility's mail rules.",
+    setupHours: 23,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Learn facility mailing rules",
+        description:
+          "Each prison has strict, specific rules — many require books be new and sent directly from a publisher or approved retailer, with limits on content and quantity. Research these carefully, because rule-breaking mail is rejected.",
+        hours: 5,
+      },
+      {
+        name: "Gather books and a workspace",
+        description:
+          "Collect donated books (within facility rules) and set up a sorting and packing area. Keep a varied selection: dictionaries, education, fiction, and reentry resources are often most requested.",
+        hours: 4,
+      },
+      {
+        name: "Set up a request-handling system",
+        description:
+          "Create a process to receive and track requests from incarcerated people, who write in with topics or titles. Match requests to available books.",
+        hours: 3,
+      },
+      {
+        name: "Recruit and train volunteers",
+        description:
+          "Train volunteers to match requests, pack within each facility's rules, and write thoughtful notes. Accuracy on the rules prevents wasted postage and rejected parcels.",
+        hours: 3,
+      },
+      {
+        name: "Cover postage and logistics",
+        description:
+          "Postage is the main ongoing cost. Fundraise for it, use the cheapest compliant shipping, and arrange regular mailing days.",
+        hours: 3,
+      },
+      {
+        name: "Organize a letter-writing program",
+        description:
+          "Match volunteers as pen-pals where wanted, with clear safety and privacy guidelines (use the program's address, not personal ones). Connection matters as much as books.",
+        hours: 3,
+      },
+      {
+        name: "Track and sustain",
+        description:
+          "Keep records of requests filled and books needed, and maintain relationships with donors and facilities so the program keeps running.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-music",
+    name: "Community Music & Instrument Program",
+    purpose:
+      "Lend instruments and offer free lessons and jam sessions so music is accessible to everyone.",
+    whoItServes: "Kids and adults who can't afford instruments or lessons.",
+    whatYoullNeed:
+      "Donated instruments, volunteer teachers, a space, and a lending system.",
+    setupHours: 22,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Collect and repair instruments",
+        description:
+          "Gather donated instruments and have them cleaned, restrung, or repaired so they're playable. Build a mix across types and skill levels.",
+        hours: 5,
+      },
+      {
+        name: "Set up an instrument lending system",
+        description:
+          "Create a checkout that tracks who has what, with care instructions and a forgiving return policy. Number and log each instrument.",
+        hours: 3,
+      },
+      {
+        name: "Recruit volunteer teachers",
+        description:
+          "Find musicians willing to teach beginners patiently. They needn't be professionals — enthusiasm and basic skill go a long way.",
+        hours: 3,
+      },
+      {
+        name: "Find a space for lessons and jams",
+        description:
+          "Secure a room where noise is fine — a community center, school, or faith hall. Set predictable times for lessons and open playing.",
+        hours: 3,
+      },
+      {
+        name: "Schedule lessons and jam sessions",
+        description:
+          "Offer beginner lessons and open jams for all levels. Keep sign-up easy and times varied for people who work or are in school.",
+        hours: 3,
+      },
+      {
+        name: "Set care and return expectations",
+        description:
+          "Teach borrowers basic instrument care and what to do if something breaks. Keep it trust-based and supportive, not punitive.",
+        hours: 2,
+      },
+      {
+        name: "Host community performances",
+        description:
+          "Hold informal showcases where learners share what they've made. Performing builds confidence and draws in new participants.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "school-supply-program",
+    name: "School Supply & Backpack Program",
+    purpose:
+      "Provide free school supplies and backpacks so kids start the year ready and confident.",
+    whoItServes: "Low-income families with school-age children.",
+    whatYoullNeed:
+      "Supply donations or funds, storage, a distribution point, and volunteers.",
+    setupHours: 17,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Get supply lists and gauge need",
+        description:
+          "Partner with local schools to learn the actual supply lists by grade and estimate how many families need help. This keeps donations relevant.",
+        hours: 3,
+      },
+      {
+        name: "Run supply drives and bulk-buy",
+        description:
+          "Combine donation drives with bulk purchases for the most-needed items. Bulk buying stretches money furthest on basics like notebooks and pencils.",
+        hours: 4,
+      },
+      {
+        name: "Sort and assemble by grade level",
+        description:
+          "Organize supplies and pack backpacks matched to each grade's list. An assembly-line packing session with volunteers moves quickly.",
+        hours: 3,
+      },
+      {
+        name: "Set up storage and a distribution point",
+        description:
+          "Secure dry storage and a welcoming spot to hand out backpacks, often at a school, community center, or alongside another back-to-school event.",
+        hours: 3,
+      },
+      {
+        name: "Build a sign-up system",
+        description:
+          "Create a low-barrier, dignified way for families to request a pack, without requiring proof of need that might deter people.",
+        hours: 2,
+      },
+      {
+        name: "Schedule and staff distribution",
+        description:
+          "Hold the giveaway before school starts, staffed by friendly volunteers. Let kids pick a backpack where possible — choice adds dignity.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+      {
+        name: "Track needs and plan year-round",
+        description:
+          "Note what ran short and keep a small reserve for mid-year restocks, since supplies run out long before June.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "legal-aid-clinic",
+    name: "Legal Aid Clinic & Know Your Rights Program",
+    purpose:
+      "Connect neighbors to free legal help and teach people their rights.",
+    whoItServes:
+      "Anyone facing legal issues without means — housing, immigration, debt, family, or benefits matters.",
+    whatYoullNeed:
+      "Volunteer lawyers and law students, a space, partner legal aid organizations, and scheduling. Individual legal advice must come from qualified, licensed attorneys (or supervised law students) — this program organizes access and shares general rights information, it is not itself a source of legal advice.",
+    setupHours: 24,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Partner with lawyers and legal aid",
+        description:
+          "Recruit licensed attorneys, or law students supervised by attorneys, to provide the actual legal advice. Build referral ties with established legal aid organizations.",
+        hours: 5,
+      },
+      {
+        name: "Define scope and referral pathways",
+        description:
+          "Decide which matters the clinic can address and set clear pathways to refer complex or specialized cases. Be upfront about what the clinic can and can't do.",
+        hours: 3,
+      },
+      {
+        name: "Set up a space and intake",
+        description:
+          "Secure a private, confidential venue and create an intake with a document checklist so attorneys can use limited time well.",
+        hours: 3,
+      },
+      {
+        name: "Build a confidential appointment system",
+        description:
+          "Create appointments that protect privacy. Legal matters are sensitive, so guard people's information carefully throughout.",
+        hours: 3,
+      },
+      {
+        name: "Develop know-your-rights materials and workshops",
+        description:
+          "Create clear, accurate guides and run workshops on common rights (tenant, worker, immigration, encounters with authorities). Frame these as general information, not individual legal advice.",
+        hours: 4,
+      },
+      {
+        name: "Promote and schedule clinics",
+        description:
+          "Set recurring clinic dates and spread the word through partner organizations and the wider mutual aid program. Offer interpretation for non-English speakers.",
+        hours: 3,
+      },
+      {
+        name: "Protect confidentiality and check conflicts",
+        description:
+          "Establish strict confidentiality and a basic conflict-of-interest check so the same volunteer never advises opposing parties. Train everyone on these duties.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "resource-hub-dispatch",
+    name: "Mutual Aid Resource Hub & Dispatch",
+    purpose:
+      "Act as the coordinating backbone — a single point where needs and offers are matched across all of your program's projects.",
+    whoItServes:
+      "Everyone in the program — members seeking help, volunteers offering it, and project leads needing coordination.",
+    whatYoullNeed:
+      "An intake system, a volunteer and resource roster, coordinators, and a master directory.",
+    setupHours: 26,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Set up a single intake for needs and offers",
+        description:
+          "Create one easy front door — a phone line, form, and in-person option — where anyone can say what they need or what they can give. One point of entry prevents people falling through the cracks.",
+        hours: 4,
+      },
+      {
+        name: "Build a volunteer and resource roster",
+        description:
+          "Maintain a current list of volunteers (skills, availability, location) and what each project can offer, so requests can be matched fast.",
+        hours: 4,
+      },
+      {
+        name: "Create a matching and dispatch process",
+        description:
+          "Establish how a request gets routed to the right project or volunteer and how quickly. Define response-time goals and how requests are tracked to completion.",
+        hours: 4,
+      },
+      {
+        name: "Maintain a master resource directory",
+        description:
+          "Keep a living directory of all your projects plus external services (shelters, clinics, food, legal aid) so the hub can route people anywhere help exists.",
+        hours: 5,
+      },
+      {
+        name: "Recruit and train coordinators",
+        description:
+          "Build a team to staff rotating dispatch shifts so the hub stays responsive without burning anyone out. Train them on the process and the directory.",
+        hours: 3,
+      },
+      {
+        name: "Set data privacy and follow-up practices",
+        description:
+          "Decide what information you collect, how it's stored and protected, and how you confirm a need was actually met. Collect the minimum and guard it carefully.",
+        hours: 3,
+      },
+      {
+        name: "Track unmet needs and gaps",
+        description:
+          "Log requests you couldn't fill. Recurring gaps reveal where your program should start its next project — turning the hub into a planning tool, not just a switchboard.",
+        hours: 3,
+      },
+    ],
+  },
 ];
 
 export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
@@ -4572,6 +5134,570 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         name: "Aliense con clínicas y proveedores",
         description:
           "Construyan relaciones con clínicas y proveedores locales para derivar con más fluidez y conocer nuevos servicios de bajo costo a medida que abren.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "toy-library",
+    name: "Juguetería comunitaria y préstamo de recursos de juego",
+    purpose:
+      "Prestar juguetes, juegos y equipo de juego para que las familias tengan variedad sin tener que comprarla.",
+    whoItServes:
+      "Familias con niñas y niños pequeños, especialmente con presupuesto ajustado; también reduce desperdicio y desorden.",
+    whatYoullNeed:
+      "Almacenamiento, juguetes donados, un catálogo y sistema de préstamo, materiales de limpieza y personas bibliotecarias.",
+    setupHours: 19,
+    defaultCategory: "childcare",
+    tasks: [
+      {
+        name: "Consigan almacenamiento y horarios de apertura",
+        description:
+          "Aseguren estantería en un centro comunitario, biblioteca o espacio compartido, y fijen horarios predecibles de recogida y devolución que las familias puedan planear.",
+        hours: 3,
+      },
+      {
+        name: "Recolecten, limpien y revisen la seguridad de los juguetes",
+        description:
+          "Reúnan donaciones, luego limpien e inspeccionen cada juguete. Revisen retiros del mercado, piezas rotas y riesgos de asfixia, y aparten cualquier cosa insegura para niñas y niños pequeños.",
+        hours: 5,
+      },
+      {
+        name: "Cataloguen y embolsen con todas las piezas",
+        description:
+          "Registren cada juguete con una foto y rango de edad, y embolsen los sets de varias piezas con el conteo para que nada se pierda. Numeren los artículos para seguimiento fácil.",
+        hours: 4,
+      },
+      {
+        name: "Escriban reglas de préstamo",
+        description:
+          "Fijen la duración del préstamo, cuántos juguetes a la vez y una política amable para devoluciones y piezas faltantes. Mantengan algo basado en la confianza y flexible.",
+        hours: 2,
+      },
+      {
+        name: "Establezcan una rutina de sanitización",
+        description:
+          "Definan cómo se limpian y sanitizan los juguetes entre préstamos, lo que importa más con niñas y niños pequeños. Tengan los materiales a mano y una lista de verificación en el mostrador.",
+        hours: 2,
+      },
+      {
+        name: "Armen el préstamo y capaciten a bibliotecarias y bibliotecarios",
+        description:
+          "Creen un registro de salida simple (nombre, contacto, artículo, fecha de devolución) y guíen a las personas voluntarias por el catálogo, la rutina de limpieza y las reglas.",
+        hours: 3,
+      },
+      {
+        name: "Curen por edad y hagan crecer la colección",
+        description:
+          "Mantengan variedad de juguetes apropiados para cada edad, retiren los gastados y agreguen con el tiempo lo que más se pide.",
+        hours: 2,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "food-preservation",
+    name: "Colectivo de conservación de alimentos y enlatado",
+    purpose:
+      "Enseñar y hacer enlatado y conservación en grupo para que el excedente de temporada dure y se desperdicie menos comida.",
+    whoItServes:
+      "Personas que cultivan, espigan y familias que quieren estirar la comida durante el año.",
+    whatYoullNeed:
+      "Una cocina, equipo de enlatado y conservación, personas líderes con conocimiento y productos. La conservación casera implica riesgos reales para la seguridad alimentaria, incluyendo botulismo, cuando se hace mal — sigan siempre guías actualizadas y probadas de una fuente confiable y nunca improvisen tiempos ni métodos de procesamiento.",
+    setupHours: 20,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Aseguren una cocina adecuada",
+        description:
+          "Encuentren una cocina con estufas, espacio de mesada y agua para procesamiento y limpieza. Un salón parroquial, centro comunitario o cocina comercial funciona bien.",
+        hours: 3,
+      },
+      {
+        name: "Aprendan métodos seguros de conservación",
+        description:
+          "Hagan que sus líderes estudien métodos probados, basados en investigación, de una fuente reconocida (como un servicio de extensión universitaria). El enlatado incorrecto puede causar enfermedades graves, así que sigan siempre recetas y tiempos de procesamiento probados al pie de la letra.",
+        hours: 5,
+      },
+      {
+        name: "Reúnan equipo y frascos",
+        description:
+          "Consigan enlatadoras de baño de agua y/o de presión, frascos, tapas y herramientas por donación o un pequeño presupuesto. Verifiquen que las enlatadoras de presión estén en condiciones seguras de funcionamiento.",
+        hours: 4,
+      },
+      {
+        name: "Consigan productos",
+        description:
+          "Traigan excedente de temporada de espigueo, huertos, granjas o compras al por mayor. Programen las sesiones para cuando los productos abunden y sean baratos.",
+        hours: 3,
+      },
+      {
+        name: "Planeen sesiones grupales de enlatado",
+        description:
+          "Elijan recetas adecuadas a los productos y al nivel del grupo, y organicen estaciones para que el trabajo fluya con seguridad y eficiencia.",
+        hours: 3,
+      },
+      {
+        name: "Enseñen y conduzcan sesiones con seguridad",
+        description:
+          "Guíen al grupo por el proceso, haciendo cumplir el manejo seguro, los tiempos correctos de procesamiento y el sellado adecuado. Háganlo una sesión de enseñanza para que las habilidades se difundan.",
+        hours: 5,
+        recurringCadence: "session",
+      },
+      {
+        name: "Compartan los alimentos conservados y registren",
+        description:
+          "Repartan los productos conservados entre participantes y proyectos como el refrigerador o la despensa. Etiqueten cada frasco con contenido y fecha, y anoten qué funcionó para la próxima.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "free-haircut",
+    name: "Días de corte de pelo y arreglo personal gratis",
+    purpose:
+      "Ofrecer cortes de pelo y arreglo personal gratis para devolver dignidad, confianza y un nuevo comienzo.",
+    whoItServes:
+      "Vecinas y vecinos sin techo, personas buscando empleo, familias de bajos ingresos y personas mayores.",
+    whatYoullNeed:
+      "Estilistas y barberas y barberos licenciados voluntarios, un espacio, materiales y sanitización.",
+    setupHours: 18,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Convoquen estilistas y barberas y barberos licenciados",
+        description:
+          "Busquen profesionales dispuestos a voluntariar sus habilidades. Las personas licenciadas garantizan un servicio seguro, de calidad y con la sanitización adecuada.",
+        hours: 4,
+      },
+      {
+        name: "Encuentren un espacio con condiciones de sanitización",
+        description:
+          "Aseguren un lugar con acceso a agua, buena iluminación y superficies lavables — un centro comunitario, una peluquería fuera de horario o un sitio de fe.",
+        hours: 3,
+      },
+      {
+        name: "Consigan equipo y materiales",
+        description:
+          "Reúnan máquinas, tijeras, capas, peines, espejos y desechables. Incluyan extras de arreglo personal como rasuradoras y artículos de aseo para llevar a casa.",
+        hours: 3,
+      },
+      {
+        name: "Armen sanitización y cumplimiento de licencias",
+        description:
+          "Establezcan la esterilización de herramientas entre clientes y cumplan las reglas locales para ofrecer cortes al público. La limpieza protege a todas las personas.",
+        hours: 3,
+      },
+      {
+        name: "Construyan un sistema de inscripción y flujo",
+        description:
+          "Creen una forma simple de gestionar la fila para que las esperas sean razonables y la gente sea atendida en un orden tranquilo y digno.",
+        hours: 2,
+      },
+      {
+        name: "Promuevan y agenden eventos",
+        description:
+          "Fijen fechas recurrentes y avisen a refugios, personas de alcance y vecinas y vecinos. Combinen con otros servicios (duchas, comidas) cuando sea posible.",
+        hours: 3,
+      },
+      {
+        name: "Conduzcan los días de arreglo personal",
+        description:
+          "Hagan el evento, mantengan un ambiente cálido y respetuoso, y traten a cada persona como invitada valorada y no como receptora de caridad.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "mutual-aid-moving-crew",
+    name: "Cuadrilla de mudanzas de apoyo mutuo",
+    purpose:
+      "Ayudar a mudarse a quienes no pueden pagar una mudanza — personas saliendo de situaciones inseguras, enfrentando desalojo o reduciendo su espacio.",
+    whoItServes:
+      "Vecinas y vecinos de bajos ingresos, personas huyendo de hogares inseguros, personas mayores y vecinas y vecinos con discapacidad.",
+    whatYoullNeed:
+      "Personas voluntarias con vehículos y fuerza, materiales de mudanza y prácticas claras de seguridad.",
+    setupHours: 18,
+    defaultCategory: "transport",
+    tasks: [
+      {
+        name: "Convoquen una cuadrilla y vehículos",
+        description:
+          "Reúnan personas voluntarias capaces de levantar y cargar con seguridad, más acceso a camionetas o vans. Mantengan un listado con disponibilidad para armar una cuadrilla rápido.",
+        hours: 4,
+      },
+      {
+        name: "Reúnan materiales de mudanza",
+        description:
+          "Consigan carretillas, correas para muebles, cobertores de mudanza y cajas reutilizables por donación. Los materiales compartidos hacen las mudanzas más rápidas y seguras.",
+        hours: 3,
+      },
+      {
+        name: "Construyan un sistema de solicitud y evaluación",
+        description:
+          "Creen una forma de pedir ayuda y dimensionar cada mudanza: cuánto, escaleras o ascensor, distancia y tiempos. Esto les permite planear el tamaño de la cuadrilla y el equipo.",
+        hours: 3,
+      },
+      {
+        name: "Resuelvan seguridad y responsabilidad",
+        description:
+          "Capaciten a las personas voluntarias en levantamiento seguro, usen renuncias simples y revisen el seguro de cualquier vehículo usado. Proteger a voluntarias y voluntarios y a las personas atendidas importa.",
+        hours: 3,
+      },
+      {
+        name: "Definan agenda y despacho",
+        description:
+          "Asignen solicitudes a cuadrillas disponibles y confirmen con todas las personas el día anterior. Mantengan una lista de respaldo, ya que las mudanzas no se pueden posponer fácilmente.",
+        hours: 3,
+      },
+      {
+        name: "Definan alcance y límites",
+        description:
+          "Decidan qué van a manejar y qué no (nada de materiales peligrosos, pianos o trabajos que superen la capacidad segura de la cuadrilla). Deriven esos casos a otro lado.",
+        hours: 2,
+      },
+      {
+        name: "Realicen mudanzas y den seguimiento",
+        description:
+          "Lleven adelante la mudanza con seguridad y respeto, luego confirmen que la persona esté instalada. Conéctenla con otros proyectos (tienda gratis, comité de bienvenida) según haga falta.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "disability-support-network",
+    name: "Red de apoyo a la discapacidad y la accesibilidad",
+    purpose:
+      "Organizar a vecinas y vecinos con discapacidad y aliadas y aliados para el apoyo mutuo, la accesibilidad y la incidencia — dirigida por las propias personas con discapacidad.",
+    whoItServes:
+      "Vecinas y vecinos con discapacidad y enfermedades crónicas.",
+    whatYoullNeed:
+      "Un sistema de comunicación accesible, liderazgos pares y un directorio de recursos.",
+    setupHours: 24,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Centren el liderazgo de personas con discapacidad",
+        description:
+          "Aseguren que las personas con discapacidad lideren y den forma a la red. \"Nada sobre nosotras y nosotros sin nosotras y nosotros\" es el principio central — las personas aliadas apoyan, no dirigen.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema de comunicación accesible",
+        description:
+          "Ofrezcan múltiples formas de participar (teléfono, mensaje, en línea, en persona), usen lenguaje claro y aseguren que los materiales funcionen con lectores de pantalla y necesidades diversas.",
+        hours: 3,
+      },
+      {
+        name: "Mapeen necesidades y recursos",
+        description:
+          "Conozcan lo que las personas miembro necesitan y cataloguen recursos locales: transporte accesible, fuentes de equipo, servicios y ayuda con prestaciones. Identifiquen los vacíos más grandes.",
+        hours: 5,
+      },
+      {
+        name: "Armen un intercambio de apoyo mutuo",
+        description:
+          "Creen una forma para que las personas miembro den y reciban ayuda — mandados, compañía para citas como apoyo de incidencia, llamadas de seguimiento — ajustada a la capacidad y la necesidad.",
+        hours: 3,
+      },
+      {
+        name: "Creen un fondo de préstamo de equipos",
+        description:
+          "Reúnan y presten ayudas de movilidad y equipo de asistencia, sanitizado entre usos. Muchos dispositivos quedan sin uso después de quedarse cortos o ya no ser necesarios.",
+        hours: 4,
+      },
+      {
+        name: "Ofrezcan apoyo de incidencia y navegación",
+        description:
+          "Ayuden a las personas miembro a navegar prestaciones, adaptaciones y servicios. Compartan información y acompañamiento, y deriven preguntas legales y médicas a profesionales calificados.",
+        hours: 3,
+      },
+      {
+        name: "Fijen estándares de accesibilidad para todos los eventos del programa",
+        description:
+          "Desarrollen una lista de verificación (acceso al lugar, asientos, interpretación, necesidades sensoriales, materiales) para que cada proyecto del programa más amplio reciba bien a las personas con discapacidad.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "books-to-prisoners",
+    name: "Libros para personas encarceladas y programa de cartas",
+    purpose:
+      "Enviar libros y cartas gratis a personas encarceladas para reducir el aislamiento y apoyar el aprendizaje.",
+    whoItServes:
+      "Personas encarceladas y, a través de ellas, sus familias y comunidades.",
+    whatYoullNeed:
+      "Libros donados, personas voluntarias, franqueo y conocimiento de las reglas de correo de cada institución.",
+    setupHours: 23,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Aprendan las reglas de correo de cada institución",
+        description:
+          "Cada prisión tiene reglas estrictas y específicas — muchas exigen que los libros sean nuevos y vengan directo de una editorial o tienda aprobada, con límites de contenido y cantidad. Investiguen con cuidado, porque el correo que rompe reglas se rechaza.",
+        hours: 5,
+      },
+      {
+        name: "Reúnan libros y un espacio de trabajo",
+        description:
+          "Recolecten libros donados (dentro de las reglas de las instituciones) y armen un área de clasificación y empaque. Mantengan variedad: diccionarios, educación, ficción y recursos de reingreso suelen ser los más pedidos.",
+        hours: 4,
+      },
+      {
+        name: "Armen un sistema para manejar solicitudes",
+        description:
+          "Creen un proceso para recibir y rastrear solicitudes de personas encarceladas, que escriben pidiendo temas o títulos. Hagan coincidir las solicitudes con los libros disponibles.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen y capaciten a personas voluntarias",
+        description:
+          "Capaciten a las personas voluntarias para hacer coincidir solicitudes, empacar dentro de las reglas de cada institución y escribir notas cuidadas. La exactitud en las reglas evita franqueo desperdiciado y paquetes rechazados.",
+        hours: 3,
+      },
+      {
+        name: "Cubran franqueo y logística",
+        description:
+          "El franqueo es el principal costo continuo. Recauden para él, usen el envío más barato que cumpla las reglas y organicen días regulares de envío.",
+        hours: 3,
+      },
+      {
+        name: "Organicen un programa de correspondencia",
+        description:
+          "Empareje a personas voluntarias como pen-pals donde se quiera, con pautas claras de seguridad y privacidad (usen la dirección del programa, no las personales). La conexión importa tanto como los libros.",
+        hours: 3,
+      },
+      {
+        name: "Registren y sostengan",
+        description:
+          "Lleven registros de solicitudes atendidas y libros necesarios, y mantengan las relaciones con donantes e instituciones para que el programa siga funcionando.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-music",
+    name: "Programa comunitario de música e instrumentos",
+    purpose:
+      "Prestar instrumentos y ofrecer clases y jam sessions gratis para que la música sea accesible a todas las personas.",
+    whoItServes:
+      "Niñas, niños y personas adultas que no pueden pagar instrumentos o clases.",
+    whatYoullNeed:
+      "Instrumentos donados, docentes voluntarias y voluntarios, un espacio y un sistema de préstamo.",
+    setupHours: 22,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Recolecten y reparen instrumentos",
+        description:
+          "Reúnan instrumentos donados y hagan que se limpien, encuerden o reparen para que se puedan tocar. Armen una mezcla de tipos y niveles de habilidad.",
+        hours: 5,
+      },
+      {
+        name: "Armen un sistema de préstamo de instrumentos",
+        description:
+          "Creen un sistema de salida que rastree quién tiene qué, con instrucciones de cuidado y una política de devolución flexible. Numeren y registren cada instrumento.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen docentes voluntarias y voluntarios",
+        description:
+          "Busquen músicas y músicos dispuestas a enseñar con paciencia a principiantes. No necesitan ser profesionales — entusiasmo y habilidad básica alcanzan mucho.",
+        hours: 3,
+      },
+      {
+        name: "Encuentren un espacio para clases y jams",
+        description:
+          "Aseguren una sala donde el ruido no sea problema — un centro comunitario, escuela o salón de fe. Fijen horarios predecibles para clases y tocadas abiertas.",
+        hours: 3,
+      },
+      {
+        name: "Agenden clases y jam sessions",
+        description:
+          "Ofrezcan clases para principiantes y jams abiertas para todos los niveles. Mantengan la inscripción sencilla y horarios variados para quienes trabajan o estudian.",
+        hours: 3,
+      },
+      {
+        name: "Fijen expectativas de cuidado y devolución",
+        description:
+          "Enseñen a quienes piden prestado el cuidado básico del instrumento y qué hacer si algo se rompe. Mantengan algo basado en la confianza y de apoyo, no punitivo.",
+        hours: 2,
+      },
+      {
+        name: "Organicen presentaciones comunitarias",
+        description:
+          "Hagan muestras informales donde quienes aprenden compartan lo que han hecho. Presentarse construye confianza y atrae a nuevas participantes.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "school-supply-program",
+    name: "Programa de útiles escolares y mochilas",
+    purpose:
+      "Brindar útiles escolares y mochilas gratis para que las niñas y los niños empiecen el año listos y con confianza.",
+    whoItServes: "Familias de bajos ingresos con niñas y niños en edad escolar.",
+    whatYoullNeed:
+      "Donaciones de útiles o fondos, almacenamiento, un punto de distribución y personas voluntarias.",
+    setupHours: 17,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Consigan las listas de útiles y midan la necesidad",
+        description:
+          "Aliense con escuelas locales para conocer las listas reales de útiles por grado y estimen cuántas familias necesitan ayuda. Esto mantiene las donaciones relevantes.",
+        hours: 3,
+      },
+      {
+        name: "Hagan colectas y compras al por mayor",
+        description:
+          "Combinen colectas de donación con compras al por mayor de los artículos más necesarios. La compra al por mayor estira el dinero al máximo en básicos como cuadernos y lápices.",
+        hours: 4,
+      },
+      {
+        name: "Clasifiquen y armen por grado",
+        description:
+          "Organicen los útiles y armen mochilas según la lista de cada grado. Una sesión de empaque tipo línea de armado con personas voluntarias avanza rápido.",
+        hours: 3,
+      },
+      {
+        name: "Armen almacenamiento y un punto de distribución",
+        description:
+          "Aseguren un almacenamiento seco y un lugar acogedor para entregar las mochilas, a menudo en una escuela, centro comunitario o junto a otro evento de regreso a clases.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema de inscripción",
+        description:
+          "Creen una forma digna y de baja barrera para que las familias pidan una mochila, sin exigir pruebas de necesidad que puedan disuadir a la gente.",
+        hours: 2,
+      },
+      {
+        name: "Agenden y cubran la distribución",
+        description:
+          "Hagan la entrega antes del inicio de clases, con personas voluntarias amables. Dejen que las niñas y los niños elijan mochila cuando se pueda — elegir agrega dignidad.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+      {
+        name: "Registren necesidades y planeen todo el año",
+        description:
+          "Anoten qué faltó y guarden una pequeña reserva para reabastecer a mitad de año, ya que los útiles se agotan mucho antes de junio.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "legal-aid-clinic",
+    name: "Clínica de ayuda legal y programa Conoce tus derechos",
+    purpose:
+      "Conectar a vecinas y vecinos con ayuda legal gratuita y enseñarles sus derechos.",
+    whoItServes:
+      "Cualquier persona que enfrente problemas legales sin medios — temas de vivienda, migración, deudas, familia o prestaciones.",
+    whatYoullNeed:
+      "Abogadas y abogados y estudiantes de derecho voluntarias y voluntarios, un espacio, organizaciones aliadas de ayuda legal y agendamiento. El consejo legal individual debe venir de abogadas y abogados calificados y con licencia (o de estudiantes de derecho supervisadas y supervisados) — este programa organiza el acceso y comparte información general sobre derechos, no es en sí mismo una fuente de consejo legal.",
+    setupHours: 24,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Aliense con abogadas y abogados y ayuda legal",
+        description:
+          "Convoquen abogadas y abogados con licencia, o estudiantes de derecho supervisadas y supervisados por abogadas y abogados, para que den el consejo legal real. Construyan vínculos de derivación con organizaciones de ayuda legal establecidas.",
+        hours: 5,
+      },
+      {
+        name: "Definan alcance y rutas de derivación",
+        description:
+          "Decidan qué temas puede atender la clínica y fijen rutas claras para derivar casos complejos o especializados. Sean transparentes sobre lo que la clínica puede y no puede hacer.",
+        hours: 3,
+      },
+      {
+        name: "Armen un espacio y una admisión",
+        description:
+          "Aseguren un lugar privado y confidencial y creen una admisión con una lista de documentos para que las abogadas y los abogados aprovechen bien el tiempo limitado.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema confidencial de citas",
+        description:
+          "Creen citas que protejan la privacidad. Los asuntos legales son delicados, así que cuiden con esmero la información de las personas durante todo el proceso.",
+        hours: 3,
+      },
+      {
+        name: "Desarrollen materiales y talleres de Conoce tus derechos",
+        description:
+          "Creen guías claras y precisas y dicten talleres sobre derechos comunes (inquilinas e inquilinos, trabajadoras y trabajadores, migración, encuentros con autoridades). Enmárquenlos como información general, no como consejo legal individual.",
+        hours: 4,
+      },
+      {
+        name: "Promuevan y agenden clínicas",
+        description:
+          "Fijen fechas recurrentes de clínica y difundan a través de organizaciones aliadas y del programa más amplio de apoyo mutuo. Ofrezcan interpretación para personas que no hablan inglés.",
+        hours: 3,
+      },
+      {
+        name: "Protejan la confidencialidad y revisen conflictos",
+        description:
+          "Establezcan confidencialidad estricta y una revisión básica de conflictos de interés para que ninguna persona voluntaria aconseje a partes opuestas. Capaciten a todas las personas en estas obligaciones.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "resource-hub-dispatch",
+    name: "Centro de recursos de apoyo mutuo y despacho",
+    purpose:
+      "Funcionar como columna vertebral de coordinación — un punto único donde se hacen coincidir necesidades y ofrecimientos entre todos los proyectos del programa.",
+    whoItServes:
+      "Todas las personas del programa — quienes buscan ayuda, quienes la ofrecen y quienes lideran proyectos y necesitan coordinación.",
+    whatYoullNeed:
+      "Un sistema de admisión, un listado de personas voluntarias y recursos, personas coordinadoras y un directorio maestro.",
+    setupHours: 26,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Armen una única admisión para necesidades y ofrecimientos",
+        description:
+          "Creen una puerta de entrada fácil — una línea telefónica, un formulario y una opción en persona — donde cualquiera pueda decir qué necesita o qué puede dar. Un solo punto de entrada evita que la gente se quede afuera.",
+        hours: 4,
+      },
+      {
+        name: "Armen un listado de personas voluntarias y recursos",
+        description:
+          "Mantengan una lista actualizada de personas voluntarias (habilidades, disponibilidad, ubicación) y lo que cada proyecto puede ofrecer, para que las solicitudes se asignen rápido.",
+        hours: 4,
+      },
+      {
+        name: "Creen un proceso de emparejamiento y despacho",
+        description:
+          "Definan cómo una solicitud se enruta al proyecto o a la persona voluntaria adecuada y con qué rapidez. Fijen metas de tiempo de respuesta y cómo se rastrean las solicitudes hasta completarse.",
+        hours: 4,
+      },
+      {
+        name: "Mantengan un directorio maestro de recursos",
+        description:
+          "Lleven un directorio vivo de todos los proyectos más servicios externos (refugios, clínicas, comida, ayuda legal) para que el centro pueda enrutar a la gente donde sea que exista la ayuda.",
+        hours: 5,
+      },
+      {
+        name: "Convoquen y capaciten personas coordinadoras",
+        description:
+          "Armen un equipo para cubrir turnos rotativos de despacho para que el centro siga respondiendo sin desgastar a nadie. Capacítenlas en el proceso y el directorio.",
+        hours: 3,
+      },
+      {
+        name: "Fijen prácticas de privacidad de datos y seguimiento",
+        description:
+          "Decidan qué información recogen, cómo se almacena y protege, y cómo confirman que una necesidad fue realmente atendida. Recojan lo mínimo y cuídenlo con esmero.",
+        hours: 3,
+      },
+      {
+        name: "Registren necesidades no atendidas y brechas",
+        description:
+          "Anoten las solicitudes que no pudieron cubrir. Las brechas recurrentes revelan dónde el programa debería arrancar su próximo proyecto — convirtiendo al centro en una herramienta de planeación, no sólo una central de despacho.",
         hours: 3,
       },
     ],
