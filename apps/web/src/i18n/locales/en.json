@@ -633,6 +633,24 @@
       "allUrgencies": "All urgencies",
       "allZones": "All zones"
     },
+    "projectFilters": {
+      "category": {
+        "ariaLabel": "Filter projects by category",
+        "all": "All categories"
+      },
+      "status": {
+        "ariaLabel": "Filter projects by status",
+        "all": "All statuses",
+        "planning": "Planning",
+        "active": "Active",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "openTasks": {
+        "toggle": "Only with open tasks"
+      },
+      "emptyForFilters": "Nothing matches your filters."
+    },
     "search": {
       "placeholderPosts": "Search posts",
       "placeholderProjects": "Search projects",
