@@ -29,7 +29,7 @@ import {
   matchesTemplate,
   type SetupBucket,
 } from "@/lib/templateFilter";
-import type { Category, ProjectCategory } from "@/types";
+import type { ProjectCategory } from "@/types";
 
 interface TemplatePickerProps {
   selectedId: string | null;
@@ -178,25 +178,11 @@ export function TemplatePicker({ selectedId, onSelect }: TemplatePickerProps) {
   );
 }
 
-/** Localized label for any ProjectCategory. Base categories use the
- *  shared `categories.*` namespace; the three project-only extension
- *  categories (`infrastructure`, `organizing`, `mutual_aid_drive`) have
- *  no entry in that namespace — they're hardcoded inline in the rest of
- *  the project UI for the same reason, so we mirror that here. */
 function categoryLabel(
   t: (key: string) => string,
   category: ProjectCategory,
 ): string {
-  switch (category) {
-    case "infrastructure":
-      return "Infrastructure";
-    case "organizing":
-      return "Organizing";
-    case "mutual_aid_drive":
-      return "Mutual aid drive";
-    default:
-      return t(`categories.${category}`);
-  }
+  return t(`categories.${category}`);
 }
 
 interface TemplateCardProps {
@@ -235,10 +221,7 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
         <span>
           {t("projects.templates.meta.tasks", { count: taskCount })}
         </span>
-        <CategoryBadge
-          category={template.defaultCategory as Category}
-          size="sm"
-        />
+        <CategoryBadge category={template.defaultCategory} size="sm" />
       </span>
     </button>
   );
