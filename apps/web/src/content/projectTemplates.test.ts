@@ -52,6 +52,17 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   "diaper-hygiene-bank": "mutual_aid_drive",
   "community-bike-workshop": "transport",
   "newcomer-translation-network": "other",
+  // Set 3
+  "community-meal": "food",
+  "seed-library": "food",
+  "digital-literacy": "education",
+  "weatherization-brigade": "skilled_labor",
+  "pet-food-bank": "mutual_aid_drive",
+  "youth-mentorship": "education",
+  "gleaning-network": "food",
+  "community-mediation": "other",
+  "reentry-support": "other",
+  "community-wood-bank": "infrastructure",
 };
 
 const VALID_CADENCES: readonly RecurringCadence[] = [
@@ -62,12 +73,12 @@ const VALID_CADENCES: readonly RecurringCadence[] = [
 ];
 
 describe("projectTemplates", () => {
-  it("ships exactly 20 templates in English", () => {
-    expect(PROJECT_TEMPLATES_EN.length).toBe(20);
+  it("ships exactly 30 templates in English", () => {
+    expect(PROJECT_TEMPLATES_EN.length).toBe(30);
   });
 
-  it("ships exactly 20 templates in Spanish", () => {
-    expect(PROJECT_TEMPLATES_ES.length).toBe(20);
+  it("ships exactly 30 templates in Spanish", () => {
+    expect(PROJECT_TEMPLATES_ES.length).toBe(30);
   });
 
   it("en and es share the same id set in the same order", () => {

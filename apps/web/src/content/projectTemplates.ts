@@ -1186,6 +1186,572 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       },
     ],
   },
+  {
+    id: "community-meal",
+    name: "Community Meal / People's Kitchen",
+    purpose:
+      "Cook and share free communal meals on a regular schedule, no questions asked.",
+    whoItServes:
+      "Anyone hungry, isolated, or food-insecure; it also builds connection across the neighborhood.",
+    whatYoullNeed:
+      "A kitchen, cooks, an ingredient pipeline, a serving space, and a volunteer crew.",
+    setupHours: 21,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Find a kitchen and serving space",
+        description:
+          "Secure a kitchen large enough to cook at scale — a church hall, community center, or commercial kitchen — plus space to serve. Confirm availability on your planned days.",
+        hours: 4,
+      },
+      {
+        name: "Sort out food safety and permits",
+        description:
+          "Check local rules for serving food to the public. You may need a permit, a certified food-handler present, or a licensed kitchen. Learn safe storage and temperature handling.",
+        hours: 4,
+      },
+      {
+        name: "Build a food supply pipeline",
+        description:
+          "Combine grocery and restaurant donations, bulk purchases, and any garden or gleaning surplus. Track reliable sources so you can plan menus around what you'll have.",
+        hours: 4,
+      },
+      {
+        name: "Plan menus for scale, diet, and allergies",
+        description:
+          "Design simple, nutritious meals that cook in volume and stretch ingredients. Offer vegetarian options and label common allergens clearly.",
+        hours: 3,
+      },
+      {
+        name: "Recruit a cooking and serving crew",
+        description:
+          "Gather volunteers for prep, cooking, serving, and cleanup. Assign a lead cook per meal and keep roles clear so service runs smoothly.",
+        hours: 3,
+      },
+      {
+        name: "Set a schedule and spread the word",
+        description:
+          "Pick a regular day and time so people can rely on it. Promote through flyers, shelters, and word of mouth, keeping the tone warm and open to all.",
+        hours: 3,
+      },
+      {
+        name: "Run the meal and clean up",
+        description:
+          "Cook, serve with dignity (table service feels better than a line where possible), and clean the kitchen to required standards. Pack leftovers safely for redistribution.",
+        hours: 5,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "seed-library",
+    name: "Seed Library & Seed Swap",
+    purpose:
+      "Share free seeds so people can grow food, while preserving locally adapted and heirloom varieties.",
+    whoItServes:
+      "Home gardeners, first-time growers, and community gardens.",
+    whatYoullNeed:
+      "A storage and catalog system, donated seeds, a host spot, and a few stewards.",
+    setupHours: 17,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Find a host and storage system",
+        description:
+          "Partner with a library, community center, or garden to host a small cabinet or drawer set. Store seeds cool, dry, and dark in labeled envelopes.",
+        hours: 3,
+      },
+      {
+        name: "Source initial seeds",
+        description:
+          "Gather donations from gardeners, seed companies' surplus, and end-of-season packets. Favor easy, regionally suited varieties so beginners succeed.",
+        hours: 3,
+      },
+      {
+        name: "Organize and label the collection",
+        description:
+          "Sort by type (vegetable, herb, flower) and difficulty. Label each with the plant, the year, and basic growing notes. Note which are easy to save seed from.",
+        hours: 3,
+      },
+      {
+        name: "Set borrowing and sharing norms",
+        description:
+          "Keep it simple: take seeds free, grow them, and ideally save and return some at season's end. Post a one-page how-it-works guide.",
+        hours: 2,
+      },
+      {
+        name: "Teach seed saving",
+        description:
+          "Offer short workshops or handouts on saving seed from easy crops (beans, tomatoes, lettuce). This keeps the library self-sustaining.",
+        hours: 3,
+      },
+      {
+        name: "Host seed swaps",
+        description:
+          "Hold seasonal events where growers trade seeds and tips. Late winter, before planting, is ideal. These build the community around the library.",
+        hours: 3,
+      },
+      {
+        name: "Maintain viability and restock",
+        description:
+          "Seeds lose viability over time. Rotate out old stock, run germination checks on doubtful batches, and refill popular varieties.",
+        hours: 2,
+        recurringCadence: "cycle",
+      },
+    ],
+  },
+  {
+    id: "digital-literacy",
+    name: "Digital Literacy & Device Lending Program",
+    purpose:
+      "Lend devices and teach digital skills to bridge the gap for people without reliable tech or internet.",
+    whoItServes:
+      "Elders, low-income neighbors, job seekers, and anyone shut out of online services.",
+    whatYoullNeed:
+      "Donated devices, internet access, volunteer tutors, and a space.",
+    setupHours: 25,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Collect and refurbish devices",
+        description:
+          "Gather donated laptops, tablets, and phones. Securely wipe each, update it, and set it up for easy use. Test that everything works before lending.",
+        hours: 6,
+      },
+      {
+        name: "Set up a lending system",
+        description:
+          "Create a simple checkout: who borrowed what, condition, and due date. Decide loan length and a forgiving return policy built on trust.",
+        hours: 3,
+      },
+      {
+        name: "Arrange internet access",
+        description:
+          "A device is little use without connectivity. Lend mobile hotspots, partner with the library, or point people to low-cost internet programs and free public WiFi.",
+        hours: 3,
+      },
+      {
+        name: "Recruit and train tutors",
+        description:
+          "Find patient volunteers and prep them to teach without jargon. Emphasize going at the learner's pace and never taking over the mouse.",
+        hours: 4,
+      },
+      {
+        name: "Design a beginner curriculum",
+        description:
+          "Build short lessons on the essentials: email, online safety, job applications, telehealth, government forms, and video calls. Provide printed cheat sheets.",
+        hours: 4,
+      },
+      {
+        name: "Schedule classes and drop-in help",
+        description:
+          "Offer both structured classes and open \"tech help\" hours. Vary times for people who work, and keep groups small.",
+        hours: 3,
+      },
+      {
+        name: "Set data security and return policies",
+        description:
+          "Wipe each device between borrowers, teach safe password and privacy habits, and explain how personal data is protected. Have a plan for lost or damaged devices.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "weatherization-brigade",
+    name: "Weatherization & Home Repair Brigade",
+    purpose:
+      "Help low-income, elderly, and disabled neighbors with home repairs and weatherization to cut energy bills and improve safety.",
+    whoItServes:
+      "Low-income homeowners, elders, and disabled neighbors who can't do or afford the work.",
+    whatYoullNeed:
+      "Skilled volunteers, materials, tools, and a request system. Stick to work within volunteer competence — route electrical, gas, structural, and roofing jobs to licensed professionals.",
+    setupHours: 18,
+    defaultCategory: "skilled_labor",
+    tasks: [
+      {
+        name: "Recruit skilled volunteers",
+        description:
+          "Find people comfortable with basic carpentry, caulking, insulation, and weather-stripping. A couple of more experienced leads can guide the rest.",
+        hours: 4,
+      },
+      {
+        name: "Set the scope of work",
+        description:
+          "Define what you will and won't do. Stick to safe, simple jobs (weatherproofing, grab bars, minor fixes) and rule out anything requiring a licensed trade, like major electrical or gas work.",
+        hours: 2,
+      },
+      {
+        name: "Build a request and assessment system",
+        description:
+          "Create a way for neighbors to request help, then do a quick visit to scope the job, list materials, and confirm it's within your skills and safety limits.",
+        hours: 3,
+      },
+      {
+        name: "Source materials and tools",
+        description:
+          "Gather caulk, weather-stripping, insulation, and basic hardware through donations, discounts, or a small budget. Maintain a shared tool kit.",
+        hours: 4,
+      },
+      {
+        name: "Sort out safety and liability",
+        description:
+          "Use simple waivers, carry first-aid supplies, require proper safety gear, and never attempt work beyond your competence. Consult on liability coverage for volunteer repairs.",
+        hours: 3,
+      },
+      {
+        name: "Schedule and run work days",
+        description:
+          "Match jobs to volunteer teams, confirm with the homeowner, and complete the work in a focused session. Respect the home and the resident's wishes throughout.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+      {
+        name: "Follow up and track impact",
+        description:
+          "Check that repairs held and the resident is satisfied. Track homes served and rough energy or safety improvements for volunteers and future support.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "pet-food-bank",
+    name: "Pet Food Bank & Pet Care Support",
+    purpose:
+      "Provide free pet food and basic care help so people aren't forced to surrender pets over cost.",
+    whoItServes:
+      "Low-income pet owners, elders on fixed incomes, and unhoused neighbors with animals.",
+    whatYoullNeed:
+      "Storage, a pet food supply stream, a distribution point, and vet partnerships.",
+    setupHours: 18,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Find storage and a distribution point",
+        description:
+          "Secure dry, pest-proof storage and a spot to hand out food — often alongside an existing food pantry or community center.",
+        hours: 3,
+      },
+      {
+        name: "Build a pet food supply stream",
+        description:
+          "Combine donation drives, pet-store and manufacturer donations, and bulk buying. Track what comes in so you can plan distributions.",
+        hours: 4,
+      },
+      {
+        name: "Sort and inventory by animal and size",
+        description:
+          "Separate dog and cat food (and other animals), note quantities, and check expiration dates. Keep a running count to guide restocking.",
+        hours: 2,
+      },
+      {
+        name: "Set a distribution policy",
+        description:
+          "Decide how much each household gets and how often, with no proof-of-need barrier. Make it predictable so owners can plan.",
+        hours: 2,
+      },
+      {
+        name: "Partner with low-cost vet and spay/neuter services",
+        description:
+          "Build referrals to affordable veterinary care, vaccination clinics, and spay/neuter programs so the support goes beyond food.",
+        hours: 4,
+      },
+      {
+        name: "Schedule and staff distribution",
+        description:
+          "Set regular distribution times, recruit volunteers, and keep the tone judgment-free. Many people skip meals to feed their pets — meet them with respect.",
+        hours: 3,
+        recurringCadence: "event",
+      },
+      {
+        name: "Run drives and track needs",
+        description:
+          "Hold periodic food drives with a clear wish list, and watch which items run short so you can target future drives and orders.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "youth-mentorship",
+    name: "Youth Mentorship & After-School Program",
+    purpose:
+      "Give kids and teens a safe space after school with homework help, mentorship, and enrichment.",
+    whoItServes:
+      "Youth in under-resourced areas and the working parents who need safe care.",
+    whatYoullNeed:
+      "A safe space, vetted mentors, activities, and snacks. Working with youth carries serious responsibility — vet adults, keep the two-adult rule, follow mandatory-reporting laws, and comply with local rules for youth programs.",
+    setupHours: 23,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Secure a safe space and set hours",
+        description:
+          "Find a suitable, accessible venue — a school room, library, or community center — and set consistent after-school hours families can rely on.",
+        hours: 3,
+      },
+      {
+        name: "Set child safety and vetting standards",
+        description:
+          "Require background checks for adults working with youth, enforce a two-adult rule so no one is alone with a child, and set clear conduct and reporting policies.",
+        hours: 5,
+      },
+      {
+        name: "Recruit and train mentors",
+        description:
+          "Find reliable, caring adults and train them on boundaries, youth safety, and how to support without doing the work for kids. Aim for consistency week to week.",
+        hours: 5,
+      },
+      {
+        name: "Plan programming",
+        description:
+          "Mix homework help with enrichment — reading, art, sports, life skills. Keep it engaging and let youth help shape what's offered.",
+        hours: 4,
+      },
+      {
+        name: "Handle enrollment, allergies, and emergency info",
+        description:
+          "Collect parent permission, allergy and medical details, emergency contacts, and pickup authorizations for each child. Store this securely.",
+        hours: 3,
+      },
+      {
+        name: "Source snacks and supplies",
+        description:
+          "Provide a healthy snack (many kids arrive hungry) and gather books, art materials, and games through donations or a small budget.",
+        hours: 3,
+      },
+      {
+        name: "Run sessions and check in with families",
+        description:
+          "Open the space, supervise closely, run the activities, and keep regular contact with parents about how their kids are doing.",
+        hours: 4,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "gleaning-network",
+    name: "Gleaning Network",
+    purpose:
+      "Rescue surplus produce from farms, orchards, gardens, and markets and redistribute it before it's wasted.",
+    whoItServes:
+      "Food-insecure neighbors and food projects like fridges, pantries, and community meals.",
+    whatYoullNeed:
+      "Volunteers, transport, grower relationships, and short-term storage.",
+    setupHours: 19,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Find produce sources",
+        description:
+          "Reach out to farms, orchards, market vendors, and neighbors with overloaded fruit trees. Many are glad to have surplus harvested rather than rot.",
+        hours: 4,
+      },
+      {
+        name: "Recruit a glean crew",
+        description:
+          "Build a list of volunteers who can mobilize quickly when produce is ready. Harvest windows are short, so flexibility matters more than numbers.",
+        hours: 3,
+      },
+      {
+        name: "Arrange transport and storage",
+        description:
+          "Line up vehicles to move produce and a cool spot to hold it briefly. Coordinate to move food quickly from field to recipients before it spoils.",
+        hours: 3,
+      },
+      {
+        name: "Set up scheduling and dispatch",
+        description:
+          "Create a fast way to alert and confirm volunteers when a glean comes up, since growers often give little notice. A group chat or call list works.",
+        hours: 3,
+      },
+      {
+        name: "Sort out liability and food safety",
+        description:
+          "Learn your area's Good Samaritan food-donation protections, agree on simple handling rules, and use a basic waiver so growers feel comfortable hosting gleans.",
+        hours: 3,
+      },
+      {
+        name: "Build distribution channels",
+        description:
+          "Line up where gleaned food goes — community fridges, pantries, meal programs, or direct to families — so it never sits unused.",
+        hours: 3,
+      },
+      {
+        name: "Run gleans and track poundage",
+        description:
+          "Harvest carefully to protect the site, distribute promptly, and record how much food was rescued. The numbers help recruit volunteers and growers.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "community-mediation",
+    name: "Community Mediation & Conflict Resolution Network",
+    purpose:
+      "Offer free, neutral mediation for neighbor disputes, resolving conflict without courts or police.",
+    whoItServes:
+      "Neighbors, tenants and landlords, roommates, and community groups in conflict.",
+    whatYoullNeed:
+      "Trained mediators, a neutral space, and a request process. Mediation is for disputes between willing parties — screen out and refer any situation involving violence, abuse, or danger to the appropriate professional or emergency services.",
+    setupHours: 22,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Recruit and train mediators",
+        description:
+          "Find calm, fair-minded volunteers and get them trained, either through a recognized mediation training or by partnering with an existing community mediation center.",
+        hours: 6,
+      },
+      {
+        name: "Set up a request and intake process",
+        description:
+          "Create a simple way for people to request mediation. During intake, learn the basics from each side and confirm the case is appropriate for mediation.",
+        hours: 3,
+      },
+      {
+        name: "Find neutral meeting spaces",
+        description:
+          "Secure quiet, neutral locations — a library room or community center — where both parties feel safe and on equal footing.",
+        hours: 2,
+      },
+      {
+        name: "Define the scope and limits",
+        description:
+          "Decide what you'll mediate (noise, shared spaces, minor disputes) and what you won't. Screen out situations involving violence, abuse, or safety risk and refer those to appropriate professionals.",
+        hours: 3,
+      },
+      {
+        name: "Establish confidentiality and ground rules",
+        description:
+          "Set clear rules: confidentiality, voluntary participation, respectful turn-taking, and a mediator who guides but doesn't decide. Put them in writing for participants.",
+        hours: 3,
+      },
+      {
+        name: "Promote the service",
+        description:
+          "Let neighbors, housing groups, and local organizations know free mediation exists, so people reach for it before conflicts escalate.",
+        hours: 3,
+      },
+      {
+        name: "Track outcomes and support mediators",
+        description:
+          "Note resolution rates (without breaching confidentiality) and debrief mediators regularly. The work is draining, so rotate cases and offer support.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "reentry-support",
+    name: "Reentry Support Network",
+    purpose:
+      "Help people returning from incarceration secure ID, housing, work, and community, easing a notoriously hard transition.",
+    whoItServes:
+      "Formerly incarcerated people and their families.",
+    whatYoullNeed:
+      "Volunteers, partner organizations, and a solid resource directory. Treat people's records and histories as private — lead with respect, follow people's own goals, and refer legal matters to qualified counsel.",
+    setupHours: 26,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Build a resource and partner directory",
+        description:
+          "Map services for ID and documents, housing, employment, healthcare, treatment, and benefits. Identify which employers and landlords are open to people with records.",
+        hours: 5,
+      },
+      {
+        name: "Recruit and train volunteers",
+        description:
+          "Find nonjudgmental volunteers and train them in trauma-informed, respectful support. People returning home need partners, not gatekeepers.",
+        hours: 4,
+      },
+      {
+        name: "Create a welcome and needs intake",
+        description:
+          "Build a simple, dignified way to learn what each person needs most urgently — often ID, a place to stay, and income — and prioritize from there.",
+        hours: 3,
+      },
+      {
+        name: "Help with documents and benefits",
+        description:
+          "Assist with replacing ID and Social Security cards, applying for benefits, and other paperwork that's hard to do without an address or internet access.",
+        hours: 4,
+      },
+      {
+        name: "Connect to employment and housing",
+        description:
+          "Make warm introductions to fair-chance employers and housing options, and help with applications, resumes, and interview prep.",
+        hours: 4,
+      },
+      {
+        name: "Offer peer mentorship",
+        description:
+          "Where possible, pair people with mentors who have lived through reentry themselves. That shared experience builds trust faster than anything.",
+        hours: 3,
+      },
+      {
+        name: "Set privacy and boundary practices",
+        description:
+          "Handle people's histories with strict confidentiality, never pressure anyone to share more than they want, and route legal questions to qualified attorneys.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-wood-bank",
+    name: "Community Wood Bank / Heating Assistance",
+    purpose:
+      "Collect and distribute firewood and coordinate heating help so neighbors stay warm through winter.",
+    whoItServes:
+      "Low-income and rural households that heat with wood, and elders who can't gather or split their own.",
+    whatYoullNeed:
+      "A wood source, a processing and storage site, equipment, a trained crew, and a delivery plan. Chainsaws and splitters are dangerous — allow only trained operators, require protective gear, and brief the crew on safety before every session.",
+    setupHours: 24,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Secure a wood source",
+        description:
+          "Arrange supply from tree services, storm cleanup, downed-tree donations, or sustainably managed lots. Confirm you can legally take and process it.",
+        hours: 4,
+      },
+      {
+        name: "Find a processing and storage site",
+        description:
+          "Secure a yard or lot where wood can be cut, split, stacked, and seasoned. You need room to keep this season's supply dry and next season's drying.",
+        hours: 4,
+      },
+      {
+        name: "Get equipment and safety gear",
+        description:
+          "Obtain or borrow a log splitter, chainsaws, and protective gear (chaps, eye and ear protection, gloves). Keep tools maintained and a first-aid kit on site.",
+        hours: 4,
+      },
+      {
+        name: "Recruit and train a wood crew",
+        description:
+          "Build a crew and ensure that only properly trained people operate chainsaws and splitters. Run a safety briefing before every work day.",
+        hours: 4,
+      },
+      {
+        name: "Build a request and delivery system",
+        description:
+          "Create a way for households to request wood and arrange delivery, since many recipients are elderly or without trucks. Confirm safe stacking near the home.",
+        hours: 3,
+      },
+      {
+        name: "Set distribution criteria",
+        description:
+          "Decide how much wood each household receives and prioritize those most at risk in cold weather. Keep the process simple and low-barrier.",
+        hours: 2,
+      },
+      {
+        name: "Schedule work days and seasoning",
+        description:
+          "Plan cutting and splitting well ahead of winter, because green wood must dry for months before it burns safely. Track what's seasoned and ready.",
+        hours: 3,
+      },
+    ],
+  },
 ];
 
 export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
@@ -2312,6 +2878,572 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         name: "Establezcan prácticas de privacidad y seguridad",
         description:
           "Recojan la información mínima necesaria y nunca pregunten ni registren estatus migratorio. Guarden los datos de forma segura y capaciten a las personas voluntarias para manejar situaciones sensibles con discreción.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-meal",
+    name: "Comida comunitaria / Cocina del pueblo",
+    purpose:
+      "Cocinar y compartir comidas comunitarias gratuitas de forma regular, sin preguntas.",
+    whoItServes:
+      "Cualquier persona con hambre, aislada o con inseguridad alimentaria; también teje vínculos en el barrio.",
+    whatYoullNeed:
+      "Una cocina, personas que cocinen, una cadena de ingredientes, un espacio para servir y un equipo voluntario.",
+    setupHours: 21,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Encuentren una cocina y un espacio para servir",
+        description:
+          "Consigan una cocina lo bastante grande para cocinar a escala — un salón parroquial, centro comunitario o cocina comercial — además de un espacio para servir. Confirmen disponibilidad en los días previstos.",
+        hours: 4,
+      },
+      {
+        name: "Resuelvan seguridad alimentaria y permisos",
+        description:
+          "Revisen las reglas locales para servir comida al público. Puede que necesiten un permiso, una persona certificada en manejo de alimentos presente, o una cocina con licencia. Aprendan almacenamiento seguro y manejo de temperaturas.",
+        hours: 4,
+      },
+      {
+        name: "Construyan una cadena de suministro de alimentos",
+        description:
+          "Combinen donaciones de tiendas y restaurantes, compras al por mayor y cualquier excedente de huertas o gleaning. Lleven registro de fuentes confiables para planear menús según lo que tendrán.",
+        hours: 4,
+      },
+      {
+        name: "Planeen menús para escala, dieta y alergias",
+        description:
+          "Diseñen comidas sencillas y nutritivas que se cocinen en volumen y rindan los ingredientes. Ofrezcan opciones vegetarianas y etiqueten con claridad los alérgenos comunes.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen un equipo de cocina y servicio",
+        description:
+          "Reúnan personas voluntarias para preparación, cocción, servicio y limpieza. Asignen una persona líder de cocina por comida y mantengan los roles claros para que el servicio fluya.",
+        hours: 3,
+      },
+      {
+        name: "Definan un horario y corran la voz",
+        description:
+          "Elijan un día y hora regulares para que la gente pueda contar con ello. Difundan con volantes, en albergues y de boca en boca, con un tono cálido y abierto para todas las personas.",
+        hours: 3,
+      },
+      {
+        name: "Sirvan la comida y limpien",
+        description:
+          "Cocinen, sirvan con dignidad (servir en mesa se siente mejor que una fila, cuando sea posible) y dejen la cocina con los estándares requeridos. Empaquen las sobras de forma segura para redistribuirlas.",
+        hours: 5,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "seed-library",
+    name: "Biblioteca de semillas e intercambio",
+    purpose:
+      "Compartir semillas gratis para que la gente cultive alimentos, y preservar variedades locales y criollas.",
+    whoItServes:
+      "Quienes cultivan en casa, quienes empiezan a sembrar y huertas comunitarias.",
+    whatYoullNeed:
+      "Un sistema de almacenamiento y catálogo, semillas donadas, un lugar anfitrión y unas pocas personas cuidadoras.",
+    setupHours: 17,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Encuentren un anfitrión y sistema de almacenamiento",
+        description:
+          "Aliáncense con una biblioteca, centro comunitario o huerta para alojar un pequeño mueble o cajonera. Guarden las semillas en lugar fresco, seco y oscuro, en sobres etiquetados.",
+        hours: 3,
+      },
+      {
+        name: "Consigan semillas iniciales",
+        description:
+          "Reúnan donaciones de hortelanas y hortelanos, excedentes de empresas de semillas y paquetes de fin de temporada. Prioricen variedades fáciles y adaptadas a la región para que quienes empiezan tengan éxito.",
+        hours: 3,
+      },
+      {
+        name: "Organicen y etiqueten la colección",
+        description:
+          "Clasifiquen por tipo (hortaliza, hierba, flor) y dificultad. Etiqueten cada sobre con la planta, el año y notas básicas de cultivo. Marquen cuáles son fáciles para guardar semilla.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan normas de préstamo y de intercambio",
+        description:
+          "Manténganlo sencillo: tomen semillas gratis, cultívenlas y, idealmente, guarden y devuelvan algunas al final de la temporada. Pongan una guía de una página sobre cómo funciona.",
+        hours: 2,
+      },
+      {
+        name: "Enseñen a guardar semilla",
+        description:
+          "Ofrezcan talleres cortos o folletos sobre cómo guardar semilla de cultivos fáciles (frijoles, tomates, lechuga). Esto mantiene la biblioteca por sí misma.",
+        hours: 3,
+      },
+      {
+        name: "Organicen intercambios de semillas",
+        description:
+          "Hagan eventos de temporada donde las personas que cultivan intercambien semillas y consejos. El final del invierno, antes de sembrar, es ideal. Tejen comunidad alrededor de la biblioteca.",
+        hours: 3,
+      },
+      {
+        name: "Mantengan la viabilidad y rellenen el stock",
+        description:
+          "Las semillas pierden viabilidad con el tiempo. Roten el stock viejo, hagan pruebas de germinación en lotes dudosos y rellenen las variedades populares.",
+        hours: 2,
+        recurringCadence: "cycle",
+      },
+    ],
+  },
+  {
+    id: "digital-literacy",
+    name: "Alfabetización digital y préstamo de dispositivos",
+    purpose:
+      "Prestar dispositivos y enseñar habilidades digitales para tender un puente a quienes no tienen tecnología ni internet confiables.",
+    whoItServes:
+      "Personas mayores, vecinas y vecinos de bajos ingresos, personas en búsqueda de empleo y cualquiera que quede fuera de los servicios en línea.",
+    whatYoullNeed:
+      "Dispositivos donados, acceso a internet, personas voluntarias para tutorías y un espacio.",
+    setupHours: 25,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Recolecten y reacondicionen dispositivos",
+        description:
+          "Reúnan computadoras portátiles, tabletas y teléfonos donados. Borren cada uno de forma segura, actualícenlo y déjenlo listo para un uso sencillo. Prueben que todo funciona antes de prestarlo.",
+        hours: 6,
+      },
+      {
+        name: "Armen un sistema de préstamo",
+        description:
+          "Creen un registro sencillo: quién pidió qué, en qué condición y para cuándo. Definan la duración del préstamo y una política de devolución flexible, basada en la confianza.",
+        hours: 3,
+      },
+      {
+        name: "Gestionen el acceso a internet",
+        description:
+          "Un dispositivo sirve poco sin conexión. Presten puntos de acceso móviles, aliáncense con la biblioteca, o orienten a la gente hacia programas de internet de bajo costo y WiFi público gratuito.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen y capaciten a tutoras y tutores",
+        description:
+          "Encuentren personas voluntarias pacientes y prepárenlas para enseñar sin tecnicismos. Insistan en ir al ritmo de quien aprende y nunca tomar el mouse.",
+        hours: 4,
+      },
+      {
+        name: "Diseñen un plan de estudios para principiantes",
+        description:
+          "Armen lecciones cortas sobre lo esencial: correo, seguridad en línea, postulaciones de trabajo, telesalud, formularios oficiales y videollamadas. Entreguen guías impresas.",
+        hours: 4,
+      },
+      {
+        name: "Programen clases y horarios de ayuda libre",
+        description:
+          "Ofrezcan tanto clases estructuradas como horarios abiertos de \"ayuda tecnológica\". Varíen los horarios para quienes trabajan y mantengan grupos pequeños.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan políticas de seguridad de datos y devolución",
+        description:
+          "Borren cada dispositivo entre personas usuarias, enseñen hábitos seguros de contraseñas y privacidad y expliquen cómo se protegen los datos personales. Tengan un plan para pérdidas o daños.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "weatherization-brigade",
+    name: "Brigada de aislamiento térmico y reparaciones del hogar",
+    purpose:
+      "Ayudar a vecinas y vecinos de bajos ingresos, personas mayores y con discapacidad con reparaciones y aislamiento para reducir facturas de energía y mejorar la seguridad.",
+    whoItServes:
+      "Propietarios de bajos ingresos, personas mayores y vecinas y vecinos con discapacidad que no pueden hacer ni costear el trabajo.",
+    whatYoullNeed:
+      "Personas voluntarias con habilidades, materiales, herramientas y un sistema de solicitudes. Quédense dentro de la competencia voluntaria — deriven trabajos eléctricos, de gas, estructurales y de techos a profesionales con licencia.",
+    setupHours: 18,
+    defaultCategory: "skilled_labor",
+    tasks: [
+      {
+        name: "Convoquen a personas voluntarias con habilidades",
+        description:
+          "Encuentren gente cómoda con carpintería básica, sellado, aislamiento y burletes. Un par de personas con más experiencia pueden guiar al resto.",
+        hours: 4,
+      },
+      {
+        name: "Definan el alcance del trabajo",
+        description:
+          "Definan qué harán y qué no. Quédense en trabajos seguros y sencillos (impermeabilización, barras de apoyo, arreglos menores) y descarten todo lo que requiera un oficio con licencia, como trabajos mayores de electricidad o gas.",
+        hours: 2,
+      },
+      {
+        name: "Armen un sistema de solicitudes y evaluación",
+        description:
+          "Creen una forma para que las vecinas y vecinos pidan ayuda; luego hagan una visita corta para dimensionar la obra, listar materiales y confirmar que está dentro de sus habilidades y límites de seguridad.",
+        hours: 3,
+      },
+      {
+        name: "Consigan materiales y herramientas",
+        description:
+          "Reúnan masilla, burletes, aislamiento y ferretería básica mediante donaciones, descuentos o un pequeño presupuesto. Mantengan un kit de herramientas compartido.",
+        hours: 4,
+      },
+      {
+        name: "Resuelvan seguridad y responsabilidad",
+        description:
+          "Usen renuncias sencillas, lleven primeros auxilios, exijan equipo de protección adecuado y nunca intenten trabajos fuera de su competencia. Asesórense sobre cobertura de responsabilidad para reparaciones voluntarias.",
+        hours: 3,
+      },
+      {
+        name: "Programen y realicen días de trabajo",
+        description:
+          "Asignen los trabajos a equipos voluntarios, confirmen con la persona del hogar y completen la obra en una sesión enfocada. Respeten la casa y los deseos de quien la habita en todo momento.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+      {
+        name: "Hagan seguimiento y midan el impacto",
+        description:
+          "Verifiquen que las reparaciones aguantaron y que la persona está satisfecha. Lleven cuenta de hogares atendidos y mejoras aproximadas de energía o seguridad, para el equipo voluntario y para apoyos futuros.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "pet-food-bank",
+    name: "Banco de alimentos y apoyo para mascotas",
+    purpose:
+      "Brindar comida gratis para mascotas y apoyo básico de cuidado para que nadie tenga que entregar a sus animales por el costo.",
+    whoItServes:
+      "Personas de bajos ingresos con mascotas, personas mayores con ingresos fijos y vecinas y vecinos sin hogar con animales.",
+    whatYoullNeed:
+      "Almacenamiento, una cadena de suministro de comida para mascotas, un punto de distribución y aliados veterinarios.",
+    setupHours: 18,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Encuentren almacenamiento y un punto de distribución",
+        description:
+          "Consigan un espacio seco y a prueba de plagas, y un lugar para entregar la comida — a menudo junto a una despensa comunitaria o centro comunitario existente.",
+        hours: 3,
+      },
+      {
+        name: "Construyan una cadena de suministro de comida para mascotas",
+        description:
+          "Combinen colectas, donaciones de tiendas de mascotas y fabricantes, y compras al por mayor. Lleven registro de lo que entra para planear las distribuciones.",
+        hours: 4,
+      },
+      {
+        name: "Clasifiquen e inventaríen por animal y tamaño",
+        description:
+          "Separen comida para perros y gatos (y otros animales), anoten las cantidades y revisen fechas de caducidad. Mantengan una cuenta corriente para guiar el reabastecimiento.",
+        hours: 2,
+      },
+      {
+        name: "Definan una política de distribución",
+        description:
+          "Decidan cuánto recibe cada hogar y con qué frecuencia, sin barreras de comprobación de necesidad. Háganlo predecible para que las personas puedan planear.",
+        hours: 2,
+      },
+      {
+        name: "Aliáncense con servicios veterinarios y de esterilización de bajo costo",
+        description:
+          "Construyan referencias a atención veterinaria asequible, clínicas de vacunación y programas de esterilización para que el apoyo vaya más allá de la comida.",
+        hours: 4,
+      },
+      {
+        name: "Programen y atiendan la distribución",
+        description:
+          "Fijen horarios regulares de distribución, convoquen voluntariado y mantengan un tono sin juicios. Mucha gente se salta comidas para alimentar a sus mascotas — recíbanlas con respeto.",
+        hours: 3,
+        recurringCadence: "event",
+      },
+      {
+        name: "Hagan colectas y rastreen necesidades",
+        description:
+          "Organicen colectas periódicas con una lista de deseos clara y observen qué artículos se agotan para apuntar las siguientes colectas y pedidos.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "youth-mentorship",
+    name: "Mentoría juvenil y programa después de la escuela",
+    purpose:
+      "Dar a niñas, niños y adolescentes un espacio seguro después de clases, con apoyo en tareas, mentoría y enriquecimiento.",
+    whoItServes:
+      "Juventud en zonas con pocos recursos y madres y padres que trabajan y necesitan cuidado seguro.",
+    whatYoullNeed:
+      "Un espacio seguro, mentoras y mentores con verificación, actividades y refrigerios. Trabajar con juventud conlleva una responsabilidad seria — verifiquen a las personas adultas, mantengan la regla de dos personas adultas, cumplan las leyes de reporte obligatorio y respeten las reglas locales para programas juveniles.",
+    setupHours: 23,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Consigan un espacio seguro y fijen un horario",
+        description:
+          "Encuentren un lugar adecuado y accesible — un salón escolar, biblioteca o centro comunitario — y fijen un horario constante después de clases con el que las familias puedan contar.",
+        hours: 3,
+      },
+      {
+        name: "Definan estándares de protección infantil y verificación",
+        description:
+          "Exijan verificaciones de antecedentes para personas adultas que trabajen con juventud, apliquen la regla de dos personas adultas para que nadie quede a solas con una niña o niño, y fijen políticas claras de conducta y reporte.",
+        hours: 5,
+      },
+      {
+        name: "Convoquen y capaciten a mentoras y mentores",
+        description:
+          "Encuentren personas adultas confiables y cariñosas, y capacítenlas en límites, protección de la juventud y cómo apoyar sin hacer la tarea por las niñas y niños. Apunten a la constancia semana a semana.",
+        hours: 5,
+      },
+      {
+        name: "Planeen la programación",
+        description:
+          "Mezclen apoyo en tareas con enriquecimiento — lectura, arte, deportes, habilidades para la vida. Mantéganlo atractivo y dejen que la juventud ayude a darle forma.",
+        hours: 4,
+      },
+      {
+        name: "Manejen inscripción, alergias e información de emergencia",
+        description:
+          "Recojan permisos de las personas adultas a cargo, detalles de alergias y salud, contactos de emergencia y autorizaciones de recogida de cada niña o niño. Guarden esto con seguridad.",
+        hours: 3,
+      },
+      {
+        name: "Consigan refrigerios e insumos",
+        description:
+          "Ofrezcan un refrigerio saludable (muchas niñas y niños llegan con hambre) y reúnan libros, materiales de arte y juegos por donaciones o con un presupuesto pequeño.",
+        hours: 3,
+      },
+      {
+        name: "Realicen las sesiones y mantengan contacto con las familias",
+        description:
+          "Abran el espacio, supervisen de cerca, lleven las actividades y mantengan contacto regular con las personas adultas a cargo sobre cómo van sus hijas e hijos.",
+        hours: 4,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "gleaning-network",
+    name: "Red de rescate de cosechas",
+    purpose:
+      "Rescatar excedentes de frutas y verduras de granjas, huertos, jardines y mercados, y redistribuirlos antes de que se desperdicien.",
+    whoItServes:
+      "Vecinas y vecinos con inseguridad alimentaria y proyectos de comida como neveras, despensas y comidas comunitarias.",
+    whatYoullNeed:
+      "Personas voluntarias, transporte, vínculos con quienes cultivan y almacenamiento de corto plazo.",
+    setupHours: 19,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Encuentren fuentes de cosecha",
+        description:
+          "Acérquense a granjas, huertos, puestos de mercado y vecinas y vecinos con frutales cargados. A muchas personas les alegra que el excedente se coseche en lugar de pudrirse.",
+        hours: 4,
+      },
+      {
+        name: "Convoquen un equipo de rescate",
+        description:
+          "Armen una lista de personas voluntarias que puedan movilizarse rápido cuando la fruta o verdura esté lista. Las ventanas de cosecha son cortas, así que la flexibilidad importa más que el número.",
+        hours: 3,
+      },
+      {
+        name: "Gestionen transporte y almacenamiento",
+        description:
+          "Alineen vehículos para mover la cosecha y un lugar fresco para guardarla brevemente. Coordinen para mover el alimento rápido del campo a quienes lo reciben antes de que se eche a perder.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema de programación y despacho",
+        description:
+          "Creen una forma rápida de avisar y confirmar a las personas voluntarias cuando surja un rescate, ya que quienes cultivan suelen avisar con poca antelación. Un chat grupal o lista de llamadas funciona.",
+        hours: 3,
+      },
+      {
+        name: "Resuelvan responsabilidad y seguridad alimentaria",
+        description:
+          "Aprendan las protecciones tipo \"Buen Samaritano\" para donación de alimentos en su zona, acuerden reglas sencillas de manejo y usen una renuncia básica para que quienes cultivan reciban con tranquilidad.",
+        hours: 3,
+      },
+      {
+        name: "Construyan canales de distribución",
+        description:
+          "Definan a dónde va la cosecha rescatada — neveras comunitarias, despensas, programas de comidas o directo a familias — para que nunca se quede sin usar.",
+        hours: 3,
+      },
+      {
+        name: "Realicen los rescates y registren los kilos",
+        description:
+          "Cosechen con cuidado para proteger el sitio, distribuyan pronto y registren cuánto alimento se rescató. Las cifras ayudan a convocar a más voluntariado y a quienes cultivan.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "community-mediation",
+    name: "Red de mediación y resolución de conflictos comunitaria",
+    purpose:
+      "Ofrecer mediación gratuita y neutral para disputas vecinales, resolviendo el conflicto sin tribunales ni policía.",
+    whoItServes:
+      "Vecinas y vecinos, personas inquilinas y propietarias, compañeras y compañeros de vivienda, y grupos comunitarios en conflicto.",
+    whatYoullNeed:
+      "Personas mediadoras capacitadas, un espacio neutral y un proceso de solicitud. La mediación es para disputas entre partes dispuestas — descarten y deriven cualquier situación con violencia, abuso o peligro a la o el profesional adecuado o a servicios de emergencia.",
+    setupHours: 22,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Convoquen y capaciten a personas mediadoras",
+        description:
+          "Encuentren personas voluntarias serenas y ecuánimes y capacítenlas, ya sea en una formación reconocida de mediación o aliándose con un centro de mediación comunitaria existente.",
+        hours: 6,
+      },
+      {
+        name: "Armen un proceso de solicitud y admisión",
+        description:
+          "Creen una forma sencilla para que la gente solicite mediación. En la admisión, escuchen lo básico de cada parte y confirmen que el caso es apropiado para mediación.",
+        hours: 3,
+      },
+      {
+        name: "Encuentren espacios neutrales de reunión",
+        description:
+          "Consigan lugares tranquilos y neutrales — un salón de biblioteca o centro comunitario — donde ambas partes se sientan seguras y en igualdad de condiciones.",
+        hours: 2,
+      },
+      {
+        name: "Definan el alcance y los límites",
+        description:
+          "Decidan qué mediarán (ruido, espacios compartidos, disputas menores) y qué no. Descarten situaciones con violencia, abuso o riesgo de seguridad y deriven esos casos a profesionales adecuadas y adecuados.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan confidencialidad y reglas básicas",
+        description:
+          "Fijen reglas claras: confidencialidad, participación voluntaria, turnos con respeto, y una persona mediadora que guía pero no decide. Pónganlas por escrito para quienes participan.",
+        hours: 3,
+      },
+      {
+        name: "Difundan el servicio",
+        description:
+          "Hagan saber a vecinas y vecinos, grupos de vivienda y organizaciones locales que existe una mediación gratuita, para que la gente la busque antes de que los conflictos escalen.",
+        hours: 3,
+      },
+      {
+        name: "Hagan seguimiento de resultados y cuiden a las personas mediadoras",
+        description:
+          "Anoten tasas de resolución (sin romper la confidencialidad) y hagan debriefs regulares con quienes median. El trabajo agota, así que roten casos y ofrezcan apoyo.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "reentry-support",
+    name: "Red de apoyo al reingreso",
+    purpose:
+      "Ayudar a personas que regresan de la prisión a conseguir identificación, vivienda, trabajo y comunidad, aliviando una transición notoriamente difícil.",
+    whoItServes:
+      "Personas anteriormente encarceladas y sus familias.",
+    whatYoullNeed:
+      "Personas voluntarias, organizaciones aliadas y un directorio sólido de recursos. Traten los antecedentes e historias de las personas como privados — guíense por el respeto, sigan los objetivos propios de cada persona y deriven asuntos legales a asesoría calificada.",
+    setupHours: 26,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Armen un directorio de recursos y aliadas y aliados",
+        description:
+          "Mapeen servicios para identificación y documentos, vivienda, empleo, salud, tratamiento y beneficios. Identifiquen qué empleadores y arrendadores están abiertos a personas con antecedentes.",
+        hours: 5,
+      },
+      {
+        name: "Convoquen y capaciten a personas voluntarias",
+        description:
+          "Encuentren personas voluntarias sin prejuicios y capacítenlas en apoyo respetuoso e informado por el trauma. Quienes regresan a casa necesitan acompañantes, no porteras y porteros.",
+        hours: 4,
+      },
+      {
+        name: "Creen una bienvenida y entrevista de necesidades",
+        description:
+          "Armen una manera sencilla y digna de saber qué necesita cada persona con más urgencia — a menudo identificación, un lugar donde quedarse e ingresos — y prioricen desde ahí.",
+        hours: 3,
+      },
+      {
+        name: "Apoyen con documentos y beneficios",
+        description:
+          "Ayuden a reponer identificación y tarjetas de seguro social, a solicitar beneficios y con otros trámites difíciles de hacer sin domicilio ni acceso a internet.",
+        hours: 4,
+      },
+      {
+        name: "Conecten con empleo y vivienda",
+        description:
+          "Hagan presentaciones cálidas con empleadores de oportunidad justa y opciones de vivienda, y apoyen con postulaciones, currículums y preparación de entrevistas.",
+        hours: 4,
+      },
+      {
+        name: "Ofrezcan mentoría entre pares",
+        description:
+          "Cuando sea posible, emparejen a las personas con mentoras y mentores que han vivido el reingreso. Esa experiencia compartida construye confianza más rápido que cualquier otra cosa.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan prácticas de privacidad y límites",
+        description:
+          "Manejen las historias de las personas con estricta confidencialidad, nunca presionen a nadie a compartir más de lo que quiere y deriven preguntas legales a abogadas y abogados calificados.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-wood-bank",
+    name: "Banco comunitario de leña / Apoyo para calefacción",
+    purpose:
+      "Recolectar y distribuir leña y coordinar apoyo de calefacción para que las vecinas y los vecinos pasen el invierno en calor.",
+    whoItServes:
+      "Hogares rurales y de bajos ingresos que se calientan con leña, y personas mayores que no pueden cortar o partir la suya.",
+    whatYoullNeed:
+      "Una fuente de leña, un sitio de procesamiento y almacenamiento, equipo, una cuadrilla capacitada y un plan de entrega. Las motosierras y las hendidoras son peligrosas — permitan operar sólo a personas capacitadas, exijan equipo de protección y hagan una charla de seguridad antes de cada sesión.",
+    setupHours: 24,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Aseguren una fuente de leña",
+        description:
+          "Gestionen el suministro con servicios de poda, limpieza tras tormentas, donaciones de árboles caídos o predios manejados de forma sostenible. Confirmen que pueden tomarla y procesarla legalmente.",
+        hours: 4,
+      },
+      {
+        name: "Encuentren un sitio de procesamiento y almacenamiento",
+        description:
+          "Consigan un patio o terreno donde se pueda cortar, partir, apilar y secar la leña. Necesitan espacio para mantener seco el suministro de esta temporada y secando el de la próxima.",
+        hours: 4,
+      },
+      {
+        name: "Consigan equipo y equipo de protección",
+        description:
+          "Obtengan o pidan prestada una hendidora, motosierras y equipo de protección (perneras, protección de ojos y oídos, guantes). Mantengan las herramientas y un botiquín de primeros auxilios en el sitio.",
+        hours: 4,
+      },
+      {
+        name: "Convoquen y capaciten a la cuadrilla de leña",
+        description:
+          "Armen la cuadrilla y aseguren que sólo personas debidamente capacitadas operen motosierras y hendidoras. Hagan una charla de seguridad antes de cada día de trabajo.",
+        hours: 4,
+      },
+      {
+        name: "Armen un sistema de solicitud y entrega",
+        description:
+          "Creen una forma para que los hogares pidan leña y coordinen la entrega, dado que muchas personas receptoras son mayores o no tienen camioneta. Confirmen un apilado seguro cerca del hogar.",
+        hours: 3,
+      },
+      {
+        name: "Definan criterios de distribución",
+        description:
+          "Decidan cuánta leña recibe cada hogar y prioricen a quienes corren más riesgo con el frío. Mantengan el proceso simple y de baja barrera.",
+        hours: 2,
+      },
+      {
+        name: "Programen días de trabajo y el secado",
+        description:
+          "Planeen el corte y la partición con mucha antelación al invierno, porque la leña verde debe secar meses antes de quemar de forma segura. Lleven registro de lo que ya está seco y listo.",
         hours: 3,
       },
     ],
