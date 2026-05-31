@@ -27,6 +27,21 @@ include breaking changes.
   that every project category has a translation.
 
 ### Added
+- **10 more community-project templates ("Set 4").** Free Community
+  WiFi / Mesh Network, Mental Health Peer Support Circle, Community
+  Cleanup & Green Space Restoration, Free Tax Prep & Financial
+  Empowerment Clinic, Community Market / Free Farm Stand, Welcome
+  Wagon (New Neighbor & New Parent Support), Library of Things,
+  Laundry & Shower Access Program, Voter Registration & Civic
+  Engagement Drive, and Community Health Navigation Program. Added
+  to both `PROJECT_TEMPLATES_EN` and `PROJECT_TEMPLATES_ES`. Four
+  carry disclaimers (peer-support vs. clinical care, certified tax
+  preparers, nonpartisan election laws, health navigators vs.
+  clinicians) woven into `whatYoullNeed`. Categories used:
+  `infrastructure`, `emotional_support`, `food`, `organizing`,
+  `other`. Cadences applied per the Set 2/3 convention: `session`
+  for "per session," `event` for "per event" / "per market"
+  (closest existing cadence to "per market"; no enum expansion).
 - **10 more community-project templates ("Set 3").** Community Meal /
   People's Kitchen, Seed Library & Seed Swap, Digital Literacy & Device
   Lending Program, Weatherization & Home Repair Brigade, Pet Food Bank
