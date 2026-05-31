@@ -633,6 +633,24 @@
       "allUrgencies": "Todas las urgencias",
       "allZones": "Todas las zonas"
     },
+    "projectFilters": {
+      "category": {
+        "ariaLabel": "Filtrar proyectos por categoría",
+        "all": "Todas las categorías"
+      },
+      "status": {
+        "ariaLabel": "Filtrar proyectos por estado",
+        "all": "Todos los estados",
+        "planning": "En planificación",
+        "active": "Activos",
+        "paused": "En pausa",
+        "completed": "Completados"
+      },
+      "openTasks": {
+        "toggle": "Solo con tareas abiertas"
+      },
+      "emptyForFilters": "Nada coincide con tus filtros."
+    },
     "search": {
       "placeholderPosts": "Buscar publicaciones",
       "placeholderProjects": "Buscar proyectos",

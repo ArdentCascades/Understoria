@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Three new filters on the Community Board's Projects tab:** a
+  category dropdown, a status dropdown (Planning / Active / Paused /
+  Completed), and an "Only with open tasks" toggle pill. All three
+  compose with each other AND with the existing project search (from
+  PR #107) via AND — a project must satisfy every active filter to
+  render. State is session-only (matching the rest of the Board —
+  only the active tab lives in the URL); defaults are every filter
+  off and both dropdowns set to "All …". Archived projects are
+  intentionally NOT exposed in the status dropdown: they remain
+  reachable only via the existing "View archive" link below the
+  project list, so the Projects tab stays an action-oriented surface
+  for what's still in flight. Empty result with active filters shows
+  "Nothing matches your filters." (separate from the existing
+  "Nothing matches your search." empty state when only the search
+  query narrows the list to zero). Reuses `matchesQuery` from
+  `lib/messageSearch.ts`, the existing post-filter dropdown styling,
+  and the claimed-toggle chip pattern. New helper
+  `lib/projectFilter.ts` (`hasOpenTasks`) with 6 unit tests; 10 new
+  i18n keys in en + es (parity test passes).
 - **Threat-model §7 entry: "In-app URLs reveal client-side
   navigation to corporate MITM proxies, browser history, and
   address-bar onlookers."** Documents what's actually visible

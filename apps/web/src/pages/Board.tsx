@@ -32,8 +32,14 @@ import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { matchesQuery } from "@/lib/messageSearch";
+import { hasOpenTasks } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
-import type { Category, Urgency } from "@/types";
+import type {
+  Category,
+  Project,
+  ProjectCategory,
+  Urgency,
+} from "@/types";
 
 const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
 
@@ -80,6 +86,18 @@ export default function BoardPage() {
   // (not across reloads); a member who wants always-on can flip
   // it each session.
   const [showClaimed, setShowClaimed] = useState(false);
+  // Project-tab filters. Deliberately separate from the post-tab
+  // category / urgency / zone filters above: a member might filter
+  // Needs by `food` and want their Projects-tab category-filter to
+  // start fresh. Session-only state (no URL persistence) matches
+  // the rest of the Board — only the tab selection lives in the URL.
+  const [projectCategoryFilter, setProjectCategoryFilter] = useState<
+    ProjectCategory | ""
+  >("");
+  const [projectStatusFilter, setProjectStatusFilter] = useState<
+    Project["status"] | ""
+  >("");
+  const [onlyWithOpenTasks, setOnlyWithOpenTasks] = useState(false);
   const navigate = useNavigate();
 
   // Debounce the visible→filtered transition. 250 ms matches the
@@ -182,6 +200,38 @@ export default function BoardPage() {
         .length,
     };
   }, [posts]);
+
+  // Project-tab filter composition. All three new filters (category /
+  // status / open-tasks) AND with the existing project search from
+  // PR #107. Archived projects never appear here regardless of
+  // selection — the dedicated "View archive" link below remains the
+  // only entry point. That's why `archived` is intentionally absent
+  // from the status dropdown (see board.projectFilters.status.* keys).
+  const visibleProjects = useMemo(() => {
+    const q = debouncedQuery.trim();
+    return projects.filter((p) => {
+      if (p.status === "archived") return false;
+      if (projectCategoryFilter && p.category !== projectCategoryFilter)
+        return false;
+      if (projectStatusFilter && p.status !== projectStatusFilter) return false;
+      if (onlyWithOpenTasks && !hasOpenTasks(p.id, projectTasks)) return false;
+      if (q !== "" && !matchesQuery(`${p.title} ${p.description}`, q))
+        return false;
+      return true;
+    });
+  }, [
+    projects,
+    projectTasks,
+    projectCategoryFilter,
+    projectStatusFilter,
+    onlyWithOpenTasks,
+    debouncedQuery,
+  ]);
+
+  const projectFiltersActive =
+    projectCategoryFilter !== "" ||
+    projectStatusFilter !== "" ||
+    onlyWithOpenTasks;
 
   return (
     <div className="px-4 pb-32 pt-4">
@@ -366,11 +416,86 @@ export default function BoardPage() {
 
       {tab === "PROJECTS" && (
         <>
+          <div className="mb-4 grid gap-2 sm:grid-cols-3">
+            <label className="sr-only" htmlFor="project-category-filter">
+              {t("board.projectFilters.category.ariaLabel")}
+            </label>
+            <select
+              id="project-category-filter"
+              className="input"
+              value={projectCategoryFilter}
+              onChange={(e) =>
+                setProjectCategoryFilter(e.target.value as ProjectCategory | "")
+              }
+              aria-label={t("board.projectFilters.category.ariaLabel")}
+            >
+              <option value="">
+                {t("board.projectFilters.category.all")}
+              </option>
+              {ALL_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+                </option>
+              ))}
+              {/* Project-only extension categories. Mirrors the
+                  hardcoded options in ProjectNew.tsx — these three
+                  don't have entries in the `categories.*` i18n
+                  namespace (post types never use them), so they're
+                  written out inline rather than gaining new keys. */}
+              <option value="infrastructure">🏗️ Infrastructure</option>
+              <option value="organizing">📋 Organizing</option>
+              <option value="mutual_aid_drive">💛 Mutual aid drive</option>
+            </select>
+            <label className="sr-only" htmlFor="project-status-filter">
+              {t("board.projectFilters.status.ariaLabel")}
+            </label>
+            <select
+              id="project-status-filter"
+              className="input"
+              value={projectStatusFilter}
+              onChange={(e) =>
+                setProjectStatusFilter(
+                  e.target.value as Project["status"] | "",
+                )
+              }
+              aria-label={t("board.projectFilters.status.ariaLabel")}
+            >
+              <option value="">{t("board.projectFilters.status.all")}</option>
+              <option value="planning">
+                {t("board.projectFilters.status.planning")}
+              </option>
+              <option value="active">
+                {t("board.projectFilters.status.active")}
+              </option>
+              <option value="paused">
+                {t("board.projectFilters.status.paused")}
+              </option>
+              <option value="completed">
+                {t("board.projectFilters.status.completed")}
+              </option>
+              {/* `archived` is intentionally NOT an option. Archived
+                  projects are reached only via the "View archive"
+                  link below; the Projects tab never lists them. */}
+            </select>
+            <button
+              type="button"
+              onClick={() => setOnlyWithOpenTasks((v) => !v)}
+              aria-pressed={onlyWithOpenTasks}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${
+                onlyWithOpenTasks
+                  ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
+                  : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+              }`}
+            >
+              {t("board.projectFilters.openTasks.toggle")}
+            </button>
+          </div>
           <ProjectList
-            projects={projects}
+            projects={visibleProjects}
             projectTasks={projectTasks}
             memberName={memberName}
             searchQuery={debouncedQuery}
+            filtersActive={projectFiltersActive}
           />
           <Link
             to="/projects/archive"
@@ -422,11 +547,21 @@ function ProjectList({
   projectTasks,
   memberName,
   searchQuery,
+  filtersActive,
 }: {
+  /** Projects to render. Already filtered by the parent — this
+   *  component does NOT re-apply category / status / open-task
+   *  filters or the search query; it just renders the list and
+   *  picks the right empty state. */
   projects: import("@/types").Project[];
   projectTasks: import("@/types").ProjectTask[];
   memberName: Map<string, string>;
+  /** Used by ProjectCard to highlight matched substrings. */
   searchQuery: string;
+  /** True iff at least one of the three project-tab filters is
+   *  narrowing the list. Drives the "Nothing matches your filters."
+   *  empty state. */
+  filtersActive: boolean;
 }) {
   const { t } = useTranslation();
   const tasksByProject = useMemo(() => {
@@ -442,23 +577,22 @@ function ProjectList({
 
   const trimmedQuery = searchQuery.trim();
 
-  // Project-level fields only — title + description. Task names /
-  // descriptions are intentionally out of scope (a task-level match
-  // would need card-level "matched on task X" affordance, which adds
-  // confusion for v1).
-  const visible = useMemo(() => {
-    const baseVisible = projects.filter((p) => p.status !== "archived");
-    if (trimmedQuery === "") return baseVisible;
-    return baseVisible.filter((p) =>
-      matchesQuery(`${p.title} ${p.description}`, trimmedQuery),
-    );
-  }, [projects, trimmedQuery]);
-
-  if (visible.length === 0) {
+  if (projects.length === 0) {
+    // Empty-state priority: search > filters > "no projects yet".
+    // An active search query is the most specific narrowing signal
+    // a member is currently looking through, so it wins. Filters
+    // win over the global empty state.
     if (trimmedQuery !== "") {
       return (
         <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
           {t("board.search.noMatches")}
+        </p>
+      );
+    }
+    if (filtersActive) {
+      return (
+        <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+          {t("board.projectFilters.emptyForFilters")}
         </p>
       );
     }
@@ -473,7 +607,7 @@ function ProjectList({
 
   return (
     <ul className="flex flex-col gap-3">
-      {visible.map((p) => {
+      {projects.map((p) => {
         const counts = tasksByProject.get(p.id) ?? { total: 0, open: 0 };
         return (
           <li key={p.id}>
