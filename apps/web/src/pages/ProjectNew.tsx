@@ -14,12 +14,17 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
-import { createProject } from "@/db/projects";
+import { addProjectTask, createProject } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
+import { TemplatePicker } from "@/components/TemplatePicker";
+import {
+  getTemplate,
+  type RecurringCadence,
+} from "@/content/projectTemplates";
 import {
   combine,
   optional,
@@ -59,7 +64,7 @@ const VALIDATORS: Record<FieldName, Validator> = {
 export default function ProjectNewPage() {
   const { currentMember, nodeId } = useApp();
   const { showToast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -72,6 +77,9 @@ export default function ProjectNewPage() {
   const [error, setError] = useState<string | null>(null);
   const [pendingDraft, setPendingDraft] =
     useState<Draft<ProjectDraftPayload> | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
 
   const validation = useFieldValidation<FieldName>(
     { title, targetHours, deadlineDays },
@@ -121,6 +129,36 @@ export default function ProjectNewPage() {
     setPendingDraft(null);
   }
 
+  function handleSelectTemplate(templateId: string | null) {
+    setSelectedTemplateId(templateId);
+    if (templateId === null) {
+      // "Start from scratch" — leave the form alone. Clearing fields
+      // here would surprise a member who already typed something.
+      return;
+    }
+    const tpl = getTemplate(templateId, i18n.resolvedLanguage ?? "en");
+    if (!tpl) return;
+    setTitle(tpl.name);
+    setDescription(
+      `${tpl.purpose}\n\n${tpl.whoItServes}\n\n${tpl.whatYoullNeed}`,
+    );
+    setCategory(tpl.defaultCategory);
+    setTargetHours(String(tpl.setupHours));
+  }
+
+  /** Suffix the localized cadence sentence onto a task description.
+   *  Recurring tasks are intentionally NOT a schema field — the cadence
+   *  lives in the description so the rest of the project lifecycle
+   *  treats them like any other task. */
+  function applyRecurringSuffix(
+    description: string,
+    cadence: RecurringCadence | undefined,
+  ): string {
+    if (!cadence) return description;
+    const key = `projects.templates.recurringSuffix.${cadence}`;
+    return `${description}${t(key)}`;
+  }
+
   if (!currentMember) return null;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -149,6 +187,37 @@ export default function ProjectNewPage() {
         },
         nodeId,
       );
+      // If the member picked a template, stage its tasks now. We loop
+      // addProjectTask rather than wrapping createProject + tasks in
+      // one Dexie transaction so the existing project-creation path
+      // stays untouched — the trade-off is that a crash mid-loop
+      // could leave a partially-populated project, which is
+      // recoverable: the organizer lands on the project page and can
+      // edit or add the rest. The toast still fires after the loop so
+      // the member sees the project as "created" only once the
+      // template is fully applied.
+      if (selectedTemplateId) {
+        const tpl = getTemplate(
+          selectedTemplateId,
+          i18n.resolvedLanguage ?? "en",
+        );
+        if (tpl) {
+          for (const task of tpl.tasks) {
+            await addProjectTask(project.id, currentMember!.publicKey, {
+              title: task.name,
+              description: applyRecurringSuffix(
+                task.description,
+                task.recurringCadence,
+              ),
+              category: project.category,
+              estimatedHours: task.hours,
+              urgency: "low",
+              requiredSkills: [],
+              dependencies: [],
+            });
+          }
+        }
+      }
       await clearDraft(DRAFT_KEY);
       showToast(t("toast.projectCreated"));
       navigate(`/project/${project.id}`);
@@ -184,6 +253,37 @@ export default function ProjectNewPage() {
           onDiscard={handleDiscardDraft}
         />
       )}
+
+      <TemplatePicker
+        selectedId={selectedTemplateId}
+        onSelect={handleSelectTemplate}
+      />
+
+      {selectedTemplateId &&
+        (() => {
+          const tpl = getTemplate(
+            selectedTemplateId,
+            i18n.resolvedLanguage ?? "en",
+          );
+          if (!tpl) return null;
+          return (
+            <div
+              role="status"
+              className="mb-4 rounded-lg border border-canopy-200 bg-canopy-50 px-4 py-3 text-sm text-canopy-900 dark:border-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100"
+            >
+              <p>
+                {t("projects.templates.selected", { name: tpl.name })}
+              </p>
+              <button
+                type="button"
+                className="mt-1 text-xs font-semibold underline"
+                onClick={() => handleSelectTemplate(null)}
+              >
+                {t("projects.templates.clear")}
+              </button>
+            </div>
+          );
+        })()}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1">

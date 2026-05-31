@@ -160,6 +160,25 @@
       "errorHours": "Target hours must be a positive number.",
       "errorDeadlineDays": "Days must be a whole number greater than 0, or blank for no deadline."
     },
+    "templates": {
+      "title": "Pick a starting point",
+      "intro": "These are starter templates with pre-written tasks. Pick one to fill in the form below — you can edit anything before creating. Or start from scratch.",
+      "scratch": "Start from scratch",
+      "scratchHint": "I'll fill in everything myself.",
+      "selected": "Starting from the {{name}} template — edit anything below before creating.",
+      "clear": "Clear template",
+      "meta": {
+        "tasks_one": "{{count}} task",
+        "tasks_other": "{{count}} tasks",
+        "setupHours": "~{{hours}}h setup"
+      },
+      "recurringSuffix": {
+        "session": " Recurs each session.",
+        "month": " Recurs monthly.",
+        "event": " Recurs per event.",
+        "cycle": " Recurs each cycle."
+      }
+    },
     "detail": {
       "back": "← Back to projects",
       "notFound": "This project couldn't be found.",

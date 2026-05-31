@@ -187,3 +187,24 @@ Display name is deliberately NOT in the derivation input — it's
 mutable, and including it would tie avatar identity to a non-
 canonical handle and would leak display-name entropy into the
 visual. Public key only.
+
+## Content-driven surfaces
+
+Some surfaces are bodies of editorial copy rather than UI strings —
+they ship as TypeScript content files alongside the components that
+render them, not via the i18n locales (which are short UI strings).
+This keeps long-form prose readable, reviewable, and version-
+controlled in the same PR as the surface it serves.
+
+| File | Surface |
+| --- | --- |
+| `content/member-guide.ts` | In-app member guide (English-only for now; i18n debt is tracked separately). |
+| `content/opsec-guide.ts` | OPSEC guide for safety-sensitive contexts. |
+| `content/faq.ts` | FAQ entries. |
+| `content/design-principles.ts` | Design-principles reading inside the app. |
+| `content/study-prompts.ts` | Study-prompt corpus. |
+| `content/projectTemplates.ts` | 10 starter community-project templates (community fridge, garden, lending library, care network, emergency prep, free store, skill share, bulk-buying co-op, repair café, rides). Ships with full Spanish parity — `getProjectTemplates(locale)` returns the locale-appropriate set. Picked via `TemplatePicker` at the top of `ProjectNew`. Recurring tasks are flat tasks with a localized cadence sentence appended to the description; no schema field. Templates are *starting points, not prescriptions* — every field is editable before the project is created. |
+
+When you add a new content surface, prefer this pattern over
+stretching the i18n locales: long prose belongs near its component,
+short UI labels belong in the locales.

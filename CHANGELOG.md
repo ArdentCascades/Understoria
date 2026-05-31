@@ -10,6 +10,69 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Project-templates gallery on the Start-a-project flow.** A
+  member who taps "Start a project" now sees a 10-card gallery at
+  the top of the create page — community fridge, community garden,
+  tool & equipment lending library, neighborhood care network,
+  emergency & disaster preparedness, free store / goods swap, skill
+  share & free classes, bulk-buying food co-op, repair café, and
+  rides & transportation. Each card shows the template name, a
+  one-line purpose, the rough setup-hours estimate, the task count,
+  and the default category. Picking a card pre-fills the project
+  form (title, multi-paragraph description, category, target hours)
+  and stages all of the template's tasks so they're created with
+  the project on submit. Picking "Start from scratch" leaves the
+  form blank for fully custom projects.
+  - **Content lives in `apps/web/src/content/projectTemplates.ts`**
+    as a content-driven file, the same shape as `member-guide.ts`
+    and `opsec-guide.ts`. Single source of truth — no DB rows, no
+    server fetch, no federation surface. Edits are PRs against this
+    file.
+  - **Full Spanish parity from day one.** Every template name,
+    purpose, who-it-serves, what-you'll-need, task name, and task
+    description has a Spanish equivalent in the same content file,
+    selected via `getProjectTemplates(locale)`. Members on `es*`
+    see Spanish content end-to-end; unknown locales fall back to
+    English. Parity test passes.
+  - **Recurring tasks (e.g. monthly volunteer debrief, per-cycle
+    bulk-order sort) are modeled as one-off tasks with a localized
+    cadence sentence appended to the description** (" Recurs
+    monthly." / " Se repite mensualmente." etc.). No new schema
+    field on `ProjectTask` — the cadence is a content concern, not
+    a lifecycle one, and keeping the type flat protects federation
+    and the rest of the project surface from churn for what is
+    really a content feature.
+  - **Picker placement is above the existing form**, not a
+    separate route. The form is still the same form — the picker
+    is an optional accelerator. A "Starting from the X template —
+    edit anything below" banner with a "Clear template" affordance
+    appears once a card is picked.
+  - **17 new i18n keys** under `projects.templates.*` in en + es
+    (title, intro, scratch/scratchHint, selected, clear,
+    meta.tasks_one/tasks_other/setupHours, four
+    recurringSuffix.*). Parity test passes.
+  - **Tone**: templates are framed as *friendly starting points,
+    not prescriptions* — copy in the intro says "you can edit
+    anything before creating" and explicitly invites the
+    start-from-scratch path. No counts of "how many communities
+    have used this template," no popularity ranking, no
+    leaderboard.
+  - **Ethos check**: no streaks, no leaderboards, no color-as-rank.
+    The selected card uses the existing canopy ring pattern, same
+    as every other focus / selection treatment in the app.
+  - **Out of scope for this PR** (deferred follow-ups):
+    per-community customization of the gallery, federation /
+    sharing of templates between nodes, "save this project as a
+    template" affordance from a finished project. The current
+    surface is content-driven and ships with the app build; those
+    deferred items would need DB rows and policy choices we're
+    not making yet.
+  - **No threat-model entry needed** — no new exposure surface
+    (everything is local content already shipping in the bundle).
+
+  Tests: 583 passing (552 prior + 31 new). Lint, typecheck, build
+  clean.
+
 - **"Draft mode" banner + organizer-side task hint on planning
   projects.** Follow-up to PR #103. The previous fix correctly
   hid the Claim button on non-active projects with an

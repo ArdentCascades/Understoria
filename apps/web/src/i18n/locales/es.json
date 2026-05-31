@@ -160,6 +160,25 @@
       "errorHours": "Las horas objetivo tienen que ser un número positivo.",
       "errorDeadlineDays": "Los días deben ser un número entero mayor que 0, o en blanco para no tener fecha límite."
     },
+    "templates": {
+      "title": "Elige un punto de partida",
+      "intro": "Estas son plantillas iniciales con tareas ya escritas. Elige una para llenar el formulario de abajo — puedes editar todo antes de crear el proyecto. O empieza desde cero.",
+      "scratch": "Empezar desde cero",
+      "scratchHint": "Yo lo lleno todo.",
+      "selected": "Empezando desde la plantilla {{name}} — edita lo que quieras abajo antes de crear el proyecto.",
+      "clear": "Quitar plantilla",
+      "meta": {
+        "tasks_one": "{{count}} tarea",
+        "tasks_other": "{{count}} tareas",
+        "setupHours": "~{{hours}}h de preparación"
+      },
+      "recurringSuffix": {
+        "session": " Se repite cada sesión.",
+        "month": " Se repite mensualmente.",
+        "event": " Se repite por evento.",
+        "cycle": " Se repite cada ciclo."
+      }
+    },
     "detail": {
       "back": "← Volver a proyectos",
       "notFound": "No se encontró este proyecto.",
