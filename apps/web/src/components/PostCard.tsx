@@ -25,6 +25,7 @@ import { formatHours, formatRelativeTime } from "@/lib/format";
 import type { TrustStatus } from "@/lib/vouch";
 import { AvailabilityChips } from "./AvailabilityChips";
 import { CategoryBadge } from "./CategoryBadge";
+import { HighlightedText } from "./HighlightedText";
 import { TrustChip } from "./TrustChip";
 import { UrgencyBadge } from "./UrgencyBadge";
 import { MemberAvatar } from "./MemberAvatar";
@@ -36,6 +37,7 @@ export function PostCard({
   posterTrust,
   isCrossNode,
   posterAvailabilityChips,
+  searchQuery,
 }: {
   post: Post;
   posterName: string;
@@ -43,6 +45,11 @@ export function PostCard({
   posterTrust?: TrustStatus;
   isCrossNode?: boolean;
   posterAvailabilityChips?: AvailabilityChip[];
+  /** Optional active search query — when non-empty, every match in
+   *  the title is wrapped in <mark> via HighlightedText so the
+   *  member sees why this card matched. Description stays plain
+   *  for v1 (title is enough; pilots can ask for description). */
+  searchQuery?: string;
 }) {
   const { t } = useTranslation();
   const typeLabel =
@@ -67,7 +74,13 @@ export function PostCard({
       <div className="flex items-start gap-3">
         <MemberAvatar publicKey={post.postedBy} size={40} framed />
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug">{post.title}</h3>
+          <h3 className="text-base font-semibold leading-snug">
+            {searchQuery && searchQuery.trim() !== "" ? (
+              <HighlightedText text={post.title} query={searchQuery} />
+            ) : (
+              post.title
+            )}
+          </h3>
           {post.description && (
             <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
               {post.description}

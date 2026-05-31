@@ -13,17 +13,24 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Project } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
+import { HighlightedText } from "./HighlightedText";
 
 export function ProjectCard({
   project,
   organizerName,
   taskCount,
   openTaskCount,
+  searchQuery,
 }: {
   project: Project;
   organizerName: string;
   taskCount: number;
   openTaskCount: number;
+  /** Optional active Board search query — when non-empty, the
+   *  project title is rendered via HighlightedText so matched
+   *  substrings are wrapped in <mark>. Description is plain for
+   *  v1 (mirrors PostCard). */
+  searchQuery?: string;
 }) {
   const { t } = useTranslation();
   const percent =
@@ -49,7 +56,13 @@ export function ProjectCard({
           {openTaskCount > 0 ? ` · ${openTaskCount} open` : ""}
         </span>
       </div>
-      <h3 className="text-base font-semibold leading-snug">{project.title}</h3>
+      <h3 className="text-base font-semibold leading-snug">
+        {searchQuery && searchQuery.trim() !== "" ? (
+          <HighlightedText text={project.title} query={searchQuery} />
+        ) : (
+          project.title
+        )}
+      </h3>
       {project.description && (
         <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
           {project.description}
