@@ -1752,6 +1752,570 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       },
     ],
   },
+  {
+    id: "community-wifi-mesh",
+    name: "Free Community WiFi / Mesh Network",
+    purpose:
+      "Provide free internet access where it's unaffordable or unavailable.",
+    whoItServes:
+      "Low-income households, students, job seekers, and anyone cut off from reliable internet.",
+    whatYoullNeed:
+      "A backhaul internet connection, routers/mesh nodes, technical volunteers, and host sites.",
+    setupHours: 26,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Map coverage needs and gaps",
+        description:
+          "Identify which blocks lack affordable access and where signal could reach. Note buildings with line-of-sight and willing hosts. This shapes the whole design.",
+        hours: 3,
+      },
+      {
+        name: "Secure a backhaul internet connection",
+        description:
+          "Arrange a source of bandwidth to share — a donated business line, an ISP partnership, or a community-network uplink. Confirm the terms allow redistribution.",
+        hours: 4,
+      },
+      {
+        name: "Recruit technical volunteers",
+        description:
+          "Find people comfortable with networking who can configure routers and troubleshoot. You only need a couple to start, plus willing learners.",
+        hours: 3,
+      },
+      {
+        name: "Source and configure equipment",
+        description:
+          "Gather routers, mesh nodes, and antennas through donations or a small budget. Configure them for an open or simply-shared network and test coverage.",
+        hours: 6,
+      },
+      {
+        name: "Find host sites for nodes",
+        description:
+          "Place nodes where they extend reach — rooftops, upper windows, and porches with power and permission. Get written okay from each host and cover any tiny power cost.",
+        hours: 4,
+      },
+      {
+        name: "Set acceptable-use and privacy norms",
+        description:
+          "Post simple rules, avoid logging users' activity, and be clear that an open network isn't private. Point users to basic safety practices like HTTPS and VPNs.",
+        hours: 3,
+      },
+      {
+        name: "Maintain and expand the network",
+        description:
+          "Check nodes regularly, replace failed hardware, and add coverage as new hosts join. Document the setup so others can help maintain it.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "mental-health-peer-support",
+    name: "Mental Health Peer Support Circle",
+    purpose:
+      "Offer a safe, regular, peer-led space for people to share and support one another — a complement to, not a replacement for, professional care.",
+    whoItServes:
+      "Anyone navigating stress, isolation, grief, or mental health challenges who wants peer connection.",
+    whatYoullNeed:
+      "Trained facilitators, a private space, and clear boundaries with a crisis-referral plan. Peer support complements professional mental health care — it doesn't replace it. Facilitators are not therapists, and there must always be a clear plan to connect anyone in crisis to qualified professional or emergency resources.",
+    setupHours: 21,
+    defaultCategory: "emotional_support",
+    tasks: [
+      {
+        name: "Recruit and train facilitators",
+        description:
+          "Find warm, steady people and have them complete peer-support or active-listening training. Be clear that facilitators are peers who hold space, not clinicians who diagnose or treat.",
+        hours: 5,
+      },
+      {
+        name: "Define the circle's scope and boundaries",
+        description:
+          "Establish that this is peer support, not therapy or crisis care. Write down what the circle is for and what's outside its role, so expectations are clear to everyone.",
+        hours: 3,
+      },
+      {
+        name: "Build a crisis referral and escalation plan",
+        description:
+          "Prepare clear steps for when someone is in distress beyond peer support: how to gently connect them to professional help or crisis services, and when to involve emergency support. Keep current local and national resources on hand.",
+        hours: 3,
+      },
+      {
+        name: "Find a private, safe space",
+        description:
+          "Secure a quiet, comfortable, confidential room where people can speak freely. Consistency of place helps people feel safe to return.",
+        hours: 2,
+      },
+      {
+        name: "Set confidentiality and group ground rules",
+        description:
+          "Agree on confidentiality, no advice-giving unless asked, no interrupting, and the right to pass. Share these at the start of every session.",
+        hours: 3,
+      },
+      {
+        name: "Schedule and promote sessions",
+        description:
+          "Pick a steady time, keep groups a manageable size, and promote it in a way that reduces stigma. Make clear it's free and open.",
+        hours: 3,
+      },
+      {
+        name: "Support facilitators and prevent burnout",
+        description:
+          "Hold regular check-ins for facilitators to debrief and decompress. Rotate who leads, and make sure they have their own support too.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-cleanup",
+    name: "Community Cleanup & Green Space Restoration",
+    purpose:
+      "Clear litter, restore neglected lots and parks, and create shared green space.",
+    whoItServes:
+      "The whole neighborhood — cleaner, safer, greener space benefits everyone.",
+    whatYoullNeed:
+      "Volunteers, supplies, site permissions, and a disposal plan.",
+    setupHours: 17,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Identify and prioritize sites",
+        description:
+          "Walk the area and list spots that need attention — trash-heavy corners, overgrown lots, neglected parks. Prioritize by impact and feasibility.",
+        hours: 3,
+      },
+      {
+        name: "Get permissions and a disposal plan",
+        description:
+          "Confirm who owns each site and get permission. Arrange for trash and debris removal in advance — coordinate a dumpster or a city pickup so bags don't just pile up.",
+        hours: 3,
+      },
+      {
+        name: "Gather supplies and safety gear",
+        description:
+          "Collect gloves, bags, grabbers, and high-visibility vests. Include a rigid sharps container and a plan for any hazardous items found.",
+        hours: 3,
+      },
+      {
+        name: "Recruit and organize volunteers",
+        description:
+          "Spread the word and sign people up. Assign team leads and zones so the day is organized rather than chaotic.",
+        hours: 3,
+      },
+      {
+        name: "Plan safety and logistics",
+        description:
+          "Brief volunteers on handling hazards (never grab needles or chemicals by hand), keep a first-aid kit and water on site, and set meeting points and an end time.",
+        hours: 2,
+      },
+      {
+        name: "Run the cleanup or restoration day",
+        description:
+          "Hold the event, keep teams safe and hydrated, and celebrate the visible result together. Take before-and-after photos to motivate future turnout.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+      {
+        name: "Plan upkeep and greening",
+        description:
+          "A one-time cleanup fades fast. Set up an adopt-a-spot rota, and where possible add plantings, benches, or a small garden to keep the space cared for.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "free-tax-prep",
+    name: "Free Tax Prep & Financial Empowerment Clinic",
+    purpose:
+      "Help low-income neighbors file taxes for free and claim the credits and refunds they're owed.",
+    whoItServes:
+      "Low-income workers, families eligible for tax credits, elders, and students.",
+    whatYoullNeed:
+      "Trained and certified preparers, a space, computers, and a scheduling system. Tax returns must be prepared by certified volunteers through a recognized program — this clinic helps with standard filings, not complex situations that need a tax professional.",
+    setupHours: 25,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Get preparers trained and certified",
+        description:
+          "Have volunteers complete a recognized free-tax-prep certification (such as the IRS VITA program) so returns are accurate and properly authorized. This is non-negotiable.",
+        hours: 6,
+      },
+      {
+        name: "Partner with a recognized free-filing program",
+        description:
+          "Affiliate with an established program for software, support, and credibility. They provide the filing tools and quality checks you shouldn't build alone.",
+        hours: 4,
+      },
+      {
+        name: "Set up a space and equipment",
+        description:
+          "Secure a venue with computers, reliable internet, and enough privacy for people to share sensitive financial information comfortably.",
+        hours: 3,
+      },
+      {
+        name: "Build an appointment and intake system",
+        description:
+          "Create appointments and a clear checklist of documents people must bring (ID, income forms, prior return). This avoids wasted trips and long waits.",
+        hours: 3,
+      },
+      {
+        name: "Promote to eligible neighbors",
+        description:
+          "Get the word out, emphasizing that filing can unlock refunds and credits many people miss. Reach workers, families, and elders who often qualify.",
+        hours: 3,
+      },
+      {
+        name: "Ensure data security and privacy",
+        description:
+          "Protect every scrap of personal and financial data: secure devices, no unnecessary copies, locked storage, and a clear retention-and-destruction policy.",
+        hours: 3,
+      },
+      {
+        name: "Offer financial empowerment follow-up",
+        description:
+          "Where wanted, connect people to budgeting help, safe banking, and benefits screening. Keep it optional and refer complex situations to qualified professionals.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-market",
+    name: "Community Market / Free Farm Stand",
+    purpose:
+      "Run a regular free or pay-what-you-can stand distributing fresh produce and staples.",
+    whoItServes:
+      "Food-insecure neighbors and people in areas without affordable fresh food.",
+    whatYoullNeed:
+      "A produce supply, a stand or location, volunteers, and a regular schedule.",
+    setupHours: 18,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Secure produce and goods supply",
+        description:
+          "Source food through gleaning, community gardens, farm and grocer donations, and bulk buys. Aim for variety and reliability so the stand isn't bare.",
+        hours: 4,
+      },
+      {
+        name: "Find a location and stand setup",
+        description:
+          "Pick a visible, accessible spot with permission — a park edge, parking lot, or transit stop. Arrange tables, shade, and signage.",
+        hours: 3,
+      },
+      {
+        name: "Decide the model",
+        description:
+          "Choose fully free, pay-what-you-can, or a mix. Whatever you pick, make sure no one is ever turned away for inability to pay.",
+        hours: 2,
+      },
+      {
+        name: "Set up display, storage, and food safety",
+        description:
+          "Keep produce cool and presentable, handle food safely, and have coolers or shade for hot days. Discard anything spoiled.",
+        hours: 3,
+      },
+      {
+        name: "Recruit and schedule volunteers",
+        description:
+          "Line up people to pick up produce, set up, staff the stand, and pack down. Assign clear roles for each market.",
+        hours: 3,
+      },
+      {
+        name: "Promote and set a regular schedule",
+        description:
+          "Pick a consistent day and time and publicize it widely. Predictability is what turns a stand into a dependable resource.",
+        hours: 3,
+      },
+      {
+        name: "Run the stand and handle leftovers",
+        description:
+          "Set up, distribute warmly with no judgment, and route any leftover produce to fridges, pantries, or meal programs so nothing is wasted.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "welcome-wagon",
+    name: "Welcome Wagon: New Neighbor & New Parent Support",
+    purpose:
+      "Greet newcomers and new parents with practical help, local info, and a real welcome into the community.",
+    whoItServes:
+      "People who've just moved in, new and expecting parents, and anyone needing a friendly start.",
+    whatYoullNeed:
+      "Volunteers, info packets, donated welcome items, and a referral system.",
+    setupHours: 19,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Decide who you'll welcome and how",
+        description:
+          "Define your focus — new residents, new parents, or both — and the form the welcome takes (a visit, a basket, a call). Keep it opt-in and never intrusive.",
+        hours: 2,
+      },
+      {
+        name: "Build a local info packet",
+        description:
+          "Assemble a clear guide to local services, transit, schools, healthcare, and your mutual aid program. Offer it in the languages spoken in your area.",
+        hours: 4,
+      },
+      {
+        name: "Assemble welcome baskets",
+        description:
+          "Put together useful items — pantry basics, household goods, and for new parents, a few baby essentials or a home-cooked meal. Source through donations.",
+        hours: 3,
+      },
+      {
+        name: "Recruit and train greeters",
+        description:
+          "Find friendly volunteers and coach them to be warm and respectful, to read whether someone wants connection, and to never pressure or pry.",
+        hours: 3,
+      },
+      {
+        name: "Set up a referral and sign-up system",
+        description:
+          "Create simple ways for people to be referred or to opt in — through landlords, clinics, schools, or a sign-up form. Respect privacy throughout.",
+        hours: 3,
+      },
+      {
+        name: "Connect newcomers to the program",
+        description:
+          "Introduce people to the projects and resources that fit their needs, turning a one-time welcome into ongoing belonging.",
+        hours: 2,
+      },
+      {
+        name: "Follow up and gather feedback",
+        description:
+          "Check in a few weeks later to see how people are settling and what else would help. Use what you learn to improve the welcome.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "library-of-things",
+    name: "Library of Things",
+    purpose:
+      "Lend household and event items people rarely need to own — kitchen gear, party and camping supplies, baby equipment, projectors, and more.",
+    whoItServes:
+      "Anyone; it saves money, cuts clutter, and reduces waste.",
+    whatYoullNeed:
+      "Storage, donated items, a catalog and checkout system, and a couple of librarians.",
+    setupHours: 19,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Survey what the community wants to borrow",
+        description:
+          "Ask members what they'd use but hate to buy — folding tables, a punch bowl, a tent, a carpet cleaner, a baby stroller. The answers set your starting inventory.",
+        hours: 2,
+      },
+      {
+        name: "Find storage and open hours",
+        description:
+          "Secure a closet, room, or container to hold items, and set predictable pickup/return hours so borrowing is easy.",
+        hours: 3,
+      },
+      {
+        name: "Collect, clean, and test items",
+        description:
+          "Gather donations, then clean, test, and check each item for safety. Set aside anything broken, recalled, or unhygienic.",
+        hours: 5,
+      },
+      {
+        name: "Catalog and photograph inventory",
+        description:
+          "Log each item with a photo and its condition in a spreadsheet or lending app. Number items so they're easy to track in and out.",
+        hours: 4,
+      },
+      {
+        name: "Write borrowing rules and a trust policy",
+        description:
+          "Set loan length, quantity limits, and a forgiving return policy. Keep it built on trust rather than fees, and note items needing extra care or cleaning.",
+        hours: 2,
+      },
+      {
+        name: "Set up checkout and train librarians",
+        description:
+          "Create a simple sign-out (name, contact, item, due date) with a quick condition photo. Walk volunteers through the catalog and process.",
+        hours: 3,
+      },
+      {
+        name: "Maintain, sanitize, and grow the collection",
+        description:
+          "Clean and inspect returned items, repair what you can, and add the most-requested things over time.",
+        hours: 2,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "laundry-shower-access",
+    name: "Laundry & Shower Access Program",
+    purpose:
+      "Provide free laundry and shower access so people can stay clean with dignity.",
+    whoItServes:
+      "Unhoused neighbors, people without working facilities, and low-income families.",
+    whatYoullNeed:
+      "Access to machines and showers (a partner site or mobile unit), supplies, and volunteers.",
+    setupHours: 21,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Secure laundry and shower access",
+        description:
+          "Partner with a laundromat, gym, faith site, recreation center, or arrange a mobile unit. Confirm dependable times and that the space offers privacy.",
+        hours: 4,
+      },
+      {
+        name: "Source supplies",
+        description:
+          "Gather detergent, clean towels, soap, shampoo, and other toiletries through donations or a small budget. Include some clean clothing if you can.",
+        hours: 3,
+      },
+      {
+        name: "Set up a sign-up and time-slot system",
+        description:
+          "Create a fair way to claim laundry loads and shower slots so wait times stay reasonable and everyone gets a turn.",
+        hours: 3,
+      },
+      {
+        name: "Establish hygiene and safety protocols",
+        description:
+          "Set cleaning routines between users, ensure private and secure shower areas, and protect everyone's dignity and safety throughout.",
+        hours: 3,
+      },
+      {
+        name: "Recruit and train volunteers",
+        description:
+          "Find volunteers to run intake, manage supplies, and clean between uses. Train them to treat every guest with warmth and respect.",
+        hours: 3,
+      },
+      {
+        name: "Set a schedule and spread the word",
+        description:
+          "Pick consistent hours and let outreach workers, shelters, and street-connected neighbors know when and where the service runs.",
+        hours: 3,
+      },
+      {
+        name: "Track usage and restock",
+        description:
+          "Note how many people you serve and what runs low, so you can keep supplies stocked and plan capacity.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "voter-registration",
+    name: "Voter Registration & Civic Engagement Drive",
+    purpose:
+      "Register voters and help people take part in elections and local decisions — strictly nonpartisan.",
+    whoItServes:
+      "Eligible residents, especially those historically underrepresented at the polls.",
+    whatYoullNeed:
+      "Trained volunteers, registration materials, accurate rules, and good locations. Keep the drive strictly nonpartisan and follow all election and registration laws precisely — provide accurate information only and never advocate for a party or candidate.",
+    setupHours: 18,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Learn the rules for registration drives",
+        description:
+          "Research your area's laws on registering voters: deadlines, what volunteers may and may not do, how forms must be handled, and ID requirements. Following these exactly is essential.",
+        hours: 4,
+      },
+      {
+        name: "Train nonpartisan volunteers",
+        description:
+          "Coach volunteers to help everyone register regardless of views, and to never promote a party or candidate. Nonpartisanship protects the drive and the community's trust.",
+        hours: 3,
+      },
+      {
+        name: "Gather materials and accurate information",
+        description:
+          "Collect registration forms and verified, current info on deadlines, ID rules, polling places, and mail-in options. Bad info does more harm than none.",
+        hours: 3,
+      },
+      {
+        name: "Pick high-traffic locations and events",
+        description:
+          "Set up where eligible residents already gather — markets, transit hubs, campuses, community events — with any required permission to table.",
+        hours: 3,
+      },
+      {
+        name: "Run registration tabling",
+        description:
+          "Staff the table, help people register accurately, and submit forms promptly within legal deadlines. Keep the tone welcoming and informative.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+      {
+        name: "Help with the next steps",
+        description:
+          "Beyond registering, help people know how, when, and where to vote, including mail-in options and rides to the polls. Registration alone isn't participation.",
+        hours: 3,
+      },
+      {
+        name: "Track and follow up",
+        description:
+          "Keep simple records (respecting privacy), confirm forms were submitted, and remind newly registered neighbors of upcoming deadlines.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "health-navigation",
+    name: "Community Health Navigation Program",
+    purpose:
+      "Help neighbors find and access healthcare — clinics, insurance, prescriptions, and appointments.",
+    whoItServes:
+      "Uninsured and underinsured people, elders, newcomers, and anyone lost in the health system.",
+    whatYoullNeed:
+      "Trained navigators, a resource directory, provider partnerships, and a request system. Navigators connect people to care — they don't provide medical advice or diagnosis. Refer all clinical questions to qualified healthcare professionals.",
+    setupHours: 25,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Build a healthcare resource directory",
+        description:
+          "Compile free and low-cost clinics, sliding-scale providers, prescription-assistance programs, dental and vision options, and mental health services. Keep it current.",
+        hours: 5,
+      },
+      {
+        name: "Recruit and train navigators",
+        description:
+          "Find volunteers and train them to connect people to care — not to give medical advice. Their job is guidance and logistics, with clinical questions referred to professionals.",
+        hours: 4,
+      },
+      {
+        name: "Set up a request and intake system",
+        description:
+          "Create a private, low-barrier way for people to ask for help and describe their situation, with phone and in-person options, not just online.",
+        hours: 3,
+      },
+      {
+        name: "Help with insurance and enrollment",
+        description:
+          "Assist people in understanding and applying for coverage they qualify for (such as Medicaid or marketplace plans) and gathering the needed documents.",
+        hours: 4,
+      },
+      {
+        name: "Offer appointment and prescription support",
+        description:
+          "Help schedule appointments, set reminders, navigate prescription costs, and link to the rides program for transportation to care.",
+        hours: 3,
+      },
+      {
+        name: "Set privacy practices for health information",
+        description:
+          "Treat all health details as highly sensitive: collect the minimum, store it securely, and never share without consent. Train navigators on confidentiality.",
+        hours: 3,
+      },
+      {
+        name: "Partner with clinics and providers",
+        description:
+          "Build relationships with local clinics and providers for smoother referrals and to learn about new low-cost services as they open.",
+        hours: 3,
+      },
+    ],
+  },
 ];
 
 export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
@@ -3444,6 +4008,570 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         name: "Programen días de trabajo y el secado",
         description:
           "Planeen el corte y la partición con mucha antelación al invierno, porque la leña verde debe secar meses antes de quemar de forma segura. Lleven registro de lo que ya está seco y listo.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-wifi-mesh",
+    name: "WiFi comunitario gratuito / Red en malla",
+    purpose:
+      "Ofrecer acceso gratuito a internet donde es inaccesible o no se puede pagar.",
+    whoItServes:
+      "Hogares de bajos ingresos, estudiantes, personas que buscan trabajo y cualquiera que esté desconectada de internet confiable.",
+    whatYoullNeed:
+      "Una conexión de internet de respaldo, routers y nodos en malla, personas voluntarias con conocimientos técnicos y sitios anfitriones.",
+    setupHours: 26,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Mapeen las necesidades y los vacíos de cobertura",
+        description:
+          "Identifiquen qué cuadras carecen de acceso asequible y hasta dónde podría llegar la señal. Anoten edificios con línea de vista y personas anfitrionas dispuestas. Esto le da forma a todo el diseño.",
+        hours: 3,
+      },
+      {
+        name: "Aseguren una conexión de internet de respaldo",
+        description:
+          "Consigan una fuente de ancho de banda para compartir — una línea empresarial donada, una alianza con un ISP o un enlace de red comunitaria. Confirmen que los términos permiten redistribuir.",
+        hours: 4,
+      },
+      {
+        name: "Convoquen personas voluntarias con perfil técnico",
+        description:
+          "Busquen gente cómoda con redes que pueda configurar routers y resolver problemas. Bastan un par para empezar, más personas dispuestas a aprender.",
+        hours: 3,
+      },
+      {
+        name: "Consigan y configuren equipo",
+        description:
+          "Reúnan routers, nodos en malla y antenas mediante donaciones o un presupuesto pequeño. Configúrenlos para una red abierta o de uso compartido simple y prueben la cobertura.",
+        hours: 6,
+      },
+      {
+        name: "Encuentren sitios anfitriones para los nodos",
+        description:
+          "Coloquen los nodos donde extiendan el alcance — techos, ventanas altas y porches con corriente y permiso. Obtengan un visto bueno por escrito de cada sitio y cubran cualquier pequeño costo eléctrico.",
+        hours: 4,
+      },
+      {
+        name: "Definan normas de uso aceptable y de privacidad",
+        description:
+          "Publiquen reglas simples, eviten registrar la actividad de las personas usuarias y dejen claro que una red abierta no es privada. Orienten sobre prácticas básicas de seguridad como HTTPS y VPN.",
+        hours: 3,
+      },
+      {
+        name: "Mantengan y amplíen la red",
+        description:
+          "Revisen los nodos con regularidad, reemplacen hardware que falle y sumen cobertura cuando se incorporen nuevos anfitriones. Documenten la instalación para que otras personas puedan ayudar a mantenerla.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "mental-health-peer-support",
+    name: "Círculo de apoyo entre pares en salud mental",
+    purpose:
+      "Ofrecer un espacio seguro, regular y dirigido por pares para que las personas compartan y se apoyen mutuamente — un complemento, no un reemplazo, de la atención profesional.",
+    whoItServes:
+      "Cualquier persona que esté atravesando estrés, aislamiento, duelo o desafíos de salud mental y quiera conexión entre pares.",
+    whatYoullNeed:
+      "Personas facilitadoras capacitadas, un espacio privado, y límites claros junto con un plan de derivación en crisis. El apoyo entre pares complementa la atención profesional en salud mental — no la reemplaza. Las personas facilitadoras no son terapeutas, y siempre debe existir un plan claro para conectar a quien esté en crisis con recursos profesionales o de emergencia calificados.",
+    setupHours: 21,
+    defaultCategory: "emotional_support",
+    tasks: [
+      {
+        name: "Convoquen y capaciten a personas facilitadoras",
+        description:
+          "Busquen personas cálidas y estables y pídanles que completen una capacitación en apoyo entre pares o escucha activa. Dejen claro que las personas facilitadoras son pares que sostienen el espacio, no clínicas que diagnostican o tratan.",
+        hours: 5,
+      },
+      {
+        name: "Definan el alcance y los límites del círculo",
+        description:
+          "Establezcan que esto es apoyo entre pares, no terapia ni atención de crisis. Pongan por escrito para qué es el círculo y qué queda fuera de su rol, para que las expectativas queden claras para todas las personas.",
+        hours: 3,
+      },
+      {
+        name: "Armen un plan de derivación y escalamiento en crisis",
+        description:
+          "Preparen pasos claros para cuando alguien esté en angustia más allá del apoyo entre pares: cómo conectarle con cuidado a ayuda profesional o a servicios de crisis, y cuándo activar apoyo de emergencia. Tengan a mano recursos locales y nacionales actualizados.",
+        hours: 3,
+      },
+      {
+        name: "Encuentren un espacio privado y seguro",
+        description:
+          "Aseguren una sala tranquila, cómoda y confidencial donde las personas puedan hablar con libertad. La constancia del lugar ayuda a que la gente se sienta segura para volver.",
+        hours: 2,
+      },
+      {
+        name: "Acuerden confidencialidad y reglas del grupo",
+        description:
+          "Acuerden confidencialidad, no dar consejos a menos que se pidan, no interrumpir y el derecho a pasar. Compártanlas al inicio de cada sesión.",
+        hours: 3,
+      },
+      {
+        name: "Agenden y difundan las sesiones",
+        description:
+          "Elijan un horario constante, mantengan grupos de un tamaño manejable y difundan de un modo que reduzca el estigma. Dejen claro que es gratuito y abierto.",
+        hours: 3,
+      },
+      {
+        name: "Acompañen a las personas facilitadoras y eviten el desgaste",
+        description:
+          "Hagan reuniones regulares para que las personas facilitadoras descarguen y descompriman. Roten quién guía y asegúrense de que también tengan su propio apoyo.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-cleanup",
+    name: "Limpieza comunitaria y restauración de espacios verdes",
+    purpose:
+      "Recoger basura, restaurar lotes y parques abandonados y crear espacios verdes compartidos.",
+    whoItServes:
+      "Todo el barrio — un espacio más limpio, seguro y verde beneficia a todas las personas.",
+    whatYoullNeed:
+      "Personas voluntarias, insumos, permisos del sitio y un plan de disposición de residuos.",
+    setupHours: 17,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Identifiquen y prioricen sitios",
+        description:
+          "Recorran la zona y enumeren los puntos que necesitan atención — esquinas cargadas de basura, lotes con maleza, parques descuidados. Prioricen por impacto y viabilidad.",
+        hours: 3,
+      },
+      {
+        name: "Obtengan permisos y un plan de disposición",
+        description:
+          "Confirmen quién es dueño de cada sitio y obtengan permiso. Arreglen la recolección de basura y escombros con anticipación — coordinen un contenedor o un recoge municipal para que las bolsas no se acumulen.",
+        hours: 3,
+      },
+      {
+        name: "Reúnan insumos y equipo de seguridad",
+        description:
+          "Recolecten guantes, bolsas, pinzas y chalecos de alta visibilidad. Incluyan un contenedor rígido para objetos punzocortantes y un plan para cualquier material peligroso que encuentren.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen y organicen personas voluntarias",
+        description:
+          "Corran la voz y registren a las personas. Asignen líderes de equipo y zonas para que el día sea organizado y no caótico.",
+        hours: 3,
+      },
+      {
+        name: "Planeen seguridad y logística",
+        description:
+          "Den una charla a las personas voluntarias sobre el manejo de riesgos (nunca tomar agujas o químicos con la mano), tengan un botiquín y agua en el sitio, y definan puntos de encuentro y hora de cierre.",
+        hours: 2,
+      },
+      {
+        name: "Lleven a cabo el día de limpieza o restauración",
+        description:
+          "Realicen el evento, mantengan a los equipos seguros e hidratados y celebren juntas y juntos el resultado visible. Tomen fotos del antes y después para motivar la próxima convocatoria.",
+        hours: 5,
+        recurringCadence: "event",
+      },
+      {
+        name: "Planeen el mantenimiento y la reforestación",
+        description:
+          "Una limpieza única se desvanece rápido. Armen una rotación de adopción del lugar y, cuando sea posible, sumen plantas, bancos o un pequeño huerto para mantener el espacio cuidado.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "free-tax-prep",
+    name: "Preparación gratuita de impuestos y clínica de empoderamiento financiero",
+    purpose:
+      "Ayudar a vecinas y vecinos de bajos ingresos a presentar impuestos de forma gratuita y reclamar los créditos y reembolsos que les corresponden.",
+    whoItServes:
+      "Personas trabajadoras de bajos ingresos, familias elegibles para créditos fiscales, personas mayores y estudiantes.",
+    whatYoullNeed:
+      "Personas preparadoras capacitadas y certificadas, un espacio, computadoras y un sistema de citas. Las declaraciones deben ser preparadas por personas voluntarias certificadas a través de un programa reconocido — esta clínica ayuda con declaraciones estándar, no con situaciones complejas que requieren a un profesional fiscal.",
+    setupHours: 25,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Capaciten y certifiquen a las personas preparadoras",
+        description:
+          "Hagan que las personas voluntarias completen una certificación reconocida de preparación gratuita de impuestos (como el programa VITA del IRS) para que las declaraciones sean correctas y estén debidamente autorizadas. Esto no es negociable.",
+        hours: 6,
+      },
+      {
+        name: "Aliense con un programa reconocido de presentación gratuita",
+        description:
+          "Afílense a un programa establecido para obtener software, soporte y credibilidad. Ellos brindan las herramientas de presentación y los controles de calidad que no conviene construir solos.",
+        hours: 4,
+      },
+      {
+        name: "Habiliten un espacio y el equipo",
+        description:
+          "Consigan un local con computadoras, internet confiable y suficiente privacidad para que las personas puedan compartir información financiera sensible con tranquilidad.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema de citas y de admisión",
+        description:
+          "Creen citas y una lista clara de documentos que las personas deben traer (identificación, comprobantes de ingresos, declaración anterior). Esto evita viajes en vano y esperas largas.",
+        hours: 3,
+      },
+      {
+        name: "Difundan entre vecinas y vecinos elegibles",
+        description:
+          "Corran la voz, resaltando que presentar puede destrabar reembolsos y créditos que muchas personas se pierden. Lleguen a trabajadores, familias y personas mayores que con frecuencia califican.",
+        hours: 3,
+      },
+      {
+        name: "Aseguren la seguridad y la privacidad de los datos",
+        description:
+          "Protejan hasta el último dato personal y financiero: dispositivos seguros, sin copias innecesarias, almacenamiento bajo llave y una política clara de retención y destrucción.",
+        hours: 3,
+      },
+      {
+        name: "Ofrezcan seguimiento de empoderamiento financiero",
+        description:
+          "Cuando se quiera, conecten a las personas con apoyo de presupuesto, banca segura y orientación sobre beneficios. Manténganlo opcional y deriven situaciones complejas a profesionales calificados.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-market",
+    name: "Mercado comunitario / Puesto agrícola gratuito",
+    purpose:
+      "Operar un puesto regular, gratuito o de pago según puedas, que distribuya frutas, verduras y básicos.",
+    whoItServes:
+      "Vecinas y vecinos con inseguridad alimentaria y personas en zonas sin acceso a productos frescos asequibles.",
+    whatYoullNeed:
+      "Una fuente de productos, un puesto o ubicación, personas voluntarias y un horario regular.",
+    setupHours: 18,
+    defaultCategory: "food",
+    tasks: [
+      {
+        name: "Aseguren suministro de productos y artículos",
+        description:
+          "Consigan alimentos a través de gleaning, huertas comunitarias, donaciones de granjas y tiendas y compras al por mayor. Apunten a variedad y confiabilidad para que el puesto no quede vacío.",
+        hours: 4,
+      },
+      {
+        name: "Encuentren ubicación y monten el puesto",
+        description:
+          "Elijan un lugar visible, accesible y con permiso — el borde de un parque, un estacionamiento o una parada de transporte. Acomoden mesas, sombra y señalización.",
+        hours: 3,
+      },
+      {
+        name: "Decidan el modelo",
+        description:
+          "Elijan totalmente gratuito, paga lo que puedas o una mezcla. Cualquier opción que tomen, asegúrense de no rechazar nunca a nadie por no poder pagar.",
+        hours: 2,
+      },
+      {
+        name: "Organicen exhibición, almacenamiento y seguridad alimentaria",
+        description:
+          "Mantengan los productos frescos y presentables, manejen los alimentos con seguridad y tengan hieleras o sombra para los días calurosos. Descarten lo que esté en mal estado.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen y agenden personas voluntarias",
+        description:
+          "Organicen personas para recoger producto, montar, atender el puesto y desmontar. Asignen roles claros para cada mercado.",
+        hours: 3,
+      },
+      {
+        name: "Difundan y fijen un horario regular",
+        description:
+          "Elijan un día y hora constantes y publíquenlo ampliamente. La previsibilidad es lo que convierte un puesto en un recurso confiable.",
+        hours: 3,
+      },
+      {
+        name: "Operen el puesto y manejen las sobras",
+        description:
+          "Monten, distribuyan con calidez y sin juicio, y deriven cualquier producto sobrante a refrigeradores, despensas o programas de comidas para que nada se desperdicie.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "welcome-wagon",
+    name: "Carreta de bienvenida: apoyo a vecinas y vecinos nuevos y a madres y padres recientes",
+    purpose:
+      "Recibir a personas recién llegadas y a quienes acaban de ser madres o padres con ayuda práctica, información local y una bienvenida real a la comunidad.",
+    whoItServes:
+      "Personas que se acaban de mudar, madres y padres nuevos o en espera, y cualquiera que necesite un comienzo amable.",
+    whatYoullNeed:
+      "Personas voluntarias, paquetes de información, artículos de bienvenida donados y un sistema de referencias.",
+    setupHours: 19,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Definan a quién darán la bienvenida y cómo",
+        description:
+          "Definan su enfoque — residentes nuevos, madres y padres nuevos, o ambos — y la forma que toma la bienvenida (una visita, una canasta, una llamada). Manténganlo opt-in y nunca invasivo.",
+        hours: 2,
+      },
+      {
+        name: "Armen un paquete de información local",
+        description:
+          "Reúnan una guía clara de servicios locales, transporte, escuelas, atención médica y su programa de apoyo mutuo. Ofrézcanlo en los idiomas que se hablan en su zona.",
+        hours: 4,
+      },
+      {
+        name: "Armen canastas de bienvenida",
+        description:
+          "Junten cosas útiles — básicos de despensa, artículos del hogar, y para madres y padres nuevos, algunos esenciales de bebé o una comida casera. Consíganlas con donaciones.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen y capaciten a personas que reciben",
+        description:
+          "Busquen personas voluntarias amables y entrénenlas para ser cálidas y respetuosas, para leer si alguien quiere conexión, y para nunca presionar ni meterse de más.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema de referencias e inscripción",
+        description:
+          "Creen formas simples para que las personas sean referidas o se anoten — por arrendadores, clínicas, escuelas o un formulario. Respeten la privacidad en todo el proceso.",
+        hours: 3,
+      },
+      {
+        name: "Conecten a las personas recién llegadas con el programa",
+        description:
+          "Preséntenles los proyectos y recursos que les sirvan, convirtiendo una bienvenida única en una pertenencia continua.",
+        hours: 2,
+      },
+      {
+        name: "Den seguimiento y recojan retroalimentación",
+        description:
+          "Vuelvan a contactar unas semanas después para ver cómo se están instalando y qué más ayudaría. Usen lo aprendido para mejorar la bienvenida.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "library-of-things",
+    name: "Biblioteca de cosas",
+    purpose:
+      "Prestar artículos del hogar y para eventos que la gente rara vez necesita poseer — utensilios de cocina, equipo para fiestas y campamento, equipo de bebé, proyectores y más.",
+    whoItServes:
+      "Cualquier persona; ahorra dinero, reduce el desorden y disminuye el desperdicio.",
+    whatYoullNeed:
+      "Almacenamiento, artículos donados, un catálogo y sistema de préstamos, y un par de personas bibliotecarias.",
+    setupHours: 19,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Pregunten a la comunidad qué quiere pedir prestado",
+        description:
+          "Pregúntenle a las personas qué usarían pero odiarían comprar — mesas plegables, una ponchera, una carpa, una limpiadora de alfombras, una carriola. Las respuestas definen su inventario inicial.",
+        hours: 2,
+      },
+      {
+        name: "Encuentren almacenamiento y horario de atención",
+        description:
+          "Consigan un clóset, sala o contenedor para guardar los artículos y fijen horas predecibles de recogida y devolución para que pedir prestado sea fácil.",
+        hours: 3,
+      },
+      {
+        name: "Recolecten, limpien y prueben los artículos",
+        description:
+          "Junten donaciones y luego limpien, prueben y revisen cada artículo por seguridad. Aparten cualquier cosa rota, retirada del mercado o no higiénica.",
+        hours: 5,
+      },
+      {
+        name: "Cataloguen y fotografíen el inventario",
+        description:
+          "Registren cada artículo con una foto y su estado en una hoja de cálculo o app de préstamos. Numeren los artículos para que sean fáciles de rastrear al salir y entrar.",
+        hours: 4,
+      },
+      {
+        name: "Escriban reglas de préstamo y una política de confianza",
+        description:
+          "Definan duración del préstamo, límites de cantidad y una política de devolución indulgente. Constrúyanla sobre la confianza, no sobre multas, y anoten los artículos que requieran cuidado o limpieza extra.",
+        hours: 2,
+      },
+      {
+        name: "Habiliten el préstamo y capaciten a bibliotecarias y bibliotecarios",
+        description:
+          "Creen un formato simple de salida (nombre, contacto, artículo, fecha de devolución) con una foto rápida del estado. Guíen a las personas voluntarias por el catálogo y el proceso.",
+        hours: 3,
+      },
+      {
+        name: "Mantengan, sanitizen y hagan crecer la colección",
+        description:
+          "Limpien e inspeccionen los artículos devueltos, reparen lo que puedan y sumen con el tiempo lo que más se pide.",
+        hours: 2,
+        recurringCadence: "session",
+      },
+    ],
+  },
+  {
+    id: "laundry-shower-access",
+    name: "Programa de acceso a lavandería y duchas",
+    purpose:
+      "Ofrecer acceso gratuito a lavandería y duchas para que las personas puedan mantenerse limpias con dignidad.",
+    whoItServes:
+      "Vecinas y vecinos sin hogar, personas sin instalaciones funcionales y familias de bajos ingresos.",
+    whatYoullNeed:
+      "Acceso a máquinas y duchas (un sitio aliado o una unidad móvil), insumos y personas voluntarias.",
+    setupHours: 21,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Aseguren acceso a lavandería y duchas",
+        description:
+          "Aliense con una lavandería, gimnasio, sitio religioso, centro recreativo, o coordinen una unidad móvil. Confirmen horarios confiables y que el espacio ofrezca privacidad.",
+        hours: 4,
+      },
+      {
+        name: "Consigan insumos",
+        description:
+          "Reúnan detergente, toallas limpias, jabón, champú y otros artículos de higiene mediante donaciones o un presupuesto pequeño. Incluyan algo de ropa limpia si pueden.",
+        hours: 3,
+      },
+      {
+        name: "Armen un sistema de inscripción y turnos",
+        description:
+          "Creen una forma justa de reservar cargas de lavado y turnos de ducha para que los tiempos de espera se mantengan razonables y todas las personas tengan su lugar.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan protocolos de higiene y seguridad",
+        description:
+          "Definan rutinas de limpieza entre personas usuarias, aseguren áreas de ducha privadas y seguras, y protejan la dignidad y la seguridad de todas las personas en todo momento.",
+        hours: 3,
+      },
+      {
+        name: "Convoquen y capaciten a personas voluntarias",
+        description:
+          "Busquen personas voluntarias para hacer la admisión, manejar los insumos y limpiar entre usos. Capacítenlas para tratar a cada persona invitada con calidez y respeto.",
+        hours: 3,
+      },
+      {
+        name: "Fijen un horario y corran la voz",
+        description:
+          "Elijan horas constantes y avísenle a personas de calle, albergues y vecinas y vecinos vinculados a la calle cuándo y dónde funciona el servicio.",
+        hours: 3,
+      },
+      {
+        name: "Lleven registro de uso y repongan",
+        description:
+          "Anoten a cuántas personas atienden y qué se está acabando, para mantener los insumos abastecidos y planear la capacidad.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "voter-registration",
+    name: "Campaña de registro de votantes y participación cívica",
+    purpose:
+      "Registrar votantes y ayudar a las personas a participar en elecciones y decisiones locales — estrictamente apartidista.",
+    whoItServes:
+      "Personas residentes elegibles, especialmente quienes históricamente han estado subrepresentadas en las urnas.",
+    whatYoullNeed:
+      "Personas voluntarias capacitadas, materiales de registro, reglas precisas y buenas ubicaciones. Mantengan la campaña estrictamente apartidista y sigan al pie de la letra todas las leyes electorales y de registro — entreguen sólo información precisa y nunca aboguen por un partido o candidatura.",
+    setupHours: 18,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Aprendan las reglas para campañas de registro",
+        description:
+          "Investiguen las leyes de su zona sobre registrar votantes: plazos, qué pueden y no pueden hacer las personas voluntarias, cómo se deben manejar los formularios y los requisitos de identificación. Cumplirlas con exactitud es esencial.",
+        hours: 4,
+      },
+      {
+        name: "Capaciten a personas voluntarias apartidistas",
+        description:
+          "Entrenen a las personas voluntarias para ayudar a registrarse a todas las personas sin importar sus opiniones, y para nunca promover un partido o candidatura. La imparcialidad protege a la campaña y a la confianza de la comunidad.",
+        hours: 3,
+      },
+      {
+        name: "Reúnan materiales e información precisa",
+        description:
+          "Recolecten formularios de registro e información verificada y actual sobre plazos, reglas de identificación, lugares de votación y opciones por correo. La información incorrecta hace más daño que ninguna.",
+        hours: 3,
+      },
+      {
+        name: "Elijan lugares y eventos de alto tránsito",
+        description:
+          "Pongan mesa donde la gente elegible ya se reúne — mercados, paradas de transporte, campus universitarios, eventos comunitarios — con cualquier permiso necesario para instalarse.",
+        hours: 3,
+      },
+      {
+        name: "Atiendan la mesa de registro",
+        description:
+          "Cubran la mesa, ayuden a registrarse correctamente y entreguen los formularios con prontitud dentro de los plazos legales. Mantengan un tono cálido e informativo.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+      {
+        name: "Acompañen los siguientes pasos",
+        description:
+          "Más allá de registrar, ayuden a la gente a saber cómo, cuándo y dónde votar, incluidas opciones por correo y traslados a las urnas. Registrarse solo no es participar.",
+        hours: 3,
+      },
+      {
+        name: "Lleven registro y den seguimiento",
+        description:
+          "Mantengan registros simples (respetando la privacidad), confirmen que los formularios fueron entregados y recuerden los próximos plazos a las personas recién registradas.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "health-navigation",
+    name: "Programa comunitario de navegación de salud",
+    purpose:
+      "Ayudar a vecinas y vecinos a encontrar y acceder a atención médica — clínicas, seguros, recetas y citas.",
+    whoItServes:
+      "Personas sin seguro o con poco seguro, personas mayores, recién llegadas y cualquiera perdida en el sistema de salud.",
+    whatYoullNeed:
+      "Personas navegadoras capacitadas, un directorio de recursos, alianzas con proveedores y un sistema de solicitudes. Las personas navegadoras conectan a la gente con la atención — no dan consejo médico ni diagnósticos. Deriven todas las preguntas clínicas a profesionales de salud calificados.",
+    setupHours: 25,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Armen un directorio de recursos de salud",
+        description:
+          "Compilen clínicas gratuitas y de bajo costo, proveedores con tarifa escalonada, programas de asistencia para recetas, opciones dentales y de vista, y servicios de salud mental. Manténganlo al día.",
+        hours: 5,
+      },
+      {
+        name: "Convoquen y capaciten a personas navegadoras",
+        description:
+          "Busquen personas voluntarias y capacítenlas para conectar a la gente con la atención — no para dar consejo médico. Su trabajo es orientación y logística, con las preguntas clínicas derivadas a profesionales.",
+        hours: 4,
+      },
+      {
+        name: "Armen un sistema de solicitud y admisión",
+        description:
+          "Creen una forma privada y de baja barrera para que la gente pida ayuda y describa su situación, con opciones por teléfono y en persona, no sólo en línea.",
+        hours: 3,
+      },
+      {
+        name: "Ayuden con seguros e inscripción",
+        description:
+          "Acompañen a las personas a entender y solicitar la cobertura para la que califican (como Medicaid o planes del mercado de seguros) y a reunir los documentos necesarios.",
+        hours: 4,
+      },
+      {
+        name: "Ofrezcan apoyo con citas y recetas",
+        description:
+          "Ayuden a agendar citas, fijar recordatorios, navegar los costos de recetas y conectar con el programa de transporte para llegar a la atención.",
+        hours: 3,
+      },
+      {
+        name: "Definan prácticas de privacidad para la información de salud",
+        description:
+          "Traten todos los datos de salud como altamente sensibles: recojan lo mínimo, almacénenlo de forma segura y nunca lo compartan sin consentimiento. Capaciten a las personas navegadoras en confidencialidad.",
+        hours: 3,
+      },
+      {
+        name: "Aliense con clínicas y proveedores",
+        description:
+          "Construyan relaciones con clínicas y proveedores locales para derivar con más fluidez y conocer nuevos servicios de bajo costo a medida que abren.",
         hours: 3,
       },
     ],
