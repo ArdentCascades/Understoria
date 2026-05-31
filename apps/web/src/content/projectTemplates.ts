@@ -623,6 +623,569 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       },
     ],
   },
+  {
+    id: "tenant-union",
+    name: "Tenant Union & Eviction Defense Network",
+    purpose:
+      "Organize renters to defend against evictions, unsafe conditions, and unfair rent hikes through collective action.",
+    whoItServes:
+      "Renters, especially in buildings with negligent or absentee landlords, and anyone facing eviction.",
+    whatYoullNeed:
+      "A core organizing group, accurate local tenant-rights info, a connection to legal aid, and a fast contact system. This project supports tenants and shares public legal information; it does not replace legal advice. Always route individual cases to qualified legal aid before deadlines.",
+    setupHours: 26,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Recruit a core organizing committee",
+        description:
+          "Find 3–6 committed tenants to anchor the work. Look for people respected in their buildings. Agree on roles, a meeting rhythm, and shared goals.",
+        hours: 4,
+      },
+      {
+        name: "Map buildings and tenant issues",
+        description:
+          "Door-knock or survey to learn which buildings have problems and what they are (repairs ignored, illegal fees, harassment). Track patterns and find natural leaders in each building.",
+        hours: 5,
+      },
+      {
+        name: "Gather accurate local tenant-rights information",
+        description:
+          "Compile your area's actual laws on eviction notice periods, repairs, deposits, and rent rules. Partner with a legal aid clinic to verify it. This is shared information, not legal advice — make that clear to members.",
+        hours: 4,
+      },
+      {
+        name: "Build a rapid-response contact system",
+        description:
+          "Set up a phone tree or group chat so a tenant getting an eviction notice or lockout can reach the union fast. Decide who responds and how quickly.",
+        hours: 3,
+      },
+      {
+        name: "Host a know-your-rights workshop",
+        description:
+          "Run a session (ideally with a legal aid partner) walking tenants through their rights and what to do if served papers. Provide printed take-home guides in relevant languages.",
+        hours: 4,
+      },
+      {
+        name: "Set up an eviction-response protocol",
+        description:
+          "Write a simple step-by-step for when someone faces eviction: document everything, contact legal aid by the deadline, organize neighbor support, and never ignore court dates.",
+        hours: 3,
+      },
+      {
+        name: "Connect to legal aid and ongoing support",
+        description:
+          "Build a referral relationship with tenant lawyers, legal aid, and housing counselors so the union can hand off cases that need professional help. Keep contacts current.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "childcare-collective",
+    name: "Childcare / Babysitting Collective",
+    purpose:
+      "Share trusted childcare among families so parents can work, rest, or handle emergencies without paying for it.",
+    whoItServes:
+      "Parents and caregivers, especially single parents, shift workers, and lower-income families.",
+    whatYoullNeed:
+      "A group of vetted families, a safe space (or rotating homes), a scheduling system, and clear safety rules. Caring for other people's children is a serious responsibility — keep firm supervision rules, screen caregivers, and follow your local rules on informal childcare.",
+    setupHours: 26,
+    defaultCategory: "childcare",
+    tasks: [
+      {
+        name: "Gather founding families and agree on a model",
+        description:
+          "Recruit families who know or can build trust with each other. Decide the model: a rotating babysitting co-op where parents earn and spend care credits, or scheduled group care.",
+        hours: 4,
+      },
+      {
+        name: "Set safety and vetting standards",
+        description:
+          "Agree on screening for anyone caring for children: references, background checks where appropriate, and a firm rule that no single adult is ever alone with another family's child unaccounted for. Set adult-to-child ratios.",
+        hours: 5,
+      },
+      {
+        name: "Find and child-proof a space",
+        description:
+          "Choose a venue or set standards for host homes. Check for hazards, cover outlets, secure heavy furniture, lock away medicines and chemicals, and confirm a safe outdoor area if used.",
+        hours: 4,
+      },
+      {
+        name: "Create a scheduling and credit system",
+        description:
+          "Use a shared calendar or co-op app. In a credit model, one hour of care earns one hour owed. Track who's hosting when so the load stays fair.",
+        hours: 3,
+      },
+      {
+        name: "Set health, allergy, and emergency policies",
+        description:
+          "Collect allergy info, medications, emergency contacts, and pickup authorizations for each child. Write a clear sick-child policy and what to do in a medical emergency.",
+        hours: 3,
+      },
+      {
+        name: "Train caregivers on basics",
+        description:
+          "Cover supervision, safe sleep for infants, allergy and emergency response, and the safety rules. Encourage at least one pediatric first-aid/CPR-certified adult per session.",
+        hours: 4,
+      },
+      {
+        name: "Run a trial session and gather feedback",
+        description:
+          "Hold a short pilot with a few families, then debrief. Fix what didn't work before scaling. Check in regularly so trust and safety stay strong.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-composting",
+    name: "Community Composting Program",
+    purpose:
+      "Collect food scraps to divert waste from landfill and produce free compost for local gardens.",
+    whoItServes:
+      "Households without a way to compost, community gardens, and the local environment.",
+    whatYoullNeed:
+      "A composting site, collection bins, basic equipment, and a small maintenance rota.",
+    setupHours: 20,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Find a composting site",
+        description:
+          "Secure a spot with space and some sun — a community garden corner, vacant lot, or willing backyard. Confirm permission and check local rules on composting.",
+        hours: 4,
+      },
+      {
+        name: "Choose a composting method",
+        description:
+          "Pick what fits your scale: a three-bin hot-compost system, tumblers, or worm bins. Match the method to how much material you expect and how much turning you can manage.",
+        hours: 3,
+      },
+      {
+        name: "Source bins and equipment",
+        description:
+          "Build or buy collection bins and the composting structure. Gather a pitchfork, thermometer, and brown material (leaves, cardboard) to balance the food scraps.",
+        hours: 4,
+      },
+      {
+        name: "Set up a collection system",
+        description:
+          "Decide how scraps arrive: a drop-off bin with set hours, or a volunteer pickup route. Give participants small countertop pails and a clear drop schedule.",
+        hours: 4,
+      },
+      {
+        name: "Make clear what's accepted",
+        description:
+          "Post a simple yes/no list (yes: fruit, veg, coffee, eggshells; no: meat, dairy, oils, pet waste). Clear signage prevents contamination that ruins a batch.",
+        hours: 2,
+      },
+      {
+        name: "Recruit and train a maintenance rota",
+        description:
+          "Compost needs regular turning, moisture checks, and balancing greens and browns. Build a shared schedule and teach volunteers the basics so piles don't smell or stall.",
+        hours: 3,
+      },
+      {
+        name: "Distribute finished compost",
+        description:
+          "Once compost is ready, share it free with contributors and community gardens. Announce pickup days and bring bags or buckets.",
+        hours: 2,
+        recurringCadence: "cycle",
+      },
+    ],
+  },
+  {
+    id: "free-little-library",
+    name: "Free Little Library & Book Exchange",
+    purpose:
+      "Provide free books 24/7 to encourage reading and sharing, with no library card or fees.",
+    whoItServes:
+      "Kids, families, and readers of all ages, especially in neighborhoods with limited book access.",
+    whatYoullNeed:
+      "A weatherproof book box, a starting collection, a host spot, and light upkeep.",
+    setupHours: 16,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Build or get a weatherproof book box",
+        description:
+          "Make or buy a sturdy, waterproof box on a post or wall. A repurposed cabinet or newspaper box works. Add a clear door and a sloped roof so books stay dry.",
+        hours: 5,
+      },
+      {
+        name: "Choose and prep a location",
+        description:
+          "Pick a spot with foot traffic and permission — your own front yard, a community center, or a park edge. Anchor the box firmly and confirm it's allowed.",
+        hours: 2,
+      },
+      {
+        name: "Stock the initial collection",
+        description:
+          "Gather donated books through a small drive. Aim for a mix: children's books, popular fiction, and practical nonfiction. Start it half-full so there's room to add.",
+        hours: 3,
+      },
+      {
+        name: "Add a sign and simple norms",
+        description:
+          "Post \"Take a book, leave a book — all free.\" Keep it welcoming and rule-light. Add a note inviting all ages and languages.",
+        hours: 1,
+      },
+      {
+        name: "Recruit a steward",
+        description:
+          "Ask someone nearby to check the box weekly: tidy it, remove anything damaged or inappropriate, and rebalance the stock. Five minutes a week keeps it healthy.",
+        hours: 1,
+      },
+      {
+        name: "Curate for the community",
+        description:
+          "Stock books that fit your neighborhood — multiple languages, children's books if there are families, practical guides. Quietly remove worn or unsuitable items.",
+        hours: 2,
+      },
+      {
+        name: "Promote and connect to literacy efforts",
+        description:
+          "Tell schools, the local library, and neighbors it exists. Consider tie-ins like a summer reading nudge or themed restocks.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-first-aid-training",
+    name: "Community First Aid & Overdose Response Training",
+    purpose:
+      "Train neighbors in first aid, CPR, and overdose reversal so the community can respond in the minutes before professionals arrive.",
+    whoItServes:
+      "Everyone; especially high-impact where EMS response is slow or overdose rates are high.",
+    whatYoullNeed:
+      "Certified trainers, supplies, a space, and a recurring schedule. All medical training should be delivered by certified instructors; this project organizes and hosts that training, it doesn't replace it.",
+    setupHours: 18,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Partner with certified trainers",
+        description:
+          "Connect with qualified instructors — the Red Cross, your local health department, or a harm-reduction organization. They deliver the actual medical training; your role is to organize and host it.",
+        hours: 4,
+      },
+      {
+        name: "Source supplies",
+        description:
+          "Obtain first-aid kits, CPR practice mannequins (often loaned by trainers), and naloxone. Many public health programs distribute naloxone free — ask your health department or harm-reduction groups.",
+        hours: 4,
+      },
+      {
+        name: "Find space and schedule sessions",
+        description:
+          "Book a room that fits hands-on practice — a community center, library, or clinic. Set recurring dates so people can plan around work.",
+        hours: 3,
+      },
+      {
+        name: "Recruit participants",
+        description:
+          "Promote sessions widely and prioritize people likely to witness emergencies. Keep sign-up easy and free, and offer varied times for shift workers.",
+        hours: 3,
+      },
+      {
+        name: "Run the training sessions",
+        description:
+          "Host the trainer-led sessions, handle setup and check-in, and make sure everyone gets hands-on practice. Provide take-home reference cards.",
+        hours: 4,
+        recurringCadence: "session",
+      },
+      {
+        name: "Distribute kits and refreshers",
+        description:
+          "Send trained people home with a first-aid kit and naloxone where available. Schedule periodic refreshers so skills stay sharp.",
+        hours: 2,
+      },
+      {
+        name: "Track trained responders and restock",
+        description:
+          "Keep an opt-in list of trained neighbors and where supplies are kept. Replace used or expired naloxone and kit contents.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "time-bank",
+    name: "Time Bank",
+    purpose:
+      "Let members exchange services by time, where one hour given equals one hour earned, valuing everyone's contribution equally.",
+    whoItServes:
+      "Anyone, especially people rich in time and skills but short on cash.",
+    whatYoullNeed:
+      "A member list, a tracking system, a coordinator, and agreed rules.",
+    setupHours: 21,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Recruit founding members and inventory skills",
+        description:
+          "Gather an initial group and ask each what they can offer (rides, tutoring, repairs, cooking, gardening) and what they need. The variety of offers is what makes it work.",
+        hours: 4,
+      },
+      {
+        name: "Choose a tracking system",
+        description:
+          "Pick a way to log hours: dedicated time-bank software, a shared spreadsheet, or a simple ledger. It must record who gave and received hours.",
+        hours: 3,
+      },
+      {
+        name: "Set the rules",
+        description:
+          "Agree on the core principle (one hour = one credit, regardless of the task), how members request and confirm exchanges, and what happens if someone's balance runs low.",
+        hours: 3,
+      },
+      {
+        name: "Onboard members",
+        description:
+          "Hold a short orientation so people understand the philosophy and the system. Give everyone a few starter credits so exchanges can begin immediately.",
+        hours: 3,
+      },
+      {
+        name: "Launch a service directory",
+        description:
+          "Publish a searchable list of who offers what. Keep it current so members can find help without asking the coordinator every time.",
+        hours: 3,
+      },
+      {
+        name: "Coordinate and broker exchanges",
+        description:
+          "Have a coordinator help match needs to offers, especially early on, and nudge quiet members. Over time members connect directly.",
+        hours: 2,
+      },
+      {
+        name: "Build trust and safety practices",
+        description:
+          "Set norms for exchanges involving homes or vulnerable members (references, not meeting alone where uncomfortable). Add a simple way to flag problems.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "solidarity-fund",
+    name: "Solidarity Fund (Mutual Aid Cash Assistance)",
+    purpose:
+      "Pool money to give direct, no-strings cash to neighbors facing a crisis.",
+    whoItServes:
+      "People hit by emergencies — a rent shortfall, a medical bill, a utility shutoff.",
+    whatYoullNeed:
+      "A transparent money system, a small stewardship team, a fundraising plan, and clear criteria. Handling pooled money carries real responsibility — use dual sign-off, keep clean records, protect recipient privacy, and get advice on the legal and tax treatment of your fund.",
+    setupHours: 23,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Form a small stewardship team",
+        description:
+          "Recruit a few trusted people to manage the fund. Define roles clearly and commit to transparency from day one — trust is everything here.",
+        hours: 3,
+      },
+      {
+        name: "Set up transparent money handling",
+        description:
+          "Open a dedicated account or use a fiscal sponsor. Require two people to approve payouts, keep a clear ledger, and check whether your structure has tax or legal implications — consult a local nonprofit resource or accountant.",
+        hours: 5,
+      },
+      {
+        name: "Define request and disbursement criteria",
+        description:
+          "Decide who's eligible, typical amounts, how often someone can request, and whether it's first-come or need-weighted. Keep barriers low and avoid requiring proof of hardship where you can.",
+        hours: 4,
+      },
+      {
+        name: "Create a simple, low-barrier request form",
+        description:
+          "Build a short, private form asking only what's necessary. Offer multiple ways to apply (online, phone, in person) and protect applicants' privacy.",
+        hours: 2,
+      },
+      {
+        name: "Set up fundraising",
+        description:
+          "Combine recurring small donations from members with occasional drives. Be clear with donors that funds go directly to neighbors in need.",
+        hours: 4,
+      },
+      {
+        name: "Build a decision and payout process",
+        description:
+          "Set a turnaround time, a quick review by the team, and fast payout methods. Speed matters in a crisis. Document each decision simply.",
+        hours: 3,
+      },
+      {
+        name: "Report back transparently",
+        description:
+          "Share regular summaries — money in, money out, number of neighbors helped — without exposing recipients' identities. Transparency keeps donors giving.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "diaper-hygiene-bank",
+    name: "Diaper & Hygiene Supply Bank",
+    purpose:
+      "Distribute free diapers, period products, and hygiene items, which can't be bought with most food assistance.",
+    whoItServes:
+      "Low-income families, infants, menstruating people, and unhoused neighbors.",
+    whatYoullNeed:
+      "Storage, a supply stream, distribution points, and volunteers.",
+    setupHours: 17,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Find storage and a distribution point",
+        description:
+          "Secure dry, secure storage and a place to hand items out — a closet at a clinic, church, or community center. The distribution spot should feel private and dignified.",
+        hours: 3,
+      },
+      {
+        name: "Set up supply sourcing",
+        description:
+          "Combine bulk buying, donation drives, and connections to diaper-bank networks or wholesalers. Track which sources are steady so you don't run dry.",
+        hours: 4,
+      },
+      {
+        name: "Sort and inventory by size and type",
+        description:
+          "Organize diapers by size, plus period products and hygiene items. Keep a running count so you know what to request. Sizes for older babies often run short.",
+        hours: 3,
+      },
+      {
+        name: "Set a fair distribution policy",
+        description:
+          "Decide how much each family gets and how often, with no proof-of-need barrier. Make it predictable so people can rely on it.",
+        hours: 2,
+      },
+      {
+        name: "Schedule distribution and staff it",
+        description:
+          "Set regular distribution days, recruit volunteers to hand out supplies, and keep the tone warm and judgment-free.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+      {
+        name: "Run supply drives",
+        description:
+          "Hold periodic drives at schools, workplaces, and faith groups. Give a specific wish list (especially larger diaper sizes and period products) so donations match needs.",
+        hours: 3,
+      },
+      {
+        name: "Track needs and restock",
+        description:
+          "Watch which items move fastest and reorder ahead of shortages. Note recurring gaps to guide your next drive or bulk order.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-bike-workshop",
+    name: "Community Bike Workshop",
+    purpose:
+      "Offer free space, tools, and help to fix, build, and earn bikes, making transport affordable and accessible.",
+    whoItServes:
+      "People without cars, youth, commuters, and anyone needing affordable transportation.",
+    whatYoullNeed:
+      "A space, tools, donated bikes and parts, and volunteer mechanics.",
+    setupHours: 23,
+    defaultCategory: "transport",
+    tasks: [
+      {
+        name: "Find a workshop space",
+        description:
+          "Secure a garage, basement, shipping container, or shared community space with room to work and store bikes. Confirm access and any insurance needs.",
+        hours: 4,
+      },
+      {
+        name: "Gather tools and a workstand",
+        description:
+          "Collect a basic bike toolkit and at least one repair stand through donations or a small budget. Organize tools so they're easy to find and return.",
+        hours: 5,
+      },
+      {
+        name: "Collect donated bikes and parts",
+        description:
+          "Put out calls for unused bikes and salvageable parts. Sort into \"fixable,\" \"for parts,\" and \"ready to ride.\" A parts stockpile is what keeps the workshop running.",
+        hours: 4,
+      },
+      {
+        name: "Recruit volunteer mechanics",
+        description:
+          "Find a few people who can fix bikes and, more importantly, teach others. The goal is helping people learn to repair their own, not doing it for them.",
+        hours: 3,
+      },
+      {
+        name: "Set open hours and an earn-a-bike model",
+        description:
+          "Pick predictable open hours. Consider an earn-a-bike program where someone learns repair skills over a few sessions and leaves with a bike they fixed themselves.",
+        hours: 3,
+      },
+      {
+        name: "Establish safety practices",
+        description:
+          "Require eye protection, set rules for tool use, and have a first-aid kit. Always do a safety check (brakes, tires, headset) before any bike leaves.",
+        hours: 2,
+      },
+      {
+        name: "Promote and track repairs and bikes given",
+        description:
+          "Spread the word through schools, shelters, and transit-poor areas. Count repairs done and bikes rehomed — useful for volunteers' morale and any future funding.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "newcomer-translation-network",
+    name: "Newcomer & Translation Support Network",
+    purpose:
+      "Help immigrants and refugees navigate a new place — translation, paperwork, orientation, and community connection.",
+    whoItServes:
+      "Newly arrived immigrants and refugees, and non-English-speaking neighbors.",
+    whatYoullNeed:
+      "Bilingual volunteers, partner organizations, orientation materials, and a request system. Be especially careful with privacy: don't collect immigration status, route legal questions to qualified immigration lawyers, and let community members lead on what support they actually want.",
+    setupHours: 25,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Recruit bilingual and multilingual volunteers",
+        description:
+          "Find volunteers who speak the languages common in your area and can help with translation, forms, and accompaniment. Match languages to actual local needs.",
+        hours: 4,
+      },
+      {
+        name: "Map local services and partners",
+        description:
+          "Build a directory of clinics, schools, legal aid, ESL classes, food resources, and immigrant-serving organizations. Newcomers often just need to know what exists and how to reach it.",
+        hours: 5,
+      },
+      {
+        name: "Build a request and matching system",
+        description:
+          "Create a simple way for newcomers to ask for help and get matched to a volunteer by language and need. Offer phone and in-person options, not just online.",
+        hours: 3,
+      },
+      {
+        name: "Create orientation materials",
+        description:
+          "Put together plain-language guides in relevant languages covering transit, schools, healthcare, and rights. Use visuals so they work across literacy levels.",
+        hours: 4,
+      },
+      {
+        name: "Offer accompaniment for appointments",
+        description:
+          "Arrange for volunteers to go with people to medical, school, or service appointments to interpret and support. Brief volunteers to interpret faithfully, not to give advice they're not qualified for.",
+        hours: 3,
+      },
+      {
+        name: "Host welcome gatherings",
+        description:
+          "Hold regular informal events where newcomers meet each other and longtime residents. Connection and belonging matter as much as paperwork.",
+        hours: 3,
+      },
+      {
+        name: "Set privacy and safety practices",
+        description:
+          "Collect the minimum information needed and never ask for or record immigration status. Store data securely and train volunteers to handle sensitive situations with discretion.",
+        hours: 3,
+      },
+    ],
+  },
 ];
 
 export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
@@ -1187,6 +1750,569 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Establezcan normas: quien maneja no entra a casas sin acompañamiento, no se maneja dinero más allá de los gastos acordados, y se hace un seguimiento después de viajes con personas vulnerables. Registren cada viaje.",
         hours: 2,
+      },
+    ],
+  },
+  {
+    id: "tenant-union",
+    name: "Sindicato de inquilinas e inquilinos y red de defensa contra desalojos",
+    purpose:
+      "Organizar a quienes rentan para defenderse de desalojos, condiciones inseguras y aumentos injustos de renta mediante la acción colectiva.",
+    whoItServes:
+      "Inquilinas e inquilinos, especialmente en edificios con caseros negligentes o ausentes, y cualquiera que enfrente un desalojo.",
+    whatYoullNeed:
+      "Un grupo organizador base, información local precisa sobre derechos de inquilinas e inquilinos, un vínculo con asistencia legal y un sistema de contacto rápido. Este proyecto apoya a inquilinas e inquilinos y comparte información legal pública; no sustituye la asesoría legal. Siempre canaliza los casos individuales a asistencia legal calificada antes de las fechas límite.",
+    setupHours: 26,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Convoca un comité organizador base",
+        description:
+          "Encuentra de 3 a 6 inquilinas e inquilinos comprometidos para anclar el trabajo. Busca personas respetadas en sus edificios. Acuerden roles, un ritmo de reuniones y metas compartidas.",
+        hours: 4,
+      },
+      {
+        name: "Mapea edificios y problemas de inquilinas e inquilinos",
+        description:
+          "Toca puertas o aplica encuestas para saber qué edificios tienen problemas y cuáles son (reparaciones ignoradas, cargos ilegales, acoso). Sigue los patrones y detecta a las personas líderes naturales en cada edificio.",
+        hours: 5,
+      },
+      {
+        name: "Reúne información local precisa sobre derechos",
+        description:
+          "Compila las leyes reales de tu zona sobre plazos de aviso de desalojo, reparaciones, depósitos y reglas de renta. Asóciate con una clínica de asistencia legal para verificarlas. Esto es información compartida, no asesoría legal — déjenlo claro con las personas integrantes.",
+        hours: 4,
+      },
+      {
+        name: "Arma un sistema de contacto de respuesta rápida",
+        description:
+          "Monta un árbol telefónico o un chat de grupo para que quien reciba un aviso de desalojo o un cierre de cerradura pueda llegar al sindicato rápido. Decidan quién responde y en cuánto tiempo.",
+        hours: 3,
+      },
+      {
+        name: "Organiza un taller de \"conoce tus derechos\"",
+        description:
+          "Realicen una sesión (idealmente con una persona aliada de asistencia legal) que recorra los derechos y qué hacer si reciben papeles. Entreguen guías impresas para llevar a casa en los idiomas que correspondan.",
+        hours: 4,
+      },
+      {
+        name: "Define un protocolo de respuesta ante desalojos",
+        description:
+          "Escriban un paso a paso sencillo para cuando alguien enfrente un desalojo: documentar todo, contactar a asistencia legal antes de la fecha límite, organizar apoyo vecinal y nunca ignorar fechas de corte.",
+        hours: 3,
+      },
+      {
+        name: "Conéctate con asistencia legal y apoyo continuo",
+        description:
+          "Construye una relación de referencia con abogadas y abogados de inquilinas e inquilinos, asistencia legal y asesoras y asesores de vivienda para que el sindicato pueda derivar los casos que necesiten ayuda profesional. Mantén los contactos al día.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "childcare-collective",
+    name: "Colectiva de cuidado infantil y niñeras compartidas",
+    purpose:
+      "Compartir cuidado infantil de confianza entre familias para que madres, padres y personas cuidadoras puedan trabajar, descansar o atender emergencias sin pagar por ello.",
+    whoItServes:
+      "Madres, padres y personas cuidadoras, especialmente quienes crían en solitario, trabajan por turnos o tienen ingresos bajos.",
+    whatYoullNeed:
+      "Un grupo de familias revisadas, un espacio seguro (o casas que rotan), un sistema de calendario y reglas claras de seguridad. Cuidar a las hijas y los hijos de otras personas es una responsabilidad seria — mantén reglas firmes de supervisión, revisa a quienes cuidan y respeta las normas locales sobre cuidado infantil informal.",
+    setupHours: 26,
+    defaultCategory: "childcare",
+    tasks: [
+      {
+        name: "Reúne a las familias fundadoras y acuerden un modelo",
+        description:
+          "Convoca familias que se conozcan o que puedan construir confianza entre sí. Decidan el modelo: una cooperativa rotativa de niñeras donde madres y padres ganan y gastan créditos de cuidado, o un cuidado grupal con horario.",
+        hours: 4,
+      },
+      {
+        name: "Definan estándares de seguridad y revisión",
+        description:
+          "Acuerden cómo revisar a cualquier persona que cuide niñas y niños: referencias, verificaciones de antecedentes cuando corresponda y una regla firme de que ninguna persona adulta queda sola con la hija o el hijo de otra familia sin que nadie sepa. Establezcan proporciones adulto-niñe.",
+        hours: 5,
+      },
+      {
+        name: "Encuentra un espacio y hazlo seguro para la infancia",
+        description:
+          "Elijan un sitio o establezcan estándares para las casas anfitrionas. Revisen riesgos, cubran enchufes, fijen muebles pesados, guarden bajo llave medicinas y químicos, y confirmen un área exterior segura si se usa.",
+        hours: 4,
+      },
+      {
+        name: "Creen un sistema de calendario y créditos",
+        description:
+          "Usen un calendario compartido o una app de cooperativa. En un modelo de créditos, una hora de cuidado da una hora a deber. Lleven cuenta de quién acoge y cuándo para que la carga sea justa.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan políticas de salud, alergias y emergencias",
+        description:
+          "Reúnan información de alergias, medicamentos, contactos de emergencia y autorizaciones de recogida para cada niña o niño. Escriban una política clara para niñas y niños enfermos y qué hacer ante una emergencia médica.",
+        hours: 3,
+      },
+      {
+        name: "Capaciten a quienes cuidan en lo básico",
+        description:
+          "Cubran supervisión, sueño seguro para bebés, respuesta ante alergias y emergencias, y las reglas de seguridad. Animen a tener al menos una persona adulta certificada en primeros auxilios pediátricos y RCP por sesión.",
+        hours: 4,
+      },
+      {
+        name: "Hagan una sesión piloto y recojan comentarios",
+        description:
+          "Hagan un piloto corto con unas pocas familias y luego una conversación de cierre. Arreglen lo que no funcionó antes de crecer. Revisen seguido para que la confianza y la seguridad se mantengan firmes.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "community-composting",
+    name: "Programa de compostaje comunitario",
+    purpose:
+      "Recolectar restos de comida para desviarlos del basurero y producir composta gratuita para huertos locales.",
+    whoItServes:
+      "Hogares sin forma de hacer composta, huertos comunitarios y el ambiente local.",
+    whatYoullNeed:
+      "Un sitio de compostaje, contenedores de recolección, equipo básico y una pequeña rotación de mantenimiento.",
+    setupHours: 20,
+    defaultCategory: "infrastructure",
+    tasks: [
+      {
+        name: "Encuentra un sitio de compostaje",
+        description:
+          "Asegura un lugar con espacio y algo de sol — una esquina de un huerto comunitario, un lote baldío o un patio dispuesto. Confirma el permiso y revisa las reglas locales sobre compostaje.",
+        hours: 4,
+      },
+      {
+        name: "Elige un método de compostaje",
+        description:
+          "Escoge lo que sea adecuado a tu escala: un sistema caliente de tres compartimentos, tambores o composta con lombrices. Que el método coincida con el material que esperas y con lo que puedas voltear.",
+        hours: 3,
+      },
+      {
+        name: "Consigue contenedores y equipo",
+        description:
+          "Construye o compra contenedores de recolección y la estructura de compostaje. Junta un bieldo, un termómetro y material café (hojas, cartón) para equilibrar los restos de comida.",
+        hours: 4,
+      },
+      {
+        name: "Arma un sistema de recolección",
+        description:
+          "Decidan cómo llegan los restos: un contenedor de entrega con horarios o una ruta voluntaria de recogida. Den a quienes participen pequeños botes para la cocina y un calendario claro de entrega.",
+        hours: 4,
+      },
+      {
+        name: "Dejen claro qué se acepta",
+        description:
+          "Pongan una lista sencilla de sí y no (sí: fruta, verdura, café, cáscaras de huevo; no: carne, lácteos, aceites, excremento de mascotas). Una señalización clara evita la contaminación que arruina una tanda.",
+        hours: 2,
+      },
+      {
+        name: "Convoca y capacita una rotación de mantenimiento",
+        description:
+          "La composta necesita voltearse, revisarse la humedad y equilibrar verdes y cafés. Hagan un calendario compartido y enseñen lo básico a quienes participen para que las pilas no huelan ni se estanquen.",
+        hours: 3,
+      },
+      {
+        name: "Distribuye la composta terminada",
+        description:
+          "Una vez lista la composta, compártanla gratis con quienes aportaron y con huertos comunitarios. Anuncien los días de recogida y que lleven bolsas o cubetas.",
+        hours: 2,
+        recurringCadence: "cycle",
+      },
+    ],
+  },
+  {
+    id: "free-little-library",
+    name: "Pequeña biblioteca libre e intercambio de libros",
+    purpose:
+      "Ofrecer libros gratis las 24 horas para fomentar la lectura y el compartir, sin credencial ni cuotas.",
+    whoItServes:
+      "Niñas, niños, familias y personas lectoras de todas las edades, sobre todo en barrios con poco acceso a libros.",
+    whatYoullNeed:
+      "Una caja de libros resistente al clima, una colección inicial, un sitio anfitrión y un mantenimiento ligero.",
+    setupHours: 16,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Construye o consigue una caja de libros resistente al clima",
+        description:
+          "Hagan o compren una caja firme y a prueba de agua, sobre un poste o en una pared. Sirve un mueble reciclado o una caja de periódicos. Pónganle una puerta clara y un techo inclinado para que los libros no se mojen.",
+        hours: 5,
+      },
+      {
+        name: "Elige y prepara un lugar",
+        description:
+          "Escojan un sitio con tránsito de gente y permiso — el patio delantero de alguien, un centro comunitario o el borde de un parque. Anclen bien la caja y confirmen que se permite.",
+        hours: 2,
+      },
+      {
+        name: "Surte la colección inicial",
+        description:
+          "Reúnan libros donados con una pequeña convocatoria. Busquen variedad: libros infantiles, ficción popular y no ficción práctica. Empiecen medio llena para que haya espacio de sumar.",
+        hours: 3,
+      },
+      {
+        name: "Pongan un letrero y normas sencillas",
+        description:
+          "Coloquen \"Toma un libro, deja un libro — todo gratis\". Mantengan el tono cálido y con pocas reglas. Añadan una nota que invite a todas las edades e idiomas.",
+        hours: 1,
+      },
+      {
+        name: "Convoca a una persona cuidadora",
+        description:
+          "Pídanle a alguien cercano que revise la caja cada semana: la ordene, retire lo dañado o inapropiado y reacomode el acervo. Cinco minutos a la semana la mantienen sana.",
+        hours: 1,
+      },
+      {
+        name: "Curen el acervo para la comunidad",
+        description:
+          "Surtan libros que encajen con su barrio — varios idiomas, libros infantiles si hay familias, guías prácticas. Retiren con discreción lo gastado o lo que no encaje.",
+        hours: 2,
+      },
+      {
+        name: "Difundan y conecten con esfuerzos de lectura",
+        description:
+          "Cuéntenles a las escuelas, a la biblioteca local y a las personas vecinas que existe. Consideren ligas como un empujón de lectura de verano o reabastecimientos temáticos.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-first-aid-training",
+    name: "Capacitación comunitaria en primeros auxilios y respuesta ante sobredosis",
+    purpose:
+      "Capacitar a vecinas y vecinos en primeros auxilios, RCP y reversión de sobredosis para que la comunidad pueda responder en los minutos antes de que llegue ayuda profesional.",
+    whoItServes:
+      "Todas las personas; con más impacto donde los servicios de emergencia tardan o las tasas de sobredosis son altas.",
+    whatYoullNeed:
+      "Personas instructoras certificadas, insumos, un espacio y un calendario recurrente. Toda capacitación médica debe darla personal certificado; este proyecto organiza y aloja esa capacitación, no la sustituye.",
+    setupHours: 18,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Asóciate con personas instructoras certificadas",
+        description:
+          "Conéctate con personal calificado — la Cruz Roja, la secretaría de salud local o una organización de reducción de daños. Ellas y ellos dan la capacitación médica real; tu papel es organizarla y alojarla.",
+        hours: 4,
+      },
+      {
+        name: "Consigue insumos",
+        description:
+          "Obtén botiquines de primeros auxilios, maniquíes para practicar RCP (a menudo prestados por quienes capacitan) y naloxona. Muchos programas de salud pública distribuyen naloxona gratis — pregunta en tu secretaría de salud o a grupos de reducción de daños.",
+        hours: 4,
+      },
+      {
+        name: "Encuentra espacio y agenda las sesiones",
+        description:
+          "Reserven un salón donde quepa práctica con las manos — un centro comunitario, biblioteca o clínica. Pongan fechas recurrentes para que la gente pueda planear alrededor del trabajo.",
+        hours: 3,
+      },
+      {
+        name: "Convoca a quienes participen",
+        description:
+          "Difundan ampliamente y prioricen a personas que probablemente presencien emergencias. Que la inscripción sea fácil y gratuita, y ofrezcan horarios variados para quien trabaja por turnos.",
+        hours: 3,
+      },
+      {
+        name: "Realiza las sesiones de capacitación",
+        description:
+          "Alojen las sesiones que dan las personas instructoras, encárguense del montaje y el registro y asegúrense de que todas las personas hagan práctica con las manos. Entreguen tarjetas de referencia para llevar a casa.",
+        hours: 4,
+        recurringCadence: "session",
+      },
+      {
+        name: "Entrega botiquines y refresca conocimientos",
+        description:
+          "Que las personas capacitadas se lleven un botiquín de primeros auxilios y naloxona donde esté disponible. Programen repasos periódicos para que las habilidades no se enmohezcan.",
+        hours: 2,
+      },
+      {
+        name: "Lleva cuenta de las personas capacitadas y reabastece",
+        description:
+          "Mantén una lista opcional de vecinas y vecinos capacitados y dónde se guardan los insumos. Reemplaza la naloxona y el contenido del botiquín cuando se use o caduque.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "time-bank",
+    name: "Banco de tiempo",
+    purpose:
+      "Permitir que las personas integrantes intercambien servicios por tiempo, donde una hora dada equivale a una hora ganada, valorando por igual lo que aporta cada quien.",
+    whoItServes:
+      "Cualquier persona, sobre todo quienes tienen tiempo y habilidades pero poco dinero.",
+    whatYoullNeed:
+      "Una lista de personas integrantes, un sistema de registro, una persona coordinadora y reglas acordadas.",
+    setupHours: 21,
+    defaultCategory: "organizing",
+    tasks: [
+      {
+        name: "Convoca a integrantes fundadoras e inventaríen habilidades",
+        description:
+          "Reúne un grupo inicial y pregúntale a cada quien qué puede ofrecer (aventones, tutoría, reparaciones, cocina, jardinería) y qué necesita. La variedad de ofrecimientos es lo que hace que funcione.",
+        hours: 4,
+      },
+      {
+        name: "Elige un sistema de registro",
+        description:
+          "Escojan cómo registrar horas: software dedicado a bancos de tiempo, una hoja de cálculo compartida o un libro sencillo. Debe registrar quién dio y quién recibió horas.",
+        hours: 3,
+      },
+      {
+        name: "Definan las reglas",
+        description:
+          "Acuerden el principio central (una hora = un crédito, sin importar la tarea), cómo se piden y se confirman los intercambios y qué pasa cuando el saldo de alguien baja mucho.",
+        hours: 3,
+      },
+      {
+        name: "Den la bienvenida a las personas integrantes",
+        description:
+          "Hagan una orientación corta para que la gente entienda la filosofía y el sistema. Den a cada persona algunos créditos iniciales para que los intercambios puedan empezar de inmediato.",
+        hours: 3,
+      },
+      {
+        name: "Lanza un directorio de servicios",
+        description:
+          "Publiquen una lista buscable de quién ofrece qué. Manténganla al día para que las personas integrantes encuentren ayuda sin preguntarle todo el tiempo a quien coordina.",
+        hours: 3,
+      },
+      {
+        name: "Coordina y conecta intercambios",
+        description:
+          "Que una persona coordinadora ayude a emparejar necesidades con ofrecimientos, sobre todo al inicio, y dé un empujón a quienes están en silencio. Con el tiempo, las personas integrantes se conectan directo.",
+        hours: 2,
+      },
+      {
+        name: "Construye prácticas de confianza y seguridad",
+        description:
+          "Pongan normas para intercambios que ocurran en casas o con personas integrantes vulnerables (referencias, no encontrarse a solas si incomoda). Añadan una forma sencilla de levantar alertas.",
+        hours: 3,
+      },
+    ],
+  },
+  {
+    id: "solidarity-fund",
+    name: "Fondo solidario (apoyo en efectivo de ayuda mutua)",
+    purpose:
+      "Juntar dinero para dar efectivo directo, sin condiciones, a vecinas y vecinos que enfrentan una crisis.",
+    whoItServes:
+      "Personas golpeadas por emergencias — un faltante de renta, una cuenta médica, un corte de servicios.",
+    whatYoullNeed:
+      "Un sistema transparente de manejo de dinero, un pequeño equipo responsable, un plan de recaudación y criterios claros. Manejar dinero en común conlleva responsabilidad real — usen doble firma, mantengan registros limpios, protejan la privacidad de quien recibe y busquen asesoría sobre el tratamiento legal y fiscal del fondo.",
+    setupHours: 23,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Forma un pequeño equipo responsable",
+        description:
+          "Convoca a unas pocas personas de confianza para administrar el fondo. Definan roles con claridad y comprométanse a la transparencia desde el primer día — aquí la confianza lo es todo.",
+        hours: 3,
+      },
+      {
+        name: "Arma un manejo transparente del dinero",
+        description:
+          "Abran una cuenta dedicada o usen un patrocinio fiscal. Pidan que dos personas aprueben los pagos, mantengan un libro contable claro y revisen si la estructura tiene implicaciones fiscales o legales — consulten un recurso local de organizaciones sin fines de lucro o a una persona contadora.",
+        hours: 5,
+      },
+      {
+        name: "Definan criterios para solicitar y entregar apoyo",
+        description:
+          "Decidan quién puede solicitar, los montos típicos, cada cuánto puede pedir alguien y si es por orden de llegada o ponderado por necesidad. Mantengan bajas las barreras y eviten exigir comprobantes de necesidad cuando sea posible.",
+        hours: 4,
+      },
+      {
+        name: "Crea un formulario de solicitud sencillo y de pocas barreras",
+        description:
+          "Hagan un formulario corto y privado que pida sólo lo necesario. Ofrezcan varias formas de aplicar (en línea, por teléfono, en persona) y protejan la privacidad de quienes solicitan.",
+        hours: 2,
+      },
+      {
+        name: "Pon en marcha la recaudación",
+        description:
+          "Combinen pequeñas donaciones recurrentes de personas integrantes con campañas ocasionales. Sean claras y claros con quienes donan: los fondos van directo a vecinas y vecinos en necesidad.",
+        hours: 4,
+      },
+      {
+        name: "Arma un proceso de decisión y de pago",
+        description:
+          "Pongan un tiempo de respuesta, una revisión rápida del equipo y métodos veloces de pago. En una crisis, la velocidad importa. Documenten cada decisión de manera sencilla.",
+        hours: 3,
+      },
+      {
+        name: "Rinde cuentas con transparencia",
+        description:
+          "Compartan resúmenes regulares — dinero que entra, dinero que sale, número de vecinas y vecinos apoyados — sin exponer la identidad de quienes recibieron. La transparencia mantiene la donación.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "diaper-hygiene-bank",
+    name: "Banco de pañales y artículos de higiene",
+    purpose:
+      "Distribuir gratis pañales, productos menstruales y artículos de higiene, que no se pueden comprar con la mayoría de los apoyos alimentarios.",
+    whoItServes:
+      "Familias de ingresos bajos, bebés, personas que menstrúan y vecinas y vecinos sin techo.",
+    whatYoullNeed:
+      "Almacenamiento, un flujo de insumos, puntos de distribución y personas voluntarias.",
+    setupHours: 17,
+    defaultCategory: "mutual_aid_drive",
+    tasks: [
+      {
+        name: "Encuentra almacenamiento y un punto de distribución",
+        description:
+          "Asegura un almacén seco y seguro y un lugar para entregar los artículos — un clóset en una clínica, iglesia o centro comunitario. El sitio de entrega debe sentirse privado y digno.",
+        hours: 3,
+      },
+      {
+        name: "Establece el abastecimiento",
+        description:
+          "Combina compras al mayoreo, campañas de donación y vínculos con redes de bancos de pañales o mayoristas. Lleva cuenta de qué fuentes son estables para no quedarte sin existencias.",
+        hours: 4,
+      },
+      {
+        name: "Clasifica e inventaría por talla y tipo",
+        description:
+          "Organiza pañales por talla, además de productos menstruales y artículos de higiene. Lleva un conteo corriente para saber qué pedir. Las tallas para bebés más grandes suelen escasear.",
+        hours: 3,
+      },
+      {
+        name: "Define una política de distribución justa",
+        description:
+          "Decidan cuánto recibe cada familia y cada cuánto, sin barreras de comprobación de necesidad. Que sea predecible para que la gente pueda contar con ello.",
+        hours: 2,
+      },
+      {
+        name: "Agenda la distribución y consigue personal",
+        description:
+          "Pongan días regulares de distribución, convoquen a personas voluntarias para entregar los insumos y mantengan el trato cálido y sin juicios.",
+        hours: 4,
+        recurringCadence: "event",
+      },
+      {
+        name: "Organicen campañas de insumos",
+        description:
+          "Hagan campañas periódicas en escuelas, lugares de trabajo y grupos de fe. Den una lista de deseos específica (especialmente tallas grandes de pañales y productos menstruales) para que las donaciones coincidan con las necesidades.",
+        hours: 3,
+      },
+      {
+        name: "Sigue las necesidades y reabastece",
+        description:
+          "Observen qué artículos salen más rápido y pidan antes de que se acaben. Anoten los huecos recurrentes para guiar la siguiente campaña o compra al mayoreo.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "community-bike-workshop",
+    name: "Taller comunitario de bicicletas",
+    purpose:
+      "Ofrecer espacio, herramientas y ayuda gratis para arreglar, armar y ganarse una bicicleta, haciendo el transporte accesible y económico.",
+    whoItServes:
+      "Personas sin auto, juventud, quienes se trasladan al trabajo y cualquiera que necesite transporte económico.",
+    whatYoullNeed:
+      "Un espacio, herramientas, bicicletas y refacciones donadas, y personas mecánicas voluntarias.",
+    setupHours: 23,
+    defaultCategory: "transport",
+    tasks: [
+      {
+        name: "Encuentra un espacio de taller",
+        description:
+          "Asegura una cochera, un sótano, un contenedor o un espacio comunitario compartido con lugar para trabajar y guardar bicicletas. Confirma el acceso y cualquier necesidad de seguro.",
+        hours: 4,
+      },
+      {
+        name: "Junta herramientas y un caballete",
+        description:
+          "Reúne un kit básico de herramientas de bicicleta y al menos un caballete de reparación con donaciones o con un pequeño presupuesto. Organiza las herramientas para que sea fácil encontrarlas y devolverlas.",
+        hours: 5,
+      },
+      {
+        name: "Recolecta bicicletas y refacciones donadas",
+        description:
+          "Hagan convocatorias para bicicletas sin uso y refacciones aprovechables. Clasifíquenlas en \"reparables\", \"para refacciones\" y \"listas para rodar\". Una reserva de refacciones es lo que mantiene andando al taller.",
+        hours: 4,
+      },
+      {
+        name: "Convoca a personas mecánicas voluntarias",
+        description:
+          "Encuentra a unas cuantas personas que sepan arreglar bicicletas y, sobre todo, enseñar a otras. La meta es ayudar a la gente a aprender a reparar la suya, no hacerlo por ella.",
+        hours: 3,
+      },
+      {
+        name: "Establece horarios y un modelo de \"gánate una bici\"",
+        description:
+          "Elijan horarios predecibles. Consideren un programa de \"gánate una bici\" donde alguien aprende habilidades de reparación a lo largo de varias sesiones y se va con la bicicleta que reparó.",
+        hours: 3,
+      },
+      {
+        name: "Establece prácticas de seguridad",
+        description:
+          "Exijan protección para los ojos, pongan reglas para el uso de herramientas y tengan un botiquín. Hagan siempre un chequeo de seguridad (frenos, llantas, dirección) antes de que cualquier bicicleta salga.",
+        hours: 2,
+      },
+      {
+        name: "Difunde y lleva cuenta de reparaciones y bicicletas entregadas",
+        description:
+          "Corran la voz en escuelas, refugios y zonas con poco transporte. Cuenten las reparaciones hechas y las bicicletas reubicadas — sirve para el ánimo de quienes participan y para apoyos futuros.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "newcomer-translation-network",
+    name: "Red de apoyo a personas recién llegadas y de traducción",
+    purpose:
+      "Ayudar a personas migrantes y refugiadas a moverse en un lugar nuevo — traducción, trámites, orientación y conexión comunitaria.",
+    whoItServes:
+      "Personas migrantes y refugiadas recién llegadas, y vecinas y vecinos que no hablan el idioma local.",
+    whatYoullNeed:
+      "Personas voluntarias bilingües, organizaciones aliadas, materiales de orientación y un sistema de solicitudes. Tengan especial cuidado con la privacidad: no recojan estatus migratorio, canalicen preguntas legales a abogadas y abogados de inmigración calificados, y dejen que las personas de la comunidad guíen qué apoyo realmente quieren.",
+    setupHours: 25,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Convoca a personas voluntarias bilingües y multilingües",
+        description:
+          "Encuentra personas voluntarias que hablen los idiomas comunes en tu zona y puedan ayudar con traducción, formularios y acompañamiento. Que los idiomas coincidan con las necesidades locales reales.",
+        hours: 4,
+      },
+      {
+        name: "Mapea servicios y aliadas y aliados locales",
+        description:
+          "Arma un directorio de clínicas, escuelas, asistencia legal, clases de ESL, recursos alimentarios y organizaciones que sirven a personas migrantes. A menudo, las personas recién llegadas sólo necesitan saber qué existe y cómo llegar.",
+        hours: 5,
+      },
+      {
+        name: "Arma un sistema de solicitudes y emparejamientos",
+        description:
+          "Crea una forma sencilla para que las personas recién llegadas pidan ayuda y se les empareje con alguien voluntario por idioma y necesidad. Ofrezcan opciones por teléfono y en persona, no sólo en línea.",
+        hours: 3,
+      },
+      {
+        name: "Crea materiales de orientación",
+        description:
+          "Junten guías en lenguaje sencillo, en los idiomas que correspondan, sobre transporte, escuelas, salud y derechos. Usen imágenes para que funcionen en distintos niveles de alfabetización.",
+        hours: 4,
+      },
+      {
+        name: "Ofrece acompañamiento a citas",
+        description:
+          "Coordinen para que personas voluntarias acompañen a la gente a citas médicas, escolares o de servicios para interpretar y apoyar. Indiquen a quienes acompañan que interpreten con fidelidad, no que den consejos para los que no están calificadas.",
+        hours: 3,
+      },
+      {
+        name: "Organicen encuentros de bienvenida",
+        description:
+          "Hagan encuentros informales regulares donde las personas recién llegadas conozcan a otras y a quienes llevan tiempo en el lugar. El vínculo y la pertenencia importan tanto como los trámites.",
+        hours: 3,
+      },
+      {
+        name: "Establezcan prácticas de privacidad y seguridad",
+        description:
+          "Recojan la información mínima necesaria y nunca pregunten ni registren estatus migratorio. Guarden los datos de forma segura y capaciten a las personas voluntarias para manejar situaciones sensibles con discreción.",
+        hours: 3,
       },
     ],
   },

@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **10 new community-project templates ("Set 2").** Tenant Union &
+  Eviction Defense Network, Childcare / Babysitting Collective,
+  Community Composting Program, Free Little Library & Book Exchange,
+  Community First Aid & Overdose Response Training, Time Bank,
+  Solidarity Fund, Diaper & Hygiene Supply Bank, Community Bike
+  Workshop, and Newcomer & Translation Support Network. Each is added
+  to both `PROJECT_TEMPLATES_EN` and `PROJECT_TEMPLATES_ES` with
+  parallel content. Several templates carry safety disclaimers
+  (legal-advice, medical-training, money-handling, child-supervision,
+  immigration-status) woven into `whatYoullNeed` so they're visible
+  on the template card. Categories used: `organizing`, `childcare`,
+  `infrastructure`, `education`, `mutual_aid_drive`, `transport`,
+  `other` — the template-gallery's category dropdown (PR #112) picks
+  these up automatically. Recurring task cadences used: `cycle`
+  (composting distribution), `session` (first-aid training), `event`
+  (diaper distribution — closest schema fit to "per distribution";
+  no enum expansion).
 - **Template gallery filters on the Start-a-project page.** Three new
   controls inside `TemplatePicker`: a search input (debounced, matches
   name + purpose + audience + needs), a category dropdown
