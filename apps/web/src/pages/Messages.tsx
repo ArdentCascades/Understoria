@@ -151,7 +151,7 @@ export default function MessagesPage() {
           message={t("messages.empty")}
         />
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {conversations.map((c) => (
             <li key={c.otherKey}>
               <Link
@@ -208,7 +208,7 @@ function SearchResults({
     );
   }
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
       {groups.map((g) => {
         const name = nameByKey.get(g.otherKey) ?? memberFallback;
         const first = g.hits[0];

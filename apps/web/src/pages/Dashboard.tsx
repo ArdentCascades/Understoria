@@ -119,7 +119,7 @@ export default function DashboardPage() {
         <LeafDivider variant="short" />
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3">
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
         <StatCard
           label={t("dashboard.stats.activeWeek")}
           value={stats.activeMembersThisWeek}
