@@ -10,6 +10,45 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Search bar on the Community Board.** A new debounced search
+  input now sits above the Board's existing filter row. Typing
+  narrows the currently-visible tab's list (Needs, Offers, or
+  Projects) by a case-insensitive substring match against post
+  title + description (or project title + description). The
+  search composes with the existing filters (category, zone,
+  urgency, claimed toggle) via AND, and the matched substring in
+  each card's title is highlighted with the project's amber
+  `<mark>` style so a member can see at a glance why each result
+  matched.
+  - **Four design decisions, deliberately scoped down for v1.**
+    (1) Search is scoped to the current tab — switching tabs
+    clears the input, because a query that's meaningful in Needs
+    usually isn't meaningful in Projects. (2) The claimed toggle
+    is respected as-is — search filters within whatever the
+    toggle currently shows, and the "Show N claimed" pill is one
+    tap away. (3) No URL persistence; the query lives in pure
+    session-local state, the same as every other Board filter.
+    (4) Project search reads project title + description only —
+    not task names or descriptions, because a task-level hit
+    would need card-level "matched on task X" affordance that
+    adds confusion.
+  - **Reuses two existing, already-tested primitives.**
+    `matchesQuery` from `apps/web/src/lib/messageSearch.ts`
+    (14 unit tests, case-insensitive, trimmed, empty-query
+    short-circuit) does the matching; `HighlightedText` from
+    `apps/web/src/components/HighlightedText.tsx` does the
+    `<mark>` wrapping with the existing amber-on-amber styling.
+    No new matching logic, no new highlight component, no new
+    color tokens.
+  - **Three i18n keys added in en + es** under `board.search.*`:
+    `placeholderPosts`, `placeholderProjects`, `noMatches`. The
+    parity test still passes. Spanish members see Spanish
+    placeholders and Spanish "Nothing matches your search."
+    copy. Empty result with an active query shows the new
+    `noMatches` copy; empty result with no query keeps the
+    existing "Nothing growing here yet" / "Aún no crece nada
+    aquí" empty state so the calm onboarding signal is
+    preserved.
 - **Project-templates gallery on the Start-a-project flow.** A
   member who taps "Start a project" now sees a 10-card gallery at
   the top of the create page — community fridge, community garden,

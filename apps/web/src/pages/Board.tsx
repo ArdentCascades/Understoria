@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -31,6 +31,7 @@ import { ContextualHint } from "@/components/ContextualHint";
 import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import { matchesQuery } from "@/lib/messageSearch";
 import type { Category, PostType, Urgency } from "@/types";
 
 type Tab = PostType | "PROJECTS";
@@ -52,7 +53,11 @@ export default function BoardPage() {
   const [tab, setTab] = useState<Tab>("NEED");
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
   const [urgencyFilter, setUrgencyFilter] = useState<Urgency | "">("");
+  // Live input value (every keystroke) + debounced value (250 ms after
+  // last keystroke). Debouncing keeps the list from re-filtering on
+  // every keystroke mid-word; the input itself stays responsive.
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
   // Hide claimed posts by default — the Board is action-oriented
   // ("what can I help with now?") and a claimed post isn't
@@ -61,6 +66,22 @@ export default function BoardPage() {
   // it each session.
   const [showClaimed, setShowClaimed] = useState(false);
   const navigate = useNavigate();
+
+  // Debounce the visible→filtered transition. 250 ms matches the
+  // Messages search debounce; small enough to feel live, long enough
+  // to skip mid-word re-filters.
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedQuery(query), 250);
+    return () => window.clearTimeout(id);
+  }, [query]);
+
+  // Search is scoped to the current tab. Switching tabs clears the
+  // input — a fresh tab gets a fresh search rather than a sticky
+  // query that may not be meaningful in the new context.
+  useEffect(() => {
+    setQuery("");
+    setDebouncedQuery("");
+  }, [tab]);
 
   const memberName = useMemo(() => {
     const map = new Map<string, string>();
@@ -105,21 +126,25 @@ export default function BoardPage() {
   // the current tab + category + urgency + query. From there, the
   // default view hides any post that already has a claimer; the
   // "Show N claimed" toggle adds them back in.
+  //
+  // The query check reuses `matchesQuery` from lib/messageSearch.ts
+  // (case-insensitive, trimmed, empty-query short-circuits to false).
+  // When the debounced query is empty we skip the predicate entirely
+  // so unfiltered scrolling stays the cheapest path.
   const matchingPosts = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery.trim();
     return posts.filter((p) => {
       if (p.type !== tab) return false;
       if (p.status === "cancelled") return false;
       if (categoryFilter && p.category !== categoryFilter) return false;
       if (urgencyFilter && p.urgency !== urgencyFilter) return false;
       if (zoneFilter && p.locationZone !== zoneFilter) return false;
-      if (q) {
-        const haystack = `${p.title} ${p.description}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
+      if (q !== "") {
+        if (!matchesQuery(`${p.title} ${p.description}`, q)) return false;
       }
       return true;
     });
-  }, [posts, tab, categoryFilter, urgencyFilter, zoneFilter, query]);
+  }, [posts, tab, categoryFilter, urgencyFilter, zoneFilter, debouncedQuery]);
 
   const claimedInScope = useMemo(
     () => matchingPosts.filter((p) => p.claimedBy !== null).length,
@@ -194,6 +219,27 @@ export default function BoardPage() {
         ))}
       </div>
 
+      <label className="mb-3 block">
+        <span className="sr-only">
+          {t(
+            tab === "PROJECTS"
+              ? "board.search.placeholderProjects"
+              : "board.search.placeholderPosts",
+          )}
+        </span>
+        <input
+          type="search"
+          className="input"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t(
+            tab === "PROJECTS"
+              ? "board.search.placeholderProjects"
+              : "board.search.placeholderPosts",
+          )}
+        />
+      </label>
+
       {tab !== "PROJECTS" && (
       <>
       <div className="mb-4 grid gap-2 sm:grid-cols-3">
@@ -250,20 +296,6 @@ export default function BoardPage() {
         </select>
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="board-search" className="sr-only">
-          {t("board.search.ariaLabel")}
-        </label>
-        <input
-          id="board-search"
-          type="search"
-          className="input"
-          placeholder={t("board.search.placeholder")}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
-
       {claimedInScope > 0 && (
         <div className="mb-3 flex justify-end">
           <button
@@ -280,17 +312,23 @@ export default function BoardPage() {
       )}
 
       {visiblePosts.length === 0 ? (
-        <EmptyState
-          illustration="sapling"
-          title={
-            tab === "NEED"
-              ? t("board.empty.titleNeeds")
-              : t("board.empty.titleOffers")
-          }
-          message={
-            tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
-          }
-        />
+        debouncedQuery.trim() !== "" ? (
+          <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+            {t("board.search.noMatches")}
+          </p>
+        ) : (
+          <EmptyState
+            illustration="sapling"
+            title={
+              tab === "NEED"
+                ? t("board.empty.titleNeeds")
+                : t("board.empty.titleOffers")
+            }
+            message={
+              tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
+            }
+          />
+        )
       ) : (
         <ul className="flex flex-col gap-3">
           {visiblePosts.map((p) => (
@@ -302,6 +340,7 @@ export default function BoardPage() {
                 posterTrust={trustByKey.get(p.postedBy)}
                 isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
                 posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
+                searchQuery={debouncedQuery}
               />
             </li>
           ))}
@@ -316,6 +355,7 @@ export default function BoardPage() {
             projects={projects}
             projectTasks={projectTasks}
             memberName={memberName}
+            searchQuery={debouncedQuery}
           />
           <Link
             to="/projects/archive"
@@ -366,10 +406,12 @@ function ProjectList({
   projects,
   projectTasks,
   memberName,
+  searchQuery,
 }: {
   projects: import("@/types").Project[];
   projectTasks: import("@/types").ProjectTask[];
   memberName: Map<string, string>;
+  searchQuery: string;
 }) {
   const { t } = useTranslation();
   const tasksByProject = useMemo(() => {
@@ -383,9 +425,28 @@ function ProjectList({
     return map;
   }, [projectTasks]);
 
-  const visible = projects.filter((p) => p.status !== "archived");
+  const trimmedQuery = searchQuery.trim();
+
+  // Project-level fields only — title + description. Task names /
+  // descriptions are intentionally out of scope (a task-level match
+  // would need card-level "matched on task X" affordance, which adds
+  // confusion for v1).
+  const visible = useMemo(() => {
+    const baseVisible = projects.filter((p) => p.status !== "archived");
+    if (trimmedQuery === "") return baseVisible;
+    return baseVisible.filter((p) =>
+      matchesQuery(`${p.title} ${p.description}`, trimmedQuery),
+    );
+  }, [projects, trimmedQuery]);
 
   if (visible.length === 0) {
+    if (trimmedQuery !== "") {
+      return (
+        <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+          {t("board.search.noMatches")}
+        </p>
+      );
+    }
     return (
       <EmptyState
         illustration="book"
@@ -406,6 +467,7 @@ function ProjectList({
               organizerName={memberName.get(p.organizerKey) ?? "Member"}
               taskCount={counts.total}
               openTaskCount={counts.open}
+              searchQuery={searchQuery}
             />
           </li>
         );

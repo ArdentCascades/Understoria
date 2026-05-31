@@ -618,8 +618,9 @@
       "allZones": "Todas las zonas"
     },
     "search": {
-      "placeholder": "Buscar en títulos y descripciones",
-      "ariaLabel": "Buscar publicaciones"
+      "placeholderPosts": "Buscar publicaciones",
+      "placeholderProjects": "Buscar proyectos",
+      "noMatches": "Nada coincide con tu búsqueda."
     },
     "fab": {
       "postNeed": "Publicar una necesidad",

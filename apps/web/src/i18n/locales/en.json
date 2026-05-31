@@ -618,8 +618,9 @@
       "allZones": "All zones"
     },
     "search": {
-      "placeholder": "Search titles and descriptions",
-      "ariaLabel": "Search posts"
+      "placeholderPosts": "Search posts",
+      "placeholderProjects": "Search projects",
+      "noMatches": "Nothing matches your search."
     },
     "fab": {
       "postNeed": "Post a need",
