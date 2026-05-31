@@ -200,7 +200,23 @@
       "paused": "En pausa. {{note}}",
       "deadline": "Fecha límite",
       "area": "Zona: {{area}}",
-      "contributors": "Contribuyentes: {{count}}"
+      "contributors": "Contribuyentes: {{count}}",
+      "taskSearch": {
+        "placeholder": "Buscar tareas",
+        "ariaLabel": "Buscar tareas"
+      },
+      "taskFilter": {
+        "all": "Todas",
+        "open": "Abiertas",
+        "inProgress": "En progreso",
+        "done": "Hechas",
+        "empty": {
+          "search": "Nada coincide con tu búsqueda.",
+          "open": "Ninguna tarea abierta ahora mismo.",
+          "inProgress": "Ninguna tarea en progreso.",
+          "done": "Ninguna tarea hecha aún."
+        }
+      }
     },
     "task": {
       "claim": "Tomar esta tarea",
