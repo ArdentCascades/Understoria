@@ -275,17 +275,27 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <LearnSection />
+      {/* Phase 1.6 reflow: at lg+, the lower settings cluster reflows
+          into a 2-col grid. Each section component owns its own
+          `card mb-4`; the `lg:[&>*]:mb-0` arbitrary variant zeros that
+          out so grid `gap-4` is the sole spacing rule above lg. Below
+          lg the children fall through to normal block flow and their
+          own `mb-4` still applies. NodeSection stays full-width below
+          this cluster — federated-node setup is its own distinct
+          surface and doesn't pair visually with these settings. */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:[&>*]:mb-0">
+        <LearnSection />
 
-      <DisputesSection />
+        <DisputesSection />
 
-      <ProposalsSection />
+        <ProposalsSection />
 
-      <CommunitySettingsSection />
+        <CommunitySettingsSection />
 
-      <LanguageSection />
+        <LanguageSection />
 
-      <AppearanceSection />
+        <AppearanceSection />
+      </div>
 
       <NodeSection />
 

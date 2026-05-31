@@ -284,7 +284,7 @@ export default function BoardPage() {
         ))}
       </div>
 
-      <label className="mb-3 block">
+      <label className="mb-3 block md:max-w-md">
         <span className="sr-only">
           {t(
             tab === "PROJECTS"
@@ -307,7 +307,7 @@ export default function BoardPage() {
 
       {tab !== "PROJECTS" && (
       <>
-      <div className="mb-4 grid gap-2 sm:grid-cols-3">
+      <div className="mb-4 grid gap-2 sm:grid-cols-3 md:max-w-2xl">
         <label className="sr-only" htmlFor="category-filter">
           {t("board.filters.categoryAriaLabel")}
         </label>
@@ -395,7 +395,7 @@ export default function BoardPage() {
           />
         )
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visiblePosts.map((p) => (
             <li key={p.id}>
               <PostCard
@@ -416,7 +416,7 @@ export default function BoardPage() {
 
       {tab === "PROJECTS" && (
         <>
-          <div className="mb-4 grid gap-2 sm:grid-cols-3">
+          <div className="mb-4 grid gap-2 sm:grid-cols-3 md:max-w-2xl">
             <label className="sr-only" htmlFor="project-category-filter">
               {t("board.projectFilters.category.ariaLabel")}
             </label>
@@ -606,7 +606,7 @@ function ProjectList({
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
       {projects.map((p) => {
         const counts = tasksByProject.get(p.id) ?? { total: 0, open: 0 };
         return (

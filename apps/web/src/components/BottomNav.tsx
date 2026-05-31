@@ -79,7 +79,7 @@ export function BottomNav() {
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95"
     >
-      <ul className="mx-auto flex max-w-screen-md items-stretch justify-around">
+      <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
         {ITEMS.map((item) => (
           <li key={item.to} className="flex-1">
             <NavLink

@@ -31,7 +31,7 @@ export function Layout() {
   const { ready, lockState } = useApp();
   const locked = lockState === "locked";
   return (
-    <div className="mx-auto flex min-h-dvh max-w-screen-md flex-col">
+    <div className="mx-auto flex min-h-dvh max-w-screen-md flex-col lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
       {!locked && <SkipLink targetId="main" />}
       <main id="main" className="flex-1 pb-20" tabIndex={-1}>
         {!ready ? (
