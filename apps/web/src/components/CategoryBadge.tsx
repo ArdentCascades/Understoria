@@ -19,18 +19,18 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import { CATEGORY_META } from "@/lib/categories";
-import type { Category } from "@/types";
+import { PROJECT_CATEGORY_META } from "@/lib/categories";
+import type { ProjectCategory } from "@/types";
 
 export function CategoryBadge({
   category,
   size = "md",
 }: {
-  category: Category;
+  category: ProjectCategory;
   size?: "sm" | "md";
 }) {
   const { t } = useTranslation();
-  const meta = CATEGORY_META[category];
+  const meta = PROJECT_CATEGORY_META[category];
   const base =
     "inline-flex items-center gap-1.5 rounded-full bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100";
   const sizes = {

@@ -9,6 +9,23 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Start-a-project page no longer blanks on render.** `CategoryBadge`
+  was typed for `Category` and looked up `CATEGORY_META[category]`,
+  but `TemplatePicker` passed `template.defaultCategory` via an
+  `as Category` cast — fine until Set 2 templates introduced
+  `infrastructure`, `organizing`, and `mutual_aid_drive`, none of
+  which had a `CATEGORY_META` entry, so `meta.emoji` threw and the
+  whole template gallery crashed. Added `PROJECT_CATEGORY_META`
+  covering all 12 `ProjectCategory` values (the three extension
+  categories use the same emoji as the existing inline dropdown
+  options in `ProjectNew.tsx` / `Board.tsx`), broadened
+  `CategoryBadge` to accept `ProjectCategory`, dropped the unsafe
+  cast in `TemplatePicker`, and added matching `categories.*` i18n
+  keys in en + es. The `categoryLabel` helper in `TemplatePicker`
+  collapses from a five-case switch back to a single `t()` call now
+  that every project category has a translation.
+
 ### Added
 - **10 new community-project templates ("Set 2").** Tenant Union &
   Eviction Defense Network, Childcare / Babysitting Collective,

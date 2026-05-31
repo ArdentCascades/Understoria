@@ -388,7 +388,10 @@
     "education": "Education",
     "housing": "Housing",
     "tech": "Tech",
-    "other": "Other"
+    "other": "Other",
+    "infrastructure": "Infrastructure",
+    "organizing": "Organizing",
+    "mutual_aid_drive": "Mutual aid drive"
   },
   "postStatus": {
     "open": "Open",

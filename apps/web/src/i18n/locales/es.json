@@ -388,7 +388,10 @@
     "education": "Educación",
     "housing": "Vivienda",
     "tech": "Tecnología",
-    "other": "Otro"
+    "other": "Otro",
+    "infrastructure": "Infraestructura",
+    "organizing": "Organización",
+    "mutual_aid_drive": "Campaña de ayuda mutua"
   },
   "postStatus": {
     "open": "Abierto",

@@ -18,10 +18,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Category } from "@/types";
+import type { Category, ProjectCategory } from "@/types";
 
 export interface CategoryMeta {
-  id: Category;
+  id: ProjectCategory;
   label: string;
   emoji: string;
   description: string;
@@ -97,3 +97,28 @@ export const CATEGORY_META: Record<Category, CategoryMeta> = {
 export const ALL_CATEGORIES: Category[] = Object.keys(
   CATEGORY_META,
 ) as Category[];
+
+export const PROJECT_CATEGORY_META: Record<ProjectCategory, CategoryMeta> = {
+  ...CATEGORY_META,
+  infrastructure: {
+    id: "infrastructure",
+    label: "Infrastructure",
+    emoji: "\u{1F3D7}\u{FE0F}",
+    description: "Building, repair, and shared physical systems",
+    barColorClass: "bg-bark-600",
+  },
+  organizing: {
+    id: "organizing",
+    label: "Organizing",
+    emoji: "\u{1F4CB}",
+    description: "Collective action, unions, time banks",
+    barColorClass: "bg-canopy-800",
+  },
+  mutual_aid_drive: {
+    id: "mutual_aid_drive",
+    label: "Mutual aid drive",
+    emoji: "\u{1F49B}",
+    description: "Distributing supplies, funds, or essentials",
+    barColorClass: "bg-moss-800",
+  },
+};
