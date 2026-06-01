@@ -20,6 +20,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import {
   getProjectTemplates,
@@ -29,7 +30,7 @@ import {
   matchesTemplate,
   type SetupBucket,
 } from "@/lib/templateFilter";
-import type { ProjectCategory } from "@/types";
+import type { Project, ProjectCategory } from "@/types";
 
 interface TemplatePickerProps {
   selectedId: string | null;
@@ -39,6 +40,13 @@ interface TemplatePickerProps {
    *  when the picker is docked in a narrow side rail (e.g. ProjectNew
    *  at lg+, where the rail is ~380px and 3-up would crush each card). */
   layout?: "default" | "rail";
+  /** Map of templateId → active community projects using that
+   *  template. Computed by the parent and passed down so the helper
+   *  isn't called per-render or per-card. When omitted (or a card's
+   *  templateId isn't in the map), the chip is suppressed entirely —
+   *  TemplatePicker stays usable in contexts that don't have project
+   *  data. */
+  activeProjectsByTemplate?: Map<string, Project[]>;
 }
 
 /**
@@ -58,6 +66,7 @@ export function TemplatePicker({
   selectedId,
   onSelect,
   layout = "default",
+  activeProjectsByTemplate,
 }: TemplatePickerProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.resolvedLanguage ?? "en";
@@ -173,11 +182,14 @@ export function TemplatePicker({
           </li>
         ) : (
           visibleTemplates.map((tpl) => (
-            <li key={tpl.id}>
+            // flex column so the chip lays out below the card button
+            // while the button still claims h-full of the grid row.
+            <li key={tpl.id} className="flex flex-col">
               <TemplateCard
                 template={tpl}
                 isSelected={selectedId === tpl.id}
                 onSelect={() => onSelect(tpl.id)}
+                activeProjects={activeProjectsByTemplate?.get(tpl.id)}
               />
             </li>
           ))
@@ -204,41 +216,68 @@ interface TemplateCardProps {
   template: ProjectTemplate;
   isSelected: boolean;
   onSelect: () => void;
+  /** Sorted newest-first by the parent's helper; index 0 is the most
+   *  recent match. Undefined when the parent didn't supply usage data. */
+  activeProjects?: Project[];
 }
 
-function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
+function TemplateCard({
+  template,
+  isSelected,
+  onSelect,
+  activeProjects,
+}: TemplateCardProps) {
   const { t } = useTranslation();
   const taskCount = template.tasks.length;
+  const hasActive = activeProjects && activeProjects.length > 0;
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      aria-pressed={isSelected}
-      className={`card w-full h-full text-left p-4 flex flex-col gap-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
-        isSelected
-          ? "ring-2 ring-canopy-500 dark:ring-canopy-400"
-          : "hover:border-canopy-300 dark:hover:border-canopy-700"
-      }`}
-    >
-      <span className="font-semibold text-canopy-900 dark:text-canopy-100">
-        {template.name}
-      </span>
-      <span className="text-sm text-moss-600 dark:text-moss-300">
-        {template.purpose}
-      </span>
-      <span className="mt-auto flex flex-wrap items-center gap-2 pt-2 text-xs text-moss-500 dark:text-moss-400">
-        <span>
-          {t("projects.templates.meta.setupHours", {
-            hours: template.setupHours,
+    // Fragment so the chip sits as a sibling of the card button inside
+    // the parent <li>. A <Link> can't legally nest inside a <button>,
+    // and we still want the chip visually attached to its card.
+    <>
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={isSelected}
+        className={`card w-full h-full text-left p-4 flex flex-col gap-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
+          isSelected
+            ? "ring-2 ring-canopy-500 dark:ring-canopy-400"
+            : "hover:border-canopy-300 dark:hover:border-canopy-700"
+        }`}
+      >
+        <span className="font-semibold text-canopy-900 dark:text-canopy-100">
+          {template.name}
+        </span>
+        <span className="text-sm text-moss-600 dark:text-moss-300">
+          {template.purpose}
+        </span>
+        <span className="mt-auto flex flex-wrap items-center gap-2 pt-2 text-xs text-moss-500 dark:text-moss-400">
+          <span>
+            {t("projects.templates.meta.setupHours", {
+              hours: template.setupHours,
+            })}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>
+            {t("projects.templates.meta.tasks", { count: taskCount })}
+          </span>
+          <CategoryBadge category={template.defaultCategory} size="sm" />
+        </span>
+      </button>
+      {hasActive ? (
+        <Link
+          to={`/project/${activeProjects[0].id}`}
+          // stopPropagation so clicking the chip routes to the existing
+          // project without also firing the card's template-select.
+          onClick={(e) => e.stopPropagation()}
+          className="mt-1 inline-block text-xs text-canopy-700 dark:text-canopy-300 underline-offset-2 hover:underline"
+        >
+          {t("projects.templates.activeInCommunity", {
+            count: activeProjects.length,
           })}
-        </span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {t("projects.templates.meta.tasks", { count: taskCount })}
-        </span>
-        <CategoryBadge category={template.defaultCategory} size="sm" />
-      </span>
-    </button>
+        </Link>
+      ) : null}
+    </>
   );
 }
 
