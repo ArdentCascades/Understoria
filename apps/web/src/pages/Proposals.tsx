@@ -98,7 +98,15 @@ export default function ProposalsPage() {
         </p>
       </header>
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      {/* Phase 3.2 (Proposals): the page has no list+detail split
+          (each ProposalCard is self-contained inline) so the plan's
+          two-pane treatment doesn't apply. Smaller reflow that fits
+          the structure: pin the filter row + "Start new" to the top
+          of the scroll context so members keep the filter controls
+          and the start-new affordance visible as they scroll through
+          long proposal lists. backdrop-blur + 95%-opaque background
+          keep content underneath legible while the bar sticks. */}
+      <div className="sticky top-0 z-10 -mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70">
         <div
           role="tablist"
           aria-label={t("proposals.filterAriaLabel")}
