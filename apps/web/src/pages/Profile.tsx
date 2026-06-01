@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { balanceFor, transactionHistory } from "@/lib/timebank";
@@ -896,6 +896,19 @@ function InvitesSection({
   const [issuing, setIssuing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  // Inline link starts redacted by default. Anyone in camera view —
+  // including security cams, webcams, and onlookers on a wide
+  // desktop monitor — can read the URL right off the screen. The
+  // InviteShareSheet modal has its own "look around" gate; this
+  // mirrors that gate for the inline display so the secret never
+  // surfaces without an explicit member action. Reset on each fresh
+  // invite (a member's surroundings can change between two share
+  // sessions on the same device — same pattern as InviteShareSheet's
+  // gate effect at line 86-93).
+  const [linkRevealed, setLinkRevealed] = useState(false);
+  useEffect(() => {
+    if (shareUrl) setLinkRevealed(false);
+  }, [shareUrl]);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
@@ -970,9 +983,17 @@ function InvitesSection({
           <p className="text-xs font-semibold uppercase tracking-wide text-canopy-800 dark:text-canopy-200">
             {t("profile.invites.shareTitle")}
           </p>
-          <code className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs dark:bg-moss-900">
-            {shareUrl}
+          <code
+            className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs dark:bg-moss-900"
+            aria-live="polite"
+          >
+            {linkRevealed ? shareUrl : t("profile.invites.shareLinkHidden")}
           </code>
+          {linkRevealed && (
+            <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+              {t("profile.invites.revealedHint")}
+            </p>
+          )}
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
             <button
               type="button"
@@ -980,6 +1001,16 @@ function InvitesSection({
               onClick={() => handleCopy(shareUrl)}
             >
               {t("common.copy")}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary text-xs"
+              aria-pressed={linkRevealed}
+              onClick={() => setLinkRevealed((v) => !v)}
+            >
+              {linkRevealed
+                ? t("profile.invites.hideLink")
+                : t("profile.invites.revealLink")}
             </button>
             <button
               type="button"
