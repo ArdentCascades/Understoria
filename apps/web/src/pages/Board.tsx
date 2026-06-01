@@ -303,26 +303,36 @@ export default function BoardPage() {
           ))}
         </div>
 
-        <label className="block md:max-w-md lg:col-start-2 lg:row-start-2">
-          <span className="sr-only">
-            {t(
-              tab === "PROJECTS"
-                ? "board.search.placeholderProjects"
-                : "board.search.placeholderPosts",
-            )}
-          </span>
-          <input
-            type="search"
-            className="input"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t(
-              tab === "PROJECTS"
-                ? "board.search.placeholderProjects"
-                : "board.search.placeholderPosts",
-            )}
-          />
-        </label>
+        {/* Sticky search: on mobile pins to top-0 so members can
+            search from anywhere in a long scroll instead of jumping
+            back to the page top. At lg+ pins at top-4 to match the
+            other rails (filters + AttentionSection). Wrapper carries
+            the grid placement + backdrop; the inner label keeps the
+            input width cap. `-mx-4 lg:mx-0` lets the backdrop bleed
+            to the viewport edge at mobile (cancelling the page's
+            px-4) while staying within the middle column at lg+. */}
+        <div className="sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:top-4 lg:col-start-2 lg:row-start-2 lg:mx-0 lg:px-0">
+          <label className="block md:max-w-md">
+            <span className="sr-only">
+              {t(
+                tab === "PROJECTS"
+                  ? "board.search.placeholderProjects"
+                  : "board.search.placeholderPosts",
+              )}
+            </span>
+            <input
+              type="search"
+              className="input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t(
+                tab === "PROJECTS"
+                  ? "board.search.placeholderProjects"
+                  : "board.search.placeholderPosts",
+              )}
+            />
+          </label>
+        </div>
 
         {tab !== "PROJECTS" && (
         <>
