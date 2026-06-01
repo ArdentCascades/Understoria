@@ -184,6 +184,7 @@ export default function ProfilePage() {
         <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           {t("profile.rolesEarned.title")}
+          <WhyTooltip principleId="no-leaderboards" />
         </h2>
         {myAchievements.length === 0 ? (
           <EmptyState
@@ -640,7 +641,10 @@ function BalanceCard({
           </div>
         </div>
         <div className="text-right text-xs text-moss-500">
-          <div>{t("profile.balance.seed", { hours: formatHours(seed) })}</div>
+          <div>
+            {t("profile.balance.seed", { hours: formatHours(seed) })}
+            <WhyTooltip principleId="asking-never-gated" />
+          </div>
           <div>{t("profile.balance.footerNote")}</div>
         </div>
       </div>
@@ -712,6 +716,7 @@ function ProfileEditor({ member }: { member: Member }) {
           </p>
           <p className="mt-2 max-w-sm text-xs text-moss-600 dark:text-moss-300">
             {t("profile.about.avatarNote")}
+            <WhyTooltip principleId="privacy-precondition" />
           </p>
         </div>
         <div className="my-4 border-t border-bark-200/60 dark:border-moss-800 lg:hidden" />

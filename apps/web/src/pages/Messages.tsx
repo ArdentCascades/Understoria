@@ -33,6 +33,7 @@ import { matchesQuery } from "@/lib/messageSearch";
 import { EmptyState } from "@/components/EmptyState";
 import { HighlightedText } from "@/components/HighlightedText";
 import { MemberAvatar } from "@/components/MemberAvatar";
+import { WhyTooltip } from "@/components/WhyTooltip";
 
 interface SearchGroup {
   otherKey: string;
@@ -145,7 +146,10 @@ export default function MessagesShell() {
       >
         <div className="px-4 pb-8 pt-4">
           <header className="mb-4">
-            <h1 className="page-title">{t("messages.title")}</h1>
+            <h1 className="page-title">
+              {t("messages.title")}
+              <WhyTooltip principleId="no-read-receipts" />
+            </h1>
           </header>
 
           {/* Sticky search within the list pane scroll context — at
