@@ -46,6 +46,11 @@
             document.documentElement.classList.add("text-larger");
           else if (size === "largest")
             document.documentElement.classList.add("text-largest");
+          // Phase 3.3 density. Opt-in only — "default" / missing /
+          // unknown means comfortable padding (the launch behavior).
+          var density = localStorage.getItem("understoria.density");
+          if (density === "compact")
+            document.documentElement.classList.add("density-compact");
         } catch (e) {
           /* private-mode / quota-exceeded — fall back to defaults */
         }

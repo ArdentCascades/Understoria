@@ -29,7 +29,7 @@ import InviteAcceptPage from "@/pages/InviteAccept";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
-import MessagesPage from "@/pages/Messages";
+import MessagesShell, { MessagesEmptyPane } from "@/pages/Messages";
 import ConversationPage from "@/pages/Conversation";
 import MemberDetailPage from "@/pages/MemberDetail";
 import HelpPage from "@/pages/Help";
@@ -68,8 +68,13 @@ export default function App() {
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
-          <Route path="/messages" element={<MessagesPage />} />
-          <Route path="/messages/:memberKey" element={<ConversationPage />} />
+          {/* Phase 3.1: nested so at lg+ the conversation renders inside
+              the MessagesShell's right pane via <Outlet />. Below lg the
+              shell collapses to single-pane based on URL — see Messages.tsx */}
+          <Route path="/messages" element={<MessagesShell />}>
+            <Route index element={<MessagesEmptyPane />} />
+            <Route path=":memberKey" element={<ConversationPage />} />
+          </Route>
           <Route path="/member/:publicKey" element={<MemberDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/disputes" element={<DisputesPage />} />

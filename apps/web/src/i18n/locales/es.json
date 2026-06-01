@@ -88,6 +88,9 @@
   },
   "messages": {
     "title": "Mensajes",
+    "shell": {
+      "emptyPane": "Elige una conversación de la lista."
+    },
     "emptyTitle": "Aún no hay conversaciones",
     "empty": "Aun no hay mensajes. Inicia una conversacion desde cualquier publicacion o perfil.",
     "sendMessage": "Mensaje",
@@ -892,7 +895,13 @@
       "autoSublabel": "En esta pantalla, Automático muestra {{resolved}}. Cambia el tamaño de la ventana para ver el cambio.",
       "default": "Predeterminado",
       "larger": "Más grande",
-      "largest": "El más grande"
+      "largest": "El más grande",
+      "densityTitle": "Densidad del diseño",
+      "densityIntro": "Compacto reduce el relleno de las tarjetas para que quepa más en pantallas densas. Los objetivos táctiles mantienen su tamaño.",
+      "density": {
+        "default": "Cómodo",
+        "compact": "Compacto"
+      }
     },
     "node": {
       "title": "Nodo comunitario",

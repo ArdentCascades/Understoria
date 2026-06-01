@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Outlet, useMatch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
@@ -39,13 +39,35 @@ interface SearchGroup {
   hits: MessageSearchHit[];
 }
 
-export default function MessagesPage() {
+// Phase 3.1: Messages is a routing shell — at lg+ it renders the
+// conversation list + the selected conversation side-by-side via
+// nested routing (the `/messages/:memberKey` child route renders
+// inside `<Outlet />`). Below lg the shell collapses to single-pane:
+// when on `/messages` the list shows; when on `/messages/:memberKey`
+// the conversation takes the full screen — matching pre-3.1 behavior
+// for small viewports.
+//
+// Read receipts, presence dots, typing indicators, and unread badges
+// are deliberately absent — the no-read-receipts and
+// privacy-precondition principles forbid the surveillance affordances
+// that "modern chat" UIs accrete around split-pane layouts.
+
+export default function MessagesShell() {
   const { currentMember, members, lockState } = useApp();
   const { t } = useTranslation();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [searchGroups, setSearchGroups] = useState<SearchGroup[] | null>(null);
+
+  // Which conversation (if any) is open in the right pane. Drives
+  // both the aria-current marker on the list item and the
+  // single-pane visibility toggle below lg.
+  const conversationMatch = useMatch("/messages/:memberKey");
+  const selectedKey = conversationMatch?.params.memberKey
+    ? decodeURIComponent(conversationMatch.params.memberKey)
+    : null;
+  const hasConversation = selectedKey !== null;
 
   const nameByKey = useMemo(
     () => new Map(members.map((m) => [m.publicKey, m.displayName])),
@@ -115,72 +137,111 @@ export default function MessagesPage() {
   const isSearching = debounced.trim() !== "";
 
   return (
-    <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
-        <h1 className="page-title">{t("messages.title")}</h1>
-      </header>
+    <div className="flex h-full flex-col lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div
+        className={`min-h-0 lg:h-full lg:overflow-y-auto lg:border-r lg:border-moss-200 lg:dark:border-moss-800 ${
+          hasConversation ? "hidden lg:block" : ""
+        }`}
+      >
+        <div className="px-4 pb-8 pt-4">
+          <header className="mb-4">
+            <h1 className="page-title">{t("messages.title")}</h1>
+          </header>
 
-      <label className="mb-3 block">
-        <span className="sr-only">{t("messages.search.placeholder")}</span>
-        <input
-          type="search"
-          className="input"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={
-            locked
-              ? t("messages.search.locked")
-              : t("messages.search.placeholder")
-          }
-          disabled={locked}
-        />
-      </label>
+          <label className="mb-3 block">
+            <span className="sr-only">{t("messages.search.placeholder")}</span>
+            <input
+              type="search"
+              className="input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={
+                locked
+                  ? t("messages.search.locked")
+                  : t("messages.search.placeholder")
+              }
+              disabled={locked}
+            />
+          </label>
 
-      {isSearching ? (
-        <SearchResults
-          groups={searchGroups}
-          query={debounced}
-          nameByKey={nameByKey}
-          memberFallback={t("common.memberFallback")}
-          noMatches={t("messages.search.noMatches")}
-        />
-      ) : conversations.length === 0 ? (
-        <EmptyState
-          illustration="hands"
-          title={t("messages.emptyTitle")}
-          message={t("messages.empty")}
-        />
-      ) : (
-        <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-          {conversations.map((c) => (
-            <li key={c.otherKey}>
-              <Link
-                to={`/messages/${encodeURIComponent(c.otherKey)}`}
-                className="card block transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-start gap-3">
-                  <MemberAvatar publicKey={c.otherKey} size={48} framed />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">
-                        {nameByKey.get(c.otherKey) ?? t("common.memberFallback")}
-                      </span>
-                      <span className="text-xs text-moss-500">
-                        {formatRelativeTime(c.lastMessage.createdAt)}
-                      </span>
-                    </div>
-                    <p className="mt-1 line-clamp-1 text-sm text-moss-600 dark:text-moss-300">
-                      {c.lastMessage.plaintext
-                        ? c.lastMessage.plaintext.slice(0, 80)
-                        : t("messages.decryptionFailed")}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+          {isSearching ? (
+            <SearchResults
+              groups={searchGroups}
+              query={debounced}
+              nameByKey={nameByKey}
+              memberFallback={t("common.memberFallback")}
+              noMatches={t("messages.search.noMatches")}
+              selectedKey={selectedKey}
+            />
+          ) : conversations.length === 0 ? (
+            <EmptyState
+              illustration="hands"
+              title={t("messages.emptyTitle")}
+              message={t("messages.empty")}
+            />
+          ) : (
+            <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1">
+              {conversations.map((c) => {
+                const isSelected = c.otherKey === selectedKey;
+                return (
+                  <li key={c.otherKey}>
+                    <Link
+                      to={`/messages/${encodeURIComponent(c.otherKey)}`}
+                      aria-current={isSelected ? "page" : undefined}
+                      className={`card block transition-shadow hover:shadow-md ${
+                        isSelected
+                          ? "ring-2 ring-canopy-500 dark:ring-canopy-400"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <MemberAvatar publicKey={c.otherKey} size={48} framed />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">
+                              {nameByKey.get(c.otherKey) ?? t("common.memberFallback")}
+                            </span>
+                            <span className="text-xs text-moss-500">
+                              {formatRelativeTime(c.lastMessage.createdAt)}
+                            </span>
+                          </div>
+                          <p className="mt-1 line-clamp-1 text-sm text-moss-600 dark:text-moss-300">
+                            {c.lastMessage.plaintext
+                              ? c.lastMessage.plaintext.slice(0, 80)
+                              : t("messages.decryptionFailed")}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div
+        className={`min-h-0 lg:h-full ${
+          !hasConversation ? "hidden lg:block" : ""
+        }`}
+      >
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
+// Index route placeholder shown in the right pane at lg+ when no
+// conversation is selected. Hidden at <lg because the list takes the
+// whole viewport there (member hasn't picked a conversation yet).
+export function MessagesEmptyPane() {
+  const { t } = useTranslation();
+  return (
+    <div className="flex h-full items-center justify-center px-4 py-8 text-center">
+      <p className="text-sm text-moss-500 dark:text-moss-400">
+        {t("messages.shell.emptyPane")}
+      </p>
     </div>
   );
 }
@@ -191,12 +252,14 @@ function SearchResults({
   nameByKey,
   memberFallback,
   noMatches,
+  selectedKey,
 }: {
   groups: SearchGroup[] | null;
   query: string;
   nameByKey: Map<string, string>;
   memberFallback: string;
   noMatches: string;
+  selectedKey: string | null;
 }) {
   const { t } = useTranslation();
   if (groups === null) return null;
@@ -208,15 +271,19 @@ function SearchResults({
     );
   }
   return (
-    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
+    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1">
       {groups.map((g) => {
         const name = nameByKey.get(g.otherKey) ?? memberFallback;
         const first = g.hits[0];
+        const isSelected = g.otherKey === selectedKey;
         return (
           <li key={g.otherKey}>
             <Link
               to={`/messages/${encodeURIComponent(g.otherKey)}?q=${encodeURIComponent(query)}`}
-              className="card block transition-shadow hover:shadow-md"
+              aria-current={isSelected ? "page" : undefined}
+              className={`card block transition-shadow hover:shadow-md ${
+                isSelected ? "ring-2 ring-canopy-500 dark:ring-canopy-400" : ""
+              }`}
             >
               <div className="flex items-center gap-3">
                 <MemberAvatar publicKey={g.otherKey} size={48} framed />

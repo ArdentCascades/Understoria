@@ -88,6 +88,9 @@
   },
   "messages": {
     "title": "Messages",
+    "shell": {
+      "emptyPane": "Pick a conversation from the list."
+    },
     "emptyTitle": "No conversations yet",
     "empty": "No messages yet. Start a conversation from any post or member profile.",
     "sendMessage": "Message",
@@ -892,7 +895,13 @@
       "autoSublabel": "On this screen, Auto shows {{resolved}}. Resize the window to see it switch.",
       "default": "Default",
       "larger": "Larger",
-      "largest": "Largest"
+      "largest": "Largest",
+      "densityTitle": "Layout density",
+      "densityIntro": "Compact trims card padding so denser screens fit more above the fold. Touch targets stay the same size.",
+      "density": {
+        "default": "Comfortable",
+        "compact": "Compact"
+      }
     },
     "node": {
       "title": "Community node",
