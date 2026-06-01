@@ -1198,6 +1198,11 @@
         "title": "La comunidad es la autoridad",
         "body1": "No hay administradores. Las decisiones se toman en conjunto — en el canal que tu comunidad use hoy, y dentro de la aplicación a medida que Understoria crezca.",
         "body2": "Si algo sale mal, la respuesta empieza con conversación, no con bloqueos. La moderación, cuando existe, es rotativa, transparente y responde a la comunidad."
+      },
+      "projects": {
+        "title": "Algo de la ayuda necesita más de una persona",
+        "body1": "Algunos esfuerzos — una nevera comunitaria, una biblioteca de herramientas, una red de defensa de inquilinos — no se arman de un favor a la vez. Los proyectos son metas compartidas con sus propias listas de tareas, organizadas en el tiempo por quien quiera asumirlas. Hay plantillas iniciales con tareas ya escritas para esfuerzos comunes, o puedes empezar desde cero.",
+        "body2": "Si una plantilla que escogerías ya está activa en tu comunidad, te la mostraremos antes de que empieces una nueva. El primer instinto es sumarse a un esfuerzo que ya está en marcha. La comunidad crece profundizando el trabajo compartido, no duplicándolo."
       }
     },
     "profileSetup": {
