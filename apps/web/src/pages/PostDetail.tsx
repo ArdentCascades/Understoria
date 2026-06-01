@@ -176,7 +176,17 @@ export default function PostDetailPage() {
   }
 
   return (
-    <div className="px-4 pb-8 pt-4">
+    <div className="mx-auto max-w-2xl px-4 pb-8 pt-4">
+      {/* Phase 2.3 downscope: PostDetail caps at max-w-2xl rather
+          than spanning the full Layout container at lg+. The plan's
+          two-pane option (dl + reach-out in a 300px sidebar) was
+          tempting but the dl is short and visually belongs with the
+          title in the same card — extracting it created either DOM
+          reordering at mobile or a near-empty sidebar when no
+          reach-out target exists. A capped reading column is the
+          honest win for a detail page; the rest of the Layout's
+          container is centered empty space at lg+, which is fine
+          for an article-style screen. */}
       <button
         type="button"
         className="btn-ghost -ml-2 mb-3 text-sm"

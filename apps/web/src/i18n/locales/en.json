@@ -161,6 +161,7 @@
       "errorDeadlineDays": "Days must be a whole number greater than 0, or blank for no deadline."
     },
     "templates": {
+      "asideAriaLabel": "Project starter templates",
       "title": "Pick a starting point",
       "intro": "These are starter templates with pre-written tasks. Pick one to fill in the form below — you can edit anything before creating. Or start from scratch.",
       "scratch": "Start from scratch",
@@ -199,6 +200,7 @@
     },
     "detail": {
       "back": "← Back to projects",
+      "sidebarAriaLabel": "Project details and organizer controls",
       "notFound": "This project couldn't be found.",
       "tasks": "Tasks",
       "noTasksTitle": "No tasks yet",
@@ -435,7 +437,11 @@
     "errorHoursPositive": "Estimated hours must be a positive number.",
     "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire.",
     "repostBanner": "Editing a copy — the original post will be cancelled when you submit.",
-    "matchingNeeds": "{{count}} active needs in this category — see them"
+    "matchingNeeds": "{{count}} active needs in this category — see them",
+    "matchingNeedsAside": {
+      "title": "Active needs in this category",
+      "seeAll": "See all {{count}}"
+    }
   },
   "postDetail": {
     "notFound": "This post couldn't be found. It may have been cancelled.",

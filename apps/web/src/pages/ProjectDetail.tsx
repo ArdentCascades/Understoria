@@ -233,242 +233,265 @@ export default function ProjectDetailPage() {
         <PlanningBanner project={project} isOrganizer={isOrg} onRun={run} />
       )}
 
-      <div className="card mb-4">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-            {t(`projects.status${capitalize(project.status)}` as `projects.statusActive`)}
-          </span>
-          <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-            {project.category.replace(/_/g, " ")}
-          </span>
-          <ProjectMomentumChip
-            state={momentum.state}
-            hoursLast7Days={momentum.hoursLast7Days}
-          />
-        </div>
-        <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
-        {project.description && (
-          <p className="mt-2 whitespace-pre-wrap text-sm text-moss-700 dark:text-moss-200">
-            {project.description}
-          </p>
-        )}
-        <div className="mt-4">
-          <div
-            className="h-3 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={percent}
-          >
-            <div
-              className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-          <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
-            {t("projects.progressLabel", {
-              contributed: formatHours(project.contributedHours),
-              target: formatHours(project.targetHours),
-              percent,
-            })}
-          </p>
-          <div className="mt-3 text-canopy-700 dark:text-canopy-300">
-            <ProjectSparkline daily={momentum.daily} />
-          </div>
-        </div>
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-          <Field
-            label={t("projects.byOrganizer", {
-              name: memberMap.get(project.organizerKey) ?? "—",
-            })}
-          >
-            {formatRelativeTime(project.createdAt)}
-          </Field>
-          {project.locationZone && (
-            <Field label={t("projects.detail.area", { area: project.locationZone })}>
-              {project.locationZone}
-            </Field>
-          )}
-          {project.deadline && (
-            <Field label={t("projects.detail.deadline")}>
-              {formatDeadline(project.deadline)}
-            </Field>
-          )}
-          <Field label={t("projects.detail.contributors", { count: contributors.size })}>
-            {contributors.size}
-          </Field>
-        </dl>
-        {project.status === "completed" && project.completedAt && (
-          <p className="mt-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-            {t("projects.detail.completed", {
-              when: formatRelativeTime(project.completedAt),
-            })}
-          </p>
-        )}
-        {project.status === "paused" && project.pauseNote && (
-          <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-            {t("projects.detail.paused", { note: project.pauseNote })}
-          </p>
-        )}
-      </div>
+      {/* Phase 2.2: 2-pane layout at lg+ — meta (overview card +
+          organizer / co-organizer / handoff controls) docks in a
+          320px right sidebar that sticks to the viewport; the main
+          reading column hosts the high-volume scrollable sections
+          (error → announcements → tasks → add-task forms → history).
+          Below lg the `lg:*` classes are inert and the grid collapses
+          to single-column DOM order — overview → controls → error →
+          announcements → tasks → ... — matching the pre-2.2 layout.
 
-      {isOrg && (
-        <OrganizerControls project={project} onRun={run} />
-      )}
-
-      {isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived" && (
-        <CoOrganizerSection
-          project={project}
-          members={members}
-          currentKey={currentMember!.publicKey}
-          memberMap={memberMap}
-          onRun={run}
-        />
-      )}
-
-      {isPrimaryOrganizer && project.coOrganizerKeys.length > 0 && project.status !== "completed" && project.status !== "archived" && (
-        <HandoffSection
-          project={project}
-          currentKey={currentMember!.publicKey}
-          memberMap={memberMap}
-          onRun={run}
-        />
-      )}
-
-      {error && (
-        <p
-          role="alert"
-          className="mb-3 rounded-xl bg-rose-50 p-3 text-sm text-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
+          The sidebar `aside` is its own scroll context at lg+ so an
+          overflowing meta panel doesn't push tasks off-screen. The
+          main column's `min-w-0` (via minmax(0,1fr)) lets long
+          announcement / task content wrap rather than blow out the
+          grid width. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
+        <aside
+          aria-label={t("projects.detail.sidebarAriaLabel")}
+          className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
         >
-          {error}
-        </p>
-      )}
-
-      <AnnouncementSection
-        project={project}
-        isOrg={isOrg}
-        memberMap={memberMap}
-        nodeId={nodeId}
-        currentKey={currentMember?.publicKey}
-      />
-
-      <section className="mb-4">
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          {t("projects.detail.tasks")}
-        </h2>
-        {tasks.length === 0 ? (
-          <div className="card">
-            <EmptyState
-              illustration="book"
-              variant="inset"
-              title={t("projects.detail.noTasksTitle")}
-              message={t("projects.detail.noTasks")}
-            />
-          </div>
-        ) : (
-          <>
-            <label className="mb-2 block">
-              <span className="sr-only">
-                {t("projects.detail.taskSearch.ariaLabel")}
+          <div className="card mb-4">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+                {t(`projects.status${capitalize(project.status)}` as `projects.statusActive`)}
               </span>
-              <input
-                type="search"
-                className="input"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t("projects.detail.taskSearch.placeholder")}
+              <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+                {project.category.replace(/_/g, " ")}
+              </span>
+              <ProjectMomentumChip
+                state={momentum.state}
+                hoursLast7Days={momentum.hoursLast7Days}
               />
-            </label>
-            <div
-              className="mb-3 flex flex-wrap gap-2"
-              role="group"
-              aria-label={t("projects.detail.taskSearch.ariaLabel")}
-            >
-              {(
-                [
-                  { value: "all", label: t("projects.detail.taskFilter.all") },
-                  { value: "open", label: t("projects.detail.taskFilter.open") },
-                  {
-                    value: "in_progress",
-                    label: t("projects.detail.taskFilter.inProgress"),
-                  },
-                  { value: "done", label: t("projects.detail.taskFilter.done") },
-                ] as { value: TaskFilter; label: string }[]
-              ).map(({ value, label }) => {
-                const active = taskFilter === value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setTaskFilter(value)}
-                    aria-pressed={active}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-                      active
-                        ? "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100"
-                        : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
             </div>
-            {visibleTasks.length === 0 ? (
-              <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-                {trimmedQuery !== ""
-                  ? t("projects.detail.taskFilter.empty.search")
-                  : taskFilter === "open"
-                    ? t("projects.detail.taskFilter.empty.open")
-                    : taskFilter === "in_progress"
-                      ? t("projects.detail.taskFilter.empty.inProgress")
-                      : taskFilter === "done"
-                        ? t("projects.detail.taskFilter.empty.done")
-                        : null}
+            <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
+            {project.description && (
+              <p className="mt-2 whitespace-pre-wrap text-sm text-moss-700 dark:text-moss-200">
+                {project.description}
               </p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {visibleTasks.map((task) => {
-                  const checkInState = taskCheckInState(task, nodeConfig);
-                  return (
-                    <li key={task.id}>
-                      <TaskRow
-                        task={task}
-                        isOrganizer={isOrg}
-                        acceptingClaims={project.status === "active"}
-                        projectStatus={project.status}
-                        currentKey={currentMember?.publicKey}
-                        memberMap={memberMap}
-                        nodeId={nodeId}
-                        onRun={run}
-                        needsMoreHands={checkInState === "needs_more_hands"}
-                        allTasks={tasks}
-                        flaggedCommentIds={flaggedCommentIds}
-                        searchQuery={debouncedQuery}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
             )}
-          </>
-        )}
-      </section>
+            <div className="mt-4">
+              <div
+                className="h-3 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={percent}
+              >
+                <div
+                  className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+                {t("projects.progressLabel", {
+                  contributed: formatHours(project.contributedHours),
+                  target: formatHours(project.targetHours),
+                  percent,
+                })}
+              </p>
+              <div className="mt-3 text-canopy-700 dark:text-canopy-300">
+                <ProjectSparkline daily={momentum.daily} />
+              </div>
+            </div>
+            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <Field
+                label={t("projects.byOrganizer", {
+                  name: memberMap.get(project.organizerKey) ?? "—",
+                })}
+              >
+                {formatRelativeTime(project.createdAt)}
+              </Field>
+              {project.locationZone && (
+                <Field label={t("projects.detail.area", { area: project.locationZone })}>
+                  {project.locationZone}
+                </Field>
+              )}
+              {project.deadline && (
+                <Field label={t("projects.detail.deadline")}>
+                  {formatDeadline(project.deadline)}
+                </Field>
+              )}
+              <Field label={t("projects.detail.contributors", { count: contributors.size })}>
+                {contributors.size}
+              </Field>
+            </dl>
+            {project.status === "completed" && project.completedAt && (
+              <p className="mt-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+                {t("projects.detail.completed", {
+                  when: formatRelativeTime(project.completedAt),
+                })}
+              </p>
+            )}
+            {project.status === "paused" && project.pauseNote && (
+              <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+                {t("projects.detail.paused", { note: project.pauseNote })}
+              </p>
+            )}
+          </div>
 
-      {isOrg &&
-        project.status !== "completed" &&
-        project.status !== "archived" && (
-          <AddTaskForm project={project} onRun={run} />
-        )}
+          {isOrg && (
+            <OrganizerControls project={project} onRun={run} />
+          )}
 
-      {isOrg &&
-        project.status !== "completed" &&
-        project.status !== "archived" && (
-          <BulkTaskForm project={project} nodeId={nodeId} onRun={run} />
-        )}
+          {isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived" && (
+            <CoOrganizerSection
+              project={project}
+              members={members}
+              currentKey={currentMember!.publicKey}
+              memberMap={memberMap}
+              onRun={run}
+            />
+          )}
 
-      {(project.status === "archived" || project.status === "completed") && (
-        <HistoryTimeline projectId={project.id} memberMap={memberMap} />
-      )}
+          {isPrimaryOrganizer && project.coOrganizerKeys.length > 0 && project.status !== "completed" && project.status !== "archived" && (
+            <HandoffSection
+              project={project}
+              currentKey={currentMember!.publicKey}
+              memberMap={memberMap}
+              onRun={run}
+            />
+          )}
+        </aside>
+
+        <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0">
+          {error && (
+            <p
+              role="alert"
+              className="mb-3 rounded-xl bg-rose-50 p-3 text-sm text-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
+            >
+              {error}
+            </p>
+          )}
+
+          <AnnouncementSection
+            project={project}
+            isOrg={isOrg}
+            memberMap={memberMap}
+            nodeId={nodeId}
+            currentKey={currentMember?.publicKey}
+          />
+
+          <section className="mb-4">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+              {t("projects.detail.tasks")}
+            </h2>
+            {tasks.length === 0 ? (
+              <div className="card">
+                <EmptyState
+                  illustration="book"
+                  variant="inset"
+                  title={t("projects.detail.noTasksTitle")}
+                  message={t("projects.detail.noTasks")}
+                />
+              </div>
+            ) : (
+              <>
+                <label className="mb-2 block">
+                  <span className="sr-only">
+                    {t("projects.detail.taskSearch.ariaLabel")}
+                  </span>
+                  <input
+                    type="search"
+                    className="input"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t("projects.detail.taskSearch.placeholder")}
+                  />
+                </label>
+                <div
+                  className="mb-3 flex flex-wrap gap-2"
+                  role="group"
+                  aria-label={t("projects.detail.taskSearch.ariaLabel")}
+                >
+                  {(
+                    [
+                      { value: "all", label: t("projects.detail.taskFilter.all") },
+                      { value: "open", label: t("projects.detail.taskFilter.open") },
+                      {
+                        value: "in_progress",
+                        label: t("projects.detail.taskFilter.inProgress"),
+                      },
+                      { value: "done", label: t("projects.detail.taskFilter.done") },
+                    ] as { value: TaskFilter; label: string }[]
+                  ).map(({ value, label }) => {
+                    const active = taskFilter === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setTaskFilter(value)}
+                        aria-pressed={active}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                          active
+                            ? "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100"
+                            : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {visibleTasks.length === 0 ? (
+                  <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+                    {trimmedQuery !== ""
+                      ? t("projects.detail.taskFilter.empty.search")
+                      : taskFilter === "open"
+                        ? t("projects.detail.taskFilter.empty.open")
+                        : taskFilter === "in_progress"
+                          ? t("projects.detail.taskFilter.empty.inProgress")
+                          : taskFilter === "done"
+                            ? t("projects.detail.taskFilter.empty.done")
+                            : null}
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {visibleTasks.map((task) => {
+                      const checkInState = taskCheckInState(task, nodeConfig);
+                      return (
+                        <li key={task.id}>
+                          <TaskRow
+                            task={task}
+                            isOrganizer={isOrg}
+                            acceptingClaims={project.status === "active"}
+                            projectStatus={project.status}
+                            currentKey={currentMember?.publicKey}
+                            memberMap={memberMap}
+                            nodeId={nodeId}
+                            onRun={run}
+                            needsMoreHands={checkInState === "needs_more_hands"}
+                            allTasks={tasks}
+                            flaggedCommentIds={flaggedCommentIds}
+                            searchQuery={debouncedQuery}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
+            )}
+          </section>
+
+          {isOrg &&
+            project.status !== "completed" &&
+            project.status !== "archived" && (
+              <AddTaskForm project={project} onRun={run} />
+            )}
+
+          {isOrg &&
+            project.status !== "completed" &&
+            project.status !== "archived" && (
+              <BulkTaskForm project={project} nodeId={nodeId} onRun={run} />
+            )}
+
+          {(project.status === "archived" || project.status === "completed") && (
+            <HistoryTimeline projectId={project.id} memberMap={memberMap} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

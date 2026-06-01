@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -90,6 +90,19 @@ export default function PostFormPage() {
     { title, hours, expiresInDays },
     VALIDATORS,
   );
+
+  // Open NEEDs in the same category — used by both the inline
+  // matching-needs hint (visible <lg) and the lg+ "Active needs in
+  // this category" aside (Phase 2.4). Filtering on type/category/
+  // status only; no title-similarity heuristic — the aside is
+  // solidarity routing, not duplicate detection (which the
+  // optimization plan explicitly ruled out as gating behavior).
+  const matchingNeeds = useMemo(() => {
+    if (type !== "OFFER" || !category) return [];
+    return posts.filter(
+      (p) => p.type === "NEED" && p.category === category && p.status === "open",
+    );
+  }, [posts, type, category]);
 
   useEffect(() => {
     let cancelled = false;
@@ -220,6 +233,17 @@ export default function PostFormPage() {
         </p>
       )}
 
+      {/* Phase 2.4: 2-col at lg+ — form stays capped at max-w-2xl
+          (deliberately narrow for long-form input); a sticky aside on
+          the right surfaces open NEEDs that this OFFER could match, so
+          the member sees existing demand before they finalize. Below
+          lg the aside is hidden and a one-liner hint stays in the form
+          so small-viewport members still get the routing signal.
+          Aside is informational, never blocking — see the
+          `matchingNeeds` useMemo for why this is solidarity routing
+          and not duplicate detection. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start lg:gap-6">
+      <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0 lg:max-w-2xl">
       <div
         role="tablist"
         aria-label={t("postForm.tabAriaLabel")}
@@ -323,22 +347,16 @@ export default function PostFormPage() {
           </div>
         </fieldset>
 
-        {type === "OFFER" && category && (() => {
-          const matching = posts.filter(
-            (p) => p.type === "NEED" && p.category === category && p.status === "open"
-          ).length;
-          if (matching === 0) return null;
-          return (
-            <p className="text-xs text-canopy-700 dark:text-canopy-300">
-              <Link
-                to={`/?tab=NEED&category=${category}`}
-                className="underline-offset-2 hover:underline"
-              >
-                {t("postForm.matchingNeeds", { count: matching })}
-              </Link>
-            </p>
-          );
-        })()}
+        {matchingNeeds.length > 0 && (
+          <p className="text-xs text-canopy-700 dark:text-canopy-300 lg:hidden">
+            <Link
+              to={`/?tab=NEED&category=${category}`}
+              className="underline-offset-2 hover:underline"
+            >
+              {t("postForm.matchingNeeds", { count: matchingNeeds.length })}
+            </Link>
+          </p>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
@@ -450,6 +468,46 @@ export default function PostFormPage() {
           </button>
         </div>
       </form>
+      </div>
+
+      {matchingNeeds.length > 0 && (
+        <aside
+          aria-labelledby="matching-needs-aside-heading"
+          className="hidden lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:block"
+        >
+          <div className="card">
+            <h2
+              id="matching-needs-aside-heading"
+              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+            >
+              {t("postForm.matchingNeedsAside.title")}
+            </h2>
+            <ul className="flex flex-col gap-2">
+              {matchingNeeds.slice(0, 3).map((need) => (
+                <li key={need.id}>
+                  <Link
+                    to={`/post/${need.id}`}
+                    className="block rounded-lg p-2 text-sm text-canopy-700 hover:bg-moss-50 dark:text-canopy-300 dark:hover:bg-moss-900"
+                  >
+                    {need.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {matchingNeeds.length > 3 && (
+              <Link
+                to={`/?tab=NEED&category=${category}`}
+                className="mt-2 inline-block text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              >
+                {t("postForm.matchingNeedsAside.seeAll", {
+                  count: matchingNeeds.length,
+                })}
+              </Link>
+            )}
+          </div>
+        </aside>
+      )}
+      </div>
     </div>
   );
 }
