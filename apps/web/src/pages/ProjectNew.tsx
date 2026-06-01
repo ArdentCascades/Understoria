@@ -315,21 +315,27 @@ export default function ProjectNewPage() {
                     {t("projects.templates.selected", { name: tpl.name })}
                   </p>
                   {active.length > 0 && (
-                    // Solidarity routing: the visible banner above is the
-                    // primary affordance; this is a muted supporting line
-                    // that points the member toward an existing effort
-                    // they could join instead of starting fresh.
-                    <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
-                      {t("projects.templates.selectedActive", {
-                        count: active.length,
-                      })}{" "}
+                    // Solidarity routing at the decision point. The
+                    // "See them" affordance is promoted from an inline
+                    // underlined link to a btn-secondary so it reads as
+                    // an inviting next step ("join an existing effort")
+                    // without urgency-coding. Canopy palette throughout
+                    // — no amber/red, no warning icons — to stay
+                    // informational instead of crossing into
+                    // are-you-sure shame framing.
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <p className="text-sm text-canopy-900 dark:text-canopy-100">
+                        {t("projects.templates.selectedActive", {
+                          count: active.length,
+                        })}
+                      </p>
                       <Link
                         to={`/project/${active[0].id}`}
-                        className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                        className="btn-secondary text-sm"
                       >
                         {t("projects.templates.seeActive")}
                       </Link>
-                    </p>
+                    </div>
                   )}
                   <button
                     type="button"
