@@ -65,6 +65,7 @@ async function aProject(organizer: { publicKey: string }, targetHours = 10) {
       deadline: null,
       locationZone: "North neighborhood",
       tags: ["garden"],
+      templateId: null,
     },
     NODE,
   );

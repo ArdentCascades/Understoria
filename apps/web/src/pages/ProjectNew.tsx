@@ -9,8 +9,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
@@ -22,9 +22,11 @@ import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import {
+  getProjectTemplates,
   getTemplate,
   type RecurringCadence,
 } from "@/content/projectTemplates";
+import { getActiveProjectsForTemplate } from "@/lib/templateUsage";
 import {
   combine,
   optional,
@@ -34,7 +36,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
-import type { ProjectCategory } from "@/types";
+import type { Project, ProjectCategory } from "@/types";
 
 const DRAFT_KEY = "project-new";
 
@@ -62,7 +64,7 @@ const VALIDATORS: Record<FieldName, Validator> = {
 };
 
 export default function ProjectNewPage() {
-  const { currentMember, nodeId } = useApp();
+  const { currentMember, nodeId, projects } = useApp();
   const { showToast } = useToast();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -85,6 +87,21 @@ export default function ProjectNewPage() {
     { title, targetHours, deadlineDays },
     VALIDATORS,
   );
+
+  // Phase 2.4 follow-up: surface existing community projects seeded
+  // from the same template so members joining can find them instead of
+  // starting fresh. Solidarity routing — the surface is informational,
+  // never blocks creation. Built off the locale-active template list so
+  // every renderable card has a lookup, including the currently
+  // selected one for the banner.
+  const activeProjectsByTemplate = useMemo(() => {
+    const map = new Map<string, Project[]>();
+    const templates = getProjectTemplates(i18n.resolvedLanguage ?? "en");
+    for (const tpl of templates) {
+      map.set(tpl.id, getActiveProjectsForTemplate(projects, tpl.id));
+    }
+    return map;
+  }, [projects, i18n.resolvedLanguage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -184,6 +201,7 @@ export default function ProjectNewPage() {
           deadline,
           locationZone: area,
           tags: tags.split(",").map((s) => s.trim()).filter(Boolean),
+          templateId: selectedTemplateId,
         },
         nodeId,
       );
@@ -275,6 +293,7 @@ export default function ProjectNewPage() {
             selectedId={selectedTemplateId}
             onSelect={handleSelectTemplate}
             layout="rail"
+            activeProjectsByTemplate={activeProjectsByTemplate}
           />
         </aside>
 
@@ -286,6 +305,7 @@ export default function ProjectNewPage() {
                 i18n.resolvedLanguage ?? "en",
               );
               if (!tpl) return null;
+              const active = activeProjectsByTemplate.get(tpl.id) ?? [];
               return (
                 <div
                   role="status"
@@ -294,6 +314,23 @@ export default function ProjectNewPage() {
                   <p>
                     {t("projects.templates.selected", { name: tpl.name })}
                   </p>
+                  {active.length > 0 && (
+                    // Solidarity routing: the visible banner above is the
+                    // primary affordance; this is a muted supporting line
+                    // that points the member toward an existing effort
+                    // they could join instead of starting fresh.
+                    <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+                      {t("projects.templates.selectedActive", {
+                        count: active.length,
+                      })}{" "}
+                      <Link
+                        to={`/project/${active[0].id}`}
+                        className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                      >
+                        {t("projects.templates.seeActive")}
+                      </Link>
+                    </p>
+                  )}
                   <button
                     type="button"
                     className="mt-1 text-xs font-semibold underline"

@@ -170,6 +170,9 @@
       "scratch": "Empezar desde cero",
       "scratchHint": "Yo lo lleno todo.",
       "selected": "Empezando desde la plantilla {{name}} — edita lo que quieras abajo antes de crear el proyecto.",
+      "selectedActive": "También activo en {{count}} proyectos de la comunidad.",
+      "seeActive": "Verlos.",
+      "activeInCommunity": "{{count}} activos en tu comunidad",
       "clear": "Quitar plantilla",
       "meta": {
         "tasks_one": "{{count}} tarea",

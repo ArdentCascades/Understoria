@@ -170,6 +170,9 @@
       "scratch": "Start from scratch",
       "scratchHint": "I'll fill in everything myself.",
       "selected": "Starting from the {{name}} template — edit anything below before creating.",
+      "selectedActive": "Also active in {{count}} community projects.",
+      "seeActive": "See them.",
+      "activeInCommunity": "{{count}} active in your community",
       "clear": "Clear template",
       "meta": {
         "tasks_one": "{{count}} task",

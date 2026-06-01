@@ -362,6 +362,19 @@ export class UnderstoriaDB extends Dexie {
         if (r.availabilityChips === undefined) r.availabilityChips = [];
       });
     });
+    // Version 17 — members can now record which starter template
+    // seeded a project (feeds the solidarity-routing surface that
+    // points to sibling efforts on the same template). Backfills
+    // pre-v17 rows to null. No new index: the projects list is short
+    // enough that the solidarity surface filters in memory, and we
+    // never query by templateId directly.
+    this.version(17).stores({}).upgrade(async (tx) => {
+      const projects = tx.table<Project, string>("projects");
+      await projects.toCollection().modify((row) => {
+        const r = row as Project & { templateId?: string | null };
+        if (r.templateId === undefined) r.templateId = null;
+      });
+    });
   }
 }
 
