@@ -254,27 +254,31 @@ export default function ProjectNewPage() {
         />
       )}
 
-      {/* Phase 2.4: 2-col at lg+ — TemplatePicker docks in a sticky
-          right aside (its own scroll context, since template lists
-          can be long); the form stays capped at max-w-2xl in the
-          left column. Single TemplatePicker instance positioned by
-          CSS grid, so the picker's internal search/filter state is
-          preserved across breakpoint changes and there's no DOM
-          duplication. Below lg the grid collapses; DOM order is
-          template-picker → selected-banner → form, matching the
-          pre-2.4 mobile layout. */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
+      {/* Phase 2.4 (revised): 2-col at lg+ — TemplatePicker docks in a
+          sticky LEFT rail (380px), the form lives on the right with its
+          own max-w-2xl reading cap. Templates on the left matches the
+          "pick a starting point, then fill in the form" reading flow.
+          TemplatePicker is passed `layout="rail"` so its internal grid
+          collapses to single-column inside the narrow rail (its default
+          1/2/3-col responsive grid was designed for full-page width and
+          crushed each card to ~95px when docked in a 320px aside).
+          Aside is its own scroll context so a long template list doesn't
+          push the form off-screen. Below lg the grid collapses; DOM
+          order template-picker → selected-banner → form is preserved
+          for mobile. */}
+      <div className="lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start lg:gap-6">
         <aside
           aria-label={t("projects.templates.asideAriaLabel")}
-          className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
+          className="lg:col-start-1 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
         >
           <TemplatePicker
             selectedId={selectedTemplateId}
             onSelect={handleSelectTemplate}
+            layout="rail"
           />
         </aside>
 
-        <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0 lg:max-w-2xl">
+        <div className="lg:col-start-2 lg:row-start-1 lg:min-w-0 lg:max-w-2xl">
           {selectedTemplateId &&
             (() => {
               const tpl = getTemplate(

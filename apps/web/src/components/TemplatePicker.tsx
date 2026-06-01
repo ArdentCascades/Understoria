@@ -34,6 +34,11 @@ import type { ProjectCategory } from "@/types";
 interface TemplatePickerProps {
   selectedId: string | null;
   onSelect: (templateId: string | null) => void;
+  /** "default" renders the gallery's responsive grid
+   *  (1/2/3 columns by breakpoint); "rail" forces single-column for
+   *  when the picker is docked in a narrow side rail (e.g. ProjectNew
+   *  at lg+, where the rail is ~380px and 3-up would crush each card). */
+  layout?: "default" | "rail";
 }
 
 /**
@@ -49,7 +54,11 @@ interface TemplatePickerProps {
  * "Start from scratch" card always renders as the last item regardless
  * of filter state, so members always have an escape hatch.
  */
-export function TemplatePicker({ selectedId, onSelect }: TemplatePickerProps) {
+export function TemplatePicker({
+  selectedId,
+  onSelect,
+  layout = "default",
+}: TemplatePickerProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.resolvedLanguage ?? "en";
   const templates = getProjectTemplates(lang);
@@ -151,7 +160,13 @@ export function TemplatePicker({ selectedId, onSelect }: TemplatePickerProps) {
           </option>
         </select>
       </div>
-      <ul className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <ul
+        className={`grid gap-3 ${
+          layout === "rail"
+            ? "grid-cols-1"
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        }`}
+      >
         {visibleTemplates.length === 0 ? (
           <li className="col-span-full text-sm text-moss-600 dark:text-moss-300">
             {t("projects.templates.filters.empty")}
