@@ -129,6 +129,16 @@ formal audit; the formal audit is one of the items in §6.
   floor bumps from 44×44 to 52×52 under `html.text-largest` so
   taps stay comfortable relative to the upsized type — WCAG AAA
   SC 2.5.5 territory.
+- **Layout density preference** — opt-in two-step setting
+  (Comfortable / Compact) under Profile → Appearance, alongside
+  text size. Compact trims card padding from 1rem to 0.75rem;
+  everything else — type size, line height, focus ring,
+  touch-target floor — stays the same. Opt-in only; default is
+  comfortable. Implementation parallels text size (`density.ts`
+  mirrors `textSize.ts`'s apply / cache / preference-guard
+  shape); the inline `index.html` script applies the
+  `density-compact` class synchronously before first paint so a
+  reload doesn't flash the wrong density.
 - **Click-to-open disclosures, not hover.** `WhyTooltip`,
   `ContextualHint`, and `FirstActionNudge` / `ProfileNudge` open
   on tap / click rather than hover — works on touch-only devices
