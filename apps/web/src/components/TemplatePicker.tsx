@@ -231,10 +231,35 @@ function TemplateCard({
   const taskCount = template.tasks.length;
   const hasActive = activeProjects && activeProjects.length > 0;
   return (
-    // Fragment so the chip sits as a sibling of the card button inside
+    // Fragment so the ribbon sits as a sibling of the card button inside
     // the parent <li>. A <Link> can't legally nest inside a <button>,
-    // and we still want the chip visually attached to its card.
+    // and the ribbon is rendered first in the flex column so it
+    // appears above the card — that's the visible-at-a-glance lever
+    // for "this is already happening in your community" without
+    // crossing into warning / shame framing.
     <>
+      {hasActive ? (
+        <Link
+          to={`/project/${activeProjects[0].id}`}
+          // stopPropagation so clicking the ribbon routes to the
+          // existing project without also firing the card's
+          // template-select. Sibling placement makes the
+          // stopPropagation belt-and-braces, but we keep it as a
+          // guardrail against future restructuring.
+          onClick={(e) => e.stopPropagation()}
+          // Canopy palette (solidarity green), NOT amber/red. Pill
+          // sized to its content (self-start) so it reads as a
+          // label attached to the card, not a banner spanning it.
+          // -mb-2 + relative + z-10 lets the ribbon overlap the card
+          // top edge slightly, visually anchoring it to the card
+          // rather than floating above as a separate element.
+          className="relative z-10 -mb-2 self-start rounded-full bg-canopy-100 px-3 py-1 text-xs font-medium text-canopy-900 shadow-sm hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100 dark:hover:bg-canopy-800"
+        >
+          {t("projects.templates.activeInCommunity", {
+            count: activeProjects.length,
+          })}
+        </Link>
+      ) : null}
       <button
         type="button"
         onClick={onSelect}
@@ -264,19 +289,6 @@ function TemplateCard({
           <CategoryBadge category={template.defaultCategory} size="sm" />
         </span>
       </button>
-      {hasActive ? (
-        <Link
-          to={`/project/${activeProjects[0].id}`}
-          // stopPropagation so clicking the chip routes to the existing
-          // project without also firing the card's template-select.
-          onClick={(e) => e.stopPropagation()}
-          className="mt-1 inline-block text-xs text-canopy-700 dark:text-canopy-300 underline-offset-2 hover:underline"
-        >
-          {t("projects.templates.activeInCommunity", {
-            count: activeProjects.length,
-          })}
-        </Link>
-      ) : null}
     </>
   );
 }
