@@ -75,6 +75,19 @@ const STEPS: readonly Step[] = [
     ],
   },
   {
+    kind: "concept",
+    key: "projects",
+    // Tree — the next stage from the seedling / herb / sprig
+    // metaphors elsewhere in the design language. Projects are the
+    // collective form of the same growth.
+    icon: "\u{1F333}",
+    titleKey: "welcome.screens.projects.title",
+    bodyKeys: [
+      "welcome.screens.projects.body1",
+      "welcome.screens.projects.body2",
+    ],
+  },
+  {
     kind: "profileSetup",
     key: "profileSetup",
     icon: "\u{1F331}",

@@ -16,7 +16,7 @@ This guide walks through the main things you'll do.
 ## 1. First time you open the app
 
 The first time you open Understoria on a device, you'll see a short
-**welcome** — four screens that explain what the app is and isn't:
+**welcome** — five screens that explain what the app is and isn't:
 
 1. **"This is a timebank."** One hour of help equals one hour of help.
 2. **"You start with credit."** New members begin with 5 hours of
@@ -24,6 +24,11 @@ The first time you open Understoria on a device, you'll see a short
 3. **"Your identity is a key, not an account."** No email, no password.
 4. **"The community is the authority."** Decisions are made together,
    not by admins.
+5. **"Some help takes more than one person."** Projects are collective
+   efforts — shared goals with their own task lists. Starter
+   templates exist for common projects, and if a template you'd pick
+   is already running in your community, the app surfaces it before
+   you start a new one.
 
 You can tap **Skip** at any point if a coordinator has already
 explained the basics in person. The welcome only shows once per

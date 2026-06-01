@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Welcome slide for community projects.** Adds a fifth slide
+  between Community-authority and the Profile-setup step,
+  introducing collective work as a principle rather than a feature.
+  Title: "Some help takes more than one person." Body 1 names the
+  shape (community fridge, tool library, tenant defense network —
+  shared goals with task lists, starter templates available or
+  begin from scratch). Body 2 names the routing intent ("if a
+  template you'd pick is already running in your community, we'll
+  surface it before you start a new one" — solidarity over
+  duplication). One slide deliberately; the density preference,
+  sticky search, and layout reflows added this cycle are UX polish
+  members discover naturally and don't warrant their own slides.
+  Spanish translation written in parallel; parity test green. Icon
+  is 🌳 — the tree, next stage in the seedling / herb / sprig
+  metaphor used elsewhere in the design language; projects are the
+  collective form of that growth.
 - **Layout density preference (Compact).** New opt-in radio under
   Profile → Appearance, mirroring the text-size and theme patterns:
   default ships the comfortable card padding (1rem); compact trims

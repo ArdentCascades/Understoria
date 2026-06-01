@@ -1198,6 +1198,11 @@
         "title": "The community is the authority",
         "body1": "There are no admins. Decisions are made together — on whatever channel your community uses today, and in-app as Understoria grows.",
         "body2": "If something goes wrong, the response starts with conversation, not bans. Moderation, when it exists, is rotating, transparent, and accountable."
+      },
+      "projects": {
+        "title": "Some help takes more than one person",
+        "body1": "Some efforts — a community fridge, a tool library, a tenant defense network — don't come together one favor at a time. Projects are shared goals with their own task lists, organized over time by anyone who steps up. There are starter templates with pre-written tasks for common efforts, or you can begin from scratch.",
+        "body2": "If a template you'd pick is already running in your community, we'll surface it before you start a new one. The first instinct is to join an effort that's already going. The community grows by deepening shared work, not by duplicating it."
       }
     },
     "profileSetup": {
