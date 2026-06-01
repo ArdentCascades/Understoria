@@ -80,6 +80,12 @@ import {
   type TextSize,
   type TextSizePreference,
 } from "@/lib/textSize";
+import {
+  applyDensity,
+  cacheDensity,
+  isDensityPreference,
+  type DensityPreference,
+} from "@/lib/density";
 
 export interface AppContextValue {
   ready: boolean;
@@ -111,6 +117,8 @@ export interface AppContextValue {
   textSizePreference: TextSizePreference;
   textSize: TextSize;
   setTextSizePreference: (pref: TextSizePreference) => Promise<void>;
+  densityPreference: DensityPreference;
+  setDensityPreference: (pref: DensityPreference) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -129,6 +137,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [textSizePreference, setTextSizePreferenceState] =
     useState<TextSizePreference>("auto");
   const [textSize, setTextSizeState] = useState<TextSize>("default");
+  const [densityPreference, setDensityPreferenceState] =
+    useState<DensityPreference>("default");
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
@@ -178,6 +188,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTextSizeState(resolvedSize);
       applyTextSize(resolvedSize);
       cacheTextSize(sizePref);
+      // Density preference. Same pattern: Dexie is source of truth,
+      // localStorage is the no-FOUC cache. Default is the comfortable
+      // padding (launch behavior); compact is opt-in only.
+      const rawDensity = await getSetting(SETTING_KEYS.density);
+      const densPref: DensityPreference = isDensityPreference(rawDensity)
+        ? rawDensity
+        : "default";
+      if (cancelled) return;
+      setDensityPreferenceState(densPref);
+      applyDensity(densPref);
+      cacheDensity(densPref);
       // Only seed the demo community when the node isn't locked. Seeding
       // writes plaintext secret keys for demo members, which we don't want
       // to run while a user's real wrapped keys are present but sealed.
@@ -288,6 +309,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const setDensityPreference = useCallback(
+    async (pref: DensityPreference) => {
+      await setSetting(SETTING_KEYS.density, pref);
+      setDensityPreferenceState(pref);
+      applyDensity(pref);
+      cacheDensity(pref);
+    },
+    [],
+  );
+
   const unlock = useCallback(
     async (passphrase: string) => {
       const result = await unlockSession(passphrase);
@@ -390,6 +421,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       textSizePreference,
       textSize,
       setTextSizePreference,
+      densityPreference,
+      setDensityPreference,
     }),
     [
       ready,
@@ -419,6 +452,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       textSizePreference,
       textSize,
       setTextSizePreference,
+      densityPreference,
+      setDensityPreference,
     ],
   );
 

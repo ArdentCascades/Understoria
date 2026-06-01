@@ -26,6 +26,10 @@ import {
   type TextSize,
   type TextSizePreference,
 } from "@/lib/textSize";
+import {
+  DENSITY_PREFERENCES,
+  type DensityPreference,
+} from "@/lib/density";
 
 // Each text-size label renders at the size it represents so the
 // choice is self-demonstrating. Auto borrows the currently-resolved
@@ -46,6 +50,8 @@ export function AppearanceSection() {
     textSizePreference,
     textSize,
     setTextSizePreference,
+    densityPreference,
+    setDensityPreference,
   } = useApp();
   return (
     <section className="card mb-4" aria-labelledby="appearance-section-title">
@@ -135,6 +141,44 @@ export function AppearanceSection() {
           })}
         </p>
       )}
+
+      <div
+        className="my-4 border-t border-bark-200/60 dark:border-moss-800"
+        aria-hidden="true"
+      />
+
+      <h3
+        id="appearance-density-title"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+      >
+        {t("profile.appearance.densityTitle")}
+      </h3>
+      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+        {t("profile.appearance.densityIntro")}
+      </p>
+      <div
+        role="radiogroup"
+        aria-labelledby="appearance-density-title"
+        className="flex flex-wrap gap-2"
+      >
+        {DENSITY_PREFERENCES.map((pref: DensityPreference) => {
+          const selected = densityPreference === pref;
+          return (
+            <button
+              key={pref}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => {
+                void setDensityPreference(pref);
+              }}
+              className={selected ? "btn-primary" : "btn-secondary"}
+            >
+              {t(`profile.appearance.density.${pref}`)}
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 }

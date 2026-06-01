@@ -88,6 +88,15 @@
            dark:border-moss-800 dark:bg-moss-900;
   }
 
+  /* Phase 3.3 opt-in compact density. Shaves card padding from 1rem
+   * (p-4) to 0.75rem (p-3) so members who prefer information density
+   * over breathing room can fit more above the fold — especially
+   * useful on Phase 1/2's reflowed multi-column lists at lg+.
+   * Touch-target floors are unchanged; only chrome compresses. */
+  html.density-compact .card {
+    padding: 0.75rem;
+  }
+
   /* Page-level title. One per page. Serif anchor + display size
    * carry hierarchy without needing font-bold. See design/README.md. */
   .page-title {

@@ -401,6 +401,10 @@ export const SETTING_KEYS = {
   /** "default" | "larger" | "largest". Absent or invalid reads as
    *  "default". Mirrored to localStorage same as themePreference. */
   textSize: "textSize",
+  /** "default" | "compact". Absent or invalid reads as "default".
+   *  Mirrored to localStorage so the inline script in index.html
+   *  applies the right class before first paint. See lib/density.ts. */
+  density: "density",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
