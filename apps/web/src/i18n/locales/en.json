@@ -199,6 +199,7 @@
     },
     "detail": {
       "back": "← Back to projects",
+      "sidebarAriaLabel": "Project details and organizer controls",
       "notFound": "This project couldn't be found.",
       "tasks": "Tasks",
       "noTasksTitle": "No tasks yet",

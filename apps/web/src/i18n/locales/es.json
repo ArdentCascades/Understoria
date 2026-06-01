@@ -199,6 +199,7 @@
     },
     "detail": {
       "back": "← Volver a proyectos",
+      "sidebarAriaLabel": "Detalles del proyecto y controles de organización",
       "notFound": "No se encontró este proyecto.",
       "tasks": "Tareas",
       "noTasksTitle": "Aún no hay tareas",
