@@ -73,6 +73,7 @@ export interface CreateProjectInput {
   deadline: number | null;
   locationZone: string;
   tags: string[];
+  templateId: string | null;
 }
 
 export async function createProject(
@@ -98,6 +99,7 @@ export async function createProject(
     locationZone: input.locationZone.trim(),
     tags: input.tags.map((t) => t.trim()).filter(Boolean),
     nodeId,
+    templateId: input.templateId,
   };
   await db.transaction("rw", [db.projects, db.projectActivity], async () => {
     await db.projects.put(project);
@@ -1084,6 +1086,9 @@ export async function cloneProject(
     locationZone: source.locationZone,
     tags: [...source.tags],
     nodeId,
+    // Carry the source's templateId so a cloned project still groups
+    // with sibling efforts under the same template.
+    templateId: source.templateId,
   };
 
   await db.transaction(

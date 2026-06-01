@@ -184,6 +184,7 @@ export default function ProjectNewPage() {
           deadline,
           locationZone: area,
           tags: tags.split(",").map((s) => s.trim()).filter(Boolean),
+          templateId: selectedTemplateId,
         },
         nodeId,
       );

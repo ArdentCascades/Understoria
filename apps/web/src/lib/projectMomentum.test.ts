@@ -34,6 +34,7 @@ function project(overrides: Partial<Project> = {}): Project {
     locationZone: "",
     tags: [],
     nodeId,
+    templateId: null,
     ...overrides,
   };
 }

@@ -177,6 +177,7 @@ describe("project achievements", () => {
       locationZone: "",
       tags: [],
       nodeId,
+      templateId: null,
       ...overrides,
     };
   }

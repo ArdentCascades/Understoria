@@ -375,6 +375,11 @@ export interface Project {
   locationZone: string;
   tags: string[];
   nodeId: string;
+  /** Stable template ID from `apps/web/src/content/projectTemplates.ts`
+   *  (e.g. `"community-fridge"`). `null` means the project wasn't
+   *  created from a template — started from scratch, created before
+   *  this field existed, or imported. */
+  templateId: string | null;
 }
 
 export type ProjectTaskStatus =

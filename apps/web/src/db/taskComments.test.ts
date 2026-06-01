@@ -62,6 +62,7 @@ async function setup() {
       deadline: null,
       locationZone: "North",
       tags: [],
+      templateId: null,
     },
     NODE,
   );
