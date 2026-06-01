@@ -940,6 +940,10 @@
       "statusRevoked": "Revocada",
       "statusExpired": "Caducada",
       "showShareSheet": "Mostrar código QR",
+      "shareLinkHidden": "•••••• Oculto — pulsa Mostrar para verlo",
+      "revealLink": "Mostrar enlace",
+      "hideLink": "Ocultar enlace",
+      "revealedHint": "Cualquiera dentro del alcance de una cámara puede leer esto. Ocúltalo de nuevo cuando termines.",
       "shareSheet": {
         "title": "Compartir esta invitación",
         "intro": "Muestra el código QR en persona, o envía el enlace a una persona de confianza. Cualquiera con este enlace puede unirse — compártelo con cuidado.",

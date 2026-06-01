@@ -940,6 +940,10 @@
       "statusRevoked": "Revoked",
       "statusExpired": "Expired",
       "showShareSheet": "Show QR code",
+      "shareLinkHidden": "•••••• Hidden — pick Reveal to display",
+      "revealLink": "Reveal link",
+      "hideLink": "Hide link",
+      "revealedHint": "Anyone in camera view can read this. Hide it again when you're done.",
       "shareSheet": {
         "title": "Share this invite",
         "intro": "Show the QR code in person, or send the link with one person you trust. Anyone with this link can join — share it carefully.",
