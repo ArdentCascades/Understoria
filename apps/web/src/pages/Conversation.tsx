@@ -49,6 +49,7 @@ export default function ConversationPage() {
   const [activeMatchIdx, setActiveMatchIdx] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const otherKey = memberKey ? decodeURIComponent(memberKey) : "";
   const otherName =
@@ -67,6 +68,21 @@ export default function ConversationPage() {
   useEffect(() => {
     void loadMessages();
   }, [loadMessages]);
+
+  // Phase 3.1 — at lg+ the Messages shell renders this page in a
+  // side-pane after the member clicks a list item, so move focus to
+  // the message input to make typing the next natural action. At <lg
+  // the same route loads as a full page and we explicitly do NOT
+  // auto-focus, so the soft keyboard doesn't spring up before the
+  // member has even seen the conversation. media-query gate is
+  // cheaper than a context plumb-through and is the only thing that
+  // varies between the two presentations.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(min-width: 1024px)").matches) {
+      inputRef.current?.focus();
+    }
+  }, [memberKey]);
 
   // Keep the URL ?q= in sync after a brief debounce so deep-links
   // from the search list page work and bookmarking is possible,
@@ -257,6 +273,7 @@ export default function ConversationPage() {
 
       <form onSubmit={handleSend} className="mt-3 flex gap-2">
         <textarea
+          ref={inputRef}
           className="input flex-1 resize-none"
           rows={1}
           value={text}

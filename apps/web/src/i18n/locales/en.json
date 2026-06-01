@@ -88,6 +88,9 @@
   },
   "messages": {
     "title": "Messages",
+    "shell": {
+      "emptyPane": "Pick a conversation from the list."
+    },
     "emptyTitle": "No conversations yet",
     "empty": "No messages yet. Start a conversation from any post or member profile.",
     "sendMessage": "Message",
