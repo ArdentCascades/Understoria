@@ -268,7 +268,16 @@ export default function BoardPage() {
           no-leaderboards principles. AttentionSection itself remains
           curated, renders null when empty, and adds no badge count. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_280px] lg:items-start lg:gap-6">
-        <div className="lg:col-start-3 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
+        {/* `lg:row-span-3` stops the rail from sizing row 1 — without
+            it the tallest of {AttentionSection, filter rail, tablist}
+            would set row 1's height and the tablist would sit at the
+            top of a tall, empty cell. Spanning all three middle-column
+            rows lets each row size by its own col-2 content (tablist
+            row 1, search row 2, list row 3) so tablist → search → list
+            stack tightly. lg:self-start keeps the rail content pinned
+            to the top of its spanning area; lg:sticky lg:top-4 pins it
+            to the viewport once the page scrolls past. */}
+        <div className="lg:col-start-3 lg:row-start-1 lg:row-span-3 lg:self-start lg:sticky lg:top-4">
           <AttentionSection />
         </div>
 
@@ -336,7 +345,7 @@ export default function BoardPage() {
 
         {tab !== "PROJECTS" && (
         <>
-        <div className="lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
+        <div className="lg:col-start-1 lg:row-start-1 lg:row-span-3 lg:self-start lg:sticky lg:top-4">
           <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
             <label className="sr-only" htmlFor="category-filter">
               {t("board.filters.categoryAriaLabel")}
@@ -449,7 +458,7 @@ export default function BoardPage() {
 
         {tab === "PROJECTS" && (
           <>
-            <div className="lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
+            <div className="lg:col-start-1 lg:row-start-1 lg:row-span-3 lg:self-start lg:sticky lg:top-4">
               <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
                 <label className="sr-only" htmlFor="project-category-filter">
                   {t("board.projectFilters.category.ariaLabel")}
@@ -538,14 +547,15 @@ export default function BoardPage() {
 
             {/* Archive link sits below the project list at every
                 breakpoint (a rarely-needed jump-off, not a primary
-                control). At lg+ it's placed at the bottom of the
-                left rail (col 1 row 2), below the sticky filters;
-                at &lt;lg it appears below the list per source order.
-                Kept as its own grid item so the mobile DOM order
-                stays filters → list → archive, matching pre-2.1. */}
+                control). At lg+ it lives in col 1 row 4 — an
+                implicit row created after the explicit rows 1-3 —
+                so it appears below the list visually and below the
+                sticky filter rail. Row 2 / 3 col 1 are now spanned
+                by the filter rail, so the only conflict-free spot
+                in col 1 for archive is past the explicit rows. */}
             <Link
               to="/projects/archive"
-              className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-2 lg:mt-0 lg:text-left"
+              className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-4 lg:mt-0 lg:text-left"
             >
               {t("projects.archive.viewArchive")}
             </Link>
