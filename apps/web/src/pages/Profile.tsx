@@ -674,81 +674,108 @@ function ProfileEditor({ member }: { member: Member }) {
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
         {t("profile.about.title")}
       </h2>
-      <div className="my-4 flex flex-col items-center gap-2 text-center">
-        <MemberAvatar publicKey={member.publicKey} size={128} framed />
-        <p className="text-title font-semibold">{member.displayName}</p>
-        <p className="font-mono text-xs text-moss-500">
-          {shortKey(member.publicKey)}
-        </p>
-        <p className="mt-2 max-w-sm text-xs text-moss-600 dark:text-moss-300">
-          {t("profile.about.avatarNote")}
-        </p>
-      </div>
-      <div className="my-4 border-t border-bark-200/60 dark:border-moss-800" />
-      <form className="flex flex-col gap-3" onSubmit={handleSave}>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{t("profile.about.name")}</span>
-          <input
-            className="input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={60}
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{t("profile.about.skills")}</span>
-          <input
-            className="input"
-            placeholder={t("profile.about.skillsPlaceholder")}
-            value={skills}
-            onChange={(e) => setSkills(e.target.value)}
-          />
-        </label>
-        <div className="flex flex-col gap-2 text-sm">
-          <div>
-            <div className="text-base font-semibold">
-              {t("profile.about.availabilityHeading")}
-            </div>
-            <div className="text-xs text-moss-600 dark:text-moss-300">
-              {t("profile.about.availabilitySubhead")}
-            </div>
+      {/* 2-pane at lg+: identity column on the left (280px), form on
+          the right (capped at max-w-2xl). Mobile falls through to the
+          single-column stack — identity centered above the form,
+          matching pre-reflow exactly. DOM order is identity → divider
+          → form so screen-reader and tab order follow the mobile
+          reading order regardless of the lg+ visual placement. The
+          divider hides at lg+; the column gap (lg:gap-8) provides
+          the visual separation between identity and form. */}
+      <div className="lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start lg:gap-8">
+        {/* `[&>svg]:lg:size-24` shrinks the avatar's SVG from 128px
+            to 96px at lg+ via CSS — the SVG's intrinsic width/height
+            attributes have very low specificity so CSS wins. The
+            avatar is identity-statement on mobile (centered, large)
+            and a utility element on desktop (left-aligned, smaller);
+            Member Detail is where the avatar gets the ceremonial
+            full-size treatment. */}
+        <div className="my-4 flex flex-col items-center gap-2 text-center lg:my-0 lg:items-start lg:text-left [&>svg]:lg:size-24">
+          <MemberAvatar publicKey={member.publicKey} size={128} framed />
+          <p className="text-title font-semibold">{member.displayName}</p>
+          <p className="font-mono text-xs text-moss-500">
+            {shortKey(member.publicKey)}
+          </p>
+          <p className="mt-2 max-w-sm text-xs text-moss-600 dark:text-moss-300">
+            {t("profile.about.avatarNote")}
+          </p>
+        </div>
+        <div className="my-4 border-t border-bark-200/60 dark:border-moss-800 lg:hidden" />
+        <form
+          className="flex flex-col gap-3 lg:max-w-2xl"
+          onSubmit={handleSave}
+        >
+          {/* Display name + Area pair side-by-side at md+ — both are
+              short single-line inputs and conceptually related (who /
+              where). Skills stays full-width because members often
+              type 50+ chars; the availability subsection stays
+              full-width because its chip picker wraps. */}
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">{t("profile.about.name")}</span>
+              <input
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={60}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">{t("profile.about.area")}</span>
+              <input
+                className="input"
+                placeholder={t("profile.about.areaPlaceholder")}
+                value={zone}
+                onChange={(e) => setZone(e.target.value)}
+              />
+            </label>
           </div>
-          <AvailabilityChipPicker
-            value={availabilityChips}
-            onChange={setAvailabilityChips}
-          />
-          <label className="flex flex-col gap-1">
-            <span className="font-medium">
-              {t("profile.about.availabilityNotesLabel")}
-            </span>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">{t("profile.about.skills")}</span>
             <input
               className="input"
-              placeholder={t("profile.about.availabilityPlaceholder")}
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value)}
+              placeholder={t("profile.about.skillsPlaceholder")}
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
             />
           </label>
-        </div>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{t("profile.about.area")}</span>
-          <input
-            className="input"
-            placeholder={t("profile.about.areaPlaceholder")}
-            value={zone}
-            onChange={(e) => setZone(e.target.value)}
-          />
-        </label>
-        <div className="flex items-center gap-3">
-          <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? t("common.saving") : t("common.save")}
-          </button>
-          {savedAt && (
-            <span className="text-xs text-canopy-700 dark:text-canopy-300">
-              {t("common.savedAt", { when: formatRelativeTime(savedAt) })}
-            </span>
-          )}
-        </div>
-      </form>
+          <div className="flex flex-col gap-2 text-sm">
+            <div>
+              <div className="text-base font-semibold">
+                {t("profile.about.availabilityHeading")}
+              </div>
+              <div className="text-xs text-moss-600 dark:text-moss-300">
+                {t("profile.about.availabilitySubhead")}
+              </div>
+            </div>
+            <AvailabilityChipPicker
+              value={availabilityChips}
+              onChange={setAvailabilityChips}
+            />
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">
+                {t("profile.about.availabilityNotesLabel")}
+              </span>
+              <input
+                className="input"
+                placeholder={t("profile.about.availabilityPlaceholder")}
+                value={availability}
+                onChange={(e) => setAvailability(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? t("common.saving") : t("common.save")}
+            </button>
+            {savedAt && (
+              <span className="text-xs text-canopy-700 dark:text-canopy-300">
+                {t("common.savedAt", { when: formatRelativeTime(savedAt) })}
+              </span>
+            )}
+          </div>
+        </form>
+      </div>
     </section>
   );
 }
