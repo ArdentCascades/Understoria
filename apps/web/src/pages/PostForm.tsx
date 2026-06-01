@@ -29,6 +29,7 @@ import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
+import { WhyTooltip } from "@/components/WhyTooltip";
 import {
   combine,
   optional,
@@ -360,7 +361,10 @@ export default function PostFormPage() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">{t("postForm.fieldHours")}</span>
+            <span className="text-sm font-medium">
+              {t("postForm.fieldHours")}
+              <WhyTooltip principleId="equal-time" />
+            </span>
             <input
               type="number"
               inputMode="decimal"
