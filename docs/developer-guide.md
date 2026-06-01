@@ -78,6 +78,9 @@ user's own.
 | `format.ts` | Relative time, short-key, signed hours |
 | `categories.ts` | Static category metadata |
 | `id.ts` | UUID v4 |
+| `boardTab.ts` | `parseTabParam` / `tabToParam` — the Board's three tabs encoded in the `?tab=` URL param. Default is `"PROJECTS"` so members see existing community efforts before posting a one-off Need |
+| `density.ts` | Opt-in compact layout density preference. Apply / cache / preference guard, mirroring `textSize.ts` |
+| `templateUsage.ts` | `getActiveProjectsForTemplate` — pure filter that finds Planning- or Active-status projects sharing a given `templateId`. Used by the Start-a-project picker to route members toward existing community efforts |
 
 Invariant: **nothing in `lib/` imports from `db/`.** If you need DB
 access, stay in `db/` (or do the I/O in a page/component and pass

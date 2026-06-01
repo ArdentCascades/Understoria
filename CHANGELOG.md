@@ -9,6 +9,114 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Layout density preference (Compact).** New opt-in radio under
+  Profile → Appearance, mirroring the text-size and theme patterns:
+  default ships the comfortable card padding (1rem); compact trims
+  it to 0.75rem so denser screens — especially the lg+ reflowed
+  multi-column lists — fit more above the fold. Dexie is the source
+  of truth (`SETTING_KEYS.density`); localStorage is the no-FOUC
+  cache; the inline script in `index.html` applies the class
+  synchronously before first paint. No `prefers-reduced-data`
+  auto-resolution — bandwidth and visual density mean different
+  things. Touch-target floors are unchanged at every setting; only
+  chrome compresses. Implementation in `lib/density.ts` follows the
+  `textSize.ts` apply / cache / preference-guard shape so a future
+  contributor adding a fourth preference has a template. Unit tests
+  cover the type guard, the class-toggle, and idempotence.
+- **"Already in your community" routing on Start-a-project.** When
+  a member opens the project-template picker and an existing
+  Planning- or Active-status project was already seeded from the
+  same template, a small canopy-palette ribbon sits on top of that
+  template's card and a "See them" button appears in the
+  selected-template banner — both link to the most recent matching
+  project. Solidarity routing toward existing community efforts,
+  never duplicate-prevention; nothing blocks creating a new project.
+  Strict canopy palette (no amber / red / warning icons),
+  presence-coded copy ("already in your community"), and i18next
+  pluralization on both surfaces. New `templateId: string | null`
+  field on Project (Dexie v17 with `null` backfill, no new index —
+  lookups are in-memory against the loaded `projects` list).
+  Stable template IDs in `apps/web/src/content/projectTemplates.ts`
+  (e.g. `"community-fridge"`) make the linkage exact rather than
+  fuzzy-matching by title. Helper in `lib/templateUsage.ts`
+  excludes paused / completed / archived / cancelled — only
+  ongoing efforts count as "already in your community" — and
+  guards both sides of the null-templateId case so an untemplated
+  project never false-matches.
+- **Messages split-pane at lg+.** Messages becomes a routing shell
+  with nested children: `/messages` renders an "Pick a conversation"
+  placeholder in the right pane; `/messages/:memberKey` renders the
+  conversation in the same outlet. Below lg the shell collapses to
+  single-pane based on URL — list when no key, conversation when a
+  key is present — so mobile behavior matches pre-3.1. Selected
+  list item gets `aria-current="page"` and a canopy `ring-2`.
+  Message-input auto-focus on `memberKey` change is gated behind a
+  `matchMedia("(min-width: 1024px)")` check so the soft keyboard
+  doesn't pop on mobile when entering a conversation. No unread
+  badges, no presence dots, no typing indicators, no read receipts
+  — the surveillance affordances "modern chat" apps accrete around
+  split-pane layouts are deliberately absent.
+
+### Changed
+- **Board defaults to the Projects tab.** Members landing on the
+  Board now see the Projects list first instead of Needs.
+  Rationale: a member arriving with a need is well-served by
+  scanning existing community projects before posting a one-off
+  Need — a project may already address what they're asking for.
+  Single source of truth in `lib/boardTab.ts` (`parseTabParam`
+  default flips from `"NEED"` to `"PROJECTS"`); existing
+  bookmarks at `/?tab=needs` continue to route correctly via the
+  same parser.
+- **Screen real estate optimized across three phases.** A
+  multi-PR layout pass — strict reflow of existing content, no
+  new persistent widgets, no leaderboards / badges / activity
+  panels — covering the wasted horizontal space on tablets and
+  desktops. Phase 1 lifts the global container cap from 768px
+  to a tiered cap (lg 1024 / xl 1280 / 2xl 1440) and reflows the
+  Board / Messages / Dashboard / Profile lists into responsive
+  grids. Phase 2 introduces sticky side rails at lg+ — filter
+  rail and AttentionSection rail on the Board, meta sidebar on
+  ProjectDetail, content-cap on PostDetail, and form asides on
+  PostForm / ProjectNew. Phase 3 ships the Messages split-pane
+  (above), a sticky filter bar on Proposals, and the density
+  preference. Implemented throughout with CSS grid placement
+  (no DOM duplication), so source order equals mobile reading
+  order at every breakpoint and tab / screen-reader navigation
+  is unaffected by the visual rail positioning.
+- **Sticky search input on Board and Messages.** Search now pins
+  to `top-0` (mobile) / `top-4` (lg+, matching the existing rail
+  offset) with a backdrop-blur strip so members can search from
+  anywhere in a long scroll instead of returning to the page top.
+  Treatment matches the Proposals sticky filter bar (95%-opaque
+  background, `backdrop-blur`); FAB stays at `z-20` above the
+  sticky search.
+- **Start-a-project page: templates on the left rail, single
+  column inside.** Two adjustments to the Phase 2.4 layout. (a)
+  Swap the columns so templates sit on the left and the form on
+  the right — matches the "pick a starting point, then act on
+  the form" reading flow and mirrors the left-rail pattern
+  already used on the Board. (b) New `layout` prop on
+  `TemplatePicker` — `"default"` keeps the gallery's responsive
+  grid (1 / 2 / 3 columns by breakpoint); `"rail"` forces single
+  column always for when the picker is docked in a narrow side
+  rail. Rail width widens from 320px → 380px so each card has
+  ~348px of usable width.
+
+### Fixed
+- **Empty band between Board tablist and search at lg+.** The
+  filter rail and AttentionSection at `lg:row-start-1` were
+  taller than the tablist, so row 1's auto-height stretched to
+  the tallest item and the tablist sat at the top of a tall,
+  empty cell. Both side rails now span all three middle-column
+  rows via `lg:row-span-3`, so row 1 sizes to the tablist alone,
+  row 2 to the search, row 3 to the list. Sticky positioning is
+  unchanged. Project-archive link moves from row 2 col 1 (now
+  spanned by the filter rail) to row 4 col 1 (an implicit row
+  past the list) so it still appears after the list both
+  visually and in DOM order. Reasoning baked into a code
+  comment so a future contributor doesn't re-flatten the spans.
+
 ### Fixed
 - **Start-a-project page no longer blanks on render.** `CategoryBadge`
   was typed for `Category` and looked up `CATEGORY_META[category]`,

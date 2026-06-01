@@ -61,10 +61,14 @@ decides how far the collective should stretch, not the software.
 
 Tap **Board** at the bottom of the screen. You'll see three tabs:
 
+- **Projects** — bigger collective efforts that take more than one
+  person and more than one task. This is the tab you land on by
+  default. The thinking: if you arrived needing help, there's a
+  good chance a community project is already addressing it, and
+  joining an ongoing effort is often more useful than posting a
+  one-off Need. See §9.
 - **Needs** — things people are asking for.
 - **Offers** — things people are offering.
-- **Projects** — bigger collective efforts that take more than one
-  person and more than one task. See §9.
 
 Each post card shows what the post is, who posted it, about how many
 hours it'll take, and how urgent it is. Tap any card to see the full
@@ -200,6 +204,15 @@ A small filter row sits above the gallery to help you find a fit:
 **Start from scratch** stays visible at the end of the gallery no
 matter how you filter, so you can always bail out to a blank form.
 
+If a template you're looking at is already running as a Planning- or
+Active-status project in your community, a small green **"N already
+in your community"** ribbon sits on top of that template's card, and
+picking the template surfaces a **See them** button in the
+selected-template banner. Both link to the most recent matching
+project. Nothing blocks you from starting a new project with the same
+template — the surface is purely informational, in case joining the
+existing effort is a better fit than starting fresh.
+
 After picking (or starting blank), fill in title, description, target
 hours, area, and an optional deadline. Once the project is created,
 you can add tasks and switch it from "Planning" to "Active" so others
@@ -292,12 +305,15 @@ Tap **Profile** to see:
 - **Appearance** — comfort settings that only affect this device.
   Pick a theme (Match system / Light / Dark — Match system follows
   whatever your phone or browser is set to, useful if you've told
-  your device to switch by time of day) and a text size (Default
-  / Larger / Largest — the larger options multiply on top of
-  whatever text size you've set on your phone, so they stack
-  rather than replace it). The three text-size buttons render at
-  the sizes they represent so you can see the difference before
-  you pick.
+  your device to switch by time of day), a text size (Default /
+  Larger / Largest — the larger options multiply on top of whatever
+  text size you've set on your phone, so they stack rather than
+  replace it; the three buttons render at the sizes they represent
+  so you can see the difference before you pick), and a layout
+  density (Comfortable / Compact — Compact trims card padding so
+  denser screens fit more above the fold, useful on a desktop or
+  tablet where you'd rather see more at once; touch targets stay
+  the same size at either setting).
 - **Community node** — optional mirror of your finalized exchanges
   to a community-wide ledger; off by default.
 - **Security** — turn on a passphrase for your identity (§14).
