@@ -290,15 +290,15 @@ export default function ProfilePage() {
       </section>
       </div>
 
-      {/* Phase 1.6 reflow: at lg+, the lower settings cluster reflows
-          into a 2-col grid. Each section component owns its own
-          `card mb-4`; the `lg:[&>*]:mb-0` arbitrary variant zeros that
-          out so grid `gap-4` is the sole spacing rule above lg. Below
-          lg the children fall through to normal block flow and their
-          own `mb-4` still applies. NodeSection stays full-width below
-          this cluster — federated-node setup is its own distinct
-          surface and doesn't pair visually with these settings. */}
-      <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:[&>*]:mb-0">
+      {/* Lower settings cluster: same CSS-columns treatment used by
+          the "your stuff" cluster above (see comment there). Originally
+          a `lg:grid lg:grid-cols-2` (Phase 1.6) but that left ragged
+          empty cells when adjacent sections had wildly different
+          heights — DisputesSection grows with each open dispute,
+          AppearanceSection is fixed-size, etc. Columns balance the
+          fill, no rags. Each section keeps its own `card mb-4` for
+          vertical spacing within its column. */}
+      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
         <LearnSection />
 
         <DisputesSection />
@@ -312,11 +312,20 @@ export default function ProfilePage() {
         <AppearanceSection />
       </div>
 
-      <NodeSection />
+      {/* Trailing sections (federation + identity safeguards). Same
+          columns treatment so the page maintains visual rhythm to
+          the very bottom — three varying-height cards (NodeSection
+          can grow with mirroring activity; Security is small;
+          Emergency has the panic buttons) balance into 2 columns
+          without leaving the empty horizontal space the trailing
+          sections used to show. */}
+      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+        <NodeSection />
 
-      <SecuritySection />
+        <SecuritySection />
 
-      <EmergencySection />
+        <EmergencySection />
+      </div>
     </div>
   );
 }
