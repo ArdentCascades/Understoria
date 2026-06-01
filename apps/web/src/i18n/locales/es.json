@@ -161,6 +161,7 @@
       "errorDeadlineDays": "Los días deben ser un número entero mayor que 0, o en blanco para no tener fecha límite."
     },
     "templates": {
+      "asideAriaLabel": "Plantillas iniciales para proyectos",
       "title": "Elige un punto de partida",
       "intro": "Estas son plantillas iniciales con tareas ya escritas. Elige una para llenar el formulario de abajo — puedes editar todo antes de crear el proyecto. O empieza desde cero.",
       "scratch": "Empezar desde cero",
@@ -436,7 +437,11 @@
     "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
     "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar.",
     "repostBanner": "Editando una copia — la publicacion original se cancelara al enviar.",
-    "matchingNeeds": "{{count}} necesidades activas en esta categoria — verlas"
+    "matchingNeeds": "{{count}} necesidades activas en esta categoria — verlas",
+    "matchingNeedsAside": {
+      "title": "Necesidades activas en esta categoria",
+      "seeAll": "Ver todas ({{count}})"
+    }
   },
   "postDetail": {
     "notFound": "No se encontró esta publicación. Puede que haya sido cancelada.",

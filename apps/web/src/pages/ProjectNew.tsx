@@ -254,210 +254,228 @@ export default function ProjectNewPage() {
         />
       )}
 
-      <TemplatePicker
-        selectedId={selectedTemplateId}
-        onSelect={handleSelectTemplate}
-      />
+      {/* Phase 2.4: 2-col at lg+ — TemplatePicker docks in a sticky
+          right aside (its own scroll context, since template lists
+          can be long); the form stays capped at max-w-2xl in the
+          left column. Single TemplatePicker instance positioned by
+          CSS grid, so the picker's internal search/filter state is
+          preserved across breakpoint changes and there's no DOM
+          duplication. Below lg the grid collapses; DOM order is
+          template-picker → selected-banner → form, matching the
+          pre-2.4 mobile layout. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
+        <aside
+          aria-label={t("projects.templates.asideAriaLabel")}
+          className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
+        >
+          <TemplatePicker
+            selectedId={selectedTemplateId}
+            onSelect={handleSelectTemplate}
+          />
+        </aside>
 
-      {selectedTemplateId &&
-        (() => {
-          const tpl = getTemplate(
-            selectedTemplateId,
-            i18n.resolvedLanguage ?? "en",
-          );
-          if (!tpl) return null;
-          return (
-            <div
-              role="status"
-              className="mb-4 rounded-lg border border-canopy-200 bg-canopy-50 px-4 py-3 text-sm text-canopy-900 dark:border-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100"
-            >
-              <p>
-                {t("projects.templates.selected", { name: tpl.name })}
+        <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0 lg:max-w-2xl">
+          {selectedTemplateId &&
+            (() => {
+              const tpl = getTemplate(
+                selectedTemplateId,
+                i18n.resolvedLanguage ?? "en",
+              );
+              if (!tpl) return null;
+              return (
+                <div
+                  role="status"
+                  className="mb-4 rounded-lg border border-canopy-200 bg-canopy-50 px-4 py-3 text-sm text-canopy-900 dark:border-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100"
+                >
+                  <p>
+                    {t("projects.templates.selected", { name: tpl.name })}
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-1 text-xs font-semibold underline"
+                    onClick={() => handleSelectTemplate(null)}
+                  >
+                    {t("projects.templates.clear")}
+                  </button>
+                </div>
+              );
+            })()}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("projects.create.fieldTitle")}
+              </span>
+              <input
+                className="input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => validation.onBlur("title")}
+                aria-invalid={validation.shouldShowError("title") || undefined}
+                aria-describedby={
+                  validation.shouldShowError("title") ? "title-error" : undefined
+                }
+                maxLength={120}
+                required
+              />
+              {validation.shouldShowError("title") && (
+                <p
+                  id="title-error"
+                  role="alert"
+                  className="text-xs text-rose-700 dark:text-rose-300"
+                >
+                  {t(validation.errors.title!.key)}
+                </p>
+              )}
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("projects.create.fieldDescription")}
+              </span>
+              <textarea
+                className="input min-h-28"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={2000}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("projects.create.fieldCategory")}
+              </span>
+              <select
+                className="input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value as ProjectCategory)}
+              >
+                {ALL_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+                  </option>
+                ))}
+                <option value="infrastructure">🏗️ Infrastructure</option>
+                <option value="organizing">📋 Organizing</option>
+                <option value="mutual_aid_drive">💛 Mutual aid drive</option>
+              </select>
+            </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {t("projects.create.fieldTargetHours")}
+                </span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min="0.5"
+                  step="0.5"
+                  className="input"
+                  value={targetHours}
+                  onChange={(e) => setTargetHours(e.target.value)}
+                  onBlur={() => validation.onBlur("targetHours")}
+                  aria-invalid={
+                    validation.shouldShowError("targetHours") || undefined
+                  }
+                  aria-describedby={
+                    validation.shouldShowError("targetHours")
+                      ? "targetHours-error"
+                      : "targetHours-hint"
+                  }
+                  required
+                />
+                {validation.shouldShowError("targetHours") ? (
+                  <p
+                    id="targetHours-error"
+                    role="alert"
+                    className="text-xs text-rose-700 dark:text-rose-300"
+                  >
+                    {t(validation.errors.targetHours!.key)}
+                  </p>
+                ) : (
+                  <span
+                    id="targetHours-hint"
+                    className="text-xs text-moss-500 dark:text-moss-400"
+                  >
+                    {t("projects.create.fieldTargetHoursHint")}
+                  </span>
+                )}
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {t("projects.create.fieldDeadlineDays")}
+                </span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  step="1"
+                  className="input"
+                  value={deadlineDays}
+                  onChange={(e) => setDeadlineDays(e.target.value)}
+                  onBlur={() => validation.onBlur("deadlineDays")}
+                  aria-invalid={
+                    validation.shouldShowError("deadlineDays") || undefined
+                  }
+                  aria-describedby={
+                    validation.shouldShowError("deadlineDays")
+                      ? "deadlineDays-error"
+                      : undefined
+                  }
+                />
+                {validation.shouldShowError("deadlineDays") && (
+                  <p
+                    id="deadlineDays-error"
+                    role="alert"
+                    className="text-xs text-rose-700 dark:text-rose-300"
+                  >
+                    {t(validation.errors.deadlineDays!.key)}
+                  </p>
+                )}
+              </label>
+            </div>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("projects.create.fieldArea")}
+              </span>
+              <input
+                className="input"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                maxLength={80}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {t("projects.create.fieldTags")}
+              </span>
+              <input
+                className="input"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="garden, tool-library"
+              />
+            </label>
+            {error && (
+              <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+                {error}
               </p>
+            )}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="mt-1 text-xs font-semibold underline"
-                onClick={() => handleSelectTemplate(null)}
+                className="btn-secondary"
+                onClick={() => navigate(-1)}
               >
-                {t("projects.templates.clear")}
+                {t("common.cancel")}
+              </button>
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting
+                  ? t("projects.create.submitting")
+                  : t("projects.create.submit")}
               </button>
             </div>
-          );
-        })()}
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {t("projects.create.fieldTitle")}
-          </span>
-          <input
-            className="input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => validation.onBlur("title")}
-            aria-invalid={validation.shouldShowError("title") || undefined}
-            aria-describedby={
-              validation.shouldShowError("title") ? "title-error" : undefined
-            }
-            maxLength={120}
-            required
-          />
-          {validation.shouldShowError("title") && (
-            <p
-              id="title-error"
-              role="alert"
-              className="text-xs text-rose-700 dark:text-rose-300"
-            >
-              {t(validation.errors.title!.key)}
-            </p>
-          )}
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {t("projects.create.fieldDescription")}
-          </span>
-          <textarea
-            className="input min-h-28"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {t("projects.create.fieldCategory")}
-          </span>
-          <select
-            className="input"
-            value={category}
-            onChange={(e) => setCategory(e.target.value as ProjectCategory)}
-          >
-            {ALL_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
-              </option>
-            ))}
-            <option value="infrastructure">🏗️ Infrastructure</option>
-            <option value="organizing">📋 Organizing</option>
-            <option value="mutual_aid_drive">💛 Mutual aid drive</option>
-          </select>
-        </label>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">
-              {t("projects.create.fieldTargetHours")}
-            </span>
-            <input
-              type="number"
-              inputMode="decimal"
-              min="0.5"
-              step="0.5"
-              className="input"
-              value={targetHours}
-              onChange={(e) => setTargetHours(e.target.value)}
-              onBlur={() => validation.onBlur("targetHours")}
-              aria-invalid={
-                validation.shouldShowError("targetHours") || undefined
-              }
-              aria-describedby={
-                validation.shouldShowError("targetHours")
-                  ? "targetHours-error"
-                  : "targetHours-hint"
-              }
-              required
-            />
-            {validation.shouldShowError("targetHours") ? (
-              <p
-                id="targetHours-error"
-                role="alert"
-                className="text-xs text-rose-700 dark:text-rose-300"
-              >
-                {t(validation.errors.targetHours!.key)}
-              </p>
-            ) : (
-              <span
-                id="targetHours-hint"
-                className="text-xs text-moss-500 dark:text-moss-400"
-              >
-                {t("projects.create.fieldTargetHoursHint")}
-              </span>
-            )}
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">
-              {t("projects.create.fieldDeadlineDays")}
-            </span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="1"
-              step="1"
-              className="input"
-              value={deadlineDays}
-              onChange={(e) => setDeadlineDays(e.target.value)}
-              onBlur={() => validation.onBlur("deadlineDays")}
-              aria-invalid={
-                validation.shouldShowError("deadlineDays") || undefined
-              }
-              aria-describedby={
-                validation.shouldShowError("deadlineDays")
-                  ? "deadlineDays-error"
-                  : undefined
-              }
-            />
-            {validation.shouldShowError("deadlineDays") && (
-              <p
-                id="deadlineDays-error"
-                role="alert"
-                className="text-xs text-rose-700 dark:text-rose-300"
-              >
-                {t(validation.errors.deadlineDays!.key)}
-              </p>
-            )}
-          </label>
+          </form>
         </div>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {t("projects.create.fieldArea")}
-          </span>
-          <input
-            className="input"
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
-            maxLength={80}
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {t("projects.create.fieldTags")}
-          </span>
-          <input
-            className="input"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="garden, tool-library"
-          />
-        </label>
-        {error && (
-          <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
-            {error}
-          </p>
-        )}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => navigate(-1)}
-          >
-            {t("common.cancel")}
-          </button>
-          <button type="submit" className="btn-primary" disabled={submitting}>
-            {submitting
-              ? t("projects.create.submitting")
-              : t("projects.create.submit")}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }
