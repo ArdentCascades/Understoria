@@ -162,13 +162,26 @@ export default function ProfilePage() {
         message={t("hints.invite.message")}
         technicalDetail={t("hints.invite.technical")}
       />
-      <InvitesSection
-        member={currentMember}
-        nodeId={nodeId}
-        invites={myInvites}
-      />
+      {/* "Your stuff" cluster reflows into CSS columns at lg+. Used
+          columns instead of grid because the cards have wildly
+          different heights (Invites can be tall; Data is just a
+          button; MemberSwitcher is null when there's only one
+          identity) — CSS columns balance the vertical fill so cards
+          don't sit next to ragged empty space the way grid rows
+          would. `[&>*]:break-inside-avoid` keeps each card whole; no
+          card splits across the column boundary. Below lg the
+          columns classes are inert and each card's own `mb-4`
+          provides the spacing as before. DOM order is preserved so
+          tab and screen-reader navigation are unaffected by the
+          column layout. */}
+      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+        <InvitesSection
+          member={currentMember}
+          nodeId={nodeId}
+          invites={myInvites}
+        />
 
-      <section className="card mb-4">
+        <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           {t("profile.rolesEarned.title")}
         </h2>
@@ -274,6 +287,7 @@ export default function ProfilePage() {
           </button>
         </div>
       </section>
+      </div>
 
       {/* Phase 1.6 reflow: at lg+, the lower settings cluster reflows
           into a 2-col grid. Each section component owns its own
