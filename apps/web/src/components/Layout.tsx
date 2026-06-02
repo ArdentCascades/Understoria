@@ -22,6 +22,7 @@ import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "./BottomNav";
 import { LockScreen } from "./LockScreen";
+import { ScrollToTop } from "./ScrollToTop";
 import { SkipLink } from "./SkipLink";
 import { ToastContainer } from "./ToastContainer";
 import { useApp } from "@/state/AppContext";
@@ -32,6 +33,7 @@ export function Layout() {
   const locked = lockState === "locked";
   return (
     <div className="mx-auto flex min-h-dvh max-w-screen-md flex-col lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
+      <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
       <main id="main" className="flex-1 pb-20" tabIndex={-1}>
         {!ready ? (
