@@ -766,7 +766,6 @@
     "skills": "Skills",
     "availability": "Availability",
     "area": "Area",
-    "exchanges": "Exchanges (helper + helped)",
     "none": "—",
     "vouchTitle": "Vouch",
     "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) move a member from pending-trust to trusted.",

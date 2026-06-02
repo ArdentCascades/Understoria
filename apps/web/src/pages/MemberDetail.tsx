@@ -32,7 +32,6 @@ export default function MemberDetailPage() {
     currentMember,
     vouches,
     invites,
-    exchanges,
   } = useApp();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,15 +64,6 @@ export default function MemberDetailPage() {
           })
         : null,
     [currentMember, vouches, invites],
-  );
-  const exchangeCount = useMemo(
-    () =>
-      exchanges.filter(
-        (x) =>
-          (publicKey && x.helperKey === publicKey) ||
-          (publicKey && x.helpedKey === publicKey),
-      ).length,
-    [exchanges, publicKey],
   );
   const alreadyVouchedByMe = useMemo(
     () =>
@@ -198,12 +188,6 @@ export default function MemberDetailPage() {
               {t("member.area")}
             </dt>
             <dd>{member.locationZone || t("member.none")}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-wide text-moss-500">
-              {t("member.exchanges")}
-            </dt>
-            <dd>{exchangeCount}</dd>
           </div>
         </dl>
       </section>
