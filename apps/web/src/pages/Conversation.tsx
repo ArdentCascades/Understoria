@@ -167,18 +167,23 @@ export default function ConversationPage() {
       </header>
 
       <div className="mb-2 flex items-center gap-2">
-        <input
-          type="search"
-          className="input flex-1"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={
-            locked
-              ? t("messages.search.locked")
-              : t("messages.search.inConversation")
-          }
-          disabled={locked}
-        />
+        <label className="flex-1">
+          <span className="sr-only">
+            {t("messages.search.inConversation")}
+          </span>
+          <input
+            type="search"
+            className="input w-full"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={
+              locked
+                ? t("messages.search.locked")
+                : t("messages.search.inConversation")
+            }
+            disabled={locked}
+          />
+        </label>
         {isSearching && (
           <>
             <span className="text-xs text-moss-600 dark:text-moss-300">
@@ -272,21 +277,24 @@ export default function ConversationPage() {
       </div>
 
       <form onSubmit={handleSend} className="mt-3 flex gap-2">
-        <textarea
-          ref={inputRef}
-          className="input flex-1 resize-none"
-          rows={1}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t("messages.inputPlaceholder")}
-          maxLength={5000}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void handleSend(e);
-            }
-          }}
-        />
+        <label className="flex-1">
+          <span className="sr-only">{t("messages.inputLabel")}</span>
+          <textarea
+            ref={inputRef}
+            className="input w-full resize-none"
+            rows={1}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t("messages.inputPlaceholder")}
+            maxLength={5000}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void handleSend(e);
+              }
+            }}
+          />
+        </label>
         <button
           type="submit"
           className="btn-primary self-end"
