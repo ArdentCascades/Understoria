@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
@@ -50,6 +50,7 @@ import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
+import { IconMessages } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { TaskComments } from "@/components/TaskComments";
@@ -266,10 +267,37 @@ export default function ProjectDetailPage() {
               />
             </div>
             <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
+            <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+              {/* Reuse the existing "Organized by {{name}}" string but
+                  render the name as a profile link. Interpolating with
+                  an empty name and trimming yields just the prefix
+                  ("Organized by" / "Organizado por") so the link sits
+                  inline after it. */}
+              {t("projects.byOrganizer", { name: "" }).trim()}{" "}
+              <Link
+                to={`/member/${encodeURIComponent(project.organizerKey)}`}
+                className="font-medium underline-offset-2 hover:underline"
+              >
+                {memberMap.get(project.organizerKey) ?? "—"}
+              </Link>
+            </p>
             {project.description && (
               <p className="mt-2 whitespace-pre-wrap text-sm text-moss-700 dark:text-moss-200">
                 {project.description}
               </p>
+            )}
+            {currentMember?.publicKey !== project.organizerKey && (
+              <div className="mt-3">
+                <Link
+                  to={`/messages/${encodeURIComponent(project.organizerKey)}`}
+                  className="btn-secondary inline-flex items-center gap-2"
+                >
+                  <IconMessages size={18} />
+                  {t("messages.messageTarget", {
+                    name: memberMap.get(project.organizerKey) ?? "—",
+                  })}
+                </Link>
+              </div>
             )}
             <div className="mt-4">
               <div
@@ -296,11 +324,7 @@ export default function ProjectDetailPage() {
               </div>
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <Field
-                label={t("projects.byOrganizer", {
-                  name: memberMap.get(project.organizerKey) ?? "—",
-                })}
-              >
+              <Field label={t("projects.detail.createdLabel")}>
                 {formatRelativeTime(project.createdAt)}
               </Field>
               {project.locationZone && (
