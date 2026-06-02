@@ -23,6 +23,7 @@ import { Layout } from "@/components/Layout";
 import BoardPage from "@/pages/Board";
 import DashboardPage from "@/pages/Dashboard";
 import ProfilePage from "@/pages/Profile";
+import SettingsPage from "@/pages/Settings";
 import PostFormPage from "@/pages/PostForm";
 import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
@@ -63,6 +64,7 @@ export default function App() {
           <Route index element={<BoardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/post/new" element={<PostFormPage />} />
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path="/project/new" element={<ProjectNewPage />} />

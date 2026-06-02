@@ -306,23 +306,31 @@ Tap **Profile** to see:
   the same two members in 30 days, the next one gets flagged). A
   yellow note explains these are bootstrap-mode — once in-app
   governance ships, changes here will route through a proposal.
+- **Emergency** — panic buttons in case a device is at risk (§15).
+  Stays on the Profile page (not under Settings) so it's reachable
+  in a stress moment without an extra tap.
+
+The Profile page also has a **gear icon in the top right** that opens
+**Settings** — device-local preferences that only affect this device:
+
 - **Language** — switch between English and Spanish.
-- **Appearance** — comfort settings that only affect this device.
-  Pick a theme (Match system / Light / Dark — Match system follows
-  whatever your phone or browser is set to, useful if you've told
-  your device to switch by time of day), a text size (Default /
-  Larger / Largest — the larger options multiply on top of whatever
-  text size you've set on your phone, so they stack rather than
-  replace it; the three buttons render at the sizes they represent
-  so you can see the difference before you pick), and a layout
-  density (Comfortable / Compact — Compact trims card padding so
-  denser screens fit more above the fold, useful on a desktop or
-  tablet where you'd rather see more at once; touch targets stay
-  the same size at either setting).
+- **Appearance** — comfort settings. Pick a theme (Match system /
+  Light / Dark — Match system follows whatever your phone or browser
+  is set to, useful if you've told your device to switch by time of
+  day), a text size (Default / Larger / Largest — the larger options
+  multiply on top of whatever text size you've set on your phone, so
+  they stack rather than replace it; the three buttons render at the
+  sizes they represent so you can see the difference before you
+  pick), and a layout density (Comfortable / Compact — Compact trims
+  card padding so denser screens fit more above the fold, useful on
+  a desktop or tablet where you'd rather see more at once; touch
+  targets stay the same size at either setting).
 - **Community node** — optional mirror of your finalized exchanges
   to a community-wide ledger; off by default.
 - **Security** — turn on a passphrase for your identity (§14).
-- **Emergency** — panic buttons in case a device is at risk (§15).
+- **Data export** — download a JSON snapshot of your local data.
+  Private keys are deliberately excluded; key backup is a separate
+  passphrase-wrapped flow.
 
 ## 13. Inviting someone new
 

@@ -10,6 +10,32 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Settings sub-page.** Five device-local sections — Language,
+  Appearance (Theme / Text size / Layout density), Community Node,
+  Security, Data export — move from the Profile page to a new
+  `/settings` route reachable from a gear icon in the Profile header.
+  Splits the kitchen-sink Profile into two focused surfaces:
+  Profile = "who you are + what you've done" (identity, balance,
+  invites, roles earned, exchange history, learn, disputes,
+  proposals, community settings), Settings = "how the app behaves
+  on this device." `EmergencySection` is deliberately NOT moved —
+  per the privacy-as-precondition principle, panic buttons need to
+  stay reachable in a stress moment, not buried behind a Settings
+  tap. `InvitesSection` is also kept on Profile because invites are
+  a record of community participation (who you vouched for), not a
+  device preference. Inline `SecuritySection` (~204 lines) and the
+  `exportData` helper extract to dedicated files
+  (`components/SecuritySection.tsx`, `lib/exportData.ts`). New
+  `IconSettings` joins the existing line-art icon set
+  (`components/visual/icons.tsx`) — gear shape matching the 1.5px
+  stroke / fill-none style of the others. Profile's column clusters
+  re-pencil to two: community-participation (Invites + Roles +
+  History) and community-governance (Learn + Disputes + Proposals +
+  Community Settings), each `lg:columns-2` (no `xl:columns-3` —
+  3-and-4 cards balance well in 2 columns). i18n keys added in en +
+  es: `settings.openSettings`, `settings.title`, `settings.intro`,
+  `settings.back`. Parity test green.
+
 - **Welcome slide for community projects.** Adds a fifth slide
   between Community-authority and the Profile-setup step,
   introducing collective work as a principle rather than a feature.

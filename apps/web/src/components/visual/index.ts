@@ -15,6 +15,7 @@ export {
   IconDashboard,
   IconMessages,
   IconProfile,
+  IconSettings,
 } from "./icons";
 export {
   Illustration,

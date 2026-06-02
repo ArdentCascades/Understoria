@@ -779,6 +779,12 @@
     "alreadyVouchedByYou": "Ya has avalado a esta persona.",
     "backToBoard": "Volver al tablero"
   },
+  "settings": {
+    "openSettings": "Abrir ajustes",
+    "title": "Ajustes",
+    "intro": "Cómo se comporta Understoria en este dispositivo. Los cambios aquí solo afectan a este dispositivo — no se sincronizan con la comunidad.",
+    "back": "← Volver al perfil"
+  },
   "profile": {
     "title": "Tu perfil",
     "identity": "Identidad: {{key}}",
