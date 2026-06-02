@@ -367,9 +367,14 @@ A few things worth knowing:
 - The prompt **comes up every time** — there's no "don't show
   this again" option. Your surroundings can change between one
   share and the next.
-- The link is **single-use** and **expires in 14 days**. If
-  you've shared it and want to undo, tap **Revoke** on the invite
-  row before they redeem it.
+- The link is **single-use** and **expires in 14 days**.
+- The Invites card on Profile shows a one-line summary of how many
+  invites you have in each state (e.g. "3 open · 2 redeemed").
+  Tap **Manage all →** to open the dedicated invites page — that's
+  where you'll find the full list with **Copy**, **Show QR code**
+  (re-opens the look-around prompt + QR for any open invite), and
+  **Revoke** on each row. If you've shared a link and want to
+  undo, that's where to do it.
 - Tell the person what your inviter-key fingerprint looks like
   (the app shows it) so they can verify when they open the link.
 - Don't share invites over email, plain SMS, or group chats
