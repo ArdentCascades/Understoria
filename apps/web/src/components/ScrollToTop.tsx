@@ -30,6 +30,14 @@ import { useLocation, useNavigationType } from "react-router-dom";
 // but the app uses the declarative `<BrowserRouter>` + `<Routes>`
 // setup, where a small effect like this is the right tool.
 //
+// On forward navigation it also moves focus to `<main>` so
+// screen-reader and keyboard users get a page-change cue instead of
+// landing on stale focus (WCAG 2.4.3). The `<main id="main"
+// tabIndex={-1}>` in Layout.tsx already exists as the skip-link
+// target; the negative tabindex lets it take programmatic focus
+// without becoming a Tab stop. POP/REPLACE are left alone so Back
+// preserves both scroll position and focus.
+//
 // Renders nothing.
 export function ScrollToTop() {
   const { pathname } = useLocation();
@@ -37,6 +45,7 @@ export function ScrollToTop() {
   useEffect(() => {
     if (navType === "PUSH") {
       window.scrollTo(0, 0);
+      document.getElementById("main")?.focus();
     }
   }, [pathname, navType]);
   return null;
