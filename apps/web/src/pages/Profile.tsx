@@ -33,7 +33,6 @@ import { InviteShareSheet } from "@/components/InviteShareSheet";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EmptyState } from "@/components/EmptyState";
 import {
-  formatDeadline,
   formatHours,
   formatRelativeTime,
   formatSignedHours,
@@ -41,10 +40,7 @@ import {
 } from "@/lib/format";
 import { updateMemberProfile } from "@/db/actions";
 import type { InviteRow } from "@/db/database";
-import {
-  issueInvite,
-  revokeInvite,
-} from "@/db/invites";
+import { issueInvite } from "@/db/invites";
 import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
@@ -72,13 +68,6 @@ function flagReasonKey(reason: FlagReason | undefined): string {
       return "profile.history.flagDefault";
   }
 }
-
-const INVITE_STATUS_KEY: Record<InviteRow["status"], string> = {
-  open: "profile.invites.statusOpen",
-  redeemed: "profile.invites.statusRedeemed",
-  revoked: "profile.invites.statusRevoked",
-  expired: "profile.invites.statusExpired",
-};
 
 export default function ProfilePage() {
   const {
@@ -659,7 +648,6 @@ function InvitesSection({
   }, [shareUrl]);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [revokingToken, setRevokingToken] = useState<string | null>(null);
 
   async function handleIssue() {
     setError(null);
@@ -690,18 +678,6 @@ function InvitesSection({
       setTimeout(() => setCopyStatus(null), 3000);
     } catch {
       setCopyStatus(t("common.copyFailed"));
-    }
-  }
-
-  async function handleRevoke(token: string) {
-    setError(null);
-    setRevokingToken(token);
-    try {
-      await revokeInvite(member.publicKey, token);
-    } catch (err) {
-      setError(humanizeError(err));
-    } finally {
-      setRevokingToken(null);
     }
   }
 
@@ -785,60 +761,14 @@ function InvitesSection({
         </p>
       )}
 
-      {invites.length === 0 ? (
-        <EmptyState
-          illustration="none"
-          variant="inset"
-          message={t("profile.invites.empty")}
-        />
-      ) : (
-        <ul className="mt-4 flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
-          {invites.map((inv) => (
-            <li
-              key={inv.token}
-              className="flex items-center justify-between gap-3 py-2"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">
-                  {t(INVITE_STATUS_KEY[inv.status])}
-                </div>
-                <div className="text-xs text-moss-500">
-                  {inv.status === "redeemed"
-                    ? t("profile.invites.redeemed", {
-                        when: formatRelativeTime(inv.redeemedAt ?? 0),
-                      })
-                    : t("profile.invites.expires", {
-                        date: formatDeadline(inv.expiresAt),
-                      })}
-                </div>
-              </div>
-              {inv.status === "open" && (
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn-ghost text-xs"
-                    onClick={() =>
-                      handleCopy(`${window.location.origin}/invite#${inv.encoded}`)
-                    }
-                  >
-                    {t("common.copy")}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
-                    onClick={() => handleRevoke(inv.token)}
-                    disabled={revokingToken === inv.token}
-                    aria-busy={revokingToken === inv.token}
-                  >
-                    {revokingToken === inv.token
-                      ? t("common.working")
-                      : t("profile.invites.revoke")}
-                  </button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+      {/* Compact summary in place of the historical list — the list
+          itself lives at /invites. Non-zero status counts only, so a
+          member with just open invites sees "3 open · Manage all →"
+          rather than padded "0" labels. When the member has no
+          invites yet, the summary doesn't render at all; the Generate
+          button + intro carry the section. */}
+      {invites.length > 0 && (
+        <InvitesSummaryLine invites={invites} />
       )}
 
       <InviteShareSheet
@@ -849,5 +779,47 @@ function InvitesSection({
         onClose={() => setShareSheetOpen(false)}
       />
     </section>
+  );
+}
+
+// One-line summary of the member's issued invites, rendered below the
+// Generate flow on Profile. Counts each status that's > 0 (e.g.
+// "3 open · 2 redeemed · 1 expired") and trails a "Manage all →" link
+// to the dedicated /invites page where the full sorted list lives.
+function InvitesSummaryLine({ invites }: { invites: InviteRow[] }) {
+  const { t } = useTranslation();
+  const counts = useMemo(() => {
+    const c = { open: 0, redeemed: 0, revoked: 0, expired: 0 };
+    for (const inv of invites) c[inv.status] += 1;
+    return c;
+  }, [invites]);
+  // Order matches the /invites page sort tier: open first, then
+  // redeemed, revoked, expired. Members read the most actionable
+  // bucket first.
+  const parts: string[] = [];
+  if (counts.open > 0)
+    parts.push(t("profile.invites.summary.open", { count: counts.open }));
+  if (counts.redeemed > 0)
+    parts.push(
+      t("profile.invites.summary.redeemed", { count: counts.redeemed }),
+    );
+  if (counts.revoked > 0)
+    parts.push(
+      t("profile.invites.summary.revoked", { count: counts.revoked }),
+    );
+  if (counts.expired > 0)
+    parts.push(
+      t("profile.invites.summary.expired", { count: counts.expired }),
+    );
+  return (
+    <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-moss-600 dark:text-moss-300">
+      <span>{parts.join(" · ")}</span>
+      <Link
+        to="/invites"
+        className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+      >
+        {t("profile.invites.summary.manageAll")}
+      </Link>
+    </p>
   );
 }

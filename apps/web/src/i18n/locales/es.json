@@ -785,6 +785,16 @@
     "intro": "Cómo se comporta Understoria en este dispositivo. Los cambios aquí solo afectan a este dispositivo — no se sincronizan con la comunidad.",
     "back": "← Volver al perfil"
   },
+  "invitesPage": {
+    "title": "Tus invitaciones",
+    "back": "← Volver al perfil",
+    "intro": "Invitaciones que has emitido. Las abiertas aparecen primero; puedes copiar, mostrar el código QR o revocar cualquiera.",
+    "empty": {
+      "title": "Aún no has emitido invitaciones",
+      "message": "Genera tu primera invitación desde tu perfil.",
+      "cta": "Ir al perfil"
+    }
+  },
   "profile": {
     "title": "Tu perfil",
     "identity": "Identidad: {{key}}",
@@ -934,6 +944,17 @@
       "title": "Invitaciones que has emitido",
       "intro": "Una nueva persona necesita dos avales para volverse de confianza. Tu invitación cuenta como el primero — alguien más tendrá que avalarle después de unirse.",
       "empty": "Aún no has invitado a nadie. Cuando lo hagas, el enlace aparecerá aquí para que puedas volver a compartirlo o revocarlo.",
+      "summary": {
+        "open_one": "1 abierta",
+        "open_other": "{{count}} abiertas",
+        "redeemed_one": "1 canjeada",
+        "redeemed_other": "{{count}} canjeadas",
+        "revoked_one": "1 revocada",
+        "revoked_other": "{{count}} revocadas",
+        "expired_one": "1 caducada",
+        "expired_other": "{{count}} caducadas",
+        "manageAll": "Gestionar todas →"
+      },
       "generate": "Generar enlace de invitación",
       "generating": "Generando…",
       "shareTitle": "Comparte este enlace con una sola persona",

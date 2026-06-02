@@ -785,6 +785,16 @@
     "intro": "How Understoria behaves on this device. Changes here only affect this device — they don't sync across the community.",
     "back": "← Back to profile"
   },
+  "invitesPage": {
+    "title": "Your invites",
+    "back": "← Back to profile",
+    "intro": "Invites you've issued. Open ones come first; you can copy, re-show the QR, or revoke any of them.",
+    "empty": {
+      "title": "No invites issued yet",
+      "message": "Generate your first invite from your Profile.",
+      "cta": "Go to Profile"
+    }
+  },
   "profile": {
     "title": "Your profile",
     "identity": "Identity: {{key}}",
@@ -934,6 +944,17 @@
       "title": "Invites you've issued",
       "intro": "A new member needs two vouches to become trusted. Your invite counts as the first — someone else will need to vouch for them after they join.",
       "empty": "You haven't invited anyone yet. When you do, the invite link will show up here so you can re-share it or revoke it.",
+      "summary": {
+        "open_one": "1 open",
+        "open_other": "{{count}} open",
+        "redeemed_one": "1 redeemed",
+        "redeemed_other": "{{count}} redeemed",
+        "revoked_one": "1 revoked",
+        "revoked_other": "{{count}} revoked",
+        "expired_one": "1 expired",
+        "expired_other": "{{count}} expired",
+        "manageAll": "Manage all →"
+      },
       "generate": "Generate invite link",
       "generating": "Generating…",
       "shareTitle": "Share this link with one person",

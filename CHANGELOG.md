@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **`/invites` management page.** The historical list of "Invites
+  you've issued" moves from inside the Profile InvitesSection card to
+  a dedicated `/invites` route reachable via a "Manage all →" link
+  from a compact summary line ("3 open · 2 redeemed · 1 expired").
+  Profile keeps the Generate flow + share banner + InviteShareSheet
+  modal — the primary "issue a link" interaction stays one tap deep —
+  but the unbounded list no longer blows out the Profile card's
+  height (a real problem for community organizers who'd issued many
+  invites). The dedicated page sorts open invites first (then
+  redeemed / revoked / expired; within each tier newest first) so
+  the most actionable rows are always at the top, and each open row
+  gains a **Show QR** button that re-opens the existing
+  InviteShareSheet so the QR code stays reachable after the
+  fresh-share banner has scrolled away. i18n keys added in en + es:
+  pluralized `profile.invites.summary.{open,redeemed,revoked,expired}`
+  + `summary.manageAll`, plus a new `invitesPage.*` block. Parity
+  test green; 677/677 tests pass.
 - **Settings sub-page.** Five device-local sections — Language,
   Appearance (Theme / Text size / Layout density), Community Node,
   Security, Data export — move from the Profile page to a new
