@@ -229,6 +229,7 @@
       "deadline": "Fecha límite",
       "area": "Zona: {{area}}",
       "contributors": "Contribuyentes: {{count}}",
+      "createdLabel": "Creado",
       "taskSearch": {
         "placeholder": "Buscar tareas",
         "ariaLabel": "Buscar tareas"

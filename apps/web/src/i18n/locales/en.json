@@ -229,6 +229,7 @@
       "deadline": "Deadline",
       "area": "Area: {{area}}",
       "contributors": "Contributors: {{count}}",
+      "createdLabel": "Created",
       "taskSearch": {
         "placeholder": "Search tasks",
         "ariaLabel": "Search tasks"
