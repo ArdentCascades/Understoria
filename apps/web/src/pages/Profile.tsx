@@ -165,16 +165,18 @@ export default function ProfilePage() {
       {/* "Your stuff" cluster reflows into CSS columns at lg+. Used
           columns instead of grid because the cards have wildly
           different heights (Invites can be tall; Data is just a
-          button; MemberSwitcher is null when there's only one
-          identity) — CSS columns balance the vertical fill so cards
+          button) — CSS columns balance the vertical fill so cards
           don't sit next to ragged empty space the way grid rows
           would. `[&>*]:break-inside-avoid` keeps each card whole; no
-          card splits across the column boundary. Below lg the
+          card splits across the column boundary. At xl+ (≥1280px)
+          the page is wide enough that 3 columns balances the 4
+          cards more evenly than 2 — variance per column drops and
+          the shorter-column dead space shrinks. Below lg the
           columns classes are inert and each card's own `mb-4`
           provides the spacing as before. DOM order is preserved so
           tab and screen-reader navigation are unaffected by the
           column layout. */}
-      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+      <div className="lg:columns-2 lg:gap-4 xl:columns-3 [&>*]:break-inside-avoid">
         <InvitesSection
           member={currentMember}
           nodeId={nodeId}
@@ -265,12 +267,6 @@ export default function ProfilePage() {
         )}
       </section>
 
-      <MemberSwitcher
-        members={members}
-        currentMember={currentMember}
-        onSwitch={setCurrentMember}
-      />
-
       <section className="card mb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           {t("profile.data.title")}
@@ -298,7 +294,7 @@ export default function ProfilePage() {
           AppearanceSection is fixed-size, etc. Columns balance the
           fill, no rags. Each section keeps its own `card mb-4` for
           vertical spacing within its column. */}
-      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+      <div className="mt-6 lg:columns-2 lg:gap-4 xl:columns-3 [&>*]:break-inside-avoid">
         <LearnSection />
 
         <DisputesSection />
@@ -319,13 +315,26 @@ export default function ProfilePage() {
           Emergency has the panic buttons) balance into 2 columns
           without leaving the empty horizontal space the trailing
           sections used to show. */}
-      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+      <div className="mt-6 lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
         <NodeSection />
 
         <SecuritySection />
 
         <EmergencySection />
       </div>
+
+      {/* MemberSwitcher lives at the very end. It only renders when
+          members.length > 1 — i.e., the dev "switch identity" tool
+          shouldn't displace the production-relevant cards above. In
+          single-identity setups (the production case) this is null
+          and invisible; in multi-identity setups it sits below the
+          last settings cluster where it doesn't interfere with the
+          working area. */}
+      <MemberSwitcher
+        members={members}
+        currentMember={currentMember}
+        onSwitch={setCurrentMember}
+      />
     </div>
   );
 }
