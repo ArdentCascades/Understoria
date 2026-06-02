@@ -97,6 +97,7 @@
     "messageButton": "Message",
     "messageTarget": "Message {{name}}",
     "inputPlaceholder": "Type a message...",
+    "inputLabel": "Write a message",
     "send": "Send",
     "sending": "Sending...",
     "decryptionFailed": "(could not decrypt)",
