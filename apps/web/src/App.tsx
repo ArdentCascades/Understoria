@@ -39,6 +39,7 @@ import DisputesPage from "@/pages/Disputes";
 import ProposalsPage from "@/pages/Proposals";
 import ProposalNewPage from "@/pages/ProposalNew";
 import WelcomePage from "@/pages/Welcome";
+import NotFoundPage from "@/pages/NotFound";
 import { useApp } from "@/state/AppContext";
 
 // Paths a brand-new device is allowed to reach without going through
@@ -85,7 +86,7 @@ export default function App() {
           <Route path="/proposals" element={<ProposalsPage />} />
           <Route path="/proposals/new" element={<ProposalNewPage />} />
           <Route path="/invite" element={<InviteAcceptPage />} />
-          <Route path="*" element={<BoardPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </OnboardingGate>

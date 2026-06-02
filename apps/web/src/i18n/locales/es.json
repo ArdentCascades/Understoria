@@ -43,6 +43,11 @@
     "trigger": "(por que?)",
     "readMore": "Leer mas"
   },
+  "notFound": {
+    "title": "Esta página no está aquí",
+    "message": "Puede que el enlace sea antiguo o esté mal escrito. No hiciste nada mal.",
+    "cta": "Volver al tablero"
+  },
   "drafts": {
     "bannerLabel": "Borrador sin guardar",
     "bannerMessage": "Empezaste uno de estos {{when}}. ¿Continúas desde donde lo dejaste o empiezas de nuevo?",
