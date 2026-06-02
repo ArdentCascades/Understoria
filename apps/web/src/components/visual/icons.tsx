@@ -58,3 +58,22 @@ export function IconProfile(props: IconProps) {
     </Icon>
   );
 }
+
+// Gear — entry point for the device-settings sub-page. Drawn with
+// six teeth around a center hub; matches the 1.5px stroke / fill-none
+// style of the rest of the icon set.
+export function IconSettings(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3" />
+      <path d="M12 19v3" />
+      <path d="M4.93 4.93l2.12 2.12" />
+      <path d="M16.95 16.95l2.12 2.12" />
+      <path d="M2 12h3" />
+      <path d="M19 12h3" />
+      <path d="M4.93 19.07l2.12-2.12" />
+      <path d="M16.95 7.05l2.12-2.12" />
+    </Icon>
+  );
+}

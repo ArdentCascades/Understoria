@@ -19,8 +19,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { IconSettings } from "@/components/visual";
 import { balanceFor, transactionHistory } from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
 import { AchievementBadge } from "@/components/AchievementBadge";
@@ -38,27 +40,18 @@ import {
   shortKey,
 } from "@/lib/format";
 import { updateMemberProfile } from "@/db/actions";
-import { db } from "@/db/database";
 import type { InviteRow } from "@/db/database";
 import {
   issueInvite,
   revokeInvite,
 } from "@/db/invites";
-import {
-  changePassphrase,
-  disablePassphrase,
-  enablePassphrase,
-} from "@/db/secrets";
 import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
-import { LanguageSection } from "@/components/LanguageSection";
-import { AppearanceSection } from "@/components/AppearanceSection";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { DisputesSection } from "@/components/DisputesSection";
 import { ProposalsSection } from "@/components/ProposalsSection";
 import { LearnSection } from "@/components/LearnSection";
-import { NodeSection } from "@/components/NodeSection";
 import type {
   AchievementType,
   AvailabilityChip,
@@ -143,7 +136,19 @@ export default function ProfilePage() {
             {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
           </p>
         </div>
-        <TrustChip status={trust} count={trustCount} />
+        <div className="flex items-center gap-2">
+          <TrustChip status={trust} count={trustCount} />
+          {/* Gear icon → device-local Settings (Language, Appearance,
+              Community Node, Security, Data export). Emergency stays
+              on Profile per the privacy-as-precondition principle. */}
+          <Link
+            to="/settings"
+            aria-label={t("settings.openSettings")}
+            className="touch-target inline-flex items-center justify-center rounded-full text-moss-700 hover:bg-moss-100 dark:text-moss-300 dark:hover:bg-moss-800"
+          >
+            <IconSettings size={20} />
+          </Link>
+        </div>
       </header>
 
       <BalanceCard balance={balance} seed={currentMember.seedBalance} />
@@ -162,21 +167,20 @@ export default function ProfilePage() {
         message={t("hints.invite.message")}
         technicalDetail={t("hints.invite.technical")}
       />
-      {/* "Your stuff" cluster reflows into CSS columns at lg+. Used
-          columns instead of grid because the cards have wildly
-          different heights (Invites can be tall; Data is just a
-          button) — CSS columns balance the vertical fill so cards
-          don't sit next to ragged empty space the way grid rows
-          would. `[&>*]:break-inside-avoid` keeps each card whole; no
-          card splits across the column boundary. At xl+ (≥1280px)
-          the page is wide enough that 3 columns balances the 4
-          cards more evenly than 2 — variance per column drops and
-          the shorter-column dead space shrinks. Below lg the
-          columns classes are inert and each card's own `mb-4`
-          provides the spacing as before. DOM order is preserved so
-          tab and screen-reader navigation are unaffected by the
-          column layout. */}
-      <div className="lg:columns-2 lg:gap-4 xl:columns-3 [&>*]:break-inside-avoid">
+      {/* Community-participation cluster. CSS columns at lg+ because
+          the three cards have uneven heights — Invites can be tall
+          (many tokens) or short (none); Roles earned grows with
+          achievements; Exchange history grows with completed
+          exchanges. Columns balance the fill so cards don't sit next
+          to ragged empty space the way grid rows would.
+          `[&>*]:break-inside-avoid` keeps each card whole. Below lg
+          the columns classes are inert and each card's own `mb-4`
+          provides the spacing. DOM order is preserved so tab and
+          screen-reader navigation are unaffected by the column
+          layout. After the Settings extraction this cluster is just
+          the three "what you've done" surfaces — Data export moved
+          to Settings, MemberSwitcher to page bottom. */}
+      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
         <InvitesSection
           member={currentMember}
           nodeId={nodeId}
@@ -267,34 +271,16 @@ export default function ProfilePage() {
         )}
       </section>
 
-      <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
-          {t("profile.data.title")}
-        </h2>
-        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-          {t("profile.data.intro")}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            className="btn-secondary"
-            onClick={() => exportData()}
-            type="button"
-          >
-            {t("profile.data.export")}
-          </button>
-        </div>
-      </section>
       </div>
 
-      {/* Lower settings cluster: same CSS-columns treatment used by
-          the "your stuff" cluster above (see comment there). Originally
-          a `lg:grid lg:grid-cols-2` (Phase 1.6) but that left ragged
-          empty cells when adjacent sections had wildly different
-          heights — DisputesSection grows with each open dispute,
-          AppearanceSection is fixed-size, etc. Columns balance the
-          fill, no rags. Each section keeps its own `card mb-4` for
-          vertical spacing within its column. */}
-      <div className="mt-6 lg:columns-2 lg:gap-4 xl:columns-3 [&>*]:break-inside-avoid">
+      {/* Community-governance cluster. CSS columns at lg+ for the
+          same uneven-heights reason as the cluster above. After the
+          Settings extraction this cluster holds Learn, Disputes,
+          Proposals, and CommunitySettings — all community-level
+          surfaces. (CommunitySettings is about community-level
+          safeguard thresholds, not device preferences — the "Settings"
+          in its name notwithstanding.) */}
+      <div className="mt-6 lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
         <LearnSection />
 
         <DisputesSection />
@@ -302,26 +288,16 @@ export default function ProfilePage() {
         <ProposalsSection />
 
         <CommunitySettingsSection />
-
-        <LanguageSection />
-
-        <AppearanceSection />
       </div>
 
-      {/* Trailing sections (federation + identity safeguards). Same
-          columns treatment so the page maintains visual rhythm to
-          the very bottom — three varying-height cards (NodeSection
-          can grow with mirroring activity; Security is small;
-          Emergency has the panic buttons) balance into 2 columns
-          without leaving the empty horizontal space the trailing
-          sections used to show. */}
-      <div className="mt-6 lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
-        <NodeSection />
-
-        <SecuritySection />
-
-        <EmergencySection />
-      </div>
+      {/* Emergency stays on Profile — NOT in Settings — per the
+          privacy-as-precondition principle. Panic buttons need to
+          stay reachable in a stress moment; burying them behind a
+          Settings tap would weaken that affordance in exactly the
+          moment it matters most. Standalone card after the
+          governance cluster so it's the last thing the eye lands on
+          before the dev MemberSwitcher below. */}
+      <EmergencySection />
 
       {/* MemberSwitcher lives at the very end. It only renders when
           members.length > 1 — i.e., the dev "switch identity" tool
@@ -336,211 +312,6 @@ export default function ProfilePage() {
         onSwitch={setCurrentMember}
       />
     </div>
-  );
-}
-
-function SecuritySection() {
-  const { lockState, lock, refreshLockState } = useApp();
-  const { t } = useTranslation();
-  const [mode, setMode] = useState<"idle" | "enable" | "change" | "disable">(
-    "idle",
-  );
-  const [pass1, setPass1] = useState("");
-  const [pass2, setPass2] = useState("");
-  const [current, setCurrent] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  function reset() {
-    setMode("idle");
-    setPass1("");
-    setPass2("");
-    setCurrent("");
-    setError(null);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    setBusy(true);
-    try {
-      if (mode === "enable") {
-        if (pass1 !== pass2)
-          throw new Error(t("profile.security.errorMismatch"));
-        await enablePassphrase(pass1);
-        setSuccess(t("profile.security.successEnable"));
-      } else if (mode === "change") {
-        if (pass1 !== pass2)
-          throw new Error(t("profile.security.errorMismatchNew"));
-        await changePassphrase(current, pass1);
-        setSuccess(t("profile.security.successChange"));
-      } else if (mode === "disable") {
-        await disablePassphrase();
-        setSuccess(t("profile.security.successDisable"));
-      }
-      await refreshLockState();
-      reset();
-    } catch (err) {
-      setError(humanizeError(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const protectionOn = lockState !== "unprotected";
-
-  return (
-    <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
-        {t("profile.security.title")}
-      </h2>
-      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-        {protectionOn
-          ? t("profile.security.summaryProtected")
-          : t("profile.security.summaryUnprotected")}
-      </p>
-
-      {success && (
-        <p
-          role="status"
-          className="mb-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100"
-        >
-          {success}
-        </p>
-      )}
-
-      <div className="flex flex-wrap gap-2">
-        {!protectionOn && (
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => {
-              reset();
-              setMode("enable");
-              setSuccess(null);
-            }}
-          >
-            {t("profile.security.enable")}
-          </button>
-        )}
-        {protectionOn && (
-          <>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                reset();
-                setMode("change");
-                setSuccess(null);
-              }}
-            >
-              {t("profile.security.change")}
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                reset();
-                setMode("disable");
-                setSuccess(null);
-              }}
-            >
-              {t("profile.security.disable")}
-            </button>
-            <button
-              type="button"
-              className="btn bg-rose-600 text-white hover:bg-rose-700"
-              onClick={() => lock()}
-            >
-              {t("profile.security.lockNow")}
-            </button>
-          </>
-        )}
-      </div>
-
-      {mode !== "idle" && (
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
-          {mode === "change" && (
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium">
-                {t("profile.security.currentPassphrase")}
-              </span>
-              <input
-                className="input"
-                type="password"
-                autoComplete="current-password"
-                value={current}
-                onChange={(e) => setCurrent(e.target.value)}
-                required
-              />
-            </label>
-          )}
-          {mode !== "disable" && (
-            <>
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-medium">
-                  {mode === "change"
-                    ? t("profile.security.newPassphrase")
-                    : t("profile.security.passphrase")}
-                </span>
-                <input
-                  className="input"
-                  type="password"
-                  autoComplete="new-password"
-                  value={pass1}
-                  onChange={(e) => setPass1(e.target.value)}
-                  minLength={8}
-                  required
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-medium">
-                  {t("profile.security.repeat")}
-                </span>
-                <input
-                  className="input"
-                  type="password"
-                  autoComplete="new-password"
-                  value={pass2}
-                  onChange={(e) => setPass2(e.target.value)}
-                  minLength={8}
-                  required
-                />
-              </label>
-              <p className="text-xs text-moss-500 dark:text-moss-400">
-                {t("profile.security.passphraseHint")}
-              </p>
-            </>
-          )}
-          {mode === "disable" && (
-            <p className="text-sm text-moss-600 dark:text-moss-300">
-              {t("profile.security.disableWarn")}
-            </p>
-          )}
-          {error && (
-            <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
-              {error}
-            </p>
-          )}
-          <div className="flex flex-wrap justify-end gap-2">
-            <button type="button" className="btn-secondary" onClick={reset}>
-              {t("common.cancel")}
-            </button>
-            <button type="submit" className="btn-primary" disabled={busy}>
-              {busy
-                ? t("profile.security.working")
-                : mode === "enable"
-                  ? t("profile.security.submitEnable")
-                  : mode === "change"
-                    ? t("profile.security.submitChange")
-                    : t("profile.security.submitDisable")}
-            </button>
-          </div>
-        </form>
-      )}
-    </section>
   );
 }
 
@@ -860,38 +631,6 @@ function MemberSwitcher({
     </section>
   );
 }
-
-async function exportData() {
-  // NOTE: db.secretKeys is deliberately excluded — private keys never leave
-  // the device via export. Key backup/recovery will be a separate, explicit
-  // passphrase-wrapped flow (Agent 2).
-  const [members, posts, exchanges, achievements, settings] = await Promise.all(
-    [
-      db.members.toArray(),
-      db.posts.toArray(),
-      db.exchanges.toArray(),
-      db.achievements.toArray(),
-      db.settings.toArray(),
-    ],
-  );
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    schemaVersion: 1,
-    data: { members, posts, exchanges, achievements, settings },
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `understoria-export-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 function InvitesSection({
   member,
   nodeId,
