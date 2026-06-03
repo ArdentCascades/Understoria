@@ -303,7 +303,9 @@ If any answer is unclear, ask. The defaults often exclude.
   and a dependency; not in the v1 plan.
 - **Manual screen reader pass** — at least one screen reader
   walkthrough per minor release (every ~2-3 PRs that touch a
-  significant surface). Findings get filed as tracked gaps.
+  significant surface). Findings get filed as tracked gaps. The
+  concrete per-page script lives in
+  [`docs/accessibility-test-runbook.md`](./accessibility-test-runbook.md).
 - **Keyboard-only pass** — same cadence as screen reader.
   Hands off the mouse; navigate every flow.
 - **Pilot feedback** — when pilot members include disabled
