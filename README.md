@@ -272,9 +272,9 @@ Kerala model and the potlatch tradition. See
 for the full breakdown, the items that were absorbed into existing
 agents, and the items that are deferred behind explicit gates.
 
-- [ ] Per-node configuration + operator transparency (Agent 11)
-- [ ] In-app onboarding & political literacy (Agent 16)
-- [ ] Breadth & reciprocity Dashboard additions (Agent 18a)
+- [x] Per-node configuration + operator transparency (Agent 11)
+- [x] In-app onboarding & political literacy (Agent 16)
+- [x] Breadth & reciprocity Dashboard additions (Agent 18a)
 - [x] Shared "Decisions" surface for proposals, disputes, and recall (Agents 13 + 14, with reversibility tiers folded in)
 - [ ] Moderation queue and graduated sanctions (Agent 12)
 - [ ] Per-peer federation agreements (Agent 15)

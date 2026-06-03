@@ -273,7 +273,7 @@ carries 8 fields (3 safeguard thresholds, 3 task-check-in thresholds,
 both `proposal` and `dispute` kinds with voting, consensus close,
 reversibility tiers, and required impact reflection for hard tier.
 Onboarding is complete (welcome flow, opsec guide, contextual hints).
-Schema is at v12; 527 tests pass.
+Schema is at v17; 677 tests pass.
 
 **E. Pilot deployment next.**
 Every remaining agent needs input that only real use provides:
