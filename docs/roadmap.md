@@ -217,6 +217,7 @@ experience. Each has a clear gate.
 | Agent 18b — community web graph | Threat-model §7 entry + governance proposal opting in | Force-directed who-helps-whom is the highest-value social-graph leak in the system. Default-off behind a governance gate, or not at all |
 | Agent 19 — balance cap + community pool | Resolution of [issue #6](https://github.com/ardentcascades/understoria/issues/6) | Cap overflow and project organizing are two faces of the same credit-model question. Decide it once, build it once |
 | Agent 21 — federation mutual aid fund | Agent 15 shipped + ≥1 federation pair operating in practice | Cross-node fund disbursement is a 4th nesting layer of governance and an attractive target for adversarial behaviour. Needs operational federation experience and a threat-model pass first |
+| Trusted node allowlist for exchange mirroring | Agent 3 federation trust anchor + Agent 15 per-peer agreements | A list served by the target node is self-attesting; a robust allowlist needs an independent trust anchor. Pre-pilot, the informed-consent gate ships instead. Design: [`federated-node-allowlist.md`](./federated-node-allowlist.md) |
 | GOVERNANCE.md welfare-flag amendment | Modified-consensus ratification | The moderator welfare flag is a governance policy choice (do moderators get standing authority to delay decisions?) — must be ratified before it ships as a feature |
 
 ## Ordering (staged delivery)

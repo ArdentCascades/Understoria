@@ -145,7 +145,14 @@ We are not trying to protect against:
   no-referrer) and a non-reversible bucket id for rate-limit keying
   so client IPs never reach memory or logs. The PWA-only deployment
   path documents the matching Caddy header config. Certificate
-  pinning in the PWA is still not implemented; tracked.
+  pinning is not an application-code item: browser PWAs cannot pin
+  certificates from JavaScript (HPKP is deprecated and removed from
+  browsers; certificate validation is the browser's and OS's
+  responsibility). The operative mitigation is HSTS, which already
+  ships — the Fastify node registers `@fastify/helmet`, and the
+  PWA-only path documents the matching Caddy headers. The one
+  remaining step is a deployment task, not an app task: submitting
+  the production domain to the HSTS preload list.
 
 - **Safeguard thresholds are community-configurable; the moderation
   workflow is not yet built.** Daily helper limits, short-exchange
@@ -175,13 +182,26 @@ We are not trying to protect against:
   hostile observer at a chosen URL. A misconfigured operator could
   also point a whole community at an adversarial node by social
   engineering ("paste this URL into Profile → Community node").
-  Mitigations not yet implemented: a community-blessed allowlist of
-  node URLs, with the PWA refusing or warning on URLs outside the
-  list; surfacing each member's configured mirror URL in their
-  profile so moderators can review. The current safeguard is
-  organizational: mirroring is off by default, and the URL field
-  sits below an explanatory note that reminds members what gets
-  sent. Tracked work.
+  Mitigation now shipped: an informed-consent gate. The PWA requires
+  an explicit confirmation — naming the data sent (counterparty public
+  key, signature, category, hours, timestamp) and the trust-graph-leak
+  risk — before mirroring is enabled or retargeted to a different URL.
+  This is consent, not prevention: it defeats accidental and social-
+  engineered misconfiguration, but a determined or deceived member can
+  still confirm. See `apps/web/src/lib/mirrorConsent.ts`.
+  Deferred, with reasoning:
+  (i) The community-blessed allowlist of node URLs is deferred to
+  post-pilot. A robust version needs a federation trust anchor — a
+  list *served by the target node* is worthless against a malicious
+  target that simply attests it is allowed. Design options and the
+  recommended approach are spelled out in
+  `docs/federated-node-allowlist.md`.
+  (ii) "Surface each member's configured mirror URL to moderators" is
+  itself a metadata leak — it broadcasts where each member mirrors —
+  so it is deliberately not built.
+  The current organizational safeguard remains in place: mirroring is
+  off by default, and the URL field sits below an explanatory note
+  that reminds members what gets sent.
 
 - **Public task check-in chip reveals claim duration.** When a
   claimed task crosses both the `taskNeedsHelpDays` floor and
