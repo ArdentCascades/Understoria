@@ -147,18 +147,21 @@ We are not trying to protect against:
   path documents the matching Caddy header config. Certificate
   pinning in the PWA is still not implemented; tracked.
 
-- **Safeguard thresholds and moderation workflow are not yet
-  community-configurable.** Daily helper limits, short-exchange
-  flags, and reciprocal-pair flags currently live as module-level
-  constants in `apps/web/src/lib/safeguards.ts`. There is also no
-  in-app surface for moderators to review flagged exchanges — the
-  "surfacing each member's configured mirror URL in their profile so
-  moderators can review" wording elsewhere in this document
-  presupposes a queue we have not built. Phase 5 / Agent 11 moves
-  the thresholds to per-node config; Phase 5 / Agent 12 adds the
-  moderation queue and the action log it writes to. Until those
-  ship, communities that need different thresholds or a moderation
-  workflow must coordinate out-of-band per `GOVERNANCE.md` §5.
+- **Safeguard thresholds are community-configurable; the moderation
+  workflow is not yet built.** Daily helper limits, short-exchange
+  flags, and reciprocal-pair flags now live in per-node `NodeConfig`
+  (Phase 5 / Agent 11, shipped) and are read from config by
+  `apps/web/src/lib/safeguards.ts` — the module-level constants
+  remain only as defaults. A community edits the three thresholds in
+  Profile → Community settings, so rules can fit local conditions
+  without a code change. What is still missing is the moderation
+  side: there is no in-app surface for moderators to review flagged
+  exchanges — the "surfacing each member's configured mirror URL in
+  their profile so moderators can review" wording elsewhere in this
+  document presupposes a queue we have not built. Phase 5 / Agent 12
+  adds that moderation queue and the action log it writes to. Until
+  it ships, communities that need a moderation workflow must
+  coordinate out-of-band per `GOVERNANCE.md` §5.
 
 - **Configurable node URL can leak counterparty public keys.** When a
   member enables exchange mirroring in Profile → Community node and
