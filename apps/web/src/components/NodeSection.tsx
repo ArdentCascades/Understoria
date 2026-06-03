@@ -28,19 +28,33 @@ import {
   writeSubmitConfig,
   type SubmitConfig,
 } from "@/lib/nodeSubmit";
+import { mirrorChangeNeedsConsent } from "@/lib/mirrorConsent";
 import { flushOutboxNow } from "@/lib/outbox";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export function NodeSection() {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<SubmitConfig>({ url: "", enabled: false });
+  // Last value actually written to storage. Drives the consent check so we
+  // only prompt when the save would point mirroring at a destination the
+  // member hasn't already confirmed.
+  const [persisted, setPersisted] = useState<SubmitConfig>({
+    url: "",
+    enabled: false,
+  });
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  // When set, the pending (trimmed) config awaiting consent confirmation.
+  const [pendingSave, setPendingSave] = useState<SubmitConfig | null>(null);
 
   // Load the persisted config once on mount.
   useEffect(() => {
     let cancelled = false;
     void readSubmitConfig().then((cfg) => {
-      if (!cancelled) setDraft(cfg);
+      if (!cancelled) {
+        setDraft(cfg);
+        setPersisted(cfg);
+      }
     });
     return () => {
       cancelled = true;
@@ -58,18 +72,29 @@ export function NodeSection() {
     [],
   );
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function persist(next: SubmitConfig) {
     setSaving(true);
     try {
-      await writeSubmitConfig({
-        url: draft.url.trim(),
-        enabled: draft.enabled,
-      });
+      await writeSubmitConfig(next);
+      setPersisted(next);
       setSavedAt(Date.now());
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const next: SubmitConfig = { url: draft.url.trim(), enabled: draft.enabled };
+    // Enabling mirroring (or retargeting it) ships the community's trust
+    // graph to a member-chosen server — require informed consent first.
+    // This is consent, not prevention: it defeats accidental/social-
+    // engineered misconfiguration, not an allowlist.
+    if (mirrorChangeNeedsConsent(persisted, next)) {
+      setPendingSave(next);
+      return;
+    }
+    await persist(next);
   }
 
   return (
@@ -119,6 +144,22 @@ export function NodeSection() {
       <Telemetry lastSuccess={lastSuccess?.value} lastError={lastError?.value} />
 
       <OutboxControls />
+
+      <ConfirmDialog
+        open={pendingSave !== null}
+        tone="caution"
+        title={t("profile.node.consent.title")}
+        description={t("profile.node.consent.body")}
+        confirmLabel={t("profile.node.consent.confirm")}
+        cancelLabel={t("common.cancel")}
+        confirmingLabel={t("common.saving")}
+        onCancel={() => setPendingSave(null)}
+        onConfirm={async () => {
+          if (!pendingSave) return;
+          await persist(pendingSave);
+          setPendingSave(null);
+        }}
+      />
     </section>
   );
 }

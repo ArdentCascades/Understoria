@@ -947,7 +947,12 @@
       "pending": "{{count}} pendientes en la cola",
       "poisoned": "{{count}} señalados para revisión",
       "retryNow": "Reintentar ahora",
-      "retrying": "Reintentando…"
+      "retrying": "Reintentando…",
+      "consent": {
+        "title": "¿Enviar tus registros de intercambio a este servidor?",
+        "body": "Activar el reflejo envía cada intercambio en el que participas a este servidor, incluyendo la clave pública de la otra persona, la firma, la categoría, las horas y la hora. Un servidor que no controlas puede usar esto para trazar quién-ayuda-a-quién en toda tu comunidad. Activa esto solo para un nodo que tu comunidad gestione y en el que confíe.",
+        "confirm": "Sí, reflejar en este nodo"
+      }
     },
     "invites": {
       "title": "Invitaciones que has emitido",
