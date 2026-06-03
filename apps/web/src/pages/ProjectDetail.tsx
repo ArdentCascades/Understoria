@@ -672,7 +672,7 @@ function OrganizerControls({
         >
           <input
             className="input"
-            placeholder="Why pause? (one short line)"
+            placeholder={t("projects.detail.pausePlaceholder")}
             value={pauseNote}
             onChange={(e) => setPauseNote(e.target.value)}
             maxLength={140}
@@ -1251,7 +1251,7 @@ function AddTaskForm({
             className="input"
             value={skills}
             onChange={(e) => setSkills(e.target.value)}
-            placeholder="carpentry, listening"
+            placeholder={t("projects.task.addTask.fieldSkillsPlaceholder")}
           />
         </label>
         <button

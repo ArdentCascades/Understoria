@@ -163,6 +163,7 @@
       "fieldDeadlineDays": "Deadline in days (optional)",
       "fieldArea": "Area (neighborhood, not address)",
       "fieldTags": "Tags (comma-separated, optional)",
+      "fieldTagsPlaceholder": "garden, tool-library",
       "submit": "Create draft",
       "submitting": "Creating…",
       "errorTitle": "Give the project a short title.",
@@ -228,6 +229,7 @@
         "bodyMember": "This project is being put together. Tasks become claimable once the organizer launches it."
       },
       "pause": "Pause",
+      "pausePlaceholder": "Why pause? (one short line)",
       "resume": "Resume",
       "markComplete": "Mark project complete",
       "completed": "Completed {{when}}",
@@ -285,6 +287,7 @@
         "fieldUrgency": "Urgency",
         "fieldCategory": "Category",
         "fieldSkills": "Suggested skills (comma-separated)",
+        "fieldSkillsPlaceholder": "carpentry, listening",
         "submit": "Add task",
         "submitting": "Adding…"
       },

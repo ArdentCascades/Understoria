@@ -498,7 +498,7 @@ export default function ProjectNewPage() {
                 className="input"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                placeholder="garden, tool-library"
+                placeholder={t("projects.create.fieldTagsPlaceholder")}
               />
             </label>
             {error && (
