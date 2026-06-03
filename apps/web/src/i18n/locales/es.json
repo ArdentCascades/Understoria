@@ -163,6 +163,7 @@
       "fieldDeadlineDays": "Fecha límite en días (opcional)",
       "fieldArea": "Zona (vecindario, no dirección exacta)",
       "fieldTags": "Etiquetas (separadas por comas, opcional)",
+      "fieldTagsPlaceholder": "jardín, biblioteca de herramientas",
       "submit": "Crear borrador",
       "submitting": "Creando…",
       "errorTitle": "Dale al proyecto un título corto.",
@@ -228,6 +229,7 @@
         "bodyMember": "Este proyecto se está armando. Las tareas se pueden tomar cuando quien organiza lo lance."
       },
       "pause": "Pausar",
+      "pausePlaceholder": "¿Por qué pausar? (una línea breve)",
       "resume": "Reanudar",
       "markComplete": "Marcar proyecto como completo",
       "completed": "Completado {{when}}",
@@ -285,6 +287,7 @@
         "fieldUrgency": "Urgencia",
         "fieldCategory": "Categoría",
         "fieldSkills": "Habilidades sugeridas (separadas por comas)",
+        "fieldSkillsPlaceholder": "carpintería, escucha",
         "submit": "Agregar tarea",
         "submitting": "Agregando…"
       },
