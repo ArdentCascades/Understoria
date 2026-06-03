@@ -744,7 +744,10 @@ function InvitesSection({
               {t("profile.invites.showShareSheet")}
             </button>
             {copyStatus && (
-              <span className="text-canopy-800 dark:text-canopy-200">
+              <span
+                role="status"
+                className="text-canopy-800 dark:text-canopy-200"
+              >
                 {copyStatus}
               </span>
             )}

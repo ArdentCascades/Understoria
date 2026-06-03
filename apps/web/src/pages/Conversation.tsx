@@ -32,6 +32,7 @@ import { matchesQuery } from "@/lib/messageSearch";
 import { HighlightedText } from "@/components/HighlightedText";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
 export default function ConversationPage() {
   const { memberKey } = useParams<{ memberKey: string }>();
@@ -50,6 +51,7 @@ export default function ConversationPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const reduced = useReducedMotion();
 
   const otherKey = memberKey ? decodeURIComponent(memberKey) : "";
   const otherName =
@@ -113,13 +115,18 @@ export default function ConversationPage() {
 
   useEffect(() => {
     if (matchIds.length === 0) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current?.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+      });
       return;
     }
     const id = matchIds[Math.min(activeMatchIdx, matchIds.length - 1)];
     const el = matchRefs.current.get(id);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [matchIds, activeMatchIdx, messages]);
+    el?.scrollIntoView({
+      behavior: reduced ? "auto" : "smooth",
+      block: "center",
+    });
+  }, [matchIds, activeMatchIdx, messages, reduced]);
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();

@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FAQ_SECTIONS } from "@/content/faq";
+import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
 // Task-oriented FAQ page. Each entry's id becomes a URL fragment
 // (`/help#confirm-exchange`) so members can share specific
@@ -23,15 +24,19 @@ export default function HelpPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     if (!location.hash) return;
     const id = location.hash.slice(1);
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "start",
+      });
     }
-  }, [location.hash]);
+  }, [location.hash, reduced]);
 
   return (
     <div className="px-4 pb-8 pt-4">
