@@ -56,6 +56,7 @@ export function CommunitySettingsSection() {
         taskCheckInGraceDays: Math.round(draft.taskCheckInGraceDays),
         proposalDeliberationDays: Math.round(draft.proposalDeliberationDays),
         proposalMinAffirms: Math.round(draft.proposalMinAffirms),
+        autoConfirmHours: Math.round(draft.autoConfirmHours),
         customMilestones: draft.customMilestones,
       });
       await refreshNodeConfig();
@@ -287,6 +288,33 @@ export function CommunitySettingsSection() {
             }
             className="input"
           />
+        </Field>
+        <Field
+          id="cfg-auto-confirm"
+          label={t("community.autoConfirmHours.label")}
+          hint={t("community.autoConfirmHours.help")}
+        >
+          <div className="flex items-center gap-2">
+            <input
+              id="cfg-auto-confirm"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={8760}
+              step={1}
+              value={draft.autoConfirmHours}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  autoConfirmHours: Number(e.target.value),
+                })
+              }
+              className="input"
+            />
+            <span className="text-xs text-moss-500">
+              {t("community.autoConfirmHours.unit")}
+            </span>
+          </div>
         </Field>
 
         <CustomMilestonesPanel

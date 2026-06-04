@@ -11,6 +11,7 @@
  */
 import type { FastifyInstance } from "fastify";
 import type { Config } from "../config.js";
+import type { SystemSigner } from "../systemSigner.js";
 
 // Agent 11: public node config endpoint. Exposes (only) the operator
 // / hosting transparency block — members and peer nodes can see who
@@ -35,18 +36,39 @@ export interface PublicConfigResponse {
     fundingNote: string | null;
     contact: string | null;
   };
+  /**
+   * Auto-confirm system key — published so members' PWAs and peer
+   * nodes can verify the helped-side signature on system-signed
+   * exchanges. `current` is the live pubkey; `history` is the
+   * rotation trail. Omitted when the operator hasn't supplied
+   * `NODE_SYSTEM_SECRET_KEY`. See `docs/auto-confirm-key.md` §4.
+   *
+   * Rotation note: `history` is always `[]` in PR-A. Rotating the
+   * key requires a deploy-time procedure (regenerate, archive the
+   * old pubkey into a static history list, restart) that is
+   * documented separately and intentionally out of scope for code
+   * in this PR. A future agent that wires rotation into the
+   * operator UI will fill this array.
+   */
+  systemKey?: {
+    current: string;
+    history: { pubkey: string; retiredAt: number }[];
+  };
 }
 
 export async function registerConfigRoutes(
   app: FastifyInstance,
-  options: { config: Config },
+  options: { config: Config; signer: SystemSigner | null },
 ): Promise<void> {
-  const { config } = options;
+  const { config, signer } = options;
 
   app.get("/config", async () => {
     const operator = buildOperatorBlock(config);
     const response: PublicConfigResponse = {};
     if (operator) response.operator = operator;
+    if (signer) {
+      response.systemKey = { current: signer.publicKey, history: [] };
+    }
     return response;
   });
 }

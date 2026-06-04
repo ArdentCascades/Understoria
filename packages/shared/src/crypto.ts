@@ -108,6 +108,16 @@ export function canonicalExchangePayload(p: ExchangePayload): string {
  * Independently verify an exchange record. Any node with the two public
  * keys can call this without contacting a central authority — the
  * foundation for trustless federation (Agent 3).
+ *
+ * For auto-confirmed records (see `docs/auto-confirm-key.md` §4) the
+ * helped-side signature is produced by the node's system key, NOT by
+ * the member identified in `helpedKey` — so this helper, which only
+ * has the member pubkey on hand, cannot verify it. Auto-confirmed rows
+ * therefore pass through this check on a verified helper signature
+ * alone; callers that need full trust (peer-node ingestion, the
+ * Decisions surface) should use `verifyExchangeLabel` below, which
+ * takes a system-pubkey resolver and returns a distinct label per
+ * §4's testable property.
  */
 export function verifyExchange(exchange: Exchange): boolean {
   const payload = canonicalExchangePayload({
@@ -118,10 +128,90 @@ export function verifyExchange(exchange: Exchange): boolean {
     category: exchange.category,
     completedAt: exchange.completedAt,
   });
-  return (
-    verify(payload, exchange.helperSignature, exchange.helperKey) &&
-    verify(payload, exchange.helpedSignature, exchange.helpedKey)
-  );
+  if (!verify(payload, exchange.helperSignature, exchange.helperKey)) {
+    return false;
+  }
+  if (exchange.autoConfirmed) {
+    // System-signed helped-side signature; can't be verified without
+    // the published system pubkey, which this helper doesn't know.
+    // Helper-side signature was already verified above.
+    return true;
+  }
+  return verify(payload, exchange.helpedSignature, exchange.helpedKey);
+}
+
+/**
+ * Distinguishability label for the §4 hard contract in
+ * `docs/auto-confirm-key.md`. Returns one of:
+ *
+ * - `"member-signed"` — both signatures verify against member keys
+ *   (the shipped mutual-confirm path).
+ * - `"system-signed"` — helper signature verifies against `helperKey`;
+ *   helped-side signature verifies against a resolved system pubkey,
+ *   and `autoConfirmed` is true with `autoConfirmedBy: "system:<nodeId>"`.
+ * - `"invalid"` — anything else (signatures don't verify, fields
+ *   contradict each other, system pubkey unavailable).
+ *
+ * The caller supplies a `resolveSystemPubkey(nodeId)` function so this
+ * remains a pure crypto helper — the shared package does not fetch
+ * `GET /config`. Pass `null` from the resolver to indicate "no key
+ * known for this node," which produces `"invalid"`: a peer that
+ * cannot verify the system signature MUST NOT label it as authentic.
+ *
+ * This is the §4 testable property the implementation PR ships with;
+ * the labels are intentionally distinct strings so a downstream
+ * auditor can fail a verification on a mismatch.
+ */
+export type ExchangeLabel = "member-signed" | "system-signed" | "invalid";
+
+export function verifyExchangeLabel(
+  exchange: Exchange,
+  resolveSystemPubkey: (nodeId: string) => string | null,
+): ExchangeLabel {
+  const payload = canonicalExchangePayload({
+    postId: exchange.postId,
+    helperKey: exchange.helperKey,
+    helpedKey: exchange.helpedKey,
+    hours: exchange.hoursExchanged,
+    category: exchange.category,
+    completedAt: exchange.completedAt,
+  });
+  if (!verify(payload, exchange.helperSignature, exchange.helperKey)) {
+    return "invalid";
+  }
+
+  if (exchange.autoConfirmed) {
+    // Auto-confirm must self-declare via both flags. A row that
+    // claims autoConfirmed but lacks the marker is rejected —
+    // refusing to fall back to the member-signed code path is the
+    // §4 contract: distinct labels for distinct provenance.
+    if (
+      typeof exchange.autoConfirmedBy !== "string" ||
+      !exchange.autoConfirmedBy.startsWith("system:")
+    ) {
+      return "invalid";
+    }
+    const expectedNodeId = exchange.autoConfirmedBy.slice("system:".length);
+    if (expectedNodeId.length === 0) return "invalid";
+    const pubkey = resolveSystemPubkey(expectedNodeId);
+    if (pubkey === null) return "invalid";
+    // The system key MUST NOT be a member's key. The label
+    // distinction is only meaningful if the helped-side identity is
+    // structurally not a member — a node operator cannot wave away
+    // the audit by pointing the system pubkey at a member account.
+    if (pubkey === exchange.helpedKey) return "invalid";
+    if (!verify(payload, exchange.helpedSignature, pubkey)) return "invalid";
+    return "system-signed";
+  }
+
+  // Member-confirmed path: helped-side signature must verify against
+  // `helpedKey`. autoConfirmedBy must be absent (a row that sets it
+  // without setting autoConfirmed is contradictory — reject).
+  if (exchange.autoConfirmedBy !== undefined) return "invalid";
+  if (!verify(payload, exchange.helpedSignature, exchange.helpedKey)) {
+    return "invalid";
+  }
+  return "member-signed";
 }
 
 /**

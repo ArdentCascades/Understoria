@@ -55,6 +55,18 @@ export async function registerExchangeRoutes(
     }
     const exchange = parsed.value;
 
+    // Auto-confirmed rows must come from `/auto-confirm`, which is
+    // the only path that can produce a valid system signature.
+    // Accepting them here would skip the system-pubkey check (the
+    // `verifyExchange` shared helper cannot verify the system side
+    // without a resolver) and let a client forge an auto-confirm
+    // flag with a garbage helped-side signature. See
+    // `docs/auto-confirm-key.md` §4.
+    if (exchange.autoConfirmed) {
+      reply.code(422);
+      return { error: "auto_confirm_via_dedicated_endpoint" };
+    }
+
     if (!verifyExchange(exchange)) {
       reply.code(422);
       return { error: "bad_signature" };

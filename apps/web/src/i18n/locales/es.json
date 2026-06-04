@@ -16,7 +16,15 @@
     "offerPosted": "Publicado. Tu oferta está en el tablero.",
     "projectCreated": "Proyecto creado. Agrega tareas y láncalo cuando estés lista.",
     "exchangeConfirmedPending": "Confirmado. Esperando a que la otra persona confirme también.",
-    "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes."
+    "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes.",
+    "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron."
+  },
+  "community": {
+    "autoConfirmHours": {
+      "label": "Confirmar automáticamente tras",
+      "help": "Cuando una parte deja de responder, la llave del sistema del nodo comunitario cierra el intercambio para que los créditos fluyan. Pon 0 para desactivar la confirmación automática por completo. Requiere que la persona operadora tenga una llave del sistema configurada; sin ella el barrido no hace nada.",
+      "unit": "horas (0 desactiva)"
+    }
   },
   "a11y": {
     "skipToMain": "Saltar al contenido principal"

@@ -16,7 +16,15 @@
     "offerPosted": "Posted. Your offer is live on the board.",
     "projectCreated": "Project created. Add tasks and launch it when you're ready.",
     "exchangeConfirmedPending": "Confirmed. Waiting for the other person to confirm too.",
-    "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you."
+    "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you.",
+    "autoConfirmed": "Auto-confirmed after {{hours}}h. Credit flowed."
+  },
+  "community": {
+    "autoConfirmHours": {
+      "label": "Auto-confirm after",
+      "help": "When one party stops responding, the community node's system key closes out the exchange so credit can flow. Set to 0 to disable auto-confirm entirely. Requires the operator to have a system key configured; without one the sweep is a no-op.",
+      "unit": "hours (0 disables)"
+    }
   },
   "a11y": {
     "skipToMain": "Skip to main content"

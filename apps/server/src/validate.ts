@@ -168,6 +168,35 @@ export function parseExchange(input: unknown): ParseResult {
     }
     flagReason = r.flagReason as FlagReason;
   }
+  // Optional auto-confirm fields. Shape-only here — the
+  // exchanges route refuses autoConfirmed=true rows entirely
+  // (those route through /auto-confirm), and the auto-confirm
+  // route does its own deeper checks.
+  let autoConfirmed: boolean | undefined;
+  if (r.autoConfirmed !== undefined) {
+    if (typeof r.autoConfirmed !== "boolean") {
+      return { ok: false, error: "autoConfirmed must be a boolean if present" };
+    }
+    autoConfirmed = r.autoConfirmed;
+  }
+  let autoConfirmedBy: string | undefined;
+  if (r.autoConfirmedBy !== undefined) {
+    if (typeof r.autoConfirmedBy !== "string" || r.autoConfirmedBy.length === 0) {
+      return { ok: false, error: "autoConfirmedBy must be a non-empty string if present" };
+    }
+    autoConfirmedBy = r.autoConfirmedBy;
+  }
+  let autoConfirmedAt: number | undefined;
+  if (r.autoConfirmedAt !== undefined) {
+    if (
+      typeof r.autoConfirmedAt !== "number" ||
+      !Number.isInteger(r.autoConfirmedAt) ||
+      r.autoConfirmedAt <= 0
+    ) {
+      return { ok: false, error: "autoConfirmedAt must be a positive integer if present" };
+    }
+    autoConfirmedAt = r.autoConfirmedAt;
+  }
 
   // Bound on completedAt: not absurdly far in the future. Keeps the
   // signature canonical-form predictable.
@@ -192,6 +221,9 @@ export function parseExchange(input: unknown): ParseResult {
     value.flaggedForReview = true;
     if (flagReason) value.flagReason = flagReason;
   }
+  if (autoConfirmed) value.autoConfirmed = true;
+  if (autoConfirmedBy !== undefined) value.autoConfirmedBy = autoConfirmedBy;
+  if (autoConfirmedAt !== undefined) value.autoConfirmedAt = autoConfirmedAt;
   return { ok: true, value };
 }
 
