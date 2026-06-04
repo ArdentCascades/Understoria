@@ -18,8 +18,9 @@ import {
   putNodeConfig,
   resetNodeConfig,
 } from "@/db/nodeConfig";
-import type { NodeConfig } from "@/types";
+import type { Milestone, NodeConfig } from "@/types";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { MAX_CUSTOM_MILESTONES } from "@/db/nodeConfig";
 
 // Per the roadmap (Agent 11 stage A), this UI is a bootstrap measure:
 // any member can edit until Agent 13 (in-app governance) ships and
@@ -55,6 +56,7 @@ export function CommunitySettingsSection() {
         taskCheckInGraceDays: Math.round(draft.taskCheckInGraceDays),
         proposalDeliberationDays: Math.round(draft.proposalDeliberationDays),
         proposalMinAffirms: Math.round(draft.proposalMinAffirms),
+        customMilestones: draft.customMilestones,
       });
       await refreshNodeConfig();
       setSavedAt(Date.now());
@@ -287,6 +289,13 @@ export function CommunitySettingsSection() {
           />
         </Field>
 
+        <CustomMilestonesPanel
+          milestones={draft.customMilestones}
+          onChange={(next) =>
+            setDraft({ ...draft, customMilestones: next })
+          }
+        />
+
         {error && (
           <p className="text-sm text-red-700 dark:text-red-300" role="alert">
             {error}
@@ -342,4 +351,173 @@ function Field({
       {children}
     </div>
   );
+}
+
+// Edits go into `draft.customMilestones` and only persist when the
+// parent form is saved — that keeps the save semantics consistent with
+// every other field on this section. Validation happens at save time
+// in `putNodeConfig`; this panel does the lightweight client-side
+// checks (duplicate, label length, count cap) for early feedback.
+function CustomMilestonesPanel({
+  milestones,
+  onChange,
+}: {
+  milestones: Milestone[];
+  onChange: (next: Milestone[]) => void;
+}) {
+  const { t } = useTranslation();
+  const [draftType, setDraftType] = useState<Milestone["type"]>("hours");
+  const [draftThreshold, setDraftThreshold] = useState<string>("");
+  const [draftLabel, setDraftLabel] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  function handleAdd(e: React.MouseEvent) {
+    e.preventDefault();
+    setLocalError(null);
+    const threshold = Number(draftThreshold);
+    const label = draftLabel.trim();
+    if (
+      !Number.isFinite(threshold) ||
+      !Number.isInteger(threshold) ||
+      threshold <= 0
+    ) {
+      setLocalError(t("community.customMilestones.validation.threshold"));
+      return;
+    }
+    if (label.length === 0) {
+      setLocalError(t("community.customMilestones.validation.labelRequired"));
+      return;
+    }
+    if (label.length > 80) {
+      setLocalError(t("community.customMilestones.validation.labelTooLong"));
+      return;
+    }
+    if (milestones.length >= MAX_CUSTOM_MILESTONES) {
+      setLocalError(t("community.customMilestones.validation.maxReached"));
+      return;
+    }
+    if (
+      milestones.some(
+        (m) => m.type === draftType && m.threshold === threshold,
+      )
+    ) {
+      setLocalError(t("community.customMilestones.validation.duplicate"));
+      return;
+    }
+    onChange([...milestones, { type: draftType, threshold, label }]);
+    setDraftThreshold("");
+    setDraftLabel("");
+  }
+
+  function handleRemove(idx: number) {
+    onChange(milestones.filter((_, i) => i !== idx));
+  }
+
+  return (
+    <fieldset className="flex flex-col gap-3 rounded-lg border border-moss-200 p-3 dark:border-moss-700">
+      <legend className="px-1 text-sm font-medium">
+        {t("community.customMilestones.title")}
+      </legend>
+      <p className="text-xs text-moss-600 dark:text-moss-300">
+        {t("community.customMilestones.intro")}
+      </p>
+
+      {milestones.length === 0 ? (
+        <p className="text-xs italic text-moss-500">
+          {t("community.customMilestones.emptyMessage")}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {milestones.map((m, idx) => (
+            <li
+              key={`${m.type}-${m.threshold}-${idx}`}
+              className="flex items-center justify-between gap-2 rounded border border-moss-100 px-2 py-1 text-sm dark:border-moss-800"
+            >
+              <span>
+                <span className="font-medium">{m.label}</span>{" "}
+                <span className="text-xs text-moss-500">
+                  ({t(`community.customMilestones.type${capitalize(m.type)}`)} ·{" "}
+                  {m.threshold})
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => handleRemove(idx)}
+                className="text-xs text-red-700 hover:underline dark:text-red-300"
+              >
+                {t("community.customMilestones.remove")}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <label className="flex flex-col gap-1 text-xs">
+            <span>{t("community.customMilestones.typeLabel")}</span>
+            <select
+              value={draftType}
+              onChange={(e) =>
+                setDraftType(e.target.value as Milestone["type"])
+              }
+              className="input"
+            >
+              <option value="hours">
+                {t("community.customMilestones.typeHours")}
+              </option>
+              <option value="exchanges">
+                {t("community.customMilestones.typeExchanges")}
+              </option>
+              <option value="members">
+                {t("community.customMilestones.typeMembers")}
+              </option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            <span>{t("community.customMilestones.thresholdLabel")}</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step={1}
+              value={draftThreshold}
+              onChange={(e) => setDraftThreshold(e.target.value)}
+              className="input"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            <span>{t("community.customMilestones.labelField")}</span>
+            <input
+              type="text"
+              maxLength={80}
+              value={draftLabel}
+              onChange={(e) => setDraftLabel(e.target.value)}
+              placeholder={t("community.customMilestones.labelHint")}
+              className="input"
+            />
+          </label>
+        </div>
+        {localError && (
+          <p className="text-xs text-red-700 dark:text-red-300" role="alert">
+            {localError}
+          </p>
+        )}
+        <div>
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="btn-secondary text-xs"
+            disabled={milestones.length >= MAX_CUSTOM_MILESTONES}
+          >
+            {t("community.customMilestones.add")}
+          </button>
+        </div>
+      </div>
+    </fieldset>
+  );
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

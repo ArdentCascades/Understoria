@@ -1219,6 +1219,29 @@
       "vulnerableImpact": "Impacto en personas vulnerables"
     }
   },
+  "community": {
+    "customMilestones": {
+      "title": "Hitos personalizados",
+      "intro": "Estos se suman a los hitos básicos de horas, intercambios y miembros con umbrales que tengan sentido para tu comunidad. Aparecen en el panel junto a los hitos básicos.",
+      "add": "Añadir hito",
+      "typeLabel": "Tipo",
+      "typeHours": "Horas",
+      "typeExchanges": "Intercambios",
+      "typeMembers": "Miembros",
+      "thresholdLabel": "Umbral",
+      "labelField": "Etiqueta",
+      "labelHint": "Qué celebrar cuando se alcance",
+      "remove": "Eliminar",
+      "emptyMessage": "Aún no hay hitos personalizados. Añade los que tengan sentido para tu comunidad.",
+      "validation": {
+        "duplicate": "Ya existe un hito con este tipo y umbral.",
+        "labelTooLong": "La etiqueta es demasiado larga (máximo 80 caracteres).",
+        "labelRequired": "Pon una etiqueta al hito para que los miembros sepan qué celebra.",
+        "threshold": "El umbral debe ser un número entero positivo.",
+        "maxReached": "Hasta 20 hitos personalizados."
+      }
+    }
+  },
   "welcome": {
     "skip": "Saltar",
     "next": "Siguiente",

@@ -1219,6 +1219,29 @@
       "vulnerableImpact": "Vulnerable impact"
     }
   },
+  "community": {
+    "customMilestones": {
+      "title": "Custom milestones",
+      "intro": "These add to the baseline hours, exchanges, and members milestones with thresholds meaningful to your community. They appear on the Dashboard alongside the baselines.",
+      "add": "Add milestone",
+      "typeLabel": "Type",
+      "typeHours": "Hours",
+      "typeExchanges": "Exchanges",
+      "typeMembers": "Members",
+      "thresholdLabel": "Threshold",
+      "labelField": "Label",
+      "labelHint": "What to celebrate when this is reached",
+      "remove": "Remove",
+      "emptyMessage": "No custom milestones yet. Add ones meaningful to your community.",
+      "validation": {
+        "duplicate": "A milestone with this type and threshold already exists.",
+        "labelTooLong": "Label is too long (max 80 characters).",
+        "labelRequired": "Give the milestone a label so members know what it celebrates.",
+        "threshold": "Threshold must be a positive whole number.",
+        "maxReached": "Up to 20 custom milestones."
+      }
+    }
+  },
   "welcome": {
     "skip": "Skip",
     "next": "Next",

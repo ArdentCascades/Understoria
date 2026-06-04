@@ -190,6 +190,14 @@ export interface NodeConfig {
    *  shouldn't pass silently. Default 2 — same threshold the
    *  vouch system uses for "trusted" status. */
   proposalMinAffirms: number;
+  /** Community-defined milestones layered ON TOP of the baseline
+   *  hardcoded set in `lib/milestones.ts`. Lets a community celebrate
+   *  thresholds meaningful to *them* (e.g. "100 union meetings",
+   *  "1,000 fridge visits") without forking the baseline. Dedup against
+   *  the baseline happens at read time — baseline wins on
+   *  `(type, threshold)` collision so a community can't accidentally
+   *  shadow a shipped milestone. */
+  customMilestones: Milestone[];
 }
 
 export const DEFAULT_NODE_CONFIG: NodeConfig = {
@@ -201,6 +209,7 @@ export const DEFAULT_NODE_CONFIG: NodeConfig = {
   taskCheckInGraceDays: 2,
   proposalDeliberationDays: 3,
   proposalMinAffirms: 2,
+  customMilestones: [],
 };
 
 /**

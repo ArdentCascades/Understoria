@@ -23,6 +23,7 @@ import type {
   CommunityStats,
   Exchange,
   Member,
+  NodeConfig,
   Post,
 } from "@/types";
 import { reachedMilestones } from "./milestones";
@@ -34,6 +35,10 @@ export function computeCommunityStats(
   members: readonly Member[],
   posts: readonly Post[],
   now: number = Date.now(),
+  /** Optional — when provided, community-defined custom milestones are
+   *  layered on top of the baseline. Omitted in older call sites and
+   *  tests; baseline-only behaviour is preserved. */
+  nodeConfig?: NodeConfig,
 ): CommunityStats {
   const totalHoursExchanged =
     Math.round(
@@ -85,9 +90,21 @@ export function computeCommunityStats(
     (p) => p.claimedBy !== null,
   ).length;
 
-  const hoursMilestones = reachedMilestones("hours", totalHoursExchanged);
-  const exchangeMilestones = reachedMilestones("exchanges", totalExchanges);
-  const memberMilestones = reachedMilestones("members", members.length);
+  const hoursMilestones = reachedMilestones(
+    "hours",
+    totalHoursExchanged,
+    nodeConfig,
+  );
+  const exchangeMilestones = reachedMilestones(
+    "exchanges",
+    totalExchanges,
+    nodeConfig,
+  );
+  const memberMilestones = reachedMilestones(
+    "members",
+    members.length,
+    nodeConfig,
+  );
 
   return {
     totalHoursExchanged,

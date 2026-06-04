@@ -9,9 +9,22 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { NodeConfig } from "@/types";
+import type { Milestone, NodeConfig } from "@/types";
 import { DEFAULT_NODE_CONFIG } from "@/types";
 import { db } from "./database";
+
+/** Hard cap on community-defined milestone rows. Prevents config bloat
+ *  (the row syncs through governance proposals and ships in the
+ *  config payload of every `config_change` proposal — keeping it small
+ *  keeps proposal diffs human-readable). 20 is large enough for any
+ *  realistic community list while still bounding the worst case. */
+export const MAX_CUSTOM_MILESTONES = 20;
+const MAX_LABEL_LENGTH = 80;
+const VALID_MILESTONE_TYPES = new Set<Milestone["type"]>([
+  "hours",
+  "exchanges",
+  "members",
+]);
 
 // Agent 11: per-node config CRUD. The PWA always operates on exactly
 // one node, so there's never more than one row in this table. The
@@ -44,6 +57,7 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
       DEFAULT_NODE_CONFIG.proposalDeliberationDays,
     proposalMinAffirms:
       row.proposalMinAffirms ?? DEFAULT_NODE_CONFIG.proposalMinAffirms,
+    customMilestones: row.customMilestones ?? [],
   };
 }
 
@@ -128,7 +142,87 @@ function validate(config: NodeConfig): NodeConfig {
       "Proposal minimum affirms must be a whole number >= 1.",
     );
   }
-  return config;
+  const validatedCustom = validateCustomMilestones(config.customMilestones);
+  return { ...config, customMilestones: validatedCustom };
+}
+
+function validateCustomMilestones(input: unknown): Milestone[] {
+  if (!Array.isArray(input)) {
+    throw new InvalidNodeConfigError(
+      "Custom milestones must be an array.",
+    );
+  }
+  if (input.length > MAX_CUSTOM_MILESTONES) {
+    throw new InvalidNodeConfigError(
+      `Up to ${MAX_CUSTOM_MILESTONES} custom milestones.`,
+    );
+  }
+  const seen = new Set<string>();
+  const out: Milestone[] = [];
+  for (const raw of input) {
+    if (!raw || typeof raw !== "object") {
+      throw new InvalidNodeConfigError(
+        "Each custom milestone must be an object.",
+      );
+    }
+    const m = raw as Partial<Milestone>;
+    if (
+      typeof m.type !== "string" ||
+      !VALID_MILESTONE_TYPES.has(m.type as Milestone["type"])
+    ) {
+      throw new InvalidNodeConfigError(
+        "Custom milestone type must be hours, exchanges, or members.",
+      );
+    }
+    // `members` and `exchanges` are intrinsically integers; `hours`
+    // is a count of whole hours for a celebrate-this-threshold
+    // marker (sub-hour milestones don't fit the "meaningful
+    // threshold" framing). Keeping all three integer simplifies the
+    // form and the dedup key.
+    if (
+      typeof m.threshold !== "number" ||
+      !Number.isFinite(m.threshold) ||
+      !Number.isInteger(m.threshold) ||
+      m.threshold <= 0
+    ) {
+      throw new InvalidNodeConfigError(
+        "Custom milestone threshold must be a positive whole number.",
+      );
+    }
+    if (typeof m.label !== "string") {
+      throw new InvalidNodeConfigError(
+        "Custom milestone label must be a string.",
+      );
+    }
+    const label = m.label.trim();
+    if (label.length === 0) {
+      throw new InvalidNodeConfigError(
+        "Custom milestone label cannot be empty.",
+      );
+    }
+    if (label.length > MAX_LABEL_LENGTH) {
+      throw new InvalidNodeConfigError(
+        `Label is too long (max ${MAX_LABEL_LENGTH} characters).`,
+      );
+    }
+    // Duplicates within the custom set are user error and rejected
+    // here. Baseline-vs-custom dedup is handled at read time in
+    // `effectiveMilestones` (baseline wins) — that one isn't an
+    // error, just a no-op.
+    const key = `${m.type}|${m.threshold}`;
+    if (seen.has(key)) {
+      throw new InvalidNodeConfigError(
+        "A milestone with this type and threshold already exists.",
+      );
+    }
+    seen.add(key);
+    out.push({
+      type: m.type as Milestone["type"],
+      threshold: m.threshold,
+      label,
+    });
+  }
+  return out;
 }
 
 /**
