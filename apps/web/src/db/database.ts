@@ -464,6 +464,11 @@ export const SETTING_KEYS = {
    *  Mirrored to localStorage so the inline script in index.html
    *  applies the right class before first paint. See lib/density.ts. */
   density: "density",
+  /** Cursor for `pullFederatedExchanges` — the highest `completedAt`
+   *  observed so far. Mirrors the post / claim / task-comment cursors
+   *  in `federationSync.ts`. Absent on a fresh install means "pull
+   *  the most recent slice on first sync." */
+  federationLastExchangePull: "federationLastExchangePull",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

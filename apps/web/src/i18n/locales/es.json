@@ -754,6 +754,11 @@
       "emptyTitle": "Una nueva understoria",
       "empty": "Aún no hay intercambios. Cuando ocurra el primero, verás la mezcla de cuidados, trabajo y apoyo fluyendo por la comunidad."
     },
+    "federation": {
+      "title": "En la federación",
+      "summaryOne": "{{count}} intercambio · {{hours}}h circulando por {{peers}} comunidad aliada",
+      "summaryOther": "{{count}} intercambios · {{hours}}h circulando por {{peers}} comunidades aliadas"
+    },
     "breadth": {
       "title": "Amplitud, no profundidad",
       "intro": "Integrantes según la cantidad de personas distintas a las que han ayudado — generosidad repartida, no acumulada.",

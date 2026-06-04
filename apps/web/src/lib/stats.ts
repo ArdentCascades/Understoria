@@ -124,6 +124,49 @@ export function computeCommunityStats(
   };
 }
 
+export interface FederationStats {
+  /** Number of exchanges in the input set whose `nodeId` is NOT the
+   *  local node. Zero if the input was already local-only. */
+  totalExchanges: number;
+  /** Hours summed across the same subset, rounded to 1dp. */
+  totalHoursExchanged: number;
+  /** Distinct peer node ids represented in the subset. The count
+   *  alone is shown in the UI; the set itself is exposed for tests
+   *  and for future per-peer breakdowns. */
+  peerNodeIds: string[];
+}
+
+/**
+ * Aggregates the subset of exchanges that originated on a node OTHER
+ * than `localNodeId`. Used by the Dashboard to render an "Across
+ * federation" rollup as a SEPARATE surface from the home-node
+ * headline, rather than silently inflating the headline number.
+ *
+ * Splitting (rather than summing) follows `no-leaderboards` and
+ * `community-authority`: a node's own metabolism stays legible
+ * regardless of how active the federation is; the federation panel
+ * surfaces flow without putting the home node in a contest.
+ */
+export function computeFederationStats(
+  exchanges: readonly Exchange[],
+  localNodeId: string,
+): FederationStats {
+  const peerSet = new Set<string>();
+  let hours = 0;
+  let count = 0;
+  for (const x of exchanges) {
+    if (x.nodeId === localNodeId || x.nodeId === "") continue;
+    peerSet.add(x.nodeId);
+    hours += x.hoursExchanged;
+    count += 1;
+  }
+  return {
+    totalExchanges: count,
+    totalHoursExchanged: Math.round(hours * 10) / 10,
+    peerNodeIds: Array.from(peerSet),
+  };
+}
+
 /**
  * Consecutive days (ending at `now`) on which at least one exchange was
  * completed, anywhere in the community.

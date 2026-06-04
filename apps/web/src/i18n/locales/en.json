@@ -754,6 +754,11 @@
       "emptyTitle": "A new understoria",
       "empty": "No exchanges yet. Once the first one happens, you'll see the mix of care, labor, and support flowing through the community."
     },
+    "federation": {
+      "title": "Across federation",
+      "summaryOne": "{{count}} exchange · {{hours}}h flowing through {{peers}} peer community",
+      "summaryOther": "{{count}} exchanges · {{hours}}h flowing through {{peers}} peer communities"
+    },
     "breadth": {
       "title": "Breadth, not depth",
       "intro": "Members ranked by the number of distinct people they've helped — generosity spread widely, not piled deep.",

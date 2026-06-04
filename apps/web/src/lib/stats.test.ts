@@ -19,7 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { describe, expect, it } from "vitest";
-import { computeCommunityStats, computeSolidarityStreak } from "./stats";
+import {
+  computeCommunityStats,
+  computeFederationStats,
+  computeSolidarityStreak,
+} from "./stats";
 import type { Exchange, Member, Post } from "@/types";
 
 const nodeId = "node_test";
@@ -209,5 +213,45 @@ describe("computeCommunityStats", () => {
     const stats = computeCommunityStats([], [member("a")], posts, now);
     expect(stats.needsPostedThisWeek).toBe(3);
     expect(stats.needsAnsweredThisWeek).toBe(2);
+  });
+});
+
+describe("computeFederationStats", () => {
+  function ex(id: string, nid: string, hours = 1): Exchange {
+    return { ...exchange(id, 0, hours), nodeId: nid };
+  }
+
+  it("returns zeros when every exchange is local", () => {
+    const result = computeFederationStats(
+      [ex("1", "node_test"), ex("2", "node_test", 2.5)],
+      "node_test",
+    );
+    expect(result.totalExchanges).toBe(0);
+    expect(result.totalHoursExchanged).toBe(0);
+    expect(result.peerNodeIds).toEqual([]);
+  });
+
+  it("aggregates only peer-node exchanges and counts distinct peers", () => {
+    const result = computeFederationStats(
+      [
+        ex("1", "node_test", 5),
+        ex("2", "peer_a", 2),
+        ex("3", "peer_a", 1.5),
+        ex("4", "peer_b", 3),
+      ],
+      "node_test",
+    );
+    expect(result.totalExchanges).toBe(3);
+    expect(result.totalHoursExchanged).toBe(6.5);
+    expect(new Set(result.peerNodeIds)).toEqual(new Set(["peer_a", "peer_b"]));
+  });
+
+  it("treats an empty nodeId as local (pre-federation rows)", () => {
+    const result = computeFederationStats(
+      [ex("1", "", 4), ex("2", "peer_x", 1)],
+      "node_test",
+    );
+    expect(result.totalExchanges).toBe(1);
+    expect(result.totalHoursExchanged).toBe(1);
   });
 });

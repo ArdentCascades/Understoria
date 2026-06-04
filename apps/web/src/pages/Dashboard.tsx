@@ -21,7 +21,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { computeCommunityStats } from "@/lib/stats";
+import { computeCommunityStats, computeFederationStats } from "@/lib/stats";
 import { computeFlowStats } from "@/lib/flow";
 import { CATEGORY_META } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
@@ -35,15 +35,34 @@ import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
-  const { exchanges, members, posts, achievements, nodeConfig } = useApp();
+  const { exchanges, members, posts, achievements, nodeConfig, nodeId } =
+    useApp();
   const { t } = useTranslation();
+  // Split BEFORE feeding the stats helpers so the headline + flow
+  // reflect only this node's exchanges. The federation rollup
+  // surfaces separately below.
+  const localExchanges = useMemo(
+    () => exchanges.filter((x) => x.nodeId === nodeId || x.nodeId === ""),
+    [exchanges, nodeId],
+  );
+  const federationStats = useMemo(
+    () => computeFederationStats(exchanges, nodeId),
+    [exchanges, nodeId],
+  );
   const stats = useMemo(
-    () => computeCommunityStats(exchanges, members, posts, undefined, nodeConfig),
-    [exchanges, members, posts, nodeConfig],
+    () =>
+      computeCommunityStats(
+        localExchanges,
+        members,
+        posts,
+        undefined,
+        nodeConfig,
+      ),
+    [localExchanges, members, posts, nodeConfig],
   );
   const flow = useMemo(
-    () => computeFlowStats(exchanges, members),
-    [exchanges, members],
+    () => computeFlowStats(localExchanges, members),
+    [localExchanges, members],
   );
 
   const achievementsThisMonth = useMemo(() => {
@@ -114,6 +133,33 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
+
+      {federationStats.totalExchanges > 0 && (
+        <section
+          className="card mb-4"
+          aria-labelledby="federation-summary-title"
+        >
+          <h2
+            id="federation-summary-title"
+            className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-500"
+          >
+            {t("dashboard.federation.title")}
+            <WhyTooltip principleId="community-authority" />
+          </h2>
+          <p className="text-sm text-moss-700 dark:text-moss-200">
+            {t(
+              federationStats.totalExchanges === 1
+                ? "dashboard.federation.summaryOne"
+                : "dashboard.federation.summaryOther",
+              {
+                count: federationStats.totalExchanges,
+                hours: formatHours(federationStats.totalHoursExchanged),
+                peers: federationStats.peerNodeIds.length,
+              },
+            )}
+          </p>
+        </section>
+      )}
 
       <div className="my-2">
         <LeafDivider variant="short" />
