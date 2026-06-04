@@ -530,6 +530,41 @@ We are not trying to protect against:
   its own entry that supersedes this paragraph for those
   specific routes.
 
+- **Node system key for auto-confirmation (design only; not yet
+  shipped).** A per-node Ed25519 signing key, held by the node
+  operator, will sign the helped-side signature on `Exchange`
+  records when neither party has confirmed within a community-
+  configured window (default proposal: 7 days; `0` disables).
+  Introduced because today an unresponsive partner blocks credit
+  permanently, and the project-task confirmation flow deliberately
+  forbids the completer from confirming themselves
+  (`apps/web/src/db/projects.ts` ~line 600) — so for organizer-
+  is-completer tasks with no co-organizer, credit cannot flow at
+  all. This is **the closest the codebase has to admin authority**,
+  and the design doc (`auto-confirm-key.md`) does not soften that.
+  What makes it acceptable is the bound: the key only signs
+  records the helper has already signed (cannot invent exchanges),
+  cannot modify hours / category / parties / completion time (all
+  inside the helper's signed canonical payload), and every record
+  it touches is audit-tagged (`autoConfirmed: true`, `confirmedBy:
+  "system:<nodeId>"`) so any verifier can distinguish a system-
+  signed auto-confirm from a member-signed mutual confirm. The
+  threshold is community-configurable through the existing Agent
+  11 / Agent 13 surfaces, including `0 = off`.
+  Accepted residual risks: the operator can change the threshold
+  to fire earlier than the community expects (detectable post-hoc
+  by comparing `autoConfirmedAt` to the original
+  `awaiting_confirmation` transition); the operator can refuse to
+  run the sweep entirely, which is a denial-of-service against
+  credit flow but is equivalent to today's status quo where
+  unresponsive partners block credit forever; the operator can
+  collude with a member who files bogus completions, but the
+  helper's signature is still on the bogus record so the
+  attribution is public and the existing safeguards module still
+  applies. Full abuse model: `auto-confirm-key.md` §5. Until that
+  PR lands, no system key exists in the codebase and this entry
+  tracks design intent only.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
