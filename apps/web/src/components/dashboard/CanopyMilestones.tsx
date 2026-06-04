@@ -20,6 +20,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { milestonesForType, type MilestoneState } from "@/lib/milestones";
+import type { NodeConfig } from "@/types";
 
 interface CanopyMilestonesProps {
   totalHours: number;
@@ -29,6 +30,9 @@ interface CanopyMilestonesProps {
    *  one-time ember tint + fade-in. Pass from
    *  useNewlyReachedMilestones in Dashboard.tsx. */
   newlyReachedLabels: ReadonlySet<string>;
+  /** Optional community config — when provided, the rows include the
+   *  community's custom milestones alongside the baseline. */
+  nodeConfig?: NodeConfig;
 }
 
 export function CanopyMilestones({
@@ -36,11 +40,12 @@ export function CanopyMilestones({
   totalExchanges,
   totalMembers,
   newlyReachedLabels,
+  nodeConfig,
 }: CanopyMilestonesProps) {
   const { t } = useTranslation();
-  const hoursRow = milestonesForType("hours", totalHours);
-  const exchangesRow = milestonesForType("exchanges", totalExchanges);
-  const membersRow = milestonesForType("members", totalMembers);
+  const hoursRow = milestonesForType("hours", totalHours, nodeConfig);
+  const exchangesRow = milestonesForType("exchanges", totalExchanges, nodeConfig);
+  const membersRow = milestonesForType("members", totalMembers, nodeConfig);
 
   return (
     <section className="card mb-4">

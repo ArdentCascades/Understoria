@@ -130,6 +130,109 @@ describe("putNodeConfig", () => {
   });
 });
 
+describe("putNodeConfig — customMilestones", () => {
+  beforeEach(reset);
+
+  it("persists a valid custom milestone array", async () => {
+    const written = await putNodeConfig(NODE, {
+      ...DEFAULT_NODE_CONFIG,
+      customMilestones: [
+        { type: "exchanges", threshold: 250, label: "250 union actions" },
+      ],
+    });
+    expect(written.customMilestones).toHaveLength(1);
+    expect(written.customMilestones[0].label).toBe("250 union actions");
+  });
+
+  it("trims whitespace from labels", async () => {
+    const written = await putNodeConfig(NODE, {
+      ...DEFAULT_NODE_CONFIG,
+      customMilestones: [
+        { type: "members", threshold: 5, label: "  five friends  " },
+      ],
+    });
+    expect(written.customMilestones[0].label).toBe("five friends");
+  });
+
+  it("rejects an unknown milestone type", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: [
+          // @ts-expect-error — testing invalid input
+          { type: "fridges", threshold: 100, label: "x" },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("rejects a non-positive threshold", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: [{ type: "hours", threshold: 0, label: "zero" }],
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("rejects a non-integer threshold", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: [
+          { type: "hours", threshold: 1.5, label: "halfway" },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("rejects an empty label", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: [{ type: "hours", threshold: 10, label: "   " }],
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("rejects a label longer than 80 chars", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: [
+          { type: "hours", threshold: 10, label: "x".repeat(81) },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("rejects duplicate (type, threshold) pairs within the custom list", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: [
+          { type: "hours", threshold: 75, label: "first" },
+          { type: "hours", threshold: 75, label: "second" },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+
+  it("rejects more than 20 entries", async () => {
+    const tooMany = Array.from({ length: 21 }, (_, i) => ({
+      type: "hours" as const,
+      threshold: 100 + i,
+      label: `m${i}`,
+    }));
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        customMilestones: tooMany,
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+});
+
 describe("resetNodeConfig", () => {
   beforeEach(reset);
 

@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Milestone } from "@/types";
+import type { Milestone, NodeConfig } from "@/types";
 
 export const MILESTONES: Milestone[] = [
   { type: "hours", threshold: 10, label: "10 hours of mutual aid" },
@@ -36,6 +36,30 @@ export const MILESTONES: Milestone[] = [
   { type: "members", threshold: 100, label: "100 members strong" },
 ];
 
+/**
+ * Returns the effective milestone set for a community: the baseline
+ * `MILESTONES` plus the community's `customMilestones`, deduped by
+ * `(type, threshold)`. Baseline wins on collision — a community can't
+ * accidentally shadow or double-count a shipped milestone by adding a
+ * custom one at the same threshold. Pure; safe to call repeatedly.
+ */
+export function effectiveMilestones(config: NodeConfig): Milestone[] {
+  const seen = new Set<string>();
+  const out: Milestone[] = [];
+  for (const m of MILESTONES) {
+    const key = `${m.type}|${m.threshold}`;
+    seen.add(key);
+    out.push(m);
+  }
+  for (const m of config.customMilestones) {
+    const key = `${m.type}|${m.threshold}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(m);
+  }
+  return out;
+}
+
 export interface MilestoneProgress {
   current: Milestone;
   next: Milestone | null;
@@ -46,10 +70,12 @@ export interface MilestoneProgress {
 export function milestoneProgress(
   type: Milestone["type"],
   value: number,
+  config?: NodeConfig,
 ): MilestoneProgress {
-  const typed = MILESTONES.filter((m) => m.type === type).sort(
-    (a, b) => a.threshold - b.threshold,
-  );
+  const source = config ? effectiveMilestones(config) : MILESTONES;
+  const typed = source
+    .filter((m) => m.type === type)
+    .sort((a, b) => a.threshold - b.threshold);
   let current: Milestone = typed[0];
   let next: Milestone | null = typed[0];
   for (let i = 0; i < typed.length; i++) {
@@ -69,8 +95,10 @@ export function milestoneProgress(
 export function reachedMilestones(
   type: Milestone["type"],
   value: number,
+  config?: NodeConfig,
 ): Milestone[] {
-  return MILESTONES.filter((m) => m.type === type && value >= m.threshold);
+  const source = config ? effectiveMilestones(config) : MILESTONES;
+  return source.filter((m) => m.type === type && value >= m.threshold);
 }
 
 export interface MilestoneState {
@@ -86,8 +114,11 @@ export interface MilestoneState {
 export function milestonesForType(
   type: Milestone["type"],
   value: number,
+  config?: NodeConfig,
 ): MilestoneState[] {
-  return MILESTONES.filter((m) => m.type === type)
+  const source = config ? effectiveMilestones(config) : MILESTONES;
+  return source
+    .filter((m) => m.type === type)
     .sort((a, b) => a.threshold - b.threshold)
     .map((milestone) => ({ milestone, reached: value >= milestone.threshold }));
 }

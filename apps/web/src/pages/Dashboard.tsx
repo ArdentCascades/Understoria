@@ -35,11 +35,11 @@ import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
-  const { exchanges, members, posts, achievements } = useApp();
+  const { exchanges, members, posts, achievements, nodeConfig } = useApp();
   const { t } = useTranslation();
   const stats = useMemo(
-    () => computeCommunityStats(exchanges, members, posts),
-    [exchanges, members, posts],
+    () => computeCommunityStats(exchanges, members, posts, undefined, nodeConfig),
+    [exchanges, members, posts, nodeConfig],
   );
   const flow = useMemo(
     () => computeFlowStats(exchanges, members),
@@ -166,6 +166,7 @@ export default function DashboardPage() {
         totalExchanges={stats.totalExchanges}
         totalMembers={members.length}
         newlyReachedLabels={new Set(newlyReached.map((m) => m.label))}
+        nodeConfig={nodeConfig}
       />
 
       <div className="my-2">

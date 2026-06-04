@@ -375,6 +375,22 @@ export class UnderstoriaDB extends Dexie {
         if (r.templateId === undefined) r.templateId = null;
       });
     });
+    // Version 18 — community-customizable milestones. Adds
+    // `customMilestones: Milestone[]` to NodeConfig. Backfills
+    // pre-v18 rows with an empty array so the field is never
+    // undefined at runtime (the read path in `db/nodeConfig.ts`
+    // also defaults to []; the upgrade keeps the on-disk shape
+    // consistent so a peer dumping the row sees the new shape).
+    // No new index — the array is read whole and walked in memory.
+    this.version(18).stores({}).upgrade(async (tx) => {
+      const configs = tx.table<NodeConfigRow, string>("nodeConfig");
+      await configs.toCollection().modify((row) => {
+        const r = row as NodeConfigRow & {
+          customMilestones?: NodeConfig["customMilestones"];
+        };
+        if (r.customMilestones === undefined) r.customMilestones = [];
+      });
+    });
   }
 }
 
