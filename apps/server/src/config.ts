@@ -69,6 +69,33 @@ export interface Config {
    *  Default 5 minutes — small enough to feel live, large enough not
    *  to hammer a peer running on a Raspberry Pi. */
   peerPullIntervalMs: number;
+  /**
+   * Base64-encoded Ed25519 secret key bytes (64-byte libsodium form,
+   * 32 seed + 32 pubkey) for the node system key — the signer used
+   * to close out `awaiting_confirmation` records that have aged past
+   * the community's `autoConfirmHours`. See
+   * `docs/auto-confirm-key.md`.
+   *
+   * Set via `NODE_SYSTEM_SECRET_KEY` at deploy time. Null means the
+   * operator has not configured one: the server still boots and the
+   * rest of the routes work, but `POST /auto-confirm` returns
+   * `missing_system_key` and `GET /config.systemKey` is omitted.
+   * The PWA's `autoConfirmHours` knob and this env var are
+   * independently controlled — a community CAN have
+   * `autoConfirmHours > 0` while the operator has not yet supplied
+   * a key. The server logs a startup warning in that case but does
+   * NOT crash; the operator may be staging the rollout.
+   */
+  systemSecretKey: string | null;
+  /**
+   * Minimum hours the server requires to have elapsed before it
+   * will sign an auto-confirm record. Independent of (and a floor
+   * over) the PWA's community-configurable `autoConfirmHours` — the
+   * server is the trust boundary for the system key and decides for
+   * itself how aged a record has to be. Default 168 (7 days),
+   * matching the design note's pilot recommendation.
+   */
+  autoConfirmMinHours: number;
 }
 
 function asInt(name: string, raw: string | undefined, fallback: number): number {
@@ -112,7 +139,31 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       env.PEER_PULL_INTERVAL_MS,
       5 * 60 * 1000,
     ),
+    systemSecretKey: nonEmpty(env.NODE_SYSTEM_SECRET_KEY),
+    // Non-negative so 0 is accepted (operator can lock the server's
+    // floor at "off" even if the community config says otherwise —
+    // defense-in-depth knob).
+    autoConfirmMinHours: asNonNegativeInt(
+      "AUTO_CONFIRM_MIN_HOURS",
+      env.AUTO_CONFIRM_MIN_HOURS,
+      168,
+    ),
   };
+}
+
+function asNonNegativeInt(
+  name: string,
+  raw: string | undefined,
+  fallback: number,
+): number {
+  if (raw === undefined || raw === "") return fallback;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error(
+      `${name} must be a non-negative integer, got ${JSON.stringify(raw)}`,
+    );
+  }
+  return n;
 }
 
 function nonEmpty(raw: string | undefined): string | null {

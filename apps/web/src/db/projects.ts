@@ -597,6 +597,12 @@ export async function confirmProjectTaskCompletion(
     throw new Error("Task isn't waiting for confirmation.");
   if (!task.completedBy)
     throw new Error("Task has no recorded completer.");
+  // Self-confirm prohibition: a member cannot attest credit to
+  // themselves. This is the rule that motivates the node system key
+  // (see docs/auto-confirm-key.md §1) — when an organizer completes
+  // their own task there is no second member to confirm, and the
+  // system key path is the bounded fallback. That fallback lives in
+  // `_systemAutoConfirmTask`; this entry point keeps the guard.
   if (task.completedBy === organizerKey)
     throw new Error(
       "An organizer who completes a task themselves needs a different project member to confirm.",
@@ -611,7 +617,139 @@ export async function confirmProjectTaskCompletion(
     getSecretKey(helpedKey),
   ]);
 
-  const result = await db.transaction(
+  const now = Date.now();
+  const payload = canonicalExchangePayload({
+    postId: `project:${project.id}/task:${task.id}`,
+    helperKey,
+    helpedKey,
+    hours: task.estimatedHours,
+    category: task.category as Exchange["category"],
+    completedAt: now,
+  });
+  const exchange: Exchange = {
+    id: uuid(),
+    postId: `project:${project.id}/task:${task.id}`,
+    helperKey,
+    helpedKey,
+    hoursExchanged: task.estimatedHours,
+    helperSignature: sign(payload, helperSecret),
+    helpedSignature: sign(payload, helpedSecret),
+    completedAt: now,
+    category: task.category as Exchange["category"],
+    nodeId,
+  };
+
+  const result = await _writeTaskConfirmation({
+    task,
+    project,
+    exchange,
+    organizerKey,
+    now,
+    acknowledgment,
+  });
+
+  // Kick the outbox worker so a connected node sees this exchange right
+  // away. Same pattern confirmExchange uses.
+  void flushOutboxNow().catch((err) => {
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn("[understoria] project flush kick crashed", err);
+    }
+  });
+
+  return result;
+}
+
+/**
+ * System-key auto-confirm entry point for project tasks. Bypasses the
+ * self-confirm guard in `confirmProjectTaskCompletion` because, in the
+ * §1 motivating case from `docs/auto-confirm-key.md`, the organizer
+ * IS the completer and there is no second member to attest. Credit
+ * still flows; the audit trail makes the substitution loud.
+ *
+ * Values context — this is the change to read carefully:
+ *
+ * The shipped rule that an organizer cannot confirm their own task is
+ * the right rule for member-signed records. A member cannot attest
+ * credit to themselves; that's `community-authority` enforced in
+ * code. This function does not relax that rule for members — it
+ * routes around it only when the attesting signature is the node
+ * system key, which is published in `GET /config`, tagged on the
+ * record (`autoConfirmed: true`, `autoConfirmedBy: "system:<nodeId>"`),
+ * and verifiable post-hoc by any peer. The substitution is therefore
+ * NOT a member self-confirming dressed up as something else; it is a
+ * structurally different signing identity that an auditor can tell
+ * apart from a member confirmation (§4 distinguishability).
+ *
+ * The pre-signed `exchange` argument carries the system-signed
+ * helped-side signature; this function does not invoke any signer.
+ * The sweep is the only caller — see
+ * `apps/web/src/lib/autoConfirmSweep.ts`. Direct invocation from
+ * anywhere else is a bug.
+ */
+export async function _systemAutoConfirmTask(
+  taskId: string,
+  exchange: Exchange,
+  acknowledgment?: string,
+): Promise<ConfirmTaskResult> {
+  const task = await db.projectTasks.get(taskId);
+  if (!task) throw new Error("Task not found.");
+  const project = await db.projects.get(task.projectId);
+  if (!project) throw new Error("Parent project not found.");
+  if (task.status !== "awaiting_confirmation")
+    throw new Error("Task isn't waiting for confirmation.");
+  if (!task.completedBy)
+    throw new Error("Task has no recorded completer.");
+  // Sanity: the pre-signed exchange must match the task we're closing.
+  if (exchange.helperKey !== task.completedBy) {
+    throw new Error(
+      "system auto-confirm: exchange helperKey does not match task.completedBy",
+    );
+  }
+  if (!exchange.autoConfirmed || !exchange.autoConfirmedBy) {
+    throw new Error(
+      "system auto-confirm: exchange is missing autoConfirmed / autoConfirmedBy",
+    );
+  }
+  return _writeTaskConfirmation({
+    task,
+    project,
+    exchange,
+    // For the audit log we record the system identity (not a member
+    // key). The activity row reflects who acted: "system" — not the
+    // organizer, who was the absent party.
+    organizerKey: exchange.autoConfirmedBy,
+    now: exchange.autoConfirmedAt ?? Date.now(),
+    acknowledgment,
+  });
+}
+
+/**
+ * Private — the shared write path used by both
+ * `confirmProjectTaskCompletion` (member-signed) and
+ * `_systemAutoConfirmTask` (system-signed). Caller has already done
+ * eligibility / signing; this function only persists, increments
+ * project hours, fires milestones, and recomputes achievements.
+ *
+ * Not exported. Tests exercise it through the two public entry
+ * points so the guard chain (self-confirm, organizer role) is part
+ * of every coverage path.
+ */
+interface WriteTaskConfirmationInput {
+  task: ProjectTask;
+  project: Project;
+  exchange: Exchange;
+  /** Who acted, for the activity log. Member key for the manual
+   *  path; `"system:<nodeId>"` for the auto-confirm path. */
+  organizerKey: string;
+  now: number;
+  acknowledgment?: string;
+}
+
+async function _writeTaskConfirmation(
+  input: WriteTaskConfirmationInput,
+): Promise<ConfirmTaskResult> {
+  const { task, project, exchange, organizerKey, now, acknowledgment } = input;
+  return db.transaction(
     "rw",
     [
       db.projects,
@@ -623,27 +761,6 @@ export async function confirmProjectTaskCompletion(
       db.achievements,
     ],
     async () => {
-      const now = Date.now();
-      const payload = canonicalExchangePayload({
-        postId: `project:${project.id}/task:${task.id}`,
-        helperKey,
-        helpedKey,
-        hours: task.estimatedHours,
-        category: task.category as Exchange["category"],
-        completedAt: now,
-      });
-      const exchange: Exchange = {
-        id: uuid(),
-        postId: `project:${project.id}/task:${task.id}`,
-        helperKey,
-        helpedKey,
-        hoursExchanged: task.estimatedHours,
-        helperSignature: sign(payload, helperSecret),
-        helpedSignature: sign(payload, helpedSecret),
-        completedAt: now,
-        category: task.category as Exchange["category"],
-        nodeId,
-      };
       await db.exchanges.put(exchange);
       await enqueueExchangeOutbox(exchange);
 
@@ -672,9 +789,12 @@ export async function confirmProjectTaskCompletion(
       const confirmActivityData: Record<string, unknown> = {
         taskId: task.id,
         exchangeId: exchange.id,
-        helperKey,
+        helperKey: exchange.helperKey,
         hours: task.estimatedHours,
       };
+      if (exchange.autoConfirmed) {
+        confirmActivityData.autoConfirmed = true;
+      }
       if (acknowledgment?.trim()) {
         confirmActivityData.acknowledgment = acknowledgment.trim();
       }
@@ -695,15 +815,22 @@ export async function confirmProjectTaskCompletion(
         );
       }
 
-      // Award any newly-earned achievements for both the helper (who
-      // can earn First Exchange, Connector, etc. from a project task
-      // just as from a board exchange — it's a real signed Exchange)
-      // and the organizer (Groundbreaker / Momentum Maker for project
-      // achievements). Keystone fires from completeProject; not here.
+      // Award any newly-earned achievements for the helper (who can
+      // earn First Exchange, Connector, etc. from a project task
+      // just as from a board exchange — it's a real signed
+      // Exchange). On the auto-confirm path the "organizer" half of
+      // this pair is the system identity, which can't earn member
+      // achievements — so we evaluate only the helper to avoid
+      // attributing a project achievement to "system:<nodeId>".
+      const helperKey = exchange.helperKey;
+      const orgEligibleForAchievements = !exchange.autoConfirmed;
       const allExchangesNow = await db.exchanges.toArray();
       const allProjectsNow = await db.projects.toArray();
       const allTasksNow = await db.projectTasks.toArray();
-      for (const memberKey of [helperKey, organizerKey]) {
+      const recipients = orgEligibleForAchievements
+        ? [helperKey, organizerKey]
+        : [helperKey];
+      for (const memberKey of recipients) {
         const existing = await db.achievements
           .where("memberKey")
           .equals(memberKey)
@@ -746,16 +873,6 @@ export async function confirmProjectTaskCompletion(
       };
     },
   );
-
-  // Kick the outbox worker so a connected node sees this exchange right
-  // away. Same pattern confirmExchange uses.
-  void flushOutboxNow().catch((err) => {
-    if (typeof console !== "undefined" && console.warn) {
-      console.warn("[understoria] project flush kick crashed", err);
-    }
-  });
-
-  return result;
 }
 
 // -- Helpers ----------------------------------------------------------------

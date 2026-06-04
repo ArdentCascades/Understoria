@@ -383,6 +383,108 @@ export async function confirmExchange(
   return result;
 }
 
+/**
+ * Apply an exchange that the server's system signer has just signed
+ * for an `awaiting_confirmation` post (see docs/auto-confirm-key.md
+ * §4 / `lib/autoConfirmSweep.ts`). The `exchange` argument carries
+ * the system-signed helped-side signature and the audit flags
+ * (`autoConfirmed`, `autoConfirmedBy`, `autoConfirmedAt`); this
+ * function persists it, completes the post, kicks the outbox, and
+ * recomputes achievements for the helper. Mirrors the credit-flow
+ * tail of `confirmExchange` without duplicating the signing or
+ * mutual-confirmation steps.
+ *
+ * Achievements: only the helper is recomputed. The helped party on
+ * an auto-confirm path is structurally absent — credit still flows
+ * to them, but earning a member achievement requires participation
+ * we can't attest to here.
+ */
+export async function applyAutoConfirmedExchange(
+  postId: string,
+  exchange: Exchange,
+): Promise<{ post: Post; exchange: Exchange; newAchievements: Achievement[] }> {
+  if (!exchange.autoConfirmed || !exchange.autoConfirmedBy) {
+    throw new Error(
+      "applyAutoConfirmedExchange: exchange must carry autoConfirmed + autoConfirmedBy",
+    );
+  }
+  return db.transaction(
+    "rw",
+    [
+      db.posts,
+      db.exchanges,
+      db.achievements,
+      db.outbox,
+      db.settings,
+      db.members,
+    ],
+    async () => {
+      const post = await db.posts.get(postId);
+      if (!post) throw new Error("Post not found");
+      if (post.status === "completed") {
+        // Idempotent: the sweep can re-fire if the page reloads
+        // mid-write. The exchange is already there.
+        const existing = await db.exchanges.get(exchange.id);
+        return {
+          post,
+          exchange: existing ?? exchange,
+          newAchievements: [] as Achievement[],
+        };
+      }
+      if (post.status !== "awaiting_confirmation") {
+        throw new Error(
+          "applyAutoConfirmedExchange: post must be awaiting_confirmation",
+        );
+      }
+      await db.exchanges.put(exchange);
+      await enqueueExchangeOutbox(exchange);
+      const updatedPost: Post = {
+        ...post,
+        status: "completed",
+        // Leave confirmedBy as-is: the post's `confirmedBy` array is
+        // the set of MEMBERS who confirmed. The system identity is
+        // not a member and does not belong in that list. Verifiers
+        // distinguish auto-confirm by reading the exchange flags,
+        // not by extending the post's confirmedBy.
+      };
+      await db.posts.put(updatedPost);
+
+      const now = exchange.autoConfirmedAt ?? Date.now();
+      const allExchanges = await db.exchanges.toArray();
+      const allMembers = await db.members.toArray();
+      const newAchievements: Achievement[] = [];
+      // Helper only — see fn-level comment.
+      const existing = await db.achievements
+        .where("memberKey")
+        .equals(exchange.helperKey)
+        .toArray();
+      const previouslyFilledCategories = new Set(
+        allExchanges
+          .filter((x) => x.id !== exchange.id)
+          .map((x) => x.category),
+      );
+      const zoneReach = computeZoneReachForHelper(
+        exchange.helperKey,
+        allExchanges,
+        allMembers,
+      );
+      const diff = diffAchievements(
+        exchange.helperKey,
+        existing.map((a) => a.achievementType),
+        allExchanges,
+        { previouslyFilledCategories, zoneReach },
+        now,
+      );
+      if (diff.length > 0) {
+        await db.achievements.bulkPut(diff);
+        newAchievements.push(...diff);
+      }
+
+      return { post: updatedPost, exchange, newAchievements };
+    },
+  );
+}
+
 export async function disputeExchange(
   postId: string,
   memberKey: string,

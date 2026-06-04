@@ -57,6 +57,8 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
       DEFAULT_NODE_CONFIG.proposalDeliberationDays,
     proposalMinAffirms:
       row.proposalMinAffirms ?? DEFAULT_NODE_CONFIG.proposalMinAffirms,
+    autoConfirmHours:
+      row.autoConfirmHours ?? DEFAULT_NODE_CONFIG.autoConfirmHours,
     customMilestones: row.customMilestones ?? [],
   };
 }
@@ -140,6 +142,19 @@ function validate(config: NodeConfig): NodeConfig {
   ) {
     throw new InvalidNodeConfigError(
       "Proposal minimum affirms must be a whole number >= 1.",
+    );
+  }
+  // Auto-confirm window: integer hours, 0 = disabled. Upper bound
+  // (8760 = a year) is generous — a community that wants
+  // "effectively never auto-confirm without turning it off" should
+  // use 0 instead, but we don't reject extra-long windows.
+  if (
+    !Number.isInteger(config.autoConfirmHours) ||
+    config.autoConfirmHours < 0 ||
+    config.autoConfirmHours > 24 * 365
+  ) {
+    throw new InvalidNodeConfigError(
+      "Auto-confirm hours must be a whole number between 0 and 8760. 0 disables auto-confirm entirely.",
     );
   }
   const validatedCustom = validateCustomMilestones(config.customMilestones);

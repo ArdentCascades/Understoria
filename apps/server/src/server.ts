@@ -42,6 +42,8 @@ import { registerClaimRoutes } from "./routes/claims.js";
 import { registerInviteRoutes } from "./routes/invites.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
+import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
+import { createSystemSignerFromSecret } from "./systemSigner.js";
 
 export interface BuildOptions {
   config: Config;
@@ -147,6 +149,19 @@ export async function buildServer({
   const taskCommentStore = createTaskCommentStore(db);
   const pullStore = createPeerPullStore(db);
 
+  // Build the system signer once at boot — secret bytes are then
+  // held only inside the closure that captured them. A null signer
+  // means the operator did not configure `NODE_SYSTEM_SECRET_KEY`;
+  // we log it and continue (auto-confirm becomes a no-op endpoint,
+  // not a boot failure — operators may stage rollout). See
+  // `docs/auto-confirm-key.md` §6.
+  const signer = createSystemSignerFromSecret(config.systemSecretKey);
+  if (signer === null && config.autoConfirmMinHours > 0) {
+    app.log.warn(
+      "auto-confirm window is configured (AUTO_CONFIRM_MIN_HOURS > 0) but no NODE_SYSTEM_SECRET_KEY is set; /auto-confirm will refuse to sign.",
+    );
+  }
+
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });
   await registerVouchRoutes(app, { store: vouchStore });
@@ -154,7 +169,13 @@ export async function buildServer({
   await registerInviteRoutes(app, { store: inviteStore });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });
-  await registerConfigRoutes(app, { config });
+  await registerConfigRoutes(app, { config, signer });
+  await registerAutoConfirmRoutes(app, {
+    store,
+    signer,
+    nodeId: config.nodeId,
+    autoConfirmMinHours: config.autoConfirmMinHours,
+  });
   await registerPeersRoutes(app, {
     pullStore,
     configuredPeers: config.peerNodeUrls,

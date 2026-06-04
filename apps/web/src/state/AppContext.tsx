@@ -267,6 +267,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, [ready]);
 
+  // Auto-confirm sweep — for `awaiting_confirmation` records older
+  // than `nodeConfig.autoConfirmHours`, ask the server's system key
+  // to close them out. Silent no-op if the community knob is 0 or
+  // the community node is unreachable. See
+  // `docs/auto-confirm-key.md`.
+  useEffect(() => {
+    if (!ready) return;
+    if (!nodeId) return;
+    void import("@/lib/autoConfirmSweep").then(({ runAutoConfirmSweep }) => {
+      void runAutoConfirmSweep(nodeId).catch((err) => {
+        if (typeof console !== "undefined" && console.warn) {
+          console.warn("[understoria] auto-confirm sweep failed", err);
+        }
+      });
+    });
+  }, [ready, nodeId]);
+
   // When the preference is "system", repaint on OS theme change.
   // When the user pins "light" or "dark", the subscription is
   // pointless (override wins) — skip it so the matchMedia handler

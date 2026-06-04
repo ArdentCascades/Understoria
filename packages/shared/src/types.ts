@@ -136,6 +136,33 @@ export interface Exchange {
    */
   flaggedForReview?: boolean;
   flagReason?: FlagReason;
+  /**
+   * True iff the helped-side signature was produced by the node's
+   * system key after `autoConfirmHours` elapsed without a member
+   * confirmation. See `docs/auto-confirm-key.md` §4. The pair
+   * (`autoConfirmed`, `autoConfirmedBy`) is the verifier-
+   * distinguishability surface any peer can read without knowing
+   * this node's keys ahead of time. Absent / false on every member-
+   * confirmed row.
+   */
+  autoConfirmed?: boolean;
+  /**
+   * Identity of the helped-side signer when `autoConfirmed === true`.
+   * Format: `"system:<nodeId>"`. Deliberately NOT named `confirmedBy` —
+   * that name is already taken on Post (the array of member pubkeys
+   * who confirmed) and reusing it would muddy the semantics. Present
+   * only on rows where `autoConfirmed === true`.
+   */
+  autoConfirmedBy?: string;
+  /**
+   * Millisecond epoch when the system key signed the helped-side
+   * signature. Distinct from `completedAt` (which is the canonical
+   * payload's timestamp — what the helper signed). A peer auditor can
+   * detect operator early-fire (§5 of the design note) by comparing
+   * this to the underlying post / task's `awaiting_confirmation`
+   * transition time, which is also federated and signed.
+   */
+  autoConfirmedAt?: number;
 }
 
 /**
@@ -190,6 +217,19 @@ export interface NodeConfig {
    *  shouldn't pass silently. Default 2 — same threshold the
    *  vouch system uses for "trusted" status. */
   proposalMinAffirms: number;
+  /**
+   * Auto-confirm window for `awaiting_confirmation` posts and project
+   * tasks. After this many hours without a member confirmation, the
+   * node's system key signs the helped-side signature so credit can
+   * flow. See `docs/auto-confirm-key.md`.
+   *
+   * Special value: `0` disables the sweep entirely. The system key
+   * signs nothing when this is 0 — useful for a community that wants
+   * to launch with auto-confirm off and turn it on via a proposal
+   * later. Default `168` (7 days) matches the design note's pilot
+   * recommendation; communities can lower or zero it.
+   */
+  autoConfirmHours: number;
   /** Community-defined milestones layered ON TOP of the baseline
    *  hardcoded set in `lib/milestones.ts`. Lets a community celebrate
    *  thresholds meaningful to *them* (e.g. "100 union meetings",
@@ -209,6 +249,7 @@ export const DEFAULT_NODE_CONFIG: NodeConfig = {
   taskCheckInGraceDays: 2,
   proposalDeliberationDays: 3,
   proposalMinAffirms: 2,
+  autoConfirmHours: 168,
   customMilestones: [],
 };
 

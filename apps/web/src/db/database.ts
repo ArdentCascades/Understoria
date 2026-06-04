@@ -391,6 +391,36 @@ export class UnderstoriaDB extends Dexie {
         if (r.customMilestones === undefined) r.customMilestones = [];
       });
     });
+    // Version 19 — node system key (auto-confirm). Local-only audit
+    // fields on Exchange (`autoConfirmed`, `autoConfirmedBy`,
+    // `autoConfirmedAt`) plus the per-node `autoConfirmHours` knob on
+    // NodeConfig. The system signing key itself does NOT ship on the
+    // client — it lives on the server (see docs/auto-confirm-key.md
+    // §4); only the audit fields land here so a member's PWA can
+    // surface an auto-confirmed exchange distinctly. No new index —
+    // verifier distinguishability is decided in memory by reading the
+    // flag at audit time.
+    //
+    // Pre-v19 NodeConfig rows backfill to 168 hours (7 days, the
+    // pilot default from §7 of the design note); a community that
+    // wants off ships off via CommunitySettings.
+    this.version(19).stores({}).upgrade(async (tx) => {
+      const configs = tx.table<NodeConfigRow, string>("nodeConfig");
+      await configs.toCollection().modify((row) => {
+        const r = row as NodeConfigRow & { autoConfirmHours?: number };
+        if (r.autoConfirmHours === undefined) r.autoConfirmHours = 168;
+      });
+      // Exchange rows: undefined autoConfirmed reads as "not auto",
+      // so a strict backfill isn't required. Explicit-false is the
+      // clearer audit value — pre-v19 rows are unambiguously
+      // member-signed. autoConfirmedBy / autoConfirmedAt stay
+      // undefined.
+      const exchanges = tx.table<Exchange, string>("exchanges");
+      await exchanges.toCollection().modify((row) => {
+        const r = row as Exchange & { autoConfirmed?: boolean };
+        if (r.autoConfirmed === undefined) r.autoConfirmed = false;
+      });
+    });
   }
 }
 
