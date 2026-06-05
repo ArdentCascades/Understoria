@@ -1,26 +1,73 @@
+# docker-compose for a single-host Understoria deployment (Linode or
+# any Docker-capable VPS). Three services:
+#
+#   - web         one-shot build that copies the PWA dist into a shared
+#                 volume, then exits. Re-run on redeploy.
+#   - understoria Fastify community node. Persists SQLite to a named
+#                 volume; not exposed on the host (only Caddy reaches it).
+#   - caddy       TLS termination + static PWA + /api reverse proxy.
+#                 The ONLY service that binds host ports.
+#
+# Secrets and per-deploy values come from `.env` (gitignored). Copy
+# `.env.example` and fill it in before `docker compose up -d`.
+#
+# See docs/deploy-linode.md for the end-to-end runbook.
+
 services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: understoria/web:${UNDERSTORIA_VERSION:-0.2.0}
+    container_name: understoria-web-build
+    restart: "no"
+    volumes:
+      - web-dist:/out
+    # No network needed — purely a file copy from /dist (baked in) to
+    # the mounted /out volume.
+    network_mode: "none"
+
   understoria:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: understoria/server:0.1.0
+    image: understoria/server:${UNDERSTORIA_VERSION:-0.2.0}
     container_name: understoria
     restart: unless-stopped
-    ports:
-      - "8787:8787"
+    # No host port binding — Caddy reaches the server on the internal
+    # compose network. This is the production posture; for local
+    # debugging on a developer machine you can add `ports: - "8787:8787"`.
+    expose:
+      - "8787"
     environment:
       HOST: "0.0.0.0"
       PORT: "8787"
       DATABASE_PATH: "/data/understoria.db"
-      # Set this to the URL of your hosted PWA in production.
-      CORS_ORIGIN: "*"
-      RATE_LIMIT_MAX: "60"
-      LOG_LEVEL: "info"
-      LOG_REQUEST_PATHS: "false"
+      # MUST be your real PWA origin in production. A wildcard here is
+      # a real bug: /auto-confirm is the system-key endpoint and a
+      # permissive CORS in front of it widens its attack surface for
+      # browser-based callers from other origins.
+      CORS_ORIGIN: "https://${DOMAIN}"
+      RATE_LIMIT_MAX: "${RATE_LIMIT_MAX:-60}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+      LOG_REQUEST_PATHS: "${LOG_REQUEST_PATHS:-false}"
+      # Operator identity surfaced on GET /config so members can see
+      # who is running the node. Optional but recommended.
+      OPERATOR_NAME: "${OPERATOR_NAME:-}"
+      OPERATOR_CONTACT: "${OPERATOR_CONTACT:-}"
+      OPERATOR_FUNDING_NOTE: "${OPERATOR_FUNDING_NOTE:-}"
+      # Auto-confirm system key. Generate with the one-liner in
+      # docs/deploy-linode.md §3 and paste the printed value into
+      # .env. An empty string disables the auto-confirm endpoint
+      # entirely (members never auto-credit; manual confirm still works).
+      NODE_SYSTEM_SECRET_KEY: "${NODE_SYSTEM_SECRET_KEY:-}"
+      AUTO_CONFIRM_MIN_HOURS: "${AUTO_CONFIRM_MIN_HOURS:-168}"
+      # Comma-separated list of peer node URLs (each MUST include the
+      # /api prefix if the peer follows the same single-domain layout).
+      # Leave empty for a solo launch.
+      PEER_NODE_URLS: "${PEER_NODE_URLS:-}"
     volumes:
       - understoria-data:/data
-    # Drop every Linux capability we don't need. better-sqlite3 + Node
-    # don't bind privileged ports inside the container.
     cap_drop:
       - ALL
     security_opt:
@@ -35,5 +82,30 @@ services:
       retries: 3
       start_period: 5s
 
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: understoria-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    environment:
+      DOMAIN: "${DOMAIN}"
+      ACME_EMAIL: "${ACME_EMAIL}"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - web-dist:/usr/share/caddy:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_completed_successfully
+      understoria:
+        condition: service_healthy
+
 volumes:
   understoria-data:
+  web-dist:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,64 @@
+# Caddyfile for the Understoria deployment.
+#
+# Single-domain layout: the PWA is served at `/` and the community node
+# is reverse-proxied under `/api/*`. Members configure their PWA with
+# `https://<DOMAIN>/api` as the community node URL; peer nodes in
+# `PEER_NODE_URLS` use the same prefix.
+#
+# Caddy auto-acquires a Let's Encrypt cert for {$DOMAIN} on first
+# launch and renews it. Email is required for revocation / expiry
+# notifications.
+
+{
+	email {$ACME_EMAIL}
+	# Production ACME endpoint; for first-time experiments uncomment
+	# the staging line and comment the prod default so you don't hit
+	# Let's Encrypt rate limits while debugging DNS.
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	# Conservative security headers. CSP is intentionally not set here —
+	# Vite + the PWA service worker need a tailored policy; tracked in
+	# the deploy runbook as a hardening follow-up rather than blocking
+	# first-launch.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+		-Server
+	}
+
+	# Federation + PWA traffic to the community node. The strip_prefix
+	# means /api/posts → /posts on the upstream, which matches the
+	# server's route layout and lets the PWA + peer nodes use one URL
+	# (`https://DOMAIN/api`) as their `communityNodeUrl` /
+	# `PEER_NODE_URLS` entry.
+	handle_path /api/* {
+		reverse_proxy understoria:8787 {
+			# Health-check the same /health endpoint the container's
+			# HEALTHCHECK uses.
+			health_uri /health
+			health_interval 30s
+			health_timeout 5s
+		}
+	}
+
+	# Static PWA. The web-build container drops the dist into the
+	# shared `web-dist` volume; Caddy serves from it.
+	handle {
+		root * /usr/share/caddy
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Pino logs to stdout; Caddy logs to stdout. `docker compose logs`
+	# captures both.
+	log {
+		output stdout
+		format console
+	}
+}
