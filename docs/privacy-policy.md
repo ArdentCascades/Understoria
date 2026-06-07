@@ -46,6 +46,16 @@ the community node or to any third party:
 - Your **private key**, encrypted under your passphrase. We never
   see it; we cannot recover it. If you lose your passphrase, the
   identity is gone.
+  The single exception is the **device-pairing flow you initiate**
+  (Profile → Add another device). When you choose to pair a second
+  device, the key is wrapped under a fresh one-time passphrase the
+  source device generates and displayed as a QR code on this
+  device's screen for up to 5 minutes. It is not transmitted to
+  the community node or any third party — the destination device
+  reads the QR directly. Detail: [`docs/device-pairing.md`](
+  ./device-pairing.md). The threat-model entry covering this surface
+  is in [`docs/threat-model.md`](./threat-model.md) §7 under "Device
+  pairing widens the identity-key surface."
 - **Direct messages** with other members. These are end-to-end
   encrypted with NaCl `box` (X25519 + XSalsa20-Poly1305) using
   ephemeral keys derived from your Ed25519 identity. Even the
@@ -159,6 +169,13 @@ You can leave Understoria at any time. You have two tools:
 - **Hard purge** (same menu → Hard) wipes every table on your
   device — including your private keys — and rotates to a fresh
   node identity. No local history remains.
+
+If you've **paired** another device (see §3, the device-pairing
+exception), hard-purging *this* device does not rotate the
+identity on the *other* device — they hold independent copies of
+the keypair. To fully rotate, hard-purge every paired device.
+There is no remote-wipe path; the community node has no power to
+revoke a key it never saw.
 
 **What persists despite a purge:** any signed record you pushed
 to the community node before the purge. That record is
