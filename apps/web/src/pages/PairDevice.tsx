@@ -16,7 +16,9 @@ import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
 import { createMember } from "@/db/seed";
 import { markOnboarded } from "@/db/onboarding";
-import { enablePassphrase, validatePassphrase } from "@/db/secrets";
+import { enablePassphrase } from "@/db/secrets";
+import { validatePassphrase } from "@/lib/passphrase";
+import type { AvailabilityChip } from "@/types";
 import {
   decodeEnvelope,
   unwrapTransfer,
@@ -318,13 +320,22 @@ async function importPayload(
   nodeId: string,
   sessionPassphrase: string | null,
 ): Promise<void> {
+  // `availabilityChips` is typed as `string[]` on the wire
+  // (`TransferProfile`) but Member requires the narrower
+  // `AvailabilityChip[]` enum. The source device only ever produces
+  // valid chips (they came from a Member row), so the cast is a
+  // type-presentation issue. A future hardened-import path could
+  // filter to known chip values; for v1 the trust boundary is the
+  // signed envelope itself, which is enforced by the secretbox tag
+  // long before we reach this line.
   await createMember(
     {
       publicKey: payload.publicKey,
       displayName: payload.profile.displayName,
       skills: payload.profile.skills,
       availability: payload.profile.availability,
-      availabilityChips: payload.profile.availabilityChips,
+      availabilityChips:
+        payload.profile.availabilityChips as AvailabilityChip[],
       locationZone: payload.profile.locationZone,
     },
     nodeId,
