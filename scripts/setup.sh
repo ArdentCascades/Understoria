@@ -251,6 +251,63 @@ EOF
 chmod 600 .env
 ok ".env written (chmod 600)."
 
+# ─── Host firewall (optional) ────────────────────────────────────────
+
+say ""
+say "${c_bold}Host firewall${c_off}"
+say "${c_dim}Caddy needs ports 80 and 443 reachable from the public internet to acquire its TLS cert.${c_off}"
+say ""
+
+# Skip entirely if ufw isn't installed; the operator is using
+# something else (firewalld, raw iptables, none at all) and we
+# don't want to silently second-guess their setup. Same for the
+# Linode Cloud Firewall — that's an external UI step the runbook
+# names; we can't touch it from here.
+if ! command -v ufw >/dev/null 2>&1; then
+  info "ufw not installed — skipping host firewall step."
+  info "If you use firewalld / iptables / Linode Cloud Firewall, make sure"
+  info "  TCP 22, 80, 443 + UDP 443 (HTTP/3) are open for inbound traffic."
+elif command -v firewall-cmd >/dev/null 2>&1 \
+     && systemctl is-active --quiet firewalld 2>/dev/null; then
+  warn "Both ufw and firewalld are installed and firewalld is active."
+  warn "Configure rules through firewalld; ufw rules would be overridden."
+  info "Open TCP 22, 80, 443 + UDP 443 via firewall-cmd, then continue."
+else
+  ufw_status="$(ufw status 2>/dev/null | head -n1 || true)"
+  case "$ufw_status" in
+    *"Status: active"*)
+      info "ufw is active. Current rules will be preserved; rules below will be added."
+      ;;
+    *)
+      info "ufw is installed but inactive."
+      ;;
+  esac
+  say "  Rules to add:"
+  say "    - OpenSSH (preserves your SSH session)"
+  say "    - 80/tcp  (HTTP — ACME HTTP-01 challenge + redirect to HTTPS)"
+  say "    - 443/tcp (HTTPS)"
+  say "    - 443/udp (HTTP/3)"
+  if confirm "Apply these ufw rules and enable the firewall if needed?"; then
+    if [ "$(id -u)" -ne 0 ]; then
+      warn "ufw needs root. Re-running through sudo."
+      sudo ufw allow OpenSSH    >/dev/null
+      sudo ufw allow 80/tcp     >/dev/null
+      sudo ufw allow 443/tcp    >/dev/null
+      sudo ufw allow 443/udp    >/dev/null
+      sudo ufw --force enable   >/dev/null
+    else
+      ufw allow OpenSSH    >/dev/null
+      ufw allow 80/tcp     >/dev/null
+      ufw allow 443/tcp    >/dev/null
+      ufw allow 443/udp    >/dev/null
+      ufw --force enable   >/dev/null
+    fi
+    ok "Host firewall configured."
+  else
+    info "Skipped. You'll need to open TCP 22/80/443 + UDP 443 yourself."
+  fi
+fi
+
 # ─── Summary ─────────────────────────────────────────────────────────
 
 say ""
@@ -264,16 +321,64 @@ say "  Peer nodes:       ${PEER_NODE_URLS:-<solo>}"
 say "  System pubkey:    $sys_pubkey"
 say ""
 
-# ─── Launch (optional) ───────────────────────────────────────────────
+# ─── Launch + TLS verification (optional) ────────────────────────────
+
+# Polls https://$DOMAIN/api/health until Caddy has acquired the cert
+# and the server is responding. Distinguishes the common failure
+# modes (DNS, port, ACME) so the operator doesn't have to grep
+# through Caddy's logs to find out which one to fix.
+verify_tls() {
+  local url="https://$DOMAIN/api/health"
+  local deadline=$(( $(date +%s) + 180 ))   # 3 minutes
+  local first_attempt_at
+  first_attempt_at=$(date +%s)
+  info "Polling $url for the next 3 minutes..."
+  while [ "$(date +%s)" -lt "$deadline" ]; do
+    # --max-time 8 so a hung connection doesn't eat the whole budget.
+    # --silent --show-error lets us capture diagnostics on failure.
+    if body="$(curl --max-time 8 -fsS "$url" 2>/tmp/setup-curl-err)"; then
+      ok "TLS + node both healthy. /api/health: $body"
+      return 0
+    fi
+    sleep 5
+  done
+  # Diagnose the last failure based on curl's stderr.
+  err="$(cat /tmp/setup-curl-err 2>/dev/null || true)"
+  rm -f /tmp/setup-curl-err
+  warn "Did not get a healthy response from $url within 3 minutes."
+  case "$err" in
+    *"Could not resolve host"*)
+      warn "DNS for $DOMAIN doesn't resolve from this host."
+      warn "Check the A record; if you just set it, give DNS time to propagate." ;;
+    *"Connection refused"*|*"Connection timed out"*|*"Failed to connect"*)
+      warn "Ports 80/443 are unreachable. Check:"
+      warn "  - The host firewall step above"
+      warn "  - The Linode Cloud Firewall (if you set one)"
+      warn "  - That Caddy is actually running: docker compose ps caddy" ;;
+    *"SSL"*|*"certificate"*|*"handshake"*)
+      warn "TLS handshake failed. Caddy may still be acquiring the cert."
+      warn "Check: docker compose logs caddy | grep -E 'acme|certificate'" ;;
+    *)
+      warn "Curl error: $err"
+      warn "Check: docker compose logs --tail=50" ;;
+  esac
+  warn "(The node may still come up; verification is best-effort.)"
+  return 1
+}
 
 if confirm "Bring the node up now (docker compose up -d --build)?"; then
   say ""
   info "Starting services..."
   docker compose up -d --build
   say ""
-  ok "Services started. Watch logs with: docker compose logs -f"
-  say "First TLS acquisition can take 30-90s. /api/health should return"
-  say "{\"status\":\"ok\"} once Caddy has its cert."
+  ok "Services started."
+  # Give Caddy a moment to start before we start hammering it. ACME
+  # itself takes 30-90s after that; the poll loop covers it.
+  sleep 5
+  verify_tls || true
+  say ""
+  say "Logs:    docker compose logs -f"
+  say "Status:  docker compose ps"
 else
   say ""
   say "Done. When you're ready: ${c_bold}docker compose up -d --build${c_off}"

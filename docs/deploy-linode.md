@@ -100,13 +100,26 @@ The fastest path through the rest of this guide is a single command:
 scripts/setup.sh
 ```
 
-The script prompts you for everything that goes in `.env` (domain,
-ACME email, operator name + contact, auto-confirm hours, peer list),
-validates each value as you type it (e-mail shape, domain shape,
-optional DNS A-record check against the host's public IP), builds
-the server image, generates the auto-confirm system key inside it,
-writes `.env` with `chmod 600`, and optionally runs
-`docker compose up -d --build`.
+The script:
+
+- Prompts for everything that goes in `.env` (domain, ACME email,
+  operator name + contact, auto-confirm hours, peer list) and
+  validates each value as you type it.
+- Optionally resolves the domain via `getent hosts` and compares
+  against the host's public IP, warns on mismatch.
+- Builds the server image and generates the auto-confirm system
+  key inside it (no Node install required on the host).
+- Writes `.env` with `chmod 600`.
+- **Offers to configure the host firewall** (`ufw`) to allow
+  OpenSSH + 80/tcp + 443/tcp + 443/udp. Skipped if `ufw` isn't
+  installed or `firewalld` is the active firewall instead — you'll
+  configure those yourself. The Linode Cloud Firewall (step 1) is
+  separate and still needs to permit the same ports.
+- Brings the stack up (`docker compose up -d --build`).
+- **Polls `https://<DOMAIN>/api/health` for 3 minutes** so you see
+  whether TLS acquisition succeeded before the script returns.
+  Names the likely fix when it fails (DNS not resolving, port
+  blocked, Caddy still acquiring the cert).
 
 If you'd rather do it the long way — or you're re-running on a
 host that already has `.env` filled in — keep reading: steps 6-8
