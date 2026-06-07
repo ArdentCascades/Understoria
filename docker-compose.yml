@@ -81,6 +81,17 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    # Cap container logs so they can't fill the disk on a busy node.
+    # Default driver retains forever — three 10MB files = 30MB max
+    # per container, which is enough for diagnosing the last hour
+    # or two of activity at typical pilot load. Operators wanting
+    # longer retention should ship logs to a centralised collector
+    # via journald/syslog.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   caddy:
     image: caddy:2.8-alpine
@@ -98,6 +109,11 @@ services:
       - web-dist:/usr/share/caddy:ro
       - caddy-data:/data
       - caddy-config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       web:
         condition: service_completed_successfully
