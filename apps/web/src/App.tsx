@@ -28,6 +28,7 @@ import InvitesPage from "@/pages/Invites";
 import PostFormPage from "@/pages/PostForm";
 import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
+import AddDevicePage from "@/pages/AddDevice";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/invites" element={<InvitesPage />} />
+          <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path="/project/new" element={<ProjectNewPage />} />

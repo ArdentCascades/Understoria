@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { IconSettings } from "@/components/visual";
@@ -279,6 +279,13 @@ export default function ProfilePage() {
         <CommunitySettingsSection />
       </div>
 
+      {/* AddDevice ships in the device-pairing series (design note:
+          docs/device-pairing.md). Placed alongside Emergency rather
+          than next to invites or "share my profile" — pairing a
+          device is more sensitive than either and the visual
+          adjacency to the panic-button section reinforces that. */}
+      <AddDeviceSection />
+
       {/* Emergency stays on Profile — NOT in Settings — per the
           privacy-as-precondition principle. Panic buttons need to
           stay reachable in a stress moment; burying them behind a
@@ -301,6 +308,34 @@ export default function ProfilePage() {
         onSwitch={setCurrentMember}
       />
     </div>
+  );
+}
+
+function AddDeviceSection() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  return (
+    <section
+      className="card mb-4"
+      aria-labelledby="profile-addDevice-heading"
+    >
+      <h2
+        id="profile-addDevice-heading"
+        className="page-title text-base"
+      >
+        {t("profile.addDevice.title")}
+      </h2>
+      <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+        {t("profile.addDevice.subtitle")}
+      </p>
+      <button
+        type="button"
+        className="btn-secondary mt-3"
+        onClick={() => navigate("/add-device")}
+      >
+        {t("profile.addDevice.cta")}
+      </button>
+    </section>
   );
 }
 

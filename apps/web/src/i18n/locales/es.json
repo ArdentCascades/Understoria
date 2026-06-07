@@ -1,4 +1,58 @@
 {
+  "addDevice": {
+    "title": "Vincular otro dispositivo",
+    "subtitle": "Usa la misma identidad en un segundo dispositivo. La transferencia ocurre localmente — ningún servidor ve tu clave.",
+    "comparison": {
+      "transfersTitle": "Lo que viaja al nuevo dispositivo",
+      "transfers": {
+        "identity": "Tu identidad",
+        "identityDetail": "Ambos dispositivos firman como la misma persona.",
+        "profile": "Tu perfil",
+        "profileDetail": "Nombre, habilidades, disponibilidad, zona.",
+        "balance": "Tu saldo e historial",
+        "balanceDetail": "Visibles en ambos dispositivos — viven en el registro de la comunidad, no en tu dispositivo."
+      },
+      "staysTitle": "Lo que se queda en este dispositivo",
+      "stays": {
+        "dms": "Mensajes directos",
+        "dmsDetail": "Los DMs están cifrados de extremo a extremo a este dispositivo. El nuevo empieza de cero.",
+        "drafts": "Borradores en progreso",
+        "draftsDetail": "Locales a propósito. Termina o copia lo que no quieras perder antes de empezar.",
+        "themeDensity": "Tema y densidad",
+        "themeDensityDetail": "Por dispositivo, a propósito — son tus ojos, no tu identidad.",
+        "achievements": "Logros",
+        "achievementsDetail": "Se reconstruyen en el nuevo dispositivo cuando sincronice con la comunidad."
+      },
+      "continue": "Continuar"
+    },
+    "gate": {
+      "title": "Atención: este QR es tu identidad durante 5 minutos.",
+      "body1": "Las cámaras de seguridad, las cámaras de timbre y las webcams pueden leer códigos QR desde el otro lado de una habitación. Una vez en pantalla, cualquiera en el campo de visión de una cámara puede guardarlo y reusarlo dentro de los próximos 5 minutos — incluso después de que cierres esta pantalla.",
+      "body2": "Con la contraseña, eso les da todo: tu nombre, tu historial, la capacidad de firmar como tú.",
+      "commitment": "Hazlo en una habitación que controles. Si no estás segura, cancela.",
+      "showQR": "Mostrar el QR"
+    },
+    "display": {
+      "countdown": "Tiempo restante: {{mmss}}",
+      "passphraseAriaLabel": "Contraseña de transferencia",
+      "spokenInstructions": "Lee estas seis palabras en voz alta, o tipéalas en el nuevo dispositivo. El orden importa. No pegues — los gestores de portapapeles recuerdan cosas.",
+      "qrAriaLabel": "Código QR para vincular dispositivo",
+      "afterImport": "Cuando el otro dispositivo diga que terminó, toca Listo. El QR también desaparecerá solo cuando el temporizador llegue a cero.",
+      "done": "Listo"
+    },
+    "expired": {
+      "title": "Se acabó el tiempo.",
+      "body": "Pasaron cinco minutos. El QR ya no está y la contraseña tampoco. Si todavía quieres vincular el otro dispositivo, empieza de nuevo — se generará una contraseña fresca.",
+      "startOver": "Empezar de nuevo",
+      "close": "Cerrar"
+    },
+    "errors": {
+      "title": "No se pudo iniciar la vinculación",
+      "generic": "Algo salió mal. Intenta otra vez.",
+      "locked": "Desbloquea tu sesión antes de vincular — tu clave de identidad está sellada.",
+      "retry": "Intentar otra vez"
+    }
+  },
   "avatar": {
     "label": "Avatar de persona para la clave {{shortKey}}"
   },
@@ -824,6 +878,11 @@
   "profile": {
     "title": "Tu perfil",
     "identity": "Identidad: {{key}}",
+    "addDevice": {
+      "title": "Vincular otro dispositivo",
+      "subtitle": "Usa la misma identidad en un segundo dispositivo — teléfono, laptop, o ambos.",
+      "cta": "Iniciar vinculación"
+    },
     "balance": {
       "label": "Tu saldo",
       "seed": "Semilla: {{hours}}",

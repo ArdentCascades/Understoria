@@ -1,4 +1,58 @@
 {
+  "addDevice": {
+    "title": "Add another device",
+    "subtitle": "Use the same identity on a second device. The transfer happens locally — no server sees your key.",
+    "comparison": {
+      "transfersTitle": "What follows you to the new device",
+      "transfers": {
+        "identity": "Your identity",
+        "identityDetail": "Both devices sign as the same member.",
+        "profile": "Your profile",
+        "profileDetail": "Display name, skills, availability, area.",
+        "balance": "Your balance and history",
+        "balanceDetail": "Visible on both devices — these live in the community ledger, not on your device."
+      },
+      "staysTitle": "What stays on this device",
+      "stays": {
+        "dms": "Direct messages",
+        "dmsDetail": "DMs are end-to-end encrypted to this device. The new device starts fresh.",
+        "drafts": "Drafts in progress",
+        "draftsDetail": "Local-only on purpose. Finish or copy anything you don't want to lose first.",
+        "themeDensity": "Theme and density",
+        "themeDensityDetail": "Per-device on purpose — your eyes, not your identity.",
+        "achievements": "Achievements",
+        "achievementsDetail": "These rebuild on the new device once it syncs with the community."
+      },
+      "continue": "Continue"
+    },
+    "gate": {
+      "title": "Heads up: this QR is your identity for 5 minutes.",
+      "body1": "Security cameras, doorbell cams, and webcams can read QR codes from across a room. Once it's on screen, anyone in camera view can save it and replay it within the next 5 minutes — even after you close this screen.",
+      "body2": "With the passphrase, that gives them everything: your name, your history, the ability to sign as you.",
+      "commitment": "Do this in a room you control. If you're not sure, cancel.",
+      "showQR": "Show the QR"
+    },
+    "display": {
+      "countdown": "Time left: {{mmss}}",
+      "passphraseAriaLabel": "Transfer passphrase",
+      "spokenInstructions": "Read these six words aloud, or type them on the new device. The order matters. Don't paste — clipboard apps remember things.",
+      "qrAriaLabel": "Device-pairing QR code",
+      "afterImport": "When the other device says it's done, tap Done. The QR will also clear on its own when the timer reaches zero.",
+      "done": "Done"
+    },
+    "expired": {
+      "title": "Time's up.",
+      "body": "Five minutes passed. The QR is gone and so is the passphrase. If you still want to pair the other device, start over — a fresh passphrase will be generated.",
+      "startOver": "Start over",
+      "close": "Close"
+    },
+    "errors": {
+      "title": "Couldn't start pairing",
+      "generic": "Something went wrong. Try again.",
+      "locked": "Unlock your session before pairing — your identity key is sealed.",
+      "retry": "Try again"
+    }
+  },
   "avatar": {
     "label": "Member avatar for key {{shortKey}}"
   },
@@ -824,6 +878,11 @@
   "profile": {
     "title": "Your profile",
     "identity": "Identity: {{key}}",
+    "addDevice": {
+      "title": "Add another device",
+      "subtitle": "Use the same identity on a second device — phone, laptop, or both.",
+      "cta": "Start pairing"
+    },
     "balance": {
       "label": "Your balance",
       "seed": "Seed: {{hours}}",
