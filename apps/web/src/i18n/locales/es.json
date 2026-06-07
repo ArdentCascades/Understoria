@@ -56,6 +56,54 @@
   "avatar": {
     "label": "Avatar de persona para la clave {{shortKey}}"
   },
+  "pairDevice": {
+    "title": "Vincular este dispositivo",
+    "subtitle": "Escanea el QR del otro dispositivo y luego escribe las 6 palabras que muestra.",
+    "capture": {
+      "requestingCamera": "Pidiendo permiso de cámara…",
+      "cameraInstructions": "Apunta al QR del otro dispositivo. Se detectará automáticamente.",
+      "cameraUnavailable": "Cámara no disponible.",
+      "cameraUnavailableHelp": "Tu navegador no tiene lector de QR integrado, o no diste permiso de cámara. Puedes pegar el contenido del QR en su lugar, si el otro dispositivo te lo da.",
+      "videoAriaLabel": "Vista en vivo de la cámara, buscando un código QR",
+      "pasteLabel": "O pega el contenido del QR",
+      "pastePlaceholder": "Pega el sobre base64 aquí…",
+      "continue": "Continuar"
+    },
+    "passphrase": {
+      "instructions": "Escribe las {{count}} palabras del otro dispositivo, en orden. Se autocompletan al escribir.",
+      "wordLabel": "Palabra {{number}}",
+      "unwrap": "Descifrar"
+    },
+    "session": {
+      "title": "Bloquea este dispositivo con una contraseña",
+      "intro": "Elige una contraseña para proteger tu identidad en este dispositivo. La escribirás cuando la app te pida desbloquear. Déjala en blanco para saltarte el bloqueo en este dispositivo — solo hazlo si nadie más tiene acceso.",
+      "passphraseLabel": "Nueva contraseña",
+      "confirmLabel": "Confirma la contraseña",
+      "skipHint": "Deja ambos en blanco para saltarte — tu clave queda sin envolver en este dispositivo.",
+      "mismatch": "La contraseña y la confirmación no coinciden.",
+      "finish": "Terminar"
+    },
+    "bootstrap": {
+      "title": "Ya está.",
+      "intro": "Algunas cosas con las que este dispositivo empieza vacío:",
+      "bullets": {
+        "noDms": "Sin historial de DMs — los mensajes están cifrados de extremo a extremo al dispositivo que los recibió.",
+        "noDrafts": "Sin borradores — el otro dispositivo puede tener publicaciones sin guardar; no viajan.",
+        "noPrefs": "Sin preferencias de tema o densidad — ajústalas en Perfil → Configuración si quieres que coincidan."
+      },
+      "outro": "Los logros se reconstruyen solos a medida que este dispositivo sincronice con la comunidad.",
+      "continue": "Ir al Tablón"
+    },
+    "errors": {
+      "lostEnvelope": "Faltan los datos del QR. Captúralo de nuevo.",
+      "malformed": "Eso no parece un QR de vinculación. Captúralo de nuevo.",
+      "wrongPassphrase": "Estas palabras no coinciden. Revisa cada una — el orden importa.",
+      "expired": "Esta transferencia pasó la ventana de 5 minutos. Pide al otro dispositivo que empiece de nuevo.",
+      "versionMismatch": "El otro dispositivo está en una versión distinta. Actualiza ambos y prueba otra vez.",
+      "publickeyMismatch": "La verificación de identidad del QR no cuadró. Pide al otro dispositivo que empiece de nuevo.",
+      "generic": "Algo salió mal. Intenta otra vez."
+    }
+  },
   "availability": {
     "weekday_days": "Días entre semana",
     "weekday_evenings": "Tardes entre semana",
@@ -1322,6 +1370,7 @@
     "skip": "Saltar",
     "next": "Siguiente",
     "start": "Abrir el tablero",
+    "pairDeviceLink": "¿Ya tienes cuenta en otro dispositivo? Vincula este →",
     "screens": {
       "timebank": {
         "title": "Esto es un banco de tiempo",

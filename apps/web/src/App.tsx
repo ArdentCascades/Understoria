@@ -29,6 +29,7 @@ import PostFormPage from "@/pages/PostForm";
 import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
 import AddDevicePage from "@/pages/AddDevice";
+import PairDevicePage from "@/pages/PairDevice";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
@@ -46,7 +47,11 @@ import { useApp } from "@/state/AppContext";
 // Paths a brand-new device is allowed to reach without going through
 // the welcome flow first. `/invite` matters because an invited member
 // may land on the redemption screen before they've seen anything else.
-const PRE_ONBOARDING_PATHS = new Set<string>(["/welcome", "/invite"]);
+const PRE_ONBOARDING_PATHS = new Set<string>([
+  "/welcome",
+  "/invite",
+  "/pair-device",
+]);
 
 function OnboardingGate({ children }: { children: React.ReactNode }) {
   const { ready, onboarded } = useApp();
@@ -88,6 +93,7 @@ export default function App() {
           <Route path="/proposals" element={<ProposalsPage />} />
           <Route path="/proposals/new" element={<ProposalNewPage />} />
           <Route path="/invite" element={<InviteAcceptPage />} />
+          <Route path="/pair-device" element={<PairDevicePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
