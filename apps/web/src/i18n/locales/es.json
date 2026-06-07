@@ -191,6 +191,10 @@
       "activeInCommunity_one": "1 ya en tu comunidad",
       "activeInCommunity_other": "{{count}} ya en tu comunidad",
       "clear": "Quitar plantilla",
+      "collapsedSelected": "Elegida: {{name}}",
+      "collapsedChange": "Cambiar",
+      "collapsedScratch": "Empezar desde cero",
+      "collapsedPick": "Elegir plantilla",
       "meta": {
         "tasks_one": "{{count}} tarea",
         "tasks_other": "{{count}} tareas",
