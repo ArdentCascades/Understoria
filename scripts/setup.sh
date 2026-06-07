@@ -121,6 +121,28 @@ docker info >/dev/null 2>&1 \
 
 ok "Docker + Compose + repo checkout look healthy."
 
+# ─── Time-sync check ─────────────────────────────────────────────────
+#
+# TLS cert validation and signed-record timestamps both depend on
+# accurate time. A drifted clock means Caddy may reject Let's
+# Encrypt's response (cert "from the future"), and federated
+# exchange records get a wrong `completedAt` that peers cannot
+# audit against their own clocks. Failing here is friendlier than
+# debugging the symptom later.
+if command -v timedatectl >/dev/null 2>&1; then
+  if timedatectl show --property=NTPSynchronized --value 2>/dev/null \
+       | grep -qx "yes"; then
+    ok "System clock is NTP-synchronized."
+  else
+    warn "System clock is NOT NTP-synchronized."
+    warn "TLS + signed-record timestamps need an accurate clock."
+    warn "Fix: sudo timedatectl set-ntp true   (then re-run this script)"
+    confirm "Continue anyway?" || exit 1
+  fi
+else
+  info "timedatectl not present — can't verify clock sync. Make sure NTP is configured."
+fi
+
 # ─── .env handling ───────────────────────────────────────────────────
 
 if [ -f .env ]; then
@@ -308,6 +330,54 @@ else
   fi
 fi
 
+# ─── Unattended security updates ─────────────────────────────────────
+#
+# Single highest-value security step for a long-running VPS — most
+# real-world compromises exploit unpatched CVEs. Detected, not
+# assumed; non-Debian systems get a note instead of a wrong command.
+
+say ""
+say "${c_bold}Unattended security updates${c_off}"
+if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
+  if dpkg -s unattended-upgrades >/dev/null 2>&1; then
+    if systemctl is-enabled --quiet unattended-upgrades 2>/dev/null \
+       || [ -f /etc/apt/apt.conf.d/20auto-upgrades ]; then
+      ok "unattended-upgrades is installed and enabled."
+    else
+      info "unattended-upgrades is installed but not enabled."
+      if confirm "Enable it now?"; then
+        if [ "$(id -u)" -ne 0 ]; then
+          sudo dpkg-reconfigure --priority=low unattended-upgrades \
+            || warn "Manual enable: sudo dpkg-reconfigure unattended-upgrades"
+        else
+          dpkg-reconfigure --priority=low unattended-upgrades \
+            || warn "Manual enable: dpkg-reconfigure unattended-upgrades"
+        fi
+        ok "unattended-upgrades reconfigured."
+      fi
+    fi
+  else
+    info "unattended-upgrades not installed."
+    if confirm "Install + enable it now? (apt-get install unattended-upgrades)"; then
+      if [ "$(id -u)" -ne 0 ]; then
+        sudo apt-get update >/dev/null
+        sudo apt-get install -y unattended-upgrades >/dev/null
+        sudo dpkg-reconfigure --priority=low unattended-upgrades \
+          || warn "Manual finalize: sudo dpkg-reconfigure unattended-upgrades"
+      else
+        apt-get update >/dev/null
+        apt-get install -y unattended-upgrades >/dev/null
+        dpkg-reconfigure --priority=low unattended-upgrades \
+          || warn "Manual finalize: dpkg-reconfigure unattended-upgrades"
+      fi
+      ok "unattended-upgrades installed + enabled."
+    fi
+  fi
+else
+  info "Non-Debian system — install your distribution's equivalent of"
+  info "  unattended-upgrades (dnf-automatic, etc.) before going public."
+fi
+
 # ─── Summary ─────────────────────────────────────────────────────────
 
 say ""
@@ -366,6 +436,45 @@ verify_tls() {
   return 1
 }
 
+# Sanity check what the live node is publishing back. Catches:
+#   - operator name typo'd in .env vs. what got loaded
+#   - system pubkey from /api/config doesn't match what we just generated
+#     (would indicate a paste / interpolation problem in .env or a key
+#      that was overwritten between keygen and launch)
+verify_config() {
+  local url="https://$DOMAIN/api/config"
+  info "Sanity-checking $url..."
+  local body
+  body="$(curl --max-time 8 -fsS "$url" 2>/dev/null || true)"
+  if [ -z "$body" ]; then
+    warn "$url did not return a response. Skipping sanity check."
+    return 1
+  fi
+  local rc=0
+  if [ -n "$OPERATOR_NAME" ]; then
+    if printf '%s' "$body" | grep -qF "$OPERATOR_NAME"; then
+      ok "Operator name present in /api/config."
+    else
+      warn "Operator name NOT found in /api/config."
+      warn "  Expected: $OPERATOR_NAME"
+      warn "  Got:      $body"
+      rc=1
+    fi
+  fi
+  if [ -n "$sys_pubkey" ]; then
+    if printf '%s' "$body" | grep -qF "$sys_pubkey"; then
+      ok "System public key matches what was generated."
+    else
+      warn "System public key in /api/config does NOT match the one we generated."
+      warn "  Expected: $sys_pubkey"
+      warn "  This usually means .env didn't pick up NODE_SYSTEM_SECRET_KEY."
+      warn "  Compare:  grep NODE_SYSTEM_SECRET_KEY .env"
+      rc=1
+    fi
+  fi
+  return "$rc"
+}
+
 if confirm "Bring the node up now (docker compose up -d --build)?"; then
   say ""
   info "Starting services..."
@@ -375,11 +484,40 @@ if confirm "Bring the node up now (docker compose up -d --build)?"; then
   # Give Caddy a moment to start before we start hammering it. ACME
   # itself takes 30-90s after that; the poll loop covers it.
   sleep 5
-  verify_tls || true
+  if verify_tls; then
+    verify_config || true
+  fi
   say ""
   say "Logs:    docker compose logs -f"
   say "Status:  docker compose ps"
 else
   say ""
   say "Done. When you're ready: ${c_bold}docker compose up -d --build${c_off}"
+fi
+
+# ─── Backup reminder ─────────────────────────────────────────────────
+#
+# `.env` now holds the only copy of NODE_SYSTEM_SECRET_KEY on this
+# host. If the disk dies, the key is gone — and auto-confirmed
+# records signed with it can no longer be re-verified by future
+# operators. Make this explicit at exit; soft-prompt for an
+# encrypted local copy.
+
+say ""
+say "${c_bold}Back up the system key — now${c_off}"
+say "  ${c_dim}.env is the ONLY copy of NODE_SYSTEM_SECRET_KEY on this host.${c_off}"
+say "  ${c_dim}Lose the host, lose the key; auto-confirmed history becomes unverifiable.${c_off}"
+say "  ${c_dim}Rotation procedure: docs/auto-confirm-key.md §6.${c_off}"
+say ""
+say "  Suggested:"
+say "    1. Copy .env to a host you control somewhere else:"
+say "         scp .env you@offsite.example.org:/secure/understoria-env-${DOMAIN}.backup"
+say "    2. Or encrypt it with gpg and store the ciphertext:"
+say "         gpg --symmetric --output understoria-env.gpg .env"
+say "    3. Or print NODE_SYSTEM_SECRET_KEY and store it in a password manager."
+say ""
+if confirm "I've backed it up — clear this confirmation prompt?"; then
+  ok "Acknowledged. The reminder will print again on next setup.sh run."
+else
+  warn "Do NOT bring this node into production use until the key is backed up."
 fi

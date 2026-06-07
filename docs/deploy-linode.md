@@ -102,9 +102,11 @@ scripts/setup.sh
 
 The script:
 
-- Prompts for everything that goes in `.env` (domain, ACME email,
-  operator name + contact, auto-confirm hours, peer list) and
-  validates each value as you type it.
+- **Verifies the system clock** is NTP-synchronized (TLS + signed
+  timestamps depend on it; warns if not).
+- **Prompts** for everything that goes in `.env` (domain, ACME
+  email, operator name + contact, auto-confirm hours, peer list)
+  and validates each value as you type it.
 - Optionally resolves the domain via `getent hosts` and compares
   against the host's public IP, warns on mismatch.
 - Builds the server image and generates the auto-confirm system
@@ -112,14 +114,31 @@ The script:
 - Writes `.env` with `chmod 600`.
 - **Offers to configure the host firewall** (`ufw`) to allow
   OpenSSH + 80/tcp + 443/tcp + 443/udp. Skipped if `ufw` isn't
-  installed or `firewalld` is the active firewall instead — you'll
-  configure those yourself. The Linode Cloud Firewall (step 1) is
-  separate and still needs to permit the same ports.
+  installed or `firewalld` is the active firewall instead. The
+  Linode Cloud Firewall (step 1) is separate and still needs the
+  same ports.
+- **Offers to install or enable `unattended-upgrades`** so the host
+  auto-applies security patches. Detected, not assumed; non-Debian
+  systems get a note instead of a wrong command.
 - Brings the stack up (`docker compose up -d --build`).
 - **Polls `https://<DOMAIN>/api/health` for 3 minutes** so you see
   whether TLS acquisition succeeded before the script returns.
   Names the likely fix when it fails (DNS not resolving, port
   blocked, Caddy still acquiring the cert).
+- **Sanity-checks `/api/config`** — fetches the live config and
+  confirms it advertises the operator name + system public key
+  you just generated. Catches subtle paste / interpolation bugs in
+  `.env`.
+- **Prompts you to back up the system key** before exit, with
+  three concrete suggestions (offsite `scp`, `gpg --symmetric`,
+  password manager). The key in `.env` is the only copy on the
+  host — losing it makes auto-confirmed history unverifiable
+  forever.
+
+Docker logs are capped at 30MB per container (3 × 10MB rotation,
+declared in `docker-compose.yml`) so a busy node can't fill the
+disk. Operators wanting longer retention should ship to a
+centralised collector via `journald`/`syslog`.
 
 If you'd rather do it the long way — or you're re-running on a
 host that already has `.env` filled in — keep reading: steps 6-8
