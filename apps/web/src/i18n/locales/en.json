@@ -56,6 +56,54 @@
   "avatar": {
     "label": "Member avatar for key {{shortKey}}"
   },
+  "pairDevice": {
+    "title": "Pair this device",
+    "subtitle": "Scan the QR from your other device, then type the 6 words it's showing.",
+    "capture": {
+      "requestingCamera": "Asking for camera permission…",
+      "cameraInstructions": "Point at the QR on the other device. It'll detect automatically.",
+      "cameraUnavailable": "Camera not available.",
+      "cameraUnavailableHelp": "Your browser doesn't have a built-in QR reader, or you didn't allow camera access. You can paste the QR contents instead, if the other device offered them.",
+      "videoAriaLabel": "Live camera view, looking for a QR code",
+      "pasteLabel": "Or paste the QR contents",
+      "pastePlaceholder": "Paste base64 envelope here…",
+      "continue": "Continue"
+    },
+    "passphrase": {
+      "instructions": "Type the {{count}} words from the other device, in order. They auto-complete as you type.",
+      "wordLabel": "Word {{number}}",
+      "unwrap": "Unwrap"
+    },
+    "session": {
+      "title": "Lock this device with a passphrase",
+      "intro": "Pick a passphrase to protect your identity on this device. You'll type it when the app asks you to unlock. Leave it blank to skip locking on this device — only do that if no one else has access.",
+      "passphraseLabel": "New passphrase",
+      "confirmLabel": "Confirm passphrase",
+      "skipHint": "Leave both blank to skip — your key stays unwrapped on this device.",
+      "mismatch": "Passphrase and confirmation don't match.",
+      "finish": "Finish"
+    },
+    "bootstrap": {
+      "title": "You're in.",
+      "intro": "A few things this device starts without:",
+      "bullets": {
+        "noDms": "No DM history — messages are end-to-end encrypted to whichever device received them.",
+        "noDrafts": "No drafts — the other device may have unsaved posts; those don't follow.",
+        "noPrefs": "No theme or density preferences — set them in Profile → Settings if you want them to match."
+      },
+      "outro": "Achievements rebuild on their own as this device syncs with the community.",
+      "continue": "Continue to the Board"
+    },
+    "errors": {
+      "lostEnvelope": "The QR data is missing. Capture it again.",
+      "malformed": "That doesn't look like a pairing QR. Capture it again.",
+      "wrongPassphrase": "These words don't match. Check each one — order matters.",
+      "expired": "This transfer is past its 5-minute window. Ask the other device to start over.",
+      "versionMismatch": "The other device is on a different version. Update both, then try again.",
+      "publickeyMismatch": "The QR's identity check didn't add up. Ask the other device to start over.",
+      "generic": "Something went wrong. Try again."
+    }
+  },
   "availability": {
     "weekday_days": "Weekday days",
     "weekday_evenings": "Weekday evenings",
@@ -1322,6 +1370,7 @@
     "skip": "Skip",
     "next": "Next",
     "start": "Open the board",
+    "pairDeviceLink": "Already have an account on another device? Pair this one →",
     "screens": {
       "timebank": {
         "title": "This is a timebank",

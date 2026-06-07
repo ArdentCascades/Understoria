@@ -158,13 +158,35 @@ export default function WelcomePage() {
   const onBack = stepIndex === 0 ? null : () => setStepIndex(stepIndex - 1);
 
   if (step.kind === "concept") {
+    // On the FIRST concept screen only, surface a small affordance
+    // for members who landed here because they want to bring an
+    // existing identity onto this device — the design doc §7.1
+    // "third path." Members who are genuinely new will scroll past
+    // without engaging.
+    const bodyWithPairLink =
+      stepIndex === 0 ? (
+        <>
+          {step.bodyKeys.map((k) => (
+            <p key={k}>{t(k)}</p>
+          ))}
+          <div className="pt-4">
+            <button
+              type="button"
+              onClick={() => navigate("/pair-device")}
+              className="text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            >
+              {t("welcome.pairDeviceLink")}
+            </button>
+          </div>
+        </>
+      ) : (
+        step.bodyKeys.map((k) => <p key={k}>{t(k)}</p>)
+      );
     return (
       <OnboardingScreen
         icon={step.icon}
         title={t(step.titleKey)}
-        body={step.bodyKeys.map((k) => (
-          <p key={k}>{t(k)}</p>
-        ))}
+        body={bodyWithPairLink}
         stepIndex={stepIndex}
         stepCount={STEPS.length}
         onBack={onBack}
