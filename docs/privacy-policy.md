@@ -94,6 +94,18 @@ community node's job is to relay records to peer nodes that pull
 from it (see §6). After that point, the operator cannot retract a
 record from peers — see §9.
 
+**Local aggregation views.** The PWA may show the same fields
+above in aggregated surfaces — for example, a community calendar
+that surfaces project deadlines, post expiry dates, and per-day
+exchange counts in a single time view. These aggregations are
+built on your device from data your PWA has already received via
+federation pull. They do not produce new records, do not introduce
+new server endpoints, and do not change what the community node
+sees about you. See `docs/calendar.md` and the threat-model entry
+"Calendar aggregation as a faster surveillance surface" for the
+reasoning and the rejected alternatives (per-member calendar
+URLs, iCal subscription feeds — both out of scope).
+
 ## 5. What the community node sees
 
 Beyond the signed records you push, the node sees:

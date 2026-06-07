@@ -486,6 +486,64 @@ We are not trying to protect against:
   "what to expect" reminder on the destination device after
   import names this so it isn't a surprise.
 
+- **Calendar aggregation as a faster surveillance surface.**
+  The community calendar (`docs/calendar.md`) collapses
+  date-shaped data already present in `Project`, `Post`, and
+  `Exchange` records into a single time-spatial view. For an
+  adversary with limited time to enumerate, this reduces the cost
+  of building a picture of "what is this community doing in
+  November" from "walk every project page" to "open the calendar
+  tab." The data itself is not new — anyone who can already see
+  the Board can see expiry dates; anyone who can see a project
+  page can see its deadline. The change is presentation, not
+  exposure.
+  Mitigations, each addressing a distinct exposure path:
+  (a) **Local aggregation only.** `lib/calendar.ts` runs in the
+  PWA on data already loaded by federation pull. No new server
+  endpoint, no new federated record type, no schema migration.
+  Nothing the server logs changes; `LOG_REQUEST_PATHS=false`
+  (server default) keeps the calendar's request shape unlogged
+  like every other page.
+  (b) **No member-level aggregation by default.** v1 never groups
+  entries by who-they-belong-to. A "Mine" filter exists and
+  shows ONLY the viewing member's own data — their own
+  authored posts, their own organized projects, their own
+  exchanges. A `/member/X/calendar` per-member time-spatial
+  view is explicitly out of scope and named as a rejected
+  alternative in `docs/calendar.md` §10.5.
+  (c) **No availability or location-zone projection.** Profile
+  fields (`availabilityChips`, `locationZone`) already appear on
+  the member's own profile and on their posts. They do NOT get
+  projected onto specific dates on the calendar — that would
+  turn coarse availability into a stalking surface ("X is in
+  zone Y, available Tuesday evenings"). Profile is the right
+  home for availability; the calendar is the wrong amplifier.
+  (d) **No recurring-task materialization.** Today the cadence
+  of a recurring template task lives in description text
+  (`projects.templates.recurringSuffix.<cadence>`). Parsing
+  localized strings back into structured cadences to project
+  virtual entries forward in time is rejected in v1 — both
+  because it's fragile and because materializing weekly /
+  monthly cadences would amplify the surveillance shape of
+  "this happens every Tuesday at this place." A future PR may
+  promote `recurringCadence` to a first-class field on
+  `ProjectTask` with its own threat-model entry covering the
+  projection surface.
+  Rejected alternatives with reasons (full enumeration in
+  `docs/calendar.md` §10.5):
+  - **iCal subscription URLs.** No authentication boundary; any
+    URL holder pulls full schedule data. Surveillance escape
+    valve.
+  - **Per-member calendar URLs.** Per-member time-spatial
+    aggregation is a stalking surface; no values win.
+  - **Server-rendered ICS feed via federation.** Federation
+    surface widens for a low-value feature.
+  What this does NOT mitigate, said plainly: the calendar makes
+  scanning the same data faster. It does not protect against an
+  adversary who was going to enumerate the project pages anyway.
+  Saying this in the threat-model entry avoids overclaiming
+  protection that the design does not provide.
+
 - **Device-level compromise is out of scope.** The camera-gate
   entry above protects against an *external* observer (CCTV,
   doorbell cam, line-of-sight surveillance). It does NOT
