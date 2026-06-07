@@ -19,17 +19,16 @@ import {
 const NODE = "node_calendar_test";
 
 function project(opts: Partial<Project> & { id: string }): Project {
-  return {
-    id: opts.id,
-    title: opts.title ?? `Project ${opts.id}`,
+  const defaults: Omit<Project, "id"> = {
+    title: `Project ${opts.id}`,
     description: "",
-    category: opts.category ?? "other",
+    category: "other",
     organizerKey: "org",
     coOrganizerKeys: [],
-    status: (opts.status ?? "active") as ProjectStatus,
+    status: "active",
     targetHours: 10,
     contributedHours: 0,
-    deadline: opts.deadline ?? null,
+    deadline: null,
     createdAt: 0,
     completedAt: null,
     pauseNote: null,
@@ -37,30 +36,29 @@ function project(opts: Partial<Project> & { id: string }): Project {
     tags: [],
     nodeId: NODE,
     templateId: null,
-    ...opts,
   };
+  return { ...defaults, ...opts };
 }
 
 function post(opts: Partial<Post> & { id: string }): Post {
-  return {
-    id: opts.id,
-    type: opts.type ?? "NEED",
-    category: opts.category ?? "other",
-    title: opts.title ?? `Post ${opts.id}`,
+  const defaults: Omit<Post, "id"> = {
+    type: "NEED",
+    category: "other",
+    title: `Post ${opts.id}`,
     description: "",
     estimatedHours: 1,
     urgency: "low",
     postedBy: "poster",
-    claimedBy: opts.claimedBy ?? null,
-    status: opts.status ?? "open",
+    claimedBy: null,
+    status: "open",
     createdAt: 0,
-    expiresAt: opts.expiresAt ?? null,
+    expiresAt: null,
     locationZone: "",
     confirmedBy: [],
     nodeId: NODE,
     signature: "",
-    ...opts,
   };
+  return { ...defaults, ...opts };
 }
 
 function exchange(id: string, completedAt: number): Exchange {
@@ -297,7 +295,7 @@ describe("buildCalendar — post_expiring", () => {
       expiresAt: NOW + 3 * DAY,
       title: "Need a ride to clinic",
       type: "NEED",
-      category: "transportation",
+      category: "transport",
     });
     const result = buildCalendar({
       projects: [],
@@ -311,7 +309,7 @@ describe("buildCalendar — post_expiring", () => {
       postId: "post_1",
       postTitle: "Need a ride to clinic",
       postType: "NEED",
-      category: "transportation",
+      category: "transport",
     });
   });
 

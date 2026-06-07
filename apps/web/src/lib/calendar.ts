@@ -18,7 +18,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Category, Exchange, Post, PostType, Project } from "@/types";
+import type {
+  Category,
+  Exchange,
+  Post,
+  PostType,
+  Project,
+  ProjectCategory,
+} from "@/types";
 
 /**
  * Community calendar data layer — aggregates date-shaped fields from
@@ -57,7 +64,11 @@ export type CalendarEntry =
       date: number;
       projectId: string;
       projectTitle: string;
-      category: Category;
+      /** ProjectCategory is the wider set — includes infrastructure,
+       *  organizing, mutual_aid_drive on top of the Post Category
+       *  enum. The UI looks up display metadata for both via
+       *  `lib/categories.ts`. */
+      category: ProjectCategory;
     }
   | {
       kind: "post_expiring";
