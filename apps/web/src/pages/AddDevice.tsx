@@ -21,7 +21,6 @@ import {
   encodeEnvelope,
   generateTransferPassphrase,
   wrapForTransfer,
-  type TransferEnvelope,
   type TransferProfile,
 } from "@/lib/devicePairing";
 import { DevicePairingComparisonCard } from "@/components/DevicePairingComparisonCard";
@@ -56,7 +55,9 @@ export default function AddDevicePage() {
   const navigate = useNavigate();
 
   const [stage, setStage] = useState<Stage>("comparison");
-  const [envelope, setEnvelope] = useState<TransferEnvelope | null>(null);
+  // Only the encoded envelope (QR payload string) is kept in state;
+  // the structured `TransferEnvelope` object is local to the wrap
+  // step. Both pieces drop on `reset()` regardless.
   const [encoded, setEncoded] = useState<string | null>(null);
   const [passphrase, setPassphrase] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
@@ -64,7 +65,6 @@ export default function AddDevicePage() {
 
   // Drops sensitive state. Called on cancel / expiry / unmount.
   const reset = useCallback(() => {
-    setEnvelope(null);
     setEncoded(null);
     setPassphrase(null);
     setExpiresAt(null);
@@ -103,7 +103,6 @@ export default function AddDevicePage() {
         passphrase: generated,
       });
 
-      setEnvelope(env);
       setEncoded(encodeEnvelope(env));
       setPassphrase(generated);
       setExpiresAt(Date.now() + DEFAULT_EXPIRY_MS);
