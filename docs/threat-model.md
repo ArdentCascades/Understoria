@@ -423,6 +423,69 @@ We are not trying to protect against:
   own threat-model entry justifying why it doesn't disadvantage
   slow scanners and members with motor impairments.
 
+- **Device pairing widens the identity-key surface.** The
+  device-pairing flow (`docs/device-pairing.md`) is the only
+  shipped path by which a member's Ed25519 secretKey leaves the
+  device it was generated on. The threat surface is broader
+  than the invite QR's because the QR encodes identity material,
+  not a single-use join token: an attacker who captures both the
+  envelope (via camera) AND the 6-word transfer passphrase
+  (overheard, or seen on the source device's screen) gets
+  everything — display name, history, the ability to sign as
+  the member — for 5 minutes.
+  The mitigations are layered, each addressing a distinct
+  capture path:
+  (a) **Comparison card before any QR.** The flow opens with an
+  explicit listing of what does and doesn't transfer. Members
+  decide whether to pair before identity material is rendered.
+  (b) **Camera-awareness gate**, identical to the invite-QR
+  gate but with sharper copy naming the 5-minute replay window.
+  No "send without showing" hatch — the envelope is several
+  hundred base64 bytes and the no-hatch decision is documented
+  in `device-pairing.md` §6.3.
+  (c) **Fresh per-transfer passphrase.** Source device generates
+  a 6-word BIP39 passphrase, ~66 bits of entropy. Member never
+  picks it; clipboard-copy is not offered (clipboard managers
+  persist). Conveyed by reading aloud or typing.
+  (d) **5-minute hard expiry.** `expiresAt` is in the wrapped
+  plaintext and enforced on the destination after a successful
+  unwrap. A captured QR is useless after the window even with
+  the passphrase.
+  (e) **No server-side state.** The community node sees
+  nothing — no envelope, no acknowledgment, no peer-discovery
+  channel. Pairing succeeds or fails entirely within the two
+  devices' memories.
+  (f) **Component-state-only on the source.** Envelope and
+  passphrase live in React state only. No localStorage,
+  sessionStorage, or IndexedDB write. Cancel / route-change /
+  auto-dismiss drops the state.
+  Rejected alternatives, each with the reason:
+  - **Server-stored wrapped envelope** (passkey-PRF style)
+    relocates identity bytes onto the community node and shifts
+    a portion of trust onto whoever holds the passkey keychain.
+    Tracked as future work in `device-pairing.md` §4, pending
+    pilot signal on whether QR transfer is too inconvenient in
+    practice.
+  - **Real-time ack channel** (long-poll, WebRTC, BroadcastChannel)
+    would put pairing state on the server or a third party. The
+    "I'm done" button is a member assertion, not a system
+    confirmation; the 5-minute auto-dismiss is the actual
+    security property.
+  - **"Send without showing" hatch** of the kind the invite QR
+    uses. The envelope is too large to type, and clipboard /
+    `navigator.share` routing re-introduces the persistence
+    problem we removed from the invite flow.
+  After successful pairing, both devices hold the same identity.
+  This is a deliberate design choice, not a bug:
+  Ed25519 has no in-protocol revocation, so a stolen paired
+  device is recoverable only by the existing hard-purge (rotate
+  identity, lose history attribution). Members are told this
+  on the comparison card; the privacy-policy §3 amendment names
+  the device-pairing exception explicitly. DM history does NOT
+  transfer (DMs are E2E to specific device keys); a brief
+  "what to expect" reminder on the destination device after
+  import names this so it isn't a surprise.
+
 - **Device-level compromise is out of scope.** The camera-gate
   entry above protects against an *external* observer (CCTV,
   doorbell cam, line-of-sight surveillance). It does NOT
