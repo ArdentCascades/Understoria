@@ -259,10 +259,14 @@ disputes; a launch posture also needs:
 - **Moderator coverage.** Disputes route to `/disputes` in-app and
   to whoever owns the moderator role per [`GOVERNANCE.md`](
   ../GOVERNANCE.md). Someone has to be ready to respond.
-- **Incident plan.** What you do if the system key is leaked. The
-  short answer is in [`auto-confirm-key.md`](./auto-confirm-key.md)
-  §6 — rotation + announcement. Have the announcement template
-  pre-written.
+- **Incident plan.** Six pre-written announcement templates ship in
+  [`incident-templates.md`](./incident-templates.md): system-key
+  rotation, member-data breach, federation depeering, extended
+  outage, routine security update, and the annual transparency
+  report promised by the privacy policy. Read them once now so you
+  know what's in them; edit the voice if you need to before
+  launch; have them ready in your operator notes for the moment
+  you actually need one.
 - **A second pair of eyes on the threat model.** [`threat-model.md`](
   ./threat-model.md) §7 lists the decisions we've made. If your
   launch context (jurisdiction, member demographics, threat surface)

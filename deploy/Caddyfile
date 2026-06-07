@@ -20,15 +20,27 @@
 {$DOMAIN} {
 	encode gzip zstd
 
-	# Conservative security headers. CSP is intentionally not set here —
-	# Vite + the PWA service worker need a tailored policy; tracked in
-	# the deploy runbook as a hardening follow-up rather than blocking
-	# first-launch.
+	# Conservative security headers.
+	#
+	# CSP is locked down to same-origin everything plus one sha256 hash
+	# for the inline theme/density bootstrap script in `index.html`
+	# (the FOUC defense that runs before the page paints — moving it
+	# to an external file would cost a blocking roundtrip and defeat
+	# its purpose). If you edit `apps/web/index.html`, you MUST refresh
+	# the hash with `scripts/csp-hash.sh` and re-deploy.
+	#
+	# style-src includes 'unsafe-inline' because React's `style={{...}}`
+	# emits `style="..."` attributes (used for dynamic widths in
+	# BreadthBar, milestone progress, etc.) and CSP3's 'unsafe-hashes'
+	# directive doesn't have broad enough browser support yet to be
+	# our floor. CSS injection is materially less weaponizable than
+	# script injection, so this is the right cost.
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-mVpOu/C1dIKbTCswgkrVcbSGV23SQYCVB6nk5bCeuno='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 
