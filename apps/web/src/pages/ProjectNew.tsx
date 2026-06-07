@@ -82,6 +82,17 @@ export default function ProjectNewPage() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null,
   );
+  // Mobile-only disclosure for the TemplatePicker. The picker has to
+  // appear in DOM order before the form (so the reading flow is
+  // "pick a starting point, then fill in"), but on a narrow viewport
+  // that means a member has to scroll past every template to reach
+  // the Create-Draft button. Once the member has made a choice
+  // (picked a template OR explicitly chose "start from scratch"),
+  // collapse the picker into a one-line summary so the form is
+  // immediately reachable. The summary header has its own
+  // expand-again affordance. Desktop (lg+) ignores this state — the
+  // sticky left rail stays open. */
+  const [pickerExpanded, setPickerExpanded] = useState(true);
 
   const validation = useFieldValidation<FieldName>(
     { title, targetHours, deadlineDays },
@@ -148,6 +159,10 @@ export default function ProjectNewPage() {
 
   function handleSelectTemplate(templateId: string | null) {
     setSelectedTemplateId(templateId);
+    // Collapse on selection — whether they picked a template or
+    // explicitly chose "start from scratch", they've made a decision
+    // and the form is the next thing they care about.
+    setPickerExpanded(false);
     if (templateId === null) {
       // "Start from scratch" — leave the form alone. Clearing fields
       // here would surprise a member who already typed something.
@@ -161,6 +176,17 @@ export default function ProjectNewPage() {
     );
     setCategory(tpl.defaultCategory);
     setTargetHours(String(tpl.setupHours));
+  }
+
+  // Clearing from the selected-banner is a different intent than the
+  // gallery's "start from scratch" card. A member who clicks Clear is
+  // saying "I don't want this template anymore" — usually because they
+  // want to reconsider. Open the picker back up rather than collapse
+  // to a "start from scratch" summary, which would force them to
+  // re-expand to actually browse.
+  function handleClearTemplate() {
+    setSelectedTemplateId(null);
+    setPickerExpanded(true);
   }
 
   /** Suffix the localized cadence sentence onto a task description.
@@ -287,14 +313,50 @@ export default function ProjectNewPage() {
       <div className="lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start lg:gap-6">
         <aside
           aria-label={t("projects.templates.asideAriaLabel")}
-          className="lg:col-start-1 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
+          className="mb-4 lg:mb-0 lg:col-start-1 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
         >
-          <TemplatePicker
-            selectedId={selectedTemplateId}
-            onSelect={handleSelectTemplate}
-            layout="rail"
-            activeProjectsByTemplate={activeProjectsByTemplate}
-          />
+          {/* Mobile-only collapsed summary. Hidden on lg+ because the
+              sticky rail stays open at that breakpoint regardless. */}
+          {!pickerExpanded && (
+            <button
+              type="button"
+              className="flex w-full items-center justify-between gap-3 rounded-lg border border-moss-200 bg-white px-4 py-3 text-left text-sm shadow-sm dark:border-moss-700 dark:bg-moss-900 lg:hidden"
+              aria-expanded={false}
+              aria-controls="project-template-picker"
+              onClick={() => setPickerExpanded(true)}
+            >
+              <span className="min-w-0 flex-1 truncate text-moss-900 dark:text-moss-100">
+                {selectedTemplateId
+                  ? t("projects.templates.collapsedSelected", {
+                      name:
+                        getTemplate(
+                          selectedTemplateId,
+                          i18n.resolvedLanguage ?? "en",
+                        )?.name ?? "",
+                    })
+                  : t("projects.templates.collapsedScratch")}
+              </span>
+              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-canopy-700 dark:text-canopy-300">
+                {selectedTemplateId
+                  ? t("projects.templates.collapsedChange")
+                  : t("projects.templates.collapsedPick")}
+              </span>
+            </button>
+          )}
+
+          {/* The picker itself. Mobile: hidden when collapsed.
+              Desktop: always visible (lg:block overrides). */}
+          <div
+            id="project-template-picker"
+            className={pickerExpanded ? "" : "hidden lg:block"}
+          >
+            <TemplatePicker
+              selectedId={selectedTemplateId}
+              onSelect={handleSelectTemplate}
+              layout="rail"
+              activeProjectsByTemplate={activeProjectsByTemplate}
+            />
+          </div>
         </aside>
 
         <div className="lg:col-start-2 lg:row-start-1 lg:min-w-0 lg:max-w-2xl">
@@ -340,7 +402,7 @@ export default function ProjectNewPage() {
                   <button
                     type="button"
                     className="mt-1 text-xs font-semibold underline"
-                    onClick={() => handleSelectTemplate(null)}
+                    onClick={handleClearTemplate}
                   >
                     {t("projects.templates.clear")}
                   </button>

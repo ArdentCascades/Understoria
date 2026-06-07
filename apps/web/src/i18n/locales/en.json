@@ -191,6 +191,10 @@
       "activeInCommunity_one": "1 already in your community",
       "activeInCommunity_other": "{{count}} already in your community",
       "clear": "Clear template",
+      "collapsedSelected": "Selected: {{name}}",
+      "collapsedChange": "Change",
+      "collapsedScratch": "Starting from scratch",
+      "collapsedPick": "Pick a template",
       "meta": {
         "tasks_one": "{{count}} task",
         "tasks_other": "{{count}} tasks",
