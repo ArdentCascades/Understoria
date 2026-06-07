@@ -28,13 +28,46 @@ export async function markOnboarded(): Promise<void> {
 }
 
 // Upgrade path for devices that have been using Understoria from
-// before Agent 16. If members already exist locally, the user has
-// clearly seen the app — silently mark the device as onboarded so
-// they don't get a welcome flow for software they already know.
+// before Agent 16. If the device shows real evidence of prior use —
+// at least one signed record authored by a LOCAL member — silently
+// mark the device as onboarded so they don't get a welcome flow for
+// software they already know.
+//
+// "Member row exists" is NOT enough on its own: a device that just
+// accepted an invite has a member row before any federation pull,
+// before any signed record — and we still want that member to see
+// the welcome concept screens + profile-setup step. Checking for an
+// authored signed record (exchange, vouch, or post) discriminates
+// returning users from freshly-invited ones.
 export async function backfillOnboardedForExistingUsers(): Promise<void> {
   if (await isOnboarded()) return;
-  const memberCount = await db.members.count();
-  if (memberCount > 0) {
+  const localKeys = new Set(
+    (await db.members.toArray()).map((m) => m.publicKey),
+  );
+  if (localKeys.size === 0) return;
+
+  // First match wins — we only need to know whether ANY signed record
+  // was authored locally, not which one. `.find()` walks the table
+  // and stops at the first hit, so cost is bounded even on big stores.
+  const authoredExchange = await db.exchanges
+    .filter((e) => localKeys.has(e.helperKey) || localKeys.has(e.helpedKey))
+    .first();
+  if (authoredExchange) {
     await markOnboarded();
+    return;
+  }
+  const authoredVouch = await db.vouches
+    .filter((v) => localKeys.has(v.voucherKey))
+    .first();
+  if (authoredVouch) {
+    await markOnboarded();
+    return;
+  }
+  const authoredPost = await db.posts
+    .filter((p) => localKeys.has(p.postedBy))
+    .first();
+  if (authoredPost) {
+    await markOnboarded();
+    return;
   }
 }
