@@ -259,10 +259,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pullFederatedPosts,
         pullFederatedClaims,
         pullFederatedTaskComments,
+        pullFederatedExchanges,
       }) => {
         void pullFederatedPosts();
         void pullFederatedClaims();
         void pullFederatedTaskComments();
+        void pullFederatedExchanges();
       },
     );
   }, [ready]);

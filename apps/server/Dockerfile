@@ -44,9 +44,11 @@ RUN npm prune --workspaces --include-workspace-root --omit=dev
 FROM node:22-bookworm-slim AS runtime
 
 # tini provides clean signal forwarding so docker stop / SIGTERM
-# triggers the server's graceful shutdown path.
+# triggers the server's graceful shutdown path. sqlite3 is the CLI
+# binary (~3MB) needed by scripts/backup-db.sh's online `.backup`
+# call — the JS binding (better-sqlite3) is unrelated.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends tini ca-certificates \
+    && apt-get install -y --no-install-recommends tini ca-certificates sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Non-root user with a writable data dir for the SQLite file.
@@ -65,6 +67,11 @@ COPY --from=build --chown=understoria:understoria /workspace/apps/server/dist ./
 COPY --from=build --chown=understoria:understoria /workspace/apps/server/package.json ./package.json
 COPY --from=build --chown=understoria:understoria /workspace/packages/shared/package.json ./node_modules/@understoria/shared/package.json
 COPY --from=build --chown=understoria:understoria /workspace/packages/shared/dist ./node_modules/@understoria/shared/dist
+
+# Operator helpers that ship with the image (key generation, etc.).
+# These are NOT on any startup path — they're invoked via
+# `docker compose run --rm --entrypoint node understoria /app/scripts/<x>.mjs`.
+COPY --chown=understoria:understoria scripts ./scripts
 
 USER understoria
 

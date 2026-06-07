@@ -32,7 +32,7 @@ a maintenance owner.
 |---|-------|--------|------|
 | 1 | Core PWA | shipped | Board, exchange flow, credits, dashboard, achievements, profile, PWA shell. Help-seeker UX improvements shipped (PRs #66–#67): repost with changes, expiry visibility chip, category descriptions in PostForm, exchange confirmation guidance, location-zone filtering on Board, "still looking" gentle prompt. Offer-poster UX improvements shipped (PR #69): "Still offering?" variant of the 3-day-old prompt (branches on `post.type`, new `postDetail.stillOffering` key), "Post this again" button on completed posts (navigates to PostForm with `?repost=<id>&again=1`; PostForm skips auto-cancel when `again=1`, new `postDetail.postAgain` key), "Active needs in this category" hint on PostForm when posting an OFFER with a category selected (shows count of matching active NEEDs with a link to filtered Board, new `postForm.matchingNeeds` key) |
 | 2 | Crypto & Identity | shipped | Ed25519 identity, signed exchanges, invites, vouching, passphrase wrapping. E2E direct messaging shipped (NaCl box, X25519 via ed2curve, schema v14). Message search shipped (PR #87) — local decrypt-and-scan across the conversation list and inside each thread, no persisted plaintext index, locked session returns no results. Threat-model §7 entry records the rejection of a persisted index and member-directory search. **Invite share affordances shipped (PRs #91–#93):** QR code + Web Share API on the invite share box (lazy-loaded `qrcode` chunk so first-load cost is unchanged); camera-surveillance awareness gate that opens with QR + URL hidden behind a plain-language prompt about screen-readable QR codes, with a "Send the link without showing it" escape hatch that uses `navigator.share` / clipboard so the URL never appears on screen, and pre-flight `canShareUrl()` capability detection that disables the escape hatch when honest about it (false confidence is worse than no path). Re-prompts every share — no persistent dismissal. Threat-model §7 entry records "QR codes are camera-surveillance targets" so future "simplify the share flow" PRs find the prior reasoning. All five original tasks complete |
-| 3 | Federation & Infra | partial | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`, invites endpoint, invite pull loop, PWA-side cross-node post surfacing on the Board. **Pending:** cross-node exchange notification lifecycle sync, Dashboard cross-node stat aggregation |
+| 3 | Federation & Infra | shipped | Fastify node, signed-exchange verification, Docker, outbox mirror, federation pull loop for exchanges + vouches + **posts** (posts now sign on createPost + push via outbox), `GET /peers`, `GET /config`, invites endpoint, invite pull loop, PWA-side cross-node post surfacing on the Board. PWA-side `pullFederatedExchanges()` pulls verified peer exchanges (signed by member or §4 system key) into Dexie alongside the existing post / claim / task-comment pulls. Dashboard splits the headline into "this node" + a separate "Across federation" panel (`computeFederationStats`) so peer activity surfaces without inflating the home node's metabolism number — explicit split rather than silent sum, per `no-leaderboards` + `community-authority`. |
 | 4 | Security & Opsec | partial | Threat model, opsec guide, panic button, anti-gaming safeguards. **Pending:** ongoing per-PR review |
 | 5 | Governance & Coop | partial | Code of Conduct, GOVERNANCE.md, trademark policy |
 | 6 | (reserved) | — | — |
@@ -246,11 +246,9 @@ main Ostrom track.
                               │
                               ▼
                  ┌─────────────────────────────────────────────┐
-   next          │ F. Agent 3 core scope DONE (pull loop,      │
-                 │    invites endpoint, PWA surfacing).        │
-                 │    Remaining: cross-node lifecycle sync +   │
-                 │    dashboard aggregation.                   │
-                 │    Agent 15 is meaningless without this     │
+   done          │ F. Agent 3 fully shipped (pull loop,        │
+                 │    invites, PWA surfacing, exchange pull,   │
+                 │    dashboard split). Agent 15 unblocked.    │
                  └────────────┬────────────────────────────────┘
                               │
                               ▼

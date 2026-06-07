@@ -9,13 +9,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Post, TaskComment } from "@/types";
+import type { Exchange, Post, TaskComment } from "@/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { verifyTaskComment } from "@/lib/crypto";
+import { verifyExchange } from "@understoria/shared/crypto";
 
 const POST_CURSOR_KEY = "federationLastPostPull";
 const CLAIM_CURSOR_KEY = "federationLastClaimPull";
 const TASK_COMMENT_CURSOR_KEY = "federationLastTaskCommentPull";
+const EXCHANGE_CURSOR_KEY = SETTING_KEYS.federationLastExchangePull;
 
 export interface FederationSyncResult {
   inserted: number;
@@ -272,6 +274,119 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
 
   if (maxCreatedAt !== null) {
     await setSetting(TASK_COMMENT_CURSOR_KEY, String(maxCreatedAt));
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull federated exchanges from the configured community node. The
+ * server-side peer-pull loop already aggregates peer exchanges into
+ * the local node's store; this loop drags them down into the PWA's
+ * Dexie so the Dashboard's federation panel + per-member balance
+ * displays reflect cross-node flow without each PWA having to peer
+ * directly with every node.
+ *
+ * Verification: every row goes through `verifyExchange`. For
+ * `autoConfirmed: true` rows the helped-side signature is produced by
+ * a peer node's system key, which this PWA doesn't have on hand —
+ * `verifyExchange` accepts on a verified helper signature in that
+ * case (the §4 docs/auto-confirm-key.md contract). A peer doing
+ * stricter auditing would use `verifyExchangeLabel` with a system-
+ * pubkey resolver; that requires a federation-wide key directory
+ * that doesn't ship yet.
+ *
+ * Idempotent: dedup on `id`. Cursor advances on `completedAt`.
+ */
+export async function pullFederatedExchanges(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(EXCHANGE_CURSOR_KEY);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/exchanges?${params.toString()}`;
+  let body: { exchanges?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { exchanges?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.exchanges)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCompletedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.exchanges) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.postId !== "string" ||
+      typeof r.helperKey !== "string" ||
+      typeof r.helpedKey !== "string" ||
+      typeof r.hoursExchanged !== "number" ||
+      typeof r.helperSignature !== "string" ||
+      typeof r.helpedSignature !== "string" ||
+      typeof r.completedAt !== "number" ||
+      typeof r.category !== "string" ||
+      typeof r.nodeId !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const exchange: Exchange = {
+      id: r.id,
+      postId: r.postId,
+      helperKey: r.helperKey,
+      helpedKey: r.helpedKey,
+      hoursExchanged: r.hoursExchanged,
+      helperSignature: r.helperSignature,
+      helpedSignature: r.helpedSignature,
+      completedAt: r.completedAt,
+      category: r.category as Exchange["category"],
+      nodeId: r.nodeId,
+      flaggedForReview:
+        (r.flaggedForReview as boolean | undefined) ?? undefined,
+      flagReason: (r.flagReason as Exchange["flagReason"]) ?? undefined,
+      autoConfirmed: (r.autoConfirmed as boolean | undefined) ?? undefined,
+      autoConfirmedBy: (r.autoConfirmedBy as string | undefined) ?? undefined,
+      autoConfirmedAt:
+        (r.autoConfirmedAt as number | undefined) ?? undefined,
+    };
+
+    const advanceCursor = () => {
+      if (maxCompletedAt === null || exchange.completedAt > maxCompletedAt) {
+        maxCompletedAt = exchange.completedAt;
+      }
+    };
+
+    if (!verifyExchange(exchange)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    const existing = await db.exchanges.get(exchange.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.exchanges.put(exchange);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCompletedAt !== null) {
+    await setSetting(EXCHANGE_CURSOR_KEY, String(maxCompletedAt));
   }
 
   return { inserted, skipped };
