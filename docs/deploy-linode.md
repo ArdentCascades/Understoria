@@ -244,12 +244,18 @@ The technical bundle above is necessary but not sufficient. A
 mutual-aid timebank holds member data and arbitrates time-credit
 disputes; a launch posture also needs:
 
-- **Privacy policy.** What you collect, who can see what, how long
-  member data persists if they leave. Required in most jurisdictions
-  for any data handling; ethically required regardless.
-- **Terms / Code of Conduct enforcement contact.** [`CODE_OF_CONDUCT.md`](
+- **Privacy policy + Terms of Service.** Templates ship in the repo
+  at [`docs/privacy-policy.md`](./privacy-policy.md) and
+  [`docs/terms-of-service.md`](./terms-of-service.md). They are
+  tailored to what Understoria actually does (local-first PWA,
+  federated signed records, E2E DMs) rather than generic SaaS
+  boilerplate. Fill in the bracketed values, delete any section
+  that does not match how you actually run the node, and link to
+  both from the PWA footer.
+- **Code of Conduct enforcement contact.** [`CODE_OF_CONDUCT.md`](
   ../CODE_OF_CONDUCT.md) is in the repo. Pick the actual humans who
-  will receive enforcement reports and put their address there.
+  will receive enforcement reports and put their address there
+  (and in the two templates above).
 - **Moderator coverage.** Disputes route to `/disputes` in-app and
   to whoever owns the moderator role per [`GOVERNANCE.md`](
   ../GOVERNANCE.md). Someone has to be ready to respond.
