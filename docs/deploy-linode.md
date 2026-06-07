@@ -9,6 +9,13 @@ specific bit is the provider UI for spinning up the VM and pointing DNS.
 > `docker compose`. You do not need to know TypeScript; the bundled
 > Dockerfiles handle the build.
 
+> **Tldr.** Steps 1-4 spin up the VM, install Docker, clone the
+> repo. Step 5 runs `scripts/setup.sh` which prompts for the rest,
+> generates the system key, writes `.env`, and brings the node up.
+> Steps 6-8 are the manual flow the script automates — read them
+> if you want to know what it did. Steps 9-11 are post-launch
+> (smoke test, backups, redeploys).
+
 > **What this gives you.** A running community node at `https://<your-
 > domain>` with the PWA served at `/` and the federation API at `/api`.
 > TLS is auto-acquired and renewed by Caddy. Member data persists in a
@@ -85,7 +92,28 @@ cd understoria
 # git checkout v0.2.0
 ```
 
-## 5. Generate the auto-confirm system key
+## 5. Run the interactive setup
+
+The fastest path through the rest of this guide is a single command:
+
+```bash
+scripts/setup.sh
+```
+
+The script prompts you for everything that goes in `.env` (domain,
+ACME email, operator name + contact, auto-confirm hours, peer list),
+validates each value as you type it (e-mail shape, domain shape,
+optional DNS A-record check against the host's public IP), builds
+the server image, generates the auto-confirm system key inside it,
+writes `.env` with `chmod 600`, and optionally runs
+`docker compose up -d --build`.
+
+If you'd rather do it the long way — or you're re-running on a
+host that already has `.env` filled in — keep reading: steps 6-8
+are the manual flow the script automates. Skip to step 9 if the
+script handled everything.
+
+## 6. Generate the auto-confirm system key (manual)
 
 This Ed25519 keypair signs auto-confirmed exchange records. It is the
 **only secret** in the system; treat it like a TLS private key. See
@@ -118,13 +146,13 @@ chat, or commit it.
 `.env`. Members will then confirm manually only; the auto-confirm
 endpoint will refuse all requests.
 
-## 6. Fill in `.env`
+## 7. Fill in `.env` (manual)
 
 ```bash
 cp .env.example .env
 chmod 600 .env
 
-# Edit with your domain, the secret key from step 5, and an ACME
+# Edit with your domain, the secret key from step 6, and an ACME
 # email Let's Encrypt can reach.
 nano .env
 ```
@@ -134,7 +162,7 @@ At minimum:
 ```ini
 DOMAIN=understoria.example.org
 ACME_EMAIL=ops@example.org
-NODE_SYSTEM_SECRET_KEY=<paste from step 5>
+NODE_SYSTEM_SECRET_KEY=<paste from step 6>
 OPERATOR_NAME="Example Mutual Aid Network"
 OPERATOR_CONTACT=help@example.org
 ```
@@ -143,7 +171,7 @@ OPERATOR_CONTACT=help@example.org
 > the secret. If you create a `deploy` user later, narrow ownership
 > with `chown deploy:deploy .env` so docker compose can still read it.
 
-## 7. First launch
+## 8. First launch (manual)
 
 ```bash
 docker compose up -d --build
@@ -169,7 +197,7 @@ You should see Caddy print something like
 that, `https://<your-domain>` serves the PWA and `https://<your-
 domain>/api/health` returns `{"status":"ok"}`.
 
-## 8. Smoke-test
+## 9. Smoke-test
 
 ```bash
 # From your laptop (NOT the Linode):
@@ -186,7 +214,7 @@ If the auto-confirm sweep is enabled, you can wait 7 days — or
 temporarily lower `AUTO_CONFIRM_MIN_HOURS` in `.env` to (say) `1`
 and `docker compose up -d` to re-test the system-signed code path.
 
-## 9. Set up backups
+## 10. Set up backups
 
 The Linode disk is a single point of failure. The bundled script
 takes online SQLite snapshots; you choose the offsite destination.
@@ -221,7 +249,7 @@ docker compose start understoria
 Verify the restored DB by checking `GET /api/health` and a couple of
 member-visible pages.
 
-## 10. Redeploy on a new version
+## 11. Redeploy on a new version
 
 ```bash
 cd /opt/understoria
