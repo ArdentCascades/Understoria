@@ -78,10 +78,111 @@ describe("backfillOnboardedForExistingUsers", () => {
     expect(await isOnboarded()).toBe(false);
   });
 
-  it("marks the device as onboarded if any members already exist", async () => {
-    await createMember({ displayName: "Existing" }, NODE);
+  it("does NOT mark onboarded when only a member row exists — the freshly-invited case", async () => {
+    // This is the regression: invite acceptance creates a member row
+    // BEFORE the welcome flow runs. The backfill must not pre-empt
+    // welcome on the basis of a member existing alone.
+    await createMember({ displayName: "Just Invited" }, NODE);
+    await backfillOnboardedForExistingUsers();
+    expect(await isOnboarded()).toBe(false);
+  });
+
+  it("marks onboarded when a local member has authored an exchange", async () => {
+    const m = await createMember({ displayName: "Helper" }, NODE);
+    await db.exchanges.put({
+      id: "ex_1",
+      postId: "p_1",
+      helperKey: m.publicKey,
+      helpedKey: "other",
+      hoursExchanged: 1,
+      helperSignature: "sig",
+      helpedSignature: "sig",
+      completedAt: 0,
+      category: "other",
+      nodeId: NODE,
+    });
     await backfillOnboardedForExistingUsers();
     expect(await isOnboarded()).toBe(true);
+  });
+
+  it("marks onboarded when a local member was the helped party", async () => {
+    const m = await createMember({ displayName: "Helped" }, NODE);
+    await db.exchanges.put({
+      id: "ex_2",
+      postId: "p_2",
+      helperKey: "other",
+      helpedKey: m.publicKey,
+      hoursExchanged: 1,
+      helperSignature: "sig",
+      helpedSignature: "sig",
+      completedAt: 0,
+      category: "other",
+      nodeId: NODE,
+    });
+    await backfillOnboardedForExistingUsers();
+    expect(await isOnboarded()).toBe(true);
+  });
+
+  it("marks onboarded when a local member has authored a vouch", async () => {
+    const m = await createMember({ displayName: "Voucher" }, NODE);
+    await db.vouches.put({
+      id: "v_1",
+      voucherKey: m.publicKey,
+      voucheeKey: "other",
+      createdAt: 0,
+      kind: "manual",
+      signature: "sig",
+    });
+    await backfillOnboardedForExistingUsers();
+    expect(await isOnboarded()).toBe(true);
+  });
+
+  it("marks onboarded when a local member has authored a post", async () => {
+    const m = await createMember({ displayName: "Poster" }, NODE);
+    await db.posts.put({
+      id: "p_1",
+      type: "NEED",
+      category: "other",
+      title: "x",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      postedBy: m.publicKey,
+      claimedBy: null,
+      status: "open",
+      createdAt: 0,
+      expiresAt: null,
+      locationZone: "",
+      confirmedBy: [],
+      nodeId: NODE,
+      signature: "",
+    });
+    await backfillOnboardedForExistingUsers();
+    expect(await isOnboarded()).toBe(true);
+  });
+
+  it("does NOT mark onboarded when only federated (non-local-authored) records exist", async () => {
+    // Federation pull can drop peer-node records into the local store
+    // immediately after invite acceptance. Those don't prove the local
+    // member has used the app yet — welcome still has work to do.
+    const m = await createMember({ displayName: "Fresh" }, NODE);
+    await db.exchanges.put({
+      id: "ex_peer",
+      postId: "p_peer",
+      helperKey: "peer_helper",
+      helpedKey: "peer_helped",
+      hoursExchanged: 2,
+      helperSignature: "sig",
+      helpedSignature: "sig",
+      completedAt: 0,
+      category: "other",
+      nodeId: "peer_node",
+    });
+    await backfillOnboardedForExistingUsers();
+    expect(await isOnboarded()).toBe(false);
+    // Sanity: the freshly-invited member is still in the store, the
+    // skipped backfill didn't delete them.
+    expect(await db.members.get(m.publicKey)).toBeDefined();
   });
 
   it("leaves an already-onboarded device alone", async () => {
