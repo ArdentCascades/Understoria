@@ -278,6 +278,14 @@ After the member confirms "Show the QR":
 - The 6-word transfer passphrase appears in a large, readable
   monospaced font, segmented visually for spoken delivery
   (`canvas | river | toolbox | yellow | march | empty`).
+- A short hex fingerprint of the member's public key
+  (`1A2B 3C4D` — first 4 bytes of the Ed25519 public key, hex,
+  one space) appears between the passphrase and the QR, labelled
+  "Confirm on the other device." The destination shows the same
+  string on its own confirm step (§7.4). The cryptographic
+  identity check is already enforced by the unwrap path's
+  `publickey_mismatch` reason; this string is human-visible
+  signal for mistaken-pairing and mid-flow QR swap.
 - The QR appears below the passphrase.
 - A live countdown ticks down from 5:00 (mm:ss).
 - Two actions: **"I'm done"** (member confirms the other device
@@ -354,15 +362,21 @@ On submit, the destination:
    minutes old. Ask the other device to start over."
 6. Sanity-checks `publicKey === derive(secretKey).publicKey` —
    guards against malformed input that survived secretbox.
-7. Prompts the member to set a **session passphrase** for this
+7. Renders the public-key fingerprint (same `XXXX XXXX` shape as
+   the source device, §6.4) and asks the member to confirm it
+   matches. "Yes" advances. "No" drops the payload and bounces
+   back to capture — letting the member retype the passphrase
+   doesn't help, because if the fingerprints diverge the envelope
+   on the wire is the wrong envelope.
+8. Prompts the member to set a **session passphrase** for this
    device. The transfer passphrase is single-use; the session
    passphrase is the member's own choice for unlocking the local
    key on this device going forward.
-8. Re-wraps the imported secretKey under the new session
+9. Re-wraps the imported secretKey under the new session
    passphrase via the existing `lib/passphrase.ts` flow and writes
    the member row + wrapped key to IndexedDB.
-9. Calls `markOnboarded()` and sets `currentMember`.
-10. Navigates to the Board.
+10. Calls `markOnboarded()` and sets `currentMember`.
+11. Navigates to the Board.
 
 ### 7.5 The brief "what to expect" reminder
 
