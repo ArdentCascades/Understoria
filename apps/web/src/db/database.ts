@@ -26,6 +26,9 @@ import type {
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
   DirectMessage,
+  Event,
+  EventCancellation,
+  EventRsvpRow,
   Exchange,
   Member,
   NodeConfig,
@@ -98,7 +101,13 @@ export interface OutboxRow {
     | "task_comment"
     | "coorg_invitation"
     | "coorg_invitation_response"
-    | "coorg_invitation_revocation";
+    | "coorg_invitation_revocation"
+    | "event"
+    | "event_cancellation";
+  // Intentionally NOT a member of this union: "event_rsvp". EventRsvpRow
+  // is local-only by design (docs/community-events.md §4 + §7); RSVPs
+  // never enter the outbox. The union rejects "event_rsvp" at the
+  // type level — events.test.ts asserts this with `// @ts-expect-error`.
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
   /** Id of the wrapped record; lets us avoid double-enqueue on retry. */
@@ -206,6 +215,20 @@ export interface CoOrganizerInvitationRevocationRow
   grandfathered?: boolean;
 }
 
+/**
+ * Community-event row — see `docs/community-events.md`. Wraps the
+ * federated `Event` record verbatim; no local-only fields. Federates
+ * via the outbox `kind: "event"` discriminator.
+ */
+export type EventRow = Event;
+
+/**
+ * Community-event cancellation row — see `docs/community-events.md`
+ * §4.3. Wraps the federated `EventCancellation` record verbatim.
+ * Federates via the outbox `kind: "event_cancellation"` discriminator.
+ */
+export type EventCancellationRow = EventCancellation;
+
 export class UnderstoriaDB extends Dexie {
   members!: Table<Member, string>;
   posts!: Table<Post, string>;
@@ -229,6 +252,9 @@ export class UnderstoriaDB extends Dexie {
   coorgInvitations!: Table<CoOrganizerInvitationRow, string>;
   coorgInvitationResponses!: Table<CoOrganizerInvitationResponseRow, string>;
   coorgInvitationRevocations!: Table<CoOrganizerInvitationRevocationRow, string>;
+  events!: Table<EventRow, string>;
+  eventRsvps!: Table<EventRsvpRow, string>;
+  eventCancellations!: Table<EventCancellationRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -592,6 +618,36 @@ export class UnderstoriaDB extends Dexie {
           }
         }
       });
+    // Version 22 — community events (PR C of
+    // `docs/community-events.md`). Three new tables, two federated and
+    // one local-only.
+    //
+    // No backfill — these are pure new tables. No prior data exists to
+    // migrate; pre-v22 nodes simply did not have events.
+    //
+    // `events` and `eventCancellations` are signed-and-federated record
+    // types. Their outbox discriminators are `"event"` and
+    // `"event_cancellation"` respectively; see the `OutboxRow.kind`
+    // union above.
+    //
+    // `eventRsvps` is LOCAL-ONLY BY DESIGN. RSVP rows MUST NEVER be
+    // enqueued into the outbox — see `docs/community-events.md` §4
+    // (data model: "EventRSVP … never enters the outbox") and §7
+    // (federation: "`EventRSVP`. Absolutely not. The discriminator
+    // `\"EventRSVP\"` MUST NOT appear in `OutboxRow.kind`. There is
+    // no `POST /event-rsvps` route. There is no `GET /event-rsvps?since=`
+    // cursor. There is no PWA-side `pullFederatedEventRSVPs`.").
+    // Accordingly: PR C does NOT add an `enqueueEventRsvp` helper to
+    // `lib/outbox.ts`. The absence is load-bearing — see
+    // `events.test.ts` for the negative tests that lock this in.
+    this.version(22).stores({
+      events:
+        "id, createdBy, startsAt, createdAt, nodeId, [nodeId+id]",
+      eventRsvps:
+        "id, eventId, memberKey, [eventId+memberKey]",
+      eventCancellations:
+        "id, eventId, cancelledAt, createdBy, nodeId",
+    });
   }
 }
 
@@ -651,6 +707,13 @@ export const SETTING_KEYS = {
    *  observed so far on co-organizer-invitation-revocation pulls. */
   federationLastCoOrgInvitationRevocationPull:
     "federationLastCoOrgInvitationRevocationPull",
+  /** Cursor for `pullFederatedEvents` — highest `createdAt` observed so
+   *  far on community-event pulls. Defaults to epoch 0 when absent. */
+  pullCursorEvent: "pullCursorEvent",
+  /** Cursor for `pullFederatedEventCancellations` — highest
+   *  `cancelledAt` observed so far on event-cancellation pulls.
+   *  Defaults to epoch 0 when absent. */
+  pullCursorEventCancellation: "pullCursorEventCancellation",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

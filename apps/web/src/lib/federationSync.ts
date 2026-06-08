@@ -14,6 +14,8 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { verifyTaskComment } from "@/lib/crypto";
@@ -21,6 +23,8 @@ import {
   verifyCoOrganizerInvitation,
   verifyCoOrganizerInvitationResponse,
   verifyCoOrganizerInvitationRevocation,
+  verifyEvent,
+  verifyEventCancellation,
   verifyExchange,
 } from "@understoria/shared/crypto";
 
@@ -673,3 +677,224 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
 
   return { inserted, skipped };
 }
+
+/**
+ * Pull federated community events from the configured community node.
+ * Same shape and merge / dedup rules as `pullFederatedCoOrgInvitations`.
+ * Cursor: `createdAt` (matches `EventPayload.createdAt`); defaults to
+ * epoch 0 when the cursor setting is absent.
+ *
+ * Signature verification is via `verifyEvent` (single-signer
+ * discipline: organizer = `createdBy`). Bad-signature rows are
+ * skipped with a console warning and the cursor does NOT advance past
+ * the rejected row — same posture as the other federated record
+ * types, so a transient peer-side bug doesn't strand the cursor.
+ *
+ * See `docs/community-events.md` §7. The peer-pull route on the server
+ * side lands in PR D; until then this function will silently return
+ * `null` (no body) on a 404 and the cursor stays where it is.
+ */
+export async function pullFederatedEvents(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = (await getSetting(SETTING_KEYS.pullCursorEvent)) ?? "0";
+  const params = new URLSearchParams({ limit: "200", since });
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/events?${params.toString()}`;
+  let body: { events?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { events?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.events)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: number | null = Number(since);
+
+  for (const raw of body.events) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      r.kind !== "event" ||
+      typeof r.title !== "string" ||
+      typeof r.description !== "string" ||
+      typeof r.category !== "string" ||
+      typeof r.startsAt !== "number" ||
+      (r.endsAt !== null && typeof r.endsAt !== "number") ||
+      typeof r.location !== "string" ||
+      (r.capacity !== null && typeof r.capacity !== "number") ||
+      (r.templateId !== null && typeof r.templateId !== "string") ||
+      typeof r.createdAt !== "number" ||
+      typeof r.createdBy !== "string" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record: Event = {
+      id: r.id,
+      kind: "event",
+      title: r.title,
+      description: r.description,
+      category: r.category,
+      startsAt: r.startsAt,
+      endsAt: r.endsAt as number | null,
+      location: r.location,
+      capacity: r.capacity as number | null,
+      templateId: r.templateId as string | null,
+      createdAt: r.createdAt,
+      createdBy: r.createdBy,
+      nodeId: r.nodeId,
+      signature: r.signature,
+    };
+
+    if (!verifyEvent(record)) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped federated event with bad signature",
+          { id: record.id, nodeId: record.nodeId },
+        );
+      }
+      skipped += 1;
+      // Do NOT advance the cursor past a rejected row — see function
+      // doc.
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
+        maxCreatedAt = record.createdAt;
+      }
+    };
+
+    const existing = await db.events.get(record.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.events.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(SETTING_KEYS.pullCursorEvent, String(maxCreatedAt));
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull federated event cancellations. Cursor: `cancelledAt`. Same
+ * merge / dedup rules as `pullFederatedEvents`. See
+ * `docs/community-events.md` §7.
+ *
+ * NB: this client verifies the signature only. The cross-record check
+ * that the cancellation's `createdBy` equals the cancelled event's
+ * `createdBy` is the server route's job (PR D) and is re-asserted by
+ * the application layer when a UI surface renders cancellation state.
+ */
+export async function pullFederatedEventCancellations(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since =
+    (await getSetting(SETTING_KEYS.pullCursorEventCancellation)) ?? "0";
+  const params = new URLSearchParams({ limit: "200", since });
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/event-cancellations?${params.toString()}`;
+  let body: { eventCancellations?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { eventCancellations?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.eventCancellations)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCancelledAt: number | null = Number(since);
+
+  for (const raw of body.eventCancellations) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      r.kind !== "event_cancellation" ||
+      typeof r.eventId !== "string" ||
+      typeof r.reason !== "string" ||
+      typeof r.cancelledAt !== "number" ||
+      typeof r.createdBy !== "string" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record: EventCancellation = {
+      id: r.id,
+      kind: "event_cancellation",
+      eventId: r.eventId,
+      reason: r.reason,
+      cancelledAt: r.cancelledAt,
+      createdBy: r.createdBy,
+      nodeId: r.nodeId,
+      signature: r.signature,
+    };
+
+    if (!verifyEventCancellation(record)) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped federated event cancellation with bad signature",
+          { id: record.id, eventId: record.eventId, nodeId: record.nodeId },
+        );
+      }
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxCancelledAt === null || record.cancelledAt > maxCancelledAt) {
+        maxCancelledAt = record.cancelledAt;
+      }
+    };
+
+    const existing = await db.eventCancellations.get(record.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.eventCancellations.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCancelledAt !== null) {
+    await setSetting(
+      SETTING_KEYS.pullCursorEventCancellation,
+      String(maxCancelledAt),
+    );
+  }
+
+  return { inserted, skipped };
+}
+
+// NOTE: there is intentionally no `pullFederatedEventRsvps`. RSVPs
+// never federate — see `docs/community-events.md` §7.2.

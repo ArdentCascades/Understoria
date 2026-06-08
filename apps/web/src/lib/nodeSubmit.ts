@@ -23,6 +23,8 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
@@ -178,6 +180,39 @@ export async function submitCoOrganizerInvitationRevocationToNode(
     deps,
   );
 }
+
+/**
+ * Mirror a signed community event to the configured community node.
+ * Same best-effort semantics as the other submitters. See
+ * `docs/community-events.md` §7. The server-side route lands in PR D;
+ * until then, this POST will 404 cleanly and the outbox worker will
+ * retry on the standard backoff schedule.
+ */
+export async function submitEventToNode(
+  record: Event,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/events", record, config, deps);
+}
+
+/**
+ * Mirror a signed event cancellation. Same semantics as
+ * `submitEventToNode`. The server enforces (in PR D) that the
+ * cancellation's `createdBy` equals the referenced event's
+ * `createdBy`; this client signs the record correctly and lets the
+ * route validate.
+ */
+export async function submitEventCancellationToNode(
+  record: EventCancellation,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/event-cancellations", record, config, deps);
+}
+
+// NOTE: there is intentionally no `submitEventRsvpToNode`. RSVPs are
+// local-only by design — see `docs/community-events.md` §4 + §7.
 
 async function postSignedRecord(
   path: string,

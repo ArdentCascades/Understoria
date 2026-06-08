@@ -757,6 +757,21 @@ workstream.
     `not_going` semantics.
   - No UI, no server.
 
+  *PR C delivered:* Dexie v22 (`events`, `eventRsvps`,
+  `eventCancellations`). `OutboxRow.kind` gains `"event"` and
+  `"event_cancellation"`; the union rejects `"event_rsvp"` at the
+  type level (asserted in `events.test.ts` with `@ts-expect-error`).
+  Actions in `apps/web/src/db/events.ts`: `createEvent`,
+  `cancelEvent` (organizer-only, idempotent), `rsvpToEvent` (local
+  upsert), `getEvent`, `listEvents` (with `includeCancelled` filter),
+  `getMemberRsvp`, `listRsvpsForEvent`, `attendeeCount`. Federation
+  pulls `pullFederatedEvents` + `pullFederatedEventCancellations` use
+  cursor keys `pullCursorEvent` + `pullCursorEventCancellation` (in
+  `SETTING_KEYS`, defaulting to `0`). Outbox enqueue helpers
+  `enqueueEvent` / `enqueueEventCancellation` live in
+  `apps/web/src/lib/outbox.ts`; there is deliberately no
+  `enqueueEventRsvp`.
+
 - **PR D — server federation.**
   - New routes mirroring `routes/vouches.ts`:
     `routes/events.ts` (POST + GET ?since=),
