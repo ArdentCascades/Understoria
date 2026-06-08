@@ -153,7 +153,7 @@ export interface CoOrganizerInvitation extends CoOrganizerInvitationPayload {
 export interface CoOrganizerInvitationResponsePayload {
   invitationId: string;     // ties back to CoOrganizerInvitation.id
   inviteeKey: string;       // must equal CoOrganizerInvitation.inviteeKey
-  decision: "accept" | "decline" | "revoke";
+  decision: "accept" | "decline";
   decidedAt: number;
   nodeId: string;
 }
@@ -161,28 +161,41 @@ export interface CoOrganizerInvitationResponsePayload {
 export interface CoOrganizerInvitationResponse
   extends CoOrganizerInvitationResponsePayload {
   id: string;
-  signature: string;        // signer depends on decision (see below)
+  signature: string;        // invitee's Ed25519 signature
+}
+
+// Canonical, signed by the inviter (the primary organizer).
+// Revocation is its own record type rather than a variant on the
+// response — every signed record in this design has exactly one
+// kind of signer, which keeps the federated-ledger verifier
+// uncomplicated and matches the discipline of the existing
+// SignedVouch / Exchange / Post types.
+export interface CoOrganizerInvitationRevocationPayload {
+  invitationId: string;     // ties back to CoOrganizerInvitation.id
+  inviterKey: string;       // must equal CoOrganizerInvitation.inviterKey
+  revokedAt: number;
+  nodeId: string;
+}
+
+export interface CoOrganizerInvitationRevocation
+  extends CoOrganizerInvitationRevocationPayload {
+  id: string;
+  signature: string;        // inviter's Ed25519 signature
 }
 ```
 
-`decision: "revoke"` is a deliberate reuse of the response-record
-machinery for the inviter-side revocation path (see §5). The
-alternative — a separate `CoOrganizerInvitationRevocation` record
-type — adds a third primitive without commensurate clarity. The
-response shape already carries the (invitationId, decidedAt,
-signature) triple a revocation needs; the only field that doesn't
-generalize is `inviteeKey`, which on a revocation echoes the inviter
-(the inviter is the only party authorized to issue a revoke). The
-signature verifier disambiguates: an `accept` or `decline` response
-verifies against `inviteeKey`; a `revoke` response verifies against
-the original invitation's `inviterKey`. The invariant the verifier
-enforces is **the signer's key matches the action**, not "the
-inviteeKey field always identifies the signer."
-
-(This is opinionated. The alternative — separate
-`CoOrganizerInvitationRevocation` record type — is named in §10 as
-an open question. Recommendation: stick with the response shape; the
-disambiguation is mechanical and the type-surface saving is real.)
+Splitting revoke into its own record type rather than reusing the
+response shape is a deliberate values choice. The earlier draft of
+this design proposed `decision: "accept" | "decline" | "revoke"`
+on a single `CoOrganizerInvitationResponse`, with the signature
+verifier disambiguating: accept/decline verify against `inviteeKey`,
+revoke verifies against `inviterKey`. That reuse saves a type
+primitive at the cost of an invariant that's hard to state in one
+sentence — a row where `inviteeKey` is filled but the signer is
+someone else is the kind of subtle gotcha that bites a future
+security review. Single-signer-per-record is the property the rest
+of the federated ledger relies on; co-organizer invitations should
+not be the place that breaks it.
 
 ### Canonical payloads
 
@@ -215,6 +228,17 @@ export function canonicalCoOrganizerInvitationResponsePayload(
     nodeId:       p.nodeId,
   });
 }
+
+export function canonicalCoOrganizerInvitationRevocationPayload(
+  p: CoOrganizerInvitationRevocationPayload,
+): string {
+  return JSON.stringify({
+    invitationId: p.invitationId,
+    inviterKey:   p.inviterKey,
+    revokedAt:    p.revokedAt,
+    nodeId:       p.nodeId,
+  });
+}
 ```
 
 The `id` and `signature` fields are NOT part of the canonical
@@ -235,8 +259,7 @@ effectiveCoOrganizerKeys(project) =
   { inviteeKey :
       ∃ invitation with projectId = project.id ∧ inviteeKey = inviteeKey,
       ∧ ∃ response with invitationId = invitation.id ∧ decision = "accept",
-      ∧ ¬∃ later response with invitationId = invitation.id
-            ∧ decision = "revoke",
+      ∧ ¬∃ revocation with invitationId = invitation.id,
       ∧ now < invitation.expiresAt OR an accept exists with
             decidedAt ≤ invitation.expiresAt
   } ⊂ Project.coOrganizerKeys
@@ -302,11 +325,11 @@ with reasons.)
   peers learn of it on their next pull).
 
 - **Revoke.** The inviter can revoke before acceptance by issuing a
-  `CoOrganizerInvitationResponse` with `decision: "revoke"`, signed
-  with the *inviter's* key (see §4 for the rationale and the
-  verifier disambiguation). A revoke is only valid if no accept or
-  decline already exists for that invitation. Revocations after
-  acceptance are not supported by this mechanism — that's
+  `CoOrganizerInvitationRevocation` record, signed with the
+  inviter's key. A revoke is only valid if no accept or decline
+  already exists for that invitation (the response and the
+  revocation are mutually exclusive terminal states). Revocations
+  after acceptance are not supported by this mechanism — that's
   organizer-removal, which is a different action (`removeCoOrganizer`
   / the parallel self-removal PR).
 
@@ -567,14 +590,16 @@ non-defense items above.
   recommended.
 
 - **Revoke as a `CoOrganizerInvitationResponse` vs. a separate
-  record type.** §4 chooses the response-shape reuse with a
-  signature-verifier disambiguation. The alternative — a separate
-  `CoOrganizerInvitationRevocation` record type — is cleaner
-  type-surface but adds a third primitive with its own canonical
-  payload and federation routes. *Recommendation: response-shape
-  reuse, the disambiguation is mechanical.* This is the open
-  question most worth a reviewer's attention before implementation
-  starts — it's a one-way decision in the data model.
+  record type.** **Resolved (this revision):** revoke is its own
+  `CoOrganizerInvitationRevocation` record type. The response-shape
+  reuse the earlier draft proposed would have let a record's
+  signer be someone other than the `inviteeKey` field implied — a
+  subtle invariant break that the rest of the federated ledger
+  doesn't have. Single-signer-per-record is the property the
+  ledger relies on; adding one more primitive (with its own
+  canonical payload and federation route) is the right cost to
+  preserve that property. The implementation PR ships both record
+  types as siblings of `CoOrganizerInvitation`.
 
 ## §11 Implementation breakdown
 
@@ -586,14 +611,18 @@ top of A; PR C ships UI on top of B.
   - Dexie schema bump (next free PWA version, probably v21).
   - `CoOrganizerInvitation`, `CoOrganizerInvitationPayload`,
     `CoOrganizerInvitationResponse`,
-    `CoOrganizerInvitationResponsePayload` types in
+    `CoOrganizerInvitationResponsePayload`,
+    `CoOrganizerInvitationRevocation`,
+    `CoOrganizerInvitationRevocationPayload` types in
     `packages/shared/src/types.ts`.
   - Canonical-payload + signing helpers in
     `packages/shared/src/crypto.ts`:
     `canonicalCoOrganizerInvitationPayload`,
     `canonicalCoOrganizerInvitationResponsePayload`,
+    `canonicalCoOrganizerInvitationRevocationPayload`,
     `verifyCoOrganizerInvitation`,
-    `verifyCoOrganizerInvitationResponse`.
+    `verifyCoOrganizerInvitationResponse`,
+    `verifyCoOrganizerInvitationRevocation`.
   - DB functions in `apps/web/src/db/projects.ts` (or a new
     `apps/web/src/db/coorgInvitations.ts` — implementation
     decides based on file size):
@@ -612,14 +641,16 @@ top of A; PR C ships UI on top of B.
 
 - **PR B — server federation.**
   - New routes mirroring `routes/vouches.ts` exactly:
-    `routes/coorgInvitations.ts` (POST + GET ?since=) and
-    `routes/coorgInvitationResponses.ts` (POST + GET ?since=).
+    `routes/coorgInvitations.ts` (POST + GET ?since=),
+    `routes/coorgInvitationResponses.ts` (POST + GET ?since=),
+    and `routes/coorgInvitationRevocations.ts` (POST + GET ?since=).
     Signature verify, dedupe by ID.
   - Server schema bump (next free server version).
   - Peer-pull integration in `apps/server/src/peerPull.ts` —
-    cursor-tracked pulls for both record types.
-  - PWA-side `pullFederatedCoOrgInvitations` and
-    `pullFederatedCoOrgResponses` in
+    cursor-tracked pulls for all three record types.
+  - PWA-side `pullFederatedCoOrgInvitations`,
+    `pullFederatedCoOrgResponses`, and
+    `pullFederatedCoOrgRevocations` in
     `apps/web/src/lib/federationSync.ts`.
   - Tests for ingest, peer-pull, dedupe, signature-verify
     rejection.
