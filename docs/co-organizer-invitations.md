@@ -1,20 +1,20 @@
 # Understoria — Co-organizer invitations (design note)
 
-> **Status:** **partially shipped.** Design note + threat-model §7
-> entry landed in PR #172; revoke-split clarification in PR #173;
-> data layer (Dexie v21 `coorgInvitations` / `coorgInvitationResponses`
-> / `coorgInvitationRevocations` tables, signing + canonical-payload
-> helpers, derived `effectiveCoOrganizerKeys`, grandfather migration,
-> `coorganizer_invitation_received` AttentionItem kind) landed in
-> PR #174. Federation routes + peer pull + PWA pull (PR B) are in CI
-> on `feat/coorganizer-invitations-federation` (PR #176) as of this
-> writing. Organizer + invitee UI (PR C) is the remaining work. Pairs
-> with the threat-model §7 entry "Co-organizer role requires signed
-> invitation + signed acceptance" added in PR #172. Read alongside the
-> self-removal fix that shipped in PR #171, which closes the
-> complementary trapped-co-organizer half of this values gap, and
-> `docs/auto-confirm-key.md` for the analogous values-grounded
-> design-note pattern.
+> **Status:** **shipped.** Design note + threat-model §7 entry landed
+> in PR #172; revoke-split clarification in PR #173. The implementation
+> shipped across three PRs: data layer (Dexie v21 `coorgInvitations` /
+> `coorgInvitationResponses` / `coorgInvitationRevocations` tables,
+> signing + canonical-payload helpers, derived
+> `effectiveCoOrganizerKeys`, grandfather migration,
+> `coorganizer_invitation_received` AttentionItem kind) in PR #174;
+> federation routes + peer pull + PWA pull in PR #176; organizer +
+> invitee UI (invite send, accept/decline, revoke, pending list) in
+> PR #178. Pairs with the threat-model §7 entry "Co-organizer role
+> requires signed invitation + signed acceptance" added in PR #172.
+> Read alongside the self-removal fix that shipped in PR #171, which
+> closes the complementary trapped-co-organizer half of this values
+> gap, and `docs/auto-confirm-key.md` for the analogous
+> values-grounded design-note pattern.
 
 ---
 
@@ -644,8 +644,7 @@ top of A; PR C ships UI on top of B.
   - Add the `coorganizer_invitation_received` `AttentionItem`
     kind to `apps/web/src/lib/attention.ts`.
 
-- **PR B — server federation. (PR #176 — in CI on
-  `feat/coorganizer-invitations-federation`; not yet on `main`.)**
+- **PR B — server federation. (PR #176 — SHIPPED.)**
   - New routes mirroring `routes/vouches.ts` exactly:
     `routes/coorgInvitations.ts` (POST + GET ?since=),
     `routes/coorgInvitationResponses.ts` (POST + GET ?since=),
@@ -661,7 +660,7 @@ top of A; PR C ships UI on top of B.
   - Tests for ingest, peer-pull, dedupe, signature-verify
     rejection.
 
-- **PR C — UI. (Not yet started.)**
+- **PR C — UI. (PR #178 — SHIPPED.)**
   - Organizer-side pending-invitations list on project detail
     (`apps/web/src/pages/ProjectDetail.tsx`), with Revoke action.
   - "Invite a co-organizer" affordance replacing the unilateral
