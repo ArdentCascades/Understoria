@@ -53,6 +53,14 @@
       "generic": "Algo salió mal. Intenta otra vez.",
       "locked": "Desbloquea tu sesión antes de vincular — tu clave de identidad está sellada.",
       "retry": "Intentar otra vez"
+    },
+    "labelSource": {
+      "title": "Listo. ¿Quieres etiquetarlo para tus registros?",
+      "body": "Una nota corta — como \"laptop de la tía\" o \"teléfono del trabajo\" — te ayuda a reconocer esta entrada después en tu Perfil. La etiqueta se queda en este dispositivo.",
+      "inputLabel": "Etiqueta (opcional)",
+      "save": "Guardar con etiqueta",
+      "skip": "Saltar — guardar sin etiqueta",
+      "dontSave": "No guardar — la vinculación falló"
     }
   },
   "avatar": {
@@ -112,6 +120,13 @@
       "versionMismatch": "El otro dispositivo está en una versión distinta. Actualiza ambos y prueba otra vez.",
       "publickeyMismatch": "La verificación de identidad del QR no cuadró. Pide al otro dispositivo que empiece de nuevo.",
       "generic": "Algo salió mal. Intenta otra vez."
+    },
+    "labelDestination": {
+      "title": "¿Quieres etiquetar este dispositivo para tus registros?",
+      "body": "Una nota corta — como \"mi laptop\" o \"teléfono de viaje\" — aparece en tu Perfil para que veas qué está vinculado. La etiqueta se queda en este dispositivo.",
+      "inputLabel": "Etiqueta (opcional)",
+      "save": "Guardar con etiqueta",
+      "skip": "Saltar — guardar sin etiqueta"
     }
   },
   "availability": {
@@ -940,6 +955,14 @@
       "title": "Vincular otro dispositivo",
       "subtitle": "Usa la misma identidad en un segundo dispositivo — teléfono, laptop, o ambos.",
       "cta": "Iniciar vinculación"
+    },
+    "pairingLog": {
+      "title": "Dispositivos vinculados",
+      "intro": "Vinculaciones que has completado en este dispositivo — para tu memoria. Esta lista vive solo en este dispositivo.",
+      "rotateHint": "Para rotar tu identidad por completo (p. ej. si pierdes un dispositivo), consulta Emergencia más abajo.",
+      "sourceTitle": "Dispositivos que autoricé desde aquí",
+      "destinationTitle": "Veces que este dispositivo fue autorizado desde otro",
+      "unlabeled": "(sin etiqueta)"
     },
     "balance": {
       "label": "Tu saldo",

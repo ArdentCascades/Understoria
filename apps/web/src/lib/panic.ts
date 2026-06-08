@@ -137,6 +137,7 @@ export async function hardPurge(): Promise<PurgeResult> {
     "projects",
     "projectTasks",
     "projectActivity",
+    "pairingLog",
   ];
 
   await Promise.all([
@@ -152,6 +153,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     db.projects.clear(),
     db.projectTasks.clear(),
     db.projectActivity.clear(),
+    // Paired-device inventory: clears alongside the identity itself
+    // so a rotated node doesn't inherit the old node's pair history.
+    db.pairingLog.clear(),
   ]);
 
   // Rotate to a fresh node identity so the post-purge node is

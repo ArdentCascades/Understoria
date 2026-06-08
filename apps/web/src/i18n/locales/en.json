@@ -53,6 +53,14 @@
       "generic": "Something went wrong. Try again.",
       "locked": "Unlock your session before pairing — your identity key is sealed.",
       "retry": "Try again"
+    },
+    "labelSource": {
+      "title": "Done. Want to label this for your records?",
+      "body": "A short note — like \"Aunt's laptop\" or \"work phone\" — helps you recognize this entry later in your Profile. The label stays on this device.",
+      "inputLabel": "Label (optional)",
+      "save": "Save with label",
+      "skip": "Skip — save unlabeled",
+      "dontSave": "Don't save — the pair failed"
     }
   },
   "avatar": {
@@ -112,6 +120,13 @@
       "versionMismatch": "The other device is on a different version. Update both, then try again.",
       "publickeyMismatch": "The QR's identity check didn't add up. Ask the other device to start over.",
       "generic": "Something went wrong. Try again."
+    },
+    "labelDestination": {
+      "title": "Want to label this device for your records?",
+      "body": "A short note — like \"my laptop\" or \"travel phone\" — shows up on your Profile so you can see what's paired. The label stays on this device.",
+      "inputLabel": "Label (optional)",
+      "save": "Save with label",
+      "skip": "Skip — save unlabeled"
     }
   },
   "availability": {
@@ -940,6 +955,14 @@
       "title": "Add another device",
       "subtitle": "Use the same identity on a second device — phone, laptop, or both.",
       "cta": "Start pairing"
+    },
+    "pairingLog": {
+      "title": "Paired devices",
+      "intro": "Pair flows you've completed on this device — for your memory. This list lives only on this device.",
+      "rotateHint": "To rotate your identity entirely (e.g. if a device is lost), see Emergency below.",
+      "sourceTitle": "Devices I've authorized from here",
+      "destinationTitle": "Times this device was authorized from elsewhere",
+      "unlabeled": "(unlabeled)"
     },
     "balance": {
       "label": "Your balance",

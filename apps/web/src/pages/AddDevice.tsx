@@ -25,8 +25,15 @@ import {
 } from "@/lib/devicePairing";
 import { DevicePairingComparisonCard } from "@/components/DevicePairingComparisonCard";
 import { DevicePairingDisplay } from "@/components/DevicePairingDisplay";
+import { recordPairing } from "@/db/pairing";
 
-type Stage = "comparison" | "gate" | "display" | "expired" | "error";
+type Stage =
+  | "comparison"
+  | "gate"
+  | "display"
+  | "label-source"
+  | "expired"
+  | "error";
 
 /**
  * Source-side AddDevice wizard. Per `docs/device-pairing.md` §6 —
@@ -62,6 +69,11 @@ export default function AddDevicePage() {
   const [passphrase, setPassphrase] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Free-text label captured at the post-pair "want to label this?"
+  // prompt. Stays empty when the member skips. Not sensitive — the
+  // inventory it feeds is local-only.
+  const [labelDraft, setLabelDraft] = useState("");
+  const [savingLabel, setSavingLabel] = useState(false);
 
   // Drops sensitive state. Called on cancel / expiry / unmount.
   const reset = useCallback(() => {
@@ -124,6 +136,42 @@ export default function AddDevicePage() {
     reset();
     setStage("comparison");
   }, [reset]);
+
+  // "Done" on the display screen no longer navigates straight to
+  // Profile — it routes through the label-source stage so the member
+  // can name this paired device for the inventory. Sensitive state
+  // is dropped here because the pair itself is complete; the label
+  // capture doesn't need the envelope or passphrase.
+  const handleDoneShowingQR = useCallback(() => {
+    reset();
+    setLabelDraft("");
+    setStage("label-source");
+  }, [reset]);
+
+  // Save path. Both "save with label" and "skip" land here; the
+  // difference is the label string. Empty string is preserved
+  // verbatim by the data layer — see `db/pairing.ts`.
+  const handleSaveLabel = useCallback(
+    async (label: string) => {
+      setSavingLabel(true);
+      try {
+        await recordPairing({ kind: "source", label });
+      } finally {
+        setSavingLabel(false);
+      }
+      navigate("/profile");
+    },
+    [navigate],
+  );
+
+  // "Don't save — the pair failed" path. The flow can reach the
+  // display stage on a member's honest attempt that the destination
+  // device never actually completed. Forcing a write in that case
+  // pollutes the inventory with phantom "you paired X" rows; the
+  // ghost option lets the member opt out of recording at all.
+  const handleDontSave = useCallback(() => {
+    navigate("/profile");
+  }, [navigate]);
 
   // Suppress null-render in some edge case where AppContext hasn't
   // wired currentMember yet — the OnboardingGate at App.tsx prevents
@@ -229,9 +277,68 @@ export default function AddDevicePage() {
             <button
               type="button"
               className="btn-primary"
-              onClick={handleCancel}
+              onClick={handleDoneShowingQR}
             >
               {t("addDevice.display.done")}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {stage === "label-source" && (
+        <section
+          className="card flex flex-col gap-4"
+          aria-labelledby="addDevice-labelSource-heading"
+        >
+          <h2
+            id="addDevice-labelSource-heading"
+            className="text-lg font-semibold"
+          >
+            {t("addDevice.labelSource.title")}
+          </h2>
+          <p className="text-sm text-moss-700 dark:text-moss-200">
+            {t("addDevice.labelSource.body")}
+          </p>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">
+              {t("addDevice.labelSource.inputLabel")}
+            </span>
+            <input
+              type="text"
+              className="input"
+              value={labelDraft}
+              onChange={(e) => setLabelDraft(e.target.value)}
+              maxLength={80}
+            />
+          </label>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={handleDontSave}
+              disabled={savingLabel}
+            >
+              {t("addDevice.labelSource.dontSave")}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                void handleSaveLabel("");
+              }}
+              disabled={savingLabel}
+            >
+              {t("addDevice.labelSource.skip")}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => {
+                void handleSaveLabel(labelDraft.trim());
+              }}
+              disabled={savingLabel}
+            >
+              {t("addDevice.labelSource.save")}
             </button>
           </div>
         </section>

@@ -48,6 +48,7 @@ import { CommunitySettingsSection } from "@/components/CommunitySettingsSection"
 import { DisputesSection } from "@/components/DisputesSection";
 import { ProposalsSection } from "@/components/ProposalsSection";
 import { LearnSection } from "@/components/LearnSection";
+import { PairingLogSection } from "@/components/PairingLogSection";
 import type {
   AchievementType,
   AvailabilityChip,
@@ -285,6 +286,15 @@ export default function ProfilePage() {
           device is more sensitive than either and the visual
           adjacency to the panic-button section reinforces that. */}
       <AddDeviceSection />
+
+      {/* Paired-device inventory. Renders null until the member has
+          completed at least one pair from this device (as source or
+          destination), so the section is invisible on a fresh
+          install and grows in over time. Placed between AddDevice
+          and Emergency because the inventory's only remediation
+          path IS Emergency → Hard purge (Ed25519 has no revocation
+          primitive). See `docs/device-pairing.md` §9.x. */}
+      <PairingLogSection />
 
       {/* Emergency stays on Profile — NOT in Settings — per the
           privacy-as-precondition principle. Panic buttons need to

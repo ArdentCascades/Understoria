@@ -130,6 +130,38 @@ export interface DraftRow {
   updatedAt: number;
 }
 
+/**
+ * Persisted entry in the local paired-device inventory. One row per
+ * pair flow the member completed on this device — either as the
+ * SOURCE (this device generated the QR) or DESTINATION (this device
+ * captured a QR and imported the identity). Surfaced on Profile so
+ * the member can see what they've authorized; never federated, never
+ * exported, never crosses the wire.
+ *
+ * The table is a UX surface — it helps members notice "I forgot I
+ * paired Aunt's laptop" — not a security boundary. It cannot detect a
+ * silent re-import the attacker performed without the member's
+ * involvement, and Ed25519 has no key-revocation primitive to act on
+ * a "remove" affordance anyway. The only remediation for a lost
+ * paired device is Emergency → Hard purge, which clears this table
+ * alongside the rest of the identity. See `docs/device-pairing.md`
+ * §9.x and `docs/threat-model.md` §7.
+ */
+export interface PairingLogRow {
+  /** UUID for the entry. Primary key. */
+  id: string;
+  /** ms-epoch when the pair completed on this device. */
+  completedAt: number;
+  /** "source" = this device generated the QR for another device.
+   *  "destination" = this device imported an identity from a scanned
+   *  QR. The two lists render under separate headings on Profile. */
+  kind: "source" | "destination";
+  /** Member-provided free-text label, e.g. "Aunt's laptop" or "work
+   *  phone". Empty string when the member skipped the prompt — never
+   *  null. The UI renders an "(unlabeled)" fallback in that case. */
+  label: string;
+}
+
 export class UnderstoriaDB extends Dexie {
   members!: Table<Member, string>;
   posts!: Table<Post, string>;
@@ -149,6 +181,7 @@ export class UnderstoriaDB extends Dexie {
   votes!: Table<Vote, string>;
   messages!: Table<DirectMessage, string>;
   taskComments!: Table<TaskComment, string>;
+  pairingLog!: Table<PairingLogRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -421,6 +454,19 @@ export class UnderstoriaDB extends Dexie {
         if (r.autoConfirmed === undefined) r.autoConfirmed = false;
       });
     });
+    // Version 20 — paired-device inventory. New table only; no
+    // existing rows to migrate. Secondary indexes on `completedAt`
+    // (for the DESC sort the Profile section needs) and `kind` (to
+    // split the source / destination lists without a full scan). The
+    // table is local-only and clears on Hard purge alongside the
+    // identity itself — see `docs/device-pairing.md` §9.x.
+    this.version(20)
+      .stores({
+        pairingLog: "id, completedAt, kind",
+      })
+      .upgrade(async () => {
+        // New table; no existing rows to migrate.
+      });
   }
 }
 

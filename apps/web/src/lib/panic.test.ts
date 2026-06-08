@@ -44,6 +44,7 @@ async function reset() {
     db.projects.clear(),
     db.projectTasks.clear(),
     db.projectActivity.clear(),
+    db.pairingLog.clear(),
   ]);
 }
 

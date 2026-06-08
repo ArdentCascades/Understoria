@@ -485,6 +485,17 @@ We are not trying to protect against:
   transfer (DMs are E2E to specific device keys); a brief
   "what to expect" reminder on the destination device after
   import names this so it isn't a surprise.
+  A local-only **paired-device inventory** on Profile (see
+  `docs/device-pairing.md` §9.1) records each completed pair —
+  source or destination — with a member-provided label. It is a
+  memory aid for the "I forgot I paired Aunt's laptop" case and
+  gives the destination-side surface a chance to flag an
+  unexpected entry. It is NOT a defense: an attacker who already
+  has the key bytes never runs the destination flow, so no row
+  appears for a silent re-import; and there is no per-row revoke
+  (Ed25519 has no revocation primitive). The only remediation is
+  still hard-purge, which clears the inventory alongside the
+  identity.
 
 - **Calendar aggregation as a faster surveillance surface.**
   The community calendar (`docs/calendar.md`) collapses
