@@ -23,6 +23,7 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   IconBoard,
+  IconCalendar,
   IconDashboard,
   IconMessages,
   IconProfile,
@@ -31,13 +32,26 @@ import {
 
 interface NavItem {
   to: string;
-  labelKey: "nav.board" | "nav.dashboard" | "nav.messages" | "nav.profile";
+  labelKey:
+    | "nav.board"
+    | "nav.calendar"
+    | "nav.dashboard"
+    | "nav.messages"
+    | "nav.profile";
   Icon: ComponentType<IconProps>;
 }
 
+// Going from 4 to 5 tabs (see docs/calendar.md §8.1). At 320px (iPhone
+// SE), five 44px touch targets fit horizontally — `touch-target` keeps
+// the floor — but the text label crowds out. So labels collapse to
+// icon-only below `sm` (640px) and reappear at small phones and up.
+// Each item is still labelled for screen readers via the `<span>`,
+// which is `sr-only` at the smallest viewports so the accessible name
+// of the link is preserved.
 const ITEMS: NavItem[] = [
   { to: "/", labelKey: "nav.board", Icon: IconBoard },
   { to: "/dashboard", labelKey: "nav.dashboard", Icon: IconDashboard },
+  { to: "/calendar", labelKey: "nav.calendar", Icon: IconCalendar },
   { to: "/messages", labelKey: "nav.messages", Icon: IconMessages },
   { to: "/profile", labelKey: "nav.profile", Icon: IconProfile },
 ];
@@ -96,7 +110,9 @@ export function BottomNav() {
               }
             >
               <item.Icon size={22} />
-              <span>{t(item.labelKey)}</span>
+              <span className="sr-only sm:not-sr-only">
+                {t(item.labelKey)}
+              </span>
             </NavLink>
           </li>
         ))}

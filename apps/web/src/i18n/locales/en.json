@@ -227,10 +227,59 @@
   },
   "nav": {
     "board": "Board",
+    "calendar": "Calendar",
     "dashboard": "Dashboard",
     "messages": "Messages",
     "profile": "Profile",
     "primaryNav": "Primary navigation"
+  },
+  "calendar": {
+    "title": "Community calendar",
+    "tagline": "What the community is doing together — project deadlines, posts about to expire, and the rhythm of exchanges that already happened.",
+    "views": {
+      "agenda": "Agenda",
+      "month": "Month",
+      "week": "Week"
+    },
+    "filters": {
+      "category": "Category",
+      "project": "Project",
+      "mine": "Mine",
+      "allCategories": "All categories",
+      "allProjects": "All projects"
+    },
+    "density": {
+      "line_one": "{{count}} exchange completed",
+      "line_other": "{{count}} exchanges completed",
+      "tooltipBody": "No member names appear here. The count is the community's metabolism, not anyone's score.",
+      "legend": "Exchange density"
+    },
+    "empty": {
+      "title": "The community's calendar is quiet this week.",
+      "body": "When someone creates a project with a deadline or posts a need that expires, it'll show up here. Activity from completed exchanges shows up too — the calendar reflects what the community is doing together, not a score to chase."
+    },
+    "weekNav": {
+      "prev": "Previous week",
+      "next": "Next week",
+      "range": "{{start}} – {{end}}"
+    },
+    "overflowMore": "+{{count}} more",
+    "entry": {
+      "projectDeadline": "{{title}} deadline",
+      "postExpiringNeed": "Need expires: {{title}}",
+      "postExpiringOffer": "Offer expires: {{title}}"
+    },
+    "month": {
+      "weekdayShort": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    }
   },
   "messages": {
     "title": "Messages",
