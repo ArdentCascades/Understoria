@@ -29,6 +29,10 @@ import type {
   CoOrganizerInvitationResponsePayload,
   CoOrganizerInvitationRevocation,
   CoOrganizerInvitationRevocationPayload,
+  Event,
+  EventCancellation,
+  EventCancellationPayload,
+  EventPayload,
   Exchange,
   InvitePayload,
   Post,
@@ -523,4 +527,94 @@ export function verifyCoOrganizerInvitationRevocation(
   if (!rec.signature) return false;
   const payload = canonicalCoOrganizerInvitationRevocationPayload(rec);
   return verify(payload, rec.signature, rec.inviterKey);
+}
+
+// -- Community events (see docs/community-events.md §3, §4, §11) -----------
+
+/**
+ * Canonical, stable serialization of a community-event payload — the
+ * bytes the organizer's secret key signs at issue time. Field order
+ * is fixed for cross-engine JSON stability, same discipline as
+ * `canonicalCoOrganizerInvitationPayload`. `signature` is NOT part
+ * of the canonical payload.
+ *
+ * The order below is the WIRE CONTRACT. It mirrors the declared
+ * field order in `EventPayload`. Do NOT alphabetize. Adding a field
+ * is a breaking change to the federation wire format.
+ *
+ * `null` values for `endsAt`, `capacity`, `templateId` serialize as
+ * literal `null` — never omitted — so signers and verifiers byte-
+ * agree on records that take the "no defined end" / "uncapped" /
+ * "no template" path.
+ *
+ * Note on `templateId`: reserved for phase 2. The types layer
+ * accepts any `string | null`; phase-1 enforcement (must be `null`)
+ * lives at the application layer, NOT at the canonical-serialization
+ * layer. A non-null `templateId` here is a perfectly well-formed
+ * canonical payload — it's just that the app will refuse to ship it
+ * until phase 2 lands.
+ */
+export function canonicalEventPayload(p: EventPayload): string {
+  return JSON.stringify({
+    id: p.id,
+    kind: p.kind,
+    title: p.title,
+    description: p.description,
+    category: p.category,
+    startsAt: p.startsAt,
+    endsAt: p.endsAt,
+    location: p.location,
+    capacity: p.capacity,
+    templateId: p.templateId,
+    createdAt: p.createdAt,
+    createdBy: p.createdBy,
+  });
+}
+
+/**
+ * Verify a community event's signature against the organizer's
+ * public key. Single-signer-per-record discipline: `createdBy` is
+ * the only valid signer of this record type.
+ *
+ * This helper verifies the signature only. Cross-record consistency
+ * (cancellation.createdBy === referenced-event.createdBy, phase-1
+ * `templateId` must be null, etc.) is enforced at the application
+ * layer — federation routes, Dexie actions — not here.
+ */
+export function verifyEvent(rec: Event): boolean {
+  if (!rec.signature) return false;
+  const payload = canonicalEventPayload(rec);
+  return verify(payload, rec.signature, rec.createdBy);
+}
+
+/**
+ * Canonical, stable serialization of an event-cancellation payload
+ * — the bytes the organizer's secret key signs to cancel an event.
+ * Field order is fixed, same discipline as `canonicalEventPayload`.
+ * `signature` is NOT part of the canonical payload.
+ */
+export function canonicalEventCancellationPayload(
+  p: EventCancellationPayload,
+): string {
+  return JSON.stringify({
+    id: p.id,
+    kind: p.kind,
+    eventId: p.eventId,
+    reason: p.reason,
+    cancelledAt: p.cancelledAt,
+    createdBy: p.createdBy,
+  });
+}
+
+/**
+ * Verify an event cancellation's signature against the organizer's
+ * public key. Same single-signer discipline as `verifyEvent` — the
+ * application layer is responsible for asserting that this record's
+ * `createdBy` matches the cancelled event's `createdBy` (the canon-
+ * ical "only the organizer can cancel" rule).
+ */
+export function verifyEventCancellation(rec: EventCancellation): boolean {
+  if (!rec.signature) return false;
+  const payload = canonicalEventCancellationPayload(rec);
+  return verify(payload, rec.signature, rec.createdBy);
 }
