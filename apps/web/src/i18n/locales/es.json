@@ -38,7 +38,9 @@
       "spokenInstructions": "Lee estas seis palabras en voz alta, o tipéalas en el nuevo dispositivo. El orden importa. No pegues — los gestores de portapapeles recuerdan cosas.",
       "qrAriaLabel": "Código QR para vincular dispositivo",
       "afterImport": "Cuando el otro dispositivo diga que terminó, toca Listo. El QR también desaparecerá solo cuando el temporizador llegue a cero.",
-      "done": "Listo"
+      "done": "Listo",
+      "fingerprintLabel": "Confirma en el otro dispositivo",
+      "fingerprintAriaLabel": "Huella de identidad para confirmar en el otro dispositivo"
     },
     "expired": {
       "title": "Se acabó el tiempo.",
@@ -73,6 +75,14 @@
       "instructions": "Escribe las {{count}} palabras del otro dispositivo, en orden. Se autocompletan al escribir.",
       "wordLabel": "Palabra {{number}}",
       "unwrap": "Descifrar"
+    },
+    "fingerprintConfirm": {
+      "title": "¿Coincide con el otro dispositivo?",
+      "body": "El otro dispositivo debería mostrar el mismo código de 8 caracteres bajo \"Confirma en el otro dispositivo\". Si no coincide, detente — algo está mal con el escaneo.",
+      "fingerprintAriaLabel": "Huella de identidad del dispositivo que escaneaste",
+      "confirm": "Sí, coinciden",
+      "mismatch": "No — no coinciden",
+      "mismatchHint": "Si tocas \"No\" reiniciaremos el escaneo en este dispositivo. Pide al otro dispositivo que empiece de nuevo también."
     },
     "session": {
       "title": "Bloquea este dispositivo con una contraseña",

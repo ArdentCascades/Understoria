@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { InviteQRCode } from "@/components/InviteQRCode";
+import { keyFingerprint } from "@/lib/keyFingerprint";
 
 interface DevicePairingDisplayProps {
   /** Base64-url-encoded envelope that the destination scans. */
@@ -15,6 +16,12 @@ interface DevicePairingDisplayProps {
    *  delivery; never copy-buttoned (per design doc §6.3 — clipboard
    *  managers persist). */
   passphrase: string;
+  /** The member's base64 Ed25519 public key. Rendered as a short
+   *  fingerprint so the destination device can confirm it's looking
+   *  at the right identity (catches mistaken-pairing and mid-flow
+   *  QR swaps). The publicKey itself never leaves the source — the
+   *  fingerprint is a one-way hash of its first bytes. */
+  publicKey: string;
   /** ms epoch at which the QR auto-dismisses. */
   expiresAt: number;
   /** Fires when expiresAt is reached. The parent transitions to the
@@ -42,6 +49,7 @@ interface DevicePairingDisplayProps {
 export function DevicePairingDisplay({
   encodedEnvelope,
   passphrase,
+  publicKey,
   expiresAt,
   onExpired,
 }: DevicePairingDisplayProps) {
@@ -65,6 +73,12 @@ export function DevicePairingDisplay({
   // Split passphrase into individual word chips so the visual encourages
   // verbal delivery one word at a time, not whole-string read-aloud.
   const words = useMemo(() => passphrase.split(" "), [passphrase]);
+
+  // Derived from the publicKey prop; the fingerprint helper is a pure
+  // function so memoising on the input string is enough. Same lifetime
+  // invariants as the rest of this component's state — drops with the
+  // component on cancel / expiry / route change.
+  const fingerprint = useMemo(() => keyFingerprint(publicKey), [publicKey]);
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -95,6 +109,25 @@ export function DevicePairingDisplay({
       <p className="max-w-prose text-center text-sm text-moss-600 dark:text-moss-300">
         {t("addDevice.display.spokenInstructions")}
       </p>
+
+      {/* Fingerprint of this device's public key, shown so the
+          destination device's confirm step has something visible to
+          compare against. Styled smaller and calmer than the
+          passphrase chips because it's verification info, not the
+          action — the member's hands are on the words, their eyes
+          glance here. Wrapped in a labelled region so screen readers
+          announce it as the "fingerprint to confirm". */}
+      <div
+        aria-label={t("addDevice.display.fingerprintAriaLabel")}
+        className="flex flex-col items-center gap-1"
+      >
+        <span className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-400">
+          {t("addDevice.display.fingerprintLabel")}
+        </span>
+        <span className="font-mono text-sm tracking-widest text-moss-700 dark:text-moss-200">
+          {fingerprint}
+        </span>
+      </div>
 
       <InviteQRCode
         value={encodedEnvelope}

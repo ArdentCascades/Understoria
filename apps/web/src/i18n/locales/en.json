@@ -38,7 +38,9 @@
       "spokenInstructions": "Read these six words aloud, or type them on the new device. The order matters. Don't paste — clipboard apps remember things.",
       "qrAriaLabel": "Device-pairing QR code",
       "afterImport": "When the other device says it's done, tap Done. The QR will also clear on its own when the timer reaches zero.",
-      "done": "Done"
+      "done": "Done",
+      "fingerprintLabel": "Confirm on the other device",
+      "fingerprintAriaLabel": "Identity fingerprint to confirm on the other device"
     },
     "expired": {
       "title": "Time's up.",
@@ -73,6 +75,14 @@
       "instructions": "Type the {{count}} words from the other device, in order. They auto-complete as you type.",
       "wordLabel": "Word {{number}}",
       "unwrap": "Unwrap"
+    },
+    "fingerprintConfirm": {
+      "title": "Does this match the other device?",
+      "body": "The other device should be showing the same 8-character code under \"Confirm on the other device.\" If it doesn't match, stop — something is wrong with the scan.",
+      "fingerprintAriaLabel": "Identity fingerprint from the device you scanned",
+      "confirm": "Yes, they match",
+      "mismatch": "No — they don't match",
+      "mismatchHint": "If you tap \"No\" we'll restart the scan on this device. Ask the other device to start over too."
     },
     "session": {
       "title": "Lock this device with a passphrase",

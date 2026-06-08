@@ -214,6 +214,7 @@ export default function AddDevicePage() {
           <DevicePairingDisplay
             encodedEnvelope={encoded}
             passphrase={passphrase}
+            publicKey={currentMember.publicKey}
             expiresAt={expiresAt}
             onExpired={handleExpired}
           />

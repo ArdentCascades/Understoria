@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -18,6 +18,7 @@ import { createMember } from "@/db/seed";
 import { markOnboarded } from "@/db/onboarding";
 import { enablePassphrase } from "@/db/secrets";
 import { validatePassphrase } from "@/lib/passphrase";
+import { keyFingerprint } from "@/lib/keyFingerprint";
 import type { AvailabilityChip } from "@/types";
 import {
   decodeEnvelope,
@@ -27,10 +28,12 @@ import {
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { PairDevicePassphraseEntry } from "@/components/PairDevicePassphraseEntry";
 import { PairDeviceBootstrapReminder } from "@/components/PairDeviceBootstrapReminder";
+import { DevicePairingFingerprintConfirm } from "@/components/DevicePairingFingerprintConfirm";
 
 type Stage =
   | "capture"
   | "passphrase"
+  | "fingerprint-confirm"
   | "session-passphrase"
   | "bootstrap"
   | "success-redirect";
@@ -39,12 +42,18 @@ type Stage =
  * Destination-side device-pairing flow. Reached via the Welcome
  * flow's "I have another device" path. Per design doc §7:
  *
- *   1. capture            — camera scan + paste fallback
- *   2. passphrase         — 6-word BIP39 input, unwrap envelope
- *   3. session-passphrase — set this device's own session
- *                           passphrase (re-wraps the imported key)
- *   4. bootstrap          — "what to expect" reminder before the
- *                           Board (§7.5)
+ *   1. capture             — camera scan + paste fallback
+ *   2. passphrase          — 6-word BIP39 input, unwrap envelope
+ *   3. fingerprint-confirm — show short hex hash of the unwrapped
+ *                            publicKey, member confirms it matches
+ *                            the source device (catches mistaken-
+ *                            pairing and mid-flow QR swap; the
+ *                            cryptographic identity check already
+ *                            ran inside `unwrapTransfer`)
+ *   4. session-passphrase  — set this device's own session
+ *                            passphrase (re-wraps the imported key)
+ *   5. bootstrap           — "what to expect" reminder before the
+ *                            Board (§7.5)
  *
  * Errors short-circuit back to the relevant step:
  *   - capture failed → stay on capture with error message
@@ -120,10 +129,39 @@ export default function PairDevicePage() {
       }
       setUnwrapError(null);
       setPayload(result.payload);
-      setStage("session-passphrase");
+      setStage("fingerprint-confirm");
     },
     [encoded, t],
   );
+
+  // Fingerprint derived from the unwrapped payload's publicKey. Pure
+  // function on a string input, so memoising keeps the component
+  // cheap and means the displayed hex is stable while the member
+  // stares at it. Same lifetime as `payload` — both drop on mismatch
+  // / cancel / unmount per design doc §6.4–§7.4. Falls back to empty
+  // when no payload is present (e.g. before the unwrap completes);
+  // the fingerprint-confirm stage is only mounted when payload is
+  // non-null so the empty branch is unreachable in practice.
+  const fingerprint = useMemo(
+    () => (payload ? keyFingerprint(payload.publicKey) : ""),
+    [payload],
+  );
+
+  // "No, they don't match" → drop everything sensitive and send the
+  // member back to capture. The framing in the destination copy is
+  // "stop and have the other device start over" — letting them
+  // retype the transfer passphrase doesn't help, because if the
+  // fingerprints diverge the envelope on the wire is the wrong
+  // envelope (or the source screen is stale). Safe default is full
+  // restart.
+  const handleMismatch = useCallback(() => {
+    setEncoded(null);
+    setPayload(null);
+    setUnwrapError(null);
+    setSessionPassphrase("");
+    setSessionConfirm("");
+    setStage("capture");
+  }, []);
 
   // The session-passphrase step optionally sets the device's own
   // unlock passphrase. Skipping (empty submit) leaves the secret
@@ -218,6 +256,14 @@ export default function PairDevicePage() {
             unwrapError={unwrapError}
           />
         </section>
+      )}
+
+      {stage === "fingerprint-confirm" && payload && (
+        <DevicePairingFingerprintConfirm
+          fingerprint={fingerprint}
+          onConfirm={() => setStage("session-passphrase")}
+          onMismatch={handleMismatch}
+        />
       )}
 
       {stage === "session-passphrase" && (
