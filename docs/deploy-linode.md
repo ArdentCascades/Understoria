@@ -39,7 +39,24 @@ DB and any local backups.
 
 **Networking.**
 - Stackscript / cloud-init optional. Bare image is fine.
-- Open ports 22, 80, 443 in the Linode Cloud Firewall.
+
+> **⚠ Linode Cloud Firewall — default-deny.** This is the single
+> biggest cause of "I followed every step and TLS still fails."
+> When you attach a Linode Cloud Firewall to a VM, its DEFAULT
+> policy is to **drop all inbound traffic**. You must explicitly
+> add inbound ACCEPT rules for **TCP 22 (SSH), TCP 80 (ACME HTTP-01),
+> TCP 443 (HTTPS), and UDP 443 (HTTP/3)** — or detach the firewall
+> entirely while you bring the node up.
+>
+> Symptom if you miss this: `curl https://<domain>/api/health` from
+> your laptop hangs or "connection refused", but the SAME curl run
+> via Linode Weblish (the in-browser console, which rides the
+> internal network and bypasses Cloud Firewall) succeeds. If you
+> see that split, the Cloud Firewall is the culprit, not Caddy and
+> not Docker.
+>
+> The host-level firewall (`ufw`) configured by `scripts/setup.sh`
+> is a SEPARATE layer; both must allow the same ports.
 
 **Disk.** The default 25 GB is plenty for the DB but TIGHT if you
 keep many local backup snapshots. Consider attaching a 40-80 GB
@@ -48,10 +65,24 @@ heavy use.
 
 ## 2. Point DNS
 
-Create an **A record** for the chosen domain (e.g. `understoria.example.org`)
-pointing at your Linode's public IPv4. If you have IPv6, add an AAAA
-record too. Wait for propagation (`dig +short understoria.example.org`
-should return the IP from at least two resolvers before continuing).
+Create an **A record** (IPv4) for the chosen domain (e.g.
+`understoria.example.org`) pointing at your Linode's public IPv4.
+**The A record is the one that matters** — Let's Encrypt's HTTP-01
+challenge works most reliably over IPv4, and several home/mobile
+networks still can't reach IPv6-only hosts.
+
+If your Linode also has a public IPv6 address, add an AAAA record
+too — but make sure the A record exists FIRST. Setup will warn you
+loudly if AAAA is present without A.
+
+Verify propagation BEFORE running setup:
+
+```bash
+# Should return the Linode's public IPv4. Run from your laptop, not
+# the Linode (a Linode resolving its own domain is not the test).
+dig +short A    understoria.example.org
+dig +short AAAA understoria.example.org   # only if you added one
+```
 
 > Caddy will FAIL to acquire a Let's Encrypt cert if DNS hasn't
 > propagated. The failure shows up as a busy-loop in `docker compose
@@ -62,16 +93,51 @@ should return the IP from at least two resolvers before continuing).
 
 ```bash
 ssh root@<your-linode-ip>
+```
 
-# Docker Engine + Compose plugin (Debian).
+**Easy path (recommended).** Docker's official convenience script
+handles repo setup, key pinning, and platform detection in one
+command. Run it as root:
+
+```bash
+curl -fsSL https://get.docker.com | sh
+systemctl enable --now docker
+docker --version
+docker compose version
+```
+
+That's it. Skip to step 4.
+
+> **Why we recommend the convenience script.** The manual `apt`
+> path below works, but the multi-line `echo "deb [arch=..."`
+> block has bitten operators who pasted into a terminal that
+> mangled the line continuations — producing an invalid
+> `/etc/apt/sources.list.d/docker.list` that the next `apt-get
+> update` silently ignores, so `apt install docker-ce` then fails
+> with "Unable to locate package". One copy-pasteable curl line
+> avoids that whole class of bug.
+
+<details>
+<summary>Manual apt path (if you'd rather not pipe curl to sh)</summary>
+
+```bash
+# Run each block separately — do NOT mass-paste; the multi-line
+# echo into sources.list.d is the friction point.
 apt-get update
 apt-get install -y ca-certificates curl gnupg
+
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/debian/gpg \
   | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-  > /etc/apt/sources.list.d/docker.list
+
+# Build the apt source file in one go via a heredoc — safer than
+# echo + backslash-continuations through copy-paste.
+ARCH="$(dpkg --print-architecture)"
+CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+cat >/etc/apt/sources.list.d/docker.list <<EOF
+deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian ${CODENAME} stable
+EOF
+
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
@@ -79,6 +145,8 @@ systemctl enable --now docker
 docker --version
 docker compose version
 ```
+
+</details>
 
 ## 4. Clone the repo
 
@@ -283,6 +351,10 @@ member-visible pages.
 
 ## 11. Redeploy on a new version
 
+This is the **safe, non-destructive** path. Member data persists
+across redeploys because it lives in the named `understoria-data`
+volume, which `docker compose up` never touches.
+
 ```bash
 cd /opt/understoria
 git fetch origin
@@ -290,11 +362,39 @@ git checkout <new-tag>
 
 # Rebuild + restart. `web` is a one-shot so it exits after copying
 # the new dist; `understoria` does a graceful SIGTERM restart.
+# This is SAFE — no data is destroyed.
 docker compose up -d --build
 ```
 
 The auto-confirm secret key SURVIVES rebuilds — it lives in `.env`,
 which `git pull` doesn't touch.
+
+> **Service worker / app shell.** Browsers cache the PWA shell
+> aggressively. After a deploy, members may still see the OLD
+> build until their service worker re-fetches. To verify the new
+> build on YOUR browser: open DevTools → Application → Service
+> Workers → "Update on reload" + hard-refresh (Ctrl/Cmd-Shift-R),
+> or use a private window. Members generally pick up the new
+> build within ~24h automatically; there is no server-side
+> invalidation needed.
+
+> ### ⚠ Do NOT use `docker compose down -v`
+>
+> The `-v` flag deletes named volumes. On this stack that
+> includes `understoria-data` — **every member's account, every
+> exchange record, every signed history item** lives there. There
+> is no undo. The auto-confirm key in `.env` survives, but the
+> data it signed is gone.
+>
+> | Command | What it does | Data? |
+> | --- | --- | --- |
+> | `docker compose up -d --build` | Redeploy a new version | **PRESERVED** ✅ |
+> | `docker compose restart` | Restart running services | **PRESERVED** ✅ |
+> | `docker compose down`       | Stop + remove containers   | **PRESERVED** ✅ |
+> | `docker compose down -v`    | Stop + remove containers + **DELETE VOLUMES** | **DESTROYED** ❌ |
+>
+> The only time you ever want `-v` is a deliberate, tested
+> teardown of a throwaway node. On a live community node, never.
 
 ---
 

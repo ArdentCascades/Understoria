@@ -176,24 +176,46 @@ esac
 
 if [ "$SKIP_DNS" -eq 0 ]; then
   info "Checking DNS for $DOMAIN..."
-  resolved="$(getent hosts "$DOMAIN" 2>/dev/null | awk '{print $1; exit}' || true)"
-  if [ -z "$resolved" ]; then
-    warn "DNS lookup for $DOMAIN returned nothing."
+  # Resolve A (IPv4) and AAAA (IPv6) separately. Compare against the
+  # host's public IPv4 from ipify; mismatching v4-vs-v6 strings is NOT
+  # a real mismatch and used to scare operators with a false positive.
+  # `getent ahosts` honours AF type; fall back to `host` if available.
+  if command -v getent >/dev/null 2>&1; then
+    resolved_v4="$(getent ahostsv4 "$DOMAIN" 2>/dev/null | awk '{print $1; exit}' || true)"
+    resolved_v6="$(getent ahostsv6 "$DOMAIN" 2>/dev/null | awk '{print $1; exit}' || true)"
+  elif command -v host >/dev/null 2>&1; then
+    resolved_v4="$(host -t A    "$DOMAIN" 2>/dev/null | awk '/has address/    {print $4; exit}' || true)"
+    resolved_v6="$(host -t AAAA "$DOMAIN" 2>/dev/null | awk '/has IPv6 address/{print $5; exit}' || true)"
+  else
+    resolved_v4=""
+    resolved_v6=""
+  fi
+  if [ -z "$resolved_v4" ] && [ -z "$resolved_v6" ]; then
+    warn "DNS lookup for $DOMAIN returned no A or AAAA record."
     warn "Caddy will fail to acquire a TLS cert until DNS resolves."
     confirm "Continue anyway?" || exit 1
   else
-    # Best-effort host IP detection. We compare against the public IP
-    # from ipify (an external service — used only here, only with
-    # the operator's consent, doesn't run in production). If that
-    # service is unreachable, we skip the comparison.
-    host_ip="$(curl -fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)"
-    if [ -n "$host_ip" ] && [ "$host_ip" != "$resolved" ]; then
-      warn "DNS says $DOMAIN → $resolved"
-      warn "This host's public IP appears to be $host_ip"
-      warn "Update your A record before Caddy tries to acquire a cert."
-      confirm "Continue anyway?" || exit 1
+    # Best-effort host IPv4 detection. ipify is external — used only
+    # here, only with the operator's consent, doesn't run in production.
+    # If unreachable we skip the comparison rather than guess.
+    host_ipv4="$(curl -fsS --max-time 5 -4 https://api.ipify.org 2>/dev/null || true)"
+    if [ -n "$resolved_v4" ]; then
+      if [ -n "$host_ipv4" ] && [ "$host_ipv4" != "$resolved_v4" ]; then
+        warn "DNS says $DOMAIN A → $resolved_v4"
+        warn "This host's public IPv4 appears to be $host_ipv4"
+        warn "Update your A record before Caddy tries to acquire a cert."
+        confirm "Continue anyway?" || exit 1
+      else
+        ok "DNS for $DOMAIN (A) resolves to $resolved_v4."
+      fi
     else
-      ok "DNS for $DOMAIN resolves to $resolved."
+      warn "$DOMAIN has no A record (only AAAA: $resolved_v6)."
+      warn "Let's Encrypt HTTP-01 over IPv4 is the most reliable path;"
+      warn "add an A record pointing at this host's IPv4 before going public."
+      confirm "Continue with IPv6-only DNS?" || exit 1
+    fi
+    if [ -n "$resolved_v6" ]; then
+      info "DNS for $DOMAIN (AAAA) resolves to $resolved_v6."
     fi
   fi
 fi
