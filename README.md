@@ -248,6 +248,8 @@ The phase view below is a public summary.
 - [x] Milestones, achievements, solidarity streaks
 - [x] Member guide and operator guide drafts
 - [x] End-to-end encrypted messaging
+- [x] Device pairing — same-identity transfer to a second device via local QR + one-time passphrase, with fingerprint verification and a paired-device inventory on Profile
+- [x] Community calendar — agenda / month / week view aggregating project deadlines, post expiries, and exchange density (5th bottom-nav tab)
 
 ### Phase 3: Federation *(active)*
 - [x] Community node server with Docker deployment
