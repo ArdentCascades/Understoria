@@ -233,8 +233,12 @@ export default function BoardPage() {
     projectStatusFilter !== "" ||
     onlyWithOpenTasks;
 
+  // pb-36 (page wrapper) reserves clearance under the fixed FAB —
+  // which sits at bottom-20 ≈ 5rem with ≈3rem of its own height — so
+  // the last card in the scroll never tucks behind the floating
+  // button on any tab.
   return (
-    <div className="px-4 pb-32 pt-4">
+    <div className="px-4 pb-36 pt-4">
       <header className="mb-4">
         <h1 className="page-title">{t("board.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
@@ -251,15 +255,36 @@ export default function BoardPage() {
         technicalDetail={t("hints.board.technical")}
       />
 
-      {/* Phase 2.1: at lg+ the Board reflows into a 3-column rail
-          layout — filters become a sticky left rail, AttentionSection
-          a sticky right rail, around the middle reading column. Below
-          lg the `lg:*` classes are inert and the grid collapses to
-          single-column DOM order: AttentionSection → tablist → search
-          → filters → list, which matches the pre-Phase-2 layout
-          exactly. Implemented with CSS grid placement (no DOM
-          duplication), so screen-reader and tab order follow source
-          order at every breakpoint.
+      {/* Phase 2.1 (revised): at lg+ the Board reflows into a 3-column
+          rail layout — filters become a sticky left rail,
+          AttentionSection a sticky right rail, around the middle
+          reading column. The three columns size INDEPENDENTLY: the
+          outer grid is a single row track (lg:items-start) so a tall
+          rail (e.g. AttentionSection's co-organizer card) grows only
+          its own column and never inflates a shared row that the
+          middle column's tablist / search / list sit inside. The
+          middle column is one grid cell holding a flex-column wrapper
+          (tablist → search → list) so those stack tightly regardless
+          of rail height.
+
+          Below lg the grid is single-column. The middle wrapper uses
+          `contents` at mobile so its children (tablist, search, list)
+          flatten into the outer grid; `order-*` then interleaves the
+          filters rail to produce the VISUAL stack: AttentionSection →
+          tablist → search → filters → list.
+
+          Known tradeoff (WCAG 2.4.3): `order` is visual-only, so the
+          DOM / focus / screen-reader order on mobile is AttentionSection
+          → tablist → search → LIST → filters — the list is read before
+          the filters even though it appears below them. This is an
+          irreducible consequence of three constraints that can't all
+          hold at once: (a) filters in a sticky LEFT rail at lg+,
+          (b) no shared-row height coupling in the middle column, and
+          (c) filters shown between search and list on mobile. Keeping
+          (a) and (b) — the structural fix this change is about — forces
+          `order` for (c). If strict reading order is required, the
+          resolution is to move filters INTO the middle column on
+          desktop too (giving up the left rail); tracked as a follow-up.
 
           The right rail is reserved exclusively for AttentionSection.
           Do NOT dock additional informational components here —
@@ -268,23 +293,26 @@ export default function BoardPage() {
           no-leaderboards principles. AttentionSection itself remains
           curated, renders null when empty, and adds no badge count. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_280px] lg:items-start lg:gap-6">
-        {/* `lg:row-span-3` stops the rail from sizing row 1 — without
-            it the tallest of {AttentionSection, filter rail, tablist}
-            would set row 1's height and the tablist would sit at the
-            top of a tall, empty cell. Spanning all three middle-column
-            rows lets each row size by its own col-2 content (tablist
-            row 1, search row 2, list row 3) so tablist → search → list
-            stack tightly. lg:self-start keeps the rail content pinned
-            to the top of its spanning area; lg:sticky lg:top-4 pins it
-            to the viewport once the page scrolls past. */}
-        <div className="lg:col-start-3 lg:row-start-1 lg:row-span-3 lg:self-start lg:sticky lg:top-4">
+        {/* Right rail. Single grid cell in col 3, sticky. With the
+            outer grid on one row track + lg:items-start, its height is
+            its own concern — a tall attention card no longer drags the
+            middle column's rhythm. */}
+        <div className="order-1 lg:order-none lg:col-start-3 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
           <AttentionSection />
         </div>
 
+        {/* Middle reading column. At lg+ this is ONE col-2 grid cell
+            laid out as a flex column so tablist → search → list stack
+            tightly with no inter-rail height coupling. At mobile it is
+            `contents`, dissolving into the outer single-column grid so
+            the filters rail (a separate grid child placed in col 1 at
+            lg+) can sit between the search and the list in the stack
+            via the `order-*` utilities below. */}
+        <div className="contents min-w-0 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}
-          className="grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900 lg:col-start-2 lg:row-start-1"
+          className="order-2 lg:order-none grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
         >
           {(["NEED", "OFFER", "PROJECTS"] as const).map((tt) => (
             <button
@@ -320,7 +348,7 @@ export default function BoardPage() {
             input width cap. `-mx-4 lg:mx-0` lets the backdrop bleed
             to the viewport edge at mobile (cancelling the page's
             px-4) while staying within the middle column at lg+. */}
-        <div className="sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:top-4 lg:col-start-2 lg:row-start-2 lg:mx-0 lg:px-0">
+        <div className="order-3 lg:order-none sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:top-4 lg:mx-0 lg:mb-0 lg:px-0">
           <label className="block md:max-w-md">
             <span className="sr-only">
               {t(
@@ -343,122 +371,145 @@ export default function BoardPage() {
           </label>
         </div>
 
+        {/* Per-tab LIST lives inside the middle wrapper (col 2). At
+            mobile the wrapper is `contents`, so this list participates
+            directly in the outer grid stack and is ordered AFTER the
+            filters via `order-5`. */}
         {tab !== "PROJECTS" && (
-        <>
-        <div className="lg:col-start-1 lg:row-start-1 lg:row-span-3 lg:self-start lg:sticky lg:top-4">
-          <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
-            <label className="sr-only" htmlFor="category-filter">
-              {t("board.filters.categoryAriaLabel")}
-            </label>
-            <select
-              id="category-filter"
-              className="input"
-              value={categoryFilter}
-              onChange={(e) =>
-                setCategoryFilter(e.target.value as Category | "")
-              }
-            >
-              <option value="">{t("board.filters.allCategories")}</option>
-              {ALL_CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
-                </option>
-              ))}
-            </select>
-            <label className="sr-only" htmlFor="urgency-filter">
-              {t("board.filters.urgencyAriaLabel")}
-            </label>
-            <select
-              id="urgency-filter"
-              className="input"
-              value={urgencyFilter}
-              onChange={(e) =>
-                setUrgencyFilter(e.target.value as Urgency | "")
-              }
-            >
-              {URGENCY_VALUES.map((value) => (
-                <option key={value} value={value}>
-                  {value === ""
-                    ? t("board.filters.allUrgencies")
-                    : t(`urgency.${value}`)}
-                </option>
-              ))}
-            </select>
-            <label className="sr-only" htmlFor="zone-filter">
-              {t("board.filters.zoneAriaLabel")}
-            </label>
-            <select
-              id="zone-filter"
-              className="input"
-              value={zoneFilter}
-              onChange={(e) => setZoneFilter(e.target.value)}
-            >
-              <option value="">{t("board.filters.allZones")}</option>
-              {zones.map((z) => (
-                <option key={z} value={z}>{z}</option>
-              ))}
-            </select>
-          </div>
-
-          {claimedInScope > 0 && (
-            <div className="mt-3 flex justify-end lg:justify-start">
-              <button
-                type="button"
-                onClick={() => setShowClaimed((v) => !v)}
-                aria-pressed={showClaimed}
-                className="rounded-full bg-moss-100 px-3 py-1 text-xs font-medium text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-              >
-                {showClaimed
-                  ? t("board.hideClaimed", { count: claimedInScope })
-                  : t("board.showClaimed", { count: claimedInScope })}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="lg:col-start-2 lg:row-start-3">
-          {visiblePosts.length === 0 ? (
-            debouncedQuery.trim() !== "" ? (
-              <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-                {t("board.search.noMatches")}
-              </p>
+          <div className="order-5 lg:order-none">
+            {visiblePosts.length === 0 ? (
+              debouncedQuery.trim() !== "" ? (
+                <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+                  {t("board.search.noMatches")}
+                </p>
+              ) : (
+                <EmptyState
+                  illustration="sapling"
+                  title={
+                    tab === "NEED"
+                      ? t("board.empty.titleNeeds")
+                      : t("board.empty.titleOffers")
+                  }
+                  message={
+                    tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
+                  }
+                />
+              )
             ) : (
-              <EmptyState
-                illustration="sapling"
-                title={
-                  tab === "NEED"
-                    ? t("board.empty.titleNeeds")
-                    : t("board.empty.titleOffers")
-                }
-                message={
-                  tab === "NEED" ? t("board.empty.needs") : t("board.empty.offers")
-                }
-              />
-            )
-          ) : (
-            <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
-              {visiblePosts.map((p) => (
-                <li key={p.id}>
-                  <PostCard
-                    post={p}
-                    posterName={memberName.get(p.postedBy) ?? ""}
-                    isCurrentMember={p.postedBy === currentMember?.publicKey}
-                    posterTrust={trustByKey.get(p.postedBy)}
-                    isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
-                    posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
-                    searchQuery={debouncedQuery}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+              <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
+                {visiblePosts.map((p) => (
+                  <li key={p.id}>
+                    <PostCard
+                      post={p}
+                      posterName={memberName.get(p.postedBy) ?? ""}
+                      isCurrentMember={p.postedBy === currentMember?.publicKey}
+                      posterTrust={trustByKey.get(p.postedBy)}
+                      isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
+                      posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
+                      searchQuery={debouncedQuery}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {tab === "PROJECTS" && (
+          <div className="order-5 lg:order-none">
+            <ProjectList
+              projects={visibleProjects}
+              projectTasks={projectTasks}
+              memberName={memberName}
+              searchQuery={debouncedQuery}
+              filtersActive={projectFiltersActive}
+            />
+          </div>
+        )}
         </div>
-        </>
+        {/* end middle reading column */}
+
+        {/* Left rail: filters. A separate grid child placed in col 1 at
+            lg+, sticky. At mobile it sits between the search (order-3)
+            and the list (order-5) via `order-4`. Its height is its own
+            concern — single-row grid + lg:items-start means it never
+            couples into the middle column's vertical rhythm. */}
+        {tab !== "PROJECTS" && (
+          <div className="order-4 lg:order-none lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
+            <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
+              <label className="sr-only" htmlFor="category-filter">
+                {t("board.filters.categoryAriaLabel")}
+              </label>
+              <select
+                id="category-filter"
+                className="input"
+                value={categoryFilter}
+                onChange={(e) =>
+                  setCategoryFilter(e.target.value as Category | "")
+                }
+              >
+                <option value="">{t("board.filters.allCategories")}</option>
+                {ALL_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+                  </option>
+                ))}
+              </select>
+              <label className="sr-only" htmlFor="urgency-filter">
+                {t("board.filters.urgencyAriaLabel")}
+              </label>
+              <select
+                id="urgency-filter"
+                className="input"
+                value={urgencyFilter}
+                onChange={(e) =>
+                  setUrgencyFilter(e.target.value as Urgency | "")
+                }
+              >
+                {URGENCY_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {value === ""
+                      ? t("board.filters.allUrgencies")
+                      : t(`urgency.${value}`)}
+                  </option>
+                ))}
+              </select>
+              <label className="sr-only" htmlFor="zone-filter">
+                {t("board.filters.zoneAriaLabel")}
+              </label>
+              <select
+                id="zone-filter"
+                className="input"
+                value={zoneFilter}
+                onChange={(e) => setZoneFilter(e.target.value)}
+              >
+                <option value="">{t("board.filters.allZones")}</option>
+                {zones.map((z) => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </select>
+            </div>
+
+            {claimedInScope > 0 && (
+              <div className="mt-3 flex justify-end lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => setShowClaimed((v) => !v)}
+                  aria-pressed={showClaimed}
+                  className="rounded-full bg-moss-100 px-3 py-1 text-xs font-medium text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+                >
+                  {showClaimed
+                    ? t("board.hideClaimed", { count: claimedInScope })
+                    : t("board.showClaimed", { count: claimedInScope })}
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {tab === "PROJECTS" && (
           <>
-            <div className="lg:col-start-1 lg:row-start-1 lg:row-span-3 lg:self-start lg:sticky lg:top-4">
+            <div className="order-4 lg:order-none lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
               <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
                 <label className="sr-only" htmlFor="project-category-filter">
                   {t("board.projectFilters.category.ariaLabel")}
@@ -535,27 +586,14 @@ export default function BoardPage() {
               </div>
             </div>
 
-            <div className="lg:col-start-2 lg:row-start-3">
-              <ProjectList
-                projects={visibleProjects}
-                projectTasks={projectTasks}
-                memberName={memberName}
-                searchQuery={debouncedQuery}
-                filtersActive={projectFiltersActive}
-              />
-            </div>
-
-            {/* Archive link sits below the project list at every
-                breakpoint (a rarely-needed jump-off, not a primary
-                control). At lg+ it lives in col 1 row 4 — an
-                implicit row created after the explicit rows 1-3 —
-                so it appears below the list visually and below the
-                sticky filter rail. Row 2 / 3 col 1 are now spanned
-                by the filter rail, so the only conflict-free spot
-                in col 1 for archive is past the explicit rows. */}
+            {/* Archive link sits below everything at every breakpoint
+                (a rarely-needed jump-off, not a primary control). At
+                lg+ it lands in col 1 below the sticky filter rail (an
+                implicit row created after row 1); at mobile `order-6`
+                keeps it last in the stack. */}
             <Link
               to="/projects/archive"
-              className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-4 lg:mt-0 lg:text-left"
+              className="order-6 lg:order-none mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-2 lg:mt-3 lg:text-left"
             >
               {t("projects.archive.viewArchive")}
             </Link>
