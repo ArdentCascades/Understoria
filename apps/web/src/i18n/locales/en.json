@@ -487,6 +487,12 @@
       "remove": "Remove",
       "selectPlaceholder": "Choose a member..."
     },
+    "coorganizer": {
+      "stepDown": "Step down as co-organizer",
+      "stepDownConfirmTitle": "Step down as co-organizer?",
+      "stepDownConfirmBody": "You'll no longer be able to confirm task completions or edit this project. Your past confirmations remain.",
+      "stepDownConfirmCta": "Step down"
+    },
     "handoff": {
       "title": "Pass the torch",
       "intro": "Transfer your primary role to a co-organizer. You'll stay as a co-organizer.",
@@ -518,7 +524,8 @@
       "viewArchive": "View archive"
     },
     "history": {
-      "title": "History"
+      "title": "History",
+      "coorganizerStepdown": "Co-organizer stepped down"
     },
     "activityType": {
       "project_created": "Project created",
@@ -535,6 +542,7 @@
       "project_unarchived": "Project unarchived",
       "milestone_reached": "Milestone reached",
       "organizer_handoff": "Organizer handoff",
+      "coorganizer_stepdown": "Co-organizer stepped down",
       "announcement": "Update posted"
     }
   },

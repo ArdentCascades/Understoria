@@ -487,6 +487,12 @@
       "remove": "Quitar",
       "selectPlaceholder": "Elegir una persona..."
     },
+    "coorganizer": {
+      "stepDown": "Dejar el rol de co-organizador",
+      "stepDownConfirmTitle": "¿Dejar el rol de co-organizador?",
+      "stepDownConfirmBody": "Ya no podrás confirmar tareas ni editar este proyecto. Tus confirmaciones anteriores se mantienen.",
+      "stepDownConfirmCta": "Dejar el rol"
+    },
     "handoff": {
       "title": "Pasar la antorcha",
       "intro": "Transfiere tu rol principal a un co-organizador. Seguiras como co-organizador.",
@@ -518,7 +524,8 @@
       "viewArchive": "Ver archivo"
     },
     "history": {
-      "title": "Historial"
+      "title": "Historial",
+      "coorganizerStepdown": "Co-organizador dejó el rol"
     },
     "activityType": {
       "project_created": "Proyecto creado",
@@ -535,6 +542,7 @@
       "project_unarchived": "Proyecto desarchivado",
       "milestone_reached": "Hito alcanzado",
       "organizer_handoff": "Traspaso de organizador",
+      "coorganizer_stepdown": "Co-organizador dejó el rol",
       "announcement": "Novedad publicada"
     }
   },
