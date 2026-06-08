@@ -317,6 +317,21 @@ export async function flushOutboxOnce(
       result = await submitTaskCommentToNode(payload as TaskComment, cfg, {
         fetchImpl: options.fetchImpl,
       });
+    } else if (
+      row.kind === "coorg_invitation" ||
+      row.kind === "coorg_invitation_response" ||
+      row.kind === "coorg_invitation_revocation"
+    ) {
+      // PR A (data layer) enqueues co-organizer invitation records to
+      // the outbox so the federation path is wired end-to-end on the
+      // client side, but the server-side submitters land with PR B.
+      // Until then, treat these as a retryable transport error so the
+      // worker leaves them pending — once PR B ships, the same rows
+      // flush through normally.
+      result = {
+        ok: false,
+        error: "coorg_invitation_submitter_not_implemented",
+      };
     } else {
       result = await submitPostToNode(payload as Post, cfg, {
         fetchImpl: options.fetchImpl,

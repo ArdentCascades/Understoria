@@ -22,6 +22,9 @@ import Dexie, { type Table } from "dexie";
 import type {
   Achievement,
   AvailabilityChip,
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
   DirectMessage,
   Exchange,
   Member,
@@ -34,6 +37,7 @@ import type {
   TaskComment,
   Vote,
 } from "@/types";
+import { uuid } from "@/lib/id";
 import type { SignedVouch } from "@/lib/vouch";
 
 /**
@@ -86,7 +90,15 @@ export interface OutboxRow {
   id: string;
   /** Discriminator. New kinds slot in here as more record types
    *  federate; the worker dispatches to the matching submitter. */
-  kind: "exchange" | "vouch" | "post" | "claim" | "task_comment";
+  kind:
+    | "exchange"
+    | "vouch"
+    | "post"
+    | "claim"
+    | "task_comment"
+    | "coorg_invitation"
+    | "coorg_invitation_response"
+    | "coorg_invitation_revocation";
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
   /** Id of the wrapped record; lets us avoid double-enqueue on retry. */
@@ -162,6 +174,38 @@ export interface PairingLogRow {
   label: string;
 }
 
+/**
+ * Co-organizer invitation row — see `docs/co-organizer-invitations.md`.
+ * Wraps the federated `CoOrganizerInvitation` record with a local-only
+ * `grandfathered` audit flag. Grandfathered rows are synthesized by
+ * the v21 upgrade callback for pre-feature `Project.coOrganizerKeys`
+ * entries; their `signature` is the sentinel `"grandfathered"` and
+ * they do NOT federate (the outbox is not retroactive).
+ */
+export interface CoOrganizerInvitationRow extends CoOrganizerInvitation {
+  /** Local-only marker — set by the v21 migration for pre-existing
+   *  unilateral additions. Absent / false for real signed invitations.
+   *  Verifiers that need to distinguish real signatures from
+   *  grandfathered placeholders read this flag instead of trying to
+   *  verify the sentinel signature. */
+  grandfathered?: boolean;
+}
+
+export interface CoOrganizerInvitationResponseRow
+  extends CoOrganizerInvitationResponse {
+  /** Local-only marker — see `CoOrganizerInvitationRow.grandfathered`. */
+  grandfathered?: boolean;
+}
+
+export interface CoOrganizerInvitationRevocationRow
+  extends CoOrganizerInvitationRevocation {
+  /** Local-only marker — see `CoOrganizerInvitationRow.grandfathered`.
+   *  Present here for shape symmetry; grandfathered rows never
+   *  populate this table (a pre-feature unilateral add was never a
+   *  revoke). */
+  grandfathered?: boolean;
+}
+
 export class UnderstoriaDB extends Dexie {
   members!: Table<Member, string>;
   posts!: Table<Post, string>;
@@ -182,6 +226,9 @@ export class UnderstoriaDB extends Dexie {
   messages!: Table<DirectMessage, string>;
   taskComments!: Table<TaskComment, string>;
   pairingLog!: Table<PairingLogRow, string>;
+  coorgInvitations!: Table<CoOrganizerInvitationRow, string>;
+  coorgInvitationResponses!: Table<CoOrganizerInvitationResponseRow, string>;
+  coorgInvitationRevocations!: Table<CoOrganizerInvitationRevocationRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -466,6 +513,84 @@ export class UnderstoriaDB extends Dexie {
       })
       .upgrade(async () => {
         // New table; no existing rows to migrate.
+      });
+    // Version 21 — co-organizer invitations (PR A of the
+    // signed-invitation series; see `docs/co-organizer-invitations.md`).
+    // Three new tables, one per signed record type. Each record has
+    // exactly one signer (inviter for invitation + revocation,
+    // invitee for response) — the single-signer-per-record discipline
+    // that the rest of the federated ledger relies on.
+    //
+    // Grandfather migration: every existing
+    // (project, coOrganizerKey) pair gets a synthesized
+    // (invitation, accepted-response) pair so the derived
+    // `effectiveCoOrganizerKeys` view returns the same set the
+    // static `Project.coOrganizerKeys` array does today. The
+    // synthesized rows carry `signature: "grandfathered"` and a
+    // local-only `grandfathered: true` flag so verifiers can
+    // distinguish them from real signed acceptances. They do NOT
+    // federate (the outbox is not retroactive).
+    this.version(21)
+      .stores({
+        coorgInvitations:
+          "id, projectId, inviterKey, inviteeKey, createdAt",
+        coorgInvitationResponses:
+          "id, invitationId, inviteeKey, decidedAt",
+        coorgInvitationRevocations:
+          "id, invitationId, inviterKey, revokedAt",
+      })
+      .upgrade(async (tx) => {
+        const settingsTable = tx.table<AppSetting, string>("settings");
+        const nodeIdRow = await settingsTable.get("nodeId");
+        const localNodeId = nodeIdRow?.value ?? "node_local";
+
+        const projects = tx.table<Project, string>("projects");
+        const invitations = tx.table<CoOrganizerInvitationRow, string>(
+          "coorgInvitations",
+        );
+        const responses = tx.table<CoOrganizerInvitationResponseRow, string>(
+          "coorgInvitationResponses",
+        );
+
+        const allProjects = await projects.toArray();
+        for (const project of allProjects) {
+          const keys = project.coOrganizerKeys ?? [];
+          for (const inviteeKey of keys) {
+            // Use `project.createdAt` as the synthetic timestamp so
+            // the audit trail roughly matches the moment authority
+            // was granted (the closest signal we have). Expiry is
+            // set well past the synthetic createdAt so the
+            // grandfathered acceptance always falls inside the
+            // "before expiry" branch of the derived view.
+            const createdAt = project.createdAt;
+            const invitationId = uuid();
+            const invitation: CoOrganizerInvitationRow = {
+              id: invitationId,
+              projectId: project.id,
+              inviterKey: project.organizerKey,
+              inviteeKey,
+              createdAt,
+              // 100 years out — grandfathered acceptance never
+              // expires from the derived view's perspective.
+              expiresAt: createdAt + 100 * 365 * 24 * 60 * 60 * 1000,
+              nodeId: project.nodeId ?? localNodeId,
+              signature: "grandfathered",
+              grandfathered: true,
+            };
+            await invitations.put(invitation);
+            const response: CoOrganizerInvitationResponseRow = {
+              id: uuid(),
+              invitationId,
+              inviteeKey,
+              decision: "accept",
+              decidedAt: createdAt,
+              nodeId: project.nodeId ?? localNodeId,
+              signature: "grandfathered",
+              grandfathered: true,
+            };
+            await responses.put(response);
+          }
+        }
       });
   }
 }

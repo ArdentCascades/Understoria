@@ -11,7 +11,15 @@
  */
 import { describe, expect, it } from "vitest";
 import { computeAttentionItems } from "./attention";
-import type { Member, Post, Project, ProjectTask } from "@/types";
+import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
+  Member,
+  Post,
+  Project,
+  ProjectTask,
+} from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
 
 const nodeId = "node_attn";
@@ -445,5 +453,139 @@ describe("computeAttentionItems", () => {
       now,
     });
     expect(items).toEqual([]);
+  });
+
+  describe("co-organizer invitations", () => {
+    const now = 1_000_000;
+    const future = now + 14 * 24 * 60 * 60 * 1000;
+    const proj = project({
+      id: "proj_coorg",
+      title: "Garden expansion",
+      organizerKey: "bob",
+    });
+    function inv(
+      overrides: Partial<CoOrganizerInvitation>,
+    ): CoOrganizerInvitation {
+      return {
+        id: "inv_1",
+        projectId: proj.id,
+        inviterKey: "bob",
+        inviteeKey: alice.publicKey,
+        createdAt: now - 1000,
+        expiresAt: future,
+        nodeId,
+        signature: "sig",
+        ...overrides,
+      };
+    }
+
+    it("surfaces an outstanding invitation addressed to the current member", () => {
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [inv({})],
+        now,
+      });
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({
+        kind: "coorganizer_invitation_received",
+        invitationId: "inv_1",
+        projectId: proj.id,
+        projectTitle: proj.title,
+        inviterName: "Bob",
+        inviterKey: "bob",
+        expiresAt: future,
+      });
+    });
+
+    it("does NOT surface invitations addressed to other members", () => {
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob, carmen],
+        coorgInvitations: [inv({ inviteeKey: carmen.publicKey })],
+        now,
+      });
+      expect(items).toEqual([]);
+    });
+
+    it("drops an invitation that already has a response", () => {
+      const response: CoOrganizerInvitationResponse = {
+        id: "r1",
+        invitationId: "inv_1",
+        inviteeKey: alice.publicKey,
+        decision: "accept",
+        decidedAt: now - 100,
+        nodeId,
+        signature: "sig",
+      };
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [inv({})],
+        coorgInvitationResponses: [response],
+        now,
+      });
+      expect(items).toEqual([]);
+    });
+
+    it("drops a revoked invitation", () => {
+      const revocation: CoOrganizerInvitationRevocation = {
+        id: "rv1",
+        invitationId: "inv_1",
+        inviterKey: "bob",
+        revokedAt: now - 100,
+        nodeId,
+        signature: "sig",
+      };
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [inv({})],
+        coorgInvitationRevocations: [revocation],
+        now,
+      });
+      expect(items).toEqual([]);
+    });
+
+    it("drops an expired invitation", () => {
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [inv({ expiresAt: now - 1 })],
+        now,
+      });
+      expect(items).toEqual([]);
+    });
+
+    it("falls back to a generic inviter name when the member cache lacks the inviter", () => {
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice], // bob deliberately omitted
+        coorgInvitations: [inv({})],
+        now,
+      });
+      expect(items).toHaveLength(1);
+      expect(
+        (items[0] as { inviterName: string }).inviterName,
+      ).toBe("another community member");
+    });
   });
 });

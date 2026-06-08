@@ -56,6 +56,9 @@ async function reset() {
     db.projectTasks.clear(),
     db.projectActivity.clear(),
     db.pairingLog.clear(),
+    db.coorgInvitations.clear(),
+    db.coorgInvitationResponses.clear(),
+    db.coorgInvitationRevocations.clear(),
   ]);
 }
 

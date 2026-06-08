@@ -9,7 +9,16 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Member, NodeConfig, Post, Project, ProjectTask } from "@/types";
+import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
+  Member,
+  NodeConfig,
+  Post,
+  Project,
+  ProjectTask,
+} from "@/types";
 import { canClaimTask } from "@/db/projects";
 import type { SignedVouch } from "@/lib/vouch";
 import {
@@ -89,6 +98,24 @@ export type AttentionItem =
       kind: "vouch_received";
       voucherName: string;
       createdAt: number;
+    }
+  | {
+      /**
+       * A co-organizer invitation addressed to the current member is
+       * waiting on their decision. See
+       * `docs/co-organizer-invitations.md` §7 for the invitee-side
+       * UX. The renderer (PR C) opens the accept comparison card or
+       * the decline confirm; this data-layer surface just carries
+       * enough context for the home screen.
+       */
+      kind: "coorganizer_invitation_received";
+      invitationId: string;
+      projectId: string;
+      projectTitle: string;
+      inviterName: string;
+      inviterKey: string;
+      expiresAt: number;
+      createdAt: number;
     };
 
 export interface AttentionInput {
@@ -98,6 +125,14 @@ export interface AttentionInput {
   projectTasks: readonly ProjectTask[];
   members: readonly Member[];
   vouches?: readonly SignedVouch[];
+  /** Outstanding co-organizer invitations on this node — feeds the
+   *  `coorganizer_invitation_received` item. Optional so callers
+   *  that don't yet read the three new tables (older renderers,
+   *  tests that don't exercise the flow) keep their existing
+   *  behaviour. */
+  coorgInvitations?: readonly CoOrganizerInvitation[];
+  coorgInvitationResponses?: readonly CoOrganizerInvitationResponse[];
+  coorgInvitationRevocations?: readonly CoOrganizerInvitationRevocation[];
   /** Per-node thresholds for the private "still on it?" nudge.
    *  Optional so the `task_check_in` items just don't surface
    *  when the caller can't supply config (tests, edge cases). */
@@ -299,6 +334,51 @@ export function computeAttentionItems(
         kind: "vouch_received",
         voucherName,
         createdAt: v.createdAt,
+      });
+    }
+  }
+
+  // Co-organizer invitations addressed to the current member that
+  // are still outstanding — no response, no revocation, not
+  // expired. See `docs/co-organizer-invitations.md` §7.
+  if (input.coorgInvitations && input.coorgInvitations.length > 0) {
+    const responseByInvitationId = new Map<
+      string,
+      CoOrganizerInvitationResponse
+    >();
+    for (const r of input.coorgInvitationResponses ?? []) {
+      responseByInvitationId.set(r.invitationId, r);
+    }
+    const revocationByInvitationId = new Map<
+      string,
+      CoOrganizerInvitationRevocation
+    >();
+    for (const r of input.coorgInvitationRevocations ?? []) {
+      revocationByInvitationId.set(r.invitationId, r);
+    }
+    for (const invitation of input.coorgInvitations) {
+      if (invitation.inviteeKey !== currentMember.publicKey) continue;
+      if (responseByInvitationId.has(invitation.id)) continue;
+      if (revocationByInvitationId.has(invitation.id)) continue;
+      if (now >= invitation.expiresAt) continue;
+      const project = projectByKey.get(invitation.projectId);
+      // Without the project row we can't render a meaningful
+      // attention item — drop quietly. This shouldn't happen in
+      // practice (the invitation row references a project that
+      // exists on this node), but federation could conceivably
+      // deliver an invitation before the project.
+      if (!project) continue;
+      const inviterName =
+        nameByKey.get(invitation.inviterKey) ?? "another community member";
+      items.push({
+        kind: "coorganizer_invitation_received",
+        invitationId: invitation.id,
+        projectId: invitation.projectId,
+        projectTitle: project.title,
+        inviterName,
+        inviterKey: invitation.inviterKey,
+        expiresAt: invitation.expiresAt,
+        createdAt: invitation.createdAt,
       });
     }
   }

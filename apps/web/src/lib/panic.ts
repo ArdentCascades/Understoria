@@ -138,6 +138,9 @@ export async function hardPurge(): Promise<PurgeResult> {
     "projectTasks",
     "projectActivity",
     "pairingLog",
+    "coorgInvitations",
+    "coorgInvitationResponses",
+    "coorgInvitationRevocations",
   ];
 
   await Promise.all([
@@ -156,6 +159,12 @@ export async function hardPurge(): Promise<PurgeResult> {
     // Paired-device inventory: clears alongside the identity itself
     // so a rotated node doesn't inherit the old node's pair history.
     db.pairingLog.clear(),
+    // Co-organizer invitations (PR A): wipe the three signed-record
+    // tables. A rotated identity should not retain pending or
+    // accepted invitations from the previous one.
+    db.coorgInvitations.clear(),
+    db.coorgInvitationResponses.clear(),
+    db.coorgInvitationRevocations.clear(),
   ]);
 
   // Rotate to a fresh node identity so the post-purge node is
