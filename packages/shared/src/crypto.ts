@@ -23,6 +23,12 @@ import ed2curve from "ed2curve";
 import { b64decode, b64encode, utf8decode, utf8encode } from "./bytes.js";
 import type {
   Category,
+  CoOrganizerInvitation,
+  CoOrganizerInvitationPayload,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationResponsePayload,
+  CoOrganizerInvitationRevocation,
+  CoOrganizerInvitationRevocationPayload,
   Exchange,
   InvitePayload,
   Post,
@@ -416,4 +422,105 @@ export function verifyTaskComment(comment: TaskComment): boolean {
     nodeId: comment.nodeId,
   });
   return verify(payload, comment.signature, comment.authorKey);
+}
+
+// -- Co-organizer invitations (see docs/co-organizer-invitations.md) -------
+
+/**
+ * Canonical, stable serialization of a co-organizer invitation —
+ * the bytes the inviter signs at issue time. Field order is fixed
+ * for cross-engine JSON stability, same discipline as
+ * `canonicalVouchPayload` / `canonicalExchangePayload`. `id` and
+ * `signature` are deliberately NOT part of the canonical payload.
+ */
+export function canonicalCoOrganizerInvitationPayload(
+  p: CoOrganizerInvitationPayload,
+): string {
+  return JSON.stringify({
+    projectId: p.projectId,
+    inviterKey: p.inviterKey,
+    inviteeKey: p.inviteeKey,
+    createdAt: p.createdAt,
+    expiresAt: p.expiresAt,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Canonical, stable serialization of a co-organizer invitation
+ * response — accept or decline, signed by the invitee. Revocation
+ * has its own record type and its own canonical payload.
+ */
+export function canonicalCoOrganizerInvitationResponsePayload(
+  p: CoOrganizerInvitationResponsePayload,
+): string {
+  return JSON.stringify({
+    invitationId: p.invitationId,
+    inviteeKey: p.inviteeKey,
+    decision: p.decision,
+    decidedAt: p.decidedAt,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Canonical, stable serialization of a co-organizer invitation
+ * revocation — signed by the inviter to cancel an outstanding
+ * invitation before the invitee has responded.
+ */
+export function canonicalCoOrganizerInvitationRevocationPayload(
+  p: CoOrganizerInvitationRevocationPayload,
+): string {
+  return JSON.stringify({
+    invitationId: p.invitationId,
+    inviterKey: p.inviterKey,
+    revokedAt: p.revokedAt,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Verify a co-organizer invitation's signature against the
+ * inviter's public key. Single-signer-per-record discipline: the
+ * inviter is the only valid signer of this record type.
+ *
+ * Grandfathered rows (synthesized by the v21 Dexie migration for
+ * pre-feature `coOrganizerKeys` entries) carry the sentinel
+ * `signature: "grandfathered"` and will never verify here — that's
+ * deliberate. Callers that distinguish real from grandfathered
+ * acceptance do so via the row-level `grandfathered` flag in Dexie,
+ * not via this verifier.
+ */
+export function verifyCoOrganizerInvitation(
+  rec: CoOrganizerInvitation,
+): boolean {
+  if (!rec.signature) return false;
+  const payload = canonicalCoOrganizerInvitationPayload(rec);
+  return verify(payload, rec.signature, rec.inviterKey);
+}
+
+/**
+ * Verify a co-organizer invitation response's signature against
+ * the invitee's public key. Accept and decline are both signed by
+ * the invitee — revocation is a different record type signed by
+ * the inviter (see `verifyCoOrganizerInvitationRevocation`).
+ */
+export function verifyCoOrganizerInvitationResponse(
+  rec: CoOrganizerInvitationResponse,
+): boolean {
+  if (!rec.signature) return false;
+  const payload = canonicalCoOrganizerInvitationResponsePayload(rec);
+  return verify(payload, rec.signature, rec.inviteeKey);
+}
+
+/**
+ * Verify a co-organizer invitation revocation's signature against
+ * the inviter's public key.
+ */
+export function verifyCoOrganizerInvitationRevocation(
+  rec: CoOrganizerInvitationRevocation,
+): boolean {
+  if (!rec.signature) return false;
+  const payload = canonicalCoOrganizerInvitationRevocationPayload(rec);
+  return verify(payload, rec.signature, rec.inviterKey);
 }

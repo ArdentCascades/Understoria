@@ -307,6 +307,31 @@ async function updateProjectStatus(
   );
 }
 
+/**
+ * PR A of the co-organizer invitations series introduced a derived
+ * `effectiveCoOrganizerKeys` view (in `db/coorgInvitations.ts`) that
+ * is async — it walks the new invitation / response / revocation
+ * tables. We deliberately KEEP this `isOrganizer` synchronous and
+ * keep it reading the static `Project.coOrganizerKeys` array for
+ * now, because:
+ *
+ *   1. The v21 Dexie migration synthesizes accepted-invitation
+ *      rows for every existing co-organizer pair, so the static
+ *      array and the derived view stay in sync until a PR mutates
+ *      one without the other.
+ *   2. The new flows (`issueCoOrganizerInvitation` /
+ *      `respondToCoOrganizerInvitation`) currently write only to
+ *      the invitation tables — they do NOT mutate `coOrganizerKeys`
+ *      yet (that wiring lands with PR C, once the UI surfaces the
+ *      accept flow).
+ *   3. `isOrganizer` has scattered call sites across the PWA;
+ *      async-ifying it would force a sweep that balloons the diff
+ *      and risks breaking unrelated paths.
+ *
+ * The migration to the derived view happens in PR C, when the UI
+ * stops feeding the static array directly. See
+ * `docs/co-organizer-invitations.md` §11.
+ */
 export function isOrganizer(project: Project, memberKey: string): boolean {
   return (
     project.organizerKey === memberKey ||

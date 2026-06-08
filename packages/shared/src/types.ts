@@ -715,3 +715,75 @@ export interface TaskComment {
    *  legacy / unsigned rows (not federable). */
   signature: string;
 }
+
+// ---------------------------------------------------------------------------
+// Co-organizer invitations — signed-invitation + signed-acceptance.
+// See `docs/co-organizer-invitations.md` §3–§4. Three signed record
+// types, one signer per record: invitation (inviter), response
+// (invitee, accept/decline), revocation (inviter). Single-signer-per-
+// record is the discipline the rest of the federated ledger relies
+// on; co-organizer invitations preserve it.
+// ---------------------------------------------------------------------------
+
+/**
+ * Canonical, signed by the inviter (the primary organizer). The
+ * `inviterKey` MUST equal `Project.organizerKey` at issue time —
+ * verifiers re-check that against the project row.
+ */
+export interface CoOrganizerInvitationPayload {
+  projectId: string;
+  inviterKey: string;
+  inviteeKey: string;
+  createdAt: number;
+  /** `createdAt + 14 days` by default, matching member invites. */
+  expiresAt: number;
+  nodeId: string;
+}
+
+export interface CoOrganizerInvitation extends CoOrganizerInvitationPayload {
+  /** UUID; the federation-stable handle peers dedupe on. */
+  id: string;
+  /** Inviter's Ed25519 detached signature over the canonical payload. */
+  signature: string;
+}
+
+/**
+ * Canonical, signed by the invitee. Only `accept` or `decline` —
+ * revocation is its own record type so every signed record has a
+ * single, unambiguous signer (see design doc §4).
+ */
+export interface CoOrganizerInvitationResponsePayload {
+  invitationId: string;
+  inviteeKey: string;
+  decision: "accept" | "decline";
+  decidedAt: number;
+  nodeId: string;
+}
+
+export interface CoOrganizerInvitationResponse
+  extends CoOrganizerInvitationResponsePayload {
+  id: string;
+  /** Invitee's Ed25519 detached signature over the canonical payload. */
+  signature: string;
+}
+
+/**
+ * Canonical, signed by the inviter — cancels an outstanding
+ * invitation before the invitee has responded. Revocation after
+ * acceptance is a different action (removeCoOrganizer / the
+ * self-removal PR); this record type only models pre-response
+ * cancellation.
+ */
+export interface CoOrganizerInvitationRevocationPayload {
+  invitationId: string;
+  inviterKey: string;
+  revokedAt: number;
+  nodeId: string;
+}
+
+export interface CoOrganizerInvitationRevocation
+  extends CoOrganizerInvitationRevocationPayload {
+  id: string;
+  /** Inviter's Ed25519 detached signature over the canonical payload. */
+  signature: string;
+}
