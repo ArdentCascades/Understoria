@@ -33,6 +33,14 @@ import type {
 // field-order assertion to catch accidental alphabetization.
 // ---------------------------------------------------------------------------
 
+// Deterministic epoch-ms constants so canonical-serialization tests
+// don't depend on `Date.now()` clock state.
+const STARTS_AT_FULL = Date.UTC(2026, 6, 4, 17, 0, 0); // 2026-07-04T17:00:00Z
+const ENDS_AT_FULL = Date.UTC(2026, 6, 4, 19, 0, 0); // 2026-07-04T19:00:00Z
+const STARTS_AT_MIN = Date.UTC(2026, 6, 5, 17, 0, 0); // 2026-07-05T17:00:00Z
+const CREATED_AT = Date.UTC(2026, 5, 1, 9, 0, 0); // 2026-06-01T09:00:00Z
+const CANCELLED_AT = Date.UTC(2026, 6, 3, 10, 0, 0); // 2026-07-03T10:00:00Z
+
 function makeFullPayload(organizerKey: string): EventPayload {
   return {
     id: "evt_01",
@@ -40,13 +48,14 @@ function makeFullPayload(organizerKey: string): EventPayload {
     title: "Community fridge restock",
     description: "Bring shelf-stable goods; volunteers welcome.",
     category: "infrastructure",
-    startsAt: "2026-07-04T17:00:00.000Z",
-    endsAt: "2026-07-04T19:00:00.000Z",
+    startsAt: STARTS_AT_FULL,
+    endsAt: ENDS_AT_FULL,
     location: "Community room, 3rd floor",
     capacity: 30,
     templateId: null,
-    createdAt: "2026-06-01T09:00:00.000Z",
+    createdAt: CREATED_AT,
     createdBy: organizerKey,
+    nodeId: "test-node",
   };
 }
 
@@ -57,13 +66,14 @@ function makeMinimalNullsPayload(organizerKey: string): EventPayload {
     title: "Quiet study circle",
     description: "",
     category: "social",
-    startsAt: "2026-07-05T17:00:00.000Z",
+    startsAt: STARTS_AT_MIN,
     endsAt: null,
     location: "Library reading room",
     capacity: null,
     templateId: null,
-    createdAt: "2026-06-01T09:00:00.000Z",
+    createdAt: CREATED_AT,
     createdBy: organizerKey,
+    nodeId: "test-node",
   };
 }
 
@@ -76,8 +86,9 @@ function makeCancellationPayload(
     kind: "event_cancellation",
     eventId: "evt_01",
     reason,
-    cancelledAt: "2026-07-03T10:00:00.000Z",
+    cancelledAt: CANCELLED_AT,
     createdBy: organizerKey,
+    nodeId: "test-node",
   };
 }
 
@@ -137,6 +148,7 @@ describe("canonicalEventPayload", () => {
       "templateId",
       "createdAt",
       "createdBy",
+      "nodeId",
     ];
     let cursor = 0;
     for (const key of order) {
@@ -144,6 +156,33 @@ describe("canonicalEventPayload", () => {
       expect(at).toBeGreaterThanOrEqual(cursor);
       cursor = at + key.length;
     }
+    // nodeId must appear last in the serialized JSON — the wire
+    // contract puts the origin-node identifier at the tail to match
+    // every other federated record type (e.g. Post, Exchange,
+    // CoOrganizerInvitationPayload).
+    const nodeIdAt = s.indexOf('"nodeId":');
+    expect(nodeIdAt).toBeGreaterThan(0);
+    // The substring after `"nodeId":"..."` should be just the
+    // closing brace — no further fields.
+    expect(s.endsWith(`"nodeId":"${"test-node"}"}`)).toBe(true);
+  });
+
+  it("remains deterministic when nodeId is present", () => {
+    // Regression guard for the contract change that added nodeId to
+    // EventPayload. The canonicalizer must include nodeId in the
+    // serialized bytes (otherwise federated peers can't attribute
+    // the record) AND must do so deterministically across re-
+    // stringify, matching the discipline used for every other field.
+    const kp = generateKeyPair();
+    const p = makeFullPayload(kp.publicKey);
+    const s = canonicalEventPayload(p);
+    expect(s).toContain('"nodeId":"test-node"');
+    const reparsed = JSON.parse(JSON.stringify(p)) as EventPayload;
+    expect(canonicalEventPayload(p)).toBe(canonicalEventPayload(reparsed));
+    // And mutating just nodeId must change the canonical bytes —
+    // i.e. nodeId is signed-over, not silently dropped.
+    const otherNode: EventPayload = { ...p, nodeId: "other-node" };
+    expect(canonicalEventPayload(otherNode)).not.toBe(s);
   });
 });
 
@@ -236,6 +275,7 @@ describe("canonicalEventCancellationPayload", () => {
       "reason",
       "cancelledAt",
       "createdBy",
+      "nodeId",
     ];
     let cursor = 0;
     for (const key of order) {
@@ -243,6 +283,24 @@ describe("canonicalEventCancellationPayload", () => {
       expect(at).toBeGreaterThanOrEqual(cursor);
       cursor = at + key.length;
     }
+    // nodeId must appear last — same wire-contract discipline as
+    // EventPayload above.
+    expect(s.endsWith(`"nodeId":"${"test-node"}"}`)).toBe(true);
+  });
+
+  it("remains deterministic when nodeId is present", () => {
+    const kp = generateKeyPair();
+    const p = makeCancellationPayload(kp.publicKey, "Venue lost power.");
+    const s = canonicalEventCancellationPayload(p);
+    expect(s).toContain('"nodeId":"test-node"');
+    const reparsed = JSON.parse(JSON.stringify(p)) as EventCancellationPayload;
+    expect(canonicalEventCancellationPayload(p)).toBe(
+      canonicalEventCancellationPayload(reparsed),
+    );
+    // Mutating just nodeId must change the canonical bytes — i.e.
+    // nodeId is signed-over, not silently dropped.
+    const otherNode: EventCancellationPayload = { ...p, nodeId: "other-node" };
+    expect(canonicalEventCancellationPayload(otherNode)).not.toBe(s);
   });
 });
 

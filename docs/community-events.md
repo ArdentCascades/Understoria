@@ -117,7 +117,7 @@ Canonical payload, signed by the organizer.
 
 ```ts
 export interface EventPayload {
-  kind: "Event";
+  kind: "event";
   id: string;               // uuid, federation-stable handle
   title: string;            // free text, ≤ 200 chars
   description: string;      // free text, ≤ 2000 chars
@@ -222,7 +222,7 @@ availability chips, achievements) and is documented in §7.
 
 ```ts
 export interface EventCancellationPayload {
-  kind: "EventCancellation";
+  kind: "event_cancellation";
   id: string;               // uuid
   eventId: string;          // refers to Event.id
   reason: string;           // free text, ≤ 500 chars; can be empty
@@ -750,8 +750,8 @@ workstream.
   - `effectiveEventState` derived view.
   - Local query helpers: `listLocalRSVPs(eventId)`,
     `localRSVPCount(eventId, status)`.
-  - `OutboxRow.kind` extended with `"Event"` and
-    `"EventCancellation"` only. Test ensures `"EventRSVP"` never
+  - `OutboxRow.kind` extended with `"event"` and
+    `"event_cancellation"` only. Test ensures `"EventRSVP"` never
     appears as a valid kind.
   - Tests for the action functions, derived view, RSVP-removal-on-
     `not_going` semantics.

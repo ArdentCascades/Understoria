@@ -831,10 +831,11 @@ export interface EventPayload {
    *  `CATEGORIES` so phase-2 templates can introduce category strings
    *  the legacy `Post` enum doesn't carry. */
   category: string;
-  /** ISO 8601 UTC. */
-  startsAt: string;
-  /** ISO 8601 UTC; `null` = single-point event with no defined end. */
-  endsAt: string | null;
+  /** Epoch milliseconds, UTC. */
+  startsAt: number;
+  /** Epoch milliseconds, UTC; `null` = single-point event with no
+   *  defined end. */
+  endsAt: number | null;
   /** Free text; 1..200 chars. NOT a GPS pin — threat-model §7
    *  rejects coordinate pairs on the public wire. "Community room,
    *  3rd floor" is the shape this field is for. */
@@ -845,11 +846,13 @@ export interface EventPayload {
   /** Reserved for phase 2. MUST be `null` in phase 1; enforced at
    *  the application layer, not at the canonical-serialization layer. */
   templateId: string | null;
-  /** ISO 8601 UTC. */
-  createdAt: string;
+  /** Epoch milliseconds, UTC. */
+  createdAt: number;
   /** Base64-encoded Ed25519 public key of the organizer; signs this
    *  payload. */
   createdBy: string;
+  /** Origin node id. */
+  nodeId: string;
 }
 
 export interface Event extends EventPayload {
@@ -875,12 +878,14 @@ export interface EventCancellationPayload {
   /** Free text, 0..500 chars; empty allowed. Rendered as
    *  "Cancelled (no reason given)" when empty. */
   reason: string;
-  /** ISO 8601 UTC. */
-  cancelledAt: string;
+  /** Epoch milliseconds, UTC. */
+  cancelledAt: number;
   /** Base64-encoded Ed25519 public key of the organizer. The
    *  application layer (PR C/D) verifies this equals the cancelled
    *  `Event.createdBy`; this layer verifies the signature only. */
   createdBy: string;
+  /** Origin node id. */
+  nodeId: string;
 }
 
 export interface EventCancellation extends EventCancellationPayload {

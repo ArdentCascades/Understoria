@@ -568,6 +568,7 @@ export function canonicalEventPayload(p: EventPayload): string {
     templateId: p.templateId,
     createdAt: p.createdAt,
     createdBy: p.createdBy,
+    nodeId: p.nodeId,
   });
 }
 
@@ -603,6 +604,7 @@ export function canonicalEventCancellationPayload(
     reason: p.reason,
     cancelledAt: p.cancelledAt,
     createdBy: p.createdBy,
+    nodeId: p.nodeId,
   });
 }
 
