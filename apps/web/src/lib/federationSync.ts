@@ -700,7 +700,8 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
   const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
   if (!baseUrl) return null;
 
-  const since = (await getSetting(SETTING_KEYS.pullCursorEvent)) ?? "0";
+  const since =
+    (await getSetting(SETTING_KEYS.federationLastEventPull)) ?? "0";
   const params = new URLSearchParams({ limit: "200", since });
 
   const url = `${baseUrl.replace(/\/+$/, "")}/events?${params.toString()}`;
@@ -789,7 +790,10 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(SETTING_KEYS.pullCursorEvent, String(maxCreatedAt));
+    await setSetting(
+      SETTING_KEYS.federationLastEventPull,
+      String(maxCreatedAt),
+    );
   }
 
   return { inserted, skipped };
@@ -812,7 +816,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
   if (!baseUrl) return null;
 
   const since =
-    (await getSetting(SETTING_KEYS.pullCursorEventCancellation)) ?? "0";
+    (await getSetting(SETTING_KEYS.federationLastEventCancellationPull)) ?? "0";
   const params = new URLSearchParams({ limit: "200", since });
 
   const url = `${baseUrl.replace(/\/+$/, "")}/event-cancellations?${params.toString()}`;
@@ -888,7 +892,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
 
   if (maxCancelledAt !== null) {
     await setSetting(
-      SETTING_KEYS.pullCursorEventCancellation,
+      SETTING_KEYS.federationLastEventCancellationPull,
       String(maxCancelledAt),
     );
   }
