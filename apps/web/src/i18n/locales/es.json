@@ -227,10 +227,59 @@
   },
   "nav": {
     "board": "Tablero",
+    "calendar": "Calendario",
     "dashboard": "Panel",
     "messages": "Mensajes",
     "profile": "Perfil",
     "primaryNav": "Navegación principal"
+  },
+  "calendar": {
+    "title": "Calendario de la comunidad",
+    "tagline": "Lo que la comunidad está haciendo en conjunto — fechas límite de proyectos, publicaciones por vencer y el ritmo de los intercambios que ya ocurrieron.",
+    "views": {
+      "agenda": "Agenda",
+      "month": "Mes",
+      "week": "Semana"
+    },
+    "filters": {
+      "category": "Categoría",
+      "project": "Proyecto",
+      "mine": "Mías",
+      "allCategories": "Todas las categorías",
+      "allProjects": "Todos los proyectos"
+    },
+    "density": {
+      "line_one": "{{count}} intercambio realizado",
+      "line_other": "{{count}} intercambios realizados",
+      "tooltipBody": "Aquí no aparecen nombres de miembros. El número es el metabolismo de la comunidad, no la puntuación de nadie.",
+      "legend": "Densidad de intercambios"
+    },
+    "empty": {
+      "title": "El calendario de la comunidad está tranquilo esta semana.",
+      "body": "Cuando alguien cree un proyecto con fecha límite o publique una necesidad que vence, aparecerá aquí. La actividad de intercambios completados también aparece — el calendario refleja lo que la comunidad hace en conjunto, no una puntuación que perseguir."
+    },
+    "weekNav": {
+      "prev": "Semana anterior",
+      "next": "Semana siguiente",
+      "range": "{{start}} – {{end}}"
+    },
+    "overflowMore": "+{{count}} más",
+    "entry": {
+      "projectDeadline": "Fecha límite: {{title}}",
+      "postExpiringNeed": "Necesidad vence: {{title}}",
+      "postExpiringOffer": "Oferta vence: {{title}}"
+    },
+    "month": {
+      "weekdayShort": {
+        "sun": "Dom",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mié",
+        "thu": "Jue",
+        "fri": "Vie",
+        "sat": "Sáb"
+      }
+    }
   },
   "messages": {
     "title": "Mensajes",

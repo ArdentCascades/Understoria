@@ -59,6 +59,23 @@ export function IconProfile(props: IconProps) {
   );
 }
 
+// Calendar — a soft-cornered grid with two binder rings at the top and
+// a single highlighted day. Matches the 1.5px stroke / fill-none style
+// of the rest of the icon set; the highlighted day reads as a sprout
+// rather than a hard dot so the icon stays consistent with the
+// botanical motifs on IconBoard / IconDashboard.
+export function IconCalendar(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+      <path d="M3.5 9h17" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+      <circle cx="12" cy="14.5" r="1.5" />
+    </Icon>
+  );
+}
+
 // Gear — entry point for the device-settings sub-page. Drawn with
 // six teeth around a center hub; matches the 1.5px stroke / fill-none
 // style of the rest of the icon set.

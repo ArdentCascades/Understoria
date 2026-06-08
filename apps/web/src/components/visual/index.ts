@@ -12,6 +12,7 @@
 export { Icon, type IconProps } from "./Icon";
 export {
   IconBoard,
+  IconCalendar,
   IconDashboard,
   IconMessages,
   IconProfile,
