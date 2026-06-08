@@ -452,6 +452,40 @@ keypair. Notable consequences:
   fresh transfer with its own envelope. There is no "pair group"
   concept.
 
+### 9.1 Paired-device inventory (local-only)
+
+After each member-initiated pair *completion*, the device writes a
+row to a local `pairingLog` table (Dexie v20) and surfaces the
+inventory on Profile. The row records `kind` ("source" or
+"destination"), `completedAt`, and an optional member-provided
+`label` ("Aunt's laptop", "work phone"). Cancelled and failed
+attempts are not recorded — the source flow includes an explicit
+"don't save — the pair failed" option so a well-meaning attempt
+that the destination never completed doesn't pollute the inventory.
+
+Properties:
+
+- **Local-only.** The inventory never federates, never syncs, never
+  rides the outbox, and is excluded from data export. The label is
+  member memory, not community memory.
+- **UX surface, not a security boundary.** It catches "I forgot I
+  paired Aunt's laptop" — what the member did themselves and lost
+  track of. It does NOT detect a silent re-import an attacker
+  performed without the member's involvement: if the attacker
+  already has the key bytes, they don't run the destination flow,
+  they just sign. The destination-side list does, however, give the
+  member a chance to notice an unexpected entry on their own
+  device, which is a weak but non-zero signal.
+- **No remove affordance.** Ed25519 has no revocation primitive (see
+  §9 above). A "delete this row" button would imply the row had a
+  security meaning it doesn't have — the paired device would still
+  hold the key. The only remediation is Emergency → Hard purge,
+  which rotates the identity and clears the inventory alongside
+  every other table.
+- **Clears on Hard purge.** `db.pairingLog.clear()` runs in the
+  hard-purge transaction list so the inventory drops with the
+  rotated identity.
+
 ## 10. Out of scope
 
 - **Multi-party transfer** (one phone → many destinations in a

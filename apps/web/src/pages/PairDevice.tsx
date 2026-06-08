@@ -29,6 +29,7 @@ import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { PairDevicePassphraseEntry } from "@/components/PairDevicePassphraseEntry";
 import { PairDeviceBootstrapReminder } from "@/components/PairDeviceBootstrapReminder";
 import { DevicePairingFingerprintConfirm } from "@/components/DevicePairingFingerprintConfirm";
+import { recordPairing } from "@/db/pairing";
 
 type Stage =
   | "capture"
@@ -36,6 +37,7 @@ type Stage =
   | "fingerprint-confirm"
   | "session-passphrase"
   | "bootstrap"
+  | "label-destination"
   | "success-redirect";
 
 /**
@@ -77,6 +79,24 @@ export default function PairDevicePage() {
   const [sessionConfirm, setSessionConfirm] = useState("");
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Free-text label for the destination-side inventory entry. Empty
+  // string is the default — the prompt only nudges, never blocks.
+  const [labelDraft, setLabelDraft] = useState("");
+  const [savingLabel, setSavingLabel] = useState(false);
+
+  const handleSaveDestinationLabel = useCallback(
+    async (label: string) => {
+      setSavingLabel(true);
+      try {
+        await recordPairing({ kind: "destination", label });
+      } finally {
+        setSavingLabel(false);
+      }
+      setStage("success-redirect");
+      navigate("/");
+    },
+    [navigate],
+  );
 
   const handleCancelToWelcome = useCallback(() => {
     setEncoded(null);
@@ -341,10 +361,68 @@ export default function PairDevicePage() {
       {stage === "bootstrap" && (
         <PairDeviceBootstrapReminder
           onContinue={() => {
-            setStage("success-redirect");
-            navigate("/");
+            // Route through the label prompt before the Board hand-off.
+            // The pair has succeeded by this point so there's no
+            // "don't save" option — the destination-side record is
+            // a member-facing signal we want regardless of label.
+            setLabelDraft("");
+            setStage("label-destination");
           }}
         />
+      )}
+
+      {stage === "label-destination" && (
+        <section
+          className="card flex flex-col gap-4"
+          aria-labelledby="pairDevice-labelDestination-heading"
+        >
+          <h2
+            id="pairDevice-labelDestination-heading"
+            className="text-lg font-semibold"
+          >
+            {t("pairDevice.labelDestination.title")}
+          </h2>
+          <p className="text-sm text-moss-700 dark:text-moss-200">
+            {t("pairDevice.labelDestination.body")}
+          </p>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium">
+              {t("pairDevice.labelDestination.inputLabel")}
+            </span>
+            {/* Default empty — no UA autofill. Browser strings are
+                long, locale-variable, and rarely match what the
+                member would call the device. Better to ask. */}
+            <input
+              type="text"
+              className="input"
+              value={labelDraft}
+              onChange={(e) => setLabelDraft(e.target.value)}
+              maxLength={80}
+            />
+          </label>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                void handleSaveDestinationLabel("");
+              }}
+              disabled={savingLabel}
+            >
+              {t("pairDevice.labelDestination.skip")}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => {
+                void handleSaveDestinationLabel(labelDraft.trim());
+              }}
+              disabled={savingLabel}
+            >
+              {t("pairDevice.labelDestination.save")}
+            </button>
+          </div>
+        </section>
       )}
 
       {stage === "success-redirect" && null}
