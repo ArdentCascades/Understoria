@@ -272,6 +272,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pullFederatedCoOrgInvitations,
         pullFederatedCoOrgResponses,
         pullFederatedCoOrgRevocations,
+        pullFederatedEvents,
+        pullFederatedEventCancellations,
       }) => {
         void pullFederatedPosts();
         void pullFederatedClaims();
@@ -280,6 +282,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         void pullFederatedCoOrgInvitations();
         void pullFederatedCoOrgResponses();
         void pullFederatedCoOrgRevocations();
+        void pullFederatedEvents();
+        void pullFederatedEventCancellations();
       },
     );
   }, [ready]);

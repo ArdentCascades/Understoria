@@ -21,3 +21,31 @@
 // Re-export shim. Domain types live in packages/shared so the Node
 // server and the React PWA share one authoritative shape.
 export * from "@understoria/shared/types";
+
+/**
+ * Local-only RSVP shape — see `docs/community-events.md` §4 (data
+ * model) + §7 (federation). EventRsvpRow lives in the web app's local
+ * Dexie store and never federates. The shared package deliberately
+ * omits an `EventRSVP` type so the federation layer has no knowledge
+ * of this shape; it lives here, in the app-layer types module,
+ * because that's the only layer that ever needs it.
+ *
+ * The `OutboxRow.kind` union in `db/database.ts` rejects
+ * `"event_rsvp"` at the type level. `lib/outbox.ts` deliberately does
+ * NOT expose an `enqueueEventRsvp` helper. Both absences are
+ * load-bearing — see `events.test.ts` for the negative tests that
+ * lock this in.
+ */
+export interface EventRsvpRow {
+  /** UUID. */
+  id: string;
+  /** References `Event.id`. */
+  eventId: string;
+  /** Base64-encoded Ed25519 public key of the RSVP'ing member. Always
+   *  a local-member key — peer-node members can't RSVP on this node
+   *  remotely (see design doc §7.3). */
+  memberKey: string;
+  status: "going" | "maybe" | "not_going";
+  /** Epoch milliseconds, UTC. */
+  respondedAt: number;
+}

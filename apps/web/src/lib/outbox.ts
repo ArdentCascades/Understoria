@@ -26,6 +26,8 @@ import {
   submitCoOrganizerInvitationResponseToNode,
   submitCoOrganizerInvitationRevocationToNode,
   submitCoOrganizerInvitationToNode,
+  submitEventCancellationToNode,
+  submitEventToNode,
   submitExchangeToNode,
   submitPostToNode,
   submitTaskCommentToNode,
@@ -37,6 +39,8 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
 } from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 
@@ -181,6 +185,33 @@ export async function enqueueClaimOutbox(claim: {
   return enqueueOutbox("claim", `claim_${claim.postId}`, claim);
 }
 
+/**
+ * Insert an outbox row for a newly-signed community event. The full
+ * `Event` shape (including signature) is serialized as the wire
+ * payload — verifiers on peer nodes re-run `verifyEvent` against the
+ * canonical bytes. See `docs/community-events.md` §7.
+ */
+export async function enqueueEvent(
+  event: Event,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("event", event.id, event);
+}
+
+/**
+ * Insert an outbox row for a signed event cancellation. Same shape
+ * and dedup semantics as `enqueueEvent`. The server route (PR D)
+ * enforces the cross-record check that the cancellation's `createdBy`
+ * equals the cancelled event's `createdBy`.
+ */
+export async function enqueueEventCancellation(
+  cancellation: EventCancellation,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("event_cancellation", cancellation.id, cancellation);
+}
+
+// NOTE: EventRsvpRow has no outbox enqueue helper — RSVPs are
+// local-only by design (docs/community-events.md §4).
+
 async function enqueueOutbox(
   kind: OutboxRow["kind"],
   recordId: string,
@@ -298,7 +329,9 @@ export async function flushOutboxOnce(
       | TaskComment
       | CoOrganizerInvitation
       | CoOrganizerInvitationResponse
-      | CoOrganizerInvitationRevocation;
+      | CoOrganizerInvitationRevocation
+      | Event
+      | EventCancellation;
     try {
       payload = JSON.parse(row.payload) as
         | Exchange
@@ -307,7 +340,9 @@ export async function flushOutboxOnce(
         | TaskComment
         | CoOrganizerInvitation
         | CoOrganizerInvitationResponse
-        | CoOrganizerInvitationRevocation;
+        | CoOrganizerInvitationRevocation
+        | Event
+        | EventCancellation;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -350,6 +385,16 @@ export async function flushOutboxOnce(
     } else if (row.kind === "coorg_invitation_revocation") {
       result = await submitCoOrganizerInvitationRevocationToNode(
         payload as CoOrganizerInvitationRevocation,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "event") {
+      result = await submitEventToNode(payload as Event, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    } else if (row.kind === "event_cancellation") {
+      result = await submitEventCancellationToNode(
+        payload as EventCancellation,
         cfg,
         { fetchImpl: options.fetchImpl },
       );
