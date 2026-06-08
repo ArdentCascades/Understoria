@@ -100,6 +100,39 @@ All three filters compose with the search box. Nothing is filtered by
 default — you see every non-archived project until you start
 narrowing. Filter selections don't persist between sessions.
 
+### The calendar
+
+There's a **Calendar** tab in the bottom row. It's a single place to
+see what's happening in the community over time, instead of checking
+each project and post one by one.
+
+You don't have to maintain it. The calendar is built from things that
+are already happening — it doesn't ask you to schedule anything new.
+It shows three kinds of things:
+
+- **Project deadlines** — the days projects are aiming to finish by.
+- **Posts about to expire** — needs and offers nearing the end of
+  their window, so they don't quietly lapse.
+- **A quiet sense of activity** — a soft marker showing roughly how
+  many exchanges happened each day. It never shows names or hours,
+  and there's no ranking. It's the community's rhythm, not a
+  scoreboard — the same reason the app has no leaderboards. A busy
+  week means something good is happening, not that anyone is "ahead."
+
+You can switch between three views:
+
+- **Agenda** — a simple chronological list, grouped by day. The
+  easiest to read on a phone.
+- **Month** — the familiar grid, good for seeing a whole month at a
+  glance.
+- **Week** — a tighter seven-day view, handy if you're tracking a few
+  deadlines in a busy stretch.
+
+Filters at the top let you narrow by **category**, by a single
+**project**, or to **"Mine"** — just the projects, posts, and
+exchanges you're part of. If a week is empty, that's fine; it means
+the community is having a quiet stretch, not that anyone's behind.
+
 ## 5. Posting a need
 
 Near the bottom of the board, tap **Post a need**.
@@ -223,6 +256,40 @@ hours, area, and an optional deadline. Once the project is created,
 you can add tasks and switch it from "Planning" to "Active" so others
 can claim tasks.
 
+### Co-organizers
+
+Bigger projects often need more than one person coordinating. A
+**co-organizer** can confirm task completions and signs their name
+alongside the project's coordination. Nobody can be made a
+co-organizer without saying yes — being asked is an invitation you
+choose to accept, not a job you can be signed up for. This is a
+deliberate change: a role that touches your balance and your name is
+yours to agree to.
+
+**If you organize a project** and want help running it, open the
+project page and use **Invite a co-organizer** — pick a member and
+tap **Send**. They'll see your invitation the next time their app
+syncs. Pending invitations show on the project page, and you can
+**Revoke** any of them right up until the moment the person accepts.
+
+**If someone invites you**, an item appears on your home screen
+saying who invited you and to which project. Before you decide, the
+app spells out what accepting means:
+
+- You'll be able to **confirm task completions** — and each time you
+  confirm one, the hours come out of *your* balance, just like any
+  other exchange.
+- You're **signing your name** to the project's coordination, visible
+  to the community on the project page.
+
+Tap **Accept** to take on the role, or **Decline** if it's not for
+you. Declining is completely fine and it's final — but you can be
+invited again later if things change.
+
+If you're already a co-organizer and need to step back, you can
+**leave the role yourself** from the project — you don't have to wait
+for the primary organizer to remove you.
+
 ## 10. The Dashboard
 
 Tap **Dashboard** at the bottom of the screen. This is the
@@ -306,6 +373,10 @@ Tap **Profile** to see:
   the same two members in 30 days, the next one gets flagged). A
   yellow note explains these are bootstrap-mode — once in-app
   governance ships, changes here will route through a proposal.
+- **Add another device** — set up Understoria on a second device
+  (a laptop as well as your phone, say) under one identity. (See §12a.)
+- **Paired devices** — a list of the devices you've added, so you can
+  see what you've authorized.
 - **Emergency** — panic buttons in case a device is at risk (§15).
   Stays on the Profile page (not under Settings) so it's reachable
   in a stress moment without an extra tap.
@@ -331,6 +402,63 @@ The Profile page also has a **gear icon in the top right** that opens
 - **Data export** — download a JSON snapshot of your local data.
   Private keys are deliberately excluded; key backup is a separate
   passphrase-wrapped flow.
+
+## 12a. Using Understoria on more than one device
+
+If you do organizing work at a laptop but answer needs from your
+phone, you don't have to choose. **Profile → Add another device** lets
+you run Understoria on a second device as the *same member* — one
+identity, one balance, one name on the Board — rather than two
+separate accounts the community can't tell apart.
+
+### What follows you, and what starts fresh
+
+Before anything else, the app shows a card laying out exactly what
+moves and what doesn't, so there are no surprises:
+
+- **Comes with you:** your identity (both devices count as the same
+  member), your profile (name, skills, availability, area), and your
+  balance and exchange history (these live in the community ledger,
+  not on the device).
+- **Starts fresh on the new device:** your direct message history
+  (messages are tied to the device that received them), any drafts in
+  progress (finish or copy anything you don't want to lose first), and
+  your appearance settings like theme and text size (those are
+  per-device on purpose). Your community roles rebuild on their own as
+  the new device catches up.
+
+### How to do it
+
+On the device you already use:
+
+1. **Profile → Add another device**, read the card, and continue.
+2. The app warns you first: **the code it's about to show is your
+   identity for the next 5 minutes.** Security cameras, doorbell cams,
+   and webcams can read a code off your screen from across a room. Do
+   this in a room you control — if you're not sure, cancel.
+3. It then shows a **QR code** and **six words**, with a five-minute
+   countdown. After five minutes they disappear on their own.
+
+On the new device:
+
+1. Open Understoria. On the welcome screen, choose **"I have another
+   device."**
+2. Scan the QR code (or paste it), then type in the six words.
+3. Both devices show a short **fingerprint** — a few characters.
+   Check that they match before you continue. A mismatch means
+   something is wrong; stop.
+4. Set a **passphrase** for this new device (it's separate from the
+   one on your other device), and you'll land on the Board, signed in
+   as you.
+
+### A couple of things to know
+
+- You can see everything you've set up under **Profile → Paired
+  devices**.
+- There's **no remote wipe**. If a device is lost or stolen, the only
+  way to cut it off is to reset your identity entirely from **Profile
+  → Emergency** (a hard purge), which starts you over with a new key.
+  It's a real cost, so keep your devices close.
 
 ## 13. Inviting someone new
 
