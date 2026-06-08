@@ -351,16 +351,39 @@ export async function removeCoOrganizer(
   callerKey: string,
   coOrgKey: string,
 ): Promise<Project> {
-  return db.transaction("rw", db.projects, async () => {
+  return db.transaction("rw", [db.projects, db.projectActivity], async () => {
     const p = await db.projects.get(projectId);
     if (!p) throw new Error("Project not found.");
-    if (p.organizerKey !== callerKey)
-      throw new Error("Only the primary organizer can remove co-organizers.");
+    // Two valid callers: the primary organizer (managing the roster) OR
+    // the co-organizer themselves (stepping down). No one is conscripted
+    // into a role, so a co-organizer can leave without primary approval.
+    // The target must actually be a co-organizer — otherwise both branches
+    // are nonsensical and we reject so callers can't quietly remove
+    // someone who isn't in the role.
+    const isInRole = p.coOrganizerKeys.includes(coOrgKey);
+    const isPrimary = p.organizerKey === callerKey;
+    const isSelfRemoval = callerKey === coOrgKey && isInRole;
+    if (!isInRole || (!isPrimary && !isSelfRemoval))
+      throw new Error(
+        "Only the primary organizer or the co-organizer themselves can remove this co-organizer role.",
+      );
     const updated: Project = {
       ...p,
       coOrganizerKeys: p.coOrganizerKeys.filter((k) => k !== coOrgKey),
     };
     await db.projects.put(updated);
+    // Self-removal leaves an audit trail in the project history so the
+    // primary and other members can see the role transition. Mirrors
+    // the organizer_handoff pattern.
+    if (isSelfRemoval) {
+      await logActivity(
+        projectId,
+        "coorganizer_stepdown",
+        callerKey,
+        { steppedDownKey: coOrgKey },
+        p.nodeId,
+      );
+    }
     return updated;
   });
 }

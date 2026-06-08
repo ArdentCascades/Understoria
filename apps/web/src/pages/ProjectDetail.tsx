@@ -377,6 +377,14 @@ export default function ProjectDetailPage() {
               onRun={run}
             />
           )}
+
+          {isOrg && !isPrimaryOrganizer && (
+            <CoOrganizerStepDownSection
+              project={project}
+              currentKey={currentMember!.publicKey}
+              onRun={run}
+            />
+          )}
         </aside>
 
         <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0">
@@ -1533,6 +1541,57 @@ function CoOrganizerSection({
           </button>
         </div>
       )}
+    </section>
+  );
+}
+
+// Self-serve role exit for a co-organizer. Shown to co-organizers
+// (not the primary) so they can leave the role without waiting on
+// primary-organizer approval — no one is conscripted into a role.
+// The confirm step exists because the action is irreversible from
+// the co-organizer's side: once they step down, only the primary
+// can add them back.
+function CoOrganizerStepDownSection({
+  project,
+  currentKey,
+  onRun,
+}: {
+  project: Project;
+  currentKey: string;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+}) {
+  const { t } = useTranslation();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const { pending, run: runWithPending } = usePendingAction();
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+        {t("projects.coOrganizers.title")}
+      </h2>
+      <button
+        type="button"
+        className="btn-ghost text-sm text-rose-700 dark:text-rose-300"
+        disabled={pending}
+        onClick={() => setConfirmOpen(true)}
+      >
+        {t("projects.coorganizer.stepDown")}
+      </button>
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t("projects.coorganizer.stepDownConfirmTitle")}
+        description={t("projects.coorganizer.stepDownConfirmBody")}
+        confirmLabel={t("projects.coorganizer.stepDownConfirmCta")}
+        tone="caution"
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() =>
+          runWithPending(() =>
+            onRun(() =>
+              removeCoOrganizer(project.id, currentKey, currentKey),
+            ),
+          ).finally(() => setConfirmOpen(false))
+        }
+      />
     </section>
   );
 }

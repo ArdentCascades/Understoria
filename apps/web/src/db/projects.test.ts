@@ -26,6 +26,7 @@ import {
   launchProject,
   markProjectTaskComplete,
   pauseProject,
+  removeCoOrganizer,
   resumeProject,
   setTaskDependencies,
   unarchiveProject,
@@ -419,6 +420,91 @@ describe("handoffOrganizer", () => {
     await expect(
       handoffOrganizer(p.id, alice.publicKey, bob.publicKey),
     ).rejects.toThrow(/completed or archived/i);
+  });
+});
+
+describe("removeCoOrganizer", () => {
+  beforeEach(reset);
+
+  it("primary organizer removes a co-organizer (no stepdown activity)", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+
+    const updated = await removeCoOrganizer(
+      p.id,
+      alice.publicKey,
+      bob.publicKey,
+    );
+    expect(updated.coOrganizerKeys).not.toContain(bob.publicKey);
+
+    // Primary-initiated removal is a roster edit, not a self-exit;
+    // intentionally does not write a coorganizer_stepdown row.
+    const stepdownRows = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "coorganizer_stepdown",
+    );
+    expect(stepdownRows).toHaveLength(0);
+  });
+
+  it("co-organizer self-removes (steps down) and writes a coorganizer_stepdown activity", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+
+    const updated = await removeCoOrganizer(
+      p.id,
+      bob.publicKey,
+      bob.publicKey,
+    );
+    expect(updated.coOrganizerKeys).not.toContain(bob.publicKey);
+    expect(updated.organizerKey).toBe(alice.publicKey);
+
+    const stepdownRows = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "coorganizer_stepdown",
+    );
+    expect(stepdownRows).toHaveLength(1);
+    expect(stepdownRows[0].actorKey).toBe(bob.publicKey);
+    expect(stepdownRows[0].data).toEqual({ steppedDownKey: bob.publicKey });
+  });
+
+  it("random other member cannot remove a co-organizer", async () => {
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const carol = await createMember({ displayName: "Carol" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+
+    await expect(
+      removeCoOrganizer(p.id, carol.publicKey, bob.publicKey),
+    ).rejects.toThrow(/primary organizer or the co-organizer themselves/i);
+  });
+
+  it("primary organizer cannot 'self-remove' themselves as if they were a co-organizer", async () => {
+    // The primary is not in coOrganizerKeys, so the self-removal
+    // branch (callerKey === coOrgKey && coOrgKey ∈ list) does not
+    // match. The primary path also fails because callerKey !==
+    // organizerKey only matters when they ARE the organizer; here
+    // the primary IS the organizer but is trying to act on
+    // themselves as a co-org, which is a no-op identity, so the
+    // self-removal guard is what catches it.
+    const alice = await createMember({ displayName: "Alice" }, NODE);
+    const bob = await createMember({ displayName: "Bob" }, NODE);
+    const p = await aProject(alice);
+    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+
+    // Alice is primary, not a co-organizer. Trying to step down as
+    // a co-organizer should reject.
+    await expect(
+      removeCoOrganizer(p.id, alice.publicKey, alice.publicKey),
+    ).rejects.toThrow(/primary organizer or the co-organizer themselves/i);
+
+    // And nothing was written to activity.
+    const stepdownRows = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "coorganizer_stepdown",
+    );
+    expect(stepdownRows).toHaveLength(0);
   });
 });
 

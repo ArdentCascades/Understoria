@@ -487,6 +487,7 @@ export type ProjectActivityType =
   | "project_unarchived"
   | "milestone_reached"
   | "organizer_handoff"
+  | "coorganizer_stepdown"
   | "announcement";
 
 export interface ProjectActivity {
