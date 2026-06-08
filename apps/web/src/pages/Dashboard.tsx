@@ -97,7 +97,7 @@ export default function DashboardPage() {
       <header className="mb-4">
         <div className="flex items-center gap-2 text-canopy-700 dark:text-canopy-300">
           <Sprig size={20} />
-          <h1 className="page-title flex-none">{t("dashboard.title")}</h1>
+          <h1 className="page-title min-w-0">{t("dashboard.title")}</h1>
           <Sprig size={20} className="-scale-x-100" />
         </div>
         <p className="text-sm text-moss-600 dark:text-moss-300">
