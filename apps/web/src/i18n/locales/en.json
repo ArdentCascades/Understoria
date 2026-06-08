@@ -531,10 +531,32 @@
     },
     "coOrganizers": {
       "title": "Co-organizers",
-      "intro": "Co-organizers can confirm tasks, add tasks, and pause or resume the project. Only the primary organizer can add or remove co-organizers.",
+      "intro": "Co-organizers can confirm tasks, add tasks, and pause or resume the project. Only the primary organizer can invite or remove co-organizers.",
       "add": "Add",
       "remove": "Remove",
-      "selectPlaceholder": "Choose a member..."
+      "selectPlaceholder": "Choose a member...",
+      "invite": {
+        "send": "Send invitation",
+        "copy": "They'll see your invitation in their next sync. You can revoke any time before they accept.",
+        "locked": "Unlock this device with your passphrase before sending an invitation."
+      },
+      "pending": {
+        "title": "Pending invitations",
+        "issued": "issued {{when}}",
+        "expires": "expires {{when}}",
+        "revoke": "Revoke",
+        "revokeConfirmTitle": "Cancel this invitation?",
+        "revokeConfirmBody": "They won't receive it on their next sync. You can invite them again later."
+      },
+      "past": {
+        "title": "Past invitations",
+        "outcome": {
+          "declined": "declined",
+          "expired": "expired",
+          "revoked": "revoked",
+          "accepted": "accepted"
+        }
+      }
     },
     "coorganizer": {
       "stepDown": "Step down as co-organizer",
@@ -592,6 +614,10 @@
       "milestone_reached": "Milestone reached",
       "organizer_handoff": "Organizer handoff",
       "coorganizer_stepdown": "Co-organizer stepped down",
+      "coorganizer_invited": "Co-organizer invited",
+      "coorganizer_accepted": "Co-organizer invitation accepted",
+      "coorganizer_declined": "Co-organizer invitation declined",
+      "coorganizer_revoked": "Co-organizer invitation revoked",
       "announcement": "Update posted"
     }
   },
@@ -859,6 +885,29 @@
     "projectPaused": {
       "line": "{{project}} has been paused for a while.",
       "hint": "Resume it or mark it complete when ready."
+    },
+    "coorgInvitation": {
+      "line": "{{name}} invited you to co-organize \"{{project}}.\"",
+      "hint": "This commits your balance and identity to confirming work on the project. Take a look before you accept.",
+      "openProject": "Open project",
+      "lockedToRespond": "Unlock this device with your passphrase before responding.",
+      "accept": {
+        "cta": "Accept",
+        "title": "Accept co-organizer role for \"{{project}}\"",
+        "meansTitle": "What this means",
+        "meansConfirm": "Confirming task completions — each confirmation debits your own balance.",
+        "meansSign": "Signing as a project organizer — records you sign in this role trace back to your identity in the project's federated history.",
+        "meansVisible": "Visible to the community — the project page lists you as a co-organizer on every peer's view.",
+        "notTitle": "What this does not mean",
+        "notObligation": "No standing obligation — you can step back from the role yourself at any time.",
+        "notDeputy": "No authority over the primary — the primary organizer keeps handoff and removal authority. Co-organizers are peers, not deputies.",
+        "sign": "Accept and sign"
+      },
+      "decline": {
+        "cta": "Decline",
+        "confirmTitle": "Decline co-organizer for \"{{project}}\"?",
+        "confirmBody": "No role is assigned. The organizer sees that you declined the next time they look at the project."
+      }
     }
   },
   "board": {

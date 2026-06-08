@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -17,11 +17,15 @@ import { useToast } from "@/state/ToastContext";
 import { computeAttentionItems } from "@/lib/attention";
 import {
   acknowledgeTaskCheckIn,
+  logActivity,
   unclaimProjectTask,
 } from "@/db/projects";
+import { respondToCoOrganizerInvitation } from "@/db/coorgInvitations";
+import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 // "Needs your attention" — see lib/attention.ts for what counts.
 // Renders null when nothing is waiting, so members never see "you
@@ -30,10 +34,21 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 export function AttentionSection() {
   const {
     currentMember, posts, projects, projectTasks, members, vouches, nodeConfig,
+    nodeId, lockState,
+    coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
   } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { pending, run } = usePendingAction();
+  // Which co-organizer invitation, if any, has its Accept comparison
+  // card or Decline confirm open. `null` when neither is open. Per §7
+  // the consequences are named before the member signs.
+  const [acceptInvitationId, setAcceptInvitationId] = useState<string | null>(
+    null,
+  );
+  const [declineInvitationId, setDeclineInvitationId] = useState<string | null>(
+    null,
+  );
   const items = useMemo(
     () =>
       computeAttentionItems({
@@ -43,9 +58,16 @@ export function AttentionSection() {
         projectTasks,
         members,
         vouches,
+        coorgInvitations,
+        coorgInvitationResponses,
+        coorgInvitationRevocations,
         config: nodeConfig,
       }),
-    [currentMember, posts, projects, projectTasks, members, vouches, nodeConfig],
+    [
+      currentMember, posts, projects, projectTasks, members, vouches,
+      coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
+      nodeConfig,
+    ],
   );
 
   if (items.length === 0) return null;
@@ -63,6 +85,50 @@ export function AttentionSection() {
     if (!currentMember) return;
     try {
       await run(() => unclaimProjectTask(taskId, currentMember.publicKey));
+    } catch (err) {
+      showToast(humanizeError(err), "error");
+    }
+  }
+
+  // Accept / decline a co-organizer invitation. Both sign with the
+  // invitee's secret key, so a locked session blocks them — surface
+  // the lock message rather than failing silently. On success the
+  // response row exists, so the attention item drops out of
+  // `computeAttentionItems` on the next live-query tick. We also write
+  // the activity row here (the data layer doesn't log activity — see
+  // `db/coorgInvitations.ts`), so the project history reflects the
+  // decision.
+  async function handleRespond(
+    invitationId: string,
+    projectId: string,
+    decision: "accept" | "decline",
+  ) {
+    if (!currentMember) return;
+    if (lockState === "locked") {
+      showToast(t("attention.coorgInvitation.lockedToRespond"), "error");
+      return;
+    }
+    try {
+      await run(async () => {
+        const inviteeSecretKey = await getSecretKey(currentMember.publicKey);
+        await respondToCoOrganizerInvitation({
+          invitationId,
+          inviteeSecretKey,
+          decision,
+          nodeId,
+        });
+        await logActivity(
+          projectId,
+          decision === "accept"
+            ? "coorganizer_accepted"
+            : "coorganizer_declined",
+          currentMember.publicKey,
+          { invitationId },
+          nodeId,
+        );
+      });
+      setAcceptInvitationId(null);
+      setDeclineInvitationId(null);
     } catch (err) {
       showToast(humanizeError(err), "error");
     }
@@ -258,6 +324,131 @@ export function AttentionSection() {
               </div>
             </li>
           );
+          }
+          // Co-organizer invitation addressed to the current member.
+          // Per §7 the consequences are named in a comparison card
+          // (same discipline as device pairing) before signing. The
+          // card and the decline confirm expand inline.
+          if (item.kind === "coorganizer_invitation_received") {
+            const accepting = acceptInvitationId === item.invitationId;
+            return (
+              <li
+                key={`coorg_${item.invitationId}`}
+                className="rounded-lg bg-canopy-50 px-3 py-2 dark:bg-canopy-950/40"
+              >
+                <p className="text-sm font-medium">
+                  {t("attention.coorgInvitation.line", {
+                    name: item.inviterName,
+                    project: item.projectTitle,
+                  })}
+                </p>
+                <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
+                  {t("attention.coorgInvitation.hint")}
+                </p>
+                {accepting && (
+                  <div className="mt-2 rounded-lg border border-canopy-200 bg-white/60 p-3 text-xs dark:border-canopy-900/50 dark:bg-canopy-950/30">
+                    <p className="font-semibold text-canopy-900 dark:text-canopy-100">
+                      {t("attention.coorgInvitation.accept.title", {
+                        project: item.projectTitle,
+                      })}
+                    </p>
+                    <p className="mt-1 font-medium text-moss-700 dark:text-moss-200">
+                      {t("attention.coorgInvitation.accept.meansTitle")}
+                    </p>
+                    <ul className="mt-1 list-disc pl-5 text-moss-600 dark:text-moss-300">
+                      <li>{t("attention.coorgInvitation.accept.meansConfirm")}</li>
+                      <li>{t("attention.coorgInvitation.accept.meansSign")}</li>
+                      <li>{t("attention.coorgInvitation.accept.meansVisible")}</li>
+                    </ul>
+                    <p className="mt-2 font-medium text-moss-700 dark:text-moss-200">
+                      {t("attention.coorgInvitation.accept.notTitle")}
+                    </p>
+                    <ul className="mt-1 list-disc pl-5 text-moss-600 dark:text-moss-300">
+                      <li>{t("attention.coorgInvitation.accept.notObligation")}</li>
+                      <li>{t("attention.coorgInvitation.accept.notDeputy")}</li>
+                    </ul>
+                  </div>
+                )}
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {accepting ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleRespond(
+                            item.invitationId,
+                            item.projectId,
+                            "accept",
+                          )
+                        }
+                        disabled={pending}
+                        className="rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
+                      >
+                        {t("attention.coorgInvitation.accept.sign")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAcceptInvitationId(null)}
+                        disabled={pending}
+                        className="rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
+                      >
+                        {t("common.cancel")}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeclineInvitationId(null);
+                          setAcceptInvitationId(item.invitationId);
+                        }}
+                        disabled={pending}
+                        className="rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
+                      >
+                        {t("attention.coorgInvitation.accept.cta")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAcceptInvitationId(null);
+                          setDeclineInvitationId(item.invitationId);
+                        }}
+                        disabled={pending}
+                        className="rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
+                      >
+                        {t("attention.coorgInvitation.decline.cta")}
+                      </button>
+                      <Link
+                        to={`/project/${item.projectId}`}
+                        className="ml-auto text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                      >
+                        {t("attention.coorgInvitation.openProject")}
+                      </Link>
+                    </>
+                  )}
+                </div>
+                <ConfirmDialog
+                  open={declineInvitationId === item.invitationId}
+                  title={t("attention.coorgInvitation.decline.confirmTitle", {
+                    project: item.projectTitle,
+                  })}
+                  description={t(
+                    "attention.coorgInvitation.decline.confirmBody",
+                  )}
+                  confirmLabel={t("attention.coorgInvitation.decline.cta")}
+                  tone="caution"
+                  onCancel={() => setDeclineInvitationId(null)}
+                  onConfirm={() =>
+                    handleRespond(
+                      item.invitationId,
+                      item.projectId,
+                      "decline",
+                    )
+                  }
+                />
+              </li>
+            );
           }
           return null;
         })}

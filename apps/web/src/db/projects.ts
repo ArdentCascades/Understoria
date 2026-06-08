@@ -945,7 +945,7 @@ function roundHours(h: number): number {
   return Math.round(h * 100) / 100;
 }
 
-async function logActivity(
+export async function logActivity(
   projectId: string,
   type: ProjectActivityType,
   actorKey: string,

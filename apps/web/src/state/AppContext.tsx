@@ -44,6 +44,9 @@ import { getNodeConfig } from "@/db/nodeConfig";
 import { DEFAULT_NODE_CONFIG } from "@/types";
 import type {
   Achievement,
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
   Exchange,
   Member,
   NodeConfig,
@@ -102,6 +105,12 @@ export interface AppContextValue {
   projectTasks: ProjectTask[];
   proposals: Proposal[];
   votes: Vote[];
+  /** Co-organizer invitation records (PR C). Feed the invitee-side
+   *  attention item and the organizer-side pending / past lists.
+   *  See `docs/co-organizer-invitations.md` §6–§7. */
+  coorgInvitations: CoOrganizerInvitation[];
+  coorgInvitationResponses: CoOrganizerInvitationResponse[];
+  coorgInvitationRevocations: CoOrganizerInvitationRevocation[];
   lockState: LockState;
   unlock: (
     passphrase: string,
@@ -406,6 +415,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as Vote[],
   );
+  const coorgInvitations = useLiveQuery(
+    () => db.coorgInvitations.toArray(),
+    [],
+    [] as CoOrganizerInvitation[],
+  );
+  const coorgInvitationResponses = useLiveQuery(
+    () => db.coorgInvitationResponses.toArray(),
+    [],
+    [] as CoOrganizerInvitationResponse[],
+  );
+  const coorgInvitationRevocations = useLiveQuery(
+    () => db.coorgInvitationRevocations.toArray(),
+    [],
+    [] as CoOrganizerInvitationRevocation[],
+  );
 
   const currentMember = useMemo(
     () => members?.find((m) => m.publicKey === currentMemberKey) ?? null,
@@ -433,6 +457,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       projectTasks: projectTasks ?? [],
       proposals: proposals ?? [],
       votes: votes ?? [],
+      coorgInvitations: coorgInvitations ?? [],
+      coorgInvitationResponses: coorgInvitationResponses ?? [],
+      coorgInvitationRevocations: coorgInvitationRevocations ?? [],
       lockState,
       unlock,
       lock,
@@ -464,6 +491,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       projectTasks,
       proposals,
       votes,
+      coorgInvitations,
+      coorgInvitationResponses,
+      coorgInvitationRevocations,
       lockState,
       unlock,
       lock,
