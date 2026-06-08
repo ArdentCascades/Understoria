@@ -129,6 +129,29 @@ export function PairDeviceCapture({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Directions surface — always shown at the top, before the
+          camera preview. A member landing on this screen on a second
+          device may not know where the QR comes from; the
+          instructions are the first thing they should read. Rendered
+          as a semantic <section> + <ol> so screen readers announce
+          it as a list of ordered steps. */}
+      <section
+        aria-labelledby="pairDevice-directions-heading"
+        className="rounded-xl border border-canopy-200 bg-canopy-50 p-4 dark:border-canopy-800 dark:bg-canopy-950/40"
+      >
+        <h2
+          id="pairDevice-directions-heading"
+          className="mb-2 text-sm font-semibold text-canopy-900 dark:text-canopy-100"
+        >
+          {t("pairDevice.capture.directions.title")}
+        </h2>
+        <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+          <li>{t("pairDevice.capture.directions.step1")}</li>
+          <li>{t("pairDevice.capture.directions.step2")}</li>
+          <li>{t("pairDevice.capture.directions.step3")}</li>
+        </ol>
+      </section>
+
       {cameraState === true && (
         <div className="flex flex-col items-center gap-2">
           <div className="relative overflow-hidden rounded-xl bg-black">

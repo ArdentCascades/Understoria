@@ -70,6 +70,12 @@
     "title": "Vincular este dispositivo",
     "subtitle": "Escanea el QR del otro dispositivo y luego escribe las 6 palabras que muestra.",
     "capture": {
+      "directions": {
+        "title": "¿Necesitas un QR? Genera uno desde tu otro dispositivo.",
+        "step1": "En el otro dispositivo, abre Perfil y luego \"Vincular otro dispositivo\".",
+        "step2": "Sigue las indicaciones — aparece el QR con un código de 6 palabras debajo.",
+        "step3": "Pon la pantalla del otro dispositivo frente a esta cámara. Se escanea automáticamente. O pega el contenido del QR en el cuadro de abajo si la cámara no lo ve."
+      },
       "requestingCamera": "Pidiendo permiso de cámara…",
       "cameraInstructions": "Apunta al QR del otro dispositivo. Se detectará automáticamente.",
       "cameraUnavailable": "Cámara no disponible.",

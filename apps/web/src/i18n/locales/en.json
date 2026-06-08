@@ -70,6 +70,12 @@
     "title": "Pair this device",
     "subtitle": "Scan the QR from your other device, then type the 6 words it's showing.",
     "capture": {
+      "directions": {
+        "title": "Need a QR? Get one from your other device.",
+        "step1": "On the other device, open Profile, then \"Add another device.\"",
+        "step2": "Follow the prompts — the QR appears with a 6-word code below it.",
+        "step3": "Hold the other device's screen up to this camera. It scans automatically. Or paste the QR contents into the box below if the camera can't see it."
+      },
       "requestingCamera": "Asking for camera permission…",
       "cameraInstructions": "Point at the QR on the other device. It'll detect automatically.",
       "cameraUnavailable": "Camera not available.",
