@@ -21,8 +21,8 @@ const {
   getSecretKeyMock,
   showToastMock,
 } = vi.hoisted(() => ({
-  issueMock: vi.fn(async () => ({ id: "inv-new" })),
-  revokeMock: vi.fn(async () => ({ id: "rev-1" })),
+  issueMock: vi.fn(async (_opts: unknown) => ({ id: "inv-new" })),
+  revokeMock: vi.fn(async (_opts: unknown) => ({ id: "rev-1" })),
   logActivityMock: vi.fn(async () => undefined),
   getSecretKeyMock: vi.fn(async () => "secret"),
   showToastMock: vi.fn(),

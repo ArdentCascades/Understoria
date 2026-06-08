@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // data-layer functions are tested separately in PR A.
 const { respondMock, logActivityMock, getSecretKeyMock, showToastMock } =
   vi.hoisted(() => ({
-    respondMock: vi.fn(async () => ({})),
+    respondMock: vi.fn(async (_opts: unknown) => ({})),
     logActivityMock: vi.fn(async () => undefined),
     getSecretKeyMock: vi.fn(async () => "secret"),
     showToastMock: vi.fn(),
