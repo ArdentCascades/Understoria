@@ -1,12 +1,18 @@
 # Understoria — Co-organizer invitations (design note)
 
-> **Status:** design note. This document is the predicate for the
-> implementation PRs; no code in this branch. Pairs with the
-> threat-model §7 entry "Co-organizer role requires signed invitation
-> + signed acceptance" added in the same PR. Read alongside the
-> parallel self-removal fix (in flight on
-> `fix/coorganizer-self-removal`), which closes the complementary
-> trapped-co-organizer half of this values gap, and
+> **Status:** **partially shipped.** Design note + threat-model §7
+> entry landed in PR #172; revoke-split clarification in PR #173;
+> data layer (Dexie v21 `coorgInvitations` / `coorgInvitationResponses`
+> / `coorgInvitationRevocations` tables, signing + canonical-payload
+> helpers, derived `effectiveCoOrganizerKeys`, grandfather migration,
+> `coorganizer_invitation_received` AttentionItem kind) landed in
+> PR #174. Federation routes + peer pull + PWA pull (PR B) are in CI
+> on `feat/coorganizer-invitations-federation` (PR #176) as of this
+> writing. Organizer + invitee UI (PR C) is the remaining work. Pairs
+> with the threat-model §7 entry "Co-organizer role requires signed
+> invitation + signed acceptance" added in PR #172. Read alongside the
+> self-removal fix that shipped in PR #171, which closes the
+> complementary trapped-co-organizer half of this values gap, and
 > `docs/auto-confirm-key.md` for the analogous values-grounded
 > design-note pattern.
 
@@ -26,10 +32,9 @@ actions.
 
 The complementary half — that a co-organizer cannot remove themselves
 once added, because `removeCoOrganizer` requires
-`p.organizerKey === callerKey` — is covered by a separate
-self-removal PR currently in flight on
-`fix/coorganizer-self-removal`. This document does not address that
-problem. It addresses **conscription on ADD**: the values failure
+`p.organizerKey === callerKey` — was covered by a separate self-removal
+PR that shipped as PR #171, allowing a co-organizer to step down from
+a project on their own. This document does not address that problem. It addresses **conscription on ADD**: the values failure
 that occurs at the moment the role is granted, before the member has
 had any chance to consent or decline.
 
@@ -607,8 +612,8 @@ Three PRs after this design doc lands. Sequencing matters: PR A
 ships the data + types; PR B ships server routes + peer pull on
 top of A; PR C ships UI on top of B.
 
-- **PR A — data layer.**
-  - Dexie schema bump (next free PWA version, probably v21).
+- **PR A — data layer. (PR #174 — SHIPPED.)**
+  - Dexie schema bump (PWA v21 — shipped).
   - `CoOrganizerInvitation`, `CoOrganizerInvitationPayload`,
     `CoOrganizerInvitationResponse`,
     `CoOrganizerInvitationResponsePayload`,
@@ -639,7 +644,8 @@ top of A; PR C ships UI on top of B.
   - Add the `coorganizer_invitation_received` `AttentionItem`
     kind to `apps/web/src/lib/attention.ts`.
 
-- **PR B — server federation.**
+- **PR B — server federation. (PR #176 — in CI on
+  `feat/coorganizer-invitations-federation`; not yet on `main`.)**
   - New routes mirroring `routes/vouches.ts` exactly:
     `routes/coorgInvitations.ts` (POST + GET ?since=),
     `routes/coorgInvitationResponses.ts` (POST + GET ?since=),
@@ -655,7 +661,7 @@ top of A; PR C ships UI on top of B.
   - Tests for ingest, peer-pull, dedupe, signature-verify
     rejection.
 
-- **PR C — UI.**
+- **PR C — UI. (Not yet started.)**
   - Organizer-side pending-invitations list on project detail
     (`apps/web/src/pages/ProjectDetail.tsx`), with Revoke action.
   - "Invite a co-organizer" affordance replacing the unilateral

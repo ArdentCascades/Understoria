@@ -1,12 +1,16 @@
 # Understoria — Device Pairing (design note)
 
-> **Status:** design note. This document is the predicate for the
-> implementation PRs; no code in this branch. Pairs with the
-> threat-model §7 entry "Device pairing widens the identity-key
-> surface" and the existing entry on QR codes as camera-surveillance
-> targets (introduced for the invite share sheet, PR #91 family). Read
-> alongside `docs/privacy-policy.md` §3 and `docs/auto-confirm-key.md`
-> for the analogous values-tension precedent.
+> **Status:** **shipped.** Design note + threat-model §7 entry +
+> privacy-policy §3 amendment landed in PR #162; crypto library + tests
+> in PR #163; source-side wizard UI in PR #166; destination-side UI in
+> PR #167; public-key fingerprint verification on both devices in
+> PR #168; paired-device inventory on Profile in PR #169; "where to
+> find the QR" directions in PR #170. Pairs with the threat-model §7
+> entry "Device pairing widens the identity-key surface" and the
+> existing entry on QR codes as camera-surveillance targets (introduced
+> for the invite share sheet, PR #91 family). Read alongside
+> `docs/privacy-policy.md` §3 and `docs/auto-confirm-key.md` for the
+> analogous values-tension precedent.
 
 ---
 
@@ -542,15 +546,20 @@ posture is consistent at any commit that touches `main`.
 
 ## 13. Implementation breakdown
 
-- **PR 1 (this PR):** design note + threat-model §7 entry +
+- **PR 1 (PR #162) — SHIPPED:** design note + threat-model §7 entry +
   privacy-policy §3 amendment. No code.
-- **PR 2:** `lib/devicePairing.ts` + BIP39 wordlist data files +
-  unit tests for wrap / unwrap / passphrase generation / expiry /
-  version mismatch / replay. No UI.
-- **PR 3:** Source UI (`Profile → Add another device` wizard,
-  comparison card, camera gate, QR display, passphrase display,
-  countdown) + destination UI (Welcome third path, camera scan +
-  paste fallback, passphrase entry, bootstrap reminder).
-- **Threat-model and privacy-policy edits land in PR 1** so
-  reviewers can audit the values posture before any code reads
-  or writes secretKey bytes.
+- **PR 2 (PR #163) — SHIPPED:** `lib/devicePairing.ts` + BIP39 wordlist
+  data files + unit tests for wrap / unwrap / passphrase generation /
+  expiry / version mismatch / replay. No UI.
+- **PR 3 (PRs #166–#170) — SHIPPED:** split across five PRs as it
+  landed. Source UI (`Profile → Add another device` wizard, comparison
+  card, camera gate, QR display, passphrase display, countdown) in
+  PR #166; destination UI (Welcome third path, camera scan + paste
+  fallback, passphrase entry, bootstrap reminder) in PR #167;
+  public-key fingerprint verification on both devices in PR #168
+  (closes the §6.4 / §7.4 fingerprint comparison loop); paired-device
+  inventory surface on Profile (with Dexie v20 `pairingLog` table) in
+  PR #169; final "where to find the QR" directions copy in PR #170.
+- **Threat-model and privacy-policy edits landed in PR #162** so
+  reviewers could audit the values posture before any code read or
+  wrote secretKey bytes.

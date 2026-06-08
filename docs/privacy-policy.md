@@ -84,6 +84,7 @@ types are:
 | Claim a post | `Claim` | Your public key, the post id, claim time |
 | Comment on a task | `TaskComment` | Your public key, project + task ids, the comment body |
 | Send an invite | `Invite` | Your public key (as inviter), invite code, expiry |
+| Invite someone to co-organize a project | `CoOrganizerInvitation`, `CoOrganizerInvitationResponse`, `CoOrganizerInvitationRevocation` | Inviter and invitee public keys, project id, decision (accept / decline) or revocation, timestamps |
 
 **Public keys are not human identities by themselves.** A peer node
 sees the keys but does not learn your display name unless you've
@@ -93,6 +94,19 @@ shared it with someone there separately.
 community node's job is to relay records to peer nodes that pull
 from it (see §6). After that point, the operator cannot retract a
 record from peers — see §9.
+
+**Co-organizer invitations** introduce three new signed record types
+but do not reveal any field the federation didn't already see. The
+invitation names an inviter pubkey, an invitee pubkey, a project id,
+and a timestamp — the same metadata shape as a signed vouch. The
+acceptance or decline is signed by the invitee; the revocation is
+signed by the inviter. No display names, no message body, no
+free-text reason fields. The values shift this delivers is at the
+trust-grant moment (the co-organizer role now requires a deliberate
+signed acceptance from the invitee), not at the federation surface.
+See [`docs/co-organizer-invitations.md`](./co-organizer-invitations.md)
+and the threat-model §7 entry "Co-organizer role requires signed
+invitation + signed acceptance" for the values reasoning.
 
 **Local aggregation views.** The PWA may show the same fields
 above in aggregated surfaces — for example, a community calendar

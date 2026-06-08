@@ -1,13 +1,17 @@
 # Understoria — Community Calendar (design note)
 
-> **Status:** design note. This document is the predicate for the
-> implementation PRs; no code in this branch. Pairs with the
-> threat-model §7 entry "Calendar aggregation as a faster
-> surveillance surface" and a small amendment to
-> `docs/privacy-policy.md` §4 (no new fields cross any wire — the
-> calendar is a local aggregation of already-federated data).
-> Same playbook as `docs/auto-confirm-key.md` and
-> `docs/device-pairing.md`: values argument + threat-model entry
+> **Status:** **shipped.** Design note + threat-model §7 entry +
+> privacy-policy §4 amendment landed in PR #164; pure data layer
+> (`lib/calendar.ts` with `buildCalendar`, `groupByDay`, `dayKey` and
+> 37 unit tests) landed in PR #165; UI (`Calendar.tsx` page +
+> `CalendarAgenda` / `CalendarMonth` / `CalendarWeek` components, 5th
+> bottom-nav tab, category / project / "Mine" filter row, density
+> tooltip, empty state, en + es i18n) landed in PR #175. Pairs with the
+> threat-model §7 entry "Calendar aggregation as a faster surveillance
+> surface" and the `docs/privacy-policy.md` §4 amendment (no new fields
+> cross any wire — the calendar is a local aggregation of
+> already-federated data). Same playbook as `docs/auto-confirm-key.md`
+> and `docs/device-pairing.md`: values argument + threat-model entry
 > land as reviewable prose before any code reads or writes data.
 
 ---
@@ -267,17 +271,18 @@ entry avoids overclaiming protection the design doesn't provide.
 
 ## 11. Implementation breakdown
 
-- **PR 1 (this PR).** Design doc + threat-model §7 entry +
+- **PR 1 (PR #164) — SHIPPED.** Design doc + threat-model §7 entry +
   privacy-policy §4 amendment. No code.
-- **PR 2.** `lib/calendar.ts` with `buildCalendar`, `groupByDay`,
-  `dayKey`. Tests covering each entry kind, window filtering,
-  UTC day boundaries, sort stability, edge cases. No UI, no nav
-  entry.
-- **PR 3.** `Calendar.tsx` page + `CalendarAgenda`,
-  `CalendarMonth`, `CalendarWeek` components. Nav entry (5th
-  tab, with the touch-target verification from §8.1). Filter row.
+- **PR 2 (PR #165) — SHIPPED.** `lib/calendar.ts` with `buildCalendar`,
+  `groupByDay`, `dayKey`. 37 tests covering each entry kind, window
+  filtering, UTC day boundaries, sort stability, edge cases. No UI,
+  no nav entry.
+- **PR 3 (PR #175) — SHIPPED.** `Calendar.tsx` page + `CalendarAgenda`,
+  `CalendarMonth`, `CalendarWeek` components. Nav entry (5th tab,
+  labels collapse to icon-only below `sm` to preserve the 44×44 touch
+  floor at 320px per §8.1). Filter row (category / project / "Mine").
   Empty state. i18n keys in en + es. `WhyTooltip` on the
   exchange-density indicator pointing at `no-leaderboards`.
 
-Threat-model and privacy-policy edits land in **PR 1** so the
-values posture is consistent at any commit that touches `main`.
+Threat-model and privacy-policy edits landed in **PR #164** so the
+values posture was consistent at every commit touching `main`.
