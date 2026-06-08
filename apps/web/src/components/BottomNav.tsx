@@ -41,13 +41,13 @@ interface NavItem {
   Icon: ComponentType<IconProps>;
 }
 
-// Going from 4 to 5 tabs (see docs/calendar.md §8.1). At 320px (iPhone
-// SE), five 44px touch targets fit horizontally — `touch-target` keeps
-// the floor — but the text label crowds out. So labels collapse to
-// icon-only below `sm` (640px) and reappear at small phones and up.
-// Each item is still labelled for screen readers via the `<span>`,
-// which is `sr-only` at the smallest viewports so the accessible name
-// of the link is preserved.
+// Five tabs; on the narrowest phones (320px / iPhone SE) each tab cell
+// is ~64px wide. Labels are ALWAYS visible — sighted users without
+// screen readers need to see them too, per operator feedback. To make
+// them fit, mobile uses a smaller rem-based size (0.6875rem ≈ 11px,
+// scales with the text-size preference) and `sm:text-xs` (12px) at
+// 640px+. `break-words` on the label lets long copy (Spanish
+// "Calendario") wrap rather than overflow at the largest text setting.
 const ITEMS: NavItem[] = [
   { to: "/", labelKey: "nav.board", Icon: IconBoard },
   { to: "/dashboard", labelKey: "nav.dashboard", Icon: IconDashboard },
@@ -102,7 +102,7 @@ export function BottomNav() {
               onKeyDown={handleArrowNav}
               className={({ isActive }) =>
                 [
-                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors",
+                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[0.6875rem] font-medium leading-tight transition-colors sm:text-xs sm:leading-normal",
                   isActive
                     ? "text-canopy-700 dark:text-canopy-300"
                     : "text-moss-600 dark:text-moss-400 hover:text-canopy-700 dark:hover:text-canopy-300",
@@ -110,7 +110,7 @@ export function BottomNav() {
               }
             >
               <item.Icon size={22} />
-              <span className="sr-only sm:not-sr-only">
+              <span className="text-center break-words">
                 {t(item.labelKey)}
               </span>
             </NavLink>
