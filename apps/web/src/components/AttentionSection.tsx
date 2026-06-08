@@ -31,6 +31,16 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 // Renders null when nothing is waiting, so members never see "you
 // have 0 things to do." Lives at the top of the Board.
 
+// aria-hidden so screen readers don't read "right arrow" — the row
+// itself is already a link and announces its label.
+function RowChevron() {
+  return (
+    <span aria-hidden="true" className="ml-auto text-moss-400">
+      →
+    </span>
+  );
+}
+
 export function AttentionSection() {
   const {
     currentMember, posts, projects, projectTasks, members, vouches, nodeConfig,
@@ -136,21 +146,20 @@ export function AttentionSection() {
 
   return (
     <section
-      className="card mb-4 border-l-4 border-canopy-500"
+      className="card mb-3 border-l-4 border-canopy-500"
       aria-labelledby="attention-title"
     >
-      <h2
-        id="attention-title"
-        className="mb-1 text-sm font-semibold uppercase tracking-wide text-canopy-700 dark:text-canopy-300"
-      >
-        {t("attention.title")}
-      </h2>
-      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
-        {t("attention.intro")}
+      <div className="mb-2 inline-flex items-baseline gap-1.5">
+        <h2
+          id="attention-title"
+          className="text-sm font-semibold uppercase tracking-wide text-canopy-700 dark:text-canopy-300"
+        >
+          {t("attention.title")}
+        </h2>
         <WhyTooltip principleId="no-notifications" />
-      </p>
+      </div>
       <ul
-        className="flex flex-col gap-2"
+        className="flex flex-col gap-1.5"
         aria-live="polite"
         aria-relevant="additions text"
       >
@@ -160,17 +169,20 @@ export function AttentionSection() {
               <li key={`ex_${item.postId}`}>
                 <Link
                   to={`/post/${item.postId}`}
-                  className="block rounded-lg bg-canopy-50 px-3 py-2 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
                 >
-                  <span className="block text-sm font-medium">
-                    {t("attention.exchangeLine", {
-                      name: item.counterpartyName,
-                      title: item.postTitle,
-                    })}
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      {t("attention.exchangeLine", {
+                        name: item.counterpartyName,
+                        title: item.postTitle,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-500">
+                      {t("attention.tapToConfirm")}
+                    </span>
                   </span>
-                  <span className="text-xs text-moss-500">
-                    {t("attention.tapToConfirm")}
-                  </span>
+                  <RowChevron />
                 </Link>
               </li>
             );
@@ -180,18 +192,21 @@ export function AttentionSection() {
               <li key={`task_${item.taskId}`}>
                 <Link
                   to={`/project/${item.projectId}`}
-                  className="block rounded-lg bg-canopy-50 px-3 py-2 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
                 >
-                  <span className="block text-sm font-medium">
-                    {t("attention.taskLine", {
-                      name: item.completerName,
-                      task: item.taskTitle,
-                      project: item.projectTitle,
-                    })}
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      {t("attention.taskLine", {
+                        name: item.completerName,
+                        task: item.taskTitle,
+                        project: item.projectTitle,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-500">
+                      {t("attention.tapToConfirmTask")}
+                    </span>
                   </span>
-                  <span className="text-xs text-moss-500">
-                    {t("attention.tapToConfirmTask")}
-                  </span>
+                  <RowChevron />
                 </Link>
               </li>
             );
@@ -201,22 +216,25 @@ export function AttentionSection() {
               <li key={`claimed_${item.postId}`}>
                 <Link
                   to={`/post/${item.postId}`}
-                  className="block rounded-lg bg-canopy-50 px-3 py-2 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
                 >
-                  <span className="block text-sm font-medium">
-                    {item.postType === "NEED"
-                      ? t("attention.postClaimed.needLine", {
-                          name: item.claimerName,
-                          title: item.postTitle,
-                        })
-                      : t("attention.postClaimed.offerLine", {
-                          name: item.claimerName,
-                          title: item.postTitle,
-                        })}
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      {item.postType === "NEED"
+                        ? t("attention.postClaimed.needLine", {
+                            name: item.claimerName,
+                            title: item.postTitle,
+                          })
+                        : t("attention.postClaimed.offerLine", {
+                            name: item.claimerName,
+                            title: item.postTitle,
+                          })}
+                    </span>
+                    <span className="block text-xs text-moss-500">
+                      {t("attention.postClaimed.hint")}
+                    </span>
                   </span>
-                  <span className="text-xs text-moss-500">
-                    {t("attention.postClaimed.hint")}
-                  </span>
+                  <RowChevron />
                 </Link>
               </li>
             );
@@ -226,16 +244,19 @@ export function AttentionSection() {
               <li key={`vouch_${item.voucherName}_${item.createdAt}`}>
                 <Link
                   to="/profile"
-                  className="block rounded-lg bg-canopy-50 px-3 py-2 hover:bg-canopy-100 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
                 >
-                  <span className="block text-sm font-medium">
-                    {t("attention.vouchReceived.line", {
-                      name: item.voucherName,
-                    })}
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      {t("attention.vouchReceived.line", {
+                        name: item.voucherName,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-500">
+                      {t("attention.vouchReceived.hint")}
+                    </span>
                   </span>
-                  <span className="text-xs text-moss-500">
-                    {t("attention.vouchReceived.hint")}
-                  </span>
+                  <RowChevron />
                 </Link>
               </li>
             );
@@ -245,17 +266,20 @@ export function AttentionSection() {
               <li key={`deadline_${item.projectId}`}>
                 <Link
                   to={`/project/${item.projectId}`}
-                  className="block rounded-lg bg-amber-50 px-3 py-2 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
                 >
-                  <span className="block text-sm font-medium text-amber-900 dark:text-amber-100">
-                    {t("attention.projectDeadline.line", {
-                      project: item.projectTitle,
-                      days: item.daysRemaining,
-                    })}
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium text-amber-900 dark:text-amber-100">
+                      {t("attention.projectDeadline.line", {
+                        project: item.projectTitle,
+                        days: item.daysRemaining,
+                      })}
+                    </span>
+                    <span className="block text-xs text-amber-800 dark:text-amber-200">
+                      {t("attention.projectDeadline.hint")}
+                    </span>
                   </span>
-                  <span className="text-xs text-amber-800 dark:text-amber-200">
-                    {t("attention.projectDeadline.hint")}
-                  </span>
+                  <RowChevron />
                 </Link>
               </li>
             );
@@ -265,16 +289,19 @@ export function AttentionSection() {
               <li key={`paused_${item.projectId}`}>
                 <Link
                   to={`/project/${item.projectId}`}
-                  className="block rounded-lg bg-moss-50 px-3 py-2 hover:bg-moss-100 dark:bg-moss-950/40 dark:hover:bg-moss-950/60"
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-moss-50 px-3 py-1.5 transition-colors hover:bg-moss-100 focus-visible:bg-moss-100 dark:bg-moss-950/40 dark:hover:bg-moss-950/60"
                 >
-                  <span className="block text-sm font-medium text-moss-900 dark:text-moss-100">
-                    {t("attention.projectPaused.line", {
-                      project: item.projectTitle,
-                    })}
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium text-moss-900 dark:text-moss-100">
+                      {t("attention.projectPaused.line", {
+                        project: item.projectTitle,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-700 dark:text-moss-300">
+                      {t("attention.projectPaused.hint")}
+                    </span>
                   </span>
-                  <span className="text-xs text-moss-700 dark:text-moss-300">
-                    {t("attention.projectPaused.hint")}
-                  </span>
+                  <RowChevron />
                 </Link>
               </li>
             );
@@ -286,14 +313,19 @@ export function AttentionSection() {
           return (
             <li
               key={`checkin_${item.taskId}`}
-              className="rounded-lg bg-amber-50 px-3 py-2 dark:bg-amber-950/40"
+              className="min-h-[44px] rounded-lg bg-amber-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-amber-950/40"
             >
               <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                {t("attention.taskCheckIn.line", {
-                  task: item.taskTitle,
-                  project: item.projectTitle,
-                  days: item.daysSinceClaim,
-                })}
+                <Link
+                  to={`/project/${item.projectId}`}
+                  className="underline-offset-2 hover:underline focus-visible:underline"
+                >
+                  {t("attention.taskCheckIn.line", {
+                    task: item.taskTitle,
+                    project: item.projectTitle,
+                    days: item.daysSinceClaim,
+                  })}
+                </Link>
               </p>
               <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-200">
                 {t("attention.taskCheckIn.hint")}
@@ -303,7 +335,7 @@ export function AttentionSection() {
                   type="button"
                   onClick={() => void handleAck(item.taskId)}
                   disabled={pending}
-                  className="rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
                 >
                   {t("attention.taskCheckIn.stillOn")}
                 </button>
@@ -311,16 +343,10 @@ export function AttentionSection() {
                   type="button"
                   onClick={() => void handleRelease(item.taskId)}
                   disabled={pending}
-                  className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200 disabled:opacity-50 dark:bg-amber-900/60 dark:text-amber-100"
+                  className="inline-flex min-h-[44px] items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200 disabled:opacity-50 dark:bg-amber-900/60 dark:text-amber-100"
                 >
                   {t("attention.taskCheckIn.release")}
                 </button>
-                <Link
-                  to={`/project/${item.projectId}`}
-                  className="ml-auto text-xs text-amber-800 underline-offset-2 hover:underline dark:text-amber-200"
-                >
-                  {t("attention.taskCheckIn.openProject")}
-                </Link>
               </div>
             </li>
           );
@@ -334,19 +360,24 @@ export function AttentionSection() {
             return (
               <li
                 key={`coorg_${item.invitationId}`}
-                className="rounded-lg bg-canopy-50 px-3 py-2 dark:bg-canopy-950/40"
+                className="min-h-[44px] rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40"
               >
                 <p className="text-sm font-medium">
-                  {t("attention.coorgInvitation.line", {
-                    name: item.inviterName,
-                    project: item.projectTitle,
-                  })}
+                  <Link
+                    to={`/project/${item.projectId}`}
+                    className="underline-offset-2 hover:underline focus-visible:underline"
+                  >
+                    {t("attention.coorgInvitation.line", {
+                      name: item.inviterName,
+                      project: item.projectTitle,
+                    })}
+                  </Link>
                 </p>
                 <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
                   {t("attention.coorgInvitation.hint")}
                 </p>
                 {accepting && (
-                  <div className="mt-2 rounded-lg border border-canopy-200 bg-white/60 p-3 text-xs dark:border-canopy-900/50 dark:bg-canopy-950/30">
+                  <div className="mt-1.5 rounded-lg border border-canopy-200 bg-white/60 p-2 text-xs dark:border-canopy-900/50 dark:bg-canopy-950/30">
                     <p className="font-semibold text-canopy-900 dark:text-canopy-100">
                       {t("attention.coorgInvitation.accept.title", {
                         project: item.projectTitle,
@@ -355,7 +386,7 @@ export function AttentionSection() {
                     <p className="mt-1 font-medium text-moss-700 dark:text-moss-200">
                       {t("attention.coorgInvitation.accept.meansTitle")}
                     </p>
-                    <ul className="mt-1 list-disc pl-5 text-moss-600 dark:text-moss-300">
+                    <ul className="mt-0.5 list-disc pl-4 text-[11px] leading-snug text-moss-600 dark:text-moss-300">
                       <li>{t("attention.coorgInvitation.accept.meansConfirm")}</li>
                       <li>{t("attention.coorgInvitation.accept.meansSign")}</li>
                       <li>{t("attention.coorgInvitation.accept.meansVisible")}</li>
@@ -363,7 +394,7 @@ export function AttentionSection() {
                     <p className="mt-2 font-medium text-moss-700 dark:text-moss-200">
                       {t("attention.coorgInvitation.accept.notTitle")}
                     </p>
-                    <ul className="mt-1 list-disc pl-5 text-moss-600 dark:text-moss-300">
+                    <ul className="mt-0.5 list-disc pl-4 text-[11px] leading-snug text-moss-600 dark:text-moss-300">
                       <li>{t("attention.coorgInvitation.accept.notObligation")}</li>
                       <li>{t("attention.coorgInvitation.accept.notDeputy")}</li>
                     </ul>
@@ -382,7 +413,7 @@ export function AttentionSection() {
                           )
                         }
                         disabled={pending}
-                        className="rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
+                        className="inline-flex min-h-[44px] items-center rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
                       >
                         {t("attention.coorgInvitation.accept.sign")}
                       </button>
@@ -390,7 +421,7 @@ export function AttentionSection() {
                         type="button"
                         onClick={() => setAcceptInvitationId(null)}
                         disabled={pending}
-                        className="rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
                       >
                         {t("common.cancel")}
                       </button>
@@ -404,7 +435,7 @@ export function AttentionSection() {
                           setAcceptInvitationId(item.invitationId);
                         }}
                         disabled={pending}
-                        className="rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
+                        className="inline-flex min-h-[44px] items-center rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
                       >
                         {t("attention.coorgInvitation.accept.cta")}
                       </button>
@@ -415,16 +446,10 @@ export function AttentionSection() {
                           setDeclineInvitationId(item.invitationId);
                         }}
                         disabled={pending}
-                        className="rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
                       >
                         {t("attention.coorgInvitation.decline.cta")}
                       </button>
-                      <Link
-                        to={`/project/${item.projectId}`}
-                        className="ml-auto text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-                      >
-                        {t("attention.coorgInvitation.openProject")}
-                      </Link>
                     </>
                   )}
                 </div>
