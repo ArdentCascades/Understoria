@@ -341,7 +341,114 @@ Security disclosure: [SECURITY_CONTACT]
 
 ---
 
-## 6. Annual transparency report
+## 6. Federated event spam from peer node
+
+**When to send.** A peer node is propagating `Event` records that
+are spam, harassment, or geographically irrelevant to this
+community (commercial promotion, off-topic content, content that
+violates this community's Code of Conduct, or a recurring stream
+of events from a venue thousands of kilometres away with no
+mutual-aid relationship to this node). The operator action below
+hides the affected events from this node's calendar; the longer
+community process opens a `Proposal{kind:"dispute"}` for
+deliberation.
+
+**Who sends.** The operator. CC the CoC enforcement contact when
+the spam shape is harassment rather than promotion.
+
+**Where.** In-app announcement, community channel. Do NOT depeer
+the upstream node for content disputes — the wire is shared
+infrastructure, and content disagreement is community-process work
+(`docs/threat-model.md` §7 federation entries; `GOVERNANCE.md`).
+Depeering belongs in §3 of these templates, not here.
+
+**Pre-flight checklist.**
+- [ ] Hide-event action taken on this node within 48 hours of the
+      decision to hide (the documented SLA — see
+      `docs/community-events.md` §11 and the open question on
+      pilot-validation of this number).
+- [ ] Hidden events identified by `id`; this node continues to
+      hold the signed records (the operator never deletes peer-node
+      records, only refuses to display them).
+- [ ] `Proposal{kind:"dispute"}` filed if the situation warrants
+      community deliberation rather than a one-off hide. Cite the
+      proposal id in the announcement.
+- [ ] No depeering. If the peer's content shape warrants
+      depeering, that is a separate decision and uses §3 above.
+
+**Template.**
+
+```
+Subject: [Understoria — [DOMAIN]] Hidden events from
+         [PEER_DOMAIN] — please read
+
+What happened
+On [YYYY-MM-DD HH:MM UTC], we hid [N] event(s) federated from
+[PEER_DOMAIN] from this node's calendar. The records remain in our
+local store — we do not delete records from peer nodes — but they
+no longer render in the events views on this node.
+
+The hidden event ids are:
+[ ID_1 ]
+[ ID_2 ]
+...
+
+Why we hid them
+[ One of:
+  - "The events were commercial promotion not aligned with this
+     community's purpose (mutual aid and labor organizing)."
+  - "The event titles or descriptions contained harassment or
+     content that violates our Code of Conduct, specifically:
+     [BRIEF FACTUAL DESCRIPTION]."
+  - "The events are scheduled at locations with no mutual-aid
+     relationship to this community and were filling the calendar
+     surface to the detriment of locally-relevant entries." ]
+
+What we did NOT do
+- We did NOT delete the records. Other nodes that federate with
+  [PEER_DOMAIN] continue to receive and (at their operators'
+  choice) display them. Each node decides what its members see.
+- We did NOT depeer [PEER_DOMAIN]. The federation wire is shared
+  infrastructure; content disagreement is community-process work,
+  not a federation-layer decision.
+
+What happens next
+[ One of:
+  - "This is a one-time hide. If similar events appear from
+     [PEER_DOMAIN] in the future, we'll consider whether to open
+     a community proposal."
+  - "We have opened a community proposal — [PROPOSAL_ID] — to
+     deliberate on whether this node should continue federating
+     event records from [PEER_DOMAIN] at all. The proposal is
+     open for [N days] of comment before consensus check." ]
+
+What you should do
+Most members: nothing. The hidden events will simply not appear
+on your calendar.
+If you had RSVP'd to one of the hidden events on the original
+node (not this one — RSVPs are local to the node where they
+happen), your RSVP is unaffected; this announcement is about
+*display* on this node's calendar, not about the underlying
+events.
+If you disagree with the hide decision: comment on
+[PROPOSAL_ID] (if a proposal is open) or reach out to me
+directly.
+
+What we still don't know
+[Genuine uncertainties. List them. If none, say so explicitly.]
+
+Next update by
+[YYYY-MM-DD HH:MM UTC] — within 7 days, or when the proposal
+closes, whichever is sooner.
+
+Contact
+[OPERATOR_NAME], [OPERATOR_CONTACT]
+Code of Conduct enforcement: [COC_CONTACT]
+```
+
+---
+
+## 7. Annual transparency report
 
 **When to send.** Once a year, on a fixed date the operator commits
 to. The Privacy Policy §11 promises this report; it goes out even

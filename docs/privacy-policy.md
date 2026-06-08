@@ -85,6 +85,8 @@ types are:
 | Comment on a task | `TaskComment` | Your public key, project + task ids, the comment body |
 | Send an invite | `Invite` | Your public key (as inviter), invite code, expiry |
 | Invite someone to co-organize a project | `CoOrganizerInvitation`, `CoOrganizerInvitationResponse`, `CoOrganizerInvitationRevocation` | Inviter and invitee public keys, project id, decision (accept / decline) or revocation, timestamps |
+| Create a community event | `Event` | Title, description, category, location (free text — no GPS pin), start time, optional end time, optional capacity, organizer public key, signature |
+| Cancel a community event you organized | `EventCancellation` | Event id, optional reason text, cancellation time, organizer public key, signature |
 
 **Public keys are not human identities by themselves.** A peer node
 sees the keys but does not learn your display name unless you've
@@ -107,6 +109,23 @@ signed acceptance from the invitee), not at the federation surface.
 See [`docs/co-organizer-invitations.md`](./co-organizer-invitations.md)
 and the threat-model §7 entry "Co-organizer role requires signed
 invitation + signed acceptance" for the values reasoning.
+
+**Community events** introduce two federated, signed record types
+(`Event`, `EventCancellation`). The fields each carries are
+enumerated in the table above; the location field is **free text,
+not a GPS coordinate or structured address**, so the organizer
+decides what level of specificity to publish on a public wire.
+**Your RSVP to an event stays on the node where you RSVP'd.** It
+is NOT a signed record, NOT pushed to the community node's outbox,
+and NOT federated to peer nodes. The organizer of the event and
+other members on this node who have also RSVP'd "going" or "maybe"
+see your name on the local attendee list; non-attendees on this
+node see the count only; peer-node viewers see neither names nor
+counts. See [`docs/community-events.md`](./community-events.md)
+and the threat-model §7 entry "Federated `Event` records widen the
+public wire surface" for the values reasoning and the rejected
+alternatives (federated RSVPs, public attendee roster, iCal
+export — all out of scope or deferred with conditions).
 
 **Local aggregation views.** The PWA may show the same fields
 above in aggregated surfaces — for example, a community calendar
@@ -149,12 +168,18 @@ If `[OPERATOR_NAME]` has federated this node with peers (listed at
 node propagate to those peers. Specifically:
 
 - Peer nodes can read every `Post`, `Exchange`, `Vouch`, `Claim`,
-  and `TaskComment` that your client signed and pushed.
+  `TaskComment`, `Event`, and `EventCancellation` that your client
+  signed and pushed.
 - Peers see public keys, not display names. They learn that "key
   X helped key Y" — not "Alice helped Bob" — unless someone on
   their node has separately associated those keys with names.
 - Peers do **not** receive your direct messages, your profile, or
-  any data that stayed on your device.
+  any data that stayed on your device. In plain language: peers
+  do **not** receive your `EventRSVP` rows. RSVPs are local-only
+  state — they live in your PWA's Dexie database, never enter the
+  outbox, and have no federation route. A peer node viewing an
+  event you organized has zero knowledge of who RSVP'd on the
+  node where the RSVP happened.
 
 The current peer list is:
 

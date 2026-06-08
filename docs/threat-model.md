@@ -586,6 +586,118 @@ We are not trying to protect against:
   Saying this in the threat-model entry avoids overclaiming
   protection that the design does not provide.
 
+- **Federated `Event` records widen the public wire surface
+  (design only; not yet shipped).** The community-events design
+  (`docs/community-events.md`) introduces two new federated, signed
+  record types — `Event` and `EventCancellation` — to let members
+  put skillshares, potlucks, work days, and meetings on the
+  community calendar as first-class entries. This is a wire-surface
+  widening over the existing calendar entry above: the calendar
+  collapses *already-federated* fields (`Project.deadline`,
+  `Post.expiresAt`) into one view, whereas events introduce *new*
+  fields that did not previously cross any wire.
+  New wire fields on `Event`, each described in the shape this §7
+  uses:
+  - `title` (free text, ≤ 200 chars) — visible on every peer. The
+    member chose to publish it; same exposure model as a `Post`
+    title.
+  - `description` (free text, ≤ 2000 chars) — same exposure model as
+    `Post.description` and `TaskComment.body`. Not encrypted at rest.
+  - `category` — visible on every peer; same shape as existing
+    post / project categories.
+  - `location` (FREE TEXT, ≤ 200 chars) — visible on every peer. NOT
+    a GPS coordinate, NOT a structured address. The free-text shape
+    is a deliberate mitigation: "Community room, 3rd floor" is the
+    intended granularity, not "47.6062 N, 122.3321 W." A
+    coordinate-pair location field would be a stalking-grade
+    location signal on a public federated wire; the free-text field
+    lets the organizer decide what level of specificity to publish.
+  - `startsAt`, `endsAt` (epoch ms, UTC) — visible on every peer.
+    Same shape as existing project deadlines and post expiries.
+  - `capacity` (integer or null) — visible on every peer. A soft cap,
+    not a count of who has RSVP'd.
+  - `signature`, `createdBy` (organizer pubkey), `nodeId`,
+    `createdAt`, `id` — same shape as every other signed record.
+  Adversary mapping (§3 rows benefiting from this new exposure):
+  - **Row 1 (Employer / management).** "Organizer X holds a
+    skillshare on Y category at location Z on date T" lets an
+    employer correlate workplace organizing activity with
+    after-hours gatherings. If location string is a recognizable
+    union hall or organizing meeting venue, the inference is direct.
+  - **Row 2 (Union-busting firms).** Professional surveillance
+    correlates organizer pubkeys (already exposed via existing
+    `Vouch`, `Post`, `Exchange` records) with new
+    location-and-time fields. The federation pull is the harvest
+    mechanism; events are the high-signal payload.
+  - **Row 7 (Intimate-partner / stalker).** "Member X is at
+    location Z on Saturday at 2 PM" is the canonical stalking
+    signal. Free-text location reduces but does not eliminate this:
+    an organizer who consistently uses the same venue string leaks
+    that venue.
+  Mitigations baked in (full design rationale in
+  `docs/community-events.md` §§4, 6, 7):
+  (a) **RSVPs are LOCAL ONLY.** `EventRSVP` is a Dexie row that
+  never enters the outbox. The discriminator `"EventRSVP"` MUST NOT
+  appear in `OutboxRow.kind`. There is no `POST /event-rsvps` route.
+  This closes the federated-attendance-graph surveillance vector:
+  the public peer wire never carries "key X is attending event Y."
+  An adversary harvesting the federation sees that the event exists
+  and who organized it; they do NOT see who is going. This is the
+  load-bearing decision in the events design, and it is settled at
+  the architecture layer rather than left as a per-deployment switch
+  because a per-deployment switch would be a foot-gun the moment a
+  community misconfigures it. Mirrors the `Post.claimedBy` pattern:
+  signed records federate; local rosters do not.
+  (b) **Attendee roster is tiered, with an informed-consent surface
+  on the RSVP control.** Non-RSVP'd members on the same node see a
+  count only, not names. Peer-node viewers see neither names nor
+  counts (the count renders as "not visible from this node" with an
+  affordance to RSVP at the organizer's node, per
+  `community-events.md` §7.3). The organizer and members who have
+  RSVP'd "going" or "maybe" see names. The RSVP control's expanded
+  card surfaces the visibility consequence *before* submission —
+  same informed-consent discipline as the co-organizer invitation
+  comparison card and the device-pairing comparison card. A member
+  who changes their RSVP to `not_going` is removed from the visible
+  roster immediately, no delta exposed.
+  (c) **Free-text location, no GPS pin, no structured address.** A
+  structured location field would invite phone-keyboard
+  autocomplete from the device's address book / map app and
+  normalize publishing precise locations. The free-text shape keeps
+  the granularity decision in the organizer's hands and keeps
+  adversaries guessing about specifics.
+  (d) **No member-pattern aggregation across events.** The calendar
+  renders events on the per-day grid (per `community-events.md` §9)
+  but does NOT add a per-member event-attendance aggregate — no
+  "members who attended these N events" view, no per-member event
+  history page. The same posture as the calendar's per-member
+  rejection (`calendar.md` §10.5).
+  Residual risk acknowledged honestly: an organizer who
+  *repeatedly* hosts events at the same location does leak that
+  location pattern. Three events at "Community room, 3rd floor"
+  triangulate to a specific community room as effectively as a
+  single coordinate would. The right mitigation here is operator
+  and community guidance — opsec-guide.md and member-guide.md
+  should name "rotate venue strings, or use a generic locator like
+  'address sent on confirmation'" as a privacy practice for
+  high-risk events. A technical lock (e.g., refusing to publish an
+  event if the location string matches a prior event's) would be
+  too coarse and would break legitimate weekly-skillshare cadences.
+  Pilot communities decide their own threshold; the doc is honest
+  about the limit.
+  No browser push notifications on this surface (cited:
+  `no-notifications` principle in `community-events.md` §8 and
+  §11.4) — events surface on pull-only attention rails, never on
+  OS-level notification surfaces that would create their own
+  disclosure to anyone with device access. iCal export is deferred
+  to phase 2 as opt-in only (cited: `calendar.md` §10.5's
+  "surveillance escape valve" framing, re-applied in
+  `community-events.md` §11.5).
+  Until the implementation PRs land (PRs B–F per
+  `community-events.md` §13), no `Event` or `EventCancellation`
+  record type exists in the codebase and this entry tracks design
+  intent only.
+
 - **Device-level compromise is out of scope.** The camera-gate
   entry above protects against an *external* observer (CCTV,
   doorbell cam, line-of-sight surveillance). It does NOT

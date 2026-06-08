@@ -208,10 +208,21 @@ The two threats this avoids:
   server schema bump, federation pull compatibility. **Recommendation:**
   defer to a follow-up after the v1 calendar ships and members
   signal whether the missing surface bites.
-- **Federated `Event` record type.** Tracked as a separate design
-  note; not in this PR. Pre-conditions: pilot signal that members
-  want events not already shaped by post or project, AND a
-  threat-model entry covering the federation surface widening.
+- **Federated `Event` record type.** **Both preconditions met.**
+  Pilot signal from the operator (members want skillshares,
+  potlucks, work days that aren't already shaped by an existing
+  post or project) AND a threat-model entry covering the
+  federation surface widening have both landed. The design lives
+  in [`docs/community-events.md`](./community-events.md); the
+  threat-model entry is "Federated `Event` records widen the
+  public wire surface" in §7 of `docs/threat-model.md`; the
+  privacy-policy §4 / §6 amendment lists the new record types and
+  confirms `EventRSVP` is local-only. Phase 1 ships `Event` +
+  `EventCancellation` as federated signed records, with the RSVP
+  roster scoped to the node where the RSVP happened (the
+  `Post.claimedBy` pattern applied to attendance). Phase 2
+  candidates (templates, opt-in iCal toggle, reminder
+  notifications) are deferred in `community-events.md` §10 / §11.
 - **Per-category default colors.** The calendar reuses
   `CATEGORY_META[c].barColorClass` from `lib/categories.ts` for
   marker color, so the visual language matches the dashboard
@@ -263,7 +274,13 @@ entry avoids overclaiming protection the design doesn't provide.
 
 - **iCal subscription URLs.** No authentication boundary;
   anyone with the URL pulls full schedule data. Surveillance
-  escape valve.
+  escape valve. The events design (`docs/community-events.md`
+  §11.5) sketches a narrower phase-2 iCal toggle scoped to a
+  single member's own RSVP'd events, off by default, gated on an
+  informed-consent surface, and revocable via URL rotation —
+  that toggle, if shipped, would supersede this rejection for the
+  per-member scope only. The community-wide iCal feed remains
+  out of scope.
 - **Per-member calendar URLs (`/member/X/calendar`).** Per-member
   time-spatial aggregation is a stalking surface. No values win.
 - **Server-rendered ICS feed via federation.** Federation surface
