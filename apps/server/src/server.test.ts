@@ -21,6 +21,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Database from "better-sqlite3";
 import {
+  canonicalCoOrganizerInvitationPayload,
+  canonicalCoOrganizerInvitationResponsePayload,
+  canonicalCoOrganizerInvitationRevocationPayload,
   canonicalExchangePayload,
   canonicalPostPayload,
   canonicalTaskCommentPayload,
@@ -29,6 +32,9 @@ import {
   sign,
 } from "@understoria/shared/crypto";
 import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
   Exchange,
   SignedVouch,
   TaskComment,
@@ -685,6 +691,345 @@ describe("GET /task-comments", () => {
     expect(since.json().count).toBe(1);
     expect(
       (since.json().taskComments as TaskComment[])[0].id,
+    ).toBe(later.id);
+  });
+});
+
+function makeSignedCoOrgInvitation(
+  overrides: Partial<CoOrganizerInvitation> = {},
+): CoOrganizerInvitation {
+  const inviter = generateKeyPair();
+  const invitee = generateKeyPair();
+  const createdAt = overrides.createdAt ?? Date.now();
+  const payload = {
+    projectId: overrides.projectId ?? "proj_test",
+    inviterKey: overrides.inviterKey ?? inviter.publicKey,
+    inviteeKey: overrides.inviteeKey ?? invitee.publicKey,
+    createdAt,
+    expiresAt: overrides.expiresAt ?? createdAt + 14 * 24 * 60 * 60 * 1000,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  const signature =
+    overrides.signature ??
+    sign(canonicalCoOrganizerInvitationPayload(payload), inviter.secretKey);
+  return {
+    id:
+      overrides.id ??
+      `ci_${createdAt}_${Math.random().toString(36).slice(2)}`,
+    ...payload,
+    signature,
+  };
+}
+
+function makeSignedCoOrgResponse(
+  overrides: Partial<CoOrganizerInvitationResponse> = {},
+): CoOrganizerInvitationResponse {
+  const invitee = generateKeyPair();
+  const decidedAt = overrides.decidedAt ?? Date.now();
+  const payload = {
+    invitationId: overrides.invitationId ?? "inv_test",
+    inviteeKey: overrides.inviteeKey ?? invitee.publicKey,
+    decision: overrides.decision ?? ("accept" as const),
+    decidedAt,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  const signature =
+    overrides.signature ??
+    sign(
+      canonicalCoOrganizerInvitationResponsePayload(payload),
+      invitee.secretKey,
+    );
+  return {
+    id:
+      overrides.id ??
+      `cr_${decidedAt}_${Math.random().toString(36).slice(2)}`,
+    ...payload,
+    signature,
+  };
+}
+
+function makeSignedCoOrgRevocation(
+  overrides: Partial<CoOrganizerInvitationRevocation> = {},
+): CoOrganizerInvitationRevocation {
+  const inviter = generateKeyPair();
+  const revokedAt = overrides.revokedAt ?? Date.now();
+  const payload = {
+    invitationId: overrides.invitationId ?? "inv_test",
+    inviterKey: overrides.inviterKey ?? inviter.publicKey,
+    revokedAt,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  const signature =
+    overrides.signature ??
+    sign(
+      canonicalCoOrganizerInvitationRevocationPayload(payload),
+      inviter.secretKey,
+    );
+  return {
+    id:
+      overrides.id ??
+      `cv_${revokedAt}_${Math.random().toString(36).slice(2)}`,
+    ...payload,
+    signature,
+  };
+}
+
+describe("POST /coorg-invitations", () => {
+  it("accepts a well-signed invitation and returns 201", async () => {
+    const rec = makeSignedCoOrgInvitation();
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json()).toEqual({ stored: true, id: rec.id });
+  });
+
+  it("is idempotent on re-POST of the same invitation id", async () => {
+    const rec = makeSignedCoOrgInvitation();
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: rec,
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ stored: false, id: rec.id });
+  });
+
+  it("rejects an invitation whose signature does not verify", async () => {
+    const rec = { ...makeSignedCoOrgInvitation(), signature: "abc" };
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it("rejects a malformed body", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: { id: "" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("GET /coorg-invitations", () => {
+  it("returns stored invitations with since= filter respected", async () => {
+    const earlier = makeSignedCoOrgInvitation({ createdAt: 1_000 });
+    const later = makeSignedCoOrgInvitation({ createdAt: 2_000 });
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: earlier,
+    });
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitations",
+      payload: later,
+    });
+    const all = await app.inject({
+      method: "GET",
+      url: "/coorg-invitations",
+    });
+    expect(all.json().count).toBe(2);
+    const since = await app.inject({
+      method: "GET",
+      url: "/coorg-invitations?since=1500",
+    });
+    expect(since.json().count).toBe(1);
+    expect(
+      (since.json().coorgInvitations as CoOrganizerInvitation[])[0].id,
+    ).toBe(later.id);
+  });
+
+  it("honors the limit query parameter (default + ceiling)", async () => {
+    for (let i = 0; i < 3; i++) {
+      await app.inject({
+        method: "POST",
+        url: "/coorg-invitations",
+        payload: makeSignedCoOrgInvitation({ createdAt: 1000 + i }),
+      });
+    }
+    const limited = await app.inject({
+      method: "GET",
+      url: "/coorg-invitations?limit=2",
+    });
+    expect(limited.json().count).toBe(2);
+  });
+});
+
+describe("POST /coorg-invitation-responses", () => {
+  it("accepts a well-signed response and returns 201", async () => {
+    const rec = makeSignedCoOrgResponse();
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json()).toEqual({ stored: true, id: rec.id });
+  });
+
+  it("is idempotent on re-POST", async () => {
+    const rec = makeSignedCoOrgResponse();
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: rec,
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it("rejects a response whose signature does not verify", async () => {
+    const rec = { ...makeSignedCoOrgResponse(), signature: "abc" };
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it("rejects a malformed body", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: { id: "" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects an unknown decision", async () => {
+    const r = makeSignedCoOrgResponse();
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: { ...r, decision: "maybe" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("GET /coorg-invitation-responses", () => {
+  it("returns stored responses with since= filter respected", async () => {
+    const earlier = makeSignedCoOrgResponse({ decidedAt: 1_000 });
+    const later = makeSignedCoOrgResponse({ decidedAt: 2_000 });
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: earlier,
+    });
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-responses",
+      payload: later,
+    });
+    const all = await app.inject({
+      method: "GET",
+      url: "/coorg-invitation-responses",
+    });
+    expect(all.json().count).toBe(2);
+    const since = await app.inject({
+      method: "GET",
+      url: "/coorg-invitation-responses?since=1500",
+    });
+    expect(since.json().count).toBe(1);
+    expect(
+      (since.json()
+        .coorgInvitationResponses as CoOrganizerInvitationResponse[])[0].id,
+    ).toBe(later.id);
+  });
+});
+
+describe("POST /coorg-invitation-revocations", () => {
+  it("accepts a well-signed revocation and returns 201", async () => {
+    const rec = makeSignedCoOrgRevocation();
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json()).toEqual({ stored: true, id: rec.id });
+  });
+
+  it("is idempotent on re-POST", async () => {
+    const rec = makeSignedCoOrgRevocation();
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: rec,
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it("rejects a revocation whose signature does not verify", async () => {
+    const rec = { ...makeSignedCoOrgRevocation(), signature: "abc" };
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: rec,
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it("rejects a malformed body", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: { id: "" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("GET /coorg-invitation-revocations", () => {
+  it("returns stored revocations with since= filter respected", async () => {
+    const earlier = makeSignedCoOrgRevocation({ revokedAt: 1_000 });
+    const later = makeSignedCoOrgRevocation({ revokedAt: 2_000 });
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: earlier,
+    });
+    await app.inject({
+      method: "POST",
+      url: "/coorg-invitation-revocations",
+      payload: later,
+    });
+    const all = await app.inject({
+      method: "GET",
+      url: "/coorg-invitation-revocations",
+    });
+    expect(all.json().count).toBe(2);
+    const since = await app.inject({
+      method: "GET",
+      url: "/coorg-invitation-revocations?since=1500",
+    });
+    expect(since.json().count).toBe(1);
+    expect(
+      (since.json()
+        .coorgInvitationRevocations as CoOrganizerInvitationRevocation[])[0]
+        .id,
     ).toBe(later.id);
   });
 });

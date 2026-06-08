@@ -10,9 +10,19 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { Exchange, Post, TaskComment } from "@/types";
+import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
+} from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { verifyTaskComment } from "@/lib/crypto";
-import { verifyExchange } from "@understoria/shared/crypto";
+import {
+  verifyCoOrganizerInvitation,
+  verifyCoOrganizerInvitationResponse,
+  verifyCoOrganizerInvitationRevocation,
+  verifyExchange,
+} from "@understoria/shared/crypto";
 
 const POST_CURSOR_KEY = "federationLastPostPull";
 const CLAIM_CURSOR_KEY = "federationLastClaimPull";
@@ -387,6 +397,278 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
 
   if (maxCompletedAt !== null) {
     await setSetting(EXCHANGE_CURSOR_KEY, String(maxCompletedAt));
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull federated co-organizer invitations from the configured community
+ * node. Same shape as `pullFederatedExchanges`/`pullFederatedPosts`.
+ * Dedupes against `db.coorgInvitations` by `id`; advances cursor on
+ * the highest `createdAt` seen. Skips rows that fail signature verify.
+ * See `docs/co-organizer-invitations.md` §8.
+ */
+export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(SETTING_KEYS.federationLastCoOrgInvitationPull);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitations?${params.toString()}`;
+  let body: { coorgInvitations?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { coorgInvitations?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.coorgInvitations)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.coorgInvitations) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.projectId !== "string" ||
+      typeof r.inviterKey !== "string" ||
+      typeof r.inviteeKey !== "string" ||
+      typeof r.createdAt !== "number" ||
+      typeof r.expiresAt !== "number" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record: CoOrganizerInvitation = {
+      id: r.id,
+      projectId: r.projectId,
+      inviterKey: r.inviterKey,
+      inviteeKey: r.inviteeKey,
+      createdAt: r.createdAt,
+      expiresAt: r.expiresAt,
+      nodeId: r.nodeId,
+      signature: r.signature,
+    };
+
+    const advanceCursor = () => {
+      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
+        maxCreatedAt = record.createdAt;
+      }
+    };
+
+    if (!verifyCoOrganizerInvitation(record)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    const existing = await db.coorgInvitations.get(record.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.coorgInvitations.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(
+      SETTING_KEYS.federationLastCoOrgInvitationPull,
+      String(maxCreatedAt),
+    );
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull federated co-organizer invitation responses (accept/decline).
+ * Cursor: `decidedAt`. Same merge / dedupe rules as
+ * `pullFederatedCoOrgInvitations`.
+ */
+export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(
+    SETTING_KEYS.federationLastCoOrgInvitationResponsePull,
+  );
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitation-responses?${params.toString()}`;
+  let body: { coorgInvitationResponses?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { coorgInvitationResponses?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.coorgInvitationResponses)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxDecidedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.coorgInvitationResponses) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.invitationId !== "string" ||
+      typeof r.inviteeKey !== "string" ||
+      (r.decision !== "accept" && r.decision !== "decline") ||
+      typeof r.decidedAt !== "number" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record: CoOrganizerInvitationResponse = {
+      id: r.id,
+      invitationId: r.invitationId,
+      inviteeKey: r.inviteeKey,
+      decision: r.decision,
+      decidedAt: r.decidedAt,
+      nodeId: r.nodeId,
+      signature: r.signature,
+    };
+
+    const advanceCursor = () => {
+      if (maxDecidedAt === null || record.decidedAt > maxDecidedAt) {
+        maxDecidedAt = record.decidedAt;
+      }
+    };
+
+    if (!verifyCoOrganizerInvitationResponse(record)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    const existing = await db.coorgInvitationResponses.get(record.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.coorgInvitationResponses.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxDecidedAt !== null) {
+    await setSetting(
+      SETTING_KEYS.federationLastCoOrgInvitationResponsePull,
+      String(maxDecidedAt),
+    );
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull federated co-organizer invitation revocations. Cursor:
+ * `revokedAt`. Same merge / dedupe rules as the other coorg pulls.
+ */
+export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(
+    SETTING_KEYS.federationLastCoOrgInvitationRevocationPull,
+  );
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitation-revocations?${params.toString()}`;
+  let body: { coorgInvitationRevocations?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { coorgInvitationRevocations?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.coorgInvitationRevocations)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxRevokedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.coorgInvitationRevocations) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.invitationId !== "string" ||
+      typeof r.inviterKey !== "string" ||
+      typeof r.revokedAt !== "number" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record: CoOrganizerInvitationRevocation = {
+      id: r.id,
+      invitationId: r.invitationId,
+      inviterKey: r.inviterKey,
+      revokedAt: r.revokedAt,
+      nodeId: r.nodeId,
+      signature: r.signature,
+    };
+
+    const advanceCursor = () => {
+      if (maxRevokedAt === null || record.revokedAt > maxRevokedAt) {
+        maxRevokedAt = record.revokedAt;
+      }
+    };
+
+    if (!verifyCoOrganizerInvitationRevocation(record)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    const existing = await db.coorgInvitationRevocations.get(record.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.coorgInvitationRevocations.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxRevokedAt !== null) {
+    await setSetting(
+      SETTING_KEYS.federationLastCoOrgInvitationRevocationPull,
+      String(maxRevokedAt),
+    );
   }
 
   return { inserted, skipped };

@@ -1,0 +1,90 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import type { FastifyInstance } from "fastify";
+import { verifyCoOrganizerInvitationResponse } from "@understoria/shared/crypto";
+import type { CoOrganizerInvitationResponseStore } from "../db.js";
+import { parseCoOrganizerInvitationResponse } from "../validate.js";
+
+interface Deps {
+  store: CoOrganizerInvitationResponseStore;
+}
+
+/**
+ * POST /coorg-invitation-responses
+ *   - Body: signed CoOrganizerInvitationResponse JSON (accept or
+ *     decline; revocations live on a sibling endpoint).
+ *   - 201 — accepted (new row inserted)
+ *   - 200 — already had this row (idempotent re-submission)
+ *   - 400 — malformed body
+ *   - 422 — well-formed but signature doesn't verify
+ *
+ * GET /coorg-invitation-responses
+ *   - Query: ?since=<ms>&limit=<n>
+ *   - Returns the most recent responses newer than `since`, paginated
+ *     by `decidedAt`, capped at `limit` (default 200, hard ceiling
+ *     1000). See `docs/co-organizer-invitations.md` §8.
+ */
+export async function registerCoOrganizerInvitationResponseRoutes(
+  app: FastifyInstance,
+  { store }: Deps,
+): Promise<void> {
+  app.post("/coorg-invitation-responses", async (req, reply) => {
+    const parsed = parseCoOrganizerInvitationResponse(req.body);
+    if (!parsed.ok) {
+      reply.code(400);
+      return { error: "invalid_body", reason: parsed.error };
+    }
+    const record = parsed.value;
+
+    if (!verifyCoOrganizerInvitationResponse(record)) {
+      reply.code(422);
+      return { error: "bad_signature" };
+    }
+
+    if (store.has(record.id)) {
+      reply.code(200);
+      return { stored: false, id: record.id };
+    }
+
+    store.insert(record);
+    reply.code(201);
+    return { stored: true, id: record.id };
+  });
+
+  app.get<{ Querystring: { since?: string; limit?: string } }>(
+    "/coorg-invitation-responses",
+    async (req) => {
+      const since = req.query.since
+        ? Number.parseInt(req.query.since, 10)
+        : undefined;
+      const limit = req.query.limit
+        ? Number.parseInt(req.query.limit, 10)
+        : undefined;
+      const safeSince =
+        since !== undefined && Number.isFinite(since) && since >= 0
+          ? since
+          : undefined;
+      const safeLimit =
+        limit !== undefined && Number.isFinite(limit) && limit > 0
+          ? limit
+          : undefined;
+      const coorgInvitationResponses = store.list({
+        since: safeSince,
+        limit: safeLimit,
+      });
+      return {
+        count: coorgInvitationResponses.length,
+        coorgInvitationResponses,
+      };
+    },
+  );
+}

@@ -10,6 +10,9 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import {
+  verifyCoOrganizerInvitation,
+  verifyCoOrganizerInvitationResponse,
+  verifyCoOrganizerInvitationRevocation,
   verifyExchange,
   verifyInvite,
   verifyPost,
@@ -18,6 +21,9 @@ import {
 } from "@understoria/shared/crypto";
 import type { Post } from "@understoria/shared/types";
 import {
+  parseCoOrganizerInvitation,
+  parseCoOrganizerInvitationResponse,
+  parseCoOrganizerInvitationRevocation,
   parseExchange,
   parseInvite,
   parsePost,
@@ -25,6 +31,9 @@ import {
   parseVouch,
 } from "./validate.js";
 import type {
+  CoOrganizerInvitationResponseStore,
+  CoOrganizerInvitationRevocationStore,
+  CoOrganizerInvitationStore,
   ExchangeStore,
   InviteStore,
   PeerPullStore,
@@ -390,9 +399,199 @@ export async function pullTaskCommentsFromPeer(opts: {
   };
 }
 
+/** Co-organizer invitation sibling. Cursor field is `createdAt`. */
+export async function pullCoOrganizerInvitationsFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: CoOrganizerInvitationStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "coorg-invitations", since, maxRows);
+  const rows = await fetchAndExtract(
+    fetcher,
+    url,
+    peerUrl,
+    "coorgInvitations",
+  );
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestCreatedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseCoOrganizerInvitation(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyCoOrganizerInvitation(record)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(record.id)) {
+      duplicateCount += 1;
+      if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
+        latestCreatedAt = record.createdAt;
+      }
+      continue;
+    }
+    store.insert(record);
+    insertedCount += 1;
+    if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
+      latestCreatedAt = record.createdAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "coorg_invitation",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestCreatedAt,
+  };
+}
+
+/** Co-organizer invitation response sibling. Cursor: `decidedAt`. */
+export async function pullCoOrganizerInvitationResponsesFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: CoOrganizerInvitationResponseStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "coorg-invitation-responses", since, maxRows);
+  const rows = await fetchAndExtract(
+    fetcher,
+    url,
+    peerUrl,
+    "coorgInvitationResponses",
+  );
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestDecidedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseCoOrganizerInvitationResponse(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyCoOrganizerInvitationResponse(record)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(record.id)) {
+      duplicateCount += 1;
+      if (latestDecidedAt === null || record.decidedAt > latestDecidedAt) {
+        latestDecidedAt = record.decidedAt;
+      }
+      continue;
+    }
+    store.insert(record);
+    insertedCount += 1;
+    if (latestDecidedAt === null || record.decidedAt > latestDecidedAt) {
+      latestDecidedAt = record.decidedAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "coorg_invitation_response",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestDecidedAt,
+  };
+}
+
+/** Co-organizer invitation revocation sibling. Cursor: `revokedAt`. */
+export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: CoOrganizerInvitationRevocationStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(
+    peerUrl,
+    "coorg-invitation-revocations",
+    since,
+    maxRows,
+  );
+  const rows = await fetchAndExtract(
+    fetcher,
+    url,
+    peerUrl,
+    "coorgInvitationRevocations",
+  );
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestRevokedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseCoOrganizerInvitationRevocation(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyCoOrganizerInvitationRevocation(record)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(record.id)) {
+      duplicateCount += 1;
+      if (latestRevokedAt === null || record.revokedAt > latestRevokedAt) {
+        latestRevokedAt = record.revokedAt;
+      }
+      continue;
+    }
+    store.insert(record);
+    insertedCount += 1;
+    if (latestRevokedAt === null || record.revokedAt > latestRevokedAt) {
+      latestRevokedAt = record.revokedAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "coorg_invitation_revocation",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestRevokedAt,
+  };
+}
+
 function buildUrl(
   peerUrl: string,
-  path: "exchanges" | "vouches" | "posts" | "invites" | "task-comments",
+  path:
+    | "exchanges"
+    | "vouches"
+    | "posts"
+    | "invites"
+    | "task-comments"
+    | "coorg-invitations"
+    | "coorg-invitation-responses"
+    | "coorg-invitation-revocations",
   since: number | null,
   limit: number,
 ): string {
@@ -409,7 +608,15 @@ async function fetchAndExtract(
   fetcher: Fetcher,
   url: string,
   peerUrl: string,
-  arrayKey: "exchanges" | "vouches" | "posts" | "invites" | "taskComments",
+  arrayKey:
+    | "exchanges"
+    | "vouches"
+    | "posts"
+    | "invites"
+    | "taskComments"
+    | "coorgInvitations"
+    | "coorgInvitationResponses"
+    | "coorgInvitationRevocations",
 ): Promise<unknown[]> {
   const response = await fetcher(url);
   if (!response.ok) {
@@ -444,6 +651,9 @@ export interface PullWorkerOptions {
   postStore: PostStore;
   inviteStore: InviteStore;
   taskCommentStore: TaskCommentStore;
+  coorgInvitationStore: CoOrganizerInvitationStore;
+  coorgInvitationResponseStore: CoOrganizerInvitationResponseStore;
+  coorgInvitationRevocationStore: CoOrganizerInvitationRevocationStore;
   pullStore: PeerPullStore;
   fetcher?: Fetcher;
   /** Called for unexpected errors (one peer failing doesn't stop the
@@ -462,6 +672,9 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     postStore,
     inviteStore,
     taskCommentStore,
+    coorgInvitationStore,
+    coorgInvitationResponseStore,
+    coorgInvitationRevocationStore,
     pullStore,
     fetcher = (url) => fetch(url),
     onError = (peerUrl, err) =>
@@ -470,52 +683,98 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     onPull,
   } = opts;
 
+  function sinceFor(
+    kind: PullRecordKind,
+    state: ReturnType<PeerPullStore["get"]>,
+  ): number | null {
+    switch (kind) {
+      case "exchange":
+        return state?.lastCompletedAt ?? null;
+      case "vouch":
+        return state?.lastVouchCreatedAt ?? null;
+      case "post":
+        return state?.lastPostCreatedAt ?? null;
+      case "invite":
+        return state?.lastInviteCreatedAt ?? null;
+      case "task_comment":
+        return state?.lastTaskCommentCreatedAt ?? null;
+      case "coorg_invitation":
+        return state?.lastCoOrgInvitationCreatedAt ?? null;
+      case "coorg_invitation_response":
+        return state?.lastCoOrgInvitationResponseDecidedAt ?? null;
+      case "coorg_invitation_revocation":
+        return state?.lastCoOrgInvitationRevocationRevokedAt ?? null;
+    }
+  }
+
+  async function runPull(
+    kind: PullRecordKind,
+    peerUrl: string,
+    since: number | null,
+  ): Promise<PullResult> {
+    switch (kind) {
+      case "exchange":
+        return pullFromPeer({ peerUrl, since, fetcher, store });
+      case "vouch":
+        return pullVouchesFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: vouchStore,
+        });
+      case "post":
+        return pullPostsFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: postStore,
+        });
+      case "invite":
+        return pullInvitesFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: inviteStore,
+        });
+      case "task_comment":
+        return pullTaskCommentsFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: taskCommentStore,
+        });
+      case "coorg_invitation":
+        return pullCoOrganizerInvitationsFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: coorgInvitationStore,
+        });
+      case "coorg_invitation_response":
+        return pullCoOrganizerInvitationResponsesFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: coorgInvitationResponseStore,
+        });
+      case "coorg_invitation_revocation":
+        return pullCoOrganizerInvitationRevocationsFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: coorgInvitationRevocationStore,
+        });
+    }
+  }
+
   async function pullKind(
     peerUrl: string,
     kind: PullRecordKind,
   ): Promise<PullResult | null> {
     const state = pullStore.get(peerUrl);
-    const since =
-      kind === "exchange"
-        ? state?.lastCompletedAt ?? null
-        : kind === "vouch"
-          ? state?.lastVouchCreatedAt ?? null
-          : kind === "post"
-            ? state?.lastPostCreatedAt ?? null
-            : kind === "invite"
-              ? state?.lastInviteCreatedAt ?? null
-              : state?.lastTaskCommentCreatedAt ?? null;
+    const since = sinceFor(kind, state);
     try {
-      const result =
-        kind === "exchange"
-          ? await pullFromPeer({ peerUrl, since, fetcher, store })
-          : kind === "vouch"
-            ? await pullVouchesFromPeer({
-                peerUrl,
-                since,
-                fetcher,
-                store: vouchStore,
-              })
-            : kind === "post"
-              ? await pullPostsFromPeer({
-                  peerUrl,
-                  since,
-                  fetcher,
-                  store: postStore,
-                })
-              : kind === "task_comment"
-                ? await pullTaskCommentsFromPeer({
-                    peerUrl,
-                    since,
-                    fetcher,
-                    store: taskCommentStore,
-                  })
-                : await pullInvitesFromPeer({
-                  peerUrl,
-                  since,
-                  fetcher,
-                  store: inviteStore,
-                });
+      const result = await runPull(kind, peerUrl, since);
       pullStore.recordSuccess({
         peerUrl,
         kind,
@@ -546,6 +805,9 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
       pullKind(url, "post"),
       pullKind(url, "invite"),
       pullKind(url, "task_comment"),
+      pullKind(url, "coorg_invitation"),
+      pullKind(url, "coorg_invitation_response"),
+      pullKind(url, "coorg_invitation_revocation"),
     ]);
     const results = await Promise.all(tasks);
     return results.filter((r): r is PullResult => r !== null);
