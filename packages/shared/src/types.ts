@@ -488,6 +488,10 @@ export type ProjectActivityType =
   | "milestone_reached"
   | "organizer_handoff"
   | "coorganizer_stepdown"
+  | "coorganizer_invited"
+  | "coorganizer_accepted"
+  | "coorganizer_declined"
+  | "coorganizer_revoked"
   | "announcement";
 
 export interface ProjectActivity {

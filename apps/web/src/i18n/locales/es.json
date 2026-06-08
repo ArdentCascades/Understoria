@@ -531,10 +531,32 @@
     },
     "coOrganizers": {
       "title": "Co-organizadores",
-      "intro": "Los co-organizadores pueden confirmar tareas, agregar tareas y pausar o reanudar el proyecto. Solo quien organiza originalmente puede agregar o quitar co-organizadores.",
+      "intro": "Los co-organizadores pueden confirmar tareas, agregar tareas y pausar o reanudar el proyecto. Solo quien organiza originalmente puede invitar o quitar co-organizadores.",
       "add": "Agregar",
       "remove": "Quitar",
-      "selectPlaceholder": "Elegir una persona..."
+      "selectPlaceholder": "Elegir una persona...",
+      "invite": {
+        "send": "Enviar invitación",
+        "copy": "La verán en su próxima sincronización. Puedes revocarla en cualquier momento antes de que la acepten.",
+        "locked": "Desbloquea este dispositivo con tu frase de acceso antes de enviar una invitación."
+      },
+      "pending": {
+        "title": "Invitaciones pendientes",
+        "issued": "enviada {{when}}",
+        "expires": "vence {{when}}",
+        "revoke": "Revocar",
+        "revokeConfirmTitle": "¿Cancelar esta invitación?",
+        "revokeConfirmBody": "No la recibirán en su próxima sincronización. Puedes volver a invitar a esta persona más adelante."
+      },
+      "past": {
+        "title": "Invitaciones anteriores",
+        "outcome": {
+          "declined": "rechazada",
+          "expired": "vencida",
+          "revoked": "revocada",
+          "accepted": "aceptada"
+        }
+      }
     },
     "coorganizer": {
       "stepDown": "Dejar el rol de co-organizador",
@@ -592,6 +614,10 @@
       "milestone_reached": "Hito alcanzado",
       "organizer_handoff": "Traspaso de organizador",
       "coorganizer_stepdown": "Co-organizador dejó el rol",
+      "coorganizer_invited": "Co-organizador invitado",
+      "coorganizer_accepted": "Invitación de co-organizador aceptada",
+      "coorganizer_declined": "Invitación de co-organizador rechazada",
+      "coorganizer_revoked": "Invitación de co-organizador revocada",
       "announcement": "Novedad publicada"
     }
   },
@@ -859,6 +885,29 @@
     "projectPaused": {
       "line": "{{project}} ha estado en pausa por un tiempo.",
       "hint": "Reanudalo o marcalo como completo cuando estes listo."
+    },
+    "coorgInvitation": {
+      "line": "{{name}} te invitó a co-organizar \"{{project}}.\"",
+      "hint": "Esto compromete tu saldo e identidad al confirmar trabajo en el proyecto. Míralo antes de aceptar.",
+      "openProject": "Abrir proyecto",
+      "lockedToRespond": "Desbloquea este dispositivo con tu frase de acceso antes de responder.",
+      "accept": {
+        "cta": "Aceptar",
+        "title": "Aceptar el rol de co-organizador en \"{{project}}\"",
+        "meansTitle": "Qué significa esto",
+        "meansConfirm": "Confirmar tareas completadas — cada confirmación descuenta de tu propio saldo.",
+        "meansSign": "Firmar como organizador del proyecto — los registros que firmes en este rol quedan ligados a tu identidad en el historial federado del proyecto.",
+        "meansVisible": "Visible para la comunidad — la página del proyecto te muestra como co-organizador en la vista de cada nodo.",
+        "notTitle": "Qué no significa esto",
+        "notObligation": "Sin obligación permanente — puedes dejar el rol por tu cuenta en cualquier momento.",
+        "notDeputy": "Sin autoridad sobre quien organiza originalmente — esa persona conserva la autoridad de traspaso y remoción. Los co-organizadores son pares, no suplentes.",
+        "sign": "Aceptar y firmar"
+      },
+      "decline": {
+        "cta": "Rechazar",
+        "confirmTitle": "¿Rechazar co-organizar \"{{project}}\"?",
+        "confirmBody": "No se asigna ningún rol. Quien organiza verá que rechazaste la próxima vez que mire el proyecto."
+      }
     }
   },
   "board": {

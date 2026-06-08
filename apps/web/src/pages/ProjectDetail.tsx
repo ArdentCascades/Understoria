@@ -16,7 +16,6 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import {
-  addCoOrganizer,
   addProjectTask,
   archiveProject,
   bulkAddTasks,
@@ -31,6 +30,7 @@ import {
   launchProject,
   listActivityForProject,
   listAnnouncements,
+  logActivity,
   markProjectTaskComplete,
   pauseProject,
   postAnnouncement,
@@ -39,12 +39,22 @@ import {
   unarchiveProject,
   unclaimProjectTask,
 } from "@/db/projects";
+import {
+  issueCoOrganizerInvitation,
+  revokeCoOrganizerInvitation,
+} from "@/db/coorgInvitations";
+import { getSecretKey, type LockState } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
 import { HighlightedText } from "@/components/HighlightedText";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
-import { formatDeadline, formatHours, formatRelativeTime } from "@/lib/format";
+import {
+  formatDeadline,
+  formatHours,
+  formatRelativeTime,
+  shortKey,
+} from "@/lib/format";
 import { taskCheckInState } from "@/lib/taskCheckInState";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
@@ -56,6 +66,9 @@ import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { TaskComments } from "@/components/TaskComments";
 import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
   Member,
   Project,
   ProjectCategory,
@@ -81,6 +94,10 @@ export default function ProjectDetailPage() {
     nodeConfig,
     exchanges,
     proposals,
+    lockState,
+    coorgInvitations,
+    coorgInvitationResponses,
+    coorgInvitationRevocations,
   } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -366,6 +383,11 @@ export default function ProjectDetailPage() {
               members={members}
               currentKey={currentMember!.publicKey}
               memberMap={memberMap}
+              nodeId={nodeId}
+              lockState={lockState}
+              invitations={coorgInvitations}
+              responses={coorgInvitationResponses}
+              revocations={coorgInvitationRevocations}
               onRun={run}
             />
           )}
@@ -1453,28 +1475,189 @@ function AnnouncementSection({
   );
 }
 
+// One invitation's terminal state, derived in the UI from the three
+// local record tables. `pending` = no response, no revocation, not
+// expired; everything else is a past outcome shown in the 30-day
+// retention window. See `docs/co-organizer-invitations.md` §6.
+type InvitationOutcome = "pending" | "accepted" | "declined" | "revoked" | "expired";
+
+interface DerivedInvitation {
+  invitation: CoOrganizerInvitation;
+  outcome: InvitationOutcome;
+  /** Wall-clock moment the terminal decision landed — used for the
+   *  30-day retention cutoff and the "when" column. For pending rows
+   *  this is the issue time. */
+  decidedAt: number;
+}
+
+const PAST_INVITATION_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+function deriveInvitations(
+  projectId: string,
+  invitations: readonly CoOrganizerInvitation[],
+  responses: readonly CoOrganizerInvitationResponse[],
+  revocations: readonly CoOrganizerInvitationRevocation[],
+  now: number,
+): DerivedInvitation[] {
+  const responseByInvitationId = new Map<string, CoOrganizerInvitationResponse>();
+  for (const r of responses) responseByInvitationId.set(r.invitationId, r);
+  const revocationByInvitationId = new Map<string, CoOrganizerInvitationRevocation>();
+  for (const r of revocations) revocationByInvitationId.set(r.invitationId, r);
+
+  const derived: DerivedInvitation[] = [];
+  for (const invitation of invitations) {
+    if (invitation.projectId !== projectId) continue;
+    const response = responseByInvitationId.get(invitation.id);
+    const revocation = revocationByInvitationId.get(invitation.id);
+    if (revocation) {
+      derived.push({ invitation, outcome: "revoked", decidedAt: revocation.revokedAt });
+    } else if (response) {
+      derived.push({
+        invitation,
+        outcome: response.decision === "accept" ? "accepted" : "declined",
+        decidedAt: response.decidedAt,
+      });
+    } else if (now >= invitation.expiresAt) {
+      derived.push({ invitation, outcome: "expired", decidedAt: invitation.expiresAt });
+    } else {
+      derived.push({ invitation, outcome: "pending", decidedAt: invitation.createdAt });
+    }
+  }
+  return derived;
+}
+
 function CoOrganizerSection({
   project,
   members,
   currentKey,
   memberMap,
+  nodeId,
+  lockState,
+  invitations,
+  responses,
+  revocations,
   onRun,
 }: {
   project: Project;
   members: readonly Member[];
   currentKey: string;
   memberMap: Map<string, string>;
+  nodeId: string;
+  lockState: LockState;
+  invitations: readonly CoOrganizerInvitation[];
+  responses: readonly CoOrganizerInvitationResponse[];
+  revocations: readonly CoOrganizerInvitationRevocation[];
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [selectedKey, setSelectedKey] = useState("");
+  const [revokeId, setRevokeId] = useState<string | null>(null);
   const { pending, run: runWithPending } = usePendingAction();
 
+  const derived = useMemo(
+    () =>
+      deriveInvitations(
+        project.id,
+        invitations,
+        responses,
+        revocations,
+        Date.now(),
+      ),
+    [project.id, invitations, responses, revocations],
+  );
+  const pendingInvitations = useMemo(
+    () =>
+      derived
+        .filter((d) => d.outcome === "pending")
+        .sort((a, b) => b.invitation.createdAt - a.invitation.createdAt),
+    [derived],
+  );
+  const now = Date.now();
+  const pastInvitations = useMemo(
+    () =>
+      derived
+        .filter(
+          (d) =>
+            d.outcome !== "pending" &&
+            now - d.decidedAt <= PAST_INVITATION_RETENTION_MS,
+        )
+        .sort((a, b) => b.decidedAt - a.decidedAt),
+    [derived, now],
+  );
+
+  // A member is eligible for an invitation if they're not already the
+  // primary, not already a (legacy) co-organizer, and don't have an
+  // outstanding pending invitation.
+  const pendingInviteeKeys = useMemo(
+    () => new Set(pendingInvitations.map((d) => d.invitation.inviteeKey)),
+    [pendingInvitations],
+  );
   const eligible = members.filter(
     (m) =>
       m.publicKey !== project.organizerKey &&
-      !project.coOrganizerKeys.includes(m.publicKey),
+      !project.coOrganizerKeys.includes(m.publicKey) &&
+      !pendingInviteeKeys.has(m.publicKey),
   );
+
+  async function handleSend() {
+    if (!selectedKey) return;
+    if (lockState === "locked") {
+      showToast(t("projects.coOrganizers.invite.locked"), "error");
+      return;
+    }
+    await runWithPending(() =>
+      onRun(async () => {
+        const inviterSecretKey = await getSecretKey(currentKey);
+        const invitation = await issueCoOrganizerInvitation({
+          projectId: project.id,
+          inviterKey: currentKey,
+          inviterSecretKey,
+          inviteeKey: selectedKey,
+          nodeId,
+        });
+        await logActivity(
+          project.id,
+          "coorganizer_invited",
+          currentKey,
+          { invitationId: invitation.id, inviteeKey: selectedKey },
+          nodeId,
+        );
+        return invitation;
+      }),
+    );
+    setSelectedKey("");
+  }
+
+  async function handleRevoke(invitationId: string) {
+    if (lockState === "locked") {
+      showToast(t("projects.coOrganizers.invite.locked"), "error");
+      return;
+    }
+    await runWithPending(() =>
+      onRun(async () => {
+        const inviterSecretKey = await getSecretKey(currentKey);
+        const revocation = await revokeCoOrganizerInvitation({
+          invitationId,
+          inviterSecretKey,
+          nodeId,
+        });
+        await logActivity(
+          project.id,
+          "coorganizer_revoked",
+          currentKey,
+          { invitationId },
+          nodeId,
+        );
+        return revocation;
+      }),
+    );
+    setRevokeId(null);
+  }
+
+  function labelFor(key: string): string {
+    return memberMap.get(key) ?? shortKey(key);
+  }
 
   return (
     <section className="card mb-4">
@@ -1491,7 +1674,7 @@ function CoOrganizerSection({
               key={key}
               className="flex items-center justify-between rounded-lg bg-moss-50 px-3 py-1.5 text-sm dark:bg-moss-900/40"
             >
-              <span>{memberMap.get(key) ?? key}</span>
+              <span>{labelFor(key)}</span>
               <button
                 type="button"
                 className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
@@ -1508,9 +1691,15 @@ function CoOrganizerSection({
           ))}
         </ul>
       )}
+
+      {/* Invite affordance — replaces the unilateral add. */}
       {eligible.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="mb-2 flex flex-wrap gap-2">
+          <label className="sr-only" htmlFor="coorg-invite-select">
+            {t("projects.coOrganizers.selectPlaceholder")}
+          </label>
           <select
+            id="coorg-invite-select"
             className="input flex-1"
             value={selectedKey}
             onChange={(e) => setSelectedKey(e.target.value)}
@@ -1528,20 +1717,95 @@ function CoOrganizerSection({
             type="button"
             className="btn-secondary"
             disabled={pending || !selectedKey}
-            onClick={() => {
-              if (!selectedKey) return;
-              void runWithPending(() =>
-                onRun(() =>
-                  addCoOrganizer(project.id, currentKey, selectedKey),
-                ),
-              );
-              setSelectedKey("");
-            }}
+            aria-busy={pending}
+            onClick={() => void handleSend()}
           >
-            {t("projects.coOrganizers.add")}
+            {pending
+              ? t("common.working")
+              : t("projects.coOrganizers.invite.send")}
           </button>
         </div>
       )}
+      <p className="mb-3 text-xs text-moss-500 dark:text-moss-400">
+        {t("projects.coOrganizers.invite.copy")}
+      </p>
+
+      {/* Pending invitations */}
+      {pendingInvitations.length > 0 && (
+        <div className="mb-3">
+          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-500">
+            {t("projects.coOrganizers.pending.title")}
+          </h3>
+          <ul className="flex flex-col gap-1">
+            {pendingInvitations.map(({ invitation }) => (
+              <li
+                key={invitation.id}
+                className="rounded-lg bg-canopy-50 px-3 py-2 text-sm dark:bg-canopy-950/40"
+              >
+                <p className="font-medium">{labelFor(invitation.inviteeKey)}</p>
+                <p className="text-xs text-moss-600 dark:text-moss-300">
+                  {t("projects.coOrganizers.pending.issued", {
+                    when: formatRelativeTime(invitation.createdAt),
+                  })}
+                  {" · "}
+                  {t("projects.coOrganizers.pending.expires", {
+                    when: formatRelativeTime(invitation.expiresAt),
+                  })}
+                </p>
+                <button
+                  type="button"
+                  className="btn-ghost mt-1 text-xs text-rose-700 dark:text-rose-300"
+                  disabled={pending}
+                  onClick={() => setRevokeId(invitation.id)}
+                >
+                  {t("projects.coOrganizers.pending.revoke")}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Past invitations — 30-day retention window. Nothing renders
+          when the window is empty. */}
+      {pastInvitations.length > 0 && (
+        <div>
+          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-500">
+            {t("projects.coOrganizers.past.title")}
+          </h3>
+          <ul className="flex flex-col gap-1">
+            {pastInvitations.map(({ invitation, outcome, decidedAt }) => (
+              <li
+                key={invitation.id}
+                className="flex flex-wrap items-center justify-between gap-1 rounded-lg bg-moss-50 px-3 py-1.5 text-xs dark:bg-moss-900/40"
+              >
+                <span className="font-medium text-moss-700 dark:text-moss-200">
+                  {labelFor(invitation.inviteeKey)}
+                </span>
+                <span className="text-moss-500 dark:text-moss-400">
+                  {t(
+                    `projects.coOrganizers.past.outcome.${outcome}` as "projects.coOrganizers.past.outcome.declined",
+                  )}
+                  {" · "}
+                  {formatRelativeTime(decidedAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={revokeId !== null}
+        title={t("projects.coOrganizers.pending.revokeConfirmTitle")}
+        description={t("projects.coOrganizers.pending.revokeConfirmBody")}
+        confirmLabel={t("projects.coOrganizers.pending.revoke")}
+        tone="caution"
+        onCancel={() => setRevokeId(null)}
+        onConfirm={() => {
+          if (revokeId) void handleRevoke(revokeId);
+        }}
+      />
     </section>
   );
 }
