@@ -791,3 +791,105 @@ export interface CoOrganizerInvitationRevocation
   /** Inviter's Ed25519 detached signature over the canonical payload. */
   signature: string;
 }
+
+// ---------------------------------------------------------------------------
+// Community events — federated `Event` + `EventCancellation`. See
+// `docs/community-events.md` §3, §4, §11. Two signed record types,
+// single-signer-per-record. RSVPs are deliberately NOT modeled here —
+// `EventRSVP` is local-Dexie only (see design doc §4.2 + §7.2) and
+// never enters the wire format, so it does not belong in the shared
+// package.
+//
+// FIELD ORDER IS THE WIRE CONTRACT. The order of properties in
+// `EventPayload` / `EventCancellationPayload` below is the order the
+// canonical serializer emits, which is the order the signature covers.
+// Do NOT alphabetize. Do NOT reorder. Adding a field is a breaking
+// change to the federation wire format.
+// ---------------------------------------------------------------------------
+
+/**
+ * Canonical, signed by the organizer. Mirrors the §3 comparison-card
+ * enumeration of "what an Event commits to": public organizer record,
+ * public location and time, permanent + append-only. The signature
+ * covers exactly the fields below in declared order.
+ *
+ * Note on `templateId`: reserved for phase 2 (see design doc §10).
+ * Phase 1 enforcement is at the application layer — the types layer
+ * accepts any `string | null`, the app layer requires `null`. No
+ * canonical-level rejection here; that would couple the wire format
+ * to a phase boundary the wire format shouldn't know about.
+ */
+export interface EventPayload {
+  /** Canonical-hash-derived federation-stable handle. */
+  id: string;
+  kind: "event";
+  /** 1..200 chars. */
+  title: string;
+  /** 0..2000 chars; empty allowed. */
+  description: string;
+  /** Free-text category identifier; 1..50 chars. Not constrained to
+   *  `CATEGORIES` so phase-2 templates can introduce category strings
+   *  the legacy `Post` enum doesn't carry. */
+  category: string;
+  /** Epoch milliseconds, UTC. */
+  startsAt: number;
+  /** Epoch milliseconds, UTC; `null` = single-point event with no
+   *  defined end. */
+  endsAt: number | null;
+  /** Free text; 1..200 chars. NOT a GPS pin — threat-model §7
+   *  rejects coordinate pairs on the public wire. "Community room,
+   *  3rd floor" is the shape this field is for. */
+  location: string;
+  /** Positive integer or `null` for uncapped. Soft cap — the server
+   *  never enforces a count; counts are local per node. */
+  capacity: number | null;
+  /** Reserved for phase 2. MUST be `null` in phase 1; enforced at
+   *  the application layer, not at the canonical-serialization layer. */
+  templateId: string | null;
+  /** Epoch milliseconds, UTC. */
+  createdAt: number;
+  /** Base64-encoded Ed25519 public key of the organizer; signs this
+   *  payload. */
+  createdBy: string;
+  /** Origin node id. */
+  nodeId: string;
+}
+
+export interface Event extends EventPayload {
+  /** Organizer's Ed25519 detached signature, base64-encoded, over
+   *  `canonicalEventPayload(payload)`. */
+  signature: string;
+}
+
+/**
+ * Canonical, signed by the organizer. Cancellation is the only
+ * lifecycle transition phase 1 supports — no edits. The federation
+ * route additionally enforces that `createdBy` equals the referenced
+ * `Event.createdBy` (single-signer authority); this types-and-crypto
+ * layer verifies the signature only, leaving the cross-record check
+ * to the application layer (PR C/D).
+ */
+export interface EventCancellationPayload {
+  /** Canonical-hash-derived federation-stable handle. */
+  id: string;
+  kind: "event_cancellation";
+  /** References `Event.id`. */
+  eventId: string;
+  /** Free text, 0..500 chars; empty allowed. Rendered as
+   *  "Cancelled (no reason given)" when empty. */
+  reason: string;
+  /** Epoch milliseconds, UTC. */
+  cancelledAt: number;
+  /** Base64-encoded Ed25519 public key of the organizer. The
+   *  application layer (PR C/D) verifies this equals the cancelled
+   *  `Event.createdBy`; this layer verifies the signature only. */
+  createdBy: string;
+  /** Origin node id. */
+  nodeId: string;
+}
+
+export interface EventCancellation extends EventCancellationPayload {
+  /** Organizer's Ed25519 detached signature, base64-encoded, over
+   *  `canonicalEventCancellationPayload(payload)`. */
+  signature: string;
+}
