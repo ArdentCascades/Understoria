@@ -497,6 +497,37 @@ We are not trying to protect against:
   still hard-purge, which clears the inventory alongside the
   identity.
 
+- **Co-organizer role requires signed invitation + signed
+  acceptance (design only; not yet shipped).** Today the primary
+  organizer of a project can call `addCoOrganizer(projectId,
+  callerKey, newCoOrgKey)` in `apps/web/src/db/projects.ts` (~line
+  328) and write the new key directly into
+  `Project.coOrganizerKeys` — no consent step from the invitee. The
+  design in `docs/co-organizer-invitations.md` replaces that with
+  two new federated record types
+  (`CoOrganizerInvitation` signed by the inviter,
+  `CoOrganizerInvitationResponse` signed by the invitee) and makes
+  the role effective only when an accepted response exists. This is
+  a **values fix**, not a new mitigation — co-organizers were
+  already a trust position with the same metadata visibility as a
+  vouch. The change tightens audit-trail provenance (every
+  co-organizer role grant now has an end-to-end-verifiable
+  acceptance signature) and closes the conscription gap
+  (signed records imputed to a member trace back to that member's
+  deliberate act). What it does **not** defend against: an organizer
+  sending an invitation under coercion; the invitee accepting under
+  coercion; pre-existing unilateral additions, which grandfather as
+  accepted because the alternative would silently strip authority
+  from members exercising the role in good faith. No new key
+  material, no new public exposure. Pairs with the complementary
+  self-removal fix (`fix/coorganizer-self-removal`), which addresses
+  the trapped-co-organizer half of this values gap. Until the
+  implementation PRs land (PR A data + types; PR B server
+  federation; PR C UI — see
+  `docs/co-organizer-invitations.md` §11), no signed-acceptance
+  flow exists in the codebase and this entry tracks design intent
+  only.
+
 - **Calendar aggregation as a faster surveillance surface.**
   The community calendar (`docs/calendar.md`) collapses
   date-shaped data already present in `Project`, `Post`, and
