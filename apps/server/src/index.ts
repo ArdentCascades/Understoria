@@ -21,6 +21,9 @@
 import { readConfigFromEnv } from "./config.js";
 import { buildServer } from "./server.js";
 import {
+  createCoOrganizerInvitationResponseStore,
+  createCoOrganizerInvitationRevocationStore,
+  createCoOrganizerInvitationStore,
   createExchangeStore,
   createInviteStore,
   createPeerPullStore,
@@ -45,6 +48,11 @@ async function main(): Promise<void> {
     postStore: createPostStore(database),
     inviteStore: createInviteStore(database),
     taskCommentStore: createTaskCommentStore(database),
+    coorgInvitationStore: createCoOrganizerInvitationStore(database),
+    coorgInvitationResponseStore:
+      createCoOrganizerInvitationResponseStore(database),
+    coorgInvitationRevocationStore:
+      createCoOrganizerInvitationRevocationStore(database),
     pullStore: createPeerPullStore(database),
     onError: (peerUrl, err) =>
       app.log.warn({ peerUrl, err }, "peer pull failed"),

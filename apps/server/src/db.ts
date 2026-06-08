@@ -21,6 +21,9 @@
 import Database from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
   Exchange,
   FlagReason,
   Post,
@@ -122,6 +125,41 @@ export interface InviteStore {
   has(token: string): boolean;
 }
 
+/**
+ * Storage for signed co-organizer invitations / responses / revocations.
+ * Three sibling stores, one per record type. Same `has(id) / insert /
+ * list({since,limit})` shape as the other federated record stores; the
+ * cursor field is `createdAt` for invitations, `decidedAt` for
+ * responses, `revokedAt` for revocations. See
+ * `docs/co-organizer-invitations.md` §4 / §8.
+ */
+export interface CoOrganizerInvitationStore {
+  insert(record: CoOrganizerInvitation): void;
+  list(opts?: { since?: number; limit?: number }): CoOrganizerInvitation[];
+  count(): number;
+  has(id: string): boolean;
+}
+
+export interface CoOrganizerInvitationResponseStore {
+  insert(record: CoOrganizerInvitationResponse): void;
+  list(opts?: {
+    since?: number;
+    limit?: number;
+  }): CoOrganizerInvitationResponse[];
+  count(): number;
+  has(id: string): boolean;
+}
+
+export interface CoOrganizerInvitationRevocationStore {
+  insert(record: CoOrganizerInvitationRevocation): void;
+  list(opts?: {
+    since?: number;
+    limit?: number;
+  }): CoOrganizerInvitationRevocation[];
+  count(): number;
+  has(id: string): boolean;
+}
+
 export interface ClaimRecord {
   postId: string;
   claimerKey: string;
@@ -162,6 +200,9 @@ export interface PeerPullStateRow {
   lastPostCreatedAt: number | null;
   lastInviteCreatedAt: number | null;
   lastTaskCommentCreatedAt: number | null;
+  lastCoOrgInvitationCreatedAt: number | null;
+  lastCoOrgInvitationResponseDecidedAt: number | null;
+  lastCoOrgInvitationRevocationRevokedAt: number | null;
   lastError: string | null;
   lastPulledCount: number;
 }
@@ -171,7 +212,10 @@ export type PullRecordKind =
   | "vouch"
   | "post"
   | "invite"
-  | "task_comment";
+  | "task_comment"
+  | "coorg_invitation"
+  | "coorg_invitation_response"
+  | "coorg_invitation_revocation";
 
 export interface PeerPullStore {
   get(peerUrl: string): PeerPullStateRow | null;
@@ -390,6 +434,70 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '8')",
+    ).run();
+  }
+
+  // Schema v9 — co-organizer invitation federation. Three sibling
+  // tables (invitation / response / revocation), each storing the
+  // signed wire shape. `peer_pull_state` grows three per-kind cursor
+  // columns (createdAt for invitations, decidedAt for responses,
+  // revokedAt for revocations). See
+  // `docs/co-organizer-invitations.md` §4 / §8.
+  if (current < 9) {
+    db.exec(`
+      CREATE TABLE coorg_invitations (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL,
+        inviter_key TEXT NOT NULL,
+        invitee_key TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX coorg_invitations_created_at_idx
+        ON coorg_invitations (created_at DESC);
+      CREATE INDEX coorg_invitations_project_idx
+        ON coorg_invitations (project_id);
+      CREATE INDEX coorg_invitations_invitee_idx
+        ON coorg_invitations (invitee_key);
+
+      CREATE TABLE coorg_invitation_responses (
+        id TEXT PRIMARY KEY,
+        invitation_id TEXT NOT NULL,
+        invitee_key TEXT NOT NULL,
+        decision TEXT NOT NULL,
+        decided_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX coorg_invitation_responses_decided_at_idx
+        ON coorg_invitation_responses (decided_at DESC);
+      CREATE INDEX coorg_invitation_responses_invitation_idx
+        ON coorg_invitation_responses (invitation_id);
+
+      CREATE TABLE coorg_invitation_revocations (
+        id TEXT PRIMARY KEY,
+        invitation_id TEXT NOT NULL,
+        inviter_key TEXT NOT NULL,
+        revoked_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX coorg_invitation_revocations_revoked_at_idx
+        ON coorg_invitation_revocations (revoked_at DESC);
+      CREATE INDEX coorg_invitation_revocations_invitation_idx
+        ON coorg_invitation_revocations (invitation_id);
+
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_coorg_invitation_created_at INTEGER;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_coorg_invitation_response_decided_at INTEGER;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_coorg_invitation_revocation_revoked_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '9')",
     ).run();
   }
 }
@@ -800,6 +908,48 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
         COALESCE(@latestSeenAt, last_task_comment_created_at),
       last_pulled_count = @pulledCount
   `);
+  const successCoOrgInvitationStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at,
+      last_coorg_invitation_created_at, last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_coorg_invitation_created_at =
+        COALESCE(@latestSeenAt, last_coorg_invitation_created_at),
+      last_pulled_count = @pulledCount
+  `);
+  const successCoOrgInvitationResponseStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at,
+      last_coorg_invitation_response_decided_at, last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_coorg_invitation_response_decided_at =
+        COALESCE(@latestSeenAt, last_coorg_invitation_response_decided_at),
+      last_pulled_count = @pulledCount
+  `);
+  const successCoOrgInvitationRevocationStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at,
+      last_coorg_invitation_revocation_revoked_at, last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_coorg_invitation_revocation_revoked_at =
+        COALESCE(@latestSeenAt, last_coorg_invitation_revocation_revoked_at),
+      last_pulled_count = @pulledCount
+  `);
   const failureStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_error, last_pulled_count
@@ -829,7 +979,13 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
               ? successPostStmt
               : kind === "invite"
                 ? successInviteStmt
-                : successTaskCommentStmt;
+                : kind === "task_comment"
+                  ? successTaskCommentStmt
+                  : kind === "coorg_invitation"
+                    ? successCoOrgInvitationStmt
+                    : kind === "coorg_invitation_response"
+                      ? successCoOrgInvitationResponseStmt
+                      : successCoOrgInvitationRevocationStmt;
       stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
@@ -847,6 +1003,9 @@ interface PeerPullStateRowSqlite {
   last_post_created_at: number | null;
   last_invite_created_at: number | null;
   last_task_comment_created_at: number | null;
+  last_coorg_invitation_created_at: number | null;
+  last_coorg_invitation_response_decided_at: number | null;
+  last_coorg_invitation_revocation_revoked_at: number | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -861,6 +1020,11 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
     lastPostCreatedAt: r.last_post_created_at,
     lastInviteCreatedAt: r.last_invite_created_at,
     lastTaskCommentCreatedAt: r.last_task_comment_created_at,
+    lastCoOrgInvitationCreatedAt: r.last_coorg_invitation_created_at,
+    lastCoOrgInvitationResponseDecidedAt:
+      r.last_coorg_invitation_response_decided_at,
+    lastCoOrgInvitationRevocationRevokedAt:
+      r.last_coorg_invitation_revocation_revoked_at,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };
@@ -1029,5 +1193,248 @@ function rowToClaim(r: ClaimRow): ClaimRecord {
     claimerKey: r.claimer_key,
     claimedAt: r.claimed_at,
     nodeId: r.node_id,
+  };
+}
+
+export function createCoOrganizerInvitationStore(
+  db: DatabaseType,
+): CoOrganizerInvitationStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO coorg_invitations (
+      id, project_id, inviter_key, invitee_key,
+      created_at, expires_at, node_id, signature
+    ) VALUES (
+      @id, @projectId, @inviterKey, @inviteeKey,
+      @createdAt, @expiresAt, @nodeId, @signature
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM coorg_invitations WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM coorg_invitations");
+
+  return {
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        projectId: record.projectId,
+        inviterKey: record.inviterKey,
+        inviteeKey: record.inviteeKey,
+        createdAt: record.createdAt,
+        expiresAt: record.expiresAt,
+        nodeId: record.nodeId,
+        signature: record.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM coorg_invitations WHERE created_at > ?
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM coorg_invitations
+               ORDER BY created_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as CoOrganizerInvitationRowSqlite[]).map(
+        rowToCoOrganizerInvitation,
+      );
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+  };
+}
+
+interface CoOrganizerInvitationRowSqlite {
+  id: string;
+  project_id: string;
+  inviter_key: string;
+  invitee_key: string;
+  created_at: number;
+  expires_at: number;
+  node_id: string;
+  signature: string;
+}
+
+function rowToCoOrganizerInvitation(
+  r: CoOrganizerInvitationRowSqlite,
+): CoOrganizerInvitation {
+  return {
+    id: r.id,
+    projectId: r.project_id,
+    inviterKey: r.inviter_key,
+    inviteeKey: r.invitee_key,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    nodeId: r.node_id,
+    signature: r.signature,
+  };
+}
+
+export function createCoOrganizerInvitationResponseStore(
+  db: DatabaseType,
+): CoOrganizerInvitationResponseStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO coorg_invitation_responses (
+      id, invitation_id, invitee_key, decision,
+      decided_at, node_id, signature
+    ) VALUES (
+      @id, @invitationId, @inviteeKey, @decision,
+      @decidedAt, @nodeId, @signature
+    )
+  `);
+  const hasStmt = db.prepare(
+    "SELECT 1 FROM coorg_invitation_responses WHERE id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM coorg_invitation_responses",
+  );
+
+  return {
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        invitationId: record.invitationId,
+        inviteeKey: record.inviteeKey,
+        decision: record.decision,
+        decidedAt: record.decidedAt,
+        nodeId: record.nodeId,
+        signature: record.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM coorg_invitation_responses WHERE decided_at > ?
+               ORDER BY decided_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM coorg_invitation_responses
+               ORDER BY decided_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as CoOrganizerInvitationResponseRowSqlite[]).map(
+        rowToCoOrganizerInvitationResponse,
+      );
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+  };
+}
+
+interface CoOrganizerInvitationResponseRowSqlite {
+  id: string;
+  invitation_id: string;
+  invitee_key: string;
+  decision: string;
+  decided_at: number;
+  node_id: string;
+  signature: string;
+}
+
+function rowToCoOrganizerInvitationResponse(
+  r: CoOrganizerInvitationResponseRowSqlite,
+): CoOrganizerInvitationResponse {
+  return {
+    id: r.id,
+    invitationId: r.invitation_id,
+    inviteeKey: r.invitee_key,
+    decision: r.decision as CoOrganizerInvitationResponse["decision"],
+    decidedAt: r.decided_at,
+    nodeId: r.node_id,
+    signature: r.signature,
+  };
+}
+
+export function createCoOrganizerInvitationRevocationStore(
+  db: DatabaseType,
+): CoOrganizerInvitationRevocationStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO coorg_invitation_revocations (
+      id, invitation_id, inviter_key, revoked_at, node_id, signature
+    ) VALUES (
+      @id, @invitationId, @inviterKey, @revokedAt, @nodeId, @signature
+    )
+  `);
+  const hasStmt = db.prepare(
+    "SELECT 1 FROM coorg_invitation_revocations WHERE id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM coorg_invitation_revocations",
+  );
+
+  return {
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        invitationId: record.invitationId,
+        inviterKey: record.inviterKey,
+        revokedAt: record.revokedAt,
+        nodeId: record.nodeId,
+        signature: record.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM coorg_invitation_revocations WHERE revoked_at > ?
+               ORDER BY revoked_at DESC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM coorg_invitation_revocations
+               ORDER BY revoked_at DESC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as CoOrganizerInvitationRevocationRowSqlite[]).map(
+        rowToCoOrganizerInvitationRevocation,
+      );
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+  };
+}
+
+interface CoOrganizerInvitationRevocationRowSqlite {
+  id: string;
+  invitation_id: string;
+  inviter_key: string;
+  revoked_at: number;
+  node_id: string;
+  signature: string;
+}
+
+function rowToCoOrganizerInvitationRevocation(
+  r: CoOrganizerInvitationRevocationRowSqlite,
+): CoOrganizerInvitationRevocation {
+  return {
+    id: r.id,
+    invitationId: r.invitation_id,
+    inviterKey: r.inviter_key,
+    revokedAt: r.revoked_at,
+    nodeId: r.node_id,
+    signature: r.signature,
   };
 }

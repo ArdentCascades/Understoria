@@ -11,15 +11,27 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  canonicalCoOrganizerInvitationPayload,
+  canonicalCoOrganizerInvitationResponsePayload,
+  canonicalCoOrganizerInvitationRevocationPayload,
   canonicalExchangePayload,
   canonicalPostPayload,
   canonicalVouchPayload,
   generateKeyPair,
   sign,
 } from "@understoria/shared/crypto";
-import type { Exchange, SignedVouch } from "@understoria/shared/types";
+import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
+  Exchange,
+  SignedVouch,
+} from "@understoria/shared/types";
 import type { Database as DatabaseType } from "better-sqlite3";
 import {
+  createCoOrganizerInvitationResponseStore,
+  createCoOrganizerInvitationRevocationStore,
+  createCoOrganizerInvitationStore,
   createExchangeStore,
   createPeerPullStore,
   createInviteStore,
@@ -30,6 +42,9 @@ import {
   type PostRecord,
 } from "./db.js";
 import {
+  pullCoOrganizerInvitationResponsesFromPeer,
+  pullCoOrganizerInvitationRevocationsFromPeer,
+  pullCoOrganizerInvitationsFromPeer,
   pullFromPeer,
   pullPostsFromPeer,
   pullVouchesFromPeer,
@@ -99,6 +114,15 @@ function exchangeOnly(inner: Fetcher): Fetcher {
     }
     if (/\/task-comments\b/.test(url)) {
       return jsonResponse({ count: 0, taskComments: [] });
+    }
+    if (/\/coorg-invitation-responses\b/.test(url)) {
+      return jsonResponse({ count: 0, coorgInvitationResponses: [] });
+    }
+    if (/\/coorg-invitation-revocations\b/.test(url)) {
+      return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
+    }
+    if (/\/coorg-invitations\b/.test(url)) {
+      return jsonResponse({ count: 0, coorgInvitations: [] });
     }
     return inner(url);
   };
@@ -287,6 +311,11 @@ describe("startPeerPullWorker", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
     });
@@ -313,6 +342,11 @@ describe("startPeerPullWorker", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
     });
@@ -341,6 +375,11 @@ describe("startPeerPullWorker", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
       onError: (url, err) => errors.push({ url, msg: err.message }),
@@ -377,6 +416,11 @@ describe("startPeerPullWorker", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
     });
@@ -460,6 +504,12 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 0, invites: [] });
       if (/\/task-comments\b/.test(url))
         return jsonResponse({ count: 0, taskComments: [] });
+      if (/\/coorg-invitation-responses\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitationResponses: [] });
+      if (/\/coorg-invitation-revocations\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
+      if (/\/coorg-invitations\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitations: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -470,6 +520,11 @@ describe("startPeerPullWorker — vouches", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
     });
@@ -477,8 +532,11 @@ describe("startPeerPullWorker — vouches", () => {
     worker.stop();
     // Three kinds attempted; posts returned empty so it's still a
     // successful pull with no insertions.
-    expect(results).toHaveLength(5);
+    expect(results).toHaveLength(8);
     expect(results.map((r) => r.kind).sort()).toEqual([
+      "coorg_invitation",
+      "coorg_invitation_response",
+      "coorg_invitation_revocation",
       "exchange",
       "invite",
       "post",
@@ -506,6 +564,12 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 0, invites: [] });
       if (/\/task-comments\b/.test(url))
         return jsonResponse({ count: 0, taskComments: [] });
+      if (/\/coorg-invitation-responses\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitationResponses: [] });
+      if (/\/coorg-invitation-revocations\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
+      if (/\/coorg-invitations\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitations: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -516,6 +580,11 @@ describe("startPeerPullWorker — vouches", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
     });
@@ -621,6 +690,12 @@ describe("startPeerPullWorker — posts", () => {
         return jsonResponse({ count: 0, invites: [] });
       if (/\/task-comments\b/.test(url))
         return jsonResponse({ count: 0, taskComments: [] });
+      if (/\/coorg-invitation-responses\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitationResponses: [] });
+      if (/\/coorg-invitation-revocations\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
+      if (/\/coorg-invitations\b/.test(url))
+        return jsonResponse({ count: 0, coorgInvitations: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -631,13 +706,21 @@ describe("startPeerPullWorker — posts", () => {
       postStore,
       inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
       pullStore,
       fetcher,
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    expect(results).toHaveLength(5);
+    expect(results).toHaveLength(8);
     expect(results.map((r) => r.kind).sort()).toEqual([
+      "coorg_invitation",
+      "coorg_invitation_response",
+      "coorg_invitation_revocation",
       "exchange",
       "invite",
       "post",
@@ -649,5 +732,245 @@ describe("startPeerPullWorker — posts", () => {
     expect(state!.lastVouchCreatedAt).toBe(200);
     expect(state!.lastPostCreatedAt).toBe(300);
     expect(state!.lastError).toBeNull();
+  });
+});
+
+function makeSignedCoOrgInvitation(
+  overrides: Partial<CoOrganizerInvitation> = {},
+): CoOrganizerInvitation {
+  const inviter = generateKeyPair();
+  const invitee = generateKeyPair();
+  const createdAt = overrides.createdAt ?? Date.now();
+  const payload = {
+    projectId: overrides.projectId ?? "proj_test",
+    inviterKey: overrides.inviterKey ?? inviter.publicKey,
+    inviteeKey: overrides.inviteeKey ?? invitee.publicKey,
+    createdAt,
+    expiresAt: overrides.expiresAt ?? createdAt + 14 * 24 * 60 * 60 * 1000,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  return {
+    id:
+      overrides.id ??
+      `ci_${createdAt}_${Math.random().toString(36).slice(2)}`,
+    ...payload,
+    signature:
+      overrides.signature ??
+      sign(canonicalCoOrganizerInvitationPayload(payload), inviter.secretKey),
+  };
+}
+
+function makeSignedCoOrgResponse(
+  overrides: Partial<CoOrganizerInvitationResponse> = {},
+): CoOrganizerInvitationResponse {
+  const invitee = generateKeyPair();
+  const decidedAt = overrides.decidedAt ?? Date.now();
+  const payload = {
+    invitationId: overrides.invitationId ?? "inv_test",
+    inviteeKey: overrides.inviteeKey ?? invitee.publicKey,
+    decision: overrides.decision ?? ("accept" as const),
+    decidedAt,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  return {
+    id:
+      overrides.id ??
+      `cr_${decidedAt}_${Math.random().toString(36).slice(2)}`,
+    ...payload,
+    signature:
+      overrides.signature ??
+      sign(
+        canonicalCoOrganizerInvitationResponsePayload(payload),
+        invitee.secretKey,
+      ),
+  };
+}
+
+function makeSignedCoOrgRevocation(
+  overrides: Partial<CoOrganizerInvitationRevocation> = {},
+): CoOrganizerInvitationRevocation {
+  const inviter = generateKeyPair();
+  const revokedAt = overrides.revokedAt ?? Date.now();
+  const payload = {
+    invitationId: overrides.invitationId ?? "inv_test",
+    inviterKey: overrides.inviterKey ?? inviter.publicKey,
+    revokedAt,
+    nodeId: overrides.nodeId ?? "node_test",
+  };
+  return {
+    id:
+      overrides.id ??
+      `cv_${revokedAt}_${Math.random().toString(36).slice(2)}`,
+    ...payload,
+    signature:
+      overrides.signature ??
+      sign(
+        canonicalCoOrganizerInvitationRevocationPayload(payload),
+        inviter.secretKey,
+      ),
+  };
+}
+
+describe("pullCoOrganizerInvitationsFromPeer", () => {
+  it("inserts every well-signed invitation the peer returns", async () => {
+    const store = createCoOrganizerInvitationStore(db);
+    const rows = [
+      makeSignedCoOrgInvitation({ createdAt: 100 }),
+      makeSignedCoOrgInvitation({ createdAt: 200 }),
+    ];
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, coorgInvitations: rows });
+    const result = await pullCoOrganizerInvitationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.kind).toBe("coorg_invitation");
+    expect(result.insertedCount).toBe(2);
+    expect(result.latestCompletedAt).toBe(200);
+    expect(store.count()).toBe(2);
+  });
+
+  it("skips a row whose signature does not verify", async () => {
+    const store = createCoOrganizerInvitationStore(db);
+    const good = makeSignedCoOrgInvitation();
+    const bad: CoOrganizerInvitation = {
+      ...good,
+      id: "ci_bad",
+      signature: "0",
+    };
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, coorgInvitations: [good, bad] });
+    const result = await pullCoOrganizerInvitationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(1);
+    expect(store.count()).toBe(1);
+  });
+
+  it("hits the /coorg-invitations path with since=", async () => {
+    const store = createCoOrganizerInvitationStore(db);
+    const seen: string[] = [];
+    const fetcher: Fetcher = (url) => {
+      seen.push(url);
+      return jsonResponse({ count: 0, coorgInvitations: [] });
+    };
+    await pullCoOrganizerInvitationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: 9999,
+      fetcher,
+      store,
+    });
+    expect(seen[0]).toMatch(/\/coorg-invitations\?/);
+    expect(seen[0]).toContain("since=9999");
+  });
+
+  it("dedupes against already-stored rows", async () => {
+    const store = createCoOrganizerInvitationStore(db);
+    const rec = makeSignedCoOrgInvitation();
+    store.insert(rec);
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 1, coorgInvitations: [rec] });
+    const result = await pullCoOrganizerInvitationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.duplicateCount).toBe(1);
+  });
+});
+
+describe("pullCoOrganizerInvitationResponsesFromPeer", () => {
+  it("inserts well-signed responses and advances cursor by decidedAt", async () => {
+    const store = createCoOrganizerInvitationResponseStore(db);
+    const rows = [
+      makeSignedCoOrgResponse({ decidedAt: 100 }),
+      makeSignedCoOrgResponse({ decidedAt: 300 }),
+    ];
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, coorgInvitationResponses: rows });
+    const result = await pullCoOrganizerInvitationResponsesFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.kind).toBe("coorg_invitation_response");
+    expect(result.insertedCount).toBe(2);
+    expect(result.latestCompletedAt).toBe(300);
+  });
+
+  it("skips a response whose signature does not verify", async () => {
+    const store = createCoOrganizerInvitationResponseStore(db);
+    const good = makeSignedCoOrgResponse();
+    const bad: CoOrganizerInvitationResponse = {
+      ...good,
+      id: "cr_bad",
+      signature: "0",
+    };
+    const fetcher: Fetcher = () =>
+      jsonResponse({
+        count: 2,
+        coorgInvitationResponses: [good, bad],
+      });
+    const result = await pullCoOrganizerInvitationResponsesFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(1);
+  });
+});
+
+describe("pullCoOrganizerInvitationRevocationsFromPeer", () => {
+  it("inserts well-signed revocations and advances cursor by revokedAt", async () => {
+    const store = createCoOrganizerInvitationRevocationStore(db);
+    const rows = [
+      makeSignedCoOrgRevocation({ revokedAt: 500 }),
+      makeSignedCoOrgRevocation({ revokedAt: 700 }),
+    ];
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, coorgInvitationRevocations: rows });
+    const result = await pullCoOrganizerInvitationRevocationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.kind).toBe("coorg_invitation_revocation");
+    expect(result.insertedCount).toBe(2);
+    expect(result.latestCompletedAt).toBe(700);
+  });
+
+  it("skips a revocation whose signature does not verify", async () => {
+    const store = createCoOrganizerInvitationRevocationStore(db);
+    const good = makeSignedCoOrgRevocation();
+    const bad: CoOrganizerInvitationRevocation = {
+      ...good,
+      id: "cv_bad",
+      signature: "0",
+    };
+    const fetcher: Fetcher = () =>
+      jsonResponse({
+        count: 2,
+        coorgInvitationRevocations: [good, bad],
+      });
+    const result = await pullCoOrganizerInvitationRevocationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(1);
   });
 });

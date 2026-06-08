@@ -640,6 +640,17 @@ export const SETTING_KEYS = {
    *  in `federationSync.ts`. Absent on a fresh install means "pull
    *  the most recent slice on first sync." */
   federationLastExchangePull: "federationLastExchangePull",
+  /** Cursor for `pullFederatedCoOrgInvitations` — highest `createdAt`
+   *  observed so far on co-organizer-invitation pulls. */
+  federationLastCoOrgInvitationPull: "federationLastCoOrgInvitationPull",
+  /** Cursor for `pullFederatedCoOrgResponses` — highest `decidedAt`
+   *  observed so far on co-organizer-invitation-response pulls. */
+  federationLastCoOrgInvitationResponsePull:
+    "federationLastCoOrgInvitationResponsePull",
+  /** Cursor for `pullFederatedCoOrgRevocations` — highest `revokedAt`
+   *  observed so far on co-organizer-invitation-revocation pulls. */
+  federationLastCoOrgInvitationRevocationPull:
+    "federationLastCoOrgInvitationRevocationPull",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

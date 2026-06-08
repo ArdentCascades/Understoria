@@ -25,6 +25,9 @@ import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
 import {
   createClaimStore,
+  createCoOrganizerInvitationResponseStore,
+  createCoOrganizerInvitationRevocationStore,
+  createCoOrganizerInvitationStore,
   createExchangeStore,
   createInviteStore,
   createPeerPullStore,
@@ -43,6 +46,9 @@ import { registerInviteRoutes } from "./routes/invites.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
+import { registerCoOrganizerInvitationRoutes } from "./routes/coorgInvitations.js";
+import { registerCoOrganizerInvitationResponseRoutes } from "./routes/coorgInvitationResponses.js";
+import { registerCoOrganizerInvitationRevocationRoutes } from "./routes/coorgInvitationRevocations.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 
 export interface BuildOptions {
@@ -147,6 +153,11 @@ export async function buildServer({
   const inviteStore = createInviteStore(db);
   const claimStore = createClaimStore(db);
   const taskCommentStore = createTaskCommentStore(db);
+  const coorgInvitationStore = createCoOrganizerInvitationStore(db);
+  const coorgInvitationResponseStore =
+    createCoOrganizerInvitationResponseStore(db);
+  const coorgInvitationRevocationStore =
+    createCoOrganizerInvitationRevocationStore(db);
   const pullStore = createPeerPullStore(db);
 
   // Build the system signer once at boot — secret bytes are then
@@ -169,6 +180,15 @@ export async function buildServer({
   await registerInviteRoutes(app, { store: inviteStore });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });
+  await registerCoOrganizerInvitationRoutes(app, {
+    store: coorgInvitationStore,
+  });
+  await registerCoOrganizerInvitationResponseRoutes(app, {
+    store: coorgInvitationResponseStore,
+  });
+  await registerCoOrganizerInvitationRevocationRoutes(app, {
+    store: coorgInvitationRevocationStore,
+  });
   await registerConfigRoutes(app, { config, signer });
   await registerAutoConfirmRoutes(app, {
     store,

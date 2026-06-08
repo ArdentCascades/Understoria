@@ -19,6 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
+import type {
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
+} from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
 /**
@@ -138,6 +143,40 @@ export async function submitTaskCommentToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/task-comments", comment, config, deps);
+}
+
+/**
+ * Mirror a signed co-organizer invitation / response / revocation to
+ * the configured community node. Same best-effort semantics as the
+ * other submitters. See `docs/co-organizer-invitations.md` §8.
+ */
+export async function submitCoOrganizerInvitationToNode(
+  record: CoOrganizerInvitation,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/coorg-invitations", record, config, deps);
+}
+
+export async function submitCoOrganizerInvitationResponseToNode(
+  record: CoOrganizerInvitationResponse,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/coorg-invitation-responses", record, config, deps);
+}
+
+export async function submitCoOrganizerInvitationRevocationToNode(
+  record: CoOrganizerInvitationRevocation,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord(
+    "/coorg-invitation-revocations",
+    record,
+    config,
+    deps,
+  );
 }
 
 async function postSignedRecord(

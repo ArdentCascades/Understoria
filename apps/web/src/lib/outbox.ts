@@ -23,13 +23,21 @@ import { uuid } from "@/lib/id";
 import {
   readSubmitConfig,
   submitClaimToNode,
+  submitCoOrganizerInvitationResponseToNode,
+  submitCoOrganizerInvitationRevocationToNode,
+  submitCoOrganizerInvitationToNode,
   submitExchangeToNode,
   submitPostToNode,
   submitTaskCommentToNode,
   submitVouchToNode,
   type SubmitResult,
 } from "@/lib/nodeSubmit";
-import type { ClaimRecord } from "@understoria/shared/types";
+import type {
+  ClaimRecord,
+  CoOrganizerInvitation,
+  CoOrganizerInvitationResponse,
+  CoOrganizerInvitationRevocation,
+} from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 
 /**
@@ -283,13 +291,23 @@ export async function flushOutboxOnce(
   let retried = 0;
 
   for (const row of due) {
-    let payload: Exchange | SignedVouch | Post | TaskComment;
+    let payload:
+      | Exchange
+      | SignedVouch
+      | Post
+      | TaskComment
+      | CoOrganizerInvitation
+      | CoOrganizerInvitationResponse
+      | CoOrganizerInvitationRevocation;
     try {
       payload = JSON.parse(row.payload) as
         | Exchange
         | SignedVouch
         | Post
-        | TaskComment;
+        | TaskComment
+        | CoOrganizerInvitation
+        | CoOrganizerInvitationResponse
+        | CoOrganizerInvitationRevocation;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -317,21 +335,24 @@ export async function flushOutboxOnce(
       result = await submitTaskCommentToNode(payload as TaskComment, cfg, {
         fetchImpl: options.fetchImpl,
       });
-    } else if (
-      row.kind === "coorg_invitation" ||
-      row.kind === "coorg_invitation_response" ||
-      row.kind === "coorg_invitation_revocation"
-    ) {
-      // PR A (data layer) enqueues co-organizer invitation records to
-      // the outbox so the federation path is wired end-to-end on the
-      // client side, but the server-side submitters land with PR B.
-      // Until then, treat these as a retryable transport error so the
-      // worker leaves them pending — once PR B ships, the same rows
-      // flush through normally.
-      result = {
-        ok: false,
-        error: "coorg_invitation_submitter_not_implemented",
-      };
+    } else if (row.kind === "coorg_invitation") {
+      result = await submitCoOrganizerInvitationToNode(
+        payload as CoOrganizerInvitation,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "coorg_invitation_response") {
+      result = await submitCoOrganizerInvitationResponseToNode(
+        payload as CoOrganizerInvitationResponse,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "coorg_invitation_revocation") {
+      result = await submitCoOrganizerInvitationRevocationToNode(
+        payload as CoOrganizerInvitationRevocation,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else {
       result = await submitPostToNode(payload as Post, cfg, {
         fetchImpl: options.fetchImpl,

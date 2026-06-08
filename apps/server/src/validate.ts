@@ -21,6 +21,9 @@
 import {
   CATEGORIES,
   type Category,
+  type CoOrganizerInvitation,
+  type CoOrganizerInvitationResponse,
+  type CoOrganizerInvitationRevocation,
   type Exchange,
   type FlagReason,
   type Post,
@@ -57,6 +60,18 @@ export type ParseTaskCommentResult =
 
 export type ParseInviteResult =
   | { ok: true; value: SignedInvite }
+  | { ok: false; error: string };
+
+export type ParseCoOrganizerInvitationResult =
+  | { ok: true; value: CoOrganizerInvitation }
+  | { ok: false; error: string };
+
+export type ParseCoOrganizerInvitationResponseResult =
+  | { ok: true; value: CoOrganizerInvitationResponse }
+  | { ok: false; error: string };
+
+export type ParseCoOrganizerInvitationRevocationResult =
+  | { ok: true; value: CoOrganizerInvitationRevocation }
   | { ok: false; error: string };
 
 const VOUCH_KINDS: ReadonlySet<SignedVouch["kind"]> = new Set([
@@ -462,6 +477,173 @@ export function parseTaskComment(input: unknown): ParseTaskCommentResult {
       body,
       createdAt: r.createdAt as number,
       deletedAt: r.deletedAt as number | null,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+const COORG_INVITATION_STRING_FIELDS = [
+  "id",
+  "projectId",
+  "inviterKey",
+  "inviteeKey",
+  "nodeId",
+  "signature",
+] as const;
+
+export function parseCoOrganizerInvitation(
+  input: unknown,
+): ParseCoOrganizerInvitationResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of COORG_INVITATION_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (
+    typeof r.expiresAt !== "number" ||
+    !Number.isInteger(r.expiresAt) ||
+    r.expiresAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "expiresAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.createdAt as number) > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      projectId: r.projectId as string,
+      inviterKey: r.inviterKey as string,
+      inviteeKey: r.inviteeKey as string,
+      createdAt: r.createdAt as number,
+      expiresAt: r.expiresAt as number,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+const COORG_INVITATION_RESPONSE_STRING_FIELDS = [
+  "id",
+  "invitationId",
+  "inviteeKey",
+  "nodeId",
+  "signature",
+] as const;
+
+const COORG_RESPONSE_DECISIONS: ReadonlySet<
+  CoOrganizerInvitationResponse["decision"]
+> = new Set(["accept", "decline"]);
+
+export function parseCoOrganizerInvitationResponse(
+  input: unknown,
+): ParseCoOrganizerInvitationResponseResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of COORG_INVITATION_RESPONSE_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.decision !== "string" ||
+    !COORG_RESPONSE_DECISIONS.has(
+      r.decision as CoOrganizerInvitationResponse["decision"],
+    )
+  ) {
+    return { ok: false, error: "decision must be 'accept' or 'decline'" };
+  }
+  if (
+    typeof r.decidedAt !== "number" ||
+    !Number.isInteger(r.decidedAt) ||
+    r.decidedAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "decidedAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.decidedAt as number) > oneDayFromNow) {
+    return { ok: false, error: "decidedAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      invitationId: r.invitationId as string,
+      inviteeKey: r.inviteeKey as string,
+      decision: r.decision as CoOrganizerInvitationResponse["decision"],
+      decidedAt: r.decidedAt as number,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+const COORG_INVITATION_REVOCATION_STRING_FIELDS = [
+  "id",
+  "invitationId",
+  "inviterKey",
+  "nodeId",
+  "signature",
+] as const;
+
+export function parseCoOrganizerInvitationRevocation(
+  input: unknown,
+): ParseCoOrganizerInvitationRevocationResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of COORG_INVITATION_REVOCATION_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.revokedAt !== "number" ||
+    !Number.isInteger(r.revokedAt) ||
+    r.revokedAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "revokedAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.revokedAt as number) > oneDayFromNow) {
+    return { ok: false, error: "revokedAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      invitationId: r.invitationId as string,
+      inviterKey: r.inviterKey as string,
+      revokedAt: r.revokedAt as number,
       nodeId: r.nodeId as string,
       signature: r.signature as string,
     },

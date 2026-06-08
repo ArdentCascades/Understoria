@@ -260,11 +260,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pullFederatedClaims,
         pullFederatedTaskComments,
         pullFederatedExchanges,
+        pullFederatedCoOrgInvitations,
+        pullFederatedCoOrgResponses,
+        pullFederatedCoOrgRevocations,
       }) => {
         void pullFederatedPosts();
         void pullFederatedClaims();
         void pullFederatedTaskComments();
         void pullFederatedExchanges();
+        void pullFederatedCoOrgInvitations();
+        void pullFederatedCoOrgResponses();
+        void pullFederatedCoOrgRevocations();
       },
     );
   }, [ready]);
