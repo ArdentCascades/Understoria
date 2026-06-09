@@ -470,6 +470,19 @@ async function importPayload(
     publicKey: payload.publicKey,
     secretKey: payload.secretKey,
   });
+  // Import the blocker's block + history bundle if the source device
+  // included it. Pre-PR-C source devices omit these fields entirely
+  // — the optionality is the cross-version compatibility hook per
+  // `docs/blocking.md` §14.1 and the TransferPayload docstring.
+  // `bulkPut` is idempotent on the primary key, so a re-pair (where
+  // the source has changed nothing) is a no-op rather than a
+  // duplicate-key error.
+  if (payload.blocks && payload.blocks.length > 0) {
+    await db.blocks.bulkPut(payload.blocks);
+  }
+  if (payload.previouslyBlocked && payload.previouslyBlocked.length > 0) {
+    await db.previouslyBlocked.bulkPut(payload.previouslyBlocked);
+  }
   if (sessionPassphrase) {
     // Re-wraps every secret key on this device under the new
     // master derived from the session passphrase. With just the

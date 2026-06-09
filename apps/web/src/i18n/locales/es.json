@@ -1658,5 +1658,72 @@
       "intro": "Todo es opcional — ayudan a que otras personas te encuentren cuando necesitan a alguien cercano o con una habilidad concreta. Puedes cambiar cualquier cosa más adelante en Perfil.",
       "hint": "Nada de esto es privado en la red — comparte solo lo que compartirías con una persona vecina."
     }
+  },
+  "block": {
+    "action": {
+      "button": "Bloquear contacto",
+      "unblockButton": "Desbloquear"
+    },
+    "confirm": {
+      "titleDefault": "Bloquear a este contacto",
+      "titleWithGovernance": "Bloquear a este contacto (completo)",
+      "commitsHeading": "Qué significa esto",
+      "commits": {
+        "cannotReach": "{{name}} ya no podrá enviarte mensajes, reclamar tus publicaciones, avalarte ni confirmar asistencia a tus eventos.",
+        "youWontSee": "No verás sus publicaciones, comentarios, avales ni eventos.",
+        "shadow": "No se le avisará.",
+        "governanceExtra": "Sus propuestas, votos y comentarios en disputas también quedarán ocultos para ti. Seguirán siendo visibles para el resto de la comunidad."
+      },
+      "notCommitsHeading": "Qué NO significa esto",
+      "notCommits": {
+        "dispute": "Esto no presenta una disputa ni avisa a moderación. Para plantear una preocupación comunitaria, ve a Perfil → Disputas.",
+        "deletion": "Esto no borra sus registros firmados de la federación.",
+        "otherNodes": "Esto no le bloquea en otros nodos."
+      },
+      "notePlaceholder": "Nota privada (opcional, solo tú la ves)",
+      "hideGovernanceCheckbox": "Ocultar también sus propuestas, votos y comentarios en disputas.",
+      "hideGovernanceWhy": "Por defecto, sigues viendo sus aportaciones a la gobernanza. Ocultarlas aquí es una elección personal — su voz sigue llegando al resto de la comunidad.",
+      "button": "Bloquear contacto",
+      "buttonPending": "Bloqueando…",
+      "cancel": "Cancelar",
+      "success": "Contacto bloqueado.",
+      "errorGeneric": "No se pudo bloquear. Inténtalo de nuevo."
+    },
+    "unblock": {
+      "confirmTitle": "¿Desbloquear a {{name}}?",
+      "confirmBody": "Podrá volver a enviarte mensajes, reclamar tus publicaciones, avalarte y confirmar asistencia a tus eventos. El historial existente (tu bloqueo anterior) se conserva en tu historial local.",
+      "confirmButton": "Desbloquear",
+      "confirmingButton": "Desbloqueando…",
+      "dismiss": "Cancelar",
+      "success": "Contacto desbloqueado.",
+      "errorGeneric": "No se pudo desbloquear. Inténtalo de nuevo."
+    },
+    "settings": {
+      "sectionTitle": "Contactos bloqueados",
+      "sectionIntro": "Tu lista personal de bloqueos. Se queda en este dispositivo — nunca se federa, y ningún otro miembro puede verla.",
+      "activeHeading": "Bloqueos activos",
+      "activeEmpty": "No has bloqueado a nadie. Para bloquear a alguien, ve a su página de miembro y pulsa Bloquear contacto.",
+      "historyHeading": "Bloqueos anteriores",
+      "historyEmpty": "Aún no hay historial. Cuando desbloquees a alguien, aparecerá aquí como recordatorio.",
+      "obscuredRowLabel": "Contacto bloqueado",
+      "tapToReveal": "Pulsa para mostrar",
+      "collapse": "Ocultar",
+      "unblockButton": "Desbloquear",
+      "hideGovernanceToggle": "Ocultar sus aportaciones a la gobernanza",
+      "clearHistoryButton": "Borrar historial de desbloqueos",
+      "clearHistoryConfirmTitle": "¿Borrar historial de desbloqueos?",
+      "clearHistoryConfirmBody": "Esto borra todas las filas del recordatorio de bloqueos anteriores. Los bloqueos activos no se ven afectados. Esto no se puede deshacer.",
+      "clearHistoryConfirmButton": "Borrar historial",
+      "clearHistorySuccess": "Historial de desbloqueos borrado.",
+      "crossDeviceWarning": "Los bloqueos llegan a un dispositivo recién emparejado cuando lo emparejas. Los dispositivos que emparejaste antes de crear un bloqueo necesitan re-emparejarse para recibirlo.",
+      "blockedAtLabel": "Bloqueado el {{date}}",
+      "firstBlockedAtLabel": "Primer bloqueo: {{when}}",
+      "unblockedAtLabel": "Desbloqueado: {{when}}",
+      "pubkeyLabel": "Clave {{shortKey}}"
+    },
+    "error": {
+      "cannotBlockSelf": "No puedes bloquearte a ti mismo.",
+      "noteTooLong": "La nota debe tener 500 caracteres o menos."
+    }
   }
 }

@@ -12,13 +12,17 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
 import { TrustedByList } from "@/components/TrustedByList";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
+import { BlockConfirmCard } from "@/components/BlockConfirmCard";
+import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
+import { isBlocked } from "@/db/blocks";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
 import { humanizeError } from "@/lib/humanizeError";
@@ -36,6 +40,21 @@ export default function MemberDetailPage() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vouchedJustNow, setVouchedJustNow] = useState(false);
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [unblockOpen, setUnblockOpen] = useState(false);
+
+  // Reactive blocked-state lookup. Re-runs when either side's
+  // pubkey changes OR when the underlying `blocks` table mutates
+  // (block / unblock toggles the value live without a manual
+  // refresh).
+  const blocked = useLiveQuery(
+    async () =>
+      currentMember && publicKey
+        ? await isBlocked(currentMember.publicKey, publicKey)
+        : false,
+    [currentMember?.publicKey, publicKey],
+    false,
+  );
 
   const member = useMemo(
     () => members.find((m) => m.publicKey === publicKey) ?? null,
@@ -256,12 +275,55 @@ export default function MemberDetailPage() {
         )}
       </section>
 
+      {/* Block / Unblock affordance. Hidden on the self-view because
+          blocking yourself is meaningless. Per design doc §11.6 +
+          §13.1: the surface lives ONLY on MemberDetail + Settings —
+          not on feed cards — and uses the literal copy "Block
+          contact" to stay clear of the `follows-not-blocked`
+          task-vocabulary collision. */}
+      {!isSelf && currentMember && (
+        <section className="card mb-4">
+          <button
+            type="button"
+            onClick={() =>
+              blocked ? setUnblockOpen(true) : setBlockOpen(true)
+            }
+            className={
+              blocked
+                ? "btn-secondary min-h-[44px]"
+                : "btn min-h-[44px] bg-rose-600 text-white hover:bg-rose-700"
+            }
+          >
+            {blocked
+              ? t("block.action.unblockButton")
+              : t("block.action.button")}
+          </button>
+        </section>
+      )}
+
       <Link
         to="/"
         className="text-sm text-moss-600 underline-offset-2 hover:underline"
       >
         {t("member.backToBoard")}
       </Link>
+
+      {!isSelf && currentMember && publicKey && (
+        <>
+          <BlockConfirmCard
+            open={blockOpen}
+            blockedKey={publicKey}
+            blockedDisplayName={member.displayName}
+            onClose={() => setBlockOpen(false)}
+          />
+          <UnblockConfirmDialog
+            open={unblockOpen}
+            blockedKey={publicKey}
+            blockedDisplayName={member.displayName}
+            onClose={() => setUnblockOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 }
