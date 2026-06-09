@@ -470,6 +470,86 @@ describe("block-bundle transfer (docs/blocking.md §14.1)", () => {
       bundle.previouslyBlocked.every((r) => r.blockerKey === "alice_key"),
     ).toBe(true);
   });
+
+  it("end-to-end: source assembles → wraps → destination unwraps → blocks persist in Dexie", async () => {
+    // This is the PR E wire-up test: it exercises the full path
+    // from `assembleBlocksForTransfer` on the source side, through
+    // `wrapForTransfer` + `unwrapTransfer`, and (the new bit) the
+    // destination-side bulkPut into `db.blocks` / `db.previouslyBlocked`.
+    // Locks the cross-device propagation guarantee described in
+    // `docs/blocking.md` §14.1 (Cross-device propagation settled YES).
+    const { db } = await import("@/db/database");
+    const { blockMember } = await import("@/db/blocks");
+    const { assembleBlocksForTransfer } = await import("./devicePairing");
+
+    await Promise.all([
+      db.blocks.clear(),
+      db.previouslyBlocked.clear(),
+    ]);
+
+    await blockMember({
+      blockerKey: "source_alice",
+      blockedKey: "bob_key",
+      hideGovernance: false,
+      note: null,
+      now: 1_000,
+    });
+    await blockMember({
+      blockerKey: "source_alice",
+      blockedKey: "carol_key",
+      hideGovernance: true,
+      note: "private memory aid",
+      now: 2_000,
+    });
+
+    const bundle = await assembleBlocksForTransfer("source_alice");
+    expect(bundle.blocks).toHaveLength(2);
+
+    const { secretKey, publicKey } = freshKeypair();
+    const passphrase = "round trip passphrase six words alpha";
+    const env = await wrapForTransfer({
+      secretKey,
+      publicKey,
+      profile: PROFILE,
+      passphrase,
+      blocks: bundle.blocks,
+      previouslyBlocked: bundle.previouslyBlocked,
+    });
+    const result = await unwrapTransfer(env, passphrase);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // Simulate the destination-side import: clear local Dexie (this
+    // is a fresh paired device) and bulkPut the unwrapped rows.
+    await Promise.all([
+      db.blocks.clear(),
+      db.previouslyBlocked.clear(),
+    ]);
+    if (result.payload.blocks) {
+      await db.blocks.bulkPut(result.payload.blocks);
+    }
+    if (result.payload.previouslyBlocked) {
+      await db.previouslyBlocked.bulkPut(result.payload.previouslyBlocked);
+    }
+
+    const persistedBlocks = await db.blocks.toArray();
+    const persistedHistory = await db.previouslyBlocked.toArray();
+    expect(persistedBlocks.map((r) => r.blockedKey).sort()).toEqual(
+      ["bob_key", "carol_key"].sort(),
+    );
+    expect(persistedBlocks.every((r) => r.blockerKey === "source_alice")).toBe(
+      true,
+    );
+    // The history rows that `blockMember` synthesises on create
+    // come along too — that's the "first blocked at" memory aid.
+    expect(persistedHistory.map((r) => r.blockedKey).sort()).toEqual(
+      ["bob_key", "carol_key"].sort(),
+    );
+    // hideGovernance + note round-trip without alteration.
+    const carol = persistedBlocks.find((r) => r.blockedKey === "carol_key");
+    expect(carol?.hideGovernance).toBe(true);
+    expect(carol?.note).toBe("private memory aid");
+  });
 });
 
 describe("envelope sizing (sanity check against design doc §5.4)", () => {

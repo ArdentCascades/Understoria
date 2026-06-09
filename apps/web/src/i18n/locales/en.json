@@ -1658,5 +1658,72 @@
       "intro": "All optional — these help others find you when they need someone nearby or with a particular skill. You can change any of it later in Profile.",
       "hint": "Nothing here is private to the network — only share what you'd share with a neighbor."
     }
+  },
+  "block": {
+    "action": {
+      "button": "Block contact",
+      "unblockButton": "Unblock"
+    },
+    "confirm": {
+      "titleDefault": "Block this contact",
+      "titleWithGovernance": "Block this contact (full)",
+      "commitsHeading": "What this means",
+      "commits": {
+        "cannotReach": "{{name}} can no longer DM you, claim your posts, vouch for you, or RSVP to your events.",
+        "youWontSee": "You won't see their posts, comments, vouches, or events.",
+        "shadow": "They will not be told.",
+        "governanceExtra": "Their proposals, votes, and dispute comments will also be hidden from your view. They will still appear to every other member."
+      },
+      "notCommitsHeading": "What this does NOT mean",
+      "notCommits": {
+        "dispute": "This does not file a dispute or notify moderators. To raise a community concern, see Profile → Disputes.",
+        "deletion": "This does not delete their signed records from the federation.",
+        "otherNodes": "This does not block them on other nodes."
+      },
+      "notePlaceholder": "Private note (optional, only you see this)",
+      "hideGovernanceCheckbox": "Also hide their proposals, votes, and dispute comments from me.",
+      "hideGovernanceWhy": "By default, you still see their governance contributions. Hiding them here is a personal choice — their voice still reaches every other member of the community.",
+      "button": "Block contact",
+      "buttonPending": "Blocking…",
+      "cancel": "Cancel",
+      "success": "Contact blocked.",
+      "errorGeneric": "Couldn't block. Try again."
+    },
+    "unblock": {
+      "confirmTitle": "Unblock {{name}}?",
+      "confirmBody": "They'll be able to message you, claim your posts, vouch for you, and RSVP to your events again. Existing history (your previous block of them) stays in your local history.",
+      "confirmButton": "Unblock",
+      "confirmingButton": "Unblocking…",
+      "dismiss": "Cancel",
+      "success": "Contact unblocked.",
+      "errorGeneric": "Couldn't unblock. Try again."
+    },
+    "settings": {
+      "sectionTitle": "Blocked contacts",
+      "sectionIntro": "Your personal block list. This stays on this device — it never federates, and no other member can see it.",
+      "activeHeading": "Active blocks",
+      "activeEmpty": "You haven't blocked anyone. To block someone, go to their member page and tap Block contact.",
+      "historyHeading": "Previously blocked",
+      "historyEmpty": "No history yet. When you unblock someone, they'll appear here as a memory aid.",
+      "obscuredRowLabel": "Blocked contact",
+      "tapToReveal": "Tap to reveal",
+      "collapse": "Hide",
+      "unblockButton": "Unblock",
+      "hideGovernanceToggle": "Hide their governance contributions from me",
+      "clearHistoryButton": "Clear unblocked history",
+      "clearHistoryConfirmTitle": "Clear unblocked history?",
+      "clearHistoryConfirmBody": "This deletes every row in your previously-blocked memory aid. Active blocks are unaffected. This cannot be undone.",
+      "clearHistoryConfirmButton": "Clear history",
+      "clearHistorySuccess": "Unblocked history cleared.",
+      "crossDeviceWarning": "Blocks reach a newly-paired device when you pair it. Devices you paired before creating a block need to be re-paired to receive it.",
+      "blockedAtLabel": "Blocked on {{date}}",
+      "firstBlockedAtLabel": "First blocked {{when}}",
+      "unblockedAtLabel": "Unblocked {{when}}",
+      "pubkeyLabel": "Key {{shortKey}}"
+    },
+    "error": {
+      "cannotBlockSelf": "You can't block yourself.",
+      "noteTooLong": "Note must be 500 characters or fewer."
+    }
   }
 }

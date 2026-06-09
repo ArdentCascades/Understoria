@@ -15,6 +15,7 @@ import { LanguageSection } from "@/components/LanguageSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
 import { NodeSection } from "@/components/NodeSection";
 import { SecuritySection } from "@/components/SecuritySection";
+import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { exportData } from "@/lib/exportData";
 
 // Device-local preferences and admin. Extracted from Profile.tsx so
@@ -51,6 +52,8 @@ export default function SettingsPage() {
         <LanguageSection />
 
         <AppearanceSection />
+
+        <BlockedContactsPanel />
 
         <NodeSection />
 

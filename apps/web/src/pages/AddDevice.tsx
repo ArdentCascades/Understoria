@@ -17,6 +17,7 @@ import { useApp } from "@/state/AppContext";
 import { getSecretKey } from "@/db/secrets";
 import { b64decode } from "@/lib/bytes";
 import {
+  assembleBlocksForTransfer,
   DEFAULT_EXPIRY_MS,
   encodeEnvelope,
   generateTransferPassphrase,
@@ -108,11 +109,21 @@ export default function AddDevicePage() {
       };
 
       const generated = generateTransferPassphrase(wordlist, 6);
+      // Per `docs/blocking.md` §14.1: block state propagates to a
+      // newly-paired device through the local-key-wrapped pairing
+      // envelope (NEVER over a peer-node wire). Read scoped to this
+      // blocker's pubkey so a shared-device cluster doesn't leak
+      // one member's blocks into another member's transfer.
+      const blockBundle = await assembleBlocksForTransfer(
+        currentMember.publicKey,
+      );
       const env = await wrapForTransfer({
         secretKey,
         publicKey,
         profile,
         passphrase: generated,
+        blocks: blockBundle.blocks,
+        previouslyBlocked: blockBundle.previouslyBlocked,
       });
 
       setEncoded(encodeEnvelope(env));
