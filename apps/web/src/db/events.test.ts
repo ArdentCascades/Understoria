@@ -516,7 +516,7 @@ describe("pullFederatedEvents", () => {
     expect(
       Number(
         await db.settings
-          .get(SETTING_KEYS.pullCursorEvent)
+          .get(SETTING_KEYS.federationLastEventPull)
           .then((r) => r?.value ?? "0"),
       ),
     ).toBe(5_000);
@@ -595,7 +595,7 @@ describe("pullFederatedEventCancellations", () => {
     });
     expect(
       await db.settings
-        .get(SETTING_KEYS.pullCursorEventCancellation)
+        .get(SETTING_KEYS.federationLastEventCancellationPull)
         .then((r) => r?.value),
     ).toBe("12345");
   });

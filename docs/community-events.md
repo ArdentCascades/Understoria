@@ -766,7 +766,8 @@ workstream.
   upsert), `getEvent`, `listEvents` (with `includeCancelled` filter),
   `getMemberRsvp`, `listRsvpsForEvent`, `attendeeCount`. Federation
   pulls `pullFederatedEvents` + `pullFederatedEventCancellations` use
-  cursor keys `pullCursorEvent` + `pullCursorEventCancellation` (in
+  cursor keys `federationLastEventPull` +
+  `federationLastEventCancellationPull` (in
   `SETTING_KEYS`, defaulting to `0`). Outbox enqueue helpers
   `enqueueEvent` / `enqueueEventCancellation` live in
   `apps/web/src/lib/outbox.ts`; there is deliberately no

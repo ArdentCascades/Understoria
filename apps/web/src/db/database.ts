@@ -648,6 +648,31 @@ export class UnderstoriaDB extends Dexie {
       eventCancellations:
         "id, eventId, cancelledAt, createdBy, nodeId",
     });
+    // Version 23 — rename federation-pull cursor keys for community
+    // events to match the `federationLast<Kind>Pull` convention used
+    // everywhere else in SETTING_KEYS. Carries the value across so any
+    // cursor already written under the old key isn't lost. The deletes
+    // are best-effort — settings rows simply won't exist on fresh
+    // installs, where the old keys were never written.
+    this.version(23).upgrade(async (tx) => {
+      const settings = tx.table<AppSetting, string>("settings");
+      const oldEvent = await settings.get("pullCursorEvent");
+      if (oldEvent && oldEvent.value !== undefined) {
+        await settings.put({
+          key: "federationLastEventPull",
+          value: oldEvent.value,
+        });
+        await settings.delete("pullCursorEvent");
+      }
+      const oldCancel = await settings.get("pullCursorEventCancellation");
+      if (oldCancel && oldCancel.value !== undefined) {
+        await settings.put({
+          key: "federationLastEventCancellationPull",
+          value: oldCancel.value,
+        });
+        await settings.delete("pullCursorEventCancellation");
+      }
+    });
   }
 }
 
@@ -709,11 +734,11 @@ export const SETTING_KEYS = {
     "federationLastCoOrgInvitationRevocationPull",
   /** Cursor for `pullFederatedEvents` — highest `createdAt` observed so
    *  far on community-event pulls. Defaults to epoch 0 when absent. */
-  pullCursorEvent: "pullCursorEvent",
+  federationLastEventPull: "federationLastEventPull",
   /** Cursor for `pullFederatedEventCancellations` — highest
    *  `cancelledAt` observed so far on event-cancellation pulls.
    *  Defaults to epoch 0 when absent. */
-  pullCursorEventCancellation: "pullCursorEventCancellation",
+  federationLastEventCancellationPull: "federationLastEventCancellationPull",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
