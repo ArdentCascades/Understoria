@@ -600,7 +600,11 @@ not a moderator action.
 - [ ] At least three members have independently and voluntarily
       disclosed a block of X to the operator. (Below three, the
       disclosures are personal and the operator's role is to
-      listen, not to announce.)
+      listen, not to announce.) **Note:** the "three" threshold
+      is a starting guess subject to pilot revision — small
+      communities may need it lower, larger ones higher. Revisit
+      after first pilot use; do not change unilaterally without
+      naming the new threshold here.
 - [ ] The disclosures were unsolicited — the operator did not
       ask members "have you blocked X?" Asking would compromise
       the privacy posture of the block primitive.
