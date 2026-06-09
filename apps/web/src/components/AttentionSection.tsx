@@ -46,6 +46,7 @@ export function AttentionSection() {
     currentMember, posts, projects, projectTasks, members, vouches, nodeConfig,
     nodeId, lockState,
     coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
+    events, eventRsvps, eventCancellations,
   } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -71,11 +72,15 @@ export function AttentionSection() {
         coorgInvitations,
         coorgInvitationResponses,
         coorgInvitationRevocations,
+        events,
+        eventRsvps,
+        eventCancellations,
         config: nodeConfig,
       }),
     [
       currentMember, posts, projects, projectTasks, members, vouches,
       coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
+      events, eventRsvps, eventCancellations,
       nodeConfig,
     ],
   );
@@ -472,6 +477,81 @@ export function AttentionSection() {
                     )
                   }
                 />
+              </li>
+            );
+          }
+          if (item.kind === "event_today") {
+            return (
+              <li key={`event_today_${item.eventId}`}>
+                <Link
+                  to={item.deepLink}
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                >
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      {t("events.attention.eventTodayLine", {
+                        title: item.title,
+                        location: item.location,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-500">
+                      {t("events.attention.eventTodayHint")}
+                      {/* `no-notifications` tooltip per design doc §8.1 —
+                          named on the row so members can see why the
+                          surface isn't pushy. */}
+                      <WhyTooltip principleId="no-notifications" />
+                    </span>
+                  </span>
+                  <RowChevron />
+                </Link>
+              </li>
+            );
+          }
+          if (item.kind === "event_cancelled") {
+            const hint = item.reason
+              ? t("events.attention.eventCancelledHint", { reason: item.reason })
+              : t("events.attention.eventCancelledHintNoReason");
+            return (
+              <li key={`event_cancelled_${item.eventId}`}>
+                <Link
+                  to={item.deepLink}
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+                >
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium text-amber-900 dark:text-amber-100">
+                      {t("events.attention.eventCancelledLine", {
+                        title: item.eventTitle,
+                      })}
+                    </span>
+                    <span className="block text-xs text-amber-800 dark:text-amber-200">
+                      {hint}
+                    </span>
+                  </span>
+                  <RowChevron />
+                </Link>
+              </li>
+            );
+          }
+          if (item.kind === "event_capacity_reached") {
+            return (
+              <li key={`event_capacity_${item.eventId}`}>
+                <Link
+                  to={item.deepLink}
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                >
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      {t("events.attention.eventCapacityReachedLine", {
+                        title: item.title,
+                        capacity: item.capacity,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-500">
+                      {t("events.attention.eventCapacityReachedHint")}
+                    </span>
+                  </span>
+                  <RowChevron />
+                </Link>
               </li>
             );
           }

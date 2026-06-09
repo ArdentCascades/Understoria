@@ -20,6 +20,8 @@
  */
 import type {
   Category,
+  Event,
+  EventCancellation,
   Exchange,
   Post,
   PostType,
@@ -49,7 +51,8 @@ import type {
 export type CalendarEntryKind =
   | "project_deadline"
   | "post_expiring"
-  | "exchange_density";
+  | "exchange_density"
+  | "event";
 
 /** Discriminated union — `kind` narrows the rest of the fields.
  *  Each entry carries the structural data the UI needs to render
@@ -87,12 +90,38 @@ export type CalendarEntry =
        *  layer renders this as opacity / dot-density per the design
        *  note §8.2, not as a raw number on the calendar grid. */
       count: number;
+    }
+  | {
+      kind: "event";
+      id: string;
+      /** Midnight UTC of the event's startsAt day. */
+      date: number;
+      eventId: string;
+      title: string;
+      /** Epoch ms of the event's actual start (NOT day-floored). The
+       *  UI uses this to render the time-of-day; `date` is the UTC
+       *  day for grouping. */
+      startsAt: number;
+      location: string;
+      /** Organizer's pubkey. The UI can look up the display name from
+       *  the members map. Carried so renderers don't have to do their
+       *  own event-to-organizer join. */
+      organizerKey: string;
+      /** Deep-link path to the event detail page. */
+      path: string;
     };
 
 export interface BuildCalendarInput {
   projects: readonly Project[];
   posts: readonly Post[];
   exchanges: readonly Exchange[];
+  /** Events to surface on the calendar. Cancelled events (those with a
+   *  matching `eventCancellations` row) are filtered out at the data
+   *  layer — the calendar never renders a cancelled event. */
+  events?: readonly Event[];
+  /** Cancellation records that suppress the corresponding event from
+   *  appearing on the calendar. Lookup is by `eventId`. */
+  eventCancellations?: readonly EventCancellation[];
   /** Inclusive lower bound on the entry's source timestamp
    *  (deadline / expiresAt / completedAt). ms epoch. */
   windowStart: number;
@@ -163,6 +192,14 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   // Density: bucket exchanges by their UTC day. One entry per
   // non-empty day. The Map preserves insertion order, but we sort
   // the full output at the end so insertion order doesn't matter.
+  //
+  // Events deliberately do NOT count toward density — see
+  // `docs/community-events.md` §9 + the WhyTooltip `no-leaderboards`
+  // discipline. Density is community metabolism keyed to completed
+  // exchanges; folding events into it would re-derive the
+  // popularity/attendance signal `no-leaderboards` exists to prevent.
+  // This loop iterates `input.exchanges` only; if you find yourself
+  // reading `input.events` here you're about to violate that.
   const byDay = new Map<string, number>();
   for (const ex of input.exchanges) {
     if (ex.completedAt < input.windowStart || ex.completedAt > input.windowEnd)
@@ -179,12 +216,36 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
     });
   }
 
+  // Events: skip any whose id has a matching cancellation row, then
+  // emit one entry per surviving event placed on its UTC start day.
+  // Window check uses `startsAt` — same shape as project deadlines /
+  // post expiries.
+  const cancelledIds = new Set<string>();
+  for (const c of input.eventCancellations ?? []) cancelledIds.add(c.eventId);
+  for (const ev of input.events ?? []) {
+    if (cancelledIds.has(ev.id)) continue;
+    if (ev.startsAt < input.windowStart || ev.startsAt > input.windowEnd)
+      continue;
+    entries.push({
+      kind: "event",
+      id: `event:${ev.id}`,
+      date: startOfUTCDay(ev.startsAt),
+      eventId: ev.id,
+      title: ev.title,
+      startsAt: ev.startsAt,
+      location: ev.location,
+      organizerKey: ev.createdBy,
+      path: `/events/${ev.id}`,
+    });
+  }
+
   // Stable sort by date, then by kind (density < deadline < post)
   // for same-day tie-breaking so the UI z-order is predictable.
   const kindOrder: Record<CalendarEntryKind, number> = {
     exchange_density: 0,
     project_deadline: 1,
     post_expiring: 2,
+    event: 3,
   };
   entries.sort((a, b) => {
     if (a.date !== b.date) return a.date - b.date;

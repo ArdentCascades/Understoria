@@ -13,6 +13,9 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
+  EventRsvpRow,
   Member,
   NodeConfig,
   Post,
@@ -21,6 +24,7 @@ import type {
 } from "@/types";
 import { canClaimTask } from "@/db/projects";
 import type { SignedVouch } from "@/lib/vouch";
+import { startOfUTCDay } from "./calendar";
 import {
   daysSinceClaim as daysSinceClaimHelper,
   taskCheckInState,
@@ -116,6 +120,49 @@ export type AttentionItem =
       inviterKey: string;
       expiresAt: number;
       createdAt: number;
+    }
+  | {
+      /**
+       * An event the current member RSVP'd "going" or "maybe" to
+       * starts today (UTC). Per `docs/community-events.md` §8.1 this
+       * is pull-only and matches the project-deadline shape — no
+       * urgency theater, just "here's what's on for you today."
+       */
+      kind: "event_today";
+      eventId: string;
+      title: string;
+      startsAt: number;
+      location: string;
+      deepLink: string;
+      createdAt: number;
+    }
+  | {
+      /**
+       * An event the current member RSVP'd "going" or "maybe" to was
+       * cancelled. Per §8.2 surfaces for 7 days from the cancellation,
+       * carries the reason (may be empty) and an event-page deep link.
+       */
+      kind: "event_cancelled";
+      eventId: string;
+      eventTitle: string;
+      cancelledAt: number;
+      reason: string;
+      deepLink: string;
+      createdAt: number;
+    }
+  | {
+      /**
+       * Organizer-only: an event the current member created has a
+       * non-null capacity and the local "going" count has reached it.
+       * Per §8.3 the cap is a planning aid for the organizer, not a
+       * public "sold out" signal — only the organizer sees this.
+       */
+      kind: "event_capacity_reached";
+      eventId: string;
+      title: string;
+      capacity: number;
+      deepLink: string;
+      createdAt: number;
     };
 
 export interface AttentionInput {
@@ -140,6 +187,17 @@ export interface AttentionInput {
     NodeConfig,
     "taskCheckInDays" | "taskNeedsHelpDays" | "taskCheckInGraceDays"
   >;
+  /** Community events visible on this node — feeds the three event
+   *  attention items (`event_today`, `event_cancelled`,
+   *  `event_capacity_reached`). Optional so callers that don't yet
+   *  read events keep working. */
+  events?: readonly Event[];
+  /** Local-only RSVP rows. The `event_today` and `event_cancelled`
+   *  queries scope to the current member's "going" / "maybe" rows. */
+  eventRsvps?: readonly EventRsvpRow[];
+  /** Signed cancellation rows. The `event_cancelled` query reads these;
+   *  cancelled events are also suppressed from `event_today`. */
+  eventCancellations?: readonly EventCancellation[];
   now?: number;
 }
 
@@ -379,6 +437,107 @@ export function computeAttentionItems(
         inviterKey: invitation.inviterKey,
         expiresAt: invitation.expiresAt,
         createdAt: invitation.createdAt,
+      });
+    }
+  }
+
+  // Community events — three items per `docs/community-events.md` §8.
+  // All three are pull-only and operate on local-only data; dismissals
+  // (per §8 dismissal lifecycle) live in the same local-storage layer
+  // the existing items use (we don't add new dismissal plumbing here).
+  if (input.events && input.events.length > 0) {
+    const cancellationByEventId = new Map<string, EventCancellation>();
+    for (const c of input.eventCancellations ?? []) {
+      cancellationByEventId.set(c.eventId, c);
+    }
+    const myRsvpByEventId = new Map<string, EventRsvpRow>();
+    for (const r of input.eventRsvps ?? []) {
+      if (r.memberKey !== currentMember.publicKey) continue;
+      myRsvpByEventId.set(r.eventId, r);
+    }
+    const eventById = new Map<string, Event>();
+    for (const e of input.events) eventById.set(e.id, e);
+
+    const todayStart = startOfUTCDay(now);
+    const todayEnd = todayStart + DAY_MS;
+    const SEVEN_DAYS_MS = 7 * DAY_MS;
+
+    // event_today — non-cancelled events starting today (UTC), for
+    // members who RSVP'd "going" or "maybe". Carries enough fields
+    // to render the row + deep link.
+    for (const ev of input.events) {
+      if (cancellationByEventId.has(ev.id)) continue;
+      if (ev.startsAt < todayStart || ev.startsAt >= todayEnd) continue;
+      const myRsvp = myRsvpByEventId.get(ev.id);
+      if (!myRsvp) continue;
+      if (myRsvp.status !== "going" && myRsvp.status !== "maybe") continue;
+      items.push({
+        kind: "event_today",
+        eventId: ev.id,
+        title: ev.title,
+        startsAt: ev.startsAt,
+        location: ev.location,
+        deepLink: `/events/${ev.id}`,
+        // Sort cursor: the event's start. Today's events stack
+        // alongside other same-day createdAt items reasonably.
+        createdAt: ev.startsAt,
+      });
+    }
+
+    // event_cancelled — surface for 7 days from the cancellation, to
+    // members who RSVP'd "going" or "maybe". Members who said
+    // "not_going" weren't planning to be there; the doc §8.2 names
+    // them out of scope deliberately.
+    for (const cancellation of input.eventCancellations ?? []) {
+      if (now - cancellation.cancelledAt > SEVEN_DAYS_MS) continue;
+      const myRsvp = myRsvpByEventId.get(cancellation.eventId);
+      if (!myRsvp) continue;
+      if (myRsvp.status !== "going" && myRsvp.status !== "maybe") continue;
+      const ev = eventById.get(cancellation.eventId);
+      // The event row is needed to render the title. If federation
+      // delivered the cancellation before the event row we just drop
+      // quietly — same shape as the coorg-invitation missing-project
+      // branch above.
+      if (!ev) continue;
+      items.push({
+        kind: "event_cancelled",
+        eventId: cancellation.eventId,
+        eventTitle: ev.title,
+        cancelledAt: cancellation.cancelledAt,
+        reason: cancellation.reason,
+        deepLink: `/events/${cancellation.eventId}`,
+        createdAt: cancellation.cancelledAt,
+      });
+    }
+
+    // event_capacity_reached — organizer-only. Reads from the local
+    // RSVP roster (not just the current member's row, so we walk
+    // `eventRsvps` directly rather than `myRsvpByEventId`). Peer-node
+    // RSVPs are out of scope by design — see §8.3.
+    const goingCountByEventId = new Map<string, number>();
+    for (const r of input.eventRsvps ?? []) {
+      if (r.status !== "going") continue;
+      goingCountByEventId.set(
+        r.eventId,
+        (goingCountByEventId.get(r.eventId) ?? 0) + 1,
+      );
+    }
+    for (const ev of input.events) {
+      if (ev.createdBy !== currentMember.publicKey) continue;
+      if (ev.capacity === null) continue;
+      if (cancellationByEventId.has(ev.id)) continue;
+      const goingCount = goingCountByEventId.get(ev.id) ?? 0;
+      if (goingCount < ev.capacity) continue;
+      items.push({
+        kind: "event_capacity_reached",
+        eventId: ev.id,
+        title: ev.title,
+        capacity: ev.capacity,
+        deepLink: `/events/${ev.id}`,
+        // Sort by the event's own createdAt; capacity-reached doesn't
+        // have a moment-it-happened timestamp without tracking each
+        // RSVP transition, which we deliberately don't.
+        createdAt: ev.createdAt,
       });
     }
   }

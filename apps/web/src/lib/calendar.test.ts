@@ -5,7 +5,14 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { describe, expect, it } from "vitest";
-import type { Exchange, Post, Project, ProjectStatus } from "@/types";
+import type {
+  Event,
+  EventCancellation,
+  Exchange,
+  Post,
+  Project,
+  ProjectStatus,
+} from "@/types";
 import {
   buildCalendar,
   dayKey,
@@ -59,6 +66,37 @@ function post(opts: Partial<Post> & { id: string }): Post {
     signature: "",
   };
   return { ...defaults, ...opts };
+}
+
+function event(opts: Partial<Event> & { id: string; startsAt: number }): Event {
+  const defaults: Omit<Event, "id" | "startsAt"> = {
+    kind: "event",
+    title: `Event ${opts.id}`,
+    description: "",
+    category: "skills",
+    endsAt: null,
+    location: "the bench",
+    capacity: null,
+    templateId: null,
+    createdAt: 0,
+    createdBy: "organizer",
+    nodeId: NODE,
+    signature: "sig",
+  };
+  return { ...defaults, ...opts };
+}
+
+function cancellation(eventId: string): EventCancellation {
+  return {
+    id: `c_${eventId}`,
+    kind: "event_cancellation",
+    eventId,
+    reason: "",
+    cancelledAt: 0,
+    createdBy: "organizer",
+    nodeId: NODE,
+    signature: "sig",
+  };
 }
 
 function exchange(id: string, completedAt: number): Exchange {
@@ -546,6 +584,159 @@ describe("groupByDay", () => {
       "project_deadline",
       "post_expiring",
     ]);
+  });
+});
+
+// ─── buildCalendar: event ───────────────────────────────────────────
+
+describe("buildCalendar — event", () => {
+  it("emits an event entry placed on the UTC day of startsAt", () => {
+    // 23:30 UTC — falls on its own UTC day, not the next.
+    const startsAt = Date.UTC(2026, 10, 20, 23, 30, 0);
+    const ev = event({ id: "ev_1", startsAt, title: "Saturday skillshare" });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      kind: "event",
+      eventId: "ev_1",
+      title: "Saturday skillshare",
+      path: "/events/ev_1",
+      organizerKey: "organizer",
+    });
+    expect(result[0].date).toBe(Date.UTC(2026, 10, 20));
+  });
+
+  it("filters cancelled events out at the data layer", () => {
+    const ev = event({ id: "ev_cancel", startsAt: NOW + 2 * DAY });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [cancellation("ev_cancel")],
+      ...defaultWindow(),
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  it("produces one entry per event when multiple share a day", () => {
+    const day = NOW + 5 * DAY;
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [
+        event({ id: "ev_a", startsAt: day + 60_000 }),
+        event({ id: "ev_b", startsAt: day + 2 * 3_600_000 }),
+        event({ id: "ev_c", startsAt: day + 4 * 3_600_000 }),
+      ],
+      eventCancellations: [],
+      ...defaultWindow(),
+    });
+    expect(result.filter((e) => e.kind === "event")).toHaveLength(3);
+  });
+
+  it("respects the window bounds on startsAt", () => {
+    const w = defaultWindow();
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [
+        event({ id: "before", startsAt: w.windowStart - 1 }),
+        event({ id: "after", startsAt: w.windowEnd + 1 }),
+        event({ id: "edge_start", startsAt: w.windowStart }),
+        event({ id: "edge_end", startsAt: w.windowEnd }),
+      ],
+      eventCancellations: [],
+      ...w,
+    });
+    const ids = result.map((e) => (e.kind === "event" ? e.eventId : null));
+    expect(ids).toEqual(expect.arrayContaining(["edge_start", "edge_end"]));
+    expect(ids).not.toContain("before");
+    expect(ids).not.toContain("after");
+  });
+
+  it("carries enough fields for rendering (title, time, location, link, organizer)", () => {
+    const startsAt = NOW + 3 * DAY;
+    const ev = event({
+      id: "ev_full",
+      startsAt,
+      title: "Potluck",
+      location: "community room",
+      createdBy: "alice_key",
+    });
+    const [entry] = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      ...defaultWindow(),
+    });
+    if (entry.kind !== "event") throw new Error("expected event entry");
+    expect(entry.title).toBe("Potluck");
+    expect(entry.location).toBe("community room");
+    expect(entry.path).toBe("/events/ev_full");
+    expect(entry.organizerKey).toBe("alice_key");
+    expect(entry.startsAt).toBe(startsAt);
+  });
+});
+
+// ─── Density stays exchange-keyed: events MUST NOT count ────────────
+
+describe("buildCalendar — density excludes events (no-leaderboards)", () => {
+  it("emits NO density entry when only events occur on a day", () => {
+    // Three events on the same UTC day, zero exchanges — density
+    // must stay empty. Events factoring into density would
+    // re-derive the popularity/attendance signal that the
+    // no-leaderboards principle exists to prevent.
+    const day = NOW + 2 * DAY;
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [
+        event({ id: "ev_a", startsAt: day + 60_000 }),
+        event({ id: "ev_b", startsAt: day + 3_600_000 }),
+        event({ id: "ev_c", startsAt: day + 7_200_000 }),
+      ],
+      eventCancellations: [],
+      ...defaultWindow(),
+    });
+    expect(result.some((e) => e.kind === "exchange_density")).toBe(false);
+  });
+
+  it("density count comes from exchanges only when both are present", () => {
+    const day = NOW - 2 * DAY;
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [
+        exchange("ex_1", day + 60_000),
+        exchange("ex_2", day + 3_600_000),
+      ],
+      events: [
+        event({ id: "ev_a", startsAt: day + 30_000 }),
+        event({ id: "ev_b", startsAt: day + 1_800_000 }),
+      ],
+      eventCancellations: [],
+      ...defaultWindow(),
+    });
+    const density = result.find((e) => e.kind === "exchange_density");
+    expect(density).toBeDefined();
+    if (density && density.kind === "exchange_density") {
+      // 2 exchanges, NOT 2+2=4 — events don't show up here.
+      expect(density.count).toBe(2);
+    }
   });
 });
 

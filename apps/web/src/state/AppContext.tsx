@@ -47,6 +47,9 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
+  EventRsvpRow,
   Exchange,
   Member,
   NodeConfig,
@@ -111,6 +114,15 @@ export interface AppContextValue {
   coorgInvitations: CoOrganizerInvitation[];
   coorgInvitationResponses: CoOrganizerInvitationResponse[];
   coorgInvitationRevocations: CoOrganizerInvitationRevocation[];
+  /** Federated community events (PR F). Drive the Calendar event
+   *  markers + three event attention-rail items. See
+   *  `docs/community-events.md`. */
+  events: Event[];
+  /** Local-only RSVP roster. Never federates — see design doc §4 + §7. */
+  eventRsvps: EventRsvpRow[];
+  /** Signed event-cancellation rows. Combined with `events` to derive
+   *  effective state and to drive the `event_cancelled` attention item. */
+  eventCancellations: EventCancellation[];
   lockState: LockState;
   unlock: (
     passphrase: string,
@@ -434,6 +446,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as CoOrganizerInvitationRevocation[],
   );
+  const events = useLiveQuery(
+    () => db.events.orderBy("startsAt").toArray(),
+    [],
+    [] as Event[],
+  );
+  const eventRsvps = useLiveQuery(
+    () => db.eventRsvps.toArray(),
+    [],
+    [] as EventRsvpRow[],
+  );
+  const eventCancellations = useLiveQuery(
+    () => db.eventCancellations.toArray(),
+    [],
+    [] as EventCancellation[],
+  );
 
   const currentMember = useMemo(
     () => members?.find((m) => m.publicKey === currentMemberKey) ?? null,
@@ -464,6 +491,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       coorgInvitations: coorgInvitations ?? [],
       coorgInvitationResponses: coorgInvitationResponses ?? [],
       coorgInvitationRevocations: coorgInvitationRevocations ?? [],
+      events: events ?? [],
+      eventRsvps: eventRsvps ?? [],
+      eventCancellations: eventCancellations ?? [],
       lockState,
       unlock,
       lock,
@@ -498,6 +528,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       coorgInvitations,
       coorgInvitationResponses,
       coorgInvitationRevocations,
+      events,
+      eventRsvps,
+      eventCancellations,
       lockState,
       unlock,
       lock,

@@ -95,12 +95,45 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
 }
 
 function AgendaEntry({ entry }: { entry: CalendarEntry }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (entry.kind === "exchange_density") {
     return (
       <p className="text-sm text-moss-600 dark:text-moss-300">
         {t("calendar.density.line", { count: entry.count })}
       </p>
+    );
+  }
+  if (entry.kind === "event") {
+    // Events: canopy-keyed treatment to differentiate from
+    // project deadlines (which colour by ProjectCategory) and post
+    // expiries (which colour by Post Category). The dedicated kind
+    // label is announced to screen readers via aria-label so the
+    // chip is unambiguous even without the colour cue.
+    const timeFmt = new Intl.DateTimeFormat(i18n.language, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    return (
+      <Link
+        to={entry.path}
+        aria-label={t("events.calendar.entryKindLabel")}
+        className="group flex items-center gap-2 rounded-xl px-2 py-1.5
+                   hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
+        <span
+          className="inline-block h-3 w-3 rounded-full bg-canopy-600"
+          aria-hidden="true"
+        />
+        <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
+          {timeFmt.format(new Date(entry.startsAt))} — {entry.title}
+          {entry.location ? (
+            <span className="text-moss-500 dark:text-moss-400">
+              {" "}
+              · {entry.location}
+            </span>
+          ) : null}
+        </span>
+      </Link>
     );
   }
   if (entry.kind === "project_deadline") {
