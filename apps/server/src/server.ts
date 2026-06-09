@@ -28,6 +28,8 @@ import {
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
+  createEventCancellationStore,
+  createEventStore,
   createExchangeStore,
   createInviteStore,
   createPeerPullStore,
@@ -49,6 +51,8 @@ import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
 import { registerCoOrganizerInvitationRoutes } from "./routes/coorgInvitations.js";
 import { registerCoOrganizerInvitationResponseRoutes } from "./routes/coorgInvitationResponses.js";
 import { registerCoOrganizerInvitationRevocationRoutes } from "./routes/coorgInvitationRevocations.js";
+import { registerEventRoutes } from "./routes/events.js";
+import { registerEventCancellationRoutes } from "./routes/eventCancellations.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 
 export interface BuildOptions {
@@ -158,6 +162,8 @@ export async function buildServer({
     createCoOrganizerInvitationResponseStore(db);
   const coorgInvitationRevocationStore =
     createCoOrganizerInvitationRevocationStore(db);
+  const eventStore = createEventStore(db);
+  const eventCancellationStore = createEventCancellationStore(db);
   const pullStore = createPeerPullStore(db);
 
   // Build the system signer once at boot — secret bytes are then
@@ -188,6 +194,11 @@ export async function buildServer({
   });
   await registerCoOrganizerInvitationRevocationRoutes(app, {
     store: coorgInvitationRevocationStore,
+  });
+  await registerEventRoutes(app, { store: eventStore });
+  await registerEventCancellationRoutes(app, {
+    store: eventCancellationStore,
+    eventStore,
   });
   await registerConfigRoutes(app, { config, signer });
   await registerAutoConfirmRoutes(app, {

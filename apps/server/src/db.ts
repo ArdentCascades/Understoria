@@ -24,6 +24,8 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
   Exchange,
   FlagReason,
   Post,
@@ -160,6 +162,40 @@ export interface CoOrganizerInvitationRevocationStore {
   has(id: string): boolean;
 }
 
+/**
+ * Storage for signed community events. Mirrors the
+ * CoOrganizerInvitationStore shape. Cursor field is `createdAt`. The
+ * full canonical wire row is preserved verbatim in the `payload`
+ * column so the pull worker (and any future audit) can re-verify the
+ * signature against the bytes we actually stored. See
+ * `docs/community-events.md` §4 / §7.
+ */
+export interface EventStore {
+  insert(record: Event): void;
+  list(opts?: { since?: number; limit?: number }): Event[];
+  count(): number;
+  has(id: string): boolean;
+  get(id: string): Event | null;
+}
+
+/**
+ * Storage for signed event cancellations. Cursor field is
+ * `cancelledAt`. `event_cancellations.eventId` carries a `UNIQUE`
+ * constraint per design doc §11 (first-write-wins on eventId — once a
+ * cancellation lands for an event, subsequent ones are dropped at the
+ * store layer). See `docs/community-events.md` §4.3 / §11.
+ */
+export interface EventCancellationStore {
+  insert(record: EventCancellation): void;
+  list(opts?: { since?: number; limit?: number }): EventCancellation[];
+  count(): number;
+  has(id: string): boolean;
+  /** Returns the existing cancellation row for an event, if any.
+   *  Used by the POST route to honor first-write-wins idempotency on
+   *  `eventId`. */
+  getByEventId(eventId: string): EventCancellation | null;
+}
+
 export interface ClaimRecord {
   postId: string;
   claimerKey: string;
@@ -203,6 +239,8 @@ export interface PeerPullStateRow {
   lastCoOrgInvitationCreatedAt: number | null;
   lastCoOrgInvitationResponseDecidedAt: number | null;
   lastCoOrgInvitationRevocationRevokedAt: number | null;
+  lastEventCreatedAt: number | null;
+  lastEventCancellationCreatedAt: number | null;
   lastError: string | null;
   lastPulledCount: number;
 }
@@ -215,7 +253,9 @@ export type PullRecordKind =
   | "task_comment"
   | "coorg_invitation"
   | "coorg_invitation_response"
-  | "coorg_invitation_revocation";
+  | "coorg_invitation_revocation"
+  | "event"
+  | "event_cancellation";
 
 export interface PeerPullStore {
   get(peerUrl: string): PeerPullStateRow | null;
@@ -498,6 +538,67 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '9')",
+    ).run();
+  }
+
+  // Schema v10 — community events federation. Two sibling tables
+  // (events / event_cancellations), each storing the signed wire shape
+  // plus a `payload` column holding the canonical-JSON bytes the
+  // signature was computed over. The cancellation table carries
+  // `UNIQUE(event_id)` because §11 of the design doc commits to
+  // first-write-wins on `eventId` — an organizer who needs to
+  // "uncancel" must create a new event, not amend the cancellation.
+  // `peer_pull_state` grows two per-kind cursor columns
+  // (`createdAt` for events, `cancelledAt` for cancellations).
+  //
+  // RSVPs are local-only per docs/community-events.md §4 — there is
+  // no server-side RSVP table, no ingestion route, no pull worker.
+  // This is enforced at the type level in apps/web and at the route
+  // level in apps/server (POST /event-rsvps returns 404; see
+  // events.test.ts for the lock).
+  if (current < 10) {
+    db.exec(`
+      CREATE TABLE events (
+        id TEXT PRIMARY KEY,
+        node_id TEXT NOT NULL,
+        created_by TEXT NOT NULL,
+        starts_at INTEGER NOT NULL,
+        ends_at INTEGER,
+        created_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX events_created_at_idx ON events (created_at DESC);
+      CREATE INDEX events_starts_at_idx ON events (starts_at);
+      CREATE INDEX events_node_id_idx ON events (node_id);
+      CREATE INDEX events_created_by_idx ON events (created_by);
+
+      CREATE TABLE event_cancellations (
+        id TEXT PRIMARY KEY,
+        node_id TEXT NOT NULL,
+        event_id TEXT NOT NULL UNIQUE,
+        created_by TEXT NOT NULL,
+        cancelled_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX event_cancellations_cancelled_at_idx
+        ON event_cancellations (cancelled_at DESC);
+      CREATE INDEX event_cancellations_event_id_idx
+        ON event_cancellations (event_id);
+      CREATE INDEX event_cancellations_node_id_idx
+        ON event_cancellations (node_id);
+      CREATE INDEX event_cancellations_created_by_idx
+        ON event_cancellations (created_by);
+
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_event_created_at INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_event_cancellation_created_at INTEGER
+          NOT NULL DEFAULT 0;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '10')",
     ).run();
   }
 }
@@ -950,6 +1051,34 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
         COALESCE(@latestSeenAt, last_coorg_invitation_revocation_revoked_at),
       last_pulled_count = @pulledCount
   `);
+  const successEventStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at,
+      last_event_created_at, last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, COALESCE(@latestSeenAt, 0), @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_event_created_at =
+        COALESCE(@latestSeenAt, last_event_created_at),
+      last_pulled_count = @pulledCount
+  `);
+  const successEventCancellationStmt = db.prepare(`
+    INSERT INTO peer_pull_state (
+      peer_url, last_pulled_at, last_success_at,
+      last_event_cancellation_created_at, last_pulled_count
+    ) VALUES (
+      @peerUrl, @at, @at, COALESCE(@latestSeenAt, 0), @pulledCount
+    )
+    ON CONFLICT(peer_url) DO UPDATE SET
+      last_pulled_at = @at,
+      last_success_at = @at,
+      last_event_cancellation_created_at =
+        COALESCE(@latestSeenAt, last_event_cancellation_created_at),
+      last_pulled_count = @pulledCount
+  `);
   const failureStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_error, last_pulled_count
@@ -985,7 +1114,11 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
                     ? successCoOrgInvitationStmt
                     : kind === "coorg_invitation_response"
                       ? successCoOrgInvitationResponseStmt
-                      : successCoOrgInvitationRevocationStmt;
+                      : kind === "coorg_invitation_revocation"
+                        ? successCoOrgInvitationRevocationStmt
+                        : kind === "event"
+                          ? successEventStmt
+                          : successEventCancellationStmt;
       stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
@@ -1006,6 +1139,8 @@ interface PeerPullStateRowSqlite {
   last_coorg_invitation_created_at: number | null;
   last_coorg_invitation_response_decided_at: number | null;
   last_coorg_invitation_revocation_revoked_at: number | null;
+  last_event_created_at: number | null;
+  last_event_cancellation_created_at: number | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -1025,6 +1160,8 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
       r.last_coorg_invitation_response_decided_at,
     lastCoOrgInvitationRevocationRevokedAt:
       r.last_coorg_invitation_revocation_revoked_at,
+    lastEventCreatedAt: r.last_event_created_at,
+    lastEventCancellationCreatedAt: r.last_event_cancellation_created_at,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };
@@ -1437,4 +1574,170 @@ function rowToCoOrganizerInvitationRevocation(
     nodeId: r.node_id,
     signature: r.signature,
   };
+}
+
+export function createEventStore(db: DatabaseType): EventStore {
+  // Note: we persist the canonical-JSON `payload` separately from the
+  // signature so a future audit can re-verify against the exact bytes
+  // the signer covered. The denormalized scalar columns are there so
+  // the cursor query and the indexed lookups don't have to JSON-parse
+  // every row.
+  const insertStmt = db.prepare(`
+    INSERT INTO events (
+      id, node_id, created_by, starts_at, ends_at,
+      created_at, payload, signature
+    ) VALUES (
+      @id, @nodeId, @createdBy, @startsAt, @endsAt,
+      @createdAt, @payload, @signature
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM events WHERE id = ?");
+  const getStmt = db.prepare("SELECT * FROM events WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM events");
+
+  return {
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        nodeId: record.nodeId,
+        createdBy: record.createdBy,
+        startsAt: record.startsAt,
+        endsAt: record.endsAt,
+        createdAt: record.createdAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM events WHERE created_at > ?
+               ORDER BY created_at ASC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM events
+               ORDER BY created_at ASC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as EventRowSqlite[]).map(rowToEvent);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+    get(id) {
+      const r = getStmt.get(id) as EventRowSqlite | undefined;
+      return r ? rowToEvent(r) : null;
+    },
+  };
+}
+
+interface EventRowSqlite {
+  id: string;
+  node_id: string;
+  created_by: string;
+  starts_at: number;
+  ends_at: number | null;
+  created_at: number;
+  payload: string;
+  signature: string;
+}
+
+function rowToEvent(r: EventRowSqlite): Event {
+  // The `payload` column is the canonical JSON we received; trust it
+  // as the source of truth for every field. Falling back to the
+  // denormalized scalars would silently mask corruption.
+  return JSON.parse(r.payload) as Event;
+}
+
+export function createEventCancellationStore(
+  db: DatabaseType,
+): EventCancellationStore {
+  // `event_id UNIQUE` (per the v10 migration) is the schema-level
+  // first-write-wins guard: a second cancellation arriving for an
+  // event already cancelled fails the INSERT and is treated as a
+  // duplicate by the route handler. We surface that via
+  // `getByEventId(eventId)` so the route can return the existing row
+  // with a 200, mirroring the idempotent-id path.
+  const insertStmt = db.prepare(`
+    INSERT INTO event_cancellations (
+      id, node_id, event_id, created_by, cancelled_at,
+      payload, signature
+    ) VALUES (
+      @id, @nodeId, @eventId, @createdBy, @cancelledAt,
+      @payload, @signature
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM event_cancellations WHERE id = ?");
+  const getByEventIdStmt = db.prepare(
+    "SELECT * FROM event_cancellations WHERE event_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM event_cancellations",
+  );
+
+  return {
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        nodeId: record.nodeId,
+        eventId: record.eventId,
+        createdBy: record.createdBy,
+        cancelledAt: record.cancelledAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM event_cancellations WHERE cancelled_at > ?
+               ORDER BY cancelled_at ASC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM event_cancellations
+               ORDER BY cancelled_at ASC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as EventCancellationRowSqlite[]).map(rowToEventCancellation);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+    getByEventId(eventId) {
+      const r = getByEventIdStmt.get(eventId) as
+        | EventCancellationRowSqlite
+        | undefined;
+      return r ? rowToEventCancellation(r) : null;
+    },
+  };
+}
+
+interface EventCancellationRowSqlite {
+  id: string;
+  node_id: string;
+  event_id: string;
+  created_by: string;
+  cancelled_at: number;
+  payload: string;
+  signature: string;
+}
+
+function rowToEventCancellation(
+  r: EventCancellationRowSqlite,
+): EventCancellation {
+  return JSON.parse(r.payload) as EventCancellation;
 }

@@ -13,6 +13,8 @@ import {
   verifyCoOrganizerInvitation,
   verifyCoOrganizerInvitationResponse,
   verifyCoOrganizerInvitationRevocation,
+  verifyEvent,
+  verifyEventCancellation,
   verifyExchange,
   verifyInvite,
   verifyPost,
@@ -24,6 +26,8 @@ import {
   parseCoOrganizerInvitation,
   parseCoOrganizerInvitationResponse,
   parseCoOrganizerInvitationRevocation,
+  parseEvent,
+  parseEventCancellation,
   parseExchange,
   parseInvite,
   parsePost,
@@ -34,6 +38,8 @@ import type {
   CoOrganizerInvitationResponseStore,
   CoOrganizerInvitationRevocationStore,
   CoOrganizerInvitationStore,
+  EventCancellationStore,
+  EventStore,
   ExchangeStore,
   InviteStore,
   PeerPullStore,
@@ -581,6 +587,136 @@ export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
   };
 }
 
+/** Community-event sibling. Cursor: `createdAt`. Mirrors the co-org
+ *  invitation pull pattern. */
+export async function pullEventsFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: EventStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "events", since, maxRows);
+  const rows = await fetchAndExtract(fetcher, url, peerUrl, "events");
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestCreatedAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseEvent(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyEvent(record)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(record.id)) {
+      duplicateCount += 1;
+      if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
+        latestCreatedAt = record.createdAt;
+      }
+      continue;
+    }
+    store.insert(record);
+    insertedCount += 1;
+    if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
+      latestCreatedAt = record.createdAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "event",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestCreatedAt,
+  };
+}
+
+/** Event-cancellation sibling. Cursor: `cancelledAt`. The cross-record
+ *  consistency check (cancellation.createdBy === event.createdBy) is
+ *  enforced at the POST route; the pull worker only verifies the
+ *  signature and dedupes by id. If a cancellation arrives ahead of
+ *  the event it cancels, the row inserts; the application layer
+ *  reconciles. See `docs/community-events.md` §7. */
+export async function pullEventCancellationsFromPeer(opts: {
+  peerUrl: string;
+  since: number | null;
+  fetcher: Fetcher;
+  store: EventCancellationStore;
+  maxRows?: number;
+}): Promise<PullResult> {
+  const { peerUrl, since, fetcher, store } = opts;
+  const maxRows = opts.maxRows ?? 500;
+
+  const url = buildUrl(peerUrl, "event-cancellations", since, maxRows);
+  const rows = await fetchAndExtract(
+    fetcher,
+    url,
+    peerUrl,
+    "eventCancellations",
+  );
+
+  let insertedCount = 0;
+  let duplicateCount = 0;
+  let rejectedCount = 0;
+  let latestCancelledAt: number | null = null;
+
+  for (const raw of rows) {
+    const parsed = parseEventCancellation(raw);
+    if (!parsed.ok) {
+      rejectedCount += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyEventCancellation(record)) {
+      rejectedCount += 1;
+      continue;
+    }
+    if (store.has(record.id)) {
+      duplicateCount += 1;
+      if (latestCancelledAt === null || record.cancelledAt > latestCancelledAt) {
+        latestCancelledAt = record.cancelledAt;
+      }
+      continue;
+    }
+    // First-write-wins by eventId. A second cancellation arriving for
+    // an event already cancelled is logged as a duplicate (not
+    // rejected — that would jam the cursor); the existing row stays.
+    const existingForEvent = store.getByEventId(record.eventId);
+    if (existingForEvent !== null) {
+      duplicateCount += 1;
+      if (latestCancelledAt === null || record.cancelledAt > latestCancelledAt) {
+        latestCancelledAt = record.cancelledAt;
+      }
+      continue;
+    }
+    store.insert(record);
+    insertedCount += 1;
+    if (latestCancelledAt === null || record.cancelledAt > latestCancelledAt) {
+      latestCancelledAt = record.cancelledAt;
+    }
+  }
+
+  return {
+    peerUrl,
+    kind: "event_cancellation",
+    insertedCount,
+    duplicateCount,
+    rejectedCount,
+    latestCompletedAt: latestCancelledAt,
+  };
+}
+
 function buildUrl(
   peerUrl: string,
   path:
@@ -591,7 +727,9 @@ function buildUrl(
     | "task-comments"
     | "coorg-invitations"
     | "coorg-invitation-responses"
-    | "coorg-invitation-revocations",
+    | "coorg-invitation-revocations"
+    | "events"
+    | "event-cancellations",
   since: number | null,
   limit: number,
 ): string {
@@ -616,7 +754,9 @@ async function fetchAndExtract(
     | "taskComments"
     | "coorgInvitations"
     | "coorgInvitationResponses"
-    | "coorgInvitationRevocations",
+    | "coorgInvitationRevocations"
+    | "events"
+    | "eventCancellations",
 ): Promise<unknown[]> {
   const response = await fetcher(url);
   if (!response.ok) {
@@ -654,6 +794,8 @@ export interface PullWorkerOptions {
   coorgInvitationStore: CoOrganizerInvitationStore;
   coorgInvitationResponseStore: CoOrganizerInvitationResponseStore;
   coorgInvitationRevocationStore: CoOrganizerInvitationRevocationStore;
+  eventStore: EventStore;
+  eventCancellationStore: EventCancellationStore;
   pullStore: PeerPullStore;
   fetcher?: Fetcher;
   /** Called for unexpected errors (one peer failing doesn't stop the
@@ -675,6 +817,8 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     coorgInvitationStore,
     coorgInvitationResponseStore,
     coorgInvitationRevocationStore,
+    eventStore,
+    eventCancellationStore,
     pullStore,
     fetcher = (url) => fetch(url),
     onError = (peerUrl, err) =>
@@ -704,6 +848,10 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return state?.lastCoOrgInvitationResponseDecidedAt ?? null;
       case "coorg_invitation_revocation":
         return state?.lastCoOrgInvitationRevocationRevokedAt ?? null;
+      case "event":
+        return state?.lastEventCreatedAt ?? null;
+      case "event_cancellation":
+        return state?.lastEventCancellationCreatedAt ?? null;
     }
   }
 
@@ -764,6 +912,20 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
           fetcher,
           store: coorgInvitationRevocationStore,
         });
+      case "event":
+        return pullEventsFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: eventStore,
+        });
+      case "event_cancellation":
+        return pullEventCancellationsFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store: eventCancellationStore,
+        });
     }
   }
 
@@ -808,6 +970,8 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
       pullKind(url, "coorg_invitation"),
       pullKind(url, "coorg_invitation_response"),
       pullKind(url, "coorg_invitation_revocation"),
+      pullKind(url, "event"),
+      pullKind(url, "event_cancellation"),
     ]);
     const results = await Promise.all(tasks);
     return results.filter((r): r is PullResult => r !== null);
