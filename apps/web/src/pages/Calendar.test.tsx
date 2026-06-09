@@ -38,6 +38,8 @@ vi.mock("@/state/AppContext", () => {
 import "@/i18n";
 import CalendarPage from "./Calendar";
 import type {
+  Event,
+  EventCancellation,
   Exchange,
   Member,
   Post,
@@ -51,6 +53,8 @@ interface MockState {
   exchanges: Exchange[];
   projectTasks: ProjectTask[];
   currentMember: Member | null;
+  events: Event[];
+  eventCancellations: EventCancellation[];
 }
 
 let mockState: MockState = blankState();
@@ -62,7 +66,29 @@ function blankState(): MockState {
     exchanges: [],
     projectTasks: [],
     currentMember: null,
+    events: [],
+    eventCancellations: [],
   };
+}
+
+function makeEvent(over: Partial<Event> & { id: string; startsAt: number }): Event {
+  const base: Event = {
+    id: over.id,
+    kind: "event",
+    title: `Event ${over.id}`,
+    description: "",
+    category: "skills",
+    startsAt: over.startsAt,
+    endsAt: null,
+    location: "the bench",
+    capacity: null,
+    templateId: null,
+    createdAt: 0,
+    createdBy: "someone-else",
+    nodeId: "node-1",
+    signature: "sig",
+  };
+  return { ...base, ...over };
 }
 
 // Minimal Member stub — only `publicKey` is read by Calendar.tsx for
@@ -261,5 +287,68 @@ describe("CalendarPage", () => {
     expect(hrefs).toContain("/post/post-mine");
     expect(hrefs).not.toContain("/post/post-theirs");
     vi.useRealTimers();
+  });
+
+  it('Events-only chip narrows the entry list to event entries', () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.projects = [
+      makeProject({
+        id: "p1",
+        title: "Project deadline thing",
+        deadline: day,
+      }),
+    ];
+    mockState.events = [
+      makeEvent({
+        id: "ev_a",
+        title: "Saturday skillshare",
+        startsAt: day + 3 * 3_600_000,
+      }),
+    ];
+    render(<CalendarPage />);
+    // Pick agenda view so we can read link hrefs unambiguously.
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => {
+      agendaPill!.click();
+    });
+
+    function linkHrefs() {
+      return Array.from(
+        container.querySelectorAll<HTMLAnchorElement>(
+          'a[href^="/project/"], a[href^="/post/"], a[href^="/events/"]',
+        ),
+      ).map((a) => a.getAttribute("href"));
+    }
+
+    let hrefs = linkHrefs();
+    // Before toggling, both the project deadline and the event appear.
+    expect(hrefs).toContain("/project/p1");
+    expect(hrefs).toContain("/events/ev_a");
+
+    const chip = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /events only/i.test(b.textContent ?? ""));
+    expect(chip, "expected Events-only chip").toBeDefined();
+    act(() => {
+      chip!.click();
+    });
+
+    hrefs = linkHrefs();
+    expect(hrefs).toContain("/events/ev_a");
+    expect(hrefs).not.toContain("/project/p1");
+    vi.useRealTimers();
+  });
+
+  it("renders the FAB linking to /events/new with the i18n aria-label", () => {
+    render(<CalendarPage />);
+    const fab = container.querySelector<HTMLAnchorElement>(
+      'a[href="/events/new"]',
+    );
+    expect(fab).not.toBeNull();
+    expect(fab?.getAttribute("aria-label")).toBe("Create an event");
   });
 });

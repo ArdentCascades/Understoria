@@ -375,6 +375,20 @@
       "bannerHeading": "This event was cancelled",
       "bannerBody": "Cancelled by {{name}} on {{date}}.",
       "reasonLine": "Reason: {{reason}}"
+    },
+    "attention": {
+      "eventTodayLine": "{{title}} is today at {{location}}",
+      "eventTodayHint": "Tap to open the event",
+      "eventCancelledLine": "{{title}} was cancelled",
+      "eventCancelledHint": "Reason: {{reason}}",
+      "eventCancelledHintNoReason": "Cancelled (no reason given)",
+      "eventCapacityReachedLine": "{{title}} is at capacity ({{capacity}} going)",
+      "eventCapacityReachedHint": "Tap to open the event"
+    },
+    "calendar": {
+      "entryKindLabel": "Event",
+      "eventsOnlyChip": "Events only",
+      "fabAriaLabel": "Create an event"
     }
   },
   "messages": {

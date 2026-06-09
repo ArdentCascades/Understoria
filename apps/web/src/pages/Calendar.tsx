@@ -19,9 +19,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { buildCalendar } from "@/lib/calendar";
+import { buildCalendar, type CalendarEntry } from "@/lib/calendar";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { EmptyState } from "@/components/EmptyState";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
@@ -46,7 +47,15 @@ function defaultViewForWidth(width: number): ViewMode {
 }
 
 export default function CalendarPage() {
-  const { projects, posts, exchanges, currentMember, projectTasks } = useApp();
+  const {
+    projects,
+    posts,
+    exchanges,
+    currentMember,
+    projectTasks,
+    events,
+    eventCancellations,
+  } = useApp();
   const { t, i18n } = useTranslation();
 
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
@@ -71,6 +80,14 @@ export default function CalendarPage() {
   const [category, setCategory] = useState<"" | Category>("");
   const [projectId, setProjectId] = useState<string>("");
   const [mine, setMine] = useState<boolean>(false);
+  // "Events only" filter chip — session-local, additive on top of the
+  // other filters (the design-doc §9 model treats it as a view filter,
+  // not a category swap). When on, the entry list passed to the views
+  // narrows to `kind: "event"` only — project deadlines, post expiries,
+  // and the density indicator drop out. Matches the storage shape of
+  // the sibling chips (also session-local — no Dexie / localStorage
+  // persistence here).
+  const [eventsOnly, setEventsOnly] = useState<boolean>(false);
 
   const now = Date.now();
   const windowStart = now - WINDOW_BACK_MS;
@@ -121,12 +138,14 @@ export default function CalendarPage() {
     return exchanges;
   }, [exchanges, projectId, category, mine]);
 
-  const entries = useMemo(
+  const allEntries = useMemo(
     () =>
       buildCalendar({
         projects: filteredProjects,
         posts: filteredPosts,
         exchanges: filteredExchanges,
+        events,
+        eventCancellations,
         windowStart,
         windowEnd,
       }),
@@ -134,9 +153,20 @@ export default function CalendarPage() {
       filteredProjects,
       filteredPosts,
       filteredExchanges,
+      events,
+      eventCancellations,
       windowStart,
       windowEnd,
     ],
+  );
+
+  // The "Events only" filter narrows the displayed list to event
+  // entries. The build step is unchanged so toggling the chip on and
+  // off doesn't re-walk the source rows.
+  const entries = useMemo<CalendarEntry[]>(
+    () =>
+      eventsOnly ? allEntries.filter((e) => e.kind === "event") : allEntries,
+    [allEntries, eventsOnly],
   );
 
   const view = (mode: ViewMode) => () => {
@@ -145,7 +175,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="px-4 py-stack-md">
+    <div className="px-4 pb-36 pt-stack-md">
       <header className="mb-stack-md">
         <h1 className="page-title">{t("calendar.title")}</h1>
         <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
@@ -222,6 +252,19 @@ export default function CalendarPage() {
           />
           {t("calendar.filters.mine")}
         </label>
+        <button
+          type="button"
+          onClick={() => setEventsOnly((v) => !v)}
+          aria-pressed={eventsOnly}
+          className={[
+            "rounded-full px-3 py-1 text-xs",
+            eventsOnly
+              ? "bg-canopy-700 text-white"
+              : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
+          ].join(" ")}
+        >
+          {t("events.calendar.eventsOnlyChip")}
+        </button>
       </div>
 
       {entries.length === 0 ? (
@@ -245,6 +288,22 @@ export default function CalendarPage() {
           locale={i18n.language}
         />
       )}
+
+      {/* "+" FAB linking to /events/new. Matches the Board FAB's
+          bottom-20 anchor + pb-36 page clearance discipline from
+          PR #181 so the last calendar cell never tucks under the
+          floating button. */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
+        <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
+          <Link
+            to="/events/new"
+            aria-label={t("events.calendar.fabAriaLabel")}
+            className="btn-primary"
+          >
+            <span aria-hidden="true">+</span> {t("events.new.title")}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

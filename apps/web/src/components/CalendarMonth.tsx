@@ -102,7 +102,9 @@ export function CalendarMonth({
           const list = byDay.get(cell.key) ?? [];
           const chips = list.filter(
             (e) =>
-              e.kind === "project_deadline" || e.kind === "post_expiring",
+              e.kind === "project_deadline" ||
+              e.kind === "post_expiring" ||
+              e.kind === "event",
           );
           const density = list.find(
             (e) => e.kind === "exchange_density",
@@ -215,10 +217,25 @@ function MonthChip({
 }: {
   entry: Extract<
     CalendarEntry,
-    { kind: "project_deadline" | "post_expiring" }
+    { kind: "project_deadline" | "post_expiring" | "event" }
   >;
 }) {
   const { t } = useTranslation();
+  if (entry.kind === "event") {
+    // Events render with a canopy-keyed chip so they're visually
+    // distinct from category-coloured project deadlines and post
+    // expiries. aria-label names the entry kind for screen readers.
+    return (
+      <Link
+        to={entry.path}
+        aria-label={t("events.calendar.entryKindLabel")}
+        className="block truncate rounded bg-canopy-600 px-1 py-0.5 text-[10px] text-white hover:opacity-90"
+        title={entry.title}
+      >
+        {entry.title}
+      </Link>
+    );
+  }
   if (entry.kind === "project_deadline") {
     const meta = PROJECT_CATEGORY_META[entry.category];
     return (

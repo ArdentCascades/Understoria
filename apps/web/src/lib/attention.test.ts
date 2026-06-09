@@ -15,6 +15,9 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
+  EventCancellation,
+  EventRsvpRow,
   Member,
   Post,
   Project,
@@ -586,6 +589,353 @@ describe("computeAttentionItems", () => {
       expect(
         (items[0] as { inviterName: string }).inviterName,
       ).toBe("another community member");
+    });
+  });
+
+  describe("community events", () => {
+    // Anchor "now" at noon UTC on a fixed day so today-range checks
+    // are deterministic regardless of when the test runs.
+    const NOW = Date.UTC(2026, 10, 15, 12, 0, 0);
+    const DAY = 24 * 60 * 60 * 1000;
+
+    function ev(overrides: Partial<Event> & { id: string }): Event {
+      const defaults: Event = {
+        id: overrides.id,
+        kind: "event",
+        title: `Event ${overrides.id}`,
+        description: "",
+        category: "skills",
+        startsAt: NOW + 60_000,
+        endsAt: null,
+        location: "the bench",
+        capacity: null,
+        templateId: null,
+        createdAt: NOW - 7 * DAY,
+        createdBy: "bob", // not the current member by default
+        nodeId,
+        signature: "sig",
+      };
+      return { ...defaults, ...overrides };
+    }
+
+    function rsvp(
+      overrides: Partial<EventRsvpRow> & {
+        eventId: string;
+        memberKey: string;
+        status: "going" | "maybe" | "not_going";
+      },
+    ): EventRsvpRow {
+      const defaults = {
+        id: `r_${overrides.eventId}_${overrides.memberKey}`,
+        respondedAt: NOW - DAY,
+      };
+      return { ...defaults, ...overrides };
+    }
+
+    function cancel(
+      overrides: Partial<EventCancellation> & { eventId: string },
+    ): EventCancellation {
+      const defaults: EventCancellation = {
+        id: `c_${overrides.eventId}`,
+        kind: "event_cancellation",
+        eventId: overrides.eventId,
+        reason: "",
+        cancelledAt: NOW - DAY,
+        createdBy: "bob",
+        nodeId,
+        signature: "sig",
+      };
+      return { ...defaults, ...overrides };
+    }
+
+    describe("event_today", () => {
+      it("surfaces to a member RSVP'd 'going' for an event starting today", () => {
+        const e = ev({ id: "ev_today", startsAt: NOW + 3 * 3_600_000 });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "going",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          now: NOW,
+        });
+        const today = items.find((i) => i.kind === "event_today");
+        expect(today).toBeDefined();
+        if (today && today.kind === "event_today") {
+          expect(today.eventId).toBe("ev_today");
+          expect(today.deepLink).toBe("/events/ev_today");
+        }
+      });
+
+      it("surfaces to a member RSVP'd 'maybe'", () => {
+        const e = ev({ id: "ev_today", startsAt: NOW + 3_600_000 });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "maybe",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_today")).toBe(true);
+      });
+
+      it("does NOT surface to a member RSVP'd 'not_going'", () => {
+        const e = ev({ id: "ev_today", startsAt: NOW + 3_600_000 });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "not_going",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_today")).toBe(false);
+      });
+
+      it("does NOT surface for events on other days", () => {
+        const e = ev({ id: "ev_tomorrow", startsAt: NOW + 2 * DAY });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "going",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_today")).toBe(false);
+      });
+
+      it("does NOT surface for cancelled events", () => {
+        const e = ev({ id: "ev_today", startsAt: NOW + 3_600_000 });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "going",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          eventCancellations: [cancel({ eventId: e.id })],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_today")).toBe(false);
+      });
+    });
+
+    describe("event_cancelled", () => {
+      it("surfaces to RSVP'd members when a cancellation lands", () => {
+        const e = ev({ id: "ev_cancel", startsAt: NOW + 5 * DAY, title: "Cleanup day" });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "going",
+        });
+        const c = cancel({
+          eventId: e.id,
+          reason: "rain",
+          cancelledAt: NOW - 2 * DAY,
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          eventCancellations: [c],
+          now: NOW,
+        });
+        const cancelled = items.find((i) => i.kind === "event_cancelled");
+        expect(cancelled).toBeDefined();
+        if (cancelled && cancelled.kind === "event_cancelled") {
+          expect(cancelled.eventTitle).toBe("Cleanup day");
+          expect(cancelled.reason).toBe("rain");
+        }
+      });
+
+      it("rolls off after 7 days", () => {
+        const e = ev({ id: "ev_cancel", startsAt: NOW - 10 * DAY });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "going",
+        });
+        const c = cancel({
+          eventId: e.id,
+          cancelledAt: NOW - 8 * DAY,
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          eventCancellations: [c],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_cancelled")).toBe(false);
+      });
+
+      it("does NOT surface to members who RSVP'd 'not_going'", () => {
+        const e = ev({ id: "ev_cancel", startsAt: NOW + 5 * DAY });
+        const r = rsvp({
+          eventId: e.id,
+          memberKey: alice.publicKey,
+          status: "not_going",
+        });
+        const c = cancel({ eventId: e.id, cancelledAt: NOW - DAY });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [r],
+          eventCancellations: [c],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_cancelled")).toBe(false);
+      });
+    });
+
+    describe("event_capacity_reached", () => {
+      it("surfaces to the organizer when going-count reaches capacity", () => {
+        const e = ev({
+          id: "ev_full",
+          startsAt: NOW + 5 * DAY,
+          capacity: 2,
+          createdBy: alice.publicKey,
+          title: "Skillshare",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice, bob, carmen],
+          events: [e],
+          eventRsvps: [
+            rsvp({ eventId: e.id, memberKey: "bob", status: "going" }),
+            rsvp({ eventId: e.id, memberKey: "carmen", status: "going" }),
+          ],
+          now: NOW,
+        });
+        const cap = items.find((i) => i.kind === "event_capacity_reached");
+        expect(cap).toBeDefined();
+        if (cap && cap.kind === "event_capacity_reached") {
+          expect(cap.capacity).toBe(2);
+          expect(cap.title).toBe("Skillshare");
+        }
+      });
+
+      it("does NOT surface to non-organizers", () => {
+        const e = ev({
+          id: "ev_full",
+          capacity: 1,
+          createdBy: "bob",
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice, bob],
+          events: [e],
+          eventRsvps: [
+            rsvp({ eventId: e.id, memberKey: "carmen", status: "going" }),
+          ],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_capacity_reached")).toBe(
+          false,
+        );
+      });
+
+      it("does NOT surface when capacity is null", () => {
+        const e = ev({
+          id: "ev_uncapped",
+          capacity: null,
+          createdBy: alice.publicKey,
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [
+            rsvp({ eventId: e.id, memberKey: "bob", status: "going" }),
+            rsvp({ eventId: e.id, memberKey: "carmen", status: "going" }),
+          ],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_capacity_reached")).toBe(
+          false,
+        );
+      });
+
+      it("does NOT surface when going count is below capacity", () => {
+        const e = ev({
+          id: "ev_underfilled",
+          capacity: 5,
+          createdBy: alice.publicKey,
+        });
+        const items = computeAttentionItems({
+          currentMember: alice,
+          posts: [],
+          projects: [],
+          projectTasks: [],
+          members: [alice],
+          events: [e],
+          eventRsvps: [
+            rsvp({ eventId: e.id, memberKey: "bob", status: "going" }),
+            rsvp({ eventId: e.id, memberKey: "carmen", status: "maybe" }),
+          ],
+          now: NOW,
+        });
+        expect(items.some((i) => i.kind === "event_capacity_reached")).toBe(
+          false,
+        );
+      });
     });
   });
 });

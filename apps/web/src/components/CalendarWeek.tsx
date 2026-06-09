@@ -133,7 +133,9 @@ export function CalendarWeek({
             | undefined;
           const chips = list.filter(
             (e) =>
-              e.kind === "project_deadline" || e.kind === "post_expiring",
+              e.kind === "project_deadline" ||
+              e.kind === "post_expiring" ||
+              e.kind === "event",
           );
           return (
             <div
@@ -198,10 +200,22 @@ function WeekChip({
 }: {
   entry: Extract<
     CalendarEntry,
-    { kind: "project_deadline" | "post_expiring" }
+    { kind: "project_deadline" | "post_expiring" | "event" }
   >;
 }) {
   const { t } = useTranslation();
+  if (entry.kind === "event") {
+    return (
+      <Link
+        to={entry.path}
+        aria-label={t("events.calendar.entryKindLabel")}
+        className="block truncate rounded bg-canopy-600 px-1 py-0.5 text-[10px] text-white hover:opacity-90"
+        title={entry.title}
+      >
+        {entry.title}
+      </Link>
+    );
+  }
   if (entry.kind === "project_deadline") {
     const meta = PROJECT_CATEGORY_META[entry.category];
     return (
