@@ -49,3 +49,66 @@ export interface EventRsvpRow {
   /** Epoch milliseconds, UTC. */
   respondedAt: number;
 }
+
+/**
+ * Local-only member block — see `docs/blocking.md` §4 (data model) +
+ * §7 (federation). Block rows live in the web app's local Dexie store
+ * and never federate, never enter the outbox, never appear in data
+ * export, are cleared by soft-purge. The shared package deliberately
+ * omits a `Block` type so the federation layer has no knowledge of
+ * this shape; it lives here, in the app-layer types module, because
+ * that's the only layer that ever needs it.
+ *
+ * The `OutboxRow.kind` union in `db/database.ts` rejects `"block"` at
+ * the type level. `lib/outbox.ts` deliberately does NOT expose an
+ * `enqueueBlock` helper. Both absences are load-bearing — see
+ * `blocking.test.ts` for the negative tests that lock this in.
+ */
+export interface BlockRow {
+  /** UUID. */
+  id: string;
+  /** Base64-encoded Ed25519 public key of the local member who created
+   *  the block. */
+  blockerKey: string;
+  /** Base64-encoded Ed25519 public key of the blocked member. */
+  blockedKey: string;
+  /** Epoch milliseconds, UTC. */
+  createdAt: number;
+  /** Per-block opt-in: when `true`, the blocked party's proposals,
+   *  votes, and dispute comments are also hidden from the blocker's
+   *  view. Default `false`. The blocked party's governance voice still
+   *  reaches every other member of the community regardless — only the
+   *  blocker, and only by their own informed choice, may stop seeing
+   *  it for themselves. See `docs/blocking.md` §6 (Dispute / Proposal
+   *  comments + votes rows). */
+  hideGovernance: boolean;
+  /** Free-text memory aid for the blocker's own reference (≤ 500
+   *  chars). Never surfaced to any other member, never federated,
+   *  never exported. May be `null` if the blocker chose not to write
+   *  one. */
+  note: string | null;
+}
+
+/**
+ * Local-only "previously blocked" history row — see `docs/blocking.md`
+ * §5 (lifecycle) + §14.1 (retention). Indefinite retention; cleared
+ * only by the explicit "Clear unblocked history" affordance in
+ * Settings or by soft-purge. Same federation posture as `BlockRow`:
+ * never leaves the device.
+ */
+export interface PreviouslyBlockedRow {
+  /** UUID. */
+  id: string;
+  /** Base64-encoded Ed25519 public key of the local member. */
+  blockerKey: string;
+  /** Base64-encoded Ed25519 public key of the previously-blocked
+   *  member. */
+  blockedKey: string;
+  /** First time the blocker blocked this member, epoch milliseconds
+   *  UTC. Stable across re-blocks — the row is created on the first
+   *  block and updated on subsequent unblocks. */
+  firstBlockedAt: number;
+  /** Most-recent unblock timestamp, epoch milliseconds UTC. Updated
+   *  on every unblock of the same `blockedKey` by the same `blockerKey`. */
+  lastUnblockedAt: number;
+}

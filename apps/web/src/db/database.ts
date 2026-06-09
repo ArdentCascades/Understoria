@@ -108,6 +108,12 @@ export interface OutboxRow {
   // is local-only by design (docs/community-events.md §4 + §7); RSVPs
   // never enter the outbox. The union rejects "event_rsvp" at the
   // type level — events.test.ts asserts this with `// @ts-expect-error`.
+  //
+  // Intentionally NOT a member of this union: "block". BlockRow and
+  // PreviouslyBlockedRow are local-only personal-relief data per
+  // docs/blocking.md §4 + §7; they never enter the outbox, never
+  // export, are cleared by soft-purge. blocking.test.ts asserts the
+  // rejection with `// @ts-expect-error`.
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
   /** Id of the wrapped record; lets us avoid double-enqueue on retry. */
