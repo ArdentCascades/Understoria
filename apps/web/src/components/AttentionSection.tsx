@@ -47,6 +47,7 @@ export function AttentionSection() {
     nodeId, lockState,
     coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
     events, eventRsvps, eventCancellations,
+    blockedKeys,
   } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -76,12 +77,13 @@ export function AttentionSection() {
         eventRsvps,
         eventCancellations,
         config: nodeConfig,
+        blockedKeys,
       }),
     [
       currentMember, posts, projects, projectTasks, members, vouches,
       coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
       events, eventRsvps, eventCancellations,
-      nodeConfig,
+      nodeConfig, blockedKeys,
     ],
   );
 

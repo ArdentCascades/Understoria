@@ -12,6 +12,11 @@ import {
   encryptMessage,
 } from "@understoria/shared/crypto";
 import { matchesQuery } from "@/lib/messageSearch";
+import {
+  BLOCKED_ACTION_MESSAGE,
+  blockedFilter,
+  isMutuallyBlocked,
+} from "./blocks";
 import type { DirectMessage } from "@/types";
 
 export async function sendMessage(
@@ -21,6 +26,13 @@ export async function sendMessage(
 ): Promise<DirectMessage> {
   const trimmed = plaintext.trim();
   if (!trimmed) throw new Error("Message body is required.");
+  // PR F: bidirectional DM gate per docs/blocking.md §6 row "DMs /
+  // Messages (c)". Generic-error discipline (§6.1) — same copy a
+  // not-available branch would surface so a recipient on the other
+  // side can't fingerprint a block from a generic delivery failure.
+  if (await isMutuallyBlocked(senderKey, recipientKey)) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
   const sk = await getSecretKey(senderKey);
   const encrypted = encryptMessage(trimmed, sk, recipientKey);
   const msg: DirectMessage = {
@@ -76,6 +88,12 @@ export interface ConversationSummary {
 export async function listConversations(
   myKey: string,
 ): Promise<ConversationSummary[]> {
+  // PR F: filter blocked counterparties from the conversation list.
+  // The DM rows stay on disk (the sender side stored them locally; we
+  // don't retroactively delete signed-state rows — block engages
+  // prospectively only). We just don't surface them in the list view.
+  // See docs/blocking.md §6 row "DMs / Messages (c)" + §6.1.
+  const { keys: blocked } = await blockedFilter(myKey);
   const all = await db.messages
     .orderBy("createdAt")
     .reverse()
@@ -83,6 +101,8 @@ export async function listConversations(
   const seen = new Map<string, DirectMessage>();
   for (const m of all) {
     if (m.senderKey !== myKey && m.recipientKey !== myKey) continue;
+    const otherKey = m.senderKey === myKey ? m.recipientKey : m.senderKey;
+    if (blocked.has(otherKey)) continue;
     if (!seen.has(m.conversationId)) seen.set(m.conversationId, m);
   }
   let sk: string;

@@ -51,16 +51,34 @@ const STATUS_FILTERS: Array<ProposalStatus | "all"> = [
 ];
 
 export default function ProposalsPage() {
-  const { proposals, members, currentMember, votes, nodeId, nodeConfig } =
-    useApp();
+  const {
+    proposals,
+    members,
+    currentMember,
+    votes,
+    nodeId,
+    nodeConfig,
+    governanceHiddenKeys,
+  } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<ProposalStatus | "all">("open");
 
+  // PR F: governance-content filter is per-block opt-in only. System
+  // default is to leave governance visible (docs/blocking.md §3.2 +
+  // §11.10 — no silent disenfranchisement). When governanceHiddenKeys
+  // is empty (the typical case, including the default-block path),
+  // listProposals returns the same set for any blocker — the
+  // load-bearing system invariant from blocking.consumers.test.ts.
+  const governanceFilteredProposals = useMemo(() => {
+    if (governanceHiddenKeys.size === 0) return proposals;
+    return proposals.filter((p) => !governanceHiddenKeys.has(p.proposerKey));
+  }, [proposals, governanceHiddenKeys]);
+
   const filtered = useMemo(() => {
-    if (filter === "all") return proposals;
-    return proposals.filter((p) => p.status === filter);
-  }, [proposals, filter]);
+    if (filter === "all") return governanceFilteredProposals;
+    return governanceFilteredProposals.filter((p) => p.status === filter);
+  }, [governanceFilteredProposals, filter]);
 
   const nameByKey = useMemo(() => {
     const map = new Map<string, string>();
@@ -69,16 +87,21 @@ export default function ProposalsPage() {
   }, [members]);
 
   // Index votes by proposal so each card can pluck its own slice
-  // in O(1) at render time.
+  // in O(1) at render time. PR F: votes by a member in
+  // governanceHiddenKeys are filtered from the blocker's view per
+  // docs/blocking.md §6 row "Proposal votes (a, only if
+  // hideGovernance: true)". When the set is empty (system default),
+  // every vote remains visible.
   const votesByProposal = useMemo(() => {
     const map = new Map<string, Vote[]>();
     for (const v of votes) {
+      if (governanceHiddenKeys.has(v.voterKey)) continue;
       const arr = map.get(v.proposalId) ?? [];
       arr.push(v);
       map.set(v.proposalId, arr);
     }
     return map;
-  }, [votes]);
+  }, [votes, governanceHiddenKeys]);
 
   return (
     <div className="px-4 pb-8 pt-4">

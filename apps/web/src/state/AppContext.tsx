@@ -60,6 +60,7 @@ import type {
   Vote,
 } from "@/types";
 import type { InviteRow } from "@/db/database";
+import type { BlockRow } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
 import {
   currentLockState,
@@ -123,6 +124,36 @@ export interface AppContextValue {
   /** Signed event-cancellation rows. Combined with `events` to derive
    *  effective state and to drive the `event_cancelled` attention item. */
   eventCancellations: EventCancellation[];
+  /**
+   * PR F (member blocking — consumer wiring). The set of `blockedKey`
+   * values the current member has actively blocked, derived once
+   * from the `blocks` table. Consumers that need the raw set (e.g.
+   * filtering attention items, custom per-page filters) can read
+   * this directly; the exported `posts` / `projects` / `events` /
+   * `vouches` arrays above are already pre-filtered against this
+   * set for the §6 hide-from-blocker rows. See `docs/blocking.md`
+   * §6.
+   *
+   * The current member's OWN content is NEVER filtered — block is
+   * one-way visibility from the blocker's perspective (see the
+   * PR F scope note "No filtering of OWN content"). The block set
+   * applies only to OTHER members' content rendered in this
+   * member's view.
+   */
+  blockedKeys: ReadonlySet<string>;
+  /**
+   * The subset of `blockedKeys` where the per-block `hideGovernance`
+   * flag is `true`. Used by governance surfaces (Proposals, Disputes,
+   * Votes) to filter contributions — system default is to leave
+   * governance visible (`hideGovernance: false`); per-block opt-in
+   * flips it. See `docs/blocking.md` §3.2 + §6 rows "Dispute /
+   * Proposal comments" and "Proposal votes" + §11.10.
+   *
+   * Membership in this set is a strict subset of `blockedKeys`;
+   * unblocking removes the entry from both sets in lockstep via the
+   * underlying `BlockRow.hideGovernance` flag.
+   */
+  governanceHiddenKeys: ReadonlySet<string>;
   lockState: LockState;
   unlock: (
     passphrase: string,
@@ -461,11 +492,109 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as EventCancellation[],
   );
+  // PR F: live block rows for the current member. Scoped by
+  // blockerKey so a paired-device cluster shared between household
+  // members (each with their own key) reads only their own rows.
+  // The query re-runs whenever the `blocks` table mutates — a fresh
+  // block / unblock / hideGovernance toggle reflows the derived
+  // filter-set without any manual refresh. See docs/blocking.md §6 /
+  // PR F scope.
+  const blockRowsForCurrent = useLiveQuery(
+    () => {
+      if (!currentMemberKey)
+        return Promise.resolve([] as BlockRow[]);
+      return db.blocks
+        .where("blockerKey")
+        .equals(currentMemberKey)
+        .toArray() as Promise<BlockRow[]>;
+    },
+    [currentMemberKey],
+    [] as BlockRow[],
+  );
 
   const currentMember = useMemo(
     () => members?.find((m) => m.publicKey === currentMemberKey) ?? null,
     [members, currentMemberKey],
   );
+
+  // PR F (member blocking — consumer wiring). Derive the two
+  // visibility-filter sets from the live block rows:
+  //
+  //   - `blockedKeys`: every member the current blocker has actively
+  //     blocked. Used by the (a) hide-from-blocker rows of the §6
+  //     scope table (posts, projects, events, vouches, attention,
+  //     etc.).
+  //   - `governanceHiddenKeys`: the strict subset for which the
+  //     per-block `hideGovernance` opt-in is on. Used by the
+  //     governance-only branches (proposals, votes, dispute
+  //     comments) per §3.2 + §6.
+  //
+  // The sets are derived ONCE per block-row mutation and consumed
+  // by every list-filter downstream — single bulk read, O(1)
+  // per-row lookups thereafter. See `db/blocks.ts` `blockedFilter`
+  // for the equivalent action-side helper.
+  const blockedKeys = useMemo<ReadonlySet<string>>(() => {
+    const s = new Set<string>();
+    for (const row of blockRowsForCurrent ?? []) s.add(row.blockedKey);
+    return s;
+  }, [blockRowsForCurrent]);
+  const governanceHiddenKeys = useMemo<ReadonlySet<string>>(() => {
+    const s = new Set<string>();
+    for (const row of blockRowsForCurrent ?? []) {
+      if (row.hideGovernance) s.add(row.blockedKey);
+    }
+    return s;
+  }, [blockRowsForCurrent]);
+
+  // PR F: pre-filter the exposed arrays so every Board / Calendar /
+  // Profile consumer downstream automatically respects the §6
+  // hide-from-blocker rule. The current member's OWN content is
+  // never filtered (block is one-way visibility from the blocker's
+  // perspective). Note: governance rows (proposals, votes) are NOT
+  // filtered here — the default `hideGovernance: false` would never
+  // filter them, and the per-block opt-in is applied by the
+  // governance consumer surfaces (Proposals, Disputes pages)
+  // reading `governanceHiddenKeys`.
+  //
+  // Why filter at the AppContext rather than the page: the consumer
+  // surfaces are too many (Board feed, Calendar agenda/month/week,
+  // Profile vouchers, MemberDetail, search results, attention rail,
+  // …) to gate one-by-one without risking a missed surface. The
+  // central filter at the data fan-out point is the leakproof shape.
+  // Per-action gates (claimPost, rsvpToEvent, sendMessage, etc.)
+  // live closer to their writes and use point-lookup
+  // `isMutuallyBlocked`.
+  const filteredPosts = useMemo(() => {
+    if (blockedKeys.size === 0) return posts ?? [];
+    return (posts ?? []).filter((p) => !blockedKeys.has(p.postedBy));
+  }, [posts, blockedKeys]);
+  const filteredProjects = useMemo(() => {
+    if (blockedKeys.size === 0 || !currentMemberKey) return projects ?? [];
+    // Co-organizer standing trumps block visibility — if the current
+    // member is a co-organizer of a project organized by someone
+    // they've now blocked, they should NOT lose access to the
+    // project (per PR F scope: "The filter is 'hide projects where
+    // I have NO standing.'"). Practically: hide projects organized
+    // by a blocked member ONLY when the current member is NOT a
+    // co-organizer of the project.
+    return (projects ?? []).filter((p) => {
+      if (!blockedKeys.has(p.organizerKey)) return true;
+      return p.coOrganizerKeys.includes(currentMemberKey);
+    });
+  }, [projects, blockedKeys, currentMemberKey]);
+  const filteredEvents = useMemo(() => {
+    if (blockedKeys.size === 0) return events ?? [];
+    return (events ?? []).filter((e) => !blockedKeys.has(e.createdBy));
+  }, [events, blockedKeys]);
+  // Vouches: hide vouches AUTHORED by a blocked member from the
+  // current blocker's view. The signed vouch row stays in Dexie
+  // (immutable; existing signed records aren't retroactively
+  // unsigned by a later block — see settled decision 6 / "block
+  // engages prospectively only"); rendering filter only.
+  const filteredVouches = useMemo(() => {
+    if (blockedKeys.size === 0) return vouches ?? [];
+    return (vouches ?? []).filter((v) => !blockedKeys.has(v.voucherKey));
+  }, [vouches, blockedKeys]);
 
   const setCurrentMember = useCallback(async (publicKey: string) => {
     await setSetting(SETTING_KEYS.currentMember, publicKey);
@@ -479,21 +608,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentMember,
       setCurrentMember,
       members: members ?? [],
-      posts: posts ?? [],
+      posts: filteredPosts,
       exchanges: exchanges ?? [],
       achievements: achievements ?? [],
       invites: invites ?? [],
-      vouches: vouches ?? [],
-      projects: projects ?? [],
+      vouches: filteredVouches,
+      projects: filteredProjects,
       projectTasks: projectTasks ?? [],
+      // proposals + votes are deliberately NOT filtered here —
+      // governance content is visible by default per docs/blocking.md
+      // §3.2 / §11.10 (no silent disenfranchisement). Governance
+      // surfaces apply the per-block opt-in via `governanceHiddenKeys`
+      // themselves. This locks the load-bearing negative test —
+      // listProposals returns the same set when hideGovernance is
+      // false for every block.
       proposals: proposals ?? [],
       votes: votes ?? [],
       coorgInvitations: coorgInvitations ?? [],
       coorgInvitationResponses: coorgInvitationResponses ?? [],
       coorgInvitationRevocations: coorgInvitationRevocations ?? [],
-      events: events ?? [],
+      events: filteredEvents,
       eventRsvps: eventRsvps ?? [],
       eventCancellations: eventCancellations ?? [],
+      blockedKeys,
+      governanceHiddenKeys,
       lockState,
       unlock,
       lock,
@@ -516,21 +654,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentMember,
       setCurrentMember,
       members,
-      posts,
+      filteredPosts,
       exchanges,
       achievements,
       invites,
-      vouches,
-      projects,
+      filteredVouches,
+      filteredProjects,
       projectTasks,
       proposals,
       votes,
       coorgInvitations,
       coorgInvitationResponses,
       coorgInvitationRevocations,
-      events,
+      filteredEvents,
       eventRsvps,
       eventCancellations,
+      blockedKeys,
+      governanceHiddenKeys,
       lockState,
       unlock,
       lock,

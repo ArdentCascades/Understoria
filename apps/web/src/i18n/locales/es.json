@@ -162,6 +162,11 @@
   "a11y": {
     "skipToMain": "Saltar al contenido principal"
   },
+  "errors": {
+    "generic": {
+      "notAvailable": "Esto no está disponible ahora mismo."
+    }
+  },
   "common": {
     "loading": "Cultivando tu comunidad...",
     "you": "Tú",

@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -28,6 +28,7 @@ import {
   listTaskComments,
   postTaskComment,
 } from "@/db/taskComments";
+import { useApp } from "@/state/AppContext";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatRelativeTime } from "@/lib/format";
 
@@ -78,11 +79,22 @@ export function TaskComments({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const comments = useLiveQuery(
+  const allComments = useLiveQuery(
     () => listTaskComments(projectId, taskId),
     [projectId, taskId],
     [],
   );
+  // PR F: TaskComments is an (a) hide-from-blocker row per
+  // docs/blocking.md §6 — filter rows authored by a blocked member
+  // from the blocker's view. The blocked party can STILL POST
+  // comments (we don't gate the action — project authority governs
+  // the comment surface, not the blocker); the asymmetry is
+  // deliberate per §6.2.
+  const { blockedKeys } = useApp();
+  const comments = useMemo(() => {
+    if (blockedKeys.size === 0) return allComments;
+    return allComments.filter((c) => !blockedKeys.has(c.authorKey));
+  }, [allComments, blockedKeys]);
 
   const count = comments.length;
   const hiddenCount = Math.max(0, comments.length - MAX_VISIBLE_COMMENTS);

@@ -72,6 +72,24 @@ export class BlockActionError extends Error {
   }
 }
 
+/**
+ * The single generic copy used by every consumer-side action that
+ * rejects because of a block. Same byte-for-byte as the copy used by
+ * `Post no longer available`, `Event not available`, and any other
+ * not-found / not-available branch — see `docs/blocking.md` §6.1
+ * "Generic-error discipline." Mirrors the en.json i18n key
+ * `errors.generic.notAvailable`.
+ *
+ * IMPORTANT: any consumer-side gate that throws because of a block
+ * MUST throw with this exact message. Surfacing a block-specific
+ * message would let the blocked party fingerprint generic-error
+ * responses (cancelled event vs. blocked-from-event), which is the
+ * shadow-on-blocked-side decision (`no-read-receipts` + threat-model
+ * §3 row 7). Keep this constant the single source of truth for the
+ * action layer; the UI layer reads `errors.generic.notAvailable`.
+ */
+export const BLOCKED_ACTION_MESSAGE = "This isn't available right now.";
+
 // -- Block ------------------------------------------------------------------
 
 export interface BlockMemberInput {
@@ -378,6 +396,51 @@ export async function listPreviouslyBlocked(
     .equals(blockerKey)
     .toArray();
   return rows.sort((a, b) => b.lastUnblockedAt - a.lastUnblockedAt);
+}
+
+/**
+ * Bulk-read every active block for `blockerKey` and project the rows
+ * down to the two shapes consumer code needs:
+ *
+ *   - `keys`: the set of `blockedKey` values the blocker has actively
+ *     blocked. Use it for the cheap "is this member in my blocked set?"
+ *     check that the PR F consumer filters (Board feed, Calendar event
+ *     list, vouch rendering, attention items, etc.) all run.
+ *   - `governance`: a Map from `blockedKey` → `hideGovernance` flag.
+ *     Use it for the per-block opt-in branch (Dispute / Proposal
+ *     comments, Proposal votes per `docs/blocking.md` §6) — the
+ *     governance content is hidden iff the corresponding row's flag
+ *     is `true`.
+ *
+ * Why a single helper rather than N `isMutuallyBlocked` point lookups
+ * across a list render: the consumer surfaces typically walk hundreds
+ * of rows (posts, vouches, events) and need to know "is this row's
+ * subject in my blocked set?" The bulk read is one Dexie scan keyed
+ * by `blockerKey`, projected into a Set + Map; the per-row lookup is
+ * O(1) thereafter. The point-lookup shape (`isMutuallyBlocked`) is
+ * still the right call inside action handlers, where exactly one
+ * direction is being checked against exactly one candidate.
+ *
+ * Local-only — consumes only this member's own Block rows. The
+ * function name uses `blockerKey` (not `memberKey`) to keep the local
+ * blocker / local action framing explicit: the only Block rows that
+ * exist on this device are ones the local member created (see design
+ * doc §13 on the `isMutuallyBlocked` naming rationale).
+ */
+export async function blockedFilter(
+  blockerKey: string,
+): Promise<{ keys: Set<string>; governance: Map<string, boolean> }> {
+  const rows = await db.blocks
+    .where("blockerKey")
+    .equals(blockerKey)
+    .toArray();
+  const keys = new Set<string>();
+  const governance = new Map<string, boolean>();
+  for (const row of rows) {
+    keys.add(row.blockedKey);
+    governance.set(row.blockedKey, row.hideGovernance);
+  }
+  return { keys, governance };
 }
 
 /**

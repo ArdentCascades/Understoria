@@ -13,6 +13,7 @@ import { db } from "./database";
 import { getSecretKey } from "./secrets";
 import { createVouch, verifyVouch } from "@/lib/vouch";
 import { enqueueVouchOutbox } from "@/lib/outbox";
+import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
 import type { SignedVouch } from "@/types";
 
 /**
@@ -60,6 +61,14 @@ export async function addManualVouch(input: {
       "duplicate",
       "You've already vouched for this member.",
     );
+  }
+  // PR F: Vouches (issuing) is a (c) bidirectional gate per
+  // docs/blocking.md §6. Generic-error discipline (§6.1) — surface the
+  // same not-available message rather than a vouch-specific code.
+  // Existing signed vouches are immutable and stay (the unifying rule
+  // from settled decision 6); only NEW issues are gated.
+  if (await isMutuallyBlocked(voucherKey, voucheeKey)) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
   }
 
   // Secret key must be loadable; this throws if the session is locked

@@ -198,6 +198,13 @@ export interface AttentionInput {
   /** Signed cancellation rows. The `event_cancelled` query reads these;
    *  cancelled events are also suppressed from `event_today`. */
   eventCancellations?: readonly EventCancellation[];
+  /** PR F: the set of members the current blocker has actively blocked.
+   *  Items whose subject is a blocked party are suppressed per
+   *  docs/blocking.md §6 row "Attention rail items (a)" — the blocker
+   *  is not pulled back toward content from the very member they
+   *  blocked. Default empty set when omitted (caller doesn't read
+   *  blocks or there's no current member). */
+  blockedKeys?: ReadonlySet<string>;
   now?: number;
 }
 
@@ -206,6 +213,11 @@ export function computeAttentionItems(
 ): AttentionItem[] {
   const { currentMember, posts, projects, projectTasks, members } = input;
   if (!currentMember) return [];
+  // PR F: suppress items whose subject is a blocked member per
+  // docs/blocking.md §6 row "Attention rail items (a)" + §6.2. The
+  // empty-set fallback keeps callers that don't yet pass `blockedKeys`
+  // (tests, old call sites) working unchanged.
+  const blockedKeys = input.blockedKeys ?? new Set<string>();
 
   const nameByKey = new Map<string, string>();
   for (const m of members) nameByKey.set(m.publicKey, m.displayName);
@@ -226,6 +238,8 @@ export function computeAttentionItems(
     // Whoever isn't me is the counterparty.
     const counterpartyKey =
       p.postedBy === currentMember.publicKey ? p.claimedBy : p.postedBy;
+    // PR F: skip if the counterparty is a blocked member.
+    if (counterpartyKey && blockedKeys.has(counterpartyKey)) continue;
     const counterpartyName =
       (counterpartyKey && nameByKey.get(counterpartyKey)) ??
       "another community member";
@@ -258,6 +272,8 @@ export function computeAttentionItems(
     )
       continue;
     if (t.completedBy === currentMember.publicKey) continue;
+    // PR F: skip when the task completer is a blocked member.
+    if (t.completedBy && blockedKeys.has(t.completedBy)) continue;
 
     const completerName =
       (t.completedBy && nameByKey.get(t.completedBy)) ??
@@ -318,6 +334,8 @@ export function computeAttentionItems(
     if (p.status !== "claimed") continue;
     if (p.postedBy !== currentMember.publicKey) continue;
     if (p.claimedBy === currentMember.publicKey) continue;
+    // PR F: skip when the claimer is a blocked member.
+    if (p.claimedBy && blockedKeys.has(p.claimedBy)) continue;
 
     const claimerName =
       (p.claimedBy && nameByKey.get(p.claimedBy)) ??
@@ -386,6 +404,8 @@ export function computeAttentionItems(
     for (const v of input.vouches) {
       if (v.voucheeKey !== currentMember.publicKey) continue;
       if (now - v.createdAt > VOUCH_WINDOW) continue;
+      // PR F: skip when the voucher is a blocked member.
+      if (blockedKeys.has(v.voucherKey)) continue;
       const voucherName =
         nameByKey.get(v.voucherKey) ?? "another community member";
       items.push({
@@ -419,6 +439,8 @@ export function computeAttentionItems(
       if (responseByInvitationId.has(invitation.id)) continue;
       if (revocationByInvitationId.has(invitation.id)) continue;
       if (now >= invitation.expiresAt) continue;
+      // PR F: skip when the inviter is a blocked member.
+      if (blockedKeys.has(invitation.inviterKey)) continue;
       const project = projectByKey.get(invitation.projectId);
       // Without the project row we can't render a meaningful
       // attention item — drop quietly. This shouldn't happen in
@@ -471,6 +493,8 @@ export function computeAttentionItems(
       const myRsvp = myRsvpByEventId.get(ev.id);
       if (!myRsvp) continue;
       if (myRsvp.status !== "going" && myRsvp.status !== "maybe") continue;
+      // PR F: skip events organized by a blocked member.
+      if (blockedKeys.has(ev.createdBy)) continue;
       items.push({
         kind: "event_today",
         eventId: ev.id,
@@ -499,6 +523,8 @@ export function computeAttentionItems(
       // quietly — same shape as the coorg-invitation missing-project
       // branch above.
       if (!ev) continue;
+      // PR F: skip cancellations of events organized by a blocked member.
+      if (blockedKeys.has(ev.createdBy)) continue;
       items.push({
         kind: "event_cancelled",
         eventId: cancellation.eventId,

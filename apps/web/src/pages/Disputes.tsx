@@ -38,16 +38,23 @@ import type {
 // dispute-only slice.
 
 export default function DisputesPage() {
-  const { proposals } = useApp();
+  const { proposals, governanceHiddenKeys } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  // PR F: dispute proposals authored by a member with the per-block
+  // `hideGovernance: true` flag are filtered out for this blocker.
+  // System default (hideGovernance: false) leaves them visible —
+  // see docs/blocking.md §6 row "Dispute / Proposal comments" +
+  // §11.10. When the opt-in set is empty, the dispute list is
+  // unchanged (load-bearing no-silent-disenfranchisement invariant).
   const disputes = useMemo(
     () =>
       proposals
         .filter((p) => p.kind === "dispute")
+        .filter((p) => !governanceHiddenKeys.has(p.proposerKey))
         .sort((a, b) => b.createdAt - a.createdAt),
-    [proposals],
+    [proposals, governanceHiddenKeys],
   );
 
   return (

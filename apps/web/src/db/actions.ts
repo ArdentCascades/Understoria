@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db } from "./database";
+import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
 import { buildDisputeProposal } from "./proposals";
 import { diffAchievements } from "@/lib/achievements";
 import { computeZoneReachForHelper } from "@/lib/flow";
@@ -130,6 +131,18 @@ export async function claimPost(
   memberKey: string,
   localNodeId?: string,
 ): Promise<Post> {
+  // PR F: Posts (claiming) is a (c) bidirectional gate per
+  // docs/blocking.md §6. Pre-load the post outside the transaction
+  // so we can run the block check; generic-error discipline (§6.1) —
+  // same copy as the "post no longer available" branch a withdrawn
+  // post would return.
+  const preflightPost = await db.posts.get(postId);
+  if (
+    preflightPost &&
+    (await isMutuallyBlocked(memberKey, preflightPost.postedBy))
+  ) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
   return db.transaction("rw", [db.posts, db.outbox, db.settings], async () => {
     const post = await db.posts.get(postId);
     if (!post) throw new Error("Post not found");
