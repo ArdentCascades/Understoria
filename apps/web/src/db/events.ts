@@ -224,6 +224,26 @@ export async function listEvents(
   return filtered;
 }
 
+/**
+ * Look up the signed cancellation row for an event, if any. Returns
+ * `null` when the event is still confirmed (no cancellation row). The
+ * event-detail page (PR E) consumes this to render the cancellation
+ * banner and to hide the RSVP control once an event is cancelled.
+ *
+ * Read-only helper; does not mutate state, does not enqueue federation.
+ * Mirrors the `getEvent` shape (single-row Dexie lookup, `null` for
+ * missing, same convention as the rest of the data layer).
+ */
+export async function getEventCancellation(
+  eventId: string,
+): Promise<EventCancellation | null> {
+  const row = await db.eventCancellations
+    .where("eventId")
+    .equals(eventId)
+    .first();
+  return row ?? null;
+}
+
 // -- RSVP (LOCAL-ONLY) ------------------------------------------------------
 
 export interface RsvpToEventInput {
