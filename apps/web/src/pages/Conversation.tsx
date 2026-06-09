@@ -36,7 +36,7 @@ import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
 export default function ConversationPage() {
   const { memberKey } = useParams<{ memberKey: string }>();
-  const { currentMember, members, lockState } = useApp();
+  const { currentMember, members, lockState, blockedKeys } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -149,6 +149,30 @@ export default function ConversationPage() {
   }
 
   if (!currentMember) return null;
+
+  // PR F: if the counterparty is in the blocked set, render the
+  // generic not-available copy in place of the conversation. No
+  // block-specific phrasing per docs/blocking.md §6.1 generic-error
+  // discipline; the message is byte-identical to the one any other
+  // unavailable conversation would render.
+  if (otherKey && blockedKeys.has(otherKey)) {
+    return (
+      <div className="flex h-full flex-col px-4 pb-4 pt-4">
+        <header className="mb-4 flex items-center gap-2">
+          <button
+            type="button"
+            className="btn-ghost -ml-2 text-sm"
+            onClick={() => navigate("/messages")}
+          >
+            {t("common.back")}
+          </button>
+        </header>
+        <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+          {t("errors.generic.notAvailable")}
+        </p>
+      </div>
+    );
+  }
 
   const locked = lockState === "locked";
   const isSearching = query.trim() !== "";

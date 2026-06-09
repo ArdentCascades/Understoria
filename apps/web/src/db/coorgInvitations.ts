@@ -27,6 +27,7 @@ import {
   verifyCoOrganizerInvitationRevocation,
 } from "@/lib/crypto";
 import { b64decode, b64encode } from "@understoria/shared/bytes";
+import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -135,6 +136,16 @@ export async function issueCoOrganizerInvitation(
       "The primary organizer is already the organizer of this project.",
     );
   }
+  // PR F: Co-organizer invitations are a (b) prevent-initiation gate
+  // per docs/blocking.md §6 — disabled in either direction. Generic-
+  // error discipline (§6.1): same message as any other "not available"
+  // path so the would-be invitee can't fingerprint the block from a
+  // disabled-affordance code. Existing co-org status is unaffected
+  // (the unifying rule that work in flight finishes through its
+  // existing flow).
+  if (await isMutuallyBlocked(input.inviterKey, input.inviteeKey)) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
 
   const derivedInviter = derivePublicKey(input.inviterSecretKey);
   if (derivedInviter !== input.inviterKey) {
@@ -241,6 +252,15 @@ export async function respondToCoOrganizerInvitation(
       "invitee_key_mismatch",
       "Invitee secret key does not match the invitation's invitee public key.",
     );
+  }
+  // PR F: same (b) prevent-initiation gate applies to the invitee-side
+  // response — if either party has blocked the other since the
+  // invitation was issued, the response is rejected with the generic
+  // not-available copy. The invitation row stays put (work-in-flight
+  // rule); only the new signed response is blocked. See
+  // docs/blocking.md §6 row "Co-organizer invitations" + §6.1.
+  if (await isMutuallyBlocked(invitation.inviteeKey, invitation.inviterKey)) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
   }
 
   const payload = {

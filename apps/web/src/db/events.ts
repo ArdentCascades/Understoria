@@ -23,6 +23,7 @@ import {
   verifyEventCancellation,
 } from "@/lib/crypto";
 import { enqueueEvent, enqueueEventCancellation } from "@/lib/outbox";
+import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
 import type {
   Event,
   EventCancellation,
@@ -270,6 +271,19 @@ export async function rsvpToEvent(
   input: RsvpToEventInput,
 ): Promise<EventRsvpRow> {
   const now = input.now ?? Date.now();
+  // PR F: Events (RSVP) is a (c) bidirectional gate per
+  // docs/blocking.md §6 — reject the RSVP write in either direction.
+  // Generic-error discipline (§6.1): same not-available copy
+  // cross-node RSVP uses (cited from community-events.md §7.3 in the
+  // design doc). Look up the event's organizer for the block check;
+  // if the event doesn't exist we let the existing flow handle it.
+  const eventRow = await db.events.get(input.eventId);
+  if (
+    eventRow &&
+    (await isMutuallyBlocked(input.memberKey, eventRow.createdBy))
+  ) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
   const existing = await db.eventRsvps
     .where("[eventId+memberKey]")
     .equals([input.eventId, input.memberKey])

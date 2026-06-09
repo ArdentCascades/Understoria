@@ -162,6 +162,11 @@
   "a11y": {
     "skipToMain": "Skip to main content"
   },
+  "errors": {
+    "generic": {
+      "notAvailable": "This isn't available right now."
+    }
+  },
   "common": {
     "loading": "Growing your community...",
     "you": "You",
