@@ -30,18 +30,17 @@ import { EmptyState } from "@/components/EmptyState";
 import { ContextualHint } from "@/components/ContextualHint";
 import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
-import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { matchesQuery } from "@/lib/messageSearch";
 import { hasOpenTasks } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
+import { PostFilterRail } from "@/components/board/PostFilterRail";
+import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
 import type {
   Category,
   Project,
   ProjectCategory,
   Urgency,
 } from "@/types";
-
-const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
 
 export default function BoardPage() {
   const {
@@ -264,27 +263,38 @@ export default function BoardPage() {
           its own column and never inflates a shared row that the
           middle column's tablist / search / list sit inside. The
           middle column is one grid cell holding a flex-column wrapper
-          (tablist → search → list) so those stack tightly regardless
-          of rail height.
+          (tablist → search → filter → list) so those stack tightly
+          regardless of rail height.
 
           Below lg the grid is single-column. The middle wrapper uses
-          `contents` at mobile so its children (tablist, search, list)
-          flatten into the outer grid; `order-*` then interleaves the
-          filters rail to produce the VISUAL stack: AttentionSection →
-          tablist → search → filters → list.
+          `contents` at mobile so its children flatten into the outer
+          grid. Mobile DOM order matches visual order natively —
+          AttentionSection → tablist → search → filter → list →
+          archive — so NO `order-*` utilities are needed. Focus order
+          and reading order agree for screen-reader and keyboard
+          users (WCAG 2.4.3 satisfied).
 
-          Known tradeoff (WCAG 2.4.3): `order` is visual-only, so the
-          DOM / focus / screen-reader order on mobile is AttentionSection
-          → tablist → search → LIST → filters — the list is read before
-          the filters even though it appears below them. This is an
-          irreducible consequence of three constraints that can't all
-          hold at once: (a) filters in a sticky LEFT rail at lg+,
-          (b) no shared-row height coupling in the middle column, and
-          (c) filters shown between search and list on mobile. Keeping
-          (a) and (b) — the structural fix this change is about — forces
-          `order` for (c). If strict reading order is required, the
-          resolution is to move filters INTO the middle column on
-          desktop too (giving up the left rail); tracked as a follow-up.
+          Filter rails (PostFilterRail / ProjectFilterRail) are
+          rendered TWICE: once inside the middle wrapper between
+          search and list (`lg:hidden`, the mobile-visible copy that
+          participates in the `contents` flatten), and once as an
+          outer-grid child positioned in col-1 (`hidden lg:block`,
+          the desktop-visible copy). The component JSX is identical
+          in both render sites — only the wrapper layout classes
+          differ. Filter state stays in this parent and threads
+          through as props.
+
+          Tradeoff: on DESKTOP the keyboard tab order is
+          tablist → search → list → filter → archive (filter comes
+          AFTER the list because its DOM position in the outer grid
+          is the last sibling). Unusual, but NOT a WCAG violation —
+          desktop users see the filter in col-1 regardless of tab
+          order, and screen-reader reading order on desktop follows
+          the same DOM sequence as on mobile would only if filters
+          were inside the middle wrapper at lg too (which would give
+          up the left-rail layout). We accept desktop tab-after-list
+          to keep the left-rail layout AND mobile-DOM-order-equals-
+          visual-order, which is the WCAG-relevant constraint.
 
           The right rail is reserved exclusively for AttentionSection.
           Do NOT dock additional informational components here —
@@ -297,7 +307,7 @@ export default function BoardPage() {
             outer grid on one row track + lg:items-start, its height is
             its own concern — a tall attention card no longer drags the
             middle column's rhythm. */}
-        <div className="order-1 lg:order-none lg:col-start-3 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
+        <div className="lg:col-start-3 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
           <AttentionSection />
         </div>
 
@@ -305,14 +315,16 @@ export default function BoardPage() {
             laid out as a flex column so tablist → search → list stack
             tightly with no inter-rail height coupling. At mobile it is
             `contents`, dissolving into the outer single-column grid so
-            the filters rail (a separate grid child placed in col 1 at
-            lg+) can sit between the search and the list in the stack
-            via the `order-*` utilities below. */}
+            DOM children flatten into the page stack. The mobile-visible
+            filter rail is rendered HERE between search and list (with
+            `lg:hidden`) so DOM order matches visual order natively —
+            no `order-*` utilities required. The desktop-visible filter
+            rail lives as an outer-grid child in col-1 below. */}
         <div className="contents min-w-0 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}
-          className="order-2 lg:order-none grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
+          className="grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
         >
           {(["NEED", "OFFER", "PROJECTS"] as const).map((tt) => (
             <button
@@ -348,7 +360,7 @@ export default function BoardPage() {
             input width cap. `-mx-4 lg:mx-0` lets the backdrop bleed
             to the viewport edge at mobile (cancelling the page's
             px-4) while staying within the middle column at lg+. */}
-        <div className="order-3 lg:order-none sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:top-4 lg:mx-0 lg:mb-0 lg:px-0">
+        <div className="sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:top-4 lg:mx-0 lg:mb-0 lg:px-0">
           <label className="block md:max-w-md">
             <span className="sr-only">
               {t(
@@ -371,12 +383,49 @@ export default function BoardPage() {
           </label>
         </div>
 
+        {/* Mobile-visible filter rail copies. These sit between the
+            search input and the list in DOM order, so on mobile
+            (where the middle wrapper is `contents`) the page reads
+            attention → tablist → search → filter → list, and the
+            list never tab-reads before the controls that filter it.
+            `lg:hidden` keeps these out of the desktop layout where
+            the col-1 outer-grid copy below takes over. */}
+        {tab !== "PROJECTS" && (
+          <div className="lg:hidden">
+            <PostFilterRail
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              urgencyFilter={urgencyFilter}
+              setUrgencyFilter={setUrgencyFilter}
+              zoneFilter={zoneFilter}
+              setZoneFilter={setZoneFilter}
+              zones={zones}
+              claimedInScope={claimedInScope}
+              showClaimed={showClaimed}
+              setShowClaimed={setShowClaimed}
+            />
+          </div>
+        )}
+
+        {tab === "PROJECTS" && (
+          <div className="lg:hidden">
+            <ProjectFilterRail
+              projectCategoryFilter={projectCategoryFilter}
+              setProjectCategoryFilter={setProjectCategoryFilter}
+              projectStatusFilter={projectStatusFilter}
+              setProjectStatusFilter={setProjectStatusFilter}
+              onlyWithOpenTasks={onlyWithOpenTasks}
+              setOnlyWithOpenTasks={setOnlyWithOpenTasks}
+            />
+          </div>
+        )}
+
         {/* Per-tab LIST lives inside the middle wrapper (col 2). At
             mobile the wrapper is `contents`, so this list participates
-            directly in the outer grid stack and is ordered AFTER the
-            filters via `order-5`. */}
+            directly in the outer grid stack and sits AFTER the mobile
+            filter rail above — DOM order matches visual order. */}
         {tab !== "PROJECTS" && (
-          <div className="order-5 lg:order-none">
+          <div>
             {visiblePosts.length === 0 ? (
               debouncedQuery.trim() !== "" ? (
                 <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
@@ -416,7 +465,7 @@ export default function BoardPage() {
         )}
 
         {tab === "PROJECTS" && (
-          <div className="order-5 lg:order-none">
+          <div>
             <ProjectList
               projects={visibleProjects}
               projectTasks={projectTasks}
@@ -429,171 +478,52 @@ export default function BoardPage() {
         </div>
         {/* end middle reading column */}
 
-        {/* Left rail: filters. A separate grid child placed in col 1 at
-            lg+, sticky. At mobile it sits between the search (order-3)
-            and the list (order-5) via `order-4`. Its height is its own
-            concern — single-row grid + lg:items-start means it never
-            couples into the middle column's vertical rhythm. */}
+        {/* Desktop-visible left rail: filters. A separate grid child
+            placed in col 1 at lg+, sticky. `hidden lg:block` hides
+            this on mobile — the mobile-visible filter copy is rendered
+            inside the middle wrapper between search and list above
+            so DOM order matches visual order without `order-*`
+            utilities. The filter rail's height is its own concern —
+            single-row grid + lg:items-start means it never couples
+            into the middle column's vertical rhythm. */}
         {tab !== "PROJECTS" && (
-          <div className="order-4 lg:order-none lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
-            <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
-              <label className="sr-only" htmlFor="category-filter">
-                {t("board.filters.categoryAriaLabel")}
-              </label>
-              <select
-                id="category-filter"
-                className="input"
-                value={categoryFilter}
-                onChange={(e) =>
-                  setCategoryFilter(e.target.value as Category | "")
-                }
-              >
-                <option value="">{t("board.filters.allCategories")}</option>
-                {ALL_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
-                  </option>
-                ))}
-              </select>
-              <label className="sr-only" htmlFor="urgency-filter">
-                {t("board.filters.urgencyAriaLabel")}
-              </label>
-              <select
-                id="urgency-filter"
-                className="input"
-                value={urgencyFilter}
-                onChange={(e) =>
-                  setUrgencyFilter(e.target.value as Urgency | "")
-                }
-              >
-                {URGENCY_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {value === ""
-                      ? t("board.filters.allUrgencies")
-                      : t(`urgency.${value}`)}
-                  </option>
-                ))}
-              </select>
-              <label className="sr-only" htmlFor="zone-filter">
-                {t("board.filters.zoneAriaLabel")}
-              </label>
-              <select
-                id="zone-filter"
-                className="input"
-                value={zoneFilter}
-                onChange={(e) => setZoneFilter(e.target.value)}
-              >
-                <option value="">{t("board.filters.allZones")}</option>
-                {zones.map((z) => (
-                  <option key={z} value={z}>{z}</option>
-                ))}
-              </select>
-            </div>
-
-            {claimedInScope > 0 && (
-              <div className="mt-3 flex justify-end lg:justify-start">
-                <button
-                  type="button"
-                  onClick={() => setShowClaimed((v) => !v)}
-                  aria-pressed={showClaimed}
-                  className="rounded-full bg-moss-100 px-3 py-1 text-xs font-medium text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-                >
-                  {showClaimed
-                    ? t("board.hideClaimed", { count: claimedInScope })
-                    : t("board.showClaimed", { count: claimedInScope })}
-                </button>
-              </div>
-            )}
+          <div className="hidden lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4 lg:block">
+            <PostFilterRail
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              urgencyFilter={urgencyFilter}
+              setUrgencyFilter={setUrgencyFilter}
+              zoneFilter={zoneFilter}
+              setZoneFilter={setZoneFilter}
+              zones={zones}
+              claimedInScope={claimedInScope}
+              showClaimed={showClaimed}
+              setShowClaimed={setShowClaimed}
+            />
           </div>
         )}
 
         {tab === "PROJECTS" && (
           <>
-            <div className="order-4 lg:order-none lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
-              <div className="grid gap-2 sm:grid-cols-3 md:max-w-2xl lg:grid-cols-1">
-                <label className="sr-only" htmlFor="project-category-filter">
-                  {t("board.projectFilters.category.ariaLabel")}
-                </label>
-                <select
-                  id="project-category-filter"
-                  className="input"
-                  value={projectCategoryFilter}
-                  onChange={(e) =>
-                    setProjectCategoryFilter(e.target.value as ProjectCategory | "")
-                  }
-                  aria-label={t("board.projectFilters.category.ariaLabel")}
-                >
-                  <option value="">
-                    {t("board.projectFilters.category.all")}
-                  </option>
-                  {ALL_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
-                    </option>
-                  ))}
-                  {/* Project-only extension categories. Mirrors the
-                      hardcoded options in ProjectNew.tsx — these three
-                      don't have entries in the `categories.*` i18n
-                      namespace (post types never use them), so they're
-                      written out inline rather than gaining new keys. */}
-                  <option value="infrastructure">🏗️ Infrastructure</option>
-                  <option value="organizing">📋 Organizing</option>
-                  <option value="mutual_aid_drive">💛 Mutual aid drive</option>
-                </select>
-                <label className="sr-only" htmlFor="project-status-filter">
-                  {t("board.projectFilters.status.ariaLabel")}
-                </label>
-                <select
-                  id="project-status-filter"
-                  className="input"
-                  value={projectStatusFilter}
-                  onChange={(e) =>
-                    setProjectStatusFilter(
-                      e.target.value as Project["status"] | "",
-                    )
-                  }
-                  aria-label={t("board.projectFilters.status.ariaLabel")}
-                >
-                  <option value="">{t("board.projectFilters.status.all")}</option>
-                  <option value="planning">
-                    {t("board.projectFilters.status.planning")}
-                  </option>
-                  <option value="active">
-                    {t("board.projectFilters.status.active")}
-                  </option>
-                  <option value="paused">
-                    {t("board.projectFilters.status.paused")}
-                  </option>
-                  <option value="completed">
-                    {t("board.projectFilters.status.completed")}
-                  </option>
-                  {/* `archived` is intentionally NOT an option. Archived
-                      projects are reached only via the "View archive"
-                      link below; the Projects tab never lists them. */}
-                </select>
-                <button
-                  type="button"
-                  onClick={() => setOnlyWithOpenTasks((v) => !v)}
-                  aria-pressed={onlyWithOpenTasks}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    onlyWithOpenTasks
-                      ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
-                      : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-                  }`}
-                >
-                  {t("board.projectFilters.openTasks.toggle")}
-                </button>
-              </div>
+            <div className="hidden lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4 lg:block">
+              <ProjectFilterRail
+                projectCategoryFilter={projectCategoryFilter}
+                setProjectCategoryFilter={setProjectCategoryFilter}
+                projectStatusFilter={projectStatusFilter}
+                setProjectStatusFilter={setProjectStatusFilter}
+                onlyWithOpenTasks={onlyWithOpenTasks}
+                setOnlyWithOpenTasks={setOnlyWithOpenTasks}
+              />
             </div>
 
             {/* Archive link sits below everything at every breakpoint
                 (a rarely-needed jump-off, not a primary control). At
                 lg+ it lands in col 1 below the sticky filter rail (an
-                implicit row created after row 1); at mobile `order-6`
-                keeps it last in the stack. */}
+                implicit row created after row 1); at mobile it
+                naturally lands last in the outer grid stack. */}
             <Link
               to="/projects/archive"
-              className="order-6 lg:order-none mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-2 lg:mt-3 lg:text-left"
+              className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-2 lg:mt-3 lg:text-left"
             >
               {t("projects.archive.viewArchive")}
             </Link>
