@@ -34,6 +34,8 @@ import PairDevicePage from "@/pages/PairDevice";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
+import EventNewPage from "@/pages/EventNew";
+import EventDetailPage from "@/pages/EventDetail";
 import MessagesShell, { MessagesEmptyPane } from "@/pages/Messages";
 import ConversationPage from "@/pages/Conversation";
 import MemberDetailPage from "@/pages/MemberDetail";
@@ -82,6 +84,8 @@ export default function App() {
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
+          <Route path="/events/new" element={<EventNewPage />} />
+          <Route path="/events/:eventId" element={<EventDetailPage />} />
           {/* Phase 3.1: nested so at lg+ the conversation renders inside
               the MessagesShell's right pane via <Outlet />. Below lg the
               shell collapses to single-pane based on URL — see Messages.tsx */}
