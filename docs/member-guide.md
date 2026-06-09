@@ -530,6 +530,67 @@ You can **Change** or **Disable** protection from the same page. There
 is also a **Lock now** button if you need to hand the device to
 someone briefly.
 
+## 14a. When to block, when to file a dispute, when to do both
+
+Sometimes another member is causing you a problem and you need a
+way to stop the contact. Sometimes the situation is bigger than
+that and the community needs to weigh in. These are two different
+tools, and they don't replace each other.
+
+**Block** is personal relief. You tap Block contact on a member's
+profile (Member → Block contact), and from that point on you stop
+seeing their posts, projects, events, vouches, task comments, and
+DMs in your view. You can no longer be silently signed up to help
+them or be vouched by them, and the same is true in reverse from
+their side, silently. The block is private to you. The other
+member is not told. No moderator hears about it. No record
+federates anywhere. You can unblock at any time from
+Settings → Blocked contacts.
+
+When you block, you'll see a card explaining what blocking does
+before you confirm. The card includes an optional checkbox to also
+hide the blocked member's proposals, votes, and dispute comments
+from your view — the default keeps them visible so the community
+process surface stays whole for you, but if seeing their voice in
+governance is the contact you're trying to escape, the checkbox is
+there for you. You can flip it any time.
+
+Blocking is private self-help. It is not a way to flag the other
+member to moderators, and it is not a community judgment about
+them.
+
+**Dispute** is the community process. If what you've experienced
+is something the community needs to weigh in on — a Code of
+Conduct violation, a pattern of behavior others have also been
+hurt by, a request for the community to take some shared action —
+then the right tool is a proposal in the dispute process. The
+proposal is public to the community by design (that's what makes
+it community process); it does not become a community matter just
+because you blocked someone, and it should not become a community
+matter just because you wanted to stop seeing their posts.
+
+**You can do both.** Block to stop the unwanted contact right now;
+file a dispute so the community has the chance to deliberate. The
+two run in parallel — the block takes effect the moment you
+confirm it; the dispute follows community process at its own pace
+(see [GOVERNANCE.md](../GOVERNANCE.md) §5). One does not depend on
+the other, and neither one diminishes the other.
+
+A short way to think about it:
+
+- "I need quiet now." → Block.
+- "The community needs to weigh in." → Dispute.
+- "Both, at the same time." → Both.
+
+Block is reversible — unblock from Settings → Blocked contacts.
+Dispute outcomes follow the community process and may or may not
+be reversible depending on what the proposal does.
+
+If someone is causing you serious harm and you need help beyond
+what these tools provide, reach out to a coordinator and to the
+Code of Conduct enforcement contact. The block and the dispute are
+tools; community care is the response.
+
 ## 15. If the device is at risk
 
 **Profile → Emergency** has two panic buttons.

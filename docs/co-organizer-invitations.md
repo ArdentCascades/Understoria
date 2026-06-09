@@ -577,6 +577,15 @@ non-defense items above.
   which it isn't. If re-invitation becomes a pestering pattern in
   practice, the response is governance (a community norm against
   pestering) rather than a technical lockout.
+  Re-invitation of a previously-declined member is unaffected by
+  blocks on the invitee's side; the invitation surface is gated by
+  the blocker (the would-be inviter) at the issue step, not by
+  any inspection of the invitee's local Dexie state. See
+  [`docs/blocking.md`](./blocking.md) §6 (Co-organizer invitations
+  row) for the per-surface semantic — `b`, prevent-blocked-from-
+  initiating — and §6.1 (Generic-error discipline) for why the
+  rejection surface looks like a generic affordance-disabled state
+  rather than block-specific copy.
 
 - **Grandfather strategy for existing `coOrganizerKeys`.**
   *Recommendation: grandfather as accepted* (see §4). The
