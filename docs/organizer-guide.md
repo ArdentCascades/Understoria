@@ -169,6 +169,89 @@ Retire the pilot — without shame — if:
   live in the people; the software should be invisible most of the
   time.
 
+## 7a. When to block, when to file a dispute, when to do both
+
+A note for organizers about the member-blocking primitive.
+
+**Block** is personal relief. Any member — including you, as an
+organizer — can tap Block contact on another member's profile and
+from that point on stop seeing their posts, projects, events,
+vouches, task comments, and DMs in their view. The block is
+private to the blocker. The other member is not told. No
+moderator hears about it. No record federates anywhere. See
+[`docs/blocking.md`](blocking.md) for the full design.
+
+**Dispute** is community process. If the situation is something
+the community needs to weigh in on — a Code of Conduct violation,
+a pattern of behavior, a question of community-wide concern — the
+right tool is a proposal in the dispute process per
+[GOVERNANCE.md](../GOVERNANCE.md) §5. Disputes are deliberately
+public to the community.
+
+**Use both, in parallel, when both apply.** Block to stop the
+unwanted contact right now; file a dispute so the community has
+the chance to deliberate. The two are independent — block takes
+effect immediately, the dispute follows community process at its
+own pace, neither depends on the other.
+
+### Your block does not carry organizer authority
+
+An important thing to be clear with yourself about: **your block,
+as an organizer, is purely personal.** It is the same primitive
+every member has. It does not carry community authority. It does
+not constitute a moderation decision. It does not signal anything
+to other members. If you block a member as an organizer, you are
+just choosing not to see them in your own view; you are not
+making a community judgment about them, and the community should
+not interpret your block as one.
+
+This is the same posture as `community-authority` everywhere else
+in the project: there is no admin role; organizers are members
+who hold a community-defined role through a community-defined
+process, and any decision that affects the community goes through
+community process (proposals, disputes, lazy consensus per
+`GOVERNANCE.md` §2 — not through unilateral organizer action).
+Block is not an exception.
+
+If a member is doing something that you think the community
+needs to address, the path is the same as for any member: file a
+proposal, raise it in a community meeting, bring it to a buddy
+or to the moderation committee. Your block is not a substitute
+for any of that, and the community should not be expected to
+treat it as one.
+
+### If you are on the receiving end of mass conscientious objection
+
+It is possible — particularly if you hold a community role for a
+while — that members will privately come to feel they would
+rather not interact with you, and will use the block primitive
+to put that into practice. Because blocks are local and never
+federate, neither you nor anyone else will see this happen as a
+system signal. You may, however, hear about it from the operator
+if members have voluntarily disclosed their blocks to the
+operator in numbers that suggest a wider pattern.
+
+If this happens, the operator response is named in the §8
+incident template in
+[`docs/incident-templates.md`](incident-templates.md). The
+template explicitly routes this to the community-process surfaces
+named in [GOVERNANCE.md](../GOVERNANCE.md) §3 (rotation) and §5
+(appeals and the community-process for the substantive concern).
+The operator will not depeer anyone, will not suspend or remove
+you unilaterally, will not publish a count or a list of who has
+blocked whom, and will not name you in any announcement. The
+announcement is about the community process for the role, not
+about social judgment on the person.
+
+If you are reading this section because that announcement has
+gone out: you have appeal rights through `GOVERNANCE.md` §5, you
+are welcome to talk with the operator directly, and you may
+choose — entirely separately from any community decision — to
+step back from the role of your own initiative. Stepping back is
+not a concession of fault; it can simply be a recognition that
+the community would benefit from a fresh holder. That choice is
+yours alone.
+
 ## 8. Bringing in the other workstreams
 
 Things the app doesn't do (yet) that your organizing might need:

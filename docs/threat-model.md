@@ -698,6 +698,138 @@ We are not trying to protect against:
   record type exists in the codebase and this entry tracks design
   intent only.
 
+- **Member blocking is a local-only personal-relief surface
+  (design only; not yet shipped).** The member-blocking design
+  (`docs/blocking.md`) introduces a single Dexie record type —
+  `Block` — that lets a member stop unwanted interaction with
+  another specific member. The load-bearing decision is that
+  `Block` rows are **local to the blocker's device cluster**, are
+  never signed, never enter the outbox, never federate, and are
+  excluded from data export. Same architectural posture as
+  `EventRSVP` (see the prior §7 entry).
+  What it is, in the shape this §7 uses:
+  - `Block` row carries `id`, `blockerKey`, `blockedKey`,
+    `createdAt`, `hideGovernance: boolean` (per-block governance
+    visibility choice — see `blocking.md` §3.2 and §6), and a
+    private `note: string | null` field (≤ 500 chars) for the
+    blocker's own reference. No `signature`, no `nodeId`.
+  - A separate `previouslyBlocked` row (local-only, same posture)
+    records pairwise unblock history for the blocker's reference.
+    Wiped on soft-purge.
+  - The discriminator string `"block"` MUST NOT appear in
+    `OutboxRow.kind`. PR B in `blocking.md` §13 asserts this with
+    `@ts-expect-error` at the type level; PR C asserts the
+    runtime equivalent in `events.test.ts`-shape unit tests.
+    There is no `POST /blocks` route. There is no
+    `GET /blocks?since=` cursor. There is no PWA-side
+    `pullFederatedBlocks`. The federation layer has no knowledge
+    of these types.
+  What it defends against: the blocker's experience of unwanted
+  DMs, post claims, vouches, co-organizer invitations, and event
+  RSVPs from a specific other member. The blocker stops seeing
+  the blocked party's posts, projects, events, vouches, and task
+  comments in their feed and surfaces, per the consumer-surface
+  table in `blocking.md` §6. Generic-error discipline is
+  load-bearing: every blocked-from action returns the same
+  generic "not available" / "not found" error a withdrawn-post or
+  cancelled-event action would return — never block-specific
+  copy. This preserves the shadow-on-blocked-side posture
+  (`blocking.md` §6.1).
+  What it does NOT defend against:
+  - A determined blocked party using a peer node's PWA to view
+    federated public content from the blocker. The blocker's
+    posts, projects, events, and vouches federate normally and
+    are visible to any peer-node viewer; block does not withdraw
+    federated content from the wire. This is the federation
+    property, not a leak (cited: `blocking.md` §7.1).
+  - An attacker who has already harvested federation traffic.
+    Past federated content already exists on the wire; block has
+    no retroactive effect.
+  - A stalker who already has device access to the blocker's
+    cluster. The blocker's local `blocks` and
+    `previouslyBlocked` tables are visible to any code with
+    storage access on the blocker's device. Mitigated by the
+    same posture as every other local Dexie surface: passphrase-
+    wrapped private key, soft-purge / hard-purge from
+    Profile → Emergency.
+  - Mob-block aggregation as a social signal — which doesn't
+    exist because blocks are never aggregated, exposed, or
+    counted. There is no surface (member-facing, operator-facing,
+    or otherwise) that says "X has been blocked by N people."
+    The §8 incident template in `docs/incident-templates.md`
+    documents the operator response when the operator becomes
+    aware, through members voluntarily disclosing, that a
+    community-role holder is the subject of widespread blocks:
+    route to `GOVERNANCE.md` §3 (rotation) and §5 (appeals); do
+    NOT depeer; do NOT auto-suspend; do NOT surface aggregates.
+  Adversary mapping (§3 rows benefiting from a federated block
+  graph, which is why blocks stay local):
+  - **Row 1 (Employer / management).** A federated block graph
+    would let an employer harvesting the public peer wire
+    correlate "organizer X has blocked these specific other
+    members" as a signal of social fractures inside the
+    organizing group. The local-only posture closes this vector:
+    there is no wire to harvest.
+  - **Row 2 (Union-busting firms).** Professional surveillance
+    treats relational fracture graphs as primary intelligence. A
+    federated block graph would hand them a relational-fracture
+    map for free. The local-only posture means the map does not
+    exist anywhere a peer-pull request could touch.
+  - **Row 7 (Intimate-partner / stalker).** A stalker notified
+    of a block gains a retaliation trigger plus a path to test
+    whether a block engaged (move to a peer node and observe).
+    Local-only with no signal to the blocked party closes both
+    vectors: no notification on the blocked party's side, no
+    cross-node propagation that could be probed.
+  Mitigations baked in (full design rationale in
+  `docs/blocking.md` §§4, 6, 7, 11):
+  (a) **Type-level rejection of `"block"` in `OutboxRow.kind`.**
+  Asserted at compile time in PR B with `@ts-expect-error`. A
+  future contributor cannot accidentally enqueue a `Block` row
+  to the outbox without removing the assertion, which a review
+  would catch. Same discipline as the `"EventRSVP"`
+  type-rejection asserted in the events workstream.
+  (b) **Soft-purge clears the tables.** The existing
+  Profile → Emergency soft-purge wipes `blocks` and
+  `previouslyBlocked` alongside the other anonymizable surfaces.
+  Hard-purge wipes everything by definition.
+  (c) **Data-export excludes the tables.** The Profile →
+  Data export JSON snapshot excludes `blocks` and
+  `previouslyBlocked` explicitly, alongside the existing
+  private-key exclusion. A member exporting their data does not
+  leak their block list into a JSON file that might be stored on
+  a less-secure surface than the device's IndexedDB.
+  (d) **UI never surfaces aggregate block counts.** There is no
+  member-facing surface that reads "this member has been blocked
+  by N members." There is no operator-facing dashboard with a
+  per-member block count. Aggregations against the blocks table
+  are not part of any data path. The cumulative invariant from
+  `blocking.md` §6.3 — the blocked party's participation in the
+  community is unchanged from every other member's view —
+  depends on this absence.
+  (e) **Generic-error discipline.** Per `blocking.md` §6.1,
+  every blocked-from action returns the same generic
+  "not available" error a not-found action returns. The blocked
+  party cannot fingerprint which not-found errors are blocks.
+  This is the technical mitigation for the
+  `no-read-receipts` / shadow-on-blocked-side posture.
+  Residual risk acknowledged honestly: a blocker's local
+  `previouslyBlocked` history is a target if their device is
+  compromised. A stalker with device-access to the blocker's
+  cluster can read the `blocks` and `previouslyBlocked` tables
+  in clear from IndexedDB the same way they can read any other
+  local-only Dexie surface. The mitigation is the same posture
+  as the rest of the local-only surface: passphrase-wrapped
+  private key, soft-purge and hard-purge in
+  Profile → Emergency. This is a device-access threat, not a
+  federation-layer threat; it does not change the federation
+  posture.
+  Until the implementation PRs land (PRs B, C, E, F per
+  `blocking.md` §13 — PR D is intentionally skipped because
+  there is no server work for this primitive), no `Block`
+  record type exists in the codebase and this entry tracks
+  design intent only.
+
 - **Device-level compromise is out of scope.** The camera-gate
   entry above protects against an *external* observer (CCTV,
   doorbell cam, line-of-sight surveillance). It does NOT

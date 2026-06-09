@@ -65,6 +65,14 @@ the community node or to any third party:
   preference flags.
 - Your **personal index** for message search — built locally on
   demand, never persisted in plaintext.
+- **Member blocks.** A list of members you have chosen to block,
+  along with any private notes you've written for your own
+  reference, your governance-visibility choice per block, and the
+  timestamps. This list never leaves your device, never federates
+  to peer nodes, and is excluded from data export. Soft-purge
+  clears it. See [`docs/blocking.md`](./blocking.md) and the
+  threat-model §7 entry "Member blocking is a local-only
+  personal-relief surface" for the values reasoning.
 
 If you uninstall the PWA or clear your browser storage, all of this
 is gone. There is no server-side copy.
@@ -126,6 +134,21 @@ and the threat-model §7 entry "Federated `Event` records widen the
 public wire surface" for the values reasoning and the rejected
 alternatives (federated RSVPs, public attendee roster, iCal
 export — all out of scope or deferred with conditions).
+
+**Member blocks** are NOT in the table above and never will be.
+A `Block` row sits alongside `EventRSVP` as a deliberately
+local-only personal-relief surface: the row records that you have
+chosen to block a specific other member, your governance-visibility
+choice for that block, and any private note to yourself. It is
+NOT a signed record, NOT pushed to the community node's outbox,
+NOT federated to peer nodes, and excluded from data export.
+The other member is not notified that you have blocked them. There
+is no community-facing surface (member-facing or operator-facing)
+that aggregates block counts or exposes "who has blocked whom" in
+any shape. See [`docs/blocking.md`](./blocking.md) for the full
+values reasoning, and the threat-model §7 entry "Member blocking is
+a local-only personal-relief surface" for the adversary mapping
+that closes federated block graphs out at the architecture layer.
 
 **Local aggregation views.** The PWA may show the same fields
 above in aggregated surfaces — for example, a community calendar

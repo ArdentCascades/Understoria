@@ -525,6 +525,169 @@ Questions / corrections
 
 ---
 
+## 8. Member holding community role faces mass conscientious objection
+
+**When to use it.** Multiple members are privately reporting to
+the operator that they have blocked X, who holds community role Y
+(moderator, organizer, treasurer, facilitator — any role named in
+[`GOVERNANCE.md`](../GOVERNANCE.md) §3). The reports arrive one
+at a time, through private channels, because the block primitive
+is local-only by design (see [`docs/blocking.md`](./blocking.md)
+§7 and the threat-model §7 entry "Member blocking is a local-only
+personal-relief surface"). The operator's awareness is itself an
+artifact of members choosing to share — the system did not surface
+it, and the system has no aggregate of who-blocked-whom to draw on.
+
+**What this template is NOT.** This is NOT a federated signal. It
+is NOT a quorum. It is NOT a vote. It is NOT a moderator action.
+The operator only knows because members have voluntarily disclosed.
+The blocked individual — the community-role holder X — does NOT
+know who has blocked them; the blocks emit no signal in either
+direction. There is no dashboard, no count, no aggregate. The
+operator's read of "this is widespread" is judgment based on
+voluntary private reports, not on a system surface.
+
+**Who sends.** The operator. CC the CoC enforcement contact if any
+of the underlying concerns members raised in their disclosures
+touches Code of Conduct enforcement; otherwise this is governance
+work, not enforcement work.
+
+**Where.** Community channel. This is a governance announcement,
+not a moderator action.
+
+**Operator action — what to do.**
+- **Route to `GOVERNANCE.md` §3 (rotation cadence).** Roles
+  rotate every 3 months by default per `GOVERNANCE.md` §3. If
+  the next rotation is imminent, name the cadence in the
+  announcement and let rotation do its work. If rotation is far
+  out, the announcement names the option to convene rotation
+  early per `GOVERNANCE.md` §3 (rotation is a community
+  decision, not the operator's call to make unilaterally).
+- **Route to `GOVERNANCE.md` §5 (community process for the
+  substantive concern).** If the disclosures included a
+  substantive concern (rather than only "I don't want to
+  interact with X"), the right tool is the dispute / proposal
+  process. The operator can encourage members to file via the
+  normal channels; the operator does NOT file on members'
+  behalf.
+- **Route to `GOVERNANCE.md` §5 (appeals).** The role-holder X
+  has a right to appeal any role-change decision through the
+  appeals process. The announcement names this explicitly.
+
+**Operator action — what NOT to do.**
+- Do NOT depeer any node. This is community-process work, not a
+  federation-layer fix.
+- Do NOT auto-suspend X from the role. Role changes go through
+  the community process named in `GOVERNANCE.md` §3 and §5,
+  not through operator action.
+- Do NOT surface aggregates of who-blocked-whom. There is no
+  legitimate path that takes the operator's private knowledge
+  of voluntary disclosures and turns it into a community-facing
+  count. The cumulative invariant from `blocking.md` §6.3
+  depends on this absence.
+- Do NOT name in the announcement *which members* have
+  disclosed blocks. Their disclosure to the operator was
+  private; treating it as a publication grade signal would
+  betray that privacy and would also chill future disclosures.
+- Do NOT name in the announcement *which individual is the
+  subject* of the disclosures. The announcement is about the
+  community process for the role, not about social judgment on
+  the person. If a community process is opened, the proposal
+  itself names what it names — that is community work, not
+  operator work.
+
+**Pre-flight checklist.**
+- [ ] At least three members have independently and voluntarily
+      disclosed a block of X to the operator. (Below three, the
+      disclosures are personal and the operator's role is to
+      listen, not to announce.)
+- [ ] The disclosures were unsolicited — the operator did not
+      ask members "have you blocked X?" Asking would compromise
+      the privacy posture of the block primitive.
+- [ ] Rotation cadence per `GOVERNANCE.md` §3 has been
+      consulted. The announcement names where in the cadence
+      the community currently is.
+- [ ] No aggregate-block surface, no per-member block count, no
+      "who has blocked whom" data has been built or surfaced
+      anywhere in service of this announcement. The operator's
+      knowledge is from private disclosure only.
+- [ ] CoC enforcement contact has been consulted if any
+      disclosure touches Code of Conduct enforcement (rather
+      than only "I don't want to interact with X").
+
+**Template.**
+
+```
+Subject: [Understoria — [DOMAIN]] Community process check-in:
+         [ROLE] role
+
+What this is about
+Several members have, in private, let me know they would prefer
+not to interact with the current holder of the [ROLE] role.
+Members do this through their own personal block surface, which
+is private to them and never federates or aggregates.
+
+I do not have a count. I do not have a list of who has chosen
+this. I am writing because several members have voluntarily told
+me, and I want the community to have a chance to think about
+whether the regular community process is the right next step.
+
+What this is NOT
+- This is NOT a moderator action.
+- This is NOT a suspension or removal.
+- This is NOT a vote against anyone.
+- This is NOT a federated signal — no other community sees
+  this. The blocks members have chosen are private to them and
+  stay on their own devices.
+
+What I'd like to invite the community to think about
+[ One or more of, as appropriate:
+  - "Our rotation cadence for community roles is 3 months per
+     GOVERNANCE.md §3. The next rotation for [ROLE] is on or
+     around [DATE]. If members would like rotation to happen
+     earlier this cycle, that is a community decision and we can
+     convene that conversation."
+  - "If members have substantive concerns about how the [ROLE]
+     role is being held, the right tool is a community
+     proposal — Proposal{kind:\"dispute\"} or the appropriate
+     proposal shape per GOVERNANCE.md §5. I am happy to help
+     anyone who wants to draft one."
+  - "The current holder of the [ROLE] role has the right to
+     appeal any community decision about the role through the
+     appeals process named in GOVERNANCE.md §5." ]
+
+What I will not do
+- I will not depeer any node based on this.
+- I will not suspend or remove anyone based on this. Role
+  changes go through the community process.
+- I will not publish or share a list of who has chosen to block
+  whom. Those disclosures were private.
+- I will not name a specific individual in this announcement.
+  This message is about the community process for the role.
+
+What you should do
+If you have a substantive concern about the [ROLE] role that
+you would like the community to deliberate on: consider
+drafting a proposal per GOVERNANCE.md §5.
+If you are the holder of the [ROLE] role and you would like to
+talk: reach out to me directly. Your role is not at risk from
+this announcement alone — the community process is the path
+for any role change, and you have appeal rights through
+GOVERNANCE.md §5.
+If you are unsure what to do: that is also fine. The community
+process does not require any specific action from you.
+
+Next update by
+[YYYY-MM-DD HH:MM UTC] — at the next regular community check-in,
+or when a proposal opens, whichever is sooner.
+
+Contact
+[OPERATOR_NAME], [OPERATOR_CONTACT]
+Code of Conduct enforcement: [COC_CONTACT]
+```
+
+---
+
 ## Cross-references
 
 - Privacy commitments behind these templates: [`privacy-policy.md`](./privacy-policy.md)
