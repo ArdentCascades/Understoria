@@ -824,6 +824,24 @@ We are not trying to protect against:
   Profile → Emergency. This is a device-access threat, not a
   federation-layer threat; it does not change the federation
   posture.
+  The Settings → Blocked contacts panel ships a
+  **tap-to-reveal** affordance (see `blocking.md` §6 row
+  "Block-list rendering" and §6.2): each row in both the
+  active list and the `previouslyBlocked` history renders
+  obscured by default (generic avatar, "Blocked contact," block
+  date) and reveals the display name + truncated pubkey only
+  when the blocker taps the row. This is a
+  **privacy-from-overshoulder mitigation** — it reduces
+  incidental exposure to someone glancing at the screen or
+  picking up a briefly-borrowed device. It is **NOT a defense
+  against an attacker with full device access**. An attacker
+  with code execution on the unlocked device, or with
+  IndexedDB read access, sees the underlying rows in clear
+  regardless of UI obscuring. The residual-risk shape above
+  (device-access threat, mitigated by passphrase-wrap and
+  soft-purge / hard-purge) is unchanged by the tap-to-reveal
+  affordance; tap-to-reveal narrows the over-the-shoulder
+  surface, not the device-access surface.
   Until the implementation PRs land (PRs B, C, E, F per
   `blocking.md` §13 — PR D is intentionally skipped because
   there is no server work for this primitive), no `Block`

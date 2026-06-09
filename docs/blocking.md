@@ -364,6 +364,7 @@ choice.
 | Events (RSVP) | c | reject RSVP in either direction |
 | Attention rail items | a | suppress items whose subject is the blocked party |
 | firstActionNudge / profileNudge | a | suppress |
+| Block-list rendering (Settings) | (separate) | obscured-by-default per row; tap-to-reveal — see §6.2 below. Privacy-from-overshoulder, NOT a security boundary. |
 
 ### §6.1 Generic-error discipline (the rule that holds the table together)
 
@@ -514,6 +515,27 @@ onboarding nudges that suggest "vouch for X" or "say hi to X"
 silently exclude blocked members from their candidate pool. The
 blocker is not nagged toward the very person they blocked. Cited:
 `no-notifications` + `solidarity-not-shame`.
+
+**Block-list rendering (Settings) (separate — obscured-by-default;
+tap-to-reveal).** The Settings → Blocked contacts panel — covering
+both the active `blocks` list and the `previouslyBlocked` history
+— renders each row with a generic avatar, the literal copy
+"Blocked contact," and the block date by default. The display
+name and truncated pubkey for any row are revealed only by tapping
+that row; a second tap re-obscures. Reveal state is per-row and
+ephemeral — never persisted. The threat model for this row is
+**device-access from over the shoulder**: someone glancing at the
+blocker's screen while they scroll Settings, or a borrowed device
+left briefly with someone else. It is explicitly **NOT a security
+boundary** — the data is in Dexie, accessible to any code with
+storage access on the unlocked device, and the residual-risk
+paragraph in `docs/threat-model.md` §7 names this exactly. The
+comparison-card create flow (`block.create.confirm.*`) is
+unaffected — when the blocker is actively choosing whom to block,
+they have explicitly chosen the target, and obscuring the target
+on the confirm card would be theater. Cited:
+`privacy-precondition` (the blocker decides how their own list
+surfaces; the system minimizes incidental exposure).
 
 ### §6.3 Cumulative invariant
 
@@ -859,6 +881,28 @@ that everyone in the community sees the governance voice of
 every member; the per-block opt-in respects the blocker's choice
 to silence it for themselves.
 
+### §11.11 Permanent obscuring of the Settings block list
+
+**Rejected.** A variant of the tap-to-reveal affordance (see §6
+"Block-list rendering" row and §6.2) was considered in which the
+display name and pubkey of every row in Settings → Blocked
+contacts would be **permanently** obscured — generic-avatar-only
+plus a truncated pubkey fragment, with no per-row reveal.
+
+Cited: the blocker has to be able to identify *who they are
+unblocking* before they tap Unblock; the per-row note field is a
+private memory aid but is not a substitute for confirming
+identity. A pubkey-only flow would force the blocker to
+fingerprint-compare an opaque hex string before every unblock,
+which is worse for the common case and trains the blocker to
+unblock without actually verifying who. Tap-to-reveal preserves
+the privacy-from-overshoulder posture for the resting state of
+the panel (the common case is scrolling past, not interacting)
+while letting the blocker confirm identity in the moment of an
+actual action. Cited: `privacy-precondition` (incidental exposure
+minimized) without sacrificing the blocker's ability to act
+intentionally on their own list.
+
 ## §12 Threat-model delta
 
 Pointer to the threat-model §7 entry landed in this same PR:
@@ -937,6 +981,16 @@ contributor doesn't add server-side block routes by accident.
     excludes `blocks` and `previouslyBlocked` and the export
     documentation (in `member-guide.md` §12) names this
     exclusion alongside the existing private-key exclusion.
+  - **Device-pairing transfer payload** integration: the
+    `blocks` and `previouslyBlocked` tables (including the
+    `hideGovernance` per-block flag and the private `note`
+    field) join the existing local-key-wrapped pairing payload
+    documented in `docs/device-pairing.md` §8. This carries
+    block state to newly-paired devices through the same
+    envelope as the identity bundle and profile fields — never
+    over a peer-node wire (settled decision §14.1). The
+    already-paired-device gap is documented in §14.1 and
+    surfaced in fine print in PR E.
   - Unit tests for each action helper, for soft-purge clearance,
     for data-export exclusion, and a test asserting
     `"block"` is rejected at the `OutboxRow.kind` type level
@@ -956,14 +1010,41 @@ contributor doesn't add server-side block routes by accident.
 
 - **PR E — UI.**
   - Comparison-card block-creation flow on MemberDetail per §3,
-    with the default and `hideGovernance: true` variants.
+    with the default and `hideGovernance: true` variants. The
+    comparison-card create flow is NOT obscured — when the
+    blocker is actively choosing whom to block, they have
+    explicitly chosen the target and a generic avatar would be
+    theater (see §6 row on block-list rendering for the
+    distinction).
   - Settings → Blocked contacts panel with:
-    - List of current blocks.
-    - Per-row `hideGovernance` toggle.
-    - Per-row "Edit private note" affordance.
-    - Per-row Unblock button.
+    - List of current blocks. **Each row obscured by default**
+      (see §6 block-list rendering): renders a generic avatar,
+      the literal copy `block.settings.obscuredRow` ("Blocked
+      contact"), the block date, the per-row `hideGovernance`
+      toggle, the per-row "Edit private note" affordance, and
+      the per-row Unblock button. The display name and
+      truncated pubkey for that row are revealed by tapping the
+      row; tapping again re-obscures. Reveal state is per-row
+      and ephemeral (not persisted). i18n keys
+      `block.settings.obscuredRow`,
+      `block.settings.tapToReveal`.
     - "Previously blocked" subsection showing
-      `previouslyBlocked` rows.
+      `previouslyBlocked` rows. Same tap-to-reveal posture as
+      the current-blocks list.
+    - **"Clear unblocked history" button** at the bottom of the
+      previouslyBlocked subsection (settled decision §14.1).
+      Single affordance, clears the whole list — not per-row.
+      ConfirmDialog before clearing, matching the
+      co-organizer-revoke confirmation pattern. i18n key
+      `block.settings.clearHistoryButton`.
+    - **Cross-device fine-print warning** at the foot of the
+      panel: a single muted line noting that blocks created
+      on this device will NOT automatically reach devices that
+      were paired *before* the block was created — the operator
+      must re-pair the second device if they want it to pick up
+      the new block state (settled decision §14.1; references
+      `docs/device-pairing.md`). i18n key
+      `block.settings.crossDeviceWarning`.
   - i18n keys under the `block.*` namespace in
     `apps/web/src/i18n/locales/en.json` and `es.json`. Copy MUST
     use **"Block contact"** or **"Don't show me [member]"** (or
@@ -1013,28 +1094,61 @@ i18n review.
 
 ## §14 Open questions
 
-- **Cross-device propagation for the blocker's own devices.** A
-  blocker who pairs a second device (per
-  `docs/device-pairing.md`) currently sees an empty `blocks`
-  table on the new device. Should the device-pairing flow include
-  the blocker's `blocks` and `previouslyBlocked` tables in the
-  paired data, or should each paired device maintain its own
-  block state? *Recommendation: paired devices should share block
-  state* (it's the same identity making the choice, and an
-  asymmetric block-state across the blocker's own devices is
-  surprising). This is a paired-data-shape question that PR E
-  may inherit; flag it for PR E review. Note that this does NOT
-  change the federation posture — block state would travel only
-  through the existing device-pairing flow, which is already
-  local-key-wrapped and never crosses a peer-node wire.
+### §14.1 Settled
 
-- **`previouslyBlocked` retention.** Should the local history
-  retain indefinitely, or cap at (say) the most recent N entries
-  / past M months? Phase 1 retains indefinitely (no rollover
-  logic to implement, and the history is a private memory aid
-  whose size is bounded by the blocker's own past actions). Open
-  for reconsideration if the row count becomes unwieldy in pilot
-  use.
+The following entries opened in earlier drafts of this doc and are
+now settled by operator + designer discussion. They are retained
+here (rather than excised) so a reader walking the doc end-to-end
+sees the rationale, not just the conclusion.
+
+- **Cross-device propagation for the blocker's own devices —
+  settled YES, via the device-pairing transfer flow, with one
+  honestly-named gap.** The blocker's `blocks` and
+  `previouslyBlocked` tables (including the `hideGovernance`
+  per-block flag and the private `note` field) join the
+  device-pairing transfer payload (see `docs/device-pairing.md`
+  §8). A device that is paired *after* a block is created
+  receives the current block state at pairing time, the same way
+  it receives the identity bundle and profile fields. This does
+  NOT change the federation posture — block state travels only
+  through the local-key-wrapped pairing envelope and never
+  crosses a peer-node wire (cited: `privacy-precondition`).
+  > **Gap, named not papered over.** Devices that were paired
+  > *before* a new block is created do NOT automatically sync
+  > that new block. There is no settings-sync channel between
+  > already-paired devices today, and the pairing flow runs once
+  > per destination. Two plausible future-work shapes: (a) a
+  > "settings sync via signed local-only delta" channel scoped to
+  > the blocker's own paired devices (would need its own
+  > threat-model entry — even a local-only sync surface is a new
+  > surface), or (b) a manual re-pairing workflow surfaced in
+  > Settings → Blocked contacts when an already-paired device
+  > should pick up new blocks. Phase 1 ships with neither; the
+  > operator must re-pair the second device if they want the new
+  > block state to reach it. The Settings → Blocked contacts
+  > panel names this in fine print (see §13 PR E).
+
+- **`previouslyBlocked` retention — settled INDEFINITE by default
+  + manual "Clear unblocked history" button.** The history is
+  the blocker's memory aid; auto-deleting it is paternalistic
+  (cited: `privacy-precondition` — the blocker, not the system,
+  decides what to keep). No auto-prune, no expiry, no cap. A
+  single "Clear unblocked history" button at the bottom of the
+  previouslyBlocked subsection of Settings → Blocked contacts
+  clears the whole list (one affordance, not per-row), gated by
+  a ConfirmDialog (see §13 PR E).
+  > **Unbounded-growth risk, named honestly.** A long-active
+  > member could accumulate hundreds of `previouslyBlocked` rows
+  > over time. The IndexedDB cost is negligible at any realistic
+  > member-lifetime scale; the UX cost is the length of the
+  > Settings list. Combined with the tap-to-reveal affordance
+  > (see §6 and §13 PR E), even a long history has minimal
+  > incidental exposure to an over-the-shoulder observer. We
+  > defer to pilot signal: if real-world bloat shows up, an
+  > opt-in expiry can be added in a follow-up. We do not impose
+  > a cap pre-emptively.
+
+### §14.2 Still open
 
 - **Should the comparison card show a sample of recent
   interactions?** A surface that says "you and X have 3 recent
