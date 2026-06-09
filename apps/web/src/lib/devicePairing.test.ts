@@ -340,6 +340,138 @@ describe("encodeEnvelope + decodeEnvelope", () => {
   });
 });
 
+describe("block-bundle transfer (docs/blocking.md §14.1)", () => {
+  it("carries blocks and previouslyBlocked through the wrap → unwrap roundtrip", async () => {
+    const { secretKey, publicKey } = freshKeypair();
+    const passphrase = "good passphrase six words alpha";
+    const blocks = [
+      {
+        id: "block_1",
+        blockerKey: "alice_key",
+        blockedKey: "bob_key",
+        createdAt: 1_000,
+        hideGovernance: false,
+        note: null,
+      },
+      {
+        id: "block_2",
+        blockerKey: "alice_key",
+        blockedKey: "carol_key",
+        createdAt: 2_000,
+        hideGovernance: true,
+        note: "private memory aid",
+      },
+    ];
+    const previouslyBlocked = [
+      {
+        id: "history_1",
+        blockerKey: "alice_key",
+        blockedKey: "dave_key",
+        firstBlockedAt: 500,
+        lastUnblockedAt: 1_500,
+      },
+    ];
+
+    const env = await wrapForTransfer({
+      secretKey,
+      publicKey,
+      profile: PROFILE,
+      passphrase,
+      blocks,
+      previouslyBlocked,
+    });
+    const result = await unwrapTransfer(env, passphrase);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.payload.blocks).toEqual(blocks);
+    expect(result.payload.previouslyBlocked).toEqual(previouslyBlocked);
+  });
+
+  it("omits blocks / previouslyBlocked fields when callers do not pass them (backward compatibility with pre-PR-C source devices)", async () => {
+    const { secretKey, publicKey } = freshKeypair();
+    const passphrase = "another good passphrase right here";
+    const env = await wrapForTransfer({
+      secretKey,
+      publicKey,
+      profile: PROFILE,
+      passphrase,
+    });
+    const result = await unwrapTransfer(env, passphrase);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.payload.blocks).toBeUndefined();
+    expect(result.payload.previouslyBlocked).toBeUndefined();
+  });
+
+  it("assembleBlocksForTransfer reads scoped rows from Dexie for the given blockerKey", async () => {
+    const { db } = await import("@/db/database");
+    const { blockMember, unblockMember } = await import("@/db/blocks");
+    const { assembleBlocksForTransfer } = await import("./devicePairing");
+
+    await Promise.all([
+      db.blocks.clear(),
+      db.previouslyBlocked.clear(),
+    ]);
+
+    // Alice (the transferring member) has two active blocks and one
+    // unblocked-history row.
+    await blockMember({
+      blockerKey: "alice_key",
+      blockedKey: "bob_key",
+      hideGovernance: false,
+      note: null,
+      now: 1_000,
+    });
+    await blockMember({
+      blockerKey: "alice_key",
+      blockedKey: "carol_key",
+      hideGovernance: true,
+      note: "private",
+      now: 2_000,
+    });
+    await blockMember({
+      blockerKey: "alice_key",
+      blockedKey: "dave_key",
+      hideGovernance: false,
+      note: null,
+      now: 500,
+    });
+    await unblockMember({
+      blockerKey: "alice_key",
+      blockedKey: "dave_key",
+      now: 1_500,
+    });
+
+    // A different member on the same device — their rows must NOT
+    // leak into Alice's transfer bundle.
+    await blockMember({
+      blockerKey: "eve_key",
+      blockedKey: "bob_key",
+      hideGovernance: false,
+      note: "eve's private",
+      now: 3_000,
+    });
+
+    const bundle = await assembleBlocksForTransfer("alice_key");
+
+    expect(bundle.blocks.map((r) => r.blockedKey).sort()).toEqual(
+      ["bob_key", "carol_key"].sort(),
+    );
+    expect(bundle.blocks.every((r) => r.blockerKey === "alice_key")).toBe(
+      true,
+    );
+    // History includes BOTH the still-active blocks (firstBlockedAt
+    // recorded on create) AND the unblocked dave_key row.
+    expect(
+      bundle.previouslyBlocked.map((r) => r.blockedKey).sort(),
+    ).toEqual(["bob_key", "carol_key", "dave_key"].sort());
+    expect(
+      bundle.previouslyBlocked.every((r) => r.blockerKey === "alice_key"),
+    ).toBe(true);
+  });
+});
+
 describe("envelope sizing (sanity check against design doc §5.4)", () => {
   it("fits in a medium-density QR (under 2900 base64 chars)", async () => {
     const { secretKey, publicKey } = freshKeypair();

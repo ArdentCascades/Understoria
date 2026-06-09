@@ -21,6 +21,8 @@
 import nacl from "tweetnacl";
 import { b64decode, b64encode, randomBytes, utf8decode, utf8encode } from "./bytes";
 import { deriveMasterKey, DEFAULT_ITERATIONS } from "./passphrase";
+import { db } from "@/db/database";
+import type { BlockRow, PreviouslyBlockedRow } from "@/types";
 
 /**
  * Device-pairing crypto helpers — wrap an Ed25519 identity for QR
@@ -92,7 +94,15 @@ export interface TransferEnvelope {
 }
 
 /** The decrypted payload. Matches the shape committed to in
- *  `docs/device-pairing.md` §5.1. */
+ *  `docs/device-pairing.md` §5.1 and (for the block-bundle fields)
+ *  `docs/blocking.md` §14.1 — newly-paired devices receive the current
+ *  block state at pairing time, the same way they receive the identity
+ *  bundle and profile fields.
+ *
+ *  `blocks` and `previouslyBlocked` are OPTIONAL on the wire: an older
+ *  source device that pre-dates this PR will simply omit them, and the
+ *  destination handles their absence as an empty list. This keeps
+ *  cross-version pairing working without bumping `PAYLOAD_VERSION`. */
 export interface TransferPayload {
   v: typeof PAYLOAD_VERSION;
   secretKey: string; // base64(NaCl Ed25519 64-byte secretKey)
@@ -100,6 +110,16 @@ export interface TransferPayload {
   profile: TransferProfile;
   issuedAt: number;
   expiresAt: number;
+  /** Active blocks held by the transferring member; absent on a payload
+   *  built by a pre-block-feature source device. See
+   *  `docs/blocking.md` §14.1 — these propagate to NEWLY-paired devices
+   *  at pairing time. Already-paired devices that were paired BEFORE a
+   *  block was created do NOT auto-sync; that is an explicit
+   *  future-work gap (§14.1). */
+  blocks?: BlockRow[];
+  /** Block history rows. Same federation posture as `blocks` — local
+   *  device-cluster-only, never crosses a peer-node wire. */
+  previouslyBlocked?: PreviouslyBlockedRow[];
 }
 
 export type UnwrapResult =
@@ -162,6 +182,17 @@ export function generateTransferPassphrase(
  * Wrap an identity keypair + profile under a transfer passphrase.
  * Caller passes the bytes directly; the helper doesn't read from
  * IndexedDB or any global state.
+ *
+ * `blocks` and `previouslyBlocked` are OPTIONAL inputs — callers that
+ * want to propagate the blocker's current block state to the
+ * newly-paired device pass them in; callers that don't omit them.
+ * The destination's unwrap path handles their absence as "no block
+ * state to import." Both are included verbatim in the encrypted
+ * envelope per `docs/blocking.md` §14.1.
+ *
+ * The convenience function `assembleBlocksForTransfer(blockerKey)`
+ * below reads the two tables from Dexie scoped to one blocker; UI
+ * callers typically use it rather than passing rows directly.
  */
 export async function wrapForTransfer(opts: {
   secretKey: Uint8Array; // 64-byte NaCl Ed25519 secretKey
@@ -170,6 +201,16 @@ export async function wrapForTransfer(opts: {
   passphrase: string;
   now?: number;
   expiryMs?: number;
+  /** Optional: active blocks held by the transferring member. See
+   *  `docs/blocking.md` §14.1 — these propagate to NEWLY-paired devices
+   *  at pairing time. Already-paired devices that were paired BEFORE a
+   *  block was created do NOT auto-sync; that is an explicit
+   *  future-work gap (§14.1). */
+  blocks?: BlockRow[];
+  /** Optional: block history rows. Same federation posture as
+   *  `blocks` — local device-cluster-only, never crosses a peer-node
+   *  wire. */
+  previouslyBlocked?: PreviouslyBlockedRow[];
 }): Promise<TransferEnvelope> {
   const now = opts.now ?? Date.now();
   const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;
@@ -191,6 +232,10 @@ export async function wrapForTransfer(opts: {
     profile: opts.profile,
     issuedAt: now,
     expiresAt: now + expiryMs,
+    ...(opts.blocks !== undefined ? { blocks: opts.blocks } : {}),
+    ...(opts.previouslyBlocked !== undefined
+      ? { previouslyBlocked: opts.previouslyBlocked }
+      : {}),
   };
 
   const salt = randomBytes(16);
@@ -360,4 +405,37 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
   return diff === 0;
+}
+
+/**
+ * Read the transferring member's `blocks` and `previouslyBlocked` rows
+ * from Dexie, scoped to the blocker's own pubkey. Convenience helper
+ * for callers that want to populate the `wrapForTransfer` payload from
+ * the live local state.
+ *
+ * `docs/blocking.md` §14.1: blocks + history propagate to NEWLY-paired
+ * devices through the device-pairing transfer envelope (the same
+ * envelope as the identity bundle + profile fields), NEVER over a
+ * peer-node wire. Already-paired devices that were paired BEFORE a
+ * block was created do not auto-sync; that is an explicit future-work
+ * gap (§14.1) — the Settings panel surfaces this in fine print (PR E).
+ *
+ * Scoped to `blockerKey` so a shared-device cluster (e.g., a household
+ * sharing one laptop) doesn't leak one member's blocks to another
+ * member's paired device.
+ */
+export async function assembleBlocksForTransfer(
+  blockerKey: string,
+): Promise<{
+  blocks: BlockRow[];
+  previouslyBlocked: PreviouslyBlockedRow[];
+}> {
+  const [blocks, previouslyBlocked] = await Promise.all([
+    db.blocks.where("blockerKey").equals(blockerKey).toArray(),
+    db.previouslyBlocked
+      .where("blockerKey")
+      .equals(blockerKey)
+      .toArray(),
+  ]);
+  return { blocks, previouslyBlocked };
 }

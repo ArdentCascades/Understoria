@@ -110,6 +110,25 @@ export async function softPurge(): Promise<PurgeResult> {
     tables.push("projectTasks");
   });
 
+  // docs/blocking.md §3 (privacy-policy.md §3): block list + history
+  // are local-only personal-relief data and are cleared on soft-purge.
+  // Unlike the tables above, every column on a BlockRow /
+  // PreviouslyBlockedRow is identifying (the row IS the relationship —
+  // there's no "structural" half to preserve), so the right scrub is a
+  // table clear rather than a field rewrite. This also matches the
+  // threat-model §7 entry naming `previouslyBlocked` as a device-access
+  // residual that soft-purge resolves.
+  await db.transaction(
+    "rw",
+    [db.blocks, db.previouslyBlocked],
+    async () => {
+      await db.blocks.clear();
+      await db.previouslyBlocked.clear();
+    },
+  );
+  tables.push("blocks");
+  tables.push("previouslyBlocked");
+
   // Settings that could leak identity are rewritten; the node identity
   // and celebrated-milestones cache survive so the UI doesn't behave
   // erratically afterward.
@@ -141,6 +160,8 @@ export async function hardPurge(): Promise<PurgeResult> {
     "coorgInvitations",
     "coorgInvitationResponses",
     "coorgInvitationRevocations",
+    "blocks",
+    "previouslyBlocked",
   ];
 
   await Promise.all([
@@ -165,6 +186,11 @@ export async function hardPurge(): Promise<PurgeResult> {
     db.coorgInvitations.clear(),
     db.coorgInvitationResponses.clear(),
     db.coorgInvitationRevocations.clear(),
+    // docs/blocking.md §3: block list + history are local-only
+    // personal-relief data. A rotated identity should not inherit
+    // the pre-rotation blocker's list.
+    db.blocks.clear(),
+    db.previouslyBlocked.clear(),
   ]);
 
   // Rotate to a fresh node identity so the post-purge node is

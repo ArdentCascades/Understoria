@@ -11,12 +11,38 @@
  */
 import { db } from "@/db/database";
 
-// Builds a JSON snapshot of the member's local data and triggers a
-// browser download. Used by the Settings page's Data export card.
-// `db.secretKeys` is deliberately excluded — private keys never leave
-// the device via export. Key backup / recovery is a separate
-// passphrase-wrapped flow (see SecuritySection).
-export async function exportData(): Promise<void> {
+/**
+ * Tables that are deliberately excluded from the data export bundle.
+ * Exported as a const so tests can assert the exclusion list without
+ * inspecting the assembled payload by table name.
+ *
+ *   - `secretKeys` — private keys never leave the device via export.
+ *     Key backup / recovery is a separate passphrase-wrapped flow
+ *     (see SecuritySection).
+ *   - `blocks` + `previouslyBlocked` — local-only personal-relief data
+ *     per `docs/blocking.md` §4 + §7 (+ `docs/privacy-policy.md` §3).
+ *     Carrying these into an export bundle (which the member may share
+ *     for backup or transfer-by-file) would re-introduce the surveillance
+ *     surface §11.1 rejected federation to avoid. Settled — block state
+ *     rides the device-pairing transfer envelope (see
+ *     `lib/devicePairing.ts`), never the export bundle.
+ */
+export const EXPORT_EXCLUDED_TABLES = [
+  "secretKeys",
+  "blocks",
+  "previouslyBlocked",
+] as const;
+
+/**
+ * Build the in-memory export bundle without serialising or triggering a
+ * download. Split out from `exportData` so tests can assert the shape
+ * (specifically the exclusion list above) without faking a DOM.
+ */
+export async function buildExportBundle(): Promise<{
+  exportedAt: string;
+  schemaVersion: number;
+  data: Record<string, unknown>;
+}> {
   const [members, posts, exchanges, achievements, settings] = await Promise.all(
     [
       db.members.toArray(),
@@ -26,11 +52,19 @@ export async function exportData(): Promise<void> {
       db.settings.toArray(),
     ],
   );
-  const payload = {
+  return {
     exportedAt: new Date().toISOString(),
     schemaVersion: 1,
     data: { members, posts, exchanges, achievements, settings },
   };
+}
+
+// Builds a JSON snapshot of the member's local data and triggers a
+// browser download. Used by the Settings page's Data export card.
+// The tables listed in EXPORT_EXCLUDED_TABLES are deliberately omitted
+// — see the const docstring for the per-table rationale.
+export async function exportData(): Promise<void> {
+  const payload = await buildExportBundle();
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
