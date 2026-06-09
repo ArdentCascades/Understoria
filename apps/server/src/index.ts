@@ -24,6 +24,8 @@ import {
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
+  createEventCancellationStore,
+  createEventStore,
   createExchangeStore,
   createInviteStore,
   createPeerPullStore,
@@ -53,6 +55,8 @@ async function main(): Promise<void> {
       createCoOrganizerInvitationResponseStore(database),
     coorgInvitationRevocationStore:
       createCoOrganizerInvitationRevocationStore(database),
+    eventStore: createEventStore(database),
+    eventCancellationStore: createEventCancellationStore(database),
     pullStore: createPeerPullStore(database),
     onError: (peerUrl, err) =>
       app.log.warn({ peerUrl, err }, "peer pull failed"),

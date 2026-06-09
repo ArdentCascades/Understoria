@@ -24,6 +24,8 @@ import {
   type CoOrganizerInvitation,
   type CoOrganizerInvitationResponse,
   type CoOrganizerInvitationRevocation,
+  type Event,
+  type EventCancellation,
   type Exchange,
   type FlagReason,
   type Post,
@@ -72,6 +74,14 @@ export type ParseCoOrganizerInvitationResponseResult =
 
 export type ParseCoOrganizerInvitationRevocationResult =
   | { ok: true; value: CoOrganizerInvitationRevocation }
+  | { ok: false; error: string };
+
+export type ParseEventResult =
+  | { ok: true; value: Event }
+  | { ok: false; error: string };
+
+export type ParseEventCancellationResult =
+  | { ok: true; value: EventCancellation }
   | { ok: false; error: string };
 
 const VOUCH_KINDS: ReadonlySet<SignedVouch["kind"]> = new Set([
@@ -644,6 +654,214 @@ export function parseCoOrganizerInvitationRevocation(
       invitationId: r.invitationId as string,
       inviterKey: r.inviterKey as string,
       revokedAt: r.revokedAt as number,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+// Field length bounds for community events. Mirrors the per-field
+// comments in `packages/shared/src/types.ts` (the wire contract) and
+// the §4 design-doc rationale. Keep these in sync.
+const EVENT_TITLE_MAX = 200;
+const EVENT_DESCRIPTION_MAX = 2000;
+const EVENT_CATEGORY_MAX = 50;
+const EVENT_LOCATION_MAX = 200;
+const EVENT_CANCELLATION_REASON_MAX = 500;
+
+const EVENT_STRING_FIELDS = [
+  "id",
+  "nodeId",
+  "createdBy",
+  "signature",
+] as const;
+
+export function parseEvent(input: unknown): ParseEventResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+
+  if (r.kind !== "event") {
+    return { ok: false, error: "kind must be 'event'" };
+  }
+  for (const f of EVENT_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.title !== "string") {
+    return { ok: false, error: "title must be a string" };
+  }
+  const title = r.title as string;
+  if (title.length === 0 || title.length > EVENT_TITLE_MAX) {
+    return {
+      ok: false,
+      error: `title must be 1..${EVENT_TITLE_MAX} characters`,
+    };
+  }
+  if (typeof r.description !== "string") {
+    return { ok: false, error: "description must be a string" };
+  }
+  if ((r.description as string).length > EVENT_DESCRIPTION_MAX) {
+    return {
+      ok: false,
+      error: `description exceeds ${EVENT_DESCRIPTION_MAX} characters`,
+    };
+  }
+  if (typeof r.category !== "string") {
+    return { ok: false, error: "category must be a string" };
+  }
+  const category = r.category as string;
+  if (category.length === 0 || category.length > EVENT_CATEGORY_MAX) {
+    return {
+      ok: false,
+      error: `category must be 1..${EVENT_CATEGORY_MAX} characters`,
+    };
+  }
+  if (typeof r.location !== "string") {
+    return { ok: false, error: "location must be a string" };
+  }
+  const location = r.location as string;
+  if (location.length === 0 || location.length > EVENT_LOCATION_MAX) {
+    return {
+      ok: false,
+      error: `location must be 1..${EVENT_LOCATION_MAX} characters`,
+    };
+  }
+  if (
+    typeof r.startsAt !== "number" ||
+    !Number.isInteger(r.startsAt) ||
+    r.startsAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "startsAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (r.endsAt !== null) {
+    if (
+      typeof r.endsAt !== "number" ||
+      !Number.isInteger(r.endsAt) ||
+      r.endsAt <= 0
+    ) {
+      return {
+        ok: false,
+        error: "endsAt must be null or a positive integer (ms epoch)",
+      };
+    }
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  if (r.capacity !== null) {
+    if (
+      typeof r.capacity !== "number" ||
+      !Number.isInteger(r.capacity) ||
+      r.capacity <= 0
+    ) {
+      return {
+        ok: false,
+        error: "capacity must be null or a positive integer",
+      };
+    }
+  }
+  // Phase 1: templateId MUST be null. Phase 2 will relax this when the
+  // template registry lands; see `docs/community-events.md` §10.
+  if (r.templateId !== null) {
+    return {
+      ok: false,
+      error: "templateId must be null in phase 1",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.createdAt as number) > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      kind: "event",
+      title,
+      description: r.description as string,
+      category,
+      startsAt: r.startsAt as number,
+      endsAt: r.endsAt as number | null,
+      location,
+      capacity: r.capacity as number | null,
+      templateId: null,
+      createdAt: r.createdAt as number,
+      createdBy: r.createdBy as string,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+const EVENT_CANCELLATION_STRING_FIELDS = [
+  "id",
+  "eventId",
+  "nodeId",
+  "createdBy",
+  "signature",
+] as const;
+
+export function parseEventCancellation(
+  input: unknown,
+): ParseEventCancellationResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+
+  if (r.kind !== "event_cancellation") {
+    return { ok: false, error: "kind must be 'event_cancellation'" };
+  }
+  for (const f of EVENT_CANCELLATION_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.reason !== "string") {
+    return { ok: false, error: "reason must be a string" };
+  }
+  if ((r.reason as string).length > EVENT_CANCELLATION_REASON_MAX) {
+    return {
+      ok: false,
+      error: `reason exceeds ${EVENT_CANCELLATION_REASON_MAX} characters`,
+    };
+  }
+  if (
+    typeof r.cancelledAt !== "number" ||
+    !Number.isInteger(r.cancelledAt) ||
+    r.cancelledAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "cancelledAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.cancelledAt as number) > oneDayFromNow) {
+    return { ok: false, error: "cancelledAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      kind: "event_cancellation",
+      eventId: r.eventId as string,
+      reason: r.reason as string,
+      cancelledAt: r.cancelledAt as number,
+      createdBy: r.createdBy as string,
       nodeId: r.nodeId as string,
       signature: r.signature as string,
     },

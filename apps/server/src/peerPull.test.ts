@@ -14,6 +14,8 @@ import {
   canonicalCoOrganizerInvitationPayload,
   canonicalCoOrganizerInvitationResponsePayload,
   canonicalCoOrganizerInvitationRevocationPayload,
+  canonicalEventCancellationPayload,
+  canonicalEventPayload,
   canonicalExchangePayload,
   canonicalPostPayload,
   canonicalVouchPayload,
@@ -32,6 +34,8 @@ import {
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
+  createEventCancellationStore,
+  createEventStore,
   createExchangeStore,
   createPeerPullStore,
   createInviteStore,
@@ -45,6 +49,8 @@ import {
   pullCoOrganizerInvitationResponsesFromPeer,
   pullCoOrganizerInvitationRevocationsFromPeer,
   pullCoOrganizerInvitationsFromPeer,
+  pullEventCancellationsFromPeer,
+  pullEventsFromPeer,
   pullFromPeer,
   pullPostsFromPeer,
   pullVouchesFromPeer,
@@ -123,6 +129,12 @@ function exchangeOnly(inner: Fetcher): Fetcher {
     }
     if (/\/coorg-invitations\b/.test(url)) {
       return jsonResponse({ count: 0, coorgInvitations: [] });
+    }
+    if (/\/event-cancellations\b/.test(url)) {
+      return jsonResponse({ count: 0, eventCancellations: [] });
+    }
+    if (/\/events\b/.test(url)) {
+      return jsonResponse({ count: 0, events: [] });
     }
     return inner(url);
   };
@@ -316,6 +328,8 @@ describe("startPeerPullWorker", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
     });
@@ -347,6 +361,8 @@ describe("startPeerPullWorker", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
     });
@@ -380,6 +396,8 @@ describe("startPeerPullWorker", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
       onError: (url, err) => errors.push({ url, msg: err.message }),
@@ -421,6 +439,8 @@ describe("startPeerPullWorker", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
     });
@@ -510,6 +530,10 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
       if (/\/coorg-invitations\b/.test(url))
         return jsonResponse({ count: 0, coorgInvitations: [] });
+      if (/\/event-cancellations\b/.test(url))
+        return jsonResponse({ count: 0, eventCancellations: [] });
+      if (/\/events\b/.test(url))
+        return jsonResponse({ count: 0, events: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -525,6 +549,8 @@ describe("startPeerPullWorker — vouches", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
     });
@@ -532,11 +558,13 @@ describe("startPeerPullWorker — vouches", () => {
     worker.stop();
     // Three kinds attempted; posts returned empty so it's still a
     // successful pull with no insertions.
-    expect(results).toHaveLength(8);
+    expect(results).toHaveLength(10);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "coorg_invitation",
       "coorg_invitation_response",
       "coorg_invitation_revocation",
+      "event",
+      "event_cancellation",
       "exchange",
       "invite",
       "post",
@@ -570,6 +598,10 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
       if (/\/coorg-invitations\b/.test(url))
         return jsonResponse({ count: 0, coorgInvitations: [] });
+      if (/\/event-cancellations\b/.test(url))
+        return jsonResponse({ count: 0, eventCancellations: [] });
+      if (/\/events\b/.test(url))
+        return jsonResponse({ count: 0, events: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -585,6 +617,8 @@ describe("startPeerPullWorker — vouches", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
     });
@@ -696,6 +730,10 @@ describe("startPeerPullWorker — posts", () => {
         return jsonResponse({ count: 0, coorgInvitationRevocations: [] });
       if (/\/coorg-invitations\b/.test(url))
         return jsonResponse({ count: 0, coorgInvitations: [] });
+      if (/\/event-cancellations\b/.test(url))
+        return jsonResponse({ count: 0, eventCancellations: [] });
+      if (/\/events\b/.test(url))
+        return jsonResponse({ count: 0, events: [] });
       return jsonResponse({ count: 1, exchanges: [exchange] });
     };
     const worker = startPeerPullWorker({
@@ -711,16 +749,20 @@ describe("startPeerPullWorker — posts", () => {
         createCoOrganizerInvitationResponseStore(db),
       coorgInvitationRevocationStore:
         createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
       pullStore,
       fetcher,
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    expect(results).toHaveLength(8);
+    expect(results).toHaveLength(10);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "coorg_invitation",
       "coorg_invitation_response",
       "coorg_invitation_revocation",
+      "event",
+      "event_cancellation",
       "exchange",
       "invite",
       "post",
@@ -972,5 +1014,262 @@ describe("pullCoOrganizerInvitationRevocationsFromPeer", () => {
     });
     expect(result.insertedCount).toBe(1);
     expect(result.rejectedCount).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Community-event pull workers — PR D.
+// ---------------------------------------------------------------------------
+
+function makeSignedEventForPull(overrides: {
+  id?: string;
+  createdAt?: number;
+  organizer?: { publicKey: string; secretKey: Uint8Array };
+} = {}): import("@understoria/shared/types").Event {
+  const org = overrides.organizer ?? generateKeyPair();
+  const createdAt = overrides.createdAt ?? Date.now();
+  const payload = {
+    id: overrides.id ?? `ev_${Math.random().toString(36).slice(2)}`,
+    kind: "event" as const,
+    title: "Skillshare",
+    description: "",
+    category: "skills-exchange",
+    startsAt: createdAt + 86_400_000,
+    endsAt: null,
+    location: "Community room",
+    capacity: null,
+    templateId: null,
+    createdAt,
+    createdBy: org.publicKey,
+    nodeId: "node_peer",
+  };
+  const sig = sign(canonicalEventPayload(payload), org.secretKey);
+  return { ...payload, signature: sig };
+}
+
+function makeSignedCancellationForPull(opts: {
+  eventId: string;
+  organizer: { publicKey: string; secretKey: Uint8Array };
+  id?: string;
+  cancelledAt?: number;
+}): import("@understoria/shared/types").EventCancellation {
+  const cancelledAt = opts.cancelledAt ?? Date.now();
+  const payload = {
+    id: opts.id ?? `ec_${Math.random().toString(36).slice(2)}`,
+    kind: "event_cancellation" as const,
+    eventId: opts.eventId,
+    reason: "",
+    cancelledAt,
+    createdBy: opts.organizer.publicKey,
+    nodeId: "node_peer",
+  };
+  const sig = sign(
+    canonicalEventCancellationPayload(payload),
+    opts.organizer.secretKey,
+  );
+  return { ...payload, signature: sig };
+}
+
+describe("pullEventsFromPeer", () => {
+  it("inserts every well-signed event the peer returns and advances the cursor on max(createdAt)", async () => {
+    const store = createEventStore(db);
+    const events = [
+      makeSignedEventForPull({ createdAt: 100 }),
+      makeSignedEventForPull({ createdAt: 200 }),
+    ];
+    const fetcher: Fetcher = () => jsonResponse({ count: 2, events });
+    const result = await pullEventsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.kind).toBe("event");
+    expect(result.insertedCount).toBe(2);
+    expect(result.latestCompletedAt).toBe(200);
+    expect(store.count()).toBe(2);
+  });
+
+  it("drops bad-signature rows without advancing the cursor past them", async () => {
+    const store = createEventStore(db);
+    const good = makeSignedEventForPull({ createdAt: 100 });
+    const bad: import("@understoria/shared/types").Event = {
+      ...makeSignedEventForPull({ createdAt: 999 }),
+      signature: "0",
+    };
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, events: [good, bad] });
+    const result = await pullEventsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(1);
+    expect(result.latestCompletedAt).toBe(100);
+    expect(store.count()).toBe(1);
+  });
+
+  it("treats already-stored events as duplicates without re-inserting", async () => {
+    const store = createEventStore(db);
+    const event = makeSignedEventForPull({ createdAt: 500 });
+    store.insert(event);
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 1, events: [event] });
+    const result = await pullEventsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.duplicateCount).toBe(1);
+    expect(store.count()).toBe(1);
+  });
+
+  it("hits the /events path with since=", async () => {
+    const store = createEventStore(db);
+    const seen: string[] = [];
+    const fetcher: Fetcher = (url) => {
+      seen.push(url);
+      return jsonResponse({ count: 0, events: [] });
+    };
+    await pullEventsFromPeer({
+      peerUrl: "https://peer.example",
+      since: 4242,
+      fetcher,
+      store,
+    });
+    expect(seen[0]).toMatch(/\/events\?/);
+    expect(seen[0]).toContain("since=4242");
+  });
+});
+
+describe("pullEventCancellationsFromPeer", () => {
+  it("inserts every well-signed cancellation the peer returns", async () => {
+    const store = createEventCancellationStore(db);
+    const org = generateKeyPair();
+    const c1 = makeSignedCancellationForPull({
+      eventId: "ev_one",
+      organizer: org,
+      cancelledAt: 100,
+    });
+    const c2 = makeSignedCancellationForPull({
+      eventId: "ev_two",
+      organizer: org,
+      cancelledAt: 200,
+    });
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, eventCancellations: [c1, c2] });
+    const result = await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.kind).toBe("event_cancellation");
+    expect(result.insertedCount).toBe(2);
+    expect(result.latestCompletedAt).toBe(200);
+    expect(store.count()).toBe(2);
+  });
+
+  it("drops bad-signature rows without advancing past them", async () => {
+    const store = createEventCancellationStore(db);
+    const org = generateKeyPair();
+    const good = makeSignedCancellationForPull({
+      eventId: "ev_good",
+      organizer: org,
+      cancelledAt: 100,
+    });
+    const bad: import("@understoria/shared/types").EventCancellation = {
+      ...makeSignedCancellationForPull({
+        eventId: "ev_bad",
+        organizer: org,
+        cancelledAt: 9999,
+      }),
+      signature: "0",
+    };
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 2, eventCancellations: [good, bad] });
+    const result = await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(1);
+    expect(result.latestCompletedAt).toBe(100);
+    expect(store.count()).toBe(1);
+  });
+
+  it("dedupes by id without re-inserting", async () => {
+    const store = createEventCancellationStore(db);
+    const org = generateKeyPair();
+    const cancel = makeSignedCancellationForPull({
+      eventId: "ev_x",
+      organizer: org,
+      cancelledAt: 500,
+    });
+    store.insert(cancel);
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 1, eventCancellations: [cancel] });
+    const result = await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.duplicateCount).toBe(1);
+    expect(store.count()).toBe(1);
+  });
+
+  it("honors first-write-wins on eventId — a second cancellation for the same eventId is treated as a duplicate", async () => {
+    const store = createEventCancellationStore(db);
+    const org = generateKeyPair();
+    const first = makeSignedCancellationForPull({
+      id: "ec_first",
+      eventId: "ev_shared",
+      organizer: org,
+      cancelledAt: 100,
+    });
+    store.insert(first);
+    const second = makeSignedCancellationForPull({
+      id: "ec_second",
+      eventId: "ev_shared",
+      organizer: org,
+      cancelledAt: 200,
+    });
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 1, eventCancellations: [second] });
+    const result = await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.duplicateCount).toBe(1);
+    expect(store.count()).toBe(1);
+    expect(store.getByEventId("ev_shared")?.id).toBe("ec_first");
+  });
+
+  it("hits the /event-cancellations path with since=", async () => {
+    const store = createEventCancellationStore(db);
+    const seen: string[] = [];
+    const fetcher: Fetcher = (url) => {
+      seen.push(url);
+      return jsonResponse({ count: 0, eventCancellations: [] });
+    };
+    await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: 9001,
+      fetcher,
+      store,
+    });
+    expect(seen[0]).toMatch(/\/event-cancellations\?/);
+    expect(seen[0]).toContain("since=9001");
   });
 });
