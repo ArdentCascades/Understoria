@@ -21,6 +21,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { hardPurge, softPurge } from "./panic";
 import { db } from "@/db/database";
+import { blockMember } from "@/db/blocks";
 import { createMember } from "@/db/seed";
 import {
   confirmExchange,
@@ -48,6 +49,8 @@ async function reset() {
     db.coorgInvitations.clear(),
     db.coorgInvitationResponses.clear(),
     db.coorgInvitationRevocations.clear(),
+    db.blocks.clear(),
+    db.previouslyBlocked.clear(),
   ]);
 }
 
@@ -167,5 +170,39 @@ describe("hardPurge", () => {
     // fast on anything modern.
     expect(result.durationMs).toBeLessThan(60_000);
     expect(result.durationMs).toBeLessThan(5_000);
+  });
+});
+
+describe("softPurge clears blocking tables (docs/blocking.md §3)", () => {
+  beforeEach(reset);
+
+  it("clears both blocks and previouslyBlocked alongside the existing scrub", async () => {
+    const members = await populate(3, 0);
+    const [a, b, c] = members;
+
+    // Two active blocks + one block-then-unblock so previouslyBlocked
+    // gets both an in-progress row and a fully-unblocked row.
+    await blockMember({
+      blockerKey: a.publicKey,
+      blockedKey: b.publicKey,
+      hideGovernance: false,
+      note: "alice blocks bob",
+    });
+    await blockMember({
+      blockerKey: a.publicKey,
+      blockedKey: c.publicKey,
+      hideGovernance: true,
+      note: null,
+    });
+
+    expect(await db.blocks.count()).toBe(2);
+    expect(await db.previouslyBlocked.count()).toBe(2);
+
+    const result = await softPurge();
+    expect(result.tablesTouched).toContain("blocks");
+    expect(result.tablesTouched).toContain("previouslyBlocked");
+
+    expect(await db.blocks.count()).toBe(0);
+    expect(await db.previouslyBlocked.count()).toBe(0);
   });
 });

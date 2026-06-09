@@ -22,6 +22,7 @@ import Dexie, { type Table } from "dexie";
 import type {
   Achievement,
   AvailabilityChip,
+  BlockRow,
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
@@ -33,6 +34,7 @@ import type {
   Member,
   NodeConfig,
   Post,
+  PreviouslyBlockedRow,
   Project,
   ProjectActivity,
   ProjectTask,
@@ -261,6 +263,23 @@ export class UnderstoriaDB extends Dexie {
   events!: Table<EventRow, string>;
   eventRsvps!: Table<EventRsvpRow, string>;
   eventCancellations!: Table<EventCancellationRow, string>;
+  /**
+   * Local-only member-block table — see `docs/blocking.md` §4 + §7.
+   * Personal-relief data. Never synced, never exported, never federated.
+   * Cleared by soft-purge. Read and written only by `db/blocks.ts` on
+   * the blocker's own device. The `OutboxRow.kind` union above rejects
+   * `"block"` at the type level; there is no `enqueueBlock` helper in
+   * `lib/outbox.ts`. Same federation posture as `eventRsvps`.
+   */
+  blocks!: Table<BlockRow, string>;
+  /**
+   * Local-only block history — see `docs/blocking.md` §4.1 + §5 + §7.
+   * Same federation posture as `blocks`. This is never synced,
+   * exported, or federated. Indefinite retention by default; cleared
+   * by the explicit "Clear unblocked history" affordance (PR E) or by
+   * soft-purge.
+   */
+  previouslyBlocked!: Table<PreviouslyBlockedRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -678,6 +697,39 @@ export class UnderstoriaDB extends Dexie {
         });
         await settings.delete("pullCursorEventCancellation");
       }
+    });
+    // v24: BlockRow + PreviouslyBlockedRow local tables.
+    // These are local-only personal-relief data per docs/blocking.md
+    // §4 + §7. Never federated, never exported, cleared by soft-purge.
+    // The OutboxRow.kind union rejects "block" at the type level (PR B);
+    // there is no enqueueBlock helper anywhere in lib/outbox. Same
+    // discipline as eventRsvps.
+    //
+    // Two pure new tables; no backfill (no prior data exists to
+    // migrate, since pre-v24 nodes had no block surface at all).
+    //
+    // Indexes:
+    //   `blocks`
+    //     - blockerKey, blockedKey, createdAt — single-column lookups
+    //       for `listBlocks` (by blocker, DESC by createdAt) and
+    //       per-key filtering.
+    //     - [blockerKey+blockedKey] — compound index used by the
+    //       `isBlocked` point lookup, which every §6 consumer surface
+    //       (PR F) calls on the hot path.
+    //   `previouslyBlocked`
+    //     - blockerKey, blockedKey, firstBlockedAt — single-column
+    //       lookups for `listPreviouslyBlocked` (by blocker, DESC by
+    //       lastUnblockedAt — in-memory sort since lastUnblockedAt
+    //       mutates) and per-key filtering.
+    //     - [blockerKey+blockedKey] — compound index used to find or
+    //       update an existing history row when the same member is
+    //       re-blocked or unblocked, keeping `firstBlockedAt` stable
+    //       across re-block cycles (docs/blocking.md §5).
+    this.version(24).stores({
+      blocks:
+        "id, blockerKey, blockedKey, createdAt, [blockerKey+blockedKey]",
+      previouslyBlocked:
+        "id, blockerKey, blockedKey, firstBlockedAt, [blockerKey+blockedKey]",
     });
   }
 }
