@@ -54,7 +54,7 @@ interface SearchGroup {
 // that "modern chat" UIs accrete around split-pane layouts.
 
 export default function MessagesShell() {
-  const { currentMember, members, lockState } = useApp();
+  const { currentMember, members, lockState, blockedKeys } = useApp();
   const { t } = useTranslation();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [query, setQuery] = useState("");
@@ -77,8 +77,13 @@ export default function MessagesShell() {
 
   useEffect(() => {
     if (!currentMember) return;
+    // `blockedKeys` is in the deps so a new block (e.g., from the
+    // Conversation header menu in PR #211) reactively drops the
+    // blocked counterparty from the list without a page reload.
+    // `listConversations` reads the same set internally — see
+    // db/messages.ts §"PR F: filter blocked counterparties".
     void listConversations(currentMember.publicKey).then(setConversations);
-  }, [currentMember]);
+  }, [currentMember, blockedKeys]);
 
   // Debounce the query so each keystroke doesn't run a full
   // decrypt-and-scan. 250 ms feels responsive without re-scanning
@@ -100,9 +105,13 @@ export default function MessagesShell() {
       if (cancelled) return;
       // Group hits by counterparty so the UI is "conversations
       // containing matches" rather than a flat hit list — that maps
-      // onto how members think about messaging.
+      // onto how members think about messaging. Hits from blocked
+      // counterparties drop out here at the render layer; the
+      // `searchAllMessages` data-layer doesn't know about blocks, so
+      // the gate is local to this page until / unless we lift it.
       const grouped = new Map<string, MessageSearchHit[]>();
       for (const h of hits) {
+        if (blockedKeys.has(h.otherKey)) continue;
         const existing = grouped.get(h.otherKey);
         if (existing) existing.push(h);
         else grouped.set(h.otherKey, [h]);
@@ -130,7 +139,7 @@ export default function MessagesShell() {
     return () => {
       cancelled = true;
     };
-  }, [currentMember, debounced, conversations, nameByKey]);
+  }, [currentMember, debounced, conversations, nameByKey, blockedKeys]);
 
   if (!currentMember) return null;
 
