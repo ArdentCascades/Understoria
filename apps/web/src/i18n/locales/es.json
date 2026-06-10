@@ -326,6 +326,7 @@
       "errorTitleRequired": "Pon un título para que la gente sepa a qué vendría.",
       "errorLocationRequired": "Agrega un lugar — aunque sea algo casual como \"el banco de la biblioteca\".",
       "errorStartRequired": "Elige una fecha y hora de inicio.",
+      "errorStartInPast": "La hora de inicio del evento está en el pasado. Elige una hora posterior a ahora.",
       "errorEndInvalid": "La hora de fin no es válida. Elige una fecha y hora, o quita la opción de hora de fin.",
       "errorEndBeforeStart": "La hora de fin tiene que ser después de la de inicio.",
       "errorCapacityInvalid": "El cupo debe ser un número entero positivo, o déjalo vacío para cupo abierto.",

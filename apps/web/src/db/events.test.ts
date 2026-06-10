@@ -162,6 +162,49 @@ describe("createEvent", () => {
     ).rejects.toMatchObject({ code: "template_not_supported" });
   });
 
+  describe("startsAt grace window", () => {
+    const GRACE_MS = 5 * 60 * 1000;
+
+    it("rejects when startsAt is more than 5 minutes before now", async () => {
+      const organizer = makeOrganizer();
+      await expect(
+        makeEvent(organizer, {
+          startsAt: 1_000_000,
+          now: 1_000_000 + GRACE_MS + 1,
+        }),
+      ).rejects.toMatchObject({ code: "start_in_past" });
+      expect(await db.events.count()).toBe(0);
+      expect(await db.outbox.count()).toBe(0);
+    });
+
+    it("accepts startsAt within the 5-minute grace window", async () => {
+      const organizer = makeOrganizer();
+      const ev = await makeEvent(organizer, {
+        startsAt: 1_000_000,
+        now: 1_000_000 + GRACE_MS - 1,
+      });
+      expect(ev.id).toBeTruthy();
+    });
+
+    it("accepts startsAt exactly at now", async () => {
+      const organizer = makeOrganizer();
+      const ev = await makeEvent(organizer, {
+        startsAt: 1_000_000,
+        now: 1_000_000,
+      });
+      expect(ev.id).toBeTruthy();
+    });
+
+    it("accepts startsAt in the future", async () => {
+      const organizer = makeOrganizer();
+      const ev = await makeEvent(organizer, {
+        startsAt: 2_000_000,
+        now: 1_000_000,
+      });
+      expect(ev.id).toBeTruthy();
+    });
+  });
+
   it("rejects when the signature does not verify (mismatched secret key)", async () => {
     const organizer = makeOrganizer();
     const stranger = generateKeyPair();

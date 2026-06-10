@@ -561,6 +561,7 @@ describe("Events (RSVP) (c)", () => {
       organizerKey: organizer.publicKey,
       organizerSecretKey: organizer.secretKey,
       nodeId: NODE,
+      now: 4_000_000,
     });
     await blockMember({
       blockerKey: member.publicKey,
@@ -595,6 +596,7 @@ describe("Events (RSVP) (c)", () => {
       organizerKey: organizer.publicKey,
       organizerSecretKey: organizer.secretKey,
       nodeId: NODE,
+      now: 4_000_000,
     });
     const rsvp = await rsvpToEvent({
       eventId: ev.id,
