@@ -195,6 +195,7 @@ describe("project achievements", () => {
       assignedTo: null,
       status: "open",
       dependencies: [],
+      orderIndex: 0,
       createdAt: 0,
       completedAt: null,
       completedBy: null,

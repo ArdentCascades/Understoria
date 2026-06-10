@@ -39,6 +39,7 @@ function makeTask(
     assignedTo: null,
     status,
     dependencies: [],
+    orderIndex: 0,
     createdAt: 0,
     completedAt: null,
     completedBy: null,
