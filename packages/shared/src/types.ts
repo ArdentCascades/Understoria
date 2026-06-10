@@ -467,9 +467,27 @@ export interface ProjectTask {
   /** Public key of the member who has claimed the task. */
   assignedTo: string | null;
   status: ProjectTaskStatus;
-  /** Other task IDs that should complete before this is workable.
-   *  Advisory; the UI shows "blocked" but does not enforce. */
+  /** DAG of in-project task IDs that should complete before this is
+   *  workable. Cycle detection at the write layer. Claim is allowed
+   *  regardless of dependency status — the attention rail and the
+   *  public `needs_more_hands` chip suppress nudges until all deps
+   *  clear (soft block). See `docs/task-ordering-and-dependencies.md`
+   *  §3 + §6. */
   dependencies: string[];
+  /** Sort key within a project. Higher index = lower in the list.
+   *  Tasks insert via the midpoint between neighbors (fractional
+   *  indexing) — `orderIndex = (prev.orderIndex + next.orderIndex) / 2`
+   *  on a reorder; new tasks land at the bottom with
+   *  `orderIndex = max(existing) + 1000`. Renumber the whole list
+   *  lazily when precision degrades. See
+   *  `docs/task-ordering-and-dependencies.md` §4 + §5.1.
+   *
+   *  Optional in PR B; PR C bumps Dexie, backfills every existing
+   *  task from `createdAt` rank, wires `addProjectTask` /
+   *  `reorderProjectTask` to populate it, then promotes this field
+   *  to required in the same commit. Until then, consumers fall
+   *  back to `createdAt` sort. */
+  orderIndex?: number;
   createdAt: number;
   completedAt: number | null;
   /** Set when the task transitions to awaiting_confirmation. */
