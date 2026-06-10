@@ -731,6 +731,32 @@ export class UnderstoriaDB extends Dexie {
       previouslyBlocked:
         "id, blockerKey, blockedKey, firstBlockedAt, [blockerKey+blockedKey]",
     });
+    // v25: backfill ProjectTask.orderIndex from createdAt rank per
+    // project. Multiplied by 1000 to leave precision room for
+    // fractional inserts before lazy renumber. See
+    // docs/task-ordering-and-dependencies.md §11.
+    // Idempotent: rows that already have orderIndex (e.g., post-PR-C
+    // installs) get re-assigned but to the same value as long as the
+    // createdAt order hasn't changed; benign.
+    this.version(25).stores({}).upgrade(async (tx) => {
+      const tasks = await tx.table<ProjectTask, string>("projectTasks").toArray();
+      const byProject = new Map<string, ProjectTask[]>();
+      for (const t of tasks) {
+        const list = byProject.get(t.projectId) ?? [];
+        list.push(t);
+        byProject.set(t.projectId, list);
+      }
+      for (const list of byProject.values()) {
+        list.sort((a, b) => a.createdAt - b.createdAt);
+        for (let i = 0; i < list.length; i++) {
+          const t = list[i];
+          await tx.table("projectTasks").put({
+            ...t,
+            orderIndex: (i + 1) * 1000,
+          });
+        }
+      }
+    });
   }
 }
 

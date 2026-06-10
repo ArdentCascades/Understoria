@@ -480,14 +480,8 @@ export interface ProjectTask {
    *  on a reorder; new tasks land at the bottom with
    *  `orderIndex = max(existing) + 1000`. Renumber the whole list
    *  lazily when precision degrades. See
-   *  `docs/task-ordering-and-dependencies.md` §4 + §5.1.
-   *
-   *  Optional in PR B; PR C bumps Dexie, backfills every existing
-   *  task from `createdAt` rank, wires `addProjectTask` /
-   *  `reorderProjectTask` to populate it, then promotes this field
-   *  to required in the same commit. Until then, consumers fall
-   *  back to `createdAt` sort. */
-  orderIndex?: number;
+   *  `docs/task-ordering-and-dependencies.md` §4 + §5.1. */
+  orderIndex: number;
   createdAt: number;
   completedAt: number | null;
   /** Set when the task transitions to awaiting_confirmation. */

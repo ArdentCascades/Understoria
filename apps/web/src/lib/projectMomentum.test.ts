@@ -52,6 +52,7 @@ function task(id: string, exchangeId: string | null = null): ProjectTask {
     assignedTo: null,
     status: exchangeId ? "completed" : "open",
     dependencies: [],
+    orderIndex: 0,
     createdAt: 0,
     completedAt: exchangeId ? 0 : null,
     completedBy: null,

@@ -38,6 +38,7 @@ function task(overrides: Partial<ProjectTask> = {}): ProjectTask {
     assignedTo: "alice",
     status: "claimed",
     dependencies: [],
+    orderIndex: 0,
     createdAt: NOW - 30 * DAY,
     completedAt: null,
     completedBy: null,

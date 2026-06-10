@@ -16,8 +16,10 @@ import {
   addCoOrganizer,
   addProjectTask,
   archiveProject,
+  bulkAddTasks,
   canClaimTask,
   claimProjectTask,
+  cloneProject,
   completeProject,
   confirmProjectTaskCompletion,
   createProject,
@@ -27,6 +29,7 @@ import {
   markProjectTaskComplete,
   pauseProject,
   removeCoOrganizer,
+  reorderProjectTask,
   resumeProject,
   setTaskDependencies,
   unarchiveProject,
@@ -525,6 +528,7 @@ function fakeTask(overrides: Partial<ProjectTask> & { id: string }): ProjectTask
     assignedTo: null,
     status: "open",
     dependencies: [],
+    orderIndex: 0,
     createdAt: Date.now(),
     completedAt: null,
     completedBy: null,
@@ -663,7 +667,12 @@ describe("setTaskDependencies", () => {
     ).rejects.toThrow(/cycle/i);
   });
 
-  it("prevents claiming a task with unmet dependencies", async () => {
+  it("allows claiming a task with unmet dependencies (soft-block, PR C)", async () => {
+    // PR C reversed the hard-block-on-claim throw. Dependencies are
+    // soft per docs/task-ordering-and-dependencies.md §3: claim is
+    // allowed regardless of dependency status; canClaimTask still
+    // reports false for the same task so attention/chip suppression
+    // continues to work.
     const org = await createMember({ displayName: "Org" }, NODE);
     const helper = await createMember({ displayName: "Helper" }, NODE);
     const p = await aProject(org);
@@ -687,9 +696,21 @@ describe("setTaskDependencies", () => {
       dependencies: [],
     });
     await setTaskDependencies(t2.id, org.publicKey, [t1.id]);
-    await expect(
-      claimProjectTask(t2.id, helper.publicKey),
-    ).rejects.toThrow(/follows/i);
+    const claimed = await claimProjectTask(t2.id, helper.publicKey);
+    expect(claimed.status).toBe("claimed");
+    expect(claimed.assignedTo).toBe(helper.publicKey);
+    // The claim persisted in Dexie.
+    const stored = await db.projectTasks.get(t2.id);
+    expect(stored?.status).toBe("claimed");
+    expect(stored?.assignedTo).toBe(helper.publicKey);
+    // canClaimTask still returns false — the helper is unchanged, so
+    // PR F's attention/chip suppression has the signal it needs.
+    const allTasks = await db.projectTasks
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    const reloaded = allTasks.find((t) => t.id === t2.id)!;
+    expect(canClaimTask(reloaded, allTasks)).toBe(false);
   });
 });
 
@@ -742,5 +763,424 @@ describe("archive lifecycle", () => {
       (a) => a.type === "project_unarchived",
     );
     expect(activity).toHaveLength(1);
+  });
+});
+
+// -- PR C: orderIndex migration + actions ----------------------------------
+
+describe("orderIndex backfill migration (v25)", () => {
+  beforeEach(reset);
+
+  it("backfills orderIndex from createdAt rank × 1000 per project", async () => {
+    // Construct a fixture set with no orderIndex (simulating
+    // pre-v25 rows) by writing tasks then clearing the field.
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const pA = await aProject(org);
+    const pB = await createProject(
+      org.publicKey,
+      {
+        title: "Other project",
+        description: "",
+        category: "infrastructure",
+        targetHours: 5,
+        deadline: null,
+        locationZone: "",
+        tags: [],
+        templateId: null,
+      },
+      NODE,
+    );
+    // Add three tasks to project A out of insertion order by
+    // patching createdAt directly after the put.
+    const taskA1 = await addProjectTask(pA.id, org.publicKey, {
+      title: "A1", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const taskA2 = await addProjectTask(pA.id, org.publicKey, {
+      title: "A2", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const taskA3 = await addProjectTask(pA.id, org.publicKey, {
+      title: "A3", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const taskB1 = await addProjectTask(pB.id, org.publicKey, {
+      title: "B1", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    // Force deterministic createdAt order: A1 < A2 < A3, B1
+    // standalone. Wipe orderIndex on every row to simulate a
+    // pre-v25 row.
+    await db.projectTasks.put({ ...taskA1, createdAt: 1000 });
+    await db.projectTasks.put({ ...taskA2, createdAt: 2000 });
+    await db.projectTasks.put({ ...taskA3, createdAt: 3000 });
+    await db.projectTasks.put({ ...taskB1, createdAt: 1500 });
+    // Now strip orderIndex from each row to mimic the pre-v25
+    // database shape. We use `update(id, { orderIndex: undefined })`
+    // which lets Dexie clear the field.
+    for (const id of [taskA1.id, taskA2.id, taskA3.id, taskB1.id]) {
+      const t = await db.projectTasks.get(id);
+      if (!t) continue;
+      // Dexie + fake-indexeddb retains the field if we just
+      // assign undefined; instead, write a row that explicitly
+      // omits it via destructuring.
+      const { orderIndex: _drop, ...rest } = t;
+      void _drop;
+      await db.projectTasks.put(rest as ProjectTask);
+    }
+    // Verify the precondition: orderIndex is missing.
+    const beforeMigration = await db.projectTasks.toArray();
+    for (const t of beforeMigration) {
+      expect(t.orderIndex).toBeUndefined();
+    }
+
+    // Run the same algorithm the v25 upgrade callback runs.
+    // This mirrors the pattern in coorgInvitations.test.ts's
+    // v21 grandfather test: fake-indexeddb starts at the latest
+    // version, so we exercise the upgrade logic by hand.
+    const allTasks = await db.projectTasks.toArray();
+    const byProject = new Map<string, ProjectTask[]>();
+    for (const t of allTasks) {
+      const list = byProject.get(t.projectId) ?? [];
+      list.push(t);
+      byProject.set(t.projectId, list);
+    }
+    for (const list of byProject.values()) {
+      list.sort((a, b) => a.createdAt - b.createdAt);
+      for (let i = 0; i < list.length; i++) {
+        await db.projectTasks.put({
+          ...list[i],
+          orderIndex: (i + 1) * 1000,
+        });
+      }
+    }
+
+    // Assertions: each project's tasks have orderIndex matching
+    // their createdAt rank × 1000.
+    const after = await db.projectTasks.toArray();
+    const aRows = after
+      .filter((t) => t.projectId === pA.id)
+      .sort((a, b) => a.createdAt - b.createdAt);
+    expect(aRows.map((t) => t.orderIndex)).toEqual([1000, 2000, 3000]);
+    const bRows = after.filter((t) => t.projectId === pB.id);
+    expect(bRows.map((t) => t.orderIndex)).toEqual([1000]);
+  });
+});
+
+describe("addProjectTask sets orderIndex", () => {
+  beforeEach(reset);
+
+  it("first task in a project gets orderIndex 1000", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const t = await addProjectTask(p.id, org.publicKey, {
+      title: "First", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    expect(t.orderIndex).toBe(1000);
+  });
+
+  it("subsequent tasks bump by + 1000 (max-based, not count-based)", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const t1 = await addProjectTask(p.id, org.publicKey, {
+      title: "First", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const t2 = await addProjectTask(p.id, org.publicKey, {
+      title: "Second", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    expect(t1.orderIndex).toBe(1000);
+    expect(t2.orderIndex).toBe(2000);
+    // Mutate t1 to a high orderIndex; the next add must use the
+    // new max, proving max-based rather than count-based.
+    await db.projectTasks.put({ ...t1, orderIndex: 50_000 });
+    const t3 = await addProjectTask(p.id, org.publicKey, {
+      title: "Third", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    expect(t3.orderIndex).toBe(51_000);
+  });
+});
+
+describe("bulkAddTasks assigns sequential orderIndex", () => {
+  beforeEach(reset);
+
+  it("each task in the batch gets + 1000 from a single starting point", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const tasks = await bulkAddTasks(
+      p.id,
+      org.publicKey,
+      ["A", "B", "C"],
+      NODE,
+    );
+    expect(tasks.map((t) => t.orderIndex)).toEqual([1000, 2000, 3000]);
+  });
+
+  it("starts above the existing max when the project has prior tasks", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await addProjectTask(p.id, org.publicKey, {
+      title: "Pre", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const tasks = await bulkAddTasks(
+      p.id,
+      org.publicKey,
+      ["A", "B"],
+      NODE,
+    );
+    expect(tasks.map((t) => t.orderIndex)).toEqual([2000, 3000]);
+  });
+});
+
+describe("cloneProject preserves source orderIndex", () => {
+  beforeEach(reset);
+
+  it("each cloned task copies its source's orderIndex", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const source = await aProject(org);
+    const a = await addProjectTask(source.id, org.publicKey, {
+      title: "A", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const b = await addProjectTask(source.id, org.publicKey, {
+      title: "B", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    // Bump A to an unusual value so we can detect copy vs.
+    // re-derive.
+    await db.projectTasks.put({ ...a, orderIndex: 12_345 });
+    const cloned = await cloneProject(
+      source.id,
+      org.publicKey,
+      "Clone",
+      NODE,
+    );
+    const clonedTasks = await db.projectTasks
+      .where("projectId")
+      .equals(cloned.id)
+      .toArray();
+    const ordered = clonedTasks.sort((x, y) => x.orderIndex - y.orderIndex);
+    expect(ordered.map((t) => t.orderIndex)).toEqual([2000, 12_345]);
+    // Sanity: clones carry source titles in matching positions.
+    expect(ordered[0].title).toBe(b.title);
+    expect(ordered[1].title).toBe(a.title);
+  });
+});
+
+describe("reorderProjectTask", () => {
+  beforeEach(reset);
+
+  async function setupThreeTasks() {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const t1 = await addProjectTask(p.id, org.publicKey, {
+      title: "First", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const t2 = await addProjectTask(p.id, org.publicKey, {
+      title: "Second", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    const t3 = await addProjectTask(p.id, org.publicKey, {
+      title: "Third", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    return { org, p, t1, t2, t3 };
+  }
+
+  it("midpoints between two neighbors", async () => {
+    const { org, t1, t2, t3 } = await setupThreeTasks();
+    // Move t3 between t1 and t2.
+    await reorderProjectTask({
+      taskId: t3.id,
+      organizerKey: org.publicKey,
+      beforeId: t1.id,
+      afterId: t2.id,
+    });
+    const updated = await db.projectTasks.get(t3.id);
+    expect(updated?.orderIndex).toBe(1500);
+  });
+
+  it("moves to the bottom via beforeId-only", async () => {
+    const { org, t1, t3 } = await setupThreeTasks();
+    // Move t1 past t3 (the current bottom).
+    await reorderProjectTask({
+      taskId: t1.id,
+      organizerKey: org.publicKey,
+      beforeId: t3.id,
+      afterId: null,
+    });
+    const updated = await db.projectTasks.get(t1.id);
+    expect(updated?.orderIndex).toBe(4000);
+  });
+
+  it("moves to the top via afterId-only", async () => {
+    const { org, t1, t3 } = await setupThreeTasks();
+    // Move t3 above t1 (the current top).
+    await reorderProjectTask({
+      taskId: t3.id,
+      organizerKey: org.publicKey,
+      beforeId: null,
+      afterId: t1.id,
+    });
+    const updated = await db.projectTasks.get(t3.id);
+    // t1.orderIndex is 1000, so candidate is 0; the floor branch
+    // kicks in (candidate < 1) and we use after.orderIndex / 2.
+    expect(updated?.orderIndex).toBe(500);
+  });
+
+  it("throws when both neighbors are null", async () => {
+    const { org, t1 } = await setupThreeTasks();
+    await expect(
+      reorderProjectTask({
+        taskId: t1.id,
+        organizerKey: org.publicKey,
+        beforeId: null,
+        afterId: null,
+      }),
+    ).rejects.toThrow(/at least one neighbor/i);
+  });
+
+  it("throws when the moved task does not exist", async () => {
+    const { org, t1 } = await setupThreeTasks();
+    await expect(
+      reorderProjectTask({
+        taskId: "no-such-task",
+        organizerKey: org.publicKey,
+        beforeId: t1.id,
+        afterId: null,
+      }),
+    ).rejects.toThrow(/not found/i);
+  });
+
+  it("throws when the caller is not an organizer", async () => {
+    const { p, t1, t3 } = await setupThreeTasks();
+    const stranger = await createMember({ displayName: "Other" }, NODE);
+    // Sanity: this isn't the organizer of p.
+    expect(p.organizerKey).not.toBe(stranger.publicKey);
+    await expect(
+      reorderProjectTask({
+        taskId: t3.id,
+        organizerKey: stranger.publicKey,
+        beforeId: t1.id,
+        afterId: null,
+      }),
+    ).rejects.toThrow(/organizer/i);
+  });
+
+  it("allows a co-organizer to reorder", async () => {
+    const { org, p, t1, t3 } = await setupThreeTasks();
+    const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
+    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await reorderProjectTask({
+      taskId: t3.id,
+      organizerKey: coOrg.publicKey,
+      beforeId: null,
+      afterId: t1.id,
+    });
+    const updated = await db.projectTasks.get(t3.id);
+    expect(updated?.orderIndex).toBe(500);
+  });
+
+  it("throws when a neighbor belongs to a different project", async () => {
+    const { org, t1 } = await setupThreeTasks();
+    const otherProject = await createProject(
+      org.publicKey,
+      {
+        title: "Other", description: "", category: "infrastructure",
+        targetHours: 1, deadline: null, locationZone: "",
+        tags: [], templateId: null,
+      },
+      NODE,
+    );
+    const foreign = await addProjectTask(otherProject.id, org.publicKey, {
+      title: "Foreign", description: "", category: "other",
+      estimatedHours: 1, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    await expect(
+      reorderProjectTask({
+        taskId: t1.id,
+        organizerKey: org.publicKey,
+        beforeId: foreign.id,
+        afterId: null,
+      }),
+    ).rejects.toThrow(/different project/i);
+  });
+
+  it("throws when a neighbor equals taskId (no-op)", async () => {
+    const { org, t1 } = await setupThreeTasks();
+    await expect(
+      reorderProjectTask({
+        taskId: t1.id,
+        organizerKey: org.publicKey,
+        beforeId: t1.id,
+        afterId: null,
+      }),
+    ).rejects.toThrow(/own neighbor/i);
+  });
+
+  it("throws when a neighbor does not exist", async () => {
+    const { org, t1 } = await setupThreeTasks();
+    await expect(
+      reorderProjectTask({
+        taskId: t1.id,
+        organizerKey: org.publicKey,
+        beforeId: "ghost-task",
+        afterId: null,
+      }),
+    ).rejects.toThrow(/not found/i);
+  });
+
+  it("renumbers the project when precision degrades", async () => {
+    const { org, p, t1, t2, t3 } = await setupThreeTasks();
+    // Crush the gap between t1 and t2 to under the epsilon
+    // threshold (1e-3), so the next midpoint between t1 and t2
+    // would collapse.
+    await db.projectTasks.put({ ...t1, orderIndex: 1000 });
+    await db.projectTasks.put({ ...t2, orderIndex: 1000.0001 });
+    // Move t3 between t1 and t2 — must trigger renumber.
+    await reorderProjectTask({
+      taskId: t3.id,
+      organizerKey: org.publicKey,
+      beforeId: t1.id,
+      afterId: t2.id,
+    });
+    const after = await db.projectTasks
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    const sorted = after.sort((a, b) => a.orderIndex - b.orderIndex);
+    // After renumber the three tasks have round 1000-spaced
+    // indices on round-number slots, and t3 lands somewhere
+    // between t1 and t2's renumbered positions.
+    // The renumber sorts by current orderIndex (createdAt
+    // secondary), so t1=1000, t2=2000, t3=3000, then t3 is moved
+    // between t1 and t2 → t3.orderIndex = (1000 + 2000) / 2 =
+    // 1500.
+    const t1Row = sorted.find((r) => r.id === t1.id)!;
+    const t2Row = sorted.find((r) => r.id === t2.id)!;
+    const t3Row = sorted.find((r) => r.id === t3.id)!;
+    expect(t1Row.orderIndex).toBe(1000);
+    expect(t2Row.orderIndex).toBe(2000);
+    expect(t3Row.orderIndex).toBe(1500);
   });
 });

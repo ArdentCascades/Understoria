@@ -350,6 +350,34 @@ async function requireOrganizer(
   return p;
 }
 
+/**
+ * Compute the next `orderIndex` for a freshly-added task in the
+ * given project. Returns `1000` when the project has no tasks
+ * yet; otherwise `max(existing orderIndex) + 1000` so the new
+ * task lands at the bottom of the list.
+ *
+ * The `t.orderIndex !== undefined` guard is defensive against the
+ * Dexie v25 upgrade not yet having run (e.g., the upgrade
+ * callback is still pending or a test fixture pre-dates the
+ * migration). After the migration runs this branch is unreachable
+ * in production code paths.
+ *
+ * See docs/task-ordering-and-dependencies.md §4.1 for the
+ * `* 1000` gap rationale.
+ */
+async function nextOrderIndexForProject(projectId: string): Promise<number> {
+  const existing = await db.projectTasks
+    .where("projectId")
+    .equals(projectId)
+    .toArray();
+  if (existing.length === 0) return 1000;
+  const max = existing.reduce(
+    (m, t) => (t.orderIndex !== undefined && t.orderIndex > m ? t.orderIndex : m),
+    0,
+  );
+  return max + 1000;
+}
+
 export async function addCoOrganizer(
   projectId: string,
   callerKey: string,
@@ -437,6 +465,7 @@ export async function addProjectTask(
       const p = await requireOrganizer(projectId, organizerKey);
       if (p.status === "completed" || p.status === "archived")
         throw new Error("Tasks cannot be added to a completed project.");
+      const orderIndex = await nextOrderIndexForProject(projectId);
       const task: ProjectTask = {
         id: uuid(),
         projectId,
@@ -451,6 +480,7 @@ export async function addProjectTask(
         assignedTo: null,
         status: "open",
         dependencies: input.dependencies,
+        orderIndex,
         createdAt: Date.now(),
         completedAt: null,
         completedBy: null,
@@ -483,10 +513,12 @@ export async function claimProjectTask(
       if (!task) throw new Error("Task not found.");
       if (task.status !== "open")
         throw new Error("This task isn't available to claim.");
-      const allTasks = await db.projectTasks
-        .where("projectId").equals(task.projectId).toArray();
-      if (!canClaimTask(task, allTasks))
-        throw new Error("This task follows other tasks that aren't completed yet.");
+      // PR C: removed the hard-block-on-claim throw. Dependencies are
+      // soft per docs/task-ordering-and-dependencies.md §3 — claim is
+      // allowed regardless of dependency status. canClaimTask remains
+      // exported as a UI/attention helper; the attention rail and the
+      // public needs_more_hands chip suppress nudges when canClaimTask
+      // returns false (the chip change ships in PR F).
       const project = await db.projects.get(task.projectId);
       if (!project) throw new Error("Parent project not found.");
       if (project.status !== "active")
@@ -1128,8 +1160,13 @@ export async function bulkAddTasks(
       const p = await requireOrganizer(projectId, organizerKey);
       if (p.status === "completed" || p.status === "archived")
         throw new Error("Tasks cannot be added to a completed project.");
+      // Compute the starting orderIndex once; each task in the
+      // batch gets `start + i * 1000` so they land at the bottom
+      // in insertion order.
+      const startOrderIndex = await nextOrderIndexForProject(projectId);
       const tasks: ProjectTask[] = [];
-      for (const title of titles) {
+      for (let i = 0; i < titles.length; i++) {
+        const title = titles[i];
         const task: ProjectTask = {
           id: uuid(),
           projectId,
@@ -1142,6 +1179,7 @@ export async function bulkAddTasks(
           assignedTo: null,
           status: "open",
           dependencies: [],
+          orderIndex: startOrderIndex + i * 1000,
           createdAt: Date.now(),
           completedAt: null,
           completedBy: null,
@@ -1220,6 +1258,186 @@ export async function setTaskDependencies(
   );
 }
 
+/**
+ * Threshold below which precision is considered "degraded" and a
+ * full per-project renumber is triggered. Picked at `0.001` rather
+ * than something like `1` to give fractional inserts ample
+ * headroom — with 1000-unit starting gaps, a member can halve the
+ * gap dozens of times before hitting this floor, while still
+ * staying well clear of IEEE-754 double-precision imprecision.
+ *
+ * If the candidate `orderIndex` lands within `PRECISION_EPSILON`
+ * of either neighbor — or if the two neighbors themselves are
+ * within `PRECISION_EPSILON` of each other — `reorderProjectTask`
+ * renumbers the project before placing the moved task.
+ *
+ * See docs/task-ordering-and-dependencies.md §4.1 and §13 for the
+ * pilot-tuning note.
+ */
+const PRECISION_EPSILON = 0.001;
+
+/**
+ * Reorder a task within its parent project by placing it between
+ * two neighbors. Neighbor-pair signature settled in
+ * docs/task-ordering-and-dependencies.md §5.1 — the button path
+ * (Move up / Move down) and the drag path both resolve to a
+ * neighbor pair before calling.
+ *
+ * Algorithm:
+ *
+ * 1. Look up the task; throw if not found.
+ * 2. Look up the project; require the caller is the primary
+ *    organizer or a co-organizer.
+ * 3. Resolve `beforeId` / `afterId` to actual rows. Reject if a
+ *    neighbor doesn't exist, belongs to a different project, or
+ *    equals `taskId` itself.
+ * 4. Compute the candidate `orderIndex`:
+ *      - both neighbors: midpoint = `(before.orderIndex + after.orderIndex) / 2`
+ *      - only `beforeId` (moving past the last task): `before.orderIndex + 1000`
+ *      - only `afterId` (moving above the first task): `after.orderIndex - 1000`
+ *        (or `after.orderIndex / 2` if that drops below a sane floor)
+ *      - both null: invalid — throw
+ * 5. If the candidate is within `PRECISION_EPSILON` of either
+ *    neighbor, or the two neighbors are within `PRECISION_EPSILON`
+ *    of each other, renumber the entire project's task list to
+ *    `(rank + 1) * 1000` and recompute the candidate against the
+ *    renumbered neighbors. The renumber happens in the same Dexie
+ *    transaction as the move — atomicity matters here, because a
+ *    partial renumber would leave the project's task order
+ *    incoherent.
+ * 6. Persist the moved task with its new `orderIndex`.
+ *
+ * `beforeId` is the task that will render immediately *before*
+ * the moved task at the destination; `afterId` is the task that
+ * will render immediately *after*. The function does not care
+ * about render direction (ascending vs descending) — it only
+ * cares that `before.orderIndex < after.orderIndex` in the
+ * canonical lower-renders-earlier convention.
+ *
+ * Reorders are not logged to the project activity feed (see
+ * docs/task-ordering-and-dependencies.md §6.5).
+ */
+export async function reorderProjectTask(input: {
+  taskId: string;
+  organizerKey: string;
+  beforeId: string | null;
+  afterId: string | null;
+}): Promise<void> {
+  const { taskId, organizerKey, beforeId, afterId } = input;
+  if (beforeId === null && afterId === null)
+    throw new Error("Reorder requires at least one neighbor.");
+  if (beforeId === taskId || afterId === taskId)
+    throw new Error("A task cannot be its own neighbor in a reorder.");
+
+  await db.transaction(
+    "rw",
+    [db.projects, db.projectTasks],
+    async () => {
+      const task = await db.projectTasks.get(taskId);
+      if (!task) throw new Error("Task not found.");
+      await requireOrganizer(task.projectId, organizerKey);
+
+      const before =
+        beforeId !== null ? await db.projectTasks.get(beforeId) : null;
+      const after =
+        afterId !== null ? await db.projectTasks.get(afterId) : null;
+      if (beforeId !== null && !before)
+        throw new Error("Neighbor task not found.");
+      if (afterId !== null && !after)
+        throw new Error("Neighbor task not found.");
+      if (before && before.projectId !== task.projectId)
+        throw new Error("Neighbor belongs to a different project.");
+      if (after && after.projectId !== task.projectId)
+        throw new Error("Neighbor belongs to a different project.");
+
+      // Compute a candidate orderIndex from the current neighbor
+      // values. If precision degrades, renumber and recompute
+      // against the renumbered neighbors.
+      const needsRenumber = (): boolean => {
+        if (before && after) {
+          if (Math.abs(after.orderIndex - before.orderIndex) < PRECISION_EPSILON)
+            return true;
+          const mid = (before.orderIndex + after.orderIndex) / 2;
+          if (
+            Math.abs(mid - before.orderIndex) < PRECISION_EPSILON ||
+            Math.abs(mid - after.orderIndex) < PRECISION_EPSILON
+          )
+            return true;
+        }
+        return false;
+      };
+
+      if (needsRenumber()) {
+        // Renumber the whole project: sort by current orderIndex
+        // (createdAt as a stable secondary key), assign
+        // `(rank + 1) * 1000`, persist every row.
+        const allTasks = await db.projectTasks
+          .where("projectId")
+          .equals(task.projectId)
+          .toArray();
+        allTasks.sort((a, b) => {
+          if (a.orderIndex !== b.orderIndex)
+            return a.orderIndex - b.orderIndex;
+          return a.createdAt - b.createdAt;
+        });
+        for (let i = 0; i < allTasks.length; i++) {
+          const renumbered = { ...allTasks[i], orderIndex: (i + 1) * 1000 };
+          await db.projectTasks.put(renumbered);
+        }
+        // Re-read the neighbors and the task so the post-renumber
+        // values drive the placement.
+        const refreshedTask = await db.projectTasks.get(taskId);
+        if (!refreshedTask) throw new Error("Task not found.");
+        const refreshedBefore =
+          beforeId !== null ? await db.projectTasks.get(beforeId) : null;
+        const refreshedAfter =
+          afterId !== null ? await db.projectTasks.get(afterId) : null;
+        const newOrderIndex = computePlacement(
+          refreshedBefore ?? null,
+          refreshedAfter ?? null,
+        );
+        await db.projectTasks.put({
+          ...refreshedTask,
+          orderIndex: newOrderIndex,
+        });
+        return;
+      }
+
+      const newOrderIndex = computePlacement(before ?? null, after ?? null);
+      await db.projectTasks.put({ ...task, orderIndex: newOrderIndex });
+    },
+  );
+}
+
+/**
+ * Compute the new `orderIndex` for a moved task given its
+ * destination neighbors. Pure function; assumes precision is
+ * adequate (the caller checks via `PRECISION_EPSILON`).
+ */
+function computePlacement(
+  before: ProjectTask | null,
+  after: ProjectTask | null,
+): number {
+  if (before && after) {
+    return (before.orderIndex + after.orderIndex) / 2;
+  }
+  if (before && !after) {
+    return before.orderIndex + 1000;
+  }
+  if (!before && after) {
+    const candidate = after.orderIndex - 1000;
+    // Stay above zero so we don't drift into negative territory
+    // (the field is documented as monotonic; negative is fine in
+    // theory, but staying positive keeps the values legible in
+    // logs). When the target task already sits near zero, halve
+    // instead of subtracting.
+    if (candidate < 1) return after.orderIndex / 2;
+    return candidate;
+  }
+  // Both null is rejected by the caller before this runs.
+  throw new Error("Reorder requires at least one neighbor.");
+}
+
 export async function cloneProject(
   sourceProjectId: string,
   organizerKey: string,
@@ -1264,7 +1482,17 @@ export async function cloneProject(
       await logActivity(project.id, "project_created", organizerKey, {
         clonedFrom: sourceProjectId,
       }, nodeId);
-      for (const t of sourceTasks) {
+      // Sort source tasks by createdAt to compute a deterministic
+      // fallback rank when a source task pre-dates the v25 backfill
+      // and somehow still lacks orderIndex. Post-migration this
+      // fallback branch is unreachable.
+      const sourceTasksByCreated = [...sourceTasks].sort(
+        (a, b) => a.createdAt - b.createdAt,
+      );
+      for (let i = 0; i < sourceTasksByCreated.length; i++) {
+        const t = sourceTasksByCreated[i];
+        const orderIndex =
+          t.orderIndex !== undefined ? t.orderIndex : (i + 1) * 1000;
         const task: ProjectTask = {
           id: uuid(),
           projectId: project.id,
@@ -1277,6 +1505,7 @@ export async function cloneProject(
           assignedTo: null,
           status: "open",
           dependencies: [],
+          orderIndex,
           createdAt: now,
           completedAt: null,
           completedBy: null,

@@ -100,6 +100,7 @@ function task(overrides: Partial<ProjectTask>): ProjectTask {
     assignedTo: null,
     status: "open",
     dependencies: [],
+    orderIndex: 0,
     createdAt: 500,
     completedAt: null,
     completedBy: null,
