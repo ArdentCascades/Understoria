@@ -48,7 +48,13 @@ label. A co-organizer:
 - signs records that commit *their identity* to the project's actions
   (project announcements, future co-signed proposals);
 - shows publicly on the project page as a community-vouched authority
-  for the project's coordination.
+  for the project's coordination;
+- can reorder tasks within the project and set task dependencies —
+  same `requireOrganizer` authority gate as `addProjectTask` and
+  `editProjectTask` (see
+  [`docs/task-ordering-and-dependencies.md`](./task-ordering-and-dependencies.md)
+  §8 for the per-action enumeration and the values rationale for
+  not creating a new authority class).
 
 Each of these carries real responsibility — financial, reputational,
 relational. None of them are roles a member should be assigned
