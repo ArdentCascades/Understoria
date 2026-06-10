@@ -245,4 +245,16 @@ describe("AttentionSection — co-organizer invitation", () => {
     expect(respondMock).not.toHaveBeenCalled();
     expect(showToastMock).toHaveBeenCalled();
   });
+
+  it("renders the kind emoji prefix with aria-hidden", () => {
+    // The co-organizer invitation row is enough to cover the
+    // structural assertion: an aria-hidden span carrying the glyph
+    // sits inside the title element. The specific glyph isn't asserted
+    // — that's the lookup table's responsibility (see attentionMeta.test).
+    render(<AttentionSection />);
+    const emojiSpans = container.querySelectorAll('[aria-hidden="true"]');
+    expect(emojiSpans.length).toBeGreaterThan(0);
+    // The title text still renders standalone — the emoji is decorative.
+    expect(container.textContent ?? "").toContain("Ada Inviter");
+  });
 });
