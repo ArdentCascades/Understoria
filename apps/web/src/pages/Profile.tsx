@@ -23,7 +23,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { IconSettings } from "@/components/visual";
-import { balanceFor, transactionHistory } from "@/lib/timebank";
+import {
+  balanceFor,
+  pendingBalanceFor,
+  transactionHistory,
+} from "@/lib/timebank";
+import type { PendingBalance, PendingEntry } from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
@@ -70,15 +75,73 @@ function flagReasonKey(reason: FlagReason | undefined): string {
   }
 }
 
+/**
+ * An exchange whose credit is still in motion — one signature on
+ * file, one to go. Distinguished from settled rows by a text badge
+ * plus italic/muted styling (never color alone). When the viewer is
+ * the one who still owes the confirmation, the whole row links to
+ * the post detail page, which is where confirming happens.
+ */
+function PendingHistoryRow({
+  entry,
+  counterpartyName,
+}: {
+  entry: PendingEntry;
+  counterpartyName: string;
+}) {
+  const { t } = useTranslation();
+  const awaitingYou = entry.owedBy === "you";
+  const body = (
+    <>
+      <CategoryBadge category={entry.category} size="sm" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm italic text-moss-600 dark:text-moss-300">
+          {entry.delta > 0
+            ? t("profile.history.helped")
+            : t("profile.history.received")}{" "}
+          <span className="font-medium">{counterpartyName}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-moss-500">
+          <span>{formatRelativeTime(entry.createdAt)}</span>
+          <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+            {awaitingYou
+              ? t("profile.history.awaitingYouBadge")
+              : t("profile.history.pendingBadge")}
+          </span>
+        </div>
+      </div>
+      <span className="text-sm font-medium italic text-moss-500 dark:text-moss-400">
+        {formatSignedHours(entry.delta)}
+      </span>
+    </>
+  );
+  return (
+    <li className="py-3">
+      {awaitingYou ? (
+        <Link
+          to={`/post/${entry.postId}`}
+          className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-moss-50 dark:hover:bg-moss-900"
+        >
+          {body}
+        </Link>
+      ) : (
+        <div className="flex items-center gap-3">{body}</div>
+      )}
+    </li>
+  );
+}
+
 export default function ProfilePage() {
   const {
     currentMember,
     members,
     exchanges,
+    posts,
     achievements,
     invites,
     vouches,
     nodeId,
+    nodeConfig,
     setCurrentMember,
   } = useApp();
   const { t } = useTranslation();
@@ -104,6 +167,14 @@ export default function ProfilePage() {
   const history = useMemo(
     () => transactionHistory(currentMember.publicKey, exchanges),
     [currentMember, exchanges],
+  );
+  // Credit "in motion" — exchanges where one signature is still
+  // missing. Display honesty only: balanceFor never counts these
+  // (an Exchange row doesn't exist until both sides sign), so the
+  // breakdown explains the gap without changing the credit model.
+  const pending = useMemo(
+    () => pendingBalanceFor(currentMember.publicKey, posts),
+    [currentMember, posts],
   );
   const memberMap = useMemo(
     () => new Map(members.map((m) => [m.publicKey, m])),
@@ -141,7 +212,12 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      <BalanceCard balance={balance} seed={currentMember.seedBalance} />
+      <BalanceCard
+        balance={balance}
+        seed={currentMember.seedBalance}
+        pending={pending}
+        autoConfirmHours={nodeConfig.autoConfirmHours}
+      />
       <ContextualHint
         settingKey="balanceHintDismissed"
         ariaLabel={t("hints.balance.label")}
@@ -206,7 +282,7 @@ export default function ProfilePage() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500">
           {t("profile.history.title")}
         </h2>
-        {history.length === 0 ? (
+        {history.length === 0 && pending.entries.length === 0 ? (
           <EmptyState
             illustration="path"
             variant="inset"
@@ -216,6 +292,21 @@ export default function ProfilePage() {
           />
         ) : (
           <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
+            {/* In-motion entries first — they're the most recent
+                activity and the credit column explains the gap
+                between the list and the balance above. Distinguished
+                by a text badge plus muted/italic treatment, never by
+                color alone. */}
+            {pending.entries.map((entry) => (
+              <PendingHistoryRow
+                key={entry.postId}
+                entry={entry}
+                counterpartyName={
+                  memberMap.get(entry.counterparty)?.displayName ??
+                  t("common.memberFallback")
+                }
+              />
+            ))}
             {history.map(({ exchange, delta, counterparty }) => {
               const other = memberMap.get(counterparty);
               return (
@@ -439,9 +530,13 @@ function EmergencySection() {
 function BalanceCard({
   balance,
   seed,
+  pending,
+  autoConfirmHours,
 }: {
   balance: number;
   seed: number;
+  pending: PendingBalance;
+  autoConfirmHours: number;
 }) {
   const { t } = useTranslation();
   const tone =
@@ -451,6 +546,10 @@ function BalanceCard({
         ? "neutral"
         : "receiving";
   const messageKey = `profile.balance.${tone}`;
+  const awaitingYou = pending.entries.filter((e) => e.owedBy === "you");
+  const awaitingPartner = pending.entries.filter(
+    (e) => e.owedBy === "partner",
+  );
   return (
     <section className="card mb-4">
       <div className="flex items-end justify-between">
@@ -462,6 +561,46 @@ function BalanceCard({
           <div className="mt-1 text-4xl font-bold text-canopy-700 dark:text-canopy-300">
             {formatHours(balance)}
           </div>
+          {/* Credit in motion — only when something actually is. The
+              awaiting-you line comes first because the member can act
+              on it; the awaiting-partner line carries nothing to do
+              (the auto-confirm sweep eventually covers it). Framed as
+              movement, never as "stuck" — solidarity-not-shame. */}
+          {pending.entries.length > 0 && (
+            <div className="mt-1 text-xs text-moss-500 dark:text-moss-400">
+              {awaitingYou.length > 0 && (
+                <div>
+                  {t("profile.balance.awaitingYouLine", {
+                    hours: formatSignedHours(pending.awaitingYouHours),
+                  })}
+                </div>
+              )}
+              {awaitingPartner.length > 0 && (
+                <div>
+                  {t("profile.balance.pendingLine", {
+                    hours: formatSignedHours(pending.awaitingPartnerHours),
+                  })}
+                </div>
+              )}
+              <details className="mt-1">
+                <summary className="cursor-pointer text-moss-400 underline-offset-2 hover:text-moss-600 hover:underline dark:text-moss-500 dark:hover:text-moss-300">
+                  {t("profile.balance.pendingWhy")}
+                </summary>
+                <p className="mt-1 max-w-sm rounded-lg bg-moss-50 px-3 py-2 text-moss-700 dark:bg-moss-900/60 dark:text-moss-200">
+                  {/* `autoConfirmHours <= 0` means this community has
+                      no auto-confirm sweep — never promise one. */}
+                  {autoConfirmHours > 0
+                    ? t("profile.balance.pendingExplainerAuto", {
+                        count: Math.max(
+                          1,
+                          Math.ceil(autoConfirmHours / 24),
+                        ),
+                      })
+                    : t("profile.balance.pendingExplainerManual")}
+                </p>
+              </details>
+            </div>
+          )}
         </div>
         <div className="text-right text-xs text-moss-500">
           <div>
