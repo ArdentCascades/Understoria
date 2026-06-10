@@ -21,7 +21,12 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { groupByDay, type CalendarEntry } from "@/lib/calendar";
+import {
+  entryIsPast,
+  groupByDay,
+  startOfTodayMs,
+  type CalendarEntry,
+} from "@/lib/calendar";
 import { PROJECT_CATEGORY_META, CATEGORY_META } from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
@@ -38,8 +43,25 @@ interface CalendarAgendaProps {
 export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
   const { t } = useTranslation();
 
+  // Agenda is forward-looking: past date-bound entries (events whose
+  // end has rolled past, project deadlines and post expiries before
+  // today) drop out before grouping. Exchange density rows are an
+  // aggregate community signal and are NEVER filtered, regardless of
+  // age. Month and week views keep showing past days (intrinsic to
+  // the grid) — the filter lives here only. See entryIsPast in
+  // lib/calendar.ts for the rule.
+  //
+  // The filter runs per-entry, NOT per-day: a day with both a past
+  // morning event and a future evening event renders only the
+  // evening one. groupByDay is called against the filtered list so
+  // empty days (all past) drop out naturally.
+  const visibleEntries = useMemo(() => {
+    const todayStart = startOfTodayMs(Date.now());
+    return entries.filter((e) => !entryIsPast(e, todayStart));
+  }, [entries]);
+
   const days = useMemo(() => {
-    const grouped = groupByDay(entries);
+    const grouped = groupByDay(visibleEntries);
     return Array.from(grouped.entries()).map(([key, list]) => ({
       key,
       // All entries in a bucket share the same UTC day, so the first
@@ -47,7 +69,7 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
       ms: list[0].date,
       entries: list,
     }));
-  }, [entries]);
+  }, [visibleEntries]);
 
   const dayFmt = useMemo(
     () =>
@@ -84,7 +106,7 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
       {/* Density footer tooltip — only renders if at least one density
           entry is in the agenda. Per design doc §8.2, this is mounted
           once at the bottom of the agenda view, not on each row. */}
-      {entries.some((e) => e.kind === "exchange_density") ? (
+      {visibleEntries.some((e) => e.kind === "exchange_density") ? (
         <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
           {t("calendar.density.tooltipBody")}
           <WhyTooltip principleId="no-leaderboards" />
