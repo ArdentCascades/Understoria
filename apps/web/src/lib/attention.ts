@@ -165,6 +165,42 @@ export type AttentionItem =
       createdAt: number;
     };
 
+// Ordering rationale: when a member opens the app, what needs them
+// most comes first. This is pull-prioritization, not urgency theater
+// — nothing pulses, badges, or counts; the order of a list the
+// member chose to look at is the only thing that changes.
+//
+// Tiers, most-actionable first:
+//   0  confirm_exchange / confirm_task — your signature is the only
+//      thing standing between someone else and their credit.
+//   1  coorganizer_invitation_received — a decision is waiting on
+//      you, and it expires.
+//   2  task_check_in — a response is wanted (private, no shame).
+//   3  event_today — time-sensitive today; after today it's moot.
+//   4  event_cancelled — a plan change you should see before you
+//      show up somewhere.
+//   5  post_claimed — actionable-informational: a helper is
+//      incoming, worth knowing but nothing blocks on you.
+//   6  event_capacity_reached — organizer planning info.
+//   7  vouch_received / project_deadline_approaching /
+//      project_paused_long — purely informational.
+//
+// The Record typing is exhaustive on purpose: adding a new
+// AttentionItem kind won't compile until it's assigned a tier here.
+export const KIND_PRIORITY: Record<AttentionItem["kind"], number> = {
+  confirm_exchange: 0,
+  confirm_task: 0,
+  coorganizer_invitation_received: 1,
+  task_check_in: 2,
+  event_today: 3,
+  event_cancelled: 4,
+  post_claimed: 5,
+  event_capacity_reached: 6,
+  vouch_received: 7,
+  project_deadline_approaching: 7,
+  project_paused_long: 7,
+};
+
 export interface AttentionInput {
   currentMember: Pick<Member, "publicKey"> | null;
   posts: readonly Post[];
@@ -573,11 +609,18 @@ export function computeAttentionItems(
     }
   }
 
-  // Newest items first. createdAt is the right cursor because all
-  // record types use it for ordering elsewhere; using "moment the
-  // first confirmation happened" would be more accurate but we
-  // don't persist that timestamp.
-  items.sort((a, b) => b.createdAt - a.createdAt);
+  // Items that block someone else or need a decision outrank purely
+  // informational items — see the KIND_PRIORITY comment block above
+  // for the full tier rationale. Within the same tier, newest first;
+  // createdAt is the right cursor because all record types use it
+  // for ordering elsewhere. The explicit createdAt tiebreak (rather
+  // than relying on push order) keeps the within-tier order stable
+  // across the kind-grouped construction above.
+  items.sort((a, b) => {
+    const tierDelta = KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind];
+    if (tierDelta !== 0) return tierDelta;
+    return b.createdAt - a.createdAt;
+  });
 
   return items;
 }

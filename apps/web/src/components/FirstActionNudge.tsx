@@ -27,6 +27,13 @@ import {
 // Disappears automatically once they post or claim anything;
 // the dismiss flag only matters for members who want to lurk
 // forever without ever taking action.
+//
+// Dismissal is permanent by design — re-showing a dismissed nudge
+// is ambient urgency theater (no-notifications). The member said
+// no; we heard them. The "Got it" flag persists in the Dexie
+// settings table, and taking the first action writes the same flag
+// so the nudge never resurfaces even if the evidence of the action
+// later disappears (e.g. a claim that was later released).
 
 export function FirstActionNudge() {
   const { t } = useTranslation();
@@ -43,11 +50,27 @@ export function FirstActionNudge() {
     };
   }, []);
 
+  const actionTaken =
+    currentMember !== null &&
+    memberHasTakenFirstAction(currentMember.publicKey, posts);
+
+  // Self-retire permanently the moment the first action is observed.
+  // Without this write the nudge would come back if the action's
+  // evidence vanished later (a released claim) — which would be the
+  // app un-hearing a thing the member already did. solidarity-not-
+  // shame: once they've acted, the encouragement chapter is closed.
+  useEffect(() => {
+    if (actionTaken && dismissed === false) {
+      setDismissed(true);
+      void dismissFirstActionNudge();
+    }
+  }, [actionTaken, dismissed]);
+
   // Render nothing until we know dismissed state — avoids a
   // flash-then-hide on every page load.
   if (dismissed !== false) return null;
   if (!currentMember) return null;
-  if (memberHasTakenFirstAction(currentMember.publicKey, posts)) return null;
+  if (actionTaken) return null;
 
   async function handleDismiss() {
     await dismissFirstActionNudge();
