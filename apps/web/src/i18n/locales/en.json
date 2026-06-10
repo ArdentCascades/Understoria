@@ -1290,6 +1290,10 @@
         "label": "Minimum affirm votes",
         "hint": "Distinct affirm votes required for a proposal to auto-pass. Even with deliberation done, a proposal that only one person has affirmed shouldn't pass silently."
       },
+      "inviteOnly": {
+        "label": "Invite-only onboarding",
+        "helpText": "When enabled, visitors to /welcome see an invite-only landing. The first member to onboard on a fresh node is the exception (bootstrap)."
+      },
       "save": "Save settings",
       "reset": "Reset to defaults"
     },
@@ -1662,6 +1666,11 @@
       "title": "A little about you",
       "intro": "All optional — these help others find you when they need someone nearby or with a particular skill. You can change any of it later in Profile.",
       "hint": "Nothing here is private to the network — only share what you'd share with a neighbor."
+    },
+    "inviteOnly": {
+      "title": "Understoria is invite-only",
+      "body1": "This community runs on personal invitations from existing members.",
+      "body2": "If a member sent you an invitation link, follow that link instead. If not, ask a member to send one."
     }
   },
   "block": {

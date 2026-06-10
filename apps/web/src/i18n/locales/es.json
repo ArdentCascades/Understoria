@@ -1290,6 +1290,10 @@
         "label": "Votos a favor minimos",
         "hint": "Votos a favor distintos necesarios para que una propuesta se apruebe automaticamente. Incluso con la deliberacion completa, una propuesta que solo una persona ha avalado no deberia pasar en silencio."
       },
+      "inviteOnly": {
+        "label": "Ingreso solo por invitación",
+        "helpText": "Cuando está activado, las visitas a /welcome ven una página de solo invitación. La primera persona en unirse a un nodo recién creado es la excepción (arranque inicial)."
+      },
       "save": "Guardar configuración",
       "reset": "Restaurar valores predeterminados"
     },
@@ -1662,6 +1666,11 @@
       "title": "Un poco sobre ti",
       "intro": "Todo es opcional — ayudan a que otras personas te encuentren cuando necesitan a alguien cercano o con una habilidad concreta. Puedes cambiar cualquier cosa más adelante en Perfil.",
       "hint": "Nada de esto es privado en la red — comparte solo lo que compartirías con una persona vecina."
+    },
+    "inviteOnly": {
+      "title": "Understoria es solo por invitación",
+      "body1": "Esta comunidad funciona con invitaciones personales de las personas que ya son parte de ella.",
+      "body2": "Si alguien te envió un enlace de invitación, sigue ese enlace en su lugar. Si no, pide a una persona miembro que te envíe uno."
     }
   },
   "block": {
