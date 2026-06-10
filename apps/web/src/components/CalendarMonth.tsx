@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   dayKey,
+  getTodayDayKey,
   startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
@@ -54,6 +55,12 @@ export function CalendarMonth({
 }: CalendarMonthProps) {
   const { t } = useTranslation();
   const [openDay, setOpenDay] = useState<string | null>(null);
+
+  // Today's UTC day key, computed once per render. UTC-day bucketing
+  // (see lib/calendar.ts) means members far from UTC may see the
+  // highlight shift by one day near local midnight — same trade-off
+  // as the rest of the calendar; out of scope to migrate here.
+  const todayKey = getTodayDayKey();
 
   const byDay = useMemo(() => {
     const map = new Map<string, CalendarEntry[]>();
@@ -111,14 +118,18 @@ export function CalendarMonth({
           ) as Extract<CalendarEntry, { kind: "exchange_density" }> | undefined;
           const overflow = chips.length - MAX_CHIPS_PER_CELL;
           const shown = chips.slice(0, MAX_CHIPS_PER_CELL);
+          const isToday = cell.key === todayKey;
           return (
             <div
               key={cell.key}
+              aria-current={isToday ? "date" : undefined}
               className={[
-                "relative min-h-[64px] bg-white p-1 dark:bg-moss-950",
-                cell.inMonth
-                  ? "text-bark-800 dark:text-moss-100"
-                  : "text-moss-400 dark:text-moss-600",
+                "relative min-h-[64px] p-1",
+                isToday
+                  ? "bg-canopy-50 text-canopy-700 dark:bg-canopy-950 dark:text-canopy-300"
+                  : cell.inMonth
+                    ? "bg-white text-bark-800 dark:bg-moss-950 dark:text-moss-100"
+                    : "bg-white text-moss-400 dark:bg-moss-950 dark:text-moss-600",
               ].join(" ")}
             >
               <div className="flex items-start justify-between">
