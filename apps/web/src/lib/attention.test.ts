@@ -287,6 +287,141 @@ describe("computeAttentionItems", () => {
     ]);
   });
 
+  describe("actionability ordering (KIND_PRIORITY tiers)", () => {
+    const now = 1_000_000_000;
+    const DAY = 24 * 60 * 60 * 1000;
+
+    it("ranks an OLDER confirm_exchange above a NEWER vouch_received", () => {
+      // The exchange confirmation blocks Bob's credit; the vouch is
+      // purely informational. Recency must not outrank actionability.
+      const oldExchange = post({
+        id: "old_exchange",
+        postedBy: "alice",
+        claimedBy: "bob",
+        status: "awaiting_confirmation",
+        confirmedBy: ["bob"],
+        createdAt: now - 6 * DAY, // much older...
+      });
+      const freshVouch: SignedVouch = {
+        id: "v_fresh",
+        voucherKey: "carmen",
+        voucheeKey: "alice",
+        kind: "manual",
+        createdAt: now - 1000, // ...than this
+        signature: "sig",
+      };
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [oldExchange],
+        projects: [],
+        projectTasks: [],
+        members: [alice, bob, carmen],
+        vouches: [freshVouch],
+        now,
+      });
+      expect(items.map((i) => i.kind)).toEqual([
+        "confirm_exchange",
+        "vouch_received",
+      ]);
+    });
+
+    it("orders across tiers: blocking > decision > informational", () => {
+      const proj = project({
+        id: "proj_tier",
+        title: "Tool library",
+        organizerKey: "bob",
+      });
+      const invitation: CoOrganizerInvitation = {
+        id: "inv_tier",
+        projectId: proj.id,
+        inviterKey: "bob",
+        inviteeKey: alice.publicKey,
+        createdAt: now - 2 * DAY,
+        expiresAt: now + 14 * DAY,
+        nodeId,
+        signature: "sig",
+      };
+      const oldExchange = post({
+        id: "tier_exchange",
+        postedBy: "alice",
+        claimedBy: "bob",
+        status: "awaiting_confirmation",
+        confirmedBy: ["bob"],
+        createdAt: now - 6 * DAY, // oldest of the three
+      });
+      const freshClaim = post({
+        id: "tier_claimed",
+        postedBy: "alice",
+        claimedBy: "carmen",
+        status: "claimed",
+        createdAt: now - 1000, // newest of the three
+      });
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [oldExchange, freshClaim],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob, carmen],
+        coorgInvitations: [invitation],
+        now,
+      });
+      expect(items.map((i) => i.kind)).toEqual([
+        "confirm_exchange",
+        "coorganizer_invitation_received",
+        "post_claimed",
+      ]);
+    });
+
+    it("keeps newest-first WITHIN a tier while tiers still lead", () => {
+      const olderExchange = post({
+        id: "within_older",
+        postedBy: "alice",
+        claimedBy: "bob",
+        status: "awaiting_confirmation",
+        confirmedBy: ["bob"],
+        createdAt: now - 5 * DAY,
+      });
+      const newerExchange = post({
+        id: "within_newer",
+        postedBy: "alice",
+        claimedBy: "carmen",
+        status: "awaiting_confirmation",
+        confirmedBy: ["carmen"],
+        createdAt: now - 2 * DAY,
+      });
+      const olderVouch: SignedVouch = {
+        id: "v_older",
+        voucherKey: "bob",
+        voucheeKey: "alice",
+        kind: "manual",
+        createdAt: now - 3 * DAY,
+        signature: "sig",
+      };
+      const newerVouch: SignedVouch = {
+        id: "v_newer",
+        voucherKey: "carmen",
+        voucheeKey: "alice",
+        kind: "manual",
+        createdAt: now - 1 * DAY,
+        signature: "sig",
+      };
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [olderExchange, newerExchange],
+        projects: [],
+        projectTasks: [],
+        members: [alice, bob, carmen],
+        vouches: [olderVouch, newerVouch],
+        now,
+      });
+      expect(
+        items.map((i) =>
+          i.kind === "confirm_exchange" ? i.postId : i.kind === "vouch_received" ? i.voucherName : i.kind,
+        ),
+      ).toEqual(["within_newer", "within_older", "Carmen", "Bob"]);
+    });
+  });
+
   it("falls back to a generic counterparty label when the name isn't known", () => {
     // Could happen on a freshly-redeemed invite where the inviter's
     // Member row is local but the counterparty isn't yet — or in a

@@ -27,6 +27,13 @@ import {
 // Disappears automatically once any of the fields is set; the
 // dismissed-setting only matters for members who want to ignore
 // the nudge forever without ever filling in their profile.
+//
+// Dismissal is permanent by design — re-showing a dismissed nudge
+// is ambient urgency theater (no-notifications). The member said
+// no; we heard them. The "Got it" flag persists in the Dexie
+// settings table, and filling in any profile field writes the same
+// flag so the nudge never resurfaces even if the member later
+// clears those fields again.
 
 export function ProfileNudge() {
   const { t } = useTranslation();
@@ -42,6 +49,21 @@ export function ProfileNudge() {
       cancelled = true;
     };
   }, []);
+
+  const profileFilled =
+    currentMember !== null && !profileIsBare(currentMember);
+
+  // Self-retire permanently the moment a filled-in profile is
+  // observed. Without this write the nudge would come back if the
+  // member later emptied those fields — emptying a profile is a
+  // choice, not an invitation to be nudged again
+  // (solidarity-not-shame).
+  useEffect(() => {
+    if (profileFilled && dismissed === false) {
+      setDismissed(true);
+      void dismissProfileNudge();
+    }
+  }, [profileFilled, dismissed]);
 
   // Render nothing until we know the dismissed state — avoids a
   // flash-then-hide on every page load for members who've already

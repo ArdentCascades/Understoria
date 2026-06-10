@@ -84,6 +84,11 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "happened or whether it counted as full help, use Flag for " +
             "review on the post detail page. A community mediator can " +
             "help sort it out; credits stay pending until then.",
+          "You're not stuck waiting forever, either. If your community " +
+            "has auto-confirmation turned on, the community node steps " +
+            "in after the agreed waiting period and completes a " +
+            "confirmation that's clearly just been forgotten, so " +
+            "nobody's credit sits in limbo indefinitely.",
         ],
       },
       {
@@ -159,11 +164,19 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "new-device",
         question: "How do I move to a new device?",
         answer: [
-          "Multi-device key transfer isn't in the app yet. For now, the " +
-            "practical path is: on the new device, accept a fresh invite " +
-            "from a community member you trust, then ask them to vouch " +
-            "for you under the new identity. Your old device's history " +
-            "stays on the old device.",
+          "Use device pairing. On the device that already has your " +
+            "identity, go to Profile → Add another device. It shows a " +
+            "QR code and a short passphrase. On the new device, choose " +
+            "'I have another device' on the welcome screen, scan the " +
+            "code (or paste it), and type in the passphrase. Your " +
+            "identity and profile move across directly, device to " +
+            "device — nothing passes through any server.",
+          "Two things don't come along: your message history (messages " +
+            "are encrypted to each device's own keys, so they stay " +
+            "where they were received) and per-device settings like " +
+            "theme and text size. Everything that lives on the shared " +
+            "community record — posts, exchanges, vouches — shows up " +
+            "on the new device through the normal sync.",
         ],
       },
     ],
@@ -180,6 +193,12 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "link. Share it in person, by Signal, or in any channel " +
             "where you can confirm it actually reached the person you " +
             "meant. Don't post invite links publicly.",
+          "You can also show an invite as a QR code for in-person " +
+            "sharing. Each invite is single-use, expires on its own, " +
+            "and can be revoked from Profile → Invites until it's " +
+            "redeemed. When someone joins on your invite, that counts " +
+            "as you vouching for them — your name backs their join, so " +
+            "invite people you actually know.",
         ],
       },
       {
@@ -190,9 +209,13 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "and don't need the app's involvement.",
           "If it's about a specific exchange, use Flag for review on " +
             "the post detail page. If it's about behaviour beyond a " +
-            "single exchange, raise it in whatever channel your " +
-            "community uses for disputes — there are no admins to take " +
+            "single exchange, you can open a dispute from Profile → " +
+            "Disputes — disputes go through the community's open " +
+            "proposal process, because there are no admins to take " +
             "the call for you.",
+          "And if what you need is simply distance from someone, " +
+            "blocking is always available too — see 'What if someone " +
+            "is bothering me?' under Messages.",
         ],
       },
       {
@@ -214,9 +237,112 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "exchange history. Other communities can see federated " +
             "posts you publish, but they can't see your balance or " +
             "your activity history.",
-          "There is no direct messaging in the app yet — coordination " +
-            "happens out-of-band (Signal, in person, whatever your " +
-            "community uses).",
+          "Direct messages are different: they're end-to-end encrypted " +
+            "between your device and the other person's, so only the " +
+            "two of you can read them — not the node, not other " +
+            "members. See 'How do I message another member?' under " +
+            "Messages for the details.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "messages",
+    title: "Messages",
+    entries: [
+      {
+        id: "message-someone",
+        question: "How do I message another member?",
+        answer: [
+          "Open any post and tap the Message button to reach out — it " +
+            "goes to the poster, or, if it's your own post, to the " +
+            "person helping you. You can also start a conversation " +
+            "from a member's page, or open Messages in the navigation " +
+            "to see all your conversations and search through them.",
+          "Messages are end-to-end encrypted and travel device to " +
+            "device. Only you and the person you're writing to can " +
+            "read them — the community node passes them along but " +
+            "can't see inside.",
+          "There are deliberately no read receipts and no typing " +
+            "indicators. Nobody can see when (or whether) you've read " +
+            "a message, and nobody is watching you compose a reply. " +
+            "Read when you read, answer when you have capacity — the " +
+            "app won't tell on you either way.",
+        ],
+      },
+      {
+        id: "someone-bothering-me",
+        question: "What if someone is bothering me?",
+        answer: [
+          "You can block them. Open your conversation with them and " +
+            "choose Block contact from the menu at the top, or use " +
+            "the block option on their member page.",
+          "Blocking is immediate and private. You stop seeing their " +
+            "posts, events, comments, and messages, and neither of " +
+            "you can message, vouch for, claim from, or invite the " +
+            "other anymore. They are not told — there's no " +
+            "notification, no mark on their profile, nothing anyone " +
+            "else can see.",
+          "Blocking does NOT file a complaint. No moderator is " +
+            "alerted, no dispute opens, and past exchanges stay as " +
+            "they were. If you want the community to weigh in, file " +
+            "a dispute from Profile → Disputes — blocking and a " +
+            "dispute work fine together. The block gives you quiet " +
+            "now; the dispute follows the community process at its " +
+            "own pace.",
+          "You can review, edit, or undo your blocks any time in " +
+            "Settings → Blocked contacts.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "events",
+    title: "Events and the calendar",
+    entries: [
+      {
+        id: "community-events",
+        question: "How do community events work?",
+        answer: [
+          "Anyone can create an event: open the Calendar and tap the " +
+            "+ button. Give it a time, a place, and a description, " +
+            "and it appears on the community calendar for everyone.",
+          "Tap an event to RSVP — going, maybe, or not going. Your " +
+            "RSVP stays on this community's node: the organizer and " +
+            "the other people who RSVP'd can see your name, members " +
+            "who haven't RSVP'd see only the counts, and peer " +
+            "communities never see your RSVP at all. If you change " +
+            "your answer to 'not going', your name comes off the " +
+            "list right away.",
+          "Events can't be edited after they're created — a signed " +
+            "event stays exactly what people said yes to. If the " +
+            "details change, the organizer cancels it and posts a " +
+            "new one. When an event you RSVP'd to is cancelled, " +
+            "you'll see a note about it (with the organizer's " +
+            "reason, if they gave one) the next time you open the " +
+            "app.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "projects",
+    title: "Projects and tasks",
+    entries: [
+      {
+        id: "task-follows",
+        question: "Why does a task say 'Follows: …'?",
+        answer: [
+          "Tasks in a project can be sequenced. 'Follows' means this " +
+            "task naturally comes after another one — pour the " +
+            "foundation before you frame the walls. Nothing is stuck " +
+            "and nobody is in anyone's way; it's just an order.",
+          "You can still claim a follows-task whenever you like. The " +
+            "only difference is that the app deliberately won't check " +
+            "in with you about it until the earlier task is done — " +
+            "there's no point asking how it's going when the " +
+            "groundwork it builds on isn't there yet. The system " +
+            "waits with you, not on you.",
         ],
       },
     ],
