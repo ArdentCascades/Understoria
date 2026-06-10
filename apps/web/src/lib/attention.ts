@@ -298,13 +298,18 @@ export function computeAttentionItems(
   if (input.config) {
     for (const t of projectTasks) {
       if (t.assignedTo !== currentMember.publicKey) continue;
+      const projectTasksForDep = projectTasks.filter(
+        (pt) => pt.projectId === t.projectId,
+      );
       if (t.dependencies.length > 0) {
-        const projectTasksForDep = projectTasks.filter(
-          (pt) => pt.projectId === t.projectId,
-        );
         if (!canClaimTask(t, projectTasksForDep)) continue;
       }
-      const checkInState = taskCheckInState(t, input.config, input.now);
+      const checkInState = taskCheckInState(
+        t,
+        input.config,
+        projectTasksForDep,
+        input.now,
+      );
       if (checkInState !== "check_in_due") continue;
       const project = projectByKey.get(t.projectId);
       if (!project) continue;

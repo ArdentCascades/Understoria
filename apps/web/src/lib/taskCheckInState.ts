@@ -9,6 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { canClaimTask } from "@/db/projects";
 import type { NodeConfig, ProjectTask } from "@/types";
 
 // Two-tier check-in handling. Pure function — state is a computed
@@ -47,8 +48,17 @@ export function taskCheckInState(
     NodeConfig,
     "taskCheckInDays" | "taskNeedsHelpDays" | "taskCheckInGraceDays"
   >,
+  allTasks: readonly ProjectTask[],
   now: number = Date.now(),
 ): TaskCheckInState {
+  // Dependency-blocked tasks are NOT chip-flagged for "needs more
+  // hands" — the issue is upstream incompleteness, not capacity.
+  // Public chip-shaming a structurally-blocked task violates
+  // solidarity-not-shame, and a chip that fires for a structurally
+  // wrong reason is the closest thing in the codebase to a
+  // false-positive notification (no-notifications).
+  // See docs/task-ordering-and-dependencies.md §6.2.
+  if (!canClaimTask(task, allTasks)) return "fresh";
   // Only claimed tasks have a check-in state. awaiting_confirmation
   // / completed / blocked / open are out of scope.
   if (task.status !== "claimed") return "fresh";

@@ -1115,7 +1115,7 @@ function TaskList({
   );
 
   function renderRow(task: ProjectTask, idx: number) {
-    const checkInState = taskCheckInState(task, nodeConfig);
+    const checkInState = taskCheckInState(task, nodeConfig, tasks);
     return (
       <SortableTaskRow
         key={task.id}
