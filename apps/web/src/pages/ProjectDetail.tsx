@@ -79,6 +79,8 @@ import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
+import { useFlipAnimation } from "@/lib/a11y/useFlipAnimation";
 import { IconMessages } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
@@ -989,6 +991,24 @@ function TaskList({
   const { showToast } = useToast();
   const { message, announce } = useLiveRegion();
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [reorderDialogOpen, setReorderDialogOpen] = useState(false);
+  const reorderButtonRef = useRef<HTMLButtonElement>(null);
+
+  // FLIP animation for inline reorders. Skipped while @dnd-kit is
+  // mid-drag on a row (it already applies its own transform) and
+  // skipped entirely under prefers-reduced-motion (handled inside
+  // the hook).
+  const isRowDragging = useCallback(
+    (id: string) => id === activeDragId,
+    [activeDragId],
+  );
+  const visibleTaskIds = useMemo(
+    () => visibleTasks.map((task) => task.id),
+    [visibleTasks],
+  );
+  const { register: registerFlipRow } = useFlipAnimation(visibleTaskIds, {
+    isRowDragging,
+  });
 
   // Per design §9: pointer + keyboard sensors. KeyboardSensor with
   // `sortableKeyboardCoordinates` so arrow keys move the sortable
@@ -1120,7 +1140,8 @@ function TaskList({
   }
 
   // Non-organizer viewers get the static list — no drag, no buttons,
-  // no @dnd-kit overhead.
+  // no @dnd-kit overhead, and (deliberately) no FLIP either. Their
+  // view doesn't reorder.
   if (!isOrg) {
     return (
       <>
@@ -1146,6 +1167,8 @@ function TaskList({
   const activeTask = activeDragId
     ? tasks.find((t) => t.id === activeDragId)
     : null;
+
+  const canOpenReorderDialog = isOrg && tasks.length >= 2 && currentKey;
 
   return (
     <DndContext
@@ -1188,10 +1211,28 @@ function TaskList({
         },
       }}
     >
+      {canOpenReorderDialog && (
+        <div className="mb-2 flex justify-end">
+          <button
+            ref={reorderButtonRef}
+            type="button"
+            className="btn-ghost text-sm"
+            aria-haspopup="dialog"
+            aria-expanded={reorderDialogOpen}
+            onClick={() => setReorderDialogOpen(true)}
+          >
+            {t("projects.task.reorderButton")}
+          </button>
+        </div>
+      )}
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
         <ul className="flex flex-col gap-2">
           {visibleTasks.map((task, idx) => (
-            <li key={task.id} id={`task-${task.id}`}>
+            <li
+              key={task.id}
+              id={`task-${task.id}`}
+              ref={registerFlipRow(task.id)}
+            >
               {renderRow(task, idx)}
             </li>
           ))}
@@ -1214,6 +1255,20 @@ function TaskList({
       >
         {message}
       </div>
+      {currentKey && (
+        <ReorderTasksDialog
+          open={reorderDialogOpen}
+          tasks={tasks}
+          projectId={project.id}
+          organizerKey={currentKey}
+          onClose={() => {
+            setReorderDialogOpen(false);
+            // Return focus to the trigger on close so a keyboard user
+            // resumes where they left off.
+            window.setTimeout(() => reorderButtonRef.current?.focus(), 0);
+          }}
+        />
+      )}
     </DndContext>
   );
 }
