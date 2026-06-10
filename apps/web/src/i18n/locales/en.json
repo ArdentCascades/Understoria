@@ -151,6 +151,12 @@
     "ask_me": "Ask me anytime",
     "summaryLabel": "Availability"
   },
+  "offline": {
+    "banner": "You're offline. Everything here still works from your device.",
+    "pendingCount_one": "{{count}} change will send when you reconnect.",
+    "pendingCount_other": "{{count}} changes will send when you reconnect.",
+    "backOnline": "Back online. Sending queued changes…"
+  },
   "toast": {
     "dismiss": "Dismiss",
     "needPosted": "Posted. Your need is live on the board.",

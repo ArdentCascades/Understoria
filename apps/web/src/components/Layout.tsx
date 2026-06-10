@@ -22,25 +22,32 @@ import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "./BottomNav";
 import { LockScreen } from "./LockScreen";
+import { OfflineBanner } from "./OfflineBanner";
 import { ScrollToTop } from "./ScrollToTop";
 import { SkipLink } from "./SkipLink";
 import { ToastContainer } from "./ToastContainer";
 import { UpdatePrompt } from "./UpdatePrompt";
 import { useApp } from "@/state/AppContext";
+import { useOnlineStatus } from "@/lib/useOnlineStatus";
 import { IllustrationSapling } from "@/components/visual";
 
 export function Layout() {
   const { ready, lockState } = useApp();
   const locked = lockState === "locked";
+  const online = useOnlineStatus();
+  // While the offline banner is visible it hovers above the BottomNav,
+  // so <main> reserves extra bottom clearance — content scrolled to the
+  // very end must never hide behind the strip. Back online, the usual
+  // nav-only clearance returns.
+  const mainPad =
+    !locked && !online
+      ? "flex-1 pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-36"
+      : "flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-20";
   return (
     <div className="mx-auto flex min-h-dvh max-w-screen-md flex-col lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
-      <main
-        id="main"
-        className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-20"
-        tabIndex={-1}
-      >
+      <main id="main" className={mainPad} tabIndex={-1}>
         {!ready ? (
           <Splash />
         ) : locked ? (
@@ -49,6 +56,7 @@ export function Layout() {
           <Outlet />
         )}
       </main>
+      {!locked && <OfflineBanner />}
       {!locked && <BottomNav />}
       {!locked && <ToastContainer />}
       {/* Rendered even while locked: the notice is about the software
