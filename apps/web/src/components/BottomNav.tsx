@@ -89,9 +89,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label={t("nav.primaryNav")}
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-moss-200
-                 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur
-                 supports-[backdrop-filter]:bg-white/70
+      className="fixed inset-x-0 bottom-0 z-30 transform-gpu border-t
+                 border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
+                 backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
                  lg:sticky lg:pb-0"
     >
