@@ -326,6 +326,7 @@
       "errorTitleRequired": "Give your event a title so members know what they'd be coming to.",
       "errorLocationRequired": "Add a location — even a casual one like \"the library bench\".",
       "errorStartRequired": "Pick a start date and time.",
+      "errorStartInPast": "Event start time is in the past. Pick a time later than now.",
       "errorEndInvalid": "End time isn't valid. Pick a date and time, or remove the end-time toggle.",
       "errorEndBeforeStart": "End time has to be after the start time.",
       "errorCapacityInvalid": "Capacity must be a positive whole number, or leave it empty for uncapped.",

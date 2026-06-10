@@ -62,6 +62,17 @@ export class EventActionError extends Error {
   }
 }
 
+/**
+ * Grace window for accepting an event whose `startsAt` is slightly in
+ * the past — covers the case where a member picks "now-ish" and takes a
+ * few seconds to hit submit. Shared by `createEvent` (the authoritative
+ * gate) and `EventNew.tsx` (a UX nicety so the user gets the error
+ * before submit instead of after). Five minutes is short enough to
+ * preclude history-rewriting and long enough that the user never feels
+ * the system is fighting them on click-timing.
+ */
+export const EVENT_START_GRACE_MS = 5 * 60 * 1000;
+
 // -- Create -----------------------------------------------------------------
 
 export interface CreateEventInput {
@@ -119,6 +130,12 @@ export async function createEvent(
   }
 
   const now = input.now ?? Date.now();
+  if (input.startsAt < now - EVENT_START_GRACE_MS) {
+    throw new EventActionError(
+      "start_in_past",
+      "Event start time must be in the future.",
+    );
+  }
   const id = uuid();
   const payload = {
     id,

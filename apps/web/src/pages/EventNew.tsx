@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
-import { createEvent } from "@/db/events";
+import { createEvent, EVENT_START_GRACE_MS } from "@/db/events";
 import { getSecretKey } from "@/db/secrets";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
@@ -90,6 +90,10 @@ export default function EventNewPage() {
     const startsAt = combineDateAndTime(startDate, startTime);
     if (startsAt === null) {
       setError(t("events.new.errorStartRequired"));
+      return;
+    }
+    if (startsAt < Date.now() - EVENT_START_GRACE_MS) {
+      setError(t("events.new.errorStartInPast"));
       return;
     }
     let endsAt: number | null = null;
