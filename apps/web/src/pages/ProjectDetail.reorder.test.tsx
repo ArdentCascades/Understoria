@@ -348,6 +348,157 @@ describe("ProjectDetail — reorder UI (Move buttons)", () => {
   });
 });
 
+describe("ProjectDetail — Reorder tasks dialog", () => {
+  function reorderButton(): HTMLButtonElement | null {
+    return container.querySelector(
+      'button[aria-haspopup="dialog"]',
+    ) as HTMLButtonElement | null;
+  }
+
+  it("Reorder button appears for organizer with 2+ tasks", () => {
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+    expect(reorderButton()).not.toBeNull();
+  });
+
+  it("Reorder button is absent with fewer than 2 tasks", () => {
+    mockState.projectTasks = [
+      task("t1", { title: "Only", orderIndex: 1000 }),
+    ];
+    render();
+    expect(reorderButton()).toBeNull();
+  });
+
+  it("Reorder button is absent for non-organizers", () => {
+    mockState.currentMember = member(memberAKey, "A Member");
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+    expect(reorderButton()).toBeNull();
+  });
+
+  it("clicking the Reorder button opens the dialog", async () => {
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+    const btn = reorderButton();
+    expect(btn).not.toBeNull();
+    clickButton(btn!);
+    await flush();
+    const dialog = document.querySelector('[role="dialog"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute("aria-modal")).toBe("true");
+  });
+
+  it("Escape closes the dialog and returns focus to the trigger", async () => {
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+    const btn = reorderButton();
+    clickButton(btn!);
+    await flush();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+    });
+    await flush();
+    // setTimeout schedules focus restoration; flush microtasks then
+    // run the pending timer.
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await flush();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(btn);
+  });
+
+  it("backdrop click closes the dialog", async () => {
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+    clickButton(reorderButton()!);
+    await flush();
+    const dialog = document.querySelector(
+      '[role="dialog"]',
+    ) as HTMLDivElement | null;
+    expect(dialog).not.toBeNull();
+    // Click the backdrop itself (target === currentTarget).
+    act(() => {
+      const evt = new MouseEvent("click", { bubbles: true });
+      Object.defineProperty(evt, "target", { value: dialog });
+      Object.defineProperty(evt, "currentTarget", { value: dialog });
+      dialog!.dispatchEvent(evt);
+    });
+    await flush();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it("Done button closes the dialog", async () => {
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+    clickButton(reorderButton()!);
+    await flush();
+    const done = Array.from(
+      document.querySelectorAll('[role="dialog"] button'),
+    ).find((b) => (b.textContent ?? "").trim() === "Done") as
+      | HTMLButtonElement
+      | undefined;
+    expect(done).toBeDefined();
+    clickButton(done!);
+    await flush();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+});
+
+describe("ProjectDetail — FLIP animation", () => {
+  it("bails on prefers-reduced-motion (no transform applied to rows)", async () => {
+    // Mock matchMedia so useReducedMotion returns true.
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("prefers-reduced-motion"),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+
+    try {
+      mockState.projectTasks = [
+        task("t1", { title: "First", orderIndex: 1000 }),
+        task("t2", { title: "Second", orderIndex: 2000 }),
+      ];
+      render();
+      await flush();
+      // Inspect the li elements that host the FLIP ref — under
+      // reduced-motion the hook should never write to style.transform.
+      const items = container.querySelectorAll('[id^="task-"]');
+      expect(items.length).toBeGreaterThan(0);
+      for (const el of Array.from(items)) {
+        expect((el as HTMLElement).style.transform).toBe("");
+      }
+    } finally {
+      window.matchMedia = originalMatchMedia;
+    }
+  });
+});
+
 describe("ProjectDetail — Follows badge", () => {
   it("renders Follows: <title> for a single unmet dependency", () => {
     mockState.projectTasks = [
