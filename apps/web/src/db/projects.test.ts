@@ -13,7 +13,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "./database";
 import { createMember } from "./seed";
 import {
-  addCoOrganizer,
   addProjectTask,
   archiveProject,
   bulkAddTasks,
@@ -283,7 +282,7 @@ describe("task confirmation transfers credit and surfaces milestones", () => {
     const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
     const helper = await createMember({ displayName: "Helper" }, NODE);
     const p = await aProject(org);
-    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await seedCoOrganizer(p.id, coOrg.publicKey);
     await launchProject(p.id, org.publicKey);
     const task = await addProjectTask(p.id, org.publicKey, {
       title: "Carry compost",
@@ -375,7 +374,7 @@ describe("handoffOrganizer", () => {
     const alice = await createMember({ displayName: "Alice" }, NODE);
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
 
     const updated = await handoffOrganizer(p.id, alice.publicKey, bob.publicKey);
     expect(updated.organizerKey).toBe(bob.publicKey);
@@ -397,7 +396,7 @@ describe("handoffOrganizer", () => {
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const carol = await createMember({ displayName: "Carol" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
 
     await expect(
       handoffOrganizer(p.id, carol.publicKey, bob.publicKey),
@@ -419,7 +418,7 @@ describe("handoffOrganizer", () => {
     const alice = await createMember({ displayName: "Alice" }, NODE);
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
     await launchProject(p.id, alice.publicKey);
     await completeProject(p.id, alice.publicKey);
 
@@ -436,7 +435,7 @@ describe("removeCoOrganizer", () => {
     const alice = await createMember({ displayName: "Alice" }, NODE);
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
 
     const updated = await removeCoOrganizer(
       p.id,
@@ -457,7 +456,7 @@ describe("removeCoOrganizer", () => {
     const alice = await createMember({ displayName: "Alice" }, NODE);
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
 
     const updated = await removeCoOrganizer(
       p.id,
@@ -480,7 +479,7 @@ describe("removeCoOrganizer", () => {
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const carol = await createMember({ displayName: "Carol" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
 
     await expect(
       removeCoOrganizer(p.id, carol.publicKey, bob.publicKey),
@@ -498,7 +497,7 @@ describe("removeCoOrganizer", () => {
     const alice = await createMember({ displayName: "Alice" }, NODE);
     const bob = await createMember({ displayName: "Bob" }, NODE);
     const p = await aProject(alice);
-    await addCoOrganizer(p.id, alice.publicKey, bob.publicKey);
+    await seedCoOrganizer(p.id, bob.publicKey);
 
     // Alice is primary, not a co-organizer. Trying to step down as
     // a co-organizer should reject.
@@ -515,6 +514,29 @@ describe("removeCoOrganizer", () => {
 });
 
 // -- Task follows (dependencies) ---------------------------------------------
+
+/**
+ * Seed a co-organizer onto a project for test setup. Bypasses the
+ * production signed-invitation flow (CoOrganizerInvitation +
+ * CoOrganizerInvitationResponse) because most tests in this file
+ * aren't exercising HOW the co-org got there — they need a co-org
+ * as a precondition for testing other things (task confirmation,
+ * dependency setting, organizer-only gates, etc.). Tests that
+ * specifically exercise the invitation flow live in
+ * `coorgInvitations.test.ts` and use the real action helpers.
+ */
+async function seedCoOrganizer(
+  projectId: string,
+  coOrgKey: string,
+): Promise<void> {
+  const p = await db.projects.get(projectId);
+  if (!p) throw new Error(`seedCoOrganizer: project ${projectId} not found`);
+  if (p.coOrganizerKeys.includes(coOrgKey)) return;
+  await db.projects.put({
+    ...p,
+    coOrganizerKeys: [...p.coOrganizerKeys, coOrgKey],
+  });
+}
 
 function fakeTask(overrides: Partial<ProjectTask> & { id: string }): ProjectTask {
   return {
@@ -734,7 +756,7 @@ describe("archive lifecycle", () => {
     const org = await createMember({ displayName: "Org" }, NODE);
     const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
     const p = await aProject(org);
-    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await seedCoOrganizer(p.id, coOrg.publicKey);
     await launchProject(p.id, org.publicKey);
     await completeProject(p.id, org.publicKey);
     await expect(archiveProject(p.id, coOrg.publicKey)).rejects.toThrow(
@@ -1087,9 +1109,9 @@ describe("reorderProjectTask", () => {
   });
 
   it("allows a co-organizer to reorder", async () => {
-    const { org, p, t1, t3 } = await setupThreeTasks();
+    const { p, t1, t3 } = await setupThreeTasks();
     const coOrg = await createMember({ displayName: "CoOrg" }, NODE);
-    await addCoOrganizer(p.id, org.publicKey, coOrg.publicKey);
+    await seedCoOrganizer(p.id, coOrg.publicKey);
     await reorderProjectTask({
       taskId: t3.id,
       organizerKey: coOrg.publicKey,

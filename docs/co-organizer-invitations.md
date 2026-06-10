@@ -20,13 +20,14 @@
 
 ## §1 Problem
 
-Today the primary organizer of a project can name another member as
-co-organizer unilaterally. `addCoOrganizer(projectId, callerKey,
-newCoOrgKey)` in `apps/web/src/db/projects.ts` (~line 328) takes the
-caller and the new key, checks only that the caller is the primary
-organizer, and writes the new key directly into
-`Project.coOrganizerKeys`. The newly named member gets no notification,
-no prompt, no consent step. They learn about it by happening to open
+Before this design shipped, the primary organizer of a project could
+name another member as co-organizer unilaterally. The legacy
+`addCoOrganizer(projectId, callerKey, newCoOrgKey)` function in
+`apps/web/src/db/projects.ts` took the caller and the new key, checked
+only that the caller was the primary organizer, and wrote the new key
+directly into `Project.coOrganizerKeys`. The newly named member got
+no notification, no prompt, no consent step. They learned about it by
+happening to open
 the project page, or by noticing that they can now do organizer
 actions.
 
@@ -180,9 +181,12 @@ action should extend this list in the same PR.
   a role they cannot leave.
 
 Not included in co-organizer authority (primary organizer only):
-**adding or removing other co-organizers** (`addCoOrganizer` /
-`removeCoOrganizer` — the role-grant authority stays with the
-primary, with the self-removal carveout for stepping down),
+**issuing co-organizer invitations** (signed `CoOrganizerInvitation`
+records — the role-grant authority stays with the primary; the
+unilateral `addCoOrganizer` legacy path was removed in PR #218 once
+the signed-invitation flow was fully shipped), **removing other
+co-organizers** (`removeCoOrganizer` from the primary side — the
+self-removal carveout still lets a co-organizer step down),
 **archiving / unarchiving the project** (`archiveProject` /
 `unarchiveProject`), and **cancelling community events** (events
 are gated by `event.createdBy === organizerKey` in

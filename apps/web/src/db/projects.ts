@@ -378,27 +378,6 @@ async function nextOrderIndexForProject(projectId: string): Promise<number> {
   return max + 1000;
 }
 
-export async function addCoOrganizer(
-  projectId: string,
-  callerKey: string,
-  newCoOrgKey: string,
-): Promise<Project> {
-  return db.transaction("rw", db.projects, async () => {
-    const p = await db.projects.get(projectId);
-    if (!p) throw new Error("Project not found.");
-    if (p.organizerKey !== callerKey)
-      throw new Error("Only the primary organizer can add co-organizers.");
-    if (p.coOrganizerKeys.includes(newCoOrgKey)) return p;
-    if (newCoOrgKey === p.organizerKey) return p;
-    const updated: Project = {
-      ...p,
-      coOrganizerKeys: [...p.coOrganizerKeys, newCoOrgKey],
-    };
-    await db.projects.put(updated);
-    return updated;
-  });
-}
-
 export async function removeCoOrganizer(
   projectId: string,
   callerKey: string,
