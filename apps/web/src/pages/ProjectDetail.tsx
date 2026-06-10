@@ -9,10 +9,27 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import {
@@ -35,6 +52,7 @@ import {
   pauseProject,
   postAnnouncement,
   removeCoOrganizer,
+  reorderProjectTask,
   resumeProject,
   unarchiveProject,
   unclaimProjectTask,
@@ -121,11 +139,18 @@ export default function ProjectDetailPage() {
     () => projects.find((p) => p.id === id) ?? null,
     [projects, id],
   );
+  // Sort by orderIndex ascending (per PR C migration). createdAt is
+  // a defensive tiebreaker for any rows that escaped the v25 backfill
+  // — should never fire in practice, but keeps the order stable if
+  // it does.
   const tasks = useMemo(
     () =>
       projectTasks
         .filter((task) => task.projectId === id)
-        .sort((a, b) => a.createdAt - b.createdAt),
+        .sort((a, b) => {
+          if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+          return a.createdAt - b.createdAt;
+        }),
     [projectTasks, id],
   );
   // Compose the status pill with the debounced search. `matchesQuery`
@@ -502,29 +527,19 @@ export default function ProjectDetailPage() {
                             : null}
                   </p>
                 ) : (
-                  <ul className="flex flex-col gap-2">
-                    {visibleTasks.map((task) => {
-                      const checkInState = taskCheckInState(task, nodeConfig);
-                      return (
-                        <li key={task.id}>
-                          <TaskRow
-                            task={task}
-                            isOrganizer={isOrg}
-                            acceptingClaims={project.status === "active"}
-                            projectStatus={project.status}
-                            currentKey={currentMember?.publicKey}
-                            memberMap={memberMap}
-                            nodeId={nodeId}
-                            onRun={run}
-                            needsMoreHands={checkInState === "needs_more_hands"}
-                            allTasks={tasks}
-                            flaggedCommentIds={flaggedCommentIds}
-                            searchQuery={debouncedQuery}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <TaskList
+                    tasks={tasks}
+                    visibleTasks={visibleTasks}
+                    isOrg={isOrg}
+                    project={project}
+                    currentKey={currentMember?.publicKey}
+                    memberMap={memberMap}
+                    nodeId={nodeId}
+                    nodeConfig={nodeConfig}
+                    onRun={run}
+                    flaggedCommentIds={flaggedCommentIds}
+                    searchQuery={debouncedQuery}
+                  />
                 )}
               </>
             )}
@@ -796,6 +811,468 @@ function OrganizerControls({
   );
 }
 
+// --- Reorder UI -----------------------------------------------------------
+//
+// The task list ships two reorder affordances per docs/task-ordering-and-
+// dependencies.md §3.2:
+//
+//   1. Drag-and-drop (sugar) — the task title is the drag handle.
+//   2. Always-visible Move up / Move down icon buttons (canonical) —
+//      keyboard-first, screen-reader-first, touch-target-44.
+//
+// Both paths resolve to a neighbor pair before calling
+// `reorderProjectTask({ taskId, organizerKey, beforeId, afterId })`,
+// which lives in db/projects.ts and itself enforces organizer / co-org
+// authority via `requireOrganizer`.
+//
+// Non-organizer / non-co-org viewers see the static list — no drag
+// handles, no buttons, no @dnd-kit overhead.
+function ArrowUpIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 13V3" />
+      <path d="M3.5 7.5 8 3l4.5 4.5" />
+    </svg>
+  );
+}
+
+function ArrowDownIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 3v10" />
+      <path d="M3.5 8.5 8 13l4.5-4.5" />
+    </svg>
+  );
+}
+
+// Single shared aria-live region for reorder announcements. The
+// @dnd-kit accessibility hooks fire for drag; we mirror the same
+// announcements for the button path so a keyboard / screen-reader
+// member hears identical feedback regardless of how they moved.
+function useLiveRegion(): {
+  message: string;
+  announce: (msg: string) => void;
+} {
+  const [message, setMessage] = useState("");
+  const counter = useRef(0);
+  const announce = useCallback((msg: string) => {
+    counter.current += 1;
+    // Append an invisible suffix on repeat messages so a re-announce
+    // of the same text still fires the screen-reader update.
+    const tag = counter.current % 2 === 0 ? "" : "​";
+    setMessage(`${msg}${tag}`);
+  }, []);
+  return { message, announce };
+}
+
+// "Follows: <upstream titles>" badge. Visible to everyone, not just
+// organizers. Three render modes:
+//   • 1 dep: "Follows: <title>"
+//   • 2-3 deps: comma-joined "Follows: A, B, C"
+//   • 4+ deps (collapsed): "Follows: <first> +N more" + tap to expand
+//   • 4+ deps (expanded): inline popover with all titles, each
+//     clickable to scroll to that upstream task row.
+// Completed deps drop out at the caller — we only see unmet ones.
+function FollowsBadge({
+  unmetDeps,
+  expanded,
+  onToggle,
+  t,
+}: {
+  unmetDeps: { id: string; title: string }[];
+  expanded: boolean;
+  onToggle: () => void;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
+  const overflow = unmetDeps.length >= 4;
+  if (!overflow) {
+    const titles = unmetDeps.map((d) => d.title).join(", ");
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300"
+        title={t("projects.task.followsHint")}
+      >
+        <span aria-hidden="true">→</span>
+        {t("projects.task.follows", { titles })}
+        <WhyTooltip principleId="follows-not-blocked" />
+      </span>
+    );
+  }
+  const first = unmetDeps[0];
+  const rest = unmetDeps.length - 1;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        aria-label={t("projects.task.followsExpandLabel")}
+        className="inline-flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-moss-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 dark:hover:bg-moss-800"
+        title={t("projects.task.followsHint")}
+      >
+        <span aria-hidden="true">→</span>
+        {t("projects.task.followsMore", {
+          titles: first.title,
+          count: rest,
+        })}
+      </button>
+      <WhyTooltip principleId="follows-not-blocked" />
+      {expanded && (
+        <ul className="basis-full pl-4">
+          {unmetDeps.map((dep) => (
+            <li key={dep.id}>
+              <button
+                type="button"
+                className="text-left text-xs text-moss-700 underline decoration-moss-300 underline-offset-2 hover:text-canopy-700 dark:text-moss-200 dark:hover:text-canopy-300"
+                onClick={() => {
+                  const el = document.getElementById(`task-${dep.id}`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  (el?.querySelector("h3") as HTMLElement | null)?.focus?.();
+                }}
+              >
+                {dep.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </span>
+  );
+}
+
+function TaskList({
+  tasks,
+  visibleTasks,
+  isOrg,
+  project,
+  currentKey,
+  memberMap,
+  nodeId,
+  nodeConfig,
+  onRun,
+  flaggedCommentIds,
+  searchQuery,
+}: {
+  tasks: readonly ProjectTask[];
+  visibleTasks: readonly ProjectTask[];
+  isOrg: boolean;
+  project: Project;
+  currentKey: string | undefined;
+  memberMap: Map<string, string>;
+  nodeId: string;
+  nodeConfig: Parameters<typeof taskCheckInState>[1];
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+  flaggedCommentIds: ReadonlySet<string>;
+  searchQuery?: string;
+}) {
+  const { t } = useTranslation();
+  const { showToast } = useToast();
+  const { message, announce } = useLiveRegion();
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+  // Per design §9: pointer + keyboard sensors. KeyboardSensor with
+  // `sortableKeyboardCoordinates` so arrow keys move the sortable
+  // item one slot per press.
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // 5px activation distance avoids accidental drags on tap.
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const taskIds = useMemo(() => visibleTasks.map((t) => t.id), [visibleTasks]);
+
+  // For the button path: locate the neighbors of `taskId` in the
+  // FULL tasks list (not the filtered visible list), and call the
+  // action with them.
+  const moveTask = useCallback(
+    async (taskId: string, direction: "up" | "down") => {
+      if (!currentKey) return;
+      const fullList = tasks;
+      const idx = fullList.findIndex((t) => t.id === taskId);
+      if (idx < 0) return;
+      // Disabled-at-the-ends check, also enforced visually.
+      if (direction === "up" && idx === 0) return;
+      if (direction === "down" && idx === fullList.length - 1) return;
+      // Compute the neighbor pair at the destination position. The
+      // neighbors are read from the CURRENT list (the task we're
+      // moving is removed in the action layer's transaction; here we
+      // just point at the two rows that flank the destination slot).
+      // Move up to idx-1: the new neighbors are the task that was at
+      // idx-2 (now still at idx-2) and the task that was at idx-1
+      // (which will end up at idx after the move). Move down to
+      // idx+1: the new neighbors are the task that was at idx+1
+      // (which steps up into idx) and the task that was at idx+2.
+      const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+      const beforeIdx = direction === "up" ? idx - 2 : idx + 1;
+      const afterIdx = direction === "up" ? idx - 1 : idx + 2;
+      const beforeId = beforeIdx >= 0 ? fullList[beforeIdx].id : null;
+      const afterId =
+        afterIdx <= fullList.length - 1 ? fullList[afterIdx].id : null;
+      const task = fullList[idx];
+      const result = await onRun(() =>
+        reorderProjectTask({
+          taskId,
+          organizerKey: currentKey,
+          beforeId,
+          afterId,
+        }),
+      );
+      if (result !== null) {
+        announce(
+          t("projects.task.dragEnd", {
+            title: task.title,
+            position: targetIdx + 1,
+            total: fullList.length,
+          }),
+        );
+      } else {
+        showToast(t("projects.task.reorderError"), { tone: "error" });
+      }
+    },
+    [tasks, currentKey, onRun, announce, t, showToast],
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id));
+  }, []);
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      setActiveDragId(null);
+      const { active, over } = event;
+      if (!over || !currentKey || active.id === over.id) return;
+      const fromIdx = tasks.findIndex((t) => t.id === active.id);
+      const toIdx = tasks.findIndex((t) => t.id === over.id);
+      if (fromIdx < 0 || toIdx < 0) return;
+      // Compute the destination neighbors as if the dragged task is
+      // now in `toIdx` (with itself removed from `fromIdx`).
+      const reordered = [...tasks];
+      const [moved] = reordered.splice(fromIdx, 1);
+      reordered.splice(toIdx, 0, moved);
+      const beforeId = toIdx > 0 ? reordered[toIdx - 1].id : null;
+      const afterId =
+        toIdx < reordered.length - 1 ? reordered[toIdx + 1].id : null;
+      if (beforeId === null && afterId === null) return;
+      const result = await onRun(() =>
+        reorderProjectTask({
+          taskId: String(active.id),
+          organizerKey: currentKey,
+          beforeId,
+          afterId,
+        }),
+      );
+      if (result === null) {
+        showToast(t("projects.task.reorderError"), { tone: "error" });
+      }
+      // Drag-end announcement is also dispatched by
+      // accessibility.announcements below; that handles the SR text.
+    },
+    [tasks, currentKey, onRun, showToast, t],
+  );
+
+  function renderRow(task: ProjectTask, idx: number) {
+    const checkInState = taskCheckInState(task, nodeConfig);
+    return (
+      <SortableTaskRow
+        key={task.id}
+        task={task}
+        sortable={isOrg}
+        isFirst={idx === 0}
+        isLast={idx === visibleTasks.length - 1}
+        onMove={moveTask}
+        isOrganizer={isOrg}
+        acceptingClaims={project.status === "active"}
+        projectStatus={project.status}
+        currentKey={currentKey}
+        memberMap={memberMap}
+        nodeId={nodeId}
+        onRun={onRun}
+        needsMoreHands={checkInState === "needs_more_hands"}
+        allTasks={tasks}
+        flaggedCommentIds={flaggedCommentIds}
+        searchQuery={searchQuery}
+      />
+    );
+  }
+
+  // Non-organizer viewers get the static list — no drag, no buttons,
+  // no @dnd-kit overhead.
+  if (!isOrg) {
+    return (
+      <>
+        <ul className="flex flex-col gap-2">
+          {visibleTasks.map((task, idx) => (
+            <li key={task.id} id={`task-${task.id}`}>
+              {renderRow(task, idx)}
+            </li>
+          ))}
+        </ul>
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+          data-testid="reorder-live-region"
+        >
+          {message}
+        </div>
+      </>
+    );
+  }
+
+  const activeTask = activeDragId
+    ? tasks.find((t) => t.id === activeDragId)
+    : null;
+
+  return (
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => {
+        if (activeTask) {
+          announce(
+            t("projects.task.dragCancel", { title: activeTask.title }),
+          );
+        }
+        setActiveDragId(null);
+      }}
+      accessibility={{
+        announcements: {
+          onDragStart: ({ active }) => {
+            const t2 = tasks.find((x) => x.id === active.id);
+            return t2
+              ? t("projects.task.dragStart", { title: t2.title })
+              : "";
+          },
+          onDragOver: () => "",
+          onDragEnd: ({ active, over }) => {
+            const t2 = tasks.find((x) => x.id === active.id);
+            if (!t2 || !over) return "";
+            const overIdx = tasks.findIndex((x) => x.id === over.id);
+            return t("projects.task.dragEnd", {
+              title: t2.title,
+              position: overIdx + 1,
+              total: tasks.length,
+            });
+          },
+          onDragCancel: ({ active }) => {
+            const t2 = tasks.find((x) => x.id === active.id);
+            return t2
+              ? t("projects.task.dragCancel", { title: t2.title })
+              : "";
+          },
+        },
+      }}
+    >
+      <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+        <ul className="flex flex-col gap-2">
+          {visibleTasks.map((task, idx) => (
+            <li key={task.id} id={`task-${task.id}`}>
+              {renderRow(task, idx)}
+            </li>
+          ))}
+        </ul>
+      </SortableContext>
+      <DragOverlay>
+        {activeTask ? (
+          <div className="card opacity-90 shadow-lg">
+            <h3 className="text-base font-semibold leading-snug">
+              {activeTask.title}
+            </h3>
+          </div>
+        ) : null}
+      </DragOverlay>
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        data-testid="reorder-live-region"
+      >
+        {message}
+      </div>
+    </DndContext>
+  );
+}
+
+function SortableTaskRow({
+  task,
+  sortable,
+  isFirst,
+  isLast,
+  onMove,
+  ...rest
+}: {
+  task: ProjectTask;
+  sortable: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  onMove: (taskId: string, direction: "up" | "down") => void;
+  isOrganizer: boolean;
+  acceptingClaims: boolean;
+  projectStatus: Project["status"];
+  currentKey: string | undefined;
+  memberMap: Map<string, string>;
+  nodeId: string;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+  needsMoreHands: boolean;
+  allTasks: readonly ProjectTask[];
+  flaggedCommentIds: ReadonlySet<string>;
+  searchQuery?: string;
+}) {
+  const sortableHook = useSortable({ id: task.id, disabled: !sortable });
+  const style = sortable
+    ? {
+        transform: CSS.Transform.toString(sortableHook.transform),
+        transition: sortableHook.transition,
+      }
+    : undefined;
+  return (
+    <div ref={sortable ? sortableHook.setNodeRef : undefined} style={style}>
+      <TaskRow
+        task={task}
+        {...rest}
+        sortableHandle={
+          sortable
+            ? {
+                attributes: sortableHook.attributes,
+                listeners: sortableHook.listeners,
+              }
+            : null
+        }
+        moveButtons={
+          sortable
+            ? { isFirst, isLast, onMove: (dir) => onMove(task.id, dir) }
+            : null
+        }
+      />
+    </div>
+  );
+}
+
 function TaskRow({
   task,
   isOrganizer,
@@ -809,6 +1286,8 @@ function TaskRow({
   allTasks,
   flaggedCommentIds,
   searchQuery,
+  sortableHandle,
+  moveButtons,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -826,6 +1305,20 @@ function TaskRow({
    *  sees why this row matched. Description stays plain for v1 — the
    *  title is enough for finding tasks at a glance. */
   searchQuery?: string;
+  /** When non-null, the row participates in drag-reorder. The title
+   *  receives the spread `{...attributes} {...listeners}` to act as
+   *  the drag handle (design doc §3 — "only show task titles"). */
+  sortableHandle?: {
+    attributes: ReturnType<typeof useSortable>["attributes"];
+    listeners: ReturnType<typeof useSortable>["listeners"];
+  } | null;
+  /** When non-null, the row renders Move up / Move down buttons.
+   *  This is the keyboard-canonical path (design doc §9.2). */
+  moveButtons?: {
+    isFirst: boolean;
+    isLast: boolean;
+    onMove: (direction: "up" | "down") => void;
+  } | null;
 }) {
   const { t } = useTranslation();
   const isAssignee = task.assignedTo === currentKey;
@@ -841,12 +1334,25 @@ function TaskRow({
   const [editDescription, setEditDescription] = useState(task.description);
   const [editHours, setEditHours] = useState(String(task.estimatedHours));
   const [editUrgency, setEditUrgency] = useState<Urgency>(task.urgency);
+  const [editDeps, setEditDeps] = useState<string[]>(task.dependencies);
+  const [followsExpanded, setFollowsExpanded] = useState(false);
 
-  const hasUnmetDeps = task.dependencies.length > 0 && !canClaimTask(task, allTasks);
-  const depNames = task.dependencies
-    .map((id) => allTasks.find((t) => t.id === id)?.title)
-    .filter(Boolean)
-    .join(", ");
+  // Only unmet (non-completed) deps render in the Follows badge — a
+  // completed upstream is no longer informative on the downstream row.
+  const unmetDepTitles = useMemo(() => {
+    return task.dependencies
+      .map((id) => allTasks.find((t) => t.id === id))
+      .filter((dep): dep is ProjectTask => !!dep && dep.status !== "completed")
+      .map((dep) => ({ id: dep.id, title: dep.title }));
+  }, [task.dependencies, allTasks]);
+  const hasUnmetDeps = unmetDepTitles.length > 0;
+  // Claimer-side note: visible only to the claimant when the task is
+  // structurally blocked. canClaimTask reads the full task list to
+  // include not-yet-loaded dep titles that have completed.
+  const isClaimant = task.assignedTo === currentKey;
+  const isStructurallyBlocked = !canClaimTask(task, allTasks);
+  const showClaimerNote =
+    isClaimant && isStructurallyBlocked && task.status === "claimed";
 
   if (editing) {
     return (
@@ -903,6 +1409,37 @@ function TaskRow({
             </select>
           </label>
         </div>
+        {/* Dependency picker. Multi-select of in-project tasks
+            excluding this one. Saved via editProjectTask (which
+            calls detectCycle + in-project-membership checks). The
+            soft cap of 10 keeps the "Follows:" badge legible. */}
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">{t("projects.task.dependsOn")}</span>
+          <select
+            multiple
+            data-testid={`deps-${task.id}`}
+            className="input min-h-[6rem]"
+            value={editDeps}
+            onChange={(e) => {
+              const picked = Array.from(
+                e.target.selectedOptions,
+                (o) => o.value,
+              );
+              setEditDeps(picked);
+            }}
+          >
+            {allTasks
+              .filter((other) => other.id !== task.id)
+              .map((other) => (
+                <option key={other.id} value={other.id}>
+                  {other.title}
+                </option>
+              ))}
+          </select>
+          <span className="text-xs text-moss-500 dark:text-moss-400">
+            {t("projects.task.dependsOnHint")}
+          </span>
+        </label>
         <div className="flex flex-wrap gap-2 self-end">
           <button
             type="button"
@@ -914,6 +1451,7 @@ function TaskRow({
               setEditDescription(task.description);
               setEditHours(String(task.estimatedHours));
               setEditUrgency(task.urgency);
+              setEditDeps(task.dependencies);
             }}
           >
             {t("projects.task.edit.cancel")}
@@ -926,12 +1464,24 @@ function TaskRow({
             onClick={async () => {
               const h = Number.parseFloat(editHours);
               if (!Number.isFinite(h) || h <= 0) return;
+              if (editDeps.length > 10) {
+                await onRun(() =>
+                  Promise.reject(
+                    new Error(t("projects.task.dependencyTooManyError")),
+                  ),
+                );
+                return;
+              }
+              // Use editProjectTask's dependencies field — single
+              // transaction, single save, cycle detection in the
+              // action layer. Cycles surface as a toast via onRun.
               const ok = await dispatch(() =>
                 editProjectTask(task.id, currentKey!, {
                   title: editTitle,
                   description: editDescription,
                   estimatedHours: h,
                   urgency: editUrgency,
+                  dependencies: editDeps,
                 }),
               );
               if (ok) setEditing(false);
@@ -969,22 +1519,64 @@ function TaskRow({
           </span>
         )}
         {hasUnmetDeps && (
-          <span
-            className="chip bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-            title={t("projects.task.followsHint")}
-          >
-            {t("projects.task.follows", { tasks: depNames })}
-            <WhyTooltip principleId="follows-not-blocked" />
-          </span>
+          <FollowsBadge
+            unmetDeps={unmetDepTitles}
+            expanded={followsExpanded}
+            onToggle={() => setFollowsExpanded((v) => !v)}
+            t={t}
+          />
+        )}
+        {moveButtons && (
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              type="button"
+              aria-label={t("projects.task.moveUp", { title: task.title })}
+              aria-disabled={moveButtons.isFirst}
+              disabled={moveButtons.isFirst}
+              onClick={() => {
+                if (!moveButtons.isFirst) moveButtons.onMove("up");
+              }}
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
+            >
+              <ArrowUpIcon />
+            </button>
+            <button
+              type="button"
+              aria-label={t("projects.task.moveDown", { title: task.title })}
+              aria-disabled={moveButtons.isLast}
+              disabled={moveButtons.isLast}
+              onClick={() => {
+                if (!moveButtons.isLast) moveButtons.onMove("down");
+              }}
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
+            >
+              <ArrowDownIcon />
+            </button>
+          </div>
         )}
       </div>
-      <h3 className="text-base font-semibold leading-snug">
+      <h3
+        className={`text-base font-semibold leading-snug ${sortableHandle ? "cursor-grab touch-none select-none active:cursor-grabbing" : ""}`}
+        {...(sortableHandle?.attributes ?? {})}
+        {...(sortableHandle?.listeners ?? {})}
+      >
         {searchQuery && searchQuery.trim() !== "" ? (
           <HighlightedText text={task.title} query={searchQuery} />
         ) : (
           task.title
         )}
+        {sortableHandle && (
+          <span className="sr-only">
+            {" "}
+            {t("projects.task.dragHint")}
+          </span>
+        )}
       </h3>
+      {showClaimerNote && (
+        <p className="text-xs italic text-moss-500 dark:text-moss-400">
+          {t("projects.task.waitingOnClaimerNote")}
+        </p>
+      )}
       {task.description && (
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {task.description}

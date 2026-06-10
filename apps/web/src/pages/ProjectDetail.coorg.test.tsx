@@ -20,12 +20,14 @@ const {
   logActivityMock,
   getSecretKeyMock,
   showToastMock,
+  reorderMock,
 } = vi.hoisted(() => ({
   issueMock: vi.fn(async (_opts: unknown) => ({ id: "inv-new" })),
   revokeMock: vi.fn(async (_opts: unknown) => ({ id: "rev-1" })),
   logActivityMock: vi.fn(async () => undefined),
   getSecretKeyMock: vi.fn(async () => "secret"),
   showToastMock: vi.fn(),
+  reorderMock: vi.fn(async (_opts: unknown) => undefined),
 }));
 
 vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
@@ -64,6 +66,7 @@ vi.mock("@/db/projects", () => ({
   pauseProject: vi.fn(),
   postAnnouncement: vi.fn(),
   removeCoOrganizer: vi.fn(),
+  reorderProjectTask: reorderMock,
   resumeProject: vi.fn(),
   unarchiveProject: vi.fn(),
   unclaimProjectTask: vi.fn(),
@@ -77,7 +80,35 @@ import type {
   CoOrganizerInvitationRevocation,
   Member,
   Project,
+  ProjectTask,
 } from "@/types";
+
+function task(
+  id: string,
+  overrides: Partial<ProjectTask> = {},
+): ProjectTask {
+  return {
+    id,
+    projectId: "proj-1",
+    title: `Task ${id}`,
+    description: "",
+    category: "infrastructure",
+    estimatedHours: 1,
+    urgency: "low",
+    requiredSkills: [],
+    assignedTo: null,
+    status: "open",
+    dependencies: [],
+    orderIndex: 1000,
+    createdAt: 0,
+    completedAt: null,
+    completedBy: null,
+    exchangeId: null,
+    claimedAt: null,
+    checkInAcknowledgedAt: null,
+    ...overrides,
+  };
+}
 
 const nodeId = "node_test";
 const organizerKey = "organizer-key";
@@ -146,6 +177,8 @@ interface MockState {
   coorgInvitations: CoOrganizerInvitation[];
   coorgInvitationResponses: CoOrganizerInvitationResponse[];
   coorgInvitationRevocations: CoOrganizerInvitationRevocation[];
+  blockedKeys: Set<string>;
+  taskComments: unknown[];
 }
 
 let mockState: MockState;
@@ -164,6 +197,8 @@ function freshState(): MockState {
     coorgInvitations: [],
     coorgInvitationResponses: [],
     coorgInvitationRevocations: [],
+    blockedKeys: new Set<string>(),
+    taskComments: [],
   };
 }
 
@@ -179,6 +214,7 @@ beforeEach(() => {
   revokeMock.mockClear();
   logActivityMock.mockClear();
   showToastMock.mockClear();
+  reorderMock.mockClear();
   container = document.createElement("div");
   document.body.appendChild(container);
 });
@@ -306,5 +342,56 @@ describe("ProjectDetail — co-organizer invitations (organizer)", () => {
     const text = container.textContent ?? "";
     expect(text).toContain("Past invitations");
     expect(text).toContain("declined");
+  });
+});
+
+describe("ProjectDetail — reorder authority (co-organizer)", () => {
+  it("co-organizer can reorder tasks via Move buttons", async () => {
+    const p = project();
+    p.coOrganizerKeys = [inviteeKey];
+    mockState.projects = [p];
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    // Current member is the co-organizer (not the primary).
+    mockState.currentMember = member(inviteeKey, "Bob Invitee");
+    render();
+
+    const moveDown = container.querySelector(
+      "[aria-label=\"Move First down\"]",
+    ) as HTMLButtonElement | null;
+    expect(moveDown).not.toBeNull();
+    act(() => {
+      moveDown!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    await flush();
+
+    expect(reorderMock).toHaveBeenCalledTimes(1);
+    expect(reorderMock.mock.calls[0][0]).toMatchObject({
+      taskId: "t1",
+      organizerKey: inviteeKey,
+      beforeId: "t2",
+      afterId: null,
+    });
+  });
+
+  it("non-organizer non-co-organizer non-claimant sees no Move buttons", () => {
+    const otherKey = "other-key";
+    mockState.members = [
+      member(organizerKey, "Organizer"),
+      member(otherKey, "Random Member"),
+    ];
+    mockState.currentMember = member(otherKey, "Random Member");
+    mockState.projectTasks = [
+      task("t1", { title: "First", orderIndex: 1000 }),
+      task("t2", { title: "Second", orderIndex: 2000 }),
+    ];
+    render();
+
+    const moveUps = container.querySelectorAll(
+      "[aria-label^=\"Move \"]",
+    );
+    expect(moveUps.length).toBe(0);
   });
 });
