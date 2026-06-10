@@ -415,6 +415,11 @@
     "lockedError": "Desbloquea tu sesion para enviar mensajes.",
     "sendError": "No se pudo enviar el mensaje. Intenta de nuevo.",
     "conversationWith": "{{name}}",
+    "conversation": {
+      "headerMenuLabel": "Más acciones",
+      "headerMenuBlock": "Bloquear contacto",
+      "headerMenuUnblock": "Desbloquear a {{name}}"
+    },
     "noReadReceipts": "Los mensajes son privados. Sin confirmacion de lectura.",
     "search": {
       "placeholder": "Busca en tus mensajes",
@@ -1717,7 +1722,7 @@
       "sectionTitle": "Contactos bloqueados",
       "sectionIntro": "Tu lista personal de bloqueos. Se queda en este dispositivo — nunca se federa, y ningún otro miembro puede verla.",
       "activeHeading": "Bloqueos activos",
-      "activeEmpty": "No has bloqueado a nadie. Para bloquear a alguien, ve a su página de miembro y pulsa Bloquear contacto.",
+      "activeEmpty": "Aún no has bloqueado a nadie. Para bloquear a alguien, abre una conversación con esa persona y pulsa el menú en el encabezado de la conversación.",
       "historyHeading": "Bloqueos anteriores",
       "historyEmpty": "Aún no hay historial. Cuando desbloquees a alguien, aparecerá aquí como recordatorio.",
       "obscuredRowLabel": "Contacto bloqueado",
