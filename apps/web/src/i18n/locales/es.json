@@ -143,6 +143,12 @@
     "ask_me": "Pregúntame cuando quieras",
     "summaryLabel": "Disponibilidad"
   },
+  "offline": {
+    "banner": "Estás sin conexión. Todo aquí sigue funcionando desde tu dispositivo.",
+    "pendingCount_one": "{{count}} cambio se enviará cuando vuelvas a conectarte.",
+    "pendingCount_other": "{{count}} cambios se enviarán cuando vuelvas a conectarte.",
+    "backOnline": "De nuevo en línea. Enviando los cambios pendientes…"
+  },
   "toast": {
     "dismiss": "Cerrar",
     "needPosted": "Publicado. Tu necesidad está en el tablero.",
