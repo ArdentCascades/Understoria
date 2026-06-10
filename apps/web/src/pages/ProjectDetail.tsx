@@ -644,26 +644,16 @@ function OrganizerControls({
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
 
+  // Draft / planning projects render their organizer CTA through the
+  // PlanningBanner above (see `planningBanner.title` / `.bodyOrganizer`
+  // / "Launch project" button at line ~580). This controls card has no
+  // additional actions to offer until the project is active, so we
+  // skip rendering it entirely rather than leaving an empty card with
+  // its own margin.
+  if (project.status === "planning") return null;
+
   return (
     <div className="card mb-4 flex flex-col gap-3">
-      {project.status === "planning" && (
-        <>
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={pending}
-            aria-busy={pending}
-            onClick={() =>
-              dispatch(() => launchProject(project.id, project.organizerKey))
-            }
-          >
-            {pending ? t("common.working") : t("projects.detail.launch")}
-          </button>
-          <p className="text-xs text-moss-500 dark:text-moss-400">
-            {t("projects.detail.launchHint")}
-          </p>
-        </>
-      )}
       {project.status === "active" && (
         <div className="flex flex-wrap gap-2">
           <button
