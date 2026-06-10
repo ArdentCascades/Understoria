@@ -1223,7 +1223,13 @@
       "footerNote": "Los saldos pueden ir en negativo — pedir nunca tiene barreras.",
       "surplus": "Has dado más de lo que has recibido últimamente. Gracias.",
       "neutral": "Tu saldo está justo en tu semilla inicial. Es un buen lugar para estar.",
-      "receiving": "Has estado recibiendo — para eso son los créditos de semilla. Pide lo que necesites."
+      "receiving": "Has estado recibiendo — para eso son los créditos de semilla. Pide lo que necesites.",
+      "pendingLine": "{{hours}} pendientes de la confirmación de la otra persona",
+      "awaitingYouLine": "{{hours}} esperando tu confirmación",
+      "pendingWhy": "Cómo funciona la confirmación",
+      "pendingExplainerAuto_one": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario confirma por ella en aproximadamente {{count}} día — nada está atascado.",
+      "pendingExplainerAuto_other": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario confirma por ella en aproximadamente {{count}} días — nada está atascado.",
+      "pendingExplainerManual": "El crédito se mueve cuando ambas partes confirman un intercambio. Nada está atascado — llega en el momento en que sucede la segunda confirmación."
     },
     "about": {
       "title": "Sobre ti",
@@ -1253,7 +1259,9 @@
       "flagShort": "Intercambio muy corto — surge para revisión comunitaria.",
       "flagReciprocal": "Intercambio recíproco repetido con la misma persona — surge para revisión comunitaria.",
       "flagDailyLimit": "Cerca del límite diario de intercambios.",
-      "flagDefault": "Señalado para revisión comunitaria."
+      "flagDefault": "Señalado para revisión comunitaria.",
+      "pendingBadge": "pendiente",
+      "awaitingYouBadge": "te espera"
     },
     "memberSwitcher": {
       "title": "Cambiar de integrante (modo desarrollo local)",

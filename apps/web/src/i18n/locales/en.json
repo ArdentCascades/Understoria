@@ -1223,7 +1223,13 @@
       "footerNote": "Balances can go negative — asking is never gated.",
       "surplus": "You've given more than you've received lately. Thank you.",
       "neutral": "Your balance is right at your starting seed. That's a fine place to be.",
-      "receiving": "You've been receiving — that's what seed credits are for. Ask for what you need."
+      "receiving": "You've been receiving — that's what seed credits are for. Ask for what you need.",
+      "pendingLine": "{{hours}} pending a partner's confirmation",
+      "awaitingYouLine": "{{hours}} waiting on your confirmation",
+      "pendingWhy": "How confirmation works",
+      "pendingExplainerAuto_one": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node confirms for them within about {{count}} day — nothing is stuck.",
+      "pendingExplainerAuto_other": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node confirms for them within about {{count}} days — nothing is stuck.",
+      "pendingExplainerManual": "Credit moves when both sides confirm an exchange. Nothing is stuck — it lands the moment the second confirmation happens."
     },
     "about": {
       "title": "About you",
@@ -1253,7 +1259,9 @@
       "flagShort": "Very short exchange — surfaced for community review.",
       "flagReciprocal": "Repeated reciprocal exchange with the same person — surfaced for community review.",
       "flagDailyLimit": "Near the daily exchange limit.",
-      "flagDefault": "Flagged for community review."
+      "flagDefault": "Flagged for community review.",
+      "pendingBadge": "pending",
+      "awaitingYouBadge": "awaiting you"
     },
     "memberSwitcher": {
       "title": "Switch member (local dev)",

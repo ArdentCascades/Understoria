@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, Member } from "@/types";
+import type { Exchange, Member, Post } from "@/types";
 
 /**
  * Credits are computed from the exchange log (event sourcing) plus each
@@ -65,4 +65,90 @@ export function transactionHistory(
       };
     })
     .sort((a, b) => b.exchange.completedAt - a.exchange.completedAt);
+}
+
+/**
+ * Credit "in motion" — display honesty for the Profile balance.
+ *
+ * An Exchange row only exists once BOTH parties have signed (or the
+ * node's system key auto-confirmed the helped side — see
+ * `docs/auto-confirm-key.md`). So `balanceFor` never counts a
+ * half-confirmed exchange; the waiting state lives on the Post:
+ * status `awaiting_confirmation` with one party's key in
+ * `confirmedBy`. This helper surfaces that state so the UI can
+ * explain why credit hasn't landed yet. It does NOT change when
+ * credit moves — that stays with the mutual-confirmation model.
+ */
+export interface PendingEntry {
+  postId: string;
+  /**
+   * Positive if credit will land for the member once both sides have
+   * confirmed; negative if it will move out. Same sign convention as
+   * `TransactionEntry.delta`.
+   */
+  delta: number;
+  counterparty: string;
+  /**
+   * Who still needs to confirm: `"you"` — the member themselves owe
+   * their confirmation (they can act); `"partner"` — the other party
+   * does (nothing for the member to do; the auto-confirm sweep
+   * eventually covers it where the community has enabled one).
+   */
+  owedBy: "you" | "partner";
+  category: Post["category"];
+  createdAt: number;
+}
+
+export interface PendingBalance {
+  /** Net signed hours across entries where the partner still owes a
+   *  confirmation. */
+  awaitingPartnerHours: number;
+  /** Net signed hours across entries where the member still owes
+   *  their own confirmation. */
+  awaitingYouHours: number;
+  /** Newest first, matching `transactionHistory` ordering. */
+  entries: PendingEntry[];
+}
+
+export function pendingBalanceFor(
+  memberKey: string,
+  posts: readonly Post[],
+): PendingBalance {
+  const entries: PendingEntry[] = [];
+  for (const post of posts) {
+    if (post.status !== "awaiting_confirmation") continue;
+    if (!post.claimedBy) continue;
+    // Counterparty would be ambiguous if a member could claim their
+    // own post; skip defensively rather than guess.
+    if (post.postedBy === post.claimedBy) continue;
+    if (post.postedBy !== memberKey && post.claimedBy !== memberKey) {
+      continue;
+    }
+    // Who helped whom — same rule confirmExchange applies when it
+    // eventually writes the Exchange row.
+    const helperKey = post.type === "NEED" ? post.claimedBy : post.postedBy;
+    const gaveHelp = helperKey === memberKey;
+    entries.push({
+      postId: post.id,
+      delta: gaveHelp ? post.estimatedHours : -post.estimatedHours,
+      counterparty:
+        post.postedBy === memberKey ? post.claimedBy : post.postedBy,
+      owedBy: post.confirmedBy.includes(memberKey) ? "partner" : "you",
+      category: post.category,
+      createdAt: post.createdAt,
+    });
+  }
+  entries.sort((a, b) => b.createdAt - a.createdAt);
+
+  let awaitingPartnerHours = 0;
+  let awaitingYouHours = 0;
+  for (const e of entries) {
+    if (e.owedBy === "partner") awaitingPartnerHours += e.delta;
+    else awaitingYouHours += e.delta;
+  }
+  return {
+    awaitingPartnerHours: Math.round(awaitingPartnerHours * 100) / 100,
+    awaitingYouHours: Math.round(awaitingYouHours * 100) / 100,
+    entries,
+  };
 }
