@@ -993,6 +993,70 @@ We are not trying to protect against:
   PR lands, no system key exists in the codebase and this entry
   tracks design intent only.
 
+- **`ProjectTask.orderIndex` and `dependencies` remain local;
+  widening would need a wire-surface review.**
+  *In design — predicate PR landing alongside
+  `docs/task-ordering-and-dependencies.md`.* The task-ordering
+  workstream adds a new local field `orderIndex: number` to
+  `ProjectTask` (Dexie v25, backfilled from `createdAt` rank ×
+  1000) and gives the existing `dependencies: string[]` field
+  honest runtime semantics — switching the claim path from a
+  hard throw at `apps/web/src/db/projects.ts:486-489` to a
+  soft block where the attention rail and the public
+  `needs_more_hands` chip suppress nudges while a task is
+  structurally blocked. The design doc is at
+  `docs/task-ordering-and-dependencies.md`; the per-PR rationale
+  for switching to soft block (alignment with
+  `solidarity-not-shame` and with the existing type doc-comment
+  at `packages/shared/src/types.ts:455-457`) is in §3.1 there.
+  **What does NOT change on the wire.** Tasks remain local.
+  The whole project / task subsystem is local-only today:
+  `apps/server/src/server.ts` registers no project or task
+  routes, and `apps/web/src/lib/federationSync.ts` exports no
+  project or task pull. `Project` and `ProjectTask` rows carry
+  no `signature` field. Adding `orderIndex` and rewriting the
+  `dependencies` semantics changes none of this. No outbox
+  enqueue. No peer-pull cursor. No server endpoint. No new
+  discriminator string in `OutboxRow.kind`. The federation
+  layer has zero knowledge of project tasks before this PR and
+  zero knowledge of project tasks after this PR.
+  **Why this matters for §7.** This file's existing precedent
+  at line 572 names the discipline explicitly: *"A future PR
+  may promote `recurringCadence` to a first-class field on
+  `ProjectTask` with its own threat-model entry covering the
+  projection surface."* The same precedent applies to every
+  `ProjectTask` field. Promoting any of `orderIndex`,
+  `dependencies`, or any other task field to a federated wire
+  surface requires its own §7 entry at promotion time —
+  enumerating the new wire fields, the adversary mapping (per
+  §3), the mitigations, and the residual risk — in the same
+  shape the `Event` entry above did for the community-events
+  workstream and the `CoOrganizerInvitation` entry did for the
+  co-organizer workstream. This PR preserves that boundary
+  explicitly: by landing the local-only design with no wire
+  changes, the discipline is intact, and a future project /
+  task federation PR knows exactly what it owes the
+  threat-model section. The flag is forward-pointing, not a
+  punt.
+  **No new adversary surface in this PR.** The §3 adversary
+  rows (employer / management, union-busting firms, stalker,
+  the rest) gain no new observable signal. The `orderIndex`
+  field never leaves the device. The `dependencies` field
+  semantics are runtime-local: the soft-block reversal changes
+  *what the local UI nudges about*, not *what bytes leave the
+  device*. The attention-rail and chip-suppression decisions
+  in `docs/task-ordering-and-dependencies.md` §6 are also pure
+  local computations over local state — they re-use
+  `canClaimTask` (which is already a pure function over the
+  local task list) and produce no new wire signal.
+  **Residual.** As long as tasks stay local, the residual for
+  this entry is just "any future federation PR must reopen
+  this entry." Said plainly: this entry's job is to be the
+  honest local-only acknowledgment so the boundary stays
+  visible. The day project / task federation lands is the day
+  this entry is superseded by a new entry that enumerates the
+  wire fields.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
