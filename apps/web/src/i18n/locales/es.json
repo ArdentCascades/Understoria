@@ -1,4 +1,12 @@
 {
+  "app": {
+    "update": {
+      "available": "Hay una nueva versión disponible.",
+      "reload": "Actualizar",
+      "later": "Más tarde",
+      "offlineReady": "Listo para funcionar sin conexión."
+    }
+  },
   "addDevice": {
     "title": "Vincular otro dispositivo",
     "subtitle": "Usa la misma identidad en un segundo dispositivo. La transferencia ocurre localmente — ningún servidor ve tu clave.",

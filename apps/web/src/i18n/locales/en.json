@@ -1,4 +1,12 @@
 {
+  "app": {
+    "update": {
+      "available": "A new version is available.",
+      "reload": "Refresh",
+      "later": "Later",
+      "offlineReady": "Ready to work offline."
+    }
+  },
   "addDevice": {
     "title": "Add another device",
     "subtitle": "Use the same identity on a second device. The transfer happens locally — no server sees your key.",
