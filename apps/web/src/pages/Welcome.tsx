@@ -9,13 +9,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useLiveQuery } from "dexie-react-hooks";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
+import { db } from "@/db/database";
 import { useApp } from "@/state/AppContext";
 import type { AvailabilityChip } from "@/types";
 
@@ -97,8 +99,37 @@ const STEPS: readonly Step[] = [
 export default function WelcomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentMember, refreshOnboarded } = useApp();
+  const { currentMember, refreshOnboarded, nodeConfig, nodeId } = useApp();
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Count members scoped to THIS node (a paired device that brought
+  // identities over from a peer node could have rows under a different
+  // nodeId — those don't satisfy the bootstrap on the LOCAL node).
+  // `undefined` while Dexie is still resolving lets us render a
+  // "loading" placeholder rather than flashing the invite-only landing
+  // and then flipping to profileSetup once the count comes back as 0.
+  //
+  // Race window: two visitors hitting /welcome simultaneously on a
+  // fresh `inviteOnly: true` node could BOTH satisfy the bootstrap
+  // check and onboard before either has written a row. The operator
+  // setup window is short and visitor traffic on a fresh node is low —
+  // acceptable risk. This is documented behavior, not a bug.
+  const localMemberCount = useLiveQuery<number | undefined>(async () => {
+    const all = await db.members.toArray();
+    return all.filter((m) => m.nodeId === nodeId).length;
+  }, [nodeId]);
+
+  // Tri-state: `true` allows onboarding, `false` shows the invite-only
+  // landing, `"loading"` defers the decision until Dexie resolves the
+  // count. Defaulting to "loading" (not `false`) when invite-only is on
+  // avoids flashing the landing on the bootstrap path; defaulting to
+  // `true` when invite-only is off is safe (open mode never gates).
+  const selfOnboardingAllowed: boolean | "loading" = useMemo(() => {
+    if (!nodeConfig.inviteOnly) return true;
+    if (localMemberCount === undefined) return "loading";
+    if (localMemberCount === 0) return true;
+    return false;
+  }, [nodeConfig.inviteOnly, localMemberCount]);
 
   // Profile-setup state lives here (not in the step component) so
   // typing it and stepping Back to a concept screen doesn't lose
@@ -203,7 +234,18 @@ export default function WelcomePage() {
     );
   }
 
-  // profileSetup
+  // profileSetup — but first, gate it on `inviteOnly`. Concept screens
+  // above always render; only the FINAL step is replaced when the gate
+  // is active. Visitors who navigated through the concept screens still
+  // get the explainer about what Understoria is — the right context for
+  // them to decide whether to seek an invite.
+  if (selfOnboardingAllowed === "loading") {
+    return <InviteOnlyLanding loading />;
+  }
+  if (selfOnboardingAllowed === false) {
+    return <InviteOnlyLanding />;
+  }
+
   return (
     <OnboardingScreen
       icon={step.icon}
@@ -277,5 +319,46 @@ export default function WelcomePage() {
       nextLabel={saving ? t("common.working") : t("welcome.start")}
       busy={saving}
     />
+  );
+}
+
+// The dead-end landing shown in place of the profileSetup step when
+// `nodeConfig.inviteOnly` is on and the bootstrap exception doesn't
+// fire (i.e. at least one member already exists on this node). No
+// action buttons by design — the intent is for the visitor to back out
+// of /welcome and follow an invite link if they have one. An invited
+// visitor never sees this page: they hit `/invite#<signed-token>`,
+// which is handled by InviteAccept.tsx and is unchanged by this gate.
+//
+// Concept screens (Steps 1-5) still render above this; only the FINAL
+// step is replaced, so a curious visitor still gets to read what
+// Understoria is.
+function InviteOnlyLanding({ loading = false }: { loading?: boolean }) {
+  const { t } = useTranslation();
+  // While the local member count is still resolving, render the same
+  // chrome but blank out the body so we never flash "invite-only" then
+  // pop into profileSetup if the count comes back as 0. Same posture
+  // as `useApp().ready` everywhere else in the app.
+  if (loading) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center gap-6 p-8 text-center">
+        <div aria-hidden className="text-5xl">{"\u{1F33F}"}</div>
+        <p className="text-sm text-moss-500 dark:text-moss-400">
+          {t("common.loading")}
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center gap-6 p-8 text-center">
+      <div aria-hidden className="text-5xl">{"\u{1F33F}"}</div>
+      <h1 className="text-2xl font-semibold">
+        {t("welcome.inviteOnly.title")}
+      </h1>
+      <div className="space-y-3 text-left text-sm text-moss-700 dark:text-moss-200">
+        <p>{t("welcome.inviteOnly.body1")}</p>
+        <p>{t("welcome.inviteOnly.body2")}</p>
+      </div>
+    </div>
   );
 }

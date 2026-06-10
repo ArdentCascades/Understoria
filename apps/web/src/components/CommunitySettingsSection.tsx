@@ -58,6 +58,7 @@ export function CommunitySettingsSection() {
         proposalMinAffirms: Math.round(draft.proposalMinAffirms),
         autoConfirmHours: Math.round(draft.autoConfirmHours),
         customMilestones: draft.customMilestones,
+        inviteOnly: draft.inviteOnly ?? false,
       });
       await refreshNodeConfig();
       setSavedAt(Date.now());
@@ -316,6 +317,29 @@ export function CommunitySettingsSection() {
             </span>
           </div>
         </Field>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="cfg-invite-only"
+            className="inline-flex items-start gap-2 text-sm font-medium"
+          >
+            <input
+              id="cfg-invite-only"
+              type="checkbox"
+              className="mt-1"
+              checked={draft.inviteOnly ?? false}
+              onChange={(e) =>
+                setDraft({ ...draft, inviteOnly: e.target.checked })
+              }
+            />
+            <span>
+              {t("profile.communitySettings.inviteOnly.label")}
+            </span>
+          </label>
+          <p className="pl-6 text-xs text-moss-600 dark:text-moss-300">
+            {t("profile.communitySettings.inviteOnly.helpText")}
+          </p>
+        </div>
 
         <CustomMilestonesPanel
           milestones={draft.customMilestones}

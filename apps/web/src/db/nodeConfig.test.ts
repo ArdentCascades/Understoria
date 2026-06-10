@@ -17,6 +17,7 @@ import {
   InvalidNodeConfigError,
   putNodeConfig,
   resetNodeConfig,
+  setInviteOnly,
 } from "./nodeConfig";
 
 const NODE = "node_config_test";
@@ -228,6 +229,65 @@ describe("putNodeConfig — customMilestones", () => {
       putNodeConfig(NODE, {
         ...DEFAULT_NODE_CONFIG,
         customMilestones: tooMany,
+      }),
+    ).rejects.toBeInstanceOf(InvalidNodeConfigError);
+  });
+});
+
+describe("inviteOnly", () => {
+  beforeEach(reset);
+
+  it("defaults to false when no row exists", async () => {
+    const config = await getNodeConfig(NODE);
+    expect(config.inviteOnly).toBe(false);
+  });
+
+  it("defaults to false when a row exists without the field (back-compat)", async () => {
+    // Older nodes wrote rows before `inviteOnly` existed. Their stored
+    // shape has no `inviteOnly` property — the read path must coerce
+    // missing to false so they keep their legacy open-onboarding
+    // behavior. Bypass the typed `putNodeConfig` to simulate the
+    // pre-field shape on disk.
+    await db.nodeConfig.put({
+      nodeId: NODE,
+      ...DEFAULT_NODE_CONFIG,
+      inviteOnly: undefined,
+    });
+    const config = await getNodeConfig(NODE);
+    expect(config.inviteOnly).toBe(false);
+  });
+
+  it("round-trips a true value through putNodeConfig", async () => {
+    const written = await putNodeConfig(NODE, {
+      ...DEFAULT_NODE_CONFIG,
+      inviteOnly: true,
+    });
+    expect(written.inviteOnly).toBe(true);
+    const readBack = await getNodeConfig(NODE);
+    expect(readBack.inviteOnly).toBe(true);
+  });
+
+  it("setInviteOnly flips the flag without disturbing other fields", async () => {
+    await putNodeConfig(NODE, {
+      ...DEFAULT_NODE_CONFIG,
+      dailyHelperLimit: 7,
+      shortExchangeHours: 0.5,
+    });
+    const flipped = await setInviteOnly(NODE, true);
+    expect(flipped.inviteOnly).toBe(true);
+    expect(flipped.dailyHelperLimit).toBe(7);
+    expect(flipped.shortExchangeHours).toBe(0.5);
+    const off = await setInviteOnly(NODE, false);
+    expect(off.inviteOnly).toBe(false);
+    expect(off.dailyHelperLimit).toBe(7);
+  });
+
+  it("rejects a non-boolean inviteOnly value", async () => {
+    await expect(
+      putNodeConfig(NODE, {
+        ...DEFAULT_NODE_CONFIG,
+        // @ts-expect-error — testing invalid input
+        inviteOnly: "yes",
       }),
     ).rejects.toBeInstanceOf(InvalidNodeConfigError);
   });

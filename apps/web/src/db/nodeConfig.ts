@@ -60,6 +60,9 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
     autoConfirmHours:
       row.autoConfirmHours ?? DEFAULT_NODE_CONFIG.autoConfirmHours,
     customMilestones: row.customMilestones ?? [],
+    // Defaults to false so pre-existing deployments behave exactly as
+    // before (open self-onboarding). Operators opt in from Settings.
+    inviteOnly: row.inviteOnly ?? false,
   };
 }
 
@@ -157,6 +160,16 @@ function validate(config: NodeConfig): NodeConfig {
       "Auto-confirm hours must be a whole number between 0 and 8760. 0 disables auto-confirm entirely.",
     );
   }
+  // `inviteOnly` is optional and only meaningful as a boolean. Coerce
+  // any non-boolean (undefined, garbage from a corrupted row) to
+  // `false` so the gate defaults to the legacy "open" behavior — same
+  // posture as the read path in `getNodeConfig`.
+  if (
+    config.inviteOnly !== undefined &&
+    typeof config.inviteOnly !== "boolean"
+  ) {
+    throw new InvalidNodeConfigError("inviteOnly must be a boolean.");
+  }
   const validatedCustom = validateCustomMilestones(config.customMilestones);
   return { ...config, customMilestones: validatedCustom };
 }
@@ -238,6 +251,25 @@ function validateCustomMilestones(input: unknown): Milestone[] {
     });
   }
   return out;
+}
+
+/**
+ * Toggles the `inviteOnly` flag for `nodeId`. Loads the current
+ * config (so unset fields stay defaulted), flips the flag, and writes
+ * it back via the normal `putNodeConfig` path so the same validation
+ * rules apply. Returns the persisted config.
+ *
+ * The CommunitySettingsSection form normally writes the full config in
+ * one go; this helper is here so callers that only need to flip the
+ * gate (e.g. future automation, tests) don't have to reconstruct the
+ * whole config object.
+ */
+export async function setInviteOnly(
+  nodeId: string,
+  inviteOnly: boolean,
+): Promise<NodeConfig> {
+  const current = await getNodeConfig(nodeId);
+  return putNodeConfig(nodeId, { ...current, inviteOnly });
 }
 
 /**

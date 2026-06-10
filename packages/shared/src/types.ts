@@ -238,6 +238,20 @@ export interface NodeConfig {
    *  `(type, threshold)` collision so a community can't accidentally
    *  shadow a shipped milestone. */
   customMilestones: Milestone[];
+  /**
+   * When true, the WelcomePage's self-onboarding flow is gated:
+   * - If the local members table is empty (fresh node), the first
+   *   visitor may complete onboarding without an invite — this is
+   *   the operator-bootstrap exception.
+   * - Once at least one member exists, the WelcomePage shows the
+   *   "invite-only" landing instead of the profileSetup step, and
+   *   the only path to onboard is /invite#<signed-token>.
+   *
+   * Defaults to false (legacy behavior — open self-onboarding) for
+   * backward compatibility on existing deployments. Operators
+   * enable it from Settings → Community.
+   */
+  inviteOnly?: boolean;
 }
 
 export const DEFAULT_NODE_CONFIG: NodeConfig = {
@@ -251,6 +265,7 @@ export const DEFAULT_NODE_CONFIG: NodeConfig = {
   proposalMinAffirms: 2,
   autoConfirmHours: 168,
   customMilestones: [],
+  inviteOnly: false,
 };
 
 /**
