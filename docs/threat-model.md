@@ -498,15 +498,16 @@ We are not trying to protect against:
   identity.
 
 - **Co-organizer role requires signed invitation + signed
-  acceptance (design only; not yet shipped).** Today the primary
-  organizer of a project can call `addCoOrganizer(projectId,
-  callerKey, newCoOrgKey)` in `apps/web/src/db/projects.ts` (~line
-  328) and write the new key directly into
-  `Project.coOrganizerKeys` — no consent step from the invitee. The
-  design in `docs/co-organizer-invitations.md` replaces that with
-  two new federated record types
-  (`CoOrganizerInvitation` signed by the inviter,
-  `CoOrganizerInvitationResponse` signed by the invitee) and makes
+  acceptance (shipped).** Before this design landed, the primary
+  organizer of a project could call the legacy `addCoOrganizer`
+  function in `apps/web/src/db/projects.ts` and write the new key
+  directly into `Project.coOrganizerKeys` — no consent step from
+  the invitee. The legacy function was removed in PR #218 once the
+  signed-invitation flow was fully shipped. The design in
+  `docs/co-organizer-invitations.md` replaces it with two
+  federated record types (`CoOrganizerInvitation` signed by the
+  inviter, `CoOrganizerInvitationResponse` signed by the invitee)
+  and makes
   the role effective only when an accepted response exists. This is
   a **values fix**, not a new mitigation — co-organizers were
   already a trust position with the same metadata visibility as a
