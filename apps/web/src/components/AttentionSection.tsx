@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { computeAttentionItems } from "@/lib/attention";
+import { ATTENTION_EMOJI } from "@/lib/attentionMeta";
 import {
   acknowledgeTaskCheckIn,
   logActivity,
@@ -37,6 +38,18 @@ function RowChevron() {
   return (
     <span aria-hidden="true" className="ml-auto text-moss-400">
       →
+    </span>
+  );
+}
+
+// Per-kind sighted-only at-a-glance cue. aria-hidden so screen
+// readers skip it — the row's title and hint already carry the
+// meaning standalone (WCAG 1.1.1). Mirrors the emoji-prefix pattern
+// CATEGORY_META establishes across Board / Calendar / Dashboard.
+function KindEmoji({ kind }: { kind: keyof typeof ATTENTION_EMOJI }) {
+  return (
+    <span aria-hidden="true" className="mr-1.5 inline-block">
+      {ATTENTION_EMOJI[kind]}
     </span>
   );
 }
@@ -180,6 +193,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
                       {t("attention.exchangeLine", {
                         name: item.counterpartyName,
                         title: item.postTitle,
@@ -203,6 +217,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
                       {t("attention.taskLine", {
                         name: item.completerName,
                         task: item.taskTitle,
@@ -227,6 +242,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
                       {item.postType === "NEED"
                         ? t("attention.postClaimed.needLine", {
                             name: item.claimerName,
@@ -255,6 +271,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
                       {t("attention.vouchReceived.line", {
                         name: item.voucherName,
                       })}
@@ -277,6 +294,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium text-amber-900 dark:text-amber-100">
+                      <KindEmoji kind={item.kind} />
                       {t("attention.projectDeadline.line", {
                         project: item.projectTitle,
                         days: item.daysRemaining,
@@ -300,6 +318,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium text-moss-900 dark:text-moss-100">
+                      <KindEmoji kind={item.kind} />
                       {t("attention.projectPaused.line", {
                         project: item.projectTitle,
                       })}
@@ -323,6 +342,7 @@ export function AttentionSection() {
               className="min-h-[44px] rounded-lg bg-amber-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-amber-950/40"
             >
               <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                <KindEmoji kind={item.kind} />
                 <Link
                   to={`/project/${item.projectId}`}
                   className="underline-offset-2 hover:underline focus-visible:underline"
@@ -370,6 +390,7 @@ export function AttentionSection() {
                 className="min-h-[44px] rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40"
               >
                 <p className="text-sm font-medium">
+                  <KindEmoji kind={item.kind} />
                   <Link
                     to={`/project/${item.projectId}`}
                     className="underline-offset-2 hover:underline focus-visible:underline"
@@ -491,6 +512,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
                       {t("events.attention.eventTodayLine", {
                         title: item.title,
                         location: item.location,
@@ -521,6 +543,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium text-amber-900 dark:text-amber-100">
+                      <KindEmoji kind={item.kind} />
                       {t("events.attention.eventCancelledLine", {
                         title: item.eventTitle,
                       })}
@@ -543,6 +566,7 @@ export function AttentionSection() {
                 >
                   <span className="flex-1">
                     <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
                       {t("events.attention.eventCapacityReachedLine", {
                         title: item.title,
                         capacity: item.capacity,
