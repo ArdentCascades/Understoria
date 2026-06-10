@@ -290,6 +290,69 @@ If you're already a co-organizer and need to step back, you can
 **leave the role yourself** from the project — you don't have to wait
 for the primary organizer to remove you.
 
+## 9a. Community events
+
+A **community event** is a thing happening at a specific time and
+place — a skillshare, a potluck, a work day, a meeting, a care
+circle. Events live on the calendar (see §4) alongside project
+deadlines and post expiries; their markers are colored by category.
+
+### Seeing what's coming up
+
+Open **Calendar** from the bottom nav. Events show up as colored
+chips on the day they're happening. An **Events only** filter at the
+top hides project deadlines and post expiries when you just want to
+see "what could I show up to?" If an event you've RSVP'd to is
+today, it appears on your attention rail when you open the app —
+pulled, never pushed. No browser notifications, no buzzing.
+
+### RSVP'ing
+
+Open an event to see the details. The **RSVP** control expands a
+small card explaining what your RSVP means before you commit:
+
+- If you RSVP **Going** or **Maybe**, the organizer sees your name
+  on the attendee list, and other members on this node who also
+  RSVP'd see your name. Non-attendees on this node see only the
+  count, not names. Members on peer nodes see neither names nor
+  counts.
+- If you RSVP **Not going** (or change to it later), you're
+  removed from the visible roster — no delta is shown to anyone.
+- Either way you'll get a heads-up on your attention rail if the
+  organizer cancels.
+
+Your RSVP **stays on this node**. It is not a signed record, it
+does not federate to peer nodes, and even on this device the
+organizer cannot see RSVPs you made from a different node. If you
+opened the PWA on another community's node, you'd have to RSVP
+there separately.
+
+### Creating an event
+
+From the Calendar page, tap the **Create event** affordance. The
+form asks for title, description, category, location (free text —
+"Community room, 3rd floor" not GPS coordinates), start time,
+optional end time, and an optional capacity cap. Before you sign,
+a comparison card spells out exactly what publishing an event
+commits you to: your public key is on the wire as the organizer,
+the time and location are visible on every peer node, the record
+is permanent (you can cancel, you can't edit or delete), and RSVPs
+stay on the node where they happened.
+
+If the time or location changes, the path is **cancel and
+re-create** — there are no edits in phase 1, because an edit
+silently moves the people who already said yes. The cancellation
+is itself a signed record so anyone who RSVP'd sees what changed
+and can decide again. Adding an optional reason to the cancellation
+is kind; it shows on the RSVP'd members' attention rails.
+
+If your local-node RSVP count hits the capacity you set, an
+attention item lets you know — the cap is a planning aid for you,
+not a "sold out" signal to other members.
+
+The full design and the values reasoning live in
+[`community-events.md`](./community-events.md).
+
 ## 10. The Dashboard
 
 Tap **Dashboard** at the bottom of the screen. This is the
@@ -399,9 +462,26 @@ The Profile page also has a **gear icon in the top right** that opens
 - **Community node** — optional mirror of your finalized exchanges
   to a community-wide ledger; off by default.
 - **Security** — turn on a passphrase for your identity (§14).
+- **Blocked contacts** — the list of members you've blocked and a
+  separate "Previously blocked" history. Each row is **obscured
+  by default** — generic avatar, the literal copy "Blocked
+  contact," and the block date — so a glance over your shoulder
+  doesn't read your block list. Tap a row to reveal the display
+  name and the truncated pubkey; tap again to re-obscure. From
+  each row you can flip the per-block hide-governance toggle,
+  edit your private note, or Unblock (with a confirm dialog).
+  A single **Clear unblocked history** button at the bottom of
+  the Previously-blocked subsection clears the whole list. A
+  fine-print note explains that blocks created on this device
+  won't automatically reach devices you paired *before* the
+  block — you'd need to re-pair the older device to bring the
+  new block state across. See §14a for when to block, when to
+  file a dispute, and when to do both.
 - **Data export** — download a JSON snapshot of your local data.
   Private keys are deliberately excluded; key backup is a separate
-  passphrase-wrapped flow.
+  passphrase-wrapped flow. Your block list and previously-blocked
+  history are also excluded — they're personal-relief data, not
+  part of the export shape.
 
 ## 12a. Using Understoria on more than one device
 

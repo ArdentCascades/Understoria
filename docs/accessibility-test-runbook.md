@@ -333,6 +333,144 @@ onboard — are prioritized; the rest confirm the page is navigable.
   announced; the recovery link is reachable and named; tone is
   calm, no dead end.
 
+### Bottom navigation (every viewport)
+
+- **Entry:** any route. The bottom nav is global.
+- **Steps:** `Tab` into the nav (or jump by landmark to the
+  `<nav>`), then arrow between tab buttons. Resize the viewport
+  from 320px to desktop; on iOS Safari, scroll a long page and
+  check that the nav stays pinned to the bottom edge through the
+  URL-bar resize. *(PR #185 made the labels always visible — they
+  no longer collapse to icon-only below `sm`. PR #201 pins the
+  nav to the viewport on mobile via `fixed` + an
+  `env(safe-area-inset-bottom)` pad so it clears the iPhone home
+  indicator.)*
+- **Expected:** every tab announces its name plus icon decoration
+  (`aria-hidden` on the glyph); the selected tab announces
+  selected; labels stay rem-based and scale with the text-size
+  preference; the home-indicator zone never sits under a tap
+  target.
+
+### Calendar (Calendar tab)
+
+- **Entry:** bottom nav "Calendar", route `/calendar`.
+- **Steps:** confirm the three view buttons (Agenda / Month /
+  Week) are a tab group — arrow between them. Reach the filter
+  row (category select, project select, "Mine" toggle, "Events
+  only" toggle). On Agenda, jump by heading through the day
+  groups; activate an event marker to open its detail. From the
+  page, reach the **Create event** FAB.
+- **Expected:** heading "Calendar"; the view tabs announce as a
+  tablist with the selected view marked selected; each filter
+  has a real label; day headings are real `<h2>`s; activating an
+  event marker lands on the event detail page with focus on its
+  heading; the FAB announces "Create event" and is reachable by
+  Tab.
+
+### EventDetail — RSVP (core flow)
+
+- **Entry:** activate an event marker from the Calendar or follow
+  a deep link. Route `/events/:id`.
+- **Steps:** read-all to hear the title, organizer, time,
+  location, category, capacity, and current RSVP count (or the
+  "not visible from this node" affordance on peer-node views).
+  `Tab` to the RSVP control; activating it expands the
+  informed-consent card. From inside the card pick Going,
+  Maybe, Not going, or Cancel. If the event is cancelled, the
+  cancellation banner announces ahead of the body content.
+- **Expected:** the event title is the page `<h1>`; the
+  organizer pubkey reads as a link to their MemberDetail; the
+  RSVP card's visibility-tier explanation is read linearly
+  before the four action buttons; switching to **Not going**
+  removes the visible name without announcing a delta; on a
+  cancelled event the banner ("Cancelled: …" plus the optional
+  reason) is the first thing announced.
+
+### Settings → Blocked contacts (tap-to-reveal)
+
+- **Entry:** the gear on Profile → Blocked contacts. Route
+  `/settings#blocked-contacts`.
+- **Steps:** read-all through the panel; each row in the active
+  block list and the Previously-blocked subsection renders
+  obscured by default. `Tab` to a row and activate it to reveal
+  the display name and truncated pubkey; activate again to
+  re-obscure. Operate the per-row `hideGovernance` toggle and the
+  Unblock button (which opens a ConfirmDialog). Reach the
+  **Clear unblocked history** button at the foot of the
+  Previously-blocked subsection.
+- **Expected:** each obscured row announces its accessible name
+  as "Blocked contact" plus the block date; tap-to-reveal swaps
+  the name + key into the row without losing focus; the
+  `hideGovernance` toggle announces on/off and changes governance
+  filtering live; Unblock fires a confirm dialog with focus
+  trapped inside; the clear-history button is named and gated
+  by its own confirm dialog. The cross-device fine-print note
+  at the foot of the panel is read inline.
+
+### MemberDetail — block confirmation (core flow)
+
+- **Entry:** open another member's profile (route
+  `/members/:key`) and reach the **Block contact** button.
+- **Steps:** activate Block contact; the comparison card opens
+  with focus trapped inside. Read-all to hear "What this means"
+  and "What this does NOT mean" rows; reach the **Also hide their
+  governance contributions from me** checkbox; reach the
+  optional private-note field; activate **Block contact** or
+  **Cancel**.
+- **Expected:** the card heading announces the target name; the
+  two comparison columns read as labeled regions; the checkbox
+  announces its current state; the note field is a labelled
+  `<textarea>`; confirming completes silently (the button
+  returns to the page state where the affordance is replaced
+  with **Unblock** — same self-explanatory shape as other silent
+  successes per §5).
+
+### Welcome — invite-only landing (when enabled)
+
+- **Entry:** open the PWA at `/welcome` on a node where
+  `nodeConfig.inviteOnly` is enabled and the local members table
+  is not empty. (PR #202.)
+- **Steps:** read-all through every concept slide, then arrive
+  at the final step. Confirm that the page is a deliberate
+  dead-end: no profile-setup form, no "Get started" button — a
+  short message explaining the node is invite-only and pointing
+  at the invite-redemption flow.
+- **Expected:** every concept slide is reachable and announced
+  the same way as the open-onboarding flow; the final step's
+  heading reads as the page-level landmark and the body explains
+  the gate plainly; tab order ends at the heading / body with no
+  invisible focusable controls; on a fresh node where the
+  members table is empty, the first-member bootstrap exception
+  fires and the standard profile-setup step renders instead
+  (this is the operator's own onboarding path).
+
+### AttentionSection — emoji prefixes per item kind
+
+- **Entry:** the AttentionSection rail on Board / Dashboard.
+- **Steps:** read-all through the rail. Each item kind now
+  renders a leading emoji glyph keyed to the kind (PR #200).
+- **Expected:** each glyph is wrapped in `aria-hidden="true"` so
+  the screen reader reads the row's accessible name (the
+  attention-item copy) without doubling up on the glyph; the
+  glyph is purely a sighted scanning aid. Confirm on every kind
+  that appears in your local data (project deadlines, post
+  expiries, exchanges awaiting confirm, the event_today /
+  event_cancelled / event_capacity_reached kinds).
+
+### Dashboard title at Large / Largest text size
+
+- **Entry:** Profile → Appearance → Text size → Largest, then
+  navigate to Dashboard.
+- **Steps:** the page title "Community dashboard" should wrap
+  cleanly at the larger sizes without clipping, scrolling
+  horizontally, or hiding behind the Sprig flanking ornament.
+  (PR #184 added the wrap path; before that the title held
+  `whitespace-nowrap` and overflowed on mobile at Largest.)
+- **Expected:** the `<h1>` wraps onto two lines without losing
+  the Sprig ornaments; the heading still announces as a single
+  `<h1>` to the screen reader; touch targets nearby remain at
+  the 52×52 floor that Largest enforces.
+
 ## 5. Known design-judgment items (do NOT flag these as bugs)
 
 These are intentional. Recording them as findings creates noise;

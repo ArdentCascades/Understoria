@@ -419,14 +419,35 @@ disputes; a launch posture also needs:
 - **Moderator coverage.** Disputes route to `/disputes` in-app and
   to whoever owns the moderator role per [`GOVERNANCE.md`](
   ../GOVERNANCE.md). Someone has to be ready to respond.
-- **Incident plan.** Six pre-written announcement templates ship in
-  [`incident-templates.md`](./incident-templates.md): system-key
+- **Incident plan.** Eight pre-written announcement templates ship
+  in [`incident-templates.md`](./incident-templates.md): system-key
   rotation, member-data breach, federation depeering, extended
-  outage, routine security update, and the annual transparency
-  report promised by the privacy policy. Read them once now so you
-  know what's in them; edit the voice if you need to before
-  launch; have them ready in your operator notes for the moment
-  you actually need one.
+  outage, routine security update, federated event spam from a
+  peer node, the annual transparency report promised by the
+  privacy policy, and the response to a community-role holder
+  facing mass conscientious objection (the local-only block
+  primitive, cross-referenced to `docs/blocking.md`). Read them
+  once now so you know what's in them; edit the voice if you need
+  to before launch; have them ready in your operator notes for
+  the moment you actually need one.
+
+- **Flip the node to invite-only after onboarding yourself.** On
+  a fresh deployment the welcome flow accepts the first member
+  who arrives at `/welcome` so you can set up your own account
+  without needing an invite from yourself — that's the
+  first-member bootstrap exception (PR #202). Once you're set
+  up, open **Settings → Community** and enable the invite-only
+  toggle (`nodeConfig.inviteOnly`). From that point on the
+  `/welcome` profile-setup step is replaced with an invite-only
+  landing — only members redeeming a signed single-use invite
+  via `/invite#<token>` can onboard. This closes the
+  walk-in-from-a-shared-event-URL path the operator surfaced.
+  Federation is unaffected — invite-only is a local node policy;
+  peer nodes neither enforce nor verify it. The
+  operator-visible i18n keys live under `welcome.inviteOnly.*`
+  in `apps/web/src/i18n/locales/en.json` and `es.json`. Cross-
+  reference: [`docs/blocking.md`](./blocking.md) for the related
+  member-level personal-relief surface.
 - **A second pair of eyes on the threat model.** [`threat-model.md`](
   ./threat-model.md) §7 lists the decisions we've made. If your
   launch context (jurisdiction, member demographics, threat surface)

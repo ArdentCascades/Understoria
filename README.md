@@ -36,6 +36,9 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more.
 - **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated.
 - **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
+- **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view. RSVPs stay on the node where they happen; nothing federates a member-attendance graph.
+- **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process. Blocks never federate, never aggregate, never signal anything to the blocked party.
+- **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
 - **Achievements as Roles** — Earn community roles like Connector, Bridge Builder, and Listener — recognition without ranking.
 - **End-to-End Encryption** — Key-pair identity, signed transactions, encrypted messaging. No email or phone number required.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
@@ -250,6 +253,9 @@ The phase view below is a public summary.
 - [x] End-to-end encrypted messaging
 - [x] Device pairing — same-identity transfer to a second device via local QR + one-time passphrase, with fingerprint verification and a paired-device inventory on Profile
 - [x] Community calendar — agenda / month / week view aggregating project deadlines, post expiries, and exchange density (5th bottom-nav tab)
+- [x] Community events — federated signed `Event` + `EventCancellation` records with local-only RSVP roster, comparison-card create flow, attention-rail integration, and an "Events only" calendar filter
+- [x] Member blocking — local-only personal-relief surface with informed-consent comparison card, per-block governance-visibility toggle, paired-device transfer, and tap-to-reveal Settings panel
+- [x] Invite-only mode — `nodeConfig.inviteOnly` flag with first-member bootstrap exception for fresh deployments
 
 ### Phase 3: Federation *(active)*
 - [x] Community node server with Docker deployment

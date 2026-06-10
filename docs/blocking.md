@@ -1,30 +1,42 @@
 # Understoria — Member blocking (design note)
 
-> **Status:** in design. This document is the values + data-model
-> argument for a local-only `Block` record. It is the predicate for
-> the implementation PRs sketched in §13. Pairs with the new
-> threat-model §7 entry "Member blocking is a local-only
-> personal-relief surface," the `docs/privacy-policy.md` §3 and §4
-> amendment, the `docs/incident-templates.md` §8 template, and the
-> short member-guide / organizer-guide subsections landing in the
-> same PR. Read alongside `docs/community-events.md` (which set the
-> precedent for the local-only-not-federated `EventRSVP` pattern that
-> this design extends) and `docs/co-organizer-invitations.md` (which
-> sets the discipline for "what a record commits the signer to"
-> comparison cards). The implementation lock that `"block"` is not a
-> federated record type — `OutboxRow.kind` rejecting `"block"` at the
-> type level — is named below and lands in PR B per §13.
+> **Status:** **shipped.** Design note + threat-model §7 entry +
+> privacy-policy §3 and §4 amendment + incident-templates §8 + the
+> short member-guide / organizer-guide subsections + the
+> `co-organizer-invitations.md` §10 cross-reference landed in PR
+> #193, with three settled open questions (cross-device propagation,
+> previouslyBlocked retention, tap-to-reveal block-list rendering)
+> folded in via PR #194. Implementation shipped across four PRs:
+> shared/local types and the `OutboxRow.kind` rejection lock in PR
+> #195; Dexie v24 + action helpers + soft-purge and data-export
+> integration in PR #196; MemberDetail block flow + Settings →
+> Blocked contacts panel + device-pairing transfer plumbing in PR
+> #197; consumer-surface wiring (`isMutuallyBlocked` into feed,
+> DMs, vouches, task comments, co-organizer invitations, event
+> RSVPs, attention rail, and nudges) in PR #198. PR D was
+> intentionally skipped — see §13. Pairs with the threat-model §7
+> entry "Member blocking is a local-only personal-relief surface."
+> Read alongside `docs/community-events.md` (which set the
+> precedent for the local-only-not-federated `EventRSVP` pattern
+> this design extends) and `docs/co-organizer-invitations.md`
+> (which sets the discipline for "what a record commits the signer
+> to" comparison cards). The implementation lock that `"block"` is
+> not a federated record type — `OutboxRow.kind` rejecting
+> `"block"` at the type level — landed in PR #195 per §13.
 
 ---
 
 ## §1 Status
 
-In design. No code lands in this PR. The doc + threat-model addendum
-+ privacy-policy amendment + incident template + member-guide and
-organizer-guide updates + the small `co-organizer-invitations.md`
-§10 cross-reference are the predicate — implementation PRs B, C, E,
-F (see §13) each cite this doc in their description and ride the
-same review cadence as the events and co-organizer workstreams.
+Shipped. The doc + threat-model addendum + privacy-policy amendment
++ incident template + member-guide and organizer-guide updates +
+the small `co-organizer-invitations.md` §10 cross-reference were
+the predicate (PR #193, with follow-up clarifications in PR #194);
+implementation PRs B, C, E, F shipped in sequence — see the per-PR
+notes in §13. PR D was deliberately skipped (no server work). The
+mute primitive, bulk block / import-block-list, taxonomized block
+reasons, and the already-paired-device sync gap remain out of scope
+per §10 and §14.1.
 
 **Block is self-help, not community judgment.** This needs to be
 said first because every other section depends on it. A block is
@@ -939,6 +951,7 @@ PR D slot is intentionally and loudly skipped so a future
 contributor doesn't add server-side block routes by accident.
 
 - **PR B — shared / local types + `OutboxRow.kind` lock.**
+  *Shipped in PR #195.*
   - `Block`, `PreviouslyBlocked` types in
     `packages/shared/src/types.ts` (or wherever local-only types
     live — `EventRSVP` precedent informs the location).
@@ -954,7 +967,7 @@ contributor doesn't add server-side block routes by accident.
     future contributor from accidentally enqueuing a Block.
   - Tiny PR. No Dexie, no UI.
 
-- **PR C — Dexie v23 → v24 + actions.**
+- **PR C — Dexie v23 → v24 + actions.** *Shipped in PR #196.*
   - Schema bump: `blocks` and `previouslyBlocked` tables in
     `apps/web/src/db`.
   - Action helpers:
@@ -1008,7 +1021,7 @@ contributor doesn't add server-side block routes by accident.
     add a PR D for "consistency" with the events workstream.
     There is no PR D here, deliberately.
 
-- **PR E — UI.**
+- **PR E — UI.** *Shipped in PR #197.*
   - Comparison-card block-creation flow on MemberDetail per §3,
     with the default and `hideGovernance: true` variants. The
     comparison-card create flow is NOT obscured — when the
@@ -1054,6 +1067,7 @@ contributor doesn't add server-side block routes by accident.
     toggle actions are pure Dexie writes.
 
 - **PR F — Consumer-surface wiring + integration tests.**
+  *Shipped in PR #198.*
   - Wire `isMutuallyBlocked` (and `hideGovernance` lookups) into
     every consumer surface per the §6 table:
     - Feed rendering (Posts, Projects, Events).

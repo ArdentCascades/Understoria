@@ -586,10 +586,12 @@ We are not trying to protect against:
   Saying this in the threat-model entry avoids overclaiming
   protection that the design does not provide.
 
-- **Federated `Event` records widen the public wire surface
-  (design only; not yet shipped).** The community-events design
-  (`docs/community-events.md`) introduces two new federated, signed
-  record types — `Event` and `EventCancellation` — to let members
+- **Federated `Event` records widen the public wire surface.**
+  *Shipped — `Event` and `EventCancellation` ride the federation
+  layer; `EventRSVP` stays local-only per the §4.2 carveout.*
+  The community-events design (`docs/community-events.md`)
+  introduces two new federated, signed record types — `Event` and
+  `EventCancellation` — to let members
   put skillshares, potlucks, work days, and meetings on the
   community calendar as first-class entries. This is a wire-surface
   widening over the existing calendar entry above: the calendar
@@ -693,13 +695,15 @@ We are not trying to protect against:
   to phase 2 as opt-in only (cited: `calendar.md` §10.5's
   "surveillance escape valve" framing, re-applied in
   `community-events.md` §11.5).
-  Until the implementation PRs land (PRs B–F per
-  `community-events.md` §13), no `Event` or `EventCancellation`
-  record type exists in the codebase and this entry tracks design
-  intent only.
+  Implementation shipped in PRs #186-#192 per
+  `community-events.md` §13; this entry describes the surface as
+  it now exists on the wire.
 
-- **Member blocking is a local-only personal-relief surface
-  (design only; not yet shipped).** The member-blocking design
+- **Member blocking is a local-only personal-relief surface.**
+  *Shipped — `Block` and `previouslyBlocked` are local Dexie rows;
+  the `"block"` discriminator is rejected at the `OutboxRow.kind`
+  type level per PR #195.*
+  The member-blocking design
   (`docs/blocking.md`) introduces a single Dexie record type —
   `Block` — that lets a member stop unwanted interaction with
   another specific member. The load-bearing decision is that
@@ -842,11 +846,10 @@ We are not trying to protect against:
   soft-purge / hard-purge) is unchanged by the tap-to-reveal
   affordance; tap-to-reveal narrows the over-the-shoulder
   surface, not the device-access surface.
-  Until the implementation PRs land (PRs B, C, E, F per
-  `blocking.md` §13 — PR D is intentionally skipped because
-  there is no server work for this primitive), no `Block`
-  record type exists in the codebase and this entry tracks
-  design intent only.
+  Implementation shipped in PRs #195 (types + outbox-kind lock),
+  #196 (Dexie v24 + actions), #197 (UI), and #198 (consumer-
+  surface wiring) per `blocking.md` §13; PR D was intentionally
+  skipped because there is no server work for this primitive.
 
 - **Device-level compromise is out of scope.** The camera-gate
   entry above protects against an *external* observer (CCTV,
