@@ -1063,7 +1063,7 @@ here: tasks don't federate, no server work, no PR D.
 
 - **PR F — Suppress `needs_more_hands` chip for
   structurally-blocked tasks. Update `taskCheckInState`
-  caller signature.**
+  caller signature.** Delivered in PR (this PR).
   - Extend `apps/web/src/lib/taskCheckInState.ts` to take an
     optional `isStructurallyBlocked` parameter (or analogous
     shape), with the guard at the top per §6.2.

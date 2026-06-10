@@ -57,26 +57,28 @@ describe("taskCheckInState", () => {
       "completed",
       "blocked",
     ] as const) {
-      expect(taskCheckInState(task({ status }), CONFIG, NOW)).toBe("fresh");
+      expect(taskCheckInState(task({ status }), CONFIG, [], NOW)).toBe(
+        "fresh",
+      );
     }
   });
 
   it("returns 'fresh' when claimedAt is null (legacy row)", () => {
-    expect(taskCheckInState(task({ claimedAt: null }), CONFIG, NOW)).toBe(
-      "fresh",
-    );
+    expect(
+      taskCheckInState(task({ claimedAt: null }), CONFIG, [], NOW),
+    ).toBe("fresh");
   });
 
   it("returns 'fresh' inside the check-in window", () => {
-    expect(taskCheckInState(task({ claimedAt: NOW - 3 * DAY }), CONFIG, NOW)).toBe(
-      "fresh",
-    );
+    expect(
+      taskCheckInState(task({ claimedAt: NOW - 3 * DAY }), CONFIG, [], NOW),
+    ).toBe("fresh");
   });
 
   it("returns 'check_in_due' between check-in and needs-help windows", () => {
-    expect(taskCheckInState(task({ claimedAt: NOW - 8 * DAY }), CONFIG, NOW)).toBe(
-      "check_in_due",
-    );
+    expect(
+      taskCheckInState(task({ claimedAt: NOW - 8 * DAY }), CONFIG, [], NOW),
+    ).toBe("check_in_due");
   });
 
   it("acknowledging within the window resets the private clock", () => {
@@ -87,6 +89,7 @@ describe("taskCheckInState", () => {
           checkInAcknowledgedAt: NOW - 1 * DAY,
         }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("fresh");
@@ -100,6 +103,7 @@ describe("taskCheckInState", () => {
           checkInAcknowledgedAt: null,
         }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("needs_more_hands");
@@ -117,6 +121,7 @@ describe("taskCheckInState", () => {
           checkInAcknowledgedAt: NOW - 1 * DAY,
         }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("fresh");
@@ -132,6 +137,7 @@ describe("taskCheckInState", () => {
           checkInAcknowledgedAt: NOW - 10 * DAY,
         }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("needs_more_hands");
@@ -148,6 +154,7 @@ describe("taskCheckInState", () => {
           checkInAcknowledgedAt: NOW - 8 * DAY,
         }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("check_in_due");
@@ -155,7 +162,7 @@ describe("taskCheckInState", () => {
 
   it("treats the check-in boundary as inclusive (>= triggers)", () => {
     expect(
-      taskCheckInState(task({ claimedAt: NOW - 7 * DAY }), CONFIG, NOW),
+      taskCheckInState(task({ claimedAt: NOW - 7 * DAY }), CONFIG, [], NOW),
     ).toBe("check_in_due");
   });
 
@@ -170,6 +177,7 @@ describe("taskCheckInState", () => {
           checkInAcknowledgedAt: NOW - 1 * DAY,
         }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("fresh");
@@ -184,6 +192,7 @@ describe("taskCheckInState", () => {
       taskCheckInState(
         task({ claimedAt: NOW - 16 * DAY, checkInAcknowledgedAt: null }),
         CONFIG,
+        [],
         NOW,
       ),
     ).toBe("needs_more_hands");
@@ -194,9 +203,91 @@ describe("taskCheckInState", () => {
       taskCheckInState(
         task({ claimedAt: NOW - 5 * DAY }),
         { taskCheckInDays: 3, taskNeedsHelpDays: 7, taskCheckInGraceDays: 1 },
+        [],
         NOW,
       ),
     ).toBe("check_in_due");
+  });
+});
+
+describe("taskCheckInState dependency suppression", () => {
+  // The chip-shaming-on-structurally-blocked-tasks gap (PR F).
+  // The downstream task ("t1") is past the public-chip floor with
+  // no ack, so the existing transition logic would normally
+  // return "needs_more_hands". A still-incomplete upstream must
+  // suppress that, returning "fresh" (the no-chip state).
+  //
+  // Note: PR C's setTaskDependencies enforces in-project membership
+  // for dependency IDs, so a dep on a task in a different project
+  // is invalid by construction — no cross-project test needed.
+
+  function downstream(overrides: Partial<ProjectTask> = {}): ProjectTask {
+    return task({
+      id: "downstream",
+      claimedAt: NOW - 20 * DAY,
+      checkInAcknowledgedAt: null,
+      dependencies: ["upstream"],
+      ...overrides,
+    });
+  }
+
+  function upstream(
+    status: ProjectTask["status"],
+    overrides: Partial<ProjectTask> = {},
+  ): ProjectTask {
+    return task({
+      id: "upstream",
+      title: "Upstream",
+      assignedTo: status === "open" ? null : "bob",
+      status,
+      claimedAt: status === "open" ? null : NOW - 25 * DAY,
+      orderIndex: -1000,
+      ...overrides,
+    });
+  }
+
+  it("suppresses the chip when the upstream dep is still open", () => {
+    const t = downstream();
+    const up = upstream("open");
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe("fresh");
+  });
+
+  it("suppresses the chip when the upstream dep is claimed (in progress)", () => {
+    const t = downstream();
+    const up = upstream("claimed");
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe("fresh");
+  });
+
+  it("suppresses the chip when the upstream dep is awaiting_confirmation", () => {
+    // Claimer signed off; organizer hasn't confirmed. Still not
+    // "completed" — downstream is structurally not yet claimable.
+    const t = downstream();
+    const up = upstream("awaiting_confirmation");
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe("fresh");
+  });
+
+  it("surfaces the chip normally when all deps are completed", () => {
+    const t = downstream();
+    const up = upstream("completed", {
+      completedAt: NOW - 5 * DAY,
+      completedBy: "bob",
+    });
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe(
+      "needs_more_hands",
+    );
+  });
+
+  it("behaves identically to pre-PR-F when the task has no dependencies", () => {
+    // Pure regression: a stuck claim with `dependencies: []` must
+    // still surface the public chip past the floor. The
+    // structurally-blocked guard must not introduce a false
+    // suppression for the empty case.
+    const t = task({
+      claimedAt: NOW - 20 * DAY,
+      checkInAcknowledgedAt: null,
+      dependencies: [],
+    });
+    expect(taskCheckInState(t, CONFIG, [t], NOW)).toBe("needs_more_hands");
   });
 });
 
