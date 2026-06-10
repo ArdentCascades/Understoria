@@ -161,6 +161,25 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         ],
       },
       {
+        id: "install-app",
+        question: "Can I install Understoria like an app?",
+        answer: [
+          "Yes. Understoria is a web app you can put on your home " +
+            "screen like any other app: you get an icon, it opens " +
+            "full-screen without the browser bars, it starts faster, " +
+            "and it keeps working offline.",
+          "On iPhone or iPad, open Understoria in Safari, tap the " +
+            "Share button, and choose 'Add to Home Screen.'",
+          "On Android, open it in Chrome, tap the menu (⋮) in the " +
+            "top corner, and choose 'Add to Home screen' or 'Install " +
+            "app.'",
+          "On a desktop browser, look for the install icon at the " +
+            "right end of the address bar.",
+          "Installing changes nothing about your data — everything " +
+            "still lives on your device, exactly as before.",
+        ],
+      },
+      {
         id: "new-device",
         question: "How do I move to a new device?",
         answer: [
