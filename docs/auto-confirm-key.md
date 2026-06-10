@@ -1,11 +1,18 @@
 # Understoria — Node System Key for Auto-Confirmation (design note)
 
-> **Status:** design note. This document is the predicate for the
-> implementation PR; no code in this branch. Pairs with the threat-model
-> §7 entry "Node system key for auto-confirmation" and the existing
-> safeguard-thresholds entry. Read alongside `GOVERNANCE.md` §3
-> (Node Operator role) and `docs/threat-model.md` §6 (no central
-> ledger; signed-by-both-parties model).
+> **Status:** **shipped.** Design note + threat-model §7 entry
+> landed in PR #150; the implementation (`apps/server/src/systemSigner.ts`,
+> `NODE_SYSTEM_SECRET_KEY` env config, the 7-day sweep, the
+> `scripts/generate-system-key.mjs` keygen, and the `/api/config`
+> rotation-history advertisement) shipped in PR #152. Operator
+> instructions for generating, rotating, and backing up the key
+> live in [`deploy-linode.md`](./deploy-linode.md) §6 and §9; the
+> rotation incident template is `incident-templates.md` §1. Pairs
+> with the threat-model §7 entry "Node system key for auto-
+> confirmation" and the existing safeguard-thresholds entry. Read
+> alongside `GOVERNANCE.md` §3 (Node Operator role) and
+> `docs/threat-model.md` §6 (no central ledger; signed-by-both-
+> parties model).
 
 ---
 

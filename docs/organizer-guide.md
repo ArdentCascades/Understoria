@@ -252,6 +252,60 @@ not a concession of fault; it can simply be a recognition that
 the community would benefit from a fresh holder. That choice is
 yours alone.
 
+## 7b. Organizing community events
+
+Events — skillshares, potlucks, work days, meetings, care circles —
+are the lightest organizing affordance in the app. They sit
+alongside posts and projects, with the same public-wire posture but
+a tighter coordination shape: a single signed record commits you,
+as the organizer, to a time and a location string visible on every
+peer node.
+
+A few things to be deliberate about when you create one:
+
+- **Read the comparison card.** Before you sign, the create-event
+  surface enumerates what your signature publishes — your
+  identity as organizer, the time and location as you typed
+  them, and the fact that the record is permanent (cancellable,
+  not editable, not deletable). The card also names what an
+  event does NOT mean: there is no "members-only" event
+  primitive in phase 1; if it shouldn't be on a public wire,
+  coordinate via DM or an Offer post instead.
+
+- **Location is free text, not a GPS pin.** You decide how
+  specific to be. "Community room, 3rd floor" is the intended
+  granularity for routine events. For higher-risk gatherings,
+  "address sent on confirmation" is a legitimate choice — the
+  field exists so the organizer can decide what level of
+  specificity is right for the situation. A pattern of
+  repeated events at the same venue does leak that venue, even
+  with free-text — `community-events.md` §12 names this honestly
+  and recommends rotating venue strings or using a generic
+  locator for high-risk events.
+
+- **Capacity is a planning aid for you.** If you set a cap and
+  your local-node RSVP count hits it, you'll see an attention
+  item — supplies, space, whatever the cap is for. Members on
+  peer nodes don't see the cap as a "sold out" signal; their
+  view shows "RSVPs not visible from this node" with an
+  affordance to RSVP on your node.
+
+- **RSVPs are per-node.** A member on a peer node who wants to
+  RSVP has to open your node's PWA to do so. Their pubkey is
+  portable (they bring their own keypair); their local RSVP
+  state lives where they signed it.
+
+- **If something changes, cancel and re-create.** Phase 1 has no
+  edit affordance — an edit would silently move the people who
+  already said yes. The cancellation is a signed record, the
+  optional reason text reaches the RSVP'd members' attention
+  rails, and the re-created event is its own consent moment.
+
+The full design and the values reasoning live in
+[`community-events.md`](community-events.md); the threat-model
+entry covering the wire surface is in `threat-model.md` §7
+("Federated `Event` records widen the public wire surface").
+
 ## 8. Bringing in the other workstreams
 
 Things the app doesn't do (yet) that your organizing might need:

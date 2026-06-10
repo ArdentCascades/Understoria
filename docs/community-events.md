@@ -1,12 +1,19 @@
 # Understoria — Community Events (design note)
 
-> **Status:** in design. This document is the values + data-model
-> argument for a federated `Event` record type. It is the predicate
-> for the implementation PRs sketched in §13. Pairs with the new
-> threat-model §7 entry "Federated `Event` records widen the public
-> wire surface" and the `docs/privacy-policy.md` §4 / §6 amendment
-> landing in the same PR. Read alongside `docs/calendar.md`
-> (which deferred this record type in its §9) and
+> **Status:** **shipped.** Design note + threat-model §7 entry +
+> privacy-policy §4 / §6 amendment + incident template + calendar.md
+> §9 update landed in PR #186. Implementation shipped across five
+> PRs: shared types + canonical payloads + signature verification
+> (PR #187, with the wire-contract alignment fix in the same PR);
+> Dexie v22 + actions + federation pull plumbing (PR #188), with a
+> cursor-key naming refactor in PR #189; server-side ingestion +
+> peer pull (PR #190); event create form + detail page + RSVP
+> control (PR #191); calendar + attention-rail integration (PR
+> #192). Pairs with the threat-model §7 entry "Federated `Event`
+> records widen the public wire surface" and the
+> `docs/privacy-policy.md` §4 / §6 amendment that landed alongside
+> the design note. Read alongside `docs/calendar.md` (whose §9
+> deferred-trigger this work fired) and
 > `docs/co-organizer-invitations.md` (which sets the discipline for
 > "what a signed record commits the signer to" comparison cards and
 > for canonical-payload field-order pinning).
@@ -15,11 +22,12 @@
 
 ## §1 Status
 
-In design. No code lands in this PR. The doc + threat-model addendum
-+ privacy-policy amendment + incident template + calendar.md §9
-update are the predicate — implementation PRs B through F (see §13)
-each cite this doc in their description and ride the same review
-cadence as the co-organizer and calendar workstreams.
+Shipped. The doc + threat-model addendum + privacy-policy amendment
++ incident template + calendar.md §9 update were the predicate
+(PR #186); implementation PRs B through F (see §13) shipped in
+sequence — see the per-PR notes in §13. The `templateId` forward
+slot, phase-2 templates, opt-in iCal export, and browser push
+reminders remain deferred per §10 / §11.
 
 ## §2 Why now
 
@@ -727,7 +735,10 @@ Five PRs after this design doc lands. Sequencing matters: each PR
 ships a layer the next builds on, same as the co-organizer
 workstream.
 
-- **PR B — shared types + crypto.**
+- **PR B — shared types + crypto.** *Shipped in PR #187.* The
+  same PR also folded in a wire-contract alignment fix bringing the
+  field names into line with the repo's existing canonical-payload
+  conventions before any other layer started reading the shape.
   - `EventPayload`, `Event`, `EventCancellationPayload`,
     `EventCancellation`, `EventRSVP` in
     `packages/shared/src/types.ts`. **Code comment on `EventRSVP`**
@@ -743,7 +754,9 @@ workstream.
     phase 1 / cancellation-by-non-organizer rejection.
   - No Dexie, no UI, no server.
 
-- **PR C — Dexie + actions.**
+- **PR C — Dexie + actions.** *Shipped in PR #188; cursor-key
+  naming was aligned with the repo convention in the follow-up
+  PR #189.*
   - Schema bump: `events`, `eventCancellations`, `eventRsvps`
     tables in `apps/web/src/db`.
   - `createEvent`, `cancelEvent`, `setEventRSVP` action functions.
@@ -773,7 +786,7 @@ workstream.
   `apps/web/src/lib/outbox.ts`; there is deliberately no
   `enqueueEventRsvp`.
 
-- **PR D — server federation.**
+- **PR D — server federation.** *Shipped in PR #190.*
   - New routes mirroring `routes/vouches.ts`:
     `routes/events.ts` (POST + GET ?since=),
     `routes/eventCancellations.ts` (POST + GET ?since=).
@@ -789,7 +802,8 @@ workstream.
   - **Negative test**: a request to a hypothetical
     `POST /event-rsvps` returns 404; the route does not exist.
 
-- **PR E — UI: create / cancel / RSVP / detail.**
+- **PR E — UI: create / cancel / RSVP / detail.** *Shipped in
+  PR #191.*
   - Create-event surface with the §3 comparison card.
   - Event detail page with the §6 tiered visibility rendering.
   - RSVP control with the §6.2 informed-consent expansion card.
@@ -798,7 +812,7 @@ workstream.
     visible from this node" affordance.
   - i18n keys in `en.json` and `es.json`.
 
-- **PR F — Calendar + attention.**
+- **PR F — Calendar + attention.** *Shipped in PR #192.*
   - Event marker rendering on `CalendarAgenda`, `CalendarMonth`,
     `CalendarWeek` per §9.
   - "Events only" filter chip per §9.

@@ -10,7 +10,112 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
-- **`/invites` management page.** The historical list of "Invites
+- **Community events (PRs #186–#192).** A federated `Event` +
+  `EventCancellation` record family for skillshares, potlucks,
+  work days, meetings, and care circles. The local `EventRSVP`
+  table never enters the outbox — RSVPs stay on the node where
+  they happen, closing the federated-attendance-graph surveillance
+  vector the design names. Create-event surface uses the
+  comparison-card discipline that the co-organizer flow established;
+  RSVP control expands an informed-consent card naming the
+  visibility tiers before submission. Location is free text (no
+  GPS pin); the soft `capacity` field surfaces an
+  `event_capacity_reached` attention item to the organizer when
+  the local RSVP count crosses the threshold. Calendar integration
+  gains an "Events only" filter chip; three new attention-rail
+  kinds (`event_today`, `event_cancelled`, `event_capacity_reached`)
+  are pull-only per `no-notifications`. Threat-model §7 entry,
+  privacy-policy §4 / §6 amendment, and an incident template for
+  federated event spam from a peer node landed alongside the
+  design in PR #186. Implementation: shared types + canonical
+  payloads + signature verification (PR #187, with wire-contract
+  alignment); Dexie v22 + actions + federation pull (PR #188, with
+  cursor-key naming alignment in PR #189); server-side ingestion
+  + peer pull (PR #190); event create / detail / RSVP / cancel UI
+  (PR #191); calendar marker + attention rail wiring (PR #192).
+  Full design in [`docs/community-events.md`](./docs/community-events.md).
+- **Member blocking (PRs #193–#198).** A local-only personal-relief
+  surface, parallel to and independent of the community dispute
+  process. A single `Block` Dexie row records `blockerKey`,
+  `blockedKey`, `createdAt`, `hideGovernance: boolean`, and an
+  optional private `note`. Blocks never federate, never aggregate
+  to any community-facing surface, never signal anything to the
+  blocked party — the discriminator `"block"` is rejected at the
+  `OutboxRow.kind` type level with `@ts-expect-error`. Generic-error
+  discipline holds across every consumer surface: a blocked-from
+  claim, RSVP, vouch issuance, or co-organizer invitation returns
+  the same generic "not available" error a withdrawn-post would
+  return, so the blocked party cannot fingerprint which not-found
+  errors are blocks. Settings → Blocked contacts renders each row
+  obscured by default (generic avatar, "Blocked contact," block
+  date); tap-to-reveal swaps in the display name and truncated
+  pubkey for privacy-from-overshoulder. Soft-purge clears both
+  `blocks` and `previouslyBlocked`; data export excludes them;
+  the device-pairing transfer payload carries block state to
+  newly-paired devices (already-paired devices need a manual
+  re-pair). Design + threat-model §7 entry + privacy-policy §3 /
+  §4 amendment + incident-templates §8 + member-guide §14a +
+  organizer-guide §7a + the `co-organizer-invitations.md` §10
+  cross-reference landed in PR #193, with three settled open
+  questions folded in via PR #194. Implementation: shared/local
+  types + outbox-kind lock (PR #195); Dexie v24 + actions
+  (PR #196); MemberDetail block flow + Settings panel + paired-
+  device sync (PR #197); consumer-surface wiring (PR #198). Full
+  design in [`docs/blocking.md`](./docs/blocking.md).
+- **Invite-only mode (PR #202).** A new `nodeConfig.inviteOnly`
+  flag. When enabled, the `/welcome` profile-setup step is
+  replaced with an invite-only landing component; concept slides
+  still render so visitors understand what they were invited to.
+  Closes the walk-in-from-a-shared-event-URL path the operator
+  surfaced. The existing signed-invite redemption flow at
+  `/invite#<token>` stays the only way in once the gate is
+  active. First-member bootstrap exception: if the local
+  `members` table is empty, the gate is bypassed so the operator
+  can set up a fresh node without needing an invite from
+  themselves. Defaults to false for backward compatibility;
+  operators flip it from Settings → Community. Federation
+  unaffected — invite-only is a local node policy; peer nodes
+  neither enforce nor verify it. The deploy-runbook
+  recommendation to flip the toggle after onboarding yourself
+  is in [`docs/deploy-linode.md`](./docs/deploy-linode.md)
+  "Before going public."
+- **Bottom-nav mobile labels at every viewport (PR #185).** The
+  bottom-nav previously collapsed labels to icon-only below `sm`,
+  trading legibility for the 44×44 touch floor. Labels now
+  render at every viewport in a rem-based small size so members
+  can identify each tab without memorizing the iconography.
+- **AttentionSection emoji prefixes (PR #200).** Each attention-
+  rail item kind gains a leading emoji glyph keyed to the kind,
+  rendered `aria-hidden="true"` so the screen-reader name is
+  unchanged. Sighted scanning aid only.
+
+### Changed
+- **Bottom-nav pinned to viewport on mobile + iOS safe-area
+  inset (PR #201).** `BottomNav` switched from `sticky bottom-0`
+  (which sticks to the bottom of the containing block) to
+  `fixed inset-x-0 bottom-0` on `<lg`, with
+  `pb-[env(safe-area-inset-bottom)]` so the nav clears the
+  iPhone home-indicator zone. Desktop (`lg+`) preserves the
+  current `sticky` container-width look. `main`'s bottom padding
+  becomes `pb-[calc(5rem+env(safe-area-inset-bottom))]` to
+  compensate. Closes the operator-reported "nav detaches on
+  long scroll, especially iOS Safari URL-bar resize" bug.
+- **Board mobile DOM order matches visual order (PR #199, WCAG
+  2.4.3).** The Board mobile layout previously used `order-*`
+  utilities to position the filter rails visually after the
+  post list while keeping them earlier in DOM order — which
+  broke focus order and reading order for screen reader and
+  keyboard users. The filter rails are now extracted to their
+  own components and placed in DOM-order matching their visual
+  position, with no `order-*` utility on the mobile path.
+- **Dashboard title wraps at Large / Largest text size (PR #184).**
+  The "Community dashboard" `<h1>` previously held
+  `whitespace-nowrap` and overflowed at the Largest text-size
+  preference on mobile, hiding behind the Sprig flanking
+  ornaments. The title now wraps cleanly across two lines at
+  the larger sizes without losing the Sprig framing.
+
+
   you've issued" moves from inside the Profile InvitesSection card to
   a dedicated `/invites` route reachable via a "Manage all →" link
   from a compact summary line ("3 open · 2 redeemed · 1 expired").
