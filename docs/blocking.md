@@ -362,7 +362,7 @@ choice.
 
 | Surface | Semantic | Notes |
 | --- | --- | --- |
-| DMs / Messages | c | bidirectional gate; sender side stores locally but recipient never renders (silent fail matches the existing no-delivery-receipt model) |
+| DMs / Messages | c | bidirectional gate; sender side stores locally but recipient never renders (silent fail matches the existing no-delivery-receipt model). The block ACTION can also be INITIATED from the conversation view via the header menu (see §13) — distinct from the GATE behavior on this row. |
 | Posts (feed visibility) | a | hide blocked party's posts from blocker's feed; their posts still federate to peers |
 | Posts (claiming) | c | rejects claim attempts in either direction with a GENERIC "Post no longer available" — never block-specific copy |
 | Vouches (issuing) | c | cannot issue in either direction; existing signed vouches are immutable and stay |
@@ -1065,6 +1065,21 @@ contributor doesn't add server-side block routes by accident.
     `follows-not-blocked` principle (see §9 below — UI naming).
   - No federation, no outbox enqueue. The block / unblock /
     toggle actions are pure Dexie writes.
+  - **Block-affordance placement: MemberDetail + Settings only as
+    of PR E.** Deliberately NOT on PostCard, EventCard,
+    ProjectCard, or TaskComment — see §11.6 for why feed-card
+    placement is rejected. As of a follow-up to PR F, the Block
+    affordance also surfaces in the **conversation header menu**
+    on the DM thread view (a kebab/"More actions" popover with a
+    single "Block contact" / "Unblock <name>" item, gated on
+    `isBlocked`). A 1:1 DM thread is contextual to a specific
+    person, not a ranked feed surface, so it does not cut against
+    `solidarity-not-shame` the way a feed-card placement would.
+    The MemberDetail Block button is retained for members the
+    operator hasn't yet messaged. i18n keys
+    `messages.conversation.headerMenuLabel`,
+    `messages.conversation.headerMenuBlock`,
+    `messages.conversation.headerMenuUnblock`.
 
 - **PR F — Consumer-surface wiring + integration tests.**
   *Shipped in PR #198.*

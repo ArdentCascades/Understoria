@@ -415,6 +415,11 @@
     "lockedError": "Unlock your session to send messages.",
     "sendError": "Message could not be sent. Try again.",
     "conversationWith": "{{name}}",
+    "conversation": {
+      "headerMenuLabel": "More actions",
+      "headerMenuBlock": "Block contact",
+      "headerMenuUnblock": "Unblock {{name}}"
+    },
     "noReadReceipts": "Messages are private. No read receipts.",
     "search": {
       "placeholder": "Search your messages",
@@ -1717,7 +1722,7 @@
       "sectionTitle": "Blocked contacts",
       "sectionIntro": "Your personal block list. This stays on this device — it never federates, and no other member can see it.",
       "activeHeading": "Active blocks",
-      "activeEmpty": "You haven't blocked anyone. To block someone, go to their member page and tap Block contact.",
+      "activeEmpty": "You haven't blocked anyone yet. To block someone, open a conversation with them and tap the menu in the conversation header.",
       "historyHeading": "Previously blocked",
       "historyEmpty": "No history yet. When you unblock someone, they'll appear here as a memory aid.",
       "obscuredRowLabel": "Blocked contact",
