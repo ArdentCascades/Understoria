@@ -1,8 +1,9 @@
 # Understoria — Task ordering + dependencies (design note)
 
 > **Status:** **in design.** This doc + a threat-model §7 addendum +
-> a one-line cross-reference in `docs/co-organizer-invitations.md`
-> §1 land together as the predicate PR. Implementation breaks out
+> a dedicated "What co-organizers can do" section in
+> `docs/co-organizer-invitations.md` §4 land together as the
+> predicate PR. Implementation breaks out
 > across five PRs (B, C, E, F — D intentionally skipped, see §12).
 > Pairs with the threat-model §7 addendum "`ProjectTask.orderIndex`
 > and `dependencies` remain local; widening would need a
@@ -22,8 +23,9 @@
 ## §1 Status
 
 In design. The doc, the threat-model §7 entry, and the
-`co-organizer-invitations.md` §1 cross-reference are the predicate
-PR — pure documentation. Implementation phases B, C, E, F are
+`co-organizer-invitations.md` §4 capabilities enumeration are
+the predicate PR — pure documentation. Implementation phases
+B, C, E, F are
 described in §12 and ship in sequence after this lands; phase D is
 intentionally skipped because tasks don't federate today and there
 is no server work to do (the loud-skip pattern is borrowed from
@@ -138,12 +140,16 @@ the system should support and then quietly stay out of.
   structurally blocked — the nudges suppress. The claimer
   doesn't get the private "still on it?" check-in; the project
   page doesn't get the public "needs more hands" chip.
-- A visible **"Waiting on: &lt;upstream task title&gt;"** badge
+- A visible **"Follows: &lt;upstream task title&gt;"** badge
+  <!-- Badge text chosen for neutral sequence framing — matches
+       existing "follows" vocabulary in projects.ts (see the
+       claim-path error message at projects.ts:486, which already
+       reads "This task follows other tasks…"). -->
   renders on the claimed-but-blocked task's row, in both the
   organizer's project view and the claimer's own task view.
   Same place as the existing status pill; same render shape.
-  The badge is information, not a scold: it says what the task
-  is waiting on, not what the claimer is failing to do.
+  The badge is information, not a scold: it names the sequence
+  the task sits in, not what the claimer is failing to do.
 - A one-line **"You'll be reminded when it's ready"** note
   appears in the claimer's own task view (only — this is not a
   public surface). The line is the system explicitly
@@ -169,10 +175,11 @@ The reorder surface on the ProjectDetail page:
   sugar. The buttons are not hidden on touch or desktop; they
   appear on every device, every breakpoint, every row.
 - Both paths persist through the same new action helper:
-  `reorderProjectTask(taskId, organizerKey, direction)` for the
-  button path, `reorderProjectTask(taskId, organizerKey, {
-  insertAfter, insertBefore })` (or similar) for the drag path.
-  Implementation detail; the action signature lands in PR C.
+  `reorderProjectTask({ taskId, organizerKey, beforeId, afterId })`.
+  The button path computes the neighbor pair from the current
+  rendered order before calling; the drag path passes the
+  neighbors directly. The action signature is settled — see
+  §5.1 for the resolution rules.
 
 The authority for both surfaces is organizer + co-organizers
 (see §8 for the rationale).
@@ -283,7 +290,7 @@ dependencies: string[];
 /** DAG of in-project task IDs that should complete before this
  *  is workable. Claim is allowed regardless; the attention rail
  *  and the public "needs more hands" chip suppress nudges until
- *  dependencies clear. A "Waiting on: <upstream>" badge keeps
+ *  dependencies clear. A "Follows: <upstream>" badge keeps
  *  the structural-block state legible to the claimer and to the
  *  organizer. Cycle detection at write time
  *  (`setTaskDependencies`); in-project membership enforced. */
@@ -324,18 +331,37 @@ task created → orderIndex = (next available rank) × 1000
    → (rare) lazy renumber if precision degrades
 ```
 
-The action helper that handles all reorder paths:
-`reorderProjectTask(taskId, organizerKey, intent)`. `intent` is
-either a direction (`"up"` / `"down"` from the button path) or a
-target-neighbors pair (`{ after: prevTaskId | null, before:
-nextTaskId | null }` from the drag path). The action:
+The action helper that handles all reorder paths is
+`reorderProjectTask({ taskId, organizerKey, beforeId, afterId })`.
+`beforeId` and `afterId` are the task ids of the immediate
+neighbors at the destination position — the task that will sit
+*before* the moved task in render order, and the task that will
+sit *after*. Either may be `null` when the destination is the
+very top (`beforeId === null`) or the very bottom
+(`afterId === null`) of the list. The button path (Move up /
+Move down) and the drag path both resolve to the same neighbor
+pair before calling the action; the action itself has one
+canonical shape, not a direction-vs-pair union.
+
+The action:
 
 1. Calls `requireOrganizer` (which accepts co-orgs).
-2. Resolves `intent` to a new numeric `orderIndex`.
+2. Resolves `(beforeId, afterId)` to a new numeric
+   `orderIndex`: the midpoint of the two neighbors'
+   `orderIndex` values when both are present, or a positional
+   fallback (`top.orderIndex - 1000` /
+   `bottom.orderIndex + 1000`) when one neighbor is `null`.
 3. Detects whether the midpoint would degrade precision; if so,
-   runs the per-project renumber, then re-resolves `intent`.
+   runs the per-project renumber (§4.1), then recomputes the
+   target `orderIndex`.
 4. Writes the updated `ProjectTask` row.
 5. Returns the new row for the UI to merge.
+
+PR C implements. The neighbor-pair shape was chosen over a
+direction-based (`"up"` / `"down"`) shape so the action has a
+single canonical form across both UI paths and so the same
+helper can serve the drag-to-arbitrary-position case without a
+second entry point.
 
 ### §5.2 Dependencies
 
@@ -366,7 +392,7 @@ member taps Claim on an open task
         - project.status === "active" → proceed
         - mark assignedTo, claimedAt, etc.
    → UI re-renders. If canClaimTask is false:
-        - "Waiting on: <upstream task title>" badge appears on
+        - "Follows: <upstream task title>" badge appears on
           the task row.
         - "You'll be reminded when it's ready" line appears in
           the claimer's own task view.
@@ -464,21 +490,21 @@ finish."*
 > appropriate, not a stall. The frame is wrong; the chip
 > shouldn't render.
 
-### §6.3 The "Waiting on" badge
+### §6.3 The "Follows" badge
 
 A new render element on every claimed task row in
 ProjectDetail (and in the claimer's own task view). Computed
 purely from local state:
 
 - If the task is claimed and `canClaimTask` returns false:
-  render "Waiting on: &lt;upstream task title&gt;" near the
+  render "Follows: &lt;upstream task title&gt;" near the
   status pill.
 - Otherwise: no badge.
 
 The badge is not an attention surface — it does not buzz, does
 not occupy the attention rail, does not count toward a badge
 count. It is a piece of legibility on a row the member is
-already looking at. The frame is structural ("waiting on")
+already looking at. The frame is structural ("follows")
 not evaluative ("late", "stuck"); the same discipline as the
 events `event_capacity_reached` decision in
 `docs/community-events.md` §8.3 (named at the structural fact,
@@ -504,6 +530,22 @@ surface. Same shape as the `co-organizer-invitations.md` §3
 comparison-card commitments: name what the system is doing
 *for* the member, before they go looking for the silence and
 wonder if something is wrong.
+
+### §6.5 Reorders are not in the activity feed
+
+Project activity rows are logged today for task creation,
+claim, completion, confirmation, and dependency changes.
+**Reorders do not get an activity entry.** They are routine
+organizing work, not audit-relevant; the chip-shame footprint
+of a `task_reordered` row on every drag would exceed the
+signal value. The same discipline that keeps the
+`needs_more_hands` chip off a structurally-blocked task (§6.2)
+keeps the reorder act off the activity feed: legibility, not
+ledger.
+
+If pilot signal shows organizers wanting an auditable trail
+of "who reordered what when," a future PR can revisit; the
+omission is named here, not buried.
 
 ## §7 Federation
 
@@ -607,18 +649,17 @@ export function isOrganizer(project: Project, memberKey: string): boolean {
 ```
 
 (The `coOrganizerKeys` array is itself a derived view post-
-PR #174 — see `docs/co-organizer-invitations.md` §4. The
+PR #174 — see `docs/co-organizer-invitations.md` §5. The
 authority check reads the effective set, not the static
 array.)
 
 This matches the established precedent in
-`docs/co-organizer-invitations.md` §1, which enumerates the
-co-organizer capabilities as:
-
-> *"can confirm task completions… signs records that commit
-> their identity to the project's actions… shows publicly on
-> the project page as a community-vouched authority for the
-> project's coordination."*
+`docs/co-organizer-invitations.md` §1 and the dedicated
+capabilities enumeration in §4 of that same doc — co-organizer
+authority covers "the project's actions": confirming task
+completions, signing records that commit the co-organizer's
+identity, and acting as a community-vouched authority for the
+project's coordination.
 
 Reorder and dependency-set both fit cleanly inside "the
 project's actions." A co-organizer who signed an acceptance
@@ -628,7 +669,8 @@ project-coordination acts. No new authority class is created;
 no carveout is needed.
 
 The cross-reference back to this design doc lives at
-`docs/co-organizer-invitations.md` §1 (added in this PR).
+`docs/co-organizer-invitations.md` §4 (the "Reorder tasks
+within the project" capability bullet points back here).
 
 What's NOT included in this authority:
 
@@ -938,9 +980,10 @@ here: tasks don't federate, no server work, no PR D.
   - `docs/threat-model.md` §7 entry: "`ProjectTask.orderIndex`
     and `dependencies` remain local; widening would need a
     wire-surface review."
-  - `docs/co-organizer-invitations.md` §1: one-line addendum
-    confirming co-organizers can reorder tasks and set
-    dependencies, with a cross-reference to this doc.
+  - `docs/co-organizer-invitations.md` §4: dedicated "What
+    co-organizers can do" section enumerating every
+    organizer-gated action including reorder and
+    dependency-set, with a cross-reference back to this doc.
   - Pure documentation. No code touched.
 
 - **PR B — shared types.**
@@ -955,9 +998,10 @@ here: tasks don't federate, no server work, no PR D.
   remove claim-time throw + tests.**
   - Dexie version bump v24 → v25 (see §11).
   - Backfill `orderIndex` per project in the upgrade callback.
-  - New action helper `reorderProjectTask(taskId, organizerKey,
-    intent)` in `apps/web/src/db/projects.ts`. Uses
-    `requireOrganizer`. Computes midpoint-or-renumber per §5.1.
+  - New action helper
+    `reorderProjectTask({ taskId, organizerKey, beforeId, afterId })`
+    in `apps/web/src/db/projects.ts`. Uses `requireOrganizer`.
+    Computes midpoint-or-renumber per §5.1.
   - **Remove the claim-time throw at `projects.ts:486-489`.**
     The `canClaimTask` helper at `projects.ts:1164` stays; only
     the claim-path read of it is removed.
@@ -993,7 +1037,7 @@ here: tasks don't federate, no server work, no PR D.
     workstream.** There is no PR D here, deliberately.
 
 - **PR E — ProjectDetail UI: `@dnd-kit` + Move buttons +
-  dependency picker + "Waiting on" badge + claimant note +
+  dependency picker + "Follows" badge + claimant note +
   i18n.**
   - Integrate `@dnd-kit/core` + `@dnd-kit/sortable` on the
     task list in `apps/web/src/pages/ProjectDetail.tsx` (or
@@ -1006,12 +1050,12 @@ here: tasks don't federate, no server work, no PR D.
   - Dependency-picker enhancements as needed for the existing
     `setTaskDependencies` flow (no functional change; UX
     polish if needed).
-  - **"Waiting on: &lt;upstream task title&gt;" badge** on
+  - **"Follows: &lt;upstream task title&gt;" badge** on
     blocked-claimed task rows in both the organizer and
     claimer views (per §6.3).
   - **"You'll be reminded when it's ready" line** on the
     claimer's own task view (per §6.4).
-  - i18n keys under `task.reorder.*` and `task.waitingOn.*`
+  - i18n keys under `task.reorder.*` and `task.follows.*`
     in `apps/web/src/i18n/locales/en.json` and `es.json`.
   - Tests for the button path (keyboard), the drag path (pure
     library; smoke test), and the badge / claimant-note
@@ -1046,43 +1090,24 @@ here: tasks don't federate, no server work, no PR D.
   data shows the renumber firing more frequently than expected.
   Not blocked; pilot signal will tell us.
 
-- **The "Waiting on" badge for multi-dependency tasks.** A
+- **The "Follows" badge for multi-dependency tasks.** A
   task with three upstream dependencies, only one of which is
-  complete, has two "waiting on" candidates. Render shapes
+  complete, has two "follows" candidates. Render shapes
   to consider:
   - List all unblocked-upstream titles, comma-separated. Clean
     when there are 2-3; verbose when there are more.
   - Show the first unblocked-upstream title + "(+ N more)".
     Loses information; the +N may need a popover.
-  - Show a count only: "Waiting on 2 tasks". Loses the most
+  - Show a count only: "Follows 2 tasks". Loses the most
     information; least clutter.
   Recommend leaving this open for PR E review with the
   designer; pilot data may help pick. The information cost vs.
   visual cost trade-off doesn't have an obvious right answer.
 
-- **Click handling on the "Waiting on" badge.** Should the
+- **Click handling on the "Follows" badge.** Should the
   badge be a link to the upstream task (scroll-to or
   highlight)? Recommend yes for legibility, but the routing
   shape inside ProjectDetail is PR E's call. Not blocked.
-
-- **`reorderProjectTask` intent shape.** Two-path action (a
-  `direction: "up" | "down"` from the button path; a
-  `{ after, before }` neighbor-pair from the drag path) vs. a
-  single canonical shape (always `{ after, before }`, with
-  the button path computing neighbors first). The single-
-  canonical-shape option is cleaner internally; the two-path
-  option matches the UI semantics more directly. Recommend
-  the single-canonical shape for PR C, but it's a minor
-  ergonomics call.
-
-- **Activity-log entry for reorder?** Today, project activity
-  rows are logged for task creation, claim, completion,
-  confirmation, and dependency changes. Should reorder add a
-  `task_reordered` activity entry? Recommend no for phase 1:
-  reorder is a frequent low-stakes affordance; logging every
-  reorder would clutter the activity feed without adding
-  audit value. If a future PR adds it, this rejection is a
-  one-line entry to supersede.
 
 - **Renumber observability.** When the lazy renumber path
   fires, it writes every task in the project in one
