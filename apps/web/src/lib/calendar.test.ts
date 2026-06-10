@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   Event,
   EventCancellation,
@@ -18,6 +18,7 @@ import {
   dayKey,
   dayKeyToMs,
   entryIsPast,
+  getTodayDayKey,
   groupByDay,
   startOfTodayMs,
   startOfUTCDay,
@@ -176,6 +177,30 @@ describe("dayKeyToMs", () => {
     expect(() => dayKeyToMs("2026-13-01")).not.toThrow(); // sloppy but parseable
     expect(() => dayKeyToMs("")).toThrow();
     expect(() => dayKeyToMs("2026/06/15")).toThrow();
+  });
+});
+
+describe("getTodayDayKey", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns dayKey(Date.now()) for the current clock", () => {
+    vi.useFakeTimers();
+    const fixed = Date.UTC(2026, 5, 10, 14, 30, 0);
+    vi.setSystemTime(new Date(fixed));
+    expect(getTodayDayKey()).toBe(dayKey(fixed));
+    expect(getTodayDayKey()).toBe("2026-06-10");
+  });
+
+  it("rolls over at UTC midnight, not local midnight", () => {
+    vi.useFakeTimers();
+    const justBefore = Date.UTC(2026, 5, 15, 23, 59, 59);
+    vi.setSystemTime(new Date(justBefore));
+    expect(getTodayDayKey()).toBe("2026-06-15");
+    const justAfter = Date.UTC(2026, 5, 16, 0, 0, 0);
+    vi.setSystemTime(new Date(justAfter));
+    expect(getTodayDayKey()).toBe("2026-06-16");
   });
 });
 

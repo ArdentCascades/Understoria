@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   dayKey,
+  getTodayDayKey,
   startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
@@ -51,6 +52,12 @@ export function CalendarWeek({
   const [anchorMs, setAnchorMs] = useState<number>(() =>
     startOfWeek(initialMs),
   );
+
+  // Today's UTC day key, computed once per render. UTC-day bucketing
+  // (see lib/calendar.ts) means members far from UTC may see the
+  // highlight shift by one day near local midnight — same trade-off
+  // as the rest of the calendar; out of scope to migrate here.
+  const todayKey = getTodayDayKey();
 
   const byDay = useMemo(() => {
     const map = new Map<string, CalendarEntry[]>();
@@ -117,15 +124,24 @@ export function CalendarWeek({
                    border border-moss-200 bg-moss-200
                    dark:border-moss-800 dark:bg-moss-800"
       >
-        {days.map((day) => (
-          <div
-            key={day.key}
-            className="bg-moss-50 px-2 py-1 text-center text-[11px]
-                       font-medium text-moss-600 dark:bg-moss-900 dark:text-moss-300"
-          >
-            {headerFmt.format(new Date(day.ms))}
-          </div>
-        ))}
+        {days.map((day) => {
+          const isToday = day.key === todayKey;
+          return (
+            <div
+              key={day.key}
+              aria-current={isToday ? "date" : undefined}
+              className={
+                isToday
+                  ? `bg-canopy-50 px-2 py-1 text-center text-[11px]
+                       font-semibold text-canopy-700 dark:bg-canopy-950 dark:text-canopy-300`
+                  : `bg-moss-50 px-2 py-1 text-center text-[11px]
+                       font-medium text-moss-600 dark:bg-moss-900 dark:text-moss-300`
+              }
+            >
+              {headerFmt.format(new Date(day.ms))}
+            </div>
+          );
+        })}
         {days.map((day) => {
           const list = byDay.get(day.key) ?? [];
           const density = list.find((e) => e.kind === "exchange_density") as
@@ -137,10 +153,16 @@ export function CalendarWeek({
               e.kind === "post_expiring" ||
               e.kind === "event",
           );
+          const isToday = day.key === todayKey;
           return (
             <div
               key={`cell-${day.key}`}
-              className="min-h-[120px] bg-white p-1 dark:bg-moss-950"
+              aria-current={isToday ? "date" : undefined}
+              className={
+                isToday
+                  ? "min-h-[120px] bg-canopy-50 p-1 text-canopy-700 dark:bg-canopy-950 dark:text-canopy-300"
+                  : "min-h-[120px] bg-white p-1 dark:bg-moss-950"
+              }
             >
               {density ? (
                 <div className="mb-1 flex justify-end">

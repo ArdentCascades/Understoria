@@ -311,6 +311,24 @@ export function startOfUTCDay(ms: number): number {
 }
 
 /**
+ * Today's UTC day key. Thin wrapper around `dayKey(Date.now())` so the
+ * three calendar views can compare each rendered day's key against a
+ * single shared "today" without each one re-reading the clock in a
+ * slightly different way.
+ *
+ * Pre-existing limitation: this uses the same UTC-day bucketing as the
+ * rest of the calendar. A member whose local time is well past
+ * midnight but whose UTC clock has not rolled over yet (or vice versa)
+ * may see "today" highlight a day that, in their local calendar, is
+ * yesterday or tomorrow. The whole calendar lives in UTC days
+ * (§8.3 of docs/calendar.md); migrating that model is out of scope —
+ * this helper inherits the same trade-off the rest of the layer makes.
+ */
+export function getTodayDayKey(): string {
+  return dayKey(Date.now());
+}
+
+/**
  * Inverse of `dayKey` — parse `YYYY-MM-DD` back to its midnight-UTC
  * ms-epoch. Strict: throws on malformed input rather than coercing
  * NaN, which would silently land entries at the Unix epoch.

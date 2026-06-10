@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   entryIsPast,
+  getTodayDayKey,
   groupByDay,
   startOfTodayMs,
   type CalendarEntry,
@@ -60,6 +61,12 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
     return entries.filter((e) => !entryIsPast(e, todayStart));
   }, [entries]);
 
+  // Today's UTC day key, computed once per render. UTC-day bucketing
+  // (see lib/calendar.ts) means members far from UTC may see the
+  // highlight shift by one day near local midnight — same trade-off
+  // as the rest of the calendar; out of scope to migrate here.
+  const todayKey = getTodayDayKey();
+
   const days = useMemo(() => {
     const grouped = groupByDay(visibleEntries);
     return Array.from(grouped.entries()).map(([key, list]) => ({
@@ -83,16 +90,31 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
 
   return (
     <div className="flex flex-col gap-stack-md">
-      {days.map((day) => (
-        <section key={day.key} aria-labelledby={`calendar-agenda-${day.key}`}>
+      {days.map((day) => {
+        const isToday = day.key === todayKey;
+        return (
+        <section
+          key={day.key}
+          aria-labelledby={`calendar-agenda-${day.key}`}
+          aria-current={isToday ? "date" : undefined}
+        >
           <h3
             id={`calendar-agenda-${day.key}`}
-            className="sticky top-0 z-10 -mx-1 bg-white/95 px-1 py-1
+            className={
+              isToday
+                ? `sticky top-0 z-10 -mx-1 bg-white/95 px-1 py-1
+                       text-sm font-semibold text-canopy-700 backdrop-blur
+                       supports-[backdrop-filter]:bg-white/70
+                       dark:bg-moss-950/95 dark:text-canopy-300`
+                : `sticky top-0 z-10 -mx-1 bg-white/95 px-1 py-1
                        text-sm font-semibold text-bark-800 backdrop-blur
                        supports-[backdrop-filter]:bg-white/70
-                       dark:bg-moss-950/95 dark:text-moss-100"
+                       dark:bg-moss-950/95 dark:text-moss-100`
+            }
           >
-            {dayFmt.format(new Date(day.ms))}
+            {isToday
+              ? `${t("calendar.todayLabel")} · ${dayFmt.format(new Date(day.ms))}`
+              : dayFmt.format(new Date(day.ms))}
           </h3>
           <ul className="mt-1 flex flex-col gap-1">
             {day.entries.map((e) => (
@@ -102,7 +124,8 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
             ))}
           </ul>
         </section>
-      ))}
+        );
+      })}
       {/* Density footer tooltip — only renders if at least one density
           entry is in the agenda. Per design doc §8.2, this is mounted
           once at the bottom of the agenda view, not on each row. */}

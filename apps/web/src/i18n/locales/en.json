@@ -269,6 +269,7 @@
       "range": "{{start}} – {{end}}"
     },
     "overflowMore": "+{{count}} more",
+    "todayLabel": "Today",
     "entry": {
       "projectDeadline": "{{title}} deadline",
       "postExpiringNeed": "Need expires: {{title}}",
