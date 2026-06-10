@@ -17,8 +17,11 @@ import {
   buildCalendar,
   dayKey,
   dayKeyToMs,
+  entryIsPast,
   groupByDay,
+  startOfTodayMs,
   startOfUTCDay,
+  type CalendarEntry,
 } from "./calendar";
 
 // ─── Fixture helpers ─────────────────────────────────────────────────
@@ -689,6 +692,36 @@ describe("buildCalendar — event", () => {
     expect(entry.organizerKey).toBe("alice_key");
     expect(entry.startsAt).toBe(startsAt);
   });
+
+  it("propagates endsAt from the source Event onto the entry", () => {
+    const startsAt = NOW + 3 * DAY;
+    const endsAt = startsAt + 2 * 3_600_000;
+    const ev = event({ id: "ev_ends", startsAt, endsAt });
+    const [entry] = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      ...defaultWindow(),
+    });
+    if (entry.kind !== "event") throw new Error("expected event entry");
+    expect(entry.endsAt).toBe(endsAt);
+  });
+
+  it("preserves a null endsAt (no defined end time)", () => {
+    const ev = event({ id: "ev_open", startsAt: NOW + 2 * DAY, endsAt: null });
+    const [entry] = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      ...defaultWindow(),
+    });
+    if (entry.kind !== "event") throw new Error("expected event entry");
+    expect(entry.endsAt).toBeNull();
+  });
 });
 
 // ─── Density stays exchange-keyed: events MUST NOT count ────────────
@@ -763,5 +796,201 @@ describe("UTC day boundary", () => {
       windowEnd: deadlineMs + DAY,
     });
     expect(result[0].date).toBe(Date.UTC(2026, 10, 20));
+  });
+});
+
+// ─── startOfTodayMs ─────────────────────────────────────────────────
+
+describe("startOfTodayMs", () => {
+  it("returns local-clock midnight for `now`", () => {
+    // We can't fix the test's local TZ from here, but we can assert
+    // the invariant: the returned value is at most `now` and within
+    // 24h, and `getHours/getMinutes/getSeconds/getMilliseconds` of
+    // the result are all 0 in local time.
+    const now = Date.now();
+    const start = startOfTodayMs(now);
+    expect(start).toBeLessThanOrEqual(now);
+    expect(now - start).toBeLessThan(24 * 60 * 60 * 1000);
+    const d = new Date(start);
+    expect(d.getHours()).toBe(0);
+    expect(d.getMinutes()).toBe(0);
+    expect(d.getSeconds()).toBe(0);
+    expect(d.getMilliseconds()).toBe(0);
+  });
+
+  it("is idempotent — a value already at local midnight is unchanged", () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const midnight = d.getTime();
+    expect(startOfTodayMs(midnight)).toBe(midnight);
+  });
+});
+
+// ─── entryIsPast ────────────────────────────────────────────────────
+
+describe("entryIsPast — events", () => {
+  // Use a synthetic local-midnight anchor: pick a noon timestamp and
+  // derive the local-midnight floor from it the same way the helper
+  // does, then build entries with offsets from that anchor. This is
+  // TZ-stable without needing to mock Date.
+  function makeAnchor() {
+    const noon = new Date(2026, 5, 15, 12, 0, 0, 0); // local time
+    const todayStart = startOfTodayMs(noon.getTime());
+    return { noon: noon.getTime(), todayStart };
+  }
+
+  function eventEntry(
+    startsAt: number,
+    endsAt: number | null,
+  ): CalendarEntry {
+    return {
+      kind: "event",
+      id: "event:ev",
+      date: startOfUTCDay(startsAt),
+      eventId: "ev",
+      title: "Test event",
+      startsAt,
+      endsAt,
+      location: "anywhere",
+      organizerKey: "org",
+      path: "/events/ev",
+    };
+  }
+
+  it("flags a past event (endsAt strictly before startOfToday) as past", () => {
+    const { todayStart } = makeAnchor();
+    const startsAt = todayStart - 2 * DAY + 10 * 3_600_000;
+    const endsAt = todayStart - 2 * DAY + 12 * 3_600_000;
+    expect(entryIsPast(eventEntry(startsAt, endsAt), todayStart)).toBe(true);
+  });
+
+  it("keeps today's event visible (startsAt today, endsAt today)", () => {
+    const { todayStart } = makeAnchor();
+    const startsAt = todayStart + 18 * 3_600_000;
+    const endsAt = todayStart + 20 * 3_600_000;
+    expect(entryIsPast(eventEntry(startsAt, endsAt), todayStart)).toBe(false);
+  });
+
+  it("keeps a multi-day event started yesterday, ending in 3 days, visible", () => {
+    const { todayStart } = makeAnchor();
+    const startsAt = todayStart - DAY + 9 * 3_600_000;
+    const endsAt = todayStart + 3 * DAY + 17 * 3_600_000;
+    expect(entryIsPast(eventEntry(startsAt, endsAt), todayStart)).toBe(false);
+  });
+
+  it("keeps a future event (startsAt tomorrow) visible", () => {
+    const { todayStart } = makeAnchor();
+    const startsAt = todayStart + DAY + 10 * 3_600_000;
+    const endsAt = todayStart + DAY + 12 * 3_600_000;
+    expect(entryIsPast(eventEntry(startsAt, endsAt), todayStart)).toBe(false);
+  });
+
+  it("with endsAt null + startsAt yesterday → past", () => {
+    const { todayStart } = makeAnchor();
+    const startsAt = todayStart - DAY + 10 * 3_600_000;
+    expect(entryIsPast(eventEntry(startsAt, null), todayStart)).toBe(true);
+  });
+
+  it("with endsAt null + startsAt today → not past", () => {
+    const { todayStart } = makeAnchor();
+    const startsAt = todayStart + 10 * 3_600_000;
+    expect(entryIsPast(eventEntry(startsAt, null), todayStart)).toBe(false);
+  });
+});
+
+describe("entryIsPast — project_deadline", () => {
+  function makeAnchor() {
+    const noon = new Date(2026, 5, 15, 12, 0, 0, 0);
+    return startOfTodayMs(noon.getTime());
+  }
+
+  function deadlineEntry(date: number): CalendarEntry {
+    return {
+      kind: "project_deadline",
+      id: "project_deadline:p1",
+      date,
+      projectId: "p1",
+      projectTitle: "Proj",
+      category: "other",
+    };
+  }
+
+  it("deadline yesterday → past", () => {
+    const todayStart = makeAnchor();
+    expect(entryIsPast(deadlineEntry(todayStart - DAY), todayStart)).toBe(true);
+  });
+
+  it("deadline today → not past", () => {
+    const todayStart = makeAnchor();
+    expect(entryIsPast(deadlineEntry(todayStart), todayStart)).toBe(false);
+  });
+
+  it("deadline tomorrow → not past", () => {
+    const todayStart = makeAnchor();
+    expect(entryIsPast(deadlineEntry(todayStart + DAY), todayStart)).toBe(false);
+  });
+});
+
+describe("entryIsPast — post_expiring", () => {
+  function makeAnchor() {
+    const noon = new Date(2026, 5, 15, 12, 0, 0, 0);
+    return startOfTodayMs(noon.getTime());
+  }
+
+  function expiringEntry(date: number): CalendarEntry {
+    return {
+      kind: "post_expiring",
+      id: "post_expiring:po1",
+      date,
+      postId: "po1",
+      postTitle: "Post",
+      postType: "NEED",
+      category: "other",
+    };
+  }
+
+  it("expiry yesterday → past", () => {
+    const todayStart = makeAnchor();
+    expect(entryIsPast(expiringEntry(todayStart - DAY), todayStart)).toBe(true);
+  });
+
+  it("expiry today → not past", () => {
+    const todayStart = makeAnchor();
+    expect(entryIsPast(expiringEntry(todayStart), todayStart)).toBe(false);
+  });
+
+  it("expiry tomorrow → not past", () => {
+    const todayStart = makeAnchor();
+    expect(entryIsPast(expiringEntry(todayStart + DAY), todayStart)).toBe(false);
+  });
+});
+
+describe("entryIsPast — exchange_density (never past)", () => {
+  function densityEntry(date: number): CalendarEntry {
+    return {
+      kind: "exchange_density",
+      id: `density:${dayKey(date)}`,
+      date,
+      count: 1,
+    };
+  }
+
+  it("returns false for a density row dated last year", () => {
+    const todayStart = startOfTodayMs(Date.now());
+    expect(entryIsPast(densityEntry(todayStart - 365 * DAY), todayStart)).toBe(
+      false,
+    );
+  });
+
+  it("returns false for a density row dated today", () => {
+    const todayStart = startOfTodayMs(Date.now());
+    expect(entryIsPast(densityEntry(todayStart), todayStart)).toBe(false);
+  });
+
+  it("returns false for a density row dated in the future", () => {
+    const todayStart = startOfTodayMs(Date.now());
+    expect(entryIsPast(densityEntry(todayStart + 30 * DAY), todayStart)).toBe(
+      false,
+    );
   });
 });

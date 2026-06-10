@@ -102,6 +102,10 @@ export type CalendarEntry =
        *  UI uses this to render the time-of-day; `date` is the UTC
        *  day for grouping. */
       startsAt: number;
+      /** Epoch ms of the event's actual end (NOT day-floored), or null
+       *  if the event has no defined end time. Used by the agenda view
+       *  to decide whether a multi-day event is still ongoing. */
+      endsAt: number | null;
       location: string;
       /** Organizer's pubkey. The UI can look up the display name from
        *  the members map. Carried so renderers don't have to do their
@@ -233,6 +237,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       eventId: ev.id,
       title: ev.title,
       startsAt: ev.startsAt,
+      endsAt: ev.endsAt,
       location: ev.location,
       organizerKey: ev.createdBy,
       path: `/events/${ev.id}`,
@@ -317,4 +322,49 @@ export function dayKeyToMs(key: string): number {
   const m = Number(match[2]);
   const d = Number(match[3]);
   return Date.UTC(y, m - 1, d);
+}
+
+/**
+ * ms-epoch for local-clock midnight on the day that contains `now`.
+ *
+ * The agenda view's "is this past?" decision wants to align with the
+ * member's wall clock — at 11:30 PM local time, today's evening event
+ * is still "today" even though its UTC day may already have rolled
+ * over for some TZs. `buildCalendar` itself uses UTC day-flooring
+ * (§8.3) for grouping; this helper is render-time only.
+ */
+export function startOfTodayMs(now: number): number {
+  const d = new Date(now);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+/**
+ * Returns true if the entry's effective time has already passed
+ * relative to `startOfTodayMs` (local-clock start of day).
+ *
+ * - Events: hide when (endsAt ?? startsAt) < startOfTodayMs. Multi-
+ *   day events that started yesterday but are still running stay
+ *   visible.
+ * - Project deadlines and post expiries: hide when date < startOfTodayMs.
+ * - Exchange density: NEVER past — aggregate signal stays everywhere.
+ *
+ * The agenda view filters past entries; month and week views do not
+ * (their grids intrinsically show the whole period).
+ */
+export function entryIsPast(
+  entry: CalendarEntry,
+  startOfTodayMs: number,
+): boolean {
+  switch (entry.kind) {
+    case "event": {
+      const end = entry.endsAt ?? entry.startsAt;
+      return end < startOfTodayMs;
+    }
+    case "project_deadline":
+    case "post_expiring":
+      return entry.date < startOfTodayMs;
+    case "exchange_density":
+      return false;
+  }
 }
