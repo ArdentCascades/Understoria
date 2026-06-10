@@ -48,13 +48,7 @@ label. A co-organizer:
 - signs records that commit *their identity* to the project's actions
   (project announcements, future co-signed proposals);
 - shows publicly on the project page as a community-vouched authority
-  for the project's coordination;
-- can reorder tasks within the project and set task dependencies —
-  same `requireOrganizer` authority gate as `addProjectTask` and
-  `editProjectTask` (see
-  [`docs/task-ordering-and-dependencies.md`](./task-ordering-and-dependencies.md)
-  §8 for the per-action enumeration and the values rationale for
-  not creating a new authority class).
+  for the project's coordination.
 
 Each of these carries real responsibility — financial, reputational,
 relational. None of them are roles a member should be assigned
@@ -137,7 +131,70 @@ later — the second invitation is a separate signed record (see §10).
 this state; the only effect is an `AttentionItem` on their home
 screen prompting them to decide.
 
-## §4 Data model
+## §4 What co-organizers can do
+
+The capabilities a co-organizer is granted, today, by virtue of
+passing the `requireOrganizer` / `isOrganizer` gate in
+`apps/web/src/db/projects.ts`. Each line names the action and the
+function that gates it. The list is sourced from the code, not
+from memory — a future contributor adding a new organizer-gated
+action should extend this list in the same PR.
+
+- **Launch the project.** `launchProject` — transitions a
+  `planning` project to `active`. Goes through
+  `updateProjectStatus` → `requireOrganizer`.
+- **Pause the project.** `pauseProject` — moves an active project
+  into a paused state with an organizer-supplied note.
+- **Resume the project.** `resumeProject` — moves a paused
+  project back to active.
+- **Complete the project.** `completeProject` — closes the
+  project out and triggers the organizer keystone achievement
+  evaluation.
+- **Add tasks to the project.** `addProjectTask` and
+  `bulkAddTasks` — single-task and quick-add (up to 50 titles
+  per ceremony) entry points.
+- **Edit open tasks.** `editProjectTask` — title, description,
+  estimated hours, urgency, and the dependency set on any task
+  still in `open` status.
+- **Set task dependencies.** `setTaskDependencies` — write the
+  `ProjectTask.dependencies` DAG; cycle detection and in-project
+  membership are enforced at the write path.
+- **Reorder tasks within the project.** `reorderProjectTask` —
+  drag-and-drop and Move up / Move down buttons, persisting an
+  `orderIndex` per task. Lands in PR C of the task-ordering
+  workstream; cross-reference
+  [`docs/task-ordering-and-dependencies.md`](./task-ordering-and-dependencies.md)
+  §8 for the per-action authority enumeration.
+- **Confirm task completions.** `confirmProjectTaskCompletion` —
+  the confirmer's own balance is debited as the helped party on
+  the signed `Exchange`, per §1 above. Self-confirm is rejected;
+  organizers who complete their own task fall through to the
+  bounded system-key path described in `docs/auto-confirm-key.md`.
+- **Post project announcements.** `postAnnouncement` — writes a
+  signed announcement onto the project activity feed.
+- **Step down from the role.** `removeCoOrganizer` — a
+  co-organizer can remove themselves (the self-removal carveout
+  shipped in PR #171). The primary-only restriction on
+  `removeCoOrganizer` is relaxed when the caller is removing
+  their own key from the roster; no member is conscripted into
+  a role they cannot leave.
+
+Not included in co-organizer authority (primary organizer only):
+**adding or removing other co-organizers** (`addCoOrganizer` /
+`removeCoOrganizer` — the role-grant authority stays with the
+primary, with the self-removal carveout for stepping down),
+**archiving / unarchiving the project** (`archiveProject` /
+`unarchiveProject`), and **cancelling community events** (events
+are gated by `event.createdBy === organizerKey` in
+`apps/web/src/db/events.ts`'s `cancelEvent`; co-org of the
+parent project does not extend to events the primary created).
+
+Each capability above is signed under the co-organizer's own
+identity and contributes to the project's audit trail — the
+signed-acceptance ceremony from §3 is the predicate that makes
+those signatures attributable to a deliberate act.
+
+## §5 Data model
 
 Two new federated record types, shaped to match `SignedVouch` and
 `Invite` so a reader who already knows those primitives can place
@@ -308,7 +365,7 @@ federate normally.
 co-organizer to re-accept — is named as an open question in §10
 with reasons.)
 
-## §5 Lifecycle, federation, revocation
+## §6 Lifecycle, federation, revocation
 
 - **Issue.** The primary organizer calls
   `issueCoOrganizerInvitation(projectId, inviterKey, inviteeKey)`.
@@ -359,7 +416,7 @@ not seconds; coercive urgency is a values failure). Co-organizer
 invitations occupy the same conceptual slot — a slow, deliberate
 attention-prompt for the invitee, not a quick yes/no modal.
 
-## §6 Organizer-side UX
+## §7 Organizer-side UX
 
 - **Project detail page.** The existing co-organizer roster section
   gains a "Pending invitations" subsection. Each outstanding
@@ -403,7 +460,7 @@ attention-prompt for the invitee, not a quick yes/no modal.
 
   (30 days is a guess. Open question in §10.)
 
-## §7 Invitee-side UX
+## §8 Invitee-side UX
 
 - **AttentionItem.** A new kind: `coorganizer_invitation_received`.
   It carries the project title, the inviter's display name, time
@@ -470,7 +527,7 @@ attention-prompt for the invitee, not a quick yes/no modal.
   posture: the values commitment is to make the member's deliberate
   act the threshold, not a glance-and-tap.
 
-## §8 Federation
+## §9 Federation
 
 - **Endpoints.** Two new community-node routes, mirroring
   `apps/server/src/routes/vouches.ts` exactly:
@@ -517,7 +574,7 @@ attention-prompt for the invitee, not a quick yes/no modal.
   signed by their key, so any node with the inviter's pubkey can
   verify it. There is no node-stickiness.
 
-## §9 Threat-model delta
+## §10 Threat-model delta
 
 This change **does not introduce new threat surface.** Co-organizers
 were already a trust position. The data model gains two new signed
@@ -557,7 +614,7 @@ entry added in this branch is a single bullet in §7 (near the
 device-pairing entry) recording the values fix and naming the
 non-defense items above.
 
-## §10 Open questions
+## §11 Open questions
 
 - **Bulk invite.** Should an organizer be able to bulk-invite
   multiple members in one ceremony? *Recommendation: no.* Each
@@ -621,7 +678,7 @@ non-defense items above.
   preserve that property. The implementation PR ships both record
   types as siblings of `CoOrganizerInvitation`.
 
-## §11 Implementation breakdown
+## §12 Implementation breakdown
 
 Three PRs after this design doc lands. Sequencing matters: PR A
 ships the data + types; PR B ships server routes + peer pull on
