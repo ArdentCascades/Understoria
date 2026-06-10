@@ -28,7 +28,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt": a new deploy does NOT silently swap the code out from
+      // under an open session. The waiting service worker activates only
+      // when the member taps Refresh in <UpdatePrompt /> (or on the next
+      // full app open). Members were silently running stale builds for
+      // days under autoUpdate's in-place refresh-on-navigation model.
+      registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.svg"],
       manifest: {
         name: "Understoria",

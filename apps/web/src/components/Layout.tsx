@@ -25,6 +25,7 @@ import { LockScreen } from "./LockScreen";
 import { ScrollToTop } from "./ScrollToTop";
 import { SkipLink } from "./SkipLink";
 import { ToastContainer } from "./ToastContainer";
+import { UpdatePrompt } from "./UpdatePrompt";
 import { useApp } from "@/state/AppContext";
 import { IllustrationSapling } from "@/components/visual";
 
@@ -50,6 +51,9 @@ export function Layout() {
       </main>
       {!locked && <BottomNav />}
       {!locked && <ToastContainer />}
+      {/* Rendered even while locked: the notice is about the software
+          itself, and a stale build on the lock screen is still stale. */}
+      <UpdatePrompt />
     </div>
   );
 }
