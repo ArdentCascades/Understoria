@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Post } from "@/types";
 
@@ -47,6 +48,14 @@ interface ExchangeStateNarrativeProps {
    *  hours; when <= 0 the sweep is disabled and we never promise
    *  one. Matches PR #221's BalanceCard reading exactly. */
   autoConfirmHours: number;
+  /** For `disputed` posts only: the id of the matching dispute
+   *  Proposal (kind="dispute", disputePostId===post.id). When
+   *  provided, the disputed-state pointer deep-links to that
+   *  card on /disputes via an anchor (#{proposalId}); when not
+   *  resolvable (e.g. the dispute row hasn't synced locally yet
+   *  on the consuming surface), the pointer falls back to the
+   *  plain list at /disputes. Other states ignore this prop. */
+  disputeProposalId?: string | null;
 }
 
 /**
@@ -72,8 +81,44 @@ export function ExchangeStateNarrative({
   alreadyConfirmed,
   otherPartyName,
   autoConfirmHours,
+  disputeProposalId,
 }: ExchangeStateNarrativeProps) {
   const { t } = useTranslation();
+
+  // Disputed posts get a wayfinding pointer to where the conversation
+  // is actually happening (the /disputes surface), not a prompt to
+  // start one. The dispute is already filed by the time the post is
+  // `disputed` — this routes someone who LANDED here to the existing
+  // conversation. Same copy regardless of viewer role: the operator
+  // settled on "operational reference, not inviting prompt" — what
+  // the viewer should do is read the discussion, not be told to act.
+  if (post.status === "disputed") {
+    const href = disputeProposalId
+      ? `/disputes#${disputeProposalId}`
+      : "/disputes";
+    return (
+      <div
+        className="rounded-xl bg-moss-50 p-3 text-sm text-moss-700 dark:bg-moss-900/60 dark:text-moss-200"
+        data-testid="exchange-state-narrative"
+      >
+        <p className="font-medium">
+          {t("postDetail.exchangeState.disputedTitle")}
+        </p>
+        <p className="mt-1.5">
+          {t("postDetail.exchangeState.disputedBody")}
+        </p>
+        <p className="mt-1.5">
+          <Link
+            to={href}
+            className="underline decoration-moss-400 underline-offset-2 hover:decoration-moss-700 dark:decoration-moss-500 dark:hover:decoration-moss-200"
+          >
+            {t("postDetail.exchangeState.disputedLink")}
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
   const lines = narrativeLines({
     status: post.status,
     viewerRole,
@@ -183,8 +228,9 @@ function narrativeLines({
     return [t("postDetail.exchangeState.completed")];
   }
 
-  // open / cancelled / disputed: PostDetail already speaks well in
-  // these states (the "still looking" hint, the cancelled chip, the
-  // disputed banner). No narrative needed here.
+  // open / cancelled: PostDetail already speaks well in these states
+  // (the "still looking" hint, the cancelled chip). The `disputed`
+  // branch is handled directly in the component above because it
+  // renders a link to /disputes, not just a string.
   return [];
 }

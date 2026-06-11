@@ -888,7 +888,6 @@
     "actionsRelease": "Soltar mi compromiso",
     "actionsClaimedBy": "Esta publicación ya está tomada. {{helper}} está ayudando a {{helped}}.",
     "actionsCompleted": "Completado. {{hours}} de crédito fluyeron de {{helped}} a {{helper}}. Gracias a las dos personas.",
-    "actionsDisputed": "Este intercambio ha sido señalado para revisión comunitaria. Una persona mediadora dará seguimiento.",
     "dialogClaimNeedTitle": "¿Tomar esta publicación?",
     "dialogClaimNeedDescription": "Te estás ofreciendo para ayudar con {{hours}} de {{category}}. Ganarás crédito cuando ambas personas confirmen que está hecho.",
     "dialogClaimOfferTitle": "¿Tomar esta oferta?",
@@ -926,7 +925,10 @@
         "autoConfirm_other": "Si no llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} días.",
         "thirdParty": "Confirmado por una parte; esperando a la otra."
       },
-      "completed": "Este intercambio está completo — el crédito se ha movido."
+      "completed": "Este intercambio está completo — el crédito se ha movido.",
+      "disputedTitle": "En revisión comunitaria.",
+      "disputedBody": "La comunidad está debatiendo este intercambio.",
+      "disputedLink": "Ver Perfil → Disputas"
     },
     "newRolesEarned": "Nuevos roles comunitarios obtenidos"
   },

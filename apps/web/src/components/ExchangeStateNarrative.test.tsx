@@ -11,6 +11,7 @@
  */
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 // Real i18n. We assert against actual English copy so a careless
@@ -44,7 +45,10 @@ afterEach(() => {
 function render(node: ReactNode) {
   act(() => {
     root = createRoot(container);
-    root.render(node);
+    // MemoryRouter so the disputed branch's <Link> can render. The
+    // other branches don't render any Link but the wrapper is cheap
+    // and keeps the test scaffold uniform.
+    root.render(<MemoryRouter>{node}</MemoryRouter>);
   });
 }
 
@@ -54,6 +58,7 @@ interface Case {
   alreadyConfirmed?: boolean;
   otherPartyName?: string;
   autoConfirmHours?: number;
+  disputeProposalId?: string | null;
 }
 
 function renderCase({
@@ -62,6 +67,7 @@ function renderCase({
   alreadyConfirmed = false,
   otherPartyName = "Maple",
   autoConfirmHours = 168,
+  disputeProposalId = null,
 }: Case) {
   render(
     <ExchangeStateNarrative
@@ -70,6 +76,7 @@ function renderCase({
       alreadyConfirmed={alreadyConfirmed}
       otherPartyName={otherPartyName}
       autoConfirmHours={autoConfirmHours}
+      disputeProposalId={disputeProposalId}
     />,
   );
 }
@@ -190,7 +197,7 @@ describe("ExchangeStateNarrative", () => {
   });
 
   describe("completed and other states", () => {
-    it.each(["open", "cancelled", "disputed"] as const)(
+    it.each(["open", "cancelled"] as const)(
       "renders nothing for status=%s",
       (status) => {
         renderCase({ status, viewerRole: "poster" });
@@ -208,6 +215,95 @@ describe("ExchangeStateNarrative", () => {
       renderCase({ status: "completed", viewerRole: "third-party" });
       const text = container.textContent ?? "";
       expect(text).toContain("credit has moved");
+    });
+  });
+
+  describe("disputed", () => {
+    // The operator-settled framing rule for the disputed branch:
+    // operational reference, not inviting prompt. The dispute is
+    // already filed by the time a post is `disputed`; the narrative
+    // points to where the conversation is happening, never asks the
+    // viewer to start one.
+
+    it("renders the body copy describing where the conversation is", () => {
+      renderCase({
+        status: "disputed",
+        viewerRole: "third-party",
+        disputeProposalId: "prop_abc",
+      });
+      const text = container.textContent ?? "";
+      // Body sentence: "The community is discussing this exchange."
+      // — descriptive, not directive. Any drift toward an imperative
+      // ("file a", "raise this", "consider…") trips this assertion.
+      expect(text).toContain("community is discussing this exchange");
+      // Forbidden framings (the operator's settled rule).
+      expect(text).not.toMatch(/open a proposal/i);
+      expect(text).not.toMatch(/file a dispute/i);
+      expect(text).not.toMatch(/raise this/i);
+      expect(text).not.toMatch(/is something wrong/i);
+    });
+
+    it("renders a link to the specific dispute when a proposal id is known", () => {
+      renderCase({
+        status: "disputed",
+        viewerRole: "poster",
+        disputeProposalId: "prop_abc",
+      });
+      const link = container.querySelector("a");
+      expect(link).not.toBeNull();
+      // Deep-link into the Disputes list anchored on the matching
+      // proposal card. Falls back to plain /disputes when the id is
+      // unknown (see next test).
+      expect(link?.getAttribute("href")).toBe("/disputes#prop_abc");
+      expect(link?.textContent).toContain("Disputes");
+    });
+
+    it("falls back to plain /disputes when no proposal id is resolvable", () => {
+      renderCase({
+        status: "disputed",
+        viewerRole: "poster",
+        disputeProposalId: null,
+      });
+      const link = container.querySelector("a");
+      expect(link?.getAttribute("href")).toBe("/disputes");
+    });
+
+    // Three viewer-role tests, one assertion each: the rendered text
+    // is identical across poster / claimer / third-party. This is the
+    // viewer-role-INDEPENDENT property — the pointer describes where
+    // the conversation lives, never what the viewer should do, so
+    // role can't change the copy.
+    it("renders the same text for the poster as for any other viewer", () => {
+      renderCase({
+        status: "disputed",
+        viewerRole: "poster",
+        disputeProposalId: "prop_abc",
+      });
+      expect(container.textContent).toBe(
+        "Under community review.The community is discussing this exchange.See Profile → Disputes",
+      );
+    });
+
+    it("renders the same text for the claimer as for any other viewer", () => {
+      renderCase({
+        status: "disputed",
+        viewerRole: "claimer",
+        disputeProposalId: "prop_abc",
+      });
+      expect(container.textContent).toBe(
+        "Under community review.The community is discussing this exchange.See Profile → Disputes",
+      );
+    });
+
+    it("renders the same text for a third party as for any other viewer", () => {
+      renderCase({
+        status: "disputed",
+        viewerRole: "third-party",
+        disputeProposalId: "prop_abc",
+      });
+      expect(container.textContent).toBe(
+        "Under community review.The community is discussing this exchange.See Profile → Disputes",
+      );
     });
   });
 });
