@@ -13,15 +13,25 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FAQ_SECTIONS } from "@/content/faq";
+import { FAQ_SECTIONS_ES } from "@/content/faq.es";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
 // Task-oriented FAQ page. Each entry's id becomes a URL fragment
 // (`/help#confirm-exchange`) so members can share specific
 // answers. On mount we honour the fragment by scrolling the
 // matching <section> into view.
+//
+// Locale selection: long-form FAQ prose lives outside i18n JSON.
+// We pick the Spanish module when i18n.language is "es" (or an
+// es-* regional variant); every other locale falls through to the
+// English source so an as-yet-untranslated language degrades to
+// English rather than to an empty page.
 
 export default function HelpPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const sections = i18n.language?.startsWith("es")
+    ? FAQ_SECTIONS_ES
+    : FAQ_SECTIONS;
   const navigate = useNavigate();
   const location = useLocation();
   const reduced = useReducedMotion();
@@ -57,7 +67,7 @@ export default function HelpPage() {
       </header>
 
       <div className="space-y-6">
-        {FAQ_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <section key={section.id} className="card" aria-labelledby={`faq-section-${section.id}`}>
             <h2
               id={`faq-section-${section.id}`}
