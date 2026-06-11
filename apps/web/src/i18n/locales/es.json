@@ -819,6 +819,19 @@
       "announcement": "Novedad publicada"
     }
   },
+  "myTasks": {
+    "title": "Tareas que llevas",
+    "subtitle": "Cada tarea que has tomado, de todos los proyectos, en un solo lugar.",
+    "summaryOne": "Llevas 1 tarea ahora mismo.",
+    "summaryOneProject": "Llevas {{count}} tareas en un proyecto.",
+    "summaryOther": "Llevas {{count}} tareas en {{projects}} proyectos.",
+    "claimedAgo": "Tomada {{when}}",
+    "emptyTitle": "Nada pendiente por ahora",
+    "empty": "Cuando tomes una tarea de un proyecto comunitario aparecerá aquí, para que veas tus compromisos sin abrir cada proyecto uno por uno.",
+    "browseProjects": "Explorar proyectos",
+    "seeAll": "Ver todas tus tareas",
+    "boardLink": "Tareas que llevas"
+  },
   "urgency": {
     "low": "Cuando puedas",
     "medium": "Pronto",

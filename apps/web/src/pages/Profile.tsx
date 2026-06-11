@@ -36,6 +36,8 @@ import type {
   PendingTaskEntry,
 } from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
+import { myClaimedTasks } from "@/lib/myTasks";
+import { MyTasksSummary } from "@/pages/MyTasks";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -244,6 +246,14 @@ export default function ProfilePage() {
     () => pendingTaskCreditFor(currentMember.publicKey, projectTasks),
     [currentMember, projectTasks],
   );
+  // Active commitments across all projects — feeds the small
+  // "Tasks you're carrying" jump-off card below. Hidden entirely at
+  // zero (same posture as AttentionSection: an empty list must never
+  // read as "you're not doing enough").
+  const carrying = useMemo(
+    () => myClaimedTasks(currentMember.publicKey, projectTasks, projects),
+    [currentMember, projectTasks, projects],
+  );
   const projectMap = useMemo(
     () => new Map(projects.map((p) => [p.id, p])),
     [projects],
@@ -311,7 +321,7 @@ export default function ProfilePage() {
         technicalDetail={t("hints.invite.technical")}
       />
       {/* Community-participation cluster. CSS columns at lg+ because
-          the three cards have uneven heights — Invites can be tall
+          the cards have uneven heights — Invites can be tall
           (many tokens) or short (none); Roles earned grows with
           achievements; Exchange history grows with completed
           exchanges. Columns balance the fill so cards don't sit next
@@ -320,10 +330,36 @@ export default function ProfilePage() {
           the columns classes are inert and each card's own `mb-4`
           provides the spacing. DOM order is preserved so tab and
           screen-reader navigation are unaffected by the column
-          layout. After the Settings extraction this cluster is just
-          the three "what you've done" surfaces — Data export moved
-          to Settings, MemberSwitcher to page bottom. */}
+          layout. After the Settings extraction this cluster is the
+          "what you're doing / what you've done" surfaces — a
+          conditional tasks-you're-carrying jump-off plus Invites,
+          Roles earned, and Exchange history. Data export moved to
+          Settings, MemberSwitcher to page bottom. */}
       <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+        {/* Cross-project commitments jump-off. Rendered only when the
+            member is actually carrying something — at zero the card
+            disappears rather than display an empty obligation. The
+            full inventory lives at /my-tasks; this card is the
+            Profile-side door to it. */}
+        {carrying.taskCount > 0 && (
+          <section className="card mb-4">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+              {t("myTasks.title")}
+            </h2>
+            <p className="text-sm text-moss-700 dark:text-moss-200">
+              <MyTasksSummary
+                taskCount={carrying.taskCount}
+                projectCount={carrying.projectCount}
+              />
+            </p>
+            <Link
+              to="/my-tasks"
+              className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            >
+              {t("myTasks.seeAll")}
+            </Link>
+          </section>
+        )}
         <InvitesSection
           member={currentMember}
           nodeId={nodeId}
