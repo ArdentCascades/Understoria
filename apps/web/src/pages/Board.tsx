@@ -30,6 +30,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { ContextualHint } from "@/components/ContextualHint";
 import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
+import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
 import { matchesQuery } from "@/lib/messageSearch";
 import { hasOpenTasks } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
@@ -247,6 +248,7 @@ export default function BoardPage() {
 
       <FirstActionNudge />
       <ProfileNudge />
+      <VouchDiscoveryNudge />
       <ContextualHint
         settingKey="boardHintDismissed"
         ariaLabel={t("hints.board.label")}

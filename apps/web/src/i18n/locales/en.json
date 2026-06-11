@@ -227,6 +227,12 @@
     "dismiss": "Got it",
     "technical": "The nudge appears on the Board until you take a first action — claiming a post, posting your own need or offer, or explicitly dismissing it. Once any of these happens, it stays dismissed per-device. A hard reset (Profile → Emergency → Hard purge) or a fresh install brings the nudge back; the state lives in local IndexedDB, not on the community node."
   },
+  "vouchNudge": {
+    "label": "Vouching is open to you",
+    "title": "You can vouch now",
+    "body": "Someone in the community vouched for you. You can do the same for people you trust — it's a way to expand who the community sees as trustworthy. Visit any member's profile and tap Vouch.",
+    "dismiss": "Got it"
+  },
   "hints": {
     "board": {
       "label": "Board orientation",
