@@ -309,6 +309,12 @@ export default function WelcomePage() {
           <p className="text-center text-xs text-moss-500 dark:text-moss-400">
             {t("welcome.profileSetup.hint")}
           </p>
+          {/* Bridge sentence so the landing isn't cold — the Board has
+              its own nudges, this is just a "what now" before the
+              finish tap. Plain text, no new buttons. */}
+          <p className="text-center text-sm text-moss-600 dark:text-moss-300">
+            {t("welcome.nextSteps")}
+          </p>
         </div>
       }
       stepIndex={stepIndex}

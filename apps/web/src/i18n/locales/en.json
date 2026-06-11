@@ -919,6 +919,7 @@
     "wantsYou": "{{name}} wants you in their mutual aid network.",
     "inviterKey": "Inviter key",
     "expires": "Expires",
+    "expiresOn": "This invite is valid until {{date}}.",
     "fingerprintReminder": "Before accepting: confirm that the inviter-key fingerprint above matches what {{name}} shared with you in person or over a secure channel. A link that reached you via untrusted email is worth a double-check.",
     "welcome": "Welcome in. Redirecting to the board…",
     "displayNameLabel": "Your display name (pseudonyms welcome)",
@@ -1115,7 +1116,10 @@
       "titleNeeds": "Nothing growing here yet",
       "titleOffers": "Nothing growing here yet",
       "needs": "No needs match these filters yet. If you need help, post something — asking is never gated in a timebank.",
-      "offers": "No offers match these filters yet. What could you share with your community this week?"
+      "offers": "No offers match these filters yet. What could you share with your community this week?",
+      "search": "No results for \"{{query}}\".",
+      "filtered": "Nothing matches these filters.",
+      "clearFilters": "Clear filters"
     }
   },
   "dashboard": {
@@ -1682,6 +1686,7 @@
     "skip": "Skip",
     "next": "Next",
     "start": "Open the board",
+    "nextSteps": "Next: browse what neighbors need, or post an offer of your own.",
     "pairDeviceLink": "Already have an account on another device? Pair this one →",
     "screens": {
       "timebank": {

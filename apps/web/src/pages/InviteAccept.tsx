@@ -140,6 +140,12 @@ export default function InviteAcceptPage() {
           </div>
         </dl>
 
+        <p className="mt-4 text-sm text-moss-600 dark:text-moss-300">
+          {t("invite.expiresOn", {
+            date: new Date(invite.expiresAt).toLocaleDateString(),
+          })}
+        </p>
+
         <p className="mt-4 rounded-xl bg-moss-50 p-3 text-xs text-moss-600 dark:bg-moss-900 dark:text-moss-300">
           {t("invite.fingerprintReminder", { name: invite.inviterName })}
         </p>

@@ -232,6 +232,26 @@ export default function BoardPage() {
     projectStatusFilter !== "" ||
     onlyWithOpenTasks;
 
+  // Post-tab filter activity: drives the "filter-empty" empty state and
+  // the Clear-filters reset affordance. Same shape as the project-tab
+  // version above. `showClaimed` is intentionally excluded — toggling
+  // it expands the visible set rather than narrowing it, so it can't
+  // be the cause of an empty list.
+  const postFiltersActive =
+    categoryFilter !== "" || urgencyFilter !== "" || zoneFilter !== "";
+
+  const resetPostFilters = () => {
+    setCategoryFilter("");
+    setUrgencyFilter("");
+    setZoneFilter("");
+  };
+
+  const resetProjectFilters = () => {
+    setProjectCategoryFilter("");
+    setProjectStatusFilter("");
+    setOnlyWithOpenTasks(false);
+  };
+
   // pb-36 (page wrapper) reserves clearance under the fixed FAB —
   // which sits at bottom-20 ≈ 5rem with ≈3rem of its own height — so
   // the last card in the scroll never tucks behind the floating
@@ -428,9 +448,27 @@ export default function BoardPage() {
           <div>
             {visiblePosts.length === 0 ? (
               debouncedQuery.trim() !== "" ? (
+                // Search-empty: name the query back so the member can
+                // see exactly what they searched for vs. fearing a
+                // broken filter elsewhere.
                 <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-                  {t("board.search.noMatches")}
+                  {t("board.empty.search", { query: debouncedQuery.trim() })}
                 </p>
+              ) : postFiltersActive ? (
+                // Filter-empty (no search): tell them filters are the
+                // cause and give a one-tap escape. Without this they
+                // can't distinguish "I filtered too tightly" from
+                // "there's truly nothing here."
+                <div className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+                  <p>{t("board.empty.filtered")}</p>
+                  <button
+                    type="button"
+                    className="mt-2 text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                    onClick={resetPostFilters}
+                  >
+                    {t("board.empty.clearFilters")}
+                  </button>
+                </div>
               ) : (
                 <EmptyState
                   illustration="sapling"
@@ -472,6 +510,7 @@ export default function BoardPage() {
               memberName={memberName}
               searchQuery={debouncedQuery}
               filtersActive={projectFiltersActive}
+              onClearFilters={resetProjectFilters}
             />
           </div>
         )}
@@ -573,6 +612,7 @@ function ProjectList({
   memberName,
   searchQuery,
   filtersActive,
+  onClearFilters,
 }: {
   /** Projects to render. Already filtered by the parent — this
    *  component does NOT re-apply category / status / open-task
@@ -587,6 +627,10 @@ function ProjectList({
    *  narrowing the list. Drives the "Nothing matches your filters."
    *  empty state. */
   filtersActive: boolean;
+  /** Reset all three project filters at once. Wired to the
+   *  Clear-filters button on the filter-empty state so a member
+   *  who narrowed too far has a one-tap escape. */
+  onClearFilters: () => void;
 }) {
   const { t } = useTranslation();
   const tasksByProject = useMemo(() => {
@@ -610,15 +654,22 @@ function ProjectList({
     if (trimmedQuery !== "") {
       return (
         <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-          {t("board.search.noMatches")}
+          {t("board.empty.search", { query: trimmedQuery })}
         </p>
       );
     }
     if (filtersActive) {
       return (
-        <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-          {t("board.projectFilters.emptyForFilters")}
-        </p>
+        <div className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+          <p>{t("board.empty.filtered")}</p>
+          <button
+            type="button"
+            className="mt-2 text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            onClick={onClearFilters}
+          >
+            {t("board.empty.clearFilters")}
+          </button>
+        </div>
       );
     }
     return (
