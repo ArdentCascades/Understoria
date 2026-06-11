@@ -227,6 +227,12 @@
     "dismiss": "Entendido",
     "technical": "El recordatorio aparece en el tablero hasta que tomas una primera acción — tomar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Una vez que cualquiera de estas pasa, se queda descartado por dispositivo. Un reinicio completo (Perfil → Emergencia → Borrado total) o una instalación nueva trae el recordatorio de vuelta; el estado vive en IndexedDB local, no en el nodo comunitario."
   },
+  "vouchNudge": {
+    "label": "Avalar está abierto para ti",
+    "title": "Ya puedes avalar",
+    "body": "Alguien en la comunidad te avaló. Puedes hacer lo mismo por las personas en quienes confías — es una forma de ampliar a quiénes la comunidad ve como dignos de confianza. Visita el perfil de cualquier persona y toca Avalar.",
+    "dismiss": "Entendido"
+  },
   "hints": {
     "board": {
       "label": "Orientacion del tablero",

@@ -786,6 +786,13 @@ export const SETTING_KEYS = {
    *  posted or claimed anything; this flag only matters for the
    *  "wants to lurk forever without dismissing" case. */
   firstActionNudgeDismissed: "firstActionNudgeDismissed",
+  /** "1" once the member has dismissed the vouch-discovery nudge —
+   *  the one-time orientation banner shown on Board the first time
+   *  a member has been welcomed into trust (i.e. they're `trusted`)
+   *  and haven't yet vouched for anyone. Self-retires the moment
+   *  they vouch for someone; this flag only matters for members
+   *  who never act on the nudge and want it gone permanently. */
+  vouchDiscoveryNudgeDismissed: "vouchDiscoveryNudgeDismissed",
   boardHintDismissed: "boardHintDismissed",
   balanceHintDismissed: "balanceHintDismissed",
   inviteHintDismissed: "inviteHintDismissed",

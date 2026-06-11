@@ -65,6 +65,9 @@ vi.mock("@/components/FirstActionNudge", () => ({
 vi.mock("@/components/ProfileNudge", () => ({
   ProfileNudge: () => null,
 }));
+vi.mock("@/components/VouchDiscoveryNudge", () => ({
+  VouchDiscoveryNudge: () => null,
+}));
 vi.mock("@/components/ContextualHint", () => ({
   ContextualHint: () => null,
 }));
