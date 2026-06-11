@@ -22,9 +22,10 @@ import { describe, expect, it } from "vitest";
 import {
   balanceFor,
   pendingBalanceFor,
+  pendingTaskCreditFor,
   transactionHistory,
 } from "./timebank";
-import type { Exchange, Member, Post } from "@/types";
+import type { Exchange, Member, Post, ProjectTask } from "@/types";
 
 const nodeId = "node_test";
 
@@ -240,6 +241,196 @@ describe("timebank.pendingBalanceFor", () => {
       post("2", { postedBy: "a", claimedBy: "a" }),
     ];
     expect(pendingBalanceFor("a", posts).entries).toEqual([]);
+  });
+});
+
+function task(
+  id: string,
+  overrides: Partial<ProjectTask> & Pick<ProjectTask, "projectId">,
+): ProjectTask {
+  return {
+    id,
+    title: `Task ${id}`,
+    description: "",
+    category: "other",
+    estimatedHours: 1,
+    urgency: "low",
+    requiredSkills: [],
+    assignedTo: null,
+    status: "open",
+    dependencies: [],
+    orderIndex: 0,
+    createdAt: 0,
+    completedAt: null,
+    completedBy: null,
+    exchangeId: null,
+    claimedAt: null,
+    checkInAcknowledgedAt: null,
+    ...overrides,
+  };
+}
+
+describe("timebank.pendingTaskCreditFor", () => {
+  it("returns zero and no entries when nothing is awaiting", () => {
+    expect(pendingTaskCreditFor("a", [])).toEqual({ hours: 0, entries: [] });
+  });
+
+  it("ignores tasks not assigned to the member", () => {
+    const tasks = [
+      task("1", {
+        projectId: "p1",
+        assignedTo: "b",
+        status: "awaiting_confirmation",
+        estimatedHours: 3,
+      }),
+    ];
+    expect(pendingTaskCreditFor("a", tasks)).toEqual({
+      hours: 0,
+      entries: [],
+    });
+  });
+
+  it("ignores any status other than awaiting_confirmation", () => {
+    const tasks = [
+      task("1", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "open",
+        estimatedHours: 2,
+      }),
+      task("2", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "claimed",
+        estimatedHours: 2,
+      }),
+      task("3", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "completed",
+        estimatedHours: 2,
+      }),
+      task("4", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "blocked",
+        estimatedHours: 2,
+      }),
+    ];
+    expect(pendingTaskCreditFor("a", tasks)).toEqual({
+      hours: 0,
+      entries: [],
+    });
+  });
+
+  it("sums a single awaiting task to the credit it would receive", () => {
+    // Hours figure mirrors what `confirmProjectTaskCompletion`
+    // (apps/web/src/db/projects.ts) records on the Exchange:
+    // `hoursExchanged: task.estimatedHours`. Predicted == recorded.
+    const tasks = [
+      task("1", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 2.5,
+      }),
+    ];
+    const pending = pendingTaskCreditFor("a", tasks);
+    expect(pending.hours).toBe(2.5);
+    expect(pending.entries).toEqual([
+      {
+        taskId: "1",
+        projectId: "p1",
+        delta: 2.5,
+        category: "other",
+        createdAt: 0,
+      },
+    ]);
+  });
+
+  it("sums several awaiting tasks and sorts entries newest first", () => {
+    const tasks = [
+      task("1", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 1,
+        createdAt: 100,
+      }),
+      task("2", {
+        projectId: "p2",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 0.5,
+        createdAt: 300,
+      }),
+      task("3", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 1.25,
+        createdAt: 200,
+      }),
+      // Different member — must not contribute.
+      task("4", {
+        projectId: "p1",
+        assignedTo: "b",
+        status: "awaiting_confirmation",
+        estimatedHours: 9,
+      }),
+    ];
+    const pending = pendingTaskCreditFor("a", tasks);
+    expect(pending.hours).toBe(2.75);
+    expect(pending.entries.map((e) => e.taskId)).toEqual(["2", "3", "1"]);
+  });
+
+  it("rounds fractional totals to two decimals", () => {
+    const tasks = [
+      task("1", {
+        projectId: "p",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 0.1,
+      }),
+      task("2", {
+        projectId: "p",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 0.2,
+      }),
+    ];
+    expect(pendingTaskCreditFor("a", tasks).hours).toBe(0.3);
+  });
+});
+
+describe("timebank mixed post + task pending", () => {
+  it("merges into a single total when callers add the two helpers", () => {
+    // The Profile sums `pendingBalanceFor.awaitingPartnerHours` and
+    // `pendingTaskCreditFor.hours` into one headline line. Both have
+    // the same sign convention (positive when credit will land for
+    // the member), so a plain `+` is the right composition.
+    const posts = [
+      post("p1", {
+        postedBy: "x",
+        claimedBy: "me",
+        estimatedHours: 1.5,
+        confirmedBy: ["me"],
+        createdAt: 50,
+      }),
+    ];
+    const tasks = [
+      task("t1", {
+        projectId: "proj1",
+        assignedTo: "me",
+        status: "awaiting_confirmation",
+        estimatedHours: 2,
+        createdAt: 100,
+      }),
+    ];
+    const postPending = pendingBalanceFor("me", posts);
+    const taskPending = pendingTaskCreditFor("me", tasks);
+    const merged = postPending.awaitingPartnerHours + taskPending.hours;
+    expect(merged).toBe(3.5);
   });
 });
 
