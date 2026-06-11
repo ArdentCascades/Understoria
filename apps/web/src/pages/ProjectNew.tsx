@@ -150,6 +150,12 @@ export default function ProjectNewPage() {
     setArea(p.area);
     setTags(p.tags);
     setPendingDraft(null);
+    // Mirror handleSelectTemplate's collapse — the member has made a
+    // decision (continue their draft) and the form is the next thing
+    // they care about. Without this, on mobile the template picker
+    // stays expanded above the now-populated form and the member has
+    // to scroll past every template card to reach their own work.
+    setPickerExpanded(false);
   }
 
   async function handleDiscardDraft() {
