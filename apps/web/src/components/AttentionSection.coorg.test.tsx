@@ -30,9 +30,14 @@ vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
 vi.mock("@/state/ToastContext", () => ({
   useToast: () => ({ showToast: showToastMock, dismissToast: vi.fn(), toast: null }),
 }));
-vi.mock("@/db/coorgInvitations", () => ({
-  respondToCoOrganizerInvitation: respondMock,
-}));
+vi.mock("@/db/coorgInvitations", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/db/coorgInvitations")>();
+  return {
+    ...actual,
+    respondToCoOrganizerInvitation: respondMock,
+  };
+});
 vi.mock("@/db/secrets", () => ({ getSecretKey: getSecretKeyMock }));
 vi.mock("@/db/projects", () => ({
   acknowledgeTaskCheckIn: vi.fn(),

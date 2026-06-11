@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { buildCalendar, type CalendarEntry } from "@/lib/calendar";
+import { effectiveCoOrganizerKeysFromRows } from "@/db/coorgInvitations";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { EmptyState } from "@/components/EmptyState";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
@@ -55,6 +56,9 @@ export default function CalendarPage() {
     projectTasks,
     events,
     eventCancellations,
+    coorgInvitations,
+    coorgInvitationResponses,
+    coorgInvitationRevocations,
   } = useApp();
   const { t, i18n } = useTranslation();
 
@@ -106,7 +110,19 @@ export default function CalendarPage() {
       const myProjectIds = new Set<string>();
       for (const p of projects) {
         if (p.organizerKey === myKey) myProjectIds.add(p.id);
-        else if (p.coOrganizerKeys.includes(myKey)) myProjectIds.add(p.id);
+        // Use the derived co-organizer view per
+        // `docs/co-organizer-invitations.md` §4 so a freshly-accepted
+        // co-org sees the project under "Mine" immediately, without
+        // waiting for some later write to materialize the static array.
+        else if (
+          effectiveCoOrganizerKeysFromRows(
+            p.id,
+            coorgInvitations,
+            coorgInvitationResponses,
+            coorgInvitationRevocations,
+          ).has(myKey)
+        )
+          myProjectIds.add(p.id);
       }
       for (const tk of projectTasks) {
         if (tk.assignedTo === myKey) myProjectIds.add(tk.projectId);
@@ -114,7 +130,17 @@ export default function CalendarPage() {
       out = out.filter((p) => myProjectIds.has(p.id));
     }
     return out;
-  }, [projects, projectTasks, category, projectId, mine, myKey]);
+  }, [
+    projects,
+    projectTasks,
+    category,
+    projectId,
+    mine,
+    myKey,
+    coorgInvitations,
+    coorgInvitationResponses,
+    coorgInvitationRevocations,
+  ]);
 
   const filteredPosts = useMemo<readonly Post[]>(() => {
     let out: readonly Post[] = posts;

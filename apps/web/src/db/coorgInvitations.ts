@@ -449,6 +449,55 @@ export async function effectiveCoOrganizerKeys(
   return Array.from(effective);
 }
 
+/**
+ * Sync counterpart to `effectiveCoOrganizerKeys` — same §4 rule, but
+ * over already-loaded in-memory rows. Used by the attention pipeline
+ * and other live-query consumers (Calendar "Mine" filter, AppContext
+ * block-visibility check) that already hold the three coorg-table
+ * arrays via `useLiveQuery` and need a pure / synchronous predicate.
+ *
+ * The design doc §4 names the derived view as authoritative — "every
+ * consumer of `coOrganizerKeys` reads the derived view, not the static
+ * array." A freshly-accepted invitation must therefore confer
+ * co-organizer authority immediately, without waiting for some later
+ * write to re-materialize the static array on the Project row. This
+ * helper is how that materialization happens at READ time for callers
+ * that need the answer right now.
+ *
+ * Returns a `Set` for the common `has(memberKey)` check pattern.
+ */
+export function effectiveCoOrganizerKeysFromRows(
+  projectId: string,
+  invitations: readonly CoOrganizerInvitation[],
+  responses: readonly CoOrganizerInvitationResponse[],
+  revocations: readonly CoOrganizerInvitationRevocation[],
+  now: number = Date.now(),
+): Set<string> {
+  const acceptedByInvitationId = new Map<string, CoOrganizerInvitationResponse>();
+  for (const r of responses) {
+    if (r.decision !== "accept") continue;
+    acceptedByInvitationId.set(r.invitationId, r);
+  }
+  const revokedInvitationIds = new Set<string>();
+  for (const r of revocations) revokedInvitationIds.add(r.invitationId);
+
+  const effective = new Set<string>();
+  for (const invitation of invitations) {
+    if (invitation.projectId !== projectId) continue;
+    const accepted = acceptedByInvitationId.get(invitation.id);
+    if (!accepted) continue;
+    if (revokedInvitationIds.has(invitation.id)) continue;
+    // Same expiry rule as the async view: an acceptance signed before
+    // expiry locks in authority even if wall time has now drifted past
+    // the window; otherwise the invitation must still be unexpired.
+    const acceptedInTime = accepted.decidedAt <= invitation.expiresAt;
+    const stillUnexpired = now < invitation.expiresAt;
+    if (!acceptedInTime && !stillUnexpired) continue;
+    effective.add(invitation.inviteeKey);
+  }
+  return effective;
+}
+
 // -- Outbox helper ---------------------------------------------------------
 
 /**
