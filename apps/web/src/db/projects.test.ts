@@ -221,6 +221,77 @@ describe("task lifecycle", () => {
     expect(open.assignedTo).toBeNull();
   });
 
+  it("unclaim from awaiting_confirmation returns task to open, clears completedBy, and logs a neutral release activity", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Haul soil",
+      description: "",
+      category: "transport",
+      estimatedHours: 2,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    await markProjectTaskComplete(task.id, helper.publicKey);
+    const reopened = await unclaimProjectTask(task.id, helper.publicKey);
+    // Clean revert: status open, no assignee, no completedBy
+    // recorded against a member who walked the task back.
+    expect(reopened.status).toBe("open");
+    expect(reopened.assignedTo).toBeNull();
+    expect(reopened.completedBy).toBeNull();
+    // The neutral trace lives in the activity feed — distinct type
+    // from the ordinary claimed→open release so HistoryTimeline can
+    // render the "stepped back" sentence with the task title.
+    const activity = await db.projectActivity
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    const release = activity.find(
+      (a) => a.type === "task_released_after_complete",
+    );
+    expect(release).toBeDefined();
+    expect(release?.actorKey).toBe(helper.publicKey);
+    expect(release?.data).toMatchObject({
+      taskId: task.id,
+      taskTitle: "Haul soil",
+    });
+    // The plain claimed→open path should still log task_unclaimed,
+    // not the new type — verify the gap was only the awaiting path.
+    expect(activity.find((a) => a.type === "task_unclaimed")).toBeUndefined();
+  });
+
+  it("unclaim from a plain claimed state still logs task_unclaimed (existing path unchanged)", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Plant beds",
+      description: "",
+      category: "infrastructure",
+      estimatedHours: 1,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    await unclaimProjectTask(task.id, helper.publicKey);
+    const activity = await db.projectActivity
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    expect(
+      activity.find((a) => a.type === "task_unclaimed"),
+    ).toBeDefined();
+    expect(
+      activity.find((a) => a.type === "task_released_after_complete"),
+    ).toBeUndefined();
+  });
+
   it("markComplete moves claimed → awaiting_confirmation and records completedBy", async () => {
     const org = await createMember({ displayName: "Org" }, NODE);
     const helper = await createMember({ displayName: "Helper" }, NODE);
