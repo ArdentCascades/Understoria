@@ -719,6 +719,19 @@
       "stepDownConfirmBody": "Ya no podrás confirmar tareas ni editar este proyecto. Tus confirmaciones anteriores se mantienen.",
       "stepDownConfirmCta": "Dejar el rol"
     },
+    "coorg": {
+      "capabilitiesTitle": "Lo que puedes hacer como co-organizador",
+      "capabilities": {
+        "lifecycle": "Lanzar, pausar, reanudar o completar el proyecto.",
+        "tasks": "Añadir y editar tareas — una a la vez o varias a la vez.",
+        "ordering": "Establecer el orden y la secuencia de las tareas (cuáles van antes de cuáles).",
+        "confirm": "Confirmar tareas completadas. Confirmar debita tu propio balance — estás firmando como la parte ayudada.",
+        "announce": "Publicar anuncios del proyecto.",
+        "stepDown": "Dejar el rol en cualquier momento."
+      },
+      "notIncluded": "Invitar a otros co-organizadores y archivar el proyecto siguen siendo del organizador principal.",
+      "acceptedPointer": "Ahora eres co-organizador. Mira \"Lo que puedes hacer\" en la página del proyecto."
+    },
     "handoff": {
       "title": "Pasar la antorcha",
       "intro": "Transfiere tu rol principal a un co-organizador. Seguiras como co-organizador.",

@@ -429,6 +429,10 @@ export default function ProjectDetailPage() {
           )}
 
           {isOrg && !isPrimaryOrganizer && (
+            <CoOrganizerCapabilityCard />
+          )}
+
+          {isOrg && !isPrimaryOrganizer && (
             <CoOrganizerStepDownSection
               project={project}
               currentKey={currentMember!.publicKey}
@@ -2443,6 +2447,46 @@ function CoOrganizerSection({
           if (revokeId) void handleRevoke(revokeId);
         }}
       />
+    </section>
+  );
+}
+
+// Persistent collapsible reference shown to co-organizers (NOT the
+// primary, NOT regular members) so the role's scope is in reach
+// without re-asking the primary. The accept flow's comparison card
+// names commitments at the moment of signing; this card answers the
+// follow-up "ok, what does that actually let me do?" without
+// changing capabilities. Member-language wording (not function
+// names). Collapsed by default so it stays informational rather than
+// nagging — `solidarity-not-shame` (no banner, no badge) and
+// `community-authority` (documents what already exists; doesn't
+// grant). The not-included line is sourced from the
+// `requireOrganizer` callers in `db/projects.ts` and the primary-only
+// gates on `archiveProject` / `unarchiveProject`, plus the
+// primary-only invite path in `CoOrganizerSection` above.
+//
+// See `docs/co-organizer-invitations.md` §4 for the canonical
+// capability list and the not-included set.
+function CoOrganizerCapabilityCard() {
+  const { t } = useTranslation();
+  return (
+    <section className="card mb-4">
+      <details>
+        <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-500 marker:hidden hover:underline">
+          {t("projects.coorg.capabilitiesTitle")}
+        </summary>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-moss-700 dark:text-moss-200">
+          <li>{t("projects.coorg.capabilities.lifecycle")}</li>
+          <li>{t("projects.coorg.capabilities.tasks")}</li>
+          <li>{t("projects.coorg.capabilities.ordering")}</li>
+          <li>{t("projects.coorg.capabilities.confirm")}</li>
+          <li>{t("projects.coorg.capabilities.announce")}</li>
+          <li>{t("projects.coorg.capabilities.stepDown")}</li>
+        </ul>
+        <p className="mt-3 text-xs text-moss-500 dark:text-moss-400">
+          {t("projects.coorg.notIncluded")}
+        </p>
+      </details>
     </section>
   );
 }

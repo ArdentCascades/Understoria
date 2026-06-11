@@ -212,6 +212,12 @@ describe("AttentionSection — co-organizer invitation", () => {
       expect.any(Object),
       nodeId,
     );
+    // Post-acceptance pointer to the persistent capability card on the
+    // project page — non-blocking, no modal, no forced tour.
+    expect(showToastMock).toHaveBeenCalled();
+    const toastMsg = String(showToastMock.mock.calls[0]?.[0] ?? "");
+    expect(toastMsg).toContain("co-organizer");
+    expect(toastMsg).toContain("What you can do");
   });
 
   it("decline confirms then signs with decision decline", async () => {

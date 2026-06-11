@@ -159,6 +159,12 @@ export function AttentionSection() {
       });
       setAcceptInvitationId(null);
       setDeclineInvitationId(null);
+      // Accept-only pointer to the persistent capability card on the
+      // project page. Non-blocking — no modal, no forced tour. Members
+      // who declined don't need a pointer to a role they don't have.
+      if (decision === "accept") {
+        showToast(t("projects.coorg.acceptedPointer"));
+      }
     } catch (err) {
       showToast(humanizeError(err), "error");
     }
