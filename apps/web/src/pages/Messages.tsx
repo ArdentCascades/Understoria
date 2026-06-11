@@ -118,7 +118,10 @@ export default function MessagesShell() {
       }
       // Also include conversations whose participant name matches
       // the query but whose messages don't (e.g. "I remember
-      // talking to Maria but can't remember what about").
+      // talking to Maria but can't remember what about"). These
+      // groups have `hits.length === 0` and render with a
+      // "Matched their name" note in <SearchResults> rather than
+      // an empty body.
       for (const c of conversations) {
         const name = nameByKey.get(c.otherKey) ?? "";
         if (
@@ -266,6 +269,13 @@ export function MessagesEmptyPane() {
   );
 }
 
+// Marker substituted into the {{name}} slot of
+// messages.search.conversationWith so the rendered string can be
+// split into "<before><name><after>" — the name slot then becomes a
+// <HighlightedText> node instead of a flat string. A character that
+// cannot appear in member display names keeps the split unambiguous.
+const NAME_SLOT = "";
+
 function SearchResults({
   groups,
   query,
@@ -294,37 +304,68 @@ function SearchResults({
     <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1">
       {groups.map((g) => {
         const name = nameByKey.get(g.otherKey) ?? memberFallback;
-        const first = g.hits[0];
         const isSelected = g.otherKey === selectedKey;
+        // Whole-group tappable mirrors the regular conversation list
+        // above: same destination route, same affordance shape
+        // members already know. We don't nest a separate "Open
+        // conversation" link — that would be a nested interactive
+        // and the audit prefers the iOS pattern of the entire row
+        // being the tap target.
+        const isNameOnlyMatch = g.hits.length === 0;
+        const headerTemplate = t("messages.search.conversationWith", {
+          name: NAME_SLOT,
+        });
+        const [headerBefore, headerAfter = ""] = headerTemplate.split(NAME_SLOT);
         return (
           <li key={g.otherKey}>
             <Link
               to={`/messages/${encodeURIComponent(g.otherKey)}?q=${encodeURIComponent(query)}`}
               aria-current={isSelected ? "page" : undefined}
+              aria-label={t("messages.search.conversationWith", { name })}
               className={`card block transition-shadow hover:shadow-md ${
                 isSelected ? "ring-2 ring-canopy-500 dark:ring-canopy-400" : ""
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start gap-3">
                 <MemberAvatar publicKey={g.otherKey} size={48} framed />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold">
+                      {headerBefore}
                       <HighlightedText text={name} query={query} />
+                      {headerAfter}
                     </span>
                     {g.hits.length > 0 && (
-                      <span className="text-xs text-moss-500 dark:text-moss-300">
+                      <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
                         {t("messages.search.matchCount", { count: g.hits.length })}
                       </span>
                     )}
                   </div>
-                  {first && first.message.plaintext && (
-                    <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
-                      <HighlightedText
-                        text={first.message.plaintext}
-                        query={query}
-                      />
+                  {isNameOnlyMatch ? (
+                    <p className="mt-1 text-sm italic text-moss-500 dark:text-moss-400">
+                      {t("messages.search.matchedName")}
                     </p>
+                  ) : (
+                    <ul className="mt-1 space-y-1">
+                      {g.hits.map((hit) => (
+                        <li
+                          key={hit.message.id}
+                          className="flex items-baseline justify-between gap-2"
+                        >
+                          {hit.message.plaintext && (
+                            <p className="line-clamp-2 flex-1 text-sm text-moss-600 dark:text-moss-300">
+                              <HighlightedText
+                                text={hit.message.plaintext}
+                                query={query}
+                              />
+                            </p>
+                          )}
+                          <span className="shrink-0 text-xs text-moss-500">
+                            {formatRelativeTime(hit.message.createdAt)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               </div>

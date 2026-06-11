@@ -446,7 +446,9 @@
       "matchCount_other": "{{count}} coincidencias",
       "matchPosition": "{{current}} de {{total}}",
       "previous": "Coincidencia anterior",
-      "next": "Coincidencia siguiente"
+      "next": "Coincidencia siguiente",
+      "conversationWith": "Conversación con {{name}}",
+      "matchedName": "Coincide con su nombre"
     }
   },
   "projects": {
