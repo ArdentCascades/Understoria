@@ -55,7 +55,7 @@ export function PairingLogSection() {
       <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
         {t("profile.pairingLog.intro")}
       </p>
-      <p className="mt-1 text-xs text-moss-500 dark:text-moss-400">
+      <p className="mt-1 text-xs text-moss-500 dark:text-moss-300">
         {t("profile.pairingLog.rotateHint")}
       </p>
 
@@ -85,7 +85,7 @@ function PairingList({
   const { t } = useTranslation();
   return (
     <div className="mt-4">
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500">
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
         {t(headingKey)}
       </h3>
       <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
@@ -96,7 +96,7 @@ function PairingList({
                 ? t("profile.pairingLog.unlabeled")
                 : row.label}
             </span>
-            <span className="shrink-0 text-xs text-moss-500 dark:text-moss-400">
+            <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
               {formatRelativeTime(row.completedAt)}
             </span>
           </li>

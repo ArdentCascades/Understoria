@@ -371,14 +371,14 @@ export default function ConversationPage() {
         )}
       </div>
 
-      <p className="mb-2 text-xs text-moss-500 dark:text-moss-400">
+      <p className="mb-2 text-xs text-moss-500 dark:text-moss-300">
         {t("messages.noReadReceipts")}
         <WhyTooltip principleId="no-read-receipts" />
       </p>
 
       <div className="flex-1 overflow-y-auto rounded-xl bg-moss-50 p-3 dark:bg-moss-950/30">
         {messages.length === 0 ? (
-          <p className="py-8 text-center text-sm text-moss-500">
+          <p className="py-8 text-center text-sm text-moss-500 dark:text-moss-300">
             {t("messages.empty")}
           </p>
         ) : (

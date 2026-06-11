@@ -83,7 +83,7 @@ export function DevicePairingComparisonCard() {
       <section aria-labelledby="addDevice-stays-heading">
         <h2
           id="addDevice-stays-heading"
-          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
         >
           {t("addDevice.comparison.staysTitle")}
         </h2>
@@ -92,7 +92,7 @@ export function DevicePairingComparisonCard() {
             <li key={row.label} className="flex gap-3">
               <span
                 aria-hidden="true"
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-moss-300 text-moss-500 dark:border-moss-600 dark:text-moss-400"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-moss-300 text-moss-500 dark:border-moss-600 dark:text-moss-300"
               >
                 {"○"}
               </span>

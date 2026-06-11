@@ -293,7 +293,7 @@ function GateView({
         {!canShare && (
           <p
             id="share-without-showing-note"
-            className="text-xs text-moss-600 dark:text-moss-400"
+            className="text-xs text-moss-600 dark:text-moss-300"
           >
             {t("profile.invites.shareSheet.cameraGate.notAvailable")}
           </p>
@@ -356,7 +356,7 @@ function RevealedView({
       <div className="mt-4">
         <label
           htmlFor="share-sheet-url"
-          className="text-xs font-semibold uppercase tracking-wide text-moss-500"
+          className="text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
         >
           {t("profile.invites.shareSheet.urlLabel")}
         </label>

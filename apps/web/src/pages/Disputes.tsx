@@ -177,7 +177,7 @@ function ExchangeDisputeCard({
       )}
       <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("disputes.helperLabel")}
           </dt>
           <dd className="mt-0.5">
@@ -187,7 +187,7 @@ function ExchangeDisputeCard({
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("disputes.recipientLabel")}
           </dt>
           <dd className="mt-0.5">
@@ -197,7 +197,7 @@ function ExchangeDisputeCard({
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("disputes.postedLabel")}
           </dt>
           <dd className="mt-0.5">
@@ -256,7 +256,7 @@ function CommentDisputeCard({
       )}
       <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("disputes.commentAuthorLabel")}
           </dt>
           <dd className="mt-0.5">
@@ -266,7 +266,7 @@ function CommentDisputeCard({
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("disputes.postedLabel")}
           </dt>
           <dd className="mt-0.5">

@@ -245,7 +245,7 @@ export default function EventDetailPage() {
         <div className="mb-2 inline-flex items-baseline gap-1.5">
           <h2
             id="event-attendees-heading"
-            className="text-sm font-semibold uppercase tracking-wide text-moss-500"
+            className="text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
           >
             {t("events.detail.attendeesHeading")}
           </h2>
@@ -261,7 +261,7 @@ export default function EventDetailPage() {
           <>
             {goingRsvps.length > 0 && (
               <div className="mt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-moss-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
                   {t("events.detail.goingRosterHeading")}
                 </p>
                 <ul className="mt-1 flex flex-col gap-1 text-sm">
@@ -273,7 +273,7 @@ export default function EventDetailPage() {
             )}
             {maybeRsvps.length > 0 && (
               <div className="mt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-moss-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
                   {t("events.detail.maybeRosterHeading")}
                 </p>
                 <ul className="mt-1 flex flex-col gap-1 text-sm">
@@ -285,7 +285,7 @@ export default function EventDetailPage() {
             )}
           </>
         ) : (
-          <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
+          <p className="mt-2 text-xs text-moss-500 dark:text-moss-300">
             {t("events.detail.rosterHiddenHint")}
           </p>
         )}
@@ -293,7 +293,7 @@ export default function EventDetailPage() {
 
       {isOrganizer && !isCancelled && (
         <section className="card mb-4 flex flex-col gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-moss-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("events.detail.organizerControlsHeading")}
           </h2>
           <p className="text-xs text-moss-600 dark:text-moss-300">
@@ -353,7 +353,7 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-moss-500">
+      <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
         {label}
       </dt>
       <dd className="mt-0.5 font-medium">{children}</dd>

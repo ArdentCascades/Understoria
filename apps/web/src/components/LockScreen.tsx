@@ -77,7 +77,7 @@ export function LockScreen() {
           {currentMember ? (
             <>
               {t("lockScreen.introWith", { name: currentMember.displayName })}
-              <span className="block text-xs text-moss-500 dark:text-moss-400">
+              <span className="block text-xs text-moss-500 dark:text-moss-300">
                 {t("lockScreen.keyLine", {
                   key: shortKey(currentMember.publicKey),
                 })}
@@ -119,7 +119,7 @@ export function LockScreen() {
             {submitting ? t("lockScreen.submitting") : t("lockScreen.submit")}
           </button>
         </form>
-        <p className="mt-4 text-xs text-moss-500 dark:text-moss-400">
+        <p className="mt-4 text-xs text-moss-500 dark:text-moss-300">
           {t("lockScreen.noRecoveryNote")}
         </p>
       </div>

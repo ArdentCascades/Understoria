@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { describe, expect, it } from "vitest";
-import { AA_NORMAL, composite, contrastRatio, parseHex } from "./contrast";
+import { AA_LARGE, AA_NORMAL, composite, contrastRatio, parseHex } from "./contrast";
 
 // Programmatic audit: every chip / badge color pairing in the
 // codebase, asserted against WCAG 2.1 AA (4.5:1 for normal text).
@@ -154,6 +154,74 @@ describe("palette contrast — dark mode (composited over moss-900)", () => {
         r,
         `${p.label} → ${r.toFixed(2)}:1 (need ≥ ${AA_NORMAL}:1)`,
       ).toBeGreaterThanOrEqual(AA_NORMAL);
+    });
+  }
+});
+
+// Secondary / muted body text on dark backgrounds. Historically the
+// codebase used `text-moss-500` (and a few `dark:text-moss-400`
+// overrides) for timestamps, hints, section eyebrows, and other
+// meta — never formally measured. The audit:
+//
+//   • moss-500 on moss-900 (card)  → 2.95:1  FAIL
+//   • moss-500 on moss-950 (page)  → 4.14:1  FAIL
+//   • moss-400 on moss-900 (card)  → 4.28:1  FAIL (just under)
+//   • moss-400 on moss-950 (page)  → 6.01:1  PASS
+//   • moss-300 on moss-900 (card)  → 6.20:1  PASS  ← chosen
+//   • moss-300 on moss-950 (page)  → 8.72:1  PASS  ← chosen
+//
+// Every dark-mode muted-text class in the codebase is now one of
+// the rows below; this block keeps it that way. When you add a new
+// muted dark-mode pairing, mirror it here.
+//
+// The two dark backgrounds in use:
+//   • moss-950 — page background (under bottom nav, calendar cells,
+//                attention rail pill backgrounds at /40)
+//   • moss-900 — `.card` background, the dominant surface
+//
+// Per accessibility.md §6, this closes the body-text contrast gap
+// for secondary labels.
+const DARK_BG_PAGE = MOSS[950];
+const DARK_BG_CARD = MOSS[900];
+
+interface SecondaryPairing {
+  label: string;
+  fg: string;
+  bg: string;
+  /** When set, this pairing is allowed to clear only AA_LARGE (3:1)
+   *  because it is only ever rendered at ≥ 24px regular / ≥ 18.66px
+   *  bold. Include the rendered context as justification. */
+  largeTextOnly?: string;
+}
+
+const SECONDARY_DARK_PAIRINGS: SecondaryPairing[] = [
+  // The new default for secondary text in dark mode. Used by every
+  // `text-moss-500 dark:text-moss-300` (and bare `text-moss-500`
+  // upgraded to add the dark override) call site.
+  { label: "moss-300 / moss-900 (secondary text on card)", fg: MOSS[300], bg: DARK_BG_CARD },
+  { label: "moss-300 / moss-950 (secondary text on page)", fg: MOSS[300], bg: DARK_BG_PAGE },
+  // Other muted shades still in active use after the audit.
+  { label: "moss-400 / moss-950 (bottom-nav inactive, dialog meta)", fg: MOSS[400], bg: DARK_BG_PAGE },
+  { label: "moss-200 / moss-900 (body emphasis on card)", fg: MOSS[200], bg: DARK_BG_CARD },
+  { label: "moss-200 / moss-950 (body emphasis on page)", fg: MOSS[200], bg: DARK_BG_PAGE },
+  { label: "moss-100 / moss-900 (primary text on card)", fg: MOSS[100], bg: DARK_BG_CARD },
+  { label: "moss-100 / moss-950 (primary text on page)", fg: MOSS[100], bg: DARK_BG_PAGE },
+  { label: "canopy-300 / moss-900 (accent secondary on card)", fg: CANOPY[300], bg: DARK_BG_CARD },
+  { label: "canopy-300 / moss-950 (accent secondary on page, bottom-nav active)", fg: CANOPY[300], bg: DARK_BG_PAGE },
+];
+
+describe("palette contrast — secondary text on dark backgrounds", () => {
+  for (const p of SECONDARY_DARK_PAIRINGS) {
+    const floor = p.largeTextOnly ? AA_LARGE : AA_NORMAL;
+    const tag = p.largeTextOnly ? `large-only ${AA_LARGE}:1` : `${AA_NORMAL}:1`;
+    it(`${p.label} clears AA (${tag})`, () => {
+      const fg = parseHex(p.fg);
+      const bg = parseHex(p.bg);
+      const r = contrastRatio(fg, bg);
+      expect(
+        r,
+        `${p.label} → ${r.toFixed(2)}:1 (need ≥ ${floor}:1${p.largeTextOnly ? ` — ${p.largeTextOnly}` : ""})`,
+      ).toBeGreaterThanOrEqual(floor);
     });
   }
 });

@@ -166,7 +166,7 @@ export function CalendarMonth({
                   <button
                     type="button"
                     onClick={() => setOpenDay(null)}
-                    className="float-right text-[11px] text-moss-500 hover:text-moss-700 dark:text-moss-400"
+                    className="float-right text-[11px] text-moss-500 hover:text-moss-700 dark:text-moss-300"
                     aria-label="Close"
                   >
                     ×
@@ -210,7 +210,7 @@ function DensityLegend({ anyDensity }: { anyDensity: boolean }) {
   const { t } = useTranslation();
   if (!anyDensity) return null;
   return (
-    <p className="text-xs text-moss-500 dark:text-moss-400">
+    <p className="text-xs text-moss-500 dark:text-moss-300">
       <span className="mr-1 inline-flex items-center gap-1">
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-30" />
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-60" />

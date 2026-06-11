@@ -130,7 +130,7 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
           entry is in the agenda. Per design doc §8.2, this is mounted
           once at the bottom of the agenda view, not on each row. */}
       {visibleEntries.some((e) => e.kind === "exchange_density") ? (
-        <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
+        <p className="mt-2 text-xs text-moss-500 dark:text-moss-300">
           {t("calendar.density.tooltipBody")}
           <WhyTooltip principleId="no-leaderboards" />
         </p>
@@ -172,7 +172,7 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
         <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
           {timeFmt.format(new Date(entry.startsAt))} — {entry.title}
           {entry.location ? (
-            <span className="text-moss-500 dark:text-moss-400">
+            <span className="text-moss-500 dark:text-moss-300">
               {" "}
               · {entry.location}
             </span>

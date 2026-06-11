@@ -313,7 +313,7 @@ export default function PostDetailPage() {
 
       {newAchievements.length > 0 && (
         <div className="mt-5">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("postDetail.newRolesEarned")}
           </h2>
           <ul className="flex flex-col gap-2">
@@ -453,11 +453,11 @@ function ActionPanel({
               {t("postDetail.repost")}
             </button>
           </div>
-          <p className="text-xs text-moss-500 dark:text-moss-400">
+          <p className="text-xs text-moss-500 dark:text-moss-300">
             {t("postDetail.repostHint")}
             <WhyTooltip principleId="no-post-editing" />
           </p>
-          <p className="text-xs text-moss-500 dark:text-moss-400">
+          <p className="text-xs text-moss-500 dark:text-moss-300">
             {t("postDetail.actionsWaiting")}
           </p>
         </Actions>
@@ -591,7 +591,7 @@ function Actions({ children }: { children: React.ReactNode }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-moss-500">
+      <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
         {label}
       </dt>
       <dd className="mt-0.5 font-medium">{children}</dd>
@@ -613,7 +613,7 @@ function PersonInline({
     return (
       <span>
         {t("common.you")}{" "}
-        <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
+        <span className="text-xs text-moss-500 dark:text-moss-300">({shortKey(publicKey)})</span>
       </span>
     );
   }
@@ -625,7 +625,7 @@ function PersonInline({
       >
         {name}
       </Link>{" "}
-      <span className="text-xs text-moss-500">({shortKey(publicKey)})</span>
+      <span className="text-xs text-moss-500 dark:text-moss-300">({shortKey(publicKey)})</span>
     </span>
   );
 }

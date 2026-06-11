@@ -77,7 +77,7 @@ export function SecuritySection() {
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
         {t("profile.security.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
@@ -193,7 +193,7 @@ export function SecuritySection() {
                   required
                 />
               </label>
-              <p className="text-xs text-moss-500 dark:text-moss-400">
+              <p className="text-xs text-moss-500 dark:text-moss-300">
                 {t("profile.security.passphraseHint")}
               </p>
             </>

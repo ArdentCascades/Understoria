@@ -82,7 +82,7 @@ export function EventRsvpControl({
     >
       <h2
         id="event-rsvp-heading"
-        className="text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("events.rsvp.heading")}
       </h2>

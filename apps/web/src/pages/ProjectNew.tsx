@@ -502,7 +502,7 @@ export default function ProjectNewPage() {
                 ) : (
                   <span
                     id="targetHours-hint"
-                    className="text-xs text-moss-500 dark:text-moss-400"
+                    className="text-xs text-moss-500 dark:text-moss-300"
                   >
                     {t("projects.create.fieldTargetHoursHint")}
                   </span>

@@ -81,7 +81,7 @@ export function BreadthBar({ entries, members, topN = 5 }: BreadthBarProps) {
         })}
       </ul>
       {moreCount > 0 && (
-        <p className="mt-3 text-xs text-moss-500 dark:text-moss-400">
+        <p className="mt-3 text-xs text-moss-500 dark:text-moss-300">
           {t("dashboard.breadth.moreNote", {
             count: moreCount,
             noun:
@@ -100,7 +100,7 @@ function Header() {
   return (
     <h2
       id="breadth-title"
-      className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+      className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
     >
       {t("dashboard.breadth.title")}
     </h2>

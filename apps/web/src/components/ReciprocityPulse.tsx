@@ -29,7 +29,7 @@ export function ReciprocityPulse({
     <section className="card mb-4" aria-labelledby="reciprocity-title">
       <h2
         id="reciprocity-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("dashboard.reciprocity.title")}
       </h2>
@@ -67,7 +67,7 @@ export function ReciprocityPulse({
           </div>
         </div>
       )}
-      <p className="mt-3 text-xs text-moss-500 dark:text-moss-400">
+      <p className="mt-3 text-xs text-moss-500 dark:text-moss-300">
         {t("dashboard.reciprocity.footnote")}
       </p>
     </section>
