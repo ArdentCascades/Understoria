@@ -888,7 +888,6 @@
     "actionsRelease": "Release claim",
     "actionsClaimedBy": "This post has been claimed. {{helper}} is helping {{helped}}.",
     "actionsCompleted": "Completed. {{hours}} of credit flowed from {{helped}} to {{helper}}. Thank you both.",
-    "actionsDisputed": "This exchange has been flagged for community review. A mediator will follow up.",
     "dialogClaimNeedTitle": "Claim this post?",
     "dialogClaimNeedDescription": "You're offering to help with {{hours}} of {{category}}. You'll earn credit once both of you confirm completion.",
     "dialogClaimOfferTitle": "Claim this offer?",
@@ -926,7 +925,10 @@
         "autoConfirm_other": "If they don't get to it, the node confirms automatically within about {{count}} days.",
         "thirdParty": "Confirmed by one side; waiting on the other."
       },
-      "completed": "This exchange is complete — credit has moved."
+      "completed": "This exchange is complete — credit has moved.",
+      "disputedTitle": "Under community review.",
+      "disputedBody": "The community is discussing this exchange.",
+      "disputedLink": "See Profile → Disputes"
     },
     "newRolesEarned": "New community roles earned"
   },

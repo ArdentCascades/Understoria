@@ -61,7 +61,8 @@ type DialogKind =
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { posts, members, currentMember, nodeId, nodeConfig } = useApp();
+  const { posts, members, currentMember, nodeId, nodeConfig, proposals } =
+    useApp();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<DialogKind>(null);
@@ -96,6 +97,20 @@ export default function PostDetailPage() {
 
   const poster = memberMap.get(post.postedBy);
   const claimer = post.claimedBy ? memberMap.get(post.claimedBy) : null;
+
+  // If this post is disputed, find the most recent matching dispute
+  // proposal so the operational pointer can deep-link to its card on
+  // /disputes. Multiple dispute rows for the same post are possible
+  // in principle (re-flags after partial resolution); the most recent
+  // one is the live conversation. If none has synced locally yet, the
+  // narrative falls back to plain /disputes — never breaks.
+  const disputeProposalId = useMemo<string | null>(() => {
+    if (post.status !== "disputed") return null;
+    const match = proposals
+      .filter((p) => p.kind === "dispute" && p.disputePostId === post.id)
+      .sort((a, b) => b.createdAt - a.createdAt)[0];
+    return match?.id ?? null;
+  }, [proposals, post.status, post.id]);
   const me = currentMember;
   const isPoster = me?.publicKey === post.postedBy;
   const isClaimer = me?.publicKey === post.claimedBy;
@@ -323,6 +338,7 @@ export default function PostDetailPage() {
               : undefined
         }
         autoConfirmHours={nodeConfig.autoConfirmHours}
+        disputeProposalId={disputeProposalId}
         onOpenDialog={setDialog}
       />
 
@@ -432,6 +448,7 @@ interface ActionPanelProps {
   viewerRole: ViewerRole;
   otherPartyName: string | undefined;
   autoConfirmHours: number;
+  disputeProposalId: string | null;
   onOpenDialog: (d: DialogKind) => void;
 }
 
@@ -446,6 +463,7 @@ function ActionPanel({
   viewerRole,
   otherPartyName,
   autoConfirmHours,
+  disputeProposalId,
   onOpenDialog,
 }: ActionPanelProps) {
   const { t } = useTranslation();
@@ -601,11 +619,24 @@ function ActionPanel({
   }
 
   if (post.status === "disputed") {
+    // Operational pointer (not invitational): the dispute is already
+    // filed by the time we reach this branch — surface where the
+    // community discussion is happening rather than prompting the
+    // viewer to act. Muted styling matches the rest of the narrative
+    // matrix; the legacy amber "alarm" banner was replaced because
+    // `disputed` is "currently being discussed", not "alert". Same
+    // copy for parties and third parties — it's wayfinding either
+    // way. See ExchangeStateNarrative for the deep-link fallback.
     return (
       <Actions>
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          {t("postDetail.actionsDisputed")}
-        </p>
+        <ExchangeStateNarrative
+          post={post}
+          viewerRole={viewerRole}
+          alreadyConfirmed={alreadyConfirmed}
+          otherPartyName={otherPartyName}
+          autoConfirmHours={autoConfirmHours}
+          disputeProposalId={disputeProposalId}
+        />
       </Actions>
     );
   }

@@ -84,7 +84,12 @@ export default function DisputesPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {disputes.map((d) => (
-            <li key={d.id}>
+            // id={d.id} enables the operational pointer on PostDetail
+            // (ExchangeStateNarrative's `disputed` branch) to deep-link
+            // straight to this dispute's card via /disputes#{id}.
+            // Cheap, no router change needed — the browser handles the
+            // anchor scroll on navigation.
+            <li key={d.id} id={d.id} className="scroll-mt-20">
               <DisputeCard proposal={d} />
             </li>
           ))}
