@@ -99,7 +99,7 @@ export function NodeSection() {
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("profile.node.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
@@ -230,7 +230,7 @@ function Telemetry({
 
   if (!haveSuccess && !haveError) {
     return (
-      <p className="mt-3 text-xs text-moss-500 dark:text-moss-300">
+      <p className="mt-3 text-xs text-moss-600 dark:text-moss-300">
         {t("profile.node.noActivity")}
       </p>
     );

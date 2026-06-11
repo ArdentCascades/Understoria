@@ -60,7 +60,7 @@ export default function SettingsPage() {
         <SecuritySection />
 
         <section className="card mb-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("profile.data.title")}
           </h2>
           <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">

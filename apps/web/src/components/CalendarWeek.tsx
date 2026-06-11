@@ -204,7 +204,7 @@ function DensityLegend({ anyDensity }: { anyDensity: boolean }) {
   const { t } = useTranslation();
   if (!anyDensity) return null;
   return (
-    <p className="text-xs text-moss-500 dark:text-moss-300">
+    <p className="text-xs text-moss-600 dark:text-moss-300">
       <span className="mr-1 inline-flex items-center gap-1">
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-30" />
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-60" />

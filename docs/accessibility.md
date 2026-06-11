@@ -229,16 +229,19 @@ formal audit; the formal audit is one of the items in §6.
 These are the items the next wave of Agent 22 surface PRs will
 address. Each maps to a focused PR or a small bundle.
 
-- **Body-text contrast survey** — the chip / badge audit covers
-  pill backgrounds. A broader survey of body-text pairings on
-  white card backgrounds (especially `text-moss-500`, which is
-  used widely for secondary labels) against 4.5:1 has not yet
-  been done. *Dark-mode half closed in PR `fix/dark-mode-secondary-contrast`*:
-  every secondary-text pairing now resolves to `dark:text-moss-300`
+- **Body-text contrast survey — CLOSED.** The chip / badge audit
+  covers pill backgrounds; the body-text halves are now both done.
+  *Dark-mode half closed in PR `fix/dark-mode-secondary-contrast`*:
+  every secondary-text pairing resolves to `dark:text-moss-300`
   on `moss-900` / `moss-950` (6.20:1 / 8.72:1) and is asserted in
   `palette-contrast.test.ts`'s "secondary text on dark backgrounds"
-  block. The light-mode half (text-moss-500 on white cards) still
-  needs surveying.
+  block. *Light-mode half closed alongside the v0.3 cycle*: the
+  survey measured `text-moss-500` at 4.09:1 on white cards and
+  3.79:1 on the `moss-50` page background — both under AA — and
+  swept every light-mode call site to `text-moss-600` (5.96:1 /
+  5.53:1). The "secondary text on light backgrounds" block in the
+  same test file locks the surviving pairings in, and a guard test
+  documents why `moss-500` left the codebase as a text color.
 - **Screen reader testing.** No one has driven the app with
   NVDA, VoiceOver, or TalkBack end-to-end. This is the gap most
   likely to surface things this audit missed.

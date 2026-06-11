@@ -109,7 +109,7 @@ function PendingHistoryRow({
             : t("profile.history.received")}{" "}
           <span className="font-medium">{counterpartyName}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-moss-500 dark:text-moss-300">
+        <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
           <span>{formatRelativeTime(entry.createdAt)}</span>
           <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
             {awaitingYou
@@ -118,7 +118,7 @@ function PendingHistoryRow({
           </span>
         </div>
       </div>
-      <span className="text-sm font-medium italic text-moss-500 dark:text-moss-300">
+      <span className="text-sm font-medium italic text-moss-600 dark:text-moss-300">
         {formatSignedHours(entry.delta)}
       </span>
     </>
@@ -171,14 +171,14 @@ function PendingTaskHistoryRow({
               {t("profile.history.taskRow", { taskTitle, projectTitle })}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-moss-500 dark:text-moss-300">
+          <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
             <span>{formatRelativeTime(entry.createdAt)}</span>
             <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
               {t("profile.history.pendingBadge")}
             </span>
           </div>
         </div>
-        <span className="text-sm font-medium italic text-moss-500 dark:text-moss-300">
+        <span className="text-sm font-medium italic text-moss-600 dark:text-moss-300">
           {formatSignedHours(entry.delta)}
         </span>
       </Link>
@@ -279,7 +279,7 @@ export default function ProfilePage() {
       <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="page-title">{t("profile.title")}</h1>
-          <p className="text-xs text-moss-500 dark:text-moss-300">
+          <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
           </p>
         </div>
@@ -343,7 +343,7 @@ export default function ProfilePage() {
             Profile-side door to it. */}
         {carrying.taskCount > 0 && (
           <section className="card mb-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("myTasks.title")}
             </h2>
             <p className="text-sm text-moss-700 dark:text-moss-200">
@@ -367,7 +367,7 @@ export default function ProfilePage() {
         />
 
         <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
           {t("profile.rolesEarned.title")}
           <WhyTooltip principleId="no-leaderboards" />
         </h2>
@@ -392,7 +392,7 @@ export default function ProfilePage() {
       </section>
 
       <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
           {t("profile.history.title")}
         </h2>
         {history.length === 0 &&
@@ -459,7 +459,7 @@ export default function ProfilePage() {
                         {other?.displayName ?? t("common.memberFallback")}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-moss-500 dark:text-moss-300">
+                    <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
                       <span>{formatRelativeTime(exchange.completedAt)}</span>
                       {exchange.flaggedForReview && (
                         <span
@@ -703,7 +703,7 @@ function BalanceCard({
     <section className="card mb-4">
       <div className="flex items-end justify-between">
         <div>
-          <div className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+          <div className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("profile.balance.label")}
             <WhyTooltip principleId="equal-time" />
           </div>
@@ -717,7 +717,7 @@ function BalanceCard({
               eventually covers either). Framed as movement, never as
               "stuck" — solidarity-not-shame. */}
           {hasAnyPending && (
-            <div className="mt-1 text-xs text-moss-500 dark:text-moss-300">
+            <div className="mt-1 text-xs text-moss-600 dark:text-moss-300">
               {awaitingYou.length > 0 && (
                 <div>
                   {t("profile.balance.awaitingYouLine", {
@@ -752,7 +752,7 @@ function BalanceCard({
             </div>
           )}
         </div>
-        <div className="text-right text-xs text-moss-500 dark:text-moss-300">
+        <div className="text-right text-xs text-moss-600 dark:text-moss-300">
           <div>
             {t("profile.balance.seed", { hours: formatHours(seed) })}
             <WhyTooltip principleId="asking-never-gated" />
@@ -801,7 +801,7 @@ function ProfileEditor({ member }: { member: Member }) {
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("profile.about.title")}
       </h2>
       {/* 2-pane at lg+: identity column on the left (280px), form on
@@ -823,7 +823,7 @@ function ProfileEditor({ member }: { member: Member }) {
         <div className="my-4 flex flex-col items-center gap-2 text-center lg:my-0 lg:items-start lg:text-left [&>svg]:lg:size-24">
           <MemberAvatar publicKey={member.publicKey} size={128} framed />
           <p className="text-title font-semibold">{member.displayName}</p>
-          <p className="font-mono text-xs text-moss-500 dark:text-moss-300">
+          <p className="font-mono text-xs text-moss-600 dark:text-moss-300">
             {shortKey(member.publicKey)}
           </p>
           <p className="mt-2 max-w-sm text-xs text-moss-600 dark:text-moss-300">
@@ -924,10 +924,10 @@ function MemberSwitcher({
   if (members.length <= 1) return null;
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("profile.memberSwitcher.title")}
       </h2>
-      <p className="mb-3 text-xs text-moss-500 dark:text-moss-300">
+      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
         {t("profile.memberSwitcher.note")}
       </p>
       <ul className="flex flex-col gap-2">
@@ -943,7 +943,7 @@ function MemberSwitcher({
               }`}
             >
               <div className="font-medium">{m.displayName}</div>
-              <div className="text-xs text-moss-500 dark:text-moss-300">
+              <div className="text-xs text-moss-600 dark:text-moss-300">
                 {shortKey(m.publicKey)} ·{" "}
                 {m.locationZone || t("profile.memberSwitcher.noAreaSet")}
               </div>
@@ -1017,7 +1017,7 @@ function InvitesSection({
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("profile.invites.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">

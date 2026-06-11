@@ -45,7 +45,7 @@ export function PairDeviceBootstrapReminder({
       <ul className="flex flex-col gap-2 text-sm text-moss-700 dark:text-moss-200">
         {bullets.map((b) => (
           <li key={b} className="flex gap-2">
-            <span aria-hidden="true" className="shrink-0 text-moss-500 dark:text-moss-300">
+            <span aria-hidden="true" className="shrink-0 text-moss-600 dark:text-moss-300">
               {"•"}
             </span>
             <span>{b}</span>

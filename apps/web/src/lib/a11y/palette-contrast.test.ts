@@ -196,8 +196,9 @@ interface SecondaryPairing {
 
 const SECONDARY_DARK_PAIRINGS: SecondaryPairing[] = [
   // The new default for secondary text in dark mode. Used by every
-  // `text-moss-500 dark:text-moss-300` (and bare `text-moss-500`
-  // upgraded to add the dark override) call site.
+  // `text-moss-600 dark:text-moss-300` call site (the light half was
+  // `text-moss-500` until the light-mode survey below found it under
+  // AA and the sweep moved it to moss-600).
   { label: "moss-300 / moss-900 (secondary text on card)", fg: MOSS[300], bg: DARK_BG_CARD },
   { label: "moss-300 / moss-950 (secondary text on page)", fg: MOSS[300], bg: DARK_BG_PAGE },
   // Other muted shades still in active use after the audit.
@@ -224,4 +225,68 @@ describe("palette contrast — secondary text on dark backgrounds", () => {
       ).toBeGreaterThanOrEqual(floor);
     });
   }
+});
+
+// Secondary / muted body text on LIGHT backgrounds — the other half
+// of the survey above. The dark-mode audit fixed `dark:` overrides
+// but light mode kept `text-moss-500` for the same timestamps,
+// hints, and section eyebrows without ever being measured. The
+// audit:
+//
+//   • moss-500 on white   (card)  → 4.09:1  FAIL
+//   • moss-500 on moss-50 (page)  → 3.79:1  FAIL
+//   • moss-600 on white   (card)  → 5.96:1  PASS  ← chosen
+//   • moss-600 on moss-50 (page)  → 5.53:1  PASS  ← chosen
+//
+// Every former `text-moss-500` call site is now `text-moss-600`
+// (the `dark:text-moss-300` overrides are untouched — that half
+// was already fixed). This block keeps light-mode muted text at or
+// above the rows below; when you add a new muted light-mode
+// pairing, mirror it here.
+//
+// The two light backgrounds in use:
+//   • moss-50 — page background (body class in index.html)
+//   • white   — `.card` background, the dominant surface
+const LIGHT_BG_PAGE = MOSS[50];
+const LIGHT_BG_CARD = "#ffffff";
+
+const SECONDARY_LIGHT_PAIRINGS: SecondaryPairing[] = [
+  // The default for secondary text in light mode after the sweep.
+  { label: "moss-600 / white (secondary text on card)", fg: MOSS[600], bg: LIGHT_BG_CARD },
+  { label: "moss-600 / moss-50 (secondary text on page)", fg: MOSS[600], bg: LIGHT_BG_PAGE },
+  // Other muted / body shades in active use in light mode.
+  { label: "moss-700 / white (ghost buttons, emphatic muted on card)", fg: MOSS[700], bg: LIGHT_BG_CARD },
+  { label: "moss-700 / moss-50 (emphatic muted on page)", fg: MOSS[700], bg: LIGHT_BG_PAGE },
+  { label: "moss-800 / white (secondary-button text)", fg: MOSS[800], bg: LIGHT_BG_CARD },
+  { label: "moss-900 / white (primary text on card)", fg: MOSS[900], bg: LIGHT_BG_CARD },
+  { label: "moss-900 / moss-50 (primary text on page)", fg: MOSS[900], bg: LIGHT_BG_PAGE },
+  { label: "canopy-700 / white (accent links on card)", fg: CANOPY[700], bg: LIGHT_BG_CARD },
+  { label: "canopy-700 / moss-50 (accent links on page)", fg: CANOPY[700], bg: LIGHT_BG_PAGE },
+];
+
+describe("palette contrast — secondary text on light backgrounds", () => {
+  for (const p of SECONDARY_LIGHT_PAIRINGS) {
+    const floor = p.largeTextOnly ? AA_LARGE : AA_NORMAL;
+    const tag = p.largeTextOnly ? `large-only ${AA_LARGE}:1` : `${AA_NORMAL}:1`;
+    it(`${p.label} clears AA (${tag})`, () => {
+      const fg = parseHex(p.fg);
+      const bg = parseHex(p.bg);
+      const r = contrastRatio(fg, bg);
+      expect(
+        r,
+        `${p.label} → ${r.toFixed(2)}:1 (need ≥ ${floor}:1${p.largeTextOnly ? ` — ${p.largeTextOnly}` : ""})`,
+      ).toBeGreaterThanOrEqual(floor);
+    });
+  }
+});
+
+// Guard the sweep itself: `text-moss-500` must not reappear as a
+// light-mode text class. (4.09:1 on card, 3.79:1 on page — both
+// under AA normal; that's why the class left the codebase.)
+describe("palette contrast — moss-500 stays out of light-mode text", () => {
+  it("moss-500 on both light surfaces is below AA normal (the reason it was swept)", () => {
+    const fg = parseHex(MOSS[500]);
+    expect(contrastRatio(fg, parseHex(LIGHT_BG_CARD))).toBeLessThan(AA_NORMAL);
+    expect(contrastRatio(fg, parseHex(LIGHT_BG_PAGE))).toBeLessThan(AA_NORMAL);
+  });
 });

@@ -136,7 +136,7 @@ export function BlockedContactsPanel() {
       <div className="flex items-baseline gap-1.5">
         <h2
           id="blocked-contacts-section-title"
-          className="text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+          className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
         >
           {t("block.settings.sectionTitle")}
         </h2>
@@ -147,11 +147,11 @@ export function BlockedContactsPanel() {
       </p>
 
       {/* Active blocks */}
-      <h3 className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h3 className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("block.settings.activeHeading")}
       </h3>
       {blocks.length === 0 ? (
-        <p className="text-sm text-moss-500 dark:text-moss-300">
+        <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("block.settings.activeEmpty")}
         </p>
       ) : (
@@ -187,7 +187,7 @@ export function BlockedContactsPanel() {
                         ? displayName
                         : t("block.settings.obscuredRowLabel")}
                     </span>
-                    <span className="block text-xs text-moss-500 dark:text-moss-300">
+                    <span className="block text-xs text-moss-600 dark:text-moss-300">
                       {t("block.settings.blockedAtLabel", {
                         date: formatAbsoluteDate(row.createdAt),
                       })}
@@ -245,11 +245,11 @@ export function BlockedContactsPanel() {
       )}
 
       {/* Previously blocked */}
-      <h3 className="mt-5 mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h3 className="mt-5 mb-2 text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("block.settings.historyHeading")}
       </h3>
       {filteredHistory.length === 0 ? (
-        <p className="text-sm text-moss-500 dark:text-moss-300">
+        <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("block.settings.historyEmpty")}
         </p>
       ) : (
@@ -285,7 +285,7 @@ export function BlockedContactsPanel() {
                         ? displayName
                         : t("block.settings.obscuredRowLabel")}
                     </span>
-                    <span className="block text-xs text-moss-500 dark:text-moss-300">
+                    <span className="block text-xs text-moss-600 dark:text-moss-300">
                       {t("block.settings.unblockedAtLabel", {
                         when: formatRelativeTime(row.lastUnblockedAt),
                       })}
@@ -326,7 +326,7 @@ export function BlockedContactsPanel() {
 
       {/* Cross-device fine print — design doc §14.1 gap named not
           papered over. */}
-      <p className="mt-5 text-xs text-moss-500 dark:text-moss-300">
+      <p className="mt-5 text-xs text-moss-600 dark:text-moss-300">
         {t("block.settings.crossDeviceWarning")}
       </p>
 

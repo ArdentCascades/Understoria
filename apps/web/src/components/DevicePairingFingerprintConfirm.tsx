@@ -76,7 +76,7 @@ export function DevicePairingFingerprintConfirm({
           {fingerprint}
         </span>
       </div>
-      <p className="text-xs text-moss-500 dark:text-moss-300">
+      <p className="text-xs text-moss-600 dark:text-moss-300">
         {t("pairDevice.fingerprintConfirm.mismatchHint")}
       </p>
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

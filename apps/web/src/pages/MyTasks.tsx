@@ -110,7 +110,7 @@ function TaskRow({ task, project }: { task: ProjectTask; project: Project }) {
             (solidarity-not-shame). The check-in nudges stay where
             they live today: the attention rail. */}
         {task.claimedAt !== null && (
-          <span className="mt-1 block text-xs text-moss-500 dark:text-moss-300">
+          <span className="mt-1 block text-xs text-moss-600 dark:text-moss-300">
             {t("myTasks.claimedAgo", {
               when: formatRelativeTime(task.claimedAt),
             })}

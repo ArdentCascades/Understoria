@@ -118,7 +118,7 @@ export default function DashboardPage() {
         >
           <Sprig size={48} />
         </div>
-        <div className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+        <div className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
           {t("dashboard.totalHoursLabel")}
         </div>
         <div className="my-1 text-5xl font-extrabold text-canopy-700 dark:text-canopy-300">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
         >
           <h2
             id="federation-summary-title"
-            className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+            className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
           >
             {t("dashboard.federation.title")}
             <WhyTooltip principleId="community-authority" />
@@ -220,7 +220,7 @@ export default function DashboardPage() {
       </div>
 
       <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
           {t("dashboard.categoryBreakdown.title")}
         </h2>
         {totalCategoryHours === 0 ? (
@@ -284,7 +284,7 @@ export default function DashboardPage() {
             <LeafDivider variant="short" />
           </div>
           <section className="card">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("dashboard.rolesThisMonth.title")}
           </h2>
           <ul className="flex flex-col gap-2 text-sm">
@@ -322,7 +322,7 @@ function StatCard({
 }) {
   return (
     <div className="card">
-      <div className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <div className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {label}
       </div>
       <div className="mt-1 text-3xl font-bold">{value}</div>

@@ -71,7 +71,7 @@ export default function HelpPage() {
           <section key={section.id} className="card" aria-labelledby={`faq-section-${section.id}`}>
             <h2
               id={`faq-section-${section.id}`}
-              className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+              className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
             >
               {section.title}
             </h2>

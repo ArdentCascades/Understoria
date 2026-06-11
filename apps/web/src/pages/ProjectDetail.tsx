@@ -474,7 +474,7 @@ export default function ProjectDetailPage() {
           />
 
           <section className="mb-4">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("projects.detail.tasks")}
             </h2>
             {tasks.length === 0 ? (
@@ -667,7 +667,7 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <dt className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {label}
       </dt>
       <dd className="mt-0.5 font-medium">{children}</dd>
@@ -1548,7 +1548,7 @@ function TaskRow({
                 </option>
               ))}
           </select>
-          <span className="text-xs text-moss-500 dark:text-moss-300">
+          <span className="text-xs text-moss-600 dark:text-moss-300">
             {t("projects.task.dependsOnHint")}
           </span>
         </label>
@@ -1685,7 +1685,7 @@ function TaskRow({
         )}
       </h3>
       {showClaimerNote && (
-        <p className="text-xs italic text-moss-500 dark:text-moss-300">
+        <p className="text-xs italic text-moss-600 dark:text-moss-300">
           {t("projects.task.waitingOnClaimerNote")}
         </p>
       )}
@@ -1696,7 +1696,7 @@ function TaskRow({
       )}
       {task.assignedTo &&
         (task.status === "awaiting_confirmation" ? (
-          <p className="text-xs text-moss-500 dark:text-moss-300">
+          <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("projects.task.completedBy", {
               name: memberMap.get(task.completedBy ?? "") ?? "—",
             })}
@@ -1708,7 +1708,7 @@ function TaskRow({
           // community work again; the claimer's own actions are
           // still surfaced to them via their AttentionSection and
           // the in-row buttons below.
-          <p className="text-xs text-moss-500 dark:text-moss-300">
+          <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("projects.task.claimedBy", {
               name: memberMap.get(task.assignedTo) ?? "—",
             })}
@@ -1733,7 +1733,7 @@ function TaskRow({
                 a gate. The "privately" wording pre-frames the
                 check-in as the considerate nudge it is, not as a
                 deadline. */}
-            <p className="basis-full text-xs text-moss-500 dark:text-moss-300">
+            <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
               {task.estimatedHours > 0
                 ? t("projects.task.claimSummary", {
                     hours: task.estimatedHours,
@@ -1798,7 +1798,7 @@ function TaskRow({
                 The framing names that releasing HELPS — it routes
                 the work to someone who can carry it — and that no
                 one is keeping score. */}
-            <p className="basis-full text-xs text-moss-500 dark:text-moss-300">
+            <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
               {t("projects.task.releaseReassurance")}
             </p>
           </>
@@ -1832,7 +1832,7 @@ function TaskRow({
           </button>
         )}
         {task.status === "awaiting_confirmation" && !isOrganizer && !isCompleter && (
-          <span className="text-xs text-moss-500 dark:text-moss-300">
+          <span className="text-xs text-moss-600 dark:text-moss-300">
             {t("projects.task.awaitingConfirmation")}
           </span>
         )}
@@ -1892,7 +1892,7 @@ function TaskRow({
                     onChange={(e) => setAcknowledgmentText(e.target.value)}
                     maxLength={500}
                   />
-                  <p className="text-xs text-moss-500 dark:text-moss-300">
+                  <p className="text-xs text-moss-600 dark:text-moss-300">
                     {t("projects.task.acknowledgment.hint")}
                   </p>
                 </div>
@@ -1990,7 +1990,7 @@ function AddTaskForm({
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.detail.addTaskTitle")}
       </h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -2106,7 +2106,7 @@ function HandoffSection({
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.handoff.title")}
       </h2>
       <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
@@ -2204,7 +2204,7 @@ function AnnouncementSection({
 
   return (
     <section className="mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.announcements.title")}
       </h2>
       {isOrg && (
@@ -2232,7 +2232,7 @@ function AnnouncementSection({
         <ul className="flex flex-col gap-2">
           {visibleAnnouncements.map((a) => (
             <li key={a.id} className="card">
-              <p className="mb-1 text-xs text-moss-500 dark:text-moss-300">
+              <p className="mb-1 text-xs text-moss-600 dark:text-moss-300">
                 {t("projects.announcements.postedBy", {
                   name: memberMap.get(a.actorKey) ?? t("common.memberFallback"),
                   when: formatRelativeTime(a.createdAt),
@@ -2451,7 +2451,7 @@ function CoOrganizerSection({
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.coOrganizers.title")}
       </h2>
       <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
@@ -2516,14 +2516,14 @@ function CoOrganizerSection({
           </button>
         </div>
       )}
-      <p className="mb-3 text-xs text-moss-500 dark:text-moss-300">
+      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
         {t("projects.coOrganizers.invite.copy")}
       </p>
 
       {/* Pending invitations */}
       {pendingInvitations.length > 0 && (
         <div className="mb-3">
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("projects.coOrganizers.pending.title")}
           </h3>
           <ul className="flex flex-col gap-1">
@@ -2560,7 +2560,7 @@ function CoOrganizerSection({
           when the window is empty. */}
       {pastInvitations.length > 0 && (
         <div>
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("projects.coOrganizers.past.title")}
           </h3>
           <ul className="flex flex-col gap-1">
@@ -2572,7 +2572,7 @@ function CoOrganizerSection({
                 <span className="font-medium text-moss-700 dark:text-moss-200">
                   {labelFor(invitation.inviteeKey)}
                 </span>
-                <span className="text-moss-500 dark:text-moss-300">
+                <span className="text-moss-600 dark:text-moss-300">
                   {t(
                     `projects.coOrganizers.past.outcome.${outcome}` as "projects.coOrganizers.past.outcome.declined",
                   )}
@@ -2621,7 +2621,7 @@ function CoOrganizerCapabilityCard() {
   return (
     <section className="card mb-4">
       <details>
-        <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-500 marker:hidden hover:underline">
+        <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-600 marker:hidden hover:underline">
           {t("projects.coorg.capabilitiesTitle")}
         </summary>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-moss-700 dark:text-moss-200">
@@ -2632,7 +2632,7 @@ function CoOrganizerCapabilityCard() {
           <li>{t("projects.coorg.capabilities.announce")}</li>
           <li>{t("projects.coorg.capabilities.stepDown")}</li>
         </ul>
-        <p className="mt-3 text-xs text-moss-500 dark:text-moss-400">
+        <p className="mt-3 text-xs text-moss-600 dark:text-moss-400">
           {t("projects.coorg.notIncluded")}
         </p>
       </details>
@@ -2661,7 +2661,7 @@ function CoOrganizerStepDownSection({
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.coOrganizers.title")}
       </h2>
       <button
@@ -2746,7 +2746,7 @@ function BulkTaskForm({
 
   return (
     <section className="card mb-4">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.bulkTask.toggle")}
       </h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -2758,7 +2758,7 @@ function BulkTaskForm({
           maxLength={5000}
           rows={6}
         />
-        <div className="flex items-center justify-between text-xs text-moss-500 dark:text-moss-300">
+        <div className="flex items-center justify-between text-xs text-moss-600 dark:text-moss-300">
           <span>
             {lineCount > 0
               ? `${lineCount} ${lineCount === 1 ? "task" : "tasks"}`
@@ -2808,7 +2808,7 @@ function HistoryTimeline({
   if (activities.length === 0) return null;
   return (
     <section className="card mb-4">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.history.title")}
       </h2>
       <ul className="flex flex-col gap-2">
@@ -2825,7 +2825,7 @@ function HistoryTimeline({
               (a.data as { taskTitle?: string }).taskTitle ?? "—";
             return (
               <li key={a.id} className="flex items-start gap-2 text-sm">
-                <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
+                <span className="shrink-0 text-xs text-moss-600 dark:text-moss-300">
                   {formatRelativeTime(a.createdAt)}
                 </span>
                 <span className="text-moss-700 dark:text-moss-200">
@@ -2839,7 +2839,7 @@ function HistoryTimeline({
           }
           return (
             <li key={a.id} className="flex items-start gap-2 text-sm">
-              <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
+              <span className="shrink-0 text-xs text-moss-600 dark:text-moss-300">
                 {formatRelativeTime(a.createdAt)}
               </span>
               <span className="text-moss-700 dark:text-moss-200">
@@ -2847,7 +2847,7 @@ function HistoryTimeline({
                 {" — "}
                 {t(`projects.activityType.${a.type}` as "projects.activityType.project_created")}
                 {a.type === "announcement" && (a.data as { body?: string }).body && (
-                  <span className="ml-1 italic text-moss-500 dark:text-moss-300">
+                  <span className="ml-1 italic text-moss-600 dark:text-moss-300">
                     {`"${((a.data as { body?: string }).body ?? "").slice(0, 80)}${((a.data as { body?: string }).body ?? "").length > 80 ? "..." : ""}"`}
                   </span>
                 )}

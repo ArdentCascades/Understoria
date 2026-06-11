@@ -98,7 +98,7 @@ export function ProjectSparkline({
           ) : null,
         )}
       </svg>
-      <p className="text-xs text-moss-500 dark:text-moss-300">
+      <p className="text-xs text-moss-600 dark:text-moss-300">
         {t("projects.sparkline.caption", {
           days: daily.length,
           hours: totalInWindow,

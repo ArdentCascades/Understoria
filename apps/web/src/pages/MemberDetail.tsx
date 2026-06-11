@@ -164,7 +164,7 @@ export default function MemberDetailPage() {
         <MemberAvatar publicKey={member.publicKey} size={128} framed />
         <div className="min-w-0 flex-1">
           <h1 className="mb-1 text-2xl font-semibold">{member.displayName}</h1>
-          <p className="text-xs font-mono text-moss-500 dark:text-moss-300">
+          <p className="text-xs font-mono text-moss-600 dark:text-moss-300">
             {shortKey(member.publicKey)}
           </p>
           <div className="mt-2">
@@ -174,12 +174,12 @@ export default function MemberDetailPage() {
       </header>
 
       <section className="card mb-4">
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
           {t("member.aboutTitle")}
         </h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <dt className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("member.skills")}
             </dt>
             <dd>
@@ -189,7 +189,7 @@ export default function MemberDetailPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <dt className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("member.availability")}
             </dt>
             <dd>
@@ -203,7 +203,7 @@ export default function MemberDetailPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <dt className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("member.area")}
             </dt>
             <dd>{member.locationZone || t("member.none")}</dd>
@@ -214,7 +214,7 @@ export default function MemberDetailPage() {
       <section className="card mb-4" aria-labelledby="trusted-by-title">
         <h2
           id="trusted-by-title"
-          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
         >
           {t("trustedBy.title")}
         </h2>
@@ -227,7 +227,7 @@ export default function MemberDetailPage() {
       <section className="card mb-4" aria-labelledby="vouch-section-title">
         <h2
           id="vouch-section-title"
-          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
         >
           {t("member.vouchTitle")}
         </h2>
@@ -240,17 +240,17 @@ export default function MemberDetailPage() {
             {t("member.vouchedJustNow")}
           </p>
         ) : isSelf ? (
-          <p className="text-sm text-moss-500 dark:text-moss-300">{t("member.cannotVouchSelf")}</p>
+          <p className="text-sm text-moss-600 dark:text-moss-300">{t("member.cannotVouchSelf")}</p>
         ) : currentTrust !== "trusted" ? (
-          <p className="text-sm text-moss-500 dark:text-moss-300">
+          <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("member.cannotVouchUntilTrusted")}
           </p>
         ) : trust === "trusted" ? (
-          <p className="text-sm text-moss-500 dark:text-moss-300">
+          <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("member.alreadyFullyTrusted")}
           </p>
         ) : alreadyVouchedByMe ? (
-          <p className="text-sm text-moss-500 dark:text-moss-300">
+          <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("member.alreadyVouchedByYou")}
           </p>
         ) : (
