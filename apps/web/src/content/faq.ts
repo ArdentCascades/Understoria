@@ -185,10 +185,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "Use device pairing. On the device that already has your " +
             "identity, go to Profile → Add another device. It shows a " +
-            "QR code and a short passphrase. On the new device, choose " +
+            "QR code and a six-word phrase. On the new device, choose " +
             "'I have another device' on the welcome screen, scan the " +
-            "code (or paste it), and type in the passphrase. Your " +
-            "identity and profile move across directly, device to " +
+            "code (or paste it), and type in the six words, in order. " +
+            "Your identity and profile move across directly, device to " +
             "device — nothing passes through any server.",
           "Two things don't come along: your message history (messages " +
             "are encrypted to each device's own keys, so they stay " +
