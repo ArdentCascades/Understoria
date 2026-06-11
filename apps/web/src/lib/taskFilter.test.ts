@@ -83,4 +83,42 @@ describe("matchesFilter", () => {
       expect(matchesFilter(makeTask(s), "done")).toBe(false);
     }
   });
+
+  describe("'mine'", () => {
+    const me = "alice-pub";
+    const other = "bob-pub";
+
+    function assigned(status: ProjectTaskStatus, key: string | null) {
+      const t = makeTask(status);
+      return { ...t, assignedTo: key };
+    }
+
+    it("matches when the task is assigned to currentKey, regardless of status", () => {
+      // Any claimer-carried status counts as "mine": claimed,
+      // awaiting_confirmation, even completed (their own history).
+      for (const s of ["claimed", "awaiting_confirmation", "completed"] as const) {
+        expect(matchesFilter(assigned(s, me), "mine", me)).toBe(true);
+      }
+    });
+
+    it("does not match tasks assigned to someone else", () => {
+      expect(matchesFilter(assigned("claimed", other), "mine", me)).toBe(false);
+      expect(
+        matchesFilter(assigned("awaiting_confirmation", other), "mine", me),
+      ).toBe(false);
+    });
+
+    it("does not match unassigned (open) tasks", () => {
+      expect(matchesFilter(assigned("open", null), "mine", me)).toBe(false);
+    });
+
+    it("matches nothing when currentKey is omitted", () => {
+      // The pill is only rendered when a current member exists, but
+      // the matcher should not silently match on an undefined key.
+      expect(matchesFilter(assigned("claimed", me), "mine")).toBe(false);
+      expect(matchesFilter(assigned("claimed", me), "mine", undefined)).toBe(
+        false,
+      );
+    });
+  });
 });

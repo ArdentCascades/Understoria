@@ -170,7 +170,11 @@ interface MockState {
   members: Member[];
   currentMember: Member | null;
   nodeId: string;
-  nodeConfig: undefined;
+  nodeConfig: {
+    taskCheckInDays: number;
+    taskNeedsHelpDays: number;
+    taskCheckInGraceDays: number;
+  };
   exchanges: unknown[];
   proposals: unknown[];
   lockState: "unprotected" | "locked" | "unlocked";
@@ -190,7 +194,11 @@ function freshState(): MockState {
     members: [member(organizerKey, "Organizer"), member(inviteeKey, "Bob Invitee")],
     currentMember: member(organizerKey, "Organizer"),
     nodeId,
-    nodeConfig: undefined,
+    nodeConfig: {
+      taskCheckInDays: 7,
+      taskNeedsHelpDays: 14,
+      taskCheckInGraceDays: 3,
+    },
     exchanges: [],
     proposals: [],
     lockState: "unprotected",

@@ -589,12 +589,20 @@
           "search": "Nothing matches your search.",
           "open": "No open tasks right now.",
           "inProgress": "No tasks in progress.",
-          "done": "No tasks done yet."
+          "done": "No tasks done yet.",
+          "mine": "Nothing claimed by you here right now."
         }
       }
     },
+    "taskFilters": {
+      "mine": "Mine"
+    },
     "task": {
       "claim": "Claim this task",
+      "claimSummary": "About {{hours}} hours · we'll check in with you privately after {{days}} days.",
+      "claimSummaryNoHours": "We'll check in with you privately after {{days}} days.",
+      "checkInAckToast": "Got it — we'll check in again in {{days}} days.",
+      "releaseReassurance": "Releasing helps the organizer find another helper — no judgment.",
       "notClaimablePlanning": "This project is still planning — the organizer hasn't launched it yet.",
       "notClaimablePaused": "This project is paused — no new claims right now.",
       "notClaimableOther": "This project isn't accepting claims right now.",

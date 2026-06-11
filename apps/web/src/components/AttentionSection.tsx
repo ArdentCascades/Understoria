@@ -106,6 +106,16 @@ export function AttentionSection() {
     if (!currentMember) return;
     try {
       await run(() => acknowledgeTaskCheckIn(taskId, currentMember.publicKey));
+      // The data layer stamps `checkInAcknowledgedAt = now`, which
+      // resets the `taskCheckInDays` clock used by `taskCheckInState`
+      // (see lib/taskCheckInState.ts). So the truthful number is
+      // exactly the configured private window — no grace stacking,
+      // no needs-help-floor arithmetic. Closing the loop with that
+      // number turns a silent button-press into a small relief
+      // moment: the claimer knows when they'll hear from us next.
+      showToast(
+        t("projects.task.checkInAckToast", { days: nodeConfig.taskCheckInDays }),
+      );
     } catch (err) {
       showToast(humanizeError(err), "error");
     }
