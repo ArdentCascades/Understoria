@@ -446,7 +446,9 @@
       "matchCount_other": "{{count}} matches",
       "matchPosition": "{{current}} of {{total}}",
       "previous": "Previous match",
-      "next": "Next match"
+      "next": "Next match",
+      "conversationWith": "Conversation with {{name}}",
+      "matchedName": "Matched their name"
     }
   },
   "projects": {
