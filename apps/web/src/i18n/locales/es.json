@@ -589,12 +589,20 @@
           "search": "Nada coincide con tu búsqueda.",
           "open": "Ninguna tarea abierta ahora mismo.",
           "inProgress": "Ninguna tarea en progreso.",
-          "done": "Ninguna tarea hecha aún."
+          "done": "Ninguna tarea hecha aún.",
+          "mine": "Aquí no tienes nada tomado ahora mismo."
         }
       }
     },
+    "taskFilters": {
+      "mine": "Míos"
+    },
     "task": {
       "claim": "Tomar esta tarea",
+      "claimSummary": "Cerca de {{hours}} horas · nos pondremos en contacto contigo en privado después de {{days}} días.",
+      "claimSummaryNoHours": "Nos pondremos en contacto contigo en privado después de {{days}} días.",
+      "checkInAckToast": "Recibido — te escribiremos de nuevo en {{days}} días.",
+      "releaseReassurance": "Soltarla ayuda a que quien organiza encuentre a alguien más — sin juicios.",
       "notClaimablePlanning": "Este proyecto sigue en planificación — quien organiza aún no lo ha lanzado.",
       "notClaimablePaused": "Este proyecto está en pausa — no acepta nuevas tomas por ahora.",
       "notClaimableOther": "Este proyecto no acepta tomas en este momento.",

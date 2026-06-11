@@ -162,7 +162,7 @@ export default function ProjectDetailPage() {
   const trimmedQuery = debouncedQuery.trim();
   const visibleTasks = useMemo(() => {
     return tasks
-      .filter((task) => matchesFilter(task, taskFilter))
+      .filter((task) => matchesFilter(task, taskFilter, currentMember?.publicKey))
       .filter((task) => {
         if (trimmedQuery === "") return true;
         return matchesQuery(
@@ -170,7 +170,21 @@ export default function ProjectDetailPage() {
           trimmedQuery,
         );
       });
-  }, [tasks, taskFilter, trimmedQuery]);
+  }, [tasks, taskFilter, trimmedQuery, currentMember?.publicKey]);
+  // "Mine" pill only renders when the current member is actually
+  // carrying something on this project — open-only projects show
+  // the three baseline pills instead of a perpetually-empty "Mine."
+  // Any claimer-carried status counts: claimed AND awaiting_confirmation
+  // (members still own the task they've just marked done).
+  const hasMineTasks = useMemo(() => {
+    if (!currentMember) return false;
+    return tasks.some(
+      (task) =>
+        task.assignedTo === currentMember.publicKey &&
+        (task.status === "claimed" ||
+          task.status === "awaiting_confirmation"),
+    );
+  }, [tasks, currentMember]);
   // Derive the set of comment ids with an open dispute proposal so
   // TaskComments can render the "Flagged" chip and hide the Flag
   // button. Computed in memory from the proposals already loaded in
@@ -500,6 +514,18 @@ export default function ProjectDetailPage() {
                         label: t("projects.detail.taskFilter.inProgress"),
                       },
                       { value: "done", label: t("projects.detail.taskFilter.done") },
+                      // "Mine" rendered only when the member has at least
+                      // one claimed/awaiting_confirmation task here. We
+                      // surface it after the lifecycle pills so the row
+                      // reads left-to-right as: scope → personal cut.
+                      ...(hasMineTasks
+                        ? [
+                            {
+                              value: "mine" as const,
+                              label: t("projects.taskFilters.mine"),
+                            },
+                          ]
+                        : []),
                     ] as { value: TaskFilter; label: string }[]
                   ).map(({ value, label }) => {
                     const active = taskFilter === value;
@@ -530,7 +556,9 @@ export default function ProjectDetailPage() {
                           ? t("projects.detail.taskFilter.empty.inProgress")
                           : taskFilter === "done"
                             ? t("projects.detail.taskFilter.empty.done")
-                            : null}
+                            : taskFilter === "mine"
+                              ? t("projects.detail.taskFilter.empty.mine")
+                              : null}
                   </p>
                 ) : (
                   <TaskList
@@ -1139,6 +1167,7 @@ function TaskList({
         allTasks={tasks}
         flaggedCommentIds={flaggedCommentIds}
         searchQuery={searchQuery}
+        taskCheckInDays={nodeConfig.taskCheckInDays}
       />
     );
   }
@@ -1301,6 +1330,7 @@ function SortableTaskRow({
   allTasks: readonly ProjectTask[];
   flaggedCommentIds: ReadonlySet<string>;
   searchQuery?: string;
+  taskCheckInDays: number;
 }) {
   const sortableHook = useSortable({ id: task.id, disabled: !sortable });
   const style = sortable
@@ -1347,6 +1377,7 @@ function TaskRow({
   searchQuery,
   sortableHandle,
   moveButtons,
+  taskCheckInDays,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -1359,6 +1390,11 @@ function TaskRow({
   needsMoreHands: boolean;
   allTasks: readonly ProjectTask[];
   flaggedCommentIds: ReadonlySet<string>;
+  /** Node-configured private check-in window. Drives the
+   *  claim-time commitment summary — the claimer sees "we'll check
+   *  in with you privately after N days" adjacent to the Claim
+   *  button so claiming isn't a black box. */
+  taskCheckInDays: number;
   /** Optional active search query — when non-empty, every match in the
    *  task title is wrapped in <mark> via HighlightedText so the member
    *  sees why this row matched. Description stays plain for v1 — the
@@ -1663,15 +1699,34 @@ function TaskRow({
         ) : null)}
       <div className="flex flex-wrap items-center gap-2">
         {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && acceptingClaims && (
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={pending}
-            aria-busy={pending}
-            onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
-          >
-            {pending ? t("common.working") : t("projects.task.claim")}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={pending}
+              aria-busy={pending}
+              onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
+            >
+              {pending ? t("common.working") : t("projects.task.claim")}
+            </button>
+            {/* Claim-time commitment summary. NOT a blocking dialog
+                — `asking-never-gated` means the affordance to step
+                up has to stay one tap; the summary sits adjacent so
+                the claimer sees what they're committing to without
+                a gate. The "privately" wording pre-frames the
+                check-in as the considerate nudge it is, not as a
+                deadline. */}
+            <p className="basis-full text-xs text-moss-500 dark:text-moss-300">
+              {task.estimatedHours > 0
+                ? t("projects.task.claimSummary", {
+                    hours: task.estimatedHours,
+                    days: taskCheckInDays,
+                  })
+                : t("projects.task.claimSummaryNoHours", {
+                    days: taskCheckInDays,
+                  })}
+            </p>
+          </>
         )}
         {task.status === "open" && !isOrganizer && !acceptingClaims && (
           <p className="text-xs text-moss-600 dark:text-moss-300">
@@ -1719,6 +1774,16 @@ function TaskRow({
             >
               {t("projects.task.release")}
             </button>
+            {/* `solidarity-not-shame`: keep release one-tap (no
+                confirm dialog gating a member who's already trying
+                to communicate "I can't carry this") and let the
+                muted line near the button carry the reassurance.
+                The framing names that releasing HELPS — it routes
+                the work to someone who can carry it — and that no
+                one is keeping score. */}
+            <p className="basis-full text-xs text-moss-500 dark:text-moss-300">
+              {t("projects.task.releaseReassurance")}
+            </p>
           </>
         )}
         {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
