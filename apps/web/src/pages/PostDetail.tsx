@@ -39,6 +39,10 @@ import { AchievementBadge } from "@/components/AchievementBadge";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { IconMessages, LeafDivider } from "@/components/visual";
 import {
+  ExchangeStateNarrative,
+  type ViewerRole,
+} from "@/components/ExchangeStateNarrative";
+import {
   formatDeadline,
   formatHours,
   formatRelativeTime,
@@ -57,7 +61,7 @@ type DialogKind =
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { posts, members, currentMember, nodeId } = useApp();
+  const { posts, members, currentMember, nodeId, nodeConfig } = useApp();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<DialogKind>(null);
@@ -308,6 +312,17 @@ export default function PostDetailPage() {
         alreadyConfirmed={alreadyConfirmed}
         helperName={helperName}
         helpedName={helpedName}
+        viewerRole={
+          isPoster ? "poster" : isClaimer ? "claimer" : "third-party"
+        }
+        otherPartyName={
+          isPoster
+            ? claimer?.displayName
+            : isClaimer
+              ? poster?.displayName
+              : undefined
+        }
+        autoConfirmHours={nodeConfig.autoConfirmHours}
         onOpenDialog={setDialog}
       />
 
@@ -414,6 +429,9 @@ interface ActionPanelProps {
   alreadyConfirmed: boolean;
   helperName: string | undefined;
   helpedName: string | undefined;
+  viewerRole: ViewerRole;
+  otherPartyName: string | undefined;
+  autoConfirmHours: number;
   onOpenDialog: (d: DialogKind) => void;
 }
 
@@ -425,6 +443,9 @@ function ActionPanel({
   alreadyConfirmed,
   helperName,
   helpedName,
+  viewerRole,
+  otherPartyName,
+  autoConfirmHours,
   onOpenDialog,
 }: ActionPanelProps) {
   const { t } = useTranslation();
@@ -478,9 +499,22 @@ function ActionPanel({
   }
 
   if (post.status === "claimed" || post.status === "awaiting_confirmation") {
+    // Non-party viewers still get a one-liner about the state. The
+    // existing "claimedBy" line below carries the names; the
+    // narrative carries the plain-language framing of where the
+    // exchange is in the both-must-confirm flow. Pre-#221 / pre-this
+    // change non-parties saw no story for `awaiting_confirmation` at
+    // all — they couldn't distinguish it from `claimed`.
     if (!isParty) {
       return (
         <Actions>
+          <ExchangeStateNarrative
+            post={post}
+            viewerRole={viewerRole}
+            alreadyConfirmed={false}
+            otherPartyName={undefined}
+            autoConfirmHours={autoConfirmHours}
+          />
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("postDetail.actionsClaimedBy", {
               helper: helperName ?? t("common.anyMember"),
@@ -492,24 +526,21 @@ function ActionPanel({
     }
     return (
       <Actions>
-        {post.status === "claimed" && (
-          <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-            {t("postDetail.guidance.claimed")}
-          </p>
-        )}
-        {post.status === "awaiting_confirmation" && !alreadyConfirmed && (
-          <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-            {t("postDetail.guidance.awaitingYou")}
-          </p>
-        )}
-        <p className="text-sm text-moss-700 dark:text-moss-200">
-          {t("postDetail.actionsExplain")}
-        </p>
-        {alreadyConfirmed ? (
-          <p className="text-sm font-medium text-canopy-700 dark:text-canopy-300">
-            {t("postDetail.actionsConfirmed")}
-          </p>
-        ) : (
+        {/* Narrative sits ABOVE the CTA per the audit: the
+            both-parties-must-confirm requirement gets stated in
+            plain language exactly where the member is about to act.
+            It replaces the old guidance.claimed / guidance.awaitingYou
+            / actionsExplain / actionsConfirmed stack, which never
+            said "both" plainly and split the truth across three
+            lines for parties to assemble. */}
+        <ExchangeStateNarrative
+          post={post}
+          viewerRole={viewerRole}
+          alreadyConfirmed={alreadyConfirmed}
+          otherPartyName={otherPartyName}
+          autoConfirmHours={autoConfirmHours}
+        />
+        {!alreadyConfirmed && (
           <button
             className="btn-primary"
             onClick={() => onOpenDialog({ type: "confirm-complete" })}

@@ -862,8 +862,6 @@
     "actionsWaiting": "Esperando que alguien la tome.",
     "actionsClaimOffer": "Tomar esta oferta",
     "actionsOfferToHelp": "Ofrecerme a ayudar",
-    "actionsExplain": "Cuando la ayuda haya ocurrido, ambas personas confirman aquí. Los créditos se transfieren cuando ambas hayan confirmado.",
-    "actionsConfirmed": "Has confirmado. Esperando a la otra persona.",
     "actionsConfirmComplete": "Confirmar que está hecho",
     "actionsFlag": "Algo no va bien — señalar",
     "actionsRelease": "Soltar mi compromiso",
@@ -893,9 +891,21 @@
     "stillOffering": "Sigues disponible? Ajustar el horario o los detalles puede ayudar a que se conecte con alguien que lo necesita.",
     "postAgain": "Publicar de nuevo",
     "guidance": {
-      "claimed": "Tu ayudante esta en ello. Cuando el trabajo termine, una persona lo marca como completo y la otra confirma.",
-      "awaitingYou": "La otra persona marco esto como completo. Revisa lo que se hizo y confirma para liberar los creditos.",
       "completed": "Los creditos se han transferido. Gracias a ambas personas por fortalecer la comunidad."
+    },
+    "exchangeState": {
+      "claimed": {
+        "party": "{{name}} tomó esto. Cuando la ayuda esté hecha, ambas personas confirman — el crédito se mueve cuando ambas partes han confirmado.",
+        "thirdParty": "Esta publicación ya está tomada."
+      },
+      "awaitingConfirmation": {
+        "viewerOwes": "{{name}} ya confirmó. Tu confirmación completa el intercambio y mueve el crédito.",
+        "viewerConfirmed": "Has confirmado. Esperando a {{name}} — el crédito se mueve cuando ambas partes han confirmado.",
+        "autoConfirm_one": "Si no llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} día.",
+        "autoConfirm_other": "Si no llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} días.",
+        "thirdParty": "Confirmado por una parte; esperando a la otra."
+      },
+      "completed": "Este intercambio está completo — el crédito se ha movido."
     },
     "newRolesEarned": "Nuevos roles comunitarios obtenidos"
   },

@@ -862,8 +862,6 @@
     "actionsWaiting": "Waiting for someone to claim this.",
     "actionsClaimOffer": "Claim this offer",
     "actionsOfferToHelp": "Offer to help",
-    "actionsExplain": "When the help has actually happened, both of you confirm below. Credits transfer once both have confirmed.",
-    "actionsConfirmed": "You've confirmed. Waiting on the other party.",
     "actionsConfirmComplete": "Confirm it's complete",
     "actionsFlag": "Something's wrong — flag it",
     "actionsRelease": "Release claim",
@@ -893,9 +891,21 @@
     "stillOffering": "Still available? Adjusting the timing or details can help match you with someone who needs this.",
     "postAgain": "Post this again",
     "guidance": {
-      "claimed": "Your helper is on it. When the work is done, one of you marks it complete and the other confirms.",
-      "awaitingYou": "The other party marked this complete. Review what was done and confirm to release the credits.",
       "completed": "Credits have transferred. Thank you both for strengthening the community."
+    },
+    "exchangeState": {
+      "claimed": {
+        "party": "{{name}} has claimed this. When the help is done, both of you confirm — credit moves when both sides have confirmed.",
+        "thirdParty": "This post is claimed."
+      },
+      "awaitingConfirmation": {
+        "viewerOwes": "{{name}} confirmed. Your confirmation completes the exchange and moves the credit.",
+        "viewerConfirmed": "You've confirmed. Waiting on {{name}} — credit moves when both sides have confirmed.",
+        "autoConfirm_one": "If they don't get to it, the node confirms automatically within about {{count}} day.",
+        "autoConfirm_other": "If they don't get to it, the node confirms automatically within about {{count}} days.",
+        "thirdParty": "Confirmed by one side; waiting on the other."
+      },
+      "completed": "This exchange is complete — credit has moved."
     },
     "newRolesEarned": "New community roles earned"
   },
