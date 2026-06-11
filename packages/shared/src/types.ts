@@ -437,6 +437,16 @@ export interface Project {
   completedAt: number | null;
   /** Note from the organizer when status transitions to "paused". */
   pauseNote: string | null;
+  /**
+   * ms-epoch when the project most recently transitioned to "paused".
+   * `null` outside the paused state; set by `pauseProject`, cleared by
+   * `resumeProject` and `completeProject`. Optional on the wire — legacy
+   * Project rows persisted before this field was introduced won't have
+   * it; readers must handle `undefined` (`attention.ts` surfaces the
+   * paused-long item with day-count-free copy in that case rather than
+   * faking precision against `createdAt`).
+   */
+  pausedAt?: number | null;
   locationZone: string;
   tags: string[];
   nodeId: string;

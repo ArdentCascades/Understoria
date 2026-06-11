@@ -23,6 +23,7 @@ import type {
   ProjectTask,
 } from "@/types";
 import { canClaimTask } from "@/db/projects";
+import { effectiveCoOrganizerKeysFromRows } from "@/db/coorgInvitations";
 import type { SignedVouch } from "@/lib/vouch";
 import { startOfUTCDay } from "./calendar";
 import {
@@ -95,7 +96,10 @@ export type AttentionItem =
       kind: "project_paused_long";
       projectId: string;
       projectTitle: string;
-      daysPaused: number;
+      /** Omitted on legacy paused rows that pre-date `Project.pausedAt`
+       *  — the renderer falls back to the day-count-free copy variant
+       *  rather than back-computing a duration from `createdAt`. */
+      daysPaused?: number;
       createdAt: number;
     }
   | {
@@ -258,6 +262,37 @@ export function computeAttentionItems(
   const nameByKey = new Map<string, string>();
   for (const m of members) nameByKey.set(m.publicKey, m.displayName);
 
+  // Organizer-authority predicate (`isProjectOrganizer` below + the
+  // `confirm_task` inline check) reads the DERIVED co-organizer view per
+  // `docs/co-organizer-invitations.md` §4: "every consumer of
+  // `coOrganizerKeys` reads the derived view, not the static array."
+  // Without this, a freshly-accepted co-organizer wouldn't receive
+  // organizer-targeted attention items (`confirm_task`,
+  // `project_deadline_approaching`, `project_paused_long`) until some
+  // later write re-materialized the static array on the Project row.
+  // We compute the projectId → effective-keys map once here from the
+  // already-passed live-query inputs and use it across the loops below.
+  const effectiveCoOrgByProjectId = new Map<string, ReadonlySet<string>>();
+  const _invitations = input.coorgInvitations ?? [];
+  const _responses = input.coorgInvitationResponses ?? [];
+  const _revocations = input.coorgInvitationRevocations ?? [];
+  const _now = input.now ?? Date.now();
+  for (const p of projects) {
+    effectiveCoOrgByProjectId.set(
+      p.id,
+      effectiveCoOrganizerKeysFromRows(
+        p.id,
+        _invitations,
+        _responses,
+        _revocations,
+        _now,
+      ),
+    );
+  }
+  function isEffectiveCoOrg(projectId: string, memberKey: string): boolean {
+    return effectiveCoOrgByProjectId.get(projectId)?.has(memberKey) ?? false;
+  }
+
   const items: AttentionItem[] = [];
 
   // Exchanges waiting for the current member's confirmation. A post
@@ -304,7 +339,7 @@ export function computeAttentionItems(
     if (!project) continue;
     if (
       project.organizerKey !== currentMember.publicKey &&
-      !project.coOrganizerKeys.includes(currentMember.publicKey)
+      !isEffectiveCoOrg(project.id, currentMember.publicKey)
     )
       continue;
     if (t.completedBy === currentMember.publicKey) continue;
@@ -398,7 +433,10 @@ export function computeAttentionItems(
   const now = input.now ?? Date.now();
 
   function isProjectOrganizer(project: Project, memberKey: string): boolean {
-    return project.organizerKey === memberKey || project.coOrganizerKeys.includes(memberKey);
+    return (
+      project.organizerKey === memberKey ||
+      isEffectiveCoOrg(project.id, memberKey)
+    );
   }
 
   for (const p of projects) {
@@ -417,18 +455,38 @@ export function computeAttentionItems(
 
   // Project paused too long — nudge the organizer if a project
   // has been paused for over 7 days. Pull-based, not a nag.
+  //
+  // Honest timing: `Project.pausedAt` is the ms-epoch of the most
+  // recent active → paused transition (set by `pauseProject`, cleared
+  // by `resumeProject` / `completeProject`). Legacy paused rows
+  // persisted before this field existed have `pausedAt === undefined`;
+  // we still surface the item for those (the organizer wants to know
+  // the project is sitting in paused) but with the day-count-free copy
+  // variant rather than faking a duration against `createdAt` — a
+  // year-old project paused yesterday would otherwise read "paused 365
+  // days." See `attention.projectPaused.line` (already day-count-free)
+  // and the design note on the type.
   for (const p of projects) {
     if (!isProjectOrganizer(p, currentMember.publicKey)) continue;
     if (p.status !== "paused") continue;
-    // Use the latest activity timestamp as proxy for when it was paused
-    // (we don't have a dedicated pausedAt field).
-    const pausedDuration = now - p.createdAt; // rough — uses createdAt as fallback
-    if (pausedDuration > 7 * DAY_MS) {
+    if (p.pausedAt != null) {
+      const pausedDuration = now - p.pausedAt;
+      if (pausedDuration > 7 * DAY_MS) {
+        items.push({
+          kind: "project_paused_long",
+          projectId: p.id,
+          projectTitle: p.title,
+          daysPaused: Math.floor(pausedDuration / DAY_MS),
+          createdAt: p.pausedAt,
+        });
+      }
+    } else {
+      // Legacy paused row — no pausedAt to threshold against. Surface
+      // the item with no day count so the copy stays honest.
       items.push({
         kind: "project_paused_long",
         projectId: p.id,
         projectTitle: p.title,
-        daysPaused: Math.floor(pausedDuration / DAY_MS),
         createdAt: p.createdAt,
       });
     }

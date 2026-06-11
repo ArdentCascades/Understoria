@@ -1074,4 +1074,255 @@ describe("computeAttentionItems", () => {
       });
     });
   });
+
+  // Bug fix: paused duration was being computed from `Project.createdAt`,
+  // which mis-fires on a year-old project paused yesterday ("paused 365
+  // days"). The fix wires `Project.pausedAt` and thresholds against it.
+  describe("project_paused_long uses pausedAt, not createdAt", () => {
+    const NOW = 10_000_000_000;
+    const DAY = 24 * 60 * 60 * 1000;
+
+    it("does NOT surface a long-lived project paused only yesterday", () => {
+      // A year-old project paused 1 day ago — under the old code this
+      // would have read `daysPaused: 365` because the threshold ran
+      // against createdAt. With pausedAt wired, it correctly stays
+      // silent until 7 days after the pause.
+      const proj = project({
+        id: "proj_recent_pause",
+        status: "paused",
+        organizerKey: "alice",
+        createdAt: NOW - 365 * DAY,
+        pausedAt: NOW - 1 * DAY,
+      });
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice],
+        now: NOW,
+      });
+      expect(items.some((i) => i.kind === "project_paused_long")).toBe(false);
+    });
+
+    it("surfaces once pausedAt is more than 7 days old", () => {
+      const proj = project({
+        id: "proj_old_pause",
+        status: "paused",
+        organizerKey: "alice",
+        createdAt: NOW - 365 * DAY,
+        pausedAt: NOW - 8 * DAY,
+      });
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice],
+        now: NOW,
+      });
+      const paused = items.find((i) => i.kind === "project_paused_long");
+      expect(paused).toBeDefined();
+      if (paused?.kind === "project_paused_long") {
+        // 8 days exactly — uses pausedAt, NOT the 365-day createdAt.
+        expect(paused.daysPaused).toBe(8);
+      }
+    });
+
+    it("legacy paused row without pausedAt still surfaces but with no day count", () => {
+      // Pre-feature project that was already in status: "paused" when
+      // the field was added — `pausedAt` is undefined. We do not fake
+      // a duration against createdAt; we surface the item with the
+      // day-count-free copy variant (the existing
+      // `attention.projectPaused.line` already omits days).
+      const proj = project({
+        id: "proj_legacy_paused",
+        status: "paused",
+        organizerKey: "alice",
+        createdAt: NOW - 365 * DAY,
+        // pausedAt deliberately omitted
+      });
+      const items = computeAttentionItems({
+        currentMember: alice,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice],
+        now: NOW,
+      });
+      const paused = items.find((i) => i.kind === "project_paused_long");
+      expect(paused).toBeDefined();
+      if (paused?.kind === "project_paused_long") {
+        expect(paused.daysPaused).toBeUndefined();
+      }
+    });
+  });
+
+  // Bug fix: organizer-targeted attention items were reading the static
+  // `Project.coOrganizerKeys` array, so a newly-accepted co-organizer
+  // didn't see `confirm_task`, `project_deadline_approaching`, or
+  // `project_paused_long` items until some later write re-materialized
+  // the array. The fix threads the derived `effectiveCoOrganizerKeys`
+  // view through the live-query rows. See `docs/co-organizer-invitations.md` §4.
+  describe("organizer authority reads the DERIVED co-organizer view", () => {
+    const NOW = 10_000_000_000;
+    const DAY = 24 * 60 * 60 * 1000;
+
+    function inv(
+      overrides: Partial<CoOrganizerInvitation> & { id: string },
+    ): CoOrganizerInvitation {
+      return {
+        projectId: "proj_derived",
+        inviterKey: "alice",
+        inviteeKey: "bob",
+        createdAt: NOW - 2 * DAY,
+        expiresAt: NOW + 14 * DAY,
+        nodeId,
+        signature: "sig",
+        ...overrides,
+      };
+    }
+    function accept(
+      invitationId: string,
+      inviteeKey: string,
+    ): CoOrganizerInvitationResponse {
+      return {
+        id: `r_${invitationId}`,
+        invitationId,
+        inviteeKey,
+        decision: "accept",
+        decidedAt: NOW - DAY,
+        nodeId,
+        signature: "sig",
+      };
+    }
+
+    it("surfaces confirm_task to a co-organizer recognized via the derived view (stale-array repro)", () => {
+      // Bob accepted an invitation from Alice (the primary) but the
+      // static `coOrganizerKeys` array has NOT been re-materialized
+      // (it still reads `[]`). Pre-fix: Bob saw no confirm_task item
+      // for Carmen's completed task. Post-fix: he does.
+      const proj = project({
+        id: "proj_derived",
+        organizerKey: "alice",
+        coOrganizerKeys: [], // deliberately stale
+      });
+      const t = task({
+        id: "t_derived",
+        projectId: proj.id,
+        status: "awaiting_confirmation",
+        completedBy: "carmen",
+        title: "Set up tool wall",
+      });
+      const invitation = inv({ id: "inv_derived_1", inviteeKey: bob.publicKey });
+      const response = accept(invitation.id, bob.publicKey);
+      const items = computeAttentionItems({
+        currentMember: bob,
+        posts: [],
+        projects: [proj],
+        projectTasks: [t],
+        members: [alice, bob, carmen],
+        coorgInvitations: [invitation],
+        coorgInvitationResponses: [response],
+        now: NOW,
+      });
+      const confirm = items.find((i) => i.kind === "confirm_task");
+      expect(confirm).toBeDefined();
+      if (confirm?.kind === "confirm_task") {
+        expect(confirm.taskId).toBe(t.id);
+      }
+    });
+
+    it("surfaces project_deadline_approaching to a derived-view co-organizer", () => {
+      const proj = project({
+        id: "proj_derived",
+        organizerKey: "alice",
+        coOrganizerKeys: [], // stale
+        status: "active",
+        deadline: NOW + 2 * DAY,
+      });
+      const invitation = inv({ id: "inv_deadline", inviteeKey: bob.publicKey });
+      const response = accept(invitation.id, bob.publicKey);
+      const items = computeAttentionItems({
+        currentMember: bob,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [invitation],
+        coorgInvitationResponses: [response],
+        now: NOW,
+      });
+      expect(
+        items.some((i) => i.kind === "project_deadline_approaching"),
+      ).toBe(true);
+    });
+
+    it("does NOT surface to an invitee whose acceptance was revoked", () => {
+      const proj = project({
+        id: "proj_derived",
+        organizerKey: "alice",
+        coOrganizerKeys: [],
+        status: "active",
+        deadline: NOW + 2 * DAY,
+      });
+      const invitation = inv({ id: "inv_revoked", inviteeKey: bob.publicKey });
+      const response = accept(invitation.id, bob.publicKey);
+      const revocation: CoOrganizerInvitationRevocation = {
+        id: "rev_1",
+        invitationId: invitation.id,
+        inviterKey: "alice",
+        revokedAt: NOW - 12 * 60 * 60 * 1000,
+        nodeId,
+        signature: "sig",
+      };
+      const items = computeAttentionItems({
+        currentMember: bob,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [invitation],
+        coorgInvitationResponses: [response],
+        coorgInvitationRevocations: [revocation],
+        now: NOW,
+      });
+      expect(
+        items.some((i) => i.kind === "project_deadline_approaching"),
+      ).toBe(false);
+    });
+
+    it("does NOT surface to an invitee who declined", () => {
+      const proj = project({
+        id: "proj_derived",
+        organizerKey: "alice",
+        coOrganizerKeys: [],
+        status: "active",
+        deadline: NOW + 2 * DAY,
+      });
+      const invitation = inv({ id: "inv_declined", inviteeKey: bob.publicKey });
+      const declined: CoOrganizerInvitationResponse = {
+        id: "r_declined",
+        invitationId: invitation.id,
+        inviteeKey: bob.publicKey,
+        decision: "decline",
+        decidedAt: NOW - DAY,
+        nodeId,
+        signature: "sig",
+      };
+      const items = computeAttentionItems({
+        currentMember: bob,
+        posts: [],
+        projects: [proj],
+        projectTasks: [],
+        members: [alice, bob],
+        coorgInvitations: [invitation],
+        coorgInvitationResponses: [declined],
+        now: NOW,
+      });
+      expect(
+        items.some((i) => i.kind === "project_deadline_approaching"),
+      ).toBe(false);
+    });
+  });
 });

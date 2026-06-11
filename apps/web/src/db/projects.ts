@@ -96,6 +96,7 @@ export async function createProject(
     createdAt: now,
     completedAt: null,
     pauseNote: null,
+    pausedAt: null,
     locationZone: input.locationZone.trim(),
     tags: input.tags.map((t) => t.trim()).filter(Boolean),
     nodeId,
@@ -131,6 +132,11 @@ export async function pauseProject(
         ...p,
         status: "paused",
         pauseNote: note.trim(),
+        // Stamp the transition so the "paused too long" attention item
+        // computes honest days-since-pause instead of falling back to
+        // createdAt (which would mis-fire on year-old projects paused
+        // yesterday). See attention.ts.
+        pausedAt: Date.now(),
       };
       await db.projects.put(updated);
       await logActivity(
@@ -156,7 +162,12 @@ export async function resumeProject(
       const p = await requireOrganizer(projectId, organizerKey);
       if (p.status !== "paused")
         throw new Error("Only a paused project can be resumed.");
-      const updated: Project = { ...p, status: "active", pauseNote: null };
+      const updated: Project = {
+        ...p,
+        status: "active",
+        pauseNote: null,
+        pausedAt: null,
+      };
       await db.projects.put(updated);
       await logActivity(
         projectId,
@@ -186,6 +197,11 @@ export async function completeProject(
         ...p,
         status: "completed",
         completedAt: now,
+        // Completing from "paused" clears the pause stamp — the project
+        // is no longer in the paused state, so the "paused too long"
+        // attention item must not re-surface if the status is later
+        // toggled.
+        pausedAt: null,
       };
       await db.projects.put(updated);
       await logActivity(
@@ -1445,6 +1461,7 @@ export async function cloneProject(
     createdAt: now,
     completedAt: null,
     pauseNote: null,
+    pausedAt: null,
     locationZone: source.locationZone,
     tags: [...source.tags],
     nodeId,

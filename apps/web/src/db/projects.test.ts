@@ -120,6 +120,35 @@ describe("project lifecycle", () => {
     expect(resumed.pauseNote).toBeNull();
   });
 
+  it("pauseProject stamps pausedAt; resumeProject clears it", async () => {
+    // Honest timing for the "paused too long" attention item — without
+    // pausedAt, that item used to compute duration from createdAt and
+    // mis-fire on year-old projects paused yesterday.
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    expect(p.pausedAt ?? null).toBeNull();
+    await launchProject(p.id, org.publicKey);
+    const before = Date.now();
+    const paused = await pauseProject(p.id, org.publicKey, "Heatwave");
+    const after = Date.now();
+    expect(paused.pausedAt).toBeDefined();
+    expect(paused.pausedAt!).toBeGreaterThanOrEqual(before);
+    expect(paused.pausedAt!).toBeLessThanOrEqual(after);
+    const resumed = await resumeProject(p.id, org.publicKey);
+    expect(resumed.pausedAt ?? null).toBeNull();
+  });
+
+  it("completeProject clears pausedAt when completing from a paused state", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    const paused = await pauseProject(p.id, org.publicKey, "Heatwave");
+    expect(paused.pausedAt).toBeDefined();
+    const done = await completeProject(p.id, org.publicKey);
+    expect(done.status).toBe("completed");
+    expect(done.pausedAt ?? null).toBeNull();
+  });
+
   it("completeProject can fire from active or paused", async () => {
     const org = await createMember({ displayName: "Org" }, NODE);
     const p = await aProject(org);
