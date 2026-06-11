@@ -343,7 +343,7 @@ function DragHandleIcon() {
       width="14"
       height="14"
       fill="currentColor"
-      className="text-moss-500"
+      className="text-moss-500 dark:text-moss-300"
     >
       <circle cx="5" cy="4" r="1.2" />
       <circle cx="11" cy="4" r="1.2" />

@@ -93,7 +93,7 @@ export function CommunitySettingsSection() {
     >
       <h2
         id="community-settings-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("profile.communitySettings.title")}
       </h2>
@@ -312,7 +312,7 @@ export function CommunitySettingsSection() {
               }
               className="input"
             />
-            <span className="text-xs text-moss-500">
+            <span className="text-xs text-moss-500 dark:text-moss-300">
               {t("community.autoConfirmHours.unit")}
             </span>
           </div>
@@ -369,7 +369,7 @@ export function CommunitySettingsSection() {
             {t("profile.communitySettings.reset")}
           </button>
           {savedAt && (
-            <span className="text-xs text-moss-500">
+            <span className="text-xs text-moss-500 dark:text-moss-300">
               {t("common.savedAt", {
                 when: new Date(savedAt).toLocaleTimeString(
                   i18n.resolvedLanguage,
@@ -475,7 +475,7 @@ function CustomMilestonesPanel({
       </p>
 
       {milestones.length === 0 ? (
-        <p className="text-xs italic text-moss-500">
+        <p className="text-xs italic text-moss-500 dark:text-moss-300">
           {t("community.customMilestones.emptyMessage")}
         </p>
       ) : (
@@ -487,7 +487,7 @@ function CustomMilestonesPanel({
             >
               <span>
                 <span className="font-medium">{m.label}</span>{" "}
-                <span className="text-xs text-moss-500">
+                <span className="text-xs text-moss-500 dark:text-moss-300">
                   ({t(`community.customMilestones.type${capitalize(m.type)}`)} ·{" "}
                   {m.threshold})
                 </span>

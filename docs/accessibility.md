@@ -233,7 +233,12 @@ address. Each maps to a focused PR or a small bundle.
   pill backgrounds. A broader survey of body-text pairings on
   white card backgrounds (especially `text-moss-500`, which is
   used widely for secondary labels) against 4.5:1 has not yet
-  been done.
+  been done. *Dark-mode half closed in PR `fix/dark-mode-secondary-contrast`*:
+  every secondary-text pairing now resolves to `dark:text-moss-300`
+  on `moss-900` / `moss-950` (6.20:1 / 8.72:1) and is asserted in
+  `palette-contrast.test.ts`'s "secondary text on dark backgrounds"
+  block. The light-mode half (text-moss-500 on white cards) still
+  needs surveying.
 - **Screen reader testing.** No one has driven the app with
   NVDA, VoiceOver, or TalkBack end-to-end. This is the gap most
   likely to surface things this audit missed.

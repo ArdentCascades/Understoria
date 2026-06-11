@@ -197,10 +197,10 @@ export default function ProposalNewPage() {
         </label>
 
         <fieldset className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">
-          <legend className="px-1 text-xs uppercase tracking-wide text-moss-500">
+          <legend className="px-1 text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("proposals.new.configHeader")}
           </legend>
-          <p className="mb-3 text-xs text-moss-500 dark:text-moss-400">
+          <p className="mb-3 text-xs text-moss-500 dark:text-moss-300">
             {t("proposals.new.configIntro")}
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -238,10 +238,10 @@ export default function ProposalNewPage() {
         </fieldset>
 
         <fieldset className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">
-          <legend className="px-1 text-xs uppercase tracking-wide text-moss-500">
+          <legend className="px-1 text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("proposals.new.tierHeader")}
           </legend>
-          <p className="mb-3 text-xs text-moss-500 dark:text-moss-400">
+          <p className="mb-3 text-xs text-moss-500 dark:text-moss-300">
             {t("proposals.new.tierIntro")}
             <WhyTooltip principleId="deliberation-over-speed" />
           </p>
@@ -260,7 +260,7 @@ export default function ProposalNewPage() {
                   <span className="font-medium">
                     {t(`proposals.reversibility.${tier}`)}
                   </span>{" "}
-                  <span className="text-xs text-moss-500 dark:text-moss-400">
+                  <span className="text-xs text-moss-500 dark:text-moss-300">
                     — {t(`proposals.reversibility.${tier}Hint`)}
                   </span>
                 </span>
@@ -396,7 +396,7 @@ function ConfigField({
         onBlur={onBlur}
         aria-invalid={Boolean(error) || undefined}
       />
-      <span className="text-xs text-moss-500 dark:text-moss-400">
+      <span className="text-xs text-moss-500 dark:text-moss-300">
         {changed
           ? t("proposals.new.currentValue", { value: current })
           : t("proposals.new.unchanged")}

@@ -94,7 +94,7 @@ export function PostCard({
                 <AvailabilityChips chips={posterAvailabilityChips} compact />
               </div>
             )}
-          <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
+          <div className="mt-3 flex items-center justify-between text-xs text-moss-600 dark:text-moss-300">
             <span className="flex flex-wrap items-center gap-1.5">
               <span className="font-medium">
                 {isCurrentMember ? t("common.you") : posterName}

@@ -24,7 +24,7 @@ export function WhyTooltip({ principleId }: { principleId: string }) {
     <span className="inline-block align-middle">
       <button
         type="button"
-        className="ml-1 text-xs text-moss-400 underline-offset-2 hover:text-moss-600 hover:underline dark:text-moss-500 dark:hover:text-moss-300"
+        className="ml-1 text-xs text-moss-400 underline-offset-2 hover:text-moss-600 hover:underline dark:text-moss-300 dark:hover:text-moss-300"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >

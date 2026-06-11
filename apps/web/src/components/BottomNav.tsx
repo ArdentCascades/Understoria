@@ -107,7 +107,7 @@ export function BottomNav() {
                   "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[0.6875rem] font-medium leading-tight transition-colors sm:text-xs sm:leading-normal",
                   isActive
                     ? "text-canopy-700 dark:text-canopy-300"
-                    : "text-moss-600 dark:text-moss-400 hover:text-canopy-700 dark:hover:text-canopy-300",
+                    : "text-moss-600 dark:text-moss-300 hover:text-canopy-700 dark:hover:text-canopy-300",
                 ].join(" ")
               }
             >

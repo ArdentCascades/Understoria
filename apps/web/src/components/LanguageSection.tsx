@@ -33,7 +33,7 @@ export function LanguageSection() {
     <section className="card mb-4" aria-labelledby="language-section-title">
       <h2
         id="language-section-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("profile.language.title")}
       </h2>

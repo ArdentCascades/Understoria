@@ -57,7 +57,7 @@ export function AppearanceSection() {
     <section className="card mb-4" aria-labelledby="appearance-section-title">
       <h2
         id="appearance-section-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("profile.appearance.title")}
       </h2>
@@ -96,7 +96,7 @@ export function AppearanceSection() {
 
       <h3
         id="appearance-text-size-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("profile.appearance.textSizeTitle")}
       </h3>
@@ -135,7 +135,7 @@ export function AppearanceSection() {
         })}
       </div>
       {textSizePreference === "auto" && (
-        <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
+        <p className="mt-2 text-xs text-moss-500 dark:text-moss-300">
           {t("profile.appearance.autoSublabel", {
             resolved: t(`profile.appearance.${textSize}`),
           })}
@@ -149,7 +149,7 @@ export function AppearanceSection() {
 
       <h3
         id="appearance-density-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("profile.appearance.densityTitle")}
       </h3>

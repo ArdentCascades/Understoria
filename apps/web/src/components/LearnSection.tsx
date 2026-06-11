@@ -40,7 +40,7 @@ export function LearnSection() {
     <section className="card mb-4" aria-labelledby="learn-section-title">
       <h2
         id="learn-section-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("profile.learn.title")}
       </h2>
@@ -107,7 +107,7 @@ export function LearnSection() {
 
       {panel === "opsec" && (
         <div className="mt-4 space-y-4 border-t border-moss-200 pt-4 dark:border-moss-800">
-          <p className="text-xs text-moss-500 dark:text-moss-400">
+          <p className="text-xs text-moss-500 dark:text-moss-300">
             {t("profile.learn.opsecIntro")}
           </p>
           {OPSEC_GUIDE.map((section) => (
@@ -130,7 +130,7 @@ export function LearnSection() {
           id="design-principles"
           className="mt-4 space-y-4 border-t border-moss-200 pt-4 dark:border-moss-800"
         >
-          <p className="text-xs text-moss-500 dark:text-moss-400">
+          <p className="text-xs text-moss-500 dark:text-moss-300">
             {t("profile.learn.principlesIntro")}
           </p>
           {DESIGN_PRINCIPLES.map((p, i) => (
@@ -160,7 +160,7 @@ export function LearnSection() {
               <button
                 type="button"
                 onClick={() => copyPrompt(p.id, promptShareText(p))}
-                className="mt-1 text-xs text-moss-500 underline-offset-2 hover:underline"
+                className="mt-1 text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-300"
               >
                 {copiedId === p.id
                   ? t("profile.learn.promptCopied")

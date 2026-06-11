@@ -344,7 +344,7 @@ export default function BoardPage() {
                   ? t("board.tabs.offers")
                   : t("projects.tab")}
               {tt !== "PROJECTS" && (
-                <span className="ml-1 text-xs text-moss-500 dark:text-moss-400">
+                <span className="ml-1 text-xs text-moss-500 dark:text-moss-300">
                   {t("board.openCount", { count: openCount[tt] })}
                 </span>
               )}

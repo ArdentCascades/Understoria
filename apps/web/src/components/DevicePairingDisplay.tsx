@@ -87,7 +87,7 @@ export function DevicePairingDisplay({
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="text-sm uppercase tracking-wide text-moss-500"
+        className="text-sm uppercase tracking-wide text-moss-500 dark:text-moss-300"
       >
         {t("addDevice.display.countdown", { mmss })}
       </div>
@@ -121,7 +121,7 @@ export function DevicePairingDisplay({
         aria-label={t("addDevice.display.fingerprintAriaLabel")}
         className="flex flex-col items-center gap-1"
       >
-        <span className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-400">
+        <span className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
           {t("addDevice.display.fingerprintLabel")}
         </span>
         <span className="font-mono text-sm tracking-widest text-moss-700 dark:text-moss-200">
@@ -135,7 +135,7 @@ export function DevicePairingDisplay({
         ariaLabel={t("addDevice.display.qrAriaLabel")}
       />
 
-      <p className="max-w-prose text-center text-xs text-moss-500 dark:text-moss-400">
+      <p className="max-w-prose text-center text-xs text-moss-500 dark:text-moss-300">
         {t("addDevice.display.afterImport")}
       </p>
     </div>

@@ -36,7 +36,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 // itself is already a link and announces its label.
 function RowChevron() {
   return (
-    <span aria-hidden="true" className="ml-auto text-moss-400">
+    <span aria-hidden="true" className="ml-auto text-moss-400 dark:text-moss-300">
       →
     </span>
   );
@@ -205,7 +205,7 @@ export function AttentionSection() {
                         title: item.postTitle,
                       })}
                     </span>
-                    <span className="block text-xs text-moss-500">
+                    <span className="block text-xs text-moss-500 dark:text-moss-300">
                       {t("attention.tapToConfirm")}
                     </span>
                   </span>
@@ -230,7 +230,7 @@ export function AttentionSection() {
                         project: item.projectTitle,
                       })}
                     </span>
-                    <span className="block text-xs text-moss-500">
+                    <span className="block text-xs text-moss-500 dark:text-moss-300">
                       {t("attention.tapToConfirmTask")}
                     </span>
                   </span>
@@ -259,7 +259,7 @@ export function AttentionSection() {
                             title: item.postTitle,
                           })}
                     </span>
-                    <span className="block text-xs text-moss-500">
+                    <span className="block text-xs text-moss-500 dark:text-moss-300">
                       {t("attention.postClaimed.hint")}
                     </span>
                   </span>
@@ -282,7 +282,7 @@ export function AttentionSection() {
                         name: item.voucherName,
                       })}
                     </span>
-                    <span className="block text-xs text-moss-500">
+                    <span className="block text-xs text-moss-500 dark:text-moss-300">
                       {t("attention.vouchReceived.hint")}
                     </span>
                   </span>
@@ -524,7 +524,7 @@ export function AttentionSection() {
                         location: item.location,
                       })}
                     </span>
-                    <span className="block text-xs text-moss-500">
+                    <span className="block text-xs text-moss-500 dark:text-moss-300">
                       {t("events.attention.eventTodayHint")}
                       {/* `no-notifications` tooltip per design doc §8.1 —
                           named on the row so members can see why the
@@ -578,7 +578,7 @@ export function AttentionSection() {
                         capacity: item.capacity,
                       })}
                     </span>
-                    <span className="block text-xs text-moss-500">
+                    <span className="block text-xs text-moss-500 dark:text-moss-300">
                       {t("events.attention.eventCapacityReachedHint")}
                     </span>
                   </span>

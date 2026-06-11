@@ -51,7 +51,7 @@ export function ProjectCard({
         <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
           {project.category.replace(/_/g, " ")}
         </span>
-        <span className="text-xs text-moss-500 dark:text-moss-400">
+        <span className="text-xs text-moss-500 dark:text-moss-300">
           {taskCount} task{taskCount === 1 ? "" : "s"}
           {openTaskCount > 0 ? ` · ${openTaskCount} open` : ""}
         </span>
@@ -80,7 +80,7 @@ export function ProjectCard({
           style={{ width: `${percent}%` }}
         />
       </div>
-      <div className="mt-2 flex items-center justify-between text-xs text-moss-600 dark:text-moss-400">
+      <div className="mt-2 flex items-center justify-between text-xs text-moss-600 dark:text-moss-300">
         <span>
           {t("projects.progressLabel", {
             contributed: formatHours(project.contributedHours),
@@ -90,7 +90,7 @@ export function ProjectCard({
         </span>
         <span>{formatRelativeTime(project.createdAt)}</span>
       </div>
-      <p className="mt-1 text-xs text-moss-500 dark:text-moss-400">
+      <p className="mt-1 text-xs text-moss-500 dark:text-moss-300">
         {t("projects.byOrganizer", { name: organizerName })}
       </p>
     </Link>

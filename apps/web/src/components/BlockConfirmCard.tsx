@@ -146,7 +146,7 @@ export function BlockConfirmCard({
           </h2>
           <WhyTooltip principleId="privacy-precondition" />
         </div>
-        <p className="mt-1 text-xs text-moss-500">
+        <p className="mt-1 text-xs text-moss-500 dark:text-moss-300">
           {blockedDisplayName}
         </p>
 
@@ -193,7 +193,7 @@ export function BlockConfirmCard({
           <span className="flex-1">
             {t("block.confirm.hideGovernanceCheckbox")}
             <WhyTooltip principleId="community-authority" />
-            <span className="mt-1 block text-[11px] text-moss-500">
+            <span className="mt-1 block text-[11px] text-moss-500 dark:text-moss-300">
               {t("block.confirm.hideGovernanceWhy")}
             </span>
           </span>

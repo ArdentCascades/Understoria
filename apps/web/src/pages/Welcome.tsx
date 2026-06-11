@@ -306,7 +306,7 @@ export default function WelcomePage() {
               />
             </label>
           </div>
-          <p className="text-center text-xs text-moss-500 dark:text-moss-400">
+          <p className="text-center text-xs text-moss-500 dark:text-moss-300">
             {t("welcome.profileSetup.hint")}
           </p>
         </div>
@@ -343,7 +343,7 @@ function InviteOnlyLanding({ loading = false }: { loading?: boolean }) {
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-6 p-8 text-center">
         <div aria-hidden className="text-5xl">{"\u{1F33F}"}</div>
-        <p className="text-sm text-moss-500 dark:text-moss-400">
+        <p className="text-sm text-moss-500 dark:text-moss-300">
           {t("common.loading")}
         </p>
       </div>

@@ -221,7 +221,7 @@ export default function MessagesShell() {
                             <span className="font-semibold">
                               {nameByKey.get(c.otherKey) ?? t("common.memberFallback")}
                             </span>
-                            <span className="text-xs text-moss-500">
+                            <span className="text-xs text-moss-500 dark:text-moss-300">
                               {formatRelativeTime(c.lastMessage.createdAt)}
                             </span>
                           </div>
@@ -259,7 +259,7 @@ export function MessagesEmptyPane() {
   const { t } = useTranslation();
   return (
     <div className="flex h-full items-center justify-center px-4 py-8 text-center">
-      <p className="text-sm text-moss-500 dark:text-moss-400">
+      <p className="text-sm text-moss-500 dark:text-moss-300">
         {t("messages.shell.emptyPane")}
       </p>
     </div>
@@ -313,7 +313,7 @@ function SearchResults({
                       <HighlightedText text={name} query={query} />
                     </span>
                     {g.hits.length > 0 && (
-                      <span className="text-xs text-moss-500">
+                      <span className="text-xs text-moss-500 dark:text-moss-300">
                         {t("messages.search.matchCount", { count: g.hits.length })}
                       </span>
                     )}

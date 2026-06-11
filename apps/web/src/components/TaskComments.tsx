@@ -175,7 +175,7 @@ export function TaskComments({
       {expanded && (
         <div className="mt-stack-sm space-y-stack-sm">
           {count === 0 && (
-            <p className="text-xs italic text-moss-500 dark:text-moss-400">
+            <p className="text-xs italic text-moss-500 dark:text-moss-300">
               {t("projects.task.comments.empty")}
             </p>
           )}
@@ -204,7 +204,7 @@ export function TaskComments({
                 key={c.id}
                 className="rounded-xl border border-bark-200/60 bg-bark-50 p-stack-sm dark:border-moss-800 dark:bg-moss-900/40"
               >
-                <p className="mb-1 flex flex-wrap items-center gap-2 text-xs text-moss-500 dark:text-moss-400">
+                <p className="mb-1 flex flex-wrap items-center gap-2 text-xs text-moss-500 dark:text-moss-300">
                   <span>
                     {t("projects.task.comments.postedBy", {
                       name:
@@ -220,7 +220,7 @@ export function TaskComments({
                   )}
                 </p>
                 {isDeleted ? (
-                  <p className="text-sm italic text-moss-500 dark:text-moss-400">
+                  <p className="text-sm italic text-moss-500 dark:text-moss-300">
                     {t("projects.task.comments.tombstone")}
                   </p>
                 ) : (
@@ -233,7 +233,7 @@ export function TaskComments({
                     <button
                       type="button"
                       onClick={() => handleDelete(c.id)}
-                      className="text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-400"
+                      className="text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-300"
                     >
                       {t("projects.task.comments.delete")}
                     </button>
@@ -242,7 +242,7 @@ export function TaskComments({
                     <button
                       type="button"
                       onClick={() => handleFlag(c.id)}
-                      className="text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-400"
+                      className="text-xs text-moss-500 underline-offset-2 hover:underline dark:text-moss-300"
                     >
                       {t("projects.task.comments.flag")}
                     </button>

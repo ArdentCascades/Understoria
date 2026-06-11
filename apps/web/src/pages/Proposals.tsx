@@ -276,18 +276,18 @@ function ProposalCard({
       )}
       <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("proposals.proposerLabel")}
           </dt>
           <dd className="mt-0.5">
             {proposal.proposerKey === "system_backfill" ? (
-              <span className="italic text-moss-500">
+              <span className="italic text-moss-500 dark:text-moss-300">
                 {t("proposals.backfillProposer")}
               </span>
             ) : (
               <>
                 {proposerName ?? t("common.memberFallback")}{" "}
-                <span className="font-mono text-xs text-moss-500">
+                <span className="font-mono text-xs text-moss-500 dark:text-moss-300">
                   ({shortKey(proposal.proposerKey)})
                 </span>
               </>
@@ -295,7 +295,7 @@ function ProposalCard({
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-moss-500">
+          <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
             {t("proposals.proposedLabel")}
           </dt>
           <dd className="mt-0.5">{formatRelativeTime(proposal.createdAt)}</dd>
@@ -303,7 +303,7 @@ function ProposalCard({
         {proposal.closedAt && (
           <>
             <div>
-              <dt className="text-xs uppercase tracking-wide text-moss-500">
+              <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
                 {t("proposals.closedLabel")}
               </dt>
               <dd className="mt-0.5">
@@ -312,7 +312,7 @@ function ProposalCard({
             </div>
             {proposal.closedReason && (
               <div className="sm:col-span-2">
-                <dt className="text-xs uppercase tracking-wide text-moss-500">
+                <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
                   {t("proposals.outcomeReasonLabel")}
                 </dt>
                 <dd className="mt-0.5 italic text-moss-700 dark:text-moss-200">
@@ -371,7 +371,7 @@ function ProposalCard({
         <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
           {closing === null ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs text-moss-500 dark:text-moss-400">
+              <span className="text-xs text-moss-500 dark:text-moss-300">
                 {t("proposals.recordOutcomeHint")}
               </span>
               <div className="flex flex-wrap gap-2">
@@ -573,7 +573,7 @@ function VoteSection({
 
   return (
     <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500">
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
         {t(
           tally.totalVoters === 0
             ? "proposals.vote.headingNone"
@@ -629,7 +629,7 @@ function VoteSection({
             </div>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-moss-500 dark:text-moss-400">
+              <span className="text-xs text-moss-500 dark:text-moss-300">
                 {myChoice
                   ? t("proposals.vote.changeChoice", {
                       choice: t(`proposals.vote.choice.${myChoice}`),
@@ -686,7 +686,7 @@ function TallyDisplay({
           })}
         </span>
         {tally.affirms.length > 0 && (
-          <span className="ml-1 text-moss-500 dark:text-moss-400">
+          <span className="ml-1 text-moss-500 dark:text-moss-300">
             ({renderNames(tally.affirms)})
           </span>
         )}
@@ -696,7 +696,7 @@ function TallyDisplay({
           {t("proposals.vote.tally.blocks", { count: tally.blocks.length })}
         </span>
         {tally.blocks.length > 0 && (
-          <span className="ml-1 text-moss-500 dark:text-moss-400">
+          <span className="ml-1 text-moss-500 dark:text-moss-300">
             ({renderNames(tally.blocks)})
           </span>
         )}
@@ -719,7 +719,7 @@ function TallyDisplay({
           })}
         </span>
         {tally.abstains.length > 0 && (
-          <span className="ml-1 text-moss-500 dark:text-moss-400">
+          <span className="ml-1 text-moss-500 dark:text-moss-300">
             ({renderNames(tally.abstains)})
           </span>
         )}
@@ -785,7 +785,7 @@ function ConfigChangePayload({ payload }: { payload: string }) {
       <ul className="flex flex-col gap-0.5 font-mono">
         {entries.map(([k, v]) => (
           <li key={k}>
-            <span className="text-moss-600 dark:text-moss-400">{k}:</span>{" "}
+            <span className="text-moss-600 dark:text-moss-300">{k}:</span>{" "}
             <span className="text-moss-900 dark:text-moss-100">{String(v)}</span>
           </li>
         ))}
