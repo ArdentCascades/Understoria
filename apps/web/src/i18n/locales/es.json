@@ -942,6 +942,7 @@
     "wantsYou": "{{name}} te quiere en su red de apoyo mutuo.",
     "inviterKey": "Clave de quien invita",
     "expires": "Caduca",
+    "expiresOn": "Esta invitación es válida hasta el {{date}}.",
     "fingerprintReminder": "Antes de aceptar: confirma que la huella de la clave de quien invita coincide con la que {{name}} te compartió en persona o por un canal seguro. Un enlace que llegó por correo no confiable merece una doble verificación.",
     "welcome": "Bienvenida. Redirigiendo al tablero…",
     "displayNameLabel": "Tu nombre visible (los seudónimos son bienvenidos)",
@@ -1138,7 +1139,10 @@
       "titleNeeds": "Aún no crece nada aquí",
       "titleOffers": "Aún no crece nada aquí",
       "needs": "Aún no hay necesidades que coincidan con estos filtros. Si necesitas ayuda, publícalo — pedir nunca tiene barreras en un banco de tiempo.",
-      "offers": "Aún no hay ofertas que coincidan con estos filtros. ¿Qué podrías compartir con tu comunidad esta semana?"
+      "offers": "Aún no hay ofertas que coincidan con estos filtros. ¿Qué podrías compartir con tu comunidad esta semana?",
+      "search": "Sin resultados para \"{{query}}\".",
+      "filtered": "Nada coincide con estos filtros.",
+      "clearFilters": "Quitar filtros"
     }
   },
   "dashboard": {
@@ -1705,6 +1709,7 @@
     "skip": "Saltar",
     "next": "Siguiente",
     "start": "Abrir el tablero",
+    "nextSteps": "Después: mira qué necesitan tus vecinas, o publica una oferta tuya.",
     "pairDeviceLink": "¿Ya tienes cuenta en otro dispositivo? Vincula este →",
     "screens": {
       "timebank": {
