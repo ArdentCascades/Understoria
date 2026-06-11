@@ -41,7 +41,11 @@ export default defineConfig({
         description:
           "A federated, privacy-first mutual aid timebank. One hour of help = one hour of help.",
         theme_color: "#15803d",
-        background_color: "#0f172a",
+        // Matches the iOS splash canvas (#14532d) and the maskable
+        // icon background so Chrome / Android's PWA splash uses the
+        // same green our iOS apple-touch-startup-image PNGs use.
+        // iOS ignores this; index.html splash links carry that load.
+        background_color: "#14532d",
         display: "standalone",
         start_url: "/",
         scope: "/",
