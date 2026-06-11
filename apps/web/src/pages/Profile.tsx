@@ -26,9 +26,15 @@ import { IconSettings } from "@/components/visual";
 import {
   balanceFor,
   pendingBalanceFor,
+  pendingTaskCreditFor,
   transactionHistory,
 } from "@/lib/timebank";
-import type { PendingBalance, PendingEntry } from "@/lib/timebank";
+import type {
+  PendingBalance,
+  PendingEntry,
+  PendingTaskCredit,
+  PendingTaskEntry,
+} from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
@@ -131,12 +137,61 @@ function PendingHistoryRow({
   );
 }
 
+/**
+ * A project task the member has submitted and is awaiting an
+ * organizer's confirmation. Mirrors `PendingHistoryRow`'s muted /
+ * italic treatment + text-badge marker. Always links to the project
+ * page — the only recourse for a stalled confirmation is to nudge in
+ * the existing project surface (pull, not push), so no new
+ * notification surface ships with this row.
+ */
+function PendingTaskHistoryRow({
+  entry,
+  taskTitle,
+  projectTitle,
+}: {
+  entry: PendingTaskEntry;
+  taskTitle: string;
+  projectTitle: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <li className="py-3">
+      <Link
+        to={`/project/${entry.projectId}`}
+        className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
+        <CategoryBadge category={entry.category} size="sm" />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm italic text-moss-600 dark:text-moss-300">
+            {t("profile.history.taskWorkingOn")}{" "}
+            <span className="font-medium">
+              {t("profile.history.taskRow", { taskTitle, projectTitle })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-moss-500 dark:text-moss-300">
+            <span>{formatRelativeTime(entry.createdAt)}</span>
+            <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+              {t("profile.history.pendingBadge")}
+            </span>
+          </div>
+        </div>
+        <span className="text-sm font-medium italic text-moss-500 dark:text-moss-300">
+          {formatSignedHours(entry.delta)}
+        </span>
+      </Link>
+    </li>
+  );
+}
+
 export default function ProfilePage() {
   const {
     currentMember,
     members,
     exchanges,
     posts,
+    projects,
+    projectTasks,
     achievements,
     invites,
     vouches,
@@ -175,6 +230,27 @@ export default function ProfilePage() {
   const pending = useMemo(
     () => pendingBalanceFor(currentMember.publicKey, posts),
     [currentMember, posts],
+  );
+  // Pending credit for project tasks the member has submitted —
+  // claimer side only. The HELPED side of a task exchange is
+  // indeterminate before confirmation (any organizer may sign), so
+  // PR #221's exclusion of helped-side post pending still stands.
+  // The CLAIMER side is fully determinate (their key on `assignedTo`,
+  // their `task.estimatedHours` — exactly the figure
+  // `confirmProjectTaskCompletion` writes onto the Exchange row), so
+  // hiding it created an asymmetry the member could only resolve by
+  // checking each project page. See `pendingTaskCreditFor` for why.
+  const pendingTask = useMemo(
+    () => pendingTaskCreditFor(currentMember.publicKey, projectTasks),
+    [currentMember, projectTasks],
+  );
+  const projectMap = useMemo(
+    () => new Map(projects.map((p) => [p.id, p])),
+    [projects],
+  );
+  const taskMap = useMemo(
+    () => new Map(projectTasks.map((t) => [t.id, t])),
+    [projectTasks],
   );
   const memberMap = useMemo(
     () => new Map(members.map((m) => [m.publicKey, m])),
@@ -216,6 +292,7 @@ export default function ProfilePage() {
         balance={balance}
         seed={currentMember.seedBalance}
         pending={pending}
+        pendingTask={pendingTask}
         autoConfirmHours={nodeConfig.autoConfirmHours}
       />
       <ContextualHint
@@ -282,7 +359,9 @@ export default function ProfilePage() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300">
           {t("profile.history.title")}
         </h2>
-        {history.length === 0 && pending.entries.length === 0 ? (
+        {history.length === 0 &&
+        pending.entries.length === 0 &&
+        pendingTask.entries.length === 0 ? (
           <EmptyState
             illustration="path"
             variant="inset"
@@ -307,6 +386,26 @@ export default function ProfilePage() {
                 }
               />
             ))}
+            {/* Project-task pending — claimer-side incoming credit
+                only. The row links to the project page so a claimer
+                can nudge a stalled confirmation in-place (pull
+                recourse, no new notification surface). Helped-side
+                task pending is deliberately omitted per PR #221's
+                "indeterminate before confirmation" reasoning. */}
+            {pendingTask.entries.map((entry) => {
+              const task = taskMap.get(entry.taskId);
+              const project = projectMap.get(entry.projectId);
+              return (
+                <PendingTaskHistoryRow
+                  key={entry.taskId}
+                  entry={entry}
+                  taskTitle={task?.title ?? ""}
+                  projectTitle={
+                    project?.title ?? t("common.memberFallback")
+                  }
+                />
+              );
+            })}
             {history.map(({ exchange, delta, counterparty }) => {
               const other = memberMap.get(counterparty);
               return (
@@ -531,11 +630,13 @@ function BalanceCard({
   balance,
   seed,
   pending,
+  pendingTask,
   autoConfirmHours,
 }: {
   balance: number;
   seed: number;
   pending: PendingBalance;
+  pendingTask: PendingTaskCredit;
   autoConfirmHours: number;
 }) {
   const { t } = useTranslation();
@@ -547,9 +648,21 @@ function BalanceCard({
         : "receiving";
   const messageKey = `profile.balance.${tone}`;
   const awaitingYou = pending.entries.filter((e) => e.owedBy === "you");
-  const awaitingPartner = pending.entries.filter(
-    (e) => e.owedBy === "partner",
-  );
+  // "Pending confirmation" — the headline merges post pending (partner
+  // owes) with project-task pending (organizer owes). For posts this
+  // is a partner's signature; for tasks an organizer's. Both end the
+  // same way for the member: nothing for them to do, credit lands on
+  // the other side's signature. The reworded `pendingLine` copy is
+  // truthful for both ("{{hours}} pending confirmation") — the
+  // post-specific "awaiting you" line above stays untouched because
+  // a claimer never owes themselves a task confirmation.
+  const partnerPendingTotal =
+    Math.round((pending.awaitingPartnerHours + pendingTask.hours) * 100) / 100;
+  const hasPartnerPending =
+    pending.entries.some((e) => e.owedBy === "partner") ||
+    pendingTask.entries.length > 0;
+  const hasAnyPending =
+    pending.entries.length > 0 || pendingTask.entries.length > 0;
   return (
     <section className="card mb-4">
       <div className="flex items-end justify-between">
@@ -563,10 +676,11 @@ function BalanceCard({
           </div>
           {/* Credit in motion — only when something actually is. The
               awaiting-you line comes first because the member can act
-              on it; the awaiting-partner line carries nothing to do
-              (the auto-confirm sweep eventually covers it). Framed as
-              movement, never as "stuck" — solidarity-not-shame. */}
-          {pending.entries.length > 0 && (
+              on it; the merged pending line carries nothing to do
+              (an organizer or partner signs; the auto-confirm sweep
+              eventually covers either). Framed as movement, never as
+              "stuck" — solidarity-not-shame. */}
+          {hasAnyPending && (
             <div className="mt-1 text-xs text-moss-500 dark:text-moss-300">
               {awaitingYou.length > 0 && (
                 <div>
@@ -575,10 +689,10 @@ function BalanceCard({
                   })}
                 </div>
               )}
-              {awaitingPartner.length > 0 && (
+              {hasPartnerPending && (
                 <div>
                   {t("profile.balance.pendingLine", {
-                    hours: formatSignedHours(pending.awaitingPartnerHours),
+                    hours: formatSignedHours(partnerPendingTotal),
                   })}
                 </div>
               )}

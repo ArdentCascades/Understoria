@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, Member, Post } from "@/types";
+import type { Exchange, Member, Post, ProjectTask } from "@/types";
 
 /**
  * Credits are computed from the exchange log (event sourcing) plus each
@@ -151,4 +151,68 @@ export function pendingBalanceFor(
     awaitingYouHours: Math.round(awaitingYouHours * 100) / 100,
     entries,
   };
+}
+
+/**
+ * Incoming-credit prediction for project tasks the member has claimed
+ * and submitted — `status === "awaiting_confirmation"` with the member
+ * still holding the assignment. Sibling to `pendingBalanceFor` rather
+ * than an extension of it: posts and tasks use disjoint stores, the
+ * #221 helper's unit tests stay untouched, and the call site composes
+ * the two outputs into one merged display total.
+ *
+ * Claimer-side only, by design. The HELPED side of a task exchange is
+ * indeterminate before confirmation — `confirmProjectTaskCompletion`
+ * (apps/web/src/db/projects.ts) sets `helpedKey` to whichever
+ * organizer signs, and the active organizer set can change between
+ * submission and confirmation. The CLAIMER side is fully determinate:
+ * their key is on `assignedTo`, and the hours figure
+ * `confirmProjectTaskCompletion` records is exactly
+ * `task.estimatedHours` (line ~693 of that file). So we can honestly
+ * predict the claimer's incoming credit; we deliberately do not
+ * predict any prospective organizer debit. PR #221's exclusion of the
+ * helped side stands; this helper closes only the asymmetry that
+ * affected the determinate side.
+ *
+ * Hours figure: `task.estimatedHours`. If
+ * `confirmProjectTaskCompletion` ever switches to an actual-hours
+ * field at confirmation time, update this AND the test fixture in
+ * lockstep so the predicted number stays the recorded number.
+ */
+export interface PendingTaskEntry {
+  taskId: string;
+  projectId: string;
+  /** Positive — the claimer always receives credit on confirmation. */
+  delta: number;
+  category: ProjectTask["category"];
+  createdAt: number;
+}
+
+export interface PendingTaskCredit {
+  /** Sum of `delta` across `entries`. Always >= 0. */
+  hours: number;
+  /** Newest first, matching `transactionHistory` / `pendingBalanceFor`. */
+  entries: PendingTaskEntry[];
+}
+
+export function pendingTaskCreditFor(
+  memberKey: string,
+  tasks: readonly ProjectTask[],
+): PendingTaskCredit {
+  const entries: PendingTaskEntry[] = [];
+  for (const task of tasks) {
+    if (task.status !== "awaiting_confirmation") continue;
+    if (task.assignedTo !== memberKey) continue;
+    entries.push({
+      taskId: task.id,
+      projectId: task.projectId,
+      delta: task.estimatedHours,
+      category: task.category,
+      createdAt: task.createdAt,
+    });
+  }
+  entries.sort((a, b) => b.createdAt - a.createdAt);
+  let hours = 0;
+  for (const e of entries) hours += e.delta;
+  return { hours: Math.round(hours * 100) / 100, entries };
 }
