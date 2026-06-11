@@ -1146,6 +1146,15 @@ function TaskList({
     [tasks, currentKey, onRun, showToast, t],
   );
 
+  // Read once for the whole list — the claimer narrative under
+  // awaiting_confirmation needs the auto-confirm window to decide
+  // whether to render the safety-net sentence. 0 (or undefined
+  // nodeConfig) means "no sweep configured on this node," and the
+  // line is suppressed entirely.
+  const autoConfirmHours =
+    (nodeConfig as { autoConfirmHours?: number } | undefined)
+      ?.autoConfirmHours ?? 0;
+
   function renderRow(task: ProjectTask, idx: number) {
     const checkInState = taskCheckInState(task, nodeConfig, tasks);
     return (
@@ -1168,6 +1177,7 @@ function TaskList({
         flaggedCommentIds={flaggedCommentIds}
         searchQuery={searchQuery}
         taskCheckInDays={nodeConfig.taskCheckInDays}
+        autoConfirmHours={autoConfirmHours}
       />
     );
   }
@@ -1331,6 +1341,7 @@ function SortableTaskRow({
   flaggedCommentIds: ReadonlySet<string>;
   searchQuery?: string;
   taskCheckInDays: number;
+  autoConfirmHours: number;
 }) {
   const sortableHook = useSortable({ id: task.id, disabled: !sortable });
   const style = sortable
@@ -1378,6 +1389,7 @@ function TaskRow({
   sortableHandle,
   moveButtons,
   taskCheckInDays,
+  autoConfirmHours,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -1395,6 +1407,10 @@ function TaskRow({
    *  in with you privately after N days" adjacent to the Claim
    *  button so claiming isn't a black box. */
   taskCheckInDays: number;
+  /** From `nodeConfig.autoConfirmHours`. 0 (or no nodeConfig) means
+   *  the sweep is off, and the claimer narrative omits its safety-net
+   *  line entirely. */
+  autoConfirmHours: number;
   /** Optional active search query — when non-empty, every match in the
    *  task title is wrapped in <mark> via HighlightedText so the member
    *  sees why this row matched. Description stays plain for v1 — the
@@ -1424,6 +1440,7 @@ function TaskRow({
 
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [acknowledgmentText, setAcknowledgmentText] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDescription, setEditDescription] = useState(task.description);
@@ -1792,46 +1809,113 @@ function TaskRow({
             className="btn-primary"
             disabled={pending}
             aria-busy={pending}
-            onClick={() =>
-              dispatch(() =>
-                confirmProjectTaskCompletion(task.id, currentKey!, nodeId, acknowledgmentText),
-              )
-            }
+            onClick={() => setConfirmDialogOpen(true)}
           >
             {pending ? t("common.working") : t("projects.task.confirm")}
           </button>
         )}
-        {task.status === "awaiting_confirmation" && !isOrganizer && (
+        {/* Completer's release path. Until this PR, attempting to
+            release an awaiting_confirmation task threw on the db
+            side and there was no UI for it at all. The button is
+            offered only to the completer (the claimer who marked
+            done) — third parties don't get to walk the task back. */}
+        {task.status === "awaiting_confirmation" && isCompleter && (
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={pending}
+            onClick={() =>
+              dispatch(() => unclaimProjectTask(task.id, currentKey!))
+            }
+          >
+            {t("projects.task.releaseAfterComplete")}
+          </button>
+        )}
+        {task.status === "awaiting_confirmation" && !isOrganizer && !isCompleter && (
           <span className="text-xs text-moss-500 dark:text-moss-300">
             {t("projects.task.awaitingConfirmation")}
           </span>
         )}
       </div>
-      {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
-        <>
-          {!showAcknowledgment ? (
-            <button
-              type="button"
-              className="self-start text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
-              onClick={() => setShowAcknowledgment(true)}
-            >
-              {t("projects.task.acknowledgment.toggle")}
-            </button>
-          ) : (
-            <div className="flex flex-col gap-1">
-              <textarea
-                className="input min-h-16 text-sm"
-                placeholder={t("projects.task.acknowledgment.placeholder")}
-                value={acknowledgmentText}
-                onChange={(e) => setAcknowledgmentText(e.target.value)}
-                maxLength={500}
-              />
-              <p className="text-xs text-moss-500 dark:text-moss-300">
-                {t("projects.task.acknowledgment.hint")}
-              </p>
-            </div>
+      {/* Claimer-side narrative (PR #226's voice — "credit moves when
+          ..."). Visible only to the completer of an awaiting task;
+          tells them the plain story while they wait. Mirrors
+          ExchangeStateNarrative's auto-confirm safety-net pattern
+          (ceil hours/24, min 1) so the post-side and task-side
+          windows read identically. */}
+      {task.status === "awaiting_confirmation" && isCompleter && (
+        <div className="rounded-md border border-canopy-100 bg-canopy-50/50 px-3 py-2 text-xs text-moss-600 dark:border-canopy-900 dark:bg-canopy-950/30 dark:text-moss-300">
+          <p>
+            {t("projects.task.claimerNarrative.intro", {
+              hours: formatHours(task.estimatedHours),
+            })}
+          </p>
+          {autoConfirmHours > 0 && (
+            <p className="mt-1">
+              {t("projects.task.claimerNarrative.autoConfirm", {
+                count: Math.max(1, Math.ceil(autoConfirmHours / 24)),
+              })}
+            </p>
           )}
-        </>
+        </div>
+      )}
+      {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
+        <ConfirmDialog
+          open={confirmDialogOpen}
+          title={t("projects.task.confirmDialog.title")}
+          description={
+            <div className="flex flex-col gap-3">
+              <p>
+                {t("projects.task.confirmDialog.body", {
+                  claimer: memberMap.get(task.completedBy ?? "") ?? "—",
+                  hours: formatHours(task.estimatedHours),
+                })}
+              </p>
+              {/* Acknowledgment lives inside the dialog so the
+                  organizer makes one decision in one moment — no
+                  stacked dialogs, no second-layer modal for the
+                  optional note. */}
+              {!showAcknowledgment ? (
+                <button
+                  type="button"
+                  className="self-start text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+                  onClick={() => setShowAcknowledgment(true)}
+                >
+                  {t("projects.task.acknowledgment.toggle")}
+                </button>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <textarea
+                    className="input min-h-16 text-sm"
+                    placeholder={t("projects.task.acknowledgment.placeholder")}
+                    value={acknowledgmentText}
+                    onChange={(e) => setAcknowledgmentText(e.target.value)}
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-moss-500 dark:text-moss-300">
+                    {t("projects.task.acknowledgment.hint")}
+                  </p>
+                </div>
+              )}
+            </div>
+          }
+          confirmLabel={t("projects.task.confirmDialog.confirmCta")}
+          confirmingLabel={t("projects.task.confirmDialog.confirming")}
+          cancelLabel={t("projects.task.confirmDialog.cancelCta")}
+          tone="neutral"
+          onCancel={() => setConfirmDialogOpen(false)}
+          onConfirm={() => {
+            setConfirmDialogOpen(false);
+            return dispatch(() =>
+              confirmProjectTaskCompletion(
+                task.id,
+                currentKey!,
+                nodeId,
+                acknowledgmentText,
+              ),
+            );
+          }}
+        />
       )}
       <TaskComments
         projectId={task.projectId}
@@ -2728,25 +2812,49 @@ function HistoryTimeline({
         {t("projects.history.title")}
       </h2>
       <ul className="flex flex-col gap-2">
-        {activities.map((a) => (
-          <li key={a.id} className="flex items-start gap-2 text-sm">
-            <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
-              {formatRelativeTime(a.createdAt)}
-            </span>
-            <span className="text-moss-700 dark:text-moss-200">
-              <span className="font-medium">
-                {memberMap.get(a.actorKey) ?? t("common.memberFallback")}
-              </span>
-              {" — "}
-              {t(`projects.activityType.${a.type}` as "projects.activityType.project_created")}
-              {a.type === "announcement" && (a.data as { body?: string }).body && (
-                <span className="ml-1 italic text-moss-500 dark:text-moss-300">
-                  {`"${((a.data as { body?: string }).body ?? "").slice(0, 80)}${((a.data as { body?: string }).body ?? "").length > 80 ? "..." : ""}"`}
+        {activities.map((a) => {
+          const actorName =
+            memberMap.get(a.actorKey) ?? t("common.memberFallback");
+          // task_released_after_complete carries a `taskTitle` in
+          // `data` (stamped in unclaimProjectTask) so the timeline can
+          // render the full neutral sentence inline — no join, no
+          // shame framing. Other activity types keep the existing
+          // "<name> — <type>" pattern.
+          if (a.type === "task_released_after_complete") {
+            const taskTitle =
+              (a.data as { taskTitle?: string }).taskTitle ?? "—";
+            return (
+              <li key={a.id} className="flex items-start gap-2 text-sm">
+                <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
+                  {formatRelativeTime(a.createdAt)}
                 </span>
-              )}
-            </span>
-          </li>
-        ))}
+                <span className="text-moss-700 dark:text-moss-200">
+                  {t("projects.activityType.task_released_after_complete", {
+                    name: actorName,
+                    task: taskTitle,
+                  })}
+                </span>
+              </li>
+            );
+          }
+          return (
+            <li key={a.id} className="flex items-start gap-2 text-sm">
+              <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
+                {formatRelativeTime(a.createdAt)}
+              </span>
+              <span className="text-moss-700 dark:text-moss-200">
+                <span className="font-medium">{actorName}</span>
+                {" — "}
+                {t(`projects.activityType.${a.type}` as "projects.activityType.project_created")}
+                {a.type === "announcement" && (a.data as { body?: string }).body && (
+                  <span className="ml-1 italic text-moss-500 dark:text-moss-300">
+                    {`"${((a.data as { body?: string }).body ?? "").slice(0, 80)}${((a.data as { body?: string }).body ?? "").length > 80 ? "..." : ""}"`}
+                  </span>
+                )}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

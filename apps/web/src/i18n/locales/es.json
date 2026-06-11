@@ -611,6 +611,19 @@
       "markDone": "Marcar completada",
       "confirm": "Confirmar completada",
       "awaitingConfirmation": "Esperando que quien organiza confirme",
+      "releaseAfterComplete": "Dar un paso atrás de esta tarea",
+      "claimerNarrative": {
+        "intro": "Marcaste esto como hecho. Una persona organizadora confirma para completar el intercambio — tus {{hours}} horas de crédito se mueven en ese momento.",
+        "autoConfirm_one": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} día.",
+        "autoConfirm_other": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} días."
+      },
+      "confirmDialog": {
+        "title": "¿Confirmar esta tarea?",
+        "body": "Confirmar registra un intercambio firmado: {{claimer}} recibe {{hours}} horas de crédito, y tu balance se debita {{hours}} horas — estás firmando como la parte ayudada en nombre del proyecto.",
+        "confirmCta": "Confirmar y firmar",
+        "confirming": "Firmando…",
+        "cancelCta": "Cancelar"
+      },
       "completedBy": "Completada por {{name}}",
       "claimedBy": "Tomada por {{name}}",
       "statusOpen": "Abierta",
@@ -787,6 +800,7 @@
       "task_added": "Tarea agregada",
       "task_claimed": "Tarea tomada",
       "task_unclaimed": "Tarea liberada",
+      "task_released_after_complete": "{{name}} dio un paso atrás de {{task}}",
       "task_completed": "Tarea marcada como completa",
       "task_confirmed": "Tarea confirmada",
       "project_launched": "Proyecto lanzado",

@@ -515,6 +515,7 @@ export type ProjectActivityType =
   | "task_added"
   | "task_claimed"
   | "task_unclaimed"
+  | "task_released_after_complete"
   | "task_completed"
   | "task_confirmed"
   | "project_paused"

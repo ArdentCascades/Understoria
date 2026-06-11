@@ -611,6 +611,19 @@
       "markDone": "Mark complete",
       "confirm": "Confirm completion",
       "awaitingConfirmation": "Waiting on organizer to confirm",
+      "releaseAfterComplete": "Step back from this task",
+      "claimerNarrative": {
+        "intro": "You've marked this done. An organizer confirms to complete the exchange — your {{hours}} hours of credit move then.",
+        "autoConfirm_one": "If no one gets to it, the node confirms automatically within about {{count}} day.",
+        "autoConfirm_other": "If no one gets to it, the node confirms automatically within about {{count}} days."
+      },
+      "confirmDialog": {
+        "title": "Confirm this task?",
+        "body": "Confirming records a signed exchange: {{claimer}} is credited {{hours}} hours, and your balance is debited {{hours}} hours — you're signing as the helped party on behalf of the project.",
+        "confirmCta": "Confirm and sign",
+        "confirming": "Signing…",
+        "cancelCta": "Cancel"
+      },
       "completedBy": "Completed by {{name}}",
       "claimedBy": "Claimed by {{name}}",
       "statusOpen": "Open",
@@ -787,6 +800,7 @@
       "task_added": "Task added",
       "task_claimed": "Task claimed",
       "task_unclaimed": "Task released",
+      "task_released_after_complete": "{{name}} stepped back from {{task}}",
       "task_completed": "Task marked complete",
       "task_confirmed": "Task confirmed",
       "project_launched": "Project launched",

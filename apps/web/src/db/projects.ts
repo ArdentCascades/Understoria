@@ -553,25 +553,42 @@ export async function unclaimProjectTask(
       if (!task) throw new Error("Task not found.");
       if (task.assignedTo !== memberKey)
         throw new Error("Only the claimer can release the task.");
-      if (task.status !== "claimed")
+      // Two release paths share this function:
+      //   1. claimed → open: the ordinary "step back from a claim"
+      //   2. awaiting_confirmation → open: the completer changes their
+      //      mind before an organizer confirms (no Exchange has been
+      //      written yet, so there is no credit to reverse — just the
+      //      task state). The audit found nothing recorded this case;
+      //      we log a distinct activity type so the organizer's pull
+      //      surface (HistoryTimeline) gets a neutral trace.
+      if (task.status !== "claimed" && task.status !== "awaiting_confirmation")
         throw new Error("Task cannot be released from its current state.");
+      const wasAwaitingConfirmation = task.status === "awaiting_confirmation";
       const updated: ProjectTask = {
         ...task,
         status: "open",
         assignedTo: null,
         // Defensive cleanup: clearing the claim metadata too so a
         // re-claim starts fresh and the prompts don't fire on
-        // stale timestamps.
+        // stale timestamps. When releasing from awaiting_confirmation
+        // we also clear completedBy so a future completion isn't
+        // attributed to a member who walked back.
         claimedAt: null,
         checkInAcknowledgedAt: null,
+        completedBy: wasAwaitingConfirmation ? null : task.completedBy,
       };
       await db.projectTasks.put(updated);
       const project = await db.projects.get(task.projectId);
       await logActivity(
         task.projectId,
-        "task_unclaimed",
+        wasAwaitingConfirmation
+          ? "task_released_after_complete"
+          : "task_unclaimed",
         memberKey,
-        { taskId },
+        // Stash the title so HistoryTimeline can render the neutral
+        // "stepped back from {{task}}" sentence without joining
+        // against the (possibly later-edited) task row.
+        { taskId, taskTitle: task.title },
         project?.nodeId ?? "",
       );
       return updated;
