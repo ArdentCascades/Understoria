@@ -345,6 +345,47 @@ describe("ProjectDetail — co-organizer invitations (organizer)", () => {
   });
 });
 
+describe("ProjectDetail — co-organizer capability card", () => {
+  it("renders the capability disclosure for a co-organizer viewer", () => {
+    const p = project();
+    p.coOrganizerKeys = [inviteeKey];
+    mockState.projects = [p];
+    mockState.currentMember = member(inviteeKey, "Bob Invitee");
+    render();
+    const text = container.textContent ?? "";
+    expect(text).toContain("What you can do as a co-organizer");
+    // Confirm capability — the load-bearing balance-debit line.
+    expect(text).toContain("debits your own balance");
+    // Not-included line — sourced from primary-only gates.
+    expect(text).toContain("Inviting other co-organizers");
+    // It's a <details> disclosure (collapsed by default).
+    const summary = container.querySelector("details > summary");
+    expect(summary).not.toBeNull();
+    expect((summary!.textContent ?? "").trim()).toBe(
+      "What you can do as a co-organizer",
+    );
+  });
+
+  it("does NOT render the capability disclosure for the primary organizer", () => {
+    // Default mockState.currentMember IS the primary organizer.
+    render();
+    const text = container.textContent ?? "";
+    expect(text).not.toContain("What you can do as a co-organizer");
+  });
+
+  it("does NOT render the capability disclosure for a regular member", () => {
+    const otherKey = "other-key";
+    mockState.members = [
+      member(organizerKey, "Organizer"),
+      member(otherKey, "Random Member"),
+    ];
+    mockState.currentMember = member(otherKey, "Random Member");
+    render();
+    const text = container.textContent ?? "";
+    expect(text).not.toContain("What you can do as a co-organizer");
+  });
+});
+
 describe("ProjectDetail — reorder authority (co-organizer)", () => {
   it("co-organizer can reorder tasks via Move buttons", async () => {
     const p = project();

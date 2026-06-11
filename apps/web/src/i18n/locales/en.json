@@ -719,6 +719,19 @@
       "stepDownConfirmBody": "You'll no longer be able to confirm task completions or edit this project. Your past confirmations remain.",
       "stepDownConfirmCta": "Step down"
     },
+    "coorg": {
+      "capabilitiesTitle": "What you can do as a co-organizer",
+      "capabilities": {
+        "lifecycle": "Launch, pause, resume, or complete the project.",
+        "tasks": "Add and edit tasks — one at a time or several at once.",
+        "ordering": "Set task order and sequencing (which tasks come before which).",
+        "confirm": "Confirm completed tasks. Confirming debits your own balance — you're signing as the helped party.",
+        "announce": "Post project announcements.",
+        "stepDown": "Step down from the role any time."
+      },
+      "notIncluded": "Inviting other co-organizers and archiving the project stay with the primary organizer.",
+      "acceptedPointer": "You're a co-organizer now. See \"What you can do\" on the project page."
+    },
     "handoff": {
       "title": "Pass the torch",
       "intro": "Transfer your primary role to a co-organizer. You'll stay as a co-organizer.",
