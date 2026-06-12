@@ -34,6 +34,7 @@ import PairDevicePage from "@/pages/PairDevice";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
+import MyTasksPage from "@/pages/MyTasks";
 import EventNewPage from "@/pages/EventNew";
 import EventDetailPage from "@/pages/EventDetail";
 import MessagesShell, { MessagesEmptyPane } from "@/pages/Messages";
@@ -84,6 +85,7 @@ export default function App() {
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
+          <Route path="/my-tasks" element={<MyTasksPage />} />
           <Route path="/events/new" element={<EventNewPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
           {/* Phase 3.1: nested so at lg+ the conversation renders inside

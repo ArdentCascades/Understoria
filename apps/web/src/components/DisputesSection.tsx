@@ -40,7 +40,7 @@ export function DisputesSection() {
         <div className="min-w-0 flex-1">
           <h2
             id="disputes-entry-title"
-            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
           >
             {t("disputes.entry.title")}
           </h2>

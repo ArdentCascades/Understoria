@@ -276,7 +276,7 @@ function TemplateCard({
         <span className="text-sm text-moss-600 dark:text-moss-300">
           {template.purpose}
         </span>
-        <span className="mt-auto flex flex-wrap items-center gap-2 pt-2 text-xs text-moss-500 dark:text-moss-300">
+        <span className="mt-auto flex flex-wrap items-center gap-2 pt-2 text-xs text-moss-600 dark:text-moss-300">
           <span>
             {t("projects.templates.meta.setupHours", {
               hours: template.setupHours,

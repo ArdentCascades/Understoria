@@ -32,6 +32,7 @@ import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
 import { matchesQuery } from "@/lib/messageSearch";
+import { myClaimedTasks } from "@/lib/myTasks";
 import { hasOpenTasks } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
@@ -233,6 +234,19 @@ export default function BoardPage() {
     projectStatusFilter !== "" ||
     onlyWithOpenTasks;
 
+  // Whether the member is carrying any task claims across projects —
+  // gates the quiet "Tasks you're carrying" jump-off below the
+  // archive link. Uses the same helper as the /my-tasks page so the
+  // link only shows when the page would have something to show.
+  const carryingCount = useMemo(
+    () =>
+      currentMember
+        ? myClaimedTasks(currentMember.publicKey, projectTasks, projects)
+            .taskCount
+        : 0,
+    [currentMember, projectTasks, projects],
+  );
+
   // Post-tab filter activity: drives the "filter-empty" empty state and
   // the Clear-filters reset affordance. Same shape as the project-tab
   // version above. `showClaimed` is intentionally excluded — toggling
@@ -366,7 +380,7 @@ export default function BoardPage() {
                   ? t("board.tabs.offers")
                   : t("projects.tab")}
               {tt !== "PROJECTS" && (
-                <span className="ml-1 text-xs text-moss-500 dark:text-moss-300">
+                <span className="ml-1 text-xs text-moss-600 dark:text-moss-300">
                   {t("board.openCount", { count: openCount[tt] })}
                 </span>
               )}
@@ -568,6 +582,19 @@ export default function BoardPage() {
             >
               {t("projects.archive.viewArchive")}
             </Link>
+
+            {/* Cross-project commitments jump-off, same quiet register
+                as the archive link. Conditional on actually carrying
+                something — no count bubble, no empty destination
+                (no-notifications; solidarity-not-shame). */}
+            {carryingCount > 0 && (
+              <Link
+                to="/my-tasks"
+                className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-3 lg:mt-2 lg:text-left"
+              >
+                {t("myTasks.boardLink")}
+              </Link>
+            )}
           </>
         )}
       </div>

@@ -156,7 +156,7 @@ export default function InvitesPage() {
                 <div className="text-sm font-medium">
                   {t(INVITE_STATUS_KEY[inv.status])}
                 </div>
-                <div className="text-xs text-moss-500 dark:text-moss-300">
+                <div className="text-xs text-moss-600 dark:text-moss-300">
                   {inv.status === "redeemed"
                     ? t("profile.invites.redeemed", {
                         when: formatRelativeTime(inv.redeemedAt ?? 0),

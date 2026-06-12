@@ -324,7 +324,7 @@ export default function PairDevicePage() {
                 autoComplete="new-password"
               />
             </label>
-            <p className="text-xs text-moss-500 dark:text-moss-300">
+            <p className="text-xs text-moss-600 dark:text-moss-300">
               {t("pairDevice.session.skipHint")}
             </p>
             {sessionError && (

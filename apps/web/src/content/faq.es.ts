@@ -189,12 +189,12 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Usa la vinculación de dispositivos. En el dispositivo que ya " +
             "tiene tu identidad, ve a Perfil → Vincular otro dispositivo. " +
-            "Te muestra un código QR y una contraseña corta. En el " +
+            "Te muestra un código QR y una frase de seis palabras. En el " +
             "dispositivo nuevo, elige 'Ya tengo otro dispositivo' en la " +
             "pantalla de bienvenida, escanea el código (o pégalo), y " +
-            "escribe la contraseña. Tu identidad y tu perfil se mueven " +
-            "directamente, de dispositivo a dispositivo — nada pasa por " +
-            "ningún servidor.",
+            "escribe las seis palabras en orden. Tu identidad y tu perfil " +
+            "se mueven directamente, de dispositivo a dispositivo — nada " +
+            "pasa por ningún servidor.",
           "Dos cosas no viajan: tu historial de mensajes (los mensajes " +
             "están cifrados a las claves propias de cada dispositivo, así " +
             "que se quedan donde fueron recibidos) y los ajustes por " +

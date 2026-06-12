@@ -123,7 +123,7 @@ export default function InviteAcceptPage() {
         </p>
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <dt className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("invite.inviterKey")}
             </dt>
             <dd className="mt-0.5 font-mono text-xs">
@@ -131,7 +131,7 @@ export default function InviteAcceptPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+            <dt className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("invite.expires")}
             </dt>
             <dd className="mt-0.5">

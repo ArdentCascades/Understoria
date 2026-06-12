@@ -282,7 +282,7 @@ export default function EventNewPage() {
             maxLength={200}
             required
           />
-          <span className="text-xs text-moss-500 dark:text-moss-300">
+          <span className="text-xs text-moss-600 dark:text-moss-300">
             {t("events.new.locationHint")}
           </span>
         </label>
@@ -300,7 +300,7 @@ export default function EventNewPage() {
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
           />
-          <span className="text-xs text-moss-500 dark:text-moss-300">
+          <span className="text-xs text-moss-600 dark:text-moss-300">
             {t("events.new.capacityHint")}
           </span>
         </label>

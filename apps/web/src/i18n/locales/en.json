@@ -819,6 +819,19 @@
       "announcement": "Update posted"
     }
   },
+  "myTasks": {
+    "title": "Tasks you're carrying",
+    "subtitle": "Every task you've claimed, across all projects, in one place.",
+    "summaryOne": "You're carrying 1 task right now.",
+    "summaryOneProject": "You're carrying {{count}} tasks in one project.",
+    "summaryOther": "You're carrying {{count}} tasks across {{projects}} projects.",
+    "claimedAgo": "Claimed {{when}}",
+    "emptyTitle": "Nothing on your plate right now",
+    "empty": "When you claim a task in a community project it shows up here, so you can see your commitments without opening each project one by one.",
+    "browseProjects": "Browse projects",
+    "seeAll": "See all your tasks",
+    "boardLink": "Tasks you're carrying"
+  },
   "urgency": {
     "low": "When you can",
     "medium": "Soon",

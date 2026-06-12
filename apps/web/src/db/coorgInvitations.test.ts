@@ -15,6 +15,7 @@ import {
   effectiveCoOrganizerKeys,
   effectiveCoOrganizerKeysFromRows,
   issueCoOrganizerInvitation,
+  materializeAcceptedCoOrganizer,
   respondToCoOrganizerInvitation,
   revokeCoOrganizerInvitation,
 } from "./coorgInvitations";
@@ -25,7 +26,7 @@ import type {
 } from "@/types";
 import { db } from "./database";
 import { createMember } from "./seed";
-import { createProject } from "./projects";
+import { createProject, isOrganizer, removeCoOrganizer } from "./projects";
 import {
   canonicalCoOrganizerInvitationPayload,
   canonicalCoOrganizerInvitationResponsePayload,
@@ -801,5 +802,203 @@ describe("effectiveCoOrganizerKeysFromRows", () => {
     );
     expect(out.size).toBe(1);
     expect(out.has("bob")).toBe(true);
+  });
+});
+
+describe("materializeAcceptedCoOrganizer", () => {
+  beforeEach(reset);
+
+  it("accept lands the invitee in Project.coOrganizerKeys and isOrganizer agrees", async () => {
+    const { organizer, organizerSecret, invitee, inviteeSecret, project } =
+      await setupOrganizerAndInvitee();
+    const invitation = await issueCoOrganizerInvitation({
+      projectId: project.id,
+      inviterKey: organizer.publicKey,
+      inviterSecretKey: organizerSecret,
+      inviteeKey: invitee.publicKey,
+      nodeId: NODE,
+    });
+    await respondToCoOrganizerInvitation({
+      invitationId: invitation.id,
+      inviteeSecretKey: inviteeSecret,
+      decision: "accept",
+      nodeId: NODE,
+    });
+    const reloaded = (await db.projects.get(project.id))!;
+    expect(reloaded.coOrganizerKeys).toContain(invitee.publicKey);
+    expect(isOrganizer(reloaded, invitee.publicKey)).toBe(true);
+  });
+
+  it("decline leaves the static array untouched", async () => {
+    const { organizer, organizerSecret, invitee, inviteeSecret, project } =
+      await setupOrganizerAndInvitee();
+    const invitation = await issueCoOrganizerInvitation({
+      projectId: project.id,
+      inviterKey: organizer.publicKey,
+      inviterSecretKey: organizerSecret,
+      inviteeKey: invitee.publicKey,
+      nodeId: NODE,
+    });
+    await respondToCoOrganizerInvitation({
+      invitationId: invitation.id,
+      inviteeSecretKey: inviteeSecret,
+      decision: "decline",
+      nodeId: NODE,
+    });
+    const reloaded = (await db.projects.get(project.id))!;
+    expect(reloaded.coOrganizerKeys).toEqual([]);
+  });
+
+  it("a materialized co-organizer can step down through removeCoOrganizer", async () => {
+    // The user-visible loop the missing materialization broke: accept
+    // the role, then later leave it. Step-down reads the static
+    // array, so before this fix it threw "not in role" for every
+    // signed-flow co-organizer.
+    const { organizer, organizerSecret, invitee, inviteeSecret, project } =
+      await setupOrganizerAndInvitee();
+    const invitation = await issueCoOrganizerInvitation({
+      projectId: project.id,
+      inviterKey: organizer.publicKey,
+      inviterSecretKey: organizerSecret,
+      inviteeKey: invitee.publicKey,
+      nodeId: NODE,
+    });
+    await respondToCoOrganizerInvitation({
+      invitationId: invitation.id,
+      inviteeSecretKey: inviteeSecret,
+      decision: "accept",
+      nodeId: NODE,
+    });
+    const updated = await removeCoOrganizer(
+      project.id,
+      invitee.publicKey,
+      invitee.publicKey,
+    );
+    expect(updated.coOrganizerKeys).toEqual([]);
+  });
+
+  it("is idempotent — re-running after a completed accept keeps a single entry", async () => {
+    const { organizer, organizerSecret, invitee, inviteeSecret, project } =
+      await setupOrganizerAndInvitee();
+    const invitation = await issueCoOrganizerInvitation({
+      projectId: project.id,
+      inviterKey: organizer.publicKey,
+      inviterSecretKey: organizerSecret,
+      inviteeKey: invitee.publicKey,
+      nodeId: NODE,
+    });
+    await respondToCoOrganizerInvitation({
+      invitationId: invitation.id,
+      inviteeSecretKey: inviteeSecret,
+      decision: "accept",
+      nodeId: NODE,
+    });
+    await materializeAcceptedCoOrganizer(invitation.id);
+    const reloaded = (await db.projects.get(project.id))!;
+    expect(
+      reloaded.coOrganizerKeys.filter((k) => k === invitee.publicKey),
+    ).toHaveLength(1);
+  });
+
+  it("quietly no-ops when the invitation or its project is missing", async () => {
+    await expect(
+      materializeAcceptedCoOrganizer("no-such-invitation"),
+    ).resolves.toBeUndefined();
+  });
+
+  // The guard tests below write rows directly. Signatures are
+  // sentinels: materialization deliberately does not re-verify them —
+  // every ingest path (local write or federation pull) has already
+  // verified before the rows exist.
+  function rawRows(opts: {
+    inviteeKey: string;
+    responseInviteeKey?: string;
+    decidedAt: number;
+    expiresAt: number;
+    revoked?: boolean;
+    projectId: string;
+  }) {
+    const invitation = {
+      id: "inv_raw",
+      projectId: opts.projectId,
+      inviterKey: "inviter_key",
+      inviteeKey: opts.inviteeKey,
+      createdAt: 0,
+      expiresAt: opts.expiresAt,
+      nodeId: NODE,
+      signature: "test",
+    };
+    const response = {
+      id: "resp_raw",
+      invitationId: "inv_raw",
+      inviteeKey: opts.responseInviteeKey ?? opts.inviteeKey,
+      decision: "accept" as const,
+      decidedAt: opts.decidedAt,
+      nodeId: NODE,
+      signature: "test",
+    };
+    const revocation = opts.revoked
+      ? {
+          id: "rev_raw",
+          invitationId: "inv_raw",
+          inviterKey: "inviter_key",
+          revokedAt: opts.decidedAt,
+          nodeId: NODE,
+          signature: "test",
+        }
+      : null;
+    return { invitation, response, revocation };
+  }
+
+  it("does not materialize a revoked invitation", async () => {
+    const { project } = await setupOrganizerAndInvitee();
+    const { invitation, response, revocation } = rawRows({
+      inviteeKey: "key_bob",
+      decidedAt: Date.now(),
+      expiresAt: Date.now() + 1000_000,
+      revoked: true,
+      projectId: project.id,
+    });
+    await db.coorgInvitations.put(invitation);
+    await db.coorgInvitationResponses.put(response);
+    await db.coorgInvitationRevocations.put(revocation!);
+    await materializeAcceptedCoOrganizer(invitation.id);
+    const reloaded = (await db.projects.get(project.id))!;
+    expect(reloaded.coOrganizerKeys).toEqual([]);
+  });
+
+  it("does not materialize an acceptance signed after expiry once the window is past", async () => {
+    const { project } = await setupOrganizerAndInvitee();
+    const expiresAt = Date.now() - 1000;
+    const { invitation, response } = rawRows({
+      inviteeKey: "key_bob",
+      decidedAt: expiresAt + 500, // late signature, window already past
+      expiresAt,
+      projectId: project.id,
+    });
+    await db.coorgInvitations.put(invitation);
+    await db.coorgInvitationResponses.put(response);
+    await materializeAcceptedCoOrganizer(invitation.id);
+    const reloaded = (await db.projects.get(project.id))!;
+    expect(reloaded.coOrganizerKeys).toEqual([]);
+  });
+
+  it("does not materialize a response whose inviteeKey differs from the invitation's", async () => {
+    // Federation ingest verifies a response's self-signature only;
+    // a forged "acceptance" naming someone else's invitation must
+    // not push the named invitee (or the forger) into the role.
+    const { project } = await setupOrganizerAndInvitee();
+    const { invitation, response } = rawRows({
+      inviteeKey: "key_bob",
+      responseInviteeKey: "key_mallory",
+      decidedAt: Date.now(),
+      expiresAt: Date.now() + 1000_000,
+      projectId: project.id,
+    });
+    await db.coorgInvitations.put(invitation);
+    await db.coorgInvitationResponses.put(response);
+    await materializeAcceptedCoOrganizer(invitation.id);
+    const reloaded = (await db.projects.get(project.id))!;
+    expect(reloaded.coOrganizerKeys).toEqual([]);
   });
 });

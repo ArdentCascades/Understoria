@@ -94,7 +94,7 @@ export function PairDevicePassphraseEntry({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {words.map((w, i) => (
           <label key={i} className="flex flex-col gap-1">
-            <span className="text-xs text-moss-500 dark:text-moss-300">
+            <span className="text-xs text-moss-600 dark:text-moss-300">
               {t("pairDevice.passphrase.wordLabel", { number: i + 1 })}
             </span>
             <input

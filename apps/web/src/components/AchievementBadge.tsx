@@ -59,7 +59,7 @@ export function AchievementBadge({
           {t(`achievement.${type}.description`)}
         </div>
         {formattedDate && (
-          <div className="mt-1 text-[0.6875rem] text-moss-500 dark:text-moss-300">
+          <div className="mt-1 text-[0.6875rem] text-moss-600 dark:text-moss-300">
             {t("achievement.earnedDate", { date: formattedDate })}
           </div>
         )}

@@ -50,12 +50,15 @@ import type {
  * the design doc — accepted, not revoked, not expired (or
  * accepted before expiry).
  *
- * This file deliberately does NOT modify
- * `Project.coOrganizerKeys`. The static array stays in sync with
- * accepted invitations via the grandfather migration in v21
- * (which seeds the new tables) and remains the source of truth
- * for `isOrganizer()` for now — see PR C in
- * `docs/co-organizer-invitations.md` §11 for the migration plan.
+ * Acceptance is MATERIALIZED into `Project.coOrganizerKeys` (see
+ * `materializeAcceptedCoOrganizer`). The static array is the live
+ * authority list every synchronous gate reads — `isOrganizer`, the
+ * project page, task confirmation, step-down — and the only place
+ * removal is recorded, because removal (step-down / primary
+ * removal) deliberately has no signed record type. The signed rows
+ * in these tables are the audit trail that lets any node verify how
+ * each entry earned its place; they are not, by themselves, the
+ * live list.
  */
 
 export class CoOrganizerInvitationError extends Error {
@@ -288,7 +291,14 @@ export async function respondToCoOrganizerInvitation(
 
   await db.transaction(
     "rw",
-    [db.coorgInvitationResponses, db.outbox, db.settings],
+    [
+      db.coorgInvitationResponses,
+      db.outbox,
+      db.settings,
+      db.projects,
+      db.coorgInvitations,
+      db.coorgInvitationRevocations,
+    ],
     async () => {
       const row: CoOrganizerInvitationResponseRow = { ...response };
       await db.coorgInvitationResponses.put(row);
@@ -297,10 +307,95 @@ export async function respondToCoOrganizerInvitation(
         response.id,
         response,
       );
+      // Same transaction as the response row: an accept either
+      // lands in both the audit trail and the live authority list,
+      // or in neither.
+      if (input.decision === "accept") {
+        await materializeAcceptedCoOrganizer(input.invitationId, now);
+      }
     },
   );
 
   return response;
+}
+
+/**
+ * Materialize an accepted invitation into `Project.coOrganizerKeys`.
+ *
+ * This is the wiring the original data-layer slice deferred (the old
+ * header note here pointed at a migration plan that never landed):
+ * without it, a real accepted invitation conferred the role only in
+ * the derived view, while every synchronous authority gate —
+ * `isOrganizer`, the project page's organizer controls,
+ * `requireOrganizer`, `confirmProjectTaskCompletion`, step-down via
+ * `removeCoOrganizer` — kept reading a static array the accept never
+ * reached. The invitee got organizer attention items pointing at
+ * controls the project page refused to show them.
+ *
+ * Invariant from here on: the static array is the live authority
+ * list, written by every grant path (v21 grandfather migration, this
+ * materialization, `handoffOrganizer`'s demotion of the old primary)
+ * and every removal path (`removeCoOrganizer`). The signed rows
+ * remain the verifiable record of how each entry got there.
+ *
+ * Guards mirror the §4 derived-view rule: an accept decision, signed
+ * in time (`decidedAt ≤ expiresAt` — federation can deliver rows a
+ * local clock would have rejected at write time), and no revocation.
+ * Quietly no-ops when the invitation, response, or project row isn't
+ * on this node — federation delivers records in any order, so both
+ * the invitation and the response ingest paths call this and
+ * whichever lands second completes the materialization. Idempotent:
+ * an already-present key is left alone.
+ */
+export async function materializeAcceptedCoOrganizer(
+  invitationId: string,
+  now: number = Date.now(),
+): Promise<void> {
+  await db.transaction(
+    "rw",
+    [
+      db.projects,
+      db.coorgInvitations,
+      db.coorgInvitationResponses,
+      db.coorgInvitationRevocations,
+    ],
+    async () => {
+      const invitation = await db.coorgInvitations.get(invitationId);
+      if (!invitation) return;
+      const response = await db.coorgInvitationResponses
+        .where("invitationId")
+        .equals(invitationId)
+        .first();
+      if (!response || response.decision !== "accept") return;
+      const revoked = await db.coorgInvitationRevocations
+        .where("invitationId")
+        .equals(invitationId)
+        .first();
+      if (revoked) return;
+      // The local accept path guarantees the responder IS the
+      // invitee, but federation ingest only verifies a response's
+      // self-signature — it cannot cross-check against an invitation
+      // that may not have arrived yet. This is the first point where
+      // both rows are in hand, so the cross-check lands here: a
+      // response signed by anyone other than the named invitee never
+      // materializes a role.
+      if (response.inviteeKey !== invitation.inviteeKey) return;
+      const acceptedInTime = response.decidedAt <= invitation.expiresAt;
+      const stillUnexpired = now < invitation.expiresAt;
+      if (!acceptedInTime && !stillUnexpired) return;
+      const project = await db.projects.get(invitation.projectId);
+      if (!project) return;
+      // The primary organizer's authority doesn't ride the array;
+      // issueCoOrganizerInvitation rejects self-invites, but a
+      // federated row could still claim one.
+      if (invitation.inviteeKey === project.organizerKey) return;
+      if (project.coOrganizerKeys.includes(invitation.inviteeKey)) return;
+      await db.projects.put({
+        ...project,
+        coOrganizerKeys: [...project.coOrganizerKeys, invitation.inviteeKey],
+      });
+    },
+  );
 }
 
 // -- Revoke -----------------------------------------------------------------

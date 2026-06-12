@@ -321,7 +321,7 @@ export default function PostFormPage() {
         </label>
 
         <fieldset className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">
-          <legend className="px-1 text-xs uppercase tracking-wide text-moss-500 dark:text-moss-300">
+          <legend className="px-1 text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("postForm.fieldCategory")}
           </legend>
           <div className="flex flex-col gap-2">
@@ -339,7 +339,7 @@ export default function PostFormPage() {
                   <span className="font-medium">
                     {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
                   </span>{" "}
-                  <span className="text-xs text-moss-500 dark:text-moss-300">
+                  <span className="text-xs text-moss-600 dark:text-moss-300">
                     — {CATEGORY_META[c].description}
                   </span>
                 </span>
@@ -393,7 +393,7 @@ export default function PostFormPage() {
             ) : (
               <span
                 id="hours-hint"
-                className="text-xs text-moss-500 dark:text-moss-300"
+                className="text-xs text-moss-600 dark:text-moss-300"
               >
                 {t("postForm.fieldHoursHint")}
               </span>
@@ -482,7 +482,7 @@ export default function PostFormPage() {
           <div className="card">
             <h2
               id="matching-needs-aside-heading"
-              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-500 dark:text-moss-300"
+              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
             >
               {t("postForm.matchingNeedsAside.title")}
             </h2>

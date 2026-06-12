@@ -378,3 +378,123 @@ describe("pullFederatedCoOrgRevocations", () => {
     expect(result).toEqual({ inserted: 0, skipped: 1 });
   });
 });
+
+describe("co-organizer acceptance materializes through federation pulls", () => {
+  // Multi-device reality check: a member accepts on device A; device
+  // B (or any node hosting the project) learns of the acceptance only
+  // through these pulls. The live authority list — the static
+  // `Project.coOrganizerKeys` array every synchronous gate reads —
+  // must follow, whichever order the two records arrive in.
+  beforeEach(async () => {
+    await resetCoOrg();
+    await db.projects.clear();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  function makeMatchedPair(opts: { idSuffix: string; projectId: string }) {
+    const inviter = generateKeyPair();
+    const invitee = generateKeyPair();
+    const invitationPayload = {
+      projectId: opts.projectId,
+      inviterKey: inviter.publicKey,
+      inviteeKey: invitee.publicKey,
+      createdAt: 1000,
+      expiresAt: 1000 + 14 * 24 * 60 * 60 * 1000,
+      nodeId: "peer_node",
+    };
+    const invitation = {
+      id: `ci_${opts.idSuffix}`,
+      ...invitationPayload,
+      signature: sign(
+        canonicalCoOrganizerInvitationPayload(invitationPayload),
+        inviter.secretKey,
+      ),
+    };
+    const responsePayload = {
+      invitationId: invitation.id,
+      inviteeKey: invitee.publicKey,
+      decision: "accept" as const,
+      decidedAt: 2000,
+      nodeId: "peer_node",
+    };
+    const response = {
+      id: `cr_${opts.idSuffix}`,
+      ...responsePayload,
+      signature: sign(
+        canonicalCoOrganizerInvitationResponsePayload(responsePayload),
+        invitee.secretKey,
+      ),
+    };
+    return { invitation, response, inviteeKey: invitee.publicKey, inviterKey: inviter.publicKey };
+  }
+
+  async function seedProject(id: string, organizerKey: string) {
+    await db.projects.put({
+      id,
+      title: "Federated fridge",
+      description: "",
+      category: "infrastructure",
+      organizerKey,
+      coOrganizerKeys: [],
+      status: "active",
+      targetHours: 10,
+      contributedHours: 0,
+      deadline: null,
+      createdAt: 0,
+      completedAt: null,
+      pauseNote: null,
+      locationZone: "",
+      tags: [],
+      nodeId: "peer_node",
+      templateId: null,
+    });
+  }
+
+  function stubPull(body: Record<string, unknown[]>) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => body }),
+    );
+  }
+
+  it("invitation then response — the response pull materializes", async () => {
+    const pair = makeMatchedPair({ idSuffix: "a", projectId: "proj_fed_a" });
+    await seedProject("proj_fed_a", pair.inviterKey);
+
+    stubPull({ coorgInvitations: [pair.invitation] });
+    await pullFederatedCoOrgInvitations();
+    let project = (await db.projects.get("proj_fed_a"))!;
+    expect(project.coOrganizerKeys).toEqual([]);
+
+    stubPull({ coorgInvitationResponses: [pair.response] });
+    await pullFederatedCoOrgResponses();
+    project = (await db.projects.get("proj_fed_a"))!;
+    expect(project.coOrganizerKeys).toEqual([pair.inviteeKey]);
+  });
+
+  it("response then invitation — the invitation pull completes the materialization", async () => {
+    const pair = makeMatchedPair({ idSuffix: "b", projectId: "proj_fed_b" });
+    await seedProject("proj_fed_b", pair.inviterKey);
+
+    stubPull({ coorgInvitationResponses: [pair.response] });
+    await pullFederatedCoOrgResponses();
+    let project = (await db.projects.get("proj_fed_b"))!;
+    // Invitation not here yet — nothing to materialize against.
+    expect(project.coOrganizerKeys).toEqual([]);
+
+    stubPull({ coorgInvitations: [pair.invitation] });
+    await pullFederatedCoOrgInvitations();
+    project = (await db.projects.get("proj_fed_b"))!;
+    expect(project.coOrganizerKeys).toEqual([pair.inviteeKey]);
+  });
+
+  it("a project this node doesn't host stays a quiet no-op", async () => {
+    const pair = makeMatchedPair({ idSuffix: "c", projectId: "proj_elsewhere" });
+    stubPull({ coorgInvitations: [pair.invitation] });
+    await pullFederatedCoOrgInvitations();
+    stubPull({ coorgInvitationResponses: [pair.response] });
+    const result = await pullFederatedCoOrgResponses();
+    expect(result).toEqual({ inserted: 1, skipped: 0 });
+    expect(await db.projects.count()).toBe(0);
+  });
+});

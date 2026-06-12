@@ -224,7 +224,7 @@ export default function MessagesShell() {
                             <span className="font-semibold">
                               {nameByKey.get(c.otherKey) ?? t("common.memberFallback")}
                             </span>
-                            <span className="text-xs text-moss-500 dark:text-moss-300">
+                            <span className="text-xs text-moss-600 dark:text-moss-300">
                               {formatRelativeTime(c.lastMessage.createdAt)}
                             </span>
                           </div>
@@ -262,7 +262,7 @@ export function MessagesEmptyPane() {
   const { t } = useTranslation();
   return (
     <div className="flex h-full items-center justify-center px-4 py-8 text-center">
-      <p className="text-sm text-moss-500 dark:text-moss-300">
+      <p className="text-sm text-moss-600 dark:text-moss-300">
         {t("messages.shell.emptyPane")}
       </p>
     </div>
@@ -336,13 +336,13 @@ function SearchResults({
                       {headerAfter}
                     </span>
                     {g.hits.length > 0 && (
-                      <span className="shrink-0 text-xs text-moss-500 dark:text-moss-300">
+                      <span className="shrink-0 text-xs text-moss-600 dark:text-moss-300">
                         {t("messages.search.matchCount", { count: g.hits.length })}
                       </span>
                     )}
                   </div>
                   {isNameOnlyMatch ? (
-                    <p className="mt-1 text-sm italic text-moss-500 dark:text-moss-400">
+                    <p className="mt-1 text-sm italic text-moss-600 dark:text-moss-400">
                       {t("messages.search.matchedName")}
                     </p>
                   ) : (
@@ -360,7 +360,7 @@ function SearchResults({
                               />
                             </p>
                           )}
-                          <span className="shrink-0 text-xs text-moss-500">
+                          <span className="shrink-0 text-xs text-moss-600">
                             {formatRelativeTime(hit.message.createdAt)}
                           </span>
                         </li>

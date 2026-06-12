@@ -48,6 +48,13 @@ interface ProjectDraftPayload {
   deadlineDays: string;
   area: string;
   tags: string;
+  /** Selected starter template at save time, `null` for "from
+   *  scratch". Carried in the draft because losing it on restore
+   *  silently drops the template's staged task list at submit (and
+   *  the project row's `templateId`, which feeds the sibling-projects
+   *  solidarity surface). Drafts saved before this field existed
+   *  parse to `undefined` — restore must treat that as `null`. */
+  templateId: string | null;
 }
 
 type FieldName = "title" | "targetHours" | "deadlineDays";
@@ -135,6 +142,7 @@ export default function ProjectNewPage() {
       deadlineDays,
       area,
       tags,
+      templateId: selectedTemplateId,
     },
     { enabled: pendingDraft === null && isDirty && !submitting },
   );
@@ -149,6 +157,9 @@ export default function ProjectNewPage() {
     setDeadlineDays(p.deadlineDays);
     setArea(p.area);
     setTags(p.tags);
+    // `?? null` covers drafts persisted before templateId joined the
+    // payload — see the field's comment on ProjectDraftPayload.
+    setSelectedTemplateId(p.templateId ?? null);
     setPendingDraft(null);
     // Mirror handleSelectTemplate's collapse — the member has made a
     // decision (continue their draft) and the form is the next thing
@@ -508,7 +519,7 @@ export default function ProjectNewPage() {
                 ) : (
                   <span
                     id="targetHours-hint"
-                    className="text-xs text-moss-500 dark:text-moss-300"
+                    className="text-xs text-moss-600 dark:text-moss-300"
                   >
                     {t("projects.create.fieldTargetHoursHint")}
                   </span>

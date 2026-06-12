@@ -324,29 +324,32 @@ async function updateProjectStatus(
 }
 
 /**
- * PR A of the co-organizer invitations series introduced a derived
- * `effectiveCoOrganizerKeys` view (in `db/coorgInvitations.ts`) that
- * is async — it walks the new invitation / response / revocation
- * tables. We deliberately KEEP this `isOrganizer` synchronous and
- * keep it reading the static `Project.coOrganizerKeys` array for
- * now, because:
+ * Synchronous authority predicate over the static
+ * `Project.coOrganizerKeys` array — which is the LIVE authority
+ * list, maintained by every path that grants or removes the role:
  *
- *   1. The v21 Dexie migration synthesizes accepted-invitation
- *      rows for every existing co-organizer pair, so the static
- *      array and the derived view stay in sync until a PR mutates
- *      one without the other.
- *   2. The new flows (`issueCoOrganizerInvitation` /
- *      `respondToCoOrganizerInvitation`) currently write only to
- *      the invitation tables — they do NOT mutate `coOrganizerKeys`
- *      yet (that wiring lands with PR C, once the UI surfaces the
- *      accept flow).
- *   3. `isOrganizer` has scattered call sites across the PWA;
- *      async-ifying it would force a sweep that balloons the diff
- *      and risks breaking unrelated paths.
+ *   - v21 grandfather migration (pre-feature unilateral adds),
+ *   - `materializeAcceptedCoOrganizer` in `db/coorgInvitations.ts`
+ *     (signed acceptances — the local accept path and both
+ *     federation ingest paths),
+ *   - `handoffOrganizer` below (old primary demotes into the array),
+ *   - `removeCoOrganizer` below (step-down / primary removal).
  *
- * The migration to the derived view happens in PR C, when the UI
- * stops feeding the static array directly. See
- * `docs/co-organizer-invitations.md` §11.
+ * The signed invitation / response / revocation tables are the
+ * audit trail for HOW an entry earned its place, not a replacement
+ * for this list: handoff demotion and removal have no signed record
+ * types, so the rows alone can neither grant the handoff case nor
+ * forget the removal case.
+ *
+ * Known residual divergence, tracked: the derived-view readers
+ * (`effectiveCoOrganizerKeysFromRows` call sites in attention.ts,
+ * Calendar's "Mine" filter, AppContext's block-standing gate) see
+ * neither of those two row-less transitions — a handoff demotee is
+ * missing from their organizer set, and a stepped-down co-organizer
+ * lingers in it. Reconciling that needs a decision about runtime
+ * sentinel rows (the v21 grandfather pattern applied at runtime)
+ * vs. pointing those readers back at this array; that is a design
+ * conversation, not a drive-by fix.
  */
 export function isOrganizer(project: Project, memberKey: string): boolean {
   return (

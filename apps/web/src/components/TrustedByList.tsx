@@ -72,12 +72,12 @@ export function TrustedByList({ vouchers, members }: TrustedByListProps) {
                 >
                   {name}
                 </Link>
-                <span className="ml-2 font-mono text-xs text-moss-500 dark:text-moss-300">
+                <span className="ml-2 font-mono text-xs text-moss-600 dark:text-moss-300">
                   ({keyHint})
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-0.5 text-xs text-moss-500 dark:text-moss-300">
+            <div className="flex flex-col items-end gap-0.5 text-xs text-moss-600 dark:text-moss-300">
               <span
                 className={
                   entry.kind === "manual"
