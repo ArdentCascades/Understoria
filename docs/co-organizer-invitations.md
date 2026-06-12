@@ -323,8 +323,7 @@ and peer-pull dedupes on `id`).
 
 ### Effective co-organizer set (derived view)
 
-`Project.coOrganizerKeys` becomes a **derived view** rather than a
-directly-written field:
+The validity rule for a signed acceptance:
 
 ```
 effectiveCoOrganizerKeys(project) =
@@ -337,9 +336,32 @@ effectiveCoOrganizerKeys(project) =
   } ⊂ Project.coOrganizerKeys
 ```
 
-Practically: `isOrganizer()` and every consumer of
-`coOrganizerKeys` reads the derived view, not the static array. The
-static field is retained for the grandfather case below.
+> **Shipped reality (June 2026 — PRs #235 and #238):** the original
+> plan here ("every consumer reads the derived view, not the static
+> array") could not hold, because two legitimate role transitions
+> have no signed record types: `handoffOrganizer` demotes the old
+> primary into the array, and `removeCoOrganizer` (step-down /
+> primary removal) takes members out of it. A rows-only predicate
+> under-grants the demoted primary and never forgets a removed
+> member. The codebase therefore converged on **materialization**:
+> `materializeAcceptedCoOrganizer` (db/coorgInvitations.ts) writes
+> an accepted invitee into `Project.coOrganizerKeys` under the
+> validity rule above — from the local accept path and from both
+> federation ingest paths, whichever order invitation and response
+> arrive. The static array is the LIVE authority list, written by
+> every grant and removal path; the signed rows are the audit trail
+> proving how each entry earned its place. `isOrganizer()` stays
+> synchronous over the array.
+>
+> Residual divergence, tracked: four pull surfaces (the attention
+> rail's organizer items, Calendar's "Mine" filter, AppContext's
+> block-standing gate) still read the derived view per PR #235 and
+> so don't see the two row-less transitions — a handoff demotee is
+> missing from their organizer set and a stepped-down co-organizer
+> lingers in it. Reconciling needs a decision between runtime
+> sentinel rows (the v21 grandfather pattern applied at runtime)
+> and pointing those readers at the array. Open question; see the
+> `isOrganizer` comment block in `db/projects.ts`.
 
 ### Grandfather migration
 
@@ -479,8 +501,8 @@ attention-prompt for the invitee, not a quick yes/no modal.
 
   What this means
 
-    ✓  Confirming task completions   Each confirmation debits your
-                                     own balance.
+    ✓  Confirming task completions   Each confirmation moves hours
+                                     out of your own balance.
     ✓  Signing as a project organizer Records you sign in this role
                                      trace back to your identity in
                                      the project's federated history.
@@ -594,6 +616,15 @@ public key appear in `Project.coOrganizerKeys` with no
 corresponding acceptance signature now sees a signed acceptance
 record. That's a small audit-trail improvement (provenance of the
 role grant is now end-to-end verifiable), not a mitigation.
+
+**Materialization guard (PR #238):** federation ingest verifies a
+response's *self*-signature only — it cannot cross-check against an
+invitation that may not have arrived yet. The first point where both
+rows are in hand is `materializeAcceptedCoOrganizer`, which refuses
+to materialize a response whose `inviteeKey` differs from the
+invitation's. A peer-forged, self-consistent "acceptance" therefore
+cannot push the named invitee (or the forger) into the role's
+authority gates.
 
 What this change does **not** defend against:
 
@@ -711,7 +742,10 @@ top of A; PR C ships UI on top of B.
     `respondToCoOrganizerInvitation`,
     `revokeCoOrganizerInvitation`,
     `effectiveCoOrganizerKeys(project)`.
-  - Update `isOrganizer()` to read the derived view.
+  - Update `isOrganizer()` to read the derived view. *(Superseded:
+    shipped as acceptance materialization instead — `isOrganizer()`
+    stays synchronous over the static array, which materialization
+    keeps live. See the "shipped reality" note in §5.)*
   - Grandfather migration in the Dexie `upgrade()` callback per
     §4.
   - Unit tests for sign / verify / canonical-payload stability /
