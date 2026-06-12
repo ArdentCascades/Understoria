@@ -377,7 +377,7 @@
       "attendeeFallbackKey": "(miembro {{shortKey}})",
       "goingRosterHeading": "Vienen",
       "maybeRosterHeading": "Tal vez",
-      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. Quienes no asisten ven sólo el conteo."
+      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. El resto ve sólo el conteo."
     },
     "rsvp": {
       "heading": "Confirmar asistencia",
@@ -694,7 +694,7 @@
         "tombstone": "(comentario eliminado por quien lo escribió)",
         "flag": "Señalar para revisión",
         "flagPrompt": "¿Por qué señalas este comentario? (Opcional — déjalo en blanco si prefieres que la comunidad decida sin un motivo.)",
-        "flaggedChip": "Señalado",
+        "flaggedChip": "En revisión",
         "showOlderOne": "Ver {{count}} comentario anterior",
         "showOlderOther": "Ver {{count}} comentarios anteriores",
         "showFewer": "Ver menos comentarios"
@@ -858,7 +858,7 @@
     "awaiting_confirmation": "Esperando confirmación",
     "completed": "Completado",
     "cancelled": "Cancelado",
-    "disputed": "Señalado para revisión"
+    "disputed": "En revisión comunitaria"
   },
   "postCard": {
     "needs": "necesita ayuda",
@@ -1021,8 +1021,8 @@
     "trustedWithCountOne": "De confianza ({{count}} aval)",
     "trustedWithCountOther": "De confianza ({{count}} avales)",
     "trustedTooltip": "Esta persona tiene al menos dos avales válidos.",
-    "pending": "Confianza en proceso",
-    "pendingWithCount": "En proceso ({{have}}/{{need}})",
+    "pending": "Persona nueva",
+    "pendingWithCount": "Persona nueva ({{have}}/{{need}} avales)",
     "pendingTooltip": "Aún tiene menos de dos avales. Puede publicar necesidades y ofertas igualmente."
   },
   "trustedBy": {
@@ -1087,7 +1087,7 @@
     "tapToConfirm": "Toca para confirmar y liberar los créditos.",
     "tapToConfirmTask": "Toca para confirmar y dar crédito a quien ayudó.",
     "taskCheckIn": {
-      "line": "¿Sigues con “{{task}}” de {{project}}? Han pasado {{days}} días.",
+      "line": "¿Sigues con “{{task}}” de {{project}}? La tomaste {{when}}.",
       "hint": "La capacidad cambia — suéltala si lo necesitas. No queda registro.",
       "stillOn": "Sigo en ello",
       "release": "Liberarla para otra persona",
@@ -1261,7 +1261,7 @@
     "area": "Zona",
     "none": "—",
     "vouchTitle": "Avalar",
-    "vouchIntro": "Avalar es una declaración firmada de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) llevan a una persona de pendiente-de-confianza a confiable.",
+    "vouchIntro": "Avalar es una declaración firmada de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) marcan a una persona como confiable.",
     "vouchButton": "Avalar a esta persona",
     "vouching": "Avalando…",
     "vouchedJustNow": "Avalado. Tu declaración firmada está en el registro local y (si hay un nodo comunitario configurado) en camino allí.",
@@ -1307,7 +1307,7 @@
       "label": "Tu saldo",
       "seed": "Semilla: {{hours}}",
       "footerNote": "Los saldos pueden ir en negativo — pedir nunca tiene barreras.",
-      "surplus": "Has dado más de lo que has recibido últimamente. Gracias.",
+      "surplus": "Has dado mucho últimamente. Las comunidades se mantienen sanas cuando quienes ayudan también piden — ¿qué te ayudaría a ti?",
       "neutral": "Tu saldo está justo en tu semilla inicial. Es un buen lugar para estar.",
       "receiving": "Has estado recibiendo — para eso son los créditos de semilla. Pide lo que necesites.",
       "pendingLine": "{{hours}} pendientes de confirmación",
@@ -1341,11 +1341,11 @@
       "empty": "Aún no hay nada aquí. Cuando des o recibas ayuda, cada intercambio aparecerá con un registro firmado que podrás verificar.",
       "helped": "Ayudaste a",
       "received": "Recibiste ayuda de",
-      "flag": "señalado para revisión",
+      "flag": "en revisión comunitaria",
       "flagShort": "Intercambio muy corto — surge para revisión comunitaria.",
       "flagReciprocal": "Intercambio recíproco repetido con la misma persona — surge para revisión comunitaria.",
       "flagDailyLimit": "Cerca del límite diario de intercambios.",
-      "flagDefault": "Señalado para revisión comunitaria.",
+      "flagDefault": "En revisión comunitaria.",
       "pendingBadge": "pendiente",
       "awaitingYouBadge": "te espera",
       "taskWorkingOn": "Trabajando en",
@@ -1572,7 +1572,7 @@
     "subtitle": "Intercambios que alguien señaló para que la comunidad los revise. Cualquier persona puede ver esta lista — no hay administradores. Las dos partes ya ven la marca en la publicación misma; aquí es donde aparece para el resto.",
     "emptyTitle": "Nada requiere atención de la comunidad",
     "empty": "Nada está señalado ahora mismo. Cuando alguien señale un intercambio, aparecerá aquí para que la comunidad pueda verlo y responder.",
-    "flagChip": "Señalado",
+    "flagChip": "En revisión",
     "typeNeed": "Necesidad",
     "typeOffer": "Oferta",
     "helperLabel": "Ayudante",

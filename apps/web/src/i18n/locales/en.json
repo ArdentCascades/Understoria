@@ -377,7 +377,7 @@
       "attendeeFallbackKey": "(member {{shortKey}})",
       "goingRosterHeading": "Going",
       "maybeRosterHeading": "Maybe",
-      "rosterHiddenHint": "RSVP \"Going\" or \"Maybe\" to see who else is coming. Non-attendees see the count only."
+      "rosterHiddenHint": "RSVP \"Going\" or \"Maybe\" to see who else is coming. Everyone else sees the count only."
     },
     "rsvp": {
       "heading": "RSVP to this event",
@@ -694,7 +694,7 @@
         "tombstone": "(comment deleted by author)",
         "flag": "Flag for review",
         "flagPrompt": "Why are you flagging this comment? (Optional — leave blank if you'd rather the community decide without a reason.)",
-        "flaggedChip": "Flagged",
+        "flaggedChip": "In review",
         "showOlderOne": "Show {{count}} older comment",
         "showOlderOther": "Show {{count}} older comments",
         "showFewer": "Show fewer comments"
@@ -858,7 +858,7 @@
     "awaiting_confirmation": "Awaiting confirmation",
     "completed": "Completed",
     "cancelled": "Cancelled",
-    "disputed": "Flagged for review"
+    "disputed": "In community review"
   },
   "postCard": {
     "needs": "needs help",
@@ -1021,8 +1021,8 @@
     "trustedWithCountOne": "Trusted ({{count}} vouch)",
     "trustedWithCountOther": "Trusted ({{count}} vouches)",
     "trustedTooltip": "This member has at least two valid vouches.",
-    "pending": "Pending trust",
-    "pendingWithCount": "Pending ({{have}}/{{need}})",
+    "pending": "New here",
+    "pendingWithCount": "New here ({{have}}/{{need}} vouches)",
     "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers."
   },
   "trustedBy": {
@@ -1087,7 +1087,7 @@
     "tapToConfirm": "Tap to confirm and release the credits.",
     "tapToConfirmTask": "Tap to confirm and credit the helper.",
     "taskCheckIn": {
-      "line": "Still on “{{task}}” for {{project}}? It's been {{days}} days.",
+      "line": "Still on “{{task}}” for {{project}}? You claimed it {{when}}.",
       "hint": "Capacity changes — release it if you need to. No record kept.",
       "stillOn": "Still on it",
       "release": "Release it for someone else",
@@ -1261,7 +1261,7 @@
     "area": "Area",
     "none": "—",
     "vouchTitle": "Vouch",
-    "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) move a member from pending-trust to trusted.",
+    "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) mark a member as trusted.",
     "vouchButton": "Vouch for this member",
     "vouching": "Vouching…",
     "vouchedJustNow": "Vouched. Your signed statement is in the local ledger and (if a community node is configured) on its way there.",
@@ -1307,7 +1307,7 @@
       "label": "Your balance",
       "seed": "Seed: {{hours}}",
       "footerNote": "Balances can go negative — asking is never gated.",
-      "surplus": "You've given more than you've received lately. Thank you.",
+      "surplus": "You've given a lot lately. Communities stay healthy when helpers ask too — what would help you?",
       "neutral": "Your balance is right at your starting seed. That's a fine place to be.",
       "receiving": "You've been receiving — that's what seed credits are for. Ask for what you need.",
       "pendingLine": "{{hours}} pending confirmation",
@@ -1341,11 +1341,11 @@
       "empty": "Nothing here yet. When you give or receive help, each exchange shows up with a signed record you can verify.",
       "helped": "Helped",
       "received": "Received help from",
-      "flag": "flagged for review",
+      "flag": "in community review",
       "flagShort": "Very short exchange — surfaced for community review.",
       "flagReciprocal": "Repeated reciprocal exchange with the same person — surfaced for community review.",
       "flagDailyLimit": "Near the daily exchange limit.",
-      "flagDefault": "Flagged for community review.",
+      "flagDefault": "In community review.",
       "pendingBadge": "pending",
       "awaitingYouBadge": "awaiting you",
       "taskWorkingOn": "Working on",
@@ -1572,7 +1572,7 @@
     "subtitle": "Exchanges someone has flagged for the community to review. Anyone can see this list — there are no admins. The two parties already see the flag on the post itself; this is where it surfaces to everyone else.",
     "emptyTitle": "Nothing needs the community's attention",
     "empty": "Nothing flagged right now. When someone flags an exchange, it shows here so the community can see and respond.",
-    "flagChip": "Flagged",
+    "flagChip": "In review",
     "typeNeed": "Need",
     "typeOffer": "Offer",
     "helperLabel": "Helper",

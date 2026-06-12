@@ -66,9 +66,9 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "confirm-exchange",
         question: "How does confirming an exchange work?",
         answer: [
-          "After the help actually happens, both parties tap Confirm " +
-            "on the post detail page. The credit only moves once both " +
-            "of you have confirmed.",
+          "After the help actually happens, both of you tap Confirm " +
+            "on the post detail page. The credit only moves once " +
+            "you've both confirmed.",
           "The order doesn't matter — one of you confirms first, the " +
             "other sees the post is waiting on them, and confirms when " +
             "they're ready.",

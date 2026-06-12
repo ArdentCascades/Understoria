@@ -16,6 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { computeAttentionItems } from "@/lib/attention";
 import { ATTENTION_EMOJI } from "@/lib/attentionMeta";
+import { formatRelativeTime } from "@/lib/format";
 import {
   acknowledgeTaskCheckIn,
   logActivity,
@@ -366,7 +367,7 @@ export function AttentionSection() {
                   {t("attention.taskCheckIn.line", {
                     task: item.taskTitle,
                     project: item.projectTitle,
-                    days: item.daysSinceClaim,
+                    when: formatRelativeTime(item.claimedAt),
                   })}
                 </Link>
               </p>
