@@ -619,7 +619,7 @@
       },
       "confirmDialog": {
         "title": "Confirm this task?",
-        "body": "Confirming records a signed exchange: {{claimer}} is credited {{hours}} hours, and your balance is debited {{hours}} hours — you're signing as the helped party on behalf of the project.",
+        "body": "Confirming records a signed exchange: {{hours}} hours move to {{claimer}}, and {{hours}} hours move out of your balance — you're signing as the helped party on behalf of the project.",
         "confirmCta": "Confirm and sign",
         "confirming": "Signing…",
         "cancelCta": "Cancel"
@@ -754,7 +754,7 @@
         "lifecycle": "Launch, pause, resume, or complete the project.",
         "tasks": "Add and edit tasks — one at a time or several at once.",
         "ordering": "Set task order and sequencing (which tasks come before which).",
-        "confirm": "Confirm completed tasks. Confirming debits your own balance — you're signing as the helped party.",
+        "confirm": "Confirm completed tasks. Each confirmation moves hours out of your own balance — you're signing as the helped party.",
         "announce": "Post project announcements.",
         "stepDown": "Step down from the role any time."
       },
@@ -924,12 +924,12 @@
     "actionsClaimedBy": "This post has been claimed. {{helper}} is helping {{helped}}.",
     "actionsCompleted": "Completed. {{hours}} of credit flowed from {{helped}} to {{helper}}. Thank you both.",
     "dialogClaimNeedTitle": "Claim this post?",
-    "dialogClaimNeedDescription": "You're offering to help with {{hours}} of {{category}}. You'll earn credit once both of you confirm completion.",
+    "dialogClaimNeedDescription": "You're offering to help with {{hours}} of {{category}}. Credit flows to you once you've both confirmed completion.",
     "dialogClaimOfferTitle": "Claim this offer?",
-    "dialogClaimOfferDescription": "You'd like to receive help for {{hours}}. Credits transfer when both parties confirm.",
+    "dialogClaimOfferDescription": "You'd like to receive help for {{hours}}. Credit moves once you've both confirmed.",
     "dialogClaimConfirm": "Yes, claim it",
     "dialogCompleteTitle": "Mark this exchange complete?",
-    "dialogCompleteDescription": "Confirm that the help actually happened. Credits transfer once both parties confirm. If something went wrong, you can flag it instead.",
+    "dialogCompleteDescription": "Confirm that the help actually happened. Credit moves once you've both confirmed. If something went wrong, you can flag it instead.",
     "dialogCompleteConfirm": "Yes, it's complete",
     "dialogDisputeTitle": "Flag this exchange for community review?",
     "dialogDisputeDescription": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved.",
@@ -965,7 +965,7 @@
       "disputedBody": "The community is discussing this exchange.",
       "disputedLink": "See Profile → Disputes"
     },
-    "newRolesEarned": "New community roles earned"
+    "newRolesEarned": "New community roles"
   },
   "lockScreen": {
     "title": "This device is locked",
@@ -1077,7 +1077,7 @@
       "label": "Keystone",
       "description": "A project you organized was completed."
     },
-    "earnedDate": "Earned {{date}}"
+    "earnedDate": "Recognized {{date}}"
   },
   "attention": {
     "title": "Needs your attention",
@@ -1119,7 +1119,7 @@
         "cta": "Accept",
         "title": "Accept co-organizer role for \"{{project}}\"",
         "meansTitle": "What this means",
-        "meansConfirm": "Confirming task completions — each confirmation debits your own balance.",
+        "meansConfirm": "Confirming task completions — each confirmation moves hours out of your own balance.",
         "meansSign": "Signing as a project organizer — records you sign in this role trace back to your identity in the project's federated history.",
         "meansVisible": "Visible to the community — the project page lists you as a co-organizer on every peer's view.",
         "notTitle": "What this does not mean",
@@ -1248,9 +1248,9 @@
       "footnote": "Not a score. Just a window into the shape of help across the community."
     },
     "rolesThisMonth": {
-      "title": "Community roles earned this month",
-      "lineOne": "{{count}} member earned {{role}}",
-      "lineOther": "{{count}} members earned {{role}}"
+      "title": "Community roles this month",
+      "lineOne": "{{count}} member stepped into {{role}}",
+      "lineOther": "{{count}} members stepped into {{role}}"
     }
   },
   "member": {
@@ -1332,8 +1332,8 @@
       "areaPlaceholder": "e.g. North neighborhood"
     },
     "rolesEarned": {
-      "title": "Community roles earned",
-      "empty": "You haven't earned any community roles yet. They show up as you participate — not as trophies, but as ways of naming the shapes your contributions take."
+      "title": "Your community roles",
+      "empty": "No named roles yet. They show up as you participate — not as trophies, but as ways of naming the shapes your contributions take."
     },
     "history": {
       "title": "Your exchange history",

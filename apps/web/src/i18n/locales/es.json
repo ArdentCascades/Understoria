@@ -619,7 +619,7 @@
       },
       "confirmDialog": {
         "title": "¿Confirmar esta tarea?",
-        "body": "Confirmar registra un intercambio firmado: {{claimer}} recibe {{hours}} horas de crédito, y tu balance se debita {{hours}} horas — estás firmando como la parte ayudada en nombre del proyecto.",
+        "body": "Confirmar registra un intercambio firmado: {{hours}} horas se mueven hacia {{claimer}}, y {{hours}} horas salen de tu balance — estás firmando como la parte ayudada en nombre del proyecto.",
         "confirmCta": "Confirmar y firmar",
         "confirming": "Firmando…",
         "cancelCta": "Cancelar"
@@ -754,7 +754,7 @@
         "lifecycle": "Lanzar, pausar, reanudar o completar el proyecto.",
         "tasks": "Añadir y editar tareas — una a la vez o varias a la vez.",
         "ordering": "Establecer el orden y la secuencia de las tareas (cuáles van antes de cuáles).",
-        "confirm": "Confirmar tareas completadas. Confirmar debita tu propio balance — estás firmando como la parte ayudada.",
+        "confirm": "Confirmar tareas completadas. Cada confirmación mueve horas de tu propio balance — estás firmando como la parte ayudada.",
         "announce": "Publicar anuncios del proyecto.",
         "stepDown": "Dejar el rol en cualquier momento."
       },
@@ -924,12 +924,12 @@
     "actionsClaimedBy": "Esta publicación ya está tomada. {{helper}} está ayudando a {{helped}}.",
     "actionsCompleted": "Completado. {{hours}} de crédito fluyeron de {{helped}} a {{helper}}. Gracias a las dos personas.",
     "dialogClaimNeedTitle": "¿Tomar esta publicación?",
-    "dialogClaimNeedDescription": "Te estás ofreciendo para ayudar con {{hours}} de {{category}}. Ganarás crédito cuando ambas personas confirmen que está hecho.",
+    "dialogClaimNeedDescription": "Te estás ofreciendo para ayudar con {{hours}} de {{category}}. El crédito fluye hacia ti cuando ambas personas confirman que está hecho.",
     "dialogClaimOfferTitle": "¿Tomar esta oferta?",
-    "dialogClaimOfferDescription": "Vas a recibir ayuda por {{hours}}. Los créditos se transfieren cuando ambas personas confirman.",
+    "dialogClaimOfferDescription": "Vas a recibir ayuda por {{hours}}. El crédito se mueve cuando ambas personas confirman.",
     "dialogClaimConfirm": "Sí, tomarla",
     "dialogCompleteTitle": "¿Marcar este intercambio como completo?",
-    "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. Los créditos se transfieren cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
+    "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. El crédito se mueve cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
     "dialogCompleteConfirm": "Sí, está completo",
     "dialogDisputeTitle": "¿Señalar este intercambio para revisión comunitaria?",
     "dialogDisputeDescription": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva.",
@@ -965,7 +965,7 @@
       "disputedBody": "La comunidad está debatiendo este intercambio.",
       "disputedLink": "Ver Perfil → Disputas"
     },
-    "newRolesEarned": "Nuevos roles comunitarios obtenidos"
+    "newRolesEarned": "Nuevos roles comunitarios"
   },
   "lockScreen": {
     "title": "Este dispositivo está bloqueado",
@@ -1077,7 +1077,7 @@
       "label": "Clave de bóveda",
       "description": "Un proyecto que organizaste fue completado."
     },
-    "earnedDate": "Obtenido el {{date}}"
+    "earnedDate": "Reconocido el {{date}}"
   },
   "attention": {
     "title": "Te toca a ti",
@@ -1119,7 +1119,7 @@
         "cta": "Aceptar",
         "title": "Aceptar el rol de co-organizador en \"{{project}}\"",
         "meansTitle": "Qué significa esto",
-        "meansConfirm": "Confirmar tareas completadas — cada confirmación descuenta de tu propio saldo.",
+        "meansConfirm": "Confirmar tareas completadas — cada confirmación mueve horas de tu propio saldo.",
         "meansSign": "Firmar como organizador del proyecto — los registros que firmes en este rol quedan ligados a tu identidad en el historial federado del proyecto.",
         "meansVisible": "Visible para la comunidad — la página del proyecto te muestra como co-organizador en la vista de cada nodo.",
         "notTitle": "Qué no significa esto",
@@ -1248,9 +1248,9 @@
       "footnote": "No es una puntuación. Solo una ventana a la forma de la ayuda en la comunidad."
     },
     "rolesThisMonth": {
-      "title": "Roles comunitarios obtenidos este mes",
-      "lineOne": "{{count}} persona obtuvo {{role}}",
-      "lineOther": "{{count}} personas obtuvieron {{role}}"
+      "title": "Roles comunitarios este mes",
+      "lineOne": "{{count}} persona asumió {{role}}",
+      "lineOther": "{{count}} personas asumieron {{role}}"
     }
   },
   "member": {
@@ -1332,8 +1332,8 @@
       "areaPlaceholder": "p. ej. zona norte"
     },
     "rolesEarned": {
-      "title": "Roles comunitarios obtenidos",
-      "empty": "Aún no has obtenido roles comunitarios. Aparecen a medida que participas — no como trofeos, sino como formas de nombrar la huella que dejas."
+      "title": "Tus roles comunitarios",
+      "empty": "Aún no hay roles con nombre. Aparecen a medida que participas — no como trofeos, sino como formas de nombrar la huella que dejas."
     },
     "history": {
       "title": "Tu historial de intercambios",
