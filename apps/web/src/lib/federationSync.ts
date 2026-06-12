@@ -18,6 +18,7 @@ import type {
   EventCancellation,
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
+import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
 import { verifyTaskComment } from "@/lib/crypto";
 import {
   verifyCoOrganizerInvitation,
@@ -485,6 +486,10 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
     }
 
     await db.coorgInvitations.put(record);
+    // Federation can deliver the accept response before its
+    // invitation; now that the invitation is here, complete any
+    // materialization the response-side hook had to skip.
+    await materializeAcceptedCoOrganizer(record.id);
     inserted += 1;
     advanceCursor();
   }
@@ -576,6 +581,12 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
     }
 
     await db.coorgInvitationResponses.put(record);
+    // Keep the live authority list in step with the audit trail —
+    // same materialization the local accept path performs. No-ops
+    // for declines and for invitations not (yet) on this node.
+    if (record.decision === "accept") {
+      await materializeAcceptedCoOrganizer(record.invitationId);
+    }
     inserted += 1;
     advanceCursor();
   }
