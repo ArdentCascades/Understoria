@@ -2,7 +2,7 @@
 
 > **Audience:** anyone in a community that has decided to use Understoria.
 > You do not need to know anything about apps, cryptography, or
-> timebanking. If any of this is unclear, tell a community coordinator —
+> timebanking. If any of this is unclear, tell a member you trust —
 > the guide is supposed to work for you.
 
 Understoria is a way for our community to ask for help, offer help, and
@@ -30,7 +30,7 @@ The first time you open Understoria on a device, you'll see a short
    is already running in your community, the app surfaces it before
    you start a new one.
 
-You can tap **Skip** at any point if a coordinator has already
+You can tap **Skip** at any point if someone has already
 explained the basics in person. The welcome only shows once per
 device — if you want to read it again later, **Profile → Learn →
 Revisit the welcome** will bring it back.
@@ -186,7 +186,10 @@ and the exchange is recorded.
 
 If something went wrong — you didn't receive what was promised, or the
 other person didn't show — tap **Something's wrong — flag it**
-instead. A community mediator will reach out.
+instead. That surfaces the exchange on the Disputes page, where the
+whole community can see it and respond — there are no admins. You can
+also request a mediated conversation under the
+[Code of Conduct](../CODE_OF_CONDUCT.md) process.
 
 ## 9. Projects
 
@@ -199,7 +202,7 @@ Open a project to see:
 
 - **Target hours** and **contributed hours**, with a progress bar.
 - A **momentum chip** beside the status — "Humming," "Active,"
-  "Stalled," or one of the terminal states. It summarises the
+  "Quiet," or one of the terminal states. It summarises the
   project's pace, not any single person's contribution.
 - A **sparkline** under the progress bar showing the last 14 days of
   contributions. Useful for seeing whether the project is gathering
@@ -215,8 +218,13 @@ for a board post. When the task is done, you mark it complete; the
 organizer confirms; the hours move into your balance just like any
 other exchange.
 
-If you finish three confirmed project tasks, you earn the **Crew
-Member** role. If you organize a project that draws contributors,
+If you're helping on several projects at once, **Tasks you're
+carrying** (linked from your Profile and from the bottom of the
+Projects tab) gathers every claim of yours in one place, grouped
+by project.
+
+If you finish three confirmed project tasks, the **Crew Member**
+role shows up on your profile. If you organize a project that draws contributors,
 that's **Groundbreaker**; halfway to the target is **Momentum
 Maker**; finished is **Keystone**.
 
@@ -313,7 +321,7 @@ small card explaining what your RSVP means before you commit:
 
 - If you RSVP **Going** or **Maybe**, the organizer sees your name
   on the attendee list, and other members on this node who also
-  RSVP'd see your name. Non-attendees on this node see only the
+  RSVP'd see your name. Everyone else on this node sees only the
   count, not names. Members on peer nodes see neither names nor
   counts.
 - If you RSVP **Not going** (or change to it later), you're
@@ -365,15 +373,15 @@ community-level view, not your personal stats. Highlights:
   10 hours, first 25, etc.).
 - **Where help is flowing** — a category breakdown showing the mix
   of care, labor, and support moving through the community.
-- **Breadth, not depth** — members ranked by how many *distinct
-  people* they've helped, not by total hours. Generosity spread
-  widely, not piled deep.
+- **Breadth, not depth** — a glimpse of how widely help spreads;
+  each bar is one member's count of *distinct people* helped, not
+  total hours. Generosity spread widely, not piled deep.
 - **Reciprocity** — the percentage of community connections that
   flow both ways. High reciprocity means most relationships are
   mutual; low reciprocity is worth a community conversation, not an
   automated response.
-- **Community roles earned this month** — a count of how many
-  members earned each role recently.
+- **Community roles this month** — a count of how many members
+  stepped into each role recently.
 
 Both the breadth bar and the reciprocity pulse are windows into the
 shape of help, not scores. They're there so the community can see
@@ -416,7 +424,7 @@ Tap **Profile** to see:
 - **Your balance** and a note about what it means.
 - **About you** — display name, skills, availability, neighborhood
   area. You can edit any of these any time.
-- **Community roles** you've earned — things like "First Exchange,"
+- **Your community roles** — things like "First Exchange,"
   "Connector," "Listener," "Weaver," "Groundbreaker," "Crew Member,"
   "Momentum Maker," "Keystone." These are ways of naming what you've
   done, not a ranking.
@@ -489,7 +497,7 @@ If you do organizing work at a laptop but answer needs from your
 phone, you don't have to choose. **Profile → Add another device** lets
 you run Understoria on a second device as the *same member* — one
 identity, one balance, one name on the Board — rather than two
-separate accounts the community can't tell apart.
+separate identities the community can't tell apart.
 
 ### What follows you, and what starts fresh
 
@@ -667,7 +675,7 @@ Dispute outcomes follow the community process and may or may not
 be reversible depending on what the proposal does.
 
 If someone is causing you serious harm and you need help beyond
-what these tools provide, reach out to a coordinator and to the
+what these tools provide, reach out to members you trust and to the
 Code of Conduct enforcement contact. The block and the dispute are
 tools; community care is the response.
 
@@ -686,8 +694,9 @@ Both happen entirely on this device. Neither contacts a server.
 ## 16. FAQ
 
 **What if nobody responds to my post?** Bump it. Repost with more
-detail. Tell a coordinator. Nobody gets everything they need, but if
-you keep being invisible, that's a community conversation.
+detail. Say so out loud — in a meeting, a thread, wherever your
+community talks. Nobody gets everything they need, but if you keep
+being invisible, that's a community conversation.
 
 **What if I don't want to give my real name?** Pseudonyms are fine
 and common. The software was designed this way on purpose.
@@ -697,9 +706,11 @@ Don't use Understoria on an employer-owned device or network —
 that's a separate problem the software can't solve. See the
 [Opsec Guide](opsec-guide.md).
 
-**What if someone I don't like is in the community?** Tell a
-moderator. The [Code of Conduct](../CODE_OF_CONDUCT.md) describes the
-conflict-resolution process.
+**What if someone I don't like is in the community?** The
+[Code of Conduct](../CODE_OF_CONDUCT.md) describes the
+conflict-resolution process — direct conversation first, a mediated
+one if that doesn't work. The block tool (above) is also there for
+your own peace, no permission needed.
 
 **What if I give a lot and never receive?** That's a community
 conversation too. The dashboard is designed to surface whether aid is
@@ -708,9 +719,9 @@ really reaching everyone. If it isn't, we adjust.
 **How do I see the welcome screens again?** Profile → Learn →
 Revisit the welcome. The welcome only auto-shows once per device.
 
-**Why does my project show "Stalled"?** A project the community has
+**Why does my project show "Quiet"?** A project the community has
 launched but where no tasks have been completed in the last 7 days
-gets a "Stalled" momentum chip. It's not a judgment — it's a signal
+gets a "Quiet" momentum chip. It's not a judgment — it's a signal
 the community might want to bump it, regroup, or pause it.
 
 **Where does my data live?** On your device, in the browser's
@@ -721,9 +732,9 @@ message, in a future release.
 **Is it really free?** Yes. The software is AGPL-3.0-or-later. No
 advertisements, no subscriptions, no data sale. If your community
 runs a server, that may cost someone a few dollars a month to host —
-ask your coordinator.
+ask whoever operates your community's node.
 
 ---
 
 *If something in this guide is unclear, that's our fault. Tell a
-coordinator what confused you so we can fix it.*
+member you trust what confused you so we can fix it.*
