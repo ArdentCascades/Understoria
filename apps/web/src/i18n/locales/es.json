@@ -242,7 +242,7 @@
     "balance": {
       "label": "Entendiendo tu saldo",
       "message": "Tu saldo son horas de ayuda. Cada persona empieza con 5, así puedes pedir ayuda desde el primer día, incluso antes de haber dado alguna. Una hora de cualquier tipo de ayuda equivale a una hora. Da y recibe a tu propio ritmo.",
-      "technical": "Los saldos son créditos de tiempo, expresados en horas, guardados en el registro local de tu comunidad. Las personas nuevas reciben una concesión semilla de 5 horas al crear su cuenta para que la participación no esté condicionada por créditos — el principio de 'pedir primero está bien'. Los créditos fluyen solo cuando un intercambio se confirma completamente: ambas partes firman el registro del intercambio (Ed25519) y el nodo local actualiza ambos saldos de forma atómica. Una hora equivale a una hora sin importar la categoría — cuidado infantil, soporte técnico, carpintería, trabajo emocional, todo se liquida a la par. Los saldos no se federan entre nodos por diseño; los intercambios entre comunidades aún ocurren, pero el crédito se liquida en el nodo de origen de quien ayudó."
+      "technical": "Los saldos son créditos de tiempo, expresados en horas, guardados en el registro local de tu comunidad. Las personas nuevas reciben una concesión semilla de 5 horas al unirse para que la participación no esté condicionada por créditos — el principio de 'pedir primero está bien'. Los créditos fluyen solo cuando un intercambio se confirma completamente: ambas partes firman el registro del intercambio (Ed25519) y el nodo local actualiza ambos saldos de forma atómica. Una hora equivale a una hora sin importar la categoría — cuidado infantil, soporte técnico, carpintería, trabajo emocional, todo se liquida a la par. Los saldos no se federan entre nodos por diseño; los intercambios entre comunidades aún ocurren, pero el crédito se liquida en el nodo de origen de quien ayudó."
     },
     "invite": {
       "label": "Hacer crecer la comunidad",
@@ -474,7 +474,7 @@
     "momentum": {
       "humming": "En marcha",
       "active": "Activo",
-      "stalled": "Estancado",
+      "stalled": "En calma",
       "completed": "Completado",
       "paused": "En pausa",
       "planning": "En planeación",
@@ -630,7 +630,7 @@
       "statusClaimed": "Tomada",
       "statusAwaiting": "Esperando confirmación",
       "statusCompleted": "Completada",
-      "statusBlocked": "Bloqueada",
+      "statusBlocked": "Sigue a otras",
       "needsMoreHands": "Le vendrían bien más manos",
       "needsMoreHandsTooltip": "Esta tarea podría aprovechar apoyo adicional. Cualquier persona puede sumarse a ayudar.",
       "hours": "{{hours}}",
@@ -932,7 +932,7 @@
     "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. Los créditos se transfieren cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
     "dialogCompleteConfirm": "Sí, está completo",
     "dialogDisputeTitle": "¿Señalar este intercambio para revisión comunitaria?",
-    "dialogDisputeDescription": "El intercambio se señalará y una persona mediadora puede ayudar a resolverlo. Tus créditos aún no se transferirán.",
+    "dialogDisputeDescription": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva.",
     "dialogDisputeConfirm": "Señalar",
     "dialogCancelTitle": "¿Cancelar esta publicación?",
     "dialogCancelDescription": "Las publicaciones canceladas siguen visibles pero ya no pueden tomarse.",
@@ -1231,7 +1231,7 @@
     },
     "breadth": {
       "title": "Amplitud, no profundidad",
-      "intro": "Integrantes según la cantidad de personas distintas a las que han ayudado — generosidad repartida, no acumulada.",
+      "intro": "Un vistazo a cuánto se extiende la ayuda — cada barra es el alcance de una persona en la comunidad. Generosidad repartida, no acumulada.",
       "empty": "Aún no hay intercambios. El primero iniciará el patrón.",
       "rowLabel": "{{name}} ha ayudado a {{count}} personas distintas",
       "moreNote": "{{count}} {{noun}} más han llegado al menos a una persona — si listáramos a toda la comunidad, cada nombre estaría aquí.",
@@ -1757,7 +1757,7 @@
     "next": "Siguiente",
     "start": "Abrir el tablero",
     "nextSteps": "Después: mira qué necesitan tus vecinas, o publica una oferta tuya.",
-    "pairDeviceLink": "¿Ya tienes cuenta en otro dispositivo? Vincula este →",
+    "pairDeviceLink": "¿Ya tienes tu identidad en otro dispositivo? Vincula este →",
     "screens": {
       "timebank": {
         "title": "Esto es un banco de tiempo",

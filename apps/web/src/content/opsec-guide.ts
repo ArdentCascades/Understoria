@@ -27,11 +27,11 @@ export const OPSEC_GUIDE: readonly GuideSection[] = [
   },
   {
     id: "accounts",
-    title: "On your accounts",
+    title: "On your identity",
     body: [
       "Understoria does not ask for an email or phone number. If anyone claiming to be from Understoria asks for these, that is a phishing attempt.",
       "Your identity is a cryptographic key on this device. You can export a backup — keep it somewhere safe and offline. A printed paper in a drawer is often better than a cloud service.",
-      "If your phone is lost or stolen, tell a community coordinator so your key can be revoked.",
+      "If your phone is lost or stolen, the passphrase lock is what protects the key on it — that's why we suggest setting one. There is no central revocation and no one who can flip a switch for you: tell your community what happened so people know to stop trusting that identity, then start fresh with a new key (Profile → Emergency → Hard purge on any device that still holds the old one).",
     ],
   },
   {
@@ -57,7 +57,7 @@ export const OPSEC_GUIDE: readonly GuideSection[] = [
     body: [
       "If someone you don't know wants to be added, go slow. Ask for a vouch.",
       "If an existing member starts asking strange questions about membership lists or who helped whom — note it. Talk to another member. Infiltration happens.",
-      "If a vendor, employer, or officer asks you to share information about members or activity: you do not have to. Talk to a community coordinator before answering.",
+      "If a vendor, employer, or officer asks you to share information about members or activity: you do not have to. Don't handle it alone — talk with members you trust before answering anything.",
     ],
   },
   {

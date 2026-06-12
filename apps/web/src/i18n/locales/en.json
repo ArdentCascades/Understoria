@@ -242,7 +242,7 @@
     "balance": {
       "label": "Understanding your balance",
       "message": "Your balance is hours of help. Everyone starts with 5 so you can ask for help right away, even before you've given any. One hour of any kind of help equals one hour. Give and receive at your own pace.",
-      "technical": "Balances are time credits, denominated in hours, kept in your community's local ledger. New members receive a 5-hour seed grant at account creation so participation isn't credit-gated — the 'asking first is fine' principle. Credits flow only on a fully-confirmed exchange: both parties sign the completed-exchange record (Ed25519) and the local node updates both balances atomically. One hour equals one hour regardless of category — childcare, tech support, carpentry, emotional labor all settle at par. Balances do not federate across nodes by design; cross-community exchanges still happen but the credit settles in the helper's home node."
+      "technical": "Balances are time credits, denominated in hours, kept in your community's local ledger. New members receive a 5-hour seed grant when they join so participation isn't credit-gated — the 'asking first is fine' principle. Credits flow only on a fully-confirmed exchange: both parties sign the completed-exchange record (Ed25519) and the local node updates both balances atomically. One hour equals one hour regardless of category — childcare, tech support, carpentry, emotional labor all settle at par. Balances do not federate across nodes by design; cross-community exchanges still happen but the credit settles in the helper's home node."
     },
     "invite": {
       "label": "Growing the community",
@@ -474,7 +474,7 @@
     "momentum": {
       "humming": "Humming",
       "active": "Active",
-      "stalled": "Stalled",
+      "stalled": "Quiet",
       "completed": "Completed",
       "paused": "Paused",
       "planning": "Planning",
@@ -630,7 +630,7 @@
       "statusClaimed": "Claimed",
       "statusAwaiting": "Awaiting confirmation",
       "statusCompleted": "Completed",
-      "statusBlocked": "Blocked",
+      "statusBlocked": "Follows others",
       "needsMoreHands": "Could use more hands",
       "needsMoreHandsTooltip": "This task could use additional support. Anyone can step in to help.",
       "hours": "{{hours}}",
@@ -932,7 +932,7 @@
     "dialogCompleteDescription": "Confirm that the help actually happened. Credits transfer once both parties confirm. If something went wrong, you can flag it instead.",
     "dialogCompleteConfirm": "Yes, it's complete",
     "dialogDisputeTitle": "Flag this exchange for community review?",
-    "dialogDisputeDescription": "The exchange will be flagged and a community mediator can help resolve it. Your credits won't transfer yet.",
+    "dialogDisputeDescription": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved.",
     "dialogDisputeConfirm": "Flag it",
     "dialogCancelTitle": "Cancel this post?",
     "dialogCancelDescription": "Cancelled posts stay visible but can't be claimed.",
@@ -1231,7 +1231,7 @@
     },
     "breadth": {
       "title": "Breadth, not depth",
-      "intro": "Members ranked by the number of distinct people they've helped — generosity spread widely, not piled deep.",
+      "intro": "A glimpse of how widely help spreads — each bar is one member's reach across the community. Generosity spread widely, not piled deep.",
       "empty": "No exchanges yet. The first one will start the pattern.",
       "rowLabel": "{{name}} has helped {{count}} different people",
       "moreNote": "{{count}} more {{noun}} have reached at least one person — every name in the community would belong here if we listed them all.",
@@ -1757,7 +1757,7 @@
     "next": "Next",
     "start": "Open the board",
     "nextSteps": "Next: browse what neighbors need, or post an offer of your own.",
-    "pairDeviceLink": "Already have an account on another device? Pair this one →",
+    "pairDeviceLink": "Already have your identity on another device? Pair this one →",
     "screens": {
       "timebank": {
         "title": "This is a timebank",

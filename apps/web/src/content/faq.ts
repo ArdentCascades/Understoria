@@ -82,8 +82,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "it's a forgotten tap, not a refusal.",
           "If there's a real disagreement about whether the exchange " +
             "happened or whether it counted as full help, use Flag for " +
-            "review on the post detail page. A community mediator can " +
-            "help sort it out; credits stay pending until then.",
+            "review on the post detail page. That surfaces it on the " +
+            "Disputes page, where the community can help sort it out — " +
+            "there are no admins. Credit stays pending until it's " +
+            "resolved.",
           "You're not stuck waiting forever, either. If your community " +
             "has auto-confirmation turned on, the community node steps " +
             "in after the agreed waiting period and completes a " +
