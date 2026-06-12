@@ -362,8 +362,8 @@ describe("ProjectDetail — co-organizer capability card", () => {
     render();
     const text = container.textContent ?? "";
     expect(text).toContain("What you can do as a co-organizer");
-    // Confirm capability — the load-bearing balance-debit line.
-    expect(text).toContain("debits your own balance");
+    // Confirm capability — the load-bearing balance-consequence line.
+    expect(text).toContain("moves hours out of your own balance");
     // Not-included line — sourced from primary-only gates.
     expect(text).toContain("Inviting other co-organizers");
     // It's a <details> disclosure (collapsed by default).

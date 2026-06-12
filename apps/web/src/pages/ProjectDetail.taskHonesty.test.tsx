@@ -284,8 +284,8 @@ describe("ProjectDetail — confirm dialog (organizer side)", () => {
     const text = container.textContent ?? "";
     // Dialog title + the consequence-naming body line.
     expect(text).toContain("Confirm this task?");
-    expect(text).toContain("Cleo Claimer is credited");
-    expect(text).toContain("your balance is debited");
+    expect(text).toContain("hours move to Cleo Claimer");
+    expect(text).toContain("move out of your balance");
     expect(text).toContain("signing as the helped party");
     // Action MUST NOT have fired yet — informed consent.
     expect(confirmMock).not.toHaveBeenCalled();

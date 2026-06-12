@@ -26,10 +26,7 @@ import { canClaimTask } from "@/db/projects";
 import { effectiveCoOrganizerKeysFromRows } from "@/db/coorgInvitations";
 import type { SignedVouch } from "@/lib/vouch";
 import { startOfUTCDay } from "./calendar";
-import {
-  daysSinceClaim as daysSinceClaimHelper,
-  taskCheckInState,
-} from "./taskCheckInState";
+import { taskCheckInState } from "./taskCheckInState";
 
 // "Needs your attention" — things waiting on the current member to
 // act. Pure utility surface: information you already need but
@@ -72,7 +69,11 @@ export type AttentionItem =
       taskId: string;
       projectTitle: string;
       taskTitle: string;
-      daysSinceClaim: number;
+      /** When the member claimed the task. Rendered as relative time
+       *  ("3w ago") — a memory jog, not a day counter
+       *  (solidarity-not-shame; the public chip's non-numeric tooltip
+       *  follows the same reasoning). */
+      claimedAt: number;
       /** Cursor for sort — the moment the prompt became due
        *  (claim time or last ack, whichever's later). */
       createdAt: number;
@@ -397,7 +398,10 @@ export function computeAttentionItems(
         taskId: t.id,
         projectTitle: project.title,
         taskTitle: t.title,
-        daysSinceClaim: daysSinceClaimHelper(t, input.now),
+        // check_in_due implies a non-null claimedAt (null reads as
+        // "fresh" in taskCheckInState); the anchor fallback is
+        // defensive only.
+        claimedAt: t.claimedAt ?? anchor,
         createdAt: anchor,
       });
     }

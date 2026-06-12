@@ -242,7 +242,7 @@
     "balance": {
       "label": "Entendiendo tu saldo",
       "message": "Tu saldo son horas de ayuda. Cada persona empieza con 5, así puedes pedir ayuda desde el primer día, incluso antes de haber dado alguna. Una hora de cualquier tipo de ayuda equivale a una hora. Da y recibe a tu propio ritmo.",
-      "technical": "Los saldos son créditos de tiempo, expresados en horas, guardados en el registro local de tu comunidad. Las personas nuevas reciben una concesión semilla de 5 horas al crear su cuenta para que la participación no esté condicionada por créditos — el principio de 'pedir primero está bien'. Los créditos fluyen solo cuando un intercambio se confirma completamente: ambas partes firman el registro del intercambio (Ed25519) y el nodo local actualiza ambos saldos de forma atómica. Una hora equivale a una hora sin importar la categoría — cuidado infantil, soporte técnico, carpintería, trabajo emocional, todo se liquida a la par. Los saldos no se federan entre nodos por diseño; los intercambios entre comunidades aún ocurren, pero el crédito se liquida en el nodo de origen de quien ayudó."
+      "technical": "Los saldos son créditos de tiempo, expresados en horas, guardados en el registro local de tu comunidad. Las personas nuevas reciben una concesión semilla de 5 horas al unirse para que la participación no esté condicionada por créditos — el principio de 'pedir primero está bien'. Los créditos fluyen solo cuando un intercambio se confirma completamente: ambas partes firman el registro del intercambio (Ed25519) y el nodo local actualiza ambos saldos de forma atómica. Una hora equivale a una hora sin importar la categoría — cuidado infantil, soporte técnico, carpintería, trabajo emocional, todo se liquida a la par. Los saldos no se federan entre nodos por diseño; los intercambios entre comunidades aún ocurren, pero el crédito se liquida en el nodo de origen de quien ayudó."
     },
     "invite": {
       "label": "Hacer crecer la comunidad",
@@ -377,7 +377,7 @@
       "attendeeFallbackKey": "(miembro {{shortKey}})",
       "goingRosterHeading": "Vienen",
       "maybeRosterHeading": "Tal vez",
-      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. Quienes no asisten ven sólo el conteo."
+      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. El resto ve sólo el conteo."
     },
     "rsvp": {
       "heading": "Confirmar asistencia",
@@ -474,7 +474,7 @@
     "momentum": {
       "humming": "En marcha",
       "active": "Activo",
-      "stalled": "Estancado",
+      "stalled": "En calma",
       "completed": "Completado",
       "paused": "En pausa",
       "planning": "En planeación",
@@ -619,7 +619,7 @@
       },
       "confirmDialog": {
         "title": "¿Confirmar esta tarea?",
-        "body": "Confirmar registra un intercambio firmado: {{claimer}} recibe {{hours}} horas de crédito, y tu balance se debita {{hours}} horas — estás firmando como la parte ayudada en nombre del proyecto.",
+        "body": "Confirmar registra un intercambio firmado: {{hours}} horas se mueven hacia {{claimer}}, y {{hours}} horas salen de tu balance — estás firmando como la parte ayudada en nombre del proyecto.",
         "confirmCta": "Confirmar y firmar",
         "confirming": "Firmando…",
         "cancelCta": "Cancelar"
@@ -630,7 +630,7 @@
       "statusClaimed": "Tomada",
       "statusAwaiting": "Esperando confirmación",
       "statusCompleted": "Completada",
-      "statusBlocked": "Bloqueada",
+      "statusBlocked": "Sigue a otras",
       "needsMoreHands": "Le vendrían bien más manos",
       "needsMoreHandsTooltip": "Esta tarea podría aprovechar apoyo adicional. Cualquier persona puede sumarse a ayudar.",
       "hours": "{{hours}}",
@@ -694,7 +694,7 @@
         "tombstone": "(comentario eliminado por quien lo escribió)",
         "flag": "Señalar para revisión",
         "flagPrompt": "¿Por qué señalas este comentario? (Opcional — déjalo en blanco si prefieres que la comunidad decida sin un motivo.)",
-        "flaggedChip": "Señalado",
+        "flaggedChip": "En revisión",
         "showOlderOne": "Ver {{count}} comentario anterior",
         "showOlderOther": "Ver {{count}} comentarios anteriores",
         "showFewer": "Ver menos comentarios"
@@ -754,7 +754,7 @@
         "lifecycle": "Lanzar, pausar, reanudar o completar el proyecto.",
         "tasks": "Añadir y editar tareas — una a la vez o varias a la vez.",
         "ordering": "Establecer el orden y la secuencia de las tareas (cuáles van antes de cuáles).",
-        "confirm": "Confirmar tareas completadas. Confirmar debita tu propio balance — estás firmando como la parte ayudada.",
+        "confirm": "Confirmar tareas completadas. Cada confirmación mueve horas de tu propio balance — estás firmando como la parte ayudada.",
         "announce": "Publicar anuncios del proyecto.",
         "stepDown": "Dejar el rol en cualquier momento."
       },
@@ -858,7 +858,7 @@
     "awaiting_confirmation": "Esperando confirmación",
     "completed": "Completado",
     "cancelled": "Cancelado",
-    "disputed": "Señalado para revisión"
+    "disputed": "En revisión comunitaria"
   },
   "postCard": {
     "needs": "necesita ayuda",
@@ -924,15 +924,15 @@
     "actionsClaimedBy": "Esta publicación ya está tomada. {{helper}} está ayudando a {{helped}}.",
     "actionsCompleted": "Completado. {{hours}} de crédito fluyeron de {{helped}} a {{helper}}. Gracias a las dos personas.",
     "dialogClaimNeedTitle": "¿Tomar esta publicación?",
-    "dialogClaimNeedDescription": "Te estás ofreciendo para ayudar con {{hours}} de {{category}}. Ganarás crédito cuando ambas personas confirmen que está hecho.",
+    "dialogClaimNeedDescription": "Te estás ofreciendo para ayudar con {{hours}} de {{category}}. El crédito fluye hacia ti cuando ambas personas confirman que está hecho.",
     "dialogClaimOfferTitle": "¿Tomar esta oferta?",
-    "dialogClaimOfferDescription": "Vas a recibir ayuda por {{hours}}. Los créditos se transfieren cuando ambas personas confirman.",
+    "dialogClaimOfferDescription": "Vas a recibir ayuda por {{hours}}. El crédito se mueve cuando ambas personas confirman.",
     "dialogClaimConfirm": "Sí, tomarla",
     "dialogCompleteTitle": "¿Marcar este intercambio como completo?",
-    "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. Los créditos se transfieren cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
+    "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. El crédito se mueve cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
     "dialogCompleteConfirm": "Sí, está completo",
     "dialogDisputeTitle": "¿Señalar este intercambio para revisión comunitaria?",
-    "dialogDisputeDescription": "El intercambio se señalará y una persona mediadora puede ayudar a resolverlo. Tus créditos aún no se transferirán.",
+    "dialogDisputeDescription": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva.",
     "dialogDisputeConfirm": "Señalar",
     "dialogCancelTitle": "¿Cancelar esta publicación?",
     "dialogCancelDescription": "Las publicaciones canceladas siguen visibles pero ya no pueden tomarse.",
@@ -965,7 +965,7 @@
       "disputedBody": "La comunidad está debatiendo este intercambio.",
       "disputedLink": "Ver Perfil → Disputas"
     },
-    "newRolesEarned": "Nuevos roles comunitarios obtenidos"
+    "newRolesEarned": "Nuevos roles comunitarios"
   },
   "lockScreen": {
     "title": "Este dispositivo está bloqueado",
@@ -1021,8 +1021,8 @@
     "trustedWithCountOne": "De confianza ({{count}} aval)",
     "trustedWithCountOther": "De confianza ({{count}} avales)",
     "trustedTooltip": "Esta persona tiene al menos dos avales válidos.",
-    "pending": "Confianza en proceso",
-    "pendingWithCount": "En proceso ({{have}}/{{need}})",
+    "pending": "Persona nueva",
+    "pendingWithCount": "Persona nueva ({{have}}/{{need}} avales)",
     "pendingTooltip": "Aún tiene menos de dos avales. Puede publicar necesidades y ofertas igualmente."
   },
   "trustedBy": {
@@ -1077,7 +1077,7 @@
       "label": "Clave de bóveda",
       "description": "Un proyecto que organizaste fue completado."
     },
-    "earnedDate": "Obtenido el {{date}}"
+    "earnedDate": "Reconocido el {{date}}"
   },
   "attention": {
     "title": "Te toca a ti",
@@ -1087,7 +1087,7 @@
     "tapToConfirm": "Toca para confirmar y liberar los créditos.",
     "tapToConfirmTask": "Toca para confirmar y dar crédito a quien ayudó.",
     "taskCheckIn": {
-      "line": "¿Sigues con “{{task}}” de {{project}}? Han pasado {{days}} días.",
+      "line": "¿Sigues con “{{task}}” de {{project}}? La tomaste {{when}}.",
       "hint": "La capacidad cambia — suéltala si lo necesitas. No queda registro.",
       "stillOn": "Sigo en ello",
       "release": "Liberarla para otra persona",
@@ -1119,7 +1119,7 @@
         "cta": "Aceptar",
         "title": "Aceptar el rol de co-organizador en \"{{project}}\"",
         "meansTitle": "Qué significa esto",
-        "meansConfirm": "Confirmar tareas completadas — cada confirmación descuenta de tu propio saldo.",
+        "meansConfirm": "Confirmar tareas completadas — cada confirmación mueve horas de tu propio saldo.",
         "meansSign": "Firmar como organizador del proyecto — los registros que firmes en este rol quedan ligados a tu identidad en el historial federado del proyecto.",
         "meansVisible": "Visible para la comunidad — la página del proyecto te muestra como co-organizador en la vista de cada nodo.",
         "notTitle": "Qué no significa esto",
@@ -1231,7 +1231,7 @@
     },
     "breadth": {
       "title": "Amplitud, no profundidad",
-      "intro": "Integrantes según la cantidad de personas distintas a las que han ayudado — generosidad repartida, no acumulada.",
+      "intro": "Un vistazo a cuánto se extiende la ayuda — cada barra es el alcance de una persona en la comunidad. Generosidad repartida, no acumulada.",
       "empty": "Aún no hay intercambios. El primero iniciará el patrón.",
       "rowLabel": "{{name}} ha ayudado a {{count}} personas distintas",
       "moreNote": "{{count}} {{noun}} más han llegado al menos a una persona — si listáramos a toda la comunidad, cada nombre estaría aquí.",
@@ -1248,9 +1248,9 @@
       "footnote": "No es una puntuación. Solo una ventana a la forma de la ayuda en la comunidad."
     },
     "rolesThisMonth": {
-      "title": "Roles comunitarios obtenidos este mes",
-      "lineOne": "{{count}} persona obtuvo {{role}}",
-      "lineOther": "{{count}} personas obtuvieron {{role}}"
+      "title": "Roles comunitarios este mes",
+      "lineOne": "{{count}} persona asumió {{role}}",
+      "lineOther": "{{count}} personas asumieron {{role}}"
     }
   },
   "member": {
@@ -1261,7 +1261,7 @@
     "area": "Zona",
     "none": "—",
     "vouchTitle": "Avalar",
-    "vouchIntro": "Avalar es una declaración firmada de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) llevan a una persona de pendiente-de-confianza a confiable.",
+    "vouchIntro": "Avalar es una declaración firmada de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) marcan a una persona como confiable.",
     "vouchButton": "Avalar a esta persona",
     "vouching": "Avalando…",
     "vouchedJustNow": "Avalado. Tu declaración firmada está en el registro local y (si hay un nodo comunitario configurado) en camino allí.",
@@ -1307,7 +1307,7 @@
       "label": "Tu saldo",
       "seed": "Semilla: {{hours}}",
       "footerNote": "Los saldos pueden ir en negativo — pedir nunca tiene barreras.",
-      "surplus": "Has dado más de lo que has recibido últimamente. Gracias.",
+      "surplus": "Has dado mucho últimamente. Las comunidades se mantienen sanas cuando quienes ayudan también piden — ¿qué te ayudaría a ti?",
       "neutral": "Tu saldo está justo en tu semilla inicial. Es un buen lugar para estar.",
       "receiving": "Has estado recibiendo — para eso son los créditos de semilla. Pide lo que necesites.",
       "pendingLine": "{{hours}} pendientes de confirmación",
@@ -1332,8 +1332,8 @@
       "areaPlaceholder": "p. ej. zona norte"
     },
     "rolesEarned": {
-      "title": "Roles comunitarios obtenidos",
-      "empty": "Aún no has obtenido roles comunitarios. Aparecen a medida que participas — no como trofeos, sino como formas de nombrar la huella que dejas."
+      "title": "Tus roles comunitarios",
+      "empty": "Aún no hay roles con nombre. Aparecen a medida que participas — no como trofeos, sino como formas de nombrar la huella que dejas."
     },
     "history": {
       "title": "Tu historial de intercambios",
@@ -1341,11 +1341,11 @@
       "empty": "Aún no hay nada aquí. Cuando des o recibas ayuda, cada intercambio aparecerá con un registro firmado que podrás verificar.",
       "helped": "Ayudaste a",
       "received": "Recibiste ayuda de",
-      "flag": "señalado para revisión",
+      "flag": "en revisión comunitaria",
       "flagShort": "Intercambio muy corto — surge para revisión comunitaria.",
       "flagReciprocal": "Intercambio recíproco repetido con la misma persona — surge para revisión comunitaria.",
       "flagDailyLimit": "Cerca del límite diario de intercambios.",
-      "flagDefault": "Señalado para revisión comunitaria.",
+      "flagDefault": "En revisión comunitaria.",
       "pendingBadge": "pendiente",
       "awaitingYouBadge": "te espera",
       "taskWorkingOn": "Trabajando en",
@@ -1572,7 +1572,7 @@
     "subtitle": "Intercambios que alguien señaló para que la comunidad los revise. Cualquier persona puede ver esta lista — no hay administradores. Las dos partes ya ven la marca en la publicación misma; aquí es donde aparece para el resto.",
     "emptyTitle": "Nada requiere atención de la comunidad",
     "empty": "Nada está señalado ahora mismo. Cuando alguien señale un intercambio, aparecerá aquí para que la comunidad pueda verlo y responder.",
-    "flagChip": "Señalado",
+    "flagChip": "En revisión",
     "typeNeed": "Necesidad",
     "typeOffer": "Oferta",
     "helperLabel": "Ayudante",
@@ -1757,7 +1757,7 @@
     "next": "Siguiente",
     "start": "Abrir el tablero",
     "nextSteps": "Después: mira qué necesitan tus vecinas, o publica una oferta tuya.",
-    "pairDeviceLink": "¿Ya tienes cuenta en otro dispositivo? Vincula este →",
+    "pairDeviceLink": "¿Ya tienes tu identidad en otro dispositivo? Vincula este →",
     "screens": {
       "timebank": {
         "title": "Esto es un banco de tiempo",

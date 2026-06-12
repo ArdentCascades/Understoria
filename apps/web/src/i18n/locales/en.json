@@ -242,7 +242,7 @@
     "balance": {
       "label": "Understanding your balance",
       "message": "Your balance is hours of help. Everyone starts with 5 so you can ask for help right away, even before you've given any. One hour of any kind of help equals one hour. Give and receive at your own pace.",
-      "technical": "Balances are time credits, denominated in hours, kept in your community's local ledger. New members receive a 5-hour seed grant at account creation so participation isn't credit-gated — the 'asking first is fine' principle. Credits flow only on a fully-confirmed exchange: both parties sign the completed-exchange record (Ed25519) and the local node updates both balances atomically. One hour equals one hour regardless of category — childcare, tech support, carpentry, emotional labor all settle at par. Balances do not federate across nodes by design; cross-community exchanges still happen but the credit settles in the helper's home node."
+      "technical": "Balances are time credits, denominated in hours, kept in your community's local ledger. New members receive a 5-hour seed grant when they join so participation isn't credit-gated — the 'asking first is fine' principle. Credits flow only on a fully-confirmed exchange: both parties sign the completed-exchange record (Ed25519) and the local node updates both balances atomically. One hour equals one hour regardless of category — childcare, tech support, carpentry, emotional labor all settle at par. Balances do not federate across nodes by design; cross-community exchanges still happen but the credit settles in the helper's home node."
     },
     "invite": {
       "label": "Growing the community",
@@ -377,7 +377,7 @@
       "attendeeFallbackKey": "(member {{shortKey}})",
       "goingRosterHeading": "Going",
       "maybeRosterHeading": "Maybe",
-      "rosterHiddenHint": "RSVP \"Going\" or \"Maybe\" to see who else is coming. Non-attendees see the count only."
+      "rosterHiddenHint": "RSVP \"Going\" or \"Maybe\" to see who else is coming. Everyone else sees the count only."
     },
     "rsvp": {
       "heading": "RSVP to this event",
@@ -474,7 +474,7 @@
     "momentum": {
       "humming": "Humming",
       "active": "Active",
-      "stalled": "Stalled",
+      "stalled": "Quiet",
       "completed": "Completed",
       "paused": "Paused",
       "planning": "Planning",
@@ -619,7 +619,7 @@
       },
       "confirmDialog": {
         "title": "Confirm this task?",
-        "body": "Confirming records a signed exchange: {{claimer}} is credited {{hours}} hours, and your balance is debited {{hours}} hours — you're signing as the helped party on behalf of the project.",
+        "body": "Confirming records a signed exchange: {{hours}} hours move to {{claimer}}, and {{hours}} hours move out of your balance — you're signing as the helped party on behalf of the project.",
         "confirmCta": "Confirm and sign",
         "confirming": "Signing…",
         "cancelCta": "Cancel"
@@ -630,7 +630,7 @@
       "statusClaimed": "Claimed",
       "statusAwaiting": "Awaiting confirmation",
       "statusCompleted": "Completed",
-      "statusBlocked": "Blocked",
+      "statusBlocked": "Follows others",
       "needsMoreHands": "Could use more hands",
       "needsMoreHandsTooltip": "This task could use additional support. Anyone can step in to help.",
       "hours": "{{hours}}",
@@ -694,7 +694,7 @@
         "tombstone": "(comment deleted by author)",
         "flag": "Flag for review",
         "flagPrompt": "Why are you flagging this comment? (Optional — leave blank if you'd rather the community decide without a reason.)",
-        "flaggedChip": "Flagged",
+        "flaggedChip": "In review",
         "showOlderOne": "Show {{count}} older comment",
         "showOlderOther": "Show {{count}} older comments",
         "showFewer": "Show fewer comments"
@@ -754,7 +754,7 @@
         "lifecycle": "Launch, pause, resume, or complete the project.",
         "tasks": "Add and edit tasks — one at a time or several at once.",
         "ordering": "Set task order and sequencing (which tasks come before which).",
-        "confirm": "Confirm completed tasks. Confirming debits your own balance — you're signing as the helped party.",
+        "confirm": "Confirm completed tasks. Each confirmation moves hours out of your own balance — you're signing as the helped party.",
         "announce": "Post project announcements.",
         "stepDown": "Step down from the role any time."
       },
@@ -858,7 +858,7 @@
     "awaiting_confirmation": "Awaiting confirmation",
     "completed": "Completed",
     "cancelled": "Cancelled",
-    "disputed": "Flagged for review"
+    "disputed": "In community review"
   },
   "postCard": {
     "needs": "needs help",
@@ -924,15 +924,15 @@
     "actionsClaimedBy": "This post has been claimed. {{helper}} is helping {{helped}}.",
     "actionsCompleted": "Completed. {{hours}} of credit flowed from {{helped}} to {{helper}}. Thank you both.",
     "dialogClaimNeedTitle": "Claim this post?",
-    "dialogClaimNeedDescription": "You're offering to help with {{hours}} of {{category}}. You'll earn credit once both of you confirm completion.",
+    "dialogClaimNeedDescription": "You're offering to help with {{hours}} of {{category}}. Credit flows to you once you've both confirmed completion.",
     "dialogClaimOfferTitle": "Claim this offer?",
-    "dialogClaimOfferDescription": "You'd like to receive help for {{hours}}. Credits transfer when both parties confirm.",
+    "dialogClaimOfferDescription": "You'd like to receive help for {{hours}}. Credit moves once you've both confirmed.",
     "dialogClaimConfirm": "Yes, claim it",
     "dialogCompleteTitle": "Mark this exchange complete?",
-    "dialogCompleteDescription": "Confirm that the help actually happened. Credits transfer once both parties confirm. If something went wrong, you can flag it instead.",
+    "dialogCompleteDescription": "Confirm that the help actually happened. Credit moves once you've both confirmed. If something went wrong, you can flag it instead.",
     "dialogCompleteConfirm": "Yes, it's complete",
     "dialogDisputeTitle": "Flag this exchange for community review?",
-    "dialogDisputeDescription": "The exchange will be flagged and a community mediator can help resolve it. Your credits won't transfer yet.",
+    "dialogDisputeDescription": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved.",
     "dialogDisputeConfirm": "Flag it",
     "dialogCancelTitle": "Cancel this post?",
     "dialogCancelDescription": "Cancelled posts stay visible but can't be claimed.",
@@ -965,7 +965,7 @@
       "disputedBody": "The community is discussing this exchange.",
       "disputedLink": "See Profile → Disputes"
     },
-    "newRolesEarned": "New community roles earned"
+    "newRolesEarned": "New community roles"
   },
   "lockScreen": {
     "title": "This device is locked",
@@ -1021,8 +1021,8 @@
     "trustedWithCountOne": "Trusted ({{count}} vouch)",
     "trustedWithCountOther": "Trusted ({{count}} vouches)",
     "trustedTooltip": "This member has at least two valid vouches.",
-    "pending": "Pending trust",
-    "pendingWithCount": "Pending ({{have}}/{{need}})",
+    "pending": "New here",
+    "pendingWithCount": "New here ({{have}}/{{need}} vouches)",
     "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers."
   },
   "trustedBy": {
@@ -1077,7 +1077,7 @@
       "label": "Keystone",
       "description": "A project you organized was completed."
     },
-    "earnedDate": "Earned {{date}}"
+    "earnedDate": "Recognized {{date}}"
   },
   "attention": {
     "title": "Needs your attention",
@@ -1087,7 +1087,7 @@
     "tapToConfirm": "Tap to confirm and release the credits.",
     "tapToConfirmTask": "Tap to confirm and credit the helper.",
     "taskCheckIn": {
-      "line": "Still on “{{task}}” for {{project}}? It's been {{days}} days.",
+      "line": "Still on “{{task}}” for {{project}}? You claimed it {{when}}.",
       "hint": "Capacity changes — release it if you need to. No record kept.",
       "stillOn": "Still on it",
       "release": "Release it for someone else",
@@ -1119,7 +1119,7 @@
         "cta": "Accept",
         "title": "Accept co-organizer role for \"{{project}}\"",
         "meansTitle": "What this means",
-        "meansConfirm": "Confirming task completions — each confirmation debits your own balance.",
+        "meansConfirm": "Confirming task completions — each confirmation moves hours out of your own balance.",
         "meansSign": "Signing as a project organizer — records you sign in this role trace back to your identity in the project's federated history.",
         "meansVisible": "Visible to the community — the project page lists you as a co-organizer on every peer's view.",
         "notTitle": "What this does not mean",
@@ -1231,7 +1231,7 @@
     },
     "breadth": {
       "title": "Breadth, not depth",
-      "intro": "Members ranked by the number of distinct people they've helped — generosity spread widely, not piled deep.",
+      "intro": "A glimpse of how widely help spreads — each bar is one member's reach across the community. Generosity spread widely, not piled deep.",
       "empty": "No exchanges yet. The first one will start the pattern.",
       "rowLabel": "{{name}} has helped {{count}} different people",
       "moreNote": "{{count}} more {{noun}} have reached at least one person — every name in the community would belong here if we listed them all.",
@@ -1248,9 +1248,9 @@
       "footnote": "Not a score. Just a window into the shape of help across the community."
     },
     "rolesThisMonth": {
-      "title": "Community roles earned this month",
-      "lineOne": "{{count}} member earned {{role}}",
-      "lineOther": "{{count}} members earned {{role}}"
+      "title": "Community roles this month",
+      "lineOne": "{{count}} member stepped into {{role}}",
+      "lineOther": "{{count}} members stepped into {{role}}"
     }
   },
   "member": {
@@ -1261,7 +1261,7 @@
     "area": "Area",
     "none": "—",
     "vouchTitle": "Vouch",
-    "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) move a member from pending-trust to trusted.",
+    "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) mark a member as trusted.",
     "vouchButton": "Vouch for this member",
     "vouching": "Vouching…",
     "vouchedJustNow": "Vouched. Your signed statement is in the local ledger and (if a community node is configured) on its way there.",
@@ -1307,7 +1307,7 @@
       "label": "Your balance",
       "seed": "Seed: {{hours}}",
       "footerNote": "Balances can go negative — asking is never gated.",
-      "surplus": "You've given more than you've received lately. Thank you.",
+      "surplus": "You've given a lot lately. Communities stay healthy when helpers ask too — what would help you?",
       "neutral": "Your balance is right at your starting seed. That's a fine place to be.",
       "receiving": "You've been receiving — that's what seed credits are for. Ask for what you need.",
       "pendingLine": "{{hours}} pending confirmation",
@@ -1332,8 +1332,8 @@
       "areaPlaceholder": "e.g. North neighborhood"
     },
     "rolesEarned": {
-      "title": "Community roles earned",
-      "empty": "You haven't earned any community roles yet. They show up as you participate — not as trophies, but as ways of naming the shapes your contributions take."
+      "title": "Your community roles",
+      "empty": "No named roles yet. They show up as you participate — not as trophies, but as ways of naming the shapes your contributions take."
     },
     "history": {
       "title": "Your exchange history",
@@ -1341,11 +1341,11 @@
       "empty": "Nothing here yet. When you give or receive help, each exchange shows up with a signed record you can verify.",
       "helped": "Helped",
       "received": "Received help from",
-      "flag": "flagged for review",
+      "flag": "in community review",
       "flagShort": "Very short exchange — surfaced for community review.",
       "flagReciprocal": "Repeated reciprocal exchange with the same person — surfaced for community review.",
       "flagDailyLimit": "Near the daily exchange limit.",
-      "flagDefault": "Flagged for community review.",
+      "flagDefault": "In community review.",
       "pendingBadge": "pending",
       "awaitingYouBadge": "awaiting you",
       "taskWorkingOn": "Working on",
@@ -1572,7 +1572,7 @@
     "subtitle": "Exchanges someone has flagged for the community to review. Anyone can see this list — there are no admins. The two parties already see the flag on the post itself; this is where it surfaces to everyone else.",
     "emptyTitle": "Nothing needs the community's attention",
     "empty": "Nothing flagged right now. When someone flags an exchange, it shows here so the community can see and respond.",
-    "flagChip": "Flagged",
+    "flagChip": "In review",
     "typeNeed": "Need",
     "typeOffer": "Offer",
     "helperLabel": "Helper",
@@ -1757,7 +1757,7 @@
     "next": "Next",
     "start": "Open the board",
     "nextSteps": "Next: browse what neighbors need, or post an offer of your own.",
-    "pairDeviceLink": "Already have an account on another device? Pair this one →",
+    "pairDeviceLink": "Already have your identity on another device? Pair this one →",
     "screens": {
       "timebank": {
         "title": "This is a timebank",

@@ -114,7 +114,7 @@ function attentionRow() {
       taskId: TASK_ID,
       projectTitle: "Community Fridge",
       taskTitle: "Install hinges",
-      daysSinceClaim: 7,
+      claimedAt: Date.now() - 7 * 24 * 60 * 60 * 1000,
       createdAt: 0,
     },
   ];

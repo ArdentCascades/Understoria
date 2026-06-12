@@ -83,9 +83,10 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "confirmación olvidada, no una negativa.",
           "Si de verdad hay un desacuerdo sobre si el intercambio ocurrió " +
             "o si contó como ayuda completa, usa Señalar para revisión en " +
-            "la página de detalle. Una persona mediadora de la comunidad " +
-            "puede ayudar a resolverlo; los créditos quedan pendientes " +
-            "mientras tanto.",
+            "la página de detalle. Eso lo lleva a la página de Disputas, " +
+            "donde la comunidad puede ayudar a resolverlo — no hay " +
+            "administradores. El crédito queda pendiente hasta que se " +
+            "resuelva.",
           "Tampoco te quedas esperando para siempre. Si tu comunidad " +
             "tiene la confirmación automática activada, el nodo comunitario " +
             "interviene tras el tiempo de espera acordado y completa una " +

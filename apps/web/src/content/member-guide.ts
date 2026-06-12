@@ -106,8 +106,8 @@ export const MEMBER_GUIDE: readonly GuideSection[] = [
       "Open the Board to see what neighbors are offering and asking " +
         "for right now.",
       "Open the Dashboard to see how your community is doing — total " +
-        "hours exchanged, who's connecting different parts of the " +
-        "network, what's been celebrated.",
+        "hours exchanged, where help is flowing, what's been " +
+        "celebrated.",
       "Open Profile to update your skills and availability, invite " +
         "someone new, or read the longer guides on disk.",
     ],
