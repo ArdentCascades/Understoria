@@ -624,14 +624,23 @@
         "hint": "Adds an open copy of this task at the bottom of the list — handy for work that recurs.",
         "toast": "Added a fresh “{{title}}” at the bottom of the task list."
       },
+      "actualHours": {
+        "legend": "How long did it take?",
+        "estimateContext": "Estimated: {{hours}}",
+        "hint": "Record the real time — the credit should match the help given. No judgment either way.",
+        "confirmCta": "Record {{hours}} and mark complete",
+        "cancel": "Cancel"
+      },
       "claimerNarrative": {
         "intro": "You've marked this done. An organizer confirms to complete the exchange — your {{hours}} hours of credit move then.",
+        "estimateNote": "You recorded {{actual}} for this task (estimated {{estimate}}).",
         "autoConfirm_one": "If no one gets to it, the node confirms automatically within about {{count}} day.",
         "autoConfirm_other": "If no one gets to it, the node confirms automatically within about {{count}} days."
       },
       "confirmDialog": {
         "title": "Confirm this task?",
         "body": "Confirming records a signed exchange: {{hours}} hours move to {{claimer}}, and {{hours}} hours move out of your balance — you're signing as the helped party on behalf of the project.",
+        "estimateNote": "{{claimer}} recorded the actual time: {{actual}}. The task was estimated at {{estimate}}.",
         "confirmCta": "Confirm and sign",
         "confirming": "Signing…",
         "cancelCta": "Cancel"

@@ -496,6 +496,17 @@ export interface ProjectTask {
   completedAt: number | null;
   /** Set when the task transitions to awaiting_confirmation. */
   completedBy: string | null;
+  /** Claimer-stated ACTUAL hours, set at mark-complete (claimed →
+   *  awaiting_confirmation) so credit records time given, not the
+   *  organizer's estimate (`equal-time`). `null` means never stated —
+   *  legacy rows, or a programmatic completion; consumers fall back to
+   *  `estimatedHours` via `creditHoursForTask` in `lib/timebank.ts`,
+   *  which is the single source of "which number moves." Cleared back
+   *  to `null` when the completer walks an awaiting task back, so a
+   *  future completion by someone else doesn't inherit it. The figure
+   *  `confirmProjectTaskCompletion` writes onto the signed Exchange's
+   *  `hoursExchanged` is exactly this (or the estimate fallback). */
+  actualHours: number | null;
   /** Set on confirmation. Mirrors the Exchange record's id. */
   exchangeId: string | null;
   /** When the current claim happened. Stamped by

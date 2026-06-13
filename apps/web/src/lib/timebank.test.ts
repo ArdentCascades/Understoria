@@ -21,6 +21,7 @@
 import { describe, expect, it } from "vitest";
 import {
   balanceFor,
+  creditHoursForTask,
   pendingBalanceFor,
   pendingTaskCreditFor,
   projectConfirmationOutflow,
@@ -266,6 +267,7 @@ function task(
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };
@@ -401,6 +403,42 @@ describe("timebank.pendingTaskCreditFor", () => {
       }),
     ];
     expect(pendingTaskCreditFor("a", tasks).hours).toBe(0.3);
+  });
+
+  it("predicts the claimer-stated actual hours when present, not the estimate", () => {
+    const tasks = [
+      task("1", {
+        projectId: "p",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        estimatedHours: 2,
+        actualHours: 6, // took longer than estimated
+      }),
+    ];
+    expect(pendingTaskCreditFor("a", tasks).hours).toBe(6);
+  });
+});
+
+describe("timebank.creditHoursForTask", () => {
+  it("returns actualHours when stated", () => {
+    expect(
+      creditHoursForTask({ actualHours: 6, estimatedHours: 2 }),
+    ).toBe(6);
+  });
+
+  it("falls back to estimatedHours when actual was never stated", () => {
+    expect(
+      creditHoursForTask({ actualHours: null, estimatedHours: 2 }),
+    ).toBe(2);
+  });
+
+  it("treats a stated zero as... not possible (mark-complete rejects it), but 0 actual would win over estimate", () => {
+    // `??` only falls back on null/undefined, so a (hypothetical) 0
+    // actual would be used as-is. mark-complete rejects <= 0 so this
+    // never reaches the ledger, but the helper's contract is explicit.
+    expect(
+      creditHoursForTask({ actualHours: 0, estimatedHours: 2 }),
+    ).toBe(0);
   });
 });
 

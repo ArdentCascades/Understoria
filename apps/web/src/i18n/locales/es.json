@@ -624,14 +624,23 @@
         "hint": "Agrega una copia abierta de esta tarea al final de la lista — útil para el trabajo que se repite.",
         "toast": "Se agregó una “{{title}}” nueva al final de la lista de tareas."
       },
+      "actualHours": {
+        "legend": "¿Cuánto tiempo llevó?",
+        "estimateContext": "Estimado: {{hours}}",
+        "hint": "Registra el tiempo real — el crédito debe coincidir con la ayuda dada. Sin juicios en ningún caso.",
+        "confirmCta": "Registrar {{hours}} y marcar como hecha",
+        "cancel": "Cancelar"
+      },
       "claimerNarrative": {
         "intro": "Marcaste esto como hecho. Una persona organizadora confirma para completar el intercambio — tus {{hours}} horas de crédito se mueven en ese momento.",
+        "estimateNote": "Registraste {{actual}} para esta tarea (estimado {{estimate}}).",
         "autoConfirm_one": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} día.",
         "autoConfirm_other": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} días."
       },
       "confirmDialog": {
         "title": "¿Confirmar esta tarea?",
         "body": "Confirmar registra un intercambio firmado: {{hours}} horas se mueven hacia {{claimer}}, y {{hours}} horas salen de tu balance — estás firmando como la parte ayudada en nombre del proyecto.",
+        "estimateNote": "{{claimer}} registró el tiempo real: {{actual}}. La tarea se estimó en {{estimate}}.",
         "confirmCta": "Confirmar y firmar",
         "confirming": "Firmando…",
         "cancelCta": "Cancelar"

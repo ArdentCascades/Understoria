@@ -58,6 +58,7 @@ function task(id: string, exchangeId: string | null = null): ProjectTask {
     completedBy: null,
     exchangeId,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
   };
 }

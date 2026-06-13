@@ -60,6 +60,7 @@ function makeTask(
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
   };
   return { ...base, ...over };

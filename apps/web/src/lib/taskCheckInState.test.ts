@@ -44,6 +44,7 @@ function task(overrides: Partial<ProjectTask> = {}): ProjectTask {
     completedBy: null,
     exchangeId: null,
     claimedAt: NOW - 3 * DAY,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };
@@ -100,6 +101,7 @@ describe("taskCheckInState", () => {
       taskCheckInState(
         task({
           claimedAt: NOW - 20 * DAY,
+          actualHours: null,
           checkInAcknowledgedAt: null,
         }),
         CONFIG,
@@ -225,6 +227,7 @@ describe("taskCheckInState dependency suppression", () => {
     return task({
       id: "downstream",
       claimedAt: NOW - 20 * DAY,
+      actualHours: null,
       checkInAcknowledgedAt: null,
       dependencies: ["upstream"],
       ...overrides,
@@ -284,6 +287,7 @@ describe("taskCheckInState dependency suppression", () => {
     // suppression for the empty case.
     const t = task({
       claimedAt: NOW - 20 * DAY,
+      actualHours: null,
       checkInAcknowledgedAt: null,
       dependencies: [],
     });

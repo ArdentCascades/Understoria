@@ -143,6 +143,7 @@ function task(
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };

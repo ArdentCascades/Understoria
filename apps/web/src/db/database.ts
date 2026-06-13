@@ -757,6 +757,19 @@ export class UnderstoriaDB extends Dexie {
         }
       }
     });
+    // v26: claimer-stated actual hours on ProjectTask. Backfill `null`
+    // ("never stated") on every pre-existing row so the field is never
+    // undefined at runtime — already-completed tasks legitimately
+    // recorded the estimate, and `creditHoursForTask` reads null as
+    // "fall back to estimatedHours", so no history is rewritten. No new
+    // index — the field is read in memory, never queried.
+    this.version(26).stores({}).upgrade(async (tx) => {
+      const tasks = tx.table<ProjectTask, string>("projectTasks");
+      await tasks.toCollection().modify((row) => {
+        const r = row as ProjectTask & { actualHours?: number | null };
+        if (r.actualHours === undefined) r.actualHours = null;
+      });
+    });
   }
 }
 

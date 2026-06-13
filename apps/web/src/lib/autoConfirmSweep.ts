@@ -50,6 +50,7 @@ import { sign } from "@/lib/crypto";
 import { uuid } from "@/lib/id";
 import { applyAutoConfirmedExchange } from "@/db/actions";
 import { _systemAutoConfirmTask } from "@/db/projects";
+import { creditHoursForTask } from "@/lib/timebank";
 import { shouldAutoConfirm } from "@/lib/autoConfirm";
 import type { Category, Exchange, Post } from "@/types";
 
@@ -166,7 +167,10 @@ export async function runAutoConfirmSweep(
       postId: `project:${project.id}/task:${task.id}`,
       helperKey: task.completedBy,
       helpedKey: project.organizerKey,
-      hoursExchanged: task.estimatedHours,
+      // The number the claimer stated at mark-complete (estimate
+      // fallback) — what a present organizer would have been shown,
+      // and what `_systemAutoConfirmTask`'s guard re-checks.
+      hoursExchanged: creditHoursForTask(task),
       category: task.category as Category,
       completedAt: now,
       awaitingSince,
