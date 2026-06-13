@@ -42,6 +42,8 @@ export interface ProjectFilterRailProps {
   setProjectStatusFilter: (value: Project["status"] | "") => void;
   onlyWithOpenTasks: boolean;
   setOnlyWithOpenTasks: (next: (prev: boolean) => boolean) => void;
+  onlyNeedsMoreHands: boolean;
+  setOnlyNeedsMoreHands: (next: (prev: boolean) => boolean) => void;
 }
 
 export function ProjectFilterRail({
@@ -51,6 +53,8 @@ export function ProjectFilterRail({
   setProjectStatusFilter,
   onlyWithOpenTasks,
   setOnlyWithOpenTasks,
+  onlyNeedsMoreHands,
+  setOnlyNeedsMoreHands,
 }: ProjectFilterRailProps) {
   const { t } = useTranslation();
   return (
@@ -126,6 +130,21 @@ export function ProjectFilterRail({
         }`}
       >
         {t("board.projectFilters.openTasks.toggle")}
+      </button>
+      {/* Points members at projects whose tasks have surfaced the
+          "could use more hands" chip — framed at the task/project,
+          never at a person (the chip's own wording, reused). */}
+      <button
+        type="button"
+        onClick={() => setOnlyNeedsMoreHands((v) => !v)}
+        aria-pressed={onlyNeedsMoreHands}
+        className={`rounded-full px-3 py-1 text-xs font-medium ${
+          onlyNeedsMoreHands
+            ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
+            : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+        }`}
+      >
+        {t("board.projectFilters.needsMoreHands.toggle")}
       </button>
     </div>
   );

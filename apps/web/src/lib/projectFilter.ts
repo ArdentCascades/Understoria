@@ -18,7 +18,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { ProjectTask } from "@/types";
+import type { NodeConfig, ProjectTask } from "@/types";
+import { taskCheckInState } from "./taskCheckInState";
 
 /**
  * True iff at least one task on this project has `status === "open"`.
@@ -34,5 +35,37 @@ export function hasOpenTasks(
 ): boolean {
   return tasks.some(
     (t) => t.projectId === projectId && t.status === "open",
+  );
+}
+
+/**
+ * True iff at least one task on this project is in the
+ * `needs_more_hands` state — the same computation that drives the
+ * "Could use more hands" chip on the task row
+ * (`lib/taskCheckInState.ts`). Lets the Board surface *which projects*
+ * have tasks that could use additional support, framed at the
+ * task/project, never at a person (solidarity-not-shame): the state
+ * machine already protects responsive claimers (grace windows, ack
+ * resets) and dependency-blocked tasks, and the claimer's name is
+ * already dropped from such rows.
+ *
+ * `tasks` may be the whole task list or a project-scoped slice; the
+ * internal filter scopes to `projectId` either way, and passing the
+ * scoped list as `allTasks` is correct because task dependencies are
+ * in-project by construction (see
+ * `docs/task-ordering-and-dependencies.md`).
+ */
+export function projectNeedsMoreHands(
+  projectId: string,
+  tasks: readonly ProjectTask[],
+  config: Pick<
+    NodeConfig,
+    "taskCheckInDays" | "taskNeedsHelpDays" | "taskCheckInGraceDays"
+  >,
+  now: number = Date.now(),
+): boolean {
+  const scoped = tasks.filter((t) => t.projectId === projectId);
+  return scoped.some(
+    (t) => taskCheckInState(t, config, scoped, now) === "needs_more_hands",
   );
 }
