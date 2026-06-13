@@ -309,6 +309,10 @@
   },
   "events": {
     "new": {
+      "workDayBannerTitle": "Programando una jornada de trabajo para {{project}}",
+      "workDayBannerBody": "Este evento aparecerá en la página del proyecto en este nodo. En los nodos pares aparece como un evento comunitario normal: la conexión con el proyecto nunca se federa. El título de abajo es tuyo para editarlo antes de firmar.",
+      "workDayTitlePrefill": "Jornada de trabajo — {{project}}",
+      "workDayDescriptionPrefill": "Una sesión práctica de trabajo para {{project}}. Ven a la parte que puedas.",
       "title": "Crear evento",
       "subtitle": "Un evento es un registro firmado y federado. Lo que comprometes al firmar se nombra antes de firmar.",
       "titleField": "Título",
@@ -353,6 +357,8 @@
       "errorLocked": "Desbloquea este dispositivo con tu frase de acceso antes de firmar el evento."
     },
     "detail": {
+      "projectLinkLabel": "Proyecto",
+      "projectLinkLine": "Jornada de trabajo para {{project}}",
       "notFound": "No encontramos ese evento en este nodo.",
       "backToCalendar": "← Volver al calendario",
       "organizerLabel": "Organizado por",
@@ -846,7 +852,14 @@
       "coorganizer_accepted": "Invitación de co-organizador aceptada",
       "coorganizer_declined": "Invitación de co-organizador rechazada",
       "coorganizer_revoked": "Invitación de co-organizador revocada",
-      "announcement": "Novedad publicada"
+      "announcement": "Novedad publicada",
+      "work_day_scheduled": "Jornada de trabajo programada"
+    },
+    "workDays": {
+      "heading": "Próximas jornadas de trabajo",
+      "scheduleButton": "Programar una jornada de trabajo",
+      "itemAt": "en {{location}}",
+      "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto."
     }
   },
   "myTasks": {

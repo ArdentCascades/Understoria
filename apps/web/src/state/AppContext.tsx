@@ -49,6 +49,7 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  EventProjectLinkRow,
   EventRsvpRow,
   Exchange,
   Member,
@@ -124,6 +125,11 @@ export interface AppContextValue {
   /** Signed event-cancellation rows. Combined with `events` to derive
    *  effective state and to drive the `event_cancelled` attention item. */
   eventCancellations: EventCancellation[];
+  /** Local-only event⇄project work-day links (plan 10). Never federates.
+   *  Consumers (Calendar, ProjectDetail, EventDetail) join these against
+   *  the already-block-filtered `events`; the rows themselves carry no
+   *  member key to filter on. */
+  eventProjectLinks: EventProjectLinkRow[];
   /**
    * PR F (member blocking — consumer wiring). The set of `blockedKey`
    * values the current member has actively blocked, derived once
@@ -492,6 +498,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as EventCancellation[],
   );
+  const eventProjectLinks = useLiveQuery(
+    () => db.eventProjectLinks.toArray(),
+    [],
+    [] as EventProjectLinkRow[],
+  );
   // PR F: live block rows for the current member. Scoped by
   // blockerKey so a paired-device cluster shared between household
   // members (each with their own key) reads only their own rows.
@@ -636,6 +647,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       events: filteredEvents,
       eventRsvps: eventRsvps ?? [],
       eventCancellations: eventCancellations ?? [],
+      eventProjectLinks: eventProjectLinks ?? [],
       blockedKeys,
       governanceHiddenKeys,
       lockState,
@@ -675,6 +687,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       filteredEvents,
       eventRsvps,
       eventCancellations,
+      eventProjectLinks,
       blockedKeys,
       governanceHiddenKeys,
       lockState,

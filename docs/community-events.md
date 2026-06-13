@@ -594,6 +594,40 @@ cover:
   surveillance-shape concern from threat-model §7's calendar
   entry, paragraph (d)
 
+### §10.1 Project work days (local-only link)
+
+A *work day* is the one event shape that is about a project —
+"Saturday build day for Community Fridge." Phase 1 connects the two
+with a **local-only link table**, never a wire field. The contract,
+stated as negative space:
+
+- **`"event_project_link"` MUST NOT appear in `OutboxRow.kind`.** The
+  link is a Dexie row (`EventProjectLinkRow`, app-layer types only —
+  never `packages/shared`), the same posture as `EventRSVP` and
+  `BlockRow`. **No route, no federation cursor, no pull helper.** No
+  new bytes cross any wire: a `projectId` on `EventPayload` would be a
+  breaking signature change AND a dead pointer on every peer, because
+  projects never federate. So the link lives only on the node that
+  created it; peers receive a plain community event.
+- **Who may link:** organizer or co-organizer, re-validated in the
+  data layer (`scheduleProjectWorkDay`) against the project's
+  `isOrganizer` authority — a hand-crafted `/events/new?projectId=…`
+  URL from a non-organizer yields a plain event and zero link rows.
+  Event *creation* stays ungated; anyone may still convene and mention
+  a project in free text (the convention baseline).
+- **What still federates is the organizer's deliberate choice:** the
+  prefilled *title* ("Work day — Community Fridge") is free text the
+  organizer edits in front of the §3 signing card. `location` is never
+  prefilled from any project field — it is the threat-model-sensitive
+  field and must be typed by hand.
+- **Asymmetries phase 1 accepts:** scheduling logs a
+  `work_day_scheduled` project activity, but **cancellation logs
+  nothing** (that would couple the federated `cancelEvent` path to the
+  links table); there is no unlink affordance (cancel-and-recreate is
+  the corrective path, consistent with §5 no-edits); a cancelled work
+  day silently drops from the project card and the project-filtered
+  calendar.
+
 ## §11 Rejected alternatives
 
 Each rejection names the reason. The list is the contract — a future

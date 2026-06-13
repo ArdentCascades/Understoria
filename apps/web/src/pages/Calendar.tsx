@@ -29,7 +29,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
 import { CalendarMonth } from "@/components/CalendarMonth";
 import { CalendarWeek } from "@/components/CalendarWeek";
-import type { Category, Exchange, Post, Project } from "@/types";
+import type { Category, Event, Exchange, Post, Project } from "@/types";
 
 // Window: 30 days back, 60 days forward. The back-window covers
 // recently-completed exchange density (historical) and the forward
@@ -56,6 +56,7 @@ export default function CalendarPage() {
     projectTasks,
     events,
     eventCancellations,
+    eventProjectLinks,
   } = useApp();
   const { t, i18n } = useTranslation();
 
@@ -143,13 +144,28 @@ export default function CalendarPage() {
     return exchanges;
   }, [exchanges, projectId, category, mine]);
 
+  // Project filter narrows events to that project's work days (plan 10)
+  // via the local-only link set. `mine` and category deliberately keep
+  // today's no-op behavior for events: an event isn't owned by a member
+  // roster or a single category on the calendar, so only the explicit
+  // project filter touches the event list.
+  const filteredEvents = useMemo<readonly Event[]>(() => {
+    if (!projectId) return events;
+    const linkedIds = new Set(
+      eventProjectLinks
+        .filter((l) => l.projectId === projectId)
+        .map((l) => l.eventId),
+    );
+    return events.filter((e) => linkedIds.has(e.id));
+  }, [events, eventProjectLinks, projectId]);
+
   const allEntries = useMemo(
     () =>
       buildCalendar({
         projects: filteredProjects,
         posts: filteredPosts,
         exchanges: filteredExchanges,
-        events,
+        events: filteredEvents,
         eventCancellations,
         windowStart,
         windowEnd,
@@ -158,7 +174,7 @@ export default function CalendarPage() {
       filteredProjects,
       filteredPosts,
       filteredExchanges,
-      events,
+      filteredEvents,
       eventCancellations,
       windowStart,
       windowEnd,

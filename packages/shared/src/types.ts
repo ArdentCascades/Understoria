@@ -541,7 +541,14 @@ export type ProjectActivityType =
   | "coorganizer_accepted"
   | "coorganizer_declined"
   | "coorganizer_revoked"
-  | "announcement";
+  | "announcement"
+  // Local-only: logged when an organizer schedules a community event as
+  // a project work day (plan 10). `ProjectActivity` never federates, so
+  // adding a member here is NOT a wire-format change — the activity log
+  // is a local Dexie table read only by the project history timeline.
+  // The work-day LINK itself lives in a separate local-only table
+  // (`eventProjectLinks`) and never enters the outbox or the wire.
+  | "work_day_scheduled";
 
 export interface ProjectActivity {
   id: string;

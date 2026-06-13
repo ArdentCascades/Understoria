@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
@@ -22,6 +22,7 @@ import {
   getMemberRsvp,
   listRsvpsForEvent,
 } from "@/db/events";
+import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
 import { shortKey } from "@/lib/format";
@@ -49,7 +50,7 @@ export default function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { currentMember, members, nodeId, lockState } = useApp();
+  const { currentMember, members, nodeId, lockState, projects } = useApp();
   const { showToast } = useToast();
 
   const event = useLiveQuery(
@@ -78,6 +79,15 @@ export default function EventDetailPage() {
     () => (eventId ? listRsvpsForEvent(eventId) : Promise.resolve([])),
     [eventId],
     [],
+  );
+  // Local-only work-day link (plan 10). Resolves only on the node that
+  // created the link — peers have neither the row nor the project, so
+  // the back-link renders nowhere else, which is itself the honest UI
+  // statement of the federation posture.
+  const projectLink = useLiveQuery(
+    () => (eventId ? getLinkForEvent(eventId) : Promise.resolve(null)),
+    [eventId],
+    undefined,
   );
 
   const memberMap = useMemo(
@@ -121,6 +131,12 @@ export default function EventDetailPage() {
   const isOrganizer = memberKey === event.createdBy;
   const isCancelled = !!cancellation;
   const organizerName = memberMap.get(event.createdBy) ?? null;
+  // Only render the project back-link when BOTH the link row and the
+  // project it points at exist locally. (The project always exists on
+  // the linking node; the guard is honest about the general case.)
+  const linkedProject = projectLink
+    ? (projects.find((p) => p.id === projectLink.projectId) ?? null)
+    : null;
 
   // Visibility tier per design doc §6: the roster of names is shown
   // only to the organizer or to members who RSVP'd "going" or "maybe."
@@ -176,6 +192,18 @@ export default function EventDetailPage() {
       <header className="mb-4">
         <h1 className="page-title">{event.title}</h1>
         <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+          {linkedProject && (
+            <Field label={t("events.detail.projectLinkLabel")}>
+              <Link
+                to={`/project/${linkedProject.id}`}
+                className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              >
+                {t("events.detail.projectLinkLine", {
+                  project: linkedProject.title,
+                })}
+              </Link>
+            </Field>
+          )}
           <Field label={t("events.detail.organizerLabel")}>
             {organizerName ?? shortKey(event.createdBy)}
           </Field>

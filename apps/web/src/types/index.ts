@@ -112,3 +112,41 @@ export interface PreviouslyBlockedRow {
    *  on every unblock of the same `blockedKey` by the same `blockerKey`. */
   lastUnblockedAt: number;
 }
+
+/**
+ * Local-only event⇄project link — see `docs/community-events.md`
+ * ("Project work days") + `docs/project-ux-plans.md` §10. Records that a
+ * community event is a work day FOR a project, on this node only.
+ *
+ * The federation asymmetry this shape exists to respect: events are
+ * signed, wire-pinned, federated records; projects are local-only and
+ * never cross the wire. A `projectId` on the event payload would be a
+ * breaking wire change AND a dead pointer on every peer (projects don't
+ * federate), so the link lives here instead. Same posture as
+ * `EventRsvpRow` and `BlockRow`: never signed, never enqueued, never
+ * pulled, never exported. The linking node renders the work-day card and
+ * the project-filtered calendar; peer nodes see a plain event.
+ *
+ * The shared package deliberately omits this type so the federation
+ * layer has no knowledge of the shape. Deliberately NO `signature` and
+ * NO `nodeId` — both absences are structural and load-bearing. The
+ * `OutboxRow.kind` union in `db/database.ts` rejects
+ * `"event_project_link"` at the type level; `lib/outbox.ts` exposes no
+ * `enqueueEventProjectLink`. `eventProjectLinks.test.ts` locks both in.
+ */
+export interface EventProjectLinkRow {
+  /** UUID for this link row. */
+  id: string;
+  /** References `Event.id` — the federated event this work day is. */
+  eventId: string;
+  /** References `Project.id` — the local-only project it's a work day
+   *  for. Never federated; a peer node has neither this row nor the
+   *  project it points at. */
+  projectId: string;
+  /** Base64-encoded Ed25519 public key of the organizer/co-organizer
+   *  who created the link (re-validated against `Project` authority at
+   *  write time). */
+  linkedBy: string;
+  /** Epoch milliseconds, UTC. */
+  createdAt: number;
+}

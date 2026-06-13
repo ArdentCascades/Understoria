@@ -29,6 +29,7 @@ import type {
   DirectMessage,
   Event,
   EventCancellation,
+  EventProjectLinkRow,
   EventRsvpRow,
   Exchange,
   Member,
@@ -115,6 +116,14 @@ export interface OutboxRow {
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never
   // export, are cleared by soft-purge. blocking.test.ts asserts the
+  // rejection with `// @ts-expect-error`.
+  //
+  // Intentionally NOT a member of this union: "event_project_link".
+  // EventProjectLinkRow ties a federated event to a local-only project
+  // as a "work day" (docs/community-events.md "Project work days" +
+  // plan 10). Projects never federate, so a project pointer must never
+  // cross the wire — the link is local-only by construction, never
+  // enqueued, never pulled. eventProjectLinks.test.ts asserts the
   // rejection with `// @ts-expect-error`.
   /** JSON-stringified signed payload. Immutable once enqueued. */
   payload: string;
@@ -280,6 +289,18 @@ export class UnderstoriaDB extends Dexie {
    * soft-purge.
    */
   previouslyBlocked!: Table<PreviouslyBlockedRow, string>;
+  /**
+   * Local-only event⇄project work-day link — see
+   * `docs/community-events.md` ("Project work days") + plan 10. Ties a
+   * federated event to a local-only project. Never synced, never
+   * exported, never federated (projects don't federate, so a project
+   * pointer must never cross the wire). Read and written only by
+   * `db/eventProjectLinks.ts`. The `OutboxRow.kind` union above rejects
+   * `"event_project_link"` at the type level; there is no
+   * `enqueueEventProjectLink` helper in `lib/outbox.ts`. Same
+   * federation posture as `eventRsvps` and `blocks`.
+   */
+  eventProjectLinks!: Table<EventProjectLinkRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -769,6 +790,16 @@ export class UnderstoriaDB extends Dexie {
         const r = row as ProjectTask & { actualHours?: number | null };
         if (r.actualHours === undefined) r.actualHours = null;
       });
+    });
+    // v27: local-only event⇄project work-day links (plan 10). Pure new
+    // table, no backfill. The `[projectId+eventId]` compound index backs
+    // the one-link-per-event guard and the per-project list query. This
+    // table NEVER federates — projects don't cross the wire, so neither
+    // can a project pointer; the `OutboxRow.kind` union rejects
+    // `"event_project_link"` and no enqueue/pull helper exists.
+    this.version(27).stores({
+      eventProjectLinks:
+        "id, eventId, projectId, createdAt, [projectId+eventId]",
     });
   }
 }
