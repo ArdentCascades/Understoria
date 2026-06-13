@@ -1181,6 +1181,9 @@
       "openTasks": {
         "toggle": "Solo con tareas abiertas"
       },
+      "needsMoreHands": {
+        "toggle": "Le vendrían bien más manos"
+      },
       "emptyForFilters": "Nada coincide con tus filtros."
     },
     "search": {

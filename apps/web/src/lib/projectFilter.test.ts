@@ -19,8 +19,46 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { describe, expect, it } from "vitest";
-import { hasOpenTasks } from "./projectFilter";
+import { hasOpenTasks, projectNeedsMoreHands } from "./projectFilter";
 import type { ProjectTask, ProjectTaskStatus } from "@/types";
+
+const DAY = 24 * 60 * 60 * 1000;
+const NOW = new Date("2026-05-23T12:00:00Z").getTime();
+const CONFIG = {
+  taskCheckInDays: 7,
+  taskNeedsHelpDays: 14,
+  taskCheckInGraceDays: 3,
+};
+
+function claimedTask(
+  id: string,
+  projectId: string,
+  overrides: Partial<ProjectTask> = {},
+): ProjectTask {
+  return {
+    id,
+    projectId,
+    title: "Test task",
+    description: "",
+    category: "other",
+    estimatedHours: 1,
+    urgency: "low",
+    requiredSkills: [],
+    assignedTo: "alice",
+    status: "claimed",
+    dependencies: [],
+    orderIndex: 0,
+    createdAt: NOW - 30 * DAY,
+    completedAt: null,
+    completedBy: null,
+    exchangeId: null,
+    // 20 days ago, no ack — past both the needs-help floor and the
+    // grace window, so this is `needs_more_hands` by default.
+    claimedAt: NOW - 20 * DAY,
+    checkInAcknowledgedAt: null,
+    ...overrides,
+  };
+}
 
 function makeTask(
   id: string,
@@ -97,5 +135,44 @@ describe("projectFilter — hasOpenTasks", () => {
 
   it("returns false for an empty tasks array", () => {
     expect(hasOpenTasks("p1", [])).toBe(false);
+  });
+});
+
+describe("projectFilter — projectNeedsMoreHands", () => {
+  it("returns true when a claimed task has gone long-silent", () => {
+    const tasks = [claimedTask("t1", "p1")];
+    expect(projectNeedsMoreHands("p1", tasks, CONFIG, NOW)).toBe(true);
+  });
+
+  it("returns false when the claimer recently acknowledged the nudge", () => {
+    const tasks = [
+      claimedTask("t1", "p1", { checkInAcknowledgedAt: NOW - 1 * DAY }),
+    ];
+    expect(projectNeedsMoreHands("p1", tasks, CONFIG, NOW)).toBe(false);
+  });
+
+  it("returns false for a dependency-blocked stale claim (issue is upstream, not capacity)", () => {
+    const tasks = [
+      makeTask("dep", "p1", "open"),
+      claimedTask("blocked", "p1", { dependencies: ["dep"] }),
+    ];
+    expect(projectNeedsMoreHands("p1", tasks, CONFIG, NOW)).toBe(false);
+  });
+
+  it("returns false when the project has only open tasks", () => {
+    const tasks = [
+      makeTask("t1", "p1", "open"),
+      makeTask("t2", "p1", "open"),
+    ];
+    expect(projectNeedsMoreHands("p1", tasks, CONFIG, NOW)).toBe(false);
+  });
+
+  it("ignores a long-silent claim that belongs to another project", () => {
+    const tasks = [claimedTask("t1", "other-project")];
+    expect(projectNeedsMoreHands("p1", tasks, CONFIG, NOW)).toBe(false);
+  });
+
+  it("returns false for an empty tasks array", () => {
+    expect(projectNeedsMoreHands("p1", [], CONFIG, NOW)).toBe(false);
   });
 });

@@ -1181,6 +1181,9 @@
       "openTasks": {
         "toggle": "Only with open tasks"
       },
+      "needsMoreHands": {
+        "toggle": "Could use more hands"
+      },
       "emptyForFilters": "Nothing matches your filters."
     },
     "search": {

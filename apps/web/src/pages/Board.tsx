@@ -33,7 +33,7 @@ import { ProfileNudge } from "@/components/ProfileNudge";
 import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
-import { hasOpenTasks } from "@/lib/projectFilter";
+import { hasOpenTasks, projectNeedsMoreHands } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
@@ -41,6 +41,7 @@ import type {
   Category,
   Project,
   ProjectCategory,
+  ProjectTask,
   Urgency,
 } from "@/types";
 
@@ -54,6 +55,7 @@ export default function BoardPage() {
     vouches,
     invites,
     nodeId,
+    nodeConfig,
   } = useApp();
   const { t } = useTranslation();
   // Tab lives in the URL as `?tab=needs|offers|projects` so back-
@@ -99,6 +101,7 @@ export default function BoardPage() {
     Project["status"] | ""
   >("");
   const [onlyWithOpenTasks, setOnlyWithOpenTasks] = useState(false);
+  const [onlyNeedsMoreHands, setOnlyNeedsMoreHands] = useState(false);
   const navigate = useNavigate();
 
   // Debounce the visible→filtered transition. 250 ms matches the
@@ -208,6 +211,31 @@ export default function BoardPage() {
   // selection — the dedicated "View archive" link below remains the
   // only entry point. That's why `archived` is intentionally absent
   // from the status dropdown (see board.projectFilters.status.* keys).
+  // Set of project ids with at least one "could use more hands" task,
+  // computed only when the toggle is on (null = filter off → zero cost
+  // on the default path) and in its own memo so it doesn't recompute on
+  // every search keystroke. Tasks are bucketed by project in one pass,
+  // so the whole thing is O(tasks), not O(projects × tasks). `now` is
+  // captured at memo time and deliberately left out of the deps — the
+  // same staleness posture the attention rail's memo uses.
+  const needsMoreHandsIds = useMemo<ReadonlySet<string> | null>(() => {
+    if (!onlyNeedsMoreHands) return null;
+    const now = Date.now();
+    const byProject = new Map<string, ProjectTask[]>();
+    for (const task of projectTasks) {
+      const list = byProject.get(task.projectId);
+      if (list) list.push(task);
+      else byProject.set(task.projectId, [task]);
+    }
+    const ids = new Set<string>();
+    for (const [projectId, scoped] of byProject) {
+      if (projectNeedsMoreHands(projectId, scoped, nodeConfig, now)) {
+        ids.add(projectId);
+      }
+    }
+    return ids;
+  }, [onlyNeedsMoreHands, projectTasks, nodeConfig]);
+
   const visibleProjects = useMemo(() => {
     const q = debouncedQuery.trim();
     return projects.filter((p) => {
@@ -216,6 +244,7 @@ export default function BoardPage() {
         return false;
       if (projectStatusFilter && p.status !== projectStatusFilter) return false;
       if (onlyWithOpenTasks && !hasOpenTasks(p.id, projectTasks)) return false;
+      if (onlyNeedsMoreHands && !needsMoreHandsIds?.has(p.id)) return false;
       if (q !== "" && !matchesQuery(`${p.title} ${p.description}`, q))
         return false;
       return true;
@@ -226,13 +255,16 @@ export default function BoardPage() {
     projectCategoryFilter,
     projectStatusFilter,
     onlyWithOpenTasks,
+    onlyNeedsMoreHands,
+    needsMoreHandsIds,
     debouncedQuery,
   ]);
 
   const projectFiltersActive =
     projectCategoryFilter !== "" ||
     projectStatusFilter !== "" ||
-    onlyWithOpenTasks;
+    onlyWithOpenTasks ||
+    onlyNeedsMoreHands;
 
   // Whether the member is carrying any task claims across projects —
   // gates the quiet "Tasks you're carrying" jump-off below the
@@ -265,6 +297,7 @@ export default function BoardPage() {
     setProjectCategoryFilter("");
     setProjectStatusFilter("");
     setOnlyWithOpenTasks(false);
+    setOnlyNeedsMoreHands(false);
   };
 
   // pb-36 (page wrapper) reserves clearance under the fixed FAB —
@@ -452,6 +485,8 @@ export default function BoardPage() {
               setProjectStatusFilter={setProjectStatusFilter}
               onlyWithOpenTasks={onlyWithOpenTasks}
               setOnlyWithOpenTasks={setOnlyWithOpenTasks}
+              onlyNeedsMoreHands={onlyNeedsMoreHands}
+              setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
             />
           </div>
         )}
@@ -568,6 +603,8 @@ export default function BoardPage() {
                 setProjectStatusFilter={setProjectStatusFilter}
                 onlyWithOpenTasks={onlyWithOpenTasks}
                 setOnlyWithOpenTasks={setOnlyWithOpenTasks}
+                onlyNeedsMoreHands={onlyNeedsMoreHands}
+                setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
               />
             </div>
 
