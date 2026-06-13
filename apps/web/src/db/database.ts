@@ -779,6 +779,12 @@ export const SETTING_KEYS = {
   currentMember: "currentMember",
   nodeId: "nodeId",
   celebratedMilestones: "celebratedMilestones",
+  /** Per-device display state: a JSON array of project ids whose
+   *  one-time completion moment has already popped on this device, so
+   *  it shows once and then settles into the permanent banner line.
+   *  Mirrors `celebratedMilestones`; survives soft purge, cleared by
+   *  hard purge with the rest of `settings`. */
+  celebratedProjectCompletions: "celebratedProjectCompletions",
   onboarded: "onboarded",
   /** Base URL of the community node to mirror finalized exchanges to.
    *  Empty / unset means "do not mirror." */

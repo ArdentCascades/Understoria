@@ -21,6 +21,7 @@ export function ProjectCard({
   taskCount,
   openTaskCount,
   searchQuery,
+  closureLine,
 }: {
   project: Project;
   organizerName: string;
@@ -31,6 +32,10 @@ export function ProjectCard({
    *  substrings are wrapped in <mark>. Description is plain for
    *  v1 (mirrors PostCard). */
   searchQuery?: string;
+  /** Optional terse, aggregate-only closure line ("N members · H
+   *  hours, together") shown under the organizer line on the archive.
+   *  Board cards never pass it, so they're unchanged. Never names. */
+  closureLine?: string;
 }) {
   const { t } = useTranslation();
   const percent =
@@ -93,6 +98,11 @@ export function ProjectCard({
       <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
         {t("projects.byOrganizer", { name: organizerName })}
       </p>
+      {closureLine && (
+        <p className="mt-1 text-xs text-canopy-700 dark:text-canopy-300">
+          {closureLine}
+        </p>
+      )}
     </Link>
   );
 }

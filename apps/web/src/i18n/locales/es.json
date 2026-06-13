@@ -734,6 +734,15 @@
       "showOlderOther": "Ver {{count}} novedades anteriores",
       "showFewer": "Ver menos novedades"
     },
+    "completionMoment": {
+      "title": "Completado, juntos.",
+      "summary_one": "{{count}} miembro movió {{hours}} horas para llevarlo hasta el final.",
+      "summary_other": "{{count}} miembros movieron {{hours}} horas juntos.",
+      "thanksHint": "Si quieres agradecer a todos, publica una novedad — queda con el proyecto.",
+      "thanksCta": "Escribir una novedad",
+      "cardLine_one": "{{count}} miembro · {{hours}} horas",
+      "cardLine_other": "{{count}} miembros · {{hours}} horas, juntos"
+    },
     "coOrganizers": {
       "title": "Co-organizadores",
       "intro": "Los co-organizadores pueden confirmar tareas, agregar tareas y pausar o reanudar el proyecto. Solo quien organiza originalmente puede invitar o quitar co-organizadores.",
