@@ -1318,7 +1318,11 @@
       "pendingWhy": "Cómo funciona la confirmación",
       "pendingExplainerAuto_one": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario confirma por ella en aproximadamente {{count}} día — nada está atascado.",
       "pendingExplainerAuto_other": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario confirma por ella en aproximadamente {{count}} días — nada está atascado.",
-      "pendingExplainerManual": "El crédito se mueve cuando ambas partes confirman un intercambio. Nada está atascado — llega en el momento en que sucede la segunda confirmación."
+      "pendingExplainerManual": "El crédito se mueve cuando ambas partes confirman un intercambio. Nada está atascado — llega en el momento en que sucede la segunda confirmación.",
+      "projectOutflowLine": "Incluye {{hours}} que moviste a quienes ayudaron en nombre de {{project}}.",
+      "projectOutflowLineMore_one": "Incluye {{hours}} que moviste a quienes ayudaron en nombre de {{project}} y {{count}} proyecto más.",
+      "projectOutflowLineMore_other": "Incluye {{hours}} que moviste a quienes ayudaron en nombre de {{project}} y {{count}} proyectos más.",
+      "projectOutflowUnknownProject": "un proyecto comunitario"
     },
     "about": {
       "title": "Sobre ti",

@@ -23,6 +23,7 @@ import {
   balanceFor,
   pendingBalanceFor,
   pendingTaskCreditFor,
+  projectConfirmationOutflow,
   transactionHistory,
 } from "./timebank";
 import type { Exchange, Member, Post, ProjectTask } from "@/types";
@@ -446,5 +447,91 @@ describe("timebank.transactionHistory", () => {
     expect(history[0].delta).toBe(-2);
     expect(history[0].counterparty).toBe("b");
     expect(history[1].delta).toBe(1);
+  });
+});
+
+describe("timebank.projectConfirmationOutflow", () => {
+  // A task-confirmation exchange: the confirming organizer is the
+  // helped party, and the project/task ids live inside the postId.
+  function taskExchange(
+    id: string,
+    helped: string,
+    hours: number,
+    projectId: string,
+    taskId: string,
+  ): Exchange {
+    return {
+      ...exchange(id, "helper", helped, hours, 0),
+      postId: `project:${projectId}/task:${taskId}`,
+    };
+  }
+
+  it("ignores plain post exchanges and rows where the member is the helper", () => {
+    const exchanges = [
+      // Plain board post — not project work.
+      exchange("p1", "helper", "org", 2, 0),
+      // Project task, but the member HELPED (earned), didn't confirm.
+      taskExchange("t1", "someone-else", 3, "proj-a", "task-1"),
+    ];
+    const out = projectConfirmationOutflow("org", exchanges);
+    expect(out.totalHours).toBe(0);
+    expect(out.perProject).toEqual([]);
+  });
+
+  it("sums multiple tasks of one project", () => {
+    const exchanges = [
+      taskExchange("t1", "org", 2, "proj-a", "task-1"),
+      taskExchange("t2", "org", 1.5, "proj-a", "task-2"),
+    ];
+    const out = projectConfirmationOutflow("org", exchanges);
+    expect(out.totalHours).toBe(3.5);
+    expect(out.perProject).toEqual([{ projectId: "proj-a", hours: 3.5 }]);
+  });
+
+  it("groups across projects and sorts largest-first", () => {
+    const exchanges = [
+      taskExchange("t1", "org", 1, "proj-small", "task-1"),
+      taskExchange("t2", "org", 4, "proj-big", "task-2"),
+      taskExchange("t3", "org", 2, "proj-mid", "task-3"),
+    ];
+    const out = projectConfirmationOutflow("org", exchanges);
+    expect(out.totalHours).toBe(7);
+    expect(out.perProject).toEqual([
+      { projectId: "proj-big", hours: 4 },
+      { projectId: "proj-mid", hours: 2 },
+      { projectId: "proj-small", hours: 1 },
+    ]);
+  });
+
+  it("breaks hour ties deterministically by projectId", () => {
+    const exchanges = [
+      taskExchange("t1", "org", 2, "proj-z", "task-1"),
+      taskExchange("t2", "org", 2, "proj-a", "task-2"),
+    ];
+    const out = projectConfirmationOutflow("org", exchanges);
+    expect(out.perProject.map((p) => p.projectId)).toEqual([
+      "proj-a",
+      "proj-z",
+    ]);
+  });
+
+  it("skips a project-prefixed postId missing the /task: segment", () => {
+    const malformed: Exchange = {
+      ...exchange("m1", "helper", "org", 9, 0),
+      postId: "project:proj-a", // no /task: — can't attribute, skip
+    };
+    const out = projectConfirmationOutflow("org", [malformed]);
+    expect(out.totalHours).toBe(0);
+    expect(out.perProject).toEqual([]);
+  });
+
+  it("rounds to two decimals", () => {
+    const exchanges = [
+      taskExchange("t1", "org", 0.1, "proj-a", "task-1"),
+      taskExchange("t2", "org", 0.2, "proj-a", "task-2"),
+    ];
+    const out = projectConfirmationOutflow("org", exchanges);
+    expect(out.totalHours).toBe(0.3);
+    expect(out.perProject).toEqual([{ projectId: "proj-a", hours: 0.3 }]);
   });
 });
