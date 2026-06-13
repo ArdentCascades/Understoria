@@ -26,17 +26,16 @@ vi.mock("@/db/events", () => ({
 vi.mock("@/db/eventProjectLinks", () => ({
   scheduleProjectWorkDay: scheduleMock,
 }));
-// Real isOrganizer — a pure function over the project's authority lists.
 vi.mock("@/db/projects", () => ({
   isOrganizer: (p: Project, key: string) =>
     p.organizerKey === key || p.coOrganizerKeys.includes(key),
 }));
 
+// Real @/content/eventTemplates — the picker renders the actual set, so
+// this is a faithful integration test of pick → seed → submit.
 import "@/i18n";
 import EventNewPage from "./EventNew";
 import type { Member, Project } from "@/types";
-
-const organizerKey = "organizer-key";
 
 function member(publicKey: string): Member {
   return {
@@ -53,29 +52,6 @@ function member(publicKey: string): Member {
   };
 }
 
-function project(over: Partial<Project> = {}): Project {
-  return {
-    id: "proj-1",
-    title: "Community Fridge",
-    description: "",
-    category: "food",
-    organizerKey,
-    coOrganizerKeys: [],
-    status: "active",
-    targetHours: 10,
-    contributedHours: 0,
-    deadline: null,
-    createdAt: 0,
-    completedAt: null,
-    pauseNote: null,
-    locationZone: "",
-    tags: [],
-    nodeId: "node-1",
-    templateId: null,
-    ...over,
-  };
-}
-
 interface MockState {
   currentMember: Member | null;
   nodeId: string;
@@ -87,10 +63,10 @@ let mockState: MockState;
 
 function freshState(): MockState {
   return {
-    currentMember: member(organizerKey),
+    currentMember: member("me-key"),
     nodeId: "node-1",
     lockState: "unprotected",
-    projects: [project()],
+    projects: [],
   };
 }
 
@@ -115,11 +91,11 @@ afterEach(() => {
   container.remove();
 });
 
-function render(initialEntry: string) {
+function render() {
   act(() => {
     root = createRoot(container);
     root.render(
-      <MemoryRouter initialEntries={[initialEntry]}>
+      <MemoryRouter initialEntries={["/events/new"]}>
         <Routes>
           <Route path="/events/new" element={<EventNewPage />} />
         </Routes>
@@ -145,73 +121,101 @@ function setInput(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-describe("EventNew — work-day prefill", () => {
-  it("prefills the banner, title, and category for an organizer with ?projectId", async () => {
-    render("/events/new?projectId=proj-1");
+function clickCardContaining(text: string) {
+  const btn = Array.from(container.querySelectorAll("button")).find((b) =>
+    (b.textContent ?? "").includes(text),
+  );
+  if (!btn) throw new Error(`Card not found: ${text}`);
+  act(() => {
+    btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+}
+
+function formTextInputs(): HTMLInputElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLInputElement>("form input"),
+  ).filter((i) => i.type === "text");
+}
+
+describe("EventNew — template prefill", () => {
+  it("seeds the form from a picked template (title stem, category, end time) but never location", async () => {
+    render();
+    clickCardContaining("Potluck");
     await flush();
-    const text = container.textContent ?? "";
-    expect(text).toContain("Scheduling a work day for Community Fridge");
 
-    const titleInput = container.querySelector("form input") as HTMLInputElement;
-    expect(titleInput.value).toBe("Work day — Community Fridge");
+    const [titleInput, locationInput] = formTextInputs();
+    expect(titleInput.value).toBe("Potluck — ");
+    expect(locationInput.value).toBe(""); // location is never prefilled
 
+    // The category carries the event-specific "social" string.
     const select = container.querySelector("select") as HTMLSelectElement;
-    // "food" is a legacy category, so it carries through unchanged.
-    expect(select.value).toBe("food");
-  });
+    expect(select.value).toBe("social");
 
-  it("links the event to the project on submit", async () => {
-    render("/events/new?projectId=proj-1");
-    await flush();
-    // Title is prefilled; the two text inputs are [title, location].
-    // Supply the location (never prefilled) and submit.
-    const textInputs = Array.from(container.querySelectorAll("input")).filter(
-      (i) => i.type === "text",
-    );
-    setInput(textInputs[1], "Community room");
-    const form = container.querySelector("form") as HTMLFormElement;
-    act(() => {
-      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-    });
-    await flush();
-    expect(scheduleMock).toHaveBeenCalledTimes(1);
-    // Work-day is the first template — the project path now tags it.
-    expect(scheduleMock.mock.calls[0][0]).toMatchObject({
-      projectId: "proj-1",
-      templateId: "work-day",
-    });
-    expect(createEventMock).not.toHaveBeenCalled();
-  });
-
-  it("gives a non-organizer the plain form and a plain event on submit", async () => {
-    mockState.currentMember = member("rando");
-    render("/events/new?projectId=proj-1");
-    await flush();
-    const text = container.textContent ?? "";
-    expect(text).not.toContain("Scheduling a work day");
-
-    const titleInput = container.querySelector("form input") as HTMLInputElement;
-    expect(titleInput.value).toBe("");
-    setInput(titleInput, "My own event");
-    const locInput = Array.from(container.querySelectorAll("input")).find(
-      (i) => i.type === "text" && i !== titleInput,
+    // The suggested duration auto-applied an end time.
+    const endCheckbox = container.querySelector(
+      'input[type="checkbox"]',
     ) as HTMLInputElement;
-    setInput(locInput, "Somewhere");
+    expect(endCheckbox.checked).toBe(true);
+  });
+
+  it("passes the templateId and category to createEvent on submit", async () => {
+    render();
+    clickCardContaining("Potluck");
+    await flush();
+    const [, locationInput] = formTextInputs();
+    setInput(locationInput, "Community room");
     const form = container.querySelector("form") as HTMLFormElement;
     act(() => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flush();
-    // A plain event, never a work-day link.
     expect(createEventMock).toHaveBeenCalledTimes(1);
+    expect(createEventMock.mock.calls[0][0]).toMatchObject({
+      templateId: "potluck",
+      category: "social",
+    });
     expect(scheduleMock).not.toHaveBeenCalled();
   });
 
-  it("degrades to the plain form when the projectId is unknown", async () => {
-    render("/events/new?projectId=does-not-exist");
+  it("start-from-scratch leaves the form blank and submits templateId null", async () => {
+    render();
+    clickCardContaining("Start from scratch");
     await flush();
-    expect(container.textContent ?? "").not.toContain("Scheduling a work day");
-    const titleInput = container.querySelector("form input") as HTMLInputElement;
+    const [titleInput, locationInput] = formTextInputs();
     expect(titleInput.value).toBe("");
+    setInput(titleInput, "My own event");
+    setInput(locationInput, "Somewhere");
+    const form = container.querySelector("form") as HTMLFormElement;
+    act(() => {
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    await flush();
+    expect(createEventMock).toHaveBeenCalledTimes(1);
+    expect(createEventMock.mock.calls[0][0]).toMatchObject({ templateId: null });
+  });
+
+  it("collapses the gallery after a pick and reopens it on Change", async () => {
+    render();
+    // Gallery open: the search box is present.
+    expect(
+      container.querySelector('input[type="search"]'),
+    ).not.toBeNull();
+    clickCardContaining("Game night");
+    await flush();
+    // Collapsed: search gone, summary names the template.
+    expect(container.querySelector('input[type="search"]')).toBeNull();
+    expect(container.textContent ?? "").toContain("Game night");
+
+    const change = Array.from(container.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === "Change",
+    );
+    expect(change).toBeDefined();
+    act(() => {
+      change!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    // Reopened: the search box is back.
+    expect(
+      container.querySelector('input[type="search"]'),
+    ).not.toBeNull();
   });
 });
