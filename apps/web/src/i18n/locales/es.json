@@ -619,6 +619,11 @@
       "confirm": "Confirmar completada",
       "awaitingConfirmation": "Esperando que quien organiza confirme",
       "releaseAfterComplete": "Dar un paso atrás de esta tarea",
+      "addFreshCopy": {
+        "button": "Agregar una copia nueva",
+        "hint": "Agrega una copia abierta de esta tarea al final de la lista — útil para el trabajo que se repite.",
+        "toast": "Se agregó una “{{title}}” nueva al final de la lista de tareas."
+      },
       "claimerNarrative": {
         "intro": "Marcaste esto como hecho. Una persona organizadora confirma para completar el intercambio — tus {{hours}} horas de crédito se mueven en ese momento.",
         "autoConfirm_one": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} día.",

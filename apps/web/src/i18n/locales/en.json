@@ -619,6 +619,11 @@
       "confirm": "Confirm completion",
       "awaitingConfirmation": "Waiting on organizer to confirm",
       "releaseAfterComplete": "Step back from this task",
+      "addFreshCopy": {
+        "button": "Add a fresh copy",
+        "hint": "Adds an open copy of this task at the bottom of the list — handy for work that recurs.",
+        "toast": "Added a fresh “{{title}}” at the bottom of the task list."
+      },
       "claimerNarrative": {
         "intro": "You've marked this done. An organizer confirms to complete the exchange — your {{hours}} hours of credit move then.",
         "autoConfirm_one": "If no one gets to it, the node confirms automatically within about {{count}} day.",
