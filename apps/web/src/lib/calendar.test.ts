@@ -617,6 +617,56 @@ describe("groupByDay", () => {
 
 // ─── buildCalendar: event ───────────────────────────────────────────
 
+describe("buildCalendar — event viewerGoing", () => {
+  const inWindow = Date.UTC(2026, 10, 20, 12, 0, 0);
+  function build(
+    currentMemberKey: string | null,
+    eventRsvps: ReadonlyArray<{
+      id: string;
+      eventId: string;
+      memberKey: string;
+      status: "going" | "maybe" | "not_going";
+      respondedAt: number;
+    }>,
+  ) {
+    return buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [event({ id: "ev_1", startsAt: inWindow })],
+      eventCancellations: [],
+      currentMemberKey,
+      eventRsvps,
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+  }
+
+  it("marks an event the current viewer RSVP'd 'going' to — and ignores other members' going", () => {
+    const result = build("me", [
+      { id: "r1", eventId: "ev_1", memberKey: "me", status: "going", respondedAt: 1 },
+      { id: "r2", eventId: "ev_1", memberKey: "other", status: "going", respondedAt: 1 },
+    ]);
+    expect(result[0]).toMatchObject({ kind: "event", viewerGoing: true });
+  });
+
+  it("does not mark 'maybe', no-RSVP, or when there's no viewer", () => {
+    expect(
+      build("me", [
+        { id: "r", eventId: "ev_1", memberKey: "me", status: "maybe", respondedAt: 1 },
+      ])[0],
+    ).toMatchObject({ viewerGoing: false });
+    expect(build("me", [])[0]).toMatchObject({ viewerGoing: false });
+    // No viewer key — a going row exists but can't be attributed to "the
+    // viewer," so nothing is marked.
+    expect(
+      build(null, [
+        { id: "r", eventId: "ev_1", memberKey: "me", status: "going", respondedAt: 1 },
+      ])[0],
+    ).toMatchObject({ viewerGoing: false });
+  });
+});
+
 describe("buildCalendar — event", () => {
   it("emits an event entry placed on the UTC day of startsAt", () => {
     // 23:30 UTC — falls on its own UTC day, not the next.
@@ -878,6 +928,7 @@ describe("entryIsPast — events", () => {
       eventId: "ev",
       title: "Test event",
       category: "other",
+      viewerGoing: false,
       startsAt,
       endsAt,
       location: "anywhere",

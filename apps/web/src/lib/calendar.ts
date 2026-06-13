@@ -22,6 +22,7 @@ import type {
   Category,
   Event,
   EventCancellation,
+  EventRsvpRow,
   Exchange,
   Post,
   PostType,
@@ -112,6 +113,12 @@ export type CalendarEntry =
        *  to decide whether a multi-day event is still ongoing. */
       endsAt: number | null;
       location: string;
+      /** True iff the CURRENT viewer has RSVP'd "going" to this event —
+       *  the viewer's own local status, never anyone else's and never a
+       *  count. Drives a quiet "you're going" marker so a member can see
+       *  what they're part of at a glance (no-leaderboards: own data
+       *  only). */
+      viewerGoing: boolean;
       /** Organizer's pubkey. The UI can look up the display name from
        *  the members map. Carried so renderers don't have to do their
        *  own event-to-organizer join. */
@@ -131,6 +138,15 @@ export interface BuildCalendarInput {
   /** Cancellation records that suppress the corresponding event from
    *  appearing on the calendar. Lookup is by `eventId`. */
   eventCancellations?: readonly EventCancellation[];
+  /** The CURRENT viewer's public key — used only to mark events the
+   *  viewer themselves RSVP'd "going" to. Optional; when omitted no
+   *  event is marked. */
+  currentMemberKey?: string | null;
+  /** Local-only RSVP rows. Only the current viewer's "going" rows are
+   *  read, to set `viewerGoing` — never another member's, never a count
+   *  (RSVPs are local-only and privacy-tiered; see
+   *  `docs/community-events.md` §4 + §7). Optional. */
+  eventRsvps?: readonly EventRsvpRow[];
   /** Inclusive lower bound on the entry's source timestamp
    *  (deadline / expiresAt / completedAt). ms epoch. */
   windowStart: number;
@@ -231,6 +247,16 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   // post expiries.
   const cancelledIds = new Set<string>();
   for (const c of input.eventCancellations ?? []) cancelledIds.add(c.eventId);
+  // The viewer's OWN "going" events — read only when we know who the
+  // viewer is. Never another member's status; never a count.
+  const viewerGoingIds = new Set<string>();
+  if (input.currentMemberKey) {
+    for (const r of input.eventRsvps ?? []) {
+      if (r.memberKey === input.currentMemberKey && r.status === "going") {
+        viewerGoingIds.add(r.eventId);
+      }
+    }
+  }
   for (const ev of input.events ?? []) {
     if (cancelledIds.has(ev.id)) continue;
     if (ev.startsAt < input.windowStart || ev.startsAt > input.windowEnd)
@@ -242,6 +268,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       eventId: ev.id,
       title: ev.title,
       category: ev.category,
+      viewerGoing: viewerGoingIds.has(ev.id),
       startsAt: ev.startsAt,
       endsAt: ev.endsAt,
       location: ev.location,
