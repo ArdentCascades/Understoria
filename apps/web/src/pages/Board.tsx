@@ -33,6 +33,7 @@ import { ProfileNudge } from "@/components/ProfileNudge";
 import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
+import { myOrganizedProjects } from "@/lib/myProjects";
 import { hasOpenTasks, projectNeedsMoreHands } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
@@ -56,6 +57,7 @@ export default function BoardPage() {
     invites,
     nodeId,
     nodeConfig,
+    blockedKeys,
   } = useApp();
   const { t } = useTranslation();
   // Tab lives in the URL as `?tab=needs|offers|projects` so back-
@@ -277,6 +279,24 @@ export default function BoardPage() {
             .taskCount
         : 0,
     [currentMember, projectTasks, projects],
+  );
+
+  // Whether the member organizes (or co-organizes) any project — gates
+  // the quiet "Projects you organize" jump-off below the carrying link.
+  // Same helper as /my-projects so the link only shows when the page
+  // would have something to show; blockedKeys keeps the gate honest for
+  // a completed project whose sole loose end is a blocked completer.
+  const organizingCount = useMemo(
+    () =>
+      currentMember
+        ? myOrganizedProjects({
+            memberKey: currentMember.publicKey,
+            projects,
+            projectTasks,
+            blockedKeys,
+          }).projectCount
+        : 0,
+    [currentMember, projects, projectTasks, blockedKeys],
   );
 
   // Post-tab filter activity: drives the "filter-empty" empty state and
@@ -630,6 +650,19 @@ export default function BoardPage() {
                 className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-3 lg:mt-2 lg:text-left"
               >
                 {t("myTasks.boardLink")}
+              </Link>
+            )}
+
+            {/* Organizer-side jump-off, same quiet register. Conditional
+                on actually stewarding a project so the rail never nudges
+                a non-organizer toward organizing (no-notifications;
+                solidarity-not-shame). */}
+            {organizingCount > 0 && (
+              <Link
+                to="/my-projects"
+                className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-4 lg:mt-2 lg:text-left"
+              >
+                {t("myProjects.boardLink")}
               </Link>
             )}
           </>

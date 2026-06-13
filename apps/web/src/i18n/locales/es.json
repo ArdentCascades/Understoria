@@ -853,6 +853,25 @@
     "seeAll": "Ver todas tus tareas",
     "boardLink": "Tareas que llevas"
   },
+  "myProjects": {
+    "title": "Proyectos que organizas",
+    "subtitle": "Cada proyecto a tu cuidado — como organizador o co-organizador — y lo que espera por ti, en un solo lugar.",
+    "summaryOne": "1 proyecto está a tu cuidado ahora mismo.",
+    "summaryOther": "{{count}} proyectos están a tu cuidado ahora mismo.",
+    "awaiting_one": "1 tarea espera tu confirmación",
+    "awaiting_other": "{{count}} tareas esperan tu confirmación",
+    "openTasks_one": "1 tarea abierta",
+    "openTasks_other": "{{count}} tareas abiertas",
+    "noOpenTasks": "Ninguna tarea abierta ahora mismo",
+    "pendingInvites_one": "1 invitación de co-organizador esperando respuesta",
+    "pendingInvites_other": "{{count}} invitaciones de co-organizador esperando respuesta",
+    "coOrganizerChip": "Co-organizador",
+    "emptyTitle": "Ningún proyecto a tu cuidado ahora mismo",
+    "empty": "Cuando inicias un proyecto, o aceptas una invitación de co-organizador, aparece aquí — para que veas todo lo que está a tu cuidado sin abrir cada uno.",
+    "startProject": "Iniciar un proyecto",
+    "seeAll": "Ver todos los proyectos que organizas",
+    "boardLink": "Proyectos que organizas"
+  },
   "urgency": {
     "low": "Cuando puedas",
     "medium": "Pronto",
