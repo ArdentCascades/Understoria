@@ -1576,6 +1576,7 @@ function TaskRow({
   } | null;
 }) {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const isAssignee = task.assignedTo === currentKey;
   const isCompleter = task.completedBy === currentKey;
   const { pending, run: runWithPending } = usePendingAction();
@@ -1980,6 +1981,55 @@ function TaskRow({
             {t("projects.task.awaitingConfirmation")}
           </span>
         )}
+        {/* Recurring work: a completed task is otherwise a dead end —
+            an organizer who runs the same thing next cycle had to
+            retype it. One tap stages a fresh, open copy at the bottom
+            of the list. Framed as "run it again", never as expiry
+            (solidarity-not-shame). Gated to match addProjectTask's own
+            guard so it never offers a guaranteed error. Dependencies
+            are dropped — the original's upstream tasks are done, so
+            copying their ids would gate on nothing while risking a
+            dangling reference (the cloneProject precedent). */}
+        {task.status === "completed" &&
+          isOrganizer &&
+          projectStatus !== "completed" &&
+          projectStatus !== "archived" && (
+            <>
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={pending}
+                aria-busy={pending}
+                onClick={async () => {
+                  const created = await dispatch(() =>
+                    addProjectTask(task.projectId, currentKey!, {
+                      title: task.title,
+                      description: task.description,
+                      category: task.category,
+                      estimatedHours: task.estimatedHours,
+                      urgency: task.urgency,
+                      requiredSkills: [...task.requiredSkills],
+                      dependencies: [],
+                    }),
+                  );
+                  if (created) {
+                    showToast(
+                      t("projects.task.addFreshCopy.toast", {
+                        title: task.title,
+                      }),
+                    );
+                  }
+                }}
+              >
+                {pending
+                  ? t("common.working")
+                  : t("projects.task.addFreshCopy.button")}
+              </button>
+              <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.task.addFreshCopy.hint")}
+              </p>
+            </>
+          )}
       </div>
       {/* Claimer-side narrative (PR #226's voice — "credit moves when
           ..."). Visible only to the completer of an awaiting task;
