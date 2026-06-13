@@ -91,7 +91,8 @@ export interface CreateEventInput {
   location: string;
   /** Soft cap; `null` for uncapped. */
   capacity: number | null;
-  /** Reserved for phase 2; MUST be `null` in phase 1. */
+  /** `null` for a plain event, or a 1..50-char template identifier
+   *  (e.g. "potluck"). See `docs/event-templates-plan.md`. */
   templateId: string | null;
   /** Base64-encoded Ed25519 public key of the organizer. */
   organizerKey: string;
@@ -114,18 +115,23 @@ export interface CreateEventInput {
  * a record whose signature doesn't verify is the same discipline as
  * `issueCoOrganizerInvitation`), then enqueues for federation.
  *
- * Phase-1 invariant: `templateId` must be `null`. Templates are
- * reserved for phase 2 (design doc §10); accepting a non-null value
- * here would let through a signed record the verifier would later
- * reject.
+ * Phase 2: `templateId` is null for a plain event, or a 1..50-char
+ * template identifier (e.g. "potluck"). The data layer is intentionally
+ * permissive — it is the wire boundary and does not validate against the
+ * local template content file; the UI picks from the known set. The
+ * signature already covers this field (`canonicalEventPayload`), so this
+ * is not a wire change.
  */
 export async function createEvent(
   input: CreateEventInput,
 ): Promise<Event> {
-  if (input.templateId !== null) {
+  if (
+    input.templateId !== null &&
+    (input.templateId.length === 0 || input.templateId.length > 50)
+  ) {
     throw new EventActionError(
-      "template_not_supported",
-      "Templates are reserved for phase 2; `templateId` must be null in phase 1.",
+      "invalid_template_id",
+      "templateId must be null or a 1..50 character identifier.",
     );
   }
 

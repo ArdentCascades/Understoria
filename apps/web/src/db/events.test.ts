@@ -155,11 +155,48 @@ describe("createEvent", () => {
     expect(verifyEvent(wire)).toBe(true);
   });
 
-  it("rejects a non-null templateId in phase 1", async () => {
+  it("accepts a valid templateId, persists and enqueues it, and the signature verifies", async () => {
+    const organizer = makeOrganizer();
+    const event = await makeEvent(organizer, { templateId: "potluck" });
+    expect(event.templateId).toBe("potluck");
+    expect(verifyEvent(event)).toBe(true);
+    expect((await getEvent(event.id))?.templateId).toBe("potluck");
+    const outboxRows = await db.outbox.toArray();
+    expect(outboxRows).toHaveLength(1);
+    const wire = JSON.parse(outboxRows[0].payload) as Event;
+    expect(wire.templateId).toBe("potluck");
+    expect(verifyEvent(wire)).toBe(true);
+  });
+
+  it("round-trips a free-text category outside the legacy nine", async () => {
+    const organizer = makeOrganizer();
+    const event = await makeEvent(organizer, { category: "social" });
+    expect(event.category).toBe("social");
+    expect((await getEvent(event.id))?.category).toBe("social");
+    expect(verifyEvent(event)).toBe(true);
+  });
+
+  it("rejects an empty templateId and persists nothing", async () => {
     const organizer = makeOrganizer();
     await expect(
-      makeEvent(organizer, { templateId: "potluck" }),
-    ).rejects.toMatchObject({ code: "template_not_supported" });
+      makeEvent(organizer, { templateId: "" }),
+    ).rejects.toMatchObject({ code: "invalid_template_id" });
+    expect(await db.events.count()).toBe(0);
+    expect(await db.outbox.count()).toBe(0);
+  });
+
+  it("rejects an over-length templateId and persists nothing", async () => {
+    const organizer = makeOrganizer();
+    await expect(
+      makeEvent(organizer, { templateId: "a".repeat(51) }),
+    ).rejects.toMatchObject({ code: "invalid_template_id" });
+    expect(await db.events.count()).toBe(0);
+  });
+
+  it("accepts a 50-character templateId (inclusive upper bound)", async () => {
+    const organizer = makeOrganizer();
+    const event = await makeEvent(organizer, { templateId: "a".repeat(50) });
+    expect(event.templateId).toBe("a".repeat(50));
   });
 
   describe("startsAt grace window", () => {
@@ -497,19 +534,26 @@ describe("listEvents includeCancelled filter", () => {
 
 function makeFederatedEvent(
   organizer: OrganizerFixture,
-  opts: { id: string; nodeId: string; createdAt: number; startsAt?: number },
+  opts: {
+    id: string;
+    nodeId: string;
+    createdAt: number;
+    startsAt?: number;
+    templateId?: string | null;
+    category?: string;
+  },
 ): Event {
   const payload = {
     id: opts.id,
     kind: "event" as const,
     title: "Federated",
     description: "",
-    category: "skills-exchange",
+    category: opts.category ?? "skills-exchange",
     startsAt: opts.startsAt ?? opts.createdAt + 1_000_000,
     endsAt: null,
     location: "Peer community room",
     capacity: null,
-    templateId: null,
+    templateId: opts.templateId ?? null,
     createdAt: opts.createdAt,
     createdBy: organizer.organizerKey,
     nodeId: opts.nodeId,
@@ -568,6 +612,29 @@ describe("pullFederatedEvents", () => {
     const second = await pullFederatedEvents();
     expect(second).toEqual({ inserted: 0, skipped: 2 });
     expect(await db.events.count()).toBe(1);
+  });
+
+  it("ingests a templated, social-category peer event — unknown templateId and category both round-trip", async () => {
+    const peerOrganizer = makeOrganizer();
+    const templated = makeFederatedEvent(peerOrganizer, {
+      id: "peer_templated",
+      nodeId: "peer_node",
+      createdAt: 5_000,
+      templateId: "game-night",
+      category: "social",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ events: [templated] }),
+      }),
+    );
+    const result = await pullFederatedEvents();
+    expect(result).toEqual({ inserted: 1, skipped: 0 });
+    const stored = await db.events.get("peer_templated");
+    expect(stored?.templateId).toBe("game-night");
+    expect(stored?.category).toBe("social");
   });
 
   it("does NOT expose a pullFederatedEventRsvps function (RSVPs never federate)", async () => {

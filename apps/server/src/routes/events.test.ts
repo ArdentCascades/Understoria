@@ -169,14 +169,29 @@ describe("POST /events", () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it("rejects a non-null templateId in phase 1 (400)", async () => {
-    // Phase 1 enforcement per design doc §4 / §10.
-    const ev = makeSignedEvent();
-    const res = await app.inject({
-      method: "POST",
-      url: "/events",
-      payload: { ...ev, templateId: "skillshare" },
-    });
+  it("accepts a templated, social-category event and round-trips both (201)", async () => {
+    // Phase 2: a non-null templateId + a free-text category outside the
+    // legacy nine both pass and are stored verbatim. The GET proves the
+    // pass-through (not the old hardcoded null) and that the stored
+    // payload re-verifies on the way back out.
+    const ev = makeSignedEvent({ templateId: "game-night", category: "social" });
+    const res = await app.inject({ method: "POST", url: "/events", payload: ev });
+    expect(res.statusCode).toBe(201);
+    const list = await app.inject({ method: "GET", url: "/events?since=0" });
+    const stored = (list.json().events as Event[]).find((e) => e.id === ev.id);
+    expect(stored?.templateId).toBe("game-night");
+    expect(stored?.category).toBe("social");
+  });
+
+  it("rejects an over-length templateId (400)", async () => {
+    const ev = makeSignedEvent({ templateId: "a".repeat(51) });
+    const res = await app.inject({ method: "POST", url: "/events", payload: ev });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects an empty-string templateId (400)", async () => {
+    const ev = makeSignedEvent({ templateId: "" });
+    const res = await app.inject({ method: "POST", url: "/events", payload: ev });
     expect(res.statusCode).toBe(400);
   });
 

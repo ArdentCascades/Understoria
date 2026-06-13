@@ -773,13 +773,24 @@ export function parseEvent(input: unknown): ParseEventResult {
       };
     }
   }
-  // Phase 1: templateId MUST be null. Phase 2 will relax this when the
-  // template registry lands; see `docs/community-events.md` §10.
+  // Phase 2: a non-null templateId is a 1..50-char identifier, passed
+  // through verbatim so the stored payload re-verifies against its
+  // signature. Length-only, mirroring `category` — the server stays
+  // content-agnostic about which template kinds exist. See
+  // `docs/event-templates-plan.md`.
   if (r.templateId !== null) {
-    return {
-      ok: false,
-      error: "templateId must be null in phase 1",
-    };
+    if (typeof r.templateId !== "string") {
+      return { ok: false, error: "templateId must be null or a string" };
+    }
+    if (
+      (r.templateId as string).length === 0 ||
+      (r.templateId as string).length > EVENT_CATEGORY_MAX
+    ) {
+      return {
+        ok: false,
+        error: `templateId must be 1..${EVENT_CATEGORY_MAX} characters`,
+      };
+    }
   }
   const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
   if ((r.createdAt as number) > oneDayFromNow) {
@@ -797,7 +808,7 @@ export function parseEvent(input: unknown): ParseEventResult {
       endsAt: r.endsAt as number | null,
       location,
       capacity: r.capacity as number | null,
-      templateId: null,
+      templateId: r.templateId as string | null,
       createdAt: r.createdAt as number,
       createdBy: r.createdBy as string,
       nodeId: r.nodeId as string,
