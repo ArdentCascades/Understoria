@@ -74,6 +74,7 @@ import {
   shortKey,
 } from "@/lib/format";
 import { taskCheckInState } from "@/lib/taskCheckInState";
+import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
@@ -119,6 +120,7 @@ export default function ProjectDetailPage() {
     coorgInvitations,
     coorgInvitationResponses,
     coorgInvitationRevocations,
+    blockedKeys,
   } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -277,6 +279,22 @@ export default function ProjectDetailPage() {
     () => new Map(members.map((m) => [m.publicKey, m.displayName])),
     [members],
   );
+  // Names-only "working alongside" roster — members with hands on a
+  // task here, alphabetical. The helper applies the same
+  // needs_more_hands name suppression the task rows use, so the card
+  // reveals nothing the page doesn't already show. Unknown keys (no
+  // member row on this device) are skipped — a bare key adds nothing a
+  // row didn't already carry.
+  const workingAlongside = useMemo(() => {
+    const keys = workingAlongsideKeys(tasks, nodeConfig, blockedKeys);
+    const people: { key: string; name: string }[] = [];
+    for (const key of keys) {
+      const name = memberMap.get(key);
+      if (name) people.push({ key, name });
+    }
+    people.sort((a, b) => a.name.localeCompare(b.name));
+    return people;
+  }, [tasks, nodeConfig, blockedKeys, memberMap]);
 
   if (!project) {
     return (
@@ -474,6 +492,8 @@ export default function ProjectDetailPage() {
               </p>
             )}
           </div>
+
+          <WorkingAlongsideCard people={workingAlongside} />
 
           {isOrg && (
             <OrganizerControls project={project} onRun={run} />
@@ -737,6 +757,45 @@ function Field({
       </dt>
       <dd className="mt-0.5 font-medium">{children}</dd>
     </div>
+  );
+}
+
+// Names-only roster of members with hands on a task here. No hours, no
+// per-member counts, no ranking (no-leaderboards). Hidden entirely when
+// empty — an absent roster never reads as "nobody helped"
+// (solidarity-not-shame). The inclusion + suppression logic lives in
+// `lib/projectRoster.ts`; this just renders the resolved, sorted list.
+function WorkingAlongsideCard({
+  people,
+}: {
+  people: { key: string; name: string }[];
+}) {
+  const { t } = useTranslation();
+  if (people.length === 0) return null;
+  return (
+    <section className="card mb-4" aria-labelledby="working-alongside-title">
+      <h2
+        id="working-alongside-title"
+        className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+      >
+        {t("projects.detail.workingAlongside.title")}
+      </h2>
+      <p className="mb-3 mt-1 text-xs text-moss-600 dark:text-moss-300">
+        {t("projects.detail.workingAlongside.intro")}
+      </p>
+      <ul className="flex flex-col gap-1">
+        {people.map((person) => (
+          <li key={person.key}>
+            <Link
+              to={`/member/${person.key}`}
+              className="text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            >
+              {person.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

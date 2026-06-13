@@ -595,6 +595,10 @@
       },
       "taskDeepLink": {
         "filtersCleared": "Showing all tasks so the linked task is visible."
+      },
+      "workingAlongside": {
+        "title": "Working alongside",
+        "intro": "Members who have picked up or finished a task here."
       }
     },
     "taskFilters": {
