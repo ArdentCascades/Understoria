@@ -59,6 +59,7 @@ import {
 } from "@/db/projects";
 import {
   issueCoOrganizerInvitation,
+  issueInvitationsForClone,
   revokeCoOrganizerInvitation,
 } from "@/db/coorgInvitations";
 import { getSecretKey, type LockState } from "@/db/secrets";
@@ -1083,7 +1084,8 @@ function OrganizerControls({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentMember, nodeId } = useApp();
+  const { currentMember, nodeId, lockState, members } = useApp();
+  const { showToast } = useToast();
   const [pauseNote, setPauseNote] = useState("");
   const [showPauseForm, setShowPauseForm] = useState(false);
   const [showCloneForm, setShowCloneForm] = useState(false);
@@ -1091,6 +1093,35 @@ function OrganizerControls({
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
+
+  // Candidate re-invitees for a clone: the source project's primary plus
+  // its co-organizers (the live authority list), minus the cloner. When
+  // the cloner is the primary, the primary drops out and the co-orgs
+  // remain; when a co-organizer clones, the source primary stays as a
+  // natural candidate. Derived ONLY from organizerKey/coOrganizerKeys —
+  // never from the block table, so a missing name can't fingerprint a
+  // block (docs/blocking.md §6.1); blocked pairs fail quietly on send.
+  const cloneCandidates = useMemo(() => {
+    if (!currentMember) return [];
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const k of [project.organizerKey, ...project.coOrganizerKeys]) {
+      if (k === currentMember.publicKey || seen.has(k)) continue;
+      seen.add(k);
+      out.push(k);
+    }
+    return out;
+  }, [project.organizerKey, project.coOrganizerKeys, currentMember]);
+  // Pre-checked by default (continuity of a working crew); each box is
+  // individually uncheckable so the send stays a deliberate act.
+  const [checkedKeys, setCheckedKeys] = useState<Set<string>>(new Set());
+  function toggleCloneForm() {
+    setShowCloneForm((open) => {
+      const next = !open;
+      if (next) setCheckedKeys(new Set(cloneCandidates));
+      return next;
+    });
+  }
 
   // Draft / planning projects render their organizer CTA through the
   // PlanningBanner above (see `planningBanner.title` / `.bodyOrganizer`
@@ -1175,7 +1206,7 @@ function OrganizerControls({
             type="button"
             className="btn-secondary"
             disabled={pending}
-            onClick={() => setShowCloneForm(!showCloneForm)}
+            onClick={toggleCloneForm}
           >
             {t("projects.clone.button")}
           </button>
@@ -1185,7 +1216,15 @@ function OrganizerControls({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-            const result = await dispatch(() =>
+            const inviteeKeys = Array.from(checkedKeys);
+            // No half-done state: if anything's checked but the session
+            // is locked we can't sign the invitations — stop before
+            // cloning and surface the existing locked message.
+            if (inviteeKeys.length > 0 && lockState === "locked") {
+              showToast(t("projects.coOrganizers.invite.locked"), "error");
+              return;
+            }
+            const clone = await dispatch(() =>
               cloneProject(
                 project.id,
                 currentMember.publicKey,
@@ -1193,11 +1232,44 @@ function OrganizerControls({
                 nodeId,
               ),
             );
-            if (result) {
-              setShowCloneForm(false);
-              setCloneTitle("");
-              navigate(`/project/${result.id}`);
+            if (!clone) return;
+            if (inviteeKeys.length > 0) {
+              try {
+                const secret = await getSecretKey(currentMember.publicKey);
+                const { sent, failed } = await issueInvitationsForClone({
+                  projectId: clone.id,
+                  inviterKey: currentMember.publicKey,
+                  inviterSecretKey: secret,
+                  inviteeKeys,
+                  nodeId,
+                });
+                for (const inviteeKey of sent) {
+                  await logActivity(
+                    clone.id,
+                    "coorganizer_invited",
+                    currentMember.publicKey,
+                    { inviteeKey },
+                    nodeId,
+                  );
+                }
+                if (failed.length > 0) {
+                  showToast(t("projects.clone.reinvite.partialToast"));
+                } else if (sent.length > 0) {
+                  showToast(
+                    t("projects.clone.reinvite.sentToast", {
+                      count: sent.length,
+                    }),
+                  );
+                }
+              } catch {
+                // The clone exists regardless; the cloner can invite from
+                // the clone page. Cause-free, consistent with §6.1.
+                showToast(t("projects.clone.reinvite.partialToast"));
+              }
             }
+            setShowCloneForm(false);
+            setCloneTitle("");
+            navigate(`/project/${clone.id}`);
           }}
           className="flex flex-col gap-2"
         >
@@ -1208,6 +1280,52 @@ function OrganizerControls({
             onChange={(e) => setCloneTitle(e.target.value)}
             maxLength={120}
           />
+          {cloneCandidates.length > 0 && (
+            <fieldset className="flex flex-col gap-1 rounded-xl bg-moss-50 p-3 dark:bg-moss-900/40">
+              <legend className="px-1 text-sm font-medium">
+                {t("projects.clone.reinvite.title")}
+              </legend>
+              <p className="text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.clone.reinvite.intro")}
+              </p>
+              <ul className="mt-1 flex flex-col gap-1">
+                {cloneCandidates.map((key) => {
+                  const name =
+                    members.find((m) => m.publicKey === key)?.displayName ??
+                    shortKey(key);
+                  return (
+                    <li key={key} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-moss-300"
+                        checked={checkedKeys.has(key)}
+                        aria-label={t("projects.clone.reinvite.candidateAria", {
+                          name,
+                        })}
+                        onChange={(e) =>
+                          setCheckedKeys((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(key);
+                            else next.delete(key);
+                            return next;
+                          })
+                        }
+                      />
+                      <span className="text-sm">{name}</span>
+                      {key === project.organizerKey && (
+                        <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+                          {t("projects.clone.reinvite.sourcePrimaryChip")}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.clone.reinvite.skipHint")}
+              </p>
+            </fieldset>
+          )}
           <button
             type="submit"
             className="btn-primary self-end"

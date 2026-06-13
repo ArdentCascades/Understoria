@@ -816,7 +816,17 @@
       "button": "Clonar proyecto",
       "titlePlaceholder": "Titulo para la nueva copia",
       "submit": "Crear copia",
-      "submitting": "Clonando..."
+      "submitting": "Clonando...",
+      "reinvite": {
+        "title": "¿Invitar de nuevo a co-organizadores?",
+        "intro": "El proyecto original tenía co-organizadores. Para este nuevo proyecto salen invitaciones nuevas: cada persona decide otra vez. Nada se traslada automáticamente, y las invitaciones expiran a los 14 días.",
+        "candidateAria": "Invitar a {{name}} a co-organizar el nuevo proyecto",
+        "sourcePrimaryChip": "organizó el original",
+        "skipHint": "Desmarca a quien prefieras no invitar ahora mismo — siempre puedes invitar a más gente luego desde la página del proyecto.",
+        "sentToast_one": "Copia creada — {{count}} invitación enviada.",
+        "sentToast_other": "Copia creada — {{count}} invitaciones enviadas.",
+        "partialToast": "Copia creada. Algunas invitaciones no se pudieron enviar — puedes invitar a la gente desde la página del nuevo proyecto."
+      }
     },
     "archive": {
       "button": "Archivar proyecto",
