@@ -216,3 +216,70 @@ export function pendingTaskCreditFor(
   for (const e of entries) hours += e.delta;
   return { hours: Math.round(hours * 100) / 100, entries };
 }
+
+/**
+ * Project confirmation outflow — display honesty for an ORGANIZER's
+ * Profile balance.
+ *
+ * `confirmProjectTaskCompletion` (and the auto-confirm sweep) records
+ * the confirming organizer as the HELPED party on the signed
+ * `Exchange`, so every task they confirm moves `hoursExchanged` OUT of
+ * their balance. An organizer of a busy project can drift well below
+ * their seed for this reason alone — those are hours they moved to
+ * helpers on the community's behalf, not personal consumption. The bare
+ * number looks like over-consuming; this helper sums the outflow per
+ * project so the Profile can name it plainly.
+ *
+ * Source-of-truth contract: the project/task ids live INSIDE the signed
+ * `Exchange.postId`, formatted `"project:<projectId>/task:<taskId>"` by
+ * `confirmProjectTaskCompletion` (apps/web/src/db/projects.ts). A row
+ * that starts with `"project:"` but is missing the `/task:` segment is
+ * skipped quietly — we can't attribute it to a project and won't let it
+ * inflate the total. If that format ever changes, update both together.
+ *
+ * Display-only: reads the same Exchange log `balanceFor` reads and
+ * changes nothing about the credit model. Title resolution is the
+ * caller's job (this layer stays free of any project-store dependency).
+ */
+export interface ProjectConfirmationOutflow {
+  /** Sum of `perProject` hours. Always >= 0. */
+  totalHours: number;
+  /** Per-project outflow, largest first (stable tiebreak on projectId). */
+  perProject: { projectId: string; hours: number }[];
+}
+
+const PROJECT_POST_PREFIX = "project:";
+const TASK_POST_SEP = "/task:";
+
+export function projectConfirmationOutflow(
+  memberKey: string,
+  exchanges: readonly Exchange[],
+): ProjectConfirmationOutflow {
+  const byProject = new Map<string, number>();
+  for (const x of exchanges) {
+    if (x.helpedKey !== memberKey) continue;
+    if (!x.postId.startsWith(PROJECT_POST_PREFIX)) continue;
+    const sepIndex = x.postId.indexOf(TASK_POST_SEP);
+    if (sepIndex < 0) continue; // malformed — skip quietly
+    const projectId = x.postId.slice(PROJECT_POST_PREFIX.length, sepIndex);
+    if (projectId === "") continue;
+    byProject.set(
+      projectId,
+      (byProject.get(projectId) ?? 0) + x.hoursExchanged,
+    );
+  }
+  const perProject = Array.from(byProject, ([projectId, hours]) => ({
+    projectId,
+    hours: Math.round(hours * 100) / 100,
+  }));
+  // Largest first so the caller can name the project that explains the
+  // most hours; the projectId tiebreak keeps the order deterministic.
+  perProject.sort((a, b) =>
+    b.hours !== a.hours
+      ? b.hours - a.hours
+      : a.projectId.localeCompare(b.projectId),
+  );
+  let totalHours = 0;
+  for (const p of perProject) totalHours += p.hours;
+  return { totalHours: Math.round(totalHours * 100) / 100, perProject };
+}

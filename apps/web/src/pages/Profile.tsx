@@ -27,6 +27,7 @@ import {
   balanceFor,
   pendingBalanceFor,
   pendingTaskCreditFor,
+  projectConfirmationOutflow,
   transactionHistory,
 } from "@/lib/timebank";
 import type {
@@ -258,6 +259,27 @@ export default function ProfilePage() {
     () => new Map(projects.map((p) => [p.id, p])),
     [projects],
   );
+  // Hours that left this member's balance by confirming project tasks
+  // (they sign as the helped party). On a busy project this can be the
+  // whole reason a balance sits below seed — naming it stops the number
+  // reading as personal over-consumption (solidarity-not-shame). The
+  // helper stays title-free; we resolve the largest project's name here,
+  // falling back quietly when its row isn't on this device.
+  const outflow = useMemo(
+    () => projectConfirmationOutflow(currentMember.publicKey, exchanges),
+    [currentMember, exchanges],
+  );
+  const projectOutflow = useMemo(() => {
+    const top = outflow.perProject[0];
+    return {
+      hours: outflow.totalHours,
+      primaryTitle: top
+        ? (projectMap.get(top.projectId)?.title ??
+          t("profile.balance.projectOutflowUnknownProject"))
+        : "",
+      moreCount: Math.max(0, outflow.perProject.length - 1),
+    };
+  }, [outflow, projectMap, t]);
   const taskMap = useMemo(
     () => new Map(projectTasks.map((t) => [t.id, t])),
     [projectTasks],
@@ -303,6 +325,7 @@ export default function ProfilePage() {
         seed={currentMember.seedBalance}
         pending={pending}
         pendingTask={pendingTask}
+        projectOutflow={projectOutflow}
         autoConfirmHours={nodeConfig.autoConfirmHours}
       />
       <ContextualHint
@@ -667,12 +690,17 @@ function BalanceCard({
   seed,
   pending,
   pendingTask,
+  projectOutflow,
   autoConfirmHours,
 }: {
   balance: number;
   seed: number;
   pending: PendingBalance;
   pendingTask: PendingTaskCredit;
+  /** Hours moved out of this member's balance by confirming project
+   *  tasks, with the largest project's title pre-resolved. `hours === 0`
+   *  hides the line entirely. */
+  projectOutflow: { hours: number; primaryTitle: string; moreCount: number };
   autoConfirmHours: number;
 }) {
   const { t } = useTranslation();
@@ -750,6 +778,26 @@ function BalanceCard({
                 </p>
               </details>
             </div>
+          )}
+          {/* Confirmation outflow — explains a below-seed balance as
+              hours moved to helpers on the community's behalf, not
+              over-consumption. Unsigned hours + no "debt" framing
+              (solidarity-not-shame); only rendered when nonzero. The
+              exchange history below itemizes each one, so this stays a
+              single quiet line, not an expandable. */}
+          {projectOutflow.hours > 0 && (
+            <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+              {projectOutflow.moreCount > 0
+                ? t("profile.balance.projectOutflowLineMore", {
+                    hours: formatHours(projectOutflow.hours),
+                    project: projectOutflow.primaryTitle,
+                    count: projectOutflow.moreCount,
+                  })
+                : t("profile.balance.projectOutflowLine", {
+                    hours: formatHours(projectOutflow.hours),
+                    project: projectOutflow.primaryTitle,
+                  })}
+            </p>
           )}
         </div>
         <div className="text-right text-xs text-moss-600 dark:text-moss-300">

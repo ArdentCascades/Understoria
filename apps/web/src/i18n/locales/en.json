@@ -1318,7 +1318,11 @@
       "pendingWhy": "How confirmation works",
       "pendingExplainerAuto_one": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node confirms for them within about {{count}} day — nothing is stuck.",
       "pendingExplainerAuto_other": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node confirms for them within about {{count}} days — nothing is stuck.",
-      "pendingExplainerManual": "Credit moves when both sides confirm an exchange. Nothing is stuck — it lands the moment the second confirmation happens."
+      "pendingExplainerManual": "Credit moves when both sides confirm an exchange. Nothing is stuck — it lands the moment the second confirmation happens.",
+      "projectOutflowLine": "Includes {{hours}} you moved to helpers on behalf of {{project}}.",
+      "projectOutflowLineMore_one": "Includes {{hours}} you moved to helpers on behalf of {{project}} and {{count}} other project.",
+      "projectOutflowLineMore_other": "Includes {{hours}} you moved to helpers on behalf of {{project}} and {{count}} other projects.",
+      "projectOutflowUnknownProject": "a community project"
     },
     "about": {
       "title": "About you",
