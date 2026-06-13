@@ -39,6 +39,8 @@ import type {
 import { humanizeError } from "@/lib/humanizeError";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { MyTasksSummary } from "@/pages/MyTasks";
+import { myOrganizedProjects } from "@/lib/myProjects";
+import { MyProjectsSummary } from "@/pages/MyProjects";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -200,6 +202,7 @@ export default function ProfilePage() {
     vouches,
     nodeId,
     nodeConfig,
+    blockedKeys,
     setCurrentMember,
   } = useApp();
   const { t } = useTranslation();
@@ -254,6 +257,22 @@ export default function ProfilePage() {
   const carrying = useMemo(
     () => myClaimedTasks(currentMember.publicKey, projectTasks, projects),
     [currentMember, projectTasks, projects],
+  );
+  // Organizer-side twin of `carrying` — the projects in this member's
+  // care, feeding the "Projects you organize" jump-off card below.
+  // `projectCount` is the only field the card reads, and it depends on
+  // projects / tasks / blockedKeys only (the co-organizer invitation
+  // rows affect `pendingInviteCount`, which lives on /my-projects), so
+  // we pass the lean slice here and let the page hydrate the rest.
+  const organizing = useMemo(
+    () =>
+      myOrganizedProjects({
+        memberKey: currentMember.publicKey,
+        projects,
+        projectTasks,
+        blockedKeys,
+      }),
+    [currentMember, projects, projectTasks, blockedKeys],
   );
   const projectMap = useMemo(
     () => new Map(projects.map((p) => [p.id, p])),
@@ -380,6 +399,26 @@ export default function ProfilePage() {
               className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
             >
               {t("myTasks.seeAll")}
+            </Link>
+          </section>
+        )}
+        {/* Organizer-side jump-off, same posture as the carrying card:
+            shown only when the member actually stewards something, so an
+            empty list never reads as "you should be organizing more".
+            The full workbench lives at /my-projects. */}
+        {organizing.projectCount > 0 && (
+          <section className="card mb-4">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+              {t("myProjects.title")}
+            </h2>
+            <p className="text-sm text-moss-700 dark:text-moss-200">
+              <MyProjectsSummary projectCount={organizing.projectCount} />
+            </p>
+            <Link
+              to="/my-projects"
+              className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            >
+              {t("myProjects.seeAll")}
             </Link>
           </section>
         )}

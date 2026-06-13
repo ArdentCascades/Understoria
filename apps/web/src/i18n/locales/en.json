@@ -853,6 +853,25 @@
     "seeAll": "See all your tasks",
     "boardLink": "Tasks you're carrying"
   },
+  "myProjects": {
+    "title": "Projects you organize",
+    "subtitle": "Every project in your care — as organizer or co-organizer — and what's waiting on you, in one place.",
+    "summaryOne": "1 project is in your care right now.",
+    "summaryOther": "{{count}} projects are in your care right now.",
+    "awaiting_one": "1 task waiting for your confirmation",
+    "awaiting_other": "{{count}} tasks waiting for your confirmation",
+    "openTasks_one": "1 open task",
+    "openTasks_other": "{{count}} open tasks",
+    "noOpenTasks": "No open tasks right now",
+    "pendingInvites_one": "1 co-organizer invitation waiting on a reply",
+    "pendingInvites_other": "{{count}} co-organizer invitations waiting on a reply",
+    "coOrganizerChip": "Co-organizer",
+    "emptyTitle": "No projects in your care right now",
+    "empty": "When you start a project, or accept a co-organizer invitation, it shows up here — so you can see everything in your care without opening each one.",
+    "startProject": "Start a project",
+    "seeAll": "See all projects you organize",
+    "boardLink": "Projects you organize"
+  },
   "urgency": {
     "low": "When you can",
     "medium": "Soon",
