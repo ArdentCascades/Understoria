@@ -595,6 +595,10 @@
       },
       "taskDeepLink": {
         "filtersCleared": "Mostrando todas las tareas para que la tarea enlazada sea visible."
+      },
+      "workingAlongside": {
+        "title": "Colaborando juntas",
+        "intro": "Integrantes que han tomado o terminado una tarea aquí."
       }
     },
     "taskFilters": {
