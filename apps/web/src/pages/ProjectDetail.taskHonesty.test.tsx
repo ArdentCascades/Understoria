@@ -34,10 +34,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const {
   confirmMock,
   unclaimMock,
+  markMock,
   showToastMock,
 } = vi.hoisted(() => ({
   confirmMock: vi.fn(async (_taskId: string) => ({})),
   unclaimMock: vi.fn(async (_taskId: string) => ({})),
+  markMock: vi.fn(async (_taskId: string) => ({})),
   showToastMock: vi.fn(),
 }));
 
@@ -74,7 +76,7 @@ vi.mock("@/db/projects", () => ({
   launchProject: vi.fn(),
   listActivityForProject: vi.fn(async () => []),
   listAnnouncements: vi.fn(async () => []),
-  markProjectTaskComplete: vi.fn(),
+  markProjectTaskComplete: markMock,
   pauseProject: vi.fn(),
   postAnnouncement: vi.fn(),
   removeCoOrganizer: vi.fn(),
@@ -119,6 +121,7 @@ function makeTask(overrides: Partial<ProjectTask> = {}): ProjectTask {
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };
@@ -223,6 +226,7 @@ beforeEach(() => {
   mockState = freshState();
   confirmMock.mockClear();
   unclaimMock.mockClear();
+  markMock.mockClear();
   showToastMock.mockClear();
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -423,5 +427,107 @@ describe("ProjectDetail — release path for awaiting_confirmation", () => {
     render();
     text = container.textContent ?? "";
     expect(text).not.toContain("Step back from this task");
+  });
+});
+
+function numberInput(): HTMLInputElement {
+  const input = container.querySelector<HTMLInputElement>('input[type="number"]');
+  if (!input) throw new Error("hours input not found");
+  return input;
+}
+
+function setNumberInput(value: string) {
+  const input = numberInput();
+  act(() => {
+    const setter = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )?.set;
+    setter?.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
+describe("ProjectDetail — mark-complete records actual hours", () => {
+  function claimedTask() {
+    return makeTask({
+      status: "claimed",
+      assignedTo: claimerKey,
+      claimedAt: 1000,
+      estimatedHours: 2,
+    });
+  }
+
+  it("tapping Mark complete reveals the prefilled hours input without firing the action", () => {
+    mockState.projectTasks = [claimedTask()];
+    mockState.currentMember = makeMember(claimerKey, "Cleo Claimer");
+    render();
+    expect(container.querySelector('input[type="number"]')).toBeNull();
+    clickButton("Mark complete");
+    // The action must NOT have fired — the disclosure just opened.
+    expect(markMock).not.toHaveBeenCalled();
+    // Input is prefilled with the estimate (2h).
+    expect(numberInput().value).toBe("2");
+    expect(container.textContent ?? "").toContain("Estimated: 2h");
+  });
+
+  it("confirming records the stated actual hours", async () => {
+    mockState.projectTasks = [claimedTask()];
+    mockState.currentMember = makeMember(claimerKey, "Cleo Claimer");
+    render();
+    clickButton("Mark complete");
+    setNumberInput("6");
+    clickButton("Record 6h and mark complete");
+    await flush();
+    expect(markMock).toHaveBeenCalledTimes(1);
+    expect(markMock.mock.calls[0]).toEqual(["task-1", claimerKey, 6]);
+  });
+
+  it("keeps the release affordance one-tap (no disclosure)", async () => {
+    mockState.projectTasks = [claimedTask()];
+    mockState.currentMember = makeMember(claimerKey, "Cleo Claimer");
+    render();
+    clickButton("Release claim");
+    await flush();
+    expect(unclaimMock).toHaveBeenCalledTimes(1);
+    expect(markMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("ProjectDetail — actual hours surface in narrative and dialog", () => {
+  it("claimer narrative names the actual hours and the estimate when they differ", () => {
+    mockState.projectTasks = [
+      makeTask({
+        status: "awaiting_confirmation",
+        assignedTo: claimerKey,
+        completedBy: claimerKey,
+        estimatedHours: 2,
+        actualHours: 6,
+      }),
+    ];
+    mockState.currentMember = makeMember(claimerKey, "Cleo Claimer");
+    render();
+    const text = container.textContent ?? "";
+    expect(text).toContain("your 6h hours of credit move then");
+    expect(text).toContain("You recorded 6h for this task (estimated 2h)");
+  });
+
+  it("organizer confirm dialog names the actual hours and the estimate note", () => {
+    mockState.projectTasks = [
+      makeTask({
+        status: "awaiting_confirmation",
+        assignedTo: claimerKey,
+        completedBy: claimerKey,
+        estimatedHours: 2,
+        actualHours: 6,
+      }),
+    ];
+    // currentMember is the organizer by default.
+    render();
+    clickButton("Confirm completion");
+    const text = container.textContent ?? "";
+    expect(text).toContain("6h hours move to Cleo Claimer");
+    expect(text).toContain("recorded the actual time: 6h");
+    expect(text).toContain("estimated at 2h");
   });
 });

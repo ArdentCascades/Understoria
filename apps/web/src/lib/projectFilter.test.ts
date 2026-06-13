@@ -55,6 +55,7 @@ function claimedTask(
     // 20 days ago, no ack — past both the needs-help floor and the
     // grace window, so this is `needs_more_hands` by default.
     claimedAt: NOW - 20 * DAY,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };
@@ -83,6 +84,7 @@ function makeTask(
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
   };
 }

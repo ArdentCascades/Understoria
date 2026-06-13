@@ -33,8 +33,9 @@ import {
   setTaskDependencies,
   unarchiveProject,
   unclaimProjectTask,
+  _systemAutoConfirmTask,
 } from "./projects";
-import type { ProjectTask } from "@/types";
+import type { Exchange, ProjectTask } from "@/types";
 import { balanceFor } from "@/lib/timebank";
 import { verifyExchange } from "@/lib/crypto";
 
@@ -467,6 +468,131 @@ describe("task confirmation transfers credit and surfaces milestones", () => {
   });
 });
 
+describe("actual hours at completion", () => {
+  beforeEach(reset);
+
+  async function setupClaimed(estimatedHours: number, targetHours = 10) {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org, targetHours);
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Paint the shelter",
+      description: "",
+      category: "transport",
+      estimatedHours,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    return { org, helper, project: p, task };
+  }
+
+  it("records the stated actual hours on the signed Exchange and rounds the input", async () => {
+    const { org, helper, task } = await setupClaimed(2);
+    // 6.125 → rounded to 6.13 (roundHours: 2 dp).
+    const marked = await markProjectTaskComplete(task.id, helper.publicKey, 6.125);
+    expect(marked.actualHours).toBe(6.13);
+
+    const result = await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    expect(result.exchange.hoursExchanged).toBe(6.13);
+    expect(verifyExchange(result.exchange)).toBe(true);
+    const exchanges = await db.exchanges.toArray();
+    expect(balanceFor(helper, exchanges)).toBe(11.13); // 5 seed + 6.13
+    expect(balanceFor(org, exchanges)).toBe(-1.13); // 5 seed - 6.13
+  });
+
+  it("falls back to the estimate when actual hours are not stated", async () => {
+    const { org, helper, task } = await setupClaimed(2);
+    const marked = await markProjectTaskComplete(task.id, helper.publicKey);
+    expect(marked.actualHours).toBeNull();
+    const result = await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    expect(result.exchange.hoursExchanged).toBe(2);
+  });
+
+  it("rejects a non-positive or non-finite stated value", async () => {
+    const { helper, task } = await setupClaimed(2);
+    await expect(
+      markProjectTaskComplete(task.id, helper.publicKey, 0),
+    ).rejects.toThrow();
+    await expect(
+      markProjectTaskComplete(task.id, helper.publicKey, -3),
+    ).rejects.toThrow();
+    await expect(
+      markProjectTaskComplete(task.id, helper.publicKey, Number.NaN),
+    ).rejects.toThrow();
+    // Still claimed — no partial write.
+    const after = await db.projectTasks.get(task.id);
+    expect(after?.status).toBe("claimed");
+    expect(after?.actualHours).toBeNull();
+  });
+
+  it("drives contributedHours and milestones from the actual hours", async () => {
+    // 1h-estimated task that actually took 4h, on a 4h-target project →
+    // confirmation crosses 100% even though the estimate was 1h.
+    const { org, helper, project, task } = await setupClaimed(1, 4);
+    await markProjectTaskComplete(task.id, helper.publicKey, 4);
+    const result = await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    expect(result.project.contributedHours).toBe(4);
+    expect(result.milestonesReached).toContain(1);
+    expect((await db.projects.get(project.id))?.contributedHours).toBe(4);
+  });
+
+  it("records both the estimate and the actual in the completion + confirmation activity", async () => {
+    const { org, helper, project, task } = await setupClaimed(2);
+    await markProjectTaskComplete(task.id, helper.publicKey, 5);
+    await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    const activity = await db.projectActivity.toArray();
+    const completed = activity.find(
+      (a) => a.type === "task_completed" && a.data.taskId === task.id,
+    );
+    expect(completed?.data.estimatedHours).toBe(2);
+    expect(completed?.data.actualHours).toBe(5);
+    const confirmed = activity.find(
+      (a) => a.type === "task_confirmed" && a.data.taskId === task.id,
+    );
+    expect(confirmed?.data.hours).toBe(5);
+    expect(confirmed?.data.estimatedHours).toBe(2);
+    expect(confirmed?.data.actualHours).toBe(5);
+    expect(project.id).toBeDefined();
+  });
+
+  it("clears the stated actual hours when the completer walks the task back", async () => {
+    const { helper, task } = await setupClaimed(2);
+    await markProjectTaskComplete(task.id, helper.publicKey, 5);
+    const released = await unclaimProjectTask(task.id, helper.publicKey);
+    expect(released.status).toBe("open");
+    expect(released.actualHours).toBeNull();
+    expect(released.completedBy).toBeNull();
+  });
+
+  it("_systemAutoConfirmTask rejects an exchange whose hours don't match the task's credit hours", async () => {
+    const { helper, task } = await setupClaimed(2);
+    await markProjectTaskComplete(task.id, helper.publicKey, 5);
+    // A pre-signed auto-confirm exchange with the WRONG hours (the
+    // sweep builds creditHoursForTask = 5; this claims 99).
+    const badExchange: Exchange = {
+      id: "ex-bad",
+      postId: `project:${task.projectId}/task:${task.id}`,
+      helperKey: helper.publicKey,
+      helpedKey: "someone",
+      hoursExchanged: 99,
+      helperSignature: "sig",
+      helpedSignature: "sig",
+      completedAt: Date.now(),
+      category: "transport",
+      nodeId: NODE,
+      autoConfirmed: true,
+      autoConfirmedBy: `system:${NODE}`,
+      autoConfirmedAt: Date.now(),
+    };
+    await expect(
+      _systemAutoConfirmTask(task.id, badExchange),
+    ).rejects.toThrow();
+  });
+});
+
 describe("handoffOrganizer", () => {
   beforeEach(reset);
 
@@ -656,6 +782,7 @@ function fakeTask(overrides: Partial<ProjectTask> & { id: string }): ProjectTask
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };
@@ -990,6 +1117,40 @@ describe("orderIndex backfill migration (v25)", () => {
     expect(aRows.map((t) => t.orderIndex)).toEqual([1000, 2000, 3000]);
     const bRows = after.filter((t) => t.projectId === pB.id);
     expect(bRows.map((t) => t.orderIndex)).toEqual([1000]);
+  });
+});
+
+describe("actualHours backfill migration (v26)", () => {
+  beforeEach(reset);
+
+  it("backfills actualHours = null on rows missing the field", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const p = await aProject(org);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Legacy task", description: "", category: "other",
+      estimatedHours: 3, urgency: "low", requiredSkills: [],
+      dependencies: [],
+    });
+    // Strip actualHours to mimic a pre-v26 row (fake-indexeddb opens at
+    // the latest version, so we exercise the upgrade callback by hand —
+    // same pattern as the v25 test above).
+    const stored = await db.projectTasks.get(task.id);
+    const { actualHours: _drop, ...rest } = stored!;
+    void _drop;
+    await db.projectTasks.put(rest as ProjectTask);
+    expect((await db.projectTasks.get(task.id))?.actualHours).toBeUndefined();
+
+    // Run the v26 algorithm.
+    await db.projectTasks.toCollection().modify((row) => {
+      const r = row as ProjectTask & { actualHours?: number | null };
+      if (r.actualHours === undefined) r.actualHours = null;
+    });
+
+    const after = await db.projectTasks.get(task.id);
+    expect(after?.actualHours).toBeNull();
+    // Neighbors untouched.
+    expect(after?.estimatedHours).toBe(3);
+    expect(after?.orderIndex).toBe(task.orderIndex);
   });
 });
 

@@ -24,6 +24,7 @@ import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
 import { enqueueExchangeOutbox, flushOutboxNow } from "@/lib/outbox";
 import { diffAchievements } from "@/lib/achievements";
+import { creditHoursForTask } from "@/lib/timebank";
 import type {
   Exchange,
   Project,
@@ -481,6 +482,7 @@ export async function addProjectTask(
         createdAt: Date.now(),
         completedAt: null,
         completedBy: null,
+        actualHours: null,
         exchangeId: null,
         claimedAt: null,
         checkInAcknowledgedAt: null,
@@ -573,11 +575,13 @@ export async function unclaimProjectTask(
         // Defensive cleanup: clearing the claim metadata too so a
         // re-claim starts fresh and the prompts don't fire on
         // stale timestamps. When releasing from awaiting_confirmation
-        // we also clear completedBy so a future completion isn't
-        // attributed to a member who walked back.
+        // we also clear completedBy AND the walked-back claimer's
+        // actualHours, so a future completion by someone else isn't
+        // attributed to them and doesn't inherit their stated figure.
         claimedAt: null,
         checkInAcknowledgedAt: null,
         completedBy: wasAwaitingConfirmation ? null : task.completedBy,
+        actualHours: wasAwaitingConfirmation ? null : task.actualHours,
       };
       await db.projectTasks.put(updated);
       const project = await db.projects.get(task.projectId);
@@ -631,7 +635,18 @@ export async function acknowledgeTaskCheckIn(
 export async function markProjectTaskComplete(
   taskId: string,
   memberKey: string,
+  actualHours?: number,
 ): Promise<ProjectTask> {
+  // Validate outside the transaction so a bad number never starts one.
+  // Omitted (undefined) means "not stated" → null, which credits the
+  // estimate. We never coerce a missing value to the estimate here, so
+  // "stated the estimate" and "never stated" stay distinguishable.
+  let actual: number | null = null;
+  if (actualHours !== undefined) {
+    if (!Number.isFinite(actualHours) || actualHours <= 0)
+      throw new Error("Actual hours must be a positive number.");
+    actual = roundHours(actualHours);
+  }
   return db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
@@ -646,14 +661,18 @@ export async function markProjectTaskComplete(
         ...task,
         status: "awaiting_confirmation",
         completedBy: memberKey,
+        actualHours: actual,
       };
       await db.projectTasks.put(updated);
       const project = await db.projects.get(task.projectId);
+      // Record both numbers so the activity feed can show "took Xh ·
+      // estimated Yh" — transparency, the anti-gaming control here
+      // (the claimer signs the figure, the organizer countersigns it).
       await logActivity(
         task.projectId,
         "task_completed",
         memberKey,
-        { taskId },
+        { taskId, estimatedHours: task.estimatedHours, actualHours: actual },
         project?.nodeId ?? "",
       );
       return updated;
@@ -712,11 +731,15 @@ export async function confirmProjectTaskCompletion(
   ]);
 
   const now = Date.now();
+  // The signed figure is the claimer-stated actual hours (estimate
+  // fallback) — `creditHoursForTask`. The wire shape is unchanged;
+  // only the value differs from the old `estimatedHours`.
+  const creditHours = creditHoursForTask(task);
   const payload = canonicalExchangePayload({
     postId: `project:${project.id}/task:${task.id}`,
     helperKey,
     helpedKey,
-    hours: task.estimatedHours,
+    hours: creditHours,
     category: task.category as Exchange["category"],
     completedAt: now,
   });
@@ -725,7 +748,7 @@ export async function confirmProjectTaskCompletion(
     postId: `project:${project.id}/task:${task.id}`,
     helperKey,
     helpedKey,
-    hoursExchanged: task.estimatedHours,
+    hoursExchanged: creditHours,
     helperSignature: sign(payload, helperSecret),
     helpedSignature: sign(payload, helpedSecret),
     completedAt: now,
@@ -799,6 +822,11 @@ export async function _systemAutoConfirmTask(
       "system auto-confirm: exchange helperKey does not match task.completedBy",
     );
   }
+  if (exchange.hoursExchanged !== creditHoursForTask(task)) {
+    throw new Error(
+      "system auto-confirm: exchange hoursExchanged does not match the task's credit hours",
+    );
+  }
   if (!exchange.autoConfirmed || !exchange.autoConfirmedBy) {
     throw new Error(
       "system auto-confirm: exchange is missing autoConfirmed / autoConfirmedBy",
@@ -866,8 +894,13 @@ async function _writeTaskConfirmation(
       };
       await db.projectTasks.put(updatedTask);
 
+      // Project progress is the sum of its signed exchanges, so it
+      // counts the recorded (actual) hours — `creditHoursForTask`,
+      // which equals `exchange.hoursExchanged`. Milestones fire against
+      // that truth; `targetHours` stays an estimate.
+      const creditHours = creditHoursForTask(task);
       const newContributed = roundHours(
-        project.contributedHours + task.estimatedHours,
+        project.contributedHours + creditHours,
       );
       const milestones = milestonesCrossed(
         project.contributedHours,
@@ -884,7 +917,9 @@ async function _writeTaskConfirmation(
         taskId: task.id,
         exchangeId: exchange.id,
         helperKey: exchange.helperKey,
-        hours: task.estimatedHours,
+        hours: creditHours,
+        estimatedHours: task.estimatedHours,
+        actualHours: task.actualHours,
       };
       if (exchange.autoConfirmed) {
         confirmActivityData.autoConfirmed = true;
@@ -1197,6 +1232,7 @@ export async function bulkAddTasks(
           createdAt: Date.now(),
           completedAt: null,
           completedBy: null,
+          actualHours: null,
           exchangeId: null,
           claimedAt: null,
           checkInAcknowledgedAt: null,
@@ -1524,6 +1560,7 @@ export async function cloneProject(
           createdAt: now,
           completedAt: null,
           completedBy: null,
+          actualHours: null,
           exchangeId: null,
           claimedAt: null,
           checkInAcknowledgedAt: null,

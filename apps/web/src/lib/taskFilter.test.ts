@@ -41,6 +41,7 @@ function makeTask(status: ProjectTaskStatus): ProjectTask {
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
   };
 }

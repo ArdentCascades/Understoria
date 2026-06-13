@@ -123,6 +123,7 @@ function completedTask(overrides: Partial<ProjectTask> = {}): ProjectTask {
     completedBy: memberKey,
     exchangeId: "ex-1",
     claimedAt: 100,
+    actualHours: null,
     checkInAcknowledgedAt: null,
     ...overrides,
   };

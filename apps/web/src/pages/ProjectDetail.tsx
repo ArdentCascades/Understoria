@@ -74,6 +74,7 @@ import {
   shortKey,
 } from "@/lib/format";
 import { taskCheckInState } from "@/lib/taskCheckInState";
+import { creditHoursForTask } from "@/lib/timebank";
 import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
@@ -1586,6 +1587,12 @@ function TaskRow({
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [acknowledgmentText, setAcknowledgmentText] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  // Mark-complete inline disclosure: tapping "Mark complete" reveals an
+  // hours field (prefilled with the estimate) so the claimer records
+  // the time actually given before submitting (equal-time). One extra
+  // tap when actual == estimate; release stays one-tap and ungated.
+  const [markingComplete, setMarkingComplete] = useState(false);
+  const [actualHoursInput, setActualHoursInput] = useState("");
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDescription, setEditDescription] = useState(task.description);
@@ -1760,8 +1767,16 @@ function TaskRow({
         >
           {t(`projects.task.status${capitalize(task.status === "awaiting_confirmation" ? "Awaiting" : task.status)}` as `projects.task.statusOpen`)}
         </span>
+        {/* Once a task is in motion, show the credit figure (the
+            recorded actual hours, estimate fallback) so the chip never
+            contradicts the signed ledger. Open tasks show the estimate. */}
         <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-          {formatHours(task.estimatedHours)}
+          {formatHours(
+            task.status === "awaiting_confirmation" ||
+              task.status === "completed"
+              ? creditHoursForTask(task)
+              : task.estimatedHours,
+          )}
         </span>
         {needsMoreHands && !hasUnmetDeps && (
           <span
@@ -1913,18 +1928,18 @@ function TaskRow({
             {t("projects.task.edit.button")}
           </button>
         )}
-        {task.status === "claimed" && isAssignee && (
+        {task.status === "claimed" && isAssignee && !markingComplete && (
           <>
             <button
               type="button"
               className="btn-primary"
               disabled={pending}
-              aria-busy={pending}
-              onClick={() =>
-                dispatch(() => markProjectTaskComplete(task.id, currentKey!))
-              }
+              onClick={() => {
+                setActualHoursInput(String(task.estimatedHours));
+                setMarkingComplete(true);
+              }}
             >
-              {pending ? t("common.working") : t("projects.task.markDone")}
+              {t("projects.task.markDone")}
             </button>
             <button
               type="button"
@@ -1947,6 +1962,73 @@ function TaskRow({
               {t("projects.task.releaseReassurance")}
             </p>
           </>
+        )}
+        {task.status === "claimed" && isAssignee && markingComplete && (
+          <div className="basis-full flex flex-col gap-2 rounded-md border border-canopy-100 bg-canopy-50/40 p-3 dark:border-canopy-900 dark:bg-canopy-950/20">
+            <label className="flex flex-col gap-1 text-xs text-moss-700 dark:text-moss-200">
+              <span className="font-medium">
+                {t("projects.task.actualHours.legend")}
+                <WhyTooltip principleId="equal-time" />
+              </span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min="0.25"
+                step="0.25"
+                className="input max-w-[8rem]"
+                value={actualHoursInput}
+                onChange={(e) => setActualHoursInput(e.target.value)}
+                aria-label={t("projects.task.actualHours.legend")}
+              />
+              <span className="text-moss-600 dark:text-moss-300">
+                {t("projects.task.actualHours.estimateContext", {
+                  hours: formatHours(task.estimatedHours),
+                })}
+              </span>
+            </label>
+            {/* Fact-recording, not haggling: the credit should match the
+                help given. No "you went over" framing
+                (solidarity-not-shame). */}
+            <p className="text-xs text-moss-600 dark:text-moss-300">
+              {t("projects.task.actualHours.hint")}
+            </p>
+            {(() => {
+              const parsed = Number.parseFloat(actualHoursInput);
+              const valid = Number.isFinite(parsed) && parsed > 0;
+              return (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    disabled={pending || !valid}
+                    aria-busy={pending}
+                    onClick={async () => {
+                      const ok = await dispatch(() =>
+                        markProjectTaskComplete(task.id, currentKey!, parsed),
+                      );
+                      if (ok) setMarkingComplete(false);
+                    }}
+                  >
+                    {pending
+                      ? t("common.working")
+                      : t("projects.task.actualHours.confirmCta", {
+                          hours: formatHours(
+                            valid ? parsed : task.estimatedHours,
+                          ),
+                        })}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ghost"
+                    disabled={pending}
+                    onClick={() => setMarkingComplete(false)}
+                  >
+                    {t("projects.task.actualHours.cancel")}
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
         )}
         {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
           <button
@@ -2041,9 +2123,18 @@ function TaskRow({
         <div className="rounded-md border border-canopy-100 bg-canopy-50/50 px-3 py-2 text-xs text-moss-600 dark:border-canopy-900 dark:bg-canopy-950/30 dark:text-moss-300">
           <p>
             {t("projects.task.claimerNarrative.intro", {
-              hours: formatHours(task.estimatedHours),
+              hours: formatHours(creditHoursForTask(task)),
             })}
           </p>
+          {task.actualHours !== null &&
+            task.actualHours !== task.estimatedHours && (
+              <p className="mt-1">
+                {t("projects.task.claimerNarrative.estimateNote", {
+                  actual: formatHours(task.actualHours),
+                  estimate: formatHours(task.estimatedHours),
+                })}
+              </p>
+            )}
           {autoConfirmHours > 0 && (
             <p className="mt-1">
               {t("projects.task.claimerNarrative.autoConfirm", {
@@ -2062,9 +2153,19 @@ function TaskRow({
               <p>
                 {t("projects.task.confirmDialog.body", {
                   claimer: memberMap.get(task.completedBy ?? "") ?? "—",
-                  hours: formatHours(task.estimatedHours),
+                  hours: formatHours(creditHoursForTask(task)),
                 })}
               </p>
+              {task.actualHours !== null &&
+                task.actualHours !== task.estimatedHours && (
+                  <p className="text-sm text-moss-600 dark:text-moss-300">
+                    {t("projects.task.confirmDialog.estimateNote", {
+                      claimer: memberMap.get(task.completedBy ?? "") ?? "—",
+                      actual: formatHours(task.actualHours),
+                      estimate: formatHours(task.estimatedHours),
+                    })}
+                  </p>
+                )}
               {/* Acknowledgment lives inside the dialog so the
                   organizer makes one decision in one moment — no
                   stacked dialogs, no second-layer modal for the

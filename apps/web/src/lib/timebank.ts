@@ -166,18 +166,16 @@ export function pendingBalanceFor(
  * (apps/web/src/db/projects.ts) sets `helpedKey` to whichever
  * organizer signs, and the active organizer set can change between
  * submission and confirmation. The CLAIMER side is fully determinate:
- * their key is on `assignedTo`, and the hours figure
- * `confirmProjectTaskCompletion` records is exactly
- * `task.estimatedHours` (line ~693 of that file). So we can honestly
- * predict the claimer's incoming credit; we deliberately do not
- * predict any prospective organizer debit. PR #221's exclusion of the
- * helped side stands; this helper closes only the asymmetry that
- * affected the determinate side.
+ * their key is on `assignedTo`, and the hours figure is exactly what
+ * `confirmProjectTaskCompletion` records — `creditHoursForTask(task)`.
+ * So we can honestly predict the claimer's incoming credit; we
+ * deliberately do not predict any prospective organizer debit. PR
+ * #221's exclusion of the helped side stands; this helper closes only
+ * the asymmetry that affected the determinate side.
  *
- * Hours figure: `task.estimatedHours`. If
- * `confirmProjectTaskCompletion` ever switches to an actual-hours
- * field at confirmation time, update this AND the test fixture in
- * lockstep so the predicted number stays the recorded number.
+ * Hours figure: `creditHoursForTask(task)` — the claimer-stated actual
+ * hours, falling back to the estimate. The prediction stays the
+ * recorded number because both read through that one helper.
  */
 export interface PendingTaskEntry {
   taskId: string;
@@ -195,6 +193,22 @@ export interface PendingTaskCredit {
   entries: PendingTaskEntry[];
 }
 
+/**
+ * The hours a project task moves on confirmation: the claimer-stated
+ * `actualHours`, or the organizer's `estimatedHours` when actual was
+ * never stated (legacy / programmatic rows). The ONE place this
+ * fallback lives — `confirmProjectTaskCompletion`, the auto-confirm
+ * sweep, `contributedHours` / milestone math, the pending-credit
+ * prediction, and the project-page display all read through it, which
+ * is what keeps the predicted number the recorded number without a
+ * comment-enforced "update both" rule.
+ */
+export function creditHoursForTask(
+  task: Pick<ProjectTask, "actualHours" | "estimatedHours">,
+): number {
+  return task.actualHours ?? task.estimatedHours;
+}
+
 export function pendingTaskCreditFor(
   memberKey: string,
   tasks: readonly ProjectTask[],
@@ -206,7 +220,7 @@ export function pendingTaskCreditFor(
     entries.push({
       taskId: task.id,
       projectId: task.projectId,
-      delta: task.estimatedHours,
+      delta: creditHoursForTask(task),
       category: task.category,
       createdAt: task.createdAt,
     });

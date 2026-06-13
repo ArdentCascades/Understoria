@@ -129,6 +129,7 @@ function task(over: Partial<ProjectTask> & { id: string; projectId: string }): P
     completedBy: null,
     exchangeId: null,
     claimedAt: null,
+    actualHours: null,
     checkInAcknowledgedAt: null,
   };
   return { ...base, ...over };
