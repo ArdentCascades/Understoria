@@ -638,6 +638,9 @@ describe("buildCalendar — event", () => {
       title: "Saturday skillshare",
       path: "/events/ev_1",
       organizerKey: "organizer",
+      // buildCalendar copies the event's free-text category onto the
+      // entry for the chip's colour/emoji (Task 4).
+      category: "skills",
     });
     expect(result[0].date).toBe(Date.UTC(2026, 10, 20));
   });
@@ -874,6 +877,7 @@ describe("entryIsPast — events", () => {
       date: startOfUTCDay(startsAt),
       eventId: "ev",
       title: "Test event",
+      category: "other",
       startsAt,
       endsAt,
       location: "anywhere",

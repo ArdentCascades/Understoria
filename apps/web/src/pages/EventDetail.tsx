@@ -26,6 +26,7 @@ import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
 import { shortKey } from "@/lib/format";
+import { eventCategoryMeta } from "@/lib/categories";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EventRsvpControl } from "@/components/EventRsvpControl";
@@ -224,9 +225,20 @@ export default function EventDetailPage() {
             </Field>
           )}
           <Field label={t("events.detail.categoryLabel")}>
-            {t(`categories.${event.category}`, {
-              defaultValue: event.category,
-            })}
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className={`inline-block h-2.5 w-2.5 rounded-full ${eventCategoryMeta(event.category).barColorClass}`}
+              />
+              <span aria-hidden="true">
+                {eventCategoryMeta(event.category).emoji}
+              </span>
+              {/* Label stays i18n'd, falling back to the raw peer string
+                  for a category this node doesn't recognize. */}
+              {t(`categories.${event.category}`, {
+                defaultValue: event.category,
+              })}
+            </span>
           </Field>
         </dl>
       </header>

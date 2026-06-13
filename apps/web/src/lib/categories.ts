@@ -122,3 +122,66 @@ export const PROJECT_CATEGORY_META: Record<ProjectCategory, CategoryMeta> = {
     barColorClass: "bg-moss-800",
   },
 };
+
+/**
+ * Display metadata for an EVENT category. Events carry a FREE-TEXT
+ * category (1..50 chars on the wire) so camaraderie templates can mint
+ * strings the legacy `Category` enum doesn't have ("social",
+ * "celebration", "learning"). `id` is therefore a plain `string`, not the
+ * closed `ProjectCategory` union — the only structural difference from
+ * `CategoryMeta`. See `docs/event-templates-plan.md` (Task 4).
+ */
+export interface EventCategoryMeta extends Omit<CategoryMeta, "id"> {
+  id: string;
+}
+
+/**
+ * Resolved by `eventCategoryMeta(category)`. Covers every legacy /
+ * project category (so an event reusing "skilled_labor" or "organizing"
+ * still gets a sensible glyph/colour) plus the three event-specific
+ * strings. All `barColorClass` values are shades already paired with
+ * `text-white` in `CATEGORY_META`, so the calendar chips stay legible.
+ */
+export const EVENT_CATEGORY_META: Record<string, EventCategoryMeta> = {
+  ...PROJECT_CATEGORY_META,
+  social: {
+    id: "social",
+    label: "Social",
+    emoji: "\u{1F389}", // party popper
+    description: "Get-togethers and good company",
+    barColorClass: "bg-canopy-500",
+  },
+  celebration: {
+    id: "celebration",
+    label: "Celebration",
+    emoji: "\u{1F382}", // birthday cake
+    description: "Marking something together",
+    barColorClass: "bg-bark-500",
+  },
+  learning: {
+    id: "learning",
+    label: "Learning",
+    emoji: "\u{1F4DA}", // books
+    description: "Sharing skills and making things",
+    barColorClass: "bg-moss-500",
+  },
+};
+
+/**
+ * Neutral fallback for a category string this node doesn't recognize —
+ * events federate with free-text categories, so a peer can send one we've
+ * never seen. The calendar/detail surfaces show a calendar glyph + the
+ * neutral `other` colour rather than crashing on a missing key.
+ */
+export const EVENT_CATEGORY_FALLBACK: EventCategoryMeta = {
+  id: "other",
+  label: "Event",
+  emoji: "\u{1F4C5}", // calendar
+  description: "",
+  barColorClass: "bg-moss-400",
+};
+
+/** Total lookup for an event's free-text category — never throws. */
+export function eventCategoryMeta(category: string): EventCategoryMeta {
+  return EVENT_CATEGORY_META[category] ?? EVENT_CATEGORY_FALLBACK;
+}
