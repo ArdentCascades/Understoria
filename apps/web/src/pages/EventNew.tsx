@@ -21,7 +21,8 @@ import { getSecretKey } from "@/db/secrets";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
 import { WhyTooltip } from "@/components/WhyTooltip";
-import type { Category } from "@/types";
+import { EventTemplatePicker } from "@/components/EventTemplatePicker";
+import { getEventTemplate } from "@/content/eventTemplates";
 
 // Combine a YYYY-MM-DD date input string and a HH:mm time input string
 // into an epoch-millis number. Returns `null` when either is empty or
@@ -37,14 +38,10 @@ function combineDateAndTime(date: string, time: string): number | null {
   return ms;
 }
 
-// Split an epoch-millis into the YYYY-MM-DD + HH:mm pair the inputs
-// expect. Used only to seed the start-time inputs with a reasonable
-// default (today + next hour) so a member doesn't stare at empty
-// fields and wonder what format to type.
-function defaultStartParts(): { date: string; time: string } {
-  const d = new Date();
-  d.setMinutes(0, 0, 0);
-  d.setHours(d.getHours() + 1);
+// Split an epoch-millis into the YYYY-MM-DD + HH:mm pair the native
+// date/time inputs expect (local-clock, matching what they collect).
+function splitDateAndTime(ms: number): { date: string; time: string } {
+  const d = new Date(ms);
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
@@ -53,10 +50,26 @@ function defaultStartParts(): { date: string; time: string } {
   return { date: `${yyyy}-${mm}-${dd}`, time: `${hh}:${mi}` };
 }
 
+// Seed the start-time inputs with a reasonable default (today + next
+// hour) so a member doesn't stare at empty fields.
+function defaultStartParts(): { date: string; time: string } {
+  const d = new Date();
+  d.setMinutes(0, 0, 0);
+  d.setHours(d.getHours() + 1);
+  return splitDateAndTime(d.getTime());
+}
+
+// Fallback label for an event-specific category string the i18n
+// `categories.*` block doesn't yet carry a key for ("social" → "Social").
+function prettifyCategory(c: string): string {
+  const s = c.replace(/[_-]+/g, " ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export default function EventNewPage() {
   const { currentMember, nodeId, lockState, projects } = useApp();
   const { showToast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -78,7 +91,11 @@ export default function EventNewPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<Category>("other");
+  // Free-text string, not the legacy `Category` enum: a template may set
+  // an event-specific category ("social", "celebration", "learning") that
+  // rides the free-text wire `category` field. The select below surfaces
+  // a non-legacy value as its own option so it shows and is preserved.
+  const [category, setCategory] = useState<string>("other");
   const [startDate, setStartDate] = useState(initialStart.date);
   const [startTime, setStartTime] = useState(initialStart.time);
   const [hasEnd, setHasEnd] = useState(false);
@@ -88,6 +105,15 @@ export default function EventNewPage() {
   const [capacity, setCapacity] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The chosen template id, threaded to the signed `templateId` on
+  // submit. `null` = "from scratch" (the plain form). The work-day
+  // deep-link sets it to "work-day" — work-day is just the first
+  // template (it additionally writes the local event⇄project link).
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
+  const [pickerExpanded, setPickerExpanded] = useState(true);
+  const titleRef = useRef<HTMLInputElement>(null);
 
   // Seed the work-day prefill exactly once, when the project first
   // resolves (it may arrive a tick after mount as the live query
@@ -98,19 +124,56 @@ export default function EventNewPage() {
   useEffect(() => {
     if (seededRef.current || !workDayProject) return;
     seededRef.current = true;
+    setSelectedTemplateId("work-day");
     setTitle(t("events.new.workDayTitlePrefill", { project: workDayProject.title }));
     setDescription(
       t("events.new.workDayDescriptionPrefill", { project: workDayProject.title }),
     );
     const cat = workDayProject.category;
     setCategory(
-      (ALL_CATEGORIES as readonly string[]).includes(cat)
-        ? (cat as Category)
-        : "other",
+      (ALL_CATEGORIES as readonly string[]).includes(cat) ? cat : "other",
     );
   }, [workDayProject, t]);
 
   if (!currentMember) return null;
+
+  const lang = i18n.resolvedLanguage ?? "en";
+  const pickedTemplate = selectedTemplateId
+    ? (getEventTemplate(selectedTemplateId, lang) ?? null)
+    : null;
+
+  function handleSelectTemplate(templateId: string | null) {
+    setSelectedTemplateId(templateId);
+    setPickerExpanded(false);
+    // "Start from scratch" — leave fields as they are (don't clobber a
+    // member who already typed); the event just carries no templateId.
+    if (templateId === null) return;
+    const tpl = getEventTemplate(templateId, lang);
+    if (!tpl) return;
+    setTitle(tpl.titleScaffold);
+    setDescription(tpl.descriptionScaffold);
+    setCategory(tpl.category);
+    // Auto-apply the suggested duration as an editable end time. NEVER a
+    // location. Computed from the current start fields.
+    const startMs = combineDateAndTime(startDate, startTime);
+    if (startMs !== null) {
+      const end = splitDateAndTime(
+        startMs + tpl.suggestedDurationMinutes * 60_000,
+      );
+      setHasEnd(true);
+      setEndDate(end.date);
+      setEndTime(end.time);
+    }
+    // Focus the title and place the caret after the scaffold stem so the
+    // member types straight into the completion ("Potluck — ▮").
+    requestAnimationFrame(() => {
+      const el = titleRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+      }
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -172,7 +235,7 @@ export default function EventNewPage() {
         endsAt,
         location: trimmedLocation,
         capacity: capacityValue,
-        templateId: null,
+        templateId: selectedTemplateId,
         organizerKey,
         organizerSecretKey,
         nodeId,
@@ -211,7 +274,9 @@ export default function EventNewPage() {
         </p>
       </header>
 
-      {workDayProject && (
+      {workDayProject ? (
+        // Work-day deep-link: the work-day banner, no gallery (the
+        // template is fixed to "work-day"; the form is already seeded).
         <section
           aria-labelledby="workday-banner-heading"
           className="mx-auto mb-4 max-w-2xl rounded-2xl border border-canopy-200 bg-canopy-50 p-4 dark:border-canopy-900/50 dark:bg-canopy-950/30"
@@ -226,6 +291,36 @@ export default function EventNewPage() {
             {t("events.new.workDayBannerBody")}
           </p>
         </section>
+      ) : (
+        <div className="mx-auto mb-4 max-w-2xl">
+          {pickerExpanded ? (
+            <div id="event-template-picker">
+              <EventTemplatePicker
+                selectedId={selectedTemplateId}
+                onSelect={handleSelectTemplate}
+              />
+            </div>
+          ) : (
+            <section className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-canopy-200 bg-canopy-50 p-3 dark:border-canopy-900/50 dark:bg-canopy-950/30">
+              <p className="text-sm text-canopy-900 dark:text-canopy-100">
+                {pickedTemplate
+                  ? t("events.templates.selected", { name: pickedTemplate.name })
+                  : t("events.templates.collapsedScratch")}
+              </p>
+              <button
+                type="button"
+                className="btn-secondary text-sm"
+                aria-expanded={false}
+                aria-controls="event-template-picker"
+                onClick={() => setPickerExpanded(true)}
+              >
+                {pickedTemplate
+                  ? t("events.templates.collapsedChange")
+                  : t("events.templates.collapsedPick")}
+              </button>
+            </section>
+          )}
+        </div>
       )}
 
       <form
@@ -238,6 +333,7 @@ export default function EventNewPage() {
             {t("events.new.titleField")}
           </span>
           <input
+            ref={titleRef}
             className="input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -267,8 +363,19 @@ export default function EventNewPage() {
           <select
             className="input"
             value={category}
-            onChange={(e) => setCategory(e.target.value as Category)}
+            onChange={(e) => setCategory(e.target.value)}
           >
+            {/* When a template set an event-specific category (e.g.
+                "social"), surface it as an option so the value shows and
+                is preserved. Task 4 gives these first-class labels/emoji;
+                until then a humanized fallback. */}
+            {!(ALL_CATEGORIES as readonly string[]).includes(category) && (
+              <option value={category}>
+                {t(`categories.${category}`, {
+                  defaultValue: prettifyCategory(category),
+                })}
+              </option>
+            )}
             {ALL_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {CATEGORY_META[c].emoji} {t(`categories.${c}`)}

@@ -308,6 +308,26 @@
     }
   },
   "events": {
+    "templates": {
+      "title": "Pick a starting point",
+      "intro": "These are starter shapes for common get-togethers. Pick one to fill in the form below — you can edit anything before you sign. Or start from scratch.",
+      "scratch": "Start from scratch",
+      "scratchHint": "I'll fill in everything myself.",
+      "selected": "Starting from the {{name}} template — edit anything below before you sign.",
+      "collapsedScratch": "Starting from scratch.",
+      "collapsedChange": "Change",
+      "collapsedPick": "Pick a template",
+      "meta": {
+        "duration": "~{{duration}}"
+      },
+      "filters": {
+        "search": {
+          "placeholder": "Search templates",
+          "ariaLabel": "Search event templates by name or description"
+        },
+        "empty": "No templates match. Try a different search, or start from scratch below."
+      }
+    },
     "new": {
       "workDayBannerTitle": "Scheduling a work day for {{project}}",
       "workDayBannerBody": "This event will appear on the project page on this node. On peer nodes it appears as a regular community event — the project connection never federates. The title below is yours to edit before you sign.",

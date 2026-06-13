@@ -308,6 +308,26 @@
     }
   },
   "events": {
+    "templates": {
+      "title": "Elige un punto de partida",
+      "intro": "Estas son formas de empezar para encuentros comunes. Elige una para llenar el formulario de abajo — puedes editar lo que quieras antes de firmar. O empieza desde cero.",
+      "scratch": "Empezar desde cero",
+      "scratchHint": "Yo lleno todo.",
+      "selected": "Empezando desde la plantilla {{name}} — edita lo que quieras abajo antes de firmar.",
+      "collapsedScratch": "Empezando desde cero.",
+      "collapsedChange": "Cambiar",
+      "collapsedPick": "Elegir una plantilla",
+      "meta": {
+        "duration": "~{{duration}}"
+      },
+      "filters": {
+        "search": {
+          "placeholder": "Buscar plantillas",
+          "ariaLabel": "Buscar plantillas de evento por nombre o descripción"
+        },
+        "empty": "Ninguna plantilla coincide. Prueba otra búsqueda, o empieza desde cero abajo."
+      }
+    },
     "new": {
       "workDayBannerTitle": "Programando una jornada de trabajo para {{project}}",
       "workDayBannerBody": "Este evento aparecerá en la página del proyecto en este nodo. En los nodos pares aparece como un evento comunitario normal: la conexión con el proyecto nunca se federa. El título de abajo es tuyo para editarlo antes de firmar.",
