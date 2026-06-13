@@ -496,13 +496,24 @@ export async function revokeCoOrganizerInvitation(
 // -- Derived view -----------------------------------------------------------
 
 /**
- * The derived `effectiveCoOrganizerKeys` view per §4 of the design
- * doc — invitee keys with an accepted invitation that has not been
- * revoked and either hasn't expired, or whose acceptance was signed
- * before expiry. Grandfathered acceptances synthesized by the v21
- * migration are included (they carry the sentinel signature, but
- * the row-level `grandfathered: true` flag distinguishes them from
- * real signed acceptances for audit purposes).
+ * The §4 derived co-organizer view — invitee keys with an accepted
+ * invitation that has not been revoked and either hasn't expired, or
+ * whose acceptance was signed before expiry. Grandfathered acceptances
+ * synthesized by the v21 migration are included (they carry the
+ * sentinel signature, but the row-level `grandfathered: true` flag
+ * distinguishes them from real signed acceptances for audit purposes).
+ *
+ * NOT an authority predicate. Authority is `isOrganizer` over the
+ * materialized `Project.coOrganizerKeys` array, because two legitimate
+ * role transitions have NO signed record type — handoff demotion and
+ * step-down / removal — so a rows-derived view under-grants a demoted
+ * primary and never forgets a removed member (the divergence PR #235
+ * shipped and this view's former sync sibling caused; see
+ * `docs/co-organizer-invitations.md` §5 and the `isOrganizer` comment
+ * in `db/projects.ts`). This async view survives as the audit /
+ * verification lens: an executable spec of "how did each entry earn
+ * its place," used by tests and available to a future "array entry
+ * lacks signed provenance" advisory.
  *
  * Returns a deduplicated list — a single invitee with multiple
  * accepted invitations for the same project (e.g. a decline
@@ -542,55 +553,6 @@ export async function effectiveCoOrganizerKeys(
     effective.add(invitation.inviteeKey);
   }
   return Array.from(effective);
-}
-
-/**
- * Sync counterpart to `effectiveCoOrganizerKeys` — same §4 rule, but
- * over already-loaded in-memory rows. Used by the attention pipeline
- * and other live-query consumers (Calendar "Mine" filter, AppContext
- * block-visibility check) that already hold the three coorg-table
- * arrays via `useLiveQuery` and need a pure / synchronous predicate.
- *
- * The design doc §4 names the derived view as authoritative — "every
- * consumer of `coOrganizerKeys` reads the derived view, not the static
- * array." A freshly-accepted invitation must therefore confer
- * co-organizer authority immediately, without waiting for some later
- * write to re-materialize the static array on the Project row. This
- * helper is how that materialization happens at READ time for callers
- * that need the answer right now.
- *
- * Returns a `Set` for the common `has(memberKey)` check pattern.
- */
-export function effectiveCoOrganizerKeysFromRows(
-  projectId: string,
-  invitations: readonly CoOrganizerInvitation[],
-  responses: readonly CoOrganizerInvitationResponse[],
-  revocations: readonly CoOrganizerInvitationRevocation[],
-  now: number = Date.now(),
-): Set<string> {
-  const acceptedByInvitationId = new Map<string, CoOrganizerInvitationResponse>();
-  for (const r of responses) {
-    if (r.decision !== "accept") continue;
-    acceptedByInvitationId.set(r.invitationId, r);
-  }
-  const revokedInvitationIds = new Set<string>();
-  for (const r of revocations) revokedInvitationIds.add(r.invitationId);
-
-  const effective = new Set<string>();
-  for (const invitation of invitations) {
-    if (invitation.projectId !== projectId) continue;
-    const accepted = acceptedByInvitationId.get(invitation.id);
-    if (!accepted) continue;
-    if (revokedInvitationIds.has(invitation.id)) continue;
-    // Same expiry rule as the async view: an acceptance signed before
-    // expiry locks in authority even if wall time has now drifted past
-    // the window; otherwise the invitation must still be unexpired.
-    const acceptedInTime = accepted.decidedAt <= invitation.expiresAt;
-    const stillUnexpired = now < invitation.expiresAt;
-    if (!acceptedInTime && !stillUnexpired) continue;
-    effective.add(invitation.inviteeKey);
-  }
-  return effective;
 }
 
 // -- Outbox helper ---------------------------------------------------------

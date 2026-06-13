@@ -1158,13 +1158,14 @@ describe("computeAttentionItems", () => {
     });
   });
 
-  // Bug fix: organizer-targeted attention items were reading the static
-  // `Project.coOrganizerKeys` array, so a newly-accepted co-organizer
-  // didn't see `confirm_task`, `project_deadline_approaching`, or
-  // `project_paused_long` items until some later write re-materialized
-  // the array. The fix threads the derived `effectiveCoOrganizerKeys`
-  // view through the live-query rows. See `docs/co-organizer-invitations.md` §4.
-  describe("organizer authority reads the DERIVED co-organizer view", () => {
+  // PR #NNN: organizer-targeted attention items read authority from
+  // `Project.coOrganizerKeys` via `isOrganizer` — the live list
+  // materialized on every grant AND removal since PR #238. This
+  // replaced the rows-derived view PR #235 threaded through, which
+  // diverged from every action gate on the two transitions the signed
+  // rows can't express: handoff demotion (under-grant) and step-down /
+  // removal (over-grant). See `docs/co-organizer-invitations.md` §5.
+  describe("organizer authority reads the materialized live list", () => {
     const NOW = 10_000_000_000;
     const DAY = 24 * 60 * 60 * 1000;
 
@@ -1172,7 +1173,7 @@ describe("computeAttentionItems", () => {
       overrides: Partial<CoOrganizerInvitation> & { id: string },
     ): CoOrganizerInvitation {
       return {
-        projectId: "proj_derived",
+        projectId: "proj_auth",
         inviterKey: "alice",
         inviteeKey: "bob",
         createdAt: NOW - 2 * DAY,
@@ -1197,33 +1198,28 @@ describe("computeAttentionItems", () => {
       };
     }
 
-    it("surfaces confirm_task to a co-organizer recognized via the derived view (stale-array repro)", () => {
-      // Bob accepted an invitation from Alice (the primary) but the
-      // static `coOrganizerKeys` array has NOT been re-materialized
-      // (it still reads `[]`). Pre-fix: Bob saw no confirm_task item
-      // for Carmen's completed task. Post-fix: he does.
+    it("surfaces confirm_task to a member in the materialized coOrganizerKeys array", () => {
+      // Bob's acceptance has been materialized into the array (PR #238
+      // does this on accept). Authority reads the array, so he gets the
+      // confirm_task item for Carmen's completed task.
       const proj = project({
-        id: "proj_derived",
+        id: "proj_auth",
         organizerKey: "alice",
-        coOrganizerKeys: [], // deliberately stale
+        coOrganizerKeys: [bob.publicKey],
       });
       const t = task({
-        id: "t_derived",
+        id: "t_auth",
         projectId: proj.id,
         status: "awaiting_confirmation",
         completedBy: "carmen",
         title: "Set up tool wall",
       });
-      const invitation = inv({ id: "inv_derived_1", inviteeKey: bob.publicKey });
-      const response = accept(invitation.id, bob.publicKey);
       const items = computeAttentionItems({
         currentMember: bob,
         posts: [],
         projects: [proj],
         projectTasks: [t],
         members: [alice, bob, carmen],
-        coorgInvitations: [invitation],
-        coorgInvitationResponses: [response],
         now: NOW,
       });
       const confirm = items.find((i) => i.kind === "confirm_task");
@@ -1233,24 +1229,20 @@ describe("computeAttentionItems", () => {
       }
     });
 
-    it("surfaces project_deadline_approaching to a derived-view co-organizer", () => {
+    it("surfaces project_deadline_approaching to a member in the array", () => {
       const proj = project({
-        id: "proj_derived",
+        id: "proj_auth",
         organizerKey: "alice",
-        coOrganizerKeys: [], // stale
+        coOrganizerKeys: [bob.publicKey],
         status: "active",
         deadline: NOW + 2 * DAY,
       });
-      const invitation = inv({ id: "inv_deadline", inviteeKey: bob.publicKey });
-      const response = accept(invitation.id, bob.publicKey);
       const items = computeAttentionItems({
         currentMember: bob,
         posts: [],
         projects: [proj],
         projectTasks: [],
         members: [alice, bob],
-        coorgInvitations: [invitation],
-        coorgInvitationResponses: [response],
         now: NOW,
       });
       expect(
@@ -1258,24 +1250,20 @@ describe("computeAttentionItems", () => {
       ).toBe(true);
     });
 
-    it("does NOT surface to an invitee whose acceptance was revoked", () => {
+    it("over-grant regression: does NOT surface to a stepped-down member whose accept rows linger but the array was cleared", () => {
+      // Bob accepted, then stepped down. `removeCoOrganizer` cleared the
+      // array but the signed invitation + acceptance rows persist (there
+      // is no step-down record type). The rows-derived view kept him
+      // "in role" forever; reading the array correctly drops him.
       const proj = project({
-        id: "proj_derived",
+        id: "proj_auth",
         organizerKey: "alice",
-        coOrganizerKeys: [],
+        coOrganizerKeys: [], // stepped down — array cleared
         status: "active",
         deadline: NOW + 2 * DAY,
       });
-      const invitation = inv({ id: "inv_revoked", inviteeKey: bob.publicKey });
+      const invitation = inv({ id: "inv_steppeddown", inviteeKey: bob.publicKey });
       const response = accept(invitation.id, bob.publicKey);
-      const revocation: CoOrganizerInvitationRevocation = {
-        id: "rev_1",
-        invitationId: invitation.id,
-        inviterKey: "alice",
-        revokedAt: NOW - 12 * 60 * 60 * 1000,
-        nodeId,
-        signature: "sig",
-      };
       const items = computeAttentionItems({
         currentMember: bob,
         posts: [],
@@ -1284,7 +1272,6 @@ describe("computeAttentionItems", () => {
         members: [alice, bob],
         coorgInvitations: [invitation],
         coorgInvitationResponses: [response],
-        coorgInvitationRevocations: [revocation],
         now: NOW,
       });
       expect(
@@ -1292,37 +1279,30 @@ describe("computeAttentionItems", () => {
       ).toBe(false);
     });
 
-    it("does NOT surface to an invitee who declined", () => {
+    it("under-grant regression: surfaces to a handoff demotee present only in the array (no coorg rows)", () => {
+      // Bob was the primary, handed off to Alice, and was demoted into
+      // `coOrganizerKeys`. Handoff writes no invitation/acceptance rows,
+      // so the rows-derived view would never see Bob's standing; the
+      // array carries it, so he keeps organizer attention items.
       const proj = project({
-        id: "proj_derived",
+        id: "proj_auth",
         organizerKey: "alice",
-        coOrganizerKeys: [],
+        coOrganizerKeys: [bob.publicKey],
         status: "active",
         deadline: NOW + 2 * DAY,
       });
-      const invitation = inv({ id: "inv_declined", inviteeKey: bob.publicKey });
-      const declined: CoOrganizerInvitationResponse = {
-        id: "r_declined",
-        invitationId: invitation.id,
-        inviteeKey: bob.publicKey,
-        decision: "decline",
-        decidedAt: NOW - DAY,
-        nodeId,
-        signature: "sig",
-      };
       const items = computeAttentionItems({
         currentMember: bob,
         posts: [],
         projects: [proj],
         projectTasks: [],
         members: [alice, bob],
-        coorgInvitations: [invitation],
-        coorgInvitationResponses: [declined],
+        // No coorg rows at all — the handoff demotion left none.
         now: NOW,
       });
       expect(
         items.some((i) => i.kind === "project_deadline_approaching"),
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 });

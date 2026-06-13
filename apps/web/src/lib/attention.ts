@@ -22,8 +22,7 @@ import type {
   Project,
   ProjectTask,
 } from "@/types";
-import { canClaimTask } from "@/db/projects";
-import { effectiveCoOrganizerKeysFromRows } from "@/db/coorgInvitations";
+import { canClaimTask, isOrganizer } from "@/db/projects";
 import type { SignedVouch } from "@/lib/vouch";
 import { startOfUTCDay } from "./calendar";
 import { taskCheckInState } from "./taskCheckInState";
@@ -263,36 +262,17 @@ export function computeAttentionItems(
   const nameByKey = new Map<string, string>();
   for (const m of members) nameByKey.set(m.publicKey, m.displayName);
 
-  // Organizer-authority predicate (`isProjectOrganizer` below + the
-  // `confirm_task` inline check) reads the DERIVED co-organizer view per
-  // `docs/co-organizer-invitations.md` §4: "every consumer of
-  // `coOrganizerKeys` reads the derived view, not the static array."
-  // Without this, a freshly-accepted co-organizer wouldn't receive
-  // organizer-targeted attention items (`confirm_task`,
-  // `project_deadline_approaching`, `project_paused_long`) until some
-  // later write re-materialized the static array on the Project row.
-  // We compute the projectId → effective-keys map once here from the
-  // already-passed live-query inputs and use it across the loops below.
-  const effectiveCoOrgByProjectId = new Map<string, ReadonlySet<string>>();
-  const _invitations = input.coorgInvitations ?? [];
-  const _responses = input.coorgInvitationResponses ?? [];
-  const _revocations = input.coorgInvitationRevocations ?? [];
-  const _now = input.now ?? Date.now();
-  for (const p of projects) {
-    effectiveCoOrgByProjectId.set(
-      p.id,
-      effectiveCoOrganizerKeysFromRows(
-        p.id,
-        _invitations,
-        _responses,
-        _revocations,
-        _now,
-      ),
-    );
-  }
-  function isEffectiveCoOrg(projectId: string, memberKey: string): boolean {
-    return effectiveCoOrgByProjectId.get(projectId)?.has(memberKey) ?? false;
-  }
+  // Organizer authority reads `Project.coOrganizerKeys` via
+  // `isOrganizer` — the live authority list every action gate
+  // (`requireOrganizer`, `confirmProjectTaskCompletion`) also reads.
+  // Since PR #238 that array is materialized on every grant (accept,
+  // both federation ingest paths) AND removal (step-down, handoff
+  // demotion), so it stays correct for transitions the signed
+  // invitation/response/revocation rows can't express — see
+  // `docs/co-organizer-invitations.md` §5 and the `isOrganizer`
+  // comment in `db/projects.ts`. The coorg rows still flow into this
+  // function, but only for the invitee-side
+  // `coorganizer_invitation_received` item below.
 
   const items: AttentionItem[] = [];
 
@@ -338,11 +318,7 @@ export function computeAttentionItems(
     if (t.status !== "awaiting_confirmation") continue;
     const project = projectByKey.get(t.projectId);
     if (!project) continue;
-    if (
-      project.organizerKey !== currentMember.publicKey &&
-      !isEffectiveCoOrg(project.id, currentMember.publicKey)
-    )
-      continue;
+    if (!isOrganizer(project, currentMember.publicKey)) continue;
     if (t.completedBy === currentMember.publicKey) continue;
     // PR F: skip when the task completer is a blocked member.
     if (t.completedBy && blockedKeys.has(t.completedBy)) continue;
@@ -437,10 +413,7 @@ export function computeAttentionItems(
   const now = input.now ?? Date.now();
 
   function isProjectOrganizer(project: Project, memberKey: string): boolean {
-    return (
-      project.organizerKey === memberKey ||
-      isEffectiveCoOrg(project.id, memberKey)
-    );
+    return isOrganizer(project, memberKey);
   }
 
   for (const p of projects) {

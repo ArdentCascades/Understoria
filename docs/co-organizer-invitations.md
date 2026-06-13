@@ -353,15 +353,28 @@ effectiveCoOrganizerKeys(project) =
 > proving how each entry earned its place. `isOrganizer()` stays
 > synchronous over the array.
 >
-> Residual divergence, tracked: four pull surfaces (the attention
-> rail's organizer items, Calendar's "Mine" filter, AppContext's
-> block-standing gate) still read the derived view per PR #235 and
-> so don't see the two row-less transitions — a handoff demotee is
-> missing from their organizer set and a stepped-down co-organizer
-> lingers in it. Reconciling needs a decision between runtime
-> sentinel rows (the v21 grandfather pattern applied at runtime)
-> and pointing those readers at the array. Open question; see the
-> `isOrganizer` comment block in `db/projects.ts`.
+> Divergence resolved (PR #NNN, design conversation in
+> `docs/project-ux-plans.md` plan 8): the four pull surfaces that
+> PR #235 pointed at the rows-derived view (the attention rail's
+> organizer items, Calendar's "Mine" filter, AppContext's
+> block-standing gate) now read `isOrganizer` over the materialized
+> array, like every action gate. The two candidate fixes were
+> weighed — runtime sentinel rows (extend the v21 grandfather
+> pattern: synthesize an accept on handoff, a revocation on
+> step-down) vs. pointing the readers at the array — and the array
+> won decisively: sentinel rows would fabricate signed ceremonies
+> that never happened (a synthesized acceptance imputes a signature
+> the demotee never produced; a step-down "revocation" misattributes
+> the actor), bend the revocation record's documented
+> pre-acceptance-only semantics, and buy zero consistency, because
+> they can't federate and projects don't federate either — every
+> surface that asks "is X a co-organizer of P" runs on a device that
+> hosts P's row. The rows-derived helper
+> (`effectiveCoOrganizerKeysFromRows`) was deleted; the async
+> `effectiveCoOrganizerKeys` survives as the §4 audit/verification
+> lens. What's genuinely deferred is remote, *signed* provenance for
+> the two row-less transitions: a real step-down / handoff record
+> type, worth doing if and when projects themselves federate.
 
 ### Grandfather migration
 

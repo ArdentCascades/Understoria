@@ -341,15 +341,14 @@ async function updateProjectStatus(
  * types, so the rows alone can neither grant the handoff case nor
  * forget the removal case.
  *
- * Known residual divergence, tracked: the derived-view readers
- * (`effectiveCoOrganizerKeysFromRows` call sites in attention.ts,
- * Calendar's "Mine" filter, AppContext's block-standing gate) see
- * neither of those two row-less transitions — a handoff demotee is
- * missing from their organizer set, and a stepped-down co-organizer
- * lingers in it. Reconciling that needs a decision about runtime
- * sentinel rows (the v21 grandfather pattern applied at runtime)
- * vs. pointing those readers back at this array; that is a design
- * conversation, not a drive-by fix.
+ * Every read site reads this array as of PR #NNN — the pull surfaces
+ * that PR #235 once pointed at the rows-derived view (attention.ts,
+ * Calendar's "Mine" filter, AppContext's block-standing gate) were
+ * reconciled onto `isOrganizer`, ending the divergence where a handoff
+ * demotee went missing from those surfaces and a stepped-down
+ * co-organizer lingered in them. Remote, signed provenance for the
+ * row-less transitions (a real step-down / handoff record type) is the
+ * remaining future work; see `docs/co-organizer-invitations.md` §5.
  */
 export function isOrganizer(project: Project, memberKey: string): boolean {
   return (

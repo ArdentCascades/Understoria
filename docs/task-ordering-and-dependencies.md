@@ -648,10 +648,10 @@ export function isOrganizer(project: Project, memberKey: string): boolean {
 }
 ```
 
-(The `coOrganizerKeys` array is itself a derived view post-
-PR #174 — see `docs/co-organizer-invitations.md` §5. The
-authority check reads the effective set, not the static
-array.)
+(`coOrganizerKeys` is the materialized live authority list —
+written on every grant and removal since PR #238 — and the
+authority check reads it directly. See
+`docs/co-organizer-invitations.md` §5.)
 
 This matches the established precedent in
 `docs/co-organizer-invitations.md` §1 and the dedicated
