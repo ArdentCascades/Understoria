@@ -9,9 +9,11 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
+import { computeProjectClosure } from "@/lib/projectClosure";
+import { formatHours } from "@/lib/format";
 
 export default function ProjectArchivePage() {
-  const { projects, projectTasks, members } = useApp();
+  const { projects, projectTasks, members, exchanges } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -67,6 +69,16 @@ export default function ProjectArchivePage() {
         <ul className="flex flex-col gap-3">
           {archived.map((p) => {
             const counts = tasksByProject.get(p.id) ?? { total: 0, open: 0 };
+            // Aggregate-only, from the signed ledger; omitted entirely
+            // when no one moved hours (a zero tally is shame-shaped).
+            const closure = computeProjectClosure({ project: p, exchanges });
+            const closureLine =
+              closure.contributorCount > 0
+                ? t("projects.completionMoment.cardLine", {
+                    count: closure.contributorCount,
+                    hours: formatHours(closure.hoursMoved),
+                  })
+                : undefined;
             return (
               <li key={p.id}>
                 <ProjectCard
@@ -74,6 +86,7 @@ export default function ProjectArchivePage() {
                   organizerName={memberName.get(p.organizerKey) ?? "Member"}
                   taskCount={counts.total}
                   openTaskCount={counts.open}
+                  closureLine={closureLine}
                 />
               </li>
             );

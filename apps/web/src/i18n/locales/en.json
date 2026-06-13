@@ -734,6 +734,15 @@
       "showOlderOther": "Show {{count}} older updates",
       "showFewer": "Show fewer updates"
     },
+    "completionMoment": {
+      "title": "Complete, together.",
+      "summary_one": "{{count}} member moved {{hours}} hours to carry this to the finish.",
+      "summary_other": "{{count}} members moved {{hours}} hours together.",
+      "thanksHint": "If you'd like to thank everyone, post an update — it stays with the project.",
+      "thanksCta": "Write an update",
+      "cardLine_one": "{{count}} member · {{hours}} hours",
+      "cardLine_other": "{{count}} members · {{hours}} hours, together"
+    },
     "coOrganizers": {
       "title": "Co-organizers",
       "intro": "Co-organizers can confirm tasks, add tasks, and pause or resume the project. Only the primary organizer can invite or remove co-organizers.",

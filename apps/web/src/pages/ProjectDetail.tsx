@@ -62,6 +62,7 @@ import {
   revokeCoOrganizerInvitation,
 } from "@/db/coorgInvitations";
 import { getSecretKey, type LockState } from "@/db/secrets";
+import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { humanizeError } from "@/lib/humanizeError";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
@@ -77,6 +78,7 @@ import { taskCheckInState } from "@/lib/taskCheckInState";
 import { creditHoursForTask } from "@/lib/timebank";
 import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
+import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
@@ -84,7 +86,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
 import { useFlipAnimation } from "@/lib/a11y/useFlipAnimation";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
-import { IconMessages } from "@/components/visual";
+import { IconMessages, Sprig } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { TaskComments } from "@/components/TaskComments";
@@ -328,10 +330,16 @@ export default function ProjectDetailPage() {
     tasks,
     exchanges,
   });
-  const contributors = new Set(
-    tasks
-      .filter((task) => task.status === "completed" && task.completedBy)
-      .map((task) => task.completedBy as string),
+  // Closure aggregates — distinct contributors and hours moved — read
+  // from the signed exchange ledger (the immutable truth), not the
+  // mutable task rows. Feeds the completion moment, the permanent banner
+  // line, and the sidebar "Contributors" field, so the page can never
+  // show two different counts. Aggregate-only by construction; see
+  // lib/projectClosure.ts.
+  const closure = computeProjectClosure({ project, exchanges });
+  const showCompletionMoment = useNewlyCompletedProjectMoment(
+    project,
+    closure.contributorCount,
   );
 
   async function run<T>(action: () => Promise<T>): Promise<T | null> {
@@ -476,17 +484,29 @@ export default function ProjectDetailPage() {
                   {formatDeadline(project.deadline)}
                 </Field>
               )}
-              <Field label={t("projects.detail.contributors", { count: contributors.size })}>
-                {contributors.size}
+              <Field label={t("projects.detail.contributors", { count: closure.contributorCount })}>
+                {closure.contributorCount}
               </Field>
             </dl>
-            {project.status === "completed" && project.completedAt && (
-              <p className="mt-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
-                {t("projects.detail.completed", {
-                  when: formatRelativeTime(project.completedAt),
-                })}
-              </p>
+            {showCompletionMoment && (
+              <CompletionMoment closure={closure} isOrg={isOrg} />
             )}
+            {(project.status === "completed" || project.status === "archived") &&
+              project.completedAt && (
+                <p className="mt-3 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+                  {t("projects.detail.completed", {
+                    when: formatRelativeTime(project.completedAt),
+                  })}
+                  {closure.contributorCount > 0 && (
+                    <span className="mt-1 block text-canopy-800 dark:text-canopy-200">
+                      {t("projects.completionMoment.summary", {
+                        count: closure.contributorCount,
+                        hours: formatHours(closure.hoursMoved),
+                      })}
+                    </span>
+                  )}
+                </p>
+              )}
             {project.status === "paused" && project.pauseNote && (
               <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
                 {t("projects.detail.paused", { note: project.pauseNote })}
@@ -688,6 +708,110 @@ export default function ProjectDetailPage() {
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Stable id on the announcement textarea so the completion moment's
+// organizer nudge can scroll to and focus it across the sidebar/main
+// column split (they live in different subtrees, so a ref would have to
+// be threaded through the whole page).
+const ANNOUNCEMENT_INPUT_ID = "project-announcement-input";
+
+// One-time, per-device completion moment — the project-closure twin of
+// Dashboard's `useNewlyReachedMilestones`. Pops once for any viewer when
+// a project is completed and at least one person moved hours, then marks
+// the id in `celebratedProjectCompletions` so a revisit shows only the
+// permanent banner line. A zero-contributor completion is never marked,
+// so if exchanges arrive later the moment can still land on a real
+// total (no-notifications: nothing buzzes; the moment waits to be seen).
+function useNewlyCompletedProjectMoment(
+  project: Project,
+  contributorCount: number,
+): boolean {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (project.status !== "completed" || contributorCount <= 0) {
+      setShow(false);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const stored = await getSetting(
+        SETTING_KEYS.celebratedProjectCompletions,
+      );
+      if (cancelled) return;
+      const celebrated = new Set<string>(
+        stored ? (JSON.parse(stored) as string[]) : [],
+      );
+      if (celebrated.has(project.id)) {
+        setShow(false);
+        return;
+      }
+      setShow(true);
+      celebrated.add(project.id);
+      await setSetting(
+        SETTING_KEYS.celebratedProjectCompletions,
+        JSON.stringify(Array.from(celebrated)),
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [project.id, project.status, contributorCount]);
+  return show;
+}
+
+// The completion moment. Aggregate sentence only — never names, never
+// shares, never percent-of-target (see lib/projectClosure.ts and the
+// plan's values tension). Shown to every viewer, organizer or not, so it
+// reads as "us," not a private medal; the organizer additionally gets a
+// nudge into the existing announcement box, because community-authority
+// prefers thanks spoken in the commons over a system-generated badge.
+function CompletionMoment({
+  closure,
+  isOrg,
+}: {
+  closure: ProjectClosure;
+  isOrg: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="mb-3 animate-milestone-pop rounded-2xl bg-canopy-50 p-4 text-canopy-900 shadow-sm dark:bg-canopy-950/40 dark:text-canopy-100">
+      <div className="flex items-center gap-3">
+        <Sprig
+          size={32}
+          className="shrink-0 text-canopy-600 dark:text-canopy-300"
+        />
+        <div>
+          <div className="text-sm font-semibold">
+            {t("projects.completionMoment.title")}
+          </div>
+          <div className="text-base">
+            {t("projects.completionMoment.summary", {
+              count: closure.contributorCount,
+              hours: formatHours(closure.hoursMoved),
+            })}
+          </div>
+        </div>
+      </div>
+      {isOrg && (
+        <div className="mt-3 border-t border-canopy-200/70 pt-3 dark:border-canopy-800/60">
+          <p className="text-sm">{t("projects.completionMoment.thanksHint")}</p>
+          <button
+            type="button"
+            className="btn-secondary mt-2"
+            onClick={() => {
+              const el = document.getElementById(ANNOUNCEMENT_INPUT_ID);
+              if (!el) return;
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              (el as HTMLTextAreaElement).focus({ preventScroll: true });
+            }}
+          >
+            {t("projects.completionMoment.thanksCta")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Persistent banner shown at the top of a project in planning
@@ -2505,6 +2629,7 @@ function AnnouncementSection({
       {isOrg && (
         <form onSubmit={handleSubmit} className="card mb-3 flex flex-col gap-2">
           <textarea
+            id={ANNOUNCEMENT_INPUT_ID}
             className="input min-h-20"
             value={body}
             onChange={(e) => setBody(e.target.value)}
