@@ -28,7 +28,11 @@ import {
   startOfTodayMs,
   type CalendarEntry,
 } from "@/lib/calendar";
-import { PROJECT_CATEGORY_META, CATEGORY_META } from "@/lib/categories";
+import {
+  PROJECT_CATEGORY_META,
+  CATEGORY_META,
+  eventCategoryMeta,
+} from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // Agenda view: chronological list grouped by UTC day, sticky day
@@ -149,11 +153,12 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
     );
   }
   if (entry.kind === "event") {
-    // Events: canopy-keyed treatment to differentiate from
-    // project deadlines (which colour by ProjectCategory) and post
-    // expiries (which colour by Post Category). The dedicated kind
-    // label is announced to screen readers via aria-label so the
-    // chip is unambiguous even without the colour cue.
+    // Events colour their dot by category (like project deadlines / post
+    // expiries) and carry a leading category emoji — the always-present
+    // glyph that keeps an event distinct from a same-coloured project or
+    // post chip. aria-label names the kind for screen readers; an unknown
+    // peer category falls back to a neutral glyph/colour, never crashes.
+    const meta = eventCategoryMeta(entry.category);
     const timeFmt = new Intl.DateTimeFormat(i18n.language, {
       hour: "numeric",
       minute: "2-digit",
@@ -166,10 +171,13 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
                    hover:bg-moss-50 dark:hover:bg-moss-900"
       >
         <span
-          className="inline-block h-3 w-3 rounded-full bg-canopy-600"
+          className={`inline-block h-3 w-3 rounded-full ${meta.barColorClass}`}
           aria-hidden="true"
         />
         <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
+          <span aria-hidden="true" className="mr-1">
+            {meta.emoji}
+          </span>
           {timeFmt.format(new Date(entry.startsAt))} — {entry.title}
           {entry.location ? (
             <span className="text-moss-600 dark:text-moss-300">

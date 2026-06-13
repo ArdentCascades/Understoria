@@ -27,7 +27,11 @@ import {
   startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
-import { CATEGORY_META, PROJECT_CATEGORY_META } from "@/lib/categories";
+import {
+  CATEGORY_META,
+  PROJECT_CATEGORY_META,
+  eventCategoryMeta,
+} from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // Month grid: 7 columns × ~5–6 weeks, rendering the month that
@@ -233,17 +237,19 @@ function MonthChip({
 }) {
   const { t } = useTranslation();
   if (entry.kind === "event") {
-    // Events render with a canopy-keyed chip so they're visually
-    // distinct from category-coloured project deadlines and post
-    // expiries. aria-label names the entry kind for screen readers.
+    // Category-coloured chip + a leading category emoji — the emoji is
+    // the discriminator that keeps an event distinct from a same-coloured
+    // project deadline / post expiry (which carry no glyph). aria-label
+    // names the kind; an unknown peer category falls back neutrally.
+    const meta = eventCategoryMeta(entry.category);
     return (
       <Link
         to={entry.path}
         aria-label={t("events.calendar.entryKindLabel")}
-        className="block truncate rounded bg-canopy-600 px-1 py-0.5 text-[10px] text-white hover:opacity-90"
+        className={`block truncate rounded px-1 py-0.5 text-[10px] text-white ${meta.barColorClass} hover:opacity-90`}
         title={entry.title}
       >
-        {entry.title}
+        <span aria-hidden="true">{meta.emoji}</span> {entry.title}
       </Link>
     );
   }

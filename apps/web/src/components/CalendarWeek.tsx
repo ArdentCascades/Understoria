@@ -27,7 +27,11 @@ import {
   startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
-import { CATEGORY_META, PROJECT_CATEGORY_META } from "@/lib/categories";
+import {
+  CATEGORY_META,
+  PROJECT_CATEGORY_META,
+  eventCategoryMeta,
+} from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // 7-column week view of the currently-selected week. Header shows the
@@ -227,14 +231,18 @@ function WeekChip({
 }) {
   const { t } = useTranslation();
   if (entry.kind === "event") {
+    // Category-coloured chip + leading category emoji (the discriminator
+    // from same-coloured project/post chips); unknown peer category falls
+    // back neutrally. aria-label names the kind for screen readers.
+    const meta = eventCategoryMeta(entry.category);
     return (
       <Link
         to={entry.path}
         aria-label={t("events.calendar.entryKindLabel")}
-        className="block truncate rounded bg-canopy-600 px-1 py-0.5 text-[10px] text-white hover:opacity-90"
+        className={`block truncate rounded px-1 py-0.5 text-[10px] text-white ${meta.barColorClass} hover:opacity-90`}
         title={entry.title}
       >
-        {entry.title}
+        <span aria-hidden="true">{meta.emoji}</span> {entry.title}
       </Link>
     );
   }

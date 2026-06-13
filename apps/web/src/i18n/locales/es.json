@@ -975,7 +975,10 @@
     "other": "Otro",
     "infrastructure": "Infraestructura",
     "organizing": "Organización",
-    "mutual_aid_drive": "Campaña de ayuda mutua"
+    "mutual_aid_drive": "Campaña de ayuda mutua",
+    "social": "Social",
+    "celebration": "Celebración",
+    "learning": "Aprendizaje"
   },
   "postStatus": {
     "open": "Abierto",

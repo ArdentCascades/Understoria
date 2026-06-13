@@ -402,6 +402,43 @@ describe("CalendarPage", () => {
     vi.useRealTimers();
   });
 
+  it("gives an event chip its category emoji (visual identity)", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({
+        id: "soc",
+        title: "Potluck night",
+        startsAt: day + 3 * 3_600_000,
+        category: "social",
+      }),
+    ];
+    render(<CalendarPage />);
+    // The "social" category emoji (🎉) renders on the chip.
+    expect(container.textContent ?? "").toContain("\u{1F389}");
+    vi.useRealTimers();
+  });
+
+  it("renders an event with an unknown peer category without crashing", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({
+        id: "x",
+        title: "Mystery gathering",
+        startsAt: day + 3 * 3_600_000,
+        category: "zzz-future-category",
+      }),
+    ];
+    // The render itself must not throw on an unrecognized free-text
+    // category — the resolver falls back to a neutral glyph/colour.
+    render(<CalendarPage />);
+    expect(container.textContent ?? "").toContain("Mystery gathering");
+    vi.useRealTimers();
+  });
+
   it("renders the FAB linking to /events/new with the i18n aria-label", () => {
     render(<CalendarPage />);
     const fab = container.querySelector<HTMLAnchorElement>(

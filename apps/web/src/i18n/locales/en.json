@@ -975,7 +975,10 @@
     "other": "Other",
     "infrastructure": "Infrastructure",
     "organizing": "Organizing",
-    "mutual_aid_drive": "Mutual aid drive"
+    "mutual_aid_drive": "Mutual aid drive",
+    "social": "Social",
+    "celebration": "Celebration",
+    "learning": "Learning"
   },
   "postStatus": {
     "open": "Open",

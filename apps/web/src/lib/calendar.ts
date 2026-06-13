@@ -98,6 +98,11 @@ export type CalendarEntry =
       date: number;
       eventId: string;
       title: string;
+      /** The event's free-text category (may be a string this node
+       *  doesn't recognize — events federate with free-text categories).
+       *  Looked up via `eventCategoryMeta` in `lib/categories.ts` for the
+       *  chip's emoji + colour, with a neutral fallback. */
+      category: string;
       /** Epoch ms of the event's actual start (NOT day-floored). The
        *  UI uses this to render the time-of-day; `date` is the UTC
        *  day for grouping. */
@@ -236,6 +241,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       date: startOfUTCDay(ev.startsAt),
       eventId: ev.id,
       title: ev.title,
+      category: ev.category,
       startsAt: ev.startsAt,
       endsAt: ev.endsAt,
       location: ev.location,
