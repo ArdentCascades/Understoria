@@ -13,17 +13,11 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   CoOrganizerInvitationError,
   effectiveCoOrganizerKeys,
-  effectiveCoOrganizerKeysFromRows,
   issueCoOrganizerInvitation,
   materializeAcceptedCoOrganizer,
   respondToCoOrganizerInvitation,
   revokeCoOrganizerInvitation,
 } from "./coorgInvitations";
-import type {
-  CoOrganizerInvitation,
-  CoOrganizerInvitationResponse,
-  CoOrganizerInvitationRevocation,
-} from "@/types";
 import { db } from "./database";
 import { createMember } from "./seed";
 import { createProject, isOrganizer, removeCoOrganizer } from "./projects";
@@ -684,124 +678,6 @@ describe("CoOrganizerInvitationError", () => {
       expect(err).toBeInstanceOf(CoOrganizerInvitationError);
       expect((err as CoOrganizerInvitationError).code).toBe("already_revoked");
     }
-  });
-});
-
-// Sync helper used by attention.ts, Calendar "Mine" filter, and
-// AppContext block-visibility. Mirrors §4 of the design doc — kept
-// in parity with the async `effectiveCoOrganizerKeys` view above.
-describe("effectiveCoOrganizerKeysFromRows", () => {
-  const PID = "proj_sync";
-  const OTHER_PID = "proj_other";
-  const NOW = 10_000_000_000;
-  const DAY = 24 * 60 * 60 * 1000;
-
-  function inv(
-    overrides: Partial<CoOrganizerInvitation> & { id: string },
-  ): CoOrganizerInvitation {
-    return {
-      projectId: PID,
-      inviterKey: "alice",
-      inviteeKey: "bob",
-      createdAt: NOW - 2 * DAY,
-      expiresAt: NOW + 14 * DAY,
-      nodeId: NODE,
-      signature: "sig",
-      ...overrides,
-    };
-  }
-  function resp(
-    overrides: Partial<CoOrganizerInvitationResponse> & {
-      invitationId: string;
-    },
-  ): CoOrganizerInvitationResponse {
-    return {
-      id: `r_${overrides.invitationId}`,
-      inviteeKey: "bob",
-      decision: "accept",
-      decidedAt: NOW - DAY,
-      nodeId: NODE,
-      signature: "sig",
-      ...overrides,
-    };
-  }
-
-  it("includes an invitee with a clean accepted, unrevoked, unexpired invitation", () => {
-    const i = inv({ id: "i1", inviteeKey: "bob" });
-    const r = resp({ invitationId: i.id, inviteeKey: "bob" });
-    const out = effectiveCoOrganizerKeysFromRows(PID, [i], [r], [], NOW);
-    expect(out.has("bob")).toBe(true);
-  });
-
-  it("excludes a declined invitation", () => {
-    const i = inv({ id: "i1", inviteeKey: "bob" });
-    const r = resp({ invitationId: i.id, decision: "decline" });
-    const out = effectiveCoOrganizerKeysFromRows(PID, [i], [r], [], NOW);
-    expect(out.has("bob")).toBe(false);
-  });
-
-  it("excludes an accepted-then-revoked invitation", () => {
-    const i = inv({ id: "i1", inviteeKey: "bob" });
-    const r = resp({ invitationId: i.id });
-    const rev: CoOrganizerInvitationRevocation = {
-      id: "rev_1",
-      invitationId: i.id,
-      inviterKey: "alice",
-      revokedAt: NOW - 12 * 60 * 60 * 1000,
-      nodeId: NODE,
-      signature: "sig",
-    };
-    const out = effectiveCoOrganizerKeysFromRows(PID, [i], [r], [rev], NOW);
-    expect(out.has("bob")).toBe(false);
-  });
-
-  it("excludes an invitation that expired before acceptance", () => {
-    const i = inv({
-      id: "i1",
-      expiresAt: NOW - 5 * DAY,
-    });
-    const r = resp({
-      invitationId: i.id,
-      decidedAt: NOW - 3 * DAY, // accepted AFTER expiry
-    });
-    const out = effectiveCoOrganizerKeysFromRows(PID, [i], [r], [], NOW);
-    expect(out.has("bob")).toBe(false);
-  });
-
-  it("keeps acceptance that was signed BEFORE expiry, even after wall time drifts past", () => {
-    // The §4 OR clause: "accept decidedAt ≤ expiresAt" — locks in the
-    // role so wall-time drift can't retroactively strip authority.
-    const i = inv({
-      id: "i1",
-      expiresAt: NOW - 1 * DAY, // expired
-    });
-    const r = resp({
-      invitationId: i.id,
-      decidedAt: NOW - 2 * DAY, // accepted before expiry
-    });
-    const out = effectiveCoOrganizerKeysFromRows(PID, [i], [r], [], NOW);
-    expect(out.has("bob")).toBe(true);
-  });
-
-  it("scopes by projectId — does not leak invitees from sibling projects", () => {
-    const i = inv({ id: "i1", projectId: OTHER_PID, inviteeKey: "bob" });
-    const r = resp({ invitationId: i.id });
-    const out = effectiveCoOrganizerKeysFromRows(PID, [i], [r], [], NOW);
-    expect(out.has("bob")).toBe(false);
-  });
-
-  it("deduplicates an invitee with multiple accepted invitations on the same project", () => {
-    const i1 = inv({ id: "i1", inviteeKey: "bob" });
-    const i2 = inv({ id: "i2", inviteeKey: "bob" });
-    const out = effectiveCoOrganizerKeysFromRows(
-      PID,
-      [i1, i2],
-      [resp({ invitationId: i1.id }), resp({ invitationId: i2.id })],
-      [],
-      NOW,
-    );
-    expect(out.size).toBe(1);
-    expect(out.has("bob")).toBe(true);
   });
 });
 

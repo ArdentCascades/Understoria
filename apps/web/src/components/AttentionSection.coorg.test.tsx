@@ -44,6 +44,8 @@ vi.mock("@/db/projects", () => ({
   unclaimProjectTask: vi.fn(),
   logActivity: logActivityMock,
   canClaimTask: () => true,
+  isOrganizer: (p: Project, key: string) =>
+    p.organizerKey === key || p.coOrganizerKeys.includes(key),
 }));
 
 import "@/i18n";

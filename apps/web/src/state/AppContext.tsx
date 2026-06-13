@@ -62,7 +62,6 @@ import type {
 import type { InviteRow } from "@/db/database";
 import type { BlockRow } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
-import { effectiveCoOrganizerKeysFromRows } from "@/db/coorgInvitations";
 import {
   currentLockState,
   lockSession,
@@ -579,31 +578,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // by a blocked member ONLY when the current member is NOT a
     // co-organizer of the project.
     //
-    // Standing reads the DERIVED co-organizer view per
-    // `docs/co-organizer-invitations.md` §4 ("every consumer of
-    // `coOrganizerKeys` reads the derived view") so a co-organizer who
-    // just accepted their invitation doesn't get the project
-    // disappeared out from under them.
-    const _invitations = coorgInvitations ?? [];
-    const _responses = coorgInvitationResponses ?? [];
-    const _revocations = coorgInvitationRevocations ?? [];
+    // Standing reads `Project.coOrganizerKeys` — the live authority
+    // list materialized on every grant and removal since PR #238, so a
+    // co-organizer who just accepted their invitation keeps the project
+    // (and a stepped-down one correctly loses standing). See
+    // `docs/co-organizer-invitations.md` §5.
     return (projects ?? []).filter((p) => {
       if (!blockedKeys.has(p.organizerKey)) return true;
-      return effectiveCoOrganizerKeysFromRows(
-        p.id,
-        _invitations,
-        _responses,
-        _revocations,
-      ).has(currentMemberKey);
+      return p.coOrganizerKeys.includes(currentMemberKey);
     });
-  }, [
-    projects,
-    blockedKeys,
-    currentMemberKey,
-    coorgInvitations,
-    coorgInvitationResponses,
-    coorgInvitationRevocations,
-  ]);
+  }, [projects, blockedKeys, currentMemberKey]);
   const filteredEvents = useMemo(() => {
     if (blockedKeys.size === 0) return events ?? [];
     return (events ?? []).filter((e) => !blockedKeys.has(e.createdBy));

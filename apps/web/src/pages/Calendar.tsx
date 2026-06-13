@@ -23,7 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { buildCalendar, type CalendarEntry } from "@/lib/calendar";
-import { effectiveCoOrganizerKeysFromRows } from "@/db/coorgInvitations";
+import { isOrganizer } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { EmptyState } from "@/components/EmptyState";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
@@ -56,9 +56,6 @@ export default function CalendarPage() {
     projectTasks,
     events,
     eventCancellations,
-    coorgInvitations,
-    coorgInvitationResponses,
-    coorgInvitationRevocations,
   } = useApp();
   const { t, i18n } = useTranslation();
 
@@ -108,21 +105,13 @@ export default function CalendarPage() {
     if (projectId) out = out.filter((p) => p.id === projectId);
     if (mine && myKey) {
       const myProjectIds = new Set<string>();
+      // `isOrganizer` reads `Project.coOrganizerKeys` — the live
+      // authority list a freshly-accepted co-organizer already lands in
+      // (materialized on accept since PR #238), and the list a
+      // stepped-down or handoff-demoted member is correctly in/out of.
+      // See `docs/co-organizer-invitations.md` §5.
       for (const p of projects) {
-        if (p.organizerKey === myKey) myProjectIds.add(p.id);
-        // Use the derived co-organizer view per
-        // `docs/co-organizer-invitations.md` §4 so a freshly-accepted
-        // co-org sees the project under "Mine" immediately, without
-        // waiting for some later write to materialize the static array.
-        else if (
-          effectiveCoOrganizerKeysFromRows(
-            p.id,
-            coorgInvitations,
-            coorgInvitationResponses,
-            coorgInvitationRevocations,
-          ).has(myKey)
-        )
-          myProjectIds.add(p.id);
+        if (isOrganizer(p, myKey)) myProjectIds.add(p.id);
       }
       for (const tk of projectTasks) {
         if (tk.assignedTo === myKey) myProjectIds.add(tk.projectId);
@@ -130,17 +119,7 @@ export default function CalendarPage() {
       out = out.filter((p) => myProjectIds.has(p.id));
     }
     return out;
-  }, [
-    projects,
-    projectTasks,
-    category,
-    projectId,
-    mine,
-    myKey,
-    coorgInvitations,
-    coorgInvitationResponses,
-    coorgInvitationRevocations,
-  ]);
+  }, [projects, projectTasks, category, projectId, mine, myKey]);
 
   const filteredPosts = useMemo<readonly Post[]>(() => {
     let out: readonly Post[] = posts;

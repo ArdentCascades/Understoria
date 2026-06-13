@@ -55,11 +55,6 @@ interface MockState {
   currentMember: Member | null;
   events: Event[];
   eventCancellations: EventCancellation[];
-  // PR: co-org Mine filter reads the derived view; tests that don't
-  // populate these get safe empty defaults so the helper doesn't fault.
-  coorgInvitations: never[];
-  coorgInvitationResponses: never[];
-  coorgInvitationRevocations: never[];
 }
 
 let mockState: MockState = blankState();
@@ -73,9 +68,6 @@ function blankState(): MockState {
     currentMember: null,
     events: [],
     eventCancellations: [],
-    coorgInvitations: [],
-    coorgInvitationResponses: [],
-    coorgInvitationRevocations: [],
   };
 }
 
