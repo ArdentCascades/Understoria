@@ -45,6 +45,15 @@ export interface AutoCloseInput {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+// Plan 11 — a role transfer over an absent person's head must not be
+// winnable in the 3-day default window. Adoption proposals get a
+// 14-day notice floor (matching the invite / co-org-invitation horizon),
+// applied as max(config.proposalDeliberationDays, this) so a community
+// that has SET a longer deliberation window keeps it. The same floor is
+// re-enforced inside `executeAdoptionProposal`, so even an out-of-band
+// "record outcome: passed" can't shortcut the absent member's window.
+export const ADOPTION_MIN_DELIBERATION_DAYS = 14;
+
 export function autoCloseEligibility(
   input: AutoCloseInput,
 ): AutoCloseEligibility {
@@ -59,7 +68,11 @@ export function autoCloseEligibility(
     return { kind: "blocked", blockCount: tally.blocks.length };
   }
 
-  const deliberationMs = config.proposalDeliberationDays * DAY_MS;
+  const deliberationDays =
+    proposal.category === "project_adoption"
+      ? Math.max(config.proposalDeliberationDays, ADOPTION_MIN_DELIBERATION_DAYS)
+      : config.proposalDeliberationDays;
+  const deliberationMs = deliberationDays * DAY_MS;
   const readyAt = proposal.createdAt + deliberationMs;
   if (now < readyAt) {
     return { kind: "wait_deliberation", readyAt };

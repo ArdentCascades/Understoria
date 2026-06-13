@@ -162,4 +162,58 @@ describe("autoCloseEligibility", () => {
     });
     expect(result.kind).toBe("passes");
   });
+
+  describe("project_adoption deliberation floor", () => {
+    const affirms = [vote("a", "affirm"), vote("b", "affirm")];
+
+    it("holds an adoption proposal to 14 days even when config says 3", () => {
+      const created = NOW - 10 * DAY; // past the 3-day config, short of 14
+      const result = autoCloseEligibility({
+        proposal: proposal({ category: "project_adoption", createdAt: created }),
+        votes: affirms,
+        config: CONFIG,
+        now: NOW,
+      });
+      expect(result.kind).toBe("wait_deliberation");
+      if (result.kind === "wait_deliberation") {
+        expect(result.readyAt).toBe(created + 14 * DAY);
+      }
+    });
+
+    it("passes an adoption proposal once 14 days have elapsed", () => {
+      const result = autoCloseEligibility({
+        proposal: proposal({
+          category: "project_adoption",
+          createdAt: NOW - 15 * DAY,
+        }),
+        votes: affirms,
+        config: CONFIG,
+        now: NOW,
+      });
+      expect(result.kind).toBe("passes");
+    });
+
+    it("uses the longer of config and 14 days (config wins when larger)", () => {
+      const result = autoCloseEligibility({
+        proposal: proposal({
+          category: "project_adoption",
+          createdAt: NOW - 15 * DAY,
+        }),
+        votes: affirms,
+        config: { proposalDeliberationDays: 20, proposalMinAffirms: 2 },
+        now: NOW,
+      });
+      expect(result.kind).toBe("wait_deliberation");
+    });
+
+    it("does not apply the floor to other categories", () => {
+      const result = autoCloseEligibility({
+        proposal: proposal({ category: "config_change", createdAt: NOW - 4 * DAY }),
+        votes: affirms,
+        config: CONFIG,
+        now: NOW,
+      });
+      expect(result.kind).toBe("passes");
+    });
+  });
 });

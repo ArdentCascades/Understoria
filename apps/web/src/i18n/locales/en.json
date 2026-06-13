@@ -853,13 +853,46 @@
       "coorganizer_declined": "Co-organizer invitation declined",
       "coorganizer_revoked": "Co-organizer invitation revoked",
       "announcement": "Update posted",
-      "work_day_scheduled": "Work day scheduled"
+      "work_day_scheduled": "Work day scheduled",
+      "adopted_by_community": "Stewardship handed on by community decision"
     },
     "workDays": {
       "heading": "Upcoming work days",
       "scheduleButton": "Schedule a work day",
       "itemAt": "at {{location}}",
       "localLinkHint": "Work days are community events connected to this project on this node only. Peer nodes see the event — never the project connection."
+    },
+    "adoptionBanner": "The community is deciding on new stewardship for this project."
+  },
+  "adoption": {
+    "section": {
+      "title": "Community stewardship",
+      "intro": "This project's organizer hasn't been active here in a while. The community can keep it alive by agreeing on a new primary organizer. Offering means taking on what the organizer role carries — invitations, archiving, handoffs.",
+      "rationaleLabel": "Why you're offering",
+      "rationalePlaceholder": "What's your connection to this project, and what would you keep going?",
+      "submit": "Offer to take this on",
+      "notice": "Your offer opens a community proposal. It stays open at least {{days}} days, and closes quietly if the current organizer is active again."
+    },
+    "card": {
+      "proposedSteward": "Offering to organize: {{name}}",
+      "quietSince": "No organizer activity on this project since {{when}}.",
+      "voidNote": "If the current organizer is active again before this closes, it closes without effect — no questions asked.",
+      "execute": "Close as passed and hand on stewardship",
+      "executing": "Handing on…",
+      "imHere": "I'm still here",
+      "imHereHint": "One tap closes this proposal. No explanation needed."
+    },
+    "toast": {
+      "filed": "Your offer is open for the community to weigh in.",
+      "executed": "Stewardship handed on. The previous organizer stays on as co-organizer.",
+      "voided": "The organizer has been active again, so this closed without effect."
+    },
+    "attention": {
+      "title": "The community is looking after \"{{projectTitle}}\"",
+      "body": "A proposal is open to add a new primary organizer while you're away. If you're around, one tap closes it."
+    },
+    "closedReason": {
+      "presence": "Closed without effect — the organizer is active again."
     }
   },
   "myTasks": {
@@ -1708,7 +1741,8 @@
     },
     "category": {
       "config_change": "Config change",
-      "dispute": "Dispute"
+      "dispute": "Dispute",
+      "project_adoption": "Project stewardship"
     },
     "reversibility": {
       "easy": "Easy to reverse",

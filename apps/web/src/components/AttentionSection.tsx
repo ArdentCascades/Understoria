@@ -23,6 +23,7 @@ import {
   unclaimProjectTask,
 } from "@/db/projects";
 import { respondToCoOrganizerInvitation } from "@/db/coorgInvitations";
+import { withdrawAdoptionAsPresent } from "@/db/adoption";
 import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
 import { usePendingAction } from "@/lib/usePendingAction";
@@ -61,6 +62,7 @@ export function AttentionSection() {
     nodeId, lockState,
     coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
     events, eventRsvps, eventCancellations,
+    proposals,
     blockedKeys,
   } = useApp();
   const { t } = useTranslation();
@@ -90,13 +92,14 @@ export function AttentionSection() {
         events,
         eventRsvps,
         eventCancellations,
+        proposals,
         config: nodeConfig,
         blockedKeys,
       }),
     [
       currentMember, posts, projects, projectTasks, members, vouches,
       coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
-      events, eventRsvps, eventCancellations,
+      events, eventRsvps, eventCancellations, proposals,
       nodeConfig, blockedKeys,
     ],
   );
@@ -126,6 +129,22 @@ export function AttentionSection() {
     if (!currentMember) return;
     try {
       await run(() => unclaimProjectTask(taskId, currentMember.publicKey));
+    } catch (err) {
+      showToast(humanizeError(err), "error");
+    }
+  }
+
+  // "I'm still here" — the sitting primary closes a community-adoption
+  // proposal with one tap, no explanation. Reading is untracked, so this
+  // is how a returning organizer registers presence and stops the
+  // transfer.
+  async function handleImStillHere(proposalId: string) {
+    if (!currentMember) return;
+    try {
+      await run(() =>
+        withdrawAdoptionAsPresent(proposalId, currentMember.publicKey),
+      );
+      showToast(t("adoption.toast.voided"));
     } catch (err) {
       showToast(humanizeError(err), "error");
     }
@@ -595,6 +614,42 @@ export function AttentionSection() {
                   </span>
                   <RowChevron />
                 </Link>
+              </li>
+            );
+          }
+          if (item.kind === "project_adoption_proposed") {
+            return (
+              <li
+                key={`adoption_${item.proposalId}`}
+                className="rounded-lg bg-canopy-50 px-3 py-1.5 dark:bg-canopy-950/40"
+              >
+                <Link
+                  to={item.deepLink}
+                  className="flex min-h-[44px] items-center gap-2 transition-colors"
+                >
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
+                      {t("adoption.attention.title", {
+                        projectTitle: item.projectTitle,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-600 dark:text-moss-300">
+                      {t("adoption.attention.body")}
+                    </span>
+                  </span>
+                  <RowChevron />
+                </Link>
+                <div className="mt-1 flex justify-end">
+                  <button
+                    type="button"
+                    className="btn-secondary text-sm"
+                    disabled={pending}
+                    onClick={() => handleImStillHere(item.proposalId)}
+                  >
+                    {t("adoption.card.imHere")}
+                  </button>
+                </div>
               </li>
             );
           }

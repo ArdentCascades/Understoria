@@ -853,13 +853,46 @@
       "coorganizer_declined": "Invitación de co-organizador rechazada",
       "coorganizer_revoked": "Invitación de co-organizador revocada",
       "announcement": "Novedad publicada",
-      "work_day_scheduled": "Jornada de trabajo programada"
+      "work_day_scheduled": "Jornada de trabajo programada",
+      "adopted_by_community": "Custodia transferida por decisión comunitaria"
     },
     "workDays": {
       "heading": "Próximas jornadas de trabajo",
       "scheduleButton": "Programar una jornada de trabajo",
       "itemAt": "en {{location}}",
       "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto."
+    },
+    "adoptionBanner": "La comunidad está decidiendo sobre una nueva custodia para este proyecto."
+  },
+  "adoption": {
+    "section": {
+      "title": "Custodia comunitaria",
+      "intro": "Quien organiza este proyecto no ha estado activo aquí desde hace un tiempo. La comunidad puede mantenerlo vivo acordando un nuevo organizador principal. Ofrecerte significa asumir lo que conlleva el rol de organizador: invitaciones, archivar, transferencias.",
+      "rationaleLabel": "Por qué te ofreces",
+      "rationalePlaceholder": "¿Cuál es tu conexión con este proyecto, y qué mantendrías en marcha?",
+      "submit": "Ofrecerme a asumirlo",
+      "notice": "Tu ofrecimiento abre una propuesta comunitaria. Permanece abierta al menos {{days}} días, y se cierra discretamente si quien organiza vuelve a estar activo."
+    },
+    "card": {
+      "proposedSteward": "Se ofrece a organizar: {{name}}",
+      "quietSince": "Sin actividad de organización en este proyecto desde {{when}}.",
+      "voidNote": "Si quien organiza vuelve a estar activo antes de que esto se cierre, se cierra sin efecto, sin preguntas.",
+      "execute": "Cerrar como aprobada y transferir la custodia",
+      "executing": "Transfiriendo…",
+      "imHere": "Sigo aquí",
+      "imHereHint": "Un toque cierra esta propuesta. No hace falta explicación."
+    },
+    "toast": {
+      "filed": "Tu ofrecimiento está abierto para que la comunidad opine.",
+      "executed": "Custodia transferida. Quien organizaba antes sigue como co-organizador.",
+      "voided": "Quien organiza ha vuelto a estar activo, así que esto se cerró sin efecto."
+    },
+    "attention": {
+      "title": "La comunidad está cuidando de \"{{projectTitle}}\"",
+      "body": "Hay una propuesta abierta para añadir un nuevo organizador principal mientras no estás. Si andas por aquí, un toque la cierra."
+    },
+    "closedReason": {
+      "presence": "Cerrada sin efecto: quien organiza ha vuelto a estar activo."
     }
   },
   "myTasks": {
@@ -1708,7 +1741,8 @@
     },
     "category": {
       "config_change": "Cambio de configuración",
-      "dispute": "Disputa"
+      "dispute": "Disputa",
+      "project_adoption": "Custodia del proyecto"
     },
     "reversibility": {
       "easy": "Fácil de revertir",

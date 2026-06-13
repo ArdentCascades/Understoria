@@ -64,6 +64,8 @@ import {
 import { getSecretKey, type LockState } from "@/db/secrets";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { listLinksForProject } from "@/db/eventProjectLinks";
+import { fileAdoptionProposal, lastOrganizerActivityAt } from "@/db/adoption";
+import { ADOPTION_MIN_DELIBERATION_DAYS } from "@/lib/autoCloseProposals";
 import { humanizeError } from "@/lib/humanizeError";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
@@ -99,6 +101,7 @@ import type {
   EventProjectLinkRow,
   Member,
   Project,
+  ProjectAdoptionPayload,
   ProjectCategory,
   ProjectTask,
   Urgency,
@@ -280,6 +283,23 @@ export default function ProjectDetailPage() {
     }
     return ids;
   }, [proposals]);
+
+  // Open community-adoption proposal for this project, if any — drives
+  // the governance-in-motion banner and suppresses a second filing.
+  // Read from the proposals already in AppContext (small list).
+  const openAdoption = useMemo(() => {
+    if (!project) return null;
+    for (const p of proposals) {
+      if (p.category !== "project_adoption" || p.status !== "open") continue;
+      try {
+        const payload = JSON.parse(p.payload) as ProjectAdoptionPayload;
+        if (payload.projectId === project.id) return p;
+      } catch {
+        // Skip malformed payloads.
+      }
+    }
+    return null;
+  }, [proposals, project]);
 
   const memberMap = useMemo(
     () => new Map(members.map((m) => [m.publicKey, m.displayName])),
@@ -558,6 +578,24 @@ export default function ProjectDetailPage() {
               onRun={run}
             />
           )}
+
+          {/* Community stewardship offer — shown to anyone who isn't the
+              sitting primary (co-organizers included; they're natural
+              candidates), once the primary has been quiet long enough and
+              no offer is already open. The quiet-period gate lives inside
+              the section. Adoption is allowed on completed projects (so a
+              new primary can archive), only archived is excluded. */}
+          {currentMember &&
+            !isPrimaryOrganizer &&
+            !openAdoption &&
+            project.status !== "archived" && (
+              <AdoptionSection
+                project={project}
+                currentKey={currentMember.publicKey}
+                nodeId={nodeId}
+                onRun={run}
+              />
+            )}
         </aside>
 
         <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0">
@@ -568,6 +606,18 @@ export default function ProjectDetailPage() {
             >
               {error}
             </p>
+          )}
+
+          {/* Governance-in-motion banner — anyone viewing sees that the
+              community is deciding on new stewardship. No push, no badge;
+              the proposal in Decisions is where it's acted on. */}
+          {openAdoption && (
+            <Link
+              to="/proposals"
+              className="mb-4 block rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 underline-offset-2 hover:underline dark:bg-canopy-950/40 dark:text-canopy-100"
+            >
+              {t("projects.adoptionBanner")}
+            </Link>
           )}
 
           <AnnouncementSection
@@ -2666,6 +2716,100 @@ function HandoffSection({
             : t("projects.handoff.submit")}
         </button>
       </div>
+    </section>
+  );
+}
+
+// Community stewardship offer — the AdoptionSection. Self-nomination
+// only: the member offers to take on the primary role of a project whose
+// organizer has gone quiet. The quiet-period gate is checked here
+// (hidden entirely when unmet — never "this organizer is absent" shaming)
+// and re-enforced in `fileAdoptionProposal`. All copy frames the project,
+// never the person.
+function AdoptionSection({
+  project,
+  currentKey,
+  nodeId,
+  onRun,
+}: {
+  project: Project;
+  currentKey: string;
+  nodeId: string;
+  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+}) {
+  const { t } = useTranslation();
+  const { nodeConfig } = useApp();
+  const { showToast } = useToast();
+  const { pending, run: runWithPending } = usePendingAction();
+  const [rationale, setRationale] = useState("");
+
+  const lastActivity = useLiveQuery(
+    () => lastOrganizerActivityAt(project.id, project.organizerKey),
+    [project.id, project.organizerKey],
+    undefined,
+  );
+  // Render nothing while the proxy loads or while the primary is still
+  // within the quiet window — the offer surfaces only once the project
+  // has genuinely gone quiet.
+  if (lastActivity === undefined) return null;
+  const quietCutoff =
+    Date.now() - nodeConfig.adoptionQuietDays * 24 * 60 * 60 * 1000;
+  const quietMet = lastActivity === null || lastActivity <= quietCutoff;
+  if (!quietMet) return null;
+
+  const noticeDays = Math.max(
+    nodeConfig.proposalDeliberationDays,
+    ADOPTION_MIN_DELIBERATION_DAYS,
+  );
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        {t("adoption.section.title")}
+      </h2>
+      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
+        {t("adoption.section.intro")}
+      </p>
+      <label className="mb-2 block">
+        <span className="mb-1 block text-sm font-medium">
+          {t("adoption.section.rationaleLabel")}
+        </span>
+        <textarea
+          className="input min-h-20"
+          value={rationale}
+          onChange={(e) => setRationale(e.target.value)}
+          maxLength={1000}
+          placeholder={t("adoption.section.rationalePlaceholder")}
+        />
+      </label>
+      <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
+        {t("adoption.section.notice", { days: noticeDays })}
+      </p>
+      <button
+        type="button"
+        className="btn-secondary"
+        disabled={pending || !rationale.trim()}
+        aria-busy={pending}
+        onClick={() => {
+          if (!rationale.trim()) return;
+          void runWithPending(async () => {
+            const result = await onRun(() =>
+              fileAdoptionProposal({
+                projectId: project.id,
+                proposerKey: currentKey,
+                rationale,
+                nodeId,
+              }),
+            );
+            if (result) {
+              showToast(t("adoption.toast.filed"));
+              setRationale("");
+            }
+          });
+        }}
+      >
+        {t("adoption.section.submit")}
+      </button>
     </section>
   );
 }
