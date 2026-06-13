@@ -375,6 +375,15 @@ effectiveCoOrganizerKeys(project) =
 > lens. What's genuinely deferred is remote, *signed* provenance for
 > the two row-less transitions: a real step-down / handoff record
 > type, worth doing if and when projects themselves federate.
+>
+> A **third** row-less transition joins these (plan 11,
+> `docs/project-adoption.md`): `adopted_by_community` flips
+> `Project.organizerKey` to a community-chosen primary and demotes the
+> old one into the array, exactly like `handoffOrganizer` — but driven
+> by a passed `project_adoption` proposal rather than the primary's own
+> choice. It changes `organizerKey`, so a co-organizer invitation
+> issued by the new primary verifies on the flipped local row; it
+> leaves no signed record of its own, the same deferred-provenance gap.
 
 ### Grandfather migration
 

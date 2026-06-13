@@ -40,4 +40,5 @@ export const ATTENTION_EMOJI: Record<AttentionItem["kind"], string> = {
   event_today: "\u{1F4C5}", // 📅
   event_cancelled: "\u{1F6AB}", // 🚫
   event_capacity_reached: "\u{1F465}", // 👥
+  project_adoption_proposed: "\u{1F91D}", // 🤝
 };

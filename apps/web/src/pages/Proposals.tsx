@@ -13,9 +13,14 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { useToast } from "@/state/ToastContext";
 import { formatHours, formatRelativeTime, shortKey } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 import { closeProposal } from "@/db/proposals";
+import {
+  executeAdoptionProposal,
+  withdrawAdoptionAsPresent,
+} from "@/db/adoption";
 import { castVote } from "@/db/votes";
 import { currentMemberVote, tallyVotes, type Tally } from "@/lib/votes";
 import {
@@ -23,10 +28,12 @@ import {
   type AutoCloseEligibility,
 } from "@/lib/autoCloseProposals";
 import { usePendingAction } from "@/lib/usePendingAction";
+import { humanizeError } from "@/lib/humanizeError";
 import type {
   DisputePayload,
   ImpactReflection,
   Proposal,
+  ProjectAdoptionPayload,
   ProposalStatus,
   Vote,
   VoteChoice,
@@ -227,6 +234,7 @@ function ProposalCard({
   eligibility: AutoCloseEligibility;
 }) {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [closing, setClosing] = useState<
     "passed" | "rejected" | "withdrawn" | null
   >(null);
@@ -238,11 +246,80 @@ function ProposalCard({
     ? currentMemberVote(currentMemberKey, proposalVotes)
     : null;
 
+  const isAdoption = proposal.category === "project_adoption";
+  const adoptionPayload = useMemo<ProjectAdoptionPayload | null>(() => {
+    if (!isAdoption) return null;
+    try {
+      return JSON.parse(proposal.payload) as ProjectAdoptionPayload;
+    } catch {
+      return null;
+    }
+  }, [isAdoption, proposal.payload]);
+  // The sitting primary's one-tap cancel is shown to them on the open
+  // card (mirrors the attention-rail action). Reading is untracked, so
+  // this is how a returning organizer registers presence here.
+  const showImStillHere =
+    proposal.status === "open" &&
+    adoptionPayload !== null &&
+    currentMemberKey === adoptionPayload.sittingPrimaryKey;
+
+  // A "passed" outcome on an adoption proposal must flip the project,
+  // not just stamp the row — so both the consensus banner and the manual
+  // record-outcome path route through `executeAdoptionProposal`.
+  // Governance state and project state can then never diverge. The
+  // presence re-check inside may "void" instead, which is a kind outcome,
+  // not an error.
+  async function executePassed(consensusReason: string) {
+    if (isAdoption) {
+      const result = await executeAdoptionProposal(
+        proposal.id,
+        currentMemberKey ?? "",
+      );
+      showToast(
+        result.kind === "voided"
+          ? t("adoption.toast.voided")
+          : t("adoption.toast.executed"),
+      );
+      return result;
+    }
+    return closeProposal(proposal.id, "passed", consensusReason);
+  }
+
   async function handleClose() {
     if (!closing) return;
-    await run(() => closeProposal(proposal.id, closing, reason));
+    try {
+      if (closing === "passed") {
+        await run(() =>
+          executePassed(reason || t("proposals.closedReason.consensus")),
+        );
+      } else {
+        await run(() => closeProposal(proposal.id, closing, reason));
+      }
+    } catch (err) {
+      showToast(humanizeError(err), "error");
+    }
     setClosing(null);
     setReason("");
+  }
+
+  async function handleConsensusPass() {
+    try {
+      await run(() => executePassed(t("proposals.closedReason.consensus")));
+    } catch (err) {
+      showToast(humanizeError(err), "error");
+    }
+  }
+
+  async function handleImStillHere() {
+    if (!currentMemberKey) return;
+    try {
+      await run(() =>
+        withdrawAdoptionAsPresent(proposal.id, currentMemberKey),
+      );
+      showToast(t("adoption.toast.voided"));
+    } catch (err) {
+      showToast(humanizeError(err), "error");
+    }
   }
 
   return (
@@ -268,6 +345,12 @@ function ProposalCard({
         <DisputePayloadView
           payload={proposal.payload}
           postId={proposal.disputePostId}
+          nameByKey={nameByKey}
+        />
+      )}
+      {adoptionPayload && (
+        <ProjectAdoptionPayloadView
+          payload={adoptionPayload}
           nameByKey={nameByKey}
         />
       )}
@@ -350,22 +433,35 @@ function ProposalCard({
               className="btn-primary text-sm"
               disabled={pending}
               aria-busy={pending}
-              onClick={() =>
-                void run(() =>
-                  closeProposal(
-                    proposal.id,
-                    "passed",
-                    t("proposals.closedReason.consensus"),
-                  ),
-                )
-              }
+              onClick={() => void handleConsensusPass()}
             >
               {pending
-                ? t("common.working")
-                : t("proposals.closeAsPassed")}
+                ? isAdoption
+                  ? t("adoption.card.executing")
+                  : t("common.working")
+                : isAdoption
+                  ? t("adoption.card.execute")
+                  : t("proposals.closeAsPassed")}
             </button>
           </div>
         )}
+
+      {showImStillHere && (
+        <div className="mt-4 rounded-xl border border-canopy-200 bg-canopy-50/60 p-3 dark:border-canopy-800 dark:bg-canopy-950/30">
+          <p className="mb-2 text-xs text-canopy-900 dark:text-canopy-100">
+            {t("adoption.card.imHereHint")}
+          </p>
+          <button
+            type="button"
+            className="btn-secondary text-sm"
+            disabled={pending}
+            aria-busy={pending}
+            onClick={() => void handleImStillHere()}
+          >
+            {t("adoption.card.imHere")}
+          </button>
+        </div>
+      )}
 
       {proposal.status === "open" && canCloseOpen && (
         <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
@@ -790,6 +886,44 @@ function ConfigChangePayload({ payload }: { payload: string }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function ProjectAdoptionPayloadView({
+  payload,
+  nameByKey,
+}: {
+  payload: ProjectAdoptionPayload;
+  nameByKey: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const stewardName =
+    nameByKey.get(payload.proposedPrimaryKey) ?? t("common.memberFallback");
+  return (
+    <div className="mt-3 rounded-xl border border-canopy-200 bg-canopy-50/50 px-3 py-2 text-xs dark:border-canopy-900 dark:bg-canopy-950/20">
+      <p className="font-semibold text-canopy-900 dark:text-canopy-100">
+        {t("adoption.card.proposedSteward", { name: stewardName })}
+      </p>
+      {payload.lastOrganizerActivityAt !== null && (
+        <p className="mt-1 text-canopy-800 dark:text-canopy-200">
+          {t("adoption.card.quietSince", {
+            when: formatRelativeTime(payload.lastOrganizerActivityAt),
+          })}
+        </p>
+      )}
+      <Link
+        to={`/project/${payload.projectId}`}
+        className="mt-1 inline-block text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+      >
+        {payload.projectTitle}
+      </Link>
+      {/* The reassurance that this carries no penalty if the organizer
+          returns — the cancel is "I'm still here," never "justify your
+          absence." */}
+      <p className="mt-2 italic text-canopy-700 dark:text-canopy-300">
+        {t("adoption.card.voidNote")}
+      </p>
     </div>
   );
 }

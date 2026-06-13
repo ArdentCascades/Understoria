@@ -218,6 +218,16 @@ export interface NodeConfig {
    *  vouch system uses for "trusted" status. */
   proposalMinAffirms: number;
   /**
+   * Plan 11 — days a project's primary organizer must be without any
+   * logged activity on that project before the community may file an
+   * adoption proposal to install a new primary. Stewardship cadence,
+   * not emergency response: default 60 (≈4× `taskNeedsHelpDays`).
+   * Measured only from `projectActivity` rows (reads are deliberately
+   * untracked), so it can under-count a silently-active primary —
+   * mitigated by the notice item and the always-available cancel.
+   */
+  adoptionQuietDays: number;
+  /**
    * Auto-confirm window for `awaiting_confirmation` posts and project
    * tasks. After this many hours without a member confirmation, the
    * node's system key signs the helped-side signature so credit can
@@ -263,6 +273,7 @@ export const DEFAULT_NODE_CONFIG: NodeConfig = {
   taskCheckInGraceDays: 2,
   proposalDeliberationDays: 3,
   proposalMinAffirms: 2,
+  adoptionQuietDays: 60,
   autoConfirmHours: 168,
   customMilestones: [],
   inviteOnly: false,
@@ -548,7 +559,13 @@ export type ProjectActivityType =
   // is a local Dexie table read only by the project history timeline.
   // The work-day LINK itself lives in a separate local-only table
   // (`eventProjectLinks`) and never enters the outbox or the wire.
-  | "work_day_scheduled";
+  | "work_day_scheduled"
+  // Local-only: the community installed a new primary organizer through
+  // a `project_adoption` proposal (plan 11). Distinct from
+  // `organizer_handoff` on purpose — handoff means the primary chose;
+  // adoption means the community acted while they were away. Never a
+  // wire change (ProjectActivity is local-only).
+  | "adopted_by_community";
 
 export interface ProjectActivity {
   id: string;
@@ -587,7 +604,15 @@ export type ProposalKind = "proposal" | "dispute";
  * exchange details so the governance row is self-contained even
  * if the underlying post is later modified.
  */
-export type ProposalCategory = "config_change" | "dispute";
+export type ProposalCategory =
+  | "config_change"
+  | "dispute"
+  // Community stewardship of an orphaned project — when a primary
+  // organizer has gone quiet, the community can install a new primary
+  // through a proposal (the one role transition that happens ABOUT
+  // someone who isn't there). Rides `kind: "proposal"`; see
+  // `docs/project-adoption.md`.
+  | "project_adoption";
 
 export type ReversibilityTier = "easy" | "moderate" | "hard";
 
@@ -668,6 +693,43 @@ export interface DisputePayload {
   recipientKey: string;
   /** When the original post was created. */
   postCreatedAt: number;
+}
+
+/**
+ * Payload shape for `project_adoption` proposals — a community offer to
+ * become a quiet project's new primary organizer. Stored as JSON inside
+ * `Proposal.payload`, following the same snapshot discipline as
+ * `DisputePayload`: the file-time snapshots (`projectTitle`,
+ * `sittingPrimaryKey`) keep the governance row honest after the flip and
+ * let execution detect "stewardship has changed since this was filed."
+ * See `docs/project-adoption.md`.
+ *
+ * Adoption is a LOCAL governance act — projects never federate, so
+ * `organizerKey` lives only on the local Project row, in the same
+ * consistency domain as proposals and votes. No new wire records.
+ */
+export interface ProjectAdoptionPayload {
+  projectId: string;
+  /** File-time snapshot of the project title (for honest display after
+   *  the project may have changed). */
+  projectTitle: string;
+  /** The member offering to take on the primary role — always equal to
+   *  the proposer (`proposerKey`); adoption is self-nomination, never
+   *  nominating someone else (GOVERNANCE.md §4). */
+  proposedPrimaryKey: string;
+  /** File-time snapshot of `Project.organizerKey` — the quiet primary
+   *  being demoted (not removed). Execution refuses if the project's
+   *  current `organizerKey` no longer matches this. */
+  sittingPrimaryKey: string;
+  /** Required free-text: the offerer's connection to the project and
+   *  what they'd keep going. Carries the social weight in place of an
+   *  impact reflection. */
+  rationale: string;
+  /** File-time snapshot of the most recent organizer-authored activity
+   *  timestamp on the project (or `null` if none), for the "quiet
+   *  since" display. A proxy: task edits/reorders write no activity
+   *  row, so this can under-count a silently-active primary. */
+  lastOrganizerActivityAt: number | null;
 }
 
 /**
@@ -788,7 +850,12 @@ export interface TaskComment {
 /**
  * Canonical, signed by the inviter (the primary organizer). The
  * `inviterKey` MUST equal `Project.organizerKey` at issue time —
- * verifiers re-check that against the project row.
+ * verifiers re-check that against the project row. `organizerKey`
+ * legitimately changes two ways: an `organizer_handoff` (the primary
+ * chose) and an `adopted_by_community` flip (the community installed a
+ * new primary while the old one was away — see `docs/project-adoption.md`);
+ * after either, the new primary's invitations pass the issue-time check
+ * on their own flipped row and verify cleanly everywhere.
  */
 export interface CoOrganizerInvitationPayload {
   projectId: string;

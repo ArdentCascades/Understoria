@@ -57,6 +57,8 @@ export async function getNodeConfig(nodeId: string): Promise<NodeConfig> {
       DEFAULT_NODE_CONFIG.proposalDeliberationDays,
     proposalMinAffirms:
       row.proposalMinAffirms ?? DEFAULT_NODE_CONFIG.proposalMinAffirms,
+    adoptionQuietDays:
+      row.adoptionQuietDays ?? DEFAULT_NODE_CONFIG.adoptionQuietDays,
     autoConfirmHours:
       row.autoConfirmHours ?? DEFAULT_NODE_CONFIG.autoConfirmHours,
     customMilestones: row.customMilestones ?? [],
@@ -145,6 +147,18 @@ function validate(config: NodeConfig): NodeConfig {
   ) {
     throw new InvalidNodeConfigError(
       "Proposal minimum affirms must be a whole number >= 1.",
+    );
+  }
+  // Adoption quiet period: whole days, with a floor of 7 so a community
+  // can't set a window short enough to make a role transfer over an
+  // absent member's head trivially winnable (the 14-day deliberation
+  // floor in autoCloseProposals.ts is the other half of this guard).
+  if (
+    !Number.isInteger(config.adoptionQuietDays) ||
+    config.adoptionQuietDays < 7
+  ) {
+    throw new InvalidNodeConfigError(
+      "Adoption quiet period must be a whole number of days >= 7.",
     );
   }
   // Auto-confirm window: integer hours, 0 = disabled. Upper bound

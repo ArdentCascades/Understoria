@@ -20,7 +20,9 @@ import type {
   NodeConfig,
   Post,
   Project,
+  ProjectAdoptionPayload,
   ProjectTask,
+  Proposal,
 } from "@/types";
 import { canClaimTask, isOrganizer } from "@/db/projects";
 import type { SignedVouch } from "@/lib/vouch";
@@ -167,6 +169,21 @@ export type AttentionItem =
       capacity: number;
       deepLink: string;
       createdAt: number;
+    }
+  | {
+      /**
+       * A community-adoption proposal is open for a project the current
+       * member is the sitting primary organizer of — a role transfer is
+       * being decided while they're away. Computed ONLY for that member
+       * (plan 11), tier 1: a decision is waiting on you, and an inline
+       * "I'm still here" closes it. Pull-only; no push, no badge.
+       */
+      kind: "project_adoption_proposed";
+      proposalId: string;
+      projectId: string;
+      projectTitle: string;
+      deepLink: string;
+      createdAt: number;
     };
 
 // Ordering rationale: when a member opens the app, what needs them
@@ -195,6 +212,7 @@ export const KIND_PRIORITY: Record<AttentionItem["kind"], number> = {
   confirm_exchange: 0,
   confirm_task: 0,
   coorganizer_invitation_received: 1,
+  project_adoption_proposed: 1,
   task_check_in: 2,
   event_today: 3,
   event_cancelled: 4,
@@ -220,6 +238,11 @@ export interface AttentionInput {
   coorgInvitations?: readonly CoOrganizerInvitation[];
   coorgInvitationResponses?: readonly CoOrganizerInvitationResponse[];
   coorgInvitationRevocations?: readonly CoOrganizerInvitationRevocation[];
+  /** Governance proposals on this node — feeds the
+   *  `project_adoption_proposed` item (computed only for the sitting
+   *  primary of an orphaned project). Optional so callers that don't
+   *  read proposals keep their existing behaviour. */
+  proposals?: readonly Proposal[];
   /** Per-node thresholds for the private "still on it?" nudge.
    *  Optional so the `task_check_in` items just don't surface
    *  when the caller can't supply config (tests, edge cases). */
@@ -535,6 +558,35 @@ export function computeAttentionItems(
         inviterKey: invitation.inviterKey,
         expiresAt: invitation.expiresAt,
         createdAt: invitation.createdAt,
+      });
+    }
+  }
+
+  // Plan 11 — a community-adoption proposal is open for a project this
+  // member is the sitting primary of. Computed only for that member: a
+  // role transfer over their head is being decided while they're "away,"
+  // and the rail is how a returning primary discovers it (reading the
+  // proposal is the only thing that even registers presence, since reads
+  // aren't tracked). The inline "I'm still here" action lives in the
+  // renderer.
+  if (input.proposals && input.proposals.length > 0) {
+    for (const proposal of input.proposals) {
+      if (proposal.category !== "project_adoption") continue;
+      if (proposal.status !== "open") continue;
+      let payload: ProjectAdoptionPayload;
+      try {
+        payload = JSON.parse(proposal.payload) as ProjectAdoptionPayload;
+      } catch {
+        continue;
+      }
+      if (payload.sittingPrimaryKey !== currentMember.publicKey) continue;
+      items.push({
+        kind: "project_adoption_proposed",
+        proposalId: proposal.id,
+        projectId: payload.projectId,
+        projectTitle: payload.projectTitle,
+        deepLink: "/proposals",
+        createdAt: proposal.createdAt,
       });
     }
   }

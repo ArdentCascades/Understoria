@@ -21,9 +21,42 @@ import type {
   Member,
   Post,
   Project,
+  ProjectAdoptionPayload,
   ProjectTask,
+  Proposal,
 } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
+
+function adoptionProposal(
+  over: Partial<Proposal> & { sittingPrimaryKey: string },
+): Proposal {
+  const payload: ProjectAdoptionPayload = {
+    projectId: "proj-1",
+    projectTitle: "Community Fridge",
+    proposedPrimaryKey: "adoptee",
+    sittingPrimaryKey: over.sittingPrimaryKey,
+    rationale: "keeping it going",
+    lastOrganizerActivityAt: null,
+  };
+  return {
+    id: over.id ?? "adopt-1",
+    nodeId,
+    kind: "proposal",
+    category: "project_adoption",
+    reversibilityTier: "moderate",
+    title: "Community Fridge",
+    description: "keeping it going",
+    payload: JSON.stringify(payload),
+    proposerKey: "adoptee",
+    status: over.status ?? "open",
+    createdAt: 5000,
+    closedAt: null,
+    closedReason: null,
+    impactReflection: null,
+    disputePostId: null,
+    ...over,
+  };
+}
 
 const nodeId = "node_attn";
 
@@ -1305,5 +1338,58 @@ describe("computeAttentionItems", () => {
         items.some((i) => i.kind === "project_deadline_approaching"),
       ).toBe(true);
     });
+  });
+});
+
+describe("project_adoption_proposed", () => {
+  const me = member("primary");
+
+  it("surfaces only for the sitting primary of the project", () => {
+    const items = computeAttentionItems({
+      currentMember: me,
+      posts: [],
+      projects: [],
+      projectTasks: [],
+      members: [me],
+      proposals: [adoptionProposal({ sittingPrimaryKey: "primary" })],
+    });
+    const adoption = items.filter(
+      (i) => i.kind === "project_adoption_proposed",
+    );
+    expect(adoption).toHaveLength(1);
+    if (adoption[0].kind === "project_adoption_proposed") {
+      expect(adoption[0].projectTitle).toBe("Community Fridge");
+      expect(adoption[0].deepLink).toBe("/proposals");
+    }
+  });
+
+  it("does not surface for a member who is not the sitting primary", () => {
+    const items = computeAttentionItems({
+      currentMember: member("someone-else"),
+      posts: [],
+      projects: [],
+      projectTasks: [],
+      members: [],
+      proposals: [adoptionProposal({ sittingPrimaryKey: "primary" })],
+    });
+    expect(
+      items.some((i) => i.kind === "project_adoption_proposed"),
+    ).toBe(false);
+  });
+
+  it("drops once the proposal is closed", () => {
+    const items = computeAttentionItems({
+      currentMember: me,
+      posts: [],
+      projects: [],
+      projectTasks: [],
+      members: [me],
+      proposals: [
+        adoptionProposal({ sittingPrimaryKey: "primary", status: "withdrawn" }),
+      ],
+    });
+    expect(
+      items.some((i) => i.kind === "project_adoption_proposed"),
+    ).toBe(false);
   });
 });

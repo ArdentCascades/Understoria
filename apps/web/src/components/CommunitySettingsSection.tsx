@@ -56,6 +56,7 @@ export function CommunitySettingsSection() {
         taskCheckInGraceDays: Math.round(draft.taskCheckInGraceDays),
         proposalDeliberationDays: Math.round(draft.proposalDeliberationDays),
         proposalMinAffirms: Math.round(draft.proposalMinAffirms),
+        adoptionQuietDays: Math.round(draft.adoptionQuietDays),
         autoConfirmHours: Math.round(draft.autoConfirmHours),
         customMilestones: draft.customMilestones,
         inviteOnly: draft.inviteOnly ?? false,
