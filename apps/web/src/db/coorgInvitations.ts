@@ -195,6 +195,54 @@ export async function issueCoOrganizerInvitation(
   return invitation;
 }
 
+export interface IssueInvitationsForCloneInput {
+  projectId: string;
+  inviterKey: string;
+  inviterSecretKey: string;
+  inviteeKeys: readonly string[];
+  nodeId: string;
+  /** Override the clock — tests inject a deterministic timestamp. */
+  now?: number;
+}
+
+/**
+ * Re-issue co-organizer invitations for a freshly cloned project — one
+ * normal signed invitation per invitee, against the CLONE's id. The
+ * ethos-clean way to carry a recurring crew forward is to re-perform
+ * consent, never to copy `coOrganizerKeys`: a clone is a new trust
+ * context (new debits to sign as the helped party), so each person
+ * decides again (docs/co-organizer-invitations.md §2–§3).
+ *
+ * Per-key isolation: each invitation runs in its own try/catch and
+ * failures are COLLECTED, never re-thrown, so one blocked pair (or a
+ * self-invite that slipped through the candidate math) can't abort the
+ * rest. The cause is deliberately swallowed — the caller renders a
+ * single cause-free "some couldn't be sent" message so a missing
+ * invitation can't fingerprint a block (docs/blocking.md §6.1).
+ */
+export async function issueInvitationsForClone(
+  input: IssueInvitationsForCloneInput,
+): Promise<{ sent: string[]; failed: string[] }> {
+  const sent: string[] = [];
+  const failed: string[] = [];
+  for (const inviteeKey of input.inviteeKeys) {
+    try {
+      await issueCoOrganizerInvitation({
+        projectId: input.projectId,
+        inviterKey: input.inviterKey,
+        inviterSecretKey: input.inviterSecretKey,
+        inviteeKey,
+        nodeId: input.nodeId,
+        now: input.now,
+      });
+      sent.push(inviteeKey);
+    } catch {
+      failed.push(inviteeKey);
+    }
+  }
+  return { sent, failed };
+}
+
 // -- Respond (accept / decline) --------------------------------------------
 
 export interface RespondToCoOrganizerInvitationInput {

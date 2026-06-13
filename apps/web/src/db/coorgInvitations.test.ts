@@ -14,6 +14,7 @@ import {
   CoOrganizerInvitationError,
   effectiveCoOrganizerKeys,
   issueCoOrganizerInvitation,
+  issueInvitationsForClone,
   materializeAcceptedCoOrganizer,
   respondToCoOrganizerInvitation,
   revokeCoOrganizerInvitation,
@@ -52,6 +53,8 @@ async function reset() {
     db.coorgInvitations.clear(),
     db.coorgInvitationResponses.clear(),
     db.coorgInvitationRevocations.clear(),
+    db.blocks.clear(),
+    db.previouslyBlocked.clear(),
   ]);
 }
 
@@ -876,5 +879,101 @@ describe("materializeAcceptedCoOrganizer", () => {
     await materializeAcceptedCoOrganizer(invitation.id);
     const reloaded = (await db.projects.get(project.id))!;
     expect(reloaded.coOrganizerKeys).toEqual([]);
+  });
+});
+
+describe("issueInvitationsForClone", () => {
+  beforeEach(reset);
+
+  const DAY = 24 * 60 * 60 * 1000;
+
+  async function setupClone() {
+    const cloner = await createMember({ displayName: "Cloner" }, NODE);
+    const aya = await createMember({ displayName: "Aya" }, NODE);
+    const bo = await createMember({ displayName: "Bo" }, NODE);
+    const clonerSecret = (await db.secretKeys.get(cloner.publicKey))!.secretKey!;
+    const clone = await createProject(
+      cloner.publicKey,
+      {
+        title: "Community fridge (copy)",
+        description: "",
+        category: "infrastructure",
+        targetHours: 20,
+        deadline: null,
+        locationZone: "north",
+        tags: [],
+        templateId: null,
+      },
+      NODE,
+    );
+    return { cloner, clonerSecret, aya, bo, clone };
+  }
+
+  it("issues one invitation per invitee against the clone, from the cloner, with a 14-day TTL", async () => {
+    const { cloner, clonerSecret, aya, bo, clone } = await setupClone();
+    const result = await issueInvitationsForClone({
+      projectId: clone.id,
+      inviterKey: cloner.publicKey,
+      inviterSecretKey: clonerSecret,
+      inviteeKeys: [aya.publicKey, bo.publicKey],
+      nodeId: NODE,
+      now: 1000,
+    });
+    expect(new Set(result.sent)).toEqual(
+      new Set([aya.publicKey, bo.publicKey]),
+    );
+    expect(result.failed).toEqual([]);
+
+    const rows = await db.coorgInvitations
+      .where("projectId")
+      .equals(clone.id)
+      .toArray();
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      expect(row.inviterKey).toBe(cloner.publicKey);
+      expect(row.expiresAt).toBe(1000 + 14 * DAY);
+    }
+  });
+
+  it("collects a mutually-blocked invitee in `failed` while the rest are sent", async () => {
+    const { cloner, clonerSecret, aya, bo, clone } = await setupClone();
+    // The cloner has blocked Bo — the invitation must fail quietly.
+    await db.blocks.put({
+      id: "blk-1",
+      blockerKey: cloner.publicKey,
+      blockedKey: bo.publicKey,
+      createdAt: 1,
+      hideGovernance: false,
+      note: null,
+    });
+    const result = await issueInvitationsForClone({
+      projectId: clone.id,
+      inviterKey: cloner.publicKey,
+      inviterSecretKey: clonerSecret,
+      inviteeKeys: [aya.publicKey, bo.publicKey],
+      nodeId: NODE,
+      now: 1000,
+    });
+    expect(result.sent).toEqual([aya.publicKey]);
+    expect(result.failed).toEqual([bo.publicKey]);
+    // Only one row written — the blocked pair produced nothing.
+    expect(
+      await db.coorgInvitations.where("projectId").equals(clone.id).count(),
+    ).toBe(1);
+  });
+
+  it("collects a self-invite (clone primary) in `failed` without aborting the rest", async () => {
+    const { cloner, clonerSecret, aya, clone } = await setupClone();
+    const result = await issueInvitationsForClone({
+      projectId: clone.id,
+      inviterKey: cloner.publicKey,
+      inviterSecretKey: clonerSecret,
+      // The cloner themselves slipped in — the existing guard rejects it.
+      inviteeKeys: [cloner.publicKey, aya.publicKey],
+      nodeId: NODE,
+      now: 1000,
+    });
+    expect(result.sent).toEqual([aya.publicKey]);
+    expect(result.failed).toEqual([cloner.publicKey]);
   });
 });

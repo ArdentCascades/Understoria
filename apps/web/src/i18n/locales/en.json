@@ -816,7 +816,17 @@
       "button": "Clone project",
       "titlePlaceholder": "Title for the new copy",
       "submit": "Create clone",
-      "submitting": "Cloning..."
+      "submitting": "Cloning...",
+      "reinvite": {
+        "title": "Invite co-organizers again?",
+        "intro": "The original project had co-organizers. Fresh invitations go out for this new project — each person decides again. Nothing carries over automatically, and invitations expire after 14 days.",
+        "candidateAria": "Invite {{name}} to co-organize the new project",
+        "sourcePrimaryChip": "organized the original",
+        "skipHint": "Uncheck anyone you'd rather not invite right now — you can always invite people later from the project page.",
+        "sentToast_one": "Clone created — {{count}} invitation sent.",
+        "sentToast_other": "Clone created — {{count}} invitations sent.",
+        "partialToast": "Clone created. Some invitations couldn't be sent — you can invite people from the new project page."
+      }
     },
     "archive": {
       "button": "Archive project",
