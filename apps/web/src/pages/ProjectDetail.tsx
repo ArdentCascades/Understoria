@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   DndContext,
@@ -81,6 +81,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
 import { useFlipAnimation } from "@/lib/a11y/useFlipAnimation";
+import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { IconMessages } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
@@ -185,6 +186,66 @@ export default function ProjectDetailPage() {
           task.status === "awaiting_confirmation"),
     );
   }, [tasks, currentMember]);
+
+  // Task deep-links: a `#task-<id>` fragment (from the attention rail
+  // or the cross-project "tasks you're carrying" view) scrolls the
+  // named task into view, moves focus to its row, and gives it a
+  // brief, motion-safe highlight. Pull-only — the member tapped a row
+  // they opened; nothing pushes. The transient ring is a locator, not
+  // a status marker (solidarity-not-shame: no day counters, no
+  // "overdue" framing rides along).
+  const location = useLocation();
+  const reduced = useReducedMotion();
+  const [highlightTaskId, setHighlightTaskId] = useState<string | null>(null);
+  const [deepLinkAnnouncement, setDeepLinkAnnouncement] = useState("");
+  // The hash we've already scrolled to. Lets the member re-filter
+  // afterward without the effect snapping the list back.
+  const handledHashRef = useRef<string | null>(null);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const match = location.hash.match(/^#task-(.+)$/);
+    if (!match) {
+      handledHashRef.current = null;
+      return;
+    }
+    if (handledHashRef.current === location.hash) return;
+    const targetId = match[1];
+    // Not on this project, or live data is still hydrating — wait; the
+    // effect re-runs when `tasks` changes.
+    if (!tasks.some((task) => task.id === targetId)) return;
+    // Present but hidden by a filter or search. Clear them once,
+    // announce the reset, and let the next pass (visibleTasks changes)
+    // do the scroll. The explicit member intent ("show me this task")
+    // outranks the session-only filter.
+    if (!visibleTasks.some((task) => task.id === targetId)) {
+      setTaskFilter("all");
+      setQuery("");
+      setDebouncedQuery("");
+      setDeepLinkAnnouncement(t("projects.detail.taskDeepLink.filtersCleared"));
+      return;
+    }
+    const el = document.getElementById(`task-${targetId}`);
+    if (!el) return;
+    handledHashRef.current = location.hash;
+    el.scrollIntoView({
+      behavior: reduced ? "auto" : "smooth",
+      block: "center",
+    });
+    // preventScroll so focus doesn't jump-cut over the smooth scroll.
+    el.focus({ preventScroll: true });
+    setHighlightTaskId(targetId);
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(
+      () => setHighlightTaskId(null),
+      2000,
+    );
+  }, [location.hash, tasks, visibleTasks, reduced, t]);
+  useEffect(
+    () => () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    },
+    [],
+  );
   // Derive the set of comment ids with an open dispute proposal so
   // TaskComments can render the "Flagged" chip and hide the Flag
   // button. Computed in memory from the proposals already loaded in
@@ -573,8 +634,12 @@ export default function ProjectDetailPage() {
                     onRun={run}
                     flaggedCommentIds={flaggedCommentIds}
                     searchQuery={debouncedQuery}
+                    highlightTaskId={highlightTaskId}
                   />
                 )}
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                  {deepLinkAnnouncement}
+                </div>
               </>
             )}
           </section>
@@ -1006,6 +1071,7 @@ function TaskList({
   onRun,
   flaggedCommentIds,
   searchQuery,
+  highlightTaskId,
 }: {
   tasks: readonly ProjectTask[];
   visibleTasks: readonly ProjectTask[];
@@ -1018,6 +1084,10 @@ function TaskList({
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
   flaggedCommentIds: ReadonlySet<string>;
   searchQuery?: string;
+  /** Task whose row should carry the transient deep-link highlight,
+   *  or null. The `id="task-<id>"` anchor lives on every row already
+   *  (used by FollowsBadge's in-page jump); this only adds the ring. */
+  highlightTaskId?: string | null;
 }) {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -1190,7 +1260,16 @@ function TaskList({
       <>
         <ul className="flex flex-col gap-2">
           {visibleTasks.map((task, idx) => (
-            <li key={task.id} id={`task-${task.id}`}>
+            <li
+              key={task.id}
+              id={`task-${task.id}`}
+              tabIndex={-1}
+              className={
+                task.id === highlightTaskId
+                  ? "rounded-lg ring-2 ring-canopy-500 motion-safe:transition-shadow"
+                  : undefined
+              }
+            >
               {renderRow(task, idx)}
             </li>
           ))}
@@ -1275,6 +1354,12 @@ function TaskList({
               key={task.id}
               id={`task-${task.id}`}
               ref={registerFlipRow(task.id)}
+              tabIndex={-1}
+              className={
+                task.id === highlightTaskId
+                  ? "rounded-lg ring-2 ring-canopy-500 motion-safe:transition-shadow"
+                  : undefined
+              }
             >
               {renderRow(task, idx)}
             </li>

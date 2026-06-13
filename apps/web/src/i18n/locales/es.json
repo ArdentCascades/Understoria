@@ -592,6 +592,9 @@
           "done": "Ninguna tarea hecha aún.",
           "mine": "Aquí no tienes nada tomado ahora mismo."
         }
+      },
+      "taskDeepLink": {
+        "filtersCleared": "Mostrando todas las tareas para que la tarea enlazada sea visible."
       }
     },
     "taskFilters": {

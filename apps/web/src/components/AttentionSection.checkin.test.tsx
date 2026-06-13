@@ -193,4 +193,11 @@ describe("AttentionSection — task check-in ack", () => {
     expect(showToastMock).toHaveBeenCalledTimes(1);
     expect(showToastMock.mock.calls[0]?.[1]).toBe("error");
   });
+
+  it("deep-links the task line to the specific task on the project page", () => {
+    render(<AttentionSection />);
+    expect(
+      container.querySelector(`a[href="/project/proj-1#task-${TASK_ID}"]`),
+    ).not.toBeNull();
+  });
 });

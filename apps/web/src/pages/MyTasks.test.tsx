@@ -209,9 +209,16 @@ describe("MyTasksPage", () => {
     expect(text).not.toContain("Already finished");
     // Summary sentence covers both counts.
     expect(text).toContain("2 tasks across 2 projects");
-    // Rows deep-link to their project pages.
+    // Project headings link to the project page; task rows deep-link to
+    // the specific task so the project page can scroll to it.
     expect(container.querySelector('a[href="/project/p1"]')).not.toBeNull();
     expect(container.querySelector('a[href="/project/p2"]')).not.toBeNull();
+    expect(
+      container.querySelector('a[href="/project/p1#task-t1"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('a[href="/project/p2#task-t2"]'),
+    ).not.toBeNull();
   });
 
   it("labels submitted work as awaiting confirmation", () => {

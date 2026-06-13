@@ -592,6 +592,9 @@
           "done": "No tasks done yet.",
           "mine": "Nothing claimed by you here right now."
         }
+      },
+      "taskDeepLink": {
+        "filtersCleared": "Showing all tasks so the linked task is visible."
       }
     },
     "taskFilters": {

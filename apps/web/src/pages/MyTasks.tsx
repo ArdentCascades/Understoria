@@ -80,7 +80,7 @@ function TaskRow({ task, project }: { task: ProjectTask; project: Project }) {
   return (
     <li className="py-2">
       <Link
-        to={`/project/${project.id}`}
+        to={`/project/${project.id}#task-${task.id}`}
         className="-mx-2 block rounded-lg px-2 py-1 hover:bg-moss-50 dark:hover:bg-moss-900"
       >
         <span className="flex flex-wrap items-center gap-2">
