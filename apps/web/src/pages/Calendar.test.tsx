@@ -40,6 +40,7 @@ import CalendarPage from "./Calendar";
 import type {
   Event,
   EventCancellation,
+  EventProjectLinkRow,
   Exchange,
   Member,
   Post,
@@ -55,6 +56,7 @@ interface MockState {
   currentMember: Member | null;
   events: Event[];
   eventCancellations: EventCancellation[];
+  eventProjectLinks: EventProjectLinkRow[];
 }
 
 let mockState: MockState = blankState();
@@ -68,6 +70,7 @@ function blankState(): MockState {
     currentMember: null,
     events: [],
     eventCancellations: [],
+    eventProjectLinks: [],
   };
 }
 
@@ -340,6 +343,62 @@ describe("CalendarPage", () => {
     hrefs = linkHrefs();
     expect(hrefs).toContain("/events/ev_a");
     expect(hrefs).not.toContain("/project/p1");
+    vi.useRealTimers();
+  });
+
+  it("project filter narrows events to that project's linked work days", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.projects = [
+      makeProject({ id: "p1", title: "Fridge", deadline: day }),
+    ];
+    mockState.events = [
+      makeEvent({ id: "linked", title: "Linked work day", startsAt: day + 3 * 3_600_000 }),
+      makeEvent({ id: "unlinked", title: "Unrelated event", startsAt: day + 4 * 3_600_000 }),
+    ];
+    mockState.eventProjectLinks = [
+      { id: "l1", eventId: "linked", projectId: "p1", linkedBy: "x", createdAt: 0 },
+    ];
+    render(<CalendarPage />);
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => {
+      agendaPill!.click();
+    });
+
+    function eventHrefs() {
+      return Array.from(
+        container.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'),
+      ).map((a) => a.getAttribute("href"));
+    }
+
+    // No project filter: both events render.
+    expect(eventHrefs()).toContain("/events/linked");
+    expect(eventHrefs()).toContain("/events/unlinked");
+
+    // Select the project. The project <select> is the one with a "p1"
+    // option (the other select holds categories).
+    const projectSelect = Array.from(
+      container.querySelectorAll<HTMLSelectElement>("select"),
+    ).find((s) => Array.from(s.options).some((o) => o.value === "p1"));
+    expect(projectSelect, "expected the project filter select").toBeDefined();
+    act(() => {
+      projectSelect!.value = "p1";
+      projectSelect!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Now only the linked work day survives among events; the unlinked
+    // event is filtered out, and the project's own deadline still shows.
+    const hrefs = eventHrefs();
+    expect(hrefs).toContain("/events/linked");
+    expect(hrefs).not.toContain("/events/unlinked");
+    expect(
+      Array.from(
+        container.querySelectorAll<HTMLAnchorElement>('a[href="/project/p1"]'),
+      ).length,
+    ).toBeGreaterThan(0);
     vi.useRealTimers();
   });
 

@@ -63,6 +63,7 @@ import {
 } from "@/db/coorgInvitations";
 import { getSecretKey, type LockState } from "@/db/secrets";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
+import { listLinksForProject } from "@/db/eventProjectLinks";
 import { humanizeError } from "@/lib/humanizeError";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
@@ -79,6 +80,7 @@ import { creditHoursForTask } from "@/lib/timebank";
 import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure";
+import { startOfTodayMs } from "@/lib/calendar";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { EmptyState } from "@/components/EmptyState";
@@ -94,6 +96,7 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  EventProjectLinkRow,
   Member,
   Project,
   ProjectCategory,
@@ -575,6 +578,8 @@ export default function ProjectDetailPage() {
             currentKey={currentMember?.publicKey}
           />
 
+          <WorkDaysSection project={project} isOrg={isOrg} />
+
           <section className="mb-4">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("projects.detail.tasks")}
@@ -715,6 +720,101 @@ function capitalize(s: string): string {
 // column split (they live in different subtrees, so a ref would have to
 // be threaded through the whole page).
 const ANNOUNCEMENT_INPUT_ID = "project-announcement-input";
+
+// Render an event start as "<date> · <time>" in the active locale —
+// matches EventDetail's formatter. Local-clock display; the federated
+// record carries UTC epoch ms.
+function formatWorkDayWhen(ms: number, locale: string | undefined): string {
+  const d = new Date(ms);
+  return `${d.toLocaleDateString(locale)} · ${d.toLocaleTimeString(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+  })}`;
+}
+
+// "Upcoming work days" — community events linked to this project as work
+// days, on THIS node only (the link is local-only; peers see a plain
+// event — see db/eventProjectLinks.ts). Pull-only, no attention items.
+// Hidden entirely for a viewer who can neither see an upcoming work day
+// nor schedule one, so an empty list never shames a project that hasn't
+// held one (solidarity-not-shame).
+function WorkDaysSection({
+  project,
+  isOrg,
+}: {
+  project: Project;
+  isOrg: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { events, eventCancellations } = useApp();
+  const links = useLiveQuery(
+    () => listLinksForProject(project.id),
+    [project.id],
+    [] as EventProjectLinkRow[],
+  );
+  const canSchedule =
+    isOrg && project.status !== "completed" && project.status !== "archived";
+
+  const upcoming = useMemo(() => {
+    const linkedIds = new Set(links.map((l) => l.eventId));
+    if (linkedIds.size === 0) return [];
+    const cancelledIds = new Set(eventCancellations.map((c) => c.eventId));
+    // Keep multi-day events still running today (end-of-day comparison),
+    // mirroring lib/calendar.ts `entryIsPast`.
+    const today = startOfTodayMs(Date.now());
+    return events
+      .filter((e) => linkedIds.has(e.id))
+      .filter((e) => !cancelledIds.has(e.id))
+      .filter((e) => (e.endsAt ?? e.startsAt) >= today)
+      .sort((a, b) => a.startsAt - b.startsAt);
+  }, [links, events, eventCancellations]);
+
+  if (upcoming.length === 0 && !canSchedule) return null;
+
+  return (
+    <section className="mb-4">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+          {t("projects.workDays.heading")}
+        </h2>
+        {canSchedule && (
+          <button
+            type="button"
+            className="btn-secondary text-sm"
+            onClick={() => navigate(`/events/new?projectId=${project.id}`)}
+          >
+            {t("projects.workDays.scheduleButton")}
+          </button>
+        )}
+      </div>
+      {upcoming.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {upcoming.map((e) => (
+            <li key={e.id}>
+              <Link
+                to={`/events/${e.id}`}
+                className="card block transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-canopy-600/50"
+              >
+                <p className="font-medium">{e.title}</p>
+                <p className="mt-0.5 text-sm text-moss-600 dark:text-moss-300">
+                  {formatWorkDayWhen(e.startsAt, i18n.resolvedLanguage)}
+                  {e.location
+                    ? ` · ${t("projects.workDays.itemAt", { location: e.location })}`
+                    : ""}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* Honest federation footnote — the link is this node's view only. */}
+      <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
+        {t("projects.workDays.localLinkHint")}
+      </p>
+    </section>
+  );
+}
 
 // One-time, per-device completion moment — the project-closure twin of
 // Dashboard's `useNewlyReachedMilestones`. Pops once for any viewer when

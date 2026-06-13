@@ -309,6 +309,10 @@
   },
   "events": {
     "new": {
+      "workDayBannerTitle": "Scheduling a work day for {{project}}",
+      "workDayBannerBody": "This event will appear on the project page on this node. On peer nodes it appears as a regular community event — the project connection never federates. The title below is yours to edit before you sign.",
+      "workDayTitlePrefill": "Work day — {{project}}",
+      "workDayDescriptionPrefill": "A hands-on work session for {{project}}. Come for any part of it.",
       "title": "Create event",
       "subtitle": "An event is a signed, federated record. Names what you're committing to before you sign.",
       "titleField": "Title",
@@ -353,6 +357,8 @@
       "errorLocked": "Unlock this device with your passphrase before signing the event."
     },
     "detail": {
+      "projectLinkLabel": "Project",
+      "projectLinkLine": "Work day for {{project}}",
       "notFound": "We couldn't find that event on this node.",
       "backToCalendar": "← Back to calendar",
       "organizerLabel": "Organized by",
@@ -846,7 +852,14 @@
       "coorganizer_accepted": "Co-organizer invitation accepted",
       "coorganizer_declined": "Co-organizer invitation declined",
       "coorganizer_revoked": "Co-organizer invitation revoked",
-      "announcement": "Update posted"
+      "announcement": "Update posted",
+      "work_day_scheduled": "Work day scheduled"
+    },
+    "workDays": {
+      "heading": "Upcoming work days",
+      "scheduleButton": "Schedule a work day",
+      "itemAt": "at {{location}}",
+      "localLinkHint": "Work days are community events connected to this project on this node only. Peer nodes see the event — never the project connection."
     }
   },
   "myTasks": {

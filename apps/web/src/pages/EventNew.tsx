@@ -9,12 +9,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { createEvent, EVENT_START_GRACE_MS } from "@/db/events";
+import { scheduleProjectWorkDay } from "@/db/eventProjectLinks";
+import { isOrganizer } from "@/db/projects";
 import { getSecretKey } from "@/db/secrets";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
@@ -52,12 +54,27 @@ function defaultStartParts(): { date: string; time: string } {
 }
 
 export default function EventNewPage() {
-  const { currentMember, nodeId, lockState } = useApp();
+  const { currentMember, nodeId, lockState, projects } = useApp();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const initialStart = useMemo(defaultStartParts, []);
+
+  // Work-day context: when `?projectId=` resolves to a project this
+  // member organizes, the form becomes "Schedule a work day" — a banner
+  // appears, title/description/category seed once, and submit links the
+  // event to the project. A non-organizer (or an unknown id) gets the
+  // plain form; authority is re-checked again in the data layer, so a
+  // hand-crafted URL can never forge the link.
+  const projectIdParam = searchParams.get("projectId");
+  const workDayProject = useMemo(() => {
+    if (!projectIdParam || !currentMember) return null;
+    const p = projects.find((proj) => proj.id === projectIdParam);
+    if (!p || !isOrganizer(p, currentMember.publicKey)) return null;
+    return p;
+  }, [projectIdParam, projects, currentMember]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -71,6 +88,27 @@ export default function EventNewPage() {
   const [capacity, setCapacity] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Seed the work-day prefill exactly once, when the project first
+  // resolves (it may arrive a tick after mount as the live query
+  // settles). The ref guard means a member's own edits are never
+  // clobbered by a re-render. Location is deliberately NEVER prefilled —
+  // it's the threat-model-sensitive field and must be typed by hand.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (seededRef.current || !workDayProject) return;
+    seededRef.current = true;
+    setTitle(t("events.new.workDayTitlePrefill", { project: workDayProject.title }));
+    setDescription(
+      t("events.new.workDayDescriptionPrefill", { project: workDayProject.title }),
+    );
+    const cat = workDayProject.category;
+    setCategory(
+      (ALL_CATEGORIES as readonly string[]).includes(cat)
+        ? (cat as Category)
+        : "other",
+    );
+  }, [workDayProject, t]);
 
   if (!currentMember) return null;
 
@@ -126,7 +164,7 @@ export default function EventNewPage() {
       setSubmitting(true);
       const organizerKey = currentMember!.publicKey;
       const organizerSecretKey = await getSecretKey(organizerKey);
-      const event = await createEvent({
+      const eventInput = {
         title: trimmedTitle,
         description: description.trim(),
         category,
@@ -138,7 +176,16 @@ export default function EventNewPage() {
         organizerKey,
         organizerSecretKey,
         nodeId,
-      });
+      };
+      // When scheduling a work day, the same signed event is created and
+      // a local-only link is written in one transaction. Otherwise it's
+      // a plain event — the federated record is identical either way.
+      const event = workDayProject
+        ? await scheduleProjectWorkDay({
+            ...eventInput,
+            projectId: workDayProject.id,
+          })
+        : await createEvent(eventInput);
       showToast(t("events.new.created"));
       navigate(`/events/${event.id}`);
     } catch (err) {
@@ -163,6 +210,23 @@ export default function EventNewPage() {
           {t("events.new.subtitle")}
         </p>
       </header>
+
+      {workDayProject && (
+        <section
+          aria-labelledby="workday-banner-heading"
+          className="mx-auto mb-4 max-w-2xl rounded-2xl border border-canopy-200 bg-canopy-50 p-4 dark:border-canopy-900/50 dark:bg-canopy-950/30"
+        >
+          <h2
+            id="workday-banner-heading"
+            className="text-sm font-semibold text-canopy-900 dark:text-canopy-100"
+          >
+            {t("events.new.workDayBannerTitle", { project: workDayProject.title })}
+          </h2>
+          <p className="mt-1 text-sm text-canopy-900 dark:text-canopy-100">
+            {t("events.new.workDayBannerBody")}
+          </p>
+        </section>
+      )}
 
       <form
         onSubmit={handleSubmit}

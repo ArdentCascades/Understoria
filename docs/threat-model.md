@@ -699,6 +699,15 @@ We are not trying to protect against:
   Implementation shipped in PRs #186-#192 per
   `community-events.md` §13; this entry describes the surface as
   it now exists on the wire.
+  Project work days (the event⇄project link, `community-events.md`
+  §10.1) do NOT widen this surface: the link is a local-only Dexie
+  row, the `"event_project_link"` discriminator is rejected at the
+  `OutboxRow.kind` type level, and no new bytes cross any wire. A
+  linked event federates as a plain event — identical on the peer
+  wire to one created without a project. The only thing that can leak
+  a project↔event correlation is the organizer's own editable
+  free-text title, decided in front of the §3 signing card; no
+  `projectId` correlator is ever published.
 
 - **Member blocking is a local-only personal-relief surface.**
   *Shipped — `Block` and `previouslyBlocked` are local Dexie rows;
