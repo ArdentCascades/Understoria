@@ -245,8 +245,16 @@ function MonthChip({
     return (
       <Link
         to={entry.path}
-        aria-label={t("events.calendar.entryKindLabel")}
-        className={`block truncate rounded px-1 py-0.5 text-[10px] text-white ${meta.barColorClass} hover:opacity-90`}
+        aria-label={
+          entry.viewerGoing
+            ? t("events.calendar.entryKindLabelGoing")
+            : t("events.calendar.entryKindLabel")
+        }
+        // A subtle inset ring marks an event the viewer themselves
+        // RSVP'd "going" to — own status only, never a count.
+        className={`block truncate rounded px-1 py-0.5 text-[10px] text-white ${meta.barColorClass} hover:opacity-90 ${
+          entry.viewerGoing ? "ring-1 ring-inset ring-white/80" : ""
+        }`}
         title={entry.title}
       >
         <span aria-hidden="true">{meta.emoji}</span> {entry.title}

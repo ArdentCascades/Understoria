@@ -57,6 +57,7 @@ export default function CalendarPage() {
     events,
     eventCancellations,
     eventProjectLinks,
+    eventRsvps,
   } = useApp();
   const { t, i18n } = useTranslation();
 
@@ -167,6 +168,8 @@ export default function CalendarPage() {
         exchanges: filteredExchanges,
         events: filteredEvents,
         eventCancellations,
+        currentMemberKey: myKey,
+        eventRsvps,
         windowStart,
         windowEnd,
       }),
@@ -176,6 +179,8 @@ export default function CalendarPage() {
       filteredExchanges,
       filteredEvents,
       eventCancellations,
+      myKey,
+      eventRsvps,
       windowStart,
       windowEnd,
     ],

@@ -440,6 +440,7 @@
     },
     "calendar": {
       "entryKindLabel": "Event",
+      "entryKindLabelGoing": "Event you're going to",
       "eventsOnlyChip": "Events only",
       "fabAriaLabel": "Create an event"
     }

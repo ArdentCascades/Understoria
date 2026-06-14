@@ -41,6 +41,7 @@ import type {
   Event,
   EventCancellation,
   EventProjectLinkRow,
+  EventRsvpRow,
   Exchange,
   Member,
   Post,
@@ -57,6 +58,7 @@ interface MockState {
   events: Event[];
   eventCancellations: EventCancellation[];
   eventProjectLinks: EventProjectLinkRow[];
+  eventRsvps: EventRsvpRow[];
 }
 
 let mockState: MockState = blankState();
@@ -71,6 +73,7 @@ function blankState(): MockState {
     events: [],
     eventCancellations: [],
     eventProjectLinks: [],
+    eventRsvps: [],
   };
 }
 
@@ -436,6 +439,34 @@ describe("CalendarPage", () => {
     // category — the resolver falls back to a neutral glyph/colour.
     render(<CalendarPage />);
     expect(container.textContent ?? "").toContain("Mystery gathering");
+    vi.useRealTimers();
+  });
+
+  it("marks an event the viewer RSVP'd 'going' to (own status, via the aria-label)", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.currentMember = makeMember("me-key");
+    mockState.events = [
+      makeEvent({ id: "going", title: "Potluck", startsAt: day + 3 * 3_600_000 }),
+      makeEvent({ id: "other", title: "Meeting", startsAt: day + 4 * 3_600_000 }),
+    ];
+    mockState.eventRsvps = [
+      {
+        id: "r1",
+        eventId: "going",
+        memberKey: "me-key",
+        status: "going",
+        respondedAt: 1,
+      },
+    ];
+    render(<CalendarPage />);
+    // The event the viewer is going to carries the going-specific
+    // aria-label; the other event keeps the plain one.
+    const goingChip = container.querySelector('a[href="/events/going"]');
+    const otherChip = container.querySelector('a[href="/events/other"]');
+    expect(goingChip?.getAttribute("aria-label")).toBe("Event you're going to");
+    expect(otherChip?.getAttribute("aria-label")).toBe("Event");
     vi.useRealTimers();
   });
 

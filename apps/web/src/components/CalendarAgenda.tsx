@@ -166,7 +166,11 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
     return (
       <Link
         to={entry.path}
-        aria-label={t("events.calendar.entryKindLabel")}
+        aria-label={
+          entry.viewerGoing
+            ? t("events.calendar.entryKindLabelGoing")
+            : t("events.calendar.entryKindLabel")
+        }
         className="group flex items-center gap-2 rounded-xl px-2 py-1.5
                    hover:bg-moss-50 dark:hover:bg-moss-900"
       >
@@ -183,6 +187,15 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
             <span className="text-moss-600 dark:text-moss-300">
               {" "}
               · {entry.location}
+            </span>
+          ) : null}
+          {/* The viewer's own "going" — own data only, no count. */}
+          {entry.viewerGoing ? (
+            <span
+              aria-hidden="true"
+              className="ml-1.5 font-semibold text-canopy-600 dark:text-canopy-300"
+            >
+              ✓
             </span>
           ) : null}
         </span>
