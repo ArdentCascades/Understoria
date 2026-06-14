@@ -1325,6 +1325,10 @@
   "dashboard": {
     "title": "Community dashboard",
     "tagline": "The unit of progress is us, not me.",
+    "gatherings": {
+      "title": "Coming up",
+      "going": "you're going"
+    },
     "totalHoursLabel": "Total hours exchanged",
     "totalExchangesOne": "across {{count}} exchange",
     "totalExchangesOther": "across {{count}} exchanges",

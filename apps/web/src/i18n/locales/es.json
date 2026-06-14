@@ -1325,6 +1325,10 @@
   "dashboard": {
     "title": "Panel comunitario",
     "tagline": "La unidad de progreso somos nosotres, no yo.",
+    "gatherings": {
+      "title": "Próximamente",
+      "going": "vas a ir"
+    },
     "totalHoursLabel": "Total de horas intercambiadas",
     "totalExchangesOne": "en {{count}} intercambio",
     "totalExchangesOther": "en {{count}} intercambios",
