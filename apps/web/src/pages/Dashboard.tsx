@@ -32,6 +32,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { LeafDivider, Sprig } from "@/components/visual";
 import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
+import { UpcomingGatherings } from "@/components/dashboard/UpcomingGatherings";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -109,6 +110,10 @@ export default function DashboardPage() {
       {newlyReached.map((m) => (
         <MilestoneCelebration key={m.label} milestone={m} />
       ))}
+
+      {/* Quiet "what's coming up" glance — leads the page only when there
+          are upcoming events; renders nothing otherwise. */}
+      <UpcomingGatherings />
 
       <section className="card relative mb-4 overflow-hidden text-center">
         <div
