@@ -17,6 +17,7 @@ export {
   IconMessages,
   IconProfile,
   IconSettings,
+  IconShare,
 } from "./icons";
 export {
   Illustration,

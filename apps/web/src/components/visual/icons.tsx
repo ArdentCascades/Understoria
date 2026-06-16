@@ -76,6 +76,21 @@ export function IconCalendar(props: IconProps) {
   );
 }
 
+// iOS Share glyph — a box open at the top with an up-arrow rising
+// through it. This is the icon the iPhone Share button shows, so the
+// install guide places it next to "tap the Share button" to make the
+// instruction unmistakable. Matches the 1.5px stroke / fill-none style
+// of the rest of the icon set.
+export function IconShare(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 15V4" />
+      <path d="M8.5 7.5 12 4l3.5 3.5" />
+      <path d="M7 11H6a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-1" />
+    </Icon>
+  );
+}
+
 // Gear — entry point for the device-settings sub-page. Drawn with
 // six teeth around a center hub; matches the 1.5px stroke / fill-none
 // style of the rest of the icon set.

@@ -233,6 +233,79 @@
     "body": "Alguien en la comunidad te avaló. Puedes hacer lo mismo por las personas en quienes confías — es una forma de ampliar a quiénes la comunidad ve como dignos de confianza. Visita el perfil de cualquier persona y toca Avalar.",
     "dismiss": "Entendido"
   },
+  "install": {
+    "card": {
+      "label": "Añade Understoria a tu teléfono",
+      "title": "Ten Understoria a un toque",
+      "body": "Añádela a tu pantalla de inicio y se abre como cualquier otra app — a pantalla completa, funciona sin conexión, sin tienda de aplicaciones.",
+      "dismiss": "Ahora no"
+    },
+    "panel": {
+      "title": "Añade Understoria a tu teléfono",
+      "intro": "Añade Understoria a tu pantalla de inicio y se abre como una app — a pantalla completa, lista sin conexión, sin cuenta de tienda de aplicaciones."
+    },
+    "oneTap": {
+      "button": "Añadir a la pantalla de inicio",
+      "working": "Abriendo el aviso…",
+      "done": "Añadida. Ya puedes abrir Understoria desde tu pantalla de inicio."
+    },
+    "ios": {
+      "intro": "En Safari, añade Understoria a tu pantalla de inicio:",
+      "step1": "Toca el botón Compartir en la parte inferior de la pantalla.",
+      "step2": "Desliza hacia abajo y toca «Añadir a pantalla de inicio».",
+      "step3": "Toca «Añadir» en la esquina superior. Understoria aparece junto a tus otras apps.",
+      "shareLabel": "Compartir"
+    },
+    "inAppBrowser": {
+      "title": "Abre esto primero en tu navegador",
+      "body": "Estás viendo Understoria dentro de otra app, que no puede añadirla a tu pantalla de inicio. Abre esta página en Safari o Chrome y añádela desde ahí.",
+      "hint": "Busca «Abrir en el navegador» en el menú de esta app (a menudo el icono ⋯ o el de compartir)."
+    },
+    "selector": {
+      "prompt": "¿Usas otro navegador?",
+      "choose": "Elige tu navegador",
+      "browsers": {
+        "iosSafari": "iPhone / iPad (Safari)",
+        "chromeAndroid": "Android (Chrome)",
+        "samsung": "Android (Samsung Internet)",
+        "firefoxAndroid": "Android (Firefox)",
+        "chromeDesktop": "Computadora (Chrome)",
+        "edgeDesktop": "Computadora (Edge)"
+      }
+    },
+    "steps": {
+      "chromeAndroid": {
+        "intro": "En Chrome, añade Understoria a tu pantalla de inicio:",
+        "step1": "Toca el menú (⋮) en la esquina superior derecha.",
+        "step2": "Toca «Añadir a pantalla de inicio» (o «Instalar aplicación»).",
+        "step3": "Toca «Añadir» para confirmar."
+      },
+      "samsung": {
+        "intro": "En Samsung Internet, añade Understoria a tu pantalla de inicio:",
+        "step1": "Toca el menú (≡) en la parte inferior.",
+        "step2": "Toca «Añadir página a» y luego «Pantalla de inicio».",
+        "step3": "Toca «Añadir» para confirmar."
+      },
+      "firefoxAndroid": {
+        "intro": "En Firefox, añade Understoria a tu pantalla de inicio:",
+        "step1": "Toca el menú (⋮) en la esquina superior derecha.",
+        "step2": "Toca «Añadir a pantalla de inicio».",
+        "step3": "Toca «Añadir» para confirmar."
+      },
+      "chromeDesktop": {
+        "intro": "En Chrome en una computadora, instala Understoria:",
+        "step1": "Busca el icono de instalar al final de la barra de direcciones.",
+        "step2": "Haz clic en él y luego en «Instalar».",
+        "step3": "Understoria se abre en su propia ventana y aparece junto a tus otras apps."
+      },
+      "edgeDesktop": {
+        "intro": "En Edge en una computadora, instala Understoria:",
+        "step1": "Abre el menú (⋯) en la esquina superior derecha.",
+        "step2": "Elige «Aplicaciones» y luego «Instalar este sitio como una aplicación».",
+        "step3": "Haz clic en «Instalar» para confirmar."
+      }
+    }
+  },
   "hints": {
     "board": {
       "label": "Orientacion del tablero",
@@ -1523,6 +1596,7 @@
       "designPrinciples": "Principios de diseno",
       "principlesIntro": "Cada decision de diseno en Understoria tiene una razon. Estos principios explican por que la aplicacion funciona como funciona, con ejemplos de lo que ocurrio cuando otros proyectos lo intentaron de otra manera.",
       "studyPrompts": "Preguntas para grupos de estudio",
+      "addToPhone": "Añadir a tu teléfono",
       "promptCopy": "Copiar para una reunión",
       "promptCopied": "Copiado"
     },
