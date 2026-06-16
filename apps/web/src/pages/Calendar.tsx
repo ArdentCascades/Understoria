@@ -24,12 +24,11 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { buildCalendar, type CalendarEntry } from "@/lib/calendar";
 import { isOrganizer } from "@/db/projects";
-import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { EmptyState } from "@/components/EmptyState";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
 import { CalendarMonth } from "@/components/CalendarMonth";
 import { CalendarWeek } from "@/components/CalendarWeek";
-import type { Category, Event, Exchange, Post, Project } from "@/types";
+import type { Event, Exchange, Post, Project } from "@/types";
 
 // Window: 30 days back, 60 days forward. The back-window covers
 // recently-completed exchange density (historical) and the forward
@@ -39,6 +38,13 @@ const WINDOW_BACK_MS = 30 * 24 * 60 * 60 * 1000;
 const WINDOW_FORWARD_MS = 60 * 24 * 60 * 60 * 1000;
 
 type ViewMode = "agenda" | "month" | "week";
+
+// Humanized fallback label for a category string the i18n `categories.*`
+// block doesn't carry a key for (e.g. a peer's unknown event category).
+function prettifyCategory(c: string): string {
+  const s = c.replace(/[_-]+/g, " ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 // `lg` breakpoint in default Tailwind is 1024px. Below that, agenda
 // is the default; at or above, month is the default. The member's
@@ -80,7 +86,9 @@ export default function CalendarPage() {
     return () => window.removeEventListener("resize", onResize);
   }, [overrideView]);
 
-  const [category, setCategory] = useState<"" | Category>("");
+  // Free-text so an event-specific category ("social" etc.) — outside the
+  // legacy `Category` enum — can be selected. "" means no filter.
+  const [category, setCategory] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
   const [mine, setMine] = useState<boolean>(false);
   // "Events only" filter chip — session-local, additive on top of the
@@ -145,20 +153,56 @@ export default function CalendarPage() {
     return exchanges;
   }, [exchanges, projectId, category, mine]);
 
-  // Project filter narrows events to that project's work days (plan 10)
-  // via the local-only link set. `mine` and category deliberately keep
-  // today's no-op behavior for events: an event isn't owned by a member
-  // roster or a single category on the calendar, so only the explicit
-  // project filter touches the event list.
+  // Event filters compose (project AND category AND mine):
+  //  - project: this project's work days (plan 10) via the link set.
+  //  - category: the event's free-text category (incl. the event-specific
+  //    social / celebration / learning vocabulary).
+  //  - mine: events I organize OR RSVP'd going/maybe to — own data only,
+  //    the same status the "you're going" marker reads. Default off, so
+  //    the calendar stays community-wide until a member opts to narrow.
   const filteredEvents = useMemo<readonly Event[]>(() => {
-    if (!projectId) return events;
-    const linkedIds = new Set(
-      eventProjectLinks
-        .filter((l) => l.projectId === projectId)
-        .map((l) => l.eventId),
+    let out: readonly Event[] = events;
+    if (projectId) {
+      const linkedIds = new Set(
+        eventProjectLinks
+          .filter((l) => l.projectId === projectId)
+          .map((l) => l.eventId),
+      );
+      out = out.filter((e) => linkedIds.has(e.id));
+    }
+    if (category) {
+      out = out.filter((e) => e.category === category);
+    }
+    if (mine && myKey) {
+      const onMyRadar = new Set<string>();
+      for (const r of eventRsvps) {
+        if (
+          r.memberKey === myKey &&
+          (r.status === "going" || r.status === "maybe")
+        ) {
+          onMyRadar.add(r.eventId);
+        }
+      }
+      out = out.filter((e) => e.createdBy === myKey || onMyRadar.has(e.id));
+    }
+    return out;
+  }, [events, eventProjectLinks, eventRsvps, projectId, category, mine, myKey]);
+
+  // Categories actually present across projects, posts, and events, so the
+  // filter offers exactly what's filterable — including the event-specific
+  // vocabulary (social / celebration / learning) — and drops categories
+  // with no data. Mirrors TemplatePicker's category filter.
+  const availableCategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of projects) set.add(p.category);
+    for (const p of posts) set.add(p.category);
+    for (const e of events) set.add(e.category);
+    const label = (c: string) =>
+      t(`categories.${c}`, { defaultValue: prettifyCategory(c) });
+    return Array.from(set).sort((a, b) =>
+      label(a).localeCompare(label(b), i18n.language),
     );
-    return events.filter((e) => linkedIds.has(e.id));
-  }, [events, eventProjectLinks, projectId]);
+  }, [projects, posts, events, t, i18n.language]);
 
   const allEntries = useMemo(
     () =>
@@ -241,13 +285,13 @@ export default function CalendarPage() {
           <select
             className="input py-1 text-xs"
             value={category}
-            onChange={(e) => setCategory(e.target.value as "" | Category)}
+            onChange={(e) => setCategory(e.target.value)}
             aria-label={t("calendar.filters.category")}
           >
             <option value="">{t("calendar.filters.allCategories")}</option>
-            {ALL_CATEGORIES.map((c) => (
+            {availableCategories.map((c) => (
               <option key={c} value={c}>
-                {CATEGORY_META[c].label}
+                {t(`categories.${c}`, { defaultValue: prettifyCategory(c) })}
               </option>
             ))}
           </select>

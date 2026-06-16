@@ -470,6 +470,85 @@ describe("CalendarPage", () => {
     vi.useRealTimers();
   });
 
+  it("Mine narrows events to ones I organize or RSVP'd going/maybe to", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.currentMember = makeMember("me-key");
+    mockState.events = [
+      makeEvent({ id: "mine-org", title: "I organize", startsAt: day + 1 * 3_600_000, createdBy: "me-key" }),
+      makeEvent({ id: "mine-going", title: "Going", startsAt: day + 2 * 3_600_000, createdBy: "other" }),
+      makeEvent({ id: "mine-maybe", title: "Maybe", startsAt: day + 3 * 3_600_000, createdBy: "other" }),
+      makeEvent({ id: "theirs", title: "Not mine", startsAt: day + 4 * 3_600_000, createdBy: "other" }),
+    ];
+    mockState.eventRsvps = [
+      { id: "r1", eventId: "mine-going", memberKey: "me-key", status: "going", respondedAt: 1 },
+      { id: "r2", eventId: "mine-maybe", memberKey: "me-key", status: "maybe", respondedAt: 1 },
+    ];
+    render(<CalendarPage />);
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => agendaPill!.click());
+
+    function eventHrefs() {
+      return Array.from(
+        container.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'),
+      ).map((a) => a.getAttribute("href"));
+    }
+    // Before toggling Mine, every event shows (community-wide).
+    expect(eventHrefs()).toContain("/events/theirs");
+
+    const checkbox = container.querySelector<HTMLInputElement>(
+      'input[type="checkbox"]',
+    );
+    act(() => checkbox!.click());
+
+    const hrefs = eventHrefs();
+    expect(hrefs).toContain("/events/mine-org");
+    expect(hrefs).toContain("/events/mine-going");
+    expect(hrefs).toContain("/events/mine-maybe");
+    expect(hrefs).not.toContain("/events/theirs");
+    vi.useRealTimers();
+  });
+
+  it("the category filter offers and narrows by an event-specific category", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({ id: "soc", title: "Potluck", startsAt: day + 1 * 3_600_000, category: "social" }),
+      makeEvent({ id: "work", title: "Build day", startsAt: day + 2 * 3_600_000, category: "skilled_labor" }),
+    ];
+    render(<CalendarPage />);
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => agendaPill!.click());
+
+    function eventHrefs() {
+      return Array.from(
+        container.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'),
+      ).map((a) => a.getAttribute("href"));
+    }
+
+    // The category dropdown is data-derived, so "social" is selectable
+    // because a social event exists.
+    const categorySelect = Array.from(
+      container.querySelectorAll<HTMLSelectElement>("select"),
+    ).find((s) => Array.from(s.options).some((o) => o.value === "social"));
+    expect(categorySelect, "expected a 'social' category option").toBeDefined();
+    act(() => {
+      categorySelect!.value = "social";
+      categorySelect!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const hrefs = eventHrefs();
+    expect(hrefs).toContain("/events/soc");
+    expect(hrefs).not.toContain("/events/work");
+    vi.useRealTimers();
+  });
+
   it("renders the FAB linking to /events/new with the i18n aria-label", () => {
     render(<CalendarPage />);
     const fab = container.querySelector<HTMLAnchorElement>(
