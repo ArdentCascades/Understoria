@@ -442,7 +442,18 @@
       "entryKindLabel": "Evento",
       "entryKindLabelGoing": "Evento al que vas",
       "eventsOnlyChip": "Sólo eventos",
-      "fabAriaLabel": "Crear un evento"
+      "fabAriaLabel": "Crear un evento",
+      "multiDay": {
+        "continues": "Continúa",
+        "dayOf": "Día {{index}} de {{count}}",
+        "endsAtLine": "Termina {{time}} — {{title}}",
+        "firstDayBadge": "Día 1 de {{count}}",
+        "ariaLabel": "Evento, día {{index}} de {{count}}",
+        "ariaLabelGoing": "Evento al que vas, día {{index}} de {{count}}",
+        "ariaLabelFinal": "Evento, último día",
+        "ariaLabelGoingFinal": "Evento al que vas, último día",
+        "chipTitle": "{{title}} — día {{index}} de {{count}}"
+      }
     }
   },
   "messages": {

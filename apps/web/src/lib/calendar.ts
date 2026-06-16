@@ -125,6 +125,22 @@ export type CalendarEntry =
       organizerKey: string;
       /** Deep-link path to the event detail page. */
       path: string;
+      /** True iff the event spans more than one UTC day (its `endsAt`
+       *  lands on a later UTC day than its `startsAt`). A multi-day
+       *  event emits one entry per spanned day; this flag lets a
+       *  renderer branch the continuation copy. A `null`-end (single-
+       *  point) event is never multi-day. */
+      isMultiDay: boolean;
+      /** 0-based index of THIS entry's day within the event's full
+       *  UTC-day span, independent of window clipping — a window-clipped
+       *  event whose first in-window day is its third overall still
+       *  carries `dayIndex: 2` here, so "Day N of M" copy reflects the
+       *  true position in the event rather than within the visible
+       *  window. */
+      dayIndex: number;
+      /** Total number of UTC days the event spans (>= 1). Single-day
+       *  events carry `1`. */
+      dayCount: number;
     };
 
 export interface BuildCalendarInput {
@@ -181,6 +197,18 @@ export interface BuildCalendarInput {
  * `post_expiring`. This produces a stable z-order at the UI layer
  * without it having to re-sort.
  */
+
+/**
+ * Upper bound on the number of per-day entries a single event may emit.
+ * Belt-and-suspenders only: the window (`[windowStart, windowEnd]`,
+ * ~90 days at the call site) is the PRIMARY bound on how many days an
+ * event can spread across the grid. This clamp guards against a
+ * malformed far-future `endsAt` ballooning the loop before the window
+ * test trims it — 92 sits just above the widest window the page asks
+ * for.
+ */
+const MAX_EVENT_DAYS = 92;
+
 export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   const entries: CalendarEntry[] = [];
 
@@ -242,9 +270,11 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   }
 
   // Events: skip any whose id has a matching cancellation row, then
-  // emit one entry per surviving event placed on its UTC start day.
-  // Window check uses `startsAt` — same shape as project deadlines /
-  // post expiries.
+  // emit ONE entry per UTC day the event spans (a Sat–Sun festival or a
+  // 3-day build shows on every one of its days, not just the first).
+  // The window check is per-day below — an event that began before
+  // `windowStart` but continues into the window still surfaces its
+  // in-window days.
   const cancelledIds = new Set<string>();
   for (const c of input.eventCancellations ?? []) cancelledIds.add(c.eventId);
   // The viewer's OWN "going" events — read only when we know who the
@@ -257,24 +287,54 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       }
     }
   }
+  // Window lower bound, floored to its UTC day: a day-floored `dayMs`
+  // (always midnight UTC) must be compared against a day-floored start
+  // so a day whose midnight precedes `windowStart` but whose later hours
+  // fall inside the window still counts as in-window.
+  const windowStartDay = startOfUTCDay(input.windowStart);
   for (const ev of input.events ?? []) {
     if (cancelledIds.has(ev.id)) continue;
-    if (ev.startsAt < input.windowStart || ev.startsAt > input.windowEnd)
-      continue;
-    entries.push({
-      kind: "event",
-      id: `event:${ev.id}`,
-      date: startOfUTCDay(ev.startsAt),
-      eventId: ev.id,
-      title: ev.title,
-      category: ev.category,
-      viewerGoing: viewerGoingIds.has(ev.id),
-      startsAt: ev.startsAt,
-      endsAt: ev.endsAt,
-      location: ev.location,
-      organizerKey: ev.createdBy,
-      path: `/events/${ev.id}`,
-    });
+    const firstDay = startOfUTCDay(ev.startsAt);
+    // A null `endsAt` is a single-point event; a malformed end before
+    // the start is treated as single-day so we never emit a negative
+    // range. UTC days are exactly 86_400_000 ms apart (same arithmetic
+    // the grid walks), so the span is a plain division.
+    let lastDay = ev.endsAt === null ? firstDay : startOfUTCDay(ev.endsAt);
+    if (lastDay < firstDay) lastDay = firstDay;
+    // Whole span outside the window — no in-window day to emit. Bail
+    // before the day loop rather than testing each day for nothing.
+    if (lastDay < windowStartDay || firstDay > input.windowEnd) continue;
+    const dayCount = (lastDay - firstDay) / 86_400_000 + 1;
+    const isMultiDay = dayCount > 1;
+    // Clamp the loop count: the window already bounds emission, this
+    // only stops a pathological far-future `endsAt` from spinning the
+    // loop before the per-day window test trims it.
+    const dayLimit = Math.min(dayCount, MAX_EVENT_DAYS);
+    for (let i = 0; i < dayLimit; i++) {
+      const dayMs = firstDay + i * 86_400_000;
+      // Per-day window test (day-based — startsAt/endsAt aren't
+      // day-floored). Skip days outside the window; keep `dayIndex` as
+      // the TRUE position in the event's span so "Day N of M" copy is
+      // honest under window clipping.
+      if (dayMs < windowStartDay || dayMs > input.windowEnd) continue;
+      entries.push({
+        kind: "event",
+        id: `event:${ev.id}:${dayKey(dayMs)}`,
+        date: dayMs,
+        eventId: ev.id,
+        title: ev.title,
+        category: ev.category,
+        viewerGoing: viewerGoingIds.has(ev.id),
+        startsAt: ev.startsAt,
+        endsAt: ev.endsAt,
+        location: ev.location,
+        organizerKey: ev.createdBy,
+        path: `/events/${ev.id}`,
+        isMultiDay,
+        dayIndex: i,
+        dayCount,
+      });
+    }
   }
 
   // Stable sort by date, then by kind (density < deadline < post)
@@ -394,9 +454,13 @@ export function startOfTodayMs(now: number): number {
  * Returns true if the entry's effective time has already passed
  * relative to `startOfTodayMs` (local-clock start of day).
  *
- * - Events: hide when (endsAt ?? startsAt) < startOfTodayMs. Multi-
- *   day events that started yesterday but are still running stay
- *   visible.
+ * - Single-day events (`dayCount === 1`, including every `endsAt: null`
+ *   point event): hide when (endsAt ?? startsAt) < startOfTodayMs.
+ * - Multi-day events (`dayCount > 1`): each spanned day is its OWN
+ *   entry, judged per-day — a day drops once it has fully elapsed
+ *   (`date + 86_400_000 <= startOfTodayMs`), so the past start days of a
+ *   still-running event fall away while today's and the remaining days
+ *   stay visible.
  * - Project deadlines and post expiries: hide when date < startOfTodayMs.
  * - Exchange density: NEVER past — aggregate signal stays everywhere.
  *
@@ -409,6 +473,10 @@ export function entryIsPast(
 ): boolean {
   switch (entry.kind) {
     case "event": {
+      if (entry.dayCount > 1) {
+        // Per-day: drop only once this UTC day has fully elapsed.
+        return entry.date + 86_400_000 <= startOfTodayMs;
+      }
       const end = entry.endsAt ?? entry.startsAt;
       return end < startOfTodayMs;
     }

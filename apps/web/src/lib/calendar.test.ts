@@ -725,15 +725,20 @@ describe("buildCalendar — event", () => {
     expect(result.filter((e) => e.kind === "event")).toHaveLength(3);
   });
 
-  it("respects the window bounds on startsAt", () => {
+  it("respects the per-day window bounds (whole-day-outside events drop)", () => {
+    // The window check is DAY-based now (multi-day events emit per UTC
+    // day): an event whose ONLY day is wholly before the window's first
+    // UTC day, or after windowEnd, drops. Events on the edge days stay.
     const w = defaultWindow();
     const result = buildCalendar({
       projects: [],
       posts: [],
       exchanges: [],
       events: [
-        event({ id: "before", startsAt: w.windowStart - 1 }),
-        event({ id: "after", startsAt: w.windowEnd + 1 }),
+        // A full UTC day before the floored window start.
+        event({ id: "before", startsAt: startOfUTCDay(w.windowStart) - DAY }),
+        // After windowEnd.
+        event({ id: "after", startsAt: w.windowEnd + DAY }),
         event({ id: "edge_start", startsAt: w.windowStart }),
         event({ id: "edge_end", startsAt: w.windowEnd }),
       ],
@@ -799,6 +804,261 @@ describe("buildCalendar — event", () => {
     });
     if (entry.kind !== "event") throw new Error("expected event entry");
     expect(entry.endsAt).toBeNull();
+  });
+
+  it("single-day (null endsAt) → one entry, isMultiDay false, dayCount 1", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 10, 0, 0);
+    const ev = event({ id: "ev_1", startsAt, endsAt: null });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      isMultiDay: false,
+      dayCount: 1,
+      dayIndex: 0,
+    });
+    expect(events[0].date).toBe(startOfUTCDay(startsAt));
+  });
+
+  it("single-day (same-UTC-day endsAt) → one entry, isMultiDay false", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 10, 0, 0);
+    const endsAt = Date.UTC(2026, 10, 20, 14, 0, 0); // same UTC day
+    const ev = event({ id: "ev_1", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ isMultiDay: false, dayCount: 1 });
+  });
+
+  it("two-day span → two entries on consecutive days with dayIndex 0,1", () => {
+    // Day D 20:00 → day D+1 02:00 UTC.
+    const startsAt = Date.UTC(2026, 10, 20, 20, 0, 0);
+    const endsAt = Date.UTC(2026, 10, 21, 2, 0, 0);
+    const ev = event({ id: "ev_span", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events).toHaveLength(2);
+    expect(events.map((e) => e.date)).toEqual([
+      Date.UTC(2026, 10, 20),
+      Date.UTC(2026, 10, 21),
+    ]);
+    expect(events.map((e) => (e.kind === "event" ? e.dayIndex : -1))).toEqual([
+      0, 1,
+    ]);
+    for (const e of events) {
+      if (e.kind === "event") expect(e.dayCount).toBe(2);
+    }
+    // Distinct ids per day.
+    expect(new Set(events.map((e) => e.id)).size).toBe(2);
+  });
+
+  it("three-day span → three entries with dayIndex 0,1,2 and dayCount 3", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 9, 0, 0);
+    const endsAt = Date.UTC(2026, 10, 22, 17, 0, 0);
+    const ev = event({ id: "ev_3", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events.map((e) => e.date)).toEqual([
+      Date.UTC(2026, 10, 20),
+      Date.UTC(2026, 10, 21),
+      Date.UTC(2026, 10, 22),
+    ]);
+    expect(events.map((e) => (e.kind === "event" ? e.dayIndex : -1))).toEqual([
+      0, 1, 2,
+    ]);
+    for (const e of events) {
+      if (e.kind === "event") expect(e.dayCount).toBe(3);
+    }
+  });
+
+  it("carries viewerGoing onto every day of a multi-day event", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 20, 0, 0);
+    const endsAt = Date.UTC(2026, 10, 21, 2, 0, 0);
+    const ev = event({ id: "ev_going", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      currentMemberKey: "me",
+      eventRsvps: [
+        {
+          id: "r1",
+          eventId: "ev_going",
+          memberKey: "me",
+          status: "going",
+          respondedAt: 1,
+        },
+      ],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events).toHaveLength(2);
+    for (const e of events) {
+      expect(e).toMatchObject({ viewerGoing: true });
+    }
+  });
+
+  it("a cancellation drops ALL days of a multi-day event", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 9, 0, 0);
+    const endsAt = Date.UTC(2026, 10, 22, 17, 0, 0);
+    const ev = event({ id: "ev_cx", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [cancellation("ev_cx")],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    expect(result.filter((e) => e.kind === "event")).toHaveLength(0);
+  });
+
+  it("clips a span that starts before the window — only in-window days, true dayIndex", () => {
+    const w = defaultWindow();
+    // Starts two days before windowStart, ends one day after — only the
+    // in-window days emit, and the first emitted entry keeps its TRUE
+    // position in the event's span (not 0).
+    const startsAt = w.windowStart - 2 * DAY;
+    const endsAt = w.windowStart + 1 * DAY;
+    const ev = event({ id: "ev_clip_start", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      ...w,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    // The previously-dropped continuing event now appears at all.
+    expect(events.length).toBeGreaterThan(0);
+    // Every emitted day's floored date is >= the floored window start.
+    const windowStartDay = startOfUTCDay(w.windowStart);
+    for (const e of events) {
+      expect(e.date).toBeGreaterThanOrEqual(windowStartDay);
+    }
+    // Pre-window days are absent.
+    expect(events.some((e) => e.date === startOfUTCDay(startsAt))).toBe(false);
+    // The first emitted entry reflects the true span position, not 0.
+    const firstDayIndex = events[0].kind === "event" ? events[0].dayIndex : -1;
+    expect(firstDayIndex).toBeGreaterThan(0);
+  });
+
+  it("clips a span that ends after the window — only in-window days", () => {
+    const w = defaultWindow();
+    // Starts one day before windowEnd, ends two days after.
+    const startsAt = w.windowEnd - 1 * DAY;
+    const endsAt = w.windowEnd + 2 * DAY;
+    const ev = event({ id: "ev_clip_end", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      ...w,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events.length).toBeGreaterThan(0);
+    // No emitted day exceeds the window end.
+    for (const e of events) {
+      expect(e.date).toBeLessThanOrEqual(w.windowEnd);
+    }
+  });
+
+  it("bounds emission by the window, not a pathological far-future endsAt", () => {
+    const w = defaultWindow();
+    const startsAt = NOW + 2 * DAY;
+    const endsAt = NOW + 5000 * DAY; // absurd far-future end
+    const ev = event({ id: "ev_huge", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      ...w,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    // Window is ~45 days wide; emission is bounded by it, not the raw
+    // span. Comfortably under the MAX_EVENT_DAYS clamp too.
+    const windowDays = (w.windowEnd - startOfUTCDay(w.windowStart)) / DAY + 1;
+    expect(events.length).toBeLessThanOrEqual(Math.ceil(windowDays));
+    expect(events.length).toBeLessThanOrEqual(92);
+  });
+
+  it("treats a malformed endsAt < startsAt as single-day (no crash)", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 12, 0, 0);
+    const endsAt = startsAt - 3 * DAY; // ends before it starts
+    const ev = event({ id: "ev_bad", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const events = result.filter((e) => e.kind === "event");
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ isMultiDay: false, dayCount: 1 });
+  });
+
+  it("emits distinct ids for every day of a multi-day event", () => {
+    const startsAt = Date.UTC(2026, 10, 20, 9, 0, 0);
+    const endsAt = Date.UTC(2026, 10, 23, 17, 0, 0); // 4-day span
+    const ev = event({ id: "ev_ids", startsAt, endsAt });
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [],
+      windowStart: NOW,
+      windowEnd: NOW + 30 * DAY,
+    });
+    const ids = result
+      .filter((e) => e.kind === "event")
+      .map((e) => e.id);
+    expect(ids).toHaveLength(4);
+    expect(new Set(ids).size).toBe(4);
   });
 });
 
@@ -934,6 +1194,12 @@ describe("entryIsPast — events", () => {
       location: "anywhere",
       organizerKey: "org",
       path: "/events/ev",
+      // Single-day fixture: dayCount 1 routes entryIsPast through the
+      // (endsAt ?? startsAt) < startOfTodayMs branch — the same path the
+      // pre-multi-day rule took.
+      isMultiDay: false,
+      dayIndex: 0,
+      dayCount: 1,
     };
   }
 
@@ -975,6 +1241,54 @@ describe("entryIsPast — events", () => {
     const { todayStart } = makeAnchor();
     const startsAt = todayStart + 10 * 3_600_000;
     expect(entryIsPast(eventEntry(startsAt, null), todayStart)).toBe(false);
+  });
+
+  // Multi-day events emit one entry per day; entryIsPast judges each
+  // day on its own. Build a per-day entry with its own `date` /
+  // dayIndex / dayCount the way buildCalendar does.
+  function multiDayEntry(
+    date: number,
+    dayIndex: number,
+    dayCount: number,
+  ): CalendarEntry {
+    return {
+      kind: "event",
+      id: `event:ev:${dayKey(date)}`,
+      date,
+      eventId: "ev",
+      title: "Multi-day build",
+      category: "other",
+      viewerGoing: false,
+      // startsAt/endsAt point at the whole event; the per-day rule reads
+      // `date` + dayCount, not these, for a multi-day entry.
+      startsAt: date - 2 * DAY,
+      endsAt: date + 2 * DAY,
+      location: "anywhere",
+      organizerKey: "org",
+      path: "/events/ev",
+      isMultiDay: dayCount > 1,
+      dayIndex,
+      dayCount,
+    };
+  }
+
+  it("multi-day: a start-day entry whose UTC day is fully past → past", () => {
+    const { todayStart } = makeAnchor();
+    // Day 0 of a 4-day event, two UTC days ago → fully elapsed.
+    const startDay = startOfUTCDay(todayStart - 2 * DAY);
+    expect(entryIsPast(multiDayEntry(startDay, 0, 4), todayStart)).toBe(true);
+  });
+
+  it("multi-day: a sibling entry on a future day stays visible", () => {
+    const { todayStart } = makeAnchor();
+    const futureDay = startOfUTCDay(todayStart + 2 * DAY);
+    expect(entryIsPast(multiDayEntry(futureDay, 3, 4), todayStart)).toBe(false);
+  });
+
+  it("multi-day: a day-entry whose date is today → not past", () => {
+    const { todayStart } = makeAnchor();
+    const todayUtc = startOfUTCDay(todayStart);
+    expect(entryIsPast(multiDayEntry(todayUtc, 1, 4), todayStart)).toBe(false);
   });
 });
 
