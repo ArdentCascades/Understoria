@@ -1,0 +1,241 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type {
+  BrowserId,
+  InstallEnvironment,
+} from "@/lib/installGuide";
+
+// In-memory settings store for the dismiss flag — mirrors the
+// VouchDiscoveryNudge harness. Keeps this test independent of Dexie.
+const settings = new Map<string, string>();
+vi.mock("@/db/database", async () => {
+  const actual =
+    await vi.importActual<typeof import("@/db/database")>("@/db/database");
+  return {
+    ...actual,
+    getSetting: async (key: string) => settings.get(key),
+    setSetting: async (key: string, value: string) => {
+      settings.set(key, value);
+    },
+  };
+});
+
+// Drive the install posture by mocking the detection + capture
+// surface rather than fighting UA strings. The rest of installGuide
+// (the dismiss helpers, BROWSER_INSTRUCTIONS, SELECTABLE_BROWSERS) is
+// kept real so the component renders genuine instruction keys.
+const mockEnv: { current: InstallEnvironment } = {
+  current: { kind: "unknown" },
+};
+const promptMock = vi.fn(async () => {});
+const deferredPrompt: {
+  current: {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+  } | null;
+} = {
+  current: null,
+};
+
+vi.mock("@/lib/installGuide", async () => {
+  const actual =
+    await vi.importActual<typeof import("@/lib/installGuide")>(
+      "@/lib/installGuide",
+    );
+  return {
+    ...actual,
+    currentInstallEnvironment: () => mockEnv.current,
+    getDeferredPrompt: () => deferredPrompt.current,
+    subscribeInstallPrompt: () => () => {},
+    subscribeStandalone: () => () => {},
+    clearDeferredPrompt: () => {
+      deferredPrompt.current = null;
+    },
+  };
+});
+
+import "@/i18n";
+import { InstallGuide } from "./InstallGuide";
+import { SETTING_KEYS } from "@/db/database";
+
+let container: HTMLDivElement;
+let root: Root;
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
+  true;
+
+async function flushAsync() {
+  // Drain the microtask queue so the hook's awaited getSetting call
+  // resolves before assertions.
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
+
+// jsdom has no matchMedia — the hook's subscribeStandalone is mocked
+// out, but the live wrapper still reads it; stub it defensively.
+function stubMatchMedia(matches = false) {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+}
+
+beforeEach(() => {
+  settings.clear();
+  mockEnv.current = { kind: "unknown" };
+  deferredPrompt.current = null;
+  promptMock.mockClear();
+  stubMatchMedia(false);
+  container = document.createElement("div");
+  document.body.appendChild(container);
+});
+
+afterEach(() => {
+  act(() => {
+    root?.unmount();
+  });
+  container.remove();
+  vi.restoreAllMocks();
+});
+
+function render(variant: "card" | "panel" = "card") {
+  act(() => {
+    root = createRoot(container);
+    root.render(
+      <MemoryRouter>
+        <InstallGuide variant={variant} />
+      </MemoryRouter>,
+    );
+  });
+}
+
+describe("InstallGuide", () => {
+  it("renders nothing when already installed", async () => {
+    mockEnv.current = { kind: "installed" };
+    render();
+    await flushAsync();
+    expect(container.textContent).toBe("");
+  });
+
+  it("promptable → shows the one-tap button and replays the prompt on click", async () => {
+    mockEnv.current = { kind: "promptable" };
+    deferredPrompt.current = {
+      prompt: promptMock,
+      userChoice: Promise.resolve({ outcome: "dismissed", platform: "" }),
+    };
+    render();
+    await flushAsync();
+    const button = container.querySelector("button.btn-primary");
+    expect(button).not.toBeNull();
+    expect(button?.textContent).toContain("Add to home screen");
+
+    await act(async () => {
+      (button as HTMLButtonElement).click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(promptMock).toHaveBeenCalledOnce();
+  });
+
+  it("ios-safari → shows the three Share steps and the Share glyph", async () => {
+    mockEnv.current = { kind: "ios-safari" };
+    render();
+    await flushAsync();
+    const items = container.querySelectorAll("ol li");
+    expect(items.length).toBe(3);
+    expect(container.textContent).toContain("Tap the Share button");
+    expect(container.textContent).toContain("Add to Home Screen");
+    // The iOS Share glyph (an inline SVG) renders next to step 1.
+    expect(container.querySelector("svg")).not.toBeNull();
+  });
+
+  it("in-app-browser → shows the open-in-browser notice with no steps", async () => {
+    mockEnv.current = { kind: "in-app-browser" };
+    render();
+    await flushAsync();
+    expect(container.textContent).toContain("Open this in your browser first");
+    expect(container.querySelector("ol")).toBeNull();
+  });
+
+  it("manual → renders the detected browser's steps plus the selector", async () => {
+    mockEnv.current = {
+      kind: "manual",
+      browser: "chrome-android" as BrowserId,
+    };
+    render();
+    await flushAsync();
+    const items = container.querySelectorAll("ol li");
+    expect(items.length).toBe(3);
+    expect(container.textContent).toContain("In Chrome");
+    // The "different browser?" selector is present.
+    expect(container.querySelector("select")).not.toBeNull();
+    expect(container.textContent).toContain("Using a different browser?");
+  });
+
+  it("card dismiss → writes the sentinel and stays hidden on re-render", async () => {
+    mockEnv.current = { kind: "ios-safari" };
+    render("card");
+    await flushAsync();
+    expect(container.textContent).toContain("Keep Understoria one tap away");
+
+    const dismiss = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Not now"),
+    );
+    expect(dismiss).toBeDefined();
+    await act(async () => {
+      (dismiss as HTMLButtonElement).click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // The permanent-dismiss sentinel was written...
+    expect(settings.get(SETTING_KEYS.installGuideDismissed)).toBe("1");
+    // ...and the card is gone.
+    expect(container.textContent).toBe("");
+
+    // A fresh render in a "second session" stays hidden.
+    act(() => {
+      root.unmount();
+    });
+    render("card");
+    await flushAsync();
+    expect(container.textContent).toBe("");
+  });
+
+  it("panel variant has no dismiss button", async () => {
+    mockEnv.current = { kind: "ios-safari" };
+    render("panel");
+    await flushAsync();
+    expect(container.textContent).toContain("Add Understoria to your phone");
+    const dismiss = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Not now"),
+    );
+    expect(dismiss).toBeUndefined();
+  });
+});

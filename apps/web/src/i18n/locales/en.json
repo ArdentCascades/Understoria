@@ -233,6 +233,79 @@
     "body": "Someone in the community vouched for you. You can do the same for people you trust — it's a way to expand who the community sees as trustworthy. Visit any member's profile and tap Vouch.",
     "dismiss": "Got it"
   },
+  "install": {
+    "card": {
+      "label": "Add Understoria to your phone",
+      "title": "Keep Understoria one tap away",
+      "body": "Add it to your home screen and it opens like any other app — full screen, works offline, no app store.",
+      "dismiss": "Not now"
+    },
+    "panel": {
+      "title": "Add Understoria to your phone",
+      "intro": "Add Understoria to your home screen and it opens like an app — full screen, offline-ready, no app store account."
+    },
+    "oneTap": {
+      "button": "Add to home screen",
+      "working": "Opening the prompt…",
+      "done": "Added. You can open Understoria from your home screen now."
+    },
+    "ios": {
+      "intro": "In Safari, add Understoria to your home screen:",
+      "step1": "Tap the Share button at the bottom of the screen.",
+      "step2": "Scroll down and tap \"Add to Home Screen\".",
+      "step3": "Tap \"Add\" in the top corner. Understoria appears with your other apps.",
+      "shareLabel": "Share"
+    },
+    "inAppBrowser": {
+      "title": "Open this in your browser first",
+      "body": "You're viewing Understoria inside another app, which can't add it to your home screen. Open this page in Safari or Chrome, then add it from there.",
+      "hint": "Look for \"Open in browser\" in this app's menu (often the ⋯ or share icon)."
+    },
+    "selector": {
+      "prompt": "Using a different browser?",
+      "choose": "Choose your browser",
+      "browsers": {
+        "iosSafari": "iPhone / iPad (Safari)",
+        "chromeAndroid": "Android (Chrome)",
+        "samsung": "Android (Samsung Internet)",
+        "firefoxAndroid": "Android (Firefox)",
+        "chromeDesktop": "Computer (Chrome)",
+        "edgeDesktop": "Computer (Edge)"
+      }
+    },
+    "steps": {
+      "chromeAndroid": {
+        "intro": "In Chrome, add Understoria to your home screen:",
+        "step1": "Tap the menu (⋮) in the top right.",
+        "step2": "Tap \"Add to Home screen\" (or \"Install app\").",
+        "step3": "Tap \"Add\" to confirm."
+      },
+      "samsung": {
+        "intro": "In Samsung Internet, add Understoria to your home screen:",
+        "step1": "Tap the menu (≡) at the bottom.",
+        "step2": "Tap \"Add page to\", then \"Home screen\".",
+        "step3": "Tap \"Add\" to confirm."
+      },
+      "firefoxAndroid": {
+        "intro": "In Firefox, add Understoria to your home screen:",
+        "step1": "Tap the menu (⋮) in the top right.",
+        "step2": "Tap \"Add to Home screen\".",
+        "step3": "Tap \"Add\" to confirm."
+      },
+      "chromeDesktop": {
+        "intro": "In Chrome on a computer, install Understoria:",
+        "step1": "Look for the install icon at the right end of the address bar.",
+        "step2": "Click it, then click \"Install\".",
+        "step3": "Understoria opens in its own window and appears with your other apps."
+      },
+      "edgeDesktop": {
+        "intro": "In Edge on a computer, install Understoria:",
+        "step1": "Open the menu (⋯) in the top right.",
+        "step2": "Choose \"Apps\", then \"Install this site as an app\".",
+        "step3": "Click \"Install\" to confirm."
+      }
+    }
+  },
   "hints": {
     "board": {
       "label": "Board orientation",
@@ -1523,6 +1596,7 @@
       "designPrinciples": "Design principles",
       "principlesIntro": "Every design choice in Understoria has a reason. These principles explain why the app works the way it does, with examples of what happened when other projects tried it differently.",
       "studyPrompts": "Study group prompts",
+      "addToPhone": "Add to your phone",
       "promptCopy": "Copy for a meeting",
       "promptCopied": "Copied"
     },

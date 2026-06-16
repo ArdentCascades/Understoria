@@ -17,8 +17,9 @@ import { MEMBER_GUIDE } from "@/content/member-guide";
 import { OPSEC_GUIDE } from "@/content/opsec-guide";
 import { promptShareText, STUDY_PROMPTS } from "@/content/study-prompts";
 import { LeafDivider } from "@/components/visual";
+import { InstallGuide } from "@/components/InstallGuide";
 
-type Panel = "none" | "guide" | "opsec" | "principles" | "prompts";
+type Panel = "none" | "guide" | "opsec" | "principles" | "prompts" | "install";
 
 export function LearnSection() {
   const { t } = useTranslation();
@@ -85,6 +86,14 @@ export function LearnSection() {
           aria-expanded={panel === "prompts"}
         >
           {t("profile.learn.studyPrompts")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setPanel(panel === "install" ? "none" : "install")}
+          className="btn-secondary"
+          aria-expanded={panel === "install"}
+        >
+          {t("profile.learn.addToPhone")}
         </button>
       </div>
 
@@ -169,6 +178,12 @@ export function LearnSection() {
             </li>
           ))}
         </ol>
+      )}
+
+      {panel === "install" && (
+        <div className="mt-4 border-t border-moss-200 pt-4 dark:border-moss-800">
+          <InstallGuide variant="panel" />
+        </div>
       )}
     </section>
   );

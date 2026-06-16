@@ -843,6 +843,13 @@ export const SETTING_KEYS = {
    *  they vouch for someone; this flag only matters for members
    *  who never act on the nudge and want it gone permanently. */
   vouchDiscoveryNudgeDismissed: "vouchDiscoveryNudgeDismissed",
+  /** "1" once the member has dismissed the "Add to home screen"
+   *  install card on Board (or once the app reports itself installed,
+   *  which writes the same flag). The card self-retires when the PWA
+   *  is installed; this flag only matters for members who dismiss it
+   *  without ever installing. The re-findable Learn-section panel
+   *  ignores this flag — it's a reference, not a nag. */
+  installGuideDismissed: "installGuideDismissed",
   boardHintDismissed: "boardHintDismissed",
   balanceHintDismissed: "balanceHintDismissed",
   inviteHintDismissed: "inviteHintDismissed",

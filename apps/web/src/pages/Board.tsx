@@ -31,6 +31,7 @@ import { ContextualHint } from "@/components/ContextualHint";
 import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
+import { InstallGuide } from "@/components/InstallGuide";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { myOrganizedProjects } from "@/lib/myProjects";
@@ -336,6 +337,21 @@ export default function BoardPage() {
       <FirstActionNudge />
       <ProfileNudge />
       <VouchDiscoveryNudge />
+      {/* Install card last in the cluster. NUDGE-STACKING NOTE: with
+          this card the Board can now show up to four calm prompts at
+          once. The three nudges above each gate on AppContext-derived
+          content (posts / profile / vouches) AND an independent async
+          dismiss flag, computed inside each component — there is no
+          shared synchronous "is any nudge eligible?" signal to read.
+          Making the install card defer would mean reimplementing all
+          four eligibility predicates plus three more dismiss-flag reads
+          here, which is neither contained nor drift-proof (it would
+          silently break if a nudge's self-retire logic changed). So we
+          place the card last and FLAG that a Board-nudge priority
+          policy — one prompt at a time, by priority — is a recommended
+          follow-up. The install card stays self-suppressing on its own
+          terms (installed / dismissed → renders nothing). */}
+      <InstallGuide variant="card" />
       <ContextualHint
         settingKey="boardHintDismissed"
         ariaLabel={t("hints.board.label")}
