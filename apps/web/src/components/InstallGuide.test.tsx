@@ -14,10 +14,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type {
-  BrowserId,
-  InstallEnvironment,
-} from "@/lib/installGuide";
+import type { InstallEnvironment } from "@/lib/installGuide";
 
 // In-memory settings store for the dismiss flag — mirrors the
 // VouchDiscoveryNudge harness. Keeps this test independent of Dexie.
@@ -36,10 +33,10 @@ vi.mock("@/db/database", async () => {
 
 // Drive the install posture by mocking the detection + capture
 // surface rather than fighting UA strings. The rest of installGuide
-// (the dismiss helpers, BROWSER_INSTRUCTIONS, SELECTABLE_BROWSERS) is
+// (the dismiss helpers, DEVICE_INSTRUCTIONS, SELECTABLE_DEVICES) is
 // kept real so the component renders genuine instruction keys.
 const mockEnv: { current: InstallEnvironment } = {
-  current: { kind: "unknown" },
+  current: { kind: "manual", device: "desktop" },
 };
 const promptMock = vi.fn(async () => {});
 const deferredPrompt: {
@@ -108,7 +105,7 @@ function stubMatchMedia(matches = false) {
 
 beforeEach(() => {
   settings.clear();
-  mockEnv.current = { kind: "unknown" };
+  mockEnv.current = { kind: "manual", device: "desktop" };
   deferredPrompt.current = null;
   promptMock.mockClear();
   stubMatchMedia(false);
@@ -163,39 +160,48 @@ describe("InstallGuide", () => {
     expect(promptMock).toHaveBeenCalledOnce();
   });
 
-  it("ios-safari → shows the three Share steps and the Share glyph", async () => {
+  it("card ios-safari → the one-line Share hint and the Share glyph, no <ol>", async () => {
     mockEnv.current = { kind: "ios-safari" };
     render();
     await flushAsync();
-    const items = container.querySelectorAll("ol li");
-    expect(items.length).toBe(3);
-    expect(container.textContent).toContain("Tap the Share button");
-    expect(container.textContent).toContain("Add to Home Screen");
-    // The iOS Share glyph (an inline SVG) renders next to step 1.
+    // Minimal card: a single hint line, never the full step list.
+    expect(container.querySelector("ol")).toBeNull();
+    expect(container.textContent).toContain('Tap Share, then "Add to Home Screen"');
+    // The iOS Share glyph (an inline SVG) renders on the hint line.
     expect(container.querySelector("svg")).not.toBeNull();
   });
 
-  it("in-app-browser → shows the open-in-browser notice with no steps", async () => {
+  it("card ios-other → the open-in-Safari sentence", async () => {
+    mockEnv.current = { kind: "ios-other" };
+    render();
+    await flushAsync();
+    expect(container.querySelector("ol")).toBeNull();
+    expect(container.textContent).toContain("only Safari can add an app");
+  });
+
+  it("card in-app-browser → the open-in-browser sentence, no steps", async () => {
     mockEnv.current = { kind: "in-app-browser" };
     render();
     await flushAsync();
-    expect(container.textContent).toContain("Open this in your browser first");
+    expect(container.textContent).toContain(
+      "You're viewing Understoria inside another app",
+    );
     expect(container.querySelector("ol")).toBeNull();
   });
 
-  it("manual → renders the detected browser's steps plus the selector", async () => {
-    mockEnv.current = {
-      kind: "manual",
-      browser: "chrome-android" as BrowserId,
-    };
+  it("card manual android → the android hint plus a 'More help' link", async () => {
+    mockEnv.current = { kind: "manual", device: "android" };
     render();
     await flushAsync();
-    const items = container.querySelectorAll("ol li");
-    expect(items.length).toBe(3);
-    expect(container.textContent).toContain("In Chrome");
-    // The "different browser?" selector is present.
-    expect(container.querySelector("select")).not.toBeNull();
-    expect(container.textContent).toContain("Using a different browser?");
+    // Minimal: one hint line, no step list.
+    expect(container.querySelector("ol")).toBeNull();
+    expect(container.textContent).toContain("Open your browser's menu");
+    // The "More help" link points out to the Learn panel on Profile.
+    const link = Array.from(container.querySelectorAll("a")).find((a) =>
+      a.textContent?.includes("More help"),
+    );
+    expect(link).toBeDefined();
+    expect(link?.getAttribute("href")).toBe("/profile");
   });
 
   it("card dismiss → writes the sentinel and stays hidden on re-render", async () => {
@@ -237,5 +243,51 @@ describe("InstallGuide", () => {
       (b) => b.textContent?.includes("Not now"),
     );
     expect(dismiss).toBeUndefined();
+  });
+
+  it("panel renders the detected device's steps and a three-device toggle", async () => {
+    mockEnv.current = { kind: "ios-safari" };
+    render("panel");
+    await flushAsync();
+    // The full pictured steps render in the panel (not the card).
+    const items = container.querySelectorAll("ol li");
+    expect(items.length).toBe(3);
+    expect(container.textContent).toContain("Tap the Share button");
+    // The three-device toggle is buttons, NEVER a <select>.
+    expect(container.querySelector("select")).toBeNull();
+    const labels = Array.from(container.querySelectorAll("button")).map(
+      (b) => b.textContent,
+    );
+    expect(labels).toContain("iPhone or iPad");
+    expect(labels).toContain("Android");
+    expect(labels).toContain("Computer");
+    // No browser-named options survive the rework.
+    expect(container.textContent).not.toContain("Samsung");
+    expect(container.textContent).not.toContain("Using a different browser?");
+  });
+
+  it("panel device toggle → selecting Android swaps in the Android steps", async () => {
+    mockEnv.current = { kind: "ios-safari" };
+    render("panel");
+    await flushAsync();
+    // Defaults to the detected device (iOS) — its Safari intro shows.
+    expect(container.textContent).toContain("In Safari");
+
+    const androidBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Android",
+    );
+    expect(androidBtn).toBeDefined();
+    await act(async () => {
+      (androidBtn as HTMLButtonElement).click();
+      await Promise.resolve();
+    });
+
+    // The Android steps replace the iOS ones (an Android-only step
+    // line proves the swap), and the toggle marks Android active.
+    expect(container.textContent).toContain("Open your browser's menu");
+    expect(container.textContent).not.toContain("Tap the Share button");
+    expect(androidBtn?.getAttribute("aria-pressed")).toBe("true");
+    const items = container.querySelectorAll("ol li");
+    expect(items.length).toBe(3);
   });
 });

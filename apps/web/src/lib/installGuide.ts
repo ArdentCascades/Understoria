@@ -23,27 +23,26 @@ import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 // We never fingerprint, never record which browser a member uses, and
 // never time how long the prompt sat unanswered.
 
-/** Browsers we can give pictured manual steps for. `ios-safari` is
- *  detected separately (it gets the live Share-glyph copy) but is
- *  included here for the "different browser?" selector so an iOS member
- *  who somehow landed in the manual branch can still pick it. */
-export type BrowserId =
-  | "ios-safari"
-  | "chrome-android"
-  | "samsung"
-  | "firefox-android"
-  | "chrome-desktop"
-  | "edge-desktop";
+/** The three device buckets we give manual install steps for. We pick a
+ *  device — not a browser — because the per-browser copy collapses: a
+ *  Chromium browser already gets a one-tap button from feature detection
+ *  (no copy needed), iOS can only install via Safari (so the iOS branch
+ *  is a single device), and the residual Android/desktop steps are
+ *  generic enough to be one instruction set each. `desktop` is the
+ *  catch-all. */
+export type DeviceId = "ios" | "android" | "desktop";
 
 /** The detected install posture. First-match-wins, classified by
- *  `detectInstallEnvironment` below. `installed` always wins. */
+ *  `detectInstallEnvironment` below. `installed` always wins. The
+ *  `manual` branch always carries a best-guess device; the panel's
+ *  device toggle lets the member correct a misdetection. */
 export type InstallEnvironment =
   | { kind: "installed" }
   | { kind: "promptable" }
   | { kind: "ios-safari" }
+  | { kind: "ios-other" } // iOS on a non-Safari browser — only Safari can install on iOS
   | { kind: "in-app-browser" }
-  | { kind: "manual"; browser: BrowserId }
-  | { kind: "unknown" };
+  | { kind: "manual"; device: DeviceId }; // android/desktop generic steps
 
 // --- Pure predicates -------------------------------------------------
 // Every predicate takes its inputs as parameters so it is unit-testable
@@ -99,19 +98,18 @@ export function isInAppBrowser(ua: string): boolean {
   ].some((token) => ua.toLowerCase().includes(token.toLowerCase()));
 }
 
-/** Best-effort browser identification for the manual-steps branch.
- *  Order matters: Samsung's UA also contains `Chrome`, and Edge's
- *  contains `Chrome` too, so the more specific token wins first. */
-export function detectBrowser(ua: string): BrowserId {
-  if (/SamsungBrowser/.test(ua)) return "samsung";
-  if (/Firefox/.test(ua) && /Android|Mobile/.test(ua)) {
-    return "firefox-android";
-  }
-  if (/Edg/.test(ua)) return "edge-desktop";
-  if (/Android/.test(ua)) return "chrome-android";
-  // Desktop Chromium (or anything else that fell through) gets the
-  // address-bar-install steps.
-  return "chrome-desktop";
+/** Best-effort device bucket for the manual-steps branch. iOS (incl.
+ *  iPadOS-as-Mac) wins first via `isIos`; then an explicit Android
+ *  token; everything else is `desktop`, the catch-all. The panel's
+ *  device toggle lets the member correct a misdetection. */
+export function detectDevice(
+  ua: string,
+  platform: string,
+  maxTouchPoints: number,
+): DeviceId {
+  if (isIos(ua, platform, maxTouchPoints)) return "ios";
+  if (/Android/i.test(ua)) return "android";
+  return "desktop";
 }
 
 /**
@@ -144,89 +142,61 @@ export function detectInstallEnvironment(input: {
     return { kind: "ios-safari" };
   }
 
-  // 5. Manual pictured steps for a recognized browser.
-  if (
-    /Android|Mobile|Edg|SamsungBrowser|Firefox|Chrome|CriOS|FxiOS/.test(ua) ||
-    isIos(ua, platform, maxTouchPoints)
-  ) {
-    return { kind: "manual", browser: detectBrowser(ua) };
+  // 5. iOS on a non-Safari browser — on iOS only Safari can add to the
+  //    home screen, so there are no pictured steps to give; the only
+  //    move is "open this in Safari".
+  if (isIos(ua, platform, maxTouchPoints)) {
+    return { kind: "ios-other" };
   }
 
-  // 6. We couldn't tell — the selector becomes the primary affordance.
-  return { kind: "unknown" };
+  // 6. Everything else gets generic manual steps for its device bucket.
+  //    iOS was handled above, so detectDevice resolves to android or
+  //    desktop here; the panel's device toggle covers a misdetection.
+  return { kind: "manual", device: detectDevice(ua, platform, maxTouchPoints) };
 }
 
 /**
- * Per-browser instruction table, keyed by i18n message keys (NOT
- * literal prose) so every string flows through the parity-checked
- * locale files. The component renders `t(labelKey)` / `t(introKey)`
- * and maps `stepKeys` through `t`.
+ * Per-device instruction table, keyed by i18n message keys (NOT literal
+ * prose) so every string flows through the parity-checked locale files.
+ * The component renders `t(labelKey)` / `t(introKey)` and maps
+ * `stepKeys` through `t`. The `ios` entry reuses the Safari Share steps
+ * (the only way to install on iOS).
  */
-export const BROWSER_INSTRUCTIONS: Record<
-  BrowserId,
+export const DEVICE_INSTRUCTIONS: Record<
+  DeviceId,
   { labelKey: string; introKey: string; stepKeys: string[] }
 > = {
-  "ios-safari": {
-    labelKey: "install.selector.browsers.iosSafari",
+  ios: {
+    labelKey: "install.devicePicker.ios",
     introKey: "install.ios.intro",
     stepKeys: ["install.ios.step1", "install.ios.step2", "install.ios.step3"],
   },
-  "chrome-android": {
-    labelKey: "install.selector.browsers.chromeAndroid",
-    introKey: "install.steps.chromeAndroid.intro",
+  android: {
+    labelKey: "install.devicePicker.android",
+    introKey: "install.android.intro",
     stepKeys: [
-      "install.steps.chromeAndroid.step1",
-      "install.steps.chromeAndroid.step2",
-      "install.steps.chromeAndroid.step3",
+      "install.android.step1",
+      "install.android.step2",
+      "install.android.step3",
     ],
   },
-  samsung: {
-    labelKey: "install.selector.browsers.samsung",
-    introKey: "install.steps.samsung.intro",
+  desktop: {
+    labelKey: "install.devicePicker.desktop",
+    introKey: "install.desktop.intro",
     stepKeys: [
-      "install.steps.samsung.step1",
-      "install.steps.samsung.step2",
-      "install.steps.samsung.step3",
-    ],
-  },
-  "firefox-android": {
-    labelKey: "install.selector.browsers.firefoxAndroid",
-    introKey: "install.steps.firefoxAndroid.intro",
-    stepKeys: [
-      "install.steps.firefoxAndroid.step1",
-      "install.steps.firefoxAndroid.step2",
-      "install.steps.firefoxAndroid.step3",
-    ],
-  },
-  "chrome-desktop": {
-    labelKey: "install.selector.browsers.chromeDesktop",
-    introKey: "install.steps.chromeDesktop.intro",
-    stepKeys: [
-      "install.steps.chromeDesktop.step1",
-      "install.steps.chromeDesktop.step2",
-      "install.steps.chromeDesktop.step3",
-    ],
-  },
-  "edge-desktop": {
-    labelKey: "install.selector.browsers.edgeDesktop",
-    introKey: "install.steps.edgeDesktop.intro",
-    stepKeys: [
-      "install.steps.edgeDesktop.step1",
-      "install.steps.edgeDesktop.step2",
-      "install.steps.edgeDesktop.step3",
+      "install.desktop.step1",
+      "install.desktop.step2",
+      "install.desktop.step3",
     ],
   },
 };
 
-/** The selectable browsers, in display order, for the "different
- *  browser?" picker. */
-export const SELECTABLE_BROWSERS: readonly BrowserId[] = [
-  "ios-safari",
-  "chrome-android",
-  "samsung",
-  "firefox-android",
-  "chrome-desktop",
-  "edge-desktop",
+/** The selectable devices, in display order, for the "different
+ *  device?" toggle. */
+export const SELECTABLE_DEVICES: readonly DeviceId[] = [
+  "ios",
+  "android",
+  "desktop",
 ] as const;
 
 // --- Module-scope beforeinstallprompt capture ------------------------
@@ -317,10 +287,12 @@ function readStandalone(): boolean {
 }
 
 /** Detect the install environment from the live browser globals.
- *  Returns `unknown` in a non-DOM context so callers don't need to
- *  guard. */
+ *  Returns the desktop manual fallback in a non-DOM context (the
+ *  catch-all device) so callers don't need to guard. */
 export function currentInstallEnvironment(): InstallEnvironment {
-  if (typeof navigator === "undefined") return { kind: "unknown" };
+  if (typeof navigator === "undefined") {
+    return { kind: "manual", device: "desktop" };
+  }
   return detectInstallEnvironment({
     ua: navigator.userAgent,
     platform: navigator.platform,

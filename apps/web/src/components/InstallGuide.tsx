@@ -11,9 +11,14 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { IconShare } from "@/components/visual";
 import { useInstallGuide } from "@/lib/useInstallGuide";
-import { SELECTABLE_BROWSERS, type BrowserId } from "@/lib/installGuide";
+import {
+  SELECTABLE_DEVICES,
+  type DeviceId,
+  type InstallEnvironment,
+} from "@/lib/installGuide";
 
 // The human-facing "Add to Home Screen" affordance. The PWA is already
 // fully installable (manifest + service worker); this is the calm,
@@ -40,8 +45,8 @@ export function InstallGuide({ variant }: { variant: Variant }) {
     state,
     dismissed,
     instructions,
-    selectedBrowser,
-    selectBrowser,
+    selectedDevice,
+    selectDevice,
     promptInstall,
     dismiss,
   } = useInstallGuide();
@@ -64,33 +69,6 @@ export function InstallGuide({ variant }: { variant: Variant }) {
   // An installed app never nags about installing.
   if (state.kind === "installed") return null;
 
-  function Body() {
-    switch (state!.kind) {
-      case "promptable":
-        return <OneTapInstall onPrompt={promptInstall} />;
-      case "ios-safari":
-        return <IosSteps />;
-      case "in-app-browser":
-        return <InAppBrowserNotice />;
-      case "manual":
-      case "unknown":
-        return (
-          <ManualSteps
-            instructions={instructions}
-            selectedBrowser={selectedBrowser}
-            selectBrowser={selectBrowser}
-            // For `unknown` the selector is the PRIMARY affordance, so
-            // surface it prominently rather than as an afterthought.
-            selectorIsPrimary={state!.kind === "unknown"}
-          />
-        );
-      // `installed` is handled above (returns null); listed for
-      // exhaustiveness so noFallthroughCasesInSwitch stays satisfied.
-      case "installed":
-        return null;
-    }
-  }
-
   if (!isCard) {
     return (
       <div className="space-y-3">
@@ -102,7 +80,13 @@ export function InstallGuide({ variant }: { variant: Variant }) {
             {t("install.panel.intro")}
           </p>
         </div>
-        <Body />
+        <PanelBody
+          state={state}
+          instructions={instructions}
+          selectedDevice={selectedDevice}
+          selectDevice={selectDevice}
+          onPrompt={promptInstall}
+        />
       </div>
     );
   }
@@ -118,10 +102,7 @@ export function InstallGuide({ variant }: { variant: Variant }) {
       <p className="font-medium text-canopy-900 dark:text-canopy-100">
         {t("install.card.title")}
       </p>
-      <p className="text-canopy-900 dark:text-canopy-100">
-        {t("install.card.body")}
-      </p>
-      <Body />
+      <CardBody state={state} onPrompt={promptInstall} />
       <div className="flex justify-end">
         <button
           type="button"
@@ -131,6 +112,131 @@ export function InstallGuide({ variant }: { variant: Variant }) {
           {t("install.card.dismiss")}
         </button>
       </div>
+    </div>
+  );
+}
+
+// --- Card body: minimal, one line at rest --------------------------
+// The card lives on Board where space is precious, so each state gets a
+// single line — never a dropdown, never an <ol>. The full guide (steps,
+// the device toggle) lives in the Learn panel; every non-promptable
+// card carries a "More help" link out to it.
+
+function CardBody({
+  state,
+  onPrompt,
+}: {
+  state: InstallEnvironment;
+  onPrompt: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+
+  // Chromium one-tap stands alone — the install happens right here, so
+  // there's nothing more to send the member to Learn for.
+  if (state.kind === "promptable") {
+    return <OneTapInstall onPrompt={onPrompt} />;
+  }
+
+  return (
+    <>
+      <CardHint state={state} />
+      {/* Every manual/iOS card points out to the full guide in Learn.
+          Deep-linking that link to auto-open the install panel is a
+          follow-up; for now it lands on Profile, where the panel lives. */}
+      <Link
+        to="/profile"
+        className="self-start text-xs font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+      >
+        {t("install.card.moreHelp")} →
+      </Link>
+    </>
+  );
+}
+
+/** The single-line hint for a non-promptable card state. The iOS-Safari
+ *  line carries the live Share glyph so "tap Share" is unmistakable. */
+function CardHint({ state }: { state: InstallEnvironment }) {
+  const { t } = useTranslation();
+  switch (state.kind) {
+    case "ios-safari":
+      return (
+        <p className="flex flex-wrap items-center gap-1 text-canopy-900 dark:text-canopy-100">
+          <IconShare
+            size={18}
+            className="text-canopy-700 dark:text-canopy-300"
+            data-decorative=""
+          />
+          <span>{t("install.card.iosHint")}</span>
+        </p>
+      );
+    case "ios-other":
+      return (
+        <p className="text-canopy-900 dark:text-canopy-100">
+          {t("install.iosOther.body")}
+        </p>
+      );
+    case "in-app-browser":
+      return (
+        <p className="text-canopy-900 dark:text-canopy-100">
+          {t("install.inAppBrowser.body")}
+        </p>
+      );
+    case "manual":
+      return (
+        <p className="text-canopy-900 dark:text-canopy-100">
+          {state.device === "android"
+            ? t("install.card.androidHint")
+            : t("install.card.desktopHint")}
+        </p>
+      );
+    // `promptable` is handled by CardBody; `installed` never reaches a
+    // body. Listed for exhaustiveness (noFallthroughCasesInSwitch).
+    case "promptable":
+    case "installed":
+      return null;
+  }
+}
+
+// --- Panel body: the full guide, room to breathe -------------------
+// The Learn panel is a re-findable reference, so it shows the primary
+// affordance for the detected state plus a three-device toggle for the
+// member to correct a misdetection or look up another device.
+
+function PanelBody({
+  state,
+  instructions,
+  selectedDevice,
+  selectDevice,
+  onPrompt,
+}: {
+  state: InstallEnvironment;
+  instructions:
+    | { labelKey: string; introKey: string; stepKeys: string[] }
+    | null;
+  selectedDevice: DeviceId | null;
+  selectDevice: (device: DeviceId) => void;
+  onPrompt: () => Promise<void>;
+}) {
+  // Chromium one-tap and the two "you can't install from here" states
+  // are terminal — no device steps, no toggle.
+  if (state.kind === "promptable") {
+    return <OneTapInstall onPrompt={onPrompt} />;
+  }
+  if (state.kind === "ios-other") {
+    return <IosOtherNotice />;
+  }
+  if (state.kind === "in-app-browser") {
+    return <InAppBrowserNotice />;
+  }
+
+  // Otherwise (ios-safari / manual): the pictured steps for the
+  // effective device, plus the device toggle so the member can switch.
+  return (
+    <div className="space-y-3">
+      {instructions && (
+        <DeviceSteps instructions={instructions} device={selectedDevice} />
+      )}
+      <DevicePicker value={selectedDevice} onChange={selectDevice} />
     </div>
   );
 }
@@ -173,28 +279,51 @@ function OneTapInstall({ onPrompt }: { onPrompt: () => Promise<void> }) {
   );
 }
 
-/** iOS Safari: the three Share steps, with the live Share glyph next to
- *  the "tap the Share button" mention so the instruction is
- *  unmistakable. */
-function IosSteps() {
+/** Pictured steps for a device. For `ios` the live Share glyph sits on
+ *  step 1 next to the "tap the Share button" mention so the instruction
+ *  is unmistakable; other devices get plain numbered steps. */
+function DeviceSteps({
+  instructions,
+  device,
+}: {
+  instructions: { labelKey: string; introKey: string; stepKeys: string[] };
+  device: DeviceId | null;
+}) {
   const { t } = useTranslation();
   return (
     <div>
       <p className="text-canopy-900 dark:text-canopy-100">
-        {t("install.ios.intro")}
+        {t(instructions.introKey)}
       </p>
       <ol className="mt-2 list-decimal space-y-1 pl-5 text-canopy-900 dark:text-canopy-100">
-        <li className="flex flex-wrap items-center gap-1">
-          <span>{t("install.ios.step1")}</span>
-          <IconShare
-            size={18}
-            className="text-canopy-700 dark:text-canopy-300"
-            data-decorative=""
-          />
-        </li>
-        <li>{t("install.ios.step2")}</li>
-        <li>{t("install.ios.step3")}</li>
+        {instructions.stepKeys.map((key, i) =>
+          device === "ios" && i === 0 ? (
+            <li key={key} className="flex flex-wrap items-center gap-1">
+              <span>{t(key)}</span>
+              <IconShare
+                size={18}
+                className="text-canopy-700 dark:text-canopy-300"
+                data-decorative=""
+              />
+            </li>
+          ) : (
+            <li key={key}>{t(key)}</li>
+          ),
+        )}
       </ol>
+    </div>
+  );
+}
+
+/** iOS on a non-Safari browser: on iOS only Safari can add to the home
+ *  screen, so there are no steps to give — the only move is to reopen
+ *  the page in Safari. */
+function IosOtherNotice() {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-1 text-canopy-900 dark:text-canopy-100">
+      <p className="font-medium">{t("install.iosOther.title")}</p>
+      <p>{t("install.iosOther.body")}</p>
     </div>
   );
 }
@@ -215,92 +344,43 @@ function InAppBrowserNotice() {
   );
 }
 
-/** Manual / unknown: pictured steps for the effective browser plus the
- *  "different browser?" selector. For `unknown`, no steps render until
- *  the member picks a browser — the selector is the primary affordance. */
-function ManualSteps({
-  instructions,
-  selectedBrowser,
-  selectBrowser,
-  selectorIsPrimary,
+/** The "Adding from a different device?" toggle — a small segmented
+ *  group of three buttons (iPhone or iPad / Android / Computer), NOT a
+ *  <select>. Device ids map straight to their i18n leaves, so there's no
+ *  kebab/camel bridge. The active device carries `aria-pressed` /
+ *  `aria-current` so assistive tech reads the current selection. */
+function DevicePicker({
+  value,
+  onChange,
 }: {
-  instructions:
-    | { labelKey: string; introKey: string; stepKeys: string[] }
-    | null;
-  selectedBrowser: BrowserId | null;
-  selectBrowser: (browser: BrowserId) => void;
-  selectorIsPrimary: boolean;
+  value: DeviceId | null;
+  onChange: (device: DeviceId) => void;
 }) {
   const { t } = useTranslation();
   return (
-    <div className="space-y-2">
-      {instructions && (
-        <div>
-          <p className="text-canopy-900 dark:text-canopy-100">
-            {t(instructions.introKey)}
-          </p>
-          <ol className="mt-2 list-decimal space-y-1 pl-5 text-canopy-900 dark:text-canopy-100">
-            {instructions.stepKeys.map((key) => (
-              <li key={key}>{t(key)}</li>
-            ))}
-          </ol>
-        </div>
-      )}
-      <BrowserSelector
-        value={selectedBrowser}
-        onChange={selectBrowser}
-        primary={selectorIsPrimary}
-      />
+    <div className="text-xs text-moss-600 dark:text-moss-300">
+      <p>{t("install.devicePicker.prompt")}</p>
+      <div className="mt-1 inline-flex gap-1" role="group">
+        {SELECTABLE_DEVICES.map((device) => {
+          const active = value === device;
+          return (
+            <button
+              key={device}
+              type="button"
+              aria-pressed={active}
+              aria-current={active ? "true" : undefined}
+              onClick={() => onChange(device)}
+              className={
+                active
+                  ? "rounded-full bg-canopy-600 px-3 py-1 font-medium text-white dark:bg-canopy-500"
+                  : "rounded-full border border-canopy-200 px-3 py-1 text-canopy-800 hover:bg-canopy-100 dark:border-canopy-800 dark:text-canopy-200 dark:hover:bg-canopy-900/40"
+              }
+            >
+              {t(`install.devicePicker.${device}`)}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
-
-/** The "Using a different browser?" picker — a labelled <select> that
- *  drives `selectBrowser`. */
-function BrowserSelector({
-  value,
-  onChange,
-  primary,
-}: {
-  value: BrowserId | null;
-  onChange: (browser: BrowserId) => void;
-  primary: boolean;
-}) {
-  const { t } = useTranslation();
-  const labelText = primary
-    ? t("install.selector.choose")
-    : t("install.selector.prompt");
-  return (
-    <label className="block text-xs text-moss-600 dark:text-moss-300">
-      <span>{labelText}</span>
-      <select
-        className="input mt-1 text-sm"
-        value={value ?? ""}
-        onChange={(e) => {
-          if (e.target.value) onChange(e.target.value as BrowserId);
-        }}
-      >
-        <option value="" disabled>
-          {t("install.selector.choose")}
-        </option>
-        {SELECTABLE_BROWSERS.map((browser) => (
-          <option key={browser} value={browser}>
-            {t(`install.selector.browsers.${browserKeyMap[browser]}`)}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-// BrowserId values are kebab-case; the i18n leaf names are camelCase.
-// This small map keeps the option labels keyed off the canonical
-// BrowserId without spreading the naming mismatch through the deck.
-const browserKeyMap: Record<BrowserId, string> = {
-  "ios-safari": "iosSafari",
-  "chrome-android": "chromeAndroid",
-  samsung: "samsung",
-  "firefox-android": "firefoxAndroid",
-  "chrome-desktop": "chromeDesktop",
-  "edge-desktop": "edgeDesktop",
-};
