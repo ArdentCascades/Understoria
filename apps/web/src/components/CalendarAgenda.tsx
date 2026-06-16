@@ -163,14 +163,43 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
       hour: "numeric",
       minute: "2-digit",
     });
+    // Day position within the event's UTC-day span. A multi-day event
+    // emits one entry per day; first day reads like a single-day event,
+    // middle days announce the continuation, the final day reads the
+    // end time. dayIndex / dayCount carry the TRUE span position even
+    // when the window clips the leading days.
+    const isContinuation = entry.isMultiDay && entry.dayIndex > 0;
+    const isLastDay =
+      entry.isMultiDay && entry.dayIndex === entry.dayCount - 1;
+    // Multi-day entries get a day-aware aria-label so a screen reader
+    // hears "day 2 of 4" / "final day"; single-day entries keep the
+    // plain kind label.
+    let ariaLabel: string;
+    if (entry.isMultiDay) {
+      if (isLastDay) {
+        ariaLabel = entry.viewerGoing
+          ? t("events.calendar.multiDay.ariaLabelGoingFinal")
+          : t("events.calendar.multiDay.ariaLabelFinal");
+      } else {
+        ariaLabel = entry.viewerGoing
+          ? t("events.calendar.multiDay.ariaLabelGoing", {
+              index: entry.dayIndex + 1,
+              count: entry.dayCount,
+            })
+          : t("events.calendar.multiDay.ariaLabel", {
+              index: entry.dayIndex + 1,
+              count: entry.dayCount,
+            });
+      }
+    } else {
+      ariaLabel = entry.viewerGoing
+        ? t("events.calendar.entryKindLabelGoing")
+        : t("events.calendar.entryKindLabel");
+    }
     return (
       <Link
         to={entry.path}
-        aria-label={
-          entry.viewerGoing
-            ? t("events.calendar.entryKindLabelGoing")
-            : t("events.calendar.entryKindLabel")
-        }
+        aria-label={ariaLabel}
         className="group flex items-center gap-2 rounded-xl px-2 py-1.5
                    hover:bg-moss-50 dark:hover:bg-moss-900"
       >
@@ -182,7 +211,31 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
           <span aria-hidden="true" className="mr-1">
             {meta.emoji}
           </span>
-          {timeFmt.format(new Date(entry.startsAt))} — {entry.title}
+          {isLastDay && entry.endsAt !== null ? (
+            // Final day of a multi-day span — show the end time, not the
+            // (now-passed) start time. endsAt is non-null here because a
+            // null-end event is never multi-day.
+            t("events.calendar.multiDay.endsAtLine", {
+              time: timeFmt.format(new Date(entry.endsAt)),
+              title: entry.title,
+            })
+          ) : isContinuation ? (
+            // A middle day — the start time belongs to day 1, so suppress
+            // it and announce the continuation + day-of-N instead.
+            <>
+              {t("events.calendar.multiDay.continues")} ·{" "}
+              {t("events.calendar.multiDay.dayOf", {
+                index: entry.dayIndex + 1,
+                count: entry.dayCount,
+              })}{" "}
+              — {entry.title}
+            </>
+          ) : (
+            // First day (or single-day) — unchanged start-time line.
+            <>
+              {timeFmt.format(new Date(entry.startsAt))} — {entry.title}
+            </>
+          )}
           {entry.location ? (
             <span className="text-moss-600 dark:text-moss-300">
               {" "}

@@ -235,20 +235,49 @@ function WeekChip({
     // from same-coloured project/post chips); unknown peer category falls
     // back neutrally. aria-label names the kind for screen readers.
     const meta = eventCategoryMeta(entry.category);
+    // Multi-day spans keep the bare title visible (preserving truncation)
+    // and carry the day position on the day-aware aria-label + title.
+    const isLastDay =
+      entry.isMultiDay && entry.dayIndex === entry.dayCount - 1;
+    let ariaLabel: string;
+    if (entry.isMultiDay) {
+      if (isLastDay) {
+        ariaLabel = entry.viewerGoing
+          ? t("events.calendar.multiDay.ariaLabelGoingFinal")
+          : t("events.calendar.multiDay.ariaLabelFinal");
+      } else {
+        ariaLabel = entry.viewerGoing
+          ? t("events.calendar.multiDay.ariaLabelGoing", {
+              index: entry.dayIndex + 1,
+              count: entry.dayCount,
+            })
+          : t("events.calendar.multiDay.ariaLabel", {
+              index: entry.dayIndex + 1,
+              count: entry.dayCount,
+            });
+      }
+    } else {
+      ariaLabel = entry.viewerGoing
+        ? t("events.calendar.entryKindLabelGoing")
+        : t("events.calendar.entryKindLabel");
+    }
+    const chipTitle = entry.isMultiDay
+      ? t("events.calendar.multiDay.chipTitle", {
+          title: entry.title,
+          index: entry.dayIndex + 1,
+          count: entry.dayCount,
+        })
+      : entry.title;
     return (
       <Link
         to={entry.path}
-        aria-label={
-          entry.viewerGoing
-            ? t("events.calendar.entryKindLabelGoing")
-            : t("events.calendar.entryKindLabel")
-        }
+        aria-label={ariaLabel}
         // Inset ring marks an event the viewer RSVP'd "going" to — own
         // status only, never a count.
         className={`block truncate rounded px-1 py-0.5 text-[10px] text-white ${meta.barColorClass} hover:opacity-90 ${
           entry.viewerGoing ? "ring-1 ring-inset ring-white/80" : ""
         }`}
-        title={entry.title}
+        title={chipTitle}
       >
         <span aria-hidden="true">{meta.emoji}</span> {entry.title}
       </Link>

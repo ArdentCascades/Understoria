@@ -557,4 +557,163 @@ describe("CalendarPage", () => {
     expect(fab).not.toBeNull();
     expect(fab?.getAttribute("aria-label")).toBe("Create an event");
   });
+
+  // Force the agenda view (jsdom defaults innerWidth to 1024 → month).
+  // The agenda lists every entry under day headers, which is what the
+  // multi-day cases below assert against.
+  function clickAgenda() {
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => agendaPill!.click());
+  }
+
+  it("renders a 2-day event under two day headers in the agenda", () => {
+    // Day D 20:00 → day D+1 02:00 UTC: the festival spans two UTC days.
+    const startsAt = Date.UTC(2026, 5, 15, 20, 0, 0);
+    const endsAt = Date.UTC(2026, 5, 16, 2, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({ id: "fest", title: "Weekend festival", startsAt, endsAt }),
+    ];
+    render(<CalendarPage />);
+    clickAgenda();
+    // The event's link appears in BOTH day sections.
+    const sections = Array.from(container.querySelectorAll("section")).filter(
+      (s) => s.querySelector('a[href="/events/fest"]') !== null,
+    );
+    expect(sections.length).toBe(2);
+    vi.useRealTimers();
+  });
+
+  it("suppresses the start time and shows the day-of copy on a continuation day", () => {
+    const startsAt = Date.UTC(2026, 5, 15, 20, 0, 0);
+    const endsAt = Date.UTC(2026, 5, 16, 2, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({ id: "fest", title: "Weekend festival", startsAt, endsAt }),
+    ];
+    render(<CalendarPage />);
+    clickAgenda();
+    // Find the two day sections in grid order; the SECOND is the
+    // continuation (final) day. For a 2-day span the continuation day IS
+    // the final day, so it renders the "Ends" line, which still carries
+    // the "day 2 of 2" cue only on the title attribute — assert here on
+    // the final-day "Ends" copy and that the start time is absent.
+    const sections = Array.from(container.querySelectorAll("section")).filter(
+      (s) => s.querySelector('a[href="/events/fest"]') !== null,
+    );
+    expect(sections.length).toBe(2);
+    const finalText = sections[1].textContent ?? "";
+    expect(finalText).toContain("Ends");
+    // The start time string is "8:00" (20:00 → 8:00 PM in en-US Intl).
+    // It must NOT appear on the continuation/final day row.
+    expect(finalText).not.toContain("8:00");
+    vi.useRealTimers();
+  });
+
+  it("shows a 'Day 2 of 3' continuation line on a true middle day", () => {
+    // A 3-day span so the middle day is a continuation that is NOT the
+    // final day — it renders the "Continues · Day 2 of 3" copy.
+    const startsAt = Date.UTC(2026, 5, 15, 9, 0, 0);
+    const endsAt = Date.UTC(2026, 5, 17, 17, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({ id: "build", title: "Three-day build", startsAt, endsAt }),
+    ];
+    render(<CalendarPage />);
+    clickAgenda();
+    const sections = Array.from(container.querySelectorAll("section")).filter(
+      (s) => s.querySelector('a[href="/events/build"]') !== null,
+    );
+    expect(sections.length).toBe(3);
+    const middleText = sections[1].textContent ?? "";
+    expect(middleText).toContain("Day 2 of 3");
+    expect(middleText).toContain("Continues");
+    // The start time (9:00) belongs to day 1, not the middle day.
+    expect(middleText).not.toContain("9:00");
+    // The final day shows the "Ends" line.
+    expect(sections[2].textContent ?? "").toContain("Ends");
+    vi.useRealTimers();
+  });
+
+  it("gives a continuation chip a day-aware aria-label (week view)", () => {
+    const startsAt = Date.UTC(2026, 5, 15, 9, 0, 0);
+    const endsAt = Date.UTC(2026, 5, 17, 17, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({ id: "build", title: "Three-day build", startsAt, endsAt }),
+    ];
+    render(<CalendarPage />);
+    // Switch to week view, then step it onto the event's week (the view
+    // anchors to "now" = the start of June, the event is mid-June).
+    const weekPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /week/i.test(b.textContent ?? ""));
+    act(() => weekPill!.click());
+    const nextBtn = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /next/i.test(b.textContent ?? ""));
+    // June 1 (Mon) → the event week (the 15th) is two weeks forward.
+    act(() => nextBtn!.click());
+    act(() => nextBtn!.click());
+    // Collect this event's chips; at least one is a continuation day
+    // (dayIndex > 0) and carries a "day N of 3" aria-label.
+    const chips = Array.from(
+      container.querySelectorAll<HTMLAnchorElement>('a[href="/events/build"]'),
+    );
+    const labels = chips.map((c) => c.getAttribute("aria-label") ?? "");
+    expect(labels.some((l) => /day 2 of 3/i.test(l))).toBe(true);
+    vi.useRealTimers();
+  });
+
+  it("marks EVERY day of a multi-day event the viewer is going to", () => {
+    const startsAt = Date.UTC(2026, 5, 15, 20, 0, 0);
+    const endsAt = Date.UTC(2026, 5, 16, 2, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.currentMember = makeMember("me-key");
+    mockState.events = [
+      makeEvent({ id: "fest", title: "Weekend festival", startsAt, endsAt }),
+    ];
+    mockState.eventRsvps = [
+      {
+        id: "r1",
+        eventId: "fest",
+        memberKey: "me-key",
+        status: "going",
+        respondedAt: 1,
+      },
+    ];
+    render(<CalendarPage />);
+    clickAgenda();
+    const chips = Array.from(
+      container.querySelectorAll<HTMLAnchorElement>('a[href="/events/fest"]'),
+    );
+    expect(chips.length).toBe(2);
+    // Both day entries carry a "going" aria-label (the going-specific
+    // multi-day variant mentions "going to").
+    for (const chip of chips) {
+      expect(chip.getAttribute("aria-label") ?? "").toMatch(/going to/i);
+    }
+    vi.useRealTimers();
+  });
+
+  it("renders a single-day (null endsAt) event as exactly one link (regression)", () => {
+    const startsAt = Date.UTC(2026, 5, 15, 18, 0, 0);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.events = [
+      makeEvent({ id: "one", title: "Single evening", startsAt, endsAt: null }),
+    ];
+    render(<CalendarPage />);
+    clickAgenda();
+    const chips = container.querySelectorAll('a[href="/events/one"]');
+    expect(chips.length).toBe(1);
+    vi.useRealTimers();
+  });
 });

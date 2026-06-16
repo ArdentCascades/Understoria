@@ -442,7 +442,18 @@
       "entryKindLabel": "Event",
       "entryKindLabelGoing": "Event you're going to",
       "eventsOnlyChip": "Events only",
-      "fabAriaLabel": "Create an event"
+      "fabAriaLabel": "Create an event",
+      "multiDay": {
+        "continues": "Continues",
+        "dayOf": "Day {{index}} of {{count}}",
+        "endsAtLine": "Ends {{time}} — {{title}}",
+        "firstDayBadge": "Day 1 of {{count}}",
+        "ariaLabel": "Event, day {{index}} of {{count}}",
+        "ariaLabelGoing": "Event you're going to, day {{index}} of {{count}}",
+        "ariaLabelFinal": "Event, final day",
+        "ariaLabelGoingFinal": "Event you're going to, final day",
+        "chipTitle": "{{title}} — day {{index}} of {{count}}"
+      }
     }
   },
   "messages": {

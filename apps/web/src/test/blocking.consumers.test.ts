@@ -515,8 +515,11 @@ describe("Events (visibility) (a)", () => {
       windowStart: 0,
       windowEnd: 10_000,
     });
+    // Entry ids embed the per-day key now that multi-day events emit one
+    // entry per spanned UTC day; these single-day events land on
+    // 1970-01-01 (startsAt 1000/2000 ms, window [0, 10_000]).
     expect(entries.filter((e) => e.kind === "event").map((e) => e.id)).toEqual([
-      "event:e2",
+      "event:e2:1970-01-01",
     ]);
   });
 
@@ -537,7 +540,7 @@ describe("Events (visibility) (a)", () => {
     });
     expect(
       entries.filter((e) => e.kind === "event").map((e) => e.id).sort(),
-    ).toEqual(["event:e1", "event:e2"]);
+    ).toEqual(["event:e1:1970-01-01", "event:e2:1970-01-01"]);
   });
 });
 
