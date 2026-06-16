@@ -237,8 +237,11 @@
     "card": {
       "label": "Añade Understoria a tu teléfono",
       "title": "Ten Understoria a un toque",
-      "body": "Añádela a tu pantalla de inicio y se abre como cualquier otra app — a pantalla completa, funciona sin conexión, sin tienda de aplicaciones.",
-      "dismiss": "Ahora no"
+      "dismiss": "Ahora no",
+      "iosHint": "Toca Compartir y luego «Añadir a pantalla de inicio».",
+      "androidHint": "Abre el menú de tu navegador y luego «Añadir a pantalla de inicio».",
+      "desktopHint": "Haz clic en el icono de instalar en tu barra de direcciones.",
+      "moreHelp": "Más ayuda"
     },
     "panel": {
       "title": "Añade Understoria a tu teléfono",
@@ -256,54 +259,32 @@
       "step3": "Toca «Añadir» en la esquina superior. Understoria aparece junto a tus otras apps.",
       "shareLabel": "Compartir"
     },
+    "iosOther": {
+      "title": "Abre esto en Safari",
+      "body": "En un iPhone o iPad, solo Safari puede añadir una app a tu pantalla de inicio. Abre esta página en Safari y añádela desde ahí."
+    },
+    "android": {
+      "intro": "Añade Understoria a tu pantalla de inicio:",
+      "step1": "Abre el menú de tu navegador (normalmente ⋮ o ≡).",
+      "step2": "Toca «Añadir a pantalla de inicio» (o «Instalar aplicación»).",
+      "step3": "Toca «Añadir» para confirmar."
+    },
+    "desktop": {
+      "intro": "Instala Understoria en tu computadora:",
+      "step1": "Busca el icono de instalar al final de la barra de direcciones (Chrome o Edge).",
+      "step2": "Haz clic en él y luego en «Instalar».",
+      "step3": "Understoria se abre en su propia ventana, junto a tus otras apps."
+    },
     "inAppBrowser": {
       "title": "Abre esto primero en tu navegador",
       "body": "Estás viendo Understoria dentro de otra app, que no puede añadirla a tu pantalla de inicio. Abre esta página en Safari o Chrome y añádela desde ahí.",
       "hint": "Busca «Abrir en el navegador» en el menú de esta app (a menudo el icono ⋯ o el de compartir)."
     },
-    "selector": {
-      "prompt": "¿Usas otro navegador?",
-      "choose": "Elige tu navegador",
-      "browsers": {
-        "iosSafari": "iPhone / iPad (Safari)",
-        "chromeAndroid": "Android (Chrome)",
-        "samsung": "Android (Samsung Internet)",
-        "firefoxAndroid": "Android (Firefox)",
-        "chromeDesktop": "Computadora (Chrome)",
-        "edgeDesktop": "Computadora (Edge)"
-      }
-    },
-    "steps": {
-      "chromeAndroid": {
-        "intro": "En Chrome, añade Understoria a tu pantalla de inicio:",
-        "step1": "Toca el menú (⋮) en la esquina superior derecha.",
-        "step2": "Toca «Añadir a pantalla de inicio» (o «Instalar aplicación»).",
-        "step3": "Toca «Añadir» para confirmar."
-      },
-      "samsung": {
-        "intro": "En Samsung Internet, añade Understoria a tu pantalla de inicio:",
-        "step1": "Toca el menú (≡) en la parte inferior.",
-        "step2": "Toca «Añadir página a» y luego «Pantalla de inicio».",
-        "step3": "Toca «Añadir» para confirmar."
-      },
-      "firefoxAndroid": {
-        "intro": "En Firefox, añade Understoria a tu pantalla de inicio:",
-        "step1": "Toca el menú (⋮) en la esquina superior derecha.",
-        "step2": "Toca «Añadir a pantalla de inicio».",
-        "step3": "Toca «Añadir» para confirmar."
-      },
-      "chromeDesktop": {
-        "intro": "En Chrome en una computadora, instala Understoria:",
-        "step1": "Busca el icono de instalar al final de la barra de direcciones.",
-        "step2": "Haz clic en él y luego en «Instalar».",
-        "step3": "Understoria se abre en su propia ventana y aparece junto a tus otras apps."
-      },
-      "edgeDesktop": {
-        "intro": "En Edge en una computadora, instala Understoria:",
-        "step1": "Abre el menú (⋯) en la esquina superior derecha.",
-        "step2": "Elige «Aplicaciones» y luego «Instalar este sitio como una aplicación».",
-        "step3": "Haz clic en «Instalar» para confirmar."
-      }
+    "devicePicker": {
+      "prompt": "¿La añades desde otro dispositivo?",
+      "ios": "iPhone o iPad",
+      "android": "Android",
+      "desktop": "Computadora"
     }
   },
   "hints": {

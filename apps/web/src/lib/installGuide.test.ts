@@ -12,13 +12,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   clearDeferredPrompt,
-  detectBrowser,
+  detectDevice,
   detectInstallEnvironment,
   getDeferredPrompt,
   initInstallCapture,
   isIos,
   isSafari,
-  type BrowserId,
+  type DeviceId,
   type InstallEnvironment,
 } from "./installGuide";
 
@@ -84,19 +84,19 @@ describe("detectInstallEnvironment", () => {
       expect: { kind: "ios-safari" },
     },
     {
-      name: "iPhone Chrome (CriOS) → NOT ios-safari (manual)",
+      name: "iPhone Chrome (CriOS) → ios-other (only Safari installs on iOS)",
       in: input({ ua: UA.iphoneChrome }),
-      expect: { kind: "manual", browser: "chrome-desktop" },
+      expect: { kind: "ios-other" },
     },
     {
-      name: "iPhone Firefox (FxiOS) → NOT ios-safari (manual)",
+      name: "iPhone Firefox (FxiOS) → ios-other",
       in: input({ ua: UA.iphoneFirefox }),
-      expect: { kind: "manual", browser: "chrome-desktop" },
+      expect: { kind: "ios-other" },
     },
     {
-      name: "iPhone Edge (EdgiOS) → NOT ios-safari (Edg → edge-desktop)",
+      name: "iPhone Edge (EdgiOS) → ios-other",
       in: input({ ua: UA.iphoneEdge }),
-      expect: { kind: "manual", browser: "edge-desktop" },
+      expect: { kind: "ios-other" },
     },
     {
       name: "iPadOS-as-Mac (MacIntel + touch) Safari → ios-safari",
@@ -113,29 +113,29 @@ describe("detectInstallEnvironment", () => {
       expect: { kind: "promptable" },
     },
     {
-      name: "Chrome Android without prompt → manual chrome-android",
+      name: "Chrome Android without prompt → manual android",
       in: input({ ua: UA.chromeAndroid }),
-      expect: { kind: "manual", browser: "chrome-android" },
+      expect: { kind: "manual", device: "android" },
     },
     {
-      name: "Samsung Internet → manual samsung",
+      name: "Samsung Internet → manual android",
       in: input({ ua: UA.samsungAndroid }),
-      expect: { kind: "manual", browser: "samsung" },
+      expect: { kind: "manual", device: "android" },
     },
     {
-      name: "Firefox Android → manual firefox-android",
+      name: "Firefox Android → manual android",
       in: input({ ua: UA.firefoxAndroid }),
-      expect: { kind: "manual", browser: "firefox-android" },
+      expect: { kind: "manual", device: "android" },
     },
     {
-      name: "Chrome desktop → manual chrome-desktop",
+      name: "Chrome desktop → manual desktop",
       in: input({ ua: UA.chromeDesktop }),
-      expect: { kind: "manual", browser: "chrome-desktop" },
+      expect: { kind: "manual", device: "desktop" },
     },
     {
-      name: "Edge desktop → manual edge-desktop",
+      name: "Edge desktop → manual desktop",
       in: input({ ua: UA.edgeDesktop }),
-      expect: { kind: "manual", browser: "edge-desktop" },
+      expect: { kind: "manual", device: "desktop" },
     },
     {
       name: "Facebook in-app (FBAN) → in-app-browser",
@@ -158,9 +158,9 @@ describe("detectInstallEnvironment", () => {
       expect: { kind: "in-app-browser" },
     },
     {
-      name: "unrecognized UA → unknown",
+      name: "unrecognized UA → manual desktop (the catch-all device)",
       in: input({ ua: "SomeRandomCrawler/1.0" }),
-      expect: { kind: "unknown" },
+      expect: { kind: "manual", device: "desktop" },
     },
   ];
 
@@ -226,17 +226,21 @@ describe("isSafari", () => {
   });
 });
 
-describe("detectBrowser", () => {
-  const expectations: Array<[string, BrowserId]> = [
-    [UA.samsungAndroid, "samsung"],
-    [UA.firefoxAndroid, "firefox-android"],
-    [UA.chromeAndroid, "chrome-android"],
-    [UA.chromeDesktop, "chrome-desktop"],
-    [UA.edgeDesktop, "edge-desktop"],
+describe("detectDevice", () => {
+  // [ua, platform, maxTouchPoints, expected]. iOS wins first via isIos,
+  // then an Android token, else the desktop catch-all.
+  const expectations: Array<[string, string, number, DeviceId]> = [
+    [UA.iphoneSafari, "iPhone", 5, "ios"],
+    [UA.ipadOsAsMac, "MacIntel", 5, "ios"], // iPadOS-as-Mac is still iOS
+    [UA.chromeAndroid, "", 0, "android"],
+    [UA.samsungAndroid, "", 0, "android"],
+    [UA.firefoxAndroid, "", 0, "android"],
+    [UA.chromeDesktop, "Win32", 0, "desktop"],
+    [UA.edgeDesktop, "Win32", 0, "desktop"],
   ];
-  for (const [ua, expected] of expectations) {
+  for (const [ua, platform, touch, expected] of expectations) {
     it(`returns ${expected}`, () => {
-      expect(detectBrowser(ua)).toBe(expected);
+      expect(detectDevice(ua, platform, touch)).toBe(expected);
     });
   }
 });

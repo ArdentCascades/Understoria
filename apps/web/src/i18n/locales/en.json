@@ -237,8 +237,11 @@
     "card": {
       "label": "Add Understoria to your phone",
       "title": "Keep Understoria one tap away",
-      "body": "Add it to your home screen and it opens like any other app — full screen, works offline, no app store.",
-      "dismiss": "Not now"
+      "dismiss": "Not now",
+      "iosHint": "Tap Share, then \"Add to Home Screen\".",
+      "androidHint": "Open your browser's menu, then \"Add to Home screen\".",
+      "desktopHint": "Click the install icon in your address bar.",
+      "moreHelp": "More help"
     },
     "panel": {
       "title": "Add Understoria to your phone",
@@ -256,54 +259,32 @@
       "step3": "Tap \"Add\" in the top corner. Understoria appears with your other apps.",
       "shareLabel": "Share"
     },
+    "iosOther": {
+      "title": "Open this in Safari",
+      "body": "On an iPhone or iPad, only Safari can add an app to your home screen. Open this page in Safari, then add it from there."
+    },
+    "android": {
+      "intro": "Add Understoria to your home screen:",
+      "step1": "Open your browser's menu (usually ⋮ or ≡).",
+      "step2": "Tap \"Add to Home screen\" (or \"Install app\").",
+      "step3": "Tap \"Add\" to confirm."
+    },
+    "desktop": {
+      "intro": "Install Understoria on your computer:",
+      "step1": "Look for the install icon at the right end of the address bar (Chrome or Edge).",
+      "step2": "Click it, then click \"Install\".",
+      "step3": "Understoria opens in its own window, with your other apps."
+    },
     "inAppBrowser": {
       "title": "Open this in your browser first",
       "body": "You're viewing Understoria inside another app, which can't add it to your home screen. Open this page in Safari or Chrome, then add it from there.",
       "hint": "Look for \"Open in browser\" in this app's menu (often the ⋯ or share icon)."
     },
-    "selector": {
-      "prompt": "Using a different browser?",
-      "choose": "Choose your browser",
-      "browsers": {
-        "iosSafari": "iPhone / iPad (Safari)",
-        "chromeAndroid": "Android (Chrome)",
-        "samsung": "Android (Samsung Internet)",
-        "firefoxAndroid": "Android (Firefox)",
-        "chromeDesktop": "Computer (Chrome)",
-        "edgeDesktop": "Computer (Edge)"
-      }
-    },
-    "steps": {
-      "chromeAndroid": {
-        "intro": "In Chrome, add Understoria to your home screen:",
-        "step1": "Tap the menu (⋮) in the top right.",
-        "step2": "Tap \"Add to Home screen\" (or \"Install app\").",
-        "step3": "Tap \"Add\" to confirm."
-      },
-      "samsung": {
-        "intro": "In Samsung Internet, add Understoria to your home screen:",
-        "step1": "Tap the menu (≡) at the bottom.",
-        "step2": "Tap \"Add page to\", then \"Home screen\".",
-        "step3": "Tap \"Add\" to confirm."
-      },
-      "firefoxAndroid": {
-        "intro": "In Firefox, add Understoria to your home screen:",
-        "step1": "Tap the menu (⋮) in the top right.",
-        "step2": "Tap \"Add to Home screen\".",
-        "step3": "Tap \"Add\" to confirm."
-      },
-      "chromeDesktop": {
-        "intro": "In Chrome on a computer, install Understoria:",
-        "step1": "Look for the install icon at the right end of the address bar.",
-        "step2": "Click it, then click \"Install\".",
-        "step3": "Understoria opens in its own window and appears with your other apps."
-      },
-      "edgeDesktop": {
-        "intro": "In Edge on a computer, install Understoria:",
-        "step1": "Open the menu (⋯) in the top right.",
-        "step2": "Choose \"Apps\", then \"Install this site as an app\".",
-        "step3": "Click \"Install\" to confirm."
-      }
+    "devicePicker": {
+      "prompt": "Adding from a different device?",
+      "ios": "iPhone or iPad",
+      "android": "Android",
+      "desktop": "Computer"
     }
   },
   "hints": {

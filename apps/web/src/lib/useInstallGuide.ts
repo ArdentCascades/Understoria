@@ -11,39 +11,40 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import {
-  BROWSER_INSTRUCTIONS,
   clearDeferredPrompt,
   currentInstallEnvironment,
+  DEVICE_INSTRUCTIONS,
   dismissInstallGuide,
   getDeferredPrompt,
   isInstallGuideDismissed,
   subscribeInstallPrompt,
   subscribeStandalone,
-  type BrowserId,
+  type DeviceId,
   type InstallEnvironment,
 } from "@/lib/installGuide";
 
 /** What `useInstallGuide` returns. `state` is null until the dismissed
  *  flag has been read (render-nothing-until-known, like the nudges);
  *  once known it's the live `InstallEnvironment`. `instructions` is the
- *  per-browser key bundle for the manual branch (null when not manual).
- *  `selectedBrowser` overrides the detected browser when the member
- *  picks a different one from the "different browser?" selector. */
+ *  per-device key bundle for the effective device (null when there's no
+ *  device to show steps for — e.g. promptable / in-app-browser).
+ *  `selectedDevice` overrides the detected device when the member picks
+ *  a different one from the "different device?" toggle. */
 export interface UseInstallGuide {
   /** The detected install posture, or null while loading. */
   state: InstallEnvironment | null;
   /** True once the member dismissed the card permanently. */
   dismissed: boolean;
-  /** Per-browser instruction keys for the currently effective browser
-   *  (selected override, else detected). Null unless manual/unknown. */
+  /** Per-device instruction keys for the currently effective device
+   *  (selected override, else detected). Null when no device applies. */
   instructions:
     | { labelKey: string; introKey: string; stepKeys: string[] }
     | null;
-  /** The browser whose steps are showing — selected override or the
-   *  detected one. Null unless manual/unknown. */
-  selectedBrowser: BrowserId | null;
-  /** Pick a browser for the "different browser?" selector. */
-  selectBrowser: (browser: BrowserId) => void;
+  /** The device whose steps are showing — selected override or the
+   *  detected one. Null when no device applies. */
+  selectedDevice: DeviceId | null;
+  /** Pick a device for the "different device?" toggle. */
+  selectDevice: (device: DeviceId) => void;
   /** Replay the captured beforeinstallprompt. Resolves once the member
    *  has answered the native dialog. */
   promptInstall: () => Promise<void>;
@@ -54,9 +55,9 @@ export interface UseInstallGuide {
 /**
  * Drives the install guide. Subscribes to the capture + standalone
  * signals so the environment stays live (e.g. a `beforeinstallprompt`
- * arriving after mount flips `unknown`/`manual` → `promptable`, and an
- * install mid-session flips everything → `installed`). Reads the
- * dismissed sentinel once on mount, like the Board nudges, so we never
+ * arriving after mount flips `manual` → `promptable`, and an install
+ * mid-session flips everything → `installed`). Reads the dismissed
+ * sentinel once on mount, like the Board nudges, so we never
  * flash-then-hide.
  */
 export function useInstallGuide(): UseInstallGuide {
@@ -64,9 +65,7 @@ export function useInstallGuide(): UseInstallGuide {
   const [environment, setEnvironment] = useState<InstallEnvironment>(() =>
     currentInstallEnvironment(),
   );
-  const [selectedBrowser, setSelectedBrowser] = useState<BrowserId | null>(
-    null,
-  );
+  const [selectedDevice, setSelectedDevice] = useState<DeviceId | null>(null);
 
   // Read the permanent-dismiss flag once. Until it resolves, `state`
   // stays null so the component renders nothing (no flash for members
@@ -96,8 +95,8 @@ export function useInstallGuide(): UseInstallGuide {
     };
   }, []);
 
-  const selectBrowser = useCallback((browser: BrowserId) => {
-    setSelectedBrowser(browser);
+  const selectDevice = useCallback((device: DeviceId) => {
+    setSelectedDevice(device);
   }, []);
 
   const promptInstall = useCallback(async () => {
@@ -121,15 +120,20 @@ export function useInstallGuide(): UseInstallGuide {
     await dismissInstallGuide();
   }, []);
 
-  // The browser whose steps to show: the explicit selection wins; else
-  // the detected one for a `manual` environment. Only meaningful for
-  // the manual / unknown branches.
-  const effectiveBrowser: BrowserId | null =
-    selectedBrowser ??
-    (environment.kind === "manual" ? environment.browser : null);
+  // The device whose steps to show: the explicit selection wins; else
+  // the detected device for the manual/iOS states (so the panel's toggle
+  // defaults sensibly). null for promptable / in-app-browser, where no
+  // device steps apply.
+  const effectiveDevice: DeviceId | null =
+    selectedDevice ??
+    (environment.kind === "manual"
+      ? environment.device
+      : environment.kind === "ios-safari" || environment.kind === "ios-other"
+        ? "ios"
+        : null);
 
   const instructions =
-    effectiveBrowser !== null ? BROWSER_INSTRUCTIONS[effectiveBrowser] : null;
+    effectiveDevice !== null ? DEVICE_INSTRUCTIONS[effectiveDevice] : null;
 
   // Render-nothing-until-known: `state` is null until the dismissed
   // flag resolves. Components branch on `state === null` → render null.
@@ -139,8 +143,8 @@ export function useInstallGuide(): UseInstallGuide {
     state,
     dismissed: dismissedState === true,
     instructions,
-    selectedBrowser: effectiveBrowser,
-    selectBrowser,
+    selectedDevice: effectiveDevice,
+    selectDevice,
     promptInstall,
     dismiss,
   };
