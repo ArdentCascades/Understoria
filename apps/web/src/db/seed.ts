@@ -22,7 +22,8 @@ import { db, SETTING_KEYS, setSetting, getSetting } from "./database";
 import { uuid } from "@/lib/id";
 import { generateKeyPair, sign } from "@/lib/crypto";
 import { canonicalPostPayload } from "@understoria/shared/crypto";
-import type { Member, Post } from "@/types";
+import { createVouch } from "@/lib/vouch";
+import type { Member, Post, SignedVouch } from "@/types";
 
 // Wraps the immutable subset of a seed Post with a real signature
 // using the poster's freshly-generated secret key. Keeps the seed
@@ -150,14 +151,49 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
     if (row?.secretKey) memberSecrets.set(created.publicKey, row.secretKey);
   }
 
-  // Cross-vouch so everyone starts "trusted" in the demo.
-  for (const m of createdMembers) {
-    m.vouchedBy = createdMembers
-      .filter((other) => other.publicKey !== m.publicKey)
-      .slice(0, 2)
-      .map((other) => other.publicKey);
-    await db.members.put(m);
-  }
+  // Seed REAL signed vouches so the demo starts with a believable web of
+  // trust. Trust is computed from signed `db.vouches` records (+ redeemed
+  // invites) — NOT the legacy `Member.vouchedBy` array — so writing that
+  // array (as this used to) had no effect and the whole demo read as
+  // "pending trust". These vouches are demo-local: they are NOT enqueued
+  // to the outbox, so they never federate to real peers (same posture as
+  // the seed posts above).
+  //
+  // "You" and the established members (Rosa, Imani, Theo) each get two
+  // distinct vouches → trusted, so the founder isn't locked out of
+  // vouching on a fresh node. Marcus is left a genuine newcomer with a
+  // single vouch → pending, so the Vouch button is both visible (you're
+  // trusted) AND usable: vouch for him and watch him tip over to trusted.
+  const [rosa, marcus, imani, theo] = createdMembers;
+  const secretByKey = new Map(memberSecrets);
+  const youSecret = await db.secretKeys.get(you.publicKey);
+  if (youSecret?.secretKey) secretByKey.set(you.publicKey, youSecret.secretKey);
+
+  const vouches: SignedVouch[] = [];
+  const vouchFor = (voucher: Member, vouchee: Member): void => {
+    const secret = secretByKey.get(voucher.publicKey);
+    if (!secret) return;
+    vouches.push(
+      createVouch({
+        voucherKey: voucher.publicKey,
+        voucherSecretKey: secret,
+        voucheeKey: vouchee.publicKey,
+        kind: "manual",
+      }),
+    );
+  };
+
+  // Established members: each vouched by the next two around the ring →
+  // two distinct vouchers → trusted.
+  const established = [you, rosa, imani, theo];
+  established.forEach((member, i) => {
+    vouchFor(established[(i + 1) % established.length], member);
+    vouchFor(established[(i + 2) % established.length], member);
+  });
+  // The newcomer: a single vouch → still pending (one short of trusted).
+  vouchFor(rosa, marcus);
+
+  await db.vouches.bulkPut(vouches);
 
   const now = Date.now();
   const hourAgo = (h: number) => now - h * 60 * 60 * 1000;
