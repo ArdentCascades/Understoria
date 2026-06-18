@@ -367,12 +367,16 @@ describe("ProjectDetail — co-organizer capability card", () => {
     expect(text).toContain("moves hours out of your own balance");
     // Not-included line — sourced from primary-only gates.
     expect(text).toContain("Inviting other co-organizers");
-    // It's a <details> disclosure (collapsed by default).
-    const summary = container.querySelector("details > summary");
-    expect(summary).not.toBeNull();
-    expect((summary!.textContent ?? "").trim()).toBe(
-      "What you can do as a co-organizer",
+    // It's a <details> disclosure (collapsed by default). A co-organizer
+    // viewer renders two disclosures (this capability card AND "Manage
+    // project"), so find the summary by its title text rather than taking
+    // the first one — the selector must not be shadowed by render order.
+    const summary = Array.from(
+      container.querySelectorAll("details > summary"),
+    ).find(
+      (el) => (el.textContent ?? "").trim() === "What you can do as a co-organizer",
     );
+    expect(summary).not.toBeUndefined();
   });
 
   it("does NOT render the capability disclosure for the primary organizer", () => {

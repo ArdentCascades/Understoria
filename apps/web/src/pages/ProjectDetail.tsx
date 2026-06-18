@@ -342,6 +342,12 @@ export default function ProjectDetailPage() {
 
   const isOrg = currentMember ? isOrganizer(project, currentMember.publicKey) : false;
   const isPrimaryOrganizer = currentMember?.publicKey === project.organizerKey;
+  const showCoOrgManagement =
+    isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived";
+  const showHandoff =
+    isPrimaryOrganizer && project.coOrganizerKeys.length > 0 &&
+    project.status !== "completed" && project.status !== "archived";
+  const showStepDown = isOrg && !isPrimaryOrganizer;
   const percent =
     project.targetHours > 0
       ? Math.min(
@@ -539,64 +545,6 @@ export default function ProjectDetailPage() {
           </div>
 
           <WorkingAlongsideCard people={workingAlongside} />
-
-          {isOrg && (
-            <OrganizerControls project={project} onRun={run} />
-          )}
-
-          {isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived" && (
-            <CoOrganizerSection
-              project={project}
-              members={members}
-              currentKey={currentMember!.publicKey}
-              memberMap={memberMap}
-              nodeId={nodeId}
-              lockState={lockState}
-              invitations={coorgInvitations}
-              responses={coorgInvitationResponses}
-              revocations={coorgInvitationRevocations}
-              onRun={run}
-            />
-          )}
-
-          {isPrimaryOrganizer && project.coOrganizerKeys.length > 0 && project.status !== "completed" && project.status !== "archived" && (
-            <HandoffSection
-              project={project}
-              currentKey={currentMember!.publicKey}
-              memberMap={memberMap}
-              onRun={run}
-            />
-          )}
-
-          {isOrg && !isPrimaryOrganizer && (
-            <CoOrganizerCapabilityCard />
-          )}
-
-          {isOrg && !isPrimaryOrganizer && (
-            <CoOrganizerStepDownSection
-              project={project}
-              currentKey={currentMember!.publicKey}
-              onRun={run}
-            />
-          )}
-
-          {/* Community stewardship offer — shown to anyone who isn't the
-              sitting primary (co-organizers included; they're natural
-              candidates), once the primary has been quiet long enough and
-              no offer is already open. The quiet-period gate lives inside
-              the section. Adoption is allowed on completed projects (so a
-              new primary can archive), only archived is excluded. */}
-          {currentMember &&
-            !isPrimaryOrganizer &&
-            !openAdoption &&
-            project.status !== "archived" && (
-              <AdoptionSection
-                project={project}
-                currentKey={currentMember.publicKey}
-                nodeId={nodeId}
-                onRun={run}
-              />
-            )}
         </aside>
 
         <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0">
@@ -755,6 +703,71 @@ export default function ProjectDetailPage() {
 
           {(project.status === "archived" || project.status === "completed") && (
             <HistoryTimeline projectId={project.id} memberMap={memberMap} />
+          )}
+
+          {/* Community stewardship offer — shown to anyone who isn't the
+              sitting primary (co-organizers included; they're natural
+              candidates), once the primary has been quiet long enough and
+              no offer is already open. The quiet-period gate lives inside
+              the section. Adoption is allowed on completed projects (so a
+              new primary can archive), only archived is excluded. */}
+          {currentMember &&
+            !isPrimaryOrganizer &&
+            !openAdoption &&
+            project.status !== "archived" && (
+              <AdoptionSection
+                project={project}
+                currentKey={currentMember.publicKey}
+                nodeId={nodeId}
+                onRun={run}
+              />
+            )}
+
+          {isOrg && <OrganizerControls project={project} onRun={run} />}
+
+          {isOrg && !isPrimaryOrganizer && <CoOrganizerCapabilityCard />}
+
+          {/* Low-frequency governance verbs (invite/handoff/step-down)
+              collapsed behind one "Manage project" disclosure so the
+              high-volume reading column isn't buried under them. Rendered
+              only when at least one inner section would show. */}
+          {(showCoOrgManagement || showHandoff || showStepDown) && (
+            <details className="card mb-4">
+              <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-600 marker:hidden hover:underline dark:text-moss-300">
+                {t("projects.manage.title")}
+              </summary>
+              <div className="mt-3 flex flex-col gap-4">
+                {showCoOrgManagement && (
+                  <CoOrganizerSection
+                    project={project}
+                    members={members}
+                    currentKey={currentMember!.publicKey}
+                    memberMap={memberMap}
+                    nodeId={nodeId}
+                    lockState={lockState}
+                    invitations={coorgInvitations}
+                    responses={coorgInvitationResponses}
+                    revocations={coorgInvitationRevocations}
+                    onRun={run}
+                  />
+                )}
+                {showHandoff && (
+                  <HandoffSection
+                    project={project}
+                    currentKey={currentMember!.publicKey}
+                    memberMap={memberMap}
+                    onRun={run}
+                  />
+                )}
+                {showStepDown && (
+                  <CoOrganizerStepDownSection
+                    project={project}
+                    currentKey={currentMember!.publicKey}
+                    onRun={run}
+                  />
+                )}
+              </div>
+            </details>
           )}
         </div>
       </div>
@@ -2792,7 +2805,7 @@ function HandoffSection({
   const { pending, run: runWithPending } = usePendingAction();
 
   return (
-    <section className="card mb-4">
+    <section>
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.handoff.title")}
       </h2>
@@ -3232,7 +3245,7 @@ function CoOrganizerSection({
   }
 
   return (
-    <section className="card mb-4">
+    <section>
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.coOrganizers.title")}
       </h2>
@@ -3442,7 +3455,7 @@ function CoOrganizerStepDownSection({
   const { pending, run: runWithPending } = usePendingAction();
 
   return (
-    <section className="card mb-4">
+    <section>
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("projects.coOrganizers.title")}
       </h2>

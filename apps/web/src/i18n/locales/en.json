@@ -658,7 +658,7 @@
     },
     "detail": {
       "back": "← Back to projects",
-      "sidebarAriaLabel": "Project details and organizer controls",
+      "sidebarAriaLabel": "Project summary",
       "notFound": "This project couldn't be found.",
       "tasks": "Tasks",
       "noTasksTitle": "No tasks yet",
@@ -895,6 +895,9 @@
       },
       "notIncluded": "Inviting other co-organizers and archiving the project stay with the primary organizer.",
       "acceptedPointer": "You're a co-organizer now. See \"What you can do\" on the project page."
+    },
+    "manage": {
+      "title": "Manage project"
     },
     "handoff": {
       "title": "Pass the torch",
