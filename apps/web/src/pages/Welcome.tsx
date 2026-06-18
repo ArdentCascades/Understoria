@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
+import type { ConceptIllustrationName } from "@/components/visual";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
@@ -29,9 +30,10 @@ type Step =
   | {
       kind: "concept";
       key: string;
-      icon: string;
+      illustration: ConceptIllustrationName;
       titleKey: string;
-      bodyKeys: readonly string[];
+      bodyKey: string;
+      bodyMoreKey: string;
     }
   | { kind: "profileSetup"; key: "profileSetup"; icon: string };
 
@@ -39,42 +41,34 @@ const STEPS: readonly Step[] = [
   {
     kind: "concept",
     key: "timebank",
-    icon: "\u{23F3}",
+    illustration: "timebank",
     titleKey: "welcome.screens.timebank.title",
-    bodyKeys: [
-      "welcome.screens.timebank.body1",
-      "welcome.screens.timebank.body2",
-    ],
+    bodyKey: "welcome.screens.timebank.body",
+    bodyMoreKey: "welcome.screens.timebank.bodyMore",
   },
   {
     kind: "concept",
     key: "credit",
-    icon: "\u{1F33E}",
+    illustration: "credit",
     titleKey: "welcome.screens.credit.title",
-    bodyKeys: [
-      "welcome.screens.credit.body1",
-      "welcome.screens.credit.body2",
-    ],
+    bodyKey: "welcome.screens.credit.body",
+    bodyMoreKey: "welcome.screens.credit.bodyMore",
   },
   {
     kind: "concept",
     key: "identity",
-    icon: "\u{1F511}",
+    illustration: "identity",
     titleKey: "welcome.screens.identity.title",
-    bodyKeys: [
-      "welcome.screens.identity.body1",
-      "welcome.screens.identity.body2",
-    ],
+    bodyKey: "welcome.screens.identity.body",
+    bodyMoreKey: "welcome.screens.identity.bodyMore",
   },
   {
     kind: "concept",
     key: "community",
-    icon: "\u{1F33F}",
+    illustration: "community",
     titleKey: "welcome.screens.community.title",
-    bodyKeys: [
-      "welcome.screens.community.body1",
-      "welcome.screens.community.body2",
-    ],
+    bodyKey: "welcome.screens.community.body",
+    bodyMoreKey: "welcome.screens.community.bodyMore",
   },
   {
     kind: "concept",
@@ -82,12 +76,10 @@ const STEPS: readonly Step[] = [
     // Tree — the next stage from the seedling / herb / sprig
     // metaphors elsewhere in the design language. Projects are the
     // collective form of the same growth.
-    icon: "\u{1F333}",
+    illustration: "projects",
     titleKey: "welcome.screens.projects.title",
-    bodyKeys: [
-      "welcome.screens.projects.body1",
-      "welcome.screens.projects.body2",
-    ],
+    bodyKey: "welcome.screens.projects.body",
+    bodyMoreKey: "welcome.screens.projects.bodyMore",
   },
   {
     kind: "profileSetup",
@@ -197,9 +189,8 @@ export default function WelcomePage() {
     const bodyWithPairLink =
       stepIndex === 0 ? (
         <>
-          {step.bodyKeys.map((k) => (
-            <p key={k}>{t(k)}</p>
-          ))}
+          <p>{t(step.bodyKey)}</p>
+          <p>{t(step.bodyMoreKey)}</p>
           <div className="pt-4">
             <button
               type="button"
@@ -211,11 +202,14 @@ export default function WelcomePage() {
           </div>
         </>
       ) : (
-        step.bodyKeys.map((k) => <p key={k}>{t(k)}</p>)
+        <>
+          <p>{t(step.bodyKey)}</p>
+          <p>{t(step.bodyMoreKey)}</p>
+        </>
       );
     return (
       <OnboardingScreen
-        icon={step.icon}
+        illustration={step.illustration}
         title={t(step.titleKey)}
         body={bodyWithPairLink}
         stepIndex={stepIndex}

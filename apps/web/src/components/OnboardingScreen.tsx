@@ -11,9 +11,21 @@
  */
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  ConceptIllustration,
+  type ConceptIllustrationName,
+} from "@/components/visual";
 
 export interface OnboardingScreenProps {
-  icon: string;
+  /** Named line-art illustration for a concept screen. Takes
+   *  precedence over `icon` when both are set (mirrors EmptyState). */
+  illustration?: ConceptIllustrationName;
+  /**
+   * Legacy emoji icon. Used only when no `illustration` is given —
+   * the profile-setup step still rides on it. Prefer `illustration`
+   * for concept screens.
+   */
+  icon?: string;
   title: string;
   /** The body content. Pass paragraphs as `<p>` elements (or any
    *  other ReactNode — the profile-setup step uses form fields).
@@ -33,6 +45,7 @@ export interface OnboardingScreenProps {
 }
 
 export function OnboardingScreen({
+  illustration,
   icon,
   title,
   body,
@@ -60,9 +73,22 @@ export function OnboardingScreen({
       </header>
 
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <div className="mb-6 text-6xl" aria-hidden="true">
-          {icon}
-        </div>
+        {/* Precedence: named illustration > legacy emoji > nothing.
+            The SVG carries its own 96x96 viewBox; the concept's
+            meaning lives in the title + body below (the illustration
+            is hidden under prefers-contrast: more). */}
+        {illustration ? (
+          <div className="mb-6" aria-hidden="true">
+            <ConceptIllustration
+              name={illustration}
+              className="text-canopy-700 dark:text-canopy-300"
+            />
+          </div>
+        ) : icon ? (
+          <div className="mb-6 text-6xl" aria-hidden="true">
+            {icon}
+          </div>
+        ) : null}
         <h1 className="page-title mb-4">{title}</h1>
         <div className="w-full max-w-md space-y-3 text-base text-moss-700 dark:text-moss-200">
           {body}

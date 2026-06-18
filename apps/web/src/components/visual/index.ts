@@ -28,5 +28,12 @@ export {
   IllustrationPath,
   type IllustrationName,
 } from "./illustrations";
+export {
+  ConceptIllustration,
+  IllustrationHourLeaf,
+  IllustrationKeyLeaf,
+  IllustrationTree,
+  type ConceptIllustrationName,
+} from "./conceptIllustrations";
 export { LeafDivider, type LeafDividerVariant } from "./LeafDivider";
 export { Sprig } from "./Sprig";
