@@ -487,3 +487,18 @@ export function entryIsPast(
       return false;
   }
 }
+
+/**
+ * Marker glyph + i18n label key for a post entry's kind. Pure +
+ * i18n-free (returns a KEY, not a translated string) so this module
+ * stays testable from vanilla vitest; the views translate the key.
+ * NEED is an open, asking palms-up hand; OFFER a calm seedling.
+ */
+export function postEntryDisplay(postType: PostType): {
+  glyph: string;
+  labelKey: string;
+} {
+  return postType === "NEED"
+    ? { glyph: "\u{1F932}", labelKey: "calendar.entry.postExpiringNeed" }
+    : { glyph: "\u{1F331}", labelKey: "calendar.entry.postExpiringOffer" };
+}

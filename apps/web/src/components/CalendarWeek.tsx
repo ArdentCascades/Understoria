@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import {
   dayKey,
   getTodayDayKey,
+  postEntryDisplay,
   startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
@@ -298,17 +299,16 @@ function WeekChip({
     );
   }
   const meta = CATEGORY_META[entry.category];
-  const title =
-    entry.postType === "NEED"
-      ? t("calendar.entry.postExpiringNeed", { title: entry.postTitle })
-      : t("calendar.entry.postExpiringOffer", { title: entry.postTitle });
+  const { glyph, labelKey } = postEntryDisplay(entry.postType);
+  const label = t(labelKey, { title: entry.postTitle });
   return (
     <Link
       to={`/post/${entry.postId}`}
+      aria-label={label}
       className={`block truncate rounded px-1 py-0.5 text-[10px] text-white ${meta.barColorClass} hover:opacity-90`}
-      title={title}
+      title={label}
     >
-      {entry.postTitle}
+      <span aria-hidden="true">{glyph}</span> {entry.postTitle}
     </Link>
   );
 }

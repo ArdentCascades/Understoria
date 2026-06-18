@@ -25,6 +25,7 @@ import {
   entryIsPast,
   getTodayDayKey,
   groupByDay,
+  postEntryDisplay,
   startOfTodayMs,
   type CalendarEntry,
 } from "@/lib/calendar";
@@ -275,10 +276,8 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
   }
   // post_expiring
   const meta = CATEGORY_META[entry.category];
-  const label =
-    entry.postType === "NEED"
-      ? t("calendar.entry.postExpiringNeed", { title: entry.postTitle })
-      : t("calendar.entry.postExpiringOffer", { title: entry.postTitle });
+  const { glyph, labelKey } = postEntryDisplay(entry.postType);
+  const label = t(labelKey, { title: entry.postTitle });
   return (
     <Link
       to={`/post/${entry.postId}`}
@@ -290,6 +289,7 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
         aria-hidden="true"
       />
       <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
+        <span aria-hidden="true" className="mr-1">{glyph}</span>
         {label}
       </span>
     </Link>

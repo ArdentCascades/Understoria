@@ -470,6 +470,78 @@ describe("CalendarPage", () => {
     vi.useRealTimers();
   });
 
+  it("distinguishes a NEED from an OFFER post by its leading glyph (agenda)", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.posts = [
+      makePost({ id: "need-1", title: "Ride to clinic", type: "NEED", expiresAt: day }),
+      makePost({ id: "offer-1", title: "Spare tomatoes", type: "OFFER", expiresAt: day }),
+    ];
+    render(<CalendarPage />);
+    // Agenda view lists every entry; switch to it so both posts render.
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => agendaPill!.click());
+
+    // Scope each glyph to its own /post/<id> row (the <li> wrapping the
+    // Link) so the need glyph (🤲) lands on the need and the seedling
+    // (🌱) on the offer — same per-row scoping the going-✓ tests use.
+    const needRow = container
+      .querySelector('a[href="/post/need-1"]')
+      ?.closest("li");
+    const offerRow = container
+      .querySelector('a[href="/post/offer-1"]')
+      ?.closest("li");
+    expect(needRow?.textContent ?? "").toContain("\u{1F932}");
+    expect(needRow?.textContent ?? "").not.toContain("\u{1F331}");
+    expect(offerRow?.textContent ?? "").toContain("\u{1F331}");
+    expect(offerRow?.textContent ?? "").not.toContain("\u{1F932}");
+    vi.useRealTimers();
+  });
+
+  it("reframes the expiring-post copy from scarcity to solidarity (agenda)", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.posts = [
+      makePost({ id: "need-1", title: "Ride to clinic", type: "NEED", expiresAt: day }),
+      makePost({ id: "offer-1", title: "Spare tomatoes", type: "OFFER", expiresAt: day }),
+    ];
+    render(<CalendarPage />);
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    act(() => agendaPill!.click());
+
+    const text = container.textContent ?? "";
+    expect(text).toContain("Help wanted");
+    expect(text).toContain("Offer ending");
+    // Regression guard: the old scarcity framing must be gone.
+    expect(text).not.toContain("Need expires");
+    expect(text).not.toContain("Offer expires");
+    vi.useRealTimers();
+  });
+
+  it("conveys a post's kind through the chip aria-label (month view)", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.posts = [
+      makePost({ id: "need-1", title: "Ride to clinic", type: "NEED", expiresAt: day }),
+      makePost({ id: "offer-1", title: "Spare tomatoes", type: "OFFER", expiresAt: day }),
+    ];
+    // Default jsdom innerWidth (1024) selects the month view — no view
+    // switch needed; the chips carry the reframed label on aria-label.
+    render(<CalendarPage />);
+    const needChip = container.querySelector('a[href="/post/need-1"]');
+    const offerChip = container.querySelector('a[href="/post/offer-1"]');
+    expect(needChip?.getAttribute("aria-label") ?? "").toMatch(/help wanted/i);
+    expect(offerChip?.getAttribute("aria-label") ?? "").toMatch(/offer ending/i);
+    vi.useRealTimers();
+  });
+
   it("Mine narrows events to ones I organize or RSVP'd going/maybe to", () => {
     const day = Date.UTC(2026, 5, 15);
     vi.useFakeTimers();
