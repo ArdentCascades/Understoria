@@ -713,6 +713,11 @@
     },
     "task": {
       "claim": "Tomar esta tarea",
+      "openDetail": "Abrir tarea ›",
+      "detail": {
+        "notFound": "No se encontró esta tarea — es posible que se haya eliminado.",
+        "backToProject": "Volver a {{title}}"
+      },
       "claimSummary": "Cerca de {{hours}} horas · nos pondremos en contacto contigo en privado después de {{days}} días.",
       "claimSummaryNoHours": "Nos pondremos en contacto contigo en privado después de {{days}} días.",
       "checkInAckToast": "Recibido — te escribiremos de nuevo en {{days}} días.",

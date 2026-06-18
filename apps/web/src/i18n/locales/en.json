@@ -713,6 +713,11 @@
     },
     "task": {
       "claim": "Claim this task",
+      "openDetail": "Open task ›",
+      "detail": {
+        "notFound": "This task couldn't be found — it may have been removed.",
+        "backToProject": "Back to {{title}}"
+      },
       "claimSummary": "About {{hours}} hours · we'll check in with you privately after {{days}} days.",
       "claimSummaryNoHours": "We'll check in with you privately after {{days}} days.",
       "checkInAckToast": "Got it — we'll check in again in {{days}} days.",

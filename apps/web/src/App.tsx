@@ -33,6 +33,7 @@ import AddDevicePage from "@/pages/AddDevice";
 import PairDevicePage from "@/pages/PairDevice";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
+import TaskDetailPage from "@/pages/TaskDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
 import MyTasksPage from "@/pages/MyTasks";
 import MyProjectsPage from "@/pages/MyProjects";
@@ -85,6 +86,10 @@ export default function App() {
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
+          <Route
+            path="/project/:id/task/:taskId"
+            element={<TaskDetailPage />}
+          />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
           <Route path="/my-tasks" element={<MyTasksPage />} />
           <Route path="/my-projects" element={<MyProjectsPage />} />

@@ -2008,7 +2008,7 @@ function SortableTaskRow({
   );
 }
 
-function TaskRow({
+export function TaskRow({
   task,
   isOrganizer,
   acceptingClaims,
@@ -2025,6 +2025,7 @@ function TaskRow({
   moveButtons,
   taskCheckInDays,
   autoConfirmHours,
+  linkToDetail = true,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -2065,6 +2066,12 @@ function TaskRow({
     isLast: boolean;
     onMove: (direction: "up" | "down") => void;
   } | null;
+  /** Whether to render the quiet "Open task" footer affordance that
+   *  links to this task's own page (`/project/:id/task/:taskId`).
+   *  Defaults to `true` for the in-list rows on the project page;
+   *  the per-task page passes `false` so the full row doesn't render
+   *  a link to itself. */
+  linkToDetail?: boolean;
 }) {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -2710,6 +2717,18 @@ function TaskRow({
         nodeId={nodeId}
         flaggedCommentIds={flaggedCommentIds}
       />
+      {/* Quiet affordance to the task's own page — a plain Link (never
+          a button, so the suites that scan/click buttons by text don't
+          see it). Suppressed on the per-task page itself, which passes
+          linkToDetail={false} to avoid a self-link. */}
+      {linkToDetail && (
+        <Link
+          to={`/project/${task.projectId}/task/${task.id}`}
+          className="self-start text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+        >
+          {t("projects.task.openDetail")}
+        </Link>
+      )}
     </div>
   );
 }
@@ -3672,7 +3691,7 @@ function BulkTaskForm({
   );
 }
 
-function HistoryTimeline({
+export function HistoryTimeline({
   projectId,
   memberMap,
 }: {
