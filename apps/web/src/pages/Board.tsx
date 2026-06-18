@@ -31,6 +31,7 @@ import { ContextualHint } from "@/components/ContextualHint";
 import { FirstActionNudge } from "@/components/FirstActionNudge";
 import { ProfileNudge } from "@/components/ProfileNudge";
 import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
+import { KeepAccessNudge } from "@/components/KeepAccessNudge";
 import { InstallGuide } from "@/components/InstallGuide";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
@@ -352,6 +353,17 @@ export default function BoardPage() {
           follow-up. The install card stays self-suppressing on its own
           terms (installed / dismissed → renders nothing). */}
       <InstallGuide variant="card" />
+      {/* Keep-access reassurance last in the cluster. With it the Board
+          can now show up to FIVE calm prompts at once (the three nudges
+          above + the install card + this one). Same constraint as the
+          install card's NUDGE-STACKING NOTE applies: each prompt gates
+          on its own async eligibility + dismiss-flag reads with no
+          shared synchronous "is any nudge eligible?" signal, so a
+          one-prompt-at-a-time priority policy remains a recommended
+          follow-up rather than something built here. This nudge
+          self-suppresses on its own terms (paired a second device /
+          dismissed → renders nothing). */}
+      <KeepAccessNudge />
       <ContextualHint
         settingKey="boardHintDismissed"
         ariaLabel={t("hints.board.label")}

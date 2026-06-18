@@ -843,6 +843,13 @@ export const SETTING_KEYS = {
    *  they vouch for someone; this flag only matters for members
    *  who never act on the nudge and want it gone permanently. */
   vouchDiscoveryNudgeDismissed: "vouchDiscoveryNudgeDismissed",
+  /** "1" once the member has dismissed the keep-access nudge — the
+   *  calm, post-onboarding Board reassurance that an account living on
+   *  one device should keep a spare copy by pairing a second device.
+   *  Self-retires the moment a second device exists (a pairing-log
+   *  row of either kind); this flag only matters for members who never
+   *  pair a second device and want the reassurance gone permanently. */
+  keepAccessNudgeDismissed: "keepAccessNudgeDismissed",
   /** "1" once the member has dismissed the "Add to home screen"
    *  install card on Board (or once the app reports itself installed,
    *  which writes the same flag). The card self-retires when the PWA

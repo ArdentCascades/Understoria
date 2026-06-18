@@ -233,6 +233,15 @@
     "body": "Someone in the community vouched for you. You can do the same for people you trust — it's a way to expand who the community sees as trustworthy. Visit any member's profile and tap Vouch.",
     "dismiss": "Got it"
   },
+  "keepAccessNudge": {
+    "label": "Keeping your account safe",
+    "title": "Keep a spare copy of your account",
+    "body": "Your account lives on this device — that's what keeps it private. If you have a second device, pair it: your phone and a laptop can hold the same account, so losing one doesn't lock you out. It only takes a minute, and you do it with both devices in front of you.",
+    "cta": "Add another device",
+    "dismiss": "Maybe later",
+    "learnMore": "There's no password to reset and no company that can restore your account — that's the trade for having no one able to lock you out or hand you over. A second paired device is the way to keep access if a device is ever lost. (Saving your data export or setting a passphrase protects different things; neither one brings your account back on a new device.)",
+    "why": "Why?"
+  },
   "install": {
     "card": {
       "label": "Add Understoria to your phone",
