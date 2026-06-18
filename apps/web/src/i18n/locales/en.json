@@ -1968,28 +1968,28 @@
     "screens": {
       "timebank": {
         "title": "This is a timebank",
-        "body1": "Help is tracked in hours. One hour of your help equals one hour of anyone else's — whether you're fixing a sink or listening to someone through a hard day.",
-        "body2": "There is no pricing. There is no rating. The work that markets undervalue gets the same weight as the work they overvalue."
+        "body": "Help is measured in hours. One hour of your help is worth one hour of anyone's.",
+        "bodyMore": "No prices. No ratings. Every kind of help counts the same."
       },
       "credit": {
         "title": "You start with credit",
-        "body1": "Every new member begins with 5 hours of seed balance. You can ask for help before you've given any.",
-        "body2": "Asking is not debt. It's how the network comes alive — and how it stays alive when it's your turn to need something."
+        "body": "Everyone begins with 5 hours. You can ask for help before you give any.",
+        "bodyMore": "Asking is normal. It's how neighbors help each other."
       },
       "identity": {
-        "title": "Your identity is a key, not an account",
-        "body1": "There is no email, no phone number, no password. You are a cryptographic key pair. Your display name is a label you choose; you can change it.",
-        "body2": "No company owns your identity. No one can lock you out. That also means no one can rescue you if you lose your keys — there's a passphrase option in Profile if that worries you."
+        "title": "You hold your own key",
+        "body": "No email, no password. You have a private key that only you hold.",
+        "bodyMore": "No company owns it, so no one can lock you out. Keep your key safe."
       },
       "community": {
-        "title": "The community is the authority",
-        "body1": "There are no admins. Decisions are made together — on whatever channel your community uses today, and in-app as Understoria grows.",
-        "body2": "If something goes wrong, the response starts with conversation, not bans. Moderation, when it exists, is rotating, transparent, and accountable."
+        "title": "The community decides",
+        "body": "There are no bosses here. People make choices together.",
+        "bodyMore": "If something goes wrong, it starts with talking, not banning."
       },
       "projects": {
-        "title": "Some help takes more than one person",
-        "body1": "Some efforts — a community fridge, a tool library, a tenant defense network — don't come together one favor at a time. Projects are shared goals with their own task lists, organized over time by anyone who steps up. There are starter templates with pre-written tasks for common efforts, or you can begin from scratch.",
-        "body2": "If a template you'd pick is already running in your community, we'll surface it before you start a new one. The first instinct is to join an effort that's already going. The community grows by deepening shared work, not by duplicating it."
+        "title": "Some help needs a group",
+        "body": "Big efforts, like a tool library, take more than one favor. A project is a shared goal many people work on.",
+        "bodyMore": "Look for one already going before you start a new one."
       }
     },
     "profileSetup": {

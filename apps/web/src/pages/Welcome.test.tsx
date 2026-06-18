@@ -167,5 +167,10 @@ describe("WelcomePage — invite-only gate", () => {
     // self-onboarding is gated. The visitor wondering whether to seek
     // an invite needs the context.
     expect(container.textContent).toContain("This is a timebank");
+    // Lock the plain-language body rewrite — the hours-are-equal line
+    // is the load-bearing sentence of the first concept screen.
+    expect(container.textContent).toContain(
+      "One hour of your help is worth one hour",
+    );
   });
 });
