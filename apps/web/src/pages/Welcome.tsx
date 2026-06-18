@@ -14,18 +14,21 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
+import { InstallGuide } from "@/components/InstallGuide";
 import type { ConceptIllustrationName } from "@/components/visual";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
+import { currentInstallEnvironment } from "@/lib/installGuide";
 import { db } from "@/db/database";
 import { useApp } from "@/state/AppContext";
 import type { AvailabilityChip } from "@/types";
 
-// Per-step shape. `concept` screens are static intros; the
-// `profileSetup` step is interactive — same chrome, form fields
-// in place of body paragraphs. New step kinds (a future "tour
-// highlight" step, say) plug in here.
+// Per-step shape. `concept` screens are static intros; the `install`
+// step offers the optional home-screen install (auto-skipped when the
+// app is already installed, so nobody hits a dead-end screen); the
+// `profileSetup` step is interactive — same chrome, form fields in
+// place of body paragraphs. New step kinds plug in here.
 type Step =
   | {
       kind: "concept";
@@ -35,6 +38,7 @@ type Step =
       bodyKey: string;
       bodyMoreKey: string;
     }
+  | { kind: "install"; key: "install"; icon: string }
   | { kind: "profileSetup"; key: "profileSetup"; icon: string };
 
 const STEPS: readonly Step[] = [
@@ -82,6 +86,11 @@ const STEPS: readonly Step[] = [
     bodyMoreKey: "welcome.screens.projects.bodyMore",
   },
   {
+    kind: "install",
+    key: "install",
+    icon: "\u{1F4F2}",
+  },
+  {
     kind: "profileSetup",
     key: "profileSetup",
     icon: "\u{1F331}",
@@ -93,6 +102,21 @@ export default function WelcomePage() {
   const navigate = useNavigate();
   const { currentMember, refreshOnboarded, nodeConfig, nodeId } = useApp();
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Auto-skip the install step when we're already running as an
+  // installed app — offering "add to home screen" inside the installed
+  // app is a dead end. Detected once on mount (the posture can't change
+  // mid-tour in a way that matters here), so the visible step list and
+  // its progress dots stay honest: when installed, the step is dropped
+  // entirely rather than shown-then-skipped.
+  const installed = useMemo(
+    () => currentInstallEnvironment().kind === "installed",
+    [],
+  );
+  const visibleSteps = useMemo(
+    () => (installed ? STEPS.filter((s) => s.kind !== "install") : STEPS),
+    [installed],
+  );
 
   // Count members scoped to THIS node (a paired device that brought
   // identities over from a peer node could have rows under a different
@@ -176,8 +200,8 @@ export default function WelcomePage() {
     await finish();
   }
 
-  const step = STEPS[stepIndex];
-  const isLast = stepIndex === STEPS.length - 1;
+  const step = visibleSteps[stepIndex];
+  const isLast = stepIndex === visibleSteps.length - 1;
   const onBack = stepIndex === 0 ? null : () => setStepIndex(stepIndex - 1);
 
   if (step.kind === "concept") {
@@ -213,7 +237,7 @@ export default function WelcomePage() {
         title={t(step.titleKey)}
         body={bodyWithPairLink}
         stepIndex={stepIndex}
-        stepCount={STEPS.length}
+        stepCount={visibleSteps.length}
         onBack={onBack}
         onNext={() => {
           if (isLast) {
@@ -224,6 +248,34 @@ export default function WelcomePage() {
         }}
         onSkip={() => void finish()}
         nextLabel={isLast ? t("welcome.start") : t("welcome.next")}
+      />
+    );
+  }
+
+  // The optional install step. Non-blocking: Next advances to
+  // profileSetup (install is never the last visible step — profileSetup
+  // always follows), Skip finishes onboarding outright, Back works like
+  // any other step. When the app is already installed this branch never
+  // renders — the step was filtered out of `visibleSteps` above.
+  if (step.kind === "install") {
+    return (
+      <OnboardingScreen
+        icon={step.icon}
+        title={t("install.step.title")}
+        body={
+          <div className="space-y-3 text-left">
+            <p className="text-center text-sm text-moss-600 dark:text-moss-300">
+              {t("install.step.intro")}
+            </p>
+            <InstallGuide variant="step" />
+          </div>
+        }
+        stepIndex={stepIndex}
+        stepCount={visibleSteps.length}
+        onBack={onBack}
+        onNext={() => setStepIndex(stepIndex + 1)}
+        onSkip={() => void finish()}
+        nextLabel={t("welcome.next")}
       />
     );
   }
@@ -312,7 +364,7 @@ export default function WelcomePage() {
         </div>
       }
       stepIndex={stepIndex}
-      stepCount={STEPS.length}
+      stepCount={visibleSteps.length}
       onBack={onBack}
       onNext={() => void saveProfileAndFinish()}
       onSkip={() => void finish()}

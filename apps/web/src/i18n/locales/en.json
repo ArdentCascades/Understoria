@@ -294,6 +294,10 @@
       "ios": "iPhone or iPad",
       "android": "Android",
       "desktop": "Computer"
+    },
+    "step": {
+      "title": "Add Understoria to your phone",
+      "intro": "Optional, but handy: add Understoria to your home screen so it opens like an app and works offline. You can always do this later from Profile → Learn."
     }
   },
   "hints": {

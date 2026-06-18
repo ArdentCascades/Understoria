@@ -31,17 +31,21 @@ import {
 // drive off the same useInstallGuide() hook and share OneTapInstall,
 // which is exported below.
 //
-// The `variant` prop is kept for call-site stability — the only caller
-// passes variant="panel", and the component now always renders the
-// panel.
+// The `variant` prop selects the chrome around the shared `PanelBody`:
 //
-// (Designed so a "step" variant for the onboarding flow can slot in
-// later; that integration is deliberately deferred to avoid a merge
-// collision with Welcome.tsx.)
+//   - "panel" (Learn section): the re-findable reference. Renders the
+//     install.panel.title/intro heading above the body.
+//   - "step" (onboarding tour): the body ONLY — the OnboardingScreen
+//     supplies the screen title/intro, so a duplicate heading here would
+//     read as a stutter. Everything below the heading is identical.
+//
+// Both variants drive off the same useInstallGuide() hook and share
+// OneTapInstall (exported below), which the dismissible Board card in
+// components/useInstallCardNudge.tsx also reuses.
 
-type Variant = "card" | "panel";
+type Variant = "panel" | "step";
 
-export function InstallGuide({ variant: _variant }: { variant: Variant }) {
+export function InstallGuide({ variant }: { variant: Variant }) {
   const { t } = useTranslation();
   const { state, instructions, selectedDevice, selectDevice, promptInstall } =
     useInstallGuide();
@@ -54,6 +58,20 @@ export function InstallGuide({ variant: _variant }: { variant: Variant }) {
   // An installed app never nags about installing.
   if (state.kind === "installed") return null;
 
+  const body = (
+    <PanelBody
+      state={state}
+      instructions={instructions}
+      selectedDevice={selectedDevice}
+      selectDevice={selectDevice}
+      onPrompt={promptInstall}
+    />
+  );
+
+  // The onboarding step gets the body alone — its OnboardingScreen owns
+  // the title + intro, so the panel heading would duplicate it.
+  if (variant === "step") return body;
+
   return (
     <div className="space-y-3">
       <div>
@@ -64,13 +82,7 @@ export function InstallGuide({ variant: _variant }: { variant: Variant }) {
           {t("install.panel.intro")}
         </p>
       </div>
-      <PanelBody
-        state={state}
-        instructions={instructions}
-        selectedDevice={selectedDevice}
-        selectDevice={selectDevice}
-        onPrompt={promptInstall}
-      />
+      {body}
     </div>
   );
 }
