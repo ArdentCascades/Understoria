@@ -147,10 +147,18 @@ let mockState: MockState;
 function freshState(): MockState {
   return {
     projects: [project()],
+    // At least MIN_TASKS_FOR_FILTERS (7) tasks so the search box and
+    // status-filter pills render — the deep-link-clears-filter test
+    // below taps the "Done"/"All" pills, which only exist above the
+    // threshold. t1/t2 carry the named-row assertions; t3..t7 are filler.
     projectTasks: [
       task("t1", { title: "First task" }),
       task("t2", { title: "Second task" }),
       task("t3", { title: "Third task" }),
+      task("t4", { title: "Fourth task" }),
+      task("t5", { title: "Fifth task" }),
+      task("t6", { title: "Sixth task" }),
+      task("t7", { title: "Seventh task" }),
     ],
     // Viewer is a plain member (not the organizer) so the static,
     // non-drag task list renders — the simpler of the two <li> paths.
