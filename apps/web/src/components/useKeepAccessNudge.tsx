@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import type { BoardNudgeStatus } from "@/lib/boardNudge";
 import {
   dismissKeepAccessNudge,
   isKeepAccessNudgeDismissed,
@@ -38,9 +39,13 @@ import {
 // ambient urgency theater (no-notifications). The member said "maybe
 // later"; we heard them. The flag persists in the Dexie settings
 // table and clears only on Hard purge.
+//
+// The gating lives in this hook (returning a BoardNudgeStatus so the
+// Board orchestrator can show at most one prompt at a time); the JSX
+// lives in KeepAccessNudgeCard below. Two async inputs gate `ready`:
+// the dismiss flag AND the paired-device check.
 
-export function KeepAccessNudge() {
-  const { t } = useTranslation();
+export function useKeepAccessNudge(): BoardNudgeStatus {
   const { currentMember } = useApp();
   const [dismissed, setDismissed] = useState<boolean | null>(null);
   const [hasPairedDevice, setHasPairedDevice] = useState<boolean | null>(null);
@@ -58,18 +63,30 @@ export function KeepAccessNudge() {
     };
   }, []);
 
-  // Render nothing until BOTH async checks resolve — avoids a
-  // flash-then-hide on every page load for members who've dismissed
-  // or already paired a second device.
-  if (dismissed !== false) return null;
-  if (hasPairedDevice !== false) return null;
-  if (!currentMember) return null;
-
   async function handleDismiss() {
     await dismissKeepAccessNudge();
     setDismissed(true);
   }
 
+  // ready once BOTH async checks resolve (render-nothing-until-known);
+  // visible is the negation of the old `return null` guards.
+  const ready = dismissed !== null && hasPairedDevice !== null;
+  const visible =
+    dismissed === false && hasPairedDevice === false && currentMember !== null;
+
+  return {
+    ready,
+    visible,
+    node: <KeepAccessNudgeCard onDismiss={handleDismiss} />,
+  };
+}
+
+function KeepAccessNudgeCard({
+  onDismiss,
+}: {
+  onDismiss: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
   return (
     <div
       role="region"
@@ -96,7 +113,7 @@ export function KeepAccessNudge() {
         <button
           type="button"
           className="btn-ghost text-xs"
-          onClick={() => void handleDismiss()}
+          onClick={() => void onDismiss()}
         >
           {t("keepAccessNudge.dismiss")}
         </button>

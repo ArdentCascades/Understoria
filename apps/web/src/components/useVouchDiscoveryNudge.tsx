@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import type { BoardNudgeStatus } from "@/lib/boardNudge";
 import {
   dismissVouchDiscoveryNudge,
   isVouchDiscoveryNudgeDismissed,
@@ -27,9 +28,12 @@ import {
 // Self-retires if the member vouches for someone before dismissing.
 // We never re-prompt, never count vouches, never gamify trust —
 // see solidarity-not-shame.
+//
+// The gating lives in this hook (returning a BoardNudgeStatus so the
+// Board orchestrator can show at most one prompt at a time); the JSX
+// lives in VouchDiscoveryNudgeCard below.
 
-export function VouchDiscoveryNudge() {
-  const { t } = useTranslation();
+export function useVouchDiscoveryNudge(): BoardNudgeStatus {
   const { currentMember, vouches, invites } = useApp();
   const [dismissed, setDismissed] = useState<boolean | null>(null);
 
@@ -64,18 +68,33 @@ export function VouchDiscoveryNudge() {
     }
   }, [alreadyVouched, dismissed]);
 
-  // Render nothing until we know dismissed state — avoids a
-  // flash-then-hide on every page load.
-  if (dismissed !== false) return null;
-  if (!currentMember) return null;
-  if (!trusted) return null;
-  if (alreadyVouched) return null;
-
   async function handleDismiss() {
     await dismissVouchDiscoveryNudge();
     setDismissed(true);
   }
 
+  // ready once the dismiss flag resolves (render-nothing-until-known);
+  // visible is the negation of the old `return null` guards.
+  const ready = dismissed !== null;
+  const visible =
+    dismissed === false &&
+    currentMember !== null &&
+    trusted &&
+    !alreadyVouched;
+
+  return {
+    ready,
+    visible,
+    node: <VouchDiscoveryNudgeCard onDismiss={handleDismiss} />,
+  };
+}
+
+function VouchDiscoveryNudgeCard({
+  onDismiss,
+}: {
+  onDismiss: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
   return (
     <div
       role="region"
@@ -95,7 +114,7 @@ export function VouchDiscoveryNudge() {
         <button
           type="button"
           className="btn-ghost text-xs"
-          onClick={() => void handleDismiss()}
+          onClick={() => void onDismiss()}
         >
           {t("vouchNudge.dismiss")}
         </button>

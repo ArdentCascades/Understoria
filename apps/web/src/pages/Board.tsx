@@ -28,11 +28,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { AttentionSection } from "@/components/AttentionSection";
 import { EmptyState } from "@/components/EmptyState";
 import { ContextualHint } from "@/components/ContextualHint";
-import { FirstActionNudge } from "@/components/FirstActionNudge";
-import { ProfileNudge } from "@/components/ProfileNudge";
-import { VouchDiscoveryNudge } from "@/components/VouchDiscoveryNudge";
-import { KeepAccessNudge } from "@/components/KeepAccessNudge";
-import { InstallGuide } from "@/components/InstallGuide";
+import { BoardNudges } from "@/components/BoardNudges";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { myOrganizedProjects } from "@/lib/myProjects";
@@ -335,35 +331,10 @@ export default function BoardPage() {
         </p>
       </header>
 
-      <FirstActionNudge />
-      <ProfileNudge />
-      <VouchDiscoveryNudge />
-      {/* Install card last in the cluster. NUDGE-STACKING NOTE: with
-          this card the Board can now show up to four calm prompts at
-          once. The three nudges above each gate on AppContext-derived
-          content (posts / profile / vouches) AND an independent async
-          dismiss flag, computed inside each component — there is no
-          shared synchronous "is any nudge eligible?" signal to read.
-          Making the install card defer would mean reimplementing all
-          four eligibility predicates plus three more dismiss-flag reads
-          here, which is neither contained nor drift-proof (it would
-          silently break if a nudge's self-retire logic changed). So we
-          place the card last and FLAG that a Board-nudge priority
-          policy — one prompt at a time, by priority — is a recommended
-          follow-up. The install card stays self-suppressing on its own
-          terms (installed / dismissed → renders nothing). */}
-      <InstallGuide variant="card" />
-      {/* Keep-access reassurance last in the cluster. With it the Board
-          can now show up to FIVE calm prompts at once (the three nudges
-          above + the install card + this one). Same constraint as the
-          install card's NUDGE-STACKING NOTE applies: each prompt gates
-          on its own async eligibility + dismiss-flag reads with no
-          shared synchronous "is any nudge eligible?" signal, so a
-          one-prompt-at-a-time priority policy remains a recommended
-          follow-up rather than something built here. This nudge
-          self-suppresses on its own terms (paired a second device /
-          dismissed → renders nothing). */}
-      <KeepAccessNudge />
+      {/* One calm prompt at a time, by priority — the orchestrator picks
+          the highest-priority eligible Board nudge (or none) and never
+          flashes a lower one while a higher one is still resolving. */}
+      <BoardNudges />
       <ContextualHint
         settingKey="boardHintDismissed"
         ariaLabel={t("hints.board.label")}
