@@ -31,10 +31,10 @@ vi.mock("@/state/AppContext", () => ({
 // dials the dismissed flag and the paired-device check independently,
 // without standing up the real Dexie pairingLog / settings tables.
 // `dismissCalls` lets the dismiss-click test observe the write the
-// component performs. Everything the mock factory touches lives on
+// hook performs. Everything the mock factory touches lives on
 // this single object so nothing is referenced before initialization
 // (the factory is hoisted above local `const`s — same shape as the
-// VouchDiscoveryNudge harness's `appState` / `settings`).
+// useVouchDiscoveryNudge harness's `appState` / `settings`).
 const nudgeState = {
   dismissed: false,
   hasPairedDevice: false,
@@ -50,7 +50,17 @@ vi.mock("@/lib/keepAccessNudge", () => ({
 }));
 
 import "@/i18n";
-import { KeepAccessNudge } from "./KeepAccessNudge";
+import { useKeepAccessNudge } from "./useKeepAccessNudge";
+
+// Harness: renders the hook's node ONLY when ready && visible, exactly
+// as the BoardNudges orchestrator does for the highest-priority prompt.
+// Nothing reaches the DOM until the async gating resolves (ready), and
+// an ineligible / dismissed / self-retired status renders null.
+function Harness() {
+  const { ready, visible, node } = useKeepAccessNudge();
+  if (!ready) return null;
+  return visible ? <>{node}</> : null;
+}
 
 let container: HTMLDivElement;
 let root: Root;
@@ -74,7 +84,7 @@ function buildMember(publicKey: string): Member {
 }
 
 async function flushAsync() {
-  // Drain the microtask queue so the useEffect's awaited
+  // Drain the microtask queue so the hook's awaited
   // isKeepAccessNudgeDismissed / memberHasPairedDevice calls resolve
   // before assertions.
   await act(async () => {
@@ -105,19 +115,19 @@ function render() {
     root = createRoot(container);
     root.render(
       <MemoryRouter>
-        <KeepAccessNudge />
+        <Harness />
       </MemoryRouter>,
     );
   });
 }
 
-describe("KeepAccessNudge", () => {
+describe("useKeepAccessNudge", () => {
   it("renders nothing before the async state resolves", async () => {
     appState.currentMember = buildMember("pk-me");
     render();
     // Asserted immediately after the synchronous render, before the
-    // dismissed / paired checks resolve — the render-nothing-until-
-    // known guard holds. (We drain afterward so the trailing setState
+    // dismissed / paired checks resolve — the harness honors `ready`
+    // and renders nothing. (We drain afterward so the trailing setState
     // settles inside act and doesn't leak into the next test.)
     expect(container.textContent).toBe("");
     await flushAsync();

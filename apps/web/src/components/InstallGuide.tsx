@@ -11,7 +11,6 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { IconShare } from "@/components/visual";
 import { useInstallGuide } from "@/lib/useInstallGuide";
 import {
@@ -25,13 +24,16 @@ import {
 // honest guide that helps a member actually find and trigger the
 // install — never a buzzing nag (no-notifications).
 //
-// Two surfaces, one component:
-//   - variant="card"  → a dismissible card on Board. Has a header and a
-//     "Not now" button wired to PERMANENT dismissal; renders nothing
-//     once dismissed (mirrors FirstActionNudge's render-nothing-until-
-//     known + permanent dismiss).
-//   - variant="panel" → a re-findable panel inside the Learn section.
-//     No dismiss — it's a reference a member can always come back to.
+// This component is the re-findable PANEL inside the Learn section: a
+// reference a member can always come back to, with no dismiss. The
+// dismissible Board CARD lives in components/useInstallCardNudge.tsx
+// (so Board can show at most one calm prompt at a time); both surfaces
+// drive off the same useInstallGuide() hook and share OneTapInstall,
+// which is exported below.
+//
+// The `variant` prop is kept for call-site stability — the only caller
+// passes variant="panel", and the component now always renders the
+// panel.
 //
 // (Designed so a "step" variant for the onboarding flow can slot in
 // later; that integration is deliberately deferred to avoid a merge
@@ -39,162 +41,38 @@ import {
 
 type Variant = "card" | "panel";
 
-export function InstallGuide({ variant }: { variant: Variant }) {
+export function InstallGuide({ variant: _variant }: { variant: Variant }) {
   const { t } = useTranslation();
-  const {
-    state,
-    dismissed,
-    instructions,
-    selectedDevice,
-    selectDevice,
-    promptInstall,
-    dismiss,
-  } = useInstallGuide();
-
-  // The card carries its own framing (header + dismiss); the panel is
-  // already wrapped by the Learn section, so it renders bare. The card
-  // is permanently dismissible; the panel is a re-findable reference
-  // and ignores the dismiss flag entirely.
-  const isCard = variant === "card";
+  const { state, instructions, selectedDevice, selectDevice, promptInstall } =
+    useInstallGuide();
 
   // Render nothing until we know the dismissed state — avoids a
   // flash-then-hide on every page load (same posture as the Board
   // nudges). `state` is null while the dismiss flag is loading.
   if (state === null) return null;
 
-  // The card honors permanent dismissal (render nothing once
-  // dismissed); the panel does not.
-  if (isCard && dismissed) return null;
-
   // An installed app never nags about installing.
   if (state.kind === "installed") return null;
 
-  if (!isCard) {
-    return (
-      <div className="space-y-3">
-        <div>
-          <h3 className="text-base font-semibold text-moss-800 dark:text-moss-100">
-            {t("install.panel.title")}
-          </h3>
-          <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
-            {t("install.panel.intro")}
-          </p>
-        </div>
-        <PanelBody
-          state={state}
-          instructions={instructions}
-          selectedDevice={selectedDevice}
-          selectDevice={selectDevice}
-          onPrompt={promptInstall}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div
-      role="region"
-      aria-label={t("install.card.label")}
-      className="mb-4 flex flex-col gap-2 rounded-xl border border-canopy-200
-                 bg-canopy-50 px-3 py-2 text-sm
-                 dark:border-canopy-900 dark:bg-canopy-950/40"
-    >
-      <p className="font-medium text-canopy-900 dark:text-canopy-100">
-        {t("install.card.title")}
-      </p>
-      <CardBody state={state} onPrompt={promptInstall} />
-      <div className="flex justify-end">
-        <button
-          type="button"
-          className="btn-ghost text-xs"
-          onClick={() => void dismiss()}
-        >
-          {t("install.card.dismiss")}
-        </button>
+    <div className="space-y-3">
+      <div>
+        <h3 className="text-base font-semibold text-moss-800 dark:text-moss-100">
+          {t("install.panel.title")}
+        </h3>
+        <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+          {t("install.panel.intro")}
+        </p>
       </div>
+      <PanelBody
+        state={state}
+        instructions={instructions}
+        selectedDevice={selectedDevice}
+        selectDevice={selectDevice}
+        onPrompt={promptInstall}
+      />
     </div>
   );
-}
-
-// --- Card body: minimal, one line at rest --------------------------
-// The card lives on Board where space is precious, so each state gets a
-// single line — never a dropdown, never an <ol>. The full guide (steps,
-// the device toggle) lives in the Learn panel; every non-promptable
-// card carries a "More help" link out to it.
-
-function CardBody({
-  state,
-  onPrompt,
-}: {
-  state: InstallEnvironment;
-  onPrompt: () => Promise<void>;
-}) {
-  const { t } = useTranslation();
-
-  // Chromium one-tap stands alone — the install happens right here, so
-  // there's nothing more to send the member to Learn for.
-  if (state.kind === "promptable") {
-    return <OneTapInstall onPrompt={onPrompt} />;
-  }
-
-  return (
-    <>
-      <CardHint state={state} />
-      {/* Every manual/iOS card points out to the full guide in Learn.
-          Deep-linking that link to auto-open the install panel is a
-          follow-up; for now it lands on Profile, where the panel lives. */}
-      <Link
-        to="/profile"
-        className="self-start text-xs font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-      >
-        {t("install.card.moreHelp")} →
-      </Link>
-    </>
-  );
-}
-
-/** The single-line hint for a non-promptable card state. The iOS-Safari
- *  line carries the live Share glyph so "tap Share" is unmistakable. */
-function CardHint({ state }: { state: InstallEnvironment }) {
-  const { t } = useTranslation();
-  switch (state.kind) {
-    case "ios-safari":
-      return (
-        <p className="flex flex-wrap items-center gap-1 text-canopy-900 dark:text-canopy-100">
-          <IconShare
-            size={18}
-            className="text-canopy-700 dark:text-canopy-300"
-            data-decorative=""
-          />
-          <span>{t("install.card.iosHint")}</span>
-        </p>
-      );
-    case "ios-other":
-      return (
-        <p className="text-canopy-900 dark:text-canopy-100">
-          {t("install.iosOther.body")}
-        </p>
-      );
-    case "in-app-browser":
-      return (
-        <p className="text-canopy-900 dark:text-canopy-100">
-          {t("install.inAppBrowser.body")}
-        </p>
-      );
-    case "manual":
-      return (
-        <p className="text-canopy-900 dark:text-canopy-100">
-          {state.device === "android"
-            ? t("install.card.androidHint")
-            : t("install.card.desktopHint")}
-        </p>
-      );
-    // `promptable` is handled by CardBody; `installed` never reaches a
-    // body. Listed for exhaustiveness (noFallthroughCasesInSwitch).
-    case "promptable":
-    case "installed":
-      return null;
-  }
 }
 
 // --- Panel body: the full guide, room to breathe -------------------
@@ -244,8 +122,11 @@ function PanelBody({
 // --- Per-environment bodies ------------------------------------------
 
 /** Chromium one-tap: a calm primary button that replays the captured
- *  beforeinstallprompt. Surfaces working / done states without buzzing. */
-function OneTapInstall({ onPrompt }: { onPrompt: () => Promise<void> }) {
+ *  beforeinstallprompt. Surfaces working / done states without buzzing.
+ *  Shared by the Learn panel (here) and the Board card
+ *  (components/useInstallCardNudge.tsx) — exported so the card reuses it
+ *  rather than duplicating the working/done state machine. */
+export function OneTapInstall({ onPrompt }: { onPrompt: () => Promise<void> }) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
 

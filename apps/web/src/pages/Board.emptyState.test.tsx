@@ -33,11 +33,8 @@ vi.mock("@/state/AppContext", () => ({
 vi.mock("@/components/AttentionSection", () => ({
   AttentionSection: () => <div data-testid="attention-section" />,
 }));
-vi.mock("@/components/FirstActionNudge", () => ({
-  FirstActionNudge: () => null,
-}));
-vi.mock("@/components/ProfileNudge", () => ({
-  ProfileNudge: () => null,
+vi.mock("@/components/BoardNudges", () => ({
+  BoardNudges: () => null,
 }));
 vi.mock("@/components/ContextualHint", () => ({
   ContextualHint: () => null,

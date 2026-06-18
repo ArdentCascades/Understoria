@@ -12,6 +12,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import type { BoardNudgeStatus } from "@/lib/boardNudge";
 import {
   dismissFirstActionNudge,
   isFirstActionNudgeDismissed,
@@ -34,9 +35,13 @@ import {
 // settings table, and taking the first action writes the same flag
 // so the nudge never resurfaces even if the evidence of the action
 // later disappears (e.g. a claim that was later released).
+//
+// The gating lives in this hook (returning a BoardNudgeStatus so the
+// Board orchestrator can show at most one prompt at a time); the JSX
+// lives in FirstActionNudgeCard below. The card is built eagerly and
+// only rendered when the status is `visible`.
 
-export function FirstActionNudge() {
-  const { t } = useTranslation();
+export function useFirstActionNudge(): BoardNudgeStatus {
   const { currentMember, posts } = useApp();
   const [dismissed, setDismissed] = useState<boolean | null>(null);
 
@@ -66,17 +71,29 @@ export function FirstActionNudge() {
     }
   }, [actionTaken, dismissed]);
 
-  // Render nothing until we know dismissed state — avoids a
-  // flash-then-hide on every page load.
-  if (dismissed !== false) return null;
-  if (!currentMember) return null;
-  if (actionTaken) return null;
-
   async function handleDismiss() {
     await dismissFirstActionNudge();
     setDismissed(true);
   }
 
+  // ready once the dismiss flag resolves (render-nothing-until-known);
+  // visible is the negation of the old `return null` guards.
+  const ready = dismissed !== null;
+  const visible = dismissed === false && currentMember !== null && !actionTaken;
+
+  return {
+    ready,
+    visible,
+    node: <FirstActionNudgeCard onDismiss={handleDismiss} />,
+  };
+}
+
+function FirstActionNudgeCard({
+  onDismiss,
+}: {
+  onDismiss: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
   return (
     <div
       role="region"
@@ -100,7 +117,7 @@ export function FirstActionNudge() {
         <button
           type="button"
           className="btn-ghost text-xs"
-          onClick={() => void handleDismiss()}
+          onClick={() => void onDismiss()}
         >
           {t("firstActionNudge.dismiss")}
         </button>

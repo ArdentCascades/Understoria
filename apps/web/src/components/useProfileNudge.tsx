@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import type { BoardNudgeStatus } from "@/lib/boardNudge";
 import {
   dismissProfileNudge,
   isProfileNudgeDismissed,
@@ -34,9 +35,12 @@ import {
 // settings table, and filling in any profile field writes the same
 // flag so the nudge never resurfaces even if the member later
 // clears those fields again.
+//
+// The gating lives in this hook (returning a BoardNudgeStatus so the
+// Board orchestrator can show at most one prompt at a time); the JSX
+// lives in ProfileNudgeCard below.
 
-export function ProfileNudge() {
-  const { t } = useTranslation();
+export function useProfileNudge(): BoardNudgeStatus {
   const { currentMember } = useApp();
   const [dismissed, setDismissed] = useState<boolean | null>(null);
 
@@ -65,17 +69,29 @@ export function ProfileNudge() {
     }
   }, [profileFilled, dismissed]);
 
-  // Render nothing until we know the dismissed state — avoids a
-  // flash-then-hide on every page load for members who've already
-  // dismissed.
-  if (dismissed !== false) return null;
-  if (!profileIsBare(currentMember)) return null;
-
   async function handleDismiss() {
     await dismissProfileNudge();
     setDismissed(true);
   }
 
+  // ready once the dismiss flag resolves (render-nothing-until-known);
+  // visible is the negation of the old `return null` guards.
+  const ready = dismissed !== null;
+  const visible = dismissed === false && profileIsBare(currentMember);
+
+  return {
+    ready,
+    visible,
+    node: <ProfileNudgeCard onDismiss={handleDismiss} />,
+  };
+}
+
+function ProfileNudgeCard({
+  onDismiss,
+}: {
+  onDismiss: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
   return (
     <div
       role="region"
@@ -100,7 +116,7 @@ export function ProfileNudge() {
         <button
           type="button"
           className="btn-ghost text-xs"
-          onClick={() => void handleDismiss()}
+          onClick={() => void onDismiss()}
         >
           {t("profileNudge.dismiss")}
         </button>

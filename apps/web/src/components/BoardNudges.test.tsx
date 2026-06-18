@@ -1,0 +1,145 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { BoardNudgeStatus } from "@/lib/boardNudge";
+
+// Each per-prompt hook is mocked to return a dialable BoardNudgeStatus,
+// so this suite tests ONLY the orchestrator's priority + flash-free
+// logic — never the prompts' real eligibility (those have their own
+// harness tests). Every hook reads its slot off this single object so
+// the hoisted mock factories reference nothing uninitialized.
+const status: Record<
+  "first" | "profile" | "keepAccess" | "vouch" | "install",
+  BoardNudgeStatus
+> = {
+  first: hidden(),
+  profile: hidden(),
+  keepAccess: hidden(),
+  vouch: hidden(),
+  install: hidden(),
+};
+
+// A resolved-but-not-shown status — the default for every slot.
+function hidden(): BoardNudgeStatus {
+  return { ready: true, visible: false, node: null };
+}
+
+vi.mock("@/components/useFirstActionNudge", () => ({
+  useFirstActionNudge: () => status.first,
+}));
+vi.mock("@/components/useProfileNudge", () => ({
+  useProfileNudge: () => status.profile,
+}));
+vi.mock("@/components/useKeepAccessNudge", () => ({
+  useKeepAccessNudge: () => status.keepAccess,
+}));
+vi.mock("@/components/useVouchDiscoveryNudge", () => ({
+  useVouchDiscoveryNudge: () => status.vouch,
+}));
+vi.mock("@/components/useInstallCardNudge", () => ({
+  useInstallCardNudge: () => status.install,
+}));
+
+import { BoardNudges } from "./BoardNudges";
+
+let container: HTMLDivElement;
+let root: Root;
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
+  true;
+
+function visibleWith(node: BoardNudgeStatus["node"]): BoardNudgeStatus {
+  return { ready: true, visible: true, node };
+}
+
+beforeEach(() => {
+  status.first = hidden();
+  status.profile = hidden();
+  status.keepAccess = hidden();
+  status.vouch = hidden();
+  status.install = hidden();
+  container = document.createElement("div");
+  document.body.appendChild(container);
+});
+
+afterEach(() => {
+  act(() => {
+    root?.unmount();
+  });
+  container.remove();
+  vi.restoreAllMocks();
+});
+
+function render() {
+  act(() => {
+    root = createRoot(container);
+    root.render(<BoardNudges />);
+  });
+}
+
+describe("BoardNudges orchestrator", () => {
+  it("renders nothing while a higher-priority prompt is still loading, even if lower ones are visible (flash-freedom)", () => {
+    // The highest-priority prompt hasn't resolved its async gating yet.
+    status.first = { ready: false, visible: false, node: null };
+    // Every lower prompt is ready AND wants to show — but none may,
+    // because a higher one could still resolve to visible.
+    status.profile = visibleWith(<div data-testid="profile" />);
+    status.keepAccess = visibleWith(<div data-testid="keep" />);
+    status.vouch = visibleWith(<div data-testid="vouch" />);
+    status.install = visibleWith(<div data-testid="install" />);
+    render();
+    expect(container.textContent).toBe("");
+    expect(container.querySelector("[data-testid]")).toBeNull();
+  });
+
+  it("falls through a resolved-but-hidden higher prompt to the next visible one", () => {
+    // First prompt resolved and decided NOT to show.
+    status.first = hidden();
+    // Second prompt resolved and wants to show.
+    status.profile = visibleWith(<div data-testid="profile" />);
+    render();
+    expect(container.querySelector('[data-testid="profile"]')).not.toBeNull();
+    // And nothing else leaks in.
+    expect(container.querySelectorAll("[data-testid]").length).toBe(1);
+  });
+
+  it("shows only the higher-priority prompt when two are visible", () => {
+    // KeepAccess (priority 3) and Vouch (priority 4) both want to show;
+    // KeepAccess wins.
+    status.keepAccess = visibleWith(<div data-testid="keep" />);
+    status.vouch = visibleWith(<div data-testid="vouch" />);
+    render();
+    expect(container.querySelector('[data-testid="keep"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="vouch"]')).toBeNull();
+  });
+
+  it("renders nothing when every prompt is resolved and hidden", () => {
+    // All slots default to hidden() in beforeEach.
+    render();
+    expect(container.textContent).toBe("");
+    expect(container.querySelector("[data-testid]")).toBeNull();
+  });
+
+  it("full-order spot check: FirstAction visible wins over every lower visible prompt", () => {
+    status.first = visibleWith(<div data-testid="first" />);
+    status.profile = visibleWith(<div data-testid="profile" />);
+    status.keepAccess = visibleWith(<div data-testid="keep" />);
+    status.vouch = visibleWith(<div data-testid="vouch" />);
+    status.install = visibleWith(<div data-testid="install" />);
+    render();
+    expect(container.querySelector('[data-testid="first"]')).not.toBeNull();
+    expect(container.querySelectorAll("[data-testid]").length).toBe(1);
+  });
+});

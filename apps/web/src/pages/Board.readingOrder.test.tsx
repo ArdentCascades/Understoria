@@ -54,19 +54,14 @@ vi.mock("@/state/AppContext", () => ({
 // AttentionSection pulls in a wide tree (toast / pending-action /
 // every event-rsvp helper) and has its own focused tests; here we
 // replace it with a marker that participates in DOM order but
-// brings nothing else along. The nudge / hint components likewise
-// stub to nulls — they only crowd the snapshot.
+// brings nothing else along. The Board-nudge orchestrator and the
+// hint component likewise stub to nulls — they only crowd the
+// snapshot and contribute nothing to synchronous DOM order.
 vi.mock("@/components/AttentionSection", () => ({
   AttentionSection: () => <div data-testid="attention-section" />,
 }));
-vi.mock("@/components/FirstActionNudge", () => ({
-  FirstActionNudge: () => null,
-}));
-vi.mock("@/components/ProfileNudge", () => ({
-  ProfileNudge: () => null,
-}));
-vi.mock("@/components/VouchDiscoveryNudge", () => ({
-  VouchDiscoveryNudge: () => null,
+vi.mock("@/components/BoardNudges", () => ({
+  BoardNudges: () => null,
 }));
 vi.mock("@/components/ContextualHint", () => ({
   ContextualHint: () => null,

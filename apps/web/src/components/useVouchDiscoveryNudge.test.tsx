@@ -38,8 +38,8 @@ vi.mock("@/state/AppContext", () => ({
 }));
 
 // In-memory settings store for the dismiss flag — mirrors what
-// firstActionNudge / profileNudge tests would do if they tested
-// the component. Keeps this test independent of the real Dexie.
+// useFirstActionNudge / useProfileNudge tests would do. Keeps this
+// test independent of the real Dexie.
 const settings = new Map<string, string>();
 vi.mock("@/db/database", async () => {
   const actual =
@@ -56,8 +56,16 @@ vi.mock("@/db/database", async () => {
 });
 
 import "@/i18n";
-import { VouchDiscoveryNudge } from "./VouchDiscoveryNudge";
+import { useVouchDiscoveryNudge } from "./useVouchDiscoveryNudge";
 import { SETTING_KEYS } from "@/db/database";
+
+// Harness: renders the hook's node ONLY when ready && visible, exactly
+// as the BoardNudges orchestrator does for the highest-priority prompt.
+function Harness() {
+  const { ready, visible, node } = useVouchDiscoveryNudge();
+  if (!ready) return null;
+  return visible ? <>{node}</> : null;
+}
 
 let container: HTMLDivElement;
 let root: Root;
@@ -101,7 +109,7 @@ function trustingVouches(forKey: string): SignedVouch[] {
 }
 
 async function flushAsync() {
-  // Drain the microtask queue so the useEffect's awaited
+  // Drain the microtask queue so the hook's awaited
   // getSetting call resolves before assertions.
   await act(async () => {
     await Promise.resolve();
@@ -129,11 +137,11 @@ afterEach(() => {
 function render() {
   act(() => {
     root = createRoot(container);
-    root.render(<VouchDiscoveryNudge />);
+    root.render(<Harness />);
   });
 }
 
-describe("VouchDiscoveryNudge", () => {
+describe("useVouchDiscoveryNudge", () => {
   it("renders nothing for an untrusted member (no vouches received)", async () => {
     const me = generateKeyPair();
     appState.currentMember = buildMember(me.publicKey);
