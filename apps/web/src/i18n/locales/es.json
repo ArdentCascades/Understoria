@@ -233,6 +233,15 @@
     "body": "Alguien en la comunidad te avaló. Puedes hacer lo mismo por las personas en quienes confías — es una forma de ampliar a quiénes la comunidad ve como dignos de confianza. Visita el perfil de cualquier persona y toca Avalar.",
     "dismiss": "Entendido"
   },
+  "keepAccessNudge": {
+    "label": "Mantener tu cuenta a salvo",
+    "title": "Guarda una copia de tu cuenta",
+    "body": "Tu cuenta vive en este dispositivo — eso es lo que la mantiene privada. Si tienes un segundo dispositivo, vincúlalo: tu teléfono y una computadora pueden tener la misma cuenta, así perder uno no te deja afuera. Toma solo un minuto, y se hace con ambos dispositivos enfrente.",
+    "cta": "Agregar otro dispositivo",
+    "dismiss": "Quizás después",
+    "learnMore": "No hay contraseña que restablecer ni empresa que pueda recuperar tu cuenta — ese es el precio de que nadie pueda bloquearte ni entregarte. Un segundo dispositivo vinculado es la manera de conservar el acceso si pierdes uno. (Guardar tu exportación de datos o poner una frase de paso protegen cosas distintas; ninguna recupera tu cuenta en un dispositivo nuevo.)",
+    "why": "¿Por qué?"
+  },
   "install": {
     "card": {
       "label": "Añade Understoria a tu teléfono",
