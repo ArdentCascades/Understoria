@@ -197,7 +197,9 @@
     "memberFallback": "alguien de la comunidad",
     "anyMember": "Alguien",
     "gotIt": "Entendido",
-    "learnMore": "Leer más"
+    "learnMore": "Leer más",
+    "showMore": "Ver más",
+    "showLess": "Ver menos"
   },
   "why": {
     "trigger": "(por que?)",
