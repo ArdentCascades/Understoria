@@ -359,8 +359,8 @@
     "todayLabel": "Today",
     "entry": {
       "projectDeadline": "{{title}} deadline",
-      "postExpiringNeed": "Need expires: {{title}}",
-      "postExpiringOffer": "Offer expires: {{title}}"
+      "postExpiringNeed": "Help wanted before it closes: {{title}}",
+      "postExpiringOffer": "Offer ending: {{title}}"
     },
     "month": {
       "weekdayShort": {

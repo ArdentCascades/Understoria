@@ -359,8 +359,8 @@
     "todayLabel": "Hoy",
     "entry": {
       "projectDeadline": "Fecha límite: {{title}}",
-      "postExpiringNeed": "Necesidad vence: {{title}}",
-      "postExpiringOffer": "Oferta vence: {{title}}"
+      "postExpiringNeed": "Se busca ayuda antes de que cierre: {{title}}",
+      "postExpiringOffer": "La oferta termina: {{title}}"
     },
     "month": {
       "weekdayShort": {
