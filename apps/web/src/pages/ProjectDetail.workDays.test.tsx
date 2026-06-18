@@ -307,3 +307,53 @@ describe("ProjectDetail — work days section", () => {
     expect(text).not.toContain(SCHEDULE);
   });
 });
+
+const GLANCE_HEADING = "Next work day";
+
+// Locate the rail's "next work day" glance by its heading. jsdom does not
+// apply the `lg:` media query, so `hidden lg:block` content is present in
+// the DOM regardless — we assert on the section's own subtree.
+function glanceSection(): HTMLElement | null {
+  const headings = Array.from(container.querySelectorAll("h2"));
+  const heading = headings.find((h) => h.textContent === GLANCE_HEADING);
+  return heading ? heading.closest("section") : null;
+}
+
+describe("ProjectDetail — next work day glance", () => {
+  it("shows the next upcoming work day's title under the glance heading", async () => {
+    mockState.events = [
+      eventRow({ id: "later", title: "Later build day", startsAt: Date.now() + 5 * DAY }),
+      eventRow({ id: "sooner", title: "Sooner build day", startsAt: Date.now() + 1 * DAY }),
+    ];
+    await db.eventProjectLinks.bulkPut([link("later"), link("sooner")]);
+    render();
+    await flush();
+    const section = glanceSection();
+    expect(section).not.toBeNull();
+    // The soonest work day is the glance — not the later one.
+    expect(section?.textContent ?? "").toContain("Sooner build day");
+    expect(section?.textContent ?? "").not.toContain("Later build day");
+    // It links to that event's detail page.
+    const link0 = section?.querySelector("a");
+    expect(link0?.getAttribute("href")).toBe("/events/sooner");
+  });
+
+  it("is absent when there is no upcoming work day", async () => {
+    // Organizer with no work days: the main section still renders its
+    // schedule affordance, but the rail glance must stay hidden.
+    render();
+    await flush();
+    expect(glanceSection()).toBeNull();
+    expect(container.textContent ?? "").not.toContain(GLANCE_HEADING);
+  });
+
+  it("is absent when the only linked work day is in the past", async () => {
+    mockState.events = [
+      eventRow({ id: "past", title: "Past build day", startsAt: Date.now() - 10 * DAY }),
+    ];
+    await db.eventProjectLinks.put(link("past"));
+    render();
+    await flush();
+    expect(glanceSection()).toBeNull();
+  });
+});

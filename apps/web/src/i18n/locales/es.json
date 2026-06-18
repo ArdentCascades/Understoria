@@ -974,7 +974,8 @@
       "heading": "Próximas jornadas de trabajo",
       "scheduleButton": "Programar una jornada de trabajo",
       "itemAt": "en {{location}}",
-      "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto."
+      "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto.",
+      "nextGlanceHeading": "Próxima jornada de trabajo"
     },
     "adoptionBanner": "La comunidad está decidiendo sobre una nueva custodia para este proyecto."
   },

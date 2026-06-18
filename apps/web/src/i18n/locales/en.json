@@ -974,7 +974,8 @@
       "heading": "Upcoming work days",
       "scheduleButton": "Schedule a work day",
       "itemAt": "at {{location}}",
-      "localLinkHint": "Work days are community events connected to this project on this node only. Peer nodes see the event — never the project connection."
+      "localLinkHint": "Work days are community events connected to this project on this node only. Peer nodes see the event — never the project connection.",
+      "nextGlanceHeading": "Next work day"
     },
     "adoptionBanner": "The community is deciding on new stewardship for this project."
   },
