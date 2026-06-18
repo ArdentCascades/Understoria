@@ -75,7 +75,33 @@ afterEach(() => {
     root?.unmount();
   });
   container.remove();
+  // The install-skip test below installs a matchMedia stub so
+  // currentInstallEnvironment() reports "installed". jsdom has none by
+  // default, so other tests rely on its absence (→ not installed, the
+  // install step present). Remove the stub so it can't leak across tests.
+  delete (window as { matchMedia?: unknown }).matchMedia;
 });
+
+// jsdom has no matchMedia. Stub one that answers `matches` for the
+// standalone display-mode query so currentInstallEnvironment() resolves
+// to { kind: "installed" } and the install step auto-skips. Mirrors the
+// stub pattern in InstallGuide.test.tsx / Conversation.test.tsx.
+function stubStandaloneMatchMedia() {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches: query.includes("display-mode: standalone"),
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+}
 
 function render(node: ReactNode) {
   act(() => {
@@ -84,12 +110,13 @@ function render(node: ReactNode) {
   });
 }
 
-// Concept screens render before profileSetup. To exercise the gate we
-// click "Next" five times to land on the final step. The button label
-// for non-last concept steps is "Next" (welcome.next); the last
-// concept step's Next label is "Open the board" (welcome.start) only
-// if the final step IS the concept screen, but here it's profileSetup,
-// so the 5th concept's Next is still "Next".
+// Concept screens (5) render, then the optional install step, then
+// profileSetup. In jsdom there's no `matchMedia`, so
+// currentInstallEnvironment() is NOT "installed" and the install step
+// is PRESENT — so reaching profileSetup takes SIX "Next" taps (5
+// concept + 1 install), not five. The button label for every step up to
+// profileSetup is "Next" (welcome.next); only profileSetup's primary
+// button reads "Open the board" (welcome.start).
 function clickNextNTimes(n: number) {
   for (let i = 0; i < n; i++) {
     const next = container.querySelector(
@@ -107,7 +134,7 @@ describe("WelcomePage — invite-only gate", () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
     mockMemberCount = 0;
     render(<WelcomePage />);
-    clickNextNTimes(5);
+    clickNextNTimes(6);
     // The profileSetup step's title is "A little about you".
     expect(container.textContent).toContain("A little about you");
     expect(container.textContent).not.toContain("Understoria is invite-only");
@@ -117,7 +144,7 @@ describe("WelcomePage — invite-only gate", () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
     mockMemberCount = 3;
     render(<WelcomePage />);
-    clickNextNTimes(5);
+    clickNextNTimes(6);
     expect(container.textContent).toContain("A little about you");
     expect(container.textContent).not.toContain("Understoria is invite-only");
   });
@@ -126,7 +153,7 @@ describe("WelcomePage — invite-only gate", () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: true };
     mockMemberCount = 0;
     render(<WelcomePage />);
-    clickNextNTimes(5);
+    clickNextNTimes(6);
     // The first member on a fresh node can still onboard.
     expect(container.textContent).toContain("A little about you");
     expect(container.textContent).not.toContain("Understoria is invite-only");
@@ -136,7 +163,7 @@ describe("WelcomePage — invite-only gate", () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: true };
     mockMemberCount = 2;
     render(<WelcomePage />);
-    clickNextNTimes(5);
+    clickNextNTimes(6);
     // The dead-end landing replaces profileSetup.
     expect(container.textContent).toContain("Understoria is invite-only");
     expect(container.textContent).not.toContain("A little about you");
@@ -152,7 +179,7 @@ describe("WelcomePage — invite-only gate", () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: true };
     mockMemberCount = undefined;
     render(<WelcomePage />);
-    clickNextNTimes(5);
+    clickNextNTimes(6);
     // Neither the landing copy nor the profileSetup copy yet — we
     // wait for the count to come back before deciding.
     expect(container.textContent).not.toContain("Understoria is invite-only");
@@ -172,5 +199,41 @@ describe("WelcomePage — invite-only gate", () => {
     expect(container.textContent).toContain(
       "One hour of your help is worth one hour",
     );
+  });
+});
+
+describe("WelcomePage — optional install step", () => {
+  it("renders the install step after the concept screens, and Next → profileSetup", () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    // Five concept Nexts land on the install step (jsdom has no
+    // matchMedia → not installed → the step is present).
+    clickNextNTimes(5);
+    expect(container.textContent).toContain("Add Understoria to your phone");
+    // The step's own intro copy distinguishes it from the panel heading.
+    expect(container.textContent).toContain("Optional, but handy");
+    // It is NOT the finishing step — profileSetup follows.
+    expect(container.textContent).not.toContain("A little about you");
+    // One more Next advances to profileSetup.
+    clickNextNTimes(1);
+    expect(container.textContent).toContain("A little about you");
+    expect(container.textContent).not.toContain("Optional, but handy");
+  });
+
+  it("skips the install step entirely when the app is already installed", () => {
+    // Report standalone so currentInstallEnvironment() → installed; the
+    // install step is filtered out of the visible tour.
+    stubStandaloneMatchMedia();
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    // Original step count: 5 concept + profileSetup, so FIVE Nexts reach
+    // profileSetup (no install step in between).
+    clickNextNTimes(5);
+    expect(container.textContent).toContain("A little about you");
+    // The install step never appeared along the way.
+    expect(container.textContent).not.toContain("Add Understoria to your phone");
+    expect(container.textContent).not.toContain("Optional, but handy");
   });
 });

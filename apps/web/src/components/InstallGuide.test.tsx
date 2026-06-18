@@ -126,7 +126,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function render(variant: "card" | "panel" = "panel") {
+function render(variant: "panel" | "step" = "panel") {
   act(() => {
     root = createRoot(container);
     root.render(

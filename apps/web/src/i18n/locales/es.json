@@ -294,6 +294,10 @@
       "ios": "iPhone o iPad",
       "android": "Android",
       "desktop": "Computadora"
+    },
+    "step": {
+      "title": "Añade Understoria a tu teléfono",
+      "intro": "Opcional, pero práctico: añade Understoria a tu pantalla de inicio para que se abra como una app y funcione sin conexión. Siempre puedes hacerlo más tarde desde Perfil → Aprender."
     }
   },
   "hints": {
