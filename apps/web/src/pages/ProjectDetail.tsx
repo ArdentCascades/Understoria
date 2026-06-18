@@ -86,6 +86,7 @@ import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure
 import { startOfTodayMs } from "@/lib/calendar";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
+import { ExpandableText } from "@/components/ExpandableText";
 import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
@@ -467,9 +468,11 @@ export default function ProjectDetailPage() {
               </Link>
             </p>
             {project.description && (
-              <p className="mt-2 whitespace-pre-wrap text-sm text-moss-700 dark:text-moss-200">
-                {project.description}
-              </p>
+              <ExpandableText
+                text={project.description}
+                className="mt-2 whitespace-pre-wrap text-sm text-moss-700 dark:text-moss-200"
+                clampLines={4}
+              />
             )}
             {currentMember?.publicKey !== project.organizerKey && (
               <div className="mt-3">
