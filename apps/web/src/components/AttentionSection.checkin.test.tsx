@@ -194,10 +194,10 @@ describe("AttentionSection — task check-in ack", () => {
     expect(showToastMock.mock.calls[0]?.[1]).toBe("error");
   });
 
-  it("deep-links the task line to the specific task on the project page", () => {
+  it("deep-links the task line to the task's own page", () => {
     render(<AttentionSection />);
     expect(
-      container.querySelector(`a[href="/project/proj-1#task-${TASK_ID}"]`),
+      container.querySelector(`a[href="/project/proj-1/task/${TASK_ID}"]`),
     ).not.toBeNull();
   });
 });

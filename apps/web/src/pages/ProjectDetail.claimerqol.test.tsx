@@ -256,26 +256,6 @@ describe("ProjectDetail — claim-time commitment summary", () => {
   });
 });
 
-describe("ProjectDetail — shame-free release framing", () => {
-  it("renders the muted reassurance line adjacent to the Release button (no confirm dialog)", () => {
-    mockState.projectTasks = [
-      task("t1", {
-        title: "Carry the bins",
-        status: "claimed",
-        assignedTo: claimerKey,
-        claimedAt: Date.now(),
-      }),
-    ];
-    render();
-    const text = container.textContent ?? "";
-    // Button label stays short — the long-form reassurance lives
-    // adjacent so the affordance stays one-tap.
-    expect(text).toContain("Release claim");
-    expect(text).toContain("Releasing helps the organizer find another helper");
-    expect(text).toContain("no judgment");
-  });
-});
-
 describe("ProjectDetail — 'Mine' filter pill", () => {
   it("does not render the pill when the current member has no claimed tasks here", () => {
     // Padded past MIN_TASKS_FOR_FILTERS (7) so the filter chrome renders;

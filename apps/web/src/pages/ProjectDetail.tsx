@@ -36,26 +36,19 @@ import {
   addProjectTask,
   archiveProject,
   bulkAddTasks,
-  canClaimTask,
-  claimProjectTask,
   cloneProject,
   completeProject,
-  confirmProjectTaskCompletion,
-  editProjectTask,
   handoffOrganizer,
-  isOrganizer,
   launchProject,
   listActivityForProject,
   listAnnouncements,
   logActivity,
-  markProjectTaskComplete,
   pauseProject,
   postAnnouncement,
   removeCoOrganizer,
   reorderProjectTask,
   resumeProject,
   unarchiveProject,
-  unclaimProjectTask,
 } from "@/db/projects";
 import {
   issueCoOrganizerInvitation,
@@ -70,7 +63,6 @@ import { ADOPTION_MIN_DELIBERATION_DAYS } from "@/lib/autoCloseProposals";
 import { humanizeError } from "@/lib/humanizeError";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
-import { HighlightedText } from "@/components/HighlightedText";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import {
   formatDeadline,
@@ -79,7 +71,8 @@ import {
   shortKey,
 } from "@/lib/format";
 import { taskCheckInState } from "@/lib/taskCheckInState";
-import { creditHoursForTask } from "@/lib/timebank";
+import { capitalize } from "@/lib/taskPresentation";
+import { useProjectTaskContext } from "@/lib/useProjectTaskContext";
 import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure";
@@ -94,8 +87,7 @@ import { useFlipAnimation } from "@/lib/a11y/useFlipAnimation";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { IconMessages, Sprig } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
-import { WhyTooltip } from "@/components/WhyTooltip";
-import { TaskComments } from "@/components/TaskComments";
+import { TaskCard } from "@/components/TaskCard";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -124,13 +116,16 @@ const MIN_TASKS_FOR_FILTERS = 7;
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  // Project-scoped read model (project, sorted tasks, memberMap,
+  // flaggedCommentIds, isOrg, nodeId/nodeConfig, autoConfirmHours) —
+  // the same context the per-task page consumes, so the two surfaces
+  // can never drift. No fetch; everything is derived from global state.
+  const ctx = useProjectTaskContext(id);
+  const { project, tasks, memberMap, isOrg, nodeId, nodeConfig } = ctx;
+  // Fields the context doesn't cover — read directly from AppContext.
   const {
-    projects,
-    projectTasks,
     members,
     currentMember,
-    nodeId,
-    nodeConfig,
     exchanges,
     proposals,
     lockState,
@@ -157,24 +152,6 @@ export default function ProjectDetailPage() {
     return () => window.clearTimeout(id);
   }, [query]);
 
-  const project = useMemo(
-    () => projects.find((p) => p.id === id) ?? null,
-    [projects, id],
-  );
-  // Sort by orderIndex ascending (per PR C migration). createdAt is
-  // a defensive tiebreaker for any rows that escaped the v25 backfill
-  // — should never fire in practice, but keeps the order stable if
-  // it does.
-  const tasks = useMemo(
-    () =>
-      projectTasks
-        .filter((task) => task.projectId === id)
-        .sort((a, b) => {
-          if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
-          return a.createdAt - b.createdAt;
-        }),
-    [projectTasks, id],
-  );
   // Compose the status pill with the debounced search. `matchesQuery`
   // is the shared case-insensitive trimmed substring matcher used
   // across Board and Messages; the empty-query short-circuit is
@@ -268,33 +245,6 @@ export default function ProjectDetailPage() {
     },
     [],
   );
-  // Derive the set of comment ids with an open dispute proposal so
-  // TaskComments can render the "Flagged" chip and hide the Flag
-  // button. Computed in memory from the proposals already loaded in
-  // AppContext rather than a separate Dexie query — the proposals
-  // list is small enough that the O(n) scan is cheap.
-  const flaggedCommentIds = useMemo<ReadonlySet<string>>(() => {
-    const ids = new Set<string>();
-    for (const p of proposals) {
-      if (p.kind !== "dispute" || p.status !== "open") continue;
-      try {
-        const payload = JSON.parse(p.payload) as {
-          subjectType?: string;
-          commentId?: string;
-        };
-        if (
-          payload.subjectType === "task_comment" &&
-          typeof payload.commentId === "string"
-        ) {
-          ids.add(payload.commentId);
-        }
-      } catch {
-        // Skip — malformed or wrong-shape payloads aren't matches.
-      }
-    }
-    return ids;
-  }, [proposals]);
-
   // Open community-adoption proposal for this project, if any — drives
   // the governance-in-motion banner and suppresses a second filing.
   // Read from the proposals already in AppContext (small list).
@@ -312,10 +262,6 @@ export default function ProjectDetailPage() {
     return null;
   }, [proposals, project]);
 
-  const memberMap = useMemo(
-    () => new Map(members.map((m) => [m.publicKey, m.displayName])),
-    [members],
-  );
   // Names-only "working alongside" roster — members with hands on a
   // task here, alphabetical. The helper applies the same
   // needs_more_hands name suppression the task rows use, so the card
@@ -350,7 +296,6 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const isOrg = currentMember ? isOrganizer(project, currentMember.publicKey) : false;
   const isPrimaryOrganizer = currentMember?.publicKey === project.organizerKey;
   const showCoOrgManagement =
     isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived";
@@ -617,11 +562,8 @@ export default function ProjectDetailPage() {
                   isOrg={isOrg}
                   project={project}
                   currentKey={currentMember?.publicKey}
-                  memberMap={memberMap}
-                  nodeId={nodeId}
                   nodeConfig={nodeConfig}
                   onRun={run}
-                  flaggedCommentIds={flaggedCommentIds}
                   searchQuery={debouncedQuery}
                   highlightTaskId={highlightTaskId}
                 />
@@ -710,11 +652,8 @@ export default function ProjectDetailPage() {
                     isOrg={isOrg}
                     project={project}
                     currentKey={currentMember?.publicKey}
-                    memberMap={memberMap}
-                    nodeId={nodeId}
                     nodeConfig={nodeConfig}
                     onRun={run}
-                    flaggedCommentIds={flaggedCommentIds}
                     searchQuery={debouncedQuery}
                     highlightTaskId={highlightTaskId}
                   />
@@ -810,10 +749,6 @@ export default function ProjectDetailPage() {
       </div>
     </div>
   );
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // Stable id on the announcement textarea so the completion moment's
@@ -1476,44 +1411,6 @@ function OrganizerControls({
 //
 // Non-organizer / non-co-org viewers see the static list — no drag
 // handles, no buttons, no @dnd-kit overhead.
-function ArrowUpIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 13V3" />
-      <path d="M3.5 7.5 8 3l4.5 4.5" />
-    </svg>
-  );
-}
-
-function ArrowDownIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 3v10" />
-      <path d="M3.5 8.5 8 13l4.5-4.5" />
-    </svg>
-  );
-}
-
 // Single shared aria-live region for reorder announcements. The
 // @dnd-kit accessibility hooks fire for drag; we mirror the same
 // announcements for the button path so a keyboard / screen-reader
@@ -1542,84 +1439,14 @@ function useLiveRegion(): {
 //   • 4+ deps (expanded): inline popover with all titles, each
 //     clickable to scroll to that upstream task row.
 // Completed deps drop out at the caller — we only see unmet ones.
-function FollowsBadge({
-  unmetDeps,
-  expanded,
-  onToggle,
-  t,
-}: {
-  unmetDeps: { id: string; title: string }[];
-  expanded: boolean;
-  onToggle: () => void;
-  t: (key: string, opts?: Record<string, unknown>) => string;
-}) {
-  const overflow = unmetDeps.length >= 4;
-  if (!overflow) {
-    const titles = unmetDeps.map((d) => d.title).join(", ");
-    return (
-      <span
-        className="inline-flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300"
-        title={t("projects.task.followsHint")}
-      >
-        <span aria-hidden="true">→</span>
-        {t("projects.task.follows", { titles })}
-        <WhyTooltip principleId="follows-not-blocked" />
-      </span>
-    );
-  }
-  const first = unmetDeps[0];
-  const rest = unmetDeps.length - 1;
-  return (
-    <span className="inline-flex flex-wrap items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        aria-label={t("projects.task.followsExpandLabel")}
-        className="inline-flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-moss-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 dark:hover:bg-moss-800"
-        title={t("projects.task.followsHint")}
-      >
-        <span aria-hidden="true">→</span>
-        {t("projects.task.followsMore", {
-          titles: first.title,
-          count: rest,
-        })}
-      </button>
-      <WhyTooltip principleId="follows-not-blocked" />
-      {expanded && (
-        <ul className="basis-full pl-4">
-          {unmetDeps.map((dep) => (
-            <li key={dep.id}>
-              <button
-                type="button"
-                className="text-left text-xs text-moss-700 underline decoration-moss-300 underline-offset-2 hover:text-canopy-700 dark:text-moss-200 dark:hover:text-canopy-300"
-                onClick={() => {
-                  const el = document.getElementById(`task-${dep.id}`);
-                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  (el?.querySelector("h3") as HTMLElement | null)?.focus?.();
-                }}
-              >
-                {dep.title}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </span>
-  );
-}
-
 function TaskList({
   tasks,
   visibleTasks,
   isOrg,
   project,
   currentKey,
-  memberMap,
-  nodeId,
   nodeConfig,
   onRun,
-  flaggedCommentIds,
   searchQuery,
   highlightTaskId,
 }: {
@@ -1628,15 +1455,13 @@ function TaskList({
   isOrg: boolean;
   project: Project;
   currentKey: string | undefined;
-  memberMap: Map<string, string>;
-  nodeId: string;
   nodeConfig: Parameters<typeof taskCheckInState>[1];
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
-  flaggedCommentIds: ReadonlySet<string>;
   searchQuery?: string;
   /** Task whose row should carry the transient deep-link highlight,
    *  or null. The `id="task-<id>"` anchor lives on every row already
-   *  (used by FollowsBadge's in-page jump); this only adds the ring. */
+   *  (used by the card's FollowsBadge in-page jump); this only adds
+   *  the ring. */
   highlightTaskId?: string | null;
 }) {
   const { t } = useTranslation();
@@ -1766,15 +1591,6 @@ function TaskList({
     [tasks, currentKey, onRun, showToast, t],
   );
 
-  // Read once for the whole list — the claimer narrative under
-  // awaiting_confirmation needs the auto-confirm window to decide
-  // whether to render the safety-net sentence. 0 (or undefined
-  // nodeConfig) means "no sweep configured on this node," and the
-  // line is suppressed entirely.
-  const autoConfirmHours =
-    (nodeConfig as { autoConfirmHours?: number } | undefined)
-      ?.autoConfirmHours ?? 0;
-
   function renderRow(task: ProjectTask, idx: number) {
     const checkInState = taskCheckInState(task, nodeConfig, tasks);
     return (
@@ -1789,15 +1605,11 @@ function TaskList({
         acceptingClaims={project.status === "active"}
         projectStatus={project.status}
         currentKey={currentKey}
-        memberMap={memberMap}
-        nodeId={nodeId}
         onRun={onRun}
         needsMoreHands={checkInState === "needs_more_hands"}
         allTasks={tasks}
-        flaggedCommentIds={flaggedCommentIds}
         searchQuery={searchQuery}
         taskCheckInDays={nodeConfig.taskCheckInDays}
-        autoConfirmHours={autoConfirmHours}
       />
     );
   }
@@ -1968,15 +1780,11 @@ function SortableTaskRow({
   acceptingClaims: boolean;
   projectStatus: Project["status"];
   currentKey: string | undefined;
-  memberMap: Map<string, string>;
-  nodeId: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
   needsMoreHands: boolean;
   allTasks: readonly ProjectTask[];
-  flaggedCommentIds: ReadonlySet<string>;
   searchQuery?: string;
   taskCheckInDays: number;
-  autoConfirmHours: number;
 }) {
   const sortableHook = useSortable({ id: task.id, disabled: !sortable });
   const style = sortable
@@ -1987,7 +1795,7 @@ function SortableTaskRow({
     : undefined;
   return (
     <div ref={sortable ? sortableHook.setNodeRef : undefined} style={style}>
-      <TaskRow
+      <TaskCard
         task={task}
         {...rest}
         sortableHandle={
@@ -2006,746 +1814,6 @@ function SortableTaskRow({
       />
     </div>
   );
-}
-
-export function TaskRow({
-  task,
-  isOrganizer,
-  acceptingClaims,
-  projectStatus,
-  currentKey,
-  memberMap,
-  nodeId,
-  onRun,
-  needsMoreHands,
-  allTasks,
-  flaggedCommentIds,
-  searchQuery,
-  sortableHandle,
-  moveButtons,
-  taskCheckInDays,
-  autoConfirmHours,
-  linkToDetail = true,
-}: {
-  task: ProjectTask;
-  isOrganizer: boolean;
-  acceptingClaims: boolean;
-  projectStatus: Project["status"];
-  currentKey: string | undefined;
-  memberMap: Map<string, string>;
-  nodeId: string;
-  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
-  needsMoreHands: boolean;
-  allTasks: readonly ProjectTask[];
-  flaggedCommentIds: ReadonlySet<string>;
-  /** Node-configured private check-in window. Drives the
-   *  claim-time commitment summary — the claimer sees "we'll check
-   *  in with you privately after N days" adjacent to the Claim
-   *  button so claiming isn't a black box. */
-  taskCheckInDays: number;
-  /** From `nodeConfig.autoConfirmHours`. 0 (or no nodeConfig) means
-   *  the sweep is off, and the claimer narrative omits its safety-net
-   *  line entirely. */
-  autoConfirmHours: number;
-  /** Optional active search query — when non-empty, every match in the
-   *  task title is wrapped in <mark> via HighlightedText so the member
-   *  sees why this row matched. Description stays plain for v1 — the
-   *  title is enough for finding tasks at a glance. */
-  searchQuery?: string;
-  /** When non-null, the row participates in drag-reorder. The title
-   *  receives the spread `{...attributes} {...listeners}` to act as
-   *  the drag handle (design doc §3 — "only show task titles"). */
-  sortableHandle?: {
-    attributes: ReturnType<typeof useSortable>["attributes"];
-    listeners: ReturnType<typeof useSortable>["listeners"];
-  } | null;
-  /** When non-null, the row renders Move up / Move down buttons.
-   *  This is the keyboard-canonical path (design doc §9.2). */
-  moveButtons?: {
-    isFirst: boolean;
-    isLast: boolean;
-    onMove: (direction: "up" | "down") => void;
-  } | null;
-  /** Whether to render the quiet "Open task" footer affordance that
-   *  links to this task's own page (`/project/:id/task/:taskId`).
-   *  Defaults to `true` for the in-list rows on the project page;
-   *  the per-task page passes `false` so the full row doesn't render
-   *  a link to itself. */
-  linkToDetail?: boolean;
-}) {
-  const { t } = useTranslation();
-  const { showToast } = useToast();
-  const isAssignee = task.assignedTo === currentKey;
-  const isCompleter = task.completedBy === currentKey;
-  const { pending, run: runWithPending } = usePendingAction();
-  const dispatch = <T,>(action: () => Promise<T>) =>
-    runWithPending(() => onRun(action));
-
-  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
-  const [acknowledgmentText, setAcknowledgmentText] = useState("");
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  // Mark-complete inline disclosure: tapping "Mark complete" reveals an
-  // hours field (prefilled with the estimate) so the claimer records
-  // the time actually given before submitting (equal-time). One extra
-  // tap when actual == estimate; release stays one-tap and ungated.
-  const [markingComplete, setMarkingComplete] = useState(false);
-  const [actualHoursInput, setActualHoursInput] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(task.title);
-  const [editDescription, setEditDescription] = useState(task.description);
-  const [editHours, setEditHours] = useState(String(task.estimatedHours));
-  const [editUrgency, setEditUrgency] = useState<Urgency>(task.urgency);
-  const [editDeps, setEditDeps] = useState<string[]>(task.dependencies);
-  const [followsExpanded, setFollowsExpanded] = useState(false);
-
-  // Only unmet (non-completed) deps render in the Follows badge — a
-  // completed upstream is no longer informative on the downstream row.
-  const unmetDepTitles = useMemo(() => {
-    return task.dependencies
-      .map((id) => allTasks.find((t) => t.id === id))
-      .filter((dep): dep is ProjectTask => !!dep && dep.status !== "completed")
-      .map((dep) => ({ id: dep.id, title: dep.title }));
-  }, [task.dependencies, allTasks]);
-  const hasUnmetDeps = unmetDepTitles.length > 0;
-  // Claimer-side note: visible only to the claimant when the task is
-  // structurally blocked. canClaimTask reads the full task list to
-  // include not-yet-loaded dep titles that have completed.
-  const isClaimant = task.assignedTo === currentKey;
-  const isStructurallyBlocked = !canClaimTask(task, allTasks);
-  const showClaimerNote =
-    isClaimant && isStructurallyBlocked && task.status === "claimed";
-
-  if (editing) {
-    return (
-      <div className="card flex flex-col gap-2">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">
-            {t("projects.task.addTask.fieldTitle")}
-          </span>
-          <input
-            className="input"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            maxLength={120}
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">
-            {t("projects.task.addTask.fieldDescription")}
-          </span>
-          <textarea
-            className="input min-h-20"
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            maxLength={1000}
-          />
-        </label>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium">
-              {t("projects.task.addTask.fieldHours")}
-            </span>
-            <input
-              type="number"
-              inputMode="decimal"
-              min="0.25"
-              step="0.25"
-              className="input"
-              value={editHours}
-              onChange={(e) => setEditHours(e.target.value)}
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium">
-              {t("projects.task.addTask.fieldUrgency")}
-            </span>
-            <select
-              className="input"
-              value={editUrgency}
-              onChange={(e) => setEditUrgency(e.target.value as Urgency)}
-            >
-              <option value="low">{t("urgency.low")}</option>
-              <option value="medium">{t("urgency.medium")}</option>
-              <option value="high">{t("urgency.high")}</option>
-            </select>
-          </label>
-        </div>
-        {/* Dependency picker. Multi-select of in-project tasks
-            excluding this one. Saved via editProjectTask (which
-            calls detectCycle + in-project-membership checks). The
-            soft cap of 10 keeps the "Follows:" badge legible. */}
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{t("projects.task.dependsOn")}</span>
-          <select
-            multiple
-            data-testid={`deps-${task.id}`}
-            className="input min-h-[6rem]"
-            value={editDeps}
-            onChange={(e) => {
-              const picked = Array.from(
-                e.target.selectedOptions,
-                (o) => o.value,
-              );
-              setEditDeps(picked);
-            }}
-          >
-            {allTasks
-              .filter((other) => other.id !== task.id)
-              .map((other) => (
-                <option key={other.id} value={other.id}>
-                  {other.title}
-                </option>
-              ))}
-          </select>
-          <span className="text-xs text-moss-600 dark:text-moss-300">
-            {t("projects.task.dependsOnHint")}
-          </span>
-        </label>
-        <div className="flex flex-wrap gap-2 self-end">
-          <button
-            type="button"
-            className="btn-ghost"
-            disabled={pending}
-            onClick={() => {
-              setEditing(false);
-              setEditTitle(task.title);
-              setEditDescription(task.description);
-              setEditHours(String(task.estimatedHours));
-              setEditUrgency(task.urgency);
-              setEditDeps(task.dependencies);
-            }}
-          >
-            {t("projects.task.edit.cancel")}
-          </button>
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={pending}
-            aria-busy={pending}
-            onClick={async () => {
-              const h = Number.parseFloat(editHours);
-              if (!Number.isFinite(h) || h <= 0) return;
-              if (editDeps.length > 10) {
-                await onRun(() =>
-                  Promise.reject(
-                    new Error(t("projects.task.dependencyTooManyError")),
-                  ),
-                );
-                return;
-              }
-              // Use editProjectTask's dependencies field — single
-              // transaction, single save, cycle detection in the
-              // action layer. Cycles surface as a toast via onRun.
-              const ok = await dispatch(() =>
-                editProjectTask(task.id, currentKey!, {
-                  title: editTitle,
-                  description: editDescription,
-                  estimatedHours: h,
-                  urgency: editUrgency,
-                  dependencies: editDeps,
-                }),
-              );
-              if (ok) setEditing(false);
-            }}
-          >
-            {pending ? t("common.working") : t("projects.task.edit.save")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="card flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <span
-          className={`chip ${statusChipClass(task.status)}`}
-          title={task.status}
-        >
-          {t(`projects.task.status${capitalize(task.status === "awaiting_confirmation" ? "Awaiting" : task.status)}` as `projects.task.statusOpen`)}
-        </span>
-        {/* Once a task is in motion, show the credit figure (the
-            recorded actual hours, estimate fallback) so the chip never
-            contradicts the signed ledger. Open tasks show the estimate. */}
-        <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-          {formatHours(
-            task.status === "awaiting_confirmation" ||
-              task.status === "completed"
-              ? creditHoursForTask(task)
-              : task.estimatedHours,
-          )}
-        </span>
-        {needsMoreHands && !hasUnmetDeps && (
-          <span
-            className="chip bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
-            title={t("projects.task.needsMoreHandsTooltip")}
-          >
-            <span aria-hidden="true" className="mr-1">
-              {"\u{1F91D}"}
-            </span>
-            {t("projects.task.needsMoreHands")}
-            <WhyTooltip principleId="solidarity-not-shame" />
-          </span>
-        )}
-        {hasUnmetDeps && (
-          <FollowsBadge
-            unmetDeps={unmetDepTitles}
-            expanded={followsExpanded}
-            onToggle={() => setFollowsExpanded((v) => !v)}
-            t={t}
-          />
-        )}
-        {moveButtons && (
-          <div className="ml-auto flex items-center gap-1">
-            <button
-              type="button"
-              aria-label={t("projects.task.moveUp", { title: task.title })}
-              aria-disabled={moveButtons.isFirst}
-              disabled={moveButtons.isFirst}
-              onClick={() => {
-                if (!moveButtons.isFirst) moveButtons.onMove("up");
-              }}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
-            >
-              <ArrowUpIcon />
-            </button>
-            <button
-              type="button"
-              aria-label={t("projects.task.moveDown", { title: task.title })}
-              aria-disabled={moveButtons.isLast}
-              disabled={moveButtons.isLast}
-              onClick={() => {
-                if (!moveButtons.isLast) moveButtons.onMove("down");
-              }}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
-            >
-              <ArrowDownIcon />
-            </button>
-          </div>
-        )}
-      </div>
-      <h3
-        className={`text-base font-semibold leading-snug ${sortableHandle ? "cursor-grab touch-none select-none active:cursor-grabbing" : ""}`}
-        {...(sortableHandle?.attributes ?? {})}
-        {...(sortableHandle?.listeners ?? {})}
-      >
-        {searchQuery && searchQuery.trim() !== "" ? (
-          <HighlightedText text={task.title} query={searchQuery} />
-        ) : (
-          task.title
-        )}
-        {sortableHandle && (
-          <span className="sr-only">
-            {" "}
-            {t("projects.task.dragHint")}
-          </span>
-        )}
-      </h3>
-      {showClaimerNote && (
-        <p className="text-xs italic text-moss-600 dark:text-moss-300">
-          {t("projects.task.waitingOnClaimerNote")}
-        </p>
-      )}
-      {task.description && (
-        <p className="text-sm text-moss-600 dark:text-moss-300">
-          {task.description}
-        </p>
-      )}
-      {task.assignedTo &&
-        (task.status === "awaiting_confirmation" ? (
-          <p className="text-xs text-moss-600 dark:text-moss-300">
-            {t("projects.task.completedBy", {
-              name: memberMap.get(task.completedBy ?? "") ?? "—",
-            })}
-          </p>
-        ) : !needsMoreHands ? (
-          // Solidarity-not-shame: once a task is community-visibly
-          // marked "could use more hands," the original claimer's
-          // name is dropped from the public row. The task is
-          // community work again; the claimer's own actions are
-          // still surfaced to them via their AttentionSection and
-          // the in-row buttons below.
-          <p className="text-xs text-moss-600 dark:text-moss-300">
-            {t("projects.task.claimedBy", {
-              name: memberMap.get(task.assignedTo) ?? "—",
-            })}
-          </p>
-        ) : null)}
-      <div className="flex flex-wrap items-center gap-2">
-        {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && acceptingClaims && (
-          <>
-            <button
-              type="button"
-              className="btn-primary"
-              disabled={pending}
-              aria-busy={pending}
-              onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
-            >
-              {pending ? t("common.working") : t("projects.task.claim")}
-            </button>
-            {/* Claim-time commitment summary. NOT a blocking dialog
-                — `asking-never-gated` means the affordance to step
-                up has to stay one tap; the summary sits adjacent so
-                the claimer sees what they're committing to without
-                a gate. The "privately" wording pre-frames the
-                check-in as the considerate nudge it is, not as a
-                deadline. */}
-            <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
-              {task.estimatedHours > 0
-                ? t("projects.task.claimSummary", {
-                    hours: task.estimatedHours,
-                    days: taskCheckInDays,
-                  })
-                : t("projects.task.claimSummaryNoHours", {
-                    days: taskCheckInDays,
-                  })}
-            </p>
-          </>
-        )}
-        {task.status === "open" && !isOrganizer && !acceptingClaims && (
-          <p className="text-xs text-moss-600 dark:text-moss-300">
-            {projectStatus === "planning"
-              ? t("projects.task.notClaimablePlanning")
-              : projectStatus === "paused"
-                ? t("projects.task.notClaimablePaused")
-                : t("projects.task.notClaimableOther")}
-          </p>
-        )}
-        {task.status === "open" && isOrganizer && projectStatus === "planning" && (
-          <p className="text-xs text-moss-600 dark:text-moss-300">
-            {t("projects.task.claimableAfterLaunch")}
-          </p>
-        )}
-        {task.status === "open" && isOrganizer && (
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setEditing(true)}
-          >
-            {t("projects.task.edit.button")}
-          </button>
-        )}
-        {task.status === "claimed" && isAssignee && !markingComplete && (
-          <>
-            <button
-              type="button"
-              className="btn-primary"
-              disabled={pending}
-              onClick={() => {
-                setActualHoursInput(String(task.estimatedHours));
-                setMarkingComplete(true);
-              }}
-            >
-              {t("projects.task.markDone")}
-            </button>
-            <button
-              type="button"
-              className="btn-ghost"
-              disabled={pending}
-              onClick={() =>
-                dispatch(() => unclaimProjectTask(task.id, currentKey!))
-              }
-            >
-              {t("projects.task.release")}
-            </button>
-            {/* `solidarity-not-shame`: keep release one-tap (no
-                confirm dialog gating a member who's already trying
-                to communicate "I can't carry this") and let the
-                muted line near the button carry the reassurance.
-                The framing names that releasing HELPS — it routes
-                the work to someone who can carry it — and that no
-                one is keeping score. */}
-            <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
-              {t("projects.task.releaseReassurance")}
-            </p>
-          </>
-        )}
-        {task.status === "claimed" && isAssignee && markingComplete && (
-          <div className="basis-full flex flex-col gap-2 rounded-md border border-canopy-100 bg-canopy-50/40 p-3 dark:border-canopy-900 dark:bg-canopy-950/20">
-            <label className="flex flex-col gap-1 text-xs text-moss-700 dark:text-moss-200">
-              <span className="font-medium">
-                {t("projects.task.actualHours.legend")}
-                <WhyTooltip principleId="equal-time" />
-              </span>
-              <input
-                type="number"
-                inputMode="decimal"
-                min="0.25"
-                step="0.25"
-                className="input max-w-[8rem]"
-                value={actualHoursInput}
-                onChange={(e) => setActualHoursInput(e.target.value)}
-                aria-label={t("projects.task.actualHours.legend")}
-              />
-              <span className="text-moss-600 dark:text-moss-300">
-                {t("projects.task.actualHours.estimateContext", {
-                  hours: formatHours(task.estimatedHours),
-                })}
-              </span>
-            </label>
-            {/* Fact-recording, not haggling: the credit should match the
-                help given. No "you went over" framing
-                (solidarity-not-shame). */}
-            <p className="text-xs text-moss-600 dark:text-moss-300">
-              {t("projects.task.actualHours.hint")}
-            </p>
-            {(() => {
-              const parsed = Number.parseFloat(actualHoursInput);
-              const valid = Number.isFinite(parsed) && parsed > 0;
-              return (
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    disabled={pending || !valid}
-                    aria-busy={pending}
-                    onClick={async () => {
-                      const ok = await dispatch(() =>
-                        markProjectTaskComplete(task.id, currentKey!, parsed),
-                      );
-                      if (ok) setMarkingComplete(false);
-                    }}
-                  >
-                    {pending
-                      ? t("common.working")
-                      : t("projects.task.actualHours.confirmCta", {
-                          hours: formatHours(
-                            valid ? parsed : task.estimatedHours,
-                          ),
-                        })}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-ghost"
-                    disabled={pending}
-                    onClick={() => setMarkingComplete(false)}
-                  >
-                    {t("projects.task.actualHours.cancel")}
-                  </button>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-        {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={pending}
-            aria-busy={pending}
-            onClick={() => setConfirmDialogOpen(true)}
-          >
-            {pending ? t("common.working") : t("projects.task.confirm")}
-          </button>
-        )}
-        {/* Completer's release path. Until this PR, attempting to
-            release an awaiting_confirmation task threw on the db
-            side and there was no UI for it at all. The button is
-            offered only to the completer (the claimer who marked
-            done) — third parties don't get to walk the task back. */}
-        {task.status === "awaiting_confirmation" && isCompleter && (
-          <button
-            type="button"
-            className="btn-ghost"
-            disabled={pending}
-            onClick={() =>
-              dispatch(() => unclaimProjectTask(task.id, currentKey!))
-            }
-          >
-            {t("projects.task.releaseAfterComplete")}
-          </button>
-        )}
-        {task.status === "awaiting_confirmation" && !isOrganizer && !isCompleter && (
-          <span className="text-xs text-moss-600 dark:text-moss-300">
-            {t("projects.task.awaitingConfirmation")}
-          </span>
-        )}
-        {/* Recurring work: a completed task is otherwise a dead end —
-            an organizer who runs the same thing next cycle had to
-            retype it. One tap stages a fresh, open copy at the bottom
-            of the list. Framed as "run it again", never as expiry
-            (solidarity-not-shame). Gated to match addProjectTask's own
-            guard so it never offers a guaranteed error. Dependencies
-            are dropped — the original's upstream tasks are done, so
-            copying their ids would gate on nothing while risking a
-            dangling reference (the cloneProject precedent). */}
-        {task.status === "completed" &&
-          isOrganizer &&
-          projectStatus !== "completed" &&
-          projectStatus !== "archived" && (
-            <>
-              <button
-                type="button"
-                className="btn-secondary"
-                disabled={pending}
-                aria-busy={pending}
-                onClick={async () => {
-                  const created = await dispatch(() =>
-                    addProjectTask(task.projectId, currentKey!, {
-                      title: task.title,
-                      description: task.description,
-                      category: task.category,
-                      estimatedHours: task.estimatedHours,
-                      urgency: task.urgency,
-                      requiredSkills: [...task.requiredSkills],
-                      dependencies: [],
-                    }),
-                  );
-                  if (created) {
-                    showToast(
-                      t("projects.task.addFreshCopy.toast", {
-                        title: task.title,
-                      }),
-                    );
-                  }
-                }}
-              >
-                {pending
-                  ? t("common.working")
-                  : t("projects.task.addFreshCopy.button")}
-              </button>
-              <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
-                {t("projects.task.addFreshCopy.hint")}
-              </p>
-            </>
-          )}
-      </div>
-      {/* Claimer-side narrative (PR #226's voice — "credit moves when
-          ..."). Visible only to the completer of an awaiting task;
-          tells them the plain story while they wait. Mirrors
-          ExchangeStateNarrative's auto-confirm safety-net pattern
-          (ceil hours/24, min 1) so the post-side and task-side
-          windows read identically. */}
-      {task.status === "awaiting_confirmation" && isCompleter && (
-        <div className="rounded-md border border-canopy-100 bg-canopy-50/50 px-3 py-2 text-xs text-moss-600 dark:border-canopy-900 dark:bg-canopy-950/30 dark:text-moss-300">
-          <p>
-            {t("projects.task.claimerNarrative.intro", {
-              hours: formatHours(creditHoursForTask(task)),
-            })}
-          </p>
-          {task.actualHours !== null &&
-            task.actualHours !== task.estimatedHours && (
-              <p className="mt-1">
-                {t("projects.task.claimerNarrative.estimateNote", {
-                  actual: formatHours(task.actualHours),
-                  estimate: formatHours(task.estimatedHours),
-                })}
-              </p>
-            )}
-          {autoConfirmHours > 0 && (
-            <p className="mt-1">
-              {t("projects.task.claimerNarrative.autoConfirm", {
-                count: Math.max(1, Math.ceil(autoConfirmHours / 24)),
-              })}
-            </p>
-          )}
-        </div>
-      )}
-      {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
-        <ConfirmDialog
-          open={confirmDialogOpen}
-          title={t("projects.task.confirmDialog.title")}
-          description={
-            <div className="flex flex-col gap-3">
-              <p>
-                {t("projects.task.confirmDialog.body", {
-                  claimer: memberMap.get(task.completedBy ?? "") ?? "—",
-                  hours: formatHours(creditHoursForTask(task)),
-                })}
-              </p>
-              {task.actualHours !== null &&
-                task.actualHours !== task.estimatedHours && (
-                  <p className="text-sm text-moss-600 dark:text-moss-300">
-                    {t("projects.task.confirmDialog.estimateNote", {
-                      claimer: memberMap.get(task.completedBy ?? "") ?? "—",
-                      actual: formatHours(task.actualHours),
-                      estimate: formatHours(task.estimatedHours),
-                    })}
-                  </p>
-                )}
-              {/* Acknowledgment lives inside the dialog so the
-                  organizer makes one decision in one moment — no
-                  stacked dialogs, no second-layer modal for the
-                  optional note. */}
-              {!showAcknowledgment ? (
-                <button
-                  type="button"
-                  className="self-start text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
-                  onClick={() => setShowAcknowledgment(true)}
-                >
-                  {t("projects.task.acknowledgment.toggle")}
-                </button>
-              ) : (
-                <div className="flex flex-col gap-1">
-                  <textarea
-                    className="input min-h-16 text-sm"
-                    placeholder={t("projects.task.acknowledgment.placeholder")}
-                    value={acknowledgmentText}
-                    onChange={(e) => setAcknowledgmentText(e.target.value)}
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-moss-600 dark:text-moss-300">
-                    {t("projects.task.acknowledgment.hint")}
-                  </p>
-                </div>
-              )}
-            </div>
-          }
-          confirmLabel={t("projects.task.confirmDialog.confirmCta")}
-          confirmingLabel={t("projects.task.confirmDialog.confirming")}
-          cancelLabel={t("projects.task.confirmDialog.cancelCta")}
-          tone="neutral"
-          onCancel={() => setConfirmDialogOpen(false)}
-          onConfirm={() => {
-            setConfirmDialogOpen(false);
-            return dispatch(() =>
-              confirmProjectTaskCompletion(
-                task.id,
-                currentKey!,
-                nodeId,
-                acknowledgmentText,
-              ),
-            );
-          }}
-        />
-      )}
-      <TaskComments
-        projectId={task.projectId}
-        taskId={task.id}
-        currentKey={currentKey}
-        memberMap={memberMap}
-        nodeId={nodeId}
-        flaggedCommentIds={flaggedCommentIds}
-      />
-      {/* Quiet affordance to the task's own page — a plain Link (never
-          a button, so the suites that scan/click buttons by text don't
-          see it). Suppressed on the per-task page itself, which passes
-          linkToDetail={false} to avoid a self-link. */}
-      {linkToDetail && (
-        <Link
-          to={`/project/${task.projectId}/task/${task.id}`}
-          className="self-start text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
-        >
-          {t("projects.task.openDetail")}
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function statusChipClass(status: ProjectTask["status"]): string {
-  switch (status) {
-    case "open":
-      return "bg-canopy-50 text-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100";
-    case "claimed":
-      return "bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200";
-    case "awaiting_confirmation":
-      return "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-100";
-    case "completed":
-      return "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100";
-    case "blocked":
-      return "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-100";
-  }
 }
 
 function AddTaskForm({
