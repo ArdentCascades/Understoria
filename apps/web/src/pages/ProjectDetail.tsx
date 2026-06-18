@@ -114,6 +114,11 @@ import type {
 // screen; "Show older (N)" expands the full set.
 const MAX_VISIBLE_ANNOUNCEMENTS = 5;
 
+// The task search + status filters only earn their vertical space once
+// the list is long enough that scanning it is hard. Below this, a small
+// project shows the bare list — no search box, no filter pills.
+const MIN_TASKS_FOR_FILTERS = 7;
+
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -198,6 +203,9 @@ export default function ProjectDetailPage() {
           task.status === "awaiting_confirmation"),
     );
   }, [tasks, currentMember]);
+  // Below the threshold the list is short enough to scan at a glance,
+  // so we drop the search box and filter pills and just show the rows.
+  const showTaskControls = tasks.length >= MIN_TASKS_FOR_FILTERS;
 
   // Task deep-links: a `#task-<id>` fragment (from the attention rail
   // or the cross-project "tasks you're carrying" view) scrolls the
@@ -592,6 +600,29 @@ export default function ProjectDetailPage() {
                   message={t("projects.detail.noTasks")}
                 />
               </div>
+            ) : !showTaskControls ? (
+              // Short list: no search, no filter pills, no filtered-empty
+              // state. Render every task (not `visibleTasks`) so a stale
+              // filter from a prior render can never strand a small list.
+              <>
+                <TaskList
+                  tasks={tasks}
+                  visibleTasks={tasks}
+                  isOrg={isOrg}
+                  project={project}
+                  currentKey={currentMember?.publicKey}
+                  memberMap={memberMap}
+                  nodeId={nodeId}
+                  nodeConfig={nodeConfig}
+                  onRun={run}
+                  flaggedCommentIds={flaggedCommentIds}
+                  searchQuery={debouncedQuery}
+                  highlightTaskId={highlightTaskId}
+                />
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                  {deepLinkAnnouncement}
+                </div>
+              </>
             ) : (
               <>
                 <label className="mb-2 block">

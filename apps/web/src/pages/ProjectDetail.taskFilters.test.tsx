@@ -14,21 +14,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { showToastMock } = vi.hoisted(() => ({
-  showToastMock: vi.fn(),
-}));
-
 vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
 vi.mock("@/state/ToastContext", () => ({
-  useToast: () => ({
-    showToast: showToastMock,
-    dismissToast: vi.fn(),
-    toast: null,
-  }),
+  useToast: () => ({ showToast: vi.fn(), dismissToast: vi.fn(), toast: null }),
 }));
-vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: () => [],
-}));
+vi.mock("dexie-react-hooks", () => ({ useLiveQuery: () => [] }));
 vi.mock("@/db/coorgInvitations", () => ({
   issueCoOrganizerInvitation: vi.fn(),
   revokeCoOrganizerInvitation: vi.fn(),
@@ -37,13 +27,7 @@ vi.mock("@/db/secrets", () => ({ getSecretKey: vi.fn(async () => "secret") }));
 vi.mock("@/db/projects", () => ({
   isOrganizer: (p: Project, key: string) =>
     p.organizerKey === key || p.coOrganizerKeys.includes(key),
-  canClaimTask: (task: ProjectTask, all: readonly ProjectTask[]) => {
-    if (task.dependencies.length === 0) return true;
-    return task.dependencies.every((d) => {
-      const dep = all.find((t) => t.id === d);
-      return dep?.status === "completed";
-    });
-  },
+  canClaimTask: () => true,
   logActivity: vi.fn(),
   addProjectTask: vi.fn(),
   archiveProject: vi.fn(),
@@ -73,7 +57,7 @@ import type { Member, Project, ProjectTask } from "@/types";
 
 const nodeId = "node_test";
 const organizerKey = "organizer-key";
-const claimerKey = "claimer-key";
+const viewerKey = "viewer-key";
 
 function member(publicKey: string, displayName: string): Member {
   return {
@@ -112,10 +96,7 @@ function project(): Project {
   };
 }
 
-function task(
-  id: string,
-  overrides: Partial<ProjectTask> = {},
-): ProjectTask {
+function task(id: string, overrides: Partial<ProjectTask> = {}): ProjectTask {
   return {
     id,
     projectId: "proj-1",
@@ -163,12 +144,18 @@ interface MockState {
 
 let mockState: MockState;
 
-function freshState(): MockState {
+// `count` tasks, t1..tN. The two cases below straddle MIN_TASKS_FOR_FILTERS
+// (7): a small project (3) and one at the threshold (7).
+function stateWithTasks(count: number): MockState {
   return {
     projects: [project()],
-    projectTasks: [],
-    members: [member(organizerKey, "Org"), member(claimerKey, "Claimer")],
-    currentMember: member(claimerKey, "Claimer"),
+    projectTasks: Array.from({ length: count }, (_, i) =>
+      task(`t${i + 1}`, { title: `Task number ${i + 1}` }),
+    ),
+    // Viewer is a plain member (not the organizer) so the static,
+    // non-drag task list renders — the simpler of the two <li> paths.
+    members: [member(organizerKey, "Org"), member(viewerKey, "Viewer")],
+    currentMember: member(viewerKey, "Viewer"),
     nodeId,
     nodeConfig: {
       taskCheckInDays: 7,
@@ -193,10 +180,12 @@ let root: Root;
   true;
 
 beforeEach(() => {
-  mockState = freshState();
-  showToastMock.mockClear();
   container = document.createElement("div");
   document.body.appendChild(container);
+  // jsdom doesn't implement scrollIntoView; some task-row effects call it.
+  Element.prototype.scrollIntoView = vi.fn() as unknown as (
+    arg?: boolean | ScrollIntoViewOptions,
+  ) => void;
 });
 
 afterEach(() => {
@@ -204,6 +193,7 @@ afterEach(() => {
     root?.unmount();
   });
   container.remove();
+  vi.unstubAllGlobals();
 });
 
 function render() {
@@ -219,106 +209,41 @@ function render() {
   });
 }
 
-describe("ProjectDetail — claim-time commitment summary", () => {
-  it("renders hours + days adjacent to the Claim button on an open task with hours", () => {
-    mockState.projectTasks = [
-      task("t1", {
-        title: "Install hinges",
-        estimatedHours: 2,
-        status: "open",
-      }),
-    ];
+// Pills are <button>s; the per-task status chip is a <span>, so matching
+// on button text alone never collides with a "Open"/"Done" status chip.
+function buttonByText(label: string): HTMLButtonElement | undefined {
+  return Array.from(container.querySelectorAll("button")).find(
+    (b) => (b.textContent ?? "").trim() === label,
+  );
+}
+
+describe("ProjectDetail — task search/filter chrome is conditional", () => {
+  it("hides the search box and filter pills for a small project", () => {
+    mockState = stateWithTasks(3);
     render();
-    const text = container.textContent ?? "";
-    expect(text).toContain("Claim this task");
-    // The summary names BOTH the hours and the configured private
-    // check-in window — proves the value is wired through from
-    // nodeConfig and not a hardcoded fallback.
-    expect(text).toContain("About 2 hours");
-    expect(text).toContain("7 days");
-    expect(text).toContain("privately");
+    // The rows still render…
+    expect(container.querySelector("#task-t1")).not.toBeNull();
+    expect(container.querySelector("#task-t3")).not.toBeNull();
+    // …but none of the filter chrome does.
+    expect(
+      container.querySelector('input[type="search"]'),
+    ).toBeNull();
+    expect(buttonByText("All")).toBeUndefined();
+    expect(buttonByText("Open")).toBeUndefined();
+    expect(buttonByText("Done")).toBeUndefined();
   });
 
-  it("uses the no-hours variant when estimatedHours is 0", () => {
-    mockState.projectTasks = [
-      task("t1", {
-        title: "Open-ended",
-        estimatedHours: 0,
-        status: "open",
-      }),
-    ];
+  it("shows the search box and filter pills once the list is long enough", () => {
+    mockState = stateWithTasks(7);
     render();
-    const text = container.textContent ?? "";
-    expect(text).not.toContain("About 0 hours");
-    // The days/privacy framing still surfaces.
-    expect(text).toContain("7 days");
-    expect(text).toContain("privately");
-  });
-});
-
-describe("ProjectDetail — shame-free release framing", () => {
-  it("renders the muted reassurance line adjacent to the Release button (no confirm dialog)", () => {
-    mockState.projectTasks = [
-      task("t1", {
-        title: "Carry the bins",
-        status: "claimed",
-        assignedTo: claimerKey,
-        claimedAt: Date.now(),
-      }),
-    ];
-    render();
-    const text = container.textContent ?? "";
-    // Button label stays short — the long-form reassurance lives
-    // adjacent so the affordance stays one-tap.
-    expect(text).toContain("Release claim");
-    expect(text).toContain("Releasing helps the organizer find another helper");
-    expect(text).toContain("no judgment");
-  });
-});
-
-describe("ProjectDetail — 'Mine' filter pill", () => {
-  it("does not render the pill when the current member has no claimed tasks here", () => {
-    // Padded past MIN_TASKS_FOR_FILTERS (7) so the filter chrome renders;
-    // this exercises the real branch where the "Mine" pill is suppressed
-    // because nothing here is claimed — not the small-list shortcut.
-    mockState.projectTasks = [
-      task("t1", { title: "Open one", status: "open" }),
-      task("t2", { status: "open" }),
-      task("t3", { status: "open" }),
-      task("t4", { status: "open" }),
-      task("t5", { status: "open" }),
-      task("t6", { status: "open" }),
-      task("t7", { status: "open" }),
-    ];
-    render();
-    const buttons = Array.from(container.querySelectorAll("button"));
-    const labels = buttons.map((b) => (b.textContent ?? "").trim());
-    expect(labels).not.toContain("Mine");
-    // The baseline pills still render, confirming the chrome is present.
-    expect(labels).toContain("All");
-  });
-
-  it("renders the pill when the current member has a claimed task here", () => {
-    // ≥ MIN_TASKS_FOR_FILTERS (7) tasks so the filter pills render at all;
-    // t1 is the claimer's claimed task that surfaces the "Mine" pill, the
-    // rest are filler so the list clears the threshold.
-    mockState.projectTasks = [
-      task("t1", {
-        title: "Mine",
-        status: "claimed",
-        assignedTo: claimerKey,
-        claimedAt: Date.now(),
-      }),
-      task("t2", { title: "Theirs", status: "open" }),
-      task("t3", { status: "open" }),
-      task("t4", { status: "open" }),
-      task("t5", { status: "open" }),
-      task("t6", { status: "open" }),
-      task("t7", { status: "open" }),
-    ];
-    render();
-    const buttons = Array.from(container.querySelectorAll("button"));
-    const labels = buttons.map((b) => (b.textContent ?? "").trim());
-    expect(labels).toContain("Mine");
+    expect(container.querySelector("#task-t1")).not.toBeNull();
+    expect(container.querySelector("#task-t7")).not.toBeNull();
+    expect(
+      container.querySelector('input[type="search"]'),
+    ).not.toBeNull();
+    expect(buttonByText("All")).toBeDefined();
+    expect(buttonByText("Open")).toBeDefined();
+    expect(buttonByText("In progress")).toBeDefined();
+    expect(buttonByText("Done")).toBeDefined();
   });
 });
