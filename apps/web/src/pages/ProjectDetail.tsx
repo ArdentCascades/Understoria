@@ -100,6 +100,7 @@ import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
+  Event,
   EventProjectLinkRow,
   Member,
   Project,
@@ -556,6 +557,8 @@ export default function ProjectDetailPage() {
           </div>
 
           <WorkingAlongsideCard people={workingAlongside} />
+
+          <NextWorkDayGlance project={project} />
         </aside>
 
         <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0">
@@ -830,6 +833,33 @@ function formatWorkDayWhen(ms: number, locale: string | undefined): string {
   })}`;
 }
 
+// Upcoming work days for a project, soonest-first — the community events
+// linked to it as work days, on THIS node only (the link is local-only;
+// peers see a plain event — see db/eventProjectLinks.ts). Shared by the
+// main-column `WorkDaysSection` and the rail's `NextWorkDayGlance` so the
+// "what counts as the next work day" rule lives in exactly one place.
+function useUpcomingWorkDays(project: Project): Event[] {
+  const { events, eventCancellations } = useApp();
+  const links = useLiveQuery(
+    () => listLinksForProject(project.id),
+    [project.id],
+    [] as EventProjectLinkRow[],
+  );
+  return useMemo(() => {
+    const linkedIds = new Set(links.map((l) => l.eventId));
+    if (linkedIds.size === 0) return [];
+    const cancelledIds = new Set(eventCancellations.map((c) => c.eventId));
+    // Keep multi-day events still running today (end-of-day comparison),
+    // mirroring lib/calendar.ts `entryIsPast`.
+    const today = startOfTodayMs(Date.now());
+    return events
+      .filter((e) => linkedIds.has(e.id))
+      .filter((e) => !cancelledIds.has(e.id))
+      .filter((e) => (e.endsAt ?? e.startsAt) >= today)
+      .sort((a, b) => a.startsAt - b.startsAt);
+  }, [links, events, eventCancellations]);
+}
+
 // "Upcoming work days" — community events linked to this project as work
 // days, on THIS node only (the link is local-only; peers see a plain
 // event — see db/eventProjectLinks.ts). Pull-only, no attention items.
@@ -845,28 +875,9 @@ function WorkDaysSection({
 }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { events, eventCancellations } = useApp();
-  const links = useLiveQuery(
-    () => listLinksForProject(project.id),
-    [project.id],
-    [] as EventProjectLinkRow[],
-  );
+  const upcoming = useUpcomingWorkDays(project);
   const canSchedule =
     isOrg && project.status !== "completed" && project.status !== "archived";
-
-  const upcoming = useMemo(() => {
-    const linkedIds = new Set(links.map((l) => l.eventId));
-    if (linkedIds.size === 0) return [];
-    const cancelledIds = new Set(eventCancellations.map((c) => c.eventId));
-    // Keep multi-day events still running today (end-of-day comparison),
-    // mirroring lib/calendar.ts `entryIsPast`.
-    const today = startOfTodayMs(Date.now());
-    return events
-      .filter((e) => linkedIds.has(e.id))
-      .filter((e) => !cancelledIds.has(e.id))
-      .filter((e) => (e.endsAt ?? e.startsAt) >= today)
-      .sort((a, b) => a.startsAt - b.startsAt);
-  }, [links, events, eventCancellations]);
 
   if (upcoming.length === 0 && !canSchedule) return null;
 
@@ -910,6 +921,46 @@ function WorkDaysSection({
       <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
         {t("projects.workDays.localLinkHint")}
       </p>
+    </section>
+  );
+}
+
+// Rail-only "next work day" glance — answers "when's the next time to show
+// up?" while the full WorkDaysSection scrolls out of view in the main
+// column. Desktop-only (`hidden lg:block`): on mobile the rail stacks
+// first and the full list is right there in the flow, so a glance would
+// just duplicate it; the empty-rail gap it fills is wide-screen-only too.
+// Renders nothing when there's no upcoming work day — an empty glance
+// would shame a project that hasn't scheduled one (same posture as
+// WorkDaysSection). No counts: just the single next day, as a calm link.
+function NextWorkDayGlance({ project }: { project: Project }) {
+  const { t, i18n } = useTranslation();
+  const upcoming = useUpcomingWorkDays(project);
+  const next = upcoming[0];
+  if (!next) return null;
+  return (
+    <section
+      className="card mb-4 hidden lg:block"
+      aria-labelledby="next-work-day-title"
+    >
+      <h2
+        id="next-work-day-title"
+        className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+      >
+        {t("projects.workDays.nextGlanceHeading")}
+      </h2>
+      <Link
+        to={`/events/${next.id}`}
+        className="mt-1 block underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-canopy-600/50"
+      >
+        <p className="font-medium">{next.title}</p>
+        <p className="mt-0.5 text-sm text-moss-600 dark:text-moss-300">
+          {formatWorkDayWhen(next.startsAt, i18n.resolvedLanguage)}
+          {next.location
+            ? ` · ${t("projects.workDays.itemAt", { location: next.location })}`
+            : ""}
+        </p>
+      </Link>
     </section>
   );
 }
