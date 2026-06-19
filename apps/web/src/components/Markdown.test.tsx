@@ -115,6 +115,145 @@ describe("Markdown — block rendering", () => {
   });
 });
 
+describe("Markdown — SAFE block rendering", () => {
+  it("renders a heading with role=heading + aria-level, NOT a raw <h1>", () => {
+    render({ text: "# Big title" });
+    // No real heading element leaks into the page outline.
+    expect(container.querySelector("h1")).toBeNull();
+    const heading = container.querySelector('[role="heading"]');
+    expect(heading).not.toBeNull();
+    expect(heading!.getAttribute("aria-level")).toBe("1");
+    expect(heading!.textContent).toBe("Big title");
+    // It is a calm <div>, not an h-tag.
+    expect(heading!.tagName).toBe("DIV");
+  });
+
+  it("renders nested heading levels with the right aria-level", () => {
+    render({ text: "### Smaller" });
+    const heading = container.querySelector('[role="heading"]');
+    expect(heading!.getAttribute("aria-level")).toBe("3");
+    expect(container.querySelector("h3")).toBeNull();
+  });
+
+  it("renders a blockquote wrapping its child blocks", () => {
+    render({ text: "> quoted text" });
+    const bq = container.querySelector("blockquote");
+    expect(bq).not.toBeNull();
+    expect(bq!.className).toContain("border-l-2");
+    expect(bq!.textContent).toContain("quoted text");
+    // The recursively-rendered child is a paragraph.
+    expect(bq!.querySelector("p")).not.toBeNull();
+  });
+
+  it("renders a fenced code block as <pre><code> with the verbatim value", () => {
+    render({ text: "```\nline *one*\nline two\n```" });
+    const pre = container.querySelector("pre");
+    expect(pre).not.toBeNull();
+    expect(pre!.className).toContain("overflow-x-auto");
+    const code = pre!.querySelector("code");
+    expect(code).not.toBeNull();
+    expect(code!.className).toContain("font-mono");
+    // The `*one*` is shown verbatim (not emphasized) — no <em> inside.
+    expect(code!.textContent).toBe("line *one*\nline two");
+    expect(pre!.querySelector("em")).toBeNull();
+  });
+
+  it("renders an <hr> for a horizontal rule", () => {
+    render({ text: "---" });
+    const hr = container.querySelector("hr");
+    expect(hr).not.toBeNull();
+    expect(hr!.className).toContain("border-moss-200");
+  });
+
+  it("renders <del> for strikethrough", () => {
+    render({ text: "~~gone~~" });
+    const del = container.querySelector("del");
+    expect(del).not.toBeNull();
+    expect(del!.textContent).toBe("gone");
+  });
+
+  it("renders a GFM table with thead/tbody, th/td, and alignment classes", () => {
+    render({
+      text: "| L | R |\n| :--- | ---: |\n| a | b |",
+    });
+    const wrapper = container.querySelector("div.overflow-x-auto");
+    expect(wrapper).not.toBeNull();
+    const table = container.querySelector("table");
+    expect(table).not.toBeNull();
+    expect(table!.className).toContain("w-full");
+    const ths = table!.querySelectorAll("thead th");
+    expect(ths).toHaveLength(2);
+    expect(ths[0].className).toContain("font-semibold");
+    expect(ths[0].className).toContain("text-left");
+    expect(ths[1].className).toContain("text-right");
+    const tds = table!.querySelectorAll("tbody td");
+    expect(tds).toHaveLength(2);
+    expect(tds[0].className).toContain("border");
+    expect(tds[0].textContent).toBe("a");
+    expect(tds[1].className).toContain("text-right");
+  });
+
+  it("renders a task list with a disabled, read-only checkbox per item", () => {
+    render({ text: "- [x] done\n- [ ] todo" });
+    const ul = container.querySelector("ul");
+    expect(ul).not.toBeNull();
+    // Task lists drop the bullet marker.
+    expect(ul!.className).toContain("list-none");
+    const boxes = container.querySelectorAll('input[type="checkbox"]');
+    expect(boxes).toHaveLength(2);
+    const first = boxes[0] as HTMLInputElement;
+    const second = boxes[1] as HTMLInputElement;
+    expect(first.checked).toBe(true);
+    expect(second.checked).toBe(false);
+    // Read-only: disabled so federated content can never be toggled.
+    expect(first.disabled).toBe(true);
+    expect(container.textContent).toContain("done");
+    expect(container.textContent).toContain("todo");
+  });
+
+  it("renders a nested list as a nested <ul> inside an <li>", () => {
+    render({ text: "- outer\n  - inner1\n  - inner2" });
+    const outer = container.querySelector("ul");
+    expect(outer).not.toBeNull();
+    const nested = outer!.querySelector("li ul");
+    expect(nested).not.toBeNull();
+    expect(nested!.querySelectorAll("li")).toHaveLength(2);
+    expect(nested!.textContent).toContain("inner1");
+    expect(nested!.textContent).toContain("inner2");
+  });
+
+  it("renders a nested <ol> inside a bullet item", () => {
+    render({ text: "- outer\n  1. one\n  2. two" });
+    const nestedOl = container.querySelector("ul li ol");
+    expect(nestedOl).not.toBeNull();
+    expect(nestedOl!.className).toContain("list-decimal");
+    expect(nestedOl!.querySelectorAll("li")).toHaveLength(2);
+  });
+});
+
+describe("Markdown — image safety (never an <img>)", () => {
+  it("renders image syntax as a safe <a>, never an <img>", () => {
+    render({ text: "![a cat](https://example.com/cat.png)" });
+    // The crucial invariant: no image element is ever produced.
+    expect(container.querySelector("img")).toBeNull();
+    const a = container.querySelector("a");
+    expect(a).not.toBeNull();
+    expect(a!.getAttribute("href")).toBe("https://example.com/cat.png");
+    expect(a!.textContent).toBe("a cat");
+    // No <img> tag string anywhere in the emitted HTML.
+    expect(container.innerHTML.toLowerCase()).not.toContain("<img");
+  });
+
+  it("renders an unsafe image url as plain text, no <img>, no href", () => {
+    render({ text: "![x](javascript:alert(1))" });
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.innerHTML.toLowerCase()).not.toContain("<img");
+    expect(container.innerHTML).not.toContain("javascript:");
+    expect(container.textContent).toContain("x");
+  });
+});
+
 // Migrated from the deleted ExpandableText.test.tsx — collapse threshold,
 // Show more / Show less toggle, and full-text-in-DOM guarantee.
 describe("Markdown — collapsible behavior", () => {
