@@ -256,6 +256,7 @@ The phase view below is a public summary.
 - [x] Community events — federated signed `Event` + `EventCancellation` records with local-only RSVP roster, comparison-card create flow, attention-rail integration, and an "Events only" calendar filter
 - [x] Member blocking — local-only personal-relief surface with informed-consent comparison card, per-block governance-visibility toggle, paired-device transfer, and tap-to-reveal Settings panel
 - [x] Invite-only mode — `nodeConfig.inviteOnly` flag with first-member bootstrap exception for fresh deployments
+- [x] Task ordering + soft-block dependencies — drag / Move buttons / Reorder modal for organisers; `Follows:` framing + claimant ack line + chip suppression for structurally-blocked tasks; local-only (no federation surface)
 
 ### Phase 3: Federation *(active)*
 - [x] Community node server with Docker deployment

@@ -1005,8 +1005,8 @@ We are not trying to protect against:
 
 - **`ProjectTask.orderIndex` and `dependencies` remain local;
   widening would need a wire-surface review.**
-  *In design — predicate PR landing alongside
-  `docs/task-ordering-and-dependencies.md`.* The task-ordering
+  *Shipped (PRs #206–#216; PR D loudly skipped per
+  `docs/task-ordering-and-dependencies.md` §12).* The task-ordering
   workstream adds a new local field `orderIndex: number` to
   `ProjectTask` (Dexie v25, backfilled from `createdAt` rank ×
   1000) and gives the existing `dependencies: string[]` field

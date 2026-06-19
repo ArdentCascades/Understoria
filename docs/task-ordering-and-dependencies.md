@@ -1,10 +1,12 @@
 # Understoria — Task ordering + dependencies (design note)
 
-> **Status:** **in design.** This doc + a threat-model §7 addendum +
+> **Status:** **shipped.** This doc + a threat-model §7 addendum +
 > a dedicated "What co-organizers can do" section in
-> `docs/co-organizer-invitations.md` §4 land together as the
-> predicate PR. Implementation breaks out
-> across five PRs (B, C, E, F — D intentionally skipped, see §12).
+> `docs/co-organizer-invitations.md` §4 landed together as the
+> predicate PR. Implementation rolled out across PRs B / C / E / F
+> (with D loudly skipped per §12). See §12 for the per-PR shipping
+> table; see §13 for the open questions that have since been
+> resolved by pilot signal.
 > Pairs with the threat-model §7 addendum "`ProjectTask.orderIndex`
 > and `dependencies` remain local; widening would need a
 > wire-surface review" that lands in this same PR. Read alongside
@@ -22,22 +24,20 @@
 
 ## §1 Status
 
-In design. The doc, the threat-model §7 entry, and the
-`co-organizer-invitations.md` §4 capabilities enumeration are
-the predicate PR — pure documentation. Implementation phases
-B, C, E, F are
-described in §12 and ship in sequence after this lands; phase D is
-intentionally skipped because tasks don't federate today and there
-is no server work to do (the loud-skip pattern is borrowed from
-`docs/blocking.md` §13).
+**Shipped.** The doc, the threat-model §7 entry, and the
+`co-organizer-invitations.md` §4 capabilities enumeration landed
+as the predicate PR (#206 / #207 / #208). Implementation phases B,
+C, E, F are described in §12 and rolled out in sequence; phase D
+remains intentionally skipped because tasks don't federate today
+and there is no server work to do (the loud-skip pattern is
+borrowed from `docs/blocking.md` §13). See §12 for the per-PR
+shipping refs.
 
-Open questions that the implementation PRs will resolve are
-collected in §13. Nothing in this design is provisional in the
-sense of "we might still ship something different" — the four
-settled decisions in the commit message are the contract — but
-a couple of UX details (the `* 1000` gap heuristic, the
-multi-dependency badge rendering) are deliberately left for the
-PR-E reviewer.
+Open questions collected in §13 are kept as historical record;
+where pilot signal has settled one, the bullet notes the
+resolution inline. Nothing in this design ended up provisional —
+the four settled decisions in the commit message were and remain
+the contract.
 
 ## §2 Why now
 
@@ -974,6 +974,21 @@ Six PR slots; PR D is intentionally and loudly skipped. The
 loud-skip pattern is borrowed from `docs/blocking.md` §13 (which
 loud-skipped PR D because blocks don't federate). Same posture
 here: tasks don't federate, no server work, no PR D.
+
+**Shipping table (all of B / C / E / F merged; D intentionally
+absent):**
+
+| PR slot | Merged as | Subject |
+| --- | --- | --- |
+| A — predicate doc + cross-doc edits | #206 | this doc, threat-model §7 entry, co-organizer-invitations §4 |
+| B — shared types | #207 | `orderIndex` on `ProjectTask`, `dependencies` doc-comment rewrite |
+| C — Dexie v25 + soft-block flip + tests | #209 | migration, `reorderProjectTask`, removed claim-time throw |
+| D — server / federation | *(skipped, loudly)* | no federation surface; see entry below |
+| E — UI: drag + Move buttons + Follows badge | #214 | `@dnd-kit` + keyboard parity + claimant ack line; FLIP animation + Reorder modal in #215 |
+| F — public-chip suppression | #216 | `needs_more_hands` chip honours structural blocks |
+
+PR D's intentional absence is still loud and is preserved as a
+guardrail for future contributors.
 
 - **PR A — this doc + cross-doc edits.** *This PR.*
   - `docs/task-ordering-and-dependencies.md` (new — this file).

@@ -471,6 +471,160 @@ onboard — are prioritized; the rest confirm the page is navigable.
   `<h1>` to the screen reader; touch targets nearby remain at
   the 52×52 floor that Largest enforces.
 
+### Offline banner + outbox transparency
+
+- **Entry:** any page; toggle the device offline (airplane mode,
+  or DevTools → Network → Offline).
+- **Steps:** confirm the offline banner appears at the top of the
+  shell with the queued-changes count when there is work in the
+  outbox (PR #220). Post a need or claim a task while offline;
+  the count should tick up. Restore connectivity; the banner
+  and count should clear once the outbox drains.
+- **Expected:** the banner is a discrete landmark / live region
+  announcing "You're offline" once on transition; the count
+  updates politely (no live-region storm); the banner has
+  sufficient contrast in both themes; dismissing connectivity
+  again re-announces.
+
+### Service-worker update prompt
+
+- **Entry:** a build is deployed while the PWA is open. Simulate
+  by registering an updated SW in DevTools, or revisit the
+  promoted build after a fresh deploy.
+- **Steps:** the update prompt (PR #219) surfaces with a
+  one-line "A new version is available" message and a Reload
+  button. Confirm it's reachable by keyboard and by screen
+  reader; that focus is *not* stolen (a member mid-typing
+  should not lose their input); that dismissing leaves the
+  rest of the UI usable.
+- **Expected:** announces once via a polite live region; the
+  Reload button is a normal button (44×44 touch target);
+  dismissing is non-destructive.
+
+### Reorder task modal (ProjectDetail)
+
+- **Entry:** ProjectDetail as an organiser or co-organiser, with
+  at least three tasks. Open the Reorder modal (PR #215).
+- **Steps:** confirm the modal opens with focus on its first
+  control; the task list inside is keyboard-reorderable (Move
+  up / Move down per row); a screen reader announces each
+  reorder via the existing live region the page uses for drag
+  reorders. Close the modal; focus should return to the
+  affordance that opened it.
+- **Expected:** focus trapped inside while open; Escape closes;
+  Move buttons disabled at the ends with `aria-disabled="true"`;
+  every row has a 44×44 touch target; the screen-reader announce
+  reads "Moved <task title> up to position N of M" or analogous.
+
+### Conversation header kebab menu
+
+- **Entry:** a conversation in Messages (PR #211).
+- **Steps:** open the **⋮** menu at the top of the conversation.
+  Confirm it's reachable by keyboard (visible focus ring on the
+  trigger; arrow keys / Enter navigate the menu items); that
+  Block / Unblock are clearly labelled; that the menu closes on
+  Escape and returns focus to the trigger.
+- **Expected:** `aria-haspopup="menu"` / `aria-expanded` on the
+  trigger; menu items are real `<button>`s; the empty-state copy
+  for a fresh conversation is descriptive ("No messages yet —
+  say hi") rather than the older blank pane.
+
+### Conversation Messages reactivity to blocks
+
+- **Entry:** Messages with a blocked contact (PR #213).
+- **Steps:** block a contact from another surface (their member
+  profile, or Settings → Blocked contacts) while the Messages
+  page is open. The Messages list should update without a manual
+  refresh — the blocked contact's thread should disappear.
+- **Expected:** the list re-renders within a tick of the Dexie
+  write; no stale entries linger; the live region (if any)
+  announces nothing about the block (the silent-success
+  discipline in §5 applies).
+
+### Co-organiser capability disclosure card
+
+- **Entry:** ProjectDetail as a primary organiser, with a
+  co-organiser invite issued or accepted (PR #224).
+- **Steps:** the capability card enumerates what a co-organiser
+  can do. Confirm headings are real heading levels; the list is
+  a real `<ul>`; the acceptance pointer (visible to the
+  invitee in the invitation card) links into the same
+  enumeration.
+- **Expected:** screen-reader announces the heading + list;
+  contrast meets AA at both themes; the card's expand /
+  collapse (if any) uses `aria-expanded`.
+
+### Confirm-task dialog (debit naming)
+
+- **Entry:** ProjectDetail or PostDetail at the moment of
+  confirming a completion (PR #237).
+- **Steps:** tap Confirm. A dialog appears naming the debit
+  ("Confirming credits <helper> with <hours> hours; the same
+  amount comes from your balance"). Confirm the dialog is
+  focus-trapped, Escape cancels, the confirm action is the
+  default (Enter activates), and the cancel action is reachable
+  by keyboard.
+- **Expected:** `role="dialog"` with `aria-modal="true"`,
+  `aria-labelledby` / `aria-describedby` pointing at the title
+  and the debit-naming body; focus returns to the Confirm
+  button on close.
+
+### Exchange state narrative + disputed pointer (PostDetail)
+
+- **Entry:** a PostDetail page across the four exchange states
+  (claimed → awaiting confirm → confirmed → disputed) (PRs #226,
+  #232).
+- **Steps:** for each state, confirm the page narrates the state
+  in plain language above the affordances ("This exchange is
+  awaiting your confirmation" etc.). When disputed, an
+  operational pointer links to the disputes surface and explains
+  the next step.
+- **Expected:** the narrative is a real heading or paragraph
+  (not a status chip alone); the disputed pointer is a real
+  link with discernible text; the link has a visible focus
+  ring; contrast at AA in both themes.
+
+### PWA install + iOS splash screens
+
+- **Entry:** Safari on iOS (or any browser supporting Add to
+  Home Screen). PRs #223 and #231.
+- **Steps:** confirm Add to Home Screen produces a PNG-icon-
+  launching standalone PWA. Cold-launch the installed PWA on
+  iOS and confirm an apple-touch-startup-image splash renders
+  in place of a white flash. Repeat at portrait / landscape and
+  across the supported device buckets.
+- **Expected:** icon resolution is crisp at every iOS launcher
+  size; the splash uses canopy colours that match the brand;
+  no white-flash at cold start; no console error about a missing
+  manifest icon.
+
+### Linkified URLs in comments / descriptions
+
+- **Entry:** a task comment, event description, or post
+  description containing one or more URLs (PR #275 — the
+  linkify pass).
+- **Steps:** URLs render as real `<a>` elements with discernible
+  text (the URL itself) and the platform's external-link
+  behaviour (target / rel). A screen reader should announce them
+  as links; keyboard tab order should include them.
+- **Expected:** `rel="noopener noreferrer"` on cross-origin
+  links; no surrounding bare text loses meaning when the link
+  is announced; the linkified copy stays selectable and
+  copy-pasteable.
+
+### Settings → Blocked contacts — tap-to-reveal (verification)
+
+- **Entry:** Settings → Blocked contacts with at least one
+  blocked member.
+- **Steps:** each row renders obscured by default (generic
+  avatar, "Blocked contact", date). Tap the row to reveal the
+  display name + truncated pubkey; tap again to re-obscure.
+- **Expected:** the row is a real button (keyboard-activatable);
+  `aria-pressed` reflects the revealed / obscured state; the
+  per-block hide-governance toggle and the Unblock affordance
+  remain reachable in both states. See also §4 PR #197 entry
+  above.
+
 ## 5. Known design-judgment items (do NOT flag these as bugs)
 
 These are intentional. Recording them as findings creates noise;
