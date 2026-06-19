@@ -194,6 +194,8 @@
     "copy": "Copy",
     "copied": "Copied. Share it over Signal, in person, or on paper.",
     "copyFailed": "Couldn't access the clipboard — select the link above and copy manually.",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied to your clipboard.",
     "memberFallback": "a member",
     "anyMember": "Member",
     "gotIt": "Got it",
@@ -734,6 +736,7 @@
       "confirm": "Confirm completion",
       "awaitingConfirmation": "Waiting on organizer to confirm",
       "releaseAfterComplete": "Step back from this task",
+      "menuLabel": "Task actions",
       "addFreshCopy": {
         "button": "Add a fresh copy",
         "hint": "Adds an open copy of this task at the bottom of the list — handy for work that recurs.",

@@ -32,12 +32,14 @@ const {
   unclaimMock,
   markMock,
   showToastMock,
+  writeTextMock,
 } = vi.hoisted(() => ({
   claimProjectTaskMock: vi.fn(),
   confirmMock: vi.fn(async (_taskId: string) => ({})),
   unclaimMock: vi.fn(async (_taskId: string) => ({})),
   markMock: vi.fn(async (_taskId: string) => ({})),
   showToastMock: vi.fn(),
+  writeTextMock: vi.fn(async (_url: string) => undefined),
 }));
 
 vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
@@ -237,7 +239,19 @@ beforeEach(() => {
   unclaimMock.mockClear();
   markMock.mockClear();
   showToastMock.mockClear();
+  writeTextMock.mockClear();
+  writeTextMock.mockResolvedValue(undefined);
   vi.mocked(addProjectTask).mockReset();
+  // Copy link routes through @/lib/share. Force the clipboard path by
+  // removing navigator.share (jsdom has no native share sheet anyway)
+  // and stubbing navigator.clipboard.writeText so the URL is observable.
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText: writeTextMock },
+  });
+  if ("share" in navigator) {
+    delete (navigator as { share?: unknown }).share;
+  }
   container = document.createElement("div");
   document.body.appendChild(container);
 });
@@ -273,6 +287,26 @@ function clickButtonByText(label: string) {
   act(() => {
     btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
+}
+
+function taskMenuTrigger(): HTMLButtonElement {
+  const btn = container.querySelector<HTMLButtonElement>(
+    'button[aria-haspopup="menu"]',
+  );
+  if (!btn) throw new Error("task header menu trigger not found");
+  return btn;
+}
+
+function openTaskMenu() {
+  act(() => {
+    taskMenuTrigger().dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+}
+
+function menuItemByText(label: string): HTMLButtonElement | undefined {
+  return Array.from(
+    container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]'),
+  ).find((b) => (b.textContent ?? "").trim() === label);
 }
 
 function numberInput(): HTMLInputElement {
@@ -656,10 +690,11 @@ describe("TaskDetailPage — fresh copy of a completed task", () => {
     });
   }
 
-  function freshCopyButton(): HTMLButtonElement | undefined {
-    return Array.from(container.querySelectorAll("button")).find(
-      (b) => (b.textContent ?? "").trim() === "Add a fresh copy",
-    );
+  // The fresh-copy affordance now lives inside the header overflow menu
+  // (Part 3 migration). It only renders as a menuitem once the menu is
+  // open, so each assertion opens the kebab first.
+  function freshCopyItem(): HTMLButtonElement | undefined {
+    return menuItemByText("Add a fresh copy");
   }
 
   it("copies the task's fields (dropping dependencies) and toasts on success", async () => {
@@ -669,10 +704,11 @@ describe("TaskDetailPage — fresh copy of a completed task", () => {
       completedTask({ id: "new", status: "open" }),
     );
     render("/project/proj-1/task/t1");
-    const btn = freshCopyButton();
-    expect(btn).toBeDefined();
+    openTaskMenu();
+    const item = freshCopyItem();
+    expect(item).toBeDefined();
     act(() => {
-      btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      item!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
     expect(vi.mocked(addProjectTask)).toHaveBeenCalledTimes(1);
@@ -692,29 +728,32 @@ describe("TaskDetailPage — fresh copy of a completed task", () => {
     );
   });
 
-  it("does not offer the button to a non-organizer", () => {
+  it("does not offer the menu item to a non-organizer", () => {
     mockState.projectTasks = [completedTask()];
     mockState.currentMember = member(claimerKey, "Cleo Claimer");
     render("/project/proj-1/task/t1");
-    expect(freshCopyButton()).toBeUndefined();
+    openTaskMenu();
+    expect(freshCopyItem()).toBeUndefined();
   });
 
-  it("does not offer the button on a completed or archived project", () => {
+  it("does not offer the menu item on a completed or archived project", () => {
     mockState.projectTasks = [completedTask()];
     mockState.currentMember = member(organizerKey, "Org");
     mockState.projects = [project({ status: "completed", completedAt: 900 })];
     render("/project/proj-1/task/t1");
-    expect(freshCopyButton()).toBeUndefined();
+    openTaskMenu();
+    expect(freshCopyItem()).toBeUndefined();
 
     act(() => {
       root.unmount();
     });
     mockState.projects = [project({ status: "archived", completedAt: 900 })];
     render("/project/proj-1/task/t1");
-    expect(freshCopyButton()).toBeUndefined();
+    openTaskMenu();
+    expect(freshCopyItem()).toBeUndefined();
   });
 
-  it("disables the button while the copy is in flight (guards double-add)", async () => {
+  it("fires addProjectTask exactly once and closes the menu on select (guards double-add)", async () => {
     let resolveAdd: (value: ProjectTask) => void = () => {};
     mockState.projectTasks = [completedTask()];
     mockState.currentMember = member(organizerKey, "Org");
@@ -724,21 +763,70 @@ describe("TaskDetailPage — fresh copy of a completed task", () => {
       }),
     );
     render("/project/proj-1/task/t1");
-    const btn = freshCopyButton();
-    expect(btn).toBeDefined();
-    expect(btn!.disabled).toBe(false);
+    openTaskMenu();
+    const item = freshCopyItem();
+    expect(item).toBeDefined();
     act(() => {
-      btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      item!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    // In flight: the same node is now disabled, so a real second click
-    // can't fire (the only thing standing between this and a double-add).
-    expect(btn!.disabled).toBe(true);
+    // Selecting closes the menu (the menuitem is gone from the DOM), so a
+    // real second click can't fire — the standing guard against a
+    // double-add now that the action moved off an inline button.
+    expect(freshCopyItem()).toBeUndefined();
     expect(vi.mocked(addProjectTask)).toHaveBeenCalledTimes(1);
     await act(async () => {
       resolveAdd(completedTask({ id: "new", status: "open" }));
       await Promise.resolve();
     });
-    expect(btn!.disabled).toBe(false);
+  });
+});
+
+describe("TaskDetailPage — header overflow menu (Copy link / Edit)", () => {
+  it("renders the kebab trigger with aria-haspopup=menu", () => {
+    render("/project/proj-1/task/t2");
+    const trigger = taskMenuTrigger();
+    expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+    expect(trigger.getAttribute("aria-label")).toBe("Task actions");
+  });
+
+  it("opening the menu shows a Copy link item; an organizer on an OPEN task also sees Edit task", () => {
+    mockState.currentMember = member(organizerKey, "Org");
+    render("/project/proj-1/task/t2");
+    // No inline Edit button outside the menu (it moved into the kebab).
+    expect(
+      Array.from(container.querySelectorAll("button")).some(
+        (b) => (b.textContent ?? "").trim() === "Edit",
+      ),
+    ).toBe(false);
+    openTaskMenu();
+    expect(menuItemByText("Copy link")).toBeDefined();
+    expect(menuItemByText("Edit")).toBeDefined();
+  });
+
+  it("a plain member sees Copy link but NOT Edit task", () => {
+    mockState.currentMember = member(viewerKey, "Viewer");
+    render("/project/proj-1/task/t2");
+    openTaskMenu();
+    expect(menuItemByText("Copy link")).toBeDefined();
+    expect(menuItemByText("Edit")).toBeUndefined();
+  });
+
+  it("selecting Copy link writes the canonical task URL and toasts the confirmation", async () => {
+    render("/project/proj-1/task/t2");
+    openTaskMenu();
+    const item = menuItemByText("Copy link");
+    expect(item).toBeDefined();
+    act(() => {
+      item!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    await flush();
+    expect(writeTextMock).toHaveBeenCalledTimes(1);
+    expect(writeTextMock).toHaveBeenCalledWith(
+      `${window.location.origin}/project/proj-1/task/t2`,
+    );
+    expect(showToastMock).toHaveBeenCalledWith(
+      "Link copied to your clipboard.",
+    );
   });
 });
 

@@ -36,6 +36,7 @@ import { MemberAvatar } from "@/components/MemberAvatar";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
+import { OverflowMenu } from "@/components/OverflowMenu";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
 export default function ConversationPage() {
@@ -57,15 +58,11 @@ export default function ConversationPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useReducedMotion();
 
-  // Header "More actions" menu (block / unblock affordance). Local
-  // state because there is only one menu on this page and pulling in
-  // a generic Menu component would be overkill — see docs/blocking.md
-  // §13 PR addition note for the placement rationale.
-  const [menuOpen, setMenuOpen] = useState(false);
+  // Header "More actions" menu (block / unblock affordance). The
+  // trigger/popover/a11y now live in the reusable <OverflowMenu>; this
+  // page only owns the two confirm-dialog open flags.
   const [blockOpen, setBlockOpen] = useState(false);
   const [unblockOpen, setUnblockOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   const otherKey = memberKey ? decodeURIComponent(memberKey) : "";
   const otherName =
@@ -138,37 +135,6 @@ export default function ConversationPage() {
       .filter((m) => matchesQuery(m.plaintext, q))
       .map((m) => m.id);
   }, [messages, query]);
-
-  // Header menu: close on Esc and on click-outside. Returning focus
-  // to the trigger after Esc is standard menu a11y; click-outside
-  // intentionally does NOT refocus (the member moved to something
-  // else on screen).
-  useEffect(() => {
-    if (!menuOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        setMenuOpen(false);
-        menuTriggerRef.current?.focus();
-      }
-    }
-    function onPointer(e: MouseEvent) {
-      const target = e.target as Node | null;
-      if (
-        menuRef.current &&
-        target &&
-        !menuRef.current.contains(target) &&
-        !menuTriggerRef.current?.contains(target)
-      ) {
-        setMenuOpen(false);
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("mousedown", onPointer);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("mousedown", onPointer);
-    };
-  }, [menuOpen]);
 
   useEffect(() => {
     if (matchIds.length === 0) {
@@ -253,43 +219,25 @@ export default function ConversationPage() {
           {t("messages.conversationWith", { name: otherName })}
         </h1>
         {currentMember && otherKey && (
-          <div className="relative ml-auto">
-            <button
-              ref={menuTriggerRef}
-              type="button"
-              className="btn-ghost inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-base"
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              aria-label={t("messages.conversation.headerMenuLabel")}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <span aria-hidden="true">⋯</span>
-            </button>
-            {menuOpen && (
-              <div
-                ref={menuRef}
-                role="menu"
-                aria-orientation="vertical"
-                className="absolute right-0 z-20 mt-1 w-56 overflow-hidden rounded-lg border border-moss-200 bg-white shadow-lg dark:border-moss-700 dark:bg-moss-900"
-              >
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex min-h-[44px] w-full items-center px-3 py-2 text-left text-sm text-rose-700 hover:bg-rose-50 focus-visible:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/30"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    if (blocked) setUnblockOpen(true);
-                    else setBlockOpen(true);
-                  }}
-                >
-                  {blocked
+          <div className="ml-auto">
+            <OverflowMenu
+              label={t("messages.conversation.headerMenuLabel")}
+              items={[
+                {
+                  key: "block",
+                  tone: "destructive",
+                  label: blocked
                     ? t("messages.conversation.headerMenuUnblock", {
                         name: otherName,
                       })
-                    : t("messages.conversation.headerMenuBlock")}
-                </button>
-              </div>
-            )}
+                    : t("messages.conversation.headerMenuBlock"),
+                  onSelect: () => {
+                    if (blocked) setUnblockOpen(true);
+                    else setBlockOpen(true);
+                  },
+                },
+              ]}
+            />
           </div>
         )}
       </header>
