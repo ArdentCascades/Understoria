@@ -29,6 +29,7 @@ import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
+import { MarkdownHint } from "@/components/MarkdownHint";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import {
   combine,
@@ -318,6 +319,7 @@ export default function PostFormPage() {
             onChange={(e) => setDescription(e.target.value)}
             maxLength={1000}
           />
+          <MarkdownHint />
         </label>
 
         <fieldset className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">

@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { AvailabilityChip, Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
+import { stripMarkdown } from "@/lib/markdown";
 import type { TrustStatus } from "@/lib/vouch";
 import { AvailabilityChips } from "./AvailabilityChips";
 import { CategoryBadge } from "./CategoryBadge";
@@ -83,7 +84,7 @@ export function PostCard({
           </h3>
           {post.description && (
             <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
-              {post.description}
+              {stripMarkdown(post.description)}
             </p>
           )}
           {post.type === "OFFER" &&

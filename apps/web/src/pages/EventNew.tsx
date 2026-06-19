@@ -21,6 +21,7 @@ import { getSecretKey } from "@/db/secrets";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { MarkdownHint } from "@/components/MarkdownHint";
 import { EventTemplatePicker } from "@/components/EventTemplatePicker";
 import { getEventTemplate } from "@/content/eventTemplates";
 
@@ -354,6 +355,7 @@ export default function EventNewPage() {
             placeholder={t("events.new.descriptionPlaceholder")}
             maxLength={2000}
           />
+          <MarkdownHint />
         </label>
 
         <label className="flex flex-col gap-1">

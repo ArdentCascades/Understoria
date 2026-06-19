@@ -31,8 +31,8 @@ import {
   unclaimPost,
 } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
-import { linkify } from "@/lib/linkify";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { Markdown } from "@/components/Markdown";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -228,9 +228,10 @@ export default function PostDetailPage() {
         </div>
         <h1 className="text-2xl font-bold leading-tight">{post.title}</h1>
         {post.description && (
-          <p className="mt-2 whitespace-pre-wrap [overflow-wrap:anywhere] text-sm text-moss-700 dark:text-moss-200">
-            {linkify(post.description)}
-          </p>
+          <Markdown
+            text={post.description}
+            className="mt-2 text-sm text-moss-700 dark:text-moss-200"
+          />
         )}
         {post.type === "OFFER" &&
           poster &&
