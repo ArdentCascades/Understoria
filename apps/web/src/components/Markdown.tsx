@@ -16,6 +16,8 @@ import {
   parseMarkdown,
   type MdBlock,
   type MdInline,
+  type MdListItem,
+  type MdTableAlign,
 } from "@/lib/markdown";
 
 // Below this character count a collapsible description renders plainly — no
@@ -31,6 +33,11 @@ export const COLLAPSE_THRESHOLD = 280;
 // XSS-proof by construction. Link hrefs were already allow-listed to
 // http(s)/mailto by the parser's sanitizeUrl; we additionally pin
 // `rel="noopener noreferrer nofollow"` and `target="_blank"` on every anchor.
+//
+// Notably absent: there is NO `<img>` branch anywhere. Markdown image syntax
+// was already degraded to a safe link (or text) by the parser, so no remote
+// image fetch can ever be triggered by federated content. Code blocks render
+// their captured text verbatim and are never re-parsed as markup.
 
 /** Render one inline node to a React node. `key` is the array index. */
 function renderInline(node: MdInline, key: number): ReactNode {
@@ -47,6 +54,8 @@ function renderInline(node: MdInline, key: number): ReactNode {
       );
     case "em":
       return <em key={key}>{node.children.map(renderInline)}</em>;
+    case "del":
+      return <del key={key}>{node.children.map(renderInline)}</del>;
     case "code":
       // Inline-code styling mirrors the app's existing <code> treatment
       // (rounded, subtle bg, slightly smaller, font-mono, dark variant).
@@ -76,16 +85,81 @@ function renderInline(node: MdInline, key: number): ReactNode {
   }
 }
 
-/** Render one block node to a React element. */
-function renderBlock(block: MdBlock, key: number): ReactNode {
-  if (block.type === "paragraph") {
-    return <p key={key}>{block.children.map(renderInline)}</p>;
+// Heading size classes by level. Levels 1–3 are progressively calmer; 4–6 are
+// muted so a deep heading never shouts. All are literal strings so Tailwind's
+// content scanner emits them. We render with role="heading"+aria-level rather
+// than raw <h1>..<h6> so federated content does not pollute the page's heading
+// outline, and so sizes stay modest regardless of document position.
+const HEADING_CLASS: Record<number, string> = {
+  1: "mt-2 text-lg font-semibold",
+  2: "mt-2 text-base font-semibold",
+  3: "mt-2 text-sm font-semibold",
+  4: "mt-2 text-sm font-semibold text-moss-600 dark:text-moss-300",
+  5: "mt-2 text-sm font-semibold text-moss-600 dark:text-moss-300",
+  6: "mt-2 text-sm font-semibold text-moss-600 dark:text-moss-300",
+};
+
+// Per-column text alignment class for a table cell. `null` → default (left).
+const ALIGN_CLASS: Record<"left" | "center" | "right", string> = {
+  left: "text-left",
+  center: "text-center",
+  right: "text-right",
+};
+
+function alignClass(a: MdTableAlign): string {
+  return a ? ALIGN_CLASS[a] : "text-left";
+}
+
+/** Render one list (recursively, so nested lists nest). A list whose items
+ *  are all task items renders without bullets and with disabled checkboxes. */
+function renderList(
+  block: Extract<MdBlock, { type: "list" }>,
+  key: number,
+): ReactNode {
+  // A "task list" is one where at least one item carries a checkbox; we render
+  // the whole list as a checklist (no marker) so rows line up.
+  const isTaskList = block.items.some((item) => item.checked !== null);
+
+  const renderItem = (item: MdListItem, idx: number): ReactNode => {
+    const nested = item.children.map(renderBlock);
+    if (isTaskList) {
+      // Read-only, disabled checkbox + content as a flex row. The checkbox is
+      // disabled+readOnly so federated content can never be toggled; it is
+      // purely a visual state indicator.
+      return (
+        <li key={idx} className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            checked={item.checked === true}
+            disabled
+            readOnly
+            aria-hidden="true"
+            className="mt-1"
+          />
+          <span className="flex-1">
+            {item.content.map(renderInline)}
+            {nested}
+          </span>
+        </li>
+      );
+    }
+    return (
+      <li key={idx}>
+        {item.content.map(renderInline)}
+        {nested}
+      </li>
+    );
+  };
+
+  const items = block.items.map(renderItem);
+
+  if (isTaskList) {
+    return (
+      <ul key={key} className="list-none space-y-1 pl-0">
+        {items}
+      </ul>
+    );
   }
-  // List: ordered → <ol>, otherwise <ul>. Literal class strings so Tailwind's
-  // content scanner generates the rules.
-  const items = block.items.map((item, idx) => (
-    <li key={idx}>{item.map(renderInline)}</li>
-  ));
   return block.ordered ? (
     <ol key={key} className="list-decimal space-y-1 pl-5">
       {items}
@@ -95,6 +169,106 @@ function renderBlock(block: MdBlock, key: number): ReactNode {
       {items}
     </ul>
   );
+}
+
+/** Render one block node to a React element. */
+function renderBlock(block: MdBlock, key: number): ReactNode {
+  switch (block.type) {
+    case "paragraph":
+      return <p key={key}>{block.children.map(renderInline)}</p>;
+
+    case "heading":
+      // role="heading" + aria-level keep the semantics for assistive tech
+      // without emitting a real <h1>..<h6> (see HEADING_CLASS note).
+      return (
+        <div
+          key={key}
+          role="heading"
+          aria-level={block.level}
+          className={HEADING_CLASS[block.level] ?? HEADING_CLASS[6]}
+        >
+          {block.children.map(renderInline)}
+        </div>
+      );
+
+    case "blockquote":
+      // Calm, not italic: a left rule + muted text wrapping the recursively
+      // rendered child blocks (so a quote can hold paragraphs and lists).
+      return (
+        <blockquote
+          key={key}
+          className="border-l-2 border-moss-300 pl-3 text-moss-600 dark:border-moss-600 dark:text-moss-300"
+        >
+          {block.children.map(renderBlock)}
+        </blockquote>
+      );
+
+    case "codeBlock":
+      // overflow-x-auto so long lines scroll instead of breaking the layout.
+      // The optional lang shows as a tiny muted label. `value` is plain text
+      // from the parser — never re-parsed, never executed.
+      return (
+        <pre
+          key={key}
+          className="overflow-x-auto rounded bg-moss-100 p-2 text-xs dark:bg-moss-900"
+        >
+          {block.lang ? (
+            <span className="mb-1 block text-[0.7rem] text-moss-500 dark:text-moss-400">
+              {block.lang}
+            </span>
+          ) : null}
+          <code className="font-mono">{block.value}</code>
+        </pre>
+      );
+
+    case "hr":
+      return (
+        <hr key={key} className="my-3 border-moss-200 dark:border-moss-700" />
+      );
+
+    case "list":
+      return renderList(block, key);
+
+    case "table":
+      // Horizontally scrollable wrapper so a wide table never pushes the card
+      // open; bordered cells with per-column alignment from `align`.
+      return (
+        <div key={key} className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                {block.header.map((cell, c) => (
+                  <th
+                    key={c}
+                    className={`border border-moss-200 px-2 py-1 font-semibold text-left dark:border-moss-700 ${alignClass(
+                      block.align[c] ?? null,
+                    )}`}
+                  >
+                    {cell.map(renderInline)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, r) => (
+                <tr key={r}>
+                  {row.map((cell, c) => (
+                    <td
+                      key={c}
+                      className={`border border-moss-200 px-2 py-1 dark:border-moss-700 ${alignClass(
+                        block.align[c] ?? null,
+                      )}`}
+                    >
+                      {cell.map(renderInline)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+  }
 }
 
 /**
