@@ -77,12 +77,14 @@ import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure";
 import { startOfTodayMs } from "@/lib/calendar";
+import { shareUrl } from "@/lib/share";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
 import { Markdown } from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
 import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
 import { useFlipAnimation } from "@/lib/a11y/useFlipAnimation";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
@@ -147,6 +149,11 @@ export default function ProjectDetailPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
+  // Lifted out of TaskList so the header overflow menu's "Reorder
+  // tasks" item can drive the keyboard-friendly dialog. The inline
+  // drag-and-drop and Move up/down buttons stay in TaskList; only the
+  // dialog + its launcher moved up here.
+  const [reorderDialogOpen, setReorderDialogOpen] = useState(false);
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedQuery(query), 250);
@@ -353,6 +360,86 @@ export default function ProjectDetailPage() {
     }
   }
 
+  // Copy-link handler. Shares the canonical project URL via the share
+  // helper (native sheet → clipboard fallback). A cancelled share stays
+  // quiet; a copy/share toasts the confirmation; a hard failure surfaces
+  // the existing manual-copy guidance as an error. Mirrors
+  // TaskDetailBody's handleCopyLink. Declared as a `const` arrow (not a
+  // hoisted `function`) so it shares this block's non-null narrowing of
+  // `project` — the early `!project` guard above already returned.
+  const handleCopyProjectLink = async () => {
+    const result = await shareUrl({
+      url: `${window.location.origin}/project/${project.id}`,
+      title: project.title,
+    });
+    if (result === "copied" || result === "shared") {
+      showToast(t("common.linkCopied"));
+    } else if (result === "failed") {
+      showToast(t("common.copyFailed"), { tone: "error" });
+    }
+    // "cancelled" → stay silent.
+  };
+
+  // Header overflow-menu actions. Built conditionally so a viewer only
+  // ever sees the actions they can take. Copy link is always available;
+  // the simple one-click lifecycle verbs (Reorder / Mark complete /
+  // Resume / Archive / Unarchive) reuse the EXACT gates their former
+  // inline buttons used — Mark complete / Resume are organizer + status;
+  // Archive / Unarchive require the PRIMARY organizer (not co-orgs). The
+  // form-based actions (Pause+note, Clone, co-organizer management) stay
+  // in their own cards.
+  const projectMenuItems: OverflowMenuItem[] = [];
+  projectMenuItems.push({
+    key: "copy-link",
+    label: t("common.copyLink"),
+    onSelect: () => {
+      void handleCopyProjectLink();
+    },
+  });
+  if (isOrg && tasks.length >= 2 && currentMember) {
+    projectMenuItems.push({
+      key: "reorder",
+      label: t("projects.task.reorderButton"),
+      onSelect: () => setReorderDialogOpen(true),
+    });
+  }
+  if (isOrg && project.status === "active") {
+    projectMenuItems.push({
+      key: "complete",
+      label: t("projects.detail.markComplete"),
+      onSelect: () => {
+        void run(() => completeProject(project.id, project.organizerKey));
+      },
+    });
+  }
+  if (isOrg && project.status === "paused") {
+    projectMenuItems.push({
+      key: "resume",
+      label: t("projects.detail.resume"),
+      onSelect: () => {
+        void run(() => resumeProject(project.id, project.organizerKey));
+      },
+    });
+  }
+  if (isPrimaryOrganizer && project.status === "completed") {
+    projectMenuItems.push({
+      key: "archive",
+      label: t("projects.archive.button"),
+      onSelect: () => {
+        void run(() => archiveProject(project.id, project.organizerKey));
+      },
+    });
+  }
+  if (isPrimaryOrganizer && project.status === "archived") {
+    projectMenuItems.push({
+      key: "unarchive",
+      label: t("projects.archive.unarchive"),
+      onSelect: () => {
+        void run(() => unarchiveProject(project.id, project.organizerKey));
+      },
+    });
+  }
+
   return (
     <div className="px-4 pb-8 pt-4">
       <button
@@ -387,16 +474,28 @@ export default function ProjectDetailPage() {
           className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
         >
           <div className="card mb-4">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-                {t(`projects.status${capitalize(project.status)}` as `projects.statusActive`)}
-              </span>
-              <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-                {project.category.replace(/_/g, " ")}
-              </span>
-              <ProjectMomentumChip
-                state={momentum.state}
-                hoursLast7Days={momentum.hoursLast7Days}
+            {/* Status/category chips on the left; the project overflow
+                (kebab) menu pinned top-right so it never disturbs the
+                chips' wrapping. The menu absorbs the simple one-click
+                organizer verbs (Mark complete / Resume / Archive /
+                Unarchive / Reorder tasks) plus Copy link for any
+                viewer. */}
+            <div className="mb-2 flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+                  {t(`projects.status${capitalize(project.status)}` as `projects.statusActive`)}
+                </span>
+                <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+                  {project.category.replace(/_/g, " ")}
+                </span>
+                <ProjectMomentumChip
+                  state={momentum.state}
+                  hoursLast7Days={momentum.hoursLast7Days}
+                />
+              </div>
+              <OverflowMenu
+                label={t("projects.detail.menuLabel")}
+                items={projectMenuItems}
               />
             </div>
             <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
@@ -665,6 +764,22 @@ export default function ProjectDetailPage() {
               </>
             )}
           </section>
+
+          {/* Reorder dialog rendered once at the page level (its launcher
+              is the header overflow menu's "Reorder tasks" item). Lifted
+              out of TaskList so the single dialog serves both mutually
+              exclusive TaskList render sites. A clean close — no
+              focus-return-to-trigger — since the trigger is now a menu
+              item the OverflowMenu has already torn down. */}
+          {currentMember && (
+            <ReorderTasksDialog
+              open={reorderDialogOpen}
+              tasks={tasks}
+              projectId={project.id}
+              organizerKey={currentMember.publicKey}
+              onClose={() => setReorderDialogOpen(false)}
+            />
+          )}
 
           {isOrg &&
             project.status !== "completed" &&
@@ -1163,7 +1278,11 @@ function OrganizerControls({
   // additional actions to offer until the project is active, so we
   // skip rendering it entirely rather than leaving an empty card with
   // its own margin.
-  if (project.status === "planning") return null;
+  // Archived projects' only former action here — Unarchive — moved to
+  // the header overflow menu, and Clone isn't offered for archived (the
+  // gate below). With nothing left to render, skip the card entirely.
+  if (project.status === "planning" || project.status === "archived")
+    return null;
 
   return (
     <div className="card mb-4 flex flex-col gap-3">
@@ -1176,17 +1295,6 @@ function OrganizerControls({
             onClick={() => setShowPauseForm((v) => !v)}
           >
             {t("projects.detail.pause")}
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            disabled={pending}
-            aria-busy={pending}
-            onClick={() =>
-              dispatch(() => completeProject(project.id, project.organizerKey))
-            }
-          >
-            {pending ? t("common.working") : t("projects.detail.markComplete")}
           </button>
         </div>
       )}
@@ -1220,19 +1328,6 @@ function OrganizerControls({
             {pending ? t("common.working") : t("projects.detail.pause")}
           </button>
         </form>
-      )}
-      {project.status === "paused" && (
-        <button
-          type="button"
-          className="btn-primary"
-          disabled={pending}
-          aria-busy={pending}
-          onClick={() =>
-            dispatch(() => resumeProject(project.id, project.organizerKey))
-          }
-        >
-          {pending ? t("common.working") : t("projects.detail.resume")}
-        </button>
       )}
       {(project.status === "active" || project.status === "paused" || project.status === "completed") && (
         <>
@@ -1372,26 +1467,6 @@ function OrganizerControls({
           </button>
         </form>
       )}
-      {project.status === "completed" && currentMember?.publicKey === project.organizerKey && (
-        <button
-          type="button"
-          className="btn-secondary"
-          disabled={pending}
-          onClick={() => dispatch(() => archiveProject(project.id, project.organizerKey))}
-        >
-          {pending ? t("common.working") : t("projects.archive.button")}
-        </button>
-      )}
-      {project.status === "archived" && currentMember?.publicKey === project.organizerKey && (
-        <button
-          type="button"
-          className="btn-secondary"
-          disabled={pending}
-          onClick={() => dispatch(() => unarchiveProject(project.id, project.organizerKey))}
-        >
-          {pending ? t("common.working") : t("projects.archive.unarchive")}
-        </button>
-      )}
     </div>
   );
 }
@@ -1469,8 +1544,6 @@ function TaskList({
   const { showToast } = useToast();
   const { message, announce } = useLiveRegion();
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
-  const [reorderDialogOpen, setReorderDialogOpen] = useState(false);
-  const reorderButtonRef = useRef<HTMLButtonElement>(null);
 
   // FLIP animation for inline reorders. Skipped while @dnd-kit is
   // mid-drag on a row (it already applies its own transform) and
@@ -1653,8 +1726,6 @@ function TaskList({
     ? tasks.find((t) => t.id === activeDragId)
     : null;
 
-  const canOpenReorderDialog = isOrg && tasks.length >= 2 && currentKey;
-
   return (
     <DndContext
       sensors={sensors}
@@ -1696,20 +1767,6 @@ function TaskList({
         },
       }}
     >
-      {canOpenReorderDialog && (
-        <div className="mb-2 flex justify-end">
-          <button
-            ref={reorderButtonRef}
-            type="button"
-            className="btn-ghost text-sm"
-            aria-haspopup="dialog"
-            aria-expanded={reorderDialogOpen}
-            onClick={() => setReorderDialogOpen(true)}
-          >
-            {t("projects.task.reorderButton")}
-          </button>
-        </div>
-      )}
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
         <ul className="flex flex-col gap-2">
           {visibleTasks.map((task, idx) => (
@@ -1746,20 +1803,6 @@ function TaskList({
       >
         {message}
       </div>
-      {currentKey && (
-        <ReorderTasksDialog
-          open={reorderDialogOpen}
-          tasks={tasks}
-          projectId={project.id}
-          organizerKey={currentKey}
-          onClose={() => {
-            setReorderDialogOpen(false);
-            // Return focus to the trigger on close so a keyboard user
-            // resumes where they left off.
-            window.setTimeout(() => reorderButtonRef.current?.focus(), 0);
-          }}
-        />
-      )}
     </DndContext>
   );
 }

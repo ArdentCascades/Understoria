@@ -350,62 +350,89 @@ describe("ProjectDetail — reorder UI (Move buttons)", () => {
 });
 
 describe("ProjectDetail — Reorder tasks dialog", () => {
-  function reorderButton(): HTMLButtonElement | null {
+  // The reorder DIALOG is now launched from the project header overflow
+  // (kebab) menu rather than a dedicated trigger button. These helpers
+  // open that menu and reach the "Reorder tasks" menuitem.
+  function projectMenuTrigger(): HTMLButtonElement | null {
     return container.querySelector(
-      'button[aria-haspopup="dialog"]',
+      'button[aria-haspopup="menu"]',
     ) as HTMLButtonElement | null;
   }
 
-  it("Reorder button appears for organizer with 2+ tasks", () => {
+  function openProjectMenu() {
+    const trigger = projectMenuTrigger();
+    if (!trigger) throw new Error("project header menu trigger not found");
+    clickButton(trigger);
+  }
+
+  function menuItemByText(label: string): HTMLButtonElement | undefined {
+    return Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]'),
+    ).find((b) => (b.textContent ?? "").trim() === label);
+  }
+
+  // Open the kebab and click "Reorder tasks" to launch the dialog. The
+  // OverflowMenu closes itself before firing onSelect, so the menu is
+  // gone by the time the dialog mounts — exactly the production path.
+  function launchReorderDialog() {
+    openProjectMenu();
+    const item = menuItemByText("Reorder tasks");
+    if (!item) throw new Error('"Reorder tasks" menuitem not found');
+    clickButton(item);
+  }
+
+  it("Reorder item appears in the header menu for organizer with 2+ tasks", () => {
     mockState.projectTasks = [
       task("t1", { title: "First", orderIndex: 1000 }),
       task("t2", { title: "Second", orderIndex: 2000 }),
     ];
     render();
-    expect(reorderButton()).not.toBeNull();
+    openProjectMenu();
+    expect(menuItemByText("Reorder tasks")).toBeDefined();
   });
 
-  it("Reorder button is absent with fewer than 2 tasks", () => {
+  it("Reorder item is absent with fewer than 2 tasks", () => {
     mockState.projectTasks = [
       task("t1", { title: "Only", orderIndex: 1000 }),
     ];
     render();
-    expect(reorderButton()).toBeNull();
+    // The kebab still exists (Copy link is always offered), but it
+    // carries no "Reorder tasks" item.
+    openProjectMenu();
+    expect(menuItemByText("Reorder tasks")).toBeUndefined();
   });
 
-  it("Reorder button is absent for non-organizers", () => {
+  it("Reorder item is absent for non-organizers", () => {
     mockState.currentMember = member(memberAKey, "A Member");
     mockState.projectTasks = [
       task("t1", { title: "First", orderIndex: 1000 }),
       task("t2", { title: "Second", orderIndex: 2000 }),
     ];
     render();
-    expect(reorderButton()).toBeNull();
+    openProjectMenu();
+    expect(menuItemByText("Reorder tasks")).toBeUndefined();
   });
 
-  it("clicking the Reorder button opens the dialog", async () => {
+  it("selecting the Reorder item opens the dialog", async () => {
     mockState.projectTasks = [
       task("t1", { title: "First", orderIndex: 1000 }),
       task("t2", { title: "Second", orderIndex: 2000 }),
     ];
     render();
-    const btn = reorderButton();
-    expect(btn).not.toBeNull();
-    clickButton(btn!);
+    launchReorderDialog();
     await flush();
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.getAttribute("aria-modal")).toBe("true");
   });
 
-  it("Escape closes the dialog and returns focus to the trigger", async () => {
+  it("Escape closes the dialog", async () => {
     mockState.projectTasks = [
       task("t1", { title: "First", orderIndex: 1000 }),
       task("t2", { title: "Second", orderIndex: 2000 }),
     ];
     render();
-    const btn = reorderButton();
-    clickButton(btn!);
+    launchReorderDialog();
     await flush();
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     act(() => {
@@ -414,12 +441,7 @@ describe("ProjectDetail — Reorder tasks dialog", () => {
       );
     });
     await flush();
-    // setTimeout schedules focus restoration; flush microtasks then
-    // run the pending timer.
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    await flush();
     expect(document.querySelector('[role="dialog"]')).toBeNull();
-    expect(document.activeElement).toBe(btn);
   });
 
   it("backdrop click closes the dialog", async () => {
@@ -428,7 +450,7 @@ describe("ProjectDetail — Reorder tasks dialog", () => {
       task("t2", { title: "Second", orderIndex: 2000 }),
     ];
     render();
-    clickButton(reorderButton()!);
+    launchReorderDialog();
     await flush();
     const dialog = document.querySelector(
       '[role="dialog"]',
@@ -451,7 +473,7 @@ describe("ProjectDetail — Reorder tasks dialog", () => {
       task("t2", { title: "Second", orderIndex: 2000 }),
     ];
     render();
-    clickButton(reorderButton()!);
+    launchReorderDialog();
     await flush();
     const done = Array.from(
       document.querySelectorAll('[role="dialog"] button'),
@@ -462,6 +484,87 @@ describe("ProjectDetail — Reorder tasks dialog", () => {
     clickButton(done!);
     await flush();
     expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+});
+
+describe("ProjectDetail — header overflow menu", () => {
+  function projectMenuTrigger(): HTMLButtonElement | null {
+    return container.querySelector(
+      'button[aria-haspopup="menu"]',
+    ) as HTMLButtonElement | null;
+  }
+
+  function menuItemTexts(): string[] {
+    return Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]'),
+    ).map((b) => (b.textContent ?? "").trim());
+  }
+
+  function openMenu() {
+    const trigger = projectMenuTrigger();
+    if (!trigger) throw new Error("project header menu trigger not found");
+    clickButton(trigger);
+  }
+
+  it("renders a header kebab containing Copy link for any viewer", () => {
+    // A non-organizer with no tasks still gets the kebab + Copy link.
+    mockState.currentMember = member(memberAKey, "A Member");
+    mockState.projectTasks = [];
+    render();
+    expect(projectMenuTrigger()).not.toBeNull();
+    openMenu();
+    expect(menuItemTexts()).toContain("Copy link");
+  });
+
+  it("offers an organizer on an active project Mark project complete", () => {
+    mockState.projectTasks = [];
+    render();
+    openMenu();
+    const texts = menuItemTexts();
+    expect(texts).toContain("Copy link");
+    expect(texts).toContain("Mark project complete");
+  });
+
+  it("does not offer Mark project complete to a non-organizer", () => {
+    mockState.currentMember = member(memberAKey, "A Member");
+    mockState.projectTasks = [];
+    render();
+    openMenu();
+    expect(menuItemTexts()).not.toContain("Mark project complete");
+  });
+
+  it("selecting Copy link writes the project URL and toasts", async () => {
+    const writeText = vi.fn(async (_text: string) => undefined);
+    // Force the clipboard fallback path: remove navigator.share so the
+    // share helper goes straight to clipboard.writeText.
+    const originalShare = (
+      navigator as { share?: unknown }
+    ).share;
+    delete (navigator as { share?: unknown }).share;
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    try {
+      mockState.projectTasks = [];
+      render();
+      openMenu();
+      const copy = Array.from(
+        container.querySelectorAll<HTMLButtonElement>(
+          'button[role="menuitem"]',
+        ),
+      ).find((b) => (b.textContent ?? "").trim() === "Copy link");
+      expect(copy).toBeDefined();
+      clickButton(copy!);
+      await flush();
+      expect(writeText).toHaveBeenCalledTimes(1);
+      expect(writeText.mock.calls[0][0]).toContain("/project/proj-1");
+      expect(showToastMock).toHaveBeenCalled();
+    } finally {
+      if (originalShare !== undefined) {
+        (navigator as { share?: unknown }).share = originalShare;
+      }
+    }
   });
 });
 
