@@ -28,6 +28,8 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 import { TaskComments } from "@/components/TaskComments";
 import { Markdown } from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
+import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
+import { shareUrl } from "@/lib/share";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
 
@@ -123,6 +125,83 @@ export function TaskDetailBody({
   const isStructurallyBlocked = !canClaimTask(task, allTasks);
   const showClaimerNote =
     isClaimant && isStructurallyBlocked && task.status === "claimed";
+
+  // Add-fresh-copy handler. Staged copy keeps every field except the
+  // dependencies (the original's upstream is done, so copying their ids
+  // would gate on nothing while risking a dangling reference). Lifted out
+  // of the inline button so the header menu can drive it; the success
+  // toast travels with it.
+  async function handleAddFreshCopy() {
+    const created = await dispatch(() =>
+      addProjectTask(task.projectId, currentKey!, {
+        title: task.title,
+        description: task.description,
+        category: task.category,
+        estimatedHours: task.estimatedHours,
+        urgency: task.urgency,
+        requiredSkills: [...task.requiredSkills],
+        dependencies: [],
+      }),
+    );
+    if (created) {
+      showToast(
+        t("projects.task.addFreshCopy.toast", {
+          title: task.title,
+        }),
+      );
+    }
+  }
+
+  // Copy-link handler. Shares the canonical task URL via the share
+  // helper (native sheet → clipboard fallback). A cancelled share stays
+  // quiet; a copy/share toasts the confirmation; a hard failure surfaces
+  // the existing manual-copy guidance as an error.
+  async function handleCopyLink() {
+    const result = await shareUrl({
+      url: `${window.location.origin}/project/${task.projectId}/task/${task.id}`,
+      title: task.title,
+    });
+    if (result === "copied" || result === "shared") {
+      showToast(t("common.linkCopied"));
+    } else if (result === "failed") {
+      showToast(t("common.copyFailed"), { tone: "error" });
+    }
+    // "cancelled" → stay silent.
+  }
+
+  // Header overflow-menu actions. Built conditionally so a viewer only
+  // ever sees the actions they can take. Edit and Add-fresh-copy reuse
+  // the exact gates their inline buttons used; Copy link is always
+  // available.
+  const menuItems: OverflowMenuItem[] = [];
+  if (task.status === "open" && isOrganizer) {
+    menuItems.push({
+      key: "edit",
+      label: t("projects.task.edit.button"),
+      onSelect: () => setEditing(true),
+    });
+  }
+  if (
+    task.status === "completed" &&
+    isOrganizer &&
+    projectStatus !== "completed" &&
+    projectStatus !== "archived"
+  ) {
+    menuItems.push({
+      key: "fresh-copy",
+      label: t("projects.task.addFreshCopy.button"),
+      onSelect: () => {
+        void handleAddFreshCopy();
+      },
+    });
+  }
+  menuItems.push({
+    key: "copy-link",
+    label: t("common.copyLink"),
+    onSelect: () => {
+      void handleCopyLink();
+    },
+  });
 
   if (editing) {
     return (
@@ -267,6 +346,16 @@ export function TaskDetailBody({
 
   return (
     <div className="card flex flex-col gap-2">
+      {/* Header control directly under the page's status/hours chips:
+          Copy link (always), plus Edit / Add-fresh-copy when the gate
+          allows. A right-aligned kebab keeps these out of the inline
+          action row without hiding the primary lifecycle buttons. */}
+      <div className="mb-2 flex justify-end">
+        <OverflowMenu
+          label={t("projects.task.menuLabel")}
+          items={menuItems}
+        />
+      </div>
       {showClaimerNote && (
         <p className="text-xs italic text-moss-600 dark:text-moss-300">
           {t("projects.task.waitingOnClaimerNote")}
@@ -338,15 +427,6 @@ export function TaskDetailBody({
           <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("projects.task.claimableAfterLaunch")}
           </p>
-        )}
-        {task.status === "open" && isOrganizer && (
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setEditing(true)}
-          >
-            {t("projects.task.edit.button")}
-          </button>
         )}
         {task.status === "claimed" && isAssignee && !markingComplete && (
           <>
@@ -483,55 +563,6 @@ export function TaskDetailBody({
             {t("projects.task.awaitingConfirmation")}
           </span>
         )}
-        {/* Recurring work: a completed task is otherwise a dead end —
-            an organizer who runs the same thing next cycle had to
-            retype it. One tap stages a fresh, open copy at the bottom
-            of the list. Framed as "run it again", never as expiry
-            (solidarity-not-shame). Gated to match addProjectTask's own
-            guard so it never offers a guaranteed error. Dependencies
-            are dropped — the original's upstream tasks are done, so
-            copying their ids would gate on nothing while risking a
-            dangling reference (the cloneProject precedent). */}
-        {task.status === "completed" &&
-          isOrganizer &&
-          projectStatus !== "completed" &&
-          projectStatus !== "archived" && (
-            <>
-              <button
-                type="button"
-                className="btn-secondary"
-                disabled={pending}
-                aria-busy={pending}
-                onClick={async () => {
-                  const created = await dispatch(() =>
-                    addProjectTask(task.projectId, currentKey!, {
-                      title: task.title,
-                      description: task.description,
-                      category: task.category,
-                      estimatedHours: task.estimatedHours,
-                      urgency: task.urgency,
-                      requiredSkills: [...task.requiredSkills],
-                      dependencies: [],
-                    }),
-                  );
-                  if (created) {
-                    showToast(
-                      t("projects.task.addFreshCopy.toast", {
-                        title: task.title,
-                      }),
-                    );
-                  }
-                }}
-              >
-                {pending
-                  ? t("common.working")
-                  : t("projects.task.addFreshCopy.button")}
-              </button>
-              <p className="basis-full text-xs text-moss-600 dark:text-moss-300">
-                {t("projects.task.addFreshCopy.hint")}
-              </p>
-            </>
-          )}
       </div>
       {/* Claimer-side narrative (PR #226's voice — "credit moves when
           ..."). Visible only to the completer of an awaiting task;

@@ -194,6 +194,8 @@
     "copy": "Copiar",
     "copied": "Copiado. Compártelo por Signal, en persona o en papel.",
     "copyFailed": "No se pudo acceder al portapapeles — selecciona el enlace de arriba y cópialo manualmente.",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "Enlace copiado al portapapeles.",
     "memberFallback": "alguien de la comunidad",
     "anyMember": "Alguien",
     "gotIt": "Entendido",
@@ -734,6 +736,7 @@
       "confirm": "Confirmar completada",
       "awaitingConfirmation": "Esperando que quien organiza confirme",
       "releaseAfterComplete": "Dar un paso atrás de esta tarea",
+      "menuLabel": "Acciones de la tarea",
       "addFreshCopy": {
         "button": "Agregar una copia nueva",
         "hint": "Agrega una copia abierta de esta tarea al final de la lista — útil para el trabajo que se repite.",
