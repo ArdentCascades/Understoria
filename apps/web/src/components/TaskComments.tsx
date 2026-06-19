@@ -31,6 +31,7 @@ import {
 import { useApp } from "@/state/AppContext";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatRelativeTime } from "@/lib/format";
+import { linkify } from "@/lib/linkify";
 
 // Density cap: once a thread has more than this many comments,
 // the older ones collapse behind a "Show older (N)" toggle so a
@@ -224,8 +225,8 @@ export function TaskComments({
                     {t("projects.task.comments.tombstone")}
                   </p>
                 ) : (
-                  <p className="whitespace-pre-wrap text-sm text-bark-800 dark:text-moss-100">
-                    {c.body}
+                  <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-sm text-bark-800 dark:text-moss-100">
+                    {linkify(c.body)}
                   </p>
                 )}
                 <div className="mt-1 flex flex-wrap gap-3">

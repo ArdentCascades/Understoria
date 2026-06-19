@@ -25,6 +25,7 @@ import {
 import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
+import { linkify } from "@/lib/linkify";
 import { shortKey } from "@/lib/format";
 import { eventCategoryMeta } from "@/lib/categories";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -261,8 +262,8 @@ export default function EventDetailPage() {
 
       {event.description && (
         <section className="card mb-4">
-          <p className="whitespace-pre-wrap text-sm">
-            {event.description}
+          <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-sm">
+            {linkify(event.description)}
           </p>
         </section>
       )}
