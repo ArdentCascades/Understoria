@@ -248,7 +248,7 @@ export function AttentionSection() {
             return (
               <li key={`task_${item.taskId}`}>
                 <Link
-                  to={`/project/${item.projectId}#task-${item.taskId}`}
+                  to={`/project/${item.projectId}/task/${item.taskId}`}
                   className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
                 >
                   <span className="flex-1">
@@ -380,7 +380,7 @@ export function AttentionSection() {
               <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
                 <KindEmoji kind={item.kind} />
                 <Link
-                  to={`/project/${item.projectId}#task-${item.taskId}`}
+                  to={`/project/${item.projectId}/task/${item.taskId}`}
                   className="underline-offset-2 hover:underline focus-visible:underline"
                 >
                   {t("attention.taskCheckIn.line", {

@@ -714,6 +714,8 @@
     "task": {
       "claim": "Claim this task",
       "openDetail": "Open task ›",
+      "openDetailWithCount_one": "Open task · {{count}} comment ›",
+      "openDetailWithCount_other": "Open task · {{count}} comments ›",
       "detail": {
         "notFound": "This task couldn't be found — it may have been removed.",
         "backToProject": "Back to {{title}}"
