@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSortable } from "@dnd-kit/sortable";
 import { claimProjectTask } from "@/db/projects";
+import { stripMarkdown } from "@/lib/markdown";
 import { formatHours } from "@/lib/format";
 import { creditHoursForTask } from "@/lib/timebank";
 import { HighlightedText } from "@/components/HighlightedText";
@@ -305,7 +306,7 @@ export function TaskCard({
           a literal class so Tailwind generates it. */}
       {task.description && (
         <p className="line-clamp-1 text-sm text-moss-600 dark:text-moss-300">
-          {task.description}
+          {stripMarkdown(task.description)}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">

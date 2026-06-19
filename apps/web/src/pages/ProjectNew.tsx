@@ -20,6 +20,7 @@ import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
+import { MarkdownHint } from "@/components/MarkdownHint";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import {
   getProjectTemplates,
@@ -464,6 +465,7 @@ export default function ProjectNewPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 maxLength={2000}
               />
+              <MarkdownHint />
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">

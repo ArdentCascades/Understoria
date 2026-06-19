@@ -199,7 +199,8 @@
     "gotIt": "Entendido",
     "learnMore": "Leer más",
     "showMore": "Ver más",
-    "showLess": "Ver menos"
+    "showLess": "Ver menos",
+    "markdownHint": "Formato: **negrita**, _cursiva_, - listas y enlaces"
   },
   "why": {
     "trigger": "(por que?)",

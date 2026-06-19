@@ -79,7 +79,8 @@ import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure
 import { startOfTodayMs } from "@/lib/calendar";
 import { ProjectSparkline } from "@/components/ProjectSparkline";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
-import { ExpandableText } from "@/components/ExpandableText";
+import { Markdown } from "@/components/Markdown";
+import { MarkdownHint } from "@/components/MarkdownHint";
 import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
@@ -414,10 +415,10 @@ export default function ProjectDetailPage() {
               </Link>
             </p>
             {project.description && (
-              <ExpandableText
+              <Markdown
+                collapsible
                 text={project.description}
-                className="mt-2 whitespace-pre-wrap text-sm text-moss-700 dark:text-moss-200"
-                clampLines={4}
+                className="mt-2 text-sm text-moss-700 dark:text-moss-200"
               />
             )}
             {currentMember?.publicKey !== project.organizerKey && (
@@ -1888,6 +1889,7 @@ function AddTaskForm({
             onChange={(e) => setDescription(e.target.value)}
             maxLength={1000}
           />
+          <MarkdownHint />
         </label>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm">

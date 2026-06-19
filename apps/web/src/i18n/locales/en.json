@@ -199,7 +199,8 @@
     "gotIt": "Got it",
     "learnMore": "Learn more",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "markdownHint": "Formatting: **bold**, _italic_, - lists, and links"
   },
   "why": {
     "trigger": "(why?)",

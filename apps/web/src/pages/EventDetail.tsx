@@ -25,13 +25,13 @@ import {
 import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
-import { linkify } from "@/lib/linkify";
 import { shortKey } from "@/lib/format";
 import { eventCategoryMeta } from "@/lib/categories";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EventRsvpControl } from "@/components/EventRsvpControl";
 import { EventCancellationCard } from "@/components/EventCancellationCard";
+import { Markdown } from "@/components/Markdown";
 
 // Render an epoch-ms timestamp as "<date> <time>" in the active
 // locale. The native date+time pickers collected local-time values
@@ -262,9 +262,7 @@ export default function EventDetailPage() {
 
       {event.description && (
         <section className="card mb-4">
-          <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-sm">
-            {linkify(event.description)}
-          </p>
+          <Markdown text={event.description} className="text-sm" />
         </section>
       )}
 

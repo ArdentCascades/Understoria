@@ -26,6 +26,8 @@ import { creditHoursForTask } from "@/lib/timebank";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { TaskComments } from "@/components/TaskComments";
+import { Markdown } from "@/components/Markdown";
+import { MarkdownHint } from "@/components/MarkdownHint";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
 
@@ -146,6 +148,7 @@ export function TaskDetailBody({
             onChange={(e) => setEditDescription(e.target.value)}
             maxLength={1000}
           />
+          <MarkdownHint />
         </label>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm">
@@ -270,9 +273,10 @@ export function TaskDetailBody({
         </p>
       )}
       {task.description && (
-        <p className="whitespace-pre-wrap text-sm text-moss-600 dark:text-moss-300">
-          {task.description}
-        </p>
+        <Markdown
+          text={task.description}
+          className="text-sm text-moss-600 dark:text-moss-300"
+        />
       )}
       {task.assignedTo &&
         (task.status === "awaiting_confirmation" ? (
