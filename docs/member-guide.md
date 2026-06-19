@@ -35,6 +35,22 @@ explained the basics in person. The welcome only shows once per
 device — if you want to read it again later, **Profile → Learn →
 Revisit the welcome** will bring it back.
 
+### Two banners you might see at the top of the screen
+
+- **"You're offline."** When the device loses connectivity, a
+  small banner appears at the top so you know federation pulls
+  and pushes are paused. Everything still works locally —
+  posting, claiming, confirming all queue up. The banner also
+  shows a small count of queued changes ("3 changes waiting to
+  sync") so the outbox is never opaque. When you're back online
+  the queue drains and the banner disappears.
+- **"A new version is available."** When the operator deploys a
+  new build, the app surfaces a one-line prompt so you can
+  reload at a moment that's convenient for you instead of
+  silently swapping under your feet. Tap **Reload** to pick up
+  the new build, or dismiss the prompt and reload on your own
+  later.
+
 ## 2. Getting in
 
 Someone in the community sends you an **invite link**. It looks like
@@ -42,10 +58,12 @@ Someone in the community sends you an **invite link**. It looks like
 
 1. Open the link on your phone.
 2. The app shows you the inviter's name and a short key fingerprint
-   (a string like `xPfj…3kQ7`). Ask the person who sent you the link
-   whether that fingerprint matches what they see on their end — in
-   person, over Signal, or over a phone call. A mismatch means
-   something went wrong; don't accept the invite.
+   (a string like `xPfj…3kQ7`). The same screen also tells you when
+   the invite expires (e.g. *"Expires in 6 days"*) so you know
+   whether to redeem now or come back later. Ask the person who sent
+   you the link whether that fingerprint matches what they see on
+   their end — in person, over Signal, or over a phone call. A
+   mismatch means something went wrong; don't accept the invite.
 3. If the fingerprint matches, choose a **display name** (a nickname is
    fine, many people use them) and tap **Accept invite and join**.
 
@@ -122,9 +140,12 @@ It shows three kinds of things:
 You can switch between three views:
 
 - **Agenda** — a simple chronological list, grouped by day. The
-  easiest to read on a phone.
+  easiest to read on a phone. By default it shows today and the
+  days ahead; a small **Show past** toggle lets you scroll back
+  through older items when you actually want them.
 - **Month** — the familiar grid, good for seeing a whole month at a
-  glance.
+  glance. The current day gets a soft canopy highlight so you can
+  find "now" without scanning the row.
 - **Week** — a tighter seven-day view, handy if you're tracking a few
   deadlines in a busy stretch.
 
@@ -184,12 +205,36 @@ After the help has actually happened, both of you confirm it:
 Once both of you have confirmed, the hours move between your balances
 and the exchange is recorded.
 
+Before you tap confirm, the app shows a small dialog that **names the
+debit out loud** — "Confirming credits Alex with 2 hours; the same
+amount comes from your balance" — so the side effect on your balance
+is never surprising. The confirm dialog is the same shape for project
+tasks (§9) as it is for board posts.
+
 If something went wrong — you didn't receive what was promised, or the
 other person didn't show — tap **Something's wrong — flag it**
 instead. That surfaces the exchange on the Disputes page, where the
 whole community can see it and respond — there are no admins. You can
 also request a mediated conversation under the
 [Code of Conduct](../CODE_OF_CONDUCT.md) process.
+
+If an exchange you're in has been marked disputed (by you or by the
+other person), the post detail page shows a small **"This exchange is
+in dispute"** pointer linking to the Disputes surface so you can see
+where the conversation is happening and what the community process
+looks like next. The exchange's state — claimed, awaiting confirm,
+confirmed, disputed — is also narrated in plain language at the top
+of the post so you don't have to infer it from buttons.
+
+### When the other person doesn't respond
+
+If you've marked an exchange complete and the other person hasn't
+confirmed within the community's auto-confirm window (default 7
+days, set per community), the exchange auto-confirms on your
+behalf so credit can flow. The record is audit-tagged so anyone
+verifying it can see it was a system confirm rather than a mutual
+one. The same auto-confirm sweep covers project tasks, not just
+board posts.
 
 ## 9. Projects
 
@@ -218,10 +263,60 @@ for a board post. When the task is done, you mark it complete; the
 organizer confirms; the hours move into your balance just like any
 other exchange.
 
+A task list can be **filtered**, **searched**, and (when there's
+enough) reorganised by the organiser. Above each project's task
+list you'll find:
+
+- A search box that narrows by title / description.
+- Pills for **All / Open / In progress / Done** so you can hide
+  the noise while you scan.
+- A **"Mine"** filter that narrows the list to tasks you're
+  carrying — the same affordance organisers use to find their
+  own claims quickly.
+
 If you're helping on several projects at once, **Tasks you're
 carrying** (linked from your Profile and from the bottom of the
 Projects tab) gathers every claim of yours in one place, grouped
 by project.
+
+### Task dependencies — "Follows:" framing
+
+Some tasks structurally depend on others (you can't paint until
+the wall is patched). When a task you've claimed *follows* an
+upstream task that isn't finished yet, two things happen:
+
+- A small **"Follows: <upstream task title>"** badge appears on
+  the row so you can see what it's waiting on.
+- The app **won't nudge you** while the upstream is still open
+  — the attention rail and the project's public chip both stay
+  quiet. You'll see a small line on your task ("You'll be
+  reminded when it's ready") explaining the calm.
+
+You can still claim a dependent task before the upstream is done
+— claiming a "follows" task is not blocked. The system just
+doesn't pretend the work is ready to start. The framing is
+deliberately *soft block*, not enforcement: the dependency tells
+the system when to *not bother you*, not when to *forbid you*.
+
+### Stepping back from a task you've claimed
+
+Plans change. If you claimed a task and can't get to it, you can
+release it — the row gets a **Release this task** affordance with
+copy that says *"step back, no judgment."* The task returns to
+Open, the organizer sees an activity entry, and the community
+keeps moving. There's no penalty surface, no flag, no public
+record of who stepped back. Solidarity-not-shame applies inside
+the project surface as much as it does on the board.
+
+### Reordering — the organiser's tool, your context
+
+Organisers can drag tasks to change their order, or use the
+**Reorder** modal (handy for accessibility and for big task
+lists). The order isn't a priority queue you're obliged to
+follow; it's the project's reading order so a contributor
+arriving fresh sees the work the way the organiser thinks about
+it. The order you see on the page is what the organiser most
+recently set.
 
 If you finish three confirmed project tasks, the **Crew Member**
 role shows up on your profile. If you organize a project that draws contributors,
@@ -408,8 +503,17 @@ A few things worth knowing:
   messages you've already received. Tap a result to open the
   conversation with the search term pre-filled — inside a thread,
   use the up / down arrows next to the search box to jump between
-  matches. Search is local to your device; it never sees the
-  community node and never sees anyone else's messages.
+  matches. Each search result also shows the **conversation
+  context** — who the thread is with, with the matched substring
+  highlighted — so you can tell at a glance whether it's the
+  conversation you meant. Search is local to your device; it never
+  sees the community node and never sees anyone else's messages.
+- **Block / unblock from the conversation header.** The header of
+  any conversation has a small **⋮** menu — that's where you
+  reach Block or Unblock for the person you're talking with,
+  without having to navigate back to their profile. Blocking
+  here behaves the same as blocking from anywhere else (§14a)
+  and the action is silent: the other member is not told.
 - **Locked sessions.** If you've set a passphrase and the session
   is locked, you can't read or search messages until you unlock —
   the secret key needed to decrypt them is sealed.
@@ -421,7 +525,14 @@ A few things worth knowing:
 
 Tap **Profile** to see:
 
-- **Your balance** and a note about what it means.
+- **Your balance** and a note about what it means. If you have
+  exchanges that are awaiting confirmation (yours or the other
+  person's), the balance breaks them out below the headline
+  number — for example, *"2 hours pending from Alex's task,
+  1 hour pending from the porch repair post"* — so you can see
+  exactly what's in flight and what's already settled. Pending
+  hours from project tasks you've completed but the organiser
+  hasn't confirmed yet are included in the breakdown.
 - **About you** — display name, skills, availability, neighborhood
   area. You can edit any of these any time.
 - **Your community roles** — things like "First Exchange,"

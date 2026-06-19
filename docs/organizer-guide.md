@@ -306,6 +306,63 @@ The full design and the values reasoning live in
 entry covering the wire surface is in `threat-model.md` §7
 ("Federated `Event` records widen the public wire surface").
 
+## 7c. Running a project as the organiser
+
+Projects are where the app does its biggest organising work, so a
+few affordances are aimed specifically at you (and at co-organisers
+once they've accepted).
+
+- **The "Mine" filter applies to you too.** Above the task list,
+  alongside the All / Open / In progress / Done pills, a
+  **Mine** filter narrows the list to tasks you've personally
+  claimed — useful when a project has dozens of tasks and you
+  want to see what's on your own plate without leaving the
+  organiser view.
+- **Reordering: drag, Move up / Move down buttons, or the
+  Reorder modal.** Drag works on a pointer device; Move
+  buttons keep keyboard and screen-reader parity; the Reorder
+  modal lays out the full task list in a focusable, accessible
+  list for projects with many tasks where drag is awkward. The
+  order is the project's reading order — the way you want
+  contributors to encounter the work — not a priority queue
+  that suppresses anyone's claim. See
+  [`task-ordering-and-dependencies.md`](./task-ordering-and-dependencies.md)
+  for the full design.
+- **Setting dependencies (Follows:).** Inside the task editor
+  you can name what each task *follows* (its upstream tasks).
+  This is a *soft* block: a member can still claim a "follows"
+  task before the upstream is done, but the system won't nudge
+  them about it and the public "needs more hands" chip stays
+  suppressed until the upstream lands. Dependencies are a
+  framing tool, not a gate.
+- **The confirm-task dialog names the debit.** When you tap
+  **Confirm** on a completed task, a small dialog spells out
+  the side effect — *"Confirming credits Sasha with 3 hours;
+  the same amount comes from your balance"* — so the cost to
+  you, as the confirmer, is never surprising. This is the same
+  shape as the post-confirmation dialog members already see.
+- **The activity feed is honest about releases.** When a member
+  releases a task they'd claimed (including a task that was in
+  *awaiting confirmation*), the activity entry says so plainly
+  — no synthetic completion, no quiet retraction. The
+  release-of-awaiting-confirmation case in particular shows up
+  as its own entry so the audit trail tracks the real shape of
+  what happened.
+- **`pausedAt` is honest.** When you pause a project the
+  timestamp records *when you paused*, not the project's
+  creation time. Reading the project page later, the paused
+  banner reflects the actual pause moment.
+- **Co-organiser capabilities, at a glance.** A small capability
+  card on the project page enumerates what your co-organisers
+  can do (launch, pause, resume, complete, add / edit tasks,
+  set dependencies, reorder, confirm completions, post
+  announcements, step down). When you invite someone, the
+  acceptance pointer in the invitation card directs them to
+  the same enumeration so the role is consented-to rather than
+  assumed. The full list is in
+  [`co-organizer-invitations.md`](./co-organizer-invitations.md)
+  §4.
+
 ## 8. Bringing in the other workstreams
 
 Things the app doesn't do (yet) that your organizing might need:

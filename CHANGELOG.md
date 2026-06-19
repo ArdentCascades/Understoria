@@ -10,6 +10,140 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Task ordering + dependencies workstream (PRs #206–#216).**
+  The full task-ordering and soft-block-dependency design from
+  `docs/task-ordering-and-dependencies.md` shipped across six PR
+  slots (D loudly skipped because tasks remain local-only — same
+  loud-skip pattern as `docs/blocking.md` §13 + community-events
+  EventRSVP). Predicate doc + threat-model §7 addendum +
+  co-organizer-invitations §4 capabilities enumeration in #206,
+  with the threat-model crossreference echoed in #207 and #208.
+  Shared types (`ProjectTask.orderIndex: number`,
+  `dependencies` doc-comment rewrite) in #207. Dexie v25 +
+  backfill + `reorderProjectTask` action + **removal of the
+  claim-time hard throw at `projects.ts:486-489`** + tests in
+  #209 (the load-bearing test "Claim of a structurally blocked
+  task SUCCEEDS" locks the soft-block reversal in code). UI in
+  #214: `@dnd-kit` drag + always-visible Move up / Move down
+  buttons + "Follows: &lt;upstream task&gt;" badge + the
+  claimant's "You'll be reminded when it's ready" line + i18n.
+  FLIP animation + Reorder modal in #215 (keyboard / screen-
+  reader parity for projects with many tasks where drag is
+  awkward). Public-chip suppression for structurally-blocked
+  tasks (`needs_more_hands` honours `isStructurallyBlocked`) in
+  #216. PR D — server / federation — was deliberately not
+  shipped: tasks remain local-only, no federation surface.
+- **Co-organizer legacy cleanup (PR #218).** Removed the legacy
+  `addCoOrganizer(projectId, callerKey, newCoOrgKey)` path now
+  that the signed-invitation flow from
+  `docs/co-organizer-invitations.md` is fully landed and
+  pilot-validated. Removing the unilateral entry point closes
+  the loophole the threat-model §7 entry called out (a primary
+  organiser could otherwise re-add a co-org without their
+  signed acceptance). `co-organizer-invitations.md` §4 already
+  carries the explicit "the unilateral `addCoOrganizer` legacy
+  path was removed in PR #218" cross-reference.
+- **Calendar + events polish (PRs #204, #205, #217).** Agenda
+  default hides past items behind a small "Show past" toggle
+  (#204) so the view leads with "today and forward" rather than
+  greeting members with a long backlog. The Month view gives the
+  current day a soft canopy highlight (#205) so "now" is
+  findable without scanning the row. Create-event flow validates
+  against past-event creation (#217) — clear inline error rather
+  than the previous silent reject.
+- **UX polish batch (PRs #210, #211, #212, #213).** Removed the
+  redundant Launch button from `OrganizerControls` (#210) — the
+  Planning banner from PR #103 already carries the launch
+  affordance, so the duplicate was clutter. Conversation header
+  block menu + clearer empty-state copy in Messages (#211): the
+  ⋮ menu on a conversation header reaches Block / Unblock
+  without leaving the thread, and a fresh conversation greets
+  the member with "No messages yet — say hi" instead of a blank
+  pane. Messages list reactivity to changes in `blockedKeys`
+  (#213) — blocking a contact from another surface (member
+  profile, Settings → Blocked) removes their thread from the
+  Messages list immediately without a manual refresh. BottomNav
+  GPU layer hint (#212) — `will-change: transform` on the
+  fixed-position nav so iOS Safari doesn't drop frames during
+  rapid scroll.
+- **UX audit Tier 1 (PRs #219, #220, #221, #222).** Service-
+  worker update prompt (#219) — when an updated SW installs,
+  a small "A new version is available" prompt with a Reload
+  button surfaces so members pick up the new build at a moment
+  of their choosing; deploy-runbook §11 updated to name the
+  prompt. Offline banner + outbox transparency (#220) — the
+  shell shows a "You're offline" banner with a count of queued
+  changes so the outbox is never opaque. Balance pending
+  breakdown on Profile (#221) — the headline balance breaks
+  out exchanges awaiting confirmation by source so members can
+  see exactly what's in flight; covers project tasks awaiting
+  organiser confirmation (groundwork for #234). FAQ refresh,
+  permanent nudge dismissal, and attention-rail actionability
+  ordering (#222) — FAQ entries reflect current behaviour;
+  dismissed nudges stay dismissed across reloads; the
+  attention rail orders items by how actionable they are
+  rather than by recency alone.
+- **UX audit Tier 2 (PRs #223, #224, #225, #226, #227).** PWA
+  PNG manifest icons + Add-to-Home-Screen polish (#223) — the
+  manifest serves crisp PNGs at every launcher size, so the
+  installed PWA is iconographically clean across iOS / Android
+  / desktop. Co-organiser capability disclosure card +
+  acceptance pointer (#224) — the project page renders a
+  capability card enumerating what a co-organiser can do; the
+  invitation card carries the same pointer so the role is
+  consented-to rather than assumed. Dark-mode secondary-text
+  contrast audit (#225) — secondary text tokens raised to meet
+  AA at the smaller text sizes and at Largest. Exchange state
+  narrative on PostDetail (#226) — the page narrates the
+  exchange's state in plain language above the affordances so
+  the member doesn't have to infer it from buttons. Board
+  empty-state clarity, Welcome CTA, invite expiry visible at
+  redeem, Settings descriptions (#227).
+- **UX audit Tier 3 (PRs #228, #229, #230, #231, #232).** Full
+  Spanish FAQ translation (#228) — the FAQ keys now have es
+  parity in `faq.es.ts`. Message-search thread context +
+  name-only-match bug fix (#229) — each search result shows
+  the conversation it came from, with the matched substring
+  highlighted; a prior bug where a hit on the conversation
+  partner's display name alone showed an empty thread is
+  fixed. Vouch-moment discovery nudge (#230) — when a member
+  is in a vouch-eligible moment, a calm pointer surfaces the
+  vouch affordance without making it adversarial. iOS
+  apple-touch-startup-image splash screens (#231) — cold-
+  launching the installed PWA on iOS renders a canopy splash
+  in place of the white flash. Disputed-state operational
+  pointer (#232) — a disputed exchange surfaces a small link
+  to the dispute conversation and a one-line explanation of
+  what the community process looks like next.
+- **Organiser / claimer cycle (PRs #233–#237).** Template
+  picker collapses on draft restore (#233) — opening a draft
+  project keeps the picker collapsed so the form is the focal
+  point. Pending task credit on Profile (#234) — the balance-
+  pending breakdown from #221 now includes hours from project
+  tasks the member has completed but the organiser hasn't
+  confirmed yet. Co-org authority uses a derived view + honest
+  `pausedAt` (#235) — the effective co-organiser set comes
+  from the signed-acceptance flow rather than the legacy
+  array, so authority checks are correct under acceptance /
+  decline / self-removal; `pausedAt` records *when* the
+  organiser paused, not the project creation time. Claimer
+  QoL batch (#236) — the "Mine" filter on a project's task
+  list narrows to tasks the viewer has claimed (same
+  affordance for organisers); a claim summary + gentle
+  release-of-claim path ("step back, no judgment") + ack
+  feedback when the organiser confirms. Task exchange honesty
+  (#237) — confirm-task dialog names the debit out loud
+  ("Confirming credits Sasha with 3 hours; the same amount
+  comes from your balance"); release of an
+  `awaiting_confirmation` task is its own activity entry
+  rather than being elided.
+- **Linkify URLs in task comments + event / post descriptions
+  (PR #275).** Free-text fields render bare URLs as real
+  `<a>` elements with `rel="noopener noreferrer"` so members
+  can tap through without copy-paste. Pure rendering pass —
+  the underlying text content is unchanged; markdown rendering
+  for the same fields is the subject of a separate workstream
+  whose docs land alongside that PR.
 - **Community events (PRs #186–#192).** A federated `Event` +
   `EventCancellation` record family for skillshares, potlucks,
   work days, meetings, and care circles. The local `EventRSVP`

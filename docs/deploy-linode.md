@@ -371,12 +371,17 @@ which `git pull` doesn't touch.
 
 > **Service worker / app shell.** Browsers cache the PWA shell
 > aggressively. After a deploy, members may still see the OLD
-> build until their service worker re-fetches. To verify the new
-> build on YOUR browser: open DevTools → Application → Service
-> Workers → "Update on reload" + hard-refresh (Ctrl/Cmd-Shift-R),
-> or use a private window. Members generally pick up the new
-> build within ~24h automatically; there is no server-side
-> invalidation needed.
+> build until their service worker re-fetches. **Since PR #219,
+> the new build self-announces** — once the updated service
+> worker installs, members see a small "A new version is
+> available" prompt with a Reload button so they can pick up
+> the new build at a moment of their choosing rather than having
+> it swap under them mid-flow. The prompt is dismissible; members
+> who dismiss it will pick up the build the next time they cold-
+> launch. To verify the new build on YOUR browser: open DevTools
+> → Application → Service Workers → "Update on reload" +
+> hard-refresh (Ctrl/Cmd-Shift-R), or use a private window. There
+> is no server-side invalidation needed.
 
 > ### ⚠ Do NOT use `docker compose down -v`
 >
