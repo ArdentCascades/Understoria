@@ -680,6 +680,7 @@
       "pausePlaceholder": "¿Por qué pausar? (una línea breve)",
       "resume": "Reanudar",
       "markComplete": "Marcar proyecto como completo",
+      "menuLabel": "Acciones del proyecto",
       "completed": "Completado {{when}}",
       "paused": "En pausa. {{note}}",
       "deadline": "Fecha límite",

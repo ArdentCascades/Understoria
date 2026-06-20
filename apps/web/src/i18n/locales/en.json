@@ -680,6 +680,7 @@
       "pausePlaceholder": "Why pause? (one short line)",
       "resume": "Resume",
       "markComplete": "Mark project complete",
+      "menuLabel": "Project actions",
       "completed": "Completed {{when}}",
       "paused": "Paused. {{note}}",
       "deadline": "Deadline",
