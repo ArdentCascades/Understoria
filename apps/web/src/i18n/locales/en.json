@@ -459,6 +459,7 @@
       "locationLabel": "Location",
       "capacityLabel": "Capacity",
       "categoryLabel": "Category",
+      "menuLabel": "Event actions",
       "organizerControlsHeading": "Organizer controls",
       "cancelButton": "Cancel event",
       "cancelHint": "Cancellation is the only post-create change in phase 1. The cancellation itself is a signed, permanent record; members who RSVP'd will see the reason on their attention rail.",
@@ -1127,6 +1128,7 @@
   },
   "postDetail": {
     "notFound": "This post couldn't be found. It may have been cancelled.",
+    "menuLabel": "Post actions",
     "backToBoard": "Back to board",
     "typeNeed": "Need",
     "typeOffer": "Offer",

@@ -32,6 +32,8 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 import { EventRsvpControl } from "@/components/EventRsvpControl";
 import { EventCancellationCard } from "@/components/EventCancellationCard";
 import { Markdown } from "@/components/Markdown";
+import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
+import { shareUrl } from "@/lib/share";
 
 // Render an epoch-ms timestamp as "<date> <time>" in the active
 // locale. The native date+time pickers collected local-time values
@@ -181,6 +183,36 @@ export default function EventDetailPage() {
     }
   }
 
+  // Copy-link handler. Shares the canonical event URL via the share
+  // helper (native sheet → clipboard fallback). A cancelled share stays
+  // quiet; a copy/share toasts the confirmation; a hard failure surfaces
+  // the manual-copy guidance as an error. Mirrors TaskDetailBody.
+  async function handleCopyLink() {
+    const result = await shareUrl({
+      url: `${window.location.origin}/events/${event!.id}`,
+      title: event!.title,
+    });
+    if (result === "copied" || result === "shared") {
+      showToast(t("common.linkCopied"));
+    } else if (result === "failed") {
+      showToast(t("common.copyFailed"), { tone: "error" });
+    }
+    // "cancelled" → stay silent.
+  }
+
+  // Header overflow-menu actions. Copy link is the only item: RSVP is a
+  // primary control and Cancel Event is destructive (and needs its
+  // reason textarea), so both stay inline.
+  const menuItems: OverflowMenuItem[] = [
+    {
+      key: "copy-link",
+      label: t("common.copyLink"),
+      onSelect: () => {
+        void handleCopyLink();
+      },
+    },
+  ];
+
   return (
     <div className="px-4 pb-8 pt-4">
       <button
@@ -192,7 +224,10 @@ export default function EventDetailPage() {
       </button>
 
       <header className="mb-4">
-        <h1 className="page-title">{event.title}</h1>
+        <div className="flex items-start justify-between gap-2">
+          <h1 className="page-title">{event.title}</h1>
+          <OverflowMenu label={t("events.detail.menuLabel")} items={menuItems} />
+        </div>
         <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {linkedProject && (
             <Field label={t("events.detail.projectLinkLabel")}>

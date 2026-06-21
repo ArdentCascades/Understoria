@@ -32,6 +32,8 @@ import {
 } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
+import { shareUrl } from "@/lib/share";
 import { Markdown } from "@/components/Markdown";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
@@ -195,6 +197,52 @@ export default function PostDetailPage() {
     }
   }
 
+  // Copy-link handler. Shares the canonical post URL via the share
+  // helper (native sheet → clipboard fallback). A cancelled share stays
+  // quiet; a copy/share toasts the confirmation; a hard failure surfaces
+  // the manual-copy guidance as an error. Mirrors TaskDetailBody.
+  async function handleCopyLink() {
+    const result = await shareUrl({
+      url: `${window.location.origin}/post/${post!.id}`,
+      title: post!.title,
+    });
+    if (result === "copied" || result === "shared") {
+      showToast(t("common.linkCopied"));
+    } else if (result === "failed") {
+      showToast(t("common.copyFailed"), { tone: "error" });
+    }
+    // "cancelled" → stay silent.
+  }
+
+  // Header overflow-menu actions. Copy link is always available; the
+  // repost / post-again affordances moved here off the inline action
+  // panel (they reuse the exact poster + status gates their buttons
+  // used). Built at the page level so the menu reads the page-level
+  // `post` / `isPoster` / `navigate` rather than ActionPanel's copies.
+  const menuItems: OverflowMenuItem[] = [
+    {
+      key: "copy-link",
+      label: t("common.copyLink"),
+      onSelect: () => {
+        void handleCopyLink();
+      },
+    },
+  ];
+  if (post.status === "open" && isPoster) {
+    menuItems.push({
+      key: "repost",
+      label: t("postDetail.repost"),
+      onSelect: () => navigate(`/post/new?repost=${post.id}`),
+    });
+  }
+  if (post.status === "completed" && isPoster) {
+    menuItems.push({
+      key: "post-again",
+      label: t("postDetail.postAgain"),
+      onSelect: () => navigate(`/post/new?repost=${post.id}&again=1`),
+    });
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 pb-8 pt-4">
       {/* Phase 2.3 downscope: PostDetail caps at max-w-2xl rather
@@ -216,15 +264,18 @@ export default function PostDetailPage() {
       </button>
 
       <div className="card mb-4">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <CategoryBadge category={post.category} />
-          <UrgencyBadge urgency={post.urgency} />
-          <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-            {post.type === "NEED"
-              ? t("postDetail.typeNeed")
-              : t("postDetail.typeOffer")}
-          </span>
-          <StatusLabel status={post.status} />
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <CategoryBadge category={post.category} />
+            <UrgencyBadge urgency={post.urgency} />
+            <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+              {post.type === "NEED"
+                ? t("postDetail.typeNeed")
+                : t("postDetail.typeOffer")}
+            </span>
+            <StatusLabel status={post.status} />
+          </div>
+          <OverflowMenu label={t("postDetail.menuLabel")} items={menuItems} />
         </div>
         <h1 className="text-2xl font-bold leading-tight">{post.title}</h1>
         {post.description && (
@@ -469,7 +520,6 @@ function ActionPanel({
   onOpenDialog,
 }: ActionPanelProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   if (post.status === "open") {
     if (isPoster) {
       return (
@@ -485,13 +535,6 @@ function ActionPanel({
               onClick={() => onOpenDialog({ type: "cancel" })}
             >
               {t("postDetail.actionsCancelPost")}
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => navigate(`/post/new?repost=${post.id}`)}
-            >
-              {t("postDetail.repost")}
             </button>
           </div>
           <p className="text-xs text-moss-600 dark:text-moss-300">
@@ -607,15 +650,6 @@ function ActionPanel({
           <p className="text-sm">{t("postDetail.guidance.completed")}</p>
         </div>
         <LeafDivider variant="short" />
-        {isPoster && (
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => navigate(`/post/new?repost=${post.id}&again=1`)}
-          >
-            {t("postDetail.postAgain")}
-          </button>
-        )}
       </Actions>
     );
   }
