@@ -257,7 +257,16 @@ export default function EventDetailPage() {
           </Field>
           {event.capacity !== null && (
             <Field label={t("events.detail.capacityLabel")}>
-              {event.capacity}
+              {/* "8 of 12 going" — fill at a glance where capacity
+                  renders. The going count here is the same node-local
+                  aggregate the attendees section already shows to every
+                  local viewer (§6 tiers unchanged — counts, never
+                  names). Uncapped events skip this Field entirely and
+                  keep the plain going count below. */}
+              {t("events.detail.capacityFill", {
+                going: goingRsvps.length,
+                capacity: event.capacity,
+              })}
             </Field>
           )}
           <Field label={t("events.detail.categoryLabel")}>

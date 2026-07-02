@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { buildCalendar, type CalendarEntry } from "@/lib/calendar";
 import { isOrganizer } from "@/db/projects";
+import { getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { EmptyState } from "@/components/EmptyState";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
 import { CalendarMonth } from "@/components/CalendarMonth";
@@ -48,9 +49,24 @@ function prettifyCategory(c: string): string {
 
 // `lg` breakpoint in default Tailwind is 1024px. Below that, agenda
 // is the default; at or above, month is the default. The member's
-// explicit override (a click on a view pill) sticks for the session.
+// explicit override (a click on a view pill) persists across visits
+// via the Dexie settings table (see the restore effect below).
 function defaultViewForWidth(width: number): ViewMode {
   return width >= 1024 ? "month" : "agenda";
+}
+
+function isViewMode(v: string | undefined): v is ViewMode {
+  return v === "agenda" || v === "month" || v === "week";
+}
+
+// Persisted-filter JSON shape (SETTING_KEYS.calendarFilters). Each
+// field is validated on restore — a malformed or partial blob falls
+// back per-field to the default rather than crashing the page.
+interface StoredCalendarFilters {
+  category?: unknown;
+  projectId?: unknown;
+  mine?: unknown;
+  eventsOnly?: unknown;
 }
 
 export default function CalendarPage() {
@@ -91,14 +107,69 @@ export default function CalendarPage() {
   const [category, setCategory] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
   const [mine, setMine] = useState<boolean>(false);
-  // "Events only" filter chip — session-local, additive on top of the
-  // other filters (the design-doc §9 model treats it as a view filter,
-  // not a category swap). When on, the entry list passed to the views
-  // narrows to `kind: "event"` only — project deadlines, post expiries,
-  // and the density indicator drop out. Matches the storage shape of
-  // the sibling chips (also session-local — no Dexie / localStorage
-  // persistence here).
+  // "Events only" filter chip — additive on top of the other filters
+  // (the design-doc §9 model treats it as a view filter, not a category
+  // swap). When on, the entry list passed to the views narrows to
+  // `kind: "event"` only — project deadlines, post expiries, and the
+  // density indicator drop out.
   const [eventsOnly, setEventsOnly] = useState<boolean>(false);
+
+  // Persistence (view + filters). This DELIBERATELY reverses the
+  // earlier session-only choice: the operator approved persistence for
+  // the calendar specifically — the stored state is device-local Dexie
+  // settings (never federated), so there's no ethos concern. Paging /
+  // offset state is intentionally NOT persisted: the calendar always
+  // opens anchored on today.
+  //
+  // `hydrated` gates the write-through effect below so the defaults
+  // rendered during the async restore never clobber the stored values.
+  const [hydrated, setHydrated] = useState<boolean>(false);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const [storedView, storedFilters] = await Promise.all([
+        getSetting(SETTING_KEYS.calendarViewMode),
+        getSetting(SETTING_KEYS.calendarFilters),
+      ]);
+      if (cancelled) return;
+      if (isViewMode(storedView)) {
+        // A stored view is an explicit past choice — honour it and stop
+        // following the breakpoint, same as a fresh pill click.
+        setViewMode(storedView);
+        setOverrideView(true);
+      }
+      if (storedFilters) {
+        try {
+          const parsed = JSON.parse(storedFilters) as StoredCalendarFilters;
+          if (typeof parsed.category === "string") setCategory(parsed.category);
+          if (typeof parsed.projectId === "string")
+            setProjectId(parsed.projectId);
+          if (typeof parsed.mine === "boolean") setMine(parsed.mine);
+          if (typeof parsed.eventsOnly === "boolean")
+            setEventsOnly(parsed.eventsOnly);
+        } catch {
+          // Malformed blob — keep the defaults; the next change
+          // overwrites it with a well-formed one.
+        }
+      }
+      setHydrated(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Write-through on any filter change, one JSON blob per change. No
+  // debounce: every control is a select / chip that changes at most
+  // once per interaction, so per-change single writes are already the
+  // floor.
+  useEffect(() => {
+    if (!hydrated) return;
+    void setSetting(
+      SETTING_KEYS.calendarFilters,
+      JSON.stringify({ category, projectId, mine, eventsOnly }),
+    );
+  }, [hydrated, category, projectId, mine, eventsOnly]);
 
   const now = Date.now();
   const windowStart = now - WINDOW_BACK_MS;
@@ -242,7 +313,50 @@ export default function CalendarPage() {
   const view = (mode: ViewMode) => () => {
     setOverrideView(true);
     setViewMode(mode);
+    // Persist the explicit pick (device-local; see the restore effect).
+    void setSetting(SETTING_KEYS.calendarViewMode, mode);
   };
+
+  // How many filters are currently narrowing the calendar. Drives the
+  // "Filters · N active" summary on the filter row and the
+  // filtered-empty split below (mirrors Board's `filtersActive`).
+  const activeFilterCount =
+    (category !== "" ? 1 : 0) +
+    (projectId !== "" ? 1 : 0) +
+    (mine ? 1 : 0) +
+    (eventsOnly ? 1 : 0);
+  const filtersActive = activeFilterCount > 0;
+
+  const resetFilters = () => {
+    setCategory("");
+    setProjectId("");
+    setMine(false);
+    setEventsOnly(false);
+  };
+
+  // Viewer-ownership sets for the agenda's commitment weighting —
+  // "yours" means the viewer organizes / co-organizes the project, or
+  // authored the post. Derived from rows the page already holds and the
+  // viewer's own key; personal-view only, nothing new is stored or
+  // federated (no-leaderboards: own data, never counts).
+  const viewerProjectIds = useMemo<ReadonlySet<string>>(() => {
+    const ids = new Set<string>();
+    if (myKey) {
+      for (const p of projects) {
+        if (isOrganizer(p, myKey)) ids.add(p.id);
+      }
+    }
+    return ids;
+  }, [projects, myKey]);
+  const viewerPostIds = useMemo<ReadonlySet<string>>(() => {
+    const ids = new Set<string>();
+    if (myKey) {
+      for (const p of posts) {
+        if (p.postedBy === myKey) ids.add(p.id);
+      }
+    }
+    return ids;
+  }, [posts, myKey]);
 
   return (
     <div className="px-4 pb-36 pt-stack-md">
@@ -312,16 +426,23 @@ export default function CalendarPage() {
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-1 text-xs text-moss-700 dark:text-moss-200">
-          <input
-            type="checkbox"
-            checked={mine}
-            onChange={(e) => setMine(e.target.checked)}
-            disabled={!myKey}
-            className="h-4 w-4 rounded border-moss-300"
-          />
+        {/* "Mine" gets the same labeled-chip treatment as the
+            Events-only chip beside it — a proper toggle rather than a
+            bare checkbox lost among the selects. */}
+        <button
+          type="button"
+          onClick={() => setMine((v) => !v)}
+          aria-pressed={mine}
+          disabled={!myKey}
+          className={[
+            "rounded-full px-3 py-1 text-xs disabled:opacity-50",
+            mine
+              ? "bg-canopy-700 text-white"
+              : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
+          ].join(" ")}
+        >
           {t("calendar.filters.mine")}
-        </label>
+        </button>
         <button
           type="button"
           onClick={() => setEventsOnly((v) => !v)}
@@ -335,16 +456,46 @@ export default function CalendarPage() {
         >
           {t("events.calendar.eventsOnlyChip")}
         </button>
+        {/* Active-filter summary — same signal Board's `filtersActive`
+            drives, rendered as a quiet count beside the controls so a
+            member can see at a glance that the calendar is narrowed. */}
+        {filtersActive ? (
+          <span className="text-xs text-moss-600 dark:text-moss-300">
+            {t("calendar.filters.active", { count: activeFilterCount })}
+          </span>
+        ) : null}
       </div>
 
       {entries.length === 0 ? (
-        <EmptyState
-          illustration="sapling"
-          title={t("calendar.empty.title")}
-          message={t("calendar.empty.body")}
-        />
+        filtersActive ? (
+          // Filter-empty: the filters are why it's empty — say so and
+          // give a one-tap escape (mirrors Board's #227 pattern) rather
+          // than the truly-empty copy, which would read as "the
+          // community has nothing" when it's just a narrow filter.
+          <div className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+            <p>{t("calendar.empty.filtered")}</p>
+            <button
+              type="button"
+              className="mt-2 text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              onClick={resetFilters}
+            >
+              {t("calendar.empty.clearFilters")}
+            </button>
+          </div>
+        ) : (
+          <EmptyState
+            illustration="sapling"
+            title={t("calendar.empty.title")}
+            message={t("calendar.empty.body")}
+          />
+        )
       ) : viewMode === "agenda" ? (
-        <CalendarAgenda entries={entries} locale={i18n.language} />
+        <CalendarAgenda
+          entries={entries}
+          locale={i18n.language}
+          viewerProjectIds={viewerProjectIds}
+          viewerPostIds={viewerPostIds}
+        />
       ) : viewMode === "month" ? (
         <CalendarMonth
           entries={entries}

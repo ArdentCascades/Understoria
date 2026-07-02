@@ -10,6 +10,29 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Calendar polish batch (PR #284).** Five smaller refinements
+  from a fresh audit. (1) The agenda weights the viewer's own
+  commitments — an RSVP'd-going event, a project deadline they
+  organize/co-organize, their own expiring post — with a canopy
+  left-accent + semibold plus an sr-only "(yours)" suffix (or the
+  existing going aria-label) so the cue is never colour-only. A
+  personal-view distinction computed purely from the viewer's own
+  local data; no counts, no popularity signal (no-leaderboards).
+  (2) The filter row shows a quiet "Filters · N active" summary
+  (mirroring Board's `filtersActive`), and Mine becomes a labeled
+  chip beside Events-only instead of a bare checkbox. (3) View
+  choice and filters persist across visits via the Dexie settings
+  table (`calendarViewMode`, `calendarFilters`) — a deliberate,
+  operator-approved reversal of the earlier session-only choice
+  (device-local, never federated); paging/offset state is
+  deliberately NOT persisted, the calendar always opens on today.
+  (4) Event detail renders capacity as "8 of 12 going" using the
+  same node-local count every local viewer already sees — §6
+  attendee-visibility tiers unchanged. (5) The truly-empty calendar
+  now points at the + button ("Know of something the community
+  should gather for?"), and a filtered-empty calendar gets the
+  Board-style "Nothing matches these filters" + Clear filters
+  escape instead of the misleading quiet-week copy.
 - **Task ordering + dependencies workstream (PRs #206–#216).**
   The full task-ordering and soft-block-dependency design from
   `docs/task-ordering-and-dependencies.md` shipped across six PR
