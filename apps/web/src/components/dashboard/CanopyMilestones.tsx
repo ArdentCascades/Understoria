@@ -80,13 +80,22 @@ function CanopyRow({
   leaves: MilestoneState[];
   newlyReachedLabels: ReadonlySet<string>;
 }) {
+  const { t } = useTranslation();
+  // The first unreached leaf is the community's next milestone for
+  // this row. It gets its threshold label in the accessible name and
+  // a quiet visible caption — orientation only. Deliberately NO
+  // progress bar and NO "N to go" quantified gap: naming the next
+  // leaf tells you where the canopy grows; quantifying the distance
+  // would turn a milestone into a target (no-leaderboards).
+  const next = leaves.find((l) => !l.reached) ?? null;
   return (
     <div className="mb-stack-sm last:mb-0">
       <div className="mb-1 text-xs text-moss-600 dark:text-moss-300">
         {rowLabel}
       </div>
       <ul className="flex flex-wrap items-center gap-2">
-        {leaves.map(({ milestone, reached }) => {
+        {leaves.map((leaf) => {
+          const { milestone, reached } = leaf;
           const isFreshlyReached =
             reached && newlyReachedLabels.has(milestone.label);
           return (
@@ -94,12 +103,23 @@ function CanopyRow({
               <CanopyLeaf
                 reached={reached}
                 isFreshlyReached={isFreshlyReached}
-                ariaLabel={milestone.label}
+                ariaLabel={
+                  leaf === next
+                    ? t("dashboard.milestones.next", {
+                        label: milestone.label,
+                      })
+                    : milestone.label
+                }
               />
             </li>
           );
         })}
       </ul>
+      {next && (
+        <div className="mt-1 text-xs text-moss-500 dark:text-moss-400">
+          {t("dashboard.milestones.next", { label: next.milestone.label })}
+        </div>
+      )}
     </div>
   );
 }

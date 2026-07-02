@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats, computeFederationStats } from "@/lib/stats";
@@ -33,11 +34,19 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 import { LeafDivider, Sprig } from "@/components/visual";
 import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
 import { UpcomingGatherings } from "@/components/dashboard/UpcomingGatherings";
+import { WhereHandsAreWelcome } from "@/components/dashboard/WhereHandsAreWelcome";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
-  const { exchanges, members, posts, achievements, nodeConfig, nodeId } =
-    useApp();
+  const {
+    exchanges,
+    members,
+    posts,
+    achievements,
+    nodeConfig,
+    nodeId,
+    proposals,
+  } = useApp();
   const { t } = useTranslation();
   // Split BEFORE feeding the stats helpers so the headline + flow
   // reflect only this node's exchanges. The federation rollup
@@ -93,6 +102,15 @@ export default function DashboardPage() {
     0,
   );
 
+  // Same "open" computation the Proposals page and ProposalsSection
+  // use: `status === "open"` (equivalently `closedAt === null` —
+  // closedAt is filled exactly when a proposal leaves the open
+  // state; see packages/shared/src/types.ts).
+  const openProposalCount = useMemo(
+    () => proposals.filter((p) => p.status === "open").length,
+    [proposals],
+  );
+
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
@@ -114,6 +132,12 @@ export default function DashboardPage() {
       {/* Quiet "what's coming up" glance — leads the page only when there
           are upcoming events; renders nothing otherwise. */}
       <UpcomingGatherings />
+
+      {/* "Where hands are welcome" sits BELOW Coming up: gatherings are
+          time-anchored (they expire and were designed to lead the page);
+          open invitations are open-ended and can wait a scroll-line.
+          Same self-hiding contract — a calm week gets a calm page. */}
+      <WhereHandsAreWelcome />
 
       <section className="card relative mb-4 overflow-hidden text-center">
         <div
@@ -166,6 +190,22 @@ export default function DashboardPage() {
         </section>
       )}
 
+      {/* Governance doorway, kept beside the federation rollup so the
+          "community as a whole" surfaces cluster. One quiet line —
+          "open for discussion", never "awaiting your vote"; no
+          deadlines, no per-proposal detail, no urgency styling.
+          Hidden entirely at zero (the Coming-up rule). */}
+      {openProposalCount > 0 && (
+        <section className="card mb-4 text-sm">
+          <Link
+            to="/proposals"
+            className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          >
+            {t("dashboard.proposalsOpen", { count: openProposalCount })}
+          </Link>
+        </section>
+      )}
+
       <div className="my-2">
         <LeafDivider variant="short" />
       </div>
@@ -181,20 +221,35 @@ export default function DashboardPage() {
           value={stats.activeMembersThisMonth}
           sublabel={t("dashboard.stats.ofMembers", { count: members.length })}
         />
+        {/* Zero-state: a streak at 0 is an ebb, not a failure — render
+            a warm word instead of "0 days in a row"
+            (solidarity-not-shame). */}
         <StatCard
           label={t("dashboard.stats.streak")}
-          value={stats.solidarityStreakDays}
-          sublabel={t(
-            stats.solidarityStreakDays === 1
-              ? "dashboard.stats.streakUnitOne"
-              : "dashboard.stats.streakUnitOther",
-          )}
+          value={
+            stats.solidarityStreakDays === 0
+              ? t("dashboard.stats.streakGathering")
+              : stats.solidarityStreakDays
+          }
+          sublabel={
+            stats.solidarityStreakDays === 0
+              ? t("dashboard.stats.streakGatheringSub")
+              : t(
+                  stats.solidarityStreakDays === 1
+                    ? "dashboard.stats.streakUnitOne"
+                    : "dashboard.stats.streakUnitOther",
+                )
+          }
         />
         <StatCard
           label={t("dashboard.stats.needsMet")}
           value={stats.needsFulfilledThisWeek}
           sublabel={t("dashboard.stats.andCounting")}
         />
+        {/* Doorway, not pressure: the stat copy is unchanged — the card
+            just gains a quiet path to the Board's Needs tab
+            (`/?tab=needs`, see lib/boardTab.ts). No "unmet"/"remaining"
+            framing, no urgency styling. */}
         <StatCard
           label={t("dashboard.stats.needsAnswered")}
           value={stats.needsAnsweredThisWeek}
@@ -205,6 +260,9 @@ export default function DashboardPage() {
                 })
               : t("dashboard.stats.noNeedsPosted")
           }
+          linkTo="/?tab=needs"
+          linkLabel={t("dashboard.stats.seeOpenNeeds")}
+          linkAriaLabel={t("dashboard.stats.seeOpenNeedsAria")}
         />
       </div>
 
@@ -320,10 +378,22 @@ function StatCard({
   label,
   value,
   sublabel,
+  linkTo,
+  linkLabel,
+  linkAriaLabel,
 }: {
   label: string;
   value: number | string;
   sublabel: string;
+  /** Optional doorway: when set (with `linkLabel`), the card gains a
+   *  quiet trailing link in the house register (canopy text +
+   *  hover-underline). The stat itself stays a plain reading — the
+   *  link is an invitation the member may tap, never an alert. */
+  linkTo?: string;
+  linkLabel?: string;
+  /** Names the destination for screen readers (the visible label is
+   *  short; the aria-label says where the link goes). */
+  linkAriaLabel?: string;
 }) {
   return (
     <div className="card">
@@ -332,6 +402,16 @@ function StatCard({
       </div>
       <div className="mt-1 text-3xl font-bold">{value}</div>
       <div className="text-xs text-moss-600 dark:text-moss-300">{sublabel}</div>
+      {linkTo && linkLabel && (
+        <Link
+          to={linkTo}
+          aria-label={linkAriaLabel}
+          className="mt-1 inline-flex items-center gap-1 text-xs text-canopy-700 underline-offset-2 hover:underline focus-visible:underline dark:text-canopy-300"
+        >
+          {linkLabel}
+          <span aria-hidden="true">→</span>
+        </Link>
+      )}
     </div>
   );
 }

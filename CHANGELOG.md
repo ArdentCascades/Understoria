@@ -37,6 +37,34 @@ include breaking changes.
   suggested duration and applies it the moment a time is chosen).
   (5) Location + capacity pair on one row at sm+; date/time pairs
   unchanged; everything stays stacked full-width below sm.
+- **Dashboard doorways batch (PR #288).** Six-part pass turning the
+  read-only stats page into one with pull-based paths to action —
+  doorways, never pressure. (1) The needs-answered stat card gains a
+  quiet "See open needs →" link to the Board's Needs tab
+  (`/?tab=needs`); stat copy byte-identical, no "unmet"/"remaining"
+  framing. (2) New "Where hands are welcome" section — the second
+  instance of the Coming-up pattern (unranked recency ordering,
+  capped at 3, self-hiding at zero, no counts) mixing open NEED
+  posts with active projects whose tasks could use more hands
+  (reusing `projectNeedsMoreHands` from `lib/projectFilter.ts`,
+  which was already extracted — Board behaviour untouched).
+  (3) CanopyMilestones names each row's next unreached leaf in its
+  accessible name and a quiet visible "next: {{label}}" caption —
+  no progress bar, no quantified gap. (4) Streak-card zero-state
+  renders a warm word ("gathering" / "en camino") instead of
+  "0 days in a row" (solidarity-not-shame); the other four stat
+  cards keep their honest plain zeros. (5) A one-line governance
+  doorway near the federation summary — "{{count}} proposals open
+  for discussion" linking to `/proposals`, hidden at zero, never
+  "awaiting your vote", no deadlines. (6) Federation-summary
+  tappability was investigated and deliberately skipped: the
+  summary only counts peer communities and no peer-communities
+  surface exists to link to (no new routes invented). i18n: new
+  keys in both locales (`dashboard.handsWelcome.*`,
+  `dashboard.proposalsOpen_one/_other`,
+  `dashboard.stats.streakGathering(Sub)`,
+  `dashboard.stats.seeOpenNeeds(Aria)`,
+  `dashboard.milestones.next`).
 - **Calendar polish batch (PR #284).** Five smaller refinements
   from a fresh audit. (1) The agenda weights the viewer's own
   commitments — an RSVP'd-going event, a project deadline they

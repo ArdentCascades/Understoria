@@ -1442,6 +1442,14 @@
       "title": "Próximamente",
       "going": "vas a ir"
     },
+    "handsWelcome": {
+      "title": "Donde las manos son bienvenidas",
+      "intro": "Algunas puertas abiertas, para cuando tengas capacidad.",
+      "typeNeed": "necesidad",
+      "typeProject": "proyecto"
+    },
+    "proposalsOpen_one": "{{count}} propuesta abierta para que la comunidad discuta",
+    "proposalsOpen_other": "{{count}} propuestas abiertas para que la comunidad discuta",
     "totalHoursLabel": "Total de horas intercambiadas",
     "totalExchangesOne": "en {{count}} intercambio",
     "totalExchangesOther": "en {{count}} intercambios",
@@ -1452,11 +1460,15 @@
       "streak": "Racha de solidaridad",
       "streakUnitOne": "día",
       "streakUnitOther": "días seguidos",
+      "streakGathering": "en camino",
+      "streakGatheringSub": "el próximo intercambio la inicia",
       "needsMet": "Necesidades cubiertas esta semana",
       "andCounting": "y contando",
       "needsAnswered": "Necesidades atendidas esta semana",
       "ofPosted": "de {{count}} publicadas esta semana",
-      "noNeedsPosted": "ninguna necesidad publicada esta semana"
+      "noNeedsPosted": "ninguna necesidad publicada esta semana",
+      "seeOpenNeeds": "Ver necesidades abiertas",
+      "seeOpenNeedsAria": "Ver las necesidades abiertas en el tablero comunitario"
     },
     "milestones": {
       "title": "Hitos colectivos",
@@ -1466,6 +1478,7 @@
       "topReached": " — máximo hito alcanzado",
       "valueOf": "{{value}} / {{next}}",
       "lastReached": "Último alcanzado: {{label}}",
+      "next": "siguiente: {{label}}",
       "celebration": "Alcanzamos un hito"
     },
     "categoryBreakdown": {
