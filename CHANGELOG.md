@@ -9,6 +9,24 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Removed
+- **Member pages carry no comparable stats or badges (operator
+  ruling + `no-leaderboards`).** MemberDetail — the page for viewing
+  ANOTHER member — no longer displays anything a member can compare
+  themselves against: the trust chip dropped its vouch count
+  ("Trusted (3 vouches)" / "New here (1/2 vouches)" → plain
+  "Trusted" / "New here"; the count variant remains on the member's
+  OWN Profile), and the "Vouched for by" roster (`TrustedByList`,
+  now deleted along with its `trustedBy.*` locale keys) is gone —
+  its length was a de facto score, its per-vouch timestamps a
+  browsable activity record (`no-activity-search`), and its empty
+  state shamed newcomers (`solidarity-not-shame`). Everything
+  functional stays: skills/availability/area, qualitative trust
+  status, and the Vouch and Block actions with unchanged gating.
+  A guard comment atop `MemberDetail.tsx` documents the ruling and
+  `MemberDetail.test.tsx` adds absence assertions plus a tripwire
+  against "N exchanges/vouches/hours"-shaped copy returning.
+
 ### Added
 - **Single-event `.ics` export (community-events.md §11.5a, PR #289).**
   "Add to calendar" in the event detail overflow menu downloads a

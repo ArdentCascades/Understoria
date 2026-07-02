@@ -1273,13 +1273,6 @@
     "pendingWithCount": "New here ({{have}}/{{need}} vouches)",
     "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers."
   },
-  "trustedBy": {
-    "title": "Vouched for by",
-    "intro": "These members signed a vouch (or invited this person into the community). Tap a name to see who they are.",
-    "empty": "No one has vouched for this member yet.",
-    "kindManual": "Vouched",
-    "kindInvite": "Invited"
-  },
   "achievement": {
     "first_exchange": {
       "label": "First Exchange",

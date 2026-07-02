@@ -201,9 +201,10 @@ onboard — are prioritized; the rest confirm the page is navigable.
 
 - **Entry:** activate a member's name/avatar from a post, the
   board, or a conversation header. Route `/members/:key`.
-- **Steps:** read-all to hear the member's name, trust state, and
-  who trusts them. `Tab` to the "Vouch for this member" button and
-  activate it.
+- **Steps:** read-all to hear the member's name and trust state
+  (qualitative only — no vouch counts or voucher roster, per the
+  no-comparable-stats ruling). `Tab` to the "Vouch for this member"
+  button and activate it.
 - **Expected:** the member's display name is the `<h1>`; the
   "Vouch" section heading is navigable; the button announces
   "Vouch for this member"; if you can't vouch yet, the reason is
