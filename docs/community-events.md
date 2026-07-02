@@ -706,6 +706,92 @@ events iCal toggle, if shipped, is a narrower thing — only the
 RSVP'ing member's events, only at their explicit opt-in — and the
 phase-2 design will re-derive the threading-the-needle argument.
 
+### §11.5a Single-event `.ics` file export (settled: permissible, phase-2 candidate)
+
+> **Status:** settled as **permissible**. This addendum records the
+> values reasoning so a future implementation PR can cite a settled
+> decision rather than re-litigate it. Implementation remains
+> phase-2 / on-demand — nothing here schedules it.
+
+§11.5 and `docs/calendar.md` §10.5 are about *subscriptions*. This
+addendum is about a different shape that the audit found threads the
+needle: a member on the event detail page taps a button, the PWA
+generates a static `.ics` file for **that one event** entirely
+client-side, and the browser offers it as a download. The
+distinction does all the work, so it gets spelled out:
+
+- **What §10.5 rejected** is a *server-hosted* subscription URL —
+  per-member or community-wide. That shape means a standing
+  endpoint; an unauthenticated fetch surface; a third party (the
+  member's calendar provider) polling the node on a schedule; URL
+  leakage becoming *ongoing* surveillance of community activity; and
+  a rotation/revocation story that never gets good. Every one of
+  those properties comes from the URL existing. That rejection
+  stands untouched.
+- **What this addendum permits** is *client-side, on-demand*
+  generation of a one-event file. No server involvement — the PWA
+  already holds the event in Dexie. No URL exists. Nothing polls.
+  The file contains exactly what the member can already read on the
+  screen in front of them (title, start/end, location, description).
+  What happens to the file next is the member's choice; importing it
+  into their device calendar is their device acting on their behalf.
+- **`no-notifications` is honored.** Any reminder that later fires
+  comes from the member's own calendar app, configured by them, on
+  their device. The node never pushes; the app never schedules. This
+  is the same pull-toward-yourself shape as the §11.4 phase-2
+  opt-in-reminder concept, with even less machinery — we don't
+  implement the reminder at all; the member's existing tools do.
+- **`privacy-precondition` is honored.** The exported file contains
+  event data the member already has. It does NOT contain the RSVP
+  roster, the member's own RSVP status, or any other member's data.
+  Exporting is equivalent to the member copying the details by hand,
+  which they can already do (and which `CODE_OF_CONDUCT.md` §4
+  already governs socially, not technically).
+
+Residual considerations, named honestly:
+
+- **The file outlives the app's purge reach.** Once imported, the
+  event lives in the member's device calendar; a member who
+  panic-purges the app still has it there. That is a consequence of
+  the member's own choice, not a leak — but the member guide should
+  say it plainly when the feature ships.
+- **Location strings reach third-party calendar sync.** An organizer's
+  free-text location ends up in Google/Apple calendar infrastructure
+  when the member's calendar syncs. This is per-event and
+  member-chosen, not a bulk channel — but the threat-model §7 events
+  entry should gain one sentence acknowledging the export path.
+  **That edit is an obligation of the implementation PR**, not of
+  this note.
+
+Implementation sketch, for the future PR:
+
+- Button on `EventDetail.tsx` — "Add to calendar" / "Añadir al
+  calendario" — visible to any member who can see the event (no new
+  visibility tier).
+- Generate a minimal RFC 5545 `VEVENT` client-side: `UID` from
+  event id + node id, `DTSTART`/`DTEND` from `startsAt`/`endsAt`
+  with the same UTC discipline as `lib/calendar.ts`,
+  `SUMMARY`/`LOCATION`/`DESCRIPTION` from the event fields. This is
+  ~20 lines of string building; no dependency is needed, and a PR
+  that pulls one in anyway must justify it.
+- Download via `Blob` + object URL. **No server route. Ever.** A
+  server-rendered `.ics` — even for one event — recreates the URL
+  shape §10.5 rejected.
+- i18n in both locales, en/es parity as usual.
+- Out of scope for that PR: recurring events (none exist); bulk or
+  multi-event export (**rejected** — a whole-calendar file is the
+  §10.5 shape with the polling removed, and re-proposing it means
+  superseding §10.5, not citing this addendum); and `VALARM`
+  components inside the `.ics`. The `VALARM` exclusion is a design
+  decision, not an omission: embedding an alarm would be the app
+  scheduling a notification by proxy — deciding *for* the member
+  that a reminder should fire — which flirts with `no-notifications`;
+  the member sets reminders in their own calendar app, on their own
+  terms, or not at all.
+
+**Settled: permissible.** Phase-2 / on-demand candidate; this note
+unblocks the implementation PR without scheduling it.
+
 ### §11.6 Attendance tracking / no-show flags
 
 **Permanently rejected.** Cited: `solidarity-not-shame` —
