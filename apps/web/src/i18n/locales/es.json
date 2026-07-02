@@ -394,6 +394,7 @@
       "collapsedScratch": "Empezando desde cero.",
       "collapsedChange": "Cambiar",
       "collapsedPick": "Elegir una plantilla",
+      "asideAriaLabel": "Plantillas iniciales para eventos",
       "meta": {
         "duration": "~{{duration}}"
       },

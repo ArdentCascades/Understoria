@@ -137,8 +137,25 @@ function formTextInputs(): HTMLInputElement[] {
   ).filter((i) => i.type === "text");
 }
 
+/** Set the start date/time inputs to a safely-future timestamp
+ *  (tomorrow 10:00 local) so the past-start guard never trips. */
+function fillFutureStart() {
+  const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const dateInput = container.querySelector(
+    'form input[type="date"]',
+  ) as HTMLInputElement;
+  const timeInput = container.querySelector(
+    'form input[type="time"]',
+  ) as HTMLInputElement;
+  act(() => {
+    setInput(dateInput, date);
+    setInput(timeInput, "10:00");
+  });
+}
+
 describe("EventNew — template prefill", () => {
-  it("seeds the form from a picked template (title stem, category, end time) but never location", async () => {
+  it("seeds the form from a picked template (title stem, category) but never location, and parks the duration until a start time exists", async () => {
     render();
     clickCardContaining("Potluck");
     await flush();
@@ -151,16 +168,34 @@ describe("EventNew — template prefill", () => {
     const select = container.querySelector("select") as HTMLSelectElement;
     expect(select.value).toBe("social");
 
-    // The suggested duration auto-applied an end time.
-    const endCheckbox = container.querySelector(
+    // Start time begins EMPTY (honest-default rule, Part 4), so the
+    // suggested duration is parked, not applied yet.
+    let endCheckbox = container.querySelector(
+      'input[type="checkbox"]',
+    ) as HTMLInputElement;
+    expect(endCheckbox.checked).toBe(false);
+
+    // The moment the member picks a start time, the parked duration
+    // applies as an editable end time.
+    fillFutureStart();
+    await flush();
+    endCheckbox = container.querySelector(
       'input[type="checkbox"]',
     ) as HTMLInputElement;
     expect(endCheckbox.checked).toBe(true);
+    const timeInputs = container.querySelectorAll<HTMLInputElement>(
+      'form input[type="time"]',
+    );
+    // [start, end] — the end time was derived from start + duration.
+    expect(timeInputs.length).toBe(2);
+    expect(timeInputs[1].value).not.toBe("");
   });
 
   it("passes the templateId and category to createEvent on submit", async () => {
     render();
     clickCardContaining("Potluck");
+    await flush();
+    fillFutureStart();
     await flush();
     const [, locationInput] = formTextInputs();
     setInput(locationInput, "Community room");
@@ -185,6 +220,8 @@ describe("EventNew — template prefill", () => {
     expect(titleInput.value).toBe("");
     setInput(titleInput, "My own event");
     setInput(locationInput, "Somewhere");
+    fillFutureStart();
+    await flush();
     const form = container.querySelector("form") as HTMLFormElement;
     act(() => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
@@ -194,28 +231,36 @@ describe("EventNew — template prefill", () => {
     expect(createEventMock.mock.calls[0][0]).toMatchObject({ templateId: null });
   });
 
-  it("collapses the gallery after a pick and reopens it on Change", async () => {
+  it("collapses the gallery after a pick (mobile summary) and reopens it from the summary", async () => {
     render();
-    // Gallery open: the search box is present.
-    expect(
-      container.querySelector('input[type="search"]'),
-    ).not.toBeNull();
+    // Gallery open: the wrapper is visible (no `hidden` class) and no
+    // collapsed-summary button exists yet.
+    const pickerWrapper = () =>
+      container.querySelector("#event-template-picker") as HTMLElement;
+    const summaryButton = () =>
+      container.querySelector(
+        'button[aria-controls="event-template-picker"]',
+      ) as HTMLButtonElement | null;
+    expect(pickerWrapper().className).not.toContain("hidden");
+    expect(summaryButton()).toBeNull();
+
     clickCardContaining("Game night");
     await flush();
-    // Collapsed: search gone, summary names the template.
-    expect(container.querySelector('input[type="search"]')).toBeNull();
-    expect(container.textContent ?? "").toContain("Game night");
+    // Collapsed on mobile: the wrapper is class-hidden below lg (it
+    // stays `lg:block` for the desktop rail) and the summary names
+    // the template.
+    expect(pickerWrapper().className).toContain("hidden");
+    expect(pickerWrapper().className).toContain("lg:block");
+    expect(summaryButton()).not.toBeNull();
+    expect(summaryButton()!.textContent ?? "").toContain("Game night");
 
-    const change = Array.from(container.querySelectorAll("button")).find(
-      (b) => (b.textContent ?? "").trim() === "Change",
-    );
-    expect(change).toBeDefined();
     act(() => {
-      change!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      summaryButton()!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true }),
+      );
     });
-    // Reopened: the search box is back.
-    expect(
-      container.querySelector('input[type="search"]'),
-    ).not.toBeNull();
+    // Reopened: wrapper visible again, summary gone.
+    expect(pickerWrapper().className).not.toContain("hidden");
+    expect(summaryButton()).toBeNull();
   });
 });

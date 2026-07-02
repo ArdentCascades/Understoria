@@ -394,6 +394,7 @@
       "collapsedScratch": "Starting from scratch.",
       "collapsedChange": "Change",
       "collapsedPick": "Pick a template",
+      "asideAriaLabel": "Event starter templates",
       "meta": {
         "duration": "~{{duration}}"
       },

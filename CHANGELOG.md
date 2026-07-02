@@ -10,6 +10,33 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **EventNew create-form parity batch (PR #287).** Five refinements
+  bringing the event-creation form to parity with ProjectNew (the
+  house create-form pattern), plus one silent-wrong-time fix.
+  (1) Draft autosave + DraftBanner (`event-new` Dexie draft key):
+  every field including the selected template and the end-time
+  toggle round-trips, restoring collapses the template picker (the
+  #233 rule), and a `?projectId=` work-day deep-link always wins —
+  no banner, no autosave, the stored plain-visit draft survives for
+  a later plain visit. (2) Inline validation via
+  `useFieldValidation` (title, location, capacity, start
+  date/time), plus cross-field on-change errors for past-start and
+  end-before-start shown at the field group the moment both parts
+  combine — the submit-time guards all stay (defense in depth; the
+  clock moves between blur and submit). (3) Two-pane lg+ layout
+  mirroring ProjectNew: sticky template rail left
+  (`EventTemplatePicker` gains the same `layout="rail"` prop as
+  TemplatePicker), form right with a reading-width cap; mobile DOM
+  order picker → form preserved (WCAG 2.4.3, no CSS `order`); the
+  §3 signing card stays in-flow immediately above Cancel/Submit —
+  mandated placement, now locked by a test. (4) The start time no
+  longer defaults to the next round hour: the date still seeds to
+  today, but the member must consciously pick a time — an unnoticed
+  default on a permanent signed federated record is worse than one
+  extra tap (a template picked before a time exists parks its
+  suggested duration and applies it the moment a time is chosen).
+  (5) Location + capacity pair on one row at sm+; date/time pairs
+  unchanged; everything stays stacked full-width below sm.
 - **Calendar polish batch (PR #284).** Five smaller refinements
   from a fresh audit. (1) The agenda weights the viewer's own
   commitments — an RSVP'd-going event, a project deadline they
