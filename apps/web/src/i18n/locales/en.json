@@ -1442,6 +1442,14 @@
       "title": "Coming up",
       "going": "you're going"
     },
+    "handsWelcome": {
+      "title": "Where hands are welcome",
+      "intro": "A few open doors, for whenever you have capacity.",
+      "typeNeed": "need",
+      "typeProject": "project"
+    },
+    "proposalsOpen_one": "{{count}} proposal open for discussion",
+    "proposalsOpen_other": "{{count}} proposals open for discussion",
     "totalHoursLabel": "Total hours exchanged",
     "totalExchangesOne": "across {{count}} exchange",
     "totalExchangesOther": "across {{count}} exchanges",
@@ -1452,11 +1460,15 @@
       "streak": "Solidarity streak",
       "streakUnitOne": "day",
       "streakUnitOther": "days in a row",
+      "streakGathering": "gathering",
+      "streakGatheringSub": "the next exchange begins it",
       "needsMet": "Needs met this week",
       "andCounting": "and counting",
       "needsAnswered": "Needs answered this week",
       "ofPosted": "of {{count}} posted this week",
-      "noNeedsPosted": "no needs posted this week"
+      "noNeedsPosted": "no needs posted this week",
+      "seeOpenNeeds": "See open needs",
+      "seeOpenNeedsAria": "See open needs on the community board"
     },
     "milestones": {
       "title": "Collective milestones",
@@ -1466,6 +1478,7 @@
       "topReached": " — top milestone reached",
       "valueOf": "{{value}} / {{next}}",
       "lastReached": "Last reached: {{label}}",
+      "next": "next: {{label}}",
       "celebration": "We reached a milestone"
     },
     "categoryBreakdown": {
