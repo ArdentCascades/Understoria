@@ -33,9 +33,16 @@ function humanizeDuration(minutes: number): string {
 export function EventTemplatePicker({
   selectedId,
   onSelect,
+  layout = "default",
 }: {
   selectedId: string | null;
   onSelect: (templateId: string | null) => void;
+  /** "default" renders the gallery's responsive grid (1/2/3 columns
+   *  by breakpoint); "rail" forces single-column for when the picker
+   *  is docked in a narrow side rail (e.g. EventNew at lg+, where the
+   *  rail is ~380px and 3-up would crush each card). Mirrors
+   *  TemplatePicker's prop of the same name. */
+  layout?: "default" | "rail";
 }) {
   const { t, i18n } = useTranslation();
   const lang = i18n.resolvedLanguage ?? "en";
@@ -77,7 +84,13 @@ export function EventTemplatePicker({
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul
+        className={`grid gap-3 ${
+          layout === "rail"
+            ? "grid-cols-1"
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        }`}
+      >
         {visible.length === 0 ? (
           <li className="col-span-full text-sm text-moss-600 dark:text-moss-300">
             {t("events.templates.filters.empty")}

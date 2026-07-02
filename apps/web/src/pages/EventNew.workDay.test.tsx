@@ -145,6 +145,25 @@ function setInput(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
+/** Set the start date/time inputs to a safely-future timestamp
+ *  (tomorrow 10:00 local). The start time begins EMPTY by design
+ *  (Part 4: no silent default on a permanent signed record), so
+ *  every submit path must pick one. */
+function fillFutureStart() {
+  const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const dateInput = container.querySelector(
+    'form input[type="date"]',
+  ) as HTMLInputElement;
+  const timeInput = container.querySelector(
+    'form input[type="time"]',
+  ) as HTMLInputElement;
+  act(() => {
+    setInput(dateInput, date);
+    setInput(timeInput, "10:00");
+  });
+}
+
 describe("EventNew — work-day prefill", () => {
   it("prefills the banner, title, and category for an organizer with ?projectId", async () => {
     render("/events/new?projectId=proj-1");
@@ -169,6 +188,7 @@ describe("EventNew — work-day prefill", () => {
       (i) => i.type === "text",
     );
     setInput(textInputs[1], "Community room");
+    fillFutureStart();
     const form = container.querySelector("form") as HTMLFormElement;
     act(() => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
@@ -197,6 +217,7 @@ describe("EventNew — work-day prefill", () => {
       (i) => i.type === "text" && i !== titleInput,
     ) as HTMLInputElement;
     setInput(locInput, "Somewhere");
+    fillFutureStart();
     const form = container.querySelector("form") as HTMLFormElement;
     act(() => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
