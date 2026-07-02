@@ -311,6 +311,14 @@ export default function ProjectDetailPage() {
     isPrimaryOrganizer && project.coOrganizerKeys.length > 0 &&
     project.status !== "completed" && project.status !== "archived";
   const showStepDown = isOrg && !isPrimaryOrganizer;
+  // Pause (active only) and Clone (active / paused / completed) live
+  // inside the "Manage project" disclosure. Planning has its CTA in the
+  // PlanningBanner; archived offers neither (Unarchive is in the kebab).
+  const showLifecycleControls =
+    isOrg &&
+    (project.status === "active" ||
+      project.status === "paused" ||
+      project.status === "completed");
   const percent =
     project.targetHours > 0
       ? Math.min(
@@ -455,13 +463,23 @@ export default function ProjectDetailPage() {
       )}
 
       {/* Phase 2.2: 2-pane layout at lg+ — meta (overview card +
-          organizer / co-organizer / handoff controls) docks in a
-          320px right sidebar that sticks to the viewport; the main
-          reading column hosts the high-volume scrollable sections
-          (error → announcements → tasks → add-task forms → history).
+          roster + next-work-day glance) docks in a 320px right
+          sidebar that sticks to the viewport; the main reading
+          column hosts the high-volume scrollable sections
+          (error → tasks → add-task forms → work days →
+          announcements → history → governance).
           Below lg the `lg:*` classes are inert and the grid collapses
-          to single-column DOM order — overview → controls → error →
-          announcements → tasks → ... — matching the pre-2.2 layout.
+          to single-column DOM order. To keep tasks within one swipe
+          on a phone, the rail is split into two mobile groups:
+          RailPrimary (title, chips + kebab, description, message
+          button, progress bar, state banners) stays at the top —
+          it's the visible part of the `aside` below — while
+          RailSecondary (sparkline, created/area/deadline/contributors
+          grid, Working-alongside roster) is `hidden lg:block` here
+          and re-renders `lg:hidden` AFTER the main column's content.
+          Two render sites, never CSS `order`, so mobile DOM order
+          matches mobile visual order (WCAG 2.4.3 — same pattern as
+          Board.tsx's filter rails, see Board.readingOrder.test.tsx).
 
           The sidebar `aside` is its own scroll context at lg+ so an
           overflowing meta panel doesn't push tasks off-screen. The
@@ -553,28 +571,22 @@ export default function ProjectDetailPage() {
                   percent,
                 })}
               </p>
-              <div className="mt-3 text-canopy-700 dark:text-canopy-300">
-                <ProjectSparkline daily={momentum.daily} />
-              </div>
             </div>
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <Field label={t("projects.detail.createdLabel")}>
-                {formatRelativeTime(project.createdAt)}
-              </Field>
-              {project.locationZone && (
-                <Field label={t("projects.detail.area", { area: project.locationZone })}>
-                  {project.locationZone}
-                </Field>
-              )}
-              {project.deadline && (
-                <Field label={t("projects.detail.deadline")}>
-                  {formatDeadline(project.deadline)}
-                </Field>
-              )}
-              <Field label={t("projects.detail.contributors", { count: closure.contributorCount })}>
-                {closure.contributorCount}
-              </Field>
-            </dl>
+            {/* Desktop copy of the secondary meta (sparkline + created/
+                area/deadline/contributors grid). On mobile this copy is
+                hidden and the SAME block re-renders after the main
+                column (see the `lg:hidden` copy below the main column),
+                so a phone visitor reaches the task list without
+                scrolling past stats. Two render sites — NOT CSS
+                `order` — so mobile DOM order matches visual order
+                (WCAG 2.4.3; see Board.tsx's filter-rail precedent). */}
+            <div className="hidden lg:block">
+              <ProjectStatsBlock
+                momentum={momentum}
+                project={project}
+                closure={closure}
+              />
+            </div>
             {showCompletionMoment && (
               <CompletionMoment closure={closure} isOrg={isOrg} />
             )}
@@ -601,7 +613,11 @@ export default function ProjectDetailPage() {
             )}
           </div>
 
-          <WorkingAlongsideCard people={workingAlongside} />
+          {/* Desktop copy — on mobile the roster re-renders below the
+              main column together with the stats block. */}
+          <div className="hidden lg:block">
+            <WorkingAlongsideCard people={workingAlongside} />
+          </div>
 
           <NextWorkDayGlance project={project} />
         </aside>
@@ -628,16 +644,9 @@ export default function ProjectDetailPage() {
             </Link>
           )}
 
-          <AnnouncementSection
-            project={project}
-            isOrg={isOrg}
-            memberMap={memberMap}
-            nodeId={nodeId}
-            currentKey={currentMember?.publicKey}
-          />
-
-          <WorkDaysSection project={project} isOrg={isOrg} />
-
+          {/* Tasks are the first main-column content after the error /
+              adoption banners — the work itself outranks its context
+              (announcements and work days follow the list + forms). */}
           <section className="mb-4">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
               {t("projects.detail.tasks")}
@@ -793,6 +802,16 @@ export default function ProjectDetailPage() {
               <BulkTaskForm project={project} nodeId={nodeId} onRun={run} />
             )}
 
+          <WorkDaysSection project={project} isOrg={isOrg} />
+
+          <AnnouncementSection
+            project={project}
+            isOrg={isOrg}
+            memberMap={memberMap}
+            nodeId={nodeId}
+            currentKey={currentMember?.publicKey}
+          />
+
           {(project.status === "archived" || project.status === "completed") && (
             <HistoryTimeline projectId={project.id} memberMap={memberMap} />
           )}
@@ -815,20 +834,28 @@ export default function ProjectDetailPage() {
               />
             )}
 
-          {isOrg && <OrganizerControls project={project} onRun={run} />}
-
           {isOrg && !isPrimaryOrganizer && <CoOrganizerCapabilityCard />}
 
-          {/* Low-frequency governance verbs (invite/handoff/step-down)
-              collapsed behind one "Manage project" disclosure so the
-              high-volume reading column isn't buried under them. Rendered
-              only when at least one inner section would show. */}
-          {(showCoOrgManagement || showHandoff || showStepDown) && (
+          {/* Low-frequency governance + lifecycle verbs (pause/clone,
+              invite/handoff/step-down) collapsed behind one "Manage
+              project" disclosure so the high-volume reading column isn't
+              buried under them. Rendered only when at least one inner
+              section would show. Pause + Clone (with their note/title
+              forms) moved in here from a former standalone card; the
+              one-click verbs (Mark complete / Resume / Archive) live in
+              the header overflow menu instead. */}
+          {(showLifecycleControls ||
+            showCoOrgManagement ||
+            showHandoff ||
+            showStepDown) && (
             <details className="card mb-4">
               <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-600 marker:hidden hover:underline dark:text-moss-300">
                 {t("projects.manage.title")}
               </summary>
               <div className="mt-3 flex flex-col gap-4">
+                {showLifecycleControls && (
+                  <OrganizerControls project={project} onRun={run} />
+                )}
                 {showCoOrgManagement && (
                   <CoOrganizerSection
                     project={project}
@@ -861,6 +888,27 @@ export default function ProjectDetailPage() {
               </div>
             </details>
           )}
+
+          {/* Mobile copy of the rail's secondary meta (RailSecondary):
+              sparkline + created/area/deadline/contributors grid +
+              Working-alongside roster. Deferred to AFTER the main
+              column's content so a phone visitor reaches tasks first;
+              the desktop copies above are `hidden lg:block`. Rendered
+              in DOM exactly where it appears visually — no CSS `order`
+              (WCAG 2.4.3). */}
+          <div className="lg:hidden">
+            <div className="card mb-4">
+              <ProjectStatsBlock
+                momentum={momentum}
+                project={project}
+                closure={closure}
+              />
+            </div>
+            <WorkingAlongsideCard
+              people={workingAlongside}
+              headingId="working-alongside-title-mobile"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -870,7 +918,8 @@ export default function ProjectDetailPage() {
 // Stable id on the announcement textarea so the completion moment's
 // organizer nudge can scroll to and focus it across the sidebar/main
 // column split (they live in different subtrees, so a ref would have to
-// be threaded through the whole page).
+// be threaded through the whole page). The textarea sits inside a
+// collapsed <details>; the nudge opens the disclosure before focusing.
 const ANNOUNCEMENT_INPUT_ID = "project-announcement-input";
 
 // Render an event start as "<date> · <time>" in the active locale —
@@ -1102,6 +1151,11 @@ function CompletionMoment({
             onClick={() => {
               const el = document.getElementById(ANNOUNCEMENT_INPUT_ID);
               if (!el) return;
+              // The compose form lives behind a <details> disclosure —
+              // open it (a no-op when already open) before scrolling so
+              // the textarea is visible and focusable.
+              const disclosure = el.closest("details");
+              if (disclosure) disclosure.open = true;
               el.scrollIntoView({ behavior: "smooth", block: "center" });
               (el as HTMLTextAreaElement).focus({ preventScroll: true });
             }}
@@ -1185,6 +1239,48 @@ function Field({
   );
 }
 
+// Secondary project meta — the momentum sparkline plus the created /
+// area / deadline / contributors grid. One component, two render sites:
+// inside the overview card at lg+ (`hidden lg:block`) and in a
+// standalone card after the main column below lg (`lg:hidden`), so the
+// two copies can never drift. Stateless by design — duplication is safe.
+function ProjectStatsBlock({
+  momentum,
+  project,
+  closure,
+}: {
+  momentum: ReturnType<typeof computeProjectMomentum>;
+  project: Project;
+  closure: ProjectClosure;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <div className="mt-3 text-canopy-700 dark:text-canopy-300">
+        <ProjectSparkline daily={momentum.daily} />
+      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <Field label={t("projects.detail.createdLabel")}>
+          {formatRelativeTime(project.createdAt)}
+        </Field>
+        {project.locationZone && (
+          <Field label={t("projects.detail.area", { area: project.locationZone })}>
+            {project.locationZone}
+          </Field>
+        )}
+        {project.deadline && (
+          <Field label={t("projects.detail.deadline")}>
+            {formatDeadline(project.deadline)}
+          </Field>
+        )}
+        <Field label={t("projects.detail.contributors", { count: closure.contributorCount })}>
+          {closure.contributorCount}
+        </Field>
+      </dl>
+    </>
+  );
+}
+
 // Names-only roster of members with hands on a task here. No hours, no
 // per-member counts, no ranking (no-leaderboards). Hidden entirely when
 // empty — an absent roster never reads as "nobody helped"
@@ -1192,15 +1288,19 @@ function Field({
 // `lib/projectRoster.ts`; this just renders the resolved, sorted list.
 function WorkingAlongsideCard({
   people,
+  headingId = "working-alongside-title",
 }: {
   people: { key: string; name: string }[];
+  /** Heading element id — the mobile copy passes a distinct id so the
+   *  two render sites never produce duplicate ids in the document. */
+  headingId?: string;
 }) {
   const { t } = useTranslation();
   if (people.length === 0) return null;
   return (
-    <section className="card mb-4" aria-labelledby="working-alongside-title">
+    <section className="card mb-4" aria-labelledby={headingId}>
       <h2
-        id="working-alongside-title"
+        id={headingId}
         className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
       >
         {t("projects.detail.workingAlongside.title")}
@@ -1224,6 +1324,13 @@ function WorkingAlongsideCard({
   );
 }
 
+// Pause (with its optional note) and Clone (with its title + re-invite
+// checklist). Mounted as the first section inside the "Manage project"
+// disclosure — these are low-frequency lifecycle verbs, so they live
+// behind the same summary as co-organizer management / handoff /
+// step-down rather than in an always-visible card. The one-click verbs
+// (Mark complete / Resume / Archive / Unarchive) live in the header
+// overflow menu.
 function OrganizerControls({
   project,
   onRun,
@@ -1274,18 +1381,18 @@ function OrganizerControls({
 
   // Draft / planning projects render their organizer CTA through the
   // PlanningBanner above (see `planningBanner.title` / `.bodyOrganizer`
-  // / "Launch project" button at line ~580). This controls card has no
-  // additional actions to offer until the project is active, so we
-  // skip rendering it entirely rather than leaving an empty card with
-  // its own margin.
+  // / "Launch project" button). This section has no additional actions
+  // to offer until the project is active, so we skip rendering it.
   // Archived projects' only former action here — Unarchive — moved to
   // the header overflow menu, and Clone isn't offered for archived (the
-  // gate below). With nothing left to render, skip the card entirely.
+  // gate below). With nothing left to render, skip entirely. The
+  // `showLifecycleControls` mount gate mirrors this; the guard stays as
+  // belt-and-braces.
   if (project.status === "planning" || project.status === "archived")
     return null;
 
   return (
-    <div className="card mb-4 flex flex-col gap-3">
+    <section className="flex flex-col gap-3">
       {project.status === "active" && (
         <div className="flex flex-wrap gap-2">
           <button
@@ -1467,7 +1574,7 @@ function OrganizerControls({
           </button>
         </form>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -1868,6 +1975,10 @@ function AddTaskForm({
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
+  // Collapsed by default behind a "+ Add task" disclosure — the 6-field
+  // form only earns its vertical space when the organizer is actually
+  // adding a task. Same disclosure pattern as its sibling BulkTaskForm.
+  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [hours, setHours] = useState("1");
@@ -1875,6 +1986,12 @@ function AddTaskForm({
   const [category, setCategory] = useState<ProjectCategory>(project.category);
   const [skills, setSkills] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  // Expanding is an explicit "I'm adding a task now" — drop focus into
+  // the first field so typing can start immediately.
+  useEffect(() => {
+    if (open) titleInputRef.current?.focus();
+  }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -1901,7 +2018,24 @@ function AddTaskForm({
       setUrgency("low");
       setCategory(project.category);
       setSkills("");
+      // Collapse after a successful add — the new task appearing in the
+      // list above is the success feedback; the form has done its job.
+      setOpen(false);
     }
+  }
+
+  if (!open) {
+    return (
+      <div className="mb-4 text-center">
+        <button
+          type="button"
+          className="text-sm text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+          onClick={() => setOpen(true)}
+        >
+          {t("projects.task.addTaskButton")}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -1915,6 +2049,7 @@ function AddTaskForm({
             {t("projects.task.addTask.fieldTitle")}
           </span>
           <input
+            ref={titleInputRef}
             className="input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -1992,15 +2127,24 @@ function AddTaskForm({
             placeholder={t("projects.task.addTask.fieldSkillsPlaceholder")}
           />
         </label>
-        <button
-          type="submit"
-          className="btn-primary self-end"
-          disabled={submitting}
-        >
-          {submitting
-            ? t("projects.task.addTask.submitting")
-            : t("projects.task.addTask.submit")}
-        </button>
+        <div className="flex gap-2 self-end">
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={() => setOpen(false)}
+          >
+            {t("common.cancel")}
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={submitting}
+          >
+            {submitting
+              ? t("projects.task.addTask.submitting")
+              : t("projects.task.addTask.submit")}
+          </button>
+        </div>
       </form>
     </section>
   );
@@ -2179,6 +2323,14 @@ function AnnouncementSection({
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  // The compose form is collapsed behind a native <details> disclosure
+  // (organizer-only; the announcement CARDS below stay visible — they
+  // are community content, only the form folds away). A native details
+  // rather than conditional rendering keeps the textarea in the DOM, so
+  // CompletionMoment's cross-subtree "say thanks" CTA can still find it
+  // by id, open the disclosure, and focus it.
+  const composeRef = useRef<HTMLDetailsElement>(null);
+  const bodyInputRef = useRef<HTMLTextAreaElement>(null);
   const announcements = useLiveQuery(
     () => listAnnouncements(project.id),
     [project.id],
@@ -2202,6 +2354,9 @@ function AnnouncementSection({
       try {
         await postAnnouncement(project.id, currentKey, body, nodeId);
         setBody("");
+        // Collapse after a successful post — the new announcement card
+        // rendering below is the success feedback.
+        if (composeRef.current) composeRef.current.open = false;
       } catch {
         // Errors are swallowed here; the user sees the field still filled.
       } finally {
@@ -2219,26 +2374,40 @@ function AnnouncementSection({
         {t("projects.announcements.title")}
       </h2>
       {isOrg && (
-        <form onSubmit={handleSubmit} className="card mb-3 flex flex-col gap-2">
-          <textarea
-            id={ANNOUNCEMENT_INPUT_ID}
-            className="input min-h-20"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            maxLength={2000}
-            placeholder={t("projects.announcements.placeholder")}
-          />
-          <button
-            type="submit"
-            className="btn-primary self-end"
-            disabled={submitting || !body.trim()}
-            aria-busy={submitting}
-          >
-            {submitting
-              ? t("projects.announcements.submitting")
-              : t("projects.announcements.submit")}
-          </button>
-        </form>
+        <details
+          ref={composeRef}
+          className="card mb-3"
+          onToggle={(e) => {
+            // Opening is an explicit "I'm writing now" — drop focus into
+            // the textarea so typing can start immediately.
+            if (e.currentTarget.open) bodyInputRef.current?.focus();
+          }}
+        >
+          <summary className="cursor-pointer text-sm font-medium text-canopy-700 marker:hidden hover:underline dark:text-canopy-300">
+            {t("projects.announcements.composeButton")}
+          </summary>
+          <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-2">
+            <textarea
+              ref={bodyInputRef}
+              id={ANNOUNCEMENT_INPUT_ID}
+              className="input min-h-20"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              maxLength={2000}
+              placeholder={t("projects.announcements.placeholder")}
+            />
+            <button
+              type="submit"
+              className="btn-primary self-end"
+              disabled={submitting || !body.trim()}
+              aria-busy={submitting}
+            >
+              {submitting
+                ? t("projects.announcements.submitting")
+                : t("projects.announcements.submit")}
+            </button>
+          </form>
+        </details>
       )}
       {announcements.length > 0 && (
         <ul className="flex flex-col gap-2">
