@@ -25,9 +25,12 @@ interface TrustChipProps {
   status: TrustStatus;
   /** Optional distinct-voucher count. When present, the chip shows
    *  "Pending (1/2)" or "Trusted (3 vouches)" instead of just the
-   *  label, which is more useful when the chip appears next to a
-   *  name in a list (Board, AttentionSection) than the bare binary
-   *  state. */
+   *  label.
+   *
+   *  IMPORTANT — operator ruling + `no-leaderboards`: pass `count`
+   *  ONLY on the member's OWN Profile (seeing your own progress to
+   *  trusted is fine). Never on MemberDetail or any surface showing
+   *  ANOTHER member — a vouch tally there is a comparable score. */
   count?: number;
   /** Smaller variant for inline use next to a name in a list, where
    *  the full chip would feel heavy. Defaults to false (regular

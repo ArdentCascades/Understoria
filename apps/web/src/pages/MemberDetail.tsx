@@ -9,16 +9,39 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+/*
+ * OPERATOR RULING (2026-07) + design principle `no-leaderboards`
+ * ("Progress is tracked at the community level. The unit of
+ * measurement is us, not me."):
+ *
+ *   A member page viewed by OTHERS must not display stats or badges
+ *   people can compare themselves to.
+ *
+ * Concretely, this page must never (re)gain:
+ *   - vouch COUNTS ("3 vouches", "1/2 vouches") — trust is shown
+ *     qualitatively via <TrustChip status={...}/> with NO `count`;
+ *   - the "Vouched for by" voucher list (its length is a de facto
+ *     score, and its timestamps are a browsable activity record —
+ *     see `no-activity-search`);
+ *   - exchange tallies, hour totals, streaks, achievement badges
+ *     (AchievementBadge is for the member's OWN Profile only), or
+ *     join-date-as-seniority.
+ *
+ * What IS welcome here: matching info (skills, availability, area),
+ * the qualitative trust status, and the Vouch / Block actions. Trust
+ * GATING logic (trustStatusWithInvites) is untouched by the ruling —
+ * only comparable DISPLAY is banned. A tripwire test lives in
+ * MemberDetail.test.tsx.
+ */
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { BackLink } from "@/components/BackLink";
-import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
+import { trustStatusWithInvites } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
-import { TrustedByList } from "@/components/TrustedByList";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
@@ -59,13 +82,6 @@ export default function MemberDetailPage() {
   const member = useMemo(
     () => members.find((m) => m.publicKey === publicKey) ?? null,
     [members, publicKey],
-  );
-  const memberVouchers = useMemo(
-    () =>
-      member
-        ? vouchersFor(member.publicKey, { vouches, invites })
-        : new Map(),
-    [member, vouches, invites],
   );
   const trust = useMemo(
     () =>
@@ -153,8 +169,8 @@ export default function MemberDetailPage() {
     <div className="px-4 py-6">
       {/* The one back affordance on this page (the old footer "Back to
           board" link folded into it). Members are reached from many
-          surfaces — board posts, project rosters, conversations,
-          trusted-by lists — so back returns to wherever the profile
+          surfaces — board posts, project rosters, conversations —
+          so back returns to wherever the profile
           was opened from; a cold entry (shared deep link) falls back
           to the Board, the surface members are discovered on. */}
       <BackLink
@@ -172,7 +188,13 @@ export default function MemberDetailPage() {
             {shortKey(member.publicKey)}
           </p>
           <div className="mt-2">
-            {trust && <TrustChip status={trust} count={memberVouchers.size} />}
+            {/* Qualitative trust status ONLY — no `count` prop. The
+                chip used to read "Trusted (3 vouches)" / "New here
+                (1/2 vouches)"; a vouch tally on someone else's page
+                is a comparable score, banned by the operator ruling
+                + `no-leaderboards` (see file header). The count
+                variant remains fine on the member's OWN Profile. */}
+            {trust && <TrustChip status={trust} />}
           </div>
         </div>
       </header>
@@ -215,18 +237,15 @@ export default function MemberDetailPage() {
         </dl>
       </section>
 
-      <section className="card mb-4" aria-labelledby="trusted-by-title">
-        <h2
-          id="trusted-by-title"
-          className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
-        >
-          {t("trustedBy.title")}
-        </h2>
-        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-          {t("trustedBy.intro")}
-        </p>
-        <TrustedByList vouchers={memberVouchers} members={members} />
-      </section>
+      {/* The "Vouched for by" section (TrustedByList) was removed
+          here per the operator ruling + `no-leaderboards`: a roster
+          of vouchers is a countable trust score in list form, its
+          per-vouch timestamps were a browsable activity record
+          (`no-activity-search`), and its empty state ("No one has
+          vouched for this member yet") shamed newcomers
+          (`solidarity-not-shame`). Trust stays visible as the
+          qualitative TrustChip above; vouch GATING below is
+          unchanged. Do not restore the list. */}
 
       <section className="card mb-4" aria-labelledby="vouch-section-title">
         <h2

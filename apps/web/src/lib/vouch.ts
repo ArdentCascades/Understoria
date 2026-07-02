@@ -138,8 +138,10 @@ export interface VoucherRef {
 
 /**
  * The distinct set of voucher keys for `memberKey`, plus what kind of
- * vouch each one was. Used by the trusted-by list in MemberDetail and
- * by trust-count displays.
+ * vouch each one was. Feeds trust computation and the own-Profile
+ * trust-count display. (Per the operator ruling + `no-leaderboards`,
+ * voucher sets/counts must NOT be displayed on OTHER members' pages —
+ * MemberDetail shows only the qualitative trust status.)
  *
  * If a voucher both invited someone AND signed a manual vouch later,
  * we keep the manual one (it's stronger as a signal: "I still vouch
