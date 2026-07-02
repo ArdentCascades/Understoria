@@ -564,7 +564,14 @@
     "conversation": {
       "headerMenuLabel": "More actions",
       "headerMenuBlock": "Block contact",
-      "headerMenuUnblock": "Unblock {{name}}"
+      "headerMenuUnblock": "Unblock {{name}}",
+      "aboutPost": "about: {{title}}",
+      "aboutPostUnknown": "about a post"
+    },
+    "compose": {
+      "aboutHint": "You're writing about: {{title}}",
+      "aboutHintUnknown": "You're writing about a post",
+      "aboutDismiss": "Don't attach this post"
     },
     "noReadReceipts": "Messages are private. No read receipts.",
     "search": {

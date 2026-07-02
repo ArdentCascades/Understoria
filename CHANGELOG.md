@@ -45,6 +45,23 @@ include breaking changes.
   description of what lives there) as a peer of the governance
   cards, so the 20px header gear is no longer the only doorway to
   /settings; the gear stays for muscle memory.
+- **Conversations show which post they're about.** "Reach out" on a
+  post now arms the conversation with `?about=<postId>`: a dismissible
+  hint above the composer shows "You're writing about: {title}", and
+  the first message sent carries the post reference — so the OTHER
+  party's thread finally shows which offer/need the conversation
+  concerns (top finding of the wayfinding audit). The reference rides
+  INSIDE the encrypted payload as a versioned envelope
+  (`{"v":1,"text","aboutPostId"}`), never as a cleartext column — a
+  cleartext topic link would widen what device access reveals beyond
+  sender/recipient/timestamp (privacy-precondition). Messages without
+  a reference stay bare strings, so legacy threads keep working;
+  decode is try-parse-with-fallback. Each referencing message renders
+  a quiet "about: {title} →" chip linking to the post (generic
+  "about a post →" when the post isn't locally known), per-message
+  rather than a sticky header so a thread that touches several posts
+  over time stays truthful. Conversation-list previews and message
+  search operate on the envelope's text, never raw JSON.
 - **EventNew create-form parity batch (PR #287).** Five refinements
   bringing the event-creation form to parity with ProjectNew (the
   house create-form pattern), plus one silent-wrong-time fix.

@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
@@ -42,7 +42,7 @@ import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
 export default function ConversationPage() {
   const { memberKey } = useParams<{ memberKey: string }>();
-  const { currentMember, members, lockState, blockedKeys } = useApp();
+  const { currentMember, members, posts, lockState, blockedKeys } = useApp();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
@@ -68,6 +68,43 @@ export default function ConversationPage() {
   const otherName =
     members.find((m) => m.publicKey === otherKey)?.displayName ??
     t("common.memberFallback");
+
+  // Post-context arming — PostDetail's "Reach out" links here with
+  // `?about=<postId>`. While armed, the NEXT message sent carries the
+  // post reference inside its encrypted payload (see
+  // lib/messageEnvelope.ts) so the other party's copy of the thread
+  // shows which offer/need this conversation is about. The URL param
+  // itself is the armed state: it survives a refresh, and stripping
+  // it (after the first send, or via the dismiss X) disarms exactly
+  // once — later messages in the session don't repeat the reference.
+  const aboutPostId = searchParams.get("about");
+  const aboutPost = aboutPostId
+    ? posts.find((p) => p.id === aboutPostId) ?? null
+    : null;
+  const disarmAbout = useCallback(() => {
+    // Functional update — handleSend may race the debounced `q` sync
+    // below; reading prev inside the updater keeps both edits.
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("about");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
+
+  // Titles for in-thread context chips: a conversation can reference
+  // several posts over its lifetime, so look up every referenced id.
+  const postTitleById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const m of messages) {
+      if (!m.aboutPostId) continue;
+      const post = posts.find((p) => p.id === m.aboutPostId);
+      if (post) map.set(m.aboutPostId, post.title);
+    }
+    return map;
+  }, [messages, posts]);
 
   // Reactive blocked-state lookup so the menu item swaps between
   // "Block contact" and "Unblock <name>" the moment the underlying
@@ -114,10 +151,18 @@ export default function ConversationPage() {
   // without burning history on every keystroke.
   useEffect(() => {
     const id = window.setTimeout(() => {
-      const next = new URLSearchParams(searchParams);
-      if (query.trim() === "") next.delete("q");
-      else next.set("q", query);
-      setSearchParams(next, { replace: true });
+      // Functional update so a debounce firing right after a send
+      // can't resurrect the just-stripped `about` param from a stale
+      // searchParams capture.
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (query.trim() === "") next.delete("q");
+          else next.set("q", query);
+          return next;
+        },
+        { replace: true },
+      );
       setActiveMatchIdx(0);
     }, 250);
     return () => window.clearTimeout(id);
@@ -157,8 +202,13 @@ export default function ConversationPage() {
     setSending(true);
     setError(null);
     try {
-      await sendMessage(currentMember.publicKey, otherKey, text);
+      await sendMessage(currentMember.publicKey, otherKey, text, {
+        aboutPostId: aboutPostId ?? undefined,
+      });
       setText("");
+      // First message of the visit carried the post reference —
+      // disarm so follow-up messages (and a refresh) don't repeat it.
+      if (aboutPostId) disarmAbout();
       await loadMessages();
     } catch (err) {
       setError(
@@ -345,6 +395,27 @@ export default function ConversationPage() {
                   }}
                   className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${baseTone}${ring}`}
                 >
+                  {/* Post-context chip: rendered on each message that
+                      carried a reference (rather than one sticky
+                      header) — a thread can touch several posts over
+                      time, and per-message chips stay truthful about
+                      WHERE the topic entered the conversation. Title
+                      comes from the local post record; a post we
+                      don't know locally (federation edge) gets the
+                      generic label and PostDetail handles not-found. */}
+                  {m.aboutPostId && (
+                    <Link
+                      to={`/post/${encodeURIComponent(m.aboutPostId)}`}
+                      className="mb-1 block truncate rounded-lg bg-moss-900/5 px-2 py-1 text-xs font-medium underline-offset-2 hover:underline dark:bg-white/10"
+                    >
+                      {postTitleById.has(m.aboutPostId)
+                        ? t("messages.conversation.aboutPost", {
+                            title: postTitleById.get(m.aboutPostId),
+                          })
+                        : t("messages.conversation.aboutPostUnknown")}
+                      {" →"}
+                    </Link>
+                  )}
                   <p className="whitespace-pre-wrap">
                     {m.plaintext === null ? (
                       t("messages.decryptionFailed")
@@ -364,6 +435,28 @@ export default function ConversationPage() {
           </div>
         )}
       </div>
+
+      {/* Pre-send hint while the ?about= param is armed: tells the
+          member their next message will carry the post reference,
+          with an X to detach it (they may have arrived from a post
+          but want to talk about something else). */}
+      {aboutPostId && (
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-canopy-50 pl-3 text-xs text-canopy-900 dark:bg-canopy-900/40 dark:text-canopy-100">
+          <p className="min-w-0 flex-1 truncate py-2">
+            {aboutPost
+              ? t("messages.compose.aboutHint", { title: aboutPost.title })
+              : t("messages.compose.aboutHintUnknown")}
+          </p>
+          <button
+            type="button"
+            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl hover:bg-canopy-100 dark:hover:bg-canopy-800/60"
+            aria-label={t("messages.compose.aboutDismiss")}
+            onClick={disarmAbout}
+          >
+            {"✕"}
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSend} className="mt-3 flex gap-2">
         <label className="flex-1">

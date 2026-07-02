@@ -564,7 +564,14 @@
     "conversation": {
       "headerMenuLabel": "Más acciones",
       "headerMenuBlock": "Bloquear contacto",
-      "headerMenuUnblock": "Desbloquear a {{name}}"
+      "headerMenuUnblock": "Desbloquear a {{name}}",
+      "aboutPost": "sobre: {{title}}",
+      "aboutPostUnknown": "sobre una publicación"
+    },
+    "compose": {
+      "aboutHint": "Estás escribiendo sobre: {{title}}",
+      "aboutHintUnknown": "Estás escribiendo sobre una publicación",
+      "aboutDismiss": "No adjuntar esta publicación"
     },
     "noReadReceipts": "Los mensajes son privados. Sin confirmacion de lectura.",
     "search": {
