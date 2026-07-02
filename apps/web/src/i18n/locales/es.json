@@ -716,6 +716,7 @@
       "mine": "Míos"
     },
     "task": {
+      "addTaskButton": "+ Añadir tarea",
       "claim": "Tomar esta tarea",
       "openDetail": "Abrir tarea ›",
       "openDetailWithCount_one": "Abrir tarea · {{count}} comentario ›",
@@ -845,6 +846,7 @@
     },
     "announcements": {
       "title": "Novedades",
+      "composeButton": "Escribir una novedad",
       "placeholder": "Comparte una novedad con la comunidad...",
       "submit": "Publicar novedad",
       "submitting": "Publicando...",

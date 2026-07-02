@@ -716,6 +716,7 @@
       "mine": "Mine"
     },
     "task": {
+      "addTaskButton": "+ Add task",
       "claim": "Claim this task",
       "openDetail": "Open task ›",
       "openDetailWithCount_one": "Open task · {{count}} comment ›",
@@ -845,6 +846,7 @@
     },
     "announcements": {
       "title": "Updates",
+      "composeButton": "Write an update",
       "placeholder": "Share an update with the community...",
       "submit": "Post update",
       "submitting": "Posting...",

@@ -224,6 +224,30 @@ include breaking changes.
   unchanged. Sighted scanning aid only.
 
 ### Changed
+- **Project detail-page ordering reflow — tasks first, forms
+  disclosed.** Four screen-real-estate fixes to
+  `ProjectDetail.tsx`: (1) on mobile the rail's secondary meta
+  (momentum sparkline, created/area/deadline/contributors grid,
+  Working-alongside roster) now renders AFTER the main column so
+  a phone visitor reaches the task list without scrolling past
+  stats — two render sites (`hidden lg:block` / `lg:hidden`),
+  never CSS `order`, so mobile DOM order matches visual order
+  (WCAG 2.4.3; same pattern as the Board filter rails from
+  PR #199, locked by `ProjectDetail.reflow.test.tsx`). Title,
+  chips + kebab, description, message-organizer button, progress
+  bar, and the completion/paused banners stay at the top. (2)
+  AddTaskForm collapses behind a "+ Add task" disclosure
+  (mirror of BulkTaskForm's); expanding focuses the first field,
+  a successful add collapses it. (3) The Updates
+  (announcements) section moved below the task list + task
+  forms, and its compose form folded behind a native "Write an
+  update" `<details>` — announcement cards stay visible; the
+  completion moment's "say thanks" CTA opens the disclosure
+  before focusing the textarea. (4) Pause + Clone (with their
+  note/title/re-invite forms) moved into the "Manage project"
+  disclosure; the standalone organizer-controls card is gone.
+  2 new i18n keys in en + es; parity passes. Desktop (`lg+`)
+  layout unchanged.
 - **Bottom-nav pinned to viewport on mobile + iOS safe-area
   inset (PR #201).** `BottomNav` switched from `sticky bottom-0`
   (which sticks to the bottom of the containing block) to
