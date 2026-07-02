@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { act } from "react";
+import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -82,10 +82,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function render() {
+function render(node: ReactNode = <BoardNudges />) {
   act(() => {
     root = createRoot(container);
-    root.render(<BoardNudges />);
+    root.render(node);
   });
 }
 
@@ -130,6 +130,27 @@ describe("BoardNudges orchestrator", () => {
     render();
     expect(container.textContent).toBe("");
     expect(container.querySelector("[data-testid]")).toBeNull();
+  });
+
+  // The `fallback` slot carries Board's ContextualHint so hint and
+  // nudge can never stack — one banner at a time, hint last in line.
+  it("renders the fallback when every prompt is resolved and hidden", () => {
+    render(<BoardNudges fallback={<div data-testid="hint" />} />);
+    expect(container.querySelector('[data-testid="hint"]')).not.toBeNull();
+  });
+
+  it("suppresses the fallback while a prompt is visible", () => {
+    status.profile = visibleWith(<div data-testid="profile" />);
+    render(<BoardNudges fallback={<div data-testid="hint" />} />);
+    expect(container.querySelector('[data-testid="profile"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="hint"]')).toBeNull();
+  });
+
+  it("holds the fallback back while any prompt is still loading (no hint flash)", () => {
+    status.keepAccess = { ready: false, visible: false, node: null };
+    render(<BoardNudges fallback={<div data-testid="hint" />} />);
+    expect(container.querySelector('[data-testid="hint"]')).toBeNull();
+    expect(container.textContent).toBe("");
   });
 
   it("full-order spot check: FirstAction visible wins over every lower visible prompt", () => {

@@ -89,6 +89,16 @@ export default function BoardPage() {
   // (not across reloads); a member who wants always-on can flip
   // it each session.
   const [showClaimed, setShowClaimed] = useState(false);
+  // Mobile-only "Filters" disclosure. Below sm (640px) the filter
+  // rail's selects stack full-width between the sticky search and the
+  // first card (~150px of chrome), so the rail collapses behind a
+  // loud full-width trigger there. At sm+ the rail lays out as a
+  // 3-across row and is always visible (the trigger is `sm:hidden`),
+  // so this state has no effect at wider viewports. Default
+  // collapsed; deliberately NOT persisted — session-local at most,
+  // matching the filter values themselves. Shared across tabs (the
+  // disclosure is one control; which rail it reveals follows the tab).
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   // Project-tab filters. Deliberately separate from the post-tab
   // category / urgency / zone filters above: a member might filter
   // Needs by `food` and want their Projects-tab category-filter to
@@ -266,6 +276,15 @@ export default function BoardPage() {
     onlyWithOpenTasks ||
     onlyNeedsMoreHands;
 
+  // How many project-tab filters are narrowing right now — feeds the
+  // mobile disclosure trigger's "Filters · N active" variant so a
+  // member never wonders why a collapsed rail is shortening the list.
+  const activeProjectFilterCount =
+    (projectCategoryFilter !== "" ? 1 : 0) +
+    (projectStatusFilter !== "" ? 1 : 0) +
+    (onlyWithOpenTasks ? 1 : 0) +
+    (onlyNeedsMoreHands ? 1 : 0);
+
   // Whether the member is carrying any task claims across projects —
   // gates the quiet "Tasks you're carrying" jump-off below the
   // archive link. Uses the same helper as the /my-tasks page so the
@@ -305,6 +324,14 @@ export default function BoardPage() {
   const postFiltersActive =
     categoryFilter !== "" || urgencyFilter !== "" || zoneFilter !== "";
 
+  // Post-tab twin of activeProjectFilterCount above. `showClaimed`
+  // is excluded for the same reason it's excluded from
+  // postFiltersActive — it widens the list, never narrows it.
+  const activePostFilterCount =
+    (categoryFilter !== "" ? 1 : 0) +
+    (urgencyFilter !== "" ? 1 : 0) +
+    (zoneFilter !== "" ? 1 : 0);
+
   const resetPostFilters = () => {
     setCategoryFilter("");
     setUrgencyFilter("");
@@ -333,13 +360,21 @@ export default function BoardPage() {
 
       {/* One calm prompt at a time, by priority — the orchestrator picks
           the highest-priority eligible Board nudge (or none) and never
-          flashes a lower one while a higher one is still resolving. */}
-      <BoardNudges />
-      <ContextualHint
-        settingKey="boardHintDismissed"
-        ariaLabel={t("hints.board.label")}
-        message={t("hints.board.message")}
-        technicalDetail={t("hints.board.technical")}
+          flashes a lower one while a higher one is still resolving.
+          ContextualHint rides along as the orchestrator's FALLBACK: it
+          renders only when every nudge has resolved to hidden, so the
+          Board never stacks two banners (nudge + hint). The hint keeps
+          its own dismiss persistence; only its turn-taking is governed
+          here. Nudge priority itself is unchanged. */}
+      <BoardNudges
+        fallback={
+          <ContextualHint
+            settingKey="boardHintDismissed"
+            ariaLabel={t("hints.board.label")}
+            message={t("hints.board.message")}
+            technicalDetail={t("hints.board.technical")}
+          />
+        }
       />
 
       {/* Phase 2.1 (revised): at lg+ the Board reflows into a 3-column
@@ -409,6 +444,21 @@ export default function BoardPage() {
             no `order-*` utilities required. The desktop-visible filter
             rail lives as an outer-grid child in col-1 below. */}
         <div className="contents min-w-0 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
+        {/* Mobile sticky header group: tablist + search stick TOGETHER
+            at top-0 so a member can flip NEED↔OFFER or search from
+            anywhere in a long scroll — previously only the search
+            stuck and switching tabs meant scrolling back up. ONE
+            container carries the shared backdrop-blur band so the
+            treatment is continuous across both rows. The mobile
+            Filters disclosure below is deliberately OUTSIDE this
+            group — only tablist + search stick. At lg+ the wrapper
+            dissolves (`lg:contents`) and the two children return to
+            being direct flex-column children, so the desktop sticky
+            story (search alone at top-4) is untouched. DOM order
+            inside the group is tablist → search, matching visual
+            order at every breakpoint (WCAG 2.4.3, PR #199). z-10
+            keeps the band under the FAB (z-20) and modal layers. */}
+        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:contents">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}
@@ -440,15 +490,16 @@ export default function BoardPage() {
           ))}
         </div>
 
-        {/* Sticky search: on mobile pins to top-0 so members can
-            search from anywhere in a long scroll instead of jumping
-            back to the page top. At lg+ pins at top-4 to match the
-            other rails (filters + AttentionSection). Wrapper carries
-            the grid placement + backdrop; the inner label keeps the
-            input width cap. `-mx-4 lg:mx-0` lets the backdrop bleed
-            to the viewport edge at mobile (cancelling the page's
-            px-4) while staying within the middle column at lg+. */}
-        <div className="sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:top-4 lg:mx-0 lg:mb-0 lg:px-0">
+        {/* Search row. On mobile it lives inside (and sticks with)
+            the sticky header group above — the group's wrapper
+            carries the backdrop band, so this row only needs its
+            mobile spacing. At lg+ the group wrapper is `contents`,
+            so this row is a flex-column child again and re-acquires
+            its own sticky-at-top-4 + backdrop treatment to match
+            the other rails (filters + AttentionSection) — the lg
+            behavior is byte-for-byte what shipped before the mobile
+            group existed. */}
+        <div className="mt-2 lg:sticky lg:top-4 lg:z-10 lg:mx-0 lg:mt-0 lg:bg-white/95 lg:px-0 lg:py-2 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/70 lg:dark:bg-moss-950/95 lg:dark:supports-[backdrop-filter]:bg-moss-950/70">
           <label className="block md:max-w-md">
             <span className="sr-only">
               {t(
@@ -470,43 +521,78 @@ export default function BoardPage() {
             />
           </label>
         </div>
+        </div>
+        {/* end mobile sticky header group */}
 
         {/* Mobile-visible filter rail copies. These sit between the
             search input and the list in DOM order, so on mobile
             (where the middle wrapper is `contents`) the page reads
-            attention → tablist → search → filter → list, and the
-            list never tab-reads before the controls that filter it.
-            `lg:hidden` keeps these out of the desktop layout where
-            the col-1 outer-grid copy below takes over. */}
+            attention → tablist → search → filters-toggle → filter →
+            list, and the list never tab-reads before the controls
+            that filter it. `lg:hidden` keeps these out of the
+            desktop layout where the col-1 outer-grid copy below
+            takes over.
+
+            Below sm the rail collapses behind the MobileFiltersToggle
+            trigger (see the component's comment for the affordance
+            rationale); the toggle is `sm:hidden` and the rail flips
+            to `hidden sm:block` while collapsed, so at sm..lg the
+            rail renders exactly as before with no trigger. Trigger
+            precedes rail in DOM — DOM order equals visual order in
+            every disclosure state (WCAG 2.4.3). This block is NOT
+            part of the sticky header group above on purpose: only
+            tablist + search stick. */}
         {tab !== "PROJECTS" && (
           <div className="lg:hidden">
-            <PostFilterRail
-              categoryFilter={categoryFilter}
-              setCategoryFilter={setCategoryFilter}
-              urgencyFilter={urgencyFilter}
-              setUrgencyFilter={setUrgencyFilter}
-              zoneFilter={zoneFilter}
-              setZoneFilter={setZoneFilter}
-              zones={zones}
-              claimedInScope={claimedInScope}
-              showClaimed={showClaimed}
-              setShowClaimed={setShowClaimed}
+            <MobileFiltersToggle
+              open={mobileFiltersOpen}
+              activeCount={activePostFilterCount}
+              controlsId="board-post-filters"
+              onToggle={() => setMobileFiltersOpen((v) => !v)}
             />
+            <div
+              id="board-post-filters"
+              className={mobileFiltersOpen ? "mt-2 sm:mt-0" : "hidden sm:block"}
+            >
+              <PostFilterRail
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                urgencyFilter={urgencyFilter}
+                setUrgencyFilter={setUrgencyFilter}
+                zoneFilter={zoneFilter}
+                setZoneFilter={setZoneFilter}
+                zones={zones}
+                claimedInScope={claimedInScope}
+                showClaimed={showClaimed}
+                setShowClaimed={setShowClaimed}
+              />
+            </div>
           </div>
         )}
 
         {tab === "PROJECTS" && (
           <div className="lg:hidden">
-            <ProjectFilterRail
-              projectCategoryFilter={projectCategoryFilter}
-              setProjectCategoryFilter={setProjectCategoryFilter}
-              projectStatusFilter={projectStatusFilter}
-              setProjectStatusFilter={setProjectStatusFilter}
-              onlyWithOpenTasks={onlyWithOpenTasks}
-              setOnlyWithOpenTasks={setOnlyWithOpenTasks}
-              onlyNeedsMoreHands={onlyNeedsMoreHands}
-              setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
+            <MobileFiltersToggle
+              open={mobileFiltersOpen}
+              activeCount={activeProjectFilterCount}
+              controlsId="board-project-filters"
+              onToggle={() => setMobileFiltersOpen((v) => !v)}
             />
+            <div
+              id="board-project-filters"
+              className={mobileFiltersOpen ? "mt-2 sm:mt-0" : "hidden sm:block"}
+            >
+              <ProjectFilterRail
+                projectCategoryFilter={projectCategoryFilter}
+                setProjectCategoryFilter={setProjectCategoryFilter}
+                projectStatusFilter={projectStatusFilter}
+                setProjectStatusFilter={setProjectStatusFilter}
+                onlyWithOpenTasks={onlyWithOpenTasks}
+                setOnlyWithOpenTasks={setOnlyWithOpenTasks}
+                onlyNeedsMoreHands={onlyNeedsMoreHands}
+                setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
+              />
+            </div>
           </div>
         )}
 
@@ -553,6 +639,16 @@ export default function BoardPage() {
                 />
               )
             ) : (
+              /* `lg:grid-cols-1` is a MEASURED decision, not a typo.
+                 Layout.tsx caps the shell at max-w-screen-lg (1024px)
+                 across the whole lg range, so the middle column is a
+                 constant 1024 − 32 (page px-4) − 240 (left rail) −
+                 280 (right rail) − 48 (2 × gap-6) = 424px at every
+                 lg viewport. Two columns would mean (424 − 12) / 2 ≈
+                 206px cards — unusably cramped. md (no rails) fits 2;
+                 xl (1280 cap → 680px middle → ~334px cards) resumes
+                 2. The 1-col dip at lg is the honest tradeoff for
+                 gaining both rails. */
               <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
                 {visiblePosts.map((p) => (
                   <li key={p.id}>
@@ -701,6 +797,58 @@ export default function BoardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Mobile-only (<sm) disclosure trigger for the Board filter rails.
+ *
+ * Affordance ruling (operator): collapsed states must have LOUD,
+ * full-width, high-affordance triggers — "very obvious to everyone
+ * where to click." Hence a card-styled full-width button (border +
+ * shadow + semibold label + chevron) at the 44px touch floor, not a
+ * quiet text link.
+ *
+ * When any filter is narrowing the list, the label switches to
+ * "Filters · N active" so a member never wonders why a collapsed
+ * rail is shortening the list. Plain text in the label — no badge
+ * pill, no dot (no-notifications principle: no badge counts).
+ *
+ * `sm:hidden`: at sm+ the rail is always visible and this trigger
+ * disappears — the disclosure exists only where the rail's selects
+ * stack full-width and cost real screen estate.
+ */
+function MobileFiltersToggle({
+  open,
+  activeCount,
+  controlsId,
+  onToggle,
+}: {
+  open: boolean;
+  activeCount: number;
+  /** id of the collapsible rail wrapper this trigger controls. */
+  controlsId: string;
+  onToggle: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-controls={controlsId}
+      onClick={onToggle}
+      className="card flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-sm font-semibold text-canopy-800 transition-colors hover:bg-moss-50 active:bg-moss-100 dark:text-canopy-200 dark:hover:bg-moss-800 sm:hidden"
+    >
+      <span>
+        {activeCount > 0
+          ? t("board.filters.toggleActive", { count: activeCount })
+          : t("board.filters.toggle")}
+      </span>
+      {/* Sighted-only state cue; aria-expanded carries the meaning. */}
+      <span aria-hidden="true" className="text-moss-500 dark:text-moss-300">
+        {open ? "▾" : "▸"}
+      </span>
+    </button>
   );
 }
 

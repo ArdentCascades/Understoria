@@ -248,6 +248,29 @@ include breaking changes.
   disclosure; the standalone organizer-controls card is gone.
   2 new i18n keys in en + es; parity passes. Desktop (`lg+`)
   layout unchanged.
+- **Board screen-real-estate polish (mobile chrome reduction +
+  card density).** Seven small ordering/density fixes, all
+  preserving the PR #199 mobile DOM-order-equals-visual-order
+  invariant (no CSS `order` utilities): (1) below `sm` the
+  Board filter rails collapse behind a loud full-width card
+  trigger ("Filters", or "Filters · N active" while any filter
+  narrows the list — plain text, no badge pill; default
+  collapsed, session-only); (2) the tablist now sticks together
+  with search at `top-0` on mobile in one backdrop-blur band
+  (desktop sticky story unchanged); (3) below `lg` the attention
+  rail collapses behind a card-styled summary row previewing the
+  waiting item kinds via their emoji prefixes — default EXPANDED
+  whenever a tier-0 confirm item (someone's credit blocked on
+  you) is present, collapsed otherwise, per `KIND_PRIORITY`;
+  (4) `ContextualHint` now renders as `BoardNudges`' fallback so
+  hint and nudge can never stack (nudge priority unchanged);
+  (5) `PostCard` drops the redundant "needs help"/"offers" meta
+  label — the active tab already declares the type; (6) the post
+  grid keeps `lg:grid-cols-1` after measurement (the lg shell
+  cap leaves a constant ~424px middle column — two ~206px
+  columns would be unusable); (7) `ProjectCard` swaps its
+  hand-rolled untranslated category chip for the shared
+  `CategoryBadge` (emoji + translated label, both locales).
 - **Bottom-nav pinned to viewport on mobile + iOS safe-area
   inset (PR #201).** `BottomNav` switched from `sticky bottom-0`
   (which sticks to the bottom of the containing block) to

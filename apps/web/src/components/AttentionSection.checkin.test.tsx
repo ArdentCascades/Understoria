@@ -50,7 +50,10 @@ vi.mock("@/db/coorgInvitations", () => ({
   respondToCoOrganizerInvitation: vi.fn(),
 }));
 vi.mock("@/db/secrets", () => ({ getSecretKey: vi.fn() }));
-vi.mock("@/lib/attention", () => ({
+// Spread the real module so KIND_PRIORITY (used by the mobile
+// collapse default) survives — only the item pipeline is stubbed.
+vi.mock("@/lib/attention", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/attention")>()),
   computeAttentionItems: computeAttentionItemsMock,
 }));
 

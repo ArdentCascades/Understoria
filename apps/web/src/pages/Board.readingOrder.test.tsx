@@ -228,8 +228,17 @@ describe("Board reading order (WCAG 2.4.3)", () => {
     const list = container.querySelector('ul');
     expect(list).not.toBeNull();
 
+    // The mobile Filters disclosure trigger sits between search and
+    // the rail it controls — trigger precedes rail in DOM so DOM
+    // order equals visual order in both disclosure states.
+    const filtersToggle = container.querySelector(
+      'button[aria-controls="board-post-filters"]',
+    );
+    expect(filtersToggle).not.toBeNull();
+
     expect(precedes(tablist!, searchInput!)).toBe(true);
-    expect(precedes(searchInput!, mobileFilter)).toBe(true);
+    expect(precedes(searchInput!, filtersToggle!)).toBe(true);
+    expect(precedes(filtersToggle!, mobileFilter)).toBe(true);
     expect(precedes(mobileFilter, list!)).toBe(true);
   });
 
@@ -259,10 +268,47 @@ describe("Board reading order (WCAG 2.4.3)", () => {
     expect(list).not.toBeNull();
     expect(archiveLink).not.toBeNull();
 
+    const filtersToggle = container.querySelector(
+      'button[aria-controls="board-project-filters"]',
+    );
+    expect(filtersToggle).not.toBeNull();
+
     expect(precedes(tablist!, searchInput!)).toBe(true);
-    expect(precedes(searchInput!, mobileFilter)).toBe(true);
+    expect(precedes(searchInput!, filtersToggle!)).toBe(true);
+    expect(precedes(filtersToggle!, mobileFilter)).toBe(true);
     expect(precedes(mobileFilter, list!)).toBe(true);
     expect(precedes(list!, archiveLink!)).toBe(true);
+  });
+
+  it("attention rail slot stays first; the sticky header group holds tablist + search and NOT the filters disclosure", () => {
+    // Part of the mobile-chrome polish: tablist + search stick
+    // together inside one wrapper (shared backdrop band), while the
+    // Filters disclosure stays OUTSIDE it — only tablist + search
+    // stick. The attention rail's slot (here the stubbed marker)
+    // still precedes everything in the reading order. The collapsed
+    // attention summary occupying that same slot is asserted in
+    // AttentionSection.mobileCollapse.test.tsx, where the real
+    // component renders.
+    mockState.posts = [makePost({ id: "n1", type: "NEED", title: "Need" })];
+    render(<BoardPage />, "/?tab=needs");
+
+    const attention = container.querySelector(
+      '[data-testid="attention-section"]',
+    );
+    const tablist = container.querySelector('[role="tablist"]');
+    const searchInput = container.querySelector('input[type="search"]');
+    const filtersToggle = container.querySelector(
+      'button[aria-controls="board-post-filters"]',
+    );
+    expect(attention).not.toBeNull();
+    expect(precedes(attention!, tablist!)).toBe(true);
+
+    // tablist and search share a sticky ancestor...
+    const stickyGroup = tablist!.parentElement;
+    expect(stickyGroup?.className).toContain("sticky");
+    expect(stickyGroup?.contains(searchInput)).toBe(true);
+    // ...which the filters disclosure is not part of.
+    expect(stickyGroup?.contains(filtersToggle)).toBe(false);
   });
 
   it("renders no `order-*` Tailwind classes anywhere in the Board tree", () => {
