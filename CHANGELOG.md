@@ -198,6 +198,180 @@ include breaking changes.
   within the day (a 10am skillshare lists above a 7pm potluck)
   instead of insertion order; density stays exchange-keyed and
   the agenda's past-entry filter is untouched.
+- **Markdown rendering for long-form prose (PRs #277, #278;
+  supersedes the #275 linkify pass).** Post, event, and project
+  descriptions plus task descriptions and comments now render a
+  safe Markdown subset. The pipeline is XSS-proof by construction:
+  `lib/markdown.ts` is a pure parser producing an AST (never an
+  HTML string), and `components/Markdown.tsx` walks it into a
+  fixed, closed set of React elements — no
+  `dangerouslySetInnerHTML` anywhere. #277 shipped the Essentials
+  set (bold / italic / inline code / links / flat lists); #278
+  extended to the full safe set: strikethrough, headings (rendered
+  `role="heading"` + `aria-level` so federated content never
+  pollutes the page's real heading outline), blockquotes, fenced
+  code blocks (verbatim, never re-parsed), tables (in
+  `overflow-x-auto` wrappers), horizontal rules, GFM task-list
+  items, and nesting. Hardening rules: `sanitizeUrl` allows only
+  http(s)/mailto (a rejected link drops to plain text); raw HTML
+  in the input is inert text; image syntax `![alt](url)` degrades
+  to a safe LINK, never an `<img>` (auto-fetching a remote image
+  would leak every viewer's IP to an author-chosen server). Links
+  open `target="_blank"` with `rel="noopener noreferrer
+  nofollow"`. A small `MarkdownHint` one-liner under each
+  Markdown-enabled editor teaches the syntax by example.
+- **Overflow (kebab) menus + Copy link on detail pages (PRs
+  #279–#281).** New reusable `OverflowMenu` component (extracted
+  from the Conversation header kebab; 44×44 trigger,
+  `aria-haspopup="menu"` / `aria-expanded`, `role="menu"` popover,
+  Escape-closes-and-refocuses). The task page (#279), project
+  header (#280), and post + event detail pages (#281) each gain a
+  kebab holding **Copy link** (canonical URL via the `shareUrl`
+  helper) plus relocated secondary actions: the project header
+  menu absorbs the one-tap organizer lifecycle verbs (Reorder
+  tasks, Mark complete, Resume, Archive/Unarchive — exact gates
+  unchanged); the post menu absorbs "Repost with changes" / "Post
+  this again". Primary and sensitive actions (Claim, Confirm,
+  Flag, RSVP, Message) stay inline.
+- **Per-task pages (PRs #273, #274).** Every project task gets its
+  own page at `/project/:id/task/:taskId`. Phase 1 (#273) added
+  the route + `useProjectTaskContext` (context reconstructed from
+  global state — no new data loading). Phase 2 (#274) split the
+  old all-in-one task row: the project list renders a slim
+  `TaskCard` (status/hours chips, badges, one-line description
+  preview, Claim, and a quiet "Open task · N comments" link) while
+  the page renders `TaskDetailBody` — the full description, every
+  lifecycle action, the claimer narrative, and the entire comment
+  thread, which previously ballooned inline on the project page.
+  The page header carries a "← Back to {project}" breadcrumb
+  (later extracted as the app-wide `BackLink` primitive in #291).
+- **Project page real-estate pass (PRs #268, #270, #271, #272).**
+  Surface the work, collapse the governance (#268): on mobile the
+  organizer/stewardship sections move out of the rail to the
+  bottom of the main column, and the infrequent governance
+  (co-organizer management, handoff, step-down) collapses behind
+  one default-collapsed **"Manage project"** disclosure; the
+  reading order becomes summary → updates → work days → tasks →
+  management with no CSS `order`. Task search + filter pills hide
+  until a project has 7+ tasks (#270) — below that the bare list
+  renders unfiltered so a stale filter can never strand a short
+  list. Long project descriptions clamp to four lines behind
+  "Show more" (#271; CSS-only clamp, full text always in the DOM
+  for screen readers). The desktop rail gains a `NextWorkDayGlance`
+  (#272) — the single soonest upcoming work day as a calm link,
+  self-hiding when none is scheduled, no counts.
+- **Board calm-prompt orchestration (PRs #265, #266).**
+  `KeepAccessNudge` (#265): a calm "keep a spare copy of your
+  account" prompt for members on a single device (no pairing-log
+  row), pointing at device pairing — the only real access-recovery
+  path, since there is no key export or seed phrase. `BoardNudges`
+  (#266): the Board previously mounted all five calm prompts
+  (first-action, profile, vouch-discovery, keep-access, install
+  card) as independent siblings that could stack into a wall of
+  cards; a new orchestrator renders AT MOST ONE — the
+  highest-priority prompt that is both resolved and eligible —
+  with each prompt's gating moved into a per-prompt status hook.
+  `ContextualHint` renders only as the fallback so hint and nudge
+  can never stack.
+- **PWA install guide (PRs #261, #262, #267).** The app was fully
+  installable but nothing ever said so. `lib/installGuide.ts`
+  feature-detects the install posture (installed / one-tap
+  `beforeinstallprompt` / manual steps) and `InstallGuide` renders
+  a dismissible Board card plus a Profile → Learn panel (#261).
+  Reframed from an OS×browser dropdown to three device buckets
+  (#262) — Chromium browsers get the one-tap button from
+  detection, iOS is Safari-only, the rest is one generic
+  instruction each. The welcome tour gains an optional,
+  non-blocking install step (#267) that auto-skips when the app
+  is already installed.
+- **Onboarding + demo polish (PRs #263, #264).** The demo seed now
+  writes real signed vouches (`db.vouches`) instead of the legacy
+  `Member.vouchedBy` array the trust computation no longer reads —
+  previously every seeded member showed "pending trust" and the
+  Vouch button could never appear (#263). The five welcome-tour
+  concept screens gain in-style inline SVG illustrations
+  (hourglass-sprouting-leaf, key-as-leaf, tree) and
+  plain-language copy for a mixed-literacy audience (#264).
+- **Calendar + events batch (PRs #257–#260, #269).** A personal
+  "you're going" marker on event chips (#257) — the viewer's OWN
+  local RSVP only, never anyone else's, never a count. A quiet
+  "Coming up" gatherings glance on the Dashboard (#258;
+  `UpcomingGatherings`, soonest non-cancelled events capped at 4,
+  chronological, no attendance counts). The "Mine" filter now
+  covers events (organized or RSVP'd going/maybe) and the category
+  filter works for event categories (#259). Multi-day events
+  render on every spanned day instead of vanishing after day one
+  (#260; per-day entries with `isMultiDay` / `dayIndex` /
+  `dayCount`). Expiring needs are reframed as a call for help
+  (#269): a 🤲 glyph for open needs vs 🌱 for offers, with
+  invitation copy instead of deadline-alarm copy.
+- **Event templates — camaraderie gatherings (PRs #254–#256).**
+  Curated event templates for the create-event flow, per
+  `docs/event-templates-plan.md` (landed with #254). Phase A
+  (#254): content + data layer (`content/eventTemplates.ts`,
+  en + es), enabling the already-signed `EventPayload.templateId`
+  wire slot (a guard change, not a wire change) and the server
+  validator fix. The "Create Event" picker + unified prefill
+  (#255; `EventTemplatePicker`). Event visual identity on the
+  calendar and detail page (#256): per-category emoji + palette
+  via `lib/categories.ts`, so gatherings read differently from
+  deadlines at a glance.
+- **Project-UX queue, all twelve plans (PRs #242–#253; plans in
+  `docs/project-ux-plans.md` via PR #241).** Task deep-links
+  (#242): attention-rail and /my-tasks links land on the task row
+  (`#task-<id>` scroll + focus + motion-safe ring), not the page
+  top. Confirmation-outflow attribution (#243): an organizer's
+  balance breakdown explains hours moved to helpers on a project's
+  behalf. "Working alongside" roster (#244): names-only,
+  alphabetical contributor card on the project page — reveals
+  nothing the task rows don't already show. One-tap fresh copy of
+  a completed task (#245) for recurring work. "Could use more
+  hands" project filter on the Board's Projects tab (#246).
+  Co-organizer authority reconciliation (#247): every read site
+  uses the materialized signed-acceptance array. Actual hours at
+  completion (#248): the claimer states the time actually given
+  and the signed Exchange credits that, not the organizer's
+  estimate (Dexie v26, wire format unchanged). "Projects you
+  organize" workbench at `/my-projects` (#249): pull-only,
+  read-only, counts only what is waiting on the viewer.
+  Aggregate-only project completion moment (#250): a one-time,
+  per-device pop card for ANY viewer plus a permanent low-volume
+  line in the completed banner — the unit is *us*, not *me*.
+  Project work days (#251): a LOCAL-ONLY `eventProjectLinks` Dexie
+  table (v27) linking events to projects with no wire surface —
+  `scheduleProjectWorkDay` re-validates organizer authority,
+  EventNew accepts `?projectId=` prefill (location deliberately
+  never prefilled), ProjectDetail gains an "Upcoming work days"
+  section, and the calendar's project filter narrows to linked
+  work days; peers see a plain event. Orphaned-project adoption
+  (#252): a `project_adoption` proposal category installs
+  community stewardship when a primary organizer goes quiet —
+  self-nominated proposer, quiet-period-gated, an "I'm still
+  here" cancel for the returning organizer, no shame framing
+  (design in `docs/project-adoption.md`). Clone re-issues
+  co-organizer invitations (#253): a pre-checked checklist of the
+  source roster sends fresh invitations — consent re-performed,
+  never inherited.
+- **Cross-project "tasks you're carrying" view + fixes batch
+  (PR #238).** New `/my-tasks` route listing the member's active
+  claims (claimed + awaiting confirmation) grouped by project,
+  newest first, read-only by design — claim / release /
+  mark-complete stay on the project page so the #236/#237
+  consequence dialogs remain the single home for those actions.
+  Same PR: accepted co-organizer invitations materialize into the
+  live authority list; light-mode secondary text moves moss-500 →
+  moss-600 (AA); a restored project draft keeps its template
+  selection; the device-pairing FAQ names the six-word phrase
+  instead of a "passphrase".
+- **Copy honesty batch (PR #239).** Softened deficit framings
+  (surplus thanks, trust chip, check-in counter, review chips),
+  traded market vocabulary for flow vocabulary, and retired
+  wording that contradicted the principle ledger.
+- **Maintenance log (`docs/maintenance.md`, PR #259).** A running
+  log of deferred maintenance + the standing dependency policy,
+  opened with the deferred dev-tooling security upgrade (vite 5→8
+  / vitest 2→4 chain; the surgical esbuild override breaks
+  `vite build`, so it's its own future migration).
 - **Task ordering + dependencies workstream (PRs #206–#216).**
   The full task-ordering and soft-block-dependency design from
   `docs/task-ordering-and-dependencies.md` shipped across six PR

@@ -1,6 +1,12 @@
 # Project UX — improvement plans (June 2026)
 
-> **Status: PROPOSED.** Nothing in this document is committed work. Each
+> **Status: SHIPPED.** All twelve plans landed as PRs #242–#253
+> (plan 1 → #242, 2 → #243, 3 → #244, 4 → #245, 5 → #246, 8 → #247,
+> 6 → #248, 7 → #249, 9 → #250, 10 → #251, 11 → #252, 12 → #253).
+> The rest of this document is preserved as the design record; the
+> original planning-time status note follows.
+>
+> **Status at writing: PROPOSED.** Nothing in this document is committed work. Each
 > section is an implementation plan for one improvement to the
 > organizer / co-organizer / helper experience on projects, produced by
 > a planning pass over the codebase following the June 2026 audit

@@ -70,6 +70,26 @@ any vitest APIs that changed in v4; then run the full gate above. If it
 can't be made green without large churn, stop and reassess rather than
 forcing it.
 
+### Duplicate top-level `"community"` key in the locale files
+
+**Status:** open (noted 2026-07-02 during docs sweep 2). Small,
+code-side fix; needs a locales PR, not a docs one.
+
+**What.** `apps/web/src/i18n/locales/en.json` and `es.json` each
+declare the top-level `"community"` key **twice** (around lines
+169 and 2007). JSON parsing is last-wins, so the first block — the
+one carrying `community.autoConfirmHours.{label,help,unit}` — is
+silently dead; only the second block (custom milestones etc.) is
+loaded. Any UI reading `community.autoConfirmHours.*` gets a
+missing-key fallback.
+
+**Fix when picked up.** Merge the `autoConfirmHours` subtree into
+the surviving second `"community"` block (in both locales), delete
+the first block, and add a guard (the parity test, or a small
+duplicate-top-level-key check) so a future merge can't reintroduce
+the shadowing. Verify the Community-settings auto-confirm control
+renders its real label/help text afterward.
+
 ## Resolved
 
 _(none yet)_
