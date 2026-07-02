@@ -13,6 +13,10 @@ import {
 } from "@understoria/shared/crypto";
 import { matchesQuery } from "@/lib/messageSearch";
 import {
+  decodeMessageBody,
+  encodeMessageBody,
+} from "@/lib/messageEnvelope";
+import {
   BLOCKED_ACTION_MESSAGE,
   blockedFilter,
   isMutuallyBlocked,
@@ -23,6 +27,12 @@ export async function sendMessage(
   senderKey: string,
   recipientKey: string,
   plaintext: string,
+  opts?: {
+    /** Post this message is about. Rides INSIDE the encrypted
+     *  payload (see lib/messageEnvelope.ts for the privacy
+     *  rationale) — never as a cleartext column on the row. */
+    aboutPostId?: string;
+  },
 ): Promise<DirectMessage> {
   const trimmed = plaintext.trim();
   if (!trimmed) throw new Error("Message body is required.");
@@ -34,7 +44,10 @@ export async function sendMessage(
     throw new Error(BLOCKED_ACTION_MESSAGE);
   }
   const sk = await getSecretKey(senderKey);
-  const encrypted = encryptMessage(trimmed, sk, recipientKey);
+  // Bare string when there's no post reference (byte-identical to
+  // pre-envelope messages); v1 JSON envelope when there is one.
+  const body = encodeMessageBody(trimmed, opts?.aboutPostId);
+  const encrypted = encryptMessage(body, sk, recipientKey);
   const msg: DirectMessage = {
     id: uuid(),
     conversationId: conversationId(senderKey, recipientKey),
@@ -49,7 +62,33 @@ export async function sendMessage(
 }
 
 export interface DecryptedMessage extends DirectMessage {
+  /** The member-visible message text (envelope already unwrapped),
+   *  or null when decryption failed. Every consumer — bubbles, list
+   *  previews, search — sees text here, never raw envelope JSON. */
   plaintext: string | null;
+  /** Post this message declared itself to be about, if any. Decoded
+   *  from the encrypted envelope; absent on legacy/plain messages. */
+  aboutPostId?: string;
+}
+
+/** Decrypt a row and unwrap the plaintext envelope in one step, so
+ *  the three read paths below stay consistent. */
+function decryptAndDecode(
+  m: DirectMessage,
+  mySecretKey: string,
+  otherPublicKey: string,
+): DecryptedMessage {
+  // NaCl box shared secret is symmetric: box(msg, nonce, B_pk, A_sk)
+  // can be opened with box.open(cipher, nonce, A_pk, B_sk). So we
+  // always decrypt with our secret key and the other party's public key.
+  const plain = decryptMessage(m, mySecretKey, otherPublicKey);
+  if (plain === null) return { ...m, plaintext: null };
+  const body = decodeMessageBody(plain);
+  return {
+    ...m,
+    plaintext: body.text,
+    ...(body.aboutPostId ? { aboutPostId: body.aboutPostId } : {}),
+  };
 }
 
 export async function getConversation(
@@ -71,13 +110,7 @@ export async function getConversation(
   } catch {
     return rows.map((m) => ({ ...m, plaintext: null }));
   }
-  return rows.map((m) => {
-    // NaCl box shared secret is symmetric: box(msg, nonce, B_pk, A_sk)
-    // can be opened with box.open(cipher, nonce, A_pk, B_sk). So we
-    // always decrypt with our secret key and the other party's public key.
-    const plain = decryptMessage(m, sk, otherKey);
-    return { ...m, plaintext: plain };
-  });
+  return rows.map((m) => decryptAndDecode(m, sk, otherKey));
 }
 
 export interface ConversationSummary {
@@ -116,10 +149,12 @@ export async function listConversations(
   }
   return Array.from(seen.values()).map((m) => {
     const otherKey = m.senderKey === myKey ? m.recipientKey : m.senderKey;
-    const plain = decryptMessage(m, sk, otherKey);
+    // decryptAndDecode (not raw decryptMessage) so a last message
+    // that happens to carry a post reference previews as its text,
+    // never as raw envelope JSON in the conversations list.
     return {
       otherKey,
-      lastMessage: { ...m, plaintext: plain },
+      lastMessage: decryptAndDecode(m, sk, otherKey),
     };
   });
 }
@@ -156,9 +191,12 @@ export async function searchAllMessages(
   for (const m of all) {
     if (m.senderKey !== myKey && m.recipientKey !== myKey) continue;
     const otherKey = m.senderKey === myKey ? m.recipientKey : m.senderKey;
-    const plain = decryptMessage(m, sk, otherKey);
-    if (matchesQuery(plain, query)) {
-      hits.push({ otherKey, message: { ...m, plaintext: plain } });
+    // Decode BEFORE matching so search runs over the member-visible
+    // text of envelope messages — a query like `"v":1` or a post id
+    // must not match envelope JSON syntax.
+    const msg = decryptAndDecode(m, sk, otherKey);
+    if (matchesQuery(msg.plaintext, query)) {
+      hits.push({ otherKey, message: msg });
     }
   }
   return hits;

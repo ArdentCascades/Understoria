@@ -353,8 +353,14 @@ export default function PostDetailPage() {
 
       {showReachOut && reachOutKey && reachOutMember && (
         <div className="mb-4">
+          {/* `?about=` arms the conversation composer with this post:
+              the first message sent in that visit carries the post
+              reference inside its encrypted payload, so the OTHER
+              party's thread shows which offer/need this is about.
+              Query param (not router state) so the armed context
+              survives a refresh and back/forward. */}
           <Link
-            to={`/messages/${encodeURIComponent(reachOutKey)}`}
+            to={`/messages/${encodeURIComponent(reachOutKey)}?about=${encodeURIComponent(post.id)}`}
             className="btn-secondary inline-flex items-center gap-2"
           >
             <IconMessages size={18} />
