@@ -230,6 +230,30 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         ],
       },
       {
+        id: "how-vouching-works",
+        question: "¿Cómo funcionan los avales?",
+        answer: [
+          "Un aval es una declaración pública y firmada de que " +
+            "conoces a esta persona y respaldas su lugar en la " +
+            "comunidad. Alguien pasa a ser 'de confianza' cuando dos " +
+            "miembros distintos le han avalado — e invitar a alguien " +
+            "cuenta automáticamente como tu aval, así que avalar a " +
+            "mano es la forma de respaldar a una persona que trajo " +
+            "otra gente.",
+          "Avalas desde la página de una persona: toca su nombre en " +
+            "cualquier parte de la app y busca la sección Avalar. El " +
+            "botón aparece cuando tu aval realmente sumaría confianza " +
+            "— tú ya eres de confianza, la persona aún está juntando " +
+            "avales y no la has avalado antes. Si no, la sección " +
+            "explica por qué no, para que nunca te quedes adivinando.",
+          "Vale la pena pensarlo un momento: tu nombre respalda el " +
+            "suyo, de forma visible y permanente — un aval no se " +
+            "puede retirar desde la app. Si después te arrepientes, " +
+            "el camino es una conversación con tu comunidad, no un " +
+            "botón. Avala a personas que de verdad conoces.",
+        ],
+      },
+      {
         id: "disagree-with-member",
         question: "¿Qué hago si no estoy de acuerdo con otra persona?",
         answer: [

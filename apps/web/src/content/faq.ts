@@ -223,6 +223,29 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         ],
       },
       {
+        id: "how-vouching-works",
+        question: "How does vouching work?",
+        answer: [
+          "A vouch is a signed public statement that you know this " +
+            "person and stand behind their place in the community. " +
+            "Someone becomes 'trusted' once two different members " +
+            "have vouched for them — and inviting someone counts as " +
+            "your vouch automatically, so vouching by hand is how " +
+            "you back a person someone else brought in.",
+          "You vouch from a member's page: tap their name anywhere " +
+            "in the app and look for the Vouch section. The button " +
+            "shows when your vouch would actually add trust — you're " +
+            "trusted yourself, they're still gathering vouches, and " +
+            "you haven't vouched for them already. Otherwise the " +
+            "section explains why not, so you're never guessing.",
+          "It's worth a moment's thought: your name backs theirs, " +
+            "visibly and permanently — a vouch can't be taken back " +
+            "in the app. If you later regret one, the path is a " +
+            "conversation with your community, not a button. Vouch " +
+            "for people you actually know.",
+        ],
+      },
+      {
         id: "disagree-with-member",
         question: "What if I disagree with another member?",
         answer: [

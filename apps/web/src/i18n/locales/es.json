@@ -235,7 +235,8 @@
   "vouchNudge": {
     "label": "Avalar está abierto para ti",
     "title": "Ya puedes avalar",
-    "body": "Alguien en la comunidad te avaló. Puedes hacer lo mismo por las personas en quienes confías — es una forma de ampliar a quiénes la comunidad ve como dignos de confianza. Visita el perfil de cualquier persona y toca Avalar.",
+    "body": "Alguien en la comunidad te avaló. Puedes hacer lo mismo por las personas en quienes confías — es una forma de ampliar a quiénes la comunidad ve como dignos de confianza. Encontrarás la sección Avalar en la página de una persona cuando tu aval pueda ayudarle.",
+    "learnMore": "Cómo funcionan los avales",
     "dismiss": "Entendido"
   },
   "keepAccessNudge": {
@@ -309,17 +310,17 @@
     "board": {
       "label": "Orientacion del tablero",
       "message": "Tres pestañas arriba: Necesidades (lo que la gente pide), Ofertas (lo que la gente puede compartir) y Proyectos (metas grupales). Toca cualquier publicación para ver más o para tomarla. El tablero oculta las publicaciones que alguien ya tomó, así ves lo que aún necesita ayuda.",
-      "technical": "Cada pestaña filtra el mismo flujo de publicaciones según su intención. Tocar una publicación abre su vista detallada donde puedes tomarla, contactar a quien la publicó o — si eres quien la tomó — confirmar la finalización para liberar créditos. Las publicaciones ya tomadas se filtran de la vista por defecto para reducir ruido; el filtro se reinicia con cada carga. Las publicaciones de comunidades vecinas (federadas vía el nodo comunitario) muestran una pequeña etiqueta y siguen el mismo ciclo, pero los créditos no fluyen entre nodos — el registro de cada comunidad es soberano."
+      "learnMoreLabel": "Cómo publicar algo"
     },
     "balance": {
       "label": "Entendiendo tu saldo",
       "message": "Tu saldo son horas de ayuda. Cada persona empieza con 5, así puedes pedir ayuda desde el primer día, incluso antes de haber dado alguna. Una hora de cualquier tipo de ayuda equivale a una hora. Da y recibe a tu propio ritmo.",
-      "technical": "Los saldos son créditos de tiempo, expresados en horas, guardados en el registro local de tu comunidad. Las personas nuevas reciben una concesión semilla de 5 horas al unirse para que la participación no esté condicionada por créditos — el principio de 'pedir primero está bien'. Los créditos fluyen solo cuando un intercambio se confirma completamente: ambas partes firman el registro del intercambio (Ed25519) y el nodo local actualiza ambos saldos de forma atómica. Una hora equivale a una hora sin importar la categoría — cuidado infantil, soporte técnico, carpintería, trabajo emocional, todo se liquida a la par. Los saldos no se federan entre nodos por diseño; los intercambios entre comunidades aún ocurren, pero el crédito se liquida en el nodo de origen de quien ayudó."
+      "learnMoreLabel": "Qué significa tu saldo"
     },
     "invite": {
       "label": "Hacer crecer la comunidad",
       "message": "Las comunidades crecen a través de la confianza. Cuando invitas a alguien, estás avalándolo — tu nombre respalda su llegada. Las personas nuevas necesitan dos avales antes de aparecer como 'de confianza' en el tablero. Comparte invitaciones con personas que conoces.",
-      "technical": "Cada invitación es un token firmado de un solo uso (firma Ed25519 sobre la carga útil de la invitación, codificado en base64url) que compartes fuera de banda — por Signal, en persona, en papel. Cuando alguien usa el token, se crea automáticamente un aval tuyo hacia esa persona. Los umbrales de confianza son binarios: una persona se vuelve 'de confianza' al alcanzar 2 avales distintos (el umbral es una constante de compilación — `MINIMUM_VOUCHES_FOR_TRUST` en `lib/vouch.ts`). Los avales son públicos, firmados, inmutables — puedes emitir un aval manual después, pero no puedes retirarlo. Si te arrepientes de un aval, el siguiente paso es una conversación comunitaria, no una acción de código."
+      "learnMoreLabel": "Cómo funcionan las invitaciones"
     }
   },
   "nav": {
@@ -986,7 +987,7 @@
       "task_added": "Tarea agregada",
       "task_claimed": "Tarea tomada",
       "task_unclaimed": "Tarea liberada",
-      "task_released_after_complete": "{{name}} dio un paso atrás de {{task}}",
+      "task_released_after_complete": "{{name}} dio un paso atrás de <taskLink>{{task}}</taskLink>",
       "task_completed": "Tarea marcada como completa",
       "task_confirmed": "Tarea confirmada",
       "project_launched": "Proyecto lanzado",

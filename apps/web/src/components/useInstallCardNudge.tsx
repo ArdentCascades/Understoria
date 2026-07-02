@@ -102,12 +102,18 @@ function CardBody({
   return (
     <>
       <CardHint state={state} />
-      {/* Every manual/iOS card points out to the full guide in Learn.
-          Deep-linking that link to auto-open the install panel is a
-          follow-up; for now it lands on Profile, where the panel lives. */}
+      {/* Every manual/iOS card points out to the full install answer
+          on Help (`/help#install-app`) — per-platform steps that
+          actually finish the job, unlike the old landing on /profile
+          which left the member to hunt for the Learn panel. The
+          touch-target + inline-flex classes give the small-text link
+          the 44px hit-area floor and a real box for the global
+          :focus-visible outline to draw around. */}
       <Link
-        to="/profile"
-        className="self-start text-xs font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        to="/help#install-app"
+        className="touch-target inline-flex items-center self-start text-xs
+                   font-medium text-canopy-700 underline-offset-2
+                   hover:underline dark:text-canopy-300"
       >
         {t("install.card.moreHelp")} →
       </Link>
