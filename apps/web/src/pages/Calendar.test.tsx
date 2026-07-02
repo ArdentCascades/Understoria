@@ -987,3 +987,50 @@ describe("CalendarPage", () => {
     expect(mineChip().getAttribute("aria-pressed")).toBe("true");
   });
 });
+
+// ─── Month paging + window-follows-view (page wiring) ───────────────
+
+describe("CalendarPage month paging", () => {
+  it("paging ahead widens the entries window: a far-out event appears", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    // ~101 days out — past the fixed 60-day forward window that used
+    // to silently hide it from every view.
+    mockState.events = [
+      makeEvent({
+        id: "far",
+        title: "Autumn build day",
+        startsAt: Date.UTC(2026, 8, 10, 18, 0, 0),
+      }),
+    ];
+    // Also seed a near event so the page doesn't short-circuit to the
+    // empty state before we can page.
+    mockState.events.push(
+      makeEvent({ id: "near", startsAt: Date.UTC(2026, 5, 10, 18, 0, 0) }),
+    );
+    // Default jsdom innerWidth (1024) selects the month view.
+    render(<CalendarPage />);
+    expect(container.textContent).toContain("June 2026");
+    expect(container.querySelector('a[href="/events/far"]')).toBeNull();
+
+    const nextMonth = () =>
+      Array.from(container.querySelectorAll<HTMLButtonElement>("button")).find(
+        (b) => /next month/i.test(b.getAttribute("aria-label") ?? ""),
+      );
+    act(() => nextMonth()!.click());
+    act(() => nextMonth()!.click());
+    act(() => nextMonth()!.click());
+    expect(container.textContent).toContain("September 2026");
+    expect(container.querySelector('a[href="/events/far"]')).not.toBeNull();
+
+    // The quiet Today jump resets to the current month.
+    const today = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => (b.textContent ?? "").trim() === "Today");
+    expect(today).toBeDefined();
+    act(() => today!.click());
+    expect(container.textContent).toContain("June 2026");
+    expect(container.querySelector('a[href="/events/far"]')).toBeNull();
+    vi.useRealTimers();
+  });
+});

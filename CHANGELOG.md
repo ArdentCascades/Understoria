@@ -33,6 +33,22 @@ include breaking changes.
   should gather for?"), and a filtered-empty calendar gets the
   Board-style "Nothing matches these filters" + Clear filters
   escape instead of the misleading quiet-week copy.
+- **Calendar month paging + same-day time sort + bounded week
+  paging.** The month view (the lg+ default) gains prev/next
+  paging with a quiet "Today" jump, mirroring the week view's
+  controls (aria-labelled buttons, `aria-live` month heading,
+  both locales). The entries window now FOLLOWS the paged view
+  (`calendarViewWindow` in `lib/calendar.ts`: union of the
+  default 30-back/60-forward window with the viewed month grid /
+  week) — previously the fixed window silently hid every event
+  more than 60 days out from all three views, since `EventNew`
+  caps the past but not the future. Paging is bounded to ±12
+  months (±52 weeks for the week view, which previously paged
+  unbounded into permanently empty grids); buttons disable at
+  the bounds. Same-day events now sort by `startsAt` ascending
+  within the day (a 10am skillshare lists above a 7pm potluck)
+  instead of insertion order; density stays exchange-keyed and
+  the agenda's past-entry filter is untouched.
 - **Task ordering + dependencies workstream (PRs #206–#216).**
   The full task-ordering and soft-block-dependency design from
   `docs/task-ordering-and-dependencies.md` shipped across six PR

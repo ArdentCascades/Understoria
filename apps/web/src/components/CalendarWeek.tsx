@@ -18,14 +18,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   dayKey,
   getTodayDayKey,
   postEntryDisplay,
-  startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
 import {
@@ -36,27 +35,38 @@ import {
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // 7-column week view of the currently-selected week. Header shows the
-// week's date range and Prev/Next buttons step a week at a time.
-// Same chip + density treatment as the month grid; see CalendarMonth
-// for the design rationale.
+// week's date range and Prev/Next buttons step a week at a time. The
+// PAGE owns the paging offset (it must widen the entries window to
+// cover the viewed week — see `Calendar.tsx`), so this component
+// receives the resolved Sunday anchor plus prev/next callbacks, and
+// paging is clamped to the page's bounds (buttons disable at the
+// edges rather than walking into permanently empty grids). Same chip
+// + density treatment as the month grid; see CalendarMonth for the
+// design rationale.
 
 interface CalendarWeekProps {
   entries: readonly CalendarEntry[];
-  /** Initial anchor — any ms-epoch within the desired week. The view
-   *  snaps to the Sunday on or before. */
-  initialMs: number;
+  /** Sunday-anchored (midnight UTC) ms of the week to render. The
+   *  page passes `startOfUTCWeek(now) + weekOffset * WEEK_MS`. */
+  anchorMs: number;
   locale: string;
+  onPrevWeek: () => void;
+  onNextWeek: () => void;
+  /** False at the paging bounds — the matching button disables. */
+  canPrev: boolean;
+  canNext: boolean;
 }
 
 export function CalendarWeek({
   entries,
-  initialMs,
+  anchorMs,
   locale,
+  onPrevWeek,
+  onNextWeek,
+  canPrev,
+  canNext,
 }: CalendarWeekProps) {
   const { t } = useTranslation();
-  const [anchorMs, setAnchorMs] = useState<number>(() =>
-    startOfWeek(initialMs),
-  );
 
   // Today's UTC day key, computed once per render. UTC-day bucketing
   // (see lib/calendar.ts) means members far from UTC may see the
@@ -108,18 +118,27 @@ export function CalendarWeek({
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={() => setAnchorMs((ms) => ms - 7 * 86400000)}
-          className="btn-ghost px-3 py-1 text-sm"
+          onClick={onPrevWeek}
+          disabled={!canPrev}
+          aria-disabled={!canPrev}
+          aria-label={t("calendar.weekNav.prev")}
+          className="btn-ghost px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-40"
         >
           ‹ {t("calendar.weekNav.prev")}
         </button>
-        <p className="text-sm font-semibold text-bark-800 dark:text-moss-100">
+        <p
+          aria-live="polite"
+          className="text-sm font-semibold text-bark-800 dark:text-moss-100"
+        >
           {rangeLabel}
         </p>
         <button
           type="button"
-          onClick={() => setAnchorMs((ms) => ms + 7 * 86400000)}
-          className="btn-ghost px-3 py-1 text-sm"
+          onClick={onNextWeek}
+          disabled={!canNext}
+          aria-disabled={!canNext}
+          aria-label={t("calendar.weekNav.next")}
+          className="btn-ghost px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t("calendar.weekNav.next")} ›
         </button>
@@ -313,9 +332,3 @@ function WeekChip({
   );
 }
 
-// Snap to the Sunday on or before `ms`, at midnight UTC.
-function startOfWeek(ms: number): number {
-  const sod = startOfUTCDay(ms);
-  const weekday = new Date(sod).getUTCDay(); // 0 = Sun
-  return sod - weekday * 86400000;
-}

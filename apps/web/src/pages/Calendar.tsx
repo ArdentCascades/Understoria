@@ -22,7 +22,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { buildCalendar, type CalendarEntry } from "@/lib/calendar";
+import {
+  WEEK_MS,
+  addUTCMonths,
+  buildCalendar,
+  calendarViewWindow,
+  startOfUTCWeek,
+  type CalendarEntry,
+} from "@/lib/calendar";
 import { isOrganizer } from "@/db/projects";
 import { getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { EmptyState } from "@/components/EmptyState";
@@ -37,6 +44,15 @@ import type { Event, Exchange, Post, Project } from "@/types";
 // filters change so the window stays anchored to "now" not stale.
 const WINDOW_BACK_MS = 30 * 24 * 60 * 60 * 1000;
 const WINDOW_FORWARD_MS = 60 * 24 * 60 * 60 * 1000;
+
+// Paging bounds for the month / week views: ~a year each way. History
+// is real data (density, past events) and events can be created at any
+// future date (EventNew caps the past, not the future), so both
+// directions are legitimate — but unbounded paging just walks members
+// into permanently empty grids. 52 weeks ≈ 12 months, so the two
+// views share the same effective horizon.
+const MAX_MONTH_OFFSET = 12;
+const MAX_WEEK_OFFSET = 52;
 
 type ViewMode = "agenda" | "month" | "week";
 
@@ -171,9 +187,29 @@ export default function CalendarPage() {
     );
   }, [hydrated, category, projectId, mine, eventsOnly]);
 
+  // Paging offsets for the month and week views (0 = the period
+  // containing "now"). Session-local, one per view so switching views
+  // doesn't lose the member's place — and deliberately NOT persisted
+  // (unlike view + filters above): the calendar always opens anchored
+  // on today. The page owns these (rather than the view components)
+  // because the ENTRIES WINDOW must follow the view: a fixed
+  // 30-back/60-forward window would render a paged-ahead month as
+  // empty even when events exist there.
+  const [monthOffset, setMonthOffset] = useState<number>(0);
+  const [weekOffset, setWeekOffset] = useState<number>(0);
+
   const now = Date.now();
-  const windowStart = now - WINDOW_BACK_MS;
-  const windowEnd = now + WINDOW_FORWARD_MS;
+  // Union of the default window with the currently-viewed period —
+  // at offset 0 the agenda / density behavior is unchanged; when
+  // paged, the window widens to cover what the grid is showing.
+  const { windowStart, windowEnd } = calendarViewWindow({
+    now,
+    defaultStart: now - WINDOW_BACK_MS,
+    defaultEnd: now + WINDOW_FORWARD_MS,
+    view: viewMode,
+    offset:
+      viewMode === "month" ? monthOffset : viewMode === "week" ? weekOffset : 0,
+  });
 
   const myKey = currentMember?.publicKey ?? null;
 
@@ -499,14 +535,32 @@ export default function CalendarPage() {
       ) : viewMode === "month" ? (
         <CalendarMonth
           entries={entries}
-          currentMs={now}
+          anchorMs={addUTCMonths(now, monthOffset)}
           locale={i18n.language}
+          onPrevMonth={() =>
+            setMonthOffset((o) => Math.max(o - 1, -MAX_MONTH_OFFSET))
+          }
+          onNextMonth={() =>
+            setMonthOffset((o) => Math.min(o + 1, MAX_MONTH_OFFSET))
+          }
+          onJumpToToday={() => setMonthOffset(0)}
+          canPrev={monthOffset > -MAX_MONTH_OFFSET}
+          canNext={monthOffset < MAX_MONTH_OFFSET}
+          atToday={monthOffset === 0}
         />
       ) : (
         <CalendarWeek
           entries={entries}
-          initialMs={now}
+          anchorMs={startOfUTCWeek(now) + weekOffset * WEEK_MS}
           locale={i18n.language}
+          onPrevWeek={() =>
+            setWeekOffset((o) => Math.max(o - 1, -MAX_WEEK_OFFSET))
+          }
+          onNextWeek={() =>
+            setWeekOffset((o) => Math.min(o + 1, MAX_WEEK_OFFSET))
+          }
+          canPrev={weekOffset > -MAX_WEEK_OFFSET}
+          canNext={weekOffset < MAX_WEEK_OFFSET}
         />
       )}
 

@@ -14,14 +14,19 @@ import type {
   ProjectStatus,
 } from "@/types";
 import {
+  WEEK_MS,
+  addUTCMonths,
   buildCalendar,
+  calendarViewWindow,
   dayKey,
   dayKeyToMs,
   entryIsPast,
   getTodayDayKey,
   groupByDay,
+  monthGridRange,
   startOfTodayMs,
   startOfUTCDay,
+  startOfUTCWeek,
   type CalendarEntry,
 } from "./calendar";
 
@@ -1386,5 +1391,198 @@ describe("entryIsPast — exchange_density (never past)", () => {
     expect(entryIsPast(densityEntry(todayStart + 30 * DAY), todayStart)).toBe(
       false,
     );
+  });
+});
+
+// ─── buildCalendar: same-day event time ordering ────────────────────
+
+describe("buildCalendar — same-day event time ordering", () => {
+  const HOUR = 60 * 60 * 1000;
+
+  it("sorts same-day events by startsAt ascending, not insertion order", () => {
+    const day = Date.UTC(2026, 10, 20);
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      // Inserted evening-first — the 10am skillshare must still list
+      // above the 7pm potluck.
+      events: [
+        event({ id: "potluck", startsAt: day + 19 * HOUR }),
+        event({ id: "skillshare", startsAt: day + 10 * HOUR }),
+      ],
+      ...defaultWindow(),
+    });
+    const ids = result
+      .filter((e) => e.kind === "event")
+      .map((e) => (e.kind === "event" ? e.eventId : ""));
+    expect(ids).toEqual(["skillshare", "potluck"]);
+  });
+
+  it("keeps the kind order intact — events still sort after the other kinds", () => {
+    const day = Date.UTC(2026, 10, 20, 12, 0, 0);
+    const result = buildCalendar({
+      projects: [project({ id: "p_1", deadline: day })],
+      posts: [post({ id: "post_1", expiresAt: day })],
+      exchanges: [exchange("e_1", day)],
+      events: [
+        event({ id: "late", startsAt: day + 7 * HOUR }),
+        event({ id: "early", startsAt: day - 2 * HOUR }),
+      ],
+      ...defaultWindow(),
+    });
+    expect(result.map((e) => e.kind)).toEqual([
+      "exchange_density",
+      "project_deadline",
+      "post_expiring",
+      "event",
+      "event",
+    ]);
+    const ids = result
+      .filter((e) => e.kind === "event")
+      .map((e) => (e.kind === "event" ? e.eventId : ""));
+    expect(ids).toEqual(["early", "late"]);
+  });
+
+  it("never reorders events across different days (date still wins)", () => {
+    const day1 = Date.UTC(2026, 10, 20);
+    const day2 = Date.UTC(2026, 10, 21);
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [
+        event({ id: "day2_morning", startsAt: day2 + 8 * HOUR }),
+        event({ id: "day1_evening", startsAt: day1 + 22 * HOUR }),
+      ],
+      ...defaultWindow(),
+    });
+    const ids = result
+      .filter((e) => e.kind === "event")
+      .map((e) => (e.kind === "event" ? e.eventId : ""));
+    expect(ids).toEqual(["day1_evening", "day2_morning"]);
+  });
+});
+
+// ─── Paging helpers: addUTCMonths / startOfUTCWeek / monthGridRange ─
+
+describe("addUTCMonths", () => {
+  it("offset 0 → midnight UTC on the first of the containing month", () => {
+    expect(addUTCMonths(NOW, 0)).toBe(Date.UTC(2026, 10, 1));
+  });
+
+  it("rolls forward across a year boundary", () => {
+    // Nov 2026 + 2 months = Jan 2027.
+    expect(addUTCMonths(NOW, 2)).toBe(Date.UTC(2027, 0, 1));
+  });
+
+  it("rolls backward across a year boundary", () => {
+    expect(addUTCMonths(Date.UTC(2026, 0, 20), -1)).toBe(Date.UTC(2025, 11, 1));
+  });
+});
+
+describe("startOfUTCWeek", () => {
+  it("snaps a mid-week timestamp to the Sunday on or before", () => {
+    // 2026-11-18 is a Wednesday; the prior Sunday is the 15th.
+    expect(startOfUTCWeek(Date.UTC(2026, 10, 18, 9, 30))).toBe(
+      Date.UTC(2026, 10, 15),
+    );
+  });
+
+  it("a Sunday snaps to its own midnight", () => {
+    // NOW (2026-11-15 12:00 UTC) is itself a Sunday.
+    expect(startOfUTCWeek(NOW)).toBe(Date.UTC(2026, 10, 15));
+  });
+});
+
+describe("monthGridRange", () => {
+  it("spans exactly 42 UTC days from the Sunday on or before the 1st", () => {
+    // Nov 2026: the 1st is itself a Sunday.
+    const r = monthGridRange(NOW);
+    expect(r.start).toBe(Date.UTC(2026, 10, 1));
+    expect(r.end).toBe(Date.UTC(2026, 10, 1) + 42 * DAY - 1);
+  });
+
+  it("pads back to the prior month's Sunday when the 1st is midweek", () => {
+    // Jul 1 2026 is a Wednesday → grid starts Sun Jun 28.
+    const r = monthGridRange(Date.UTC(2026, 6, 10));
+    expect(r.start).toBe(Date.UTC(2026, 5, 28));
+    expect(new Date(r.start).getUTCDay()).toBe(0);
+  });
+});
+
+// ─── calendarViewWindow ─────────────────────────────────────────────
+
+describe("calendarViewWindow", () => {
+  const defaults = {
+    now: NOW,
+    defaultStart: NOW - 15 * DAY,
+    defaultEnd: NOW + 30 * DAY,
+  };
+
+  it("agenda: default window unchanged (offset ignored)", () => {
+    const w = calendarViewWindow({ ...defaults, view: "agenda", offset: 5 });
+    expect(w).toEqual({
+      windowStart: defaults.defaultStart,
+      windowEnd: defaults.defaultEnd,
+    });
+  });
+
+  it("month offset 0 whose grid the defaults already cover: unchanged", () => {
+    // Nov 2026 grid = Nov 1 .. Dec 12 (inclusive); defaults run
+    // Oct 31 12:00 .. Dec 15 12:00 — the union IS the default window.
+    const w = calendarViewWindow({ ...defaults, view: "month", offset: 0 });
+    expect(w).toEqual({
+      windowStart: defaults.defaultStart,
+      windowEnd: defaults.defaultEnd,
+    });
+  });
+
+  it("month paged ahead: windowEnd widens to cover the viewed grid", () => {
+    const w = calendarViewWindow({ ...defaults, view: "month", offset: 3 });
+    expect(w.windowStart).toBe(defaults.defaultStart);
+    expect(w.windowEnd).toBe(monthGridRange(addUTCMonths(NOW, 3)).end);
+    expect(w.windowEnd).toBeGreaterThan(defaults.defaultEnd);
+  });
+
+  it("month paged back: windowStart widens to cover the viewed grid", () => {
+    const w = calendarViewWindow({ ...defaults, view: "month", offset: -3 });
+    expect(w.windowStart).toBe(monthGridRange(addUTCMonths(NOW, -3)).start);
+    expect(w.windowStart).toBeLessThan(defaults.defaultStart);
+    expect(w.windowEnd).toBe(defaults.defaultEnd);
+  });
+
+  it("week paged ahead: windowEnd widens to the viewed week's end", () => {
+    const w = calendarViewWindow({ ...defaults, view: "week", offset: 10 });
+    const anchor = startOfUTCWeek(NOW) + 10 * WEEK_MS;
+    expect(w.windowStart).toBe(defaults.defaultStart);
+    expect(w.windowEnd).toBe(anchor + WEEK_MS - 1);
+    expect(w.windowEnd).toBeGreaterThan(defaults.defaultEnd);
+  });
+
+  it("an event 3 months out is in the paged window but NOT the default", () => {
+    // Pre-fix, the fixed 60-day-forward window silently hid any event
+    // created further out than that; the paged window surfaces it.
+    const farEvent = event({
+      id: "far",
+      startsAt: Date.UTC(2027, 1, 10, 18, 0, 0), // Feb 2027
+    });
+    const base = {
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [farEvent],
+    };
+    const hidden = buildCalendar({ ...base, ...defaultWindow() });
+    expect(hidden).toHaveLength(0);
+    const w = calendarViewWindow({ ...defaults, view: "month", offset: 3 });
+    const shown = buildCalendar({
+      ...base,
+      windowStart: w.windowStart,
+      windowEnd: w.windowEnd,
+    });
+    expect(
+      shown.some((e) => e.kind === "event" && e.eventId === "far"),
+    ).toBe(true);
   });
 });

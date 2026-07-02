@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import {
   dayKey,
   getTodayDayKey,
+  monthGridRange,
   postEntryDisplay,
   startOfUTCDay,
   type CalendarEntry,
@@ -35,11 +36,14 @@ import {
 } from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
-// Month grid: 7 columns × ~5–6 weeks, rendering the month that
-// contains the `currentMs` prop (the page passes "now" by default).
-// Each cell shows the day number, up to three category-colored chips,
-// a "+N more" overflow link when full, and a calm density dot whose
-// opacity scales with exchange count.
+// Month grid: 7 columns × 6 weeks, rendering the month that contains
+// the `anchorMs` prop. The PAGE owns the paging offset (it must widen
+// the entries window to cover the viewed month — see `Calendar.tsx`),
+// so this component receives the resolved anchor plus prev/next/today
+// callbacks and renders the nav header (same control pattern as
+// CalendarWeek's). Each cell shows the day number, up to three
+// category-colored chips, a "+N more" overflow link when full, and a
+// calm density dot whose opacity scales with exchange count.
 //
 // Per design doc §8.2: no numeric overlay on density by default. The
 // overflow popover, when opened, lists every entry for that day —
@@ -47,16 +51,34 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 
 interface CalendarMonthProps {
   entries: readonly CalendarEntry[];
-  currentMs: number;
+  /** Any ms-epoch within the month to render. The page passes
+   *  `addUTCMonths(now, monthOffset)`. */
+  anchorMs: number;
   locale: string;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  /** Resets the paging offset to 0 (the month containing "now"). */
+  onJumpToToday: () => void;
+  /** False at the paging bounds — the matching button disables. */
+  canPrev: boolean;
+  canNext: boolean;
+  /** True when the rendered month is the one containing "now"; the
+   *  quiet "Today" jump only shows when this is false. */
+  atToday: boolean;
 }
 
 const MAX_CHIPS_PER_CELL = 3;
 
 export function CalendarMonth({
   entries,
-  currentMs,
+  anchorMs,
   locale,
+  onPrevMonth,
+  onNextMonth,
+  onJumpToToday,
+  canPrev,
+  canNext,
+  atToday,
 }: CalendarMonthProps) {
   const { t } = useTranslation();
   const [openDay, setOpenDay] = useState<string | null>(null);
@@ -78,7 +100,7 @@ export function CalendarMonth({
     return map;
   }, [entries]);
 
-  const grid = useMemo(() => buildMonthGrid(currentMs), [currentMs]);
+  const grid = useMemo(() => buildMonthGrid(anchorMs), [anchorMs]);
 
   const monthLabel = useMemo(
     () =>
@@ -93,9 +115,50 @@ export function CalendarMonth({
 
   return (
     <div className="flex flex-col gap-stack-sm">
-      <p className="text-sm font-semibold text-bark-800 dark:text-moss-100">
-        {monthLabel}
-      </p>
+      {/* Month nav — mirrors CalendarWeek's prev/next control pattern.
+          The heading is aria-live so paging announces the new month to
+          screen readers; buttons disable at the paging bounds. */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onPrevMonth}
+          disabled={!canPrev}
+          aria-disabled={!canPrev}
+          aria-label={t("calendar.monthNav.prev")}
+          className="btn-ghost px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ‹ {t("calendar.monthNav.prev")}
+        </button>
+        <span className="flex items-center gap-2">
+          <p
+            aria-live="polite"
+            className="text-sm font-semibold text-bark-800 dark:text-moss-100"
+          >
+            {monthLabel}
+          </p>
+          {atToday ? null : (
+            <button
+              type="button"
+              onClick={onJumpToToday}
+              className="rounded-full bg-moss-100 px-2 py-0.5 text-xs text-moss-700
+                         hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200
+                         dark:hover:bg-moss-700"
+            >
+              {t("calendar.monthNav.today")}
+            </button>
+          )}
+        </span>
+        <button
+          type="button"
+          onClick={onNextMonth}
+          disabled={!canNext}
+          aria-disabled={!canNext}
+          aria-label={t("calendar.monthNav.next")}
+          className="btn-ghost px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {t("calendar.monthNav.next")} ›
+        </button>
+      </div>
       <div
         className="grid grid-cols-7 gap-px overflow-hidden rounded-xl
                    border border-moss-200 bg-moss-200 text-xs
@@ -334,20 +397,25 @@ function PopoverEntry({ entry }: { entry: CalendarEntry }) {
 }
 
 // Builds a 7-column × N-row grid covering the month that contains
-// `currentMs`. Rows are padded from the prior month and the following
+// `anchorMs`. Rows are padded from the prior month and the following
 // month so the grid is always a rectangle and weeks are aligned.
 // Week starts Sunday for simplicity — matches the weekday header.
-function buildMonthGrid(currentMs: number): {
+// The grid start comes from `monthGridRange` (lib/calendar.ts) so the
+// page's entries-window math and this render walk the same 42 cells.
+// Note on today-highlight when paged: `todayKey` is an exact UTC-day
+// match, so a paged month never highlights a wrong day — but an
+// adjacent-month padding cell that genuinely IS today (e.g. viewing
+// next month whose first row pads with this week) still highlights,
+// which is truthful.
+function buildMonthGrid(anchorMs: number): {
   cells: Array<{ key: string; dayNum: number; inMonth: boolean }>;
   monthAnchorMs: number;
 } {
-  const d = new Date(currentMs);
+  const d = new Date(anchorMs);
   const year = d.getUTCFullYear();
   const month = d.getUTCMonth();
   const firstOfMonth = Date.UTC(year, month, 1);
-  const firstWeekday = new Date(firstOfMonth).getUTCDay(); // 0 = Sun
-  // Walk back to the Sunday on or before the first.
-  const gridStart = firstOfMonth - firstWeekday * 86400000;
+  const gridStart = monthGridRange(anchorMs).start;
   // Render 6 weeks (42 cells) — always covers any month.
   const cells: Array<{ key: string; dayNum: number; inMonth: boolean }> = [];
   for (let i = 0; i < 42; i++) {
