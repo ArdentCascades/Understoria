@@ -19,6 +19,7 @@ import { useProjectTaskContext } from "@/lib/useProjectTaskContext";
 import { formatHours } from "@/lib/format";
 import { creditHoursForTask } from "@/lib/timebank";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
+import { BackLink } from "@/components/BackLink";
 import { TaskDetailBody } from "@/components/TaskDetailBody";
 import { HistoryTimeline } from "@/pages/ProjectDetail";
 
@@ -95,12 +96,13 @@ export default function TaskDetailPage() {
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("projects.task.detail.notFound")}
         </p>
-        <Link
+        <BackLink
           to={`/project/${id}`}
+          label={t("projects.task.detail.backToProject", {
+            title: project.title,
+          })}
           className="btn-ghost -ml-2 mt-4 inline-block text-sm"
-        >
-          {`← ${t("projects.task.detail.backToProject", { title: project.title })}`}
-        </Link>
+        />
       </div>
     );
   }
@@ -109,12 +111,12 @@ export default function TaskDetailPage() {
     <div className="px-4 pb-8 pt-4">
       {/* Re-anchors the project list to this row on return, so the
           member lands back where they were. */}
-      <Link
+      <BackLink
         to={`/project/${id}#task-${taskId}`}
-        className="btn-ghost -ml-2 mb-3 inline-block text-sm"
-      >
-        {`← ${t("projects.task.detail.backToProject", { title: project.title })}`}
-      </Link>
+        label={t("projects.task.detail.backToProject", {
+          title: project.title,
+        })}
+      />
       {error && (
         <p
           role="alert"

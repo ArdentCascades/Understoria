@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
@@ -27,6 +27,7 @@ import { getSecretKey } from "@/db/secrets";
 import { humanizeError } from "@/lib/humanizeError";
 import { shortKey } from "@/lib/format";
 import { eventCategoryMeta } from "@/lib/categories";
+import { BackLink, useHistoryAwareBack } from "@/components/BackLink";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EventRsvpControl } from "@/components/EventRsvpControl";
@@ -53,7 +54,12 @@ function formatDateTime(ms: number, locale: string | undefined): string {
 
 export default function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
+  // History-aware back: an event reached from inside the app (project
+  // page → work-day link, calendar, a shared conversation) returns to
+  // where the member actually was; a cold entry (direct link) falls
+  // back to the calendar. Fixes the project → event → Back dead-end
+  // that used to dump members onto /calendar and lose the project.
+  const goBack = useHistoryAwareBack("/calendar");
   const { t, i18n } = useTranslation();
   const { currentMember, members, nodeId, lockState, projects } = useApp();
   const { showToast } = useToast();
@@ -125,7 +131,7 @@ export default function EventDetailPage() {
         <button
           type="button"
           className="btn-secondary mt-4"
-          onClick={() => navigate("/calendar")}
+          onClick={goBack}
         >
           {t("events.detail.backToCalendar")}
         </button>
@@ -253,13 +259,12 @@ export default function EventDetailPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <button
-        type="button"
-        className="btn-ghost -ml-2 mb-3 text-sm"
-        onClick={() => navigate("/calendar")}
-      >
-        {t("events.detail.backToCalendar")}
-      </button>
+      <BackLink
+        to="/calendar"
+        label={t("events.detail.backToCalendar")}
+        preferHistory
+        className="btn-ghost -ml-2 mb-3 inline-block text-sm"
+      />
 
       <header className="mb-4">
         <div className="flex items-start justify-between gap-2">

@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
@@ -31,6 +31,7 @@ import {
 import { isBlocked } from "@/db/blocks";
 import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
+import { BackLink } from "@/components/BackLink";
 import { HighlightedText } from "@/components/HighlightedText";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { WhyTooltip } from "@/components/WhyTooltip";
@@ -43,7 +44,6 @@ export default function ConversationPage() {
   const { memberKey } = useParams<{ memberKey: string }>();
   const { currentMember, members, lockState, blockedKeys } = useApp();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [text, setText] = useState("");
@@ -182,13 +182,11 @@ export default function ConversationPage() {
     return (
       <div className="flex h-full flex-col px-4 pb-4 pt-4">
         <header className="mb-4 flex items-center gap-2">
-          <button
-            type="button"
+          <BackLink
+            to="/messages"
+            label={t("common.back")}
             className="btn-ghost -ml-2 text-sm"
-            onClick={() => navigate("/messages")}
-          >
-            {t("common.back")}
-          </button>
+          />
         </header>
         <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
           {t("errors.generic.notAvailable")}
@@ -207,13 +205,11 @@ export default function ConversationPage() {
   return (
     <div className="flex h-full flex-col px-4 pb-4 pt-4">
       <header className="mb-4 flex items-center gap-2">
-        <button
-          type="button"
+        <BackLink
+          to="/messages"
+          label={t("common.back")}
           className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate("/messages")}
-        >
-          {t("common.back")}
-        </button>
+        />
         {otherKey && <MemberAvatar publicKey={otherKey} size={48} framed />}
         <h1 className="text-lg font-bold">
           {t("messages.conversationWith", { name: otherName })}

@@ -10,9 +10,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { BackLink } from "@/components/BackLink";
 import { useToast } from "@/state/ToastContext";
 import { formatHours, formatRelativeTime, shortKey } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
@@ -68,7 +69,6 @@ export default function ProposalsPage() {
     governanceHiddenKeys,
   } = useApp();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [filter, setFilter] = useState<ProposalStatus | "all">("open");
 
   // PR F: governance-content filter is per-block opt-in only. System
@@ -113,13 +113,17 @@ export default function ProposalsPage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <button
-          type="button"
+        {/* Reached from Profile's governance cluster (and from
+            cross-links between the governance pages), so back follows
+            in-app history when there is any and falls back to
+            /profile on a cold entry — where navigate(-1) used to be
+            a dead button. */}
+        <BackLink
+          to="/profile"
+          label={t("common.back")}
+          preferHistory
           className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate(-1)}
-        >
-          {t("common.back")}
-        </button>
+        />
         <h1 className="page-title mt-2">
           {t("proposals.title")}
         </h1>

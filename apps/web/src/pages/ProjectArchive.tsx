@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { BackLink } from "@/components/BackLink";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { computeProjectClosure } from "@/lib/projectClosure";
@@ -15,7 +15,6 @@ import { formatHours } from "@/lib/format";
 export default function ProjectArchivePage() {
   const { projects, projectTasks, members, exchanges } = useApp();
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const memberName = useMemo(() => {
     const map = new Map<string, string>();
@@ -45,13 +44,15 @@ export default function ProjectArchivePage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <button
-          type="button"
+        {/* Named parent: the projects tab is where the archive is
+            reached from. History-aware so the tab's scroll/filter
+            state is restored when it's actually the previous entry. */}
+        <BackLink
+          to="/?tab=projects"
+          label={t("projects.detail.back")}
+          preferHistory
           className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate(-1)}
-        >
-          {t("common.back")}
-        </button>
+        />
         <h1 className="page-title mt-2">
           {t("projects.archive.title")}
         </h1>
