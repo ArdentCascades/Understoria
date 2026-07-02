@@ -894,6 +894,16 @@ export const SETTING_KEYS = {
    *  `cancelledAt` observed so far on event-cancellation pulls.
    *  Defaults to epoch 0 when absent. */
   federationLastEventCancellationPull: "federationLastEventCancellationPull",
+  /** The calendar page's last explicitly-picked view: "agenda" |
+   *  "month" | "week". Absent or invalid reads as the breakpoint-derived
+   *  default. Device-local display state only — never federated. */
+  calendarViewMode: "calendarViewMode",
+  /** The calendar page's filter state as a JSON blob:
+   *  `{ category, projectId, mine, eventsOnly }`. Absent or malformed
+   *  reads as "no filters". Device-local display state only — never
+   *  federated. Paging / offset state is deliberately NOT stored here:
+   *  the calendar always opens anchored on today. */
+  calendarFilters: "calendarFilters",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

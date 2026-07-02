@@ -44,9 +44,25 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 interface CalendarAgendaProps {
   entries: readonly CalendarEntry[];
   locale: string;
+  /** Ids of projects the VIEWER organizes or co-organizes — derived by
+   *  the page from data it already holds (`Project.organizerKey` /
+   *  `coOrganizerKeys` vs the viewer's own key). Personal-view weighting
+   *  only; nothing new is stored or federated. Optional: when omitted,
+   *  no project deadline is weighted. */
+  viewerProjectIds?: ReadonlySet<string>;
+  /** Ids of posts the VIEWER authored (`Post.postedBy` vs the viewer's
+   *  own key). Same personal-view-only posture as `viewerProjectIds`. */
+  viewerPostIds?: ReadonlySet<string>;
 }
 
-export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
+const EMPTY_ID_SET: ReadonlySet<string> = new Set();
+
+export function CalendarAgenda({
+  entries,
+  locale,
+  viewerProjectIds = EMPTY_ID_SET,
+  viewerPostIds = EMPTY_ID_SET,
+}: CalendarAgendaProps) {
   const { t } = useTranslation();
 
   // Agenda is forward-looking: past date-bound entries (events whose
@@ -124,7 +140,11 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
           <ul className="mt-1 flex flex-col gap-1">
             {day.entries.map((e) => (
               <li key={e.id}>
-                <AgendaEntry entry={e} />
+                <AgendaEntry
+                  entry={e}
+                  viewerProjectIds={viewerProjectIds}
+                  viewerPostIds={viewerPostIds}
+                />
               </li>
             ))}
           </ul>
@@ -144,7 +164,29 @@ export function CalendarAgenda({ entries, locale }: CalendarAgendaProps) {
   );
 }
 
-function AgendaEntry({ entry }: { entry: CalendarEntry }) {
+// Commitment weighting: rows the viewer is personally part of (RSVP'd
+// "going", their own project's deadline, their own expiring post) read
+// slightly heavier — a canopy left-accent plus font-semibold. This is a
+// PERSONAL-VIEW distinction computed only from the viewer's own local
+// data (their RSVPs, their key vs organizerKey/postedBy) — never a
+// count, never anyone else's status, never a popularity signal
+// (no-leaderboards). Every row carries the same border width (accent
+// rows colour it, ambient rows keep it transparent) so alignment never
+// shifts.
+const ENTRY_ROW_BASE = `group flex items-center gap-2 rounded-xl border-l-2
+   px-2 py-1.5 hover:bg-moss-50 dark:hover:bg-moss-900`;
+const ENTRY_ROW_AMBIENT = `${ENTRY_ROW_BASE} border-transparent`;
+const ENTRY_ROW_VIEWER = `${ENTRY_ROW_BASE} border-canopy-600 dark:border-canopy-400`;
+
+function AgendaEntry({
+  entry,
+  viewerProjectIds,
+  viewerPostIds,
+}: {
+  entry: CalendarEntry;
+  viewerProjectIds: ReadonlySet<string>;
+  viewerPostIds: ReadonlySet<string>;
+}) {
   const { t, i18n } = useTranslation();
   if (entry.kind === "exchange_density") {
     return (
@@ -201,14 +243,20 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
       <Link
         to={entry.path}
         aria-label={ariaLabel}
-        className="group flex items-center gap-2 rounded-xl px-2 py-1.5
-                   hover:bg-moss-50 dark:hover:bg-moss-900"
+        className={entry.viewerGoing ? ENTRY_ROW_VIEWER : ENTRY_ROW_AMBIENT}
       >
         <span
           className={`inline-block h-3 w-3 rounded-full ${meta.barColorClass}`}
           aria-hidden="true"
         />
-        <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
+        <span
+          className={[
+            "text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300",
+            // The weight is never the only cue: the going-specific
+            // aria-label above names the commitment for screen readers.
+            entry.viewerGoing ? "font-semibold" : "",
+          ].join(" ")}
+        >
           <span aria-hidden="true" className="mr-1">
             {meta.emoji}
           </span>
@@ -258,18 +306,29 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
   }
   if (entry.kind === "project_deadline") {
     const meta = PROJECT_CATEGORY_META[entry.category];
+    // "Yours" = the viewer organizes / co-organizes this project —
+    // derived by the page from its own local rows, never federated.
+    const isViewers = viewerProjectIds.has(entry.projectId);
     return (
       <Link
         to={`/project/${entry.projectId}`}
-        className="group flex items-center gap-2 rounded-xl px-2 py-1.5
-                   hover:bg-moss-50 dark:hover:bg-moss-900"
+        className={isViewers ? ENTRY_ROW_VIEWER : ENTRY_ROW_AMBIENT}
       >
         <span
           className={`inline-block h-3 w-3 rounded-full ${meta.barColorClass}`}
           aria-hidden="true"
         />
-        <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
+        <span
+          className={[
+            "text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300",
+            isViewers ? "font-semibold" : "",
+          ].join(" ")}
+        >
           {t("calendar.entry.projectDeadline", { title: entry.projectTitle })}
+          {/* Not colour/weight-only: screen readers hear the suffix. */}
+          {isViewers ? (
+            <span className="sr-only"> {t("calendar.entry.yoursSrSuffix")}</span>
+          ) : null}
         </span>
       </Link>
     );
@@ -278,19 +337,29 @@ function AgendaEntry({ entry }: { entry: CalendarEntry }) {
   const meta = CATEGORY_META[entry.category];
   const { glyph, labelKey } = postEntryDisplay(entry.postType);
   const label = t(labelKey, { title: entry.postTitle });
+  // "Yours" = the viewer authored this post (postedBy vs own key).
+  const isViewers = viewerPostIds.has(entry.postId);
   return (
     <Link
       to={`/post/${entry.postId}`}
-      className="group flex items-center gap-2 rounded-xl px-2 py-1.5
-                 hover:bg-moss-50 dark:hover:bg-moss-900"
+      className={isViewers ? ENTRY_ROW_VIEWER : ENTRY_ROW_AMBIENT}
     >
       <span
         className={`inline-block h-3 w-3 rounded-full ${meta.barColorClass}`}
         aria-hidden="true"
       />
-      <span className="text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300">
+      <span
+        className={[
+          "text-sm text-bark-800 group-hover:text-canopy-700 dark:text-moss-100 dark:group-hover:text-canopy-300",
+          isViewers ? "font-semibold" : "",
+        ].join(" ")}
+      >
         <span aria-hidden="true" className="mr-1">{glyph}</span>
         {label}
+        {/* Not colour/weight-only: screen readers hear the suffix. */}
+        {isViewers ? (
+          <span className="sr-only"> {t("calendar.entry.yoursSrSuffix")}</span>
+        ) : null}
       </span>
     </Link>
   );

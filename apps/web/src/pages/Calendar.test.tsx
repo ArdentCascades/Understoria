@@ -36,6 +36,11 @@ vi.mock("@/state/AppContext", () => {
 // Importing it once here brings the locale resources in so `useTranslation()`
 // returns real strings during render rather than the raw key names.
 import "@/i18n";
+// `@/db/database` is NOT mocked — the page persists its view + filter
+// state through the real settings store, backed by fake-indexeddb
+// (src/test/setup.ts). We clear it per test so persistence never leaks
+// between cases.
+import { db, getSetting, SETTING_KEYS } from "@/db/database";
 import CalendarPage from "./Calendar";
 import type {
   Event,
@@ -168,8 +173,9 @@ let root: Root;
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
 
-beforeEach(() => {
+beforeEach(async () => {
   mockState = blankState();
+  await db.settings.clear();
   container = document.createElement("div");
   document.body.appendChild(container);
 });
@@ -185,6 +191,25 @@ function render(node: ReactNode) {
   act(() => {
     root = createRoot(container);
     root.render(<MemoryRouter>{node}</MemoryRouter>);
+  });
+}
+
+// The Mine filter is a chip (aria-pressed toggle button), sibling of
+// the Events-only chip — not a checkbox.
+function mineChip(): HTMLButtonElement {
+  const chip = Array.from(
+    container.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"),
+  ).find((b) => (b.textContent ?? "").trim() === "Mine");
+  if (!chip) throw new Error("Mine chip not found");
+  return chip;
+}
+
+// Let React effects and the fake-indexeddb reads/writes settle (real
+// timers only — under vi.useFakeTimers the IDB callbacks never fire).
+async function flushDb() {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
   });
 }
 
@@ -279,13 +304,9 @@ describe("CalendarPage", () => {
     expect(hrefs).toContain("/post/post-mine");
     expect(hrefs).toContain("/post/post-theirs");
 
-    // Toggle the Mine checkbox. After that, only mine should appear.
-    const checkbox = container.querySelector<HTMLInputElement>(
-      'input[type="checkbox"]',
-    );
-    expect(checkbox).not.toBeNull();
+    // Toggle the Mine chip. After that, only mine should appear.
     act(() => {
-      checkbox!.click();
+      mineChip().click();
     });
     hrefs = linkHrefs();
     expect(hrefs).toContain("/project/p-mine");
@@ -571,10 +592,7 @@ describe("CalendarPage", () => {
     // Before toggling Mine, every event shows (community-wide).
     expect(eventHrefs()).toContain("/events/theirs");
 
-    const checkbox = container.querySelector<HTMLInputElement>(
-      'input[type="checkbox"]',
-    );
-    act(() => checkbox!.click());
+    act(() => mineChip().click());
 
     const hrefs = eventHrefs();
     expect(hrefs).toContain("/events/mine-org");
@@ -787,5 +805,185 @@ describe("CalendarPage", () => {
     const chips = container.querySelectorAll('a[href="/events/one"]');
     expect(chips.length).toBe(1);
     vi.useRealTimers();
+  });
+
+  it("weights the viewer's commitments in the agenda (canopy accent + sr-only suffix); ambient rows stay plain", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.currentMember = makeMember("me-key");
+    mockState.projects = [
+      makeProject({ id: "p-mine", title: "Mine project", deadline: day, organizerKey: "me-key" }),
+      makeProject({ id: "p-theirs", title: "Theirs project", deadline: day, organizerKey: "other-key" }),
+    ];
+    mockState.posts = [
+      makePost({ id: "post-mine", title: "My need", expiresAt: day, postedBy: "me-key" }),
+    ];
+    mockState.events = [
+      makeEvent({ id: "going", title: "Potluck", startsAt: day + 3 * 3_600_000 }),
+      makeEvent({ id: "ambient", title: "Meeting", startsAt: day + 4 * 3_600_000 }),
+    ];
+    mockState.eventRsvps = [
+      { id: "r1", eventId: "going", memberKey: "me-key", status: "going", respondedAt: 1 },
+    ];
+    render(<CalendarPage />);
+    clickAgenda();
+
+    // Own project deadline: canopy accent + semibold + sr-only "(yours)".
+    const mineRow = container.querySelector('a[href="/project/p-mine"]');
+    expect(mineRow?.className ?? "").toContain("border-canopy");
+    expect(mineRow?.querySelector("span.sr-only")?.textContent ?? "").toContain(
+      "(yours)",
+    );
+    expect(mineRow?.innerHTML ?? "").toContain("font-semibold");
+
+    // Someone else's deadline: no accent, no suffix, no weight.
+    const theirsRow = container.querySelector('a[href="/project/p-theirs"]');
+    expect(theirsRow?.className ?? "").not.toContain("border-canopy");
+    expect(theirsRow?.textContent ?? "").not.toContain("(yours)");
+    expect(theirsRow?.innerHTML ?? "").not.toContain("font-semibold");
+
+    // Own expiring post carries the same treatment.
+    const postRow = container.querySelector('a[href="/post/post-mine"]');
+    expect(postRow?.className ?? "").toContain("border-canopy");
+    expect(postRow?.querySelector("span.sr-only")?.textContent ?? "").toContain(
+      "(yours)",
+    );
+
+    // RSVP'd-going event: accent + weight + the existing ✓ stays; the
+    // going aria-label (not colour) carries it for screen readers.
+    const goingChip = container.querySelector('a[href="/events/going"]');
+    expect(goingChip?.className ?? "").toContain("border-canopy");
+    expect(goingChip?.innerHTML ?? "").toContain("font-semibold");
+    expect(goingChip?.textContent ?? "").toContain("✓");
+    // Ambient event: none of it.
+    const ambientChip = container.querySelector('a[href="/events/ambient"]');
+    expect(ambientChip?.className ?? "").not.toContain("border-canopy");
+    expect(ambientChip?.innerHTML ?? "").not.toContain("font-semibold");
+    vi.useRealTimers();
+  });
+
+  it("shows an active-filter count reflecting each filter and drops it on clear", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    mockState.currentMember = makeMember("me-key");
+    mockState.projects = [makeProject({ id: "p1", deadline: day })];
+    render(<CalendarPage />);
+
+    expect(container.textContent ?? "").not.toContain("Filters ·");
+
+    // Events-only on → 1 active.
+    const eventsOnlyChip = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /events only/i.test(b.textContent ?? ""));
+    act(() => eventsOnlyChip!.click());
+    expect(container.textContent ?? "").toContain("Filters · 1 active");
+
+    // Mine on → 2 active.
+    act(() => mineChip().click());
+    expect(container.textContent ?? "").toContain("Filters · 2 active");
+
+    // Project select set → 3 active.
+    const projectSelect = Array.from(
+      container.querySelectorAll<HTMLSelectElement>("select"),
+    ).find((s) => Array.from(s.options).some((o) => o.value === "p1"));
+    act(() => {
+      projectSelect!.value = "p1";
+      projectSelect!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(container.textContent ?? "").toContain("Filters · 3 active");
+
+    // The narrowed list is empty (Events-only with no events), so the
+    // filtered-empty state offers Clear filters; clicking it resets
+    // every filter and the count disappears.
+    const clearBtn = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /clear filters/i.test(b.textContent ?? ""));
+    expect(clearBtn, "expected the Clear filters affordance").toBeDefined();
+    act(() => clearBtn!.click());
+    expect(container.textContent ?? "").not.toContain("Filters ·");
+    vi.useRealTimers();
+  });
+
+  it("truly-empty state points at the + button; no guilt framing", () => {
+    render(<CalendarPage />);
+    const text = container.textContent ?? "";
+    expect(text).toContain("calendar is quiet");
+    expect(text).toContain("The + button below starts an event.");
+    // Not the filtered-empty variant.
+    expect(text).not.toContain("Nothing matches these filters.");
+  });
+
+  it("filtered-empty shows the clear-filters variant instead of the truly-empty copy", () => {
+    const day = Date.UTC(2026, 5, 15);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 1)));
+    // Data exists (a project deadline), but Events-only narrows to zero.
+    mockState.projects = [makeProject({ id: "p1", deadline: day })];
+    render(<CalendarPage />);
+    const eventsOnlyChip = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /events only/i.test(b.textContent ?? ""));
+    act(() => eventsOnlyChip!.click());
+
+    let text = container.textContent ?? "";
+    expect(text).toContain("Nothing matches these filters.");
+    expect(text).not.toContain("calendar is quiet");
+
+    // Clear filters brings the entries back.
+    const clearBtn = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /clear filters/i.test(b.textContent ?? ""));
+    act(() => clearBtn!.click());
+    text = container.textContent ?? "";
+    expect(text).not.toContain("Nothing matches these filters.");
+    expect(
+      container.querySelector('a[href="/project/p1"]'),
+    ).not.toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("persists the view mode and filters and restores them on remount", async () => {
+    // Real timers throughout — fake-indexeddb schedules its callbacks
+    // through the timer queue.
+    mockState.currentMember = makeMember("me-key");
+    render(<CalendarPage />);
+    await flushDb(); // initial hydration (nothing stored yet)
+
+    // Explicit picks: agenda view, Events-only + Mine on.
+    clickAgenda();
+    const eventsOnlyChip = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /events only/i.test(b.textContent ?? ""));
+    act(() => eventsOnlyChip!.click());
+    act(() => mineChip().click());
+    await flushDb(); // write-through lands
+
+    expect(await getSetting(SETTING_KEYS.calendarViewMode)).toBe("agenda");
+    const storedFilters = await getSetting(SETTING_KEYS.calendarFilters);
+    expect(storedFilters).toBeDefined();
+    expect(JSON.parse(storedFilters!)).toMatchObject({
+      eventsOnly: true,
+      mine: true,
+    });
+
+    // Unmount and remount fresh — the restore effect rehydrates both.
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    render(<CalendarPage />);
+    await flushDb();
+
+    const agendaPill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => /agenda/i.test(b.textContent ?? ""));
+    expect(agendaPill?.getAttribute("aria-selected")).toBe("true");
+    const restoredEventsOnly = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => /events only/i.test(b.textContent ?? ""));
+    expect(restoredEventsOnly?.getAttribute("aria-pressed")).toBe("true");
+    expect(mineChip().getAttribute("aria-pressed")).toBe("true");
   });
 });
