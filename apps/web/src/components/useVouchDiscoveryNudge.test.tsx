@@ -11,6 +11,7 @@
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Test fixtures — driven via the AppContext mock below.
@@ -137,7 +138,13 @@ afterEach(() => {
 function render() {
   act(() => {
     root = createRoot(container);
-    root.render(<Harness />);
+    // The card carries a Link ("How vouching works" → /help), so the
+    // harness needs a router context, same as useInstallCardNudge.
+    root.render(
+      <MemoryRouter>
+        <Harness />
+      </MemoryRouter>,
+    );
   });
 }
 
@@ -158,6 +165,13 @@ describe("useVouchDiscoveryNudge", () => {
     render();
     await flushAsync();
     expect(container.textContent).toContain("You can vouch now");
+    // The CTA answers itself: "How vouching works" lands on the FAQ
+    // entry rather than sending the member to hunt a Vouch button.
+    const link = Array.from(container.querySelectorAll("a")).find((a) =>
+      a.textContent?.includes("How vouching works"),
+    );
+    expect(link).toBeDefined();
+    expect(link?.getAttribute("href")).toBe("/help#how-vouching-works");
   });
 
   it("self-retires when the member has already vouched for someone", async () => {

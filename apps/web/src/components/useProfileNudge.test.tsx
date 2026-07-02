@@ -117,8 +117,10 @@ describe("useProfileNudge", () => {
     expect(container.textContent).toContain(
       "Members can find you for in-person help",
     );
+    // `?edit=1` asks Profile to scroll to + focus the editor, so the
+    // CTA lands on the details form rather than the top of the page.
     const link = container.querySelector("a");
-    expect(link?.getAttribute("href")).toBe("/profile");
+    expect(link?.getAttribute("href")).toBe("/profile?edit=1");
   });
 
   it("renders nothing when the profile already has a skill", async () => {

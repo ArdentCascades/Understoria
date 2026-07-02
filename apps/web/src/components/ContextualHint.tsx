@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getSetting, setSetting } from "@/db/database";
 
@@ -18,13 +19,22 @@ export function ContextualHint({
   ariaLabel,
   message,
   dismissLabel,
-  technicalDetail,
+  learnMoreTo,
+  learnMoreLabel,
 }: {
   settingKey: string;
   ariaLabel: string;
   message: string;
   dismissLabel?: string;
-  technicalDetail?: string;
+  /** Route (usually a `/help#…` FAQ anchor) the hint's "Learn more"
+   *  link lands on. The hint keeps its one-breath headline; the full
+   *  answer lives in Help where it's re-findable after dismissal —
+   *  no more duplicating FAQ prose inside a <details> toggle. */
+  learnMoreTo?: string;
+  /** Descriptive label for the link — two identical "Learn more"
+   *  links on one page (Profile shows two hints) are ambiguous for
+   *  screen-reader users, so callers name the destination. */
+  learnMoreLabel?: string;
 }) {
   const { t } = useTranslation();
   const [dismissed, setDismissed] = useState<boolean | null>(null);
@@ -55,15 +65,15 @@ export function ContextualHint({
                  dark:border-canopy-900 dark:bg-canopy-950/40"
     >
       <p className="text-canopy-900 dark:text-canopy-100">{message}</p>
-      {technicalDetail && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-xs font-medium text-canopy-700 marker:hidden hover:underline dark:text-canopy-300">
-            {t("common.learnMore")}
-          </summary>
-          <p className="mt-2 whitespace-pre-wrap text-xs text-moss-600 dark:text-moss-300">
-            {technicalDetail}
-          </p>
-        </details>
+      {learnMoreTo && (
+        <Link
+          to={learnMoreTo}
+          className="touch-target inline-flex items-center self-start text-xs
+                     font-medium text-canopy-700 underline-offset-2
+                     hover:underline dark:text-canopy-300"
+        >
+          {learnMoreLabel ?? t("common.learnMore")} →
+        </Link>
       )}
       <div className="flex justify-end">
         <button

@@ -18,8 +18,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { IconSettings } from "@/components/visual";
@@ -37,6 +37,7 @@ import type {
   PendingTaskEntry,
 } from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
+import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { MyTasksSummary } from "@/pages/MyTasks";
 import { myOrganizedProjects } from "@/lib/myProjects";
@@ -207,6 +208,23 @@ export default function ProfilePage() {
     setCurrentMember,
   } = useApp();
   const { t } = useTranslation();
+  // `/profile?edit=1` (the Board profile-nudge CTA) means "take me to
+  // the editor", not just "take me to the page" — ProfileEditor
+  // scrolls into view and focuses its first field. The param is
+  // stripped after handling (history.replace) so back/refresh don't
+  // replay the scroll.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const editRequested = searchParams.get("edit") === "1";
+  const clearEditParam = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("edit");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
 
   if (!currentMember) return null;
 
@@ -367,16 +385,22 @@ export default function ProfilePage() {
         settingKey="balanceHintDismissed"
         ariaLabel={t("hints.balance.label")}
         message={t("hints.balance.message")}
-        technicalDetail={t("hints.balance.technical")}
+        learnMoreTo="/help#what-is-balance"
+        learnMoreLabel={t("hints.balance.learnMoreLabel")}
       />
 
-      <ProfileEditor member={currentMember} />
+      <ProfileEditor
+        member={currentMember}
+        focusOnMount={editRequested}
+        onFocusHandled={clearEditParam}
+      />
 
       <ContextualHint
         settingKey="inviteHintDismissed"
         ariaLabel={t("hints.invite.label")}
         message={t("hints.invite.message")}
-        technicalDetail={t("hints.invite.technical")}
+        learnMoreTo="/help#invite-someone"
+        learnMoreLabel={t("hints.invite.learnMoreLabel")}
       />
       {/* Community-participation cluster. CSS columns at lg+ because
           the cards have uneven heights — Invites can be tall
@@ -923,8 +947,39 @@ function BalanceCard({
   );
 }
 
-function ProfileEditor({ member }: { member: Member }) {
+function ProfileEditor({
+  member,
+  focusOnMount = false,
+  onFocusHandled,
+}: {
+  member: Member;
+  /** True when the page was entered via `/profile?edit=1` (the Board
+   *  profile-nudge CTA): scroll this section into view and focus the
+   *  first field so "Add some details" lands ON the details form. */
+  focusOnMount?: boolean;
+  /** Called once the scroll/focus has run, so the caller can strip
+   *  the `edit` param from the URL (replace, not push). */
+  onFocusHandled?: () => void;
+}) {
   const { t } = useTranslation();
+  const reduced = useReducedMotion();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (!focusOnMount) return;
+    sectionRef.current?.scrollIntoView({
+      behavior: reduced ? "auto" : "smooth",
+      block: "start",
+    });
+    // preventScroll: the scrollIntoView above already framed the whole
+    // section; letting focus() scroll again would yank the heading off
+    // the top of the viewport.
+    nameInputRef.current?.focus({ preventScroll: true });
+    onFocusHandled?.();
+    // Run once on the mount that carried the param — clearing the
+    // param flips focusOnMount to false, and the guard above makes
+    // that a no-op rather than a re-scroll.
+  }, [focusOnMount, reduced, onFocusHandled]);
   const [name, setName] = useState(member.displayName);
   const [skills, setSkills] = useState(member.skills.join(", "));
   const [availability, setAvailability] = useState(member.availability);
@@ -956,7 +1011,7 @@ function ProfileEditor({ member }: { member: Member }) {
   }
 
   return (
-    <section className="card mb-4">
+    <section ref={sectionRef} className="card mb-4 scroll-mt-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("profile.about.title")}
       </h2>
@@ -1001,6 +1056,7 @@ function ProfileEditor({ member }: { member: Member }) {
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">{t("profile.about.name")}</span>
               <input
+                ref={nameInputRef}
                 className="input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}

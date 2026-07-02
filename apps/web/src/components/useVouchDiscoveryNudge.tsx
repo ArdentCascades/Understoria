@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { WhyTooltip } from "@/components/WhyTooltip";
@@ -110,6 +111,20 @@ function VouchDiscoveryNudgeCard({
       <p className="text-canopy-900 dark:text-canopy-100">
         {t("vouchNudge.body")}
       </p>
+      {/* The full actor-side answer (what vouching commits, where the
+          button lives, when it appears) is the `how-vouching-works`
+          FAQ entry — re-findable on Help after this one-shot nudge is
+          dismissed. The body deliberately stops over-promising a
+          Vouch button on "any member's profile"; the button shows
+          only where a vouch would actually add trust. */}
+      <Link
+        to="/help#how-vouching-works"
+        className="touch-target inline-flex items-center self-start text-xs
+                   font-medium text-canopy-700 underline-offset-2
+                   hover:underline dark:text-canopy-300"
+      >
+        {t("vouchNudge.learnMore")} →
+      </Link>
       <div className="flex justify-end">
         <button
           type="button"

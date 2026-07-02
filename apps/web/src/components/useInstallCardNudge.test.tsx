@@ -204,12 +204,17 @@ describe("useInstallCardNudge", () => {
     // Minimal: one hint line, no step list.
     expect(container.querySelector("ol")).toBeNull();
     expect(container.textContent).toContain("Open your browser's menu");
-    // The "More help" link points out to the Learn panel on Profile.
+    // The "More help" link lands on the Help page's install answer
+    // (per-platform steps), anchored so the member arrives at the
+    // exact entry — not on Profile to hunt for the Learn panel.
     const link = Array.from(container.querySelectorAll("a")).find((a) =>
       a.textContent?.includes("More help"),
     );
     expect(link).toBeDefined();
-    expect(link?.getAttribute("href")).toBe("/profile");
+    expect(link?.getAttribute("href")).toBe("/help#install-app");
+    // Hit-area floor: the small-text link carries the 44px
+    // touch-target class.
+    expect(link?.className).toContain("touch-target");
   });
 
   it("card dismiss → writes the sentinel and stays hidden on re-render", async () => {

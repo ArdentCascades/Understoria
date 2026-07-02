@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import {
   DndContext,
   DragOverlay,
@@ -2973,6 +2973,25 @@ function BulkTaskForm({
   );
 }
 
+// Inline text-link affordance for timeline rows — the house small-link
+// treatment (see useInstallCardNudge's "More help"), without the 44px
+// touch-target class because these sit inside dense list rows where a
+// 44px box would break the timeline's line rhythm; the global
+// :focus-visible outline still draws around the link.
+const HISTORY_LINK_CLASS =
+  "font-medium text-canopy-700 underline underline-offset-2 " +
+  "hover:text-canopy-800 dark:text-canopy-300 dark:hover:text-canopy-200";
+
+/** The task id an activity row was stamped with at write time, or null.
+ *  Every task_* logActivity call site stamps `data.taskId` today, but
+ *  rows written before that convention may not carry one — those rows
+ *  stay plain text. Never title-match a row to a task; a missing id
+ *  means no link. */
+function activityTaskId(data: Record<string, unknown>): string | null {
+  const taskId = (data as { taskId?: unknown }).taskId;
+  return typeof taskId === "string" && taskId.length > 0 ? taskId : null;
+}
+
 export function HistoryTimeline({
   projectId,
   memberMap,
@@ -2996,10 +3015,21 @@ export function HistoryTimeline({
         {activities.map((a) => {
           const actorName =
             memberMap.get(a.actorKey) ?? t("common.memberFallback");
+          // Absolute path on purpose: HistoryTimeline also mounts on
+          // the task page (`/project/:id/task/:taskId`, see
+          // TaskDetail), where a relative link would resolve against
+          // the wrong base.
+          const taskId = a.type.startsWith("task_")
+            ? activityTaskId(a.data)
+            : null;
+          const taskHref =
+            taskId === null ? null : `/project/${projectId}/task/${taskId}`;
           // task_released_after_complete carries a `taskTitle` in
           // `data` (stamped in unclaimProjectTask) so the timeline can
           // render the full neutral sentence inline — no join, no
-          // shame framing. Other activity types keep the existing
+          // shame framing. The <taskLink> segment of the sentence (the
+          // task title) becomes the link; the member's name stays
+          // plain text. Other activity types keep the existing
           // "<name> — <type>" pattern.
           if (a.type === "task_released_after_complete") {
             const taskTitle =
@@ -3010,14 +3040,25 @@ export function HistoryTimeline({
                   {formatRelativeTime(a.createdAt)}
                 </span>
                 <span className="text-moss-700 dark:text-moss-200">
-                  {t("projects.activityType.task_released_after_complete", {
-                    name: actorName,
-                    task: taskTitle,
-                  })}
+                  <Trans
+                    i18nKey="projects.activityType.task_released_after_complete"
+                    values={{ name: actorName, task: taskTitle }}
+                    components={{
+                      taskLink:
+                        taskHref === null ? (
+                          <span />
+                        ) : (
+                          <Link to={taskHref} className={HISTORY_LINK_CLASS} />
+                        ),
+                    }}
+                  />
                 </span>
               </li>
             );
           }
+          const typeLabel = t(
+            `projects.activityType.${a.type}` as "projects.activityType.project_created",
+          );
           return (
             <li key={a.id} className="flex items-start gap-2 text-sm">
               <span className="shrink-0 text-xs text-moss-600 dark:text-moss-300">
@@ -3026,7 +3067,18 @@ export function HistoryTimeline({
               <span className="text-moss-700 dark:text-moss-200">
                 <span className="font-medium">{actorName}</span>
                 {" — "}
-                {t(`projects.activityType.${a.type}` as "projects.activityType.project_created")}
+                {/* Task rows whose data carries the task's id link to
+                    the task page; rows without one keep the plain
+                    label. Member names deliberately never link — the
+                    timeline is about the work, not a doorway to
+                    member pages. */}
+                {taskHref === null ? (
+                  typeLabel
+                ) : (
+                  <Link to={taskHref} className={HISTORY_LINK_CLASS}>
+                    {typeLabel}
+                  </Link>
+                )}
                 {a.type === "announcement" && (a.data as { body?: string }).body && (
                   <span className="ml-1 italic text-moss-600 dark:text-moss-300">
                     {`"${((a.data as { body?: string }).body ?? "").slice(0, 80)}${((a.data as { body?: string }).body ?? "").length > 80 ? "..." : ""}"`}

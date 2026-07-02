@@ -10,6 +10,30 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **History-row task links + hint CTAs land on their answers
+  (wayfinding audit + hint-CTA inventory).** (1) Project History
+  timeline rows for task activity (added / claimed / released /
+  completed / confirmed) now link to the task page
+  (`/project/:id/task/:taskId`) whenever the activity row's `data`
+  carries the task id stamped at write time; rows without one stay
+  plain text (never title-matched), and member names deliberately
+  never link. The "stepped back from …" sentence links just the task
+  title (via `Trans`); links are absolute so they also work from the
+  timeline's mount on the task page. (2) Hint CTAs: the install
+  card's "More help" goes to `/help#install-app` (was `/profile`)
+  and gains the 44px touch-target floor; the profile nudge's "Add
+  some details" goes to `/profile?edit=1`, which scrolls the editor
+  into view, focuses the display-name field, and strips the param
+  via history replace; the Board / balance / invite ContextualHints
+  swap their FAQ-duplicating `<details>` toggles for descriptive
+  links to the FAQ anchors (`/help#post-something`,
+  `/help#what-is-balance`, `/help#invite-someone`) — removing the
+  `<summary>` hit-area/focus issues outright; the vouch-discovery
+  nudge stops over-promising a Vouch button on "any member's
+  profile" and links "How vouching works" to a new
+  `how-vouching-works` FAQ entry (en + es) covering what a vouch
+  commits, where the button lives, and why it can't be retracted.
+  Dismissal behavior of every hint/nudge is unchanged.
 - **Single-event `.ics` export (community-events.md §11.5a, PR #289).**
   "Add to calendar" in the event detail overflow menu downloads a
   one-event RFC 5545 file built entirely client-side

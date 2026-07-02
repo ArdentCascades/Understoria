@@ -120,7 +120,13 @@ function ProfileNudgeCard({
         >
           {t("profileNudge.dismiss")}
         </button>
-        <Link to="/profile" className="btn-primary text-xs">
+        {/* `?edit=1` lands the member INSIDE the editor — Profile
+            scrolls the About section into view and focuses the first
+            field — instead of dropping them at the top of a long page
+            to find the form themselves. Profile strips the param
+            after handling (history.replace), so refresh/back don't
+            re-trigger the scroll. */}
+        <Link to="/profile?edit=1" className="btn-primary text-xs">
           {t("profileNudge.cta")}
         </Link>
       </div>
