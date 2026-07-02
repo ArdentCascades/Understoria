@@ -280,7 +280,10 @@ entry avoids overclaiming protection the design doesn't provide.
   informed-consent surface, and revocable via URL rotation —
   that toggle, if shipped, would supersede this rejection for the
   per-member scope only. The community-wide iCal feed remains
-  out of scope.
+  out of scope. A client-side single-event `.ics` file export — no
+  server, no URL, nothing polls — is a materially different shape
+  and is settled as permissible; see `docs/community-events.md`
+  §11.5a.
 - **Per-member calendar URLs (`/member/X/calendar`).** Per-member
   time-spatial aggregation is a stalking surface. No values win.
 - **Server-rendered ICS feed via federation.** Federation surface
