@@ -1089,8 +1089,6 @@
     "disputed": "In community review"
   },
   "postCard": {
-    "needs": "needs help",
-    "offers": "offers",
     "peerCommunity": "Peer community",
     "expiresIn": "Expires in {{count}} days",
     "expiresToday": "Expires today",
@@ -1310,6 +1308,7 @@
   },
   "attention": {
     "title": "Needs your attention",
+    "mobileSummary": "Things need you",
     "intro": "A few things are waiting on you. Tap to handle them when you have a moment.",
     "exchangeLine": "{{name}} marked “{{title}}” complete — confirm it happened.",
     "taskLine": "{{name}} finished “{{task}}” for the {{project}} project — confirm.",
@@ -1375,6 +1374,8 @@
     "showClaimed": "Show {{count}} claimed",
     "hideClaimed": "Hide claimed",
     "filters": {
+      "toggle": "Filters",
+      "toggleActive": "Filters · {{count}} active",
       "categoryAriaLabel": "Filter by category",
       "urgencyAriaLabel": "Filter by urgency",
       "zoneAriaLabel": "Filter by zone",

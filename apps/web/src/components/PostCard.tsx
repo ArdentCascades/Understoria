@@ -53,8 +53,12 @@ export function PostCard({
   searchQuery?: string;
 }) {
   const { t } = useTranslation();
-  const typeLabel =
-    post.type === "NEED" ? t("postCard.needs") : t("postCard.offers");
+  // No "needs help" / "offers" type label in the meta row: PostCard
+  // renders only inside the Board's NEED / OFFER tabs, where the
+  // active tab already declares the type — repeating it on every
+  // card was pure chrome. If PostCard ever gains a mixed-type
+  // context (cross-type search results, profile history), reintroduce
+  // the label behind a `showTypeLabel` prop defaulting to false.
   return (
     <Link
       to={`/post/${post.id}`}
@@ -103,7 +107,6 @@ export function PostCard({
               {posterTrust && !isCurrentMember && (
                 <TrustChip status={posterTrust} compact />
               )}
-              <span>{typeLabel}</span>
               <span className="font-medium">
                 {formatHours(post.estimatedHours)}
               </span>

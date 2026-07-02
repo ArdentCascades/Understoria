@@ -9,6 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import type { ReactNode } from "react";
 import { useFirstActionNudge } from "@/components/useFirstActionNudge";
 import { useProfileNudge } from "@/components/useProfileNudge";
 import { useKeepAccessNudge } from "@/components/useKeepAccessNudge";
@@ -35,7 +36,15 @@ import { useInstallCardNudge } from "@/components/useInstallCardNudge";
 //
 // This resolves the old NUDGE-STACKING NOTE on Board: the priority
 // policy flagged there as a follow-up now lives here.
-export function BoardNudges() {
+//
+// `fallback` extends the one-prompt-at-a-time discipline to banners
+// that live OUTSIDE the nudge priority list (Board's ContextualHint):
+// it renders only when every nudge has resolved to hidden. While any
+// higher-priority nudge is still loading we render nothing — showing
+// the fallback and then yanking it for a nudge would be exactly the
+// flash this orchestrator exists to prevent. The fallback keeps its
+// own eligibility/dismiss logic; only turn-taking is decided here.
+export function BoardNudges({ fallback }: { fallback?: ReactNode } = {}) {
   // Rules of Hooks: all five hooks are called unconditionally, in a
   // fixed order, every render. Priority is the array order (index 0 =
   // highest). Do NOT make any of these calls conditional.
@@ -52,5 +61,7 @@ export function BoardNudges() {
     if (s.visible) return <>{s.node}</>; // highest ready+visible wins
     // ready && !visible → this prompt decided not to show → try the next
   }
-  return null;
+  // Every prompt resolved and none wants the slot → the fallback
+  // banner (if any) gets its turn.
+  return fallback ? <>{fallback}</> : null;
 }

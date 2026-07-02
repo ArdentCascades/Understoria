@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
-import { computeAttentionItems } from "@/lib/attention";
+import { computeAttentionItems, KIND_PRIORITY } from "@/lib/attention";
 import { ATTENTION_EMOJI } from "@/lib/attentionMeta";
 import { formatRelativeTime } from "@/lib/format";
 import {
@@ -77,6 +77,22 @@ export function AttentionSection() {
   const [declineInvitationId, setDeclineInvitationId] = useState<string | null>(
     null,
   );
+  // Mobile-only (<lg) disclosure state for the whole rail. `null`
+  // until the member toggles by hand; while null the default is
+  // derived LIVE from the items below: EXPANDED when any top-tier
+  // item is present (KIND_PRIORITY 0 — confirm_exchange /
+  // confirm_task, where someone else's credit is blocked on your
+  // signature; those must never load hidden), COLLAPSED otherwise
+  // (informational items keep their glanceability via the summary
+  // row's emoji preview instead of ~200px of cards). Deriving until
+  // the first manual toggle — rather than seeding useState once —
+  // matters because items stream in from live queries: a confirm
+  // item that arrives a tick after mount still un-hides the rail.
+  // Session-local only, by design; no persistence. Desktop (lg+)
+  // ignores all of this — the rail is always fully visible there.
+  const [mobileManualOpen, setMobileManualOpen] = useState<boolean | null>(
+    null,
+  );
   const items = useMemo(
     () =>
       computeAttentionItems({
@@ -104,7 +120,20 @@ export function AttentionSection() {
     ],
   );
 
+  // Empty rail renders NOTHING — no summary row, no "0 things"
+  // placeholder. Unchanged from the pre-disclosure behavior.
   if (items.length === 0) return null;
+
+  const hasBlockingItem = items.some((item) => KIND_PRIORITY[item.kind] === 0);
+  const mobileOpen = mobileManualOpen ?? hasBlockingItem;
+  // Unique emoji prefixes of the current items, in priority order —
+  // the collapsed summary row previews WHAT kinds of things await
+  // (e.g. "📅 ✅ 🤝") so glanceability survives the collapse. These
+  // carry the preview; there is deliberately NO count badge
+  // (no-notifications: no badge counts).
+  const summaryEmojis = [
+    ...new Set(items.map((item) => ATTENTION_EMOJI[item.kind])),
+  ];
 
   async function handleAck(taskId: string) {
     if (!currentMember) return;
@@ -201,8 +230,42 @@ export function AttentionSection() {
   }
 
   return (
+    <>
+      {/* Mobile-only summary/toggle row. Affordance ruling (operator):
+          collapsed states need LOUD, full-width, obviously-clickable
+          triggers — hence a card-styled full-width button with the
+          same canopy accent bar as the rail itself, a semibold label,
+          and a chevron, at the 44px touch floor. The trigger stays
+          visible while expanded (chevron flips) so re-collapsing is
+          one tap. DOM order: trigger precedes rail — DOM order equals
+          visual order in both disclosure states (WCAG 2.4.3). */}
+      <button
+        type="button"
+        aria-expanded={mobileOpen}
+        aria-controls="attention-rail"
+        onClick={() => setMobileManualOpen(!mobileOpen)}
+        className="card mb-2 flex min-h-[44px] w-full items-center gap-2 border-l-4 border-canopy-500 py-2 text-left transition-colors hover:bg-moss-50 dark:hover:bg-moss-800 lg:hidden"
+      >
+        {/* Sighted-only preview of what's waiting; the label carries
+            the meaning standalone for screen readers (WCAG 1.1.1). */}
+        <span aria-hidden="true" className="shrink-0">
+          {summaryEmojis.join(" ")}
+        </span>
+        <span className="flex-1 text-sm font-semibold text-canopy-700 dark:text-canopy-300">
+          {t("attention.mobileSummary")}
+        </span>
+        <span aria-hidden="true" className="text-moss-400 dark:text-moss-300">
+          {mobileOpen ? "▾" : "▸"}
+        </span>
+      </button>
+      {/* When collapsed the rail hides on mobile only — `lg:block`
+          keeps the desktop right-rail rendering exactly as today in
+          every state (single render site; ids stay unique). */}
     <section
-      className="card mb-3 border-l-4 border-canopy-500"
+      id="attention-rail"
+      className={`card mb-3 border-l-4 border-canopy-500 ${
+        mobileOpen ? "" : "hidden lg:block"
+      }`}
       aria-labelledby="attention-title"
     >
       <div className="mb-2 inline-flex items-baseline gap-1.5">
@@ -657,5 +720,6 @@ export function AttentionSection() {
         })}
       </ul>
     </section>
+    </>
   );
 }

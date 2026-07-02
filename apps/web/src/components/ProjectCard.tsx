@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Project } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
+import { CategoryBadge } from "./CategoryBadge";
 import { HighlightedText } from "./HighlightedText";
 
 export function ProjectCard({
@@ -53,9 +54,11 @@ export function ProjectCard({
     >
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <StatusChip status={project.status} />
-        <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-          {project.category.replace(/_/g, " ")}
-        </span>
+        {/* Same CategoryBadge as PostCard — emoji + translated label
+            from PROJECT_CATEGORY_META (which covers the three
+            project-only categories), replacing the old hand-rolled
+            untranslated `replace(/_/g, " ")` chip. */}
+        <CategoryBadge category={project.category} size="sm" />
         <span className="text-xs text-moss-600 dark:text-moss-300">
           {taskCount} task{taskCount === 1 ? "" : "s"}
           {openTaskCount > 0 ? ` · ${openTaskCount} open` : ""}

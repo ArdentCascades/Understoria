@@ -1089,8 +1089,6 @@
     "disputed": "En revisión comunitaria"
   },
   "postCard": {
-    "needs": "necesita ayuda",
-    "offers": "ofrece",
     "peerCommunity": "Comunidad vecina",
     "expiresIn": "Expira en {{count}} dias",
     "expiresToday": "Expira hoy",
@@ -1310,6 +1308,7 @@
   },
   "attention": {
     "title": "Te toca a ti",
+    "mobileSummary": "Hay cosas que te esperan",
     "intro": "Algunas cosas están esperando por ti. Tócalas para resolverlas cuando puedas.",
     "exchangeLine": "{{name}} marcó “{{title}}” como completado — confirma que ocurrió.",
     "taskLine": "{{name}} terminó “{{task}}” del proyecto {{project}} — confirma.",
@@ -1375,6 +1374,8 @@
     "showClaimed": "Mostrar {{count}} tomadas",
     "hideClaimed": "Ocultar tomadas",
     "filters": {
+      "toggle": "Filtros",
+      "toggleActive": "Filtros · {{count}} activos",
       "categoryAriaLabel": "Filtrar por categoría",
       "urgencyAriaLabel": "Filtrar por urgencia",
       "zoneAriaLabel": "Filtrar por zona",
