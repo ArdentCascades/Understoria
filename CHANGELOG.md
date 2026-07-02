@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Single-event `.ics` export (community-events.md §11.5a, PR #289).**
+  "Add to calendar" in the event detail overflow menu downloads a
+  one-event RFC 5545 file built entirely client-side
+  (`apps/web/src/lib/eventIcs.ts`): UID from event id + node id,
+  UTC DTSTART/DTEND (DTEND omitted for point events per §3.6.1),
+  TEXT escaping, 75-octet line folding, CRLF endings, and a
+  link-back URL in the description. Deliberately excluded and
+  locked by tests: no server route or subscription URL (calendar.md
+  §10.5 stands), no VALARM (reminders belong to the member's own
+  calendar app), no ATTENDEE/ORGANIZER properties, no RSVP data.
+  Item hides on cancelled events, mirroring the RSVP control.
+  Threat-model §7 events entry and the member guide gained the
+  §11.5a-obligated sentences (exported files outlive a panic-purge).
 - **EventNew create-form parity batch (PR #287).** Five refinements
   bringing the event-creation form to parity with ProjectNew (the
   house create-form pattern), plus one silent-wrong-time fix.

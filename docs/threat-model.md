@@ -696,6 +696,13 @@ We are not trying to protect against:
   to phase 2 as opt-in only (cited: `calendar.md` §10.5's
   "surveillance escape valve" framing, re-applied in
   `community-events.md` §11.5).
+  A member-initiated single-event `.ics` export exists per
+  `community-events.md` §11.5a (client-side, on-demand, no server
+  route, no subscription URL): the file contains only what the
+  member already sees on the event detail screen (never RSVP data),
+  and once downloaded or imported into a device calendar it sits
+  outside the app's soft/hard-purge reach — a consequence of the
+  member's own export choice, named plainly in the member guide.
   Implementation shipped in PRs #186-#192 per
   `community-events.md` §13; this entry describes the surface as
   it now exists on the wire.
