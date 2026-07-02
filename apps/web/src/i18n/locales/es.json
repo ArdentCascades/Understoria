@@ -459,6 +459,7 @@
       "locationLabel": "Lugar",
       "capacityLabel": "Cupo",
       "categoryLabel": "Categoría",
+      "menuLabel": "Acciones del evento",
       "organizerControlsHeading": "Controles de organizador",
       "cancelButton": "Cancelar evento",
       "cancelHint": "Cancelar es el único cambio posible después de crear, en la fase 1. La cancelación es a su vez un registro firmado y permanente; quienes confirmaron asistencia verán el motivo en su panel.",
@@ -1129,6 +1130,7 @@
   },
   "postDetail": {
     "notFound": "No se encontró esta publicación. Puede que haya sido cancelada.",
+    "menuLabel": "Acciones de la publicación",
     "backToBoard": "Volver al tablero",
     "typeNeed": "Necesidad",
     "typeOffer": "Oferta",
