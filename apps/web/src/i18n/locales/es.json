@@ -1624,6 +1624,10 @@
       "note": "En un despliegue real cada dispositivo tiene una sola identidad. Este selector existe para que puedas recorrer el flujo completo de intercambio mientras pruebas.",
       "noAreaSet": "sin zona definida"
     },
+    "settingsRow": {
+      "label": "Ajustes",
+      "description": "Idioma, apariencia, contactos bloqueados, seguridad."
+    },
     "data": {
       "title": "Datos y privacidad",
       "intro": "Todo lo que ves se guarda localmente en este dispositivo. Sin servidor. Sin analíticas. Sin cuenta que crear.",

@@ -203,6 +203,7 @@ export default function ProfilePage() {
     nodeId,
     nodeConfig,
     blockedKeys,
+    proposals,
     setCurrentMember,
   } = useApp();
   const { t } = useTranslation();
@@ -314,6 +315,21 @@ export default function ProfilePage() {
         .sort((a, b) => b.earnedAt - a.earnedAt),
     [achievements, currentMember.publicKey],
   );
+  // Flagged-exchange chip → dispute context. When a flagged exchange's
+  // post has a dispute proposal on file, the amber chip deep-links to
+  // that card via the `id={d.id}` anchors the /disputes list renders
+  // (PR #232's PostDetail lookup, same shape: match on `disputePostId`,
+  // most recent row wins — it's the live conversation). No match →
+  // plain /disputes; the link never breaks.
+  const disputeIdByPostId = useMemo(() => {
+    const map = new Map<string, string>();
+    const rows = proposals
+      .filter((p) => p.kind === "dispute" && p.disputePostId)
+      .sort((a, b) => a.createdAt - b.createdAt);
+    // Ascending sort + overwrite ⇒ the most recent proposal wins.
+    for (const p of rows) map.set(p.disputePostId as string, p.id);
+    return map;
+  }, [proposals]);
 
   return (
     <div className="px-4 pb-8 pt-4">
@@ -523,13 +539,23 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
                       <span>{formatRelativeTime(exchange.completedAt)}</span>
+                      {/* The chip links to the review conversation it
+                          names — anchored to the matching dispute card
+                          when one is resolvable, the disputes list
+                          otherwise. Same chip styling; the link is
+                          context, not alarm. */}
                       {exchange.flaggedForReview && (
-                        <span
+                        <Link
+                          to={
+                            disputeIdByPostId.has(exchange.postId)
+                              ? `/disputes#${disputeIdByPostId.get(exchange.postId)}`
+                              : "/disputes"
+                          }
                           title={t(flagReasonKey(exchange.flagReason))}
                           className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
                         >
                           {t("profile.history.flag")}
-                        </span>
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -566,6 +592,14 @@ export default function ProfilePage() {
         <ProposalsSection />
 
         <CommunitySettingsSection />
+
+        {/* Labeled doorway to device-local Settings — a peer of the
+            Learn/Disputes/Proposals cards so it's discoverable by
+            reading, not just by recognizing the header gear (which
+            stays, for muscle memory). Placed after CommunitySettings
+            so "community-level settings" and "this-device settings"
+            sit adjacent and the naming collision resolves itself. */}
+        <SettingsRowSection />
       </div>
 
       {/* AddDevice ships in the device-pairing series (design note:
@@ -606,6 +640,41 @@ export default function ProfilePage() {
         onSwitch={setCurrentMember}
       />
     </div>
+  );
+}
+
+// The labeled route to /settings (Language, Appearance, Blocked
+// contacts, Node, Security, Export). The header gear was the ONLY
+// doorway before this row — a 20px icon with no label. The whole row
+// is the link (44px+ touch target) with the house `›` chevron; no
+// counts, no badges.
+function SettingsRowSection() {
+  const { t } = useTranslation();
+  return (
+    <section className="card mb-4" aria-labelledby="profile-settings-row-title">
+      <Link
+        to="/settings"
+        className="-m-2 flex min-h-[44px] items-center justify-between gap-3 rounded-xl p-2 hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
+        <div className="min-w-0 flex-1">
+          <h2
+            id="profile-settings-row-title"
+            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+          >
+            {t("profile.settingsRow.label")}
+          </h2>
+          <p className="text-sm text-moss-600 dark:text-moss-300">
+            {t("profile.settingsRow.description")}
+          </p>
+        </div>
+        <span
+          aria-hidden="true"
+          className="shrink-0 text-lg text-moss-400 dark:text-moss-500"
+        >
+          ›
+        </span>
+      </Link>
+    </section>
   );
 }
 

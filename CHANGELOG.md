@@ -23,6 +23,28 @@ include breaking changes.
   Item hides on cancelled events, mirroring the RSVP control.
   Threat-model §7 events entry and the member guide gained the
   §11.5a-obligated sentences (exported files outlive a panic-purge).
+- **Navigation quick batch (wayfinding audit).** (1) New `<BackLink>`
+  primitive extracted from TaskDetail's "← Back to {project}"
+  breadcrumb — a real link (middle-click/new-tab work) with
+  TaskDetail's exact styling plus an optional history-aware mode
+  (`navigate(-1)` when `window.history.state.idx > 0`, the named
+  fallback on a cold entry); adopted by TaskDetail (zero visual
+  change), EventDetail, MemberDetail (its duplicate top
+  `navigate(-1)` + footer "Back to board" pair unified into one),
+  Conversation, Project archive, Settings, Proposals, and Disputes —
+  the last four of which previously had a dead Back button on cold
+  entries. (2) EventDetail's back is history-aware: project →
+  work-day → event → Back returns to the project instead of dumping
+  members onto /calendar; direct links still fall back to the
+  calendar. (3) The amber "in community review" chip on flagged
+  exchange-history rows on Profile now links to the dispute
+  conversation it names — anchored to the matching card
+  (`/disputes#<proposalId>`) when resolvable from the exchange's
+  post, plain `/disputes` otherwise; same chip styling, no new alarm.
+  (4) Profile gains a labeled "Settings" row (with a one-line
+  description of what lives there) as a peer of the governance
+  cards, so the 20px header gear is no longer the only doorway to
+  /settings; the gear stays for muscle memory.
 - **EventNew create-form parity batch (PR #287).** Five refinements
   bringing the event-creation form to parity with ProjectNew (the
   house create-form pattern), plus one silent-wrong-time fix.

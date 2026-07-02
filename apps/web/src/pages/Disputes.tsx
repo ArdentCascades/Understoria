@@ -10,9 +10,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { BackLink } from "@/components/BackLink";
 import {
   formatHours,
   formatRelativeTime,
@@ -40,7 +41,6 @@ import type {
 export default function DisputesPage() {
   const { proposals, governanceHiddenKeys } = useApp();
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   // PR F: dispute proposals authored by a member with the per-block
   // `hideGovernance: true` flag are filtered out for this blocker.
@@ -60,13 +60,17 @@ export default function DisputesPage() {
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-6">
-        <button
-          type="button"
+        {/* Reached from Profile's governance cluster (and from
+            cross-links between the governance pages), so back follows
+            in-app history when there is any and falls back to
+            /profile on a cold entry — where navigate(-1) used to be
+            a dead button. */}
+        <BackLink
+          to="/profile"
+          label={t("common.back")}
+          preferHistory
           className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate(-1)}
-        >
-          {t("common.back")}
-        </button>
+        />
         <h1 className="page-title mt-2">
           {t("disputes.title")}
         </h1>

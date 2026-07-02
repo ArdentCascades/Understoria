@@ -10,10 +10,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
+import { BackLink } from "@/components/BackLink";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { TrustChip } from "@/components/TrustChip";
@@ -29,7 +30,6 @@ import { humanizeError } from "@/lib/humanizeError";
 
 export default function MemberDetailPage() {
   const { publicKey } = useParams<{ publicKey: string }>();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const {
     members,
@@ -99,13 +99,12 @@ export default function MemberDetailPage() {
   if (!member) {
     return (
       <div className="px-4 py-6">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="mb-4 text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
-        >
-          {t("common.back")}
-        </button>
+        <BackLink
+          to="/"
+          label={t("common.back")}
+          preferHistory
+          className="mb-4 inline-block text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+        />
         <p className="text-moss-600 dark:text-moss-300">
           {t("member.notFound")}
         </p>
@@ -152,13 +151,18 @@ export default function MemberDetailPage() {
 
   return (
     <div className="px-4 py-6">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="mb-4 text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
-      >
-        {t("common.back")}
-      </button>
+      {/* The one back affordance on this page (the old footer "Back to
+          board" link folded into it). Members are reached from many
+          surfaces — board posts, project rosters, conversations,
+          trusted-by lists — so back returns to wherever the profile
+          was opened from; a cold entry (shared deep link) falls back
+          to the Board, the surface members are discovered on. */}
+      <BackLink
+        to="/"
+        label={t("common.back")}
+        preferHistory
+        className="mb-4 inline-block text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+      />
 
       <header className="mb-4 flex items-start gap-6">
         <MemberAvatar publicKey={member.publicKey} size={128} framed />
@@ -300,13 +304,6 @@ export default function MemberDetailPage() {
           </button>
         </section>
       )}
-
-      <Link
-        to="/"
-        className="text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
-      >
-        {t("member.backToBoard")}
-      </Link>
 
       {!isSelf && currentMember && publicKey && (
         <>

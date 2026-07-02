@@ -1624,6 +1624,10 @@
       "note": "In a real deployment each device holds one identity. This switcher exists so you can walk through the full exchange flow yourself while testing.",
       "noAreaSet": "no area set"
     },
+    "settingsRow": {
+      "label": "Settings",
+      "description": "Language, appearance, blocked contacts, security."
+    },
     "data": {
       "title": "Data & privacy",
       "intro": "Everything you see is stored locally on this device. No server. No analytics. No account to sign up for.",

@@ -9,8 +9,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { BackLink } from "@/components/BackLink";
 import { LanguageSection } from "@/components/LanguageSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
 import { NodeSection } from "@/components/NodeSection";
@@ -31,17 +31,19 @@ import { exportData } from "@/lib/exportData";
 // reachable in a stress moment, not buried under a settings tap.
 export default function SettingsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
-        <button
-          type="button"
+        {/* Settings' one parent is Profile (gear icon + the labeled
+            Settings row). History-aware so returning restores
+            Profile's scroll position; a cold entry still lands on
+            /profile rather than a dead navigate(-1). */}
+        <BackLink
+          to="/profile"
+          label={t("settings.back")}
+          preferHistory
           className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate(-1)}
-        >
-          {t("settings.back")}
-        </button>
+        />
         <h1 className="page-title mt-2">{t("settings.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("settings.intro")}
