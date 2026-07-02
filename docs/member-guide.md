@@ -430,6 +430,18 @@ organizer cannot see RSVPs you made from a different node. If you
 opened the PWA on another community's node, you'd have to RSVP
 there separately.
 
+### Adding an event to your device calendar
+
+On an event's page, **Add to calendar** (in the event-actions menu)
+downloads a small calendar file for that one event that you can
+import into your device's own calendar app. The file carries only
+what you already see on the event page — never your RSVP or anyone
+else's. Reminders are yours to set in your calendar app;
+Understoria never schedules them. One thing to know plainly: once
+that copy is in your device's calendar it lives there — it is
+**not** removed by Understoria's emergency purge, so if you ever
+purge the app, clean up your calendar separately.
+
 ### Creating an event
 
 From the Calendar page, tap the **Create event** affordance. The

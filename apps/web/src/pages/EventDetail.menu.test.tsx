@@ -11,10 +11,12 @@
  */
 /**
  * Event detail header overflow menu (`/events/:eventId`). Covers the
- * kebab that carries Copy link as its only item (RSVP stays a primary
- * control, Cancel Event stays inline + destructive). Asserts the trigger
- * exists with the right a11y contract and that Copy link writes the
- * canonical `/events/<id>` URL and toasts the confirmation.
+ * kebab that carries Copy link and Add to calendar (RSVP stays a
+ * primary control, Cancel Event stays inline + destructive). Asserts
+ * the trigger exists with the right a11y contract and that Copy link
+ * writes the canonical `/events/<id>` URL and toasts the confirmation.
+ * The Add to calendar item's behavior lives in
+ * `EventDetail.addToCalendar.test.tsx`.
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -238,13 +240,19 @@ describe("EventDetailPage — header overflow menu", () => {
     expect(trigger.getAttribute("aria-label")).toBe("Event actions");
   });
 
-  it("opening the menu shows a Copy link item (the only menu item)", () => {
+  it("opening the menu shows Copy link and Add to calendar (the only two items)", () => {
     render();
     openMenu();
     expect(menuItemByText("Copy link")).toBeDefined();
+    // Add to calendar carries a description line inside the same
+    // menuitem, so match on the label prefix rather than full text.
+    const items = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]'),
+    );
     expect(
-      container.querySelectorAll('button[role="menuitem"]'),
-    ).toHaveLength(1);
+      items.some((b) => (b.textContent ?? "").startsWith("Add to calendar")),
+    ).toBe(true);
+    expect(items).toHaveLength(2);
   });
 
   it("selecting Copy link writes the canonical /events/<id> URL and toasts the confirmation", async () => {

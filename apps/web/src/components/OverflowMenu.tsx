@@ -33,6 +33,11 @@ import { useEffect, useRef, useState } from "react";
 export interface OverflowMenuItem {
   key: string;
   label: string;
+  /** Optional one-line hint rendered as small muted text under the
+   *  label, inside the same menuitem. For entries whose consequence
+   *  isn't obvious from the label alone (e.g. "Add to calendar"
+   *  downloads a file and leaves reminders to the member's own app). */
+  description?: string;
   onSelect: () => void;
   tone?: "default" | "destructive";
   disabled?: boolean;
@@ -133,7 +138,14 @@ export function OverflowMenu({
                   item.onSelect();
                 }}
               >
-                {item.label}
+                <span className="flex flex-col">
+                  <span>{item.label}</span>
+                  {item.description && (
+                    <span className="mt-0.5 text-xs font-normal text-moss-600 dark:text-moss-300">
+                      {item.description}
+                    </span>
+                  )}
+                </span>
               </button>
             );
           })}

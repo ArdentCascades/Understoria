@@ -472,6 +472,8 @@
       "capacityFill": "{{going}} of {{capacity}} going",
       "categoryLabel": "Category",
       "menuLabel": "Event actions",
+      "addToCalendar": "Add to calendar",
+      "addToCalendarHint": "Downloads a file for your device's calendar. Reminders are up to you and your calendar app.",
       "organizerControlsHeading": "Organizer controls",
       "cancelButton": "Cancel event",
       "cancelHint": "Cancellation is the only post-create change in phase 1. The cancellation itself is a signed, permanent record; members who RSVP'd will see the reason on their attention rail.",

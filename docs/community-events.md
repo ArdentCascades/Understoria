@@ -706,12 +706,14 @@ events iCal toggle, if shipped, is a narrower thing — only the
 RSVP'ing member's events, only at their explicit opt-in — and the
 phase-2 design will re-derive the threading-the-needle argument.
 
-### §11.5a Single-event `.ics` file export (settled: permissible, phase-2 candidate)
+### §11.5a Single-event `.ics` file export (settled: permissible — shipped)
 
-> **Status:** settled as **permissible**. This addendum records the
-> values reasoning so a future implementation PR can cite a settled
-> decision rather than re-litigate it. Implementation remains
-> phase-2 / on-demand — nothing here schedules it.
+> **Status:** settled as **permissible**; *shipped in PR #289*
+> (`apps/web/src/lib/eventIcs.ts` + the "Add to calendar" entry on
+> `EventDetail.tsx`, exactly the sketch below: no server route, no
+> VALARM, no attendee/organizer properties). This addendum records
+> the values reasoning so the implementation cites a settled
+> decision rather than re-litigating it.
 
 §11.5 and `docs/calendar.md` §10.5 are about *subscriptions*. This
 addendum is about a different shape that the audit found threads the
@@ -789,8 +791,9 @@ Implementation sketch, for the future PR:
   the member sets reminders in their own calendar app, on their own
   terms, or not at all.
 
-**Settled: permissible.** Phase-2 / on-demand candidate; this note
-unblocks the implementation PR without scheduling it.
+**Settled: permissible.** Implemented in PR #289 per the sketch
+above; the threat-model §7 events entry and the member guide gained
+their §11.5a-obligated sentences in the same PR.
 
 ### §11.6 Attendance tracking / no-show flags
 

@@ -472,6 +472,8 @@
       "capacityFill": "{{going}} de {{capacity}} confirmadas",
       "categoryLabel": "Categoría",
       "menuLabel": "Acciones del evento",
+      "addToCalendar": "Añadir al calendario",
+      "addToCalendarHint": "Descarga un archivo para el calendario de tu dispositivo. Los recordatorios quedan en tus manos y en tu app de calendario.",
       "organizerControlsHeading": "Controles de organizador",
       "cancelButton": "Cancelar evento",
       "cancelHint": "Cancelar es el único cambio posible después de crear, en la fase 1. La cancelación es a su vez un registro firmado y permanente; quienes confirmaron asistencia verán el motivo en su panel.",

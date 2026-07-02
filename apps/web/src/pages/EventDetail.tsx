@@ -34,6 +34,7 @@ import { EventCancellationCard } from "@/components/EventCancellationCard";
 import { Markdown } from "@/components/Markdown";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
+import { buildEventIcs, icsFilename } from "@/lib/eventIcs";
 
 // Render an epoch-ms timestamp as "<date> <time>" in the active
 // locale. The native date+time pickers collected local-time values
@@ -200,9 +201,30 @@ export default function EventDetailPage() {
     // "cancelled" → stay silent.
   }
 
-  // Header overflow-menu actions. Copy link is the only item: RSVP is a
-  // primary control and Cancel Event is destructive (and needs its
-  // reason textarea), so both stay inline.
+  // Single-event .ics export per community-events.md §11.5a: build the
+  // file entirely client-side (the event is already in Dexie) and hand
+  // it to the browser as a download. No server route exists for this,
+  // ever — a server-rendered .ics recreates the subscription-URL shape
+  // calendar.md §10.5 permanently rejected. The generator deliberately
+  // emits no VALARM (reminders belong to the member's own calendar
+  // app, per §11.5a) and no ATTENDEE/ORGANIZER properties.
+  function handleAddToCalendar() {
+    const ics = buildEventIcs(event!, { appUrl: window.location.origin });
+    const blob = new Blob([ics], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = icsFilename(event!.title);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // Header overflow-menu actions. Copy link and Add to calendar are
+  // quiet secondary actions; RSVP is a primary control and Cancel
+  // Event is destructive (and needs its reason textarea), so both of
+  // those stay inline.
   const menuItems: OverflowMenuItem[] = [
     {
       key: "copy-link",
@@ -212,6 +234,22 @@ export default function EventDetailPage() {
       },
     },
   ];
+  // Hidden once the event is cancelled — importing a cancelled event
+  // into a device calendar is a footgun. Same treatment as the RSVP
+  // control, which also disappears on cancellation (the cancellation
+  // banner above carries the state).
+  if (!isCancelled) {
+    menuItems.push({
+      key: "add-to-calendar",
+      label: t("events.detail.addToCalendar"),
+      // The hint carries the no-VALARM stance to the member: the file
+      // has no embedded reminder; their calendar app is in charge.
+      description: t("events.detail.addToCalendarHint"),
+      onSelect: () => {
+        handleAddToCalendar();
+      },
+    });
+  }
 
   return (
     <div className="px-4 pb-8 pt-4">
