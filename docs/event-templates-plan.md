@@ -6,6 +6,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Event templates — camaraderie gatherings (plan, June 2026)
 
+> **Status: SHIPPED** — content + data layer in PR #254, the
+> "Create Event" picker + unified prefill in PR #255, and the
+> calendar / detail visual identity in PR #256. Preserved as the
+> design record.
+
 Companion to `docs/project-ux-plans.md`. Brings curated, camaraderie-aimed
 templates to "Create Event" — the way `projectTemplates.ts` already powers
 "Start a Project" — and, along the way, finally gives events a visual

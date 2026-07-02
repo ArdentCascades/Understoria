@@ -599,19 +599,33 @@ onboard — are prioritized; the rest confirm the page is navigable.
   no white-flash at cold start; no console error about a missing
   manifest icon.
 
-### Linkified URLs in comments / descriptions
+### Markdown-rendered content (comments / descriptions)
 
-- **Entry:** a task comment, event description, or post
-  description containing one or more URLs (PR #275 — the
-  linkify pass).
-- **Steps:** URLs render as real `<a>` elements with discernible
-  text (the URL itself) and the platform's external-link
-  behaviour (target / rel). A screen reader should announce them
-  as links; keyboard tab order should include them.
-- **Expected:** `rel="noopener noreferrer"` on cross-origin
-  links; no surrounding bare text loses meaning when the link
-  is announced; the linkified copy stays selectable and
-  copy-pasteable.
+- **Entry:** a task comment, task description, or post / event /
+  project description containing Markdown — bold, lists, links,
+  a heading, a table, a code block (PRs #277 + #278; supersedes
+  the PR #275 linkify entry that used to live here).
+- **Steps:** read-all through a formatted comment. Confirm links
+  are real `<a>` elements announced as links and present in tab
+  order; that a list announces as a list with item positions;
+  that an author's heading is announced as a heading but does
+  NOT appear in the page's next-heading (`H`) navigation ring at
+  the page-outline levels — the renderer emits
+  `role="heading"` + `aria-level`, deliberately never a raw
+  `<h1>`–`<h6>`, so federated content can't pollute the page
+  outline. Tab into a wide table and a long code block; both sit
+  in `overflow-x-auto` wrappers, so confirm horizontal scroll is
+  reachable and the page body itself never scrolls sideways.
+  Paste `<script>alert(1)</script>` and a `javascript:` link
+  into a comment you author: both must render as inert text
+  (the label of a rejected link survives as plain text).
+- **Expected:** `rel="noopener noreferrer nofollow"` +
+  `target="_blank"` on every rendered link; emphasis is
+  visual-only (screen readers read the words, which is correct —
+  do not flag unannounced bold as a bug); `![image](url)` syntax
+  renders as a link, never an `<img>` (no remote fetch, no
+  missing-alt issue possible); nothing an author types can steal
+  focus or trap the reader.
 
 ### Settings → Blocked contacts — tap-to-reveal (verification)
 
@@ -625,6 +639,146 @@ onboard — are prioritized; the rest confirm the page is navigable.
   per-block hide-governance toggle and the Unblock affordance
   remain reachable in both states. See also §4 PR #197 entry
   above.
+
+### Per-task page + BackLink breadcrumb (TaskDetail)
+
+- **Entry:** from a project's task list, activate the
+  "Open task · N comments" link on a task card. Route
+  `/project/:id/task/:taskId` (PRs #273 / #274; breadcrumb
+  extracted as the `BackLink` primitive in PR #291).
+- **Steps:** on arrival, focus moves per the global route-change
+  rule. Read-all: the breadcrumb "← Back to {project}" comes
+  first, then the compact header (task title + status / hours
+  chips), the full description, the lifecycle actions, and the
+  comment thread. Confirm the breadcrumb is a real link (it
+  should appear in the browse-mode links list and support
+  middle-click / open-in-new-tab), not a button. Post a comment;
+  exercise a lifecycle action and hear its result. Open the
+  page from a cold direct link too — the breadcrumb must still
+  point at the project.
+- **Expected:** the task title is the page `<h1>`; the
+  breadcrumb announces as a link named "Back to {project}"; the
+  comment composer has a label and the MarkdownHint line under
+  it reads inline; action failures surface both inline and as
+  an error toast with a reachable Retry; the deep-linked
+  `#task-<id>` anchors on the project list are unaffected.
+
+### Calendar month / week paging + bounds
+
+- **Entry:** Calendar in Month view (the lg+ default) or Week
+  view (PR #285).
+- **Steps:** `Tab` to the prev / next paging buttons and
+  activate each; the month (or week) heading between them is
+  `aria-live="polite"`, so each page announces the new range
+  without moving focus. Page away from today and confirm a
+  quiet **Today** button appears (it hides while you're on
+  today); activate it. Page all the way to the bound (±12
+  months; ±52 weeks in Week view) and confirm the button
+  disables rather than paging into permanently empty grids.
+- **Expected:** prev / next carry `aria-label`s in both
+  locales; at a bound the button is `disabled` +
+  `aria-disabled="true"` and skipped or announced dimmed;
+  the live heading announces exactly once per page (no
+  live-region storm); "Today" returns the view AND the
+  announcement to the current period.
+
+### Board mobile disclosures (Filters + attention summary)
+
+- **Entry:** Board at a below-`sm` viewport (PR #283).
+- **Steps:** the filter rails sit behind a full-width card
+  trigger reading "Filters" (or "Filters · N active" when
+  something narrows the list). `Tab` to it, confirm
+  `aria-expanded` flips on activation, and that the controls
+  inside are reachable once open. Below `lg`, the attention
+  rail sits behind a card-styled summary row previewing the
+  waiting item kinds; confirm it announces its expanded /
+  collapsed state, and that it renders EXPANDED by default when
+  a tier-0 confirm item (someone's credit blocked on you) is
+  present.
+- **Expected:** the triggers are real buttons with
+  `aria-expanded` carrying the state (the visual chevron is
+  decorative); "N active" is plain text, not an unlabeled badge;
+  collapsing never traps focus inside; the sticky search band
+  stays reachable while either disclosure is open.
+
+### EventNew — two-pane create form + inline validation
+
+- **Entry:** Calendar → Create event. Route `/events/new`
+  (PR #287).
+- **Steps:** at lg+ confirm the template rail sits left and the
+  form right, and that on mobile the DOM order is picker → form
+  (matching visual order — no CSS `order`). Fill the title,
+  blur it empty, and hear the inline error; set a start in the
+  past, or an end before the start, and confirm the cross-field
+  error announces at the field group as soon as both parts
+  combine. Confirm the start **time** field arrives empty (the
+  date seeds to today; the time is a conscious choice). Read-all
+  to the "what you're signing" comparison card — it must sit
+  in-flow immediately above Cancel / Submit, never in a side
+  rail. Leave mid-form and return to confirm the draft banner.
+- **Expected:** invalid fields carry `aria-invalid` and their
+  errors announce via `role="alert"`; the template picker
+  announces the applied template (`role="status"`); the signing
+  card is read linearly before the submit controls; the draft
+  banner is reachable and its restore / discard actions are
+  named.
+
+### Dashboard doorways
+
+- **Entry:** Dashboard (PR #288).
+- **Steps:** read-all. The needs-answered stat card carries a
+  quiet "See open needs →" link (it has its own aria-label);
+  the "Where hands are welcome" section lists up to three open
+  needs / projects as links and disappears entirely at zero;
+  each milestone row names its next unreached leaf in its
+  accessible name with a visible "next: {label}" caption; when
+  proposals are open, a one-line "N proposals open for
+  discussion" link points at `/proposals`. With a zero streak,
+  the streak card reads a warm word ("gathering"), not
+  "0 days in a row".
+- **Expected:** every doorway is a real link with discernible
+  text (no bare arrows); nothing announces urgency, deadlines,
+  or "awaiting your vote"; sections at zero are absent from the
+  reading order rather than rendering empty shells.
+
+### Overflow (kebab) menus on detail pages + "Add to calendar"
+
+- **Entry:** the task page, project header, post detail, or
+  event detail ⋮ trigger (PRs #279–#281; the event menu gains
+  "Add to calendar" in PR #289).
+- **Steps:** same contract as the Conversation header kebab
+  above: `aria-haspopup="menu"` / `aria-expanded` on the 44×44
+  trigger, `role="menu"` with `role="menuitem"` buttons, Escape
+  closes and refocuses the trigger, outside-click closes.
+  Confirm **Copy link** announces its success politely; on an
+  event, confirm **Add to calendar** downloads the `.ics` (and
+  that the item is absent on a cancelled event, mirroring the
+  RSVP control); on a project, confirm the organizer lifecycle
+  verbs appear only for organizers.
+- **Expected:** menu items are real buttons with plain-language
+  names; destructive tones are conveyed by more than color; no
+  menu steals focus on page load.
+
+### Hint + nudge CTAs land on their answers
+
+- **Entry:** Board with an eligible calm prompt (`BoardNudges`
+  renders at most one), or Profile with the profile nudge
+  (PRs #266, #293).
+- **Steps:** confirm only ONE prompt renders at a time. Follow
+  each prompt's CTA: the install card's "More help" goes to
+  `/help#install-app`; the profile nudge's "Add some details"
+  goes to the Profile editor with focus moved to the
+  display-name field; the Board / balance / invite hints link to
+  their FAQ anchors (`/help#post-something`,
+  `/help#what-is-balance`, `/help#invite-someone`); the
+  vouch-discovery nudge's "How vouching works" lands on the
+  `#how-vouching-works` FAQ entry. Dismiss each prompt and
+  confirm it stays dismissed.
+- **Expected:** every CTA is a real link (not a `<details>`
+  toggle — those are gone), meets the 44px touch floor, and the
+  landing FAQ section scrolls into view (instantly under
+  reduced motion) with its heading announced; dismissal controls
+  are named buttons.
 
 ## 5. Known design-judgment items (do NOT flag these as bugs)
 

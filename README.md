@@ -33,16 +33,17 @@ Understoria is a platform where communities exchange help, tracked through **tim
 
 **Post what you need. Offer what you can. Build collective power.**
 
-- **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more.
-- **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated.
+- **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more. Descriptions and comments render a safe Markdown subset (bold, lists, links, tables) with no HTML injection path by construction.
+- **Community Projects** — Collective efforts with task lists, starter templates, co-organizer invitations, task ordering and soft dependencies, and a page per task for its discussion thread. `/my-tasks` gathers every task you're carrying across projects; `/my-projects` gathers every project in your care.
+- **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated. Project-task credit records the hours actually given, not the estimate.
 - **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
-- **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view. RSVPs stay on the node where they happen; nothing federates a member-attendance graph.
+- **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view, with event templates for common gatherings and a per-event "Add to calendar" `.ics` export (client-side only — no subscription URLs, ever). RSVPs stay on the node where they happen; nothing federates a member-attendance graph.
 - **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process. Blocks never federate, never aggregate, never signal anything to the blocked party.
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
 - **Achievements as Roles** — Earn community roles like Connector, Bridge Builder, and Listener — recognition without ranking.
 - **End-to-End Encryption** — Key-pair identity, signed transactions, encrypted messaging. No email or phone number required.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
-- **Organizing Tools** — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action.
+- **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. The Organizing Integration module is a future workstream (Agent 7 on the roadmap).
 
 ## Why It Exists
 

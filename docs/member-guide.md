@@ -30,10 +30,35 @@ The first time you open Understoria on a device, you'll see a short
    is already running in your community, the app surfaces it before
    you start a new one.
 
+Each concept screen carries a small illustration in the app's
+forest-growth style, and near the end the tour offers an optional
+**"Add it to your home screen"** step — installing the app so it
+lives beside your other apps instead of getting lost in a browser
+tab. It's genuinely optional (Next moves on, Skip finishes the
+tour), and it doesn't appear at all if the app is already
+installed. You can also install later — see §1a.
+
 You can tap **Skip** at any point if someone has already
 explained the basics in person. The welcome only shows once per
 device — if you want to read it again later, **Profile → Learn →
 Revisit the welcome** will bring it back.
+
+## 1a. Putting the app on your home screen
+
+Understoria works in an ordinary browser tab, but it's easier to
+come back to as an icon on your home screen. Two places offer to
+help:
+
+- A small **install card** may appear on the Board after you've
+  settled in. On most Android phones and desktop browsers it's a
+  one-tap button; on an iPhone it walks you through Safari's
+  **Share → Add to Home Screen** steps. Dismissing the card is
+  fine — it won't nag.
+- **Profile → Learn** has the same guide any time, organized by
+  device (iPhone / Android / computer) rather than by browser.
+
+Installing changes nothing about your data or identity — it's the
+same app, just easier to find.
 
 ### Two banners you might see at the top of the screen
 
@@ -113,6 +138,9 @@ The **Projects** tab has its own filter row above the project list:
 - **Only with open tasks** — a toggle that hides projects where every
   task is already claimed or done. Useful when you're looking for
   something to pitch in on right now.
+- **Could use more hands** — a toggle that narrows to projects with
+  a task that's been waiting on extra help for a while. It points at
+  the work, never at a person.
 
 All three filters compose with the search box. Nothing is filtered by
 default — you see every non-archived project until you start
@@ -145,14 +173,41 @@ You can switch between three views:
   through older items when you actually want them.
 - **Month** — the familiar grid, good for seeing a whole month at a
   glance. The current day gets a soft canopy highlight so you can
-  find "now" without scanning the row.
+  find "now" without scanning the row. Prev / next arrows page
+  through the months (up to a year each way), and a quiet **Today**
+  button jumps you back whenever you've wandered.
 - **Week** — a tighter seven-day view, handy if you're tracking a few
-  deadlines in a busy stretch.
+  deadlines in a busy stretch. It pages the same way the month view
+  does.
 
 Filters at the top let you narrow by **category**, by a single
-**project**, or to **"Mine"** — just the projects, posts, and
-exchanges you're part of. If a week is empty, that's fine; it means
-the community is having a quiet stretch, not that anyone's behind.
+**project**, or to **"Mine"** — just the projects, posts, events,
+and exchanges you're part of (for events, "Mine" means ones you
+organize or have RSVP'd going/maybe to). A small "Filters · N
+active" summary shows when anything is narrowing the list, and your
+view choice and filters are remembered on this device between
+visits — the calendar always reopens on today, though. If a week is
+empty, that's fine; it means the community is having a quiet
+stretch, not that anyone's behind.
+
+A few quiet touches worth knowing about:
+
+- Things **you're part of** — an event you're going to, a deadline
+  for a project you organize, your own expiring post — get a soft
+  accent so your own commitments stand out from the community-wide
+  picture. It's computed only from your own local data; nobody
+  else's plans are marked.
+- Events you've RSVP'd **"going"** to carry a small personal
+  marker. Only you see it — RSVPs never show as counts or lists on
+  the calendar.
+- An event that **spans several days** (a weekend build, a
+  multi-day drive) shows on every day it's happening, not just the
+  first.
+- An expiring **need** is marked with a small 🤲 glyph — open,
+  asking hands — and framed as an invitation to help before the
+  window closes, while an expiring offer gets a calm 🌱. A need
+  about to lapse is the most useful thing the calendar can show
+  you.
 
 ## 5. Posting a need
 
@@ -172,6 +227,19 @@ Fill in:
 - **Expires in (days)** — optional. Leave blank if there's no deadline.
 
 Tap **Post to the board**. Your need is live.
+
+### Formatting what you write
+
+Longer text fields — post, event, and project descriptions, task
+descriptions, and task comments — understand a small set of
+formatting marks. A one-line hint under each of these editors shows
+the basics: `**bold**`, `_italic_`, `-` at the start of a line for
+a list, and web links, plus a bit more if you know Markdown
+(headings, quotes, tables, `~~struck text~~`). You never have to
+use any of it — plain text is always fine. Links you (or anyone
+else) include open in a new tab, and nothing anyone types can ever
+run as code or load a remote image; the worst a strange link can be
+is a link, and you can see where it points before you tap.
 
 ## 6. Posting an offer
 
@@ -254,18 +322,40 @@ Open a project to see:
   steam or losing it.
 - A list of **tasks** — each one with an estimated number of hours,
   an urgency, and who (if anyone) is currently working on it.
+- A **"Working alongside"** card — a simple alphabetical list of
+  the people currently carrying or completing the project's tasks,
+  so the project feels like shared work and you can see who you'd
+  be joining. Names only; no hours, no ranking.
+- **Upcoming work days** — if the organizer has scheduled work-day
+  events for the project (see §9a), the next ones are listed right
+  on the project page.
+
+### Every task has its own page
+
+Tap **"Open task"** on any task card (the link also shows the
+comment count) to open the task's own page. That's where the full
+description, all the actions, and the **comment thread** live — the
+place to ask a clarifying question, coordinate timing, or leave a
+note for whoever picks the task up next. The task card back on the
+project list stays slim on purpose: a one-line preview and the
+Claim button, so a busy discussion never buries the rest of the
+project. A "← Back to {project}" link at the top of the task page
+takes you back to the list.
 
 ### Joining a project
 
 Open the project, find a task with "Open" status, and tap **Claim
 this task**. Coordinate with the organizer the same way you would
-for a board post. When the task is done, you mark it complete; the
-organizer confirms; the hours move into your balance just like any
-other exchange.
+for a board post. When the task is done, you mark it complete — the
+app asks **how long it actually took**, and that's what you're
+credited for, not the organizer's estimate (a 2-hour guess that
+took 6 hours credits 6). The organizer confirms; the hours move
+into your balance just like any other exchange.
 
 A task list can be **filtered**, **searched**, and (when there's
-enough) reorganised by the organiser. Above each project's task
-list you'll find:
+enough) reorganised by the organiser. Once a project has enough
+tasks that scanning gets hard (the controls stay out of the way on
+small projects), above the task list you'll find:
 
 - A search box that narrows by title / description.
 - Pills for **All / Open / In progress / Done** so you can hide
@@ -322,6 +412,27 @@ If you finish three confirmed project tasks, the **Crew Member**
 role shows up on your profile. If you organize a project that draws contributors,
 that's **Groundbreaker**; halfway to the target is **Momentum
 Maker**; finished is **Keystone**.
+
+### When a project finishes
+
+When a project you can see reaches Completed, the page shows a
+one-time closure card — a quiet communal sentence about what the
+community built together. It appears for any viewer, not just
+contributors, because the unit of measurement is *us*, not *me*.
+A low-key line stays in the completed banner afterward.
+
+### When an organizer goes quiet
+
+Life happens — organizers get sick, move, burn out. If a project's
+primary organizer has been quiet for a long stretch, another member
+can offer to **adopt** the project: they put themselves forward
+(nobody can be volunteered by someone else), and the offer becomes
+a community proposal that everyone can weigh in on, like any other
+decision. If the community agrees, stewardship transfers; if the
+original organizer comes back before then, a simple "I'm still
+here" withdraws the whole thing, no questions asked. The framing is
+always about keeping the *project* alive — never about judging the
+person who stepped away.
 
 ### Starting a project
 
@@ -444,10 +555,20 @@ purge the app, clean up your calendar separately.
 
 ### Creating an event
 
-From the Calendar page, tap the **Create event** affordance. The
-form asks for title, description, category, location (free text —
+From the Calendar page, tap the **Create event** affordance. A
+small gallery of **event templates** — potlucks, skillshares, and
+other camaraderie gatherings — can pre-fill the form as a friendly
+starting point, exactly like project templates; **start from
+scratch** is always right there too. The form asks for title,
+description, category, location (free text —
 "Community room, 3rd floor" not GPS coordinates), start time,
-optional end time, and an optional capacity cap. Before you sign,
+optional end time, and an optional capacity cap. The form saves a
+draft as you type (so an interruption doesn't lose your work) and
+points out problems inline — a start in the past, an end before
+the start — as soon as it can see them. One deliberate thing: the
+**time doesn't pre-fill**. An event is a permanent signed record,
+so the app asks you to consciously pick the time rather than
+letting a default slip through. Before you sign,
 a comparison card spells out exactly what publishing an event
 commits you to: your public key is on the wire as the organizer,
 the time and location are visible on every peer node, the record
@@ -464,6 +585,17 @@ is kind; it shows on the RSVP'd members' attention rails.
 If your local-node RSVP count hits the capacity you set, an
 attention item lets you know — the cap is a planning aid for you,
 not a "sold out" signal to other members.
+
+Some events are **work days for a project** ("Saturday build day
+for the community fridge"). Organizers schedule these from the
+project page; on the calendar and the event page they look like any
+other event, and the project's page lists its upcoming work days so
+you know when to show up.
+
+One more small thing: post, project, task, and event pages all have
+a **⋮ menu** with a **Copy link** item, so you can hand someone a
+direct link to the thing you're talking about (over Signal, say)
+without copying it from the address bar.
 
 The full design and the values reasoning live in
 [`community-events.md`](./community-events.md).
@@ -494,6 +626,22 @@ Both the breadth bar and the reciprocity pulse are windows into the
 shape of help, not scores. They're there so the community can see
 itself, not so members can compete.
 
+The Dashboard also offers a few quiet doorways into doing
+something, never pressure to:
+
+- **Coming up** — the next few community gatherings, in
+  chronological order, each linking to its event page. No
+  attendance counts; if you've RSVP'd going, only you see that
+  marked.
+- **Where hands are welcome** — a small mix of open needs and
+  active projects that could use more help, capped at a few and
+  hidden entirely when there's nothing. A doorway, not a to-do
+  list.
+- The needs stat card carries a small **"See open needs →"** link
+  to the Board, and when proposals are open for discussion a
+  one-line link points at them. Nothing counts down, nothing says
+  "awaiting your vote."
+
 ## 11. Messages
 
 Tap **Messages** to see private one-on-one conversations with
@@ -508,6 +656,14 @@ A few things worth knowing:
   There's no "search the member list and DM anyone" affordance —
   by design. Messaging is for coordinating on actual help, not
   for cold-DMing strangers.
+- **The thread shows which post it's about.** When you tap Reach
+  out on a post, a small "You're writing about: {title}" note sits
+  above the composer, and the message you send carries that
+  reference — so the *other* person's thread shows a quiet
+  "about: {title} →" chip linking back to the offer or need the
+  conversation concerns. The reference travels inside the
+  encrypted message itself, so the community node never learns
+  which post a conversation is about.
 - **No read receipts, no typing indicators, no online/offline
   status.** These are metadata leaks the project explicitly does
   not collect.
@@ -551,14 +707,27 @@ Tap **Profile** to see:
   "Connector," "Listener," "Weaver," "Groundbreaker," "Crew Member,"
   "Momentum Maker," "Keystone." These are ways of naming what you've
   done, not a ranking.
-- **Your exchange history** — every give or receive, with who and when.
+- **Your exchange history** — every give or receive, with who and
+  when. Rows that came from a project task link straight to that
+  task's page, and if an exchange of yours is in community review,
+  the small amber chip on its row links to the conversation where
+  the community is discussing it.
+- **Tasks you're carrying** and **Projects you organize** — links
+  to the two gather-it-in-one-place views: `/my-tasks` collects
+  every task you've claimed across all projects, and
+  `/my-projects` collects every project in your care (as organizer
+  or co-organizer) with what's quietly waiting on you — tasks
+  awaiting your confirmation, open slots, invitations you've
+  issued. Both are read-only by design; the actions stay on the
+  project pages.
 - **Invites you've issued** — once you've been in the community a
   while, you can generate invite links for people you want to bring
   in. (See §13.)
 - **Learn** — revisit the welcome flow any time, expand the in-app
   member guide (a shorter version of this document, available
-  offline), or open the study-group prompts and copy one to share
-  in a meeting.
+  offline), open the study-group prompts and copy one to share
+  in a meeting, or open the **install guide** (§1a) to put the app
+  on your home screen.
 - **Community settings** — three safeguard thresholds the community
   can tune to fit its own context: daily helper limit (a hard
   per-day cap), short-exchange threshold (exchanges shorter than

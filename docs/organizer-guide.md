@@ -263,6 +263,16 @@ peer node.
 
 A few things to be deliberate about when you create one:
 
+- **Templates are a starting point, not a script.** The create
+  form opens with a small gallery of camaraderie templates
+  (potluck, skillshare, and friends) that pre-fill the form;
+  everything stays editable and "start from scratch" is always
+  available. The form autosaves a draft, flags problems inline
+  (a start in the past, an end before the start), and
+  deliberately does *not* pre-fill a start time — a signed,
+  permanent record deserves a consciously chosen time, not a
+  default that slipped through.
+
 - **Read the comparison card.** Before you sign, the create-event
   surface enumerates what your signature publishes — your
   identity as organizer, the time and location as you typed
@@ -362,6 +372,65 @@ once they've accepted).
   assumed. The full list is in
   [`co-organizer-invitations.md`](./co-organizer-invitations.md)
   §4.
+- **Where the controls live.** The project page leads with the
+  work — summary, updates, work days, task list — and tucks the
+  organiser machinery where it doesn't crowd contributors out.
+  The one-tap lifecycle verbs (Reorder tasks, Mark complete,
+  Resume, Archive) plus **Copy link** sit in the **⋮ menu** in
+  the project header. **Pause** (with its note) and **Clone**
+  live inside the **"Manage project"** disclosure near the
+  bottom, together with co-organiser management, handoff, and
+  step-down. **"+ Add task"** and the announcements' **"Write an
+  update"** are small disclosures that expand into the forms.
+  Nothing was removed — it's the same set of controls, arranged
+  so a phone-sized screen reaches the task list first.
+- **Confirmation credits the time actually given.** When a
+  claimer marks a task complete they state how long it actually
+  took, and that — not your estimate — is what the confirm
+  dialog names and the signed exchange records. A task estimated
+  at 2 hours that took 6 credits 6.
+- **Recurring work: "Add a fresh copy."** A completed task row
+  offers a one-tap fresh copy — same title, description, hours,
+  and skills, staged open at the bottom of the list — so
+  next cycle's version of the same job doesn't mean retyping it.
+- **Cloning re-invites your crew, it never copies it.** The
+  clone form shows a pre-checked list of the source project's
+  co-organisers; submitting sends each of them a fresh
+  *invitation* to the new project. A clone is a new trust
+  context — new debits to sign — so consent is re-performed,
+  never inherited.
+- **Work days connect events to the project.** A **"Schedule a
+  work day"** button on the project page creates a community
+  event pre-linked to the project; the project page lists its
+  upcoming work days (and the desktop rail shows the next one at
+  a glance), and the calendar's project filter narrows to them.
+  The link is local to your node only — on the wire, and to
+  every peer, a work day is indistinguishable from any other
+  event, and the location field is never pre-filled for you;
+  how specific to be stays your call (see §7b).
+- **"Projects you organize" (`/my-projects`).** If you steward
+  several projects, this pull-only workbench gathers them with
+  what's quietly waiting on you — tasks awaiting your
+  confirmation, open slots, invitations you've issued. It's
+  read-only on purpose: confirming and every other organiser
+  action stays on the project page.
+- **Completion gets a communal moment.** When a project reaches
+  Completed, viewers see a one-time aggregate closure card (and
+  a permanent quiet line in the completed banner). No individual
+  tallies — the unit is the community.
+- **If you go quiet, the community can keep the project alive.**
+  After a long quiet stretch another member can self-nominate to
+  adopt the project via a community proposal
+  ([`project-adoption.md`](./project-adoption.md)). If you're
+  back before it resolves, a one-tap **"I'm still here"**
+  withdraws it — no explanation owed. The copy never frames the
+  quiet organiser as negligent; capacity changes.
+- **Descriptions, announcements, and comments take formatting.**
+  A safe Markdown subset (`**bold**`, `_italic_`, lists, links,
+  headings, tables) renders in project descriptions, task
+  descriptions, task comments, and updates — useful for supply
+  lists and sign-up links. Plain text is always fine; the hint
+  under each editor shows the basics.
 
 ## 8. Bringing in the other workstreams
 
