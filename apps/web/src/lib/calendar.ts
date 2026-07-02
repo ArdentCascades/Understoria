@@ -200,12 +200,15 @@ export interface BuildCalendarInput {
 
 /**
  * Upper bound on the number of per-day entries a single event may emit.
- * Belt-and-suspenders only: the window (`[windowStart, windowEnd]`,
- * ~90 days at the call site) is the PRIMARY bound on how many days an
- * event can spread across the grid. This clamp guards against a
- * malformed far-future `endsAt` ballooning the loop before the window
- * test trims it — 92 sits just above the widest window the page asks
- * for.
+ * Belt-and-suspenders only: the window (`[windowStart, windowEnd]`) is
+ * the PRIMARY bound on how many days an event can spread across the
+ * grid. This clamp guards against a malformed far-future `endsAt`
+ * ballooning the loop before the window test trims it — 92 sits just
+ * above the ~90-day default window, and a real event spanning more
+ * than three months of consecutive days is pathological data, not a
+ * calendar. (The page may pass a wider window when the member pages
+ * the month/week views away from today — see `calendarViewWindow` —
+ * but the per-event clamp intentionally stays put.)
  */
 const MAX_EVENT_DAYS = 92;
 
@@ -339,6 +342,11 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
 
   // Stable sort by date, then by kind (density < deadline < post)
   // for same-day tie-breaking so the UI z-order is predictable.
+  // Within equal (date, kind) for events, tiebreak by `startsAt`
+  // ascending so two same-day events list in time-of-day order (a
+  // 10am skillshare above a 7pm potluck) instead of insertion order.
+  // Other kinds carry no time-of-day; `sort` is stable, so returning
+  // 0 preserves their input order.
   const kindOrder: Record<CalendarEntryKind, number> = {
     exchange_density: 0,
     project_deadline: 1,
@@ -347,7 +355,11 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   };
   entries.sort((a, b) => {
     if (a.date !== b.date) return a.date - b.date;
-    return kindOrder[a.kind] - kindOrder[b.kind];
+    if (a.kind !== b.kind) return kindOrder[a.kind] - kindOrder[b.kind];
+    if (a.kind === "event" && b.kind === "event") {
+      return a.startsAt - b.startsAt;
+    }
+    return 0;
   });
 
   return entries;
@@ -401,6 +413,101 @@ export function dayKey(ms: number): string {
 export function startOfUTCDay(ms: number): number {
   const d = new Date(ms);
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
+/** One UTC week in ms. UTC days are exactly 86_400_000 ms apart (no
+ *  DST in UTC), so a week is a plain multiple — the same arithmetic
+ *  the grids walk. */
+export const WEEK_MS = 7 * 86_400_000;
+
+/**
+ * Midnight UTC on the first day of the month that is `months` whole
+ * months away from the month containing `ms` (0 = that same month,
+ * negative = past). `Date.UTC` normalizes out-of-range month indices,
+ * so year rollover is handled for free. Used as the month view's
+ * paging anchor: any ms within the target month works for the grid,
+ * and the first-of-month is a stable, clock-independent choice.
+ */
+export function addUTCMonths(ms: number, months: number): number {
+  const d = new Date(ms);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + months, 1);
+}
+
+/**
+ * Midnight UTC of the Sunday on or before `ms` — the week view's
+ * anchor convention (week starts Sunday, matching the grids' weekday
+ * headers).
+ */
+export function startOfUTCWeek(ms: number): number {
+  const sod = startOfUTCDay(ms);
+  const weekday = new Date(sod).getUTCDay(); // 0 = Sun
+  return sod - weekday * 86_400_000;
+}
+
+/**
+ * Inclusive ms range of the 6-week (42-cell) grid the month view
+ * renders for the month containing `anchorMs`: from midnight UTC of
+ * the Sunday on or before the 1st, through the last ms of the 42nd
+ * cell. Must stay in lockstep with `buildMonthGrid` in
+ * `CalendarMonth.tsx` (which derives its grid start from this) so the
+ * entries window always covers every rendered cell.
+ */
+export function monthGridRange(anchorMs: number): {
+  start: number;
+  end: number;
+} {
+  const d = new Date(anchorMs);
+  const firstOfMonth = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  const firstWeekday = new Date(firstOfMonth).getUTCDay(); // 0 = Sun
+  const start = firstOfMonth - firstWeekday * 86_400_000;
+  return { start, end: start + 42 * 86_400_000 - 1 };
+}
+
+/**
+ * The entries window for the currently-displayed view: the union of
+ * the page's default window (30 back / 60 forward, anchored to "now")
+ * with the period the paged month/week view is actually showing.
+ *
+ * Why a union and not a swap: the default window is what the agenda
+ * and the density signal are calibrated to — at offset 0 the behavior
+ * of those surfaces is unchanged. But a FIXED window means paging the
+ * month view two months ahead would render an empty grid even when
+ * events exist there (they were being built out of the window). So
+ * when the member pages, the window widens to cover the viewed
+ * period; density on far-past months is honest history, and far-future
+ * months simply have no density yet.
+ *
+ * Pure — the page passes `now` and its default bounds; unit-testable
+ * without a clock or React.
+ */
+export function calendarViewWindow(input: {
+  now: number;
+  defaultStart: number;
+  defaultEnd: number;
+  view: "agenda" | "month" | "week";
+  /** Paging offset for the active view: whole months for "month",
+   *  whole weeks for "week". Ignored for "agenda" (not pageable). */
+  offset: number;
+}): { windowStart: number; windowEnd: number } {
+  let viewStart: number | null = null;
+  let viewEnd: number | null = null;
+  if (input.view === "month") {
+    const range = monthGridRange(addUTCMonths(input.now, input.offset));
+    viewStart = range.start;
+    viewEnd = range.end;
+  } else if (input.view === "week") {
+    const anchor = startOfUTCWeek(input.now) + input.offset * WEEK_MS;
+    viewStart = anchor;
+    viewEnd = anchor + WEEK_MS - 1;
+  }
+  return {
+    windowStart:
+      viewStart === null
+        ? input.defaultStart
+        : Math.min(input.defaultStart, viewStart),
+    windowEnd:
+      viewEnd === null ? input.defaultEnd : Math.max(input.defaultEnd, viewEnd),
+  };
 }
 
 /**

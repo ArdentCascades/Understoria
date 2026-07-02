@@ -364,6 +364,11 @@
       "next": "Next week",
       "range": "{{start}} – {{end}}"
     },
+    "monthNav": {
+      "prev": "Previous month",
+      "next": "Next month",
+      "today": "Today"
+    },
     "overflowMore": "+{{count}} more",
     "todayLabel": "Today",
     "entry": {
