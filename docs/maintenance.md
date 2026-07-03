@@ -26,20 +26,72 @@ items below — never bundled into unrelated work.
 
 ## Open
 
-### Dev-tooling security upgrade: vite 5 → 8, vitest 2 → 4 (deferred)
+(nothing currently deferred)
 
-**Status:** deferred (2026-06-14; decision still pending as of
-2026-07-03). Low urgency while no one depends on the software yet;
-**revisit before a real deployment / real users**, or when vitest 4 has
-settled enough to migrate cleanly.
+## Resolved
 
-**What.** Before the 2026-07-03 cleanup below, `npm audit` reported 10
-advisories across 9 packages (GitHub Dependabot counted 25 alerts on the
-default branch). **All are dev/build tooling**, none touch the production
-PWA or the runtime.
+### Dev-tooling security upgrade: vite 5 → 8, vitest 2 → 4
 
-**2026-07-03 cleanup (semver-safe subset).** A lockfile-only pass cleared
-5 of the 10 advisories, including both standalone highs:
+**Status:** resolved 2026-07-03 (deferred 2026-06-14; semver-safe
+subset cleared earlier on 2026-07-03, see the entry below).
+
+**What.** The 5 advisories left after the lockfile pass all sat on the
+vite/vitest chain: nested `esbuild` ≤ 0.28.0 (GHSA-67mh-4wv8-2f99),
+`vite` ≤ 6.4.2 dev-server advisories (GHSA-4w7w-66w2-5vf9,
+GHSA-fx2h-pf6j-xcff, GHSA-v6wh-96g9-6wx3), their `@vitest/mocker` /
+`vite-node` propagation, and the critical-rated vitest UI-server RCE
+(GHSA-5xrq-8626-4rwp — unreachable here, nothing runs `--ui` or an
+`api:` server). All dev/build tooling; the deployed app never runs
+vite/esbuild/vitest.
+
+**Fix.** Bumped the four packages together on their own branch:
+`vite` 5.4.21 → **8.1.3**, `vitest` 2.1.9 → **4.1.9** (web + server),
+`@vitejs/plugin-react` 4.7.0 → **6.0.3**, `vite-plugin-pwa` 0.21.2 →
+**1.3.0** (workbox stayed ^7.4.1 — no workbox major taken). `npm audit`
+now reports **0 advisories** (was 5: 3 moderate, 1 high, 1 critical).
+Full gate green afterwards: typecheck, web lint, 1,858 web + 135 server
+tests, `vite build`, server `tsc` build, and both Docker image builds.
+Node floors are satisfied everywhere (vite 8 needs `^20.19 || >=22.12`;
+CI pins `node-version: '22'` and both Dockerfiles use
+`node:22-bookworm-slim`, which float to current 22.x).
+
+**What the migration actually cost (for the next major bump).**
+Far less churn than feared when this was deferred:
+
+- `vite.config.ts` needed **zero changes** — `registerType: "prompt"`,
+  the workbox `generateSW` options, and the `test:` block all carried
+  over as-is. Only two test files changed: vitest 4's stricter `vi.fn`
+  typing (`Mock<Procedure | Constructable>` no longer assignable to a
+  concrete signature) required typing the `scrollIntoView` spies in
+  `LearnSection.test.tsx` and `Profile.editParam.test.tsx` as
+  `vi.fn<typeof Element.prototype.scrollIntoView>()`. All 1,993 tests
+  passed under vitest 4 with no behavioral edits.
+- **Surprise worth remembering:** `npm install` after the manifest bump
+  left the lockfile in a hybrid state — stale `node_modules/vite@5.4.21`
+  hoisted at root (still carrying vulnerable esbuild 0.21.5) with vite 8
+  nested under `apps/web`, and `npm dedupe` refused to fix it
+  (ERESOLVE). Deleting the stale `node_modules/vite*` entries from
+  `package-lock.json` and re-running `npm install` produced the clean
+  single-vite-8 tree. Check `npm ls vite` after any vite-chain bump.
+- Vite 8 builds with rolldown/oxc instead of rollup/esbuild. Output is
+  equivalent (precache 37 → 39 entries: rolldown emits its module
+  runtime and the workbox-window helper as separate chunks). Rolldown
+  surfaces a pre-existing pattern as an `INEFFECTIVE_DYNAMIC_IMPORT`
+  warning for `src/lib/outbox.ts` (dynamically and statically imported)
+  — informational, not new behavior.
+- **Service-worker prompt flow re-verified in a real browser** (the
+  0.x → 1.x plugin major was the biggest regression risk after the
+  silent-update burn that led to PR #219): generated `sw.js` still gates
+  `skipWaiting` on the `SKIP_WAITING` message only; live check confirmed
+  deploy → "A new version is available." card (old build keeps running)
+  → Refresh tap activates the new build. No silent swap.
+
+### Dev-tooling advisory cleanup, semver-safe subset (2026-07-03)
+
+**Status:** resolved 2026-07-03 (PR #299).
+
+A lockfile-only pass cleared 5 of the then-10 advisories, including
+both standalone highs:
 
 - `npm audit fix` (no `--force`): `form-data` 4.0.5 → 4.0.6 (high, CRLF
   injection), `ws` 8.20.1 → 8.21.0 (high, fragment-flood DoS), `js-yaml`
@@ -49,51 +101,9 @@ PWA or the runtime.
 - `npm update tsx`: 4.21.0 → 4.23.0 within `^4.19.2`, which moves the
   tsx-owned `esbuild` node to 0.28.1 and clears that esbuild advisory.
 
-No `package.json` manifest changed; full gate verified green.
-
-**What remains.** 5 advisories, all on the vite/vitest chain (`esbuild`
-nested under vite, `vite`, `@vitest/mocker`, `vitest`, `vite-node`):
-
-- `esbuild` ≤ 0.28.0 (vite's bundled copy) — dev-server can be asked to
-  return arbitrary responses (GHSA-67mh-4wv8-2f99). Fixed in esbuild
-  0.28.1.
-- `vite` ≤ 6.4.2 — dev-server path traversal in optimized-deps `.map`
-  handling (GHSA-4w7w-66w2-5vf9) and related dev-server advisories
-  (GHSA-fx2h-pf6j-xcff, GHSA-v6wh-96g9-6wx3). Propagates to
-  `@vitest/mocker` and `vite-node`.
-- `vitest` ≤ 3.2.5 — UI-mode API server RCE (GHSA-5xrq-8626-4rwp).
-  Rated critical, but **unreachable here**: it requires running vitest
-  with `--ui` or an `api:` server config, and neither appears anywhere in
-  our configs or CI.
-
-These are exploitable only against a developer running the local dev
-server who is then specifically targeted. The deployed app does not run
-vite/esbuild/vitest. All five clear only with the vite 8 / vitest 4
-migration below.
-
-**Why deferred (the surgical fix doesn't work).** The only esbuild that
-fixes the advisories is 0.28.1, and the only vite that bundles it (and
-fixes the vite path-traversal) is **vite 8**. An npm `overrides` forcing
-`esbuild@0.28.1` under the current vite 5.4 **breaks `vite build`**
-(verified 2026-06-14 — esbuild 0.21→0.28 is incompatible with vite 5.4).
-So clearing these requires the full chain:
-
-- `vite` 5 → 8
-- `vitest` 2 → 4 (to match vite 8; has breaking config/API changes)
-- `@vitejs/plugin-react` and `vite-plugin-pwa` → versions compatible with
-  vite 8
-
-That is a real migration touching the build/test config and possibly test
-APIs — breaking and behavior-visible, so it's its own deliberate effort,
-not an auto-patch.
-
-**When picked up:** do it on its own branch; bump the four packages
-together; expect to update `vite.config.ts`, the vitest config/setup, and
-any vitest APIs that changed in v4; then run the full gate above. If it
-can't be made green without large churn, stop and reassess rather than
-forcing it.
-
-## Resolved
+No `package.json` manifest changed; full gate verified green. The
+remaining 5 advisories were cleared the same day by the vite 8 /
+vitest 4 migration above.
 
 ### Duplicate top-level `"community"` key in the locale files
 

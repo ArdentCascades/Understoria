@@ -9,7 +9,31 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Dev-toolchain migration: vite 5 → 8, vitest 2 → 4.** Bumped the
+  build/test chain together — `vite` 5.4.21 → 8.1.3, `vitest` 2.1.9 →
+  4.1.9 (web + server), `@vitejs/plugin-react` 4.7.0 → 6.0.3,
+  `vite-plugin-pwa` 0.21.2 → 1.3.0 (workbox stays ^7.4.1). No runtime
+  behavior change intended: `vite.config.ts` needed no edits, and the
+  only source churn was typing two `scrollIntoView` test spies for
+  vitest 4's stricter `vi.fn` types. Vite 8 builds with rolldown/oxc
+  instead of rollup/esbuild; the generated service worker still
+  registers in `prompt` mode with `skipWaiting` gated on the member's
+  explicit Refresh tap, and the full update flow (new deploy → "A new
+  version is available." card → Refresh activates the new build, never
+  a silent swap) was re-verified in a real browser against the vite 8
+  output. Full gate green: 1,858 web + 135 server tests, typecheck,
+  lint, both builds, both Docker images.
+
 ### Security
+- **All remaining `npm audit` advisories cleared (5 → 0).** The
+  vite 8 / vitest 4 migration above clears the five advisories left
+  after the 2026-07-03 lockfile pass — nested `esbuild` ≤ 0.28.0
+  (GHSA-67mh-4wv8-2f99), `vite` ≤ 6.4.2 dev-server advisories
+  (GHSA-4w7w-66w2-5vf9 and related), their `@vitest/mocker` /
+  `vite-node` propagation, and the critical-rated vitest UI-server
+  RCE (GHSA-5xrq-8626-4rwp, unreachable here since nothing runs
+  `--ui` or an `api:` server). `npm audit` now reports 0 advisories.
 - **Dev-tooling advisory cleanup (lockfile-only).** `npm audit fix`
   plus an in-range `tsx` update bumped `form-data` 4.0.5 → 4.0.6,
   `ws` 8.20.1 → 8.21.0, `js-yaml` 4.1.1 → 4.3.0, `@babel/core` (and
