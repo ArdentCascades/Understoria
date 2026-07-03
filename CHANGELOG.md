@@ -10,7 +10,31 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
-- **Profile page reordered around every-visit content, with rare-need
+- **Onboarding overhaul: production first-run is now an EMPTY node.**
+  The demo community (the "You" founder, Rosa/Marcus/Imani/Theo,
+  their vouches and five sample posts) seeds in dev builds only
+  (`import.meta.env.DEV`) — real deployments start with no members
+  and no posts, and no purge choreography is needed before inviting
+  anyone. The first identity is minted by onboarding itself:
+  (1) Welcome's profile-setup step now carries a required
+  display-name field and creates a real Ed25519 member on finish
+  (open nodes, plus the first-device bootstrap on invite-only
+  nodes, which previously could never fire because the seed always
+  won the race); when a member already exists — an invited member
+  arriving from InviteAccept, or the dev founder — the step greets
+  them by name, prefills the field, and updates the profile instead
+  of minting a second identity. Invited members keep the full
+  five-screen concept tour (operator ruling). (2) Skipping the tour
+  now lands on profile setup instead of finishing outright:
+  "onboarded" can never be true without a named identity behind it,
+  and the profile-setup step itself has no Skip affordance (Back and
+  leaving still work — nobody is trapped). (3) The identity concept
+  screen now states the honest other half of "no one can lock you
+  out": there is no reset and no company that can restore the key —
+  losing the device without a paired backup device means the
+  identity is gone. Operator and quickstart guides updated to the
+  dev-only-seed contract, including the corrected purge-first step
+  order for existing deployments that still carry demo data.
   sections indexed and a two-pane layout at lg+.** (1) Mobile stack:
   balance (+ its hint) → exchange history → participation rows
   (carrying / organizing / Invites, with the invite hint now adjacent

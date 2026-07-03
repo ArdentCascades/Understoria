@@ -91,7 +91,7 @@ pure data to `lib/`).
 | Module | Responsibility |
 |--------|---------------|
 | `database.ts` | Dexie schema (`members`, `posts`, `exchanges`, `achievements`, `settings`, `secretKeys`, `invites`, `vouches`) |
-| `seed.ts` | First-launch demo community |
+| `seed.ts` | First-launch demo community (dev builds only) |
 | `actions.ts` | Post lifecycle (`createPost`, `claimPost`, `confirmExchange`, …) |
 | `secrets.ts` | Session-aware `getSecretKey`, enable / change / disable passphrase |
 | `invites.ts` | `issueInvite`, `redeemInvite`, `revokeInvite`, `listInvitesFrom` |

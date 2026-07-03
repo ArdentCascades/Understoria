@@ -156,18 +156,28 @@ pressure you to modify the build.
 
 Operators are also members. On your first visit:
 
-1. The app seeds a demo community (five fictional members). For a
-   real pilot, you can leave these in during shakedown and wipe them
-   before inviting anyone: **Profile → Emergency → Hard purge**.
-2. Set a display name under **Profile → About you**.
-3. Set a passphrase under **Profile → Security**. As the operator,
+1. Your node starts **empty** — production builds carry no demo
+   data (the demo community is dev-mode only). Walk the welcome
+   tour; the final step asks for your display name and mints your
+   identity. On an invite-only node the very first device gets a
+   bootstrap exception, so you can self-onboard before any invites
+   exist. No purge choreography needed.
+2. Set a passphrase under **Profile → Security**. As the operator,
    you'll be issuing the first invites — your key really matters.
    Write the passphrase on paper. Put the paper somewhere safe.
-4. **Profile → Invites → Generate invite link** for each founding
+3. **Profile → Invites → Generate invite link** for each founding
    member. Deliver links through a channel you trust (in person is
    best; Signal is a reasonable second choice).
-5. Verify each new member's key fingerprint in person or on a voice
+4. Verify each new member's key fingerprint in person or on a voice
    call before confirming they're who you think they are.
+
+**Existing deployments that predate the dev-only seed:** devices that
+already carry the old demo community (Rosa, Marcus, Imani, Theo and
+their sample posts) can still clear it via **Profile → Emergency →
+Hard purge**. Do the purge **first**, and only then set your display
+name and passphrase — the purge wipes everything on the device, so
+running it after your setup destroys the identity and passphrase you
+just created.
 
 ## 6. Running the community node (optional)
 
