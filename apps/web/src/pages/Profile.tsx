@@ -356,235 +356,273 @@ export default function ProfilePage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="page-title">{t("profile.title")}</h1>
-          <p className="text-xs text-moss-600 dark:text-moss-300">
-            {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <TrustChip status={trust} count={trustCount} />
-          {/* Gear icon → device-local Settings (Language, Appearance,
-              Community Node, Security, Data export). Emergency stays
-              on Profile per the privacy-as-precondition principle. */}
-          <Link
-            to="/settings"
-            aria-label={t("settings.openSettings")}
-            className="touch-target inline-flex items-center justify-center rounded-full text-moss-700 hover:bg-moss-100 dark:text-moss-300 dark:hover:bg-moss-800"
-          >
-            <IconSettings size={20} />
-          </Link>
-        </div>
-      </header>
+      {/* 2-pane layout at lg+ — the identity glance (header, balance
+          + its hint, Roles earned) docks in a 320px right sidebar
+          that sticks to the viewport; the main reading column hosts
+          the high-volume scrollable sections (history →
+          participation → editor → index → CommunitySettings →
+          PairingLog → Emergency → dev MemberSwitcher). Below lg the
+          `lg:*` classes are inert and the grid collapses to
+          single-column DOM order. Roles earned renders at TWO sites
+          — `hidden lg:block` in the rail here, `lg:hidden` after the
+          participation cluster — so the mobile stack keeps roles
+          between Invites and the editor. Two render sites, never CSS
+          `order`, so mobile DOM order matches mobile visual order
+          (WCAG 2.4.3 — same pattern as ProjectDetail.tsx's rail and
+          Board.tsx's filter rails; see Profile.reflow.test.tsx).
 
-      <BalanceCard
-        balance={balance}
-        seed={currentMember.seedBalance}
-        pending={pending}
-        pendingTask={pendingTask}
-        projectOutflow={projectOutflow}
-        autoConfirmHours={nodeConfig.autoConfirmHours}
-      />
-      <ContextualHint
-        settingKey="balanceHintDismissed"
-        ariaLabel={t("hints.balance.label")}
-        message={t("hints.balance.message")}
-        learnMoreTo="/help#what-is-balance"
-        learnMoreLabel={t("hints.balance.learnMoreLabel")}
-      />
-
-      {/* Exchange history is promoted to sit directly under the
-          balance it itemizes — the every-visit pair (the number and
-          the ledger behind it) stays within one screen instead of
-          3–4 swipes apart. The About editor, touched rarely after
-          first setup, now lives below the participation rows rather
-          than between balance and history. */}
-      <ExchangeHistorySection
-        history={history}
-        pending={pending}
-        pendingTask={pendingTask}
-        memberMap={memberMap}
-        taskMap={taskMap}
-        projectMap={projectMap}
-        disputeIdByPostId={disputeIdByPostId}
-      />
-
-      {/* Community-participation cluster. CSS columns at lg+ because
-          the cards have uneven heights — Invites can be tall
-          (many tokens) or short (none); Roles earned grows with
-          achievements. Columns balance the fill so cards don't sit
-          next to ragged empty space the way grid rows would.
-          `[&>*]:break-inside-avoid` keeps each card whole. Below lg
-          the columns classes are inert and each card's own `mb-4`
-          provides the spacing. DOM order is preserved so tab and
-          screen-reader navigation are unaffected by the column
-          layout. This cluster is the "what you're doing / what
-          you've done" surfaces — a conditional tasks-you're-carrying
-          jump-off plus the organizer twin, Invites, and Roles
-          earned. Exchange history moved up beside the balance it
-          explains; data export lives in Settings, MemberSwitcher at
-          the page bottom. */}
-      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
-        {/* Cross-project commitments jump-off. Rendered only when the
-            member is actually carrying something — at zero the card
-            disappears rather than display an empty obligation. The
-            full inventory lives at /my-tasks; this card is the
-            Profile-side door to it. */}
-        {carrying.taskCount > 0 && (
-          <section className="card mb-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
-              {t("myTasks.title")}
-            </h2>
-            <p className="text-sm text-moss-700 dark:text-moss-200">
-              <MyTasksSummary
-                taskCount={carrying.taskCount}
-                projectCount={carrying.projectCount}
-              />
-            </p>
-            <Link
-              to="/my-tasks"
-              className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-            >
-              {t("myTasks.seeAll")}
-            </Link>
-          </section>
-        )}
-        {/* Organizer-side jump-off, same posture as the carrying card:
-            shown only when the member actually stewards something, so an
-            empty list never reads as "you should be organizing more".
-            The full workbench lives at /my-projects. */}
-        {organizing.projectCount > 0 && (
-          <section className="card mb-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
-              {t("myProjects.title")}
-            </h2>
-            <p className="text-sm text-moss-700 dark:text-moss-200">
-              <MyProjectsSummary projectCount={organizing.projectCount} />
-            </p>
-            <Link
-              to="/my-projects"
-              className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-            >
-              {t("myProjects.seeAll")}
-            </Link>
-          </section>
-        )}
-        <InvitesSection
-          member={currentMember}
-          nodeId={nodeId}
-          invites={myInvites}
-        />
-
-        {/* The invite hint sits adjacent to the Invites card it
-            explains — it used to float above the whole cluster,
-            several cards away from the Generate button it talks
-            about. `break-inside-avoid` keeps it in the same column
-            as its card at lg+. */}
-        <ContextualHint
-          settingKey="inviteHintDismissed"
-          ariaLabel={t("hints.invite.label")}
-          message={t("hints.invite.message")}
-          learnMoreTo="/help#invite-someone"
-          learnMoreLabel={t("hints.invite.learnMoreLabel")}
-        />
-
-        <RolesEarnedSection achievements={myAchievements} />
-      </div>
-
-      {/* About editor — touched rarely after first setup, so it sits
-          below the every-visit surfaces (balance, history,
-          participation) instead of between balance and history.
-          `/profile?edit=1` (the Board profile-nudge CTA) still lands
-          here: the editor scrolls itself into view via its own
-          section ref, so its stack position is free to change. */}
-      <ProfileEditor
-        member={currentMember}
-        focusOnMount={editRequested}
-        onFocusHandled={clearEditParam}
-      />
-
-      {/* "Community & account" index — one compact section of labeled
-          rows replacing the five standalone cards that used to sprawl
-          here (Learn, Disputes, Proposals, the Settings row, Add
-          device). Rare-need surfaces index into a row each; the
-          every-visit surfaces live above. Disputes and Proposals keep
-          their open counts (attention-on-open, not a notification).
-          CommunitySettings stays OUT of the index as its own card
-          below — it's about community-level safeguard thresholds, not
-          device preferences (the "Settings" in its name
-          notwithstanding), and the community-authority principle
-          wants it on the page in its own right. */}
-      <section
-        className="card mb-4 mt-6"
-        aria-labelledby="profile-communityAccount-title"
-      >
-        <h2
-          id="profile-communityAccount-title"
-          className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+          The sidebar `aside` is its own scroll context at lg+ so an
+          overflowing rail never pushes the ledger off-screen. The
+          main column's min-w-0 lets long history rows wrap rather
+          than blow out the grid width. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
+        <aside
+          aria-label={t("profile.sidebarAriaLabel")}
+          className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
         >
-          {t("profile.communityAccount.title")}
-        </h2>
-        <div className="divide-y divide-moss-100 dark:divide-moss-800">
-          <LearnSection />
+          <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h1 className="page-title">{t("profile.title")}</h1>
+              <p className="text-xs text-moss-600 dark:text-moss-300">
+                {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrustChip status={trust} count={trustCount} />
+              {/* Gear icon → device-local Settings (Language, Appearance,
+                  Community Node, Security, Data export). Emergency stays
+                  on Profile per the privacy-as-precondition principle. */}
+              <Link
+                to="/settings"
+                aria-label={t("settings.openSettings")}
+                className="touch-target inline-flex items-center justify-center rounded-full text-moss-700 hover:bg-moss-100 dark:text-moss-300 dark:hover:bg-moss-800"
+              >
+                <IconSettings size={20} />
+              </Link>
+            </div>
+          </header>
 
-          <DisputesSection />
+          <BalanceCard
+            balance={balance}
+            seed={currentMember.seedBalance}
+            pending={pending}
+            pendingTask={pendingTask}
+            projectOutflow={projectOutflow}
+            autoConfirmHours={nodeConfig.autoConfirmHours}
+          />
+          <ContextualHint
+            settingKey="balanceHintDismissed"
+            ariaLabel={t("hints.balance.label")}
+            message={t("hints.balance.message")}
+            learnMoreTo="/help#what-is-balance"
+            learnMoreLabel={t("hints.balance.learnMoreLabel")}
+          />
 
-          <ProposalsSection />
+          {/* Desktop copy of Roles earned — on mobile this copy is hidden
+              and the SAME section re-renders between the participation
+              cluster and the editor (see the `lg:hidden` copy in the main
+              column), so a phone visitor reads it in stack order. Two
+              render sites, never CSS `order` (WCAG 2.4.3). */}
+          <div className="hidden lg:block">
+            <RolesEarnedSection achievements={myAchievements} />
+          </div>
+        </aside>
 
-          {/* Labeled doorway to device-local Settings — discoverable
-              by reading, not just by recognizing the header gear
-              (which stays, for muscle memory). */}
-          <SettingsRowSection />
+        <div className="lg:col-start-1 lg:row-start-1 lg:min-w-0">
 
-          {/* AddDevice ships in the device-pairing series (design
-              note: docs/device-pairing.md). Its entry point is an
-              index row whose disclosure keeps one deliberate step
-              before the sensitive pairing flow — pairing a device is
-              weightier than sharing an invite. The paired-device
-              inventory (PairingLogSection) is what keeps the
-              Emergency adjacency now: its only remediation path IS
-              Emergency → Hard purge. */}
-          <AddDeviceSection />
+          {/* Exchange history is promoted to sit directly under the
+              balance it itemizes — the every-visit pair (the number and
+              the ledger behind it) stays within one screen instead of
+              3–4 swipes apart. The About editor, touched rarely after
+              first setup, now lives below the participation rows rather
+              than between balance and history. */}
+          <ExchangeHistorySection
+            history={history}
+            pending={pending}
+            pendingTask={pendingTask}
+            memberMap={memberMap}
+            taskMap={taskMap}
+            projectMap={projectMap}
+            disputeIdByPostId={disputeIdByPostId}
+          />
+
+          {/* Community-participation cluster — the "what you're doing"
+              surfaces: a conditional tasks-you're-carrying jump-off plus
+              the organizer twin and Invites. A plain stack at every
+              breakpoint (each card's own `mb-4` provides the spacing) —
+              the old lg:columns-2 CSS-column packing is superseded by
+              the rail grid above, which already narrows this column.
+              Exchange history moved up beside the balance it explains;
+              data export lives in Settings, MemberSwitcher at the page
+              bottom. */}
+          <div>
+            {/* Cross-project commitments jump-off. Rendered only when the
+                member is actually carrying something — at zero the card
+                disappears rather than display an empty obligation. The
+                full inventory lives at /my-tasks; this card is the
+                Profile-side door to it. */}
+            {carrying.taskCount > 0 && (
+              <section className="card mb-4">
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+                  {t("myTasks.title")}
+                </h2>
+                <p className="text-sm text-moss-700 dark:text-moss-200">
+                  <MyTasksSummary
+                    taskCount={carrying.taskCount}
+                    projectCount={carrying.projectCount}
+                  />
+                </p>
+                <Link
+                  to="/my-tasks"
+                  className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                >
+                  {t("myTasks.seeAll")}
+                </Link>
+              </section>
+            )}
+            {/* Organizer-side jump-off, same posture as the carrying card:
+                shown only when the member actually stewards something, so an
+                empty list never reads as "you should be organizing more".
+                The full workbench lives at /my-projects. */}
+            {organizing.projectCount > 0 && (
+              <section className="card mb-4">
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+                  {t("myProjects.title")}
+                </h2>
+                <p className="text-sm text-moss-700 dark:text-moss-200">
+                  <MyProjectsSummary projectCount={organizing.projectCount} />
+                </p>
+                <Link
+                  to="/my-projects"
+                  className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                >
+                  {t("myProjects.seeAll")}
+                </Link>
+              </section>
+            )}
+            <InvitesSection
+              member={currentMember}
+              nodeId={nodeId}
+              invites={myInvites}
+            />
+
+            {/* The invite hint sits adjacent to the Invites card it
+                explains — it used to float above the whole cluster,
+                several cards away from the Generate button it talks
+                about. */}
+            <ContextualHint
+              settingKey="inviteHintDismissed"
+              ariaLabel={t("hints.invite.label")}
+              message={t("hints.invite.message")}
+              learnMoreTo="/help#invite-someone"
+              learnMoreLabel={t("hints.invite.learnMoreLabel")}
+            />
+
+            {/* Mobile copy of Roles earned — the desktop copy lives in
+                the rail (`hidden lg:block`); this one is `lg:hidden` so
+                the mobile stack reads Invites → Roles → editor in DOM
+                exactly where it appears visually. No CSS `order`
+                (WCAG 2.4.3). */}
+            <div className="lg:hidden">
+              <RolesEarnedSection achievements={myAchievements} />
+            </div>
+          </div>
+
+          {/* About editor — touched rarely after first setup, so it sits
+              below the every-visit surfaces (balance, history,
+              participation) instead of between balance and history.
+              `/profile?edit=1` (the Board profile-nudge CTA) still lands
+              here: the editor scrolls itself into view via its own
+              section ref, so its stack position is free to change. */}
+          <ProfileEditor
+            member={currentMember}
+            focusOnMount={editRequested}
+            onFocusHandled={clearEditParam}
+          />
+
+          {/* "Community & account" index — one compact section of labeled
+              rows replacing the five standalone cards that used to sprawl
+              here (Learn, Disputes, Proposals, the Settings row, Add
+              device). Rare-need surfaces index into a row each; the
+              every-visit surfaces live above. Disputes and Proposals keep
+              their open counts (attention-on-open, not a notification).
+              CommunitySettings stays OUT of the index as its own card
+              below — it's about community-level safeguard thresholds, not
+              device preferences (the "Settings" in its name
+              notwithstanding), and the community-authority principle
+              wants it on the page in its own right. */}
+          <section
+            className="card mb-4 mt-6"
+            aria-labelledby="profile-communityAccount-title"
+          >
+            <h2
+              id="profile-communityAccount-title"
+              className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+            >
+              {t("profile.communityAccount.title")}
+            </h2>
+            <div className="divide-y divide-moss-100 dark:divide-moss-800">
+              <LearnSection />
+
+              <DisputesSection />
+
+              <ProposalsSection />
+
+              {/* Labeled doorway to device-local Settings — discoverable
+                  by reading, not just by recognizing the header gear
+                  (which stays, for muscle memory). */}
+              <SettingsRowSection />
+
+              {/* AddDevice ships in the device-pairing series (design
+                  note: docs/device-pairing.md). Its entry point is an
+                  index row whose disclosure keeps one deliberate step
+                  before the sensitive pairing flow — pairing a device is
+                  weightier than sharing an invite. The paired-device
+                  inventory (PairingLogSection) is what keeps the
+                  Emergency adjacency now: its only remediation path IS
+                  Emergency → Hard purge. */}
+              <AddDeviceSection />
+            </div>
+          </section>
+
+          <CommunitySettingsSection />
+
+          {/* Paired-device inventory. Renders null until the member has
+              completed at least one pair from this device (as source or
+              destination), so the section is invisible on a fresh
+              install and grows in over time. Placed directly before
+              Emergency (AddDevice moved into the index above; this
+              section keeps the adjacency alone) because the inventory's
+              only remediation path IS Emergency → Hard purge (Ed25519
+              has no revocation primitive). See `docs/device-pairing.md`
+              §9.x. */}
+          <PairingLogSection />
+
+          {/* Emergency stays on Profile — NOT in Settings, and NEVER
+              inside the index or any disclosure — per the
+              privacy-as-precondition principle. Panic buttons need to
+              stay reachable in a stress moment; burying them behind a
+              Settings tap or a collapsed row would weaken that
+              affordance in exactly the moment it matters most.
+              Standalone top-level card after the index and
+              CommunitySettings so it's the last thing the eye lands on
+              before the dev MemberSwitcher below. */}
+          <EmergencySection />
+
+          {/* MemberSwitcher lives at the very end. It only renders when
+              members.length > 1 — i.e., the dev "switch identity" tool
+              shouldn't displace the production-relevant cards above. In
+              single-identity setups (the production case) this is null
+              and invisible; in multi-identity setups it sits below the
+              last settings cluster where it doesn't interfere with the
+              working area. */}
+          <MemberSwitcher
+            members={members}
+            currentMember={currentMember}
+            onSwitch={setCurrentMember}
+          />
         </div>
-      </section>
-
-      <CommunitySettingsSection />
-
-      {/* Paired-device inventory. Renders null until the member has
-          completed at least one pair from this device (as source or
-          destination), so the section is invisible on a fresh
-          install and grows in over time. Placed directly before
-          Emergency (AddDevice moved into the index above; this
-          section keeps the adjacency alone) because the inventory's
-          only remediation path IS Emergency → Hard purge (Ed25519
-          has no revocation primitive). See `docs/device-pairing.md`
-          §9.x. */}
-      <PairingLogSection />
-
-      {/* Emergency stays on Profile — NOT in Settings, and NEVER
-          inside the index or any disclosure — per the
-          privacy-as-precondition principle. Panic buttons need to
-          stay reachable in a stress moment; burying them behind a
-          Settings tap or a collapsed row would weaken that
-          affordance in exactly the moment it matters most.
-          Standalone top-level card after the index and
-          CommunitySettings so it's the last thing the eye lands on
-          before the dev MemberSwitcher below. */}
-      <EmergencySection />
-
-      {/* MemberSwitcher lives at the very end. It only renders when
-          members.length > 1 — i.e., the dev "switch identity" tool
-          shouldn't displace the production-relevant cards above. In
-          single-identity setups (the production case) this is null
-          and invisible; in multi-identity setups it sits below the
-          last settings cluster where it doesn't interfere with the
-          working area. */}
-      <MemberSwitcher
-        members={members}
-        currentMember={currentMember}
-        onSwitch={setCurrentMember}
-      />
+      </div>
     </div>
   );
 }

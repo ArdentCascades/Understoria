@@ -195,6 +195,15 @@ function hintByLabel(label: string): Element {
   return el;
 }
 
+/** The two Roles-earned render sites (rail + mobile), in DOM order:
+ *  [0] the desktop copy inside the rail `aside` (`hidden lg:block`),
+ *  [1] the mobile copy in the main column (`lg:hidden`). */
+function rolesHeadings(): Element[] {
+  return Array.from(container.querySelectorAll("h2, h3")).filter((el) =>
+    (el.textContent ?? "").includes("Your community roles"),
+  );
+}
+
 describe("ProfilePage — mobile reading order (WCAG 2.4.3)", () => {
   it("orders balance → history → invites (+hint) → roles → editor → emergency", () => {
     mockState.exchanges = [exchange("e1", 1000)];
@@ -206,15 +215,49 @@ describe("ProfilePage — mobile reading order (WCAG 2.4.3)", () => {
     expect(balance).toBeDefined();
     const history = headingByText("Your exchange history");
     const invites = headingByText("Invites you've issued");
-    const roles = headingByText("Your community roles");
+    // Both roles copies render in jsdom (no viewport); the MOBILE
+    // copy is the one whose position the phone stack reads.
+    const mobileRoles = rolesHeadings()[1]!;
     const editor = headingByText("About you");
     const emergency = headingByText("Emergency");
 
     expect(precedes(balance!, history)).toBe(true);
     expect(precedes(history, invites)).toBe(true);
-    expect(precedes(invites, roles)).toBe(true);
-    expect(precedes(roles, editor)).toBe(true);
+    expect(precedes(invites, mobileRoles)).toBe(true);
+    expect(precedes(mobileRoles, editor)).toBe(true);
     expect(precedes(editor, emergency)).toBe(true);
+  });
+
+  it("renders Roles earned at two sites: rail copy hidden below lg, mobile copy hidden at lg+", () => {
+    render();
+    const [railRoles, mobileRoles] = rolesHeadings();
+    expect(railRoles).toBeDefined();
+    expect(mobileRoles).toBeDefined();
+    // Rail copy: inside the sidebar, desktop-only.
+    expect(railRoles!.closest("aside")).not.toBeNull();
+    expect(railRoles!.closest(".hidden.lg\\:block")).not.toBeNull();
+    // Mobile copy: in the main column, mobile-only.
+    expect(mobileRoles!.closest("aside")).toBeNull();
+    expect(mobileRoles!.closest(".lg\\:hidden")).not.toBeNull();
+  });
+
+  it("docks header, balance (+hint), and roles in the rail aside; history in the main column", () => {
+    render();
+    const aside = container.querySelector("aside");
+    expect(aside).not.toBeNull();
+    // Header identity + balance live in the rail...
+    expect(aside!.querySelector("h1")).not.toBeNull();
+    expect(aside!.textContent).toContain("Your balance");
+    expect(
+      aside!.querySelector('[aria-label="Understanding your balance"]'),
+    ).not.toBeNull();
+    // ...the ledger does not.
+    expect(headingByText("Your exchange history").closest("aside")).toBeNull();
+  });
+
+  it("uses no lg:columns-2 CSS-column clusters (superseded by the rail grid)", () => {
+    render();
+    expect(container.querySelector('[class*="columns-2"]')).toBeNull();
   });
 
   it("keeps the balance hint with the balance card, before the history", () => {
@@ -228,9 +271,9 @@ describe("ProfilePage — mobile reading order (WCAG 2.4.3)", () => {
     render();
     const invites = headingByText("Invites you've issued");
     const inviteHint = hintByLabel("Growing the community");
-    const roles = headingByText("Your community roles");
+    const mobileRoles = rolesHeadings()[1]!;
     expect(precedes(invites, inviteHint)).toBe(true);
-    expect(precedes(inviteHint, roles)).toBe(true);
+    expect(precedes(inviteHint, mobileRoles)).toBe(true);
   });
 
   it("keeps Emergency top-level — never inside a <details> disclosure", () => {

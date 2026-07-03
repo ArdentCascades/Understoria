@@ -1555,6 +1555,7 @@
   "profile": {
     "title": "Tu perfil",
     "identity": "Identidad: {{key}}",
+    "sidebarAriaLabel": "Resumen del perfil",
     "addDevice": {
       "title": "Vincular otro dispositivo",
       "subtitle": "Usa la misma identidad en un segundo dispositivo — teléfono, laptop, o ambos.",
