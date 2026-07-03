@@ -94,7 +94,7 @@ function LocationProbe() {
 
 let container: HTMLDivElement;
 let root: Root;
-let scrollSpy: ReturnType<typeof vi.fn>;
+let scrollSpy: ReturnType<typeof vi.fn<typeof Element.prototype.scrollIntoView>>;
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
@@ -103,7 +103,7 @@ beforeEach(() => {
   lastSearch = null;
   // jsdom doesn't implement `scrollIntoView` (same stub pattern as
   // Conversation.test.tsx) — spy on it so the handler is observable.
-  scrollSpy = vi.fn();
+  scrollSpy = vi.fn<typeof Element.prototype.scrollIntoView>();
   Element.prototype.scrollIntoView = scrollSpy;
   container = document.createElement("div");
   document.body.appendChild(container);
