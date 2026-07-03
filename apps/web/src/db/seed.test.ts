@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { db } from "./database";
-import { seedDemoCommunityIfEmpty } from "./seed";
+import { db, getSetting, SETTING_KEYS } from "./database";
+import { seedDemoCommunityIfDev, seedDemoCommunityIfEmpty } from "./seed";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 
 async function reset() {
@@ -62,5 +62,42 @@ describe("seedDemoCommunityIfEmpty", () => {
     // Exactly one existing voucher → one more vouch reaches the trust
     // threshold of two.
     expect(vouchersFor(newcomer!.publicKey, ctx).size).toBe(1);
+  });
+});
+
+// Operator ruling R1: the demo community is DEV-MODE ONLY. Production
+// (isDev: false) must start with a genuinely empty node — no members,
+// no posts, no vouches, no current-member setting — because the first
+// identity is minted by onboarding, never by the seed.
+describe("seedDemoCommunityIfDev", () => {
+  beforeEach(reset);
+
+  it("does NOT seed when isDev is false — production starts empty", async () => {
+    const result = await seedDemoCommunityIfDev(false);
+    expect(result).toBeNull();
+    expect(await db.members.count()).toBe(0);
+    expect(await db.posts.count()).toBe(0);
+    expect(await db.vouches.count()).toBe(0);
+    expect(await db.secretKeys.count()).toBe(0);
+    expect(await getSetting(SETTING_KEYS.currentMember)).toBeUndefined();
+  });
+
+  it("seeds the demo community when isDev is true", async () => {
+    const result = await seedDemoCommunityIfDev(true);
+    expect(result).not.toBeNull();
+    // Founder + 4 fictional members.
+    expect(await db.members.count()).toBe(5);
+    expect(await getSetting(SETTING_KEYS.currentMember)).toBe(
+      result!.publicKey,
+    );
+  });
+
+  it("defaults the flag from import.meta.env.DEV (true under vitest)", async () => {
+    // Vitest runs with DEV=true, so the zero-arg call — the exact shape
+    // AppContext uses — must seed. If the default-param wiring ever
+    // breaks, dev builds silently lose their demo community.
+    const result = await seedDemoCommunityIfDev();
+    expect(result).not.toBeNull();
+    expect(await db.members.count()).toBe(5);
   });
 });

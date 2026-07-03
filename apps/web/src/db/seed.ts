@@ -85,10 +85,29 @@ export async function createMember(
 }
 
 /**
+ * DEV-MODE-ONLY entry point for the demo seed. The contract (operator
+ * ruling R1): dev builds get a demo community so there's something to
+ * interact with; real deployments start with an EMPTY node — identities
+ * are minted by onboarding (Welcome's profile-setup step, InviteAccept,
+ * or PairDevice), never by the seed.
+ *
+ * `isDev` defaults to Vite's build-time flag; tests inject the flag
+ * explicitly to exercise both sides of the gate without stubbing the
+ * build environment.
+ */
+export async function seedDemoCommunityIfDev(
+  isDev: boolean = import.meta.env.DEV,
+): Promise<Member | null> {
+  if (!isDev) return null;
+  return seedDemoCommunityIfEmpty();
+}
+
+/**
  * Seeds the database with a small demo community so the board isn't empty
- * on first launch. Real pilots will start with an empty node and grow through
- * invites (see Agent 2). Safe to call multiple times — it is a no-op once
- * the current member is set.
+ * on first launch in dev. Production never calls this — real deployments
+ * start with an empty node and grow through onboarding + invites (see
+ * `seedDemoCommunityIfDev` above for the gate). Safe to call multiple
+ * times — it is a no-op once the current member is set.
  */
 export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   const nodeId = await ensureNodeId();
