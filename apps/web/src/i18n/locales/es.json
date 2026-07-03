@@ -2071,7 +2071,10 @@
     },
     "profileSetup": {
       "title": "Un poco sobre ti",
-      "intro": "Todo es opcional — ayudan a que otras personas te encuentren cuando necesitan a alguien cercano o con una habilidad concreta. Puedes cambiar cualquier cosa más adelante en Perfil.",
+      "intro": "Elige el nombre que verán tus vecinas. Todo lo demás es opcional — ayuda a que otras personas te encuentren cuando necesitan a alguien cercano o con una habilidad concreta. Puedes cambiar cualquier cosa más adelante en Perfil.",
+      "introExisting": "Qué bueno verte, {{name}} — ese es el nombre que elegiste, y puedes ajustarlo aquí. Todo lo demás es opcional y ayuda a que tus vecinas te encuentren. Puedes cambiar cualquier cosa más adelante en Perfil.",
+      "nameLabel": "Tu nombre visible (los seudónimos son bienvenidos)",
+      "nameRequired": "Elige un nombre visible o seudónimo para continuar.",
       "hint": "Nada de esto es privado en la red — comparte solo lo que compartirías con una persona vecina."
     },
     "inviteOnly": {

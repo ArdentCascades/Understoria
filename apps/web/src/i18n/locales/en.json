@@ -2071,7 +2071,10 @@
     },
     "profileSetup": {
       "title": "A little about you",
-      "intro": "All optional — these help others find you when they need someone nearby or with a particular skill. You can change any of it later in Profile.",
+      "intro": "Pick the name neighbors will see. Everything else is optional — it helps others find you when they need someone nearby or with a particular skill. You can change any of it later in Profile.",
+      "introExisting": "Good to see you, {{name}} — that's the name you chose, and you can adjust it here. Everything else is optional and helps neighbors find you. You can change any of it later in Profile.",
+      "nameLabel": "Your display name (pseudonyms welcome)",
+      "nameRequired": "Pick a display name or pseudonym to continue.",
       "hint": "Nothing here is private to the network — only share what you'd share with a neighbor."
     },
     "inviteOnly": {
