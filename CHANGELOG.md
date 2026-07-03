@@ -9,6 +9,18 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **Dev-tooling advisory cleanup (lockfile-only).** `npm audit fix`
+  plus an in-range `tsx` update bumped `form-data` 4.0.5 → 4.0.6,
+  `ws` 8.20.1 → 8.21.0, `js-yaml` 4.1.1 → 4.3.0, `@babel/core` (and
+  `@babel/*` sub-packages) 7.29.0 → 7.29.7, and `tsx` 4.21.0 → 4.23.0
+  (moving its `esbuild` to 0.28.1), clearing 5 of 10 open `npm audit`
+  advisories — including both standalone highs. No `package.json`
+  manifest changed and no production code is affected; all advisories
+  were dev/build tooling only. The remaining 5 sit on the vite/vitest
+  chain and clear only with the deferred vite 8 / vitest 4 migration
+  (see `docs/maintenance.md`).
+
 ## [0.3.0] — 2026-07-03
 
 Third development release. Community life beyond one-to-one
