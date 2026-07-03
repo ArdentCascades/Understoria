@@ -1224,7 +1224,19 @@
   "invite": {
     "reading": "Reading invite…",
     "cantUse": "This invite can't be used.",
-    "continueToBoard": "Continue to the board",
+    "continueWithoutJoining": "Continue without joining",
+    "notJoinedNote": "You can look around, but you haven't joined {{name}}'s community yet. Anything you post stays on this device until you join — and you can join any time with a fresh invite link.",
+    "notJoinedNoteGeneric": "You can look around, but you haven't joined a community yet. Anything you post stays on this device until you join — and you can join any time with a fresh invite link.",
+    "noFragment": {
+      "title": "Open your invite",
+      "body": "This page opened without its invite code. Messaging apps sometimes drop the code when you tap a link preview — pasting the original message below usually brings it back."
+    },
+    "paste": {
+      "label": "If you have the invite link, paste the whole thing here.",
+      "placeholder": "https://your-community.example/invite#…",
+      "submit": "Use this link",
+      "invalid": "That doesn't look like an invite link. Paste the full link — or just the code after the # sign."
+    },
     "youInvited": "You've been invited",
     "wantsYou": "{{name}} wants you in their mutual aid network.",
     "inviterKey": "Inviter key",
@@ -1232,19 +1244,38 @@
     "expiresOn": "This invite is valid until {{date}}.",
     "fingerprintReminder": "Before accepting: confirm that the inviter-key fingerprint above matches what {{name}} shared with you in person or over a secure channel. A link that reached you via untrusted email is worth a double-check.",
     "welcome": "Welcome in. Redirecting to the board…",
+    "welcomeStay": "Welcome in. One question below before the board.",
     "displayNameLabel": "Your display name (pseudonyms welcome)",
     "displayNameRequired": "Choose a display name or pseudonym to continue.",
-    "notNow": "Not now",
+    "joiningAs": "Joining as {{name}}",
+    "attachNote": "This device already holds your identity, so the invite will be added to it — your name, balance, and history stay yours. You can update your display name below.",
+    "someoneElse": "I'm someone else — create a new identity",
+    "joinAsExisting": "Actually, I'm {{name}} — join with my existing identity",
+    "mintingNote": "You're creating a separate, brand-new identity on this shared device.",
     "submit": "Accept invite and join",
     "submitting": "Joining…",
     "errors": {
-      "malformed": "This invite link is missing or damaged. Ask the inviter to send a fresh one.",
-      "expired": "This invite has expired. Ask the inviter to issue a new one.",
-      "bad_signature": "This invite's signature didn't verify. Do not accept — it may have been tampered with.",
-      "already_redeemed": "Someone has already used this invite. Invites are single-use.",
-      "revoked": "The inviter revoked this invite.",
+      "malformed": "This invite link is damaged or incomplete. That's usually the messaging app's doing, not yours — some apps mangle links when you tap them. Try opening the link in your regular browser, or paste the original message below. If that doesn't work, ask the person who invited you for a fresh link.",
+      "expired": "This invite has expired. Ask the person who invited you for a fresh link — you can paste it below.",
+      "bad_signature": "This invite's signature didn't verify. A messaging app may have altered the link in transit — try pasting the original message below. If it still fails, do not accept: it may have been tampered with.",
+      "already_redeemed": "Someone has already used this invite. Invites are single-use — ask the person who invited you for a fresh link, and paste it below.",
+      "revoked": "The person who invited you revoked this invite. If that's a surprise, ask them for a fresh link — you can paste it below.",
       "self_redeem": "You can't redeem an invite you issued yourself. Share the link with someone else."
     }
+  },
+  "notJoinedCard": {
+    "label": "Not joined yet",
+    "title": "You haven't joined a community yet.",
+    "body": "Everything you do here stays on this device. Have an invite link?",
+    "cta": "Open an invite link",
+    "dismiss": "Dismiss"
+  },
+  "nodeSuggest": {
+    "label": "Connect to this community's node",
+    "title": "Connect to this community's node?",
+    "body": "You got this app from {{origin}}, which is running a community node. Connecting lets what you share — posts, exchanges, vouches, including the public keys of people you exchange with — sync to that server so the rest of the community can see it. Nothing is sent until you confirm. Only confirm if this is the community you meant to join.",
+    "confirm": "Yes, connect to {{origin}}",
+    "decline": "Not now"
   },
   "format": {
     "justNow": "just now",
@@ -1734,6 +1765,7 @@
       "poisoned": "{{count}} flagged for review",
       "retryNow": "Retry now",
       "retrying": "Retrying…",
+      "inviteLink": "Have an invite link? Open it here.",
       "consent": {
         "title": "Send your exchange records to this server?",
         "body": "Turning on mirroring sends every exchange you take part in to this server — including the other person's public key, the signature, category, hours, and time. A server you don't control can use this to map who-helps-whom across your community. Only enable this for a node your community runs and trusts.",

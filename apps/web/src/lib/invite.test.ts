@@ -25,6 +25,7 @@ import {
   createInvite,
   decodeAndVerifyInvite,
   encodeInviteToken,
+  extractInviteToken,
 } from "./invite";
 
 describe("createInvite + decodeAndVerifyInvite", () => {
@@ -99,5 +100,83 @@ describe("createInvite + decodeAndVerifyInvite", () => {
     const r = decodeAndVerifyInvite(encodeInviteToken(spoofed));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("bad_signature");
+  });
+});
+
+// The paste-the-link recovery extractor (docs/invite-redemption.md
+// §5.1.1). The incident vector: messenger in-app browsers strip or
+// mangle the #fragment of a tapped invite link; pasting the original
+// message restores it. The extractor must therefore cope with full
+// URLs, whole messages, bare tokens, and whitespace — and reject
+// pastes with nothing token-shaped in them.
+describe("extractInviteToken", () => {
+  // A realistic token: what encodeInviteToken actually produces.
+  function realToken(): string {
+    const kp = generateKeyPair();
+    return encodeInviteToken(
+      createInvite({
+        inviterKey: kp.publicKey,
+        inviterSecretKey: kp.secretKey,
+        inviterName: "Rosa",
+        nodeId: "node_x",
+      }),
+    );
+  }
+
+  it("extracts the fragment from a full invite URL", () => {
+    const token = realToken();
+    expect(
+      extractInviteToken(`https://aid.example.org/invite#${token}`),
+    ).toBe(token);
+  });
+
+  it("finds the link inside a whole pasted message", () => {
+    const token = realToken();
+    const message = `hey! join us here: https://aid.example.org/invite#${token} — see you Saturday`;
+    expect(extractInviteToken(message)).toBe(token);
+  });
+
+  it("accepts a bare token, with or without the leading #", () => {
+    const token = realToken();
+    expect(extractInviteToken(token)).toBe(token);
+    expect(extractInviteToken(`#${token}`)).toBe(token);
+  });
+
+  it("tolerates surrounding whitespace and a line break after the #", () => {
+    const token = realToken();
+    expect(extractInviteToken(`  ${token}\n`)).toBe(token);
+    expect(
+      extractInviteToken(`https://aid.example.org/invite#\n${token}`),
+    ).toBe(token);
+  });
+
+  it("round-trips: an extracted token still decodes and verifies", () => {
+    const kp = generateKeyPair();
+    const invite = createInvite({
+      inviterKey: kp.publicKey,
+      inviterSecretKey: kp.secretKey,
+      inviterName: "Rosa",
+      nodeId: "node_x",
+    });
+    const url = `https://aid.example.org/invite#${encodeInviteToken(invite)}`;
+    const token = extractInviteToken(`Invite: ${url}`);
+    expect(token).not.toBeNull();
+    const result = decodeAndVerifyInvite(token!);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.invite.token).toBe(invite.token);
+  });
+
+  it("returns null for empty, whitespace-only, and token-free pastes", () => {
+    expect(extractInviteToken("")).toBeNull();
+    expect(extractInviteToken("   \n ")).toBeNull();
+    expect(extractInviteToken("see you saturday!")).toBeNull();
+    // A URL whose fragment is too short to be an invite blob.
+    expect(
+      extractInviteToken("https://example.org/docs#s3"),
+    ).toBeNull();
+    // A URL with no fragment at all — the mangled-link case itself.
+    expect(
+      extractInviteToken("https://aid.example.org/invite"),
+    ).toBeNull();
   });
 });

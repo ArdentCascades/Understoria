@@ -18,7 +18,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { db, type InviteRow } from "./database";
+import {
+  db,
+  getSetting,
+  SETTING_KEYS,
+  type InviteRow,
+} from "./database";
 import { createMember } from "./seed";
 import { generateKeyPair } from "@/lib/crypto";
 import {
@@ -121,11 +126,53 @@ export interface RedeemSuccess {
   member: Member;
   inviterKey: string;
   inviterName: string;
+  /** How the redemption was recorded — attached to an existing
+   *  identity, or minted as a fresh one. See decideRedeemMode. */
+  mode: RedeemMode;
 }
 
 export type RedeemResult =
   | { ok: true; value: RedeemSuccess }
   | { ok: false; error: RedeemError };
+
+export type RedeemMode = "attach" | "mint";
+
+export interface RedeemOptions {
+  /** Shared-device escape hatch (`docs/invite-redemption.md` §5.2):
+   *  the accept screen's "I'm someone else — create a new identity"
+   *  action. Forces a fresh keypair even when this device already
+   *  holds an identity. */
+  forceNewIdentity?: boolean;
+}
+
+/**
+ * Attach or mint? (`docs/invite-redemption.md` §5.2.)
+ *
+ * The invite's semantics are "the inviter admits the token-holder" —
+ * the token-holder is a PERSON, not a keypair. When the device already
+ * holds the current member's secret key, redemption ATTACHES the
+ * invite to that identity: no new keypair, no new member row, no
+ * second seed-credit balance. This is what rescues the incident
+ * sequence (failed redemption → orphan self-onboarded identity →
+ * fresh link → redeem) from producing a ghost second identity, and it
+ * closes the accumulate-identities-for-seed-credits path.
+ *
+ * Mint stays the default on a fresh device, and stays one tap away on
+ * shared devices via `forceNewIdentity`. A current member whose secret
+ * key is NOT on this device (e.g. a view-only oddity) cannot attach —
+ * in Phase 1 the redemption receipt must be signed by the attached
+ * key, and semantically the device doesn't hold that person.
+ */
+export function decideRedeemMode(input: {
+  hasCurrentIdentity: boolean;
+  holdsSecretKey: boolean;
+  forceNewIdentity?: boolean;
+}): RedeemMode {
+  if (input.forceNewIdentity) return "mint";
+  return input.hasCurrentIdentity && input.holdsSecretKey
+    ? "attach"
+    : "mint";
+}
 
 /**
  * Redeem a signed invite token on this node.
@@ -137,15 +184,23 @@ export type RedeemResult =
  * the `vouches` table by a different trusted member, is what promotes a
  * member from `pending_trust` to `trusted` (see lib/vouch.ts).
  *
+ * Identity: on a device that already holds the current member's secret
+ * key the invite ATTACHES to that identity (see decideRedeemMode);
+ * only fresh devices — or the explicit shared-device escape hatch —
+ * mint a new keypair. `docs/invite-redemption.md` §5.2.
+ *
  * Redemption consumes the invite on *this* node only. In a federated
  * deployment, redemption status is gossiped between peers so a
  * compromised token shared twice fails the second time on any synced
- * node. That work lives with Agent 3.
+ * node. That propagation is Phase 1 of `docs/invite-redemption.md`
+ * (the `RedemptionReceipt`, §6–§7); Phase 0 deliberately enqueues
+ * nothing — zero new bytes cross any wire.
  */
 export async function redeemInvite(
   encoded: string,
   displayName: string,
   nodeId: string,
+  opts: RedeemOptions = {},
 ): Promise<RedeemResult> {
   const parsed = decodeAndVerifyInvite(encoded);
   if (!parsed.ok) {
@@ -164,23 +219,53 @@ export async function redeemInvite(
   }
 
   // The inviter must not redeem their own invite — this protects against
-  // a compromised device being used to inflate a trust graph.
+  // a compromised device being used to inflate a trust graph. It is also
+  // the one ATTACH we must never do (§5.2): the check runs before the
+  // mode decision, so an inviter's own device can never attach either.
   const ownSecret = await db.secretKeys.get(invite.inviterKey);
   if (ownSecret) {
     return { ok: false, error: "self_redeem" };
   }
 
-  const kp = generateKeyPair();
-  const member = await createMember(
-    { publicKey: kp.publicKey, displayName },
-    nodeId,
-  );
-  // createMember skips secret-key generation when a publicKey is supplied,
-  // so we persist it explicitly.
-  await db.secretKeys.put({
-    publicKey: kp.publicKey,
-    secretKey: kp.secretKey,
+  const currentKey = await getSetting(SETTING_KEYS.currentMember);
+  const currentMemberRow = currentKey
+    ? await db.members.get(currentKey)
+    : undefined;
+  const currentSecret =
+    currentKey && currentMemberRow
+      ? await db.secretKeys.get(currentKey)
+      : undefined;
+  const mode = decideRedeemMode({
+    hasCurrentIdentity: !!currentMemberRow,
+    holdsSecretKey: !!currentSecret,
+    forceNewIdentity: opts.forceNewIdentity,
   });
+
+  let member: Member;
+  if (mode === "attach") {
+    // Attach: no keypair minting, no member creation — and critically
+    // no second starting balance (createMember would seed one). The
+    // invite screen's name field is an EDIT of the existing display
+    // name; an unchanged (or blank) name is a no-op.
+    member = currentMemberRow as Member;
+    const name = displayName.trim();
+    if (name && name !== member.displayName) {
+      await db.members.update(member.publicKey, { displayName: name });
+      member = { ...member, displayName: name };
+    }
+  } else {
+    const kp = generateKeyPair();
+    member = await createMember(
+      { publicKey: kp.publicKey, displayName },
+      nodeId,
+    );
+    // createMember skips secret-key generation when a publicKey is
+    // supplied, so we persist it explicitly.
+    await db.secretKeys.put({
+      publicKey: kp.publicKey,
+      secretKey: kp.secretKey,
+    });
+  }
 
   await db.invites.put({
     token: invite.token,
@@ -189,7 +274,7 @@ export async function redeemInvite(
     createdAt: invite.createdAt,
     expiresAt: invite.expiresAt,
     status: "redeemed",
-    redeemedBy: kp.publicKey,
+    redeemedBy: member.publicKey,
     redeemedAt: Date.now(),
     encoded,
   });
@@ -200,6 +285,7 @@ export async function redeemInvite(
       member,
       inviterKey: invite.inviterKey,
       inviterName: invite.inviterName,
+      mode,
     },
   };
 }
