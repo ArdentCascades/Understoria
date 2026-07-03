@@ -1,6 +1,6 @@
 {
   "name": "@understoria/server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "description": "Understoria community node — Fastify + SQLite. Receives signed exchanges, verifies them with @understoria/shared, stores them for federation.",

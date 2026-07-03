@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    image: understoria/web:${UNDERSTORIA_VERSION:-0.2.0}
+    image: understoria/web:${UNDERSTORIA_VERSION:-0.3.0}
     container_name: understoria-web-build
     restart: "no"
     volumes:
@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: understoria/server:${UNDERSTORIA_VERSION:-0.2.0}
+    image: understoria/server:${UNDERSTORIA_VERSION:-0.3.0}
     container_name: understoria
     restart: unless-stopped
     # No host port binding — Caddy reaches the server on the internal

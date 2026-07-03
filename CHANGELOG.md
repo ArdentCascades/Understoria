@@ -9,6 +9,8 @@ include breaking changes.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-03
+
 ### Fixed
 - **Community-settings auto-confirm control shows its real strings
   again.** Both locale files declared the top-level `"community"`

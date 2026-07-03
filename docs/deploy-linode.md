@@ -157,7 +157,7 @@ cd understoria
 
 # Pin to a tagged release for production (the `main` branch may have
 # unreleased work). See https://github.com/ArdentCascades/Understoria/releases
-# git checkout v0.2.0
+# git checkout v0.3.0
 ```
 
 ## 5. Run the interactive setup
