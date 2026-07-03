@@ -10,6 +10,35 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Invite redemption propagation (design note,
+  [`docs/invite-redemption.md`](./docs/invite-redemption.md)).**
+  Docs-only response to a live production incident: redeeming an
+  invite is purely local, so the inviter's invite row stays "open"
+  forever, the new member appears on no one else's roster, and the
+  implicit first vouch never reaches any other device's trust
+  computation — and a redemption error silently funnels into the
+  welcome tour, minting an orphan identity that looks like success.
+  Phase 0 (client-only, no wire change): honest error exits with a
+  paste-the-link recovery input, a "continue without joining" state
+  with a quiet re-join affordance, attach-don't-mint redemption on
+  already-identified devices, and an origin-derived
+  `communityNodeUrl` suggestion behind the existing informed-consent
+  card. Phase 1 (the wire change): a single new federated record —
+  a `RedemptionReceipt` signed by the new member, embedding the
+  inviter's original `SignedInvite` — pushed via the outbox to
+  `POST /redemptions` and pulled by every member device, flipping
+  the inviter's row open→redeemed, materializing the roster row,
+  and feeding the existing `trustStatusWithInvites` machinery; plus
+  the companion `pullFederatedVouches` so manual vouches stop
+  dead-ending at the server. Open invites never cross any wire
+  (registration-at-creation is analyzed and rejected), receipts do
+  not peer-replicate, and the unwired `POST/GET /invites` routes —
+  whose GET would serve live redeemable tokens if ever wired — are
+  removed in the same phase. Three threat-model §7 entries ship
+  with the note *(design only; not yet shipped)*; three operator
+  rulings surfaced with recommended defaults (§15). Implementation
+  not started; PR ladder in §14 with Phase 0 shippable
+  independently.
 - **Event ↔ need bridge (design note,
   [`docs/event-need-bridge.md`](./docs/event-need-bridge.md)).**
   Docs-only predicate for connecting board Needs with community
