@@ -166,13 +166,6 @@
     "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes.",
     "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron."
   },
-  "community": {
-    "autoConfirmHours": {
-      "label": "Confirmar automáticamente tras",
-      "help": "Cuando una parte deja de responder, la llave del sistema del nodo comunitario cierra el intercambio para que los créditos fluyan. Pon 0 para desactivar la confirmación automática por completo. Requiere que la persona operadora tenga una llave del sistema configurada; sin ella el barrido no hace nada.",
-      "unit": "horas (0 desactiva)"
-    }
-  },
   "a11y": {
     "skipToMain": "Saltar al contenido principal"
   },
@@ -2014,6 +2007,11 @@
     }
   },
   "community": {
+    "autoConfirmHours": {
+      "label": "Confirmar automáticamente tras",
+      "help": "Cuando una parte deja de responder, la llave del sistema del nodo comunitario cierra el intercambio para que los créditos fluyan. Pon 0 para desactivar la confirmación automática por completo. Requiere que la persona operadora tenga una llave del sistema configurada; sin ella el barrido no hace nada.",
+      "unit": "horas (0 desactiva)"
+    },
     "customMilestones": {
       "title": "Hitos personalizados",
       "intro": "Estos se suman a los hitos básicos de horas, intercambios y miembros con umbrales que tengan sentido para tu comunidad. Aparecen en el panel junto a los hitos básicos.",

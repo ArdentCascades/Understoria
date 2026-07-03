@@ -65,8 +65,8 @@ this step, the build prereqs from §1 didn't install — go back.
 npm test
 ```
 
-Expect **148 web + 14 server = 162 tests passing** in about 10
-seconds. If anything fails, stop and ask — that's a real signal.
+Expect **the full suite (web + server, 1,800+ tests) to pass** in a
+minute or two. If anything fails, stop and ask — that's a real signal.
 
 ## 5. Start the PWA
 
