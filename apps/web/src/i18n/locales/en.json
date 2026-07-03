@@ -166,13 +166,6 @@
     "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you.",
     "autoConfirmed": "Auto-confirmed after {{hours}}h. Credit flowed."
   },
-  "community": {
-    "autoConfirmHours": {
-      "label": "Auto-confirm after",
-      "help": "When one party stops responding, the community node's system key closes out the exchange so credit can flow. Set to 0 to disable auto-confirm entirely. Requires the operator to have a system key configured; without one the sweep is a no-op.",
-      "unit": "hours (0 disables)"
-    }
-  },
   "a11y": {
     "skipToMain": "Skip to main content"
   },
@@ -2014,6 +2007,11 @@
     }
   },
   "community": {
+    "autoConfirmHours": {
+      "label": "Auto-confirm after",
+      "help": "When one party stops responding, the community node's system key closes out the exchange so credit can flow. Set to 0 to disable auto-confirm entirely. Requires the operator to have a system key configured; without one the sweep is a no-op.",
+      "unit": "hours (0 disables)"
+    },
     "customMilestones": {
       "title": "Custom milestones",
       "intro": "These add to the baseline hours, exchanges, and members milestones with thresholds meaningful to your community. They appear on the Dashboard alongside the baselines.",

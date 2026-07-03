@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Community-settings auto-confirm control shows its real strings
+  again.** Both locale files declared the top-level `"community"`
+  key twice; JSON parsing is last-wins, so the first block — the one
+  carrying `community.autoConfirmHours.{label,help,unit}` — was
+  silently discarded and the auto-confirm hours control in
+  Profile → Community settings rendered raw key-path fallbacks.
+  The two blocks are now merged into one per file (en + es, no keys
+  dropped — every key in both blocks is referenced), and a new
+  `duplicateKeys.test.ts` scans the raw locale JSON for duplicate
+  keys at any nesting depth so `JSON.parse`'s silent shadowing can't
+  eat translations again. Also refreshed `docs/quickstart.md`'s
+  stale "162 tests passing" claim.
+
 ### Changed
 - **Onboarding overhaul: production first-run is now an EMPTY node.**
   The demo community (the "You" founder, Rosa/Marcus/Imani/Theo,
