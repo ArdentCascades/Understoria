@@ -9,6 +9,34 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Invite redemption Phase 0: honest error exits, paste recovery,
+  attach-don't-mint, origin-derived node suggestion**
+  (`docs/invite-redemption.md` §5, client-only — zero new wire
+  bytes). A failed redemption is never silently converted into
+  looks-like-success self-onboarding again: `/invite` with a missing
+  fragment (the incident vector — messenger in-app browsers strip
+  `#fragments` from tapped link previews) renders a paste-the-link
+  recovery input instead of an immediate `malformed` error, every
+  error screen carries the same input (`extractInviteToken` accepts
+  a full URL, a whole pasted message, or a bare token), per-error
+  guidance blames the transport rather than the member, and the
+  exit is renamed "Continue without joining" with plain not-joined
+  copy. On a device that already holds the current member's secret
+  key, `redeemInvite` now ATTACHES the invite to the existing
+  identity (display-name edit offered; no new keypair, no member
+  row, no second seed-credit balance) instead of minting a ghost
+  second identity — the shared-device "I'm someone else" escape
+  hatch keeps the mint path one tap away, and the self-redeem guard
+  still runs first. A quiet, dismissible (per-identity) Board card
+  offers `/invite` to members who onboarded without joining, and
+  `/invite` is now reachable from Settings. When the PWA was served
+  by a community node and no node is configured, the derived
+  `${origin}/api` is health-probed and offered behind an explicit
+  informed-consent card (invite-accept success path + Board;
+  localhost/dev and already-configured devices excluded; decline is
+  permanent; never silent — operator ruling §15.2).
+
 ### Added
 - **Invite redemption propagation (design note,
   [`docs/invite-redemption.md`](./docs/invite-redemption.md)).**

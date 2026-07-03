@@ -10,6 +10,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { ReactNode } from "react";
+import { useNotJoinedNudge } from "@/components/useNotJoinedNudge";
+import { useNodeOriginSuggestNudge } from "@/components/useNodeOriginSuggestNudge";
 import { useFirstActionNudge } from "@/components/useFirstActionNudge";
 import { useProfileNudge } from "@/components/useProfileNudge";
 import { useKeepAccessNudge } from "@/components/useKeepAccessNudge";
@@ -45,15 +47,27 @@ import { useInstallCardNudge } from "@/components/useInstallCardNudge";
 // flash this orchestrator exists to prevent. The fallback keeps its
 // own eligibility/dismiss logic; only turn-taking is decided here.
 export function BoardNudges({ fallback }: { fallback?: ReactNode } = {}) {
-  // Rules of Hooks: all five hooks are called unconditionally, in a
+  // Rules of Hooks: all seven hooks are called unconditionally, in a
   // fixed order, every render. Priority is the array order (index 0 =
   // highest). Do NOT make any of these calls conditional.
+  //
+  // The two invite-redemption prompts (`docs/invite-redemption.md`
+  // §5.1.4 / §5.3) outrank the rest: not-joined names the one state
+  // that makes every other nudge moot (a member on an island can post,
+  // but nothing reaches anyone), and the node suggestion is the consent
+  // moment that lets an invited member's device sync at all. They are
+  // near-mutually exclusive — not-joined requires no configured node
+  // AND no redeemed invite; the suggestion requires only the former —
+  // so a member who redeemed but skipped the invite-screen consent card
+  // sees the suggestion, while an orphan sees not-joined first.
   const statuses = [
-    useFirstActionNudge(), // 1 highest
-    useProfileNudge(), // 2
-    useKeepAccessNudge(), // 3
-    useVouchDiscoveryNudge(), // 4
-    useInstallCardNudge(), // 5 lowest
+    useNotJoinedNudge(), // 1 highest
+    useNodeOriginSuggestNudge(), // 2
+    useFirstActionNudge(), // 3
+    useProfileNudge(), // 4
+    useKeepAccessNudge(), // 5
+    useVouchDiscoveryNudge(), // 6
+    useInstallCardNudge(), // 7 lowest
   ];
 
   for (const s of statuses) {

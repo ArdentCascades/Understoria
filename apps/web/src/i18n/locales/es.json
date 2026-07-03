@@ -1224,7 +1224,19 @@
   "invite": {
     "reading": "Leyendo invitación…",
     "cantUse": "Esta invitación no se puede usar.",
-    "continueToBoard": "Ir al tablero",
+    "continueWithoutJoining": "Continuar sin unirme",
+    "notJoinedNote": "Puedes mirar alrededor, pero todavía no te has unido a la comunidad de {{name}}. Lo que publiques se queda en este dispositivo hasta que te unas — y puedes unirte en cualquier momento con un enlace de invitación nuevo.",
+    "notJoinedNoteGeneric": "Puedes mirar alrededor, pero todavía no te has unido a ninguna comunidad. Lo que publiques se queda en este dispositivo hasta que te unas — y puedes unirte en cualquier momento con un enlace de invitación nuevo.",
+    "noFragment": {
+      "title": "Abre tu invitación",
+      "body": "Esta página se abrió sin su código de invitación. Las aplicaciones de mensajería a veces pierden el código cuando tocas la vista previa de un enlace — pegar el mensaje original abajo suele recuperarlo."
+    },
+    "paste": {
+      "label": "Si tienes el enlace de invitación, pégalo completo aquí.",
+      "placeholder": "https://tu-comunidad.ejemplo/invite#…",
+      "submit": "Usar este enlace",
+      "invalid": "Eso no parece un enlace de invitación. Pega el enlace completo — o solo el código después del signo #."
+    },
     "youInvited": "Has sido invitada",
     "wantsYou": "{{name}} te quiere en su red de apoyo mutuo.",
     "inviterKey": "Clave de quien invita",
@@ -1232,19 +1244,38 @@
     "expiresOn": "Esta invitación es válida hasta el {{date}}.",
     "fingerprintReminder": "Antes de aceptar: confirma que la huella de la clave de quien invita coincide con la que {{name}} te compartió en persona o por un canal seguro. Un enlace que llegó por correo no confiable merece una doble verificación.",
     "welcome": "Bienvenida. Redirigiendo al tablero…",
+    "welcomeStay": "Bienvenida. Una pregunta abajo antes del tablero.",
     "displayNameLabel": "Tu nombre visible (los seudónimos son bienvenidos)",
     "displayNameRequired": "Elige un nombre visible o seudónimo para continuar.",
-    "notNow": "Ahora no",
+    "joiningAs": "Te unes como {{name}}",
+    "attachNote": "Este dispositivo ya guarda tu identidad, así que la invitación se añadirá a ella — tu nombre, tu saldo y tu historial siguen siendo tuyos. Puedes actualizar tu nombre visible abajo.",
+    "someoneElse": "Soy otra persona — crear una identidad nueva",
+    "joinAsExisting": "En realidad soy {{name}} — unirme con mi identidad existente",
+    "mintingNote": "Estás creando una identidad nueva y separada en este dispositivo compartido.",
     "submit": "Aceptar invitación y unirme",
     "submitting": "Uniéndome…",
     "errors": {
-      "malformed": "Este enlace de invitación falta o está dañado. Pídele a quien te invitó que envíe uno nuevo.",
-      "expired": "Esta invitación ha caducado. Pídele a quien te invitó que emita una nueva.",
-      "bad_signature": "La firma de esta invitación no se verificó. No la aceptes — puede haber sido manipulada.",
-      "already_redeemed": "Alguien ya usó esta invitación. Las invitaciones son de un solo uso.",
-      "revoked": "Quien te invitó revocó esta invitación.",
+      "malformed": "Este enlace de invitación está dañado o incompleto. Suele ser culpa de la aplicación de mensajería, no tuya — algunas alteran los enlaces al tocarlos. Prueba a abrir el enlace en tu navegador habitual, o pega el mensaje original abajo. Si eso no funciona, pídele un enlace nuevo a quien te invitó.",
+      "expired": "Esta invitación ha caducado. Pídele un enlace nuevo a quien te invitó — puedes pegarlo abajo.",
+      "bad_signature": "La firma de esta invitación no se verificó. Puede que una aplicación de mensajería alterara el enlace por el camino — prueba a pegar el mensaje original abajo. Si sigue fallando, no la aceptes: puede haber sido manipulada.",
+      "already_redeemed": "Alguien ya usó esta invitación. Las invitaciones son de un solo uso — pídele un enlace nuevo a quien te invitó y pégalo abajo.",
+      "revoked": "Quien te invitó revocó esta invitación. Si te sorprende, pídele un enlace nuevo — puedes pegarlo abajo.",
       "self_redeem": "No puedes canjear una invitación que tú misma emitiste. Comparte el enlace con alguien más."
     }
+  },
+  "notJoinedCard": {
+    "label": "Aún sin unirte",
+    "title": "Todavía no te has unido a ninguna comunidad.",
+    "body": "Todo lo que hagas aquí se queda en este dispositivo. ¿Tienes un enlace de invitación?",
+    "cta": "Abrir un enlace de invitación",
+    "dismiss": "Descartar"
+  },
+  "nodeSuggest": {
+    "label": "Conectar con el nodo de esta comunidad",
+    "title": "¿Conectar con el nodo de esta comunidad?",
+    "body": "Obtuviste esta aplicación de {{origin}}, que tiene un nodo comunitario en marcha. Conectarte permite que lo que compartes — publicaciones, intercambios, avales, incluidas las claves públicas de las personas con quienes intercambias — se sincronice con ese servidor para que el resto de la comunidad lo vea. No se envía nada hasta que confirmes. Confirma solo si esta es la comunidad a la que querías unirte.",
+    "confirm": "Sí, conectar con {{origin}}",
+    "decline": "Ahora no"
   },
   "format": {
     "justNow": "ahora mismo",
@@ -1734,6 +1765,7 @@
       "poisoned": "{{count}} señalados para revisión",
       "retryNow": "Reintentar ahora",
       "retrying": "Reintentando…",
+      "inviteLink": "¿Tienes un enlace de invitación? Ábrelo aquí.",
       "consent": {
         "title": "¿Enviar tus registros de intercambio a este servidor?",
         "body": "Activar el reflejo envía cada intercambio en el que participas a este servidor, incluyendo la clave pública de la otra persona, la firma, la categoría, las horas y la hora. Un servidor que no controlas puede usar esto para trazar quién-ayuda-a-quién en toda tu comunidad. Activa esto solo para un nodo que tu comunidad gestione y en el que confíe.",

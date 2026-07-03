@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatAbsoluteDateTime } from "@/lib/format";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -144,6 +145,20 @@ export function NodeSection() {
       <Telemetry lastSuccess={lastSuccess?.value} lastError={lastError?.value} />
 
       <OutboxControls />
+
+      {/* The /invite paste-recovery entry point stays reachable from
+          Settings (docs/invite-redemption.md §5.1.4) — a member who
+          dismissed the Board's not-joined card, or whose invite link
+          arrived while they were already poking around, can always
+          get back to it without a tappable link. */}
+      <p className="mt-3 text-xs text-moss-600 dark:text-moss-300">
+        <Link
+          to="/invite"
+          className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("profile.node.inviteLink")}
+        </Link>
+      </p>
 
       <ConfirmDialog
         open={pendingSave !== null}

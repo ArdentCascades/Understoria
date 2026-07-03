@@ -857,6 +857,15 @@ export const SETTING_KEYS = {
    *  without ever installing. The re-findable Learn-section panel
    *  ignores this flag — it's a reference, not a nag. */
   installGuideDismissed: "installGuideDismissed",
+  /** "1" once the member has declined the origin-derived community-
+   *  node suggestion (`docs/invite-redemption.md` §5.3) — anywhere it
+   *  appeared (invite-accept success card or Board card). Declining is
+   *  permanent for this device; re-asking would be nagging
+   *  (no-notifications). Manual configuration in Settings is always
+   *  available and untouched by this flag. Note the counterpart
+   *  per-identity not-joined dismissal lives under a dynamic key —
+   *  see lib/notJoinedNudge.ts `notJoinedDismissKey`. */
+  nodeOriginSuggestDismissed: "nodeOriginSuggestDismissed",
   boardHintDismissed: "boardHintDismissed",
   balanceHintDismissed: "balanceHintDismissed",
   inviteHintDismissed: "inviteHintDismissed",

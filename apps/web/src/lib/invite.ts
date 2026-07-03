@@ -116,6 +116,48 @@ export function encodeInviteToken(invite: SignedInvite): string {
   return b64urlEncode(JSON.stringify(invite));
 }
 
+/**
+ * Recover an invite token from whatever the member pasted — the
+ * fragment-loss recovery input of `docs/invite-redemption.md` §5.1.
+ *
+ * The dominant redemption failure is a messenger in-app browser
+ * stripping or mangling the `#fragment` of a tapped invite link
+ * (fragments deliberately never reach servers, see encodeInviteToken
+ * above — but that also means link-preview fetchers rebuild URLs
+ * without them). Pasting the ORIGINAL message text restores the
+ * fragment, so we accept, in order of preference:
+ *
+ *   1. anything containing `#<base64url>` — a full invite URL, or a
+ *      whole message with the link somewhere inside it;
+ *   2. a bare token (the part after `#`), with or without a leading
+ *      `#`, surrounded by any amount of whitespace.
+ *
+ * Returns the token, or null when nothing token-shaped is present.
+ * Validation of the token itself (signature, expiry) stays with
+ * `decodeAndVerifyInvite` — this function only finds the candidate.
+ */
+export function extractInviteToken(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  // A signed-invite blob is a few hundred base64url chars; 16 is a
+  // generous lower bound that still rejects "#1" style fragments in
+  // unrelated URLs the member might paste by accident.
+  const MIN_TOKEN_LENGTH = 16;
+  // Case 1: fragment marker present somewhere in the paste. Allow
+  // whitespace right after `#` — some messengers wrap long links.
+  const fragmentMatch = /#\s*([A-Za-z0-9_-]{16,})/.exec(trimmed);
+  if (fragmentMatch) return fragmentMatch[1];
+  // Case 2: a bare token, optionally with the `#` still attached.
+  const bare = trimmed.replace(/^#/, "");
+  if (
+    bare.length >= MIN_TOKEN_LENGTH &&
+    /^[A-Za-z0-9_-]+$/.test(bare)
+  ) {
+    return bare;
+  }
+  return null;
+}
+
 export type InviteParseError =
   | "malformed"
   | "expired"

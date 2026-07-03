@@ -20,13 +20,14 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  decideRedeemMode,
   issueInvite,
   listInvitesFrom,
   redeemInvite,
   revokeInvite,
 } from "./invites";
 import { createMember } from "./seed";
-import { db } from "./database";
+import { db, SETTING_KEYS, setSetting } from "./database";
 import { generateKeyPair } from "@/lib/crypto";
 import { createVouch, trustStatusWithInvites } from "@/lib/vouch";
 
@@ -176,6 +177,173 @@ describe("redeemInvite", () => {
     const a = await redeemInvite("garbage", "x", NODE);
     expect(a.ok).toBe(false);
     if (!a.ok) expect(a.error).toBe("malformed");
+  });
+});
+
+// docs/invite-redemption.md §5.2 — the attach-vs-mint decision. The
+// invite admits a PERSON, not a keypair: when the device already holds
+// the current member's secret key, redemption attaches to that
+// identity instead of minting a ghost second one.
+describe("decideRedeemMode", () => {
+  it("mints on a fresh device (no current identity)", () => {
+    expect(
+      decideRedeemMode({ hasCurrentIdentity: false, holdsSecretKey: false }),
+    ).toBe("mint");
+  });
+
+  it("attaches when the device holds the current member's secret key", () => {
+    expect(
+      decideRedeemMode({ hasCurrentIdentity: true, holdsSecretKey: true }),
+    ).toBe("attach");
+  });
+
+  it("mints when a current member exists but their secret key is absent", () => {
+    expect(
+      decideRedeemMode({ hasCurrentIdentity: true, holdsSecretKey: false }),
+    ).toBe("mint");
+  });
+
+  it("honors the shared-device escape hatch over an eligible attach", () => {
+    expect(
+      decideRedeemMode({
+        hasCurrentIdentity: true,
+        holdsSecretKey: true,
+        forceNewIdentity: true,
+      }),
+    ).toBe("mint");
+  });
+});
+
+describe("redeemInvite — attach, don't mint (§5.2)", () => {
+  beforeEach(reset);
+
+  // Issue an invite from an inviter whose secret key is then removed,
+  // simulating "the invite arrived from another device."
+  async function inviteFromElsewhere(): Promise<string> {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    await db.secretKeys.delete(inviter.publicKey);
+    return shareUrl.split("#")[1];
+  }
+
+  it("attaches to the existing identity: same key, no new member row, no second seed balance (the incident's orphan case)", async () => {
+    // The orphan: a member whose first redemption failed and who
+    // self-onboarded via the welcome tour, spent some seed credits,
+    // and now redeems a fresh link on the same device.
+    const orphan = await createMember(
+      { displayName: "Ash", seedBalance: 2 },
+      NODE,
+    );
+    await setSetting(SETTING_KEYS.currentMember, orphan.publicKey);
+    const encoded = await inviteFromElsewhere();
+    const membersBefore = await db.members.count();
+    const secretsBefore = await db.secretKeys.count();
+
+    const result = await redeemInvite(encoded, "Ash", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("attach");
+    expect(result.value.member.publicKey).toBe(orphan.publicKey);
+
+    // No minting: member and secret-key counts are unchanged.
+    expect(await db.members.count()).toBe(membersBefore);
+    expect(await db.secretKeys.count()).toBe(secretsBefore);
+
+    // The redeemed-invite row names the EXISTING identity — this is
+    // the row trust computation reads (trustStatusWithInvites).
+    const [invite] = await db.invites.toArray();
+    expect(invite.status).toBe("redeemed");
+    expect(invite.redeemedBy).toBe(orphan.publicKey);
+
+    // No second starting balance: attach never touches seedBalance
+    // (createMember would have reset it to the default 5).
+    const after = await db.members.get(orphan.publicKey);
+    expect(after?.seedBalance).toBe(2);
+  });
+
+  it("offers the display-name edit: a changed name updates the existing member", async () => {
+    const member = await createMember({ displayName: "Ash" }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, member.publicKey);
+    const encoded = await inviteFromElsewhere();
+
+    const result = await redeemInvite(encoded, "Ash Grove", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("attach");
+    const after = await db.members.get(member.publicKey);
+    expect(after?.displayName).toBe("Ash Grove");
+  });
+
+  it("attaches for a long-lived identity redeeming a later invite", async () => {
+    const veteran = await createMember(
+      { displayName: "Vera", createdAt: Date.now() - 90 * 24 * 3600 * 1000 },
+      NODE,
+    );
+    await setSetting(SETTING_KEYS.currentMember, veteran.publicKey);
+    const encoded = await inviteFromElsewhere();
+
+    const result = await redeemInvite(encoded, "Vera", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("attach");
+    expect(result.value.member.publicKey).toBe(veteran.publicKey);
+  });
+
+  it("shared-device escape hatch: forceNewIdentity mints a fresh keypair with its own seed balance", async () => {
+    const resident = await createMember({ displayName: "Ash" }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, resident.publicKey);
+    const encoded = await inviteFromElsewhere();
+
+    const result = await redeemInvite(encoded, "Blair", NODE, {
+      forceNewIdentity: true,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("mint");
+    expect(result.value.member.publicKey).not.toBe(resident.publicKey);
+    // The new person gets the normal starting balance; the resident's
+    // identity is untouched.
+    expect(result.value.member.seedBalance).toBe(5);
+    const residentAfter = await db.members.get(resident.publicKey);
+    expect(residentAfter?.displayName).toBe("Ash");
+  });
+
+  it("mints when the current member's secret key is not on this device", async () => {
+    const viewOnly = await createMember({ displayName: "Ash" }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, viewOnly.publicKey);
+    // Simulate a device that knows the member but doesn't hold the key.
+    await db.secretKeys.delete(viewOnly.publicKey);
+    const encoded = await inviteFromElsewhere();
+
+    const result = await redeemInvite(encoded, "Newcomer", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("mint");
+    expect(result.value.member.publicKey).not.toBe(viewOnly.publicKey);
+  });
+
+  it("still refuses self-redemption before any attach can happen", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, inviter.publicKey);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    const result = await redeemInvite(encoded, "Rosa", NODE);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("self_redeem");
   });
 });
 

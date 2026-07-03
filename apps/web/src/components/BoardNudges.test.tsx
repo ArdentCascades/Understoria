@@ -21,9 +21,17 @@ import type { BoardNudgeStatus } from "@/lib/boardNudge";
 // harness tests). Every hook reads its slot off this single object so
 // the hoisted mock factories reference nothing uninitialized.
 const status: Record<
-  "first" | "profile" | "keepAccess" | "vouch" | "install",
+  | "notJoined"
+  | "nodeSuggest"
+  | "first"
+  | "profile"
+  | "keepAccess"
+  | "vouch"
+  | "install",
   BoardNudgeStatus
 > = {
+  notJoined: hidden(),
+  nodeSuggest: hidden(),
   first: hidden(),
   profile: hidden(),
   keepAccess: hidden(),
@@ -36,6 +44,12 @@ function hidden(): BoardNudgeStatus {
   return { ready: true, visible: false, node: null };
 }
 
+vi.mock("@/components/useNotJoinedNudge", () => ({
+  useNotJoinedNudge: () => status.notJoined,
+}));
+vi.mock("@/components/useNodeOriginSuggestNudge", () => ({
+  useNodeOriginSuggestNudge: () => status.nodeSuggest,
+}));
 vi.mock("@/components/useFirstActionNudge", () => ({
   useFirstActionNudge: () => status.first,
 }));
@@ -65,6 +79,8 @@ function visibleWith(node: BoardNudgeStatus["node"]): BoardNudgeStatus {
 }
 
 beforeEach(() => {
+  status.notJoined = hidden();
+  status.nodeSuggest = hidden();
   status.first = hidden();
   status.profile = hidden();
   status.keepAccess = hidden();
@@ -153,14 +169,26 @@ describe("BoardNudges orchestrator", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("full-order spot check: FirstAction visible wins over every lower visible prompt", () => {
+  it("full-order spot check: NotJoined visible wins over every lower visible prompt", () => {
+    status.notJoined = visibleWith(<div data-testid="notjoined" />);
+    status.nodeSuggest = visibleWith(<div data-testid="nodesuggest" />);
     status.first = visibleWith(<div data-testid="first" />);
     status.profile = visibleWith(<div data-testid="profile" />);
     status.keepAccess = visibleWith(<div data-testid="keep" />);
     status.vouch = visibleWith(<div data-testid="vouch" />);
     status.install = visibleWith(<div data-testid="install" />);
     render();
-    expect(container.querySelector('[data-testid="first"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="notjoined"]')).not.toBeNull();
     expect(container.querySelectorAll("[data-testid]").length).toBe(1);
+  });
+
+  it("node suggestion outranks first-action but yields to not-joined", () => {
+    status.nodeSuggest = visibleWith(<div data-testid="nodesuggest" />);
+    status.first = visibleWith(<div data-testid="first" />);
+    render();
+    expect(
+      container.querySelector('[data-testid="nodesuggest"]'),
+    ).not.toBeNull();
+    expect(container.querySelector('[data-testid="first"]')).toBeNull();
   });
 });
