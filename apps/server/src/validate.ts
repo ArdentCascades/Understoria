@@ -29,7 +29,6 @@ import {
   type Exchange,
   type FlagReason,
   type Post,
-  type SignedInvite,
   type SignedVouch,
   type TaskComment,
 } from "@understoria/shared/types";
@@ -60,9 +59,11 @@ export type ParseTaskCommentResult =
   | { ok: true; value: TaskComment }
   | { ok: false; error: string };
 
-export type ParseInviteResult =
-  | { ok: true; value: SignedInvite }
-  | { ok: false; error: string };
+// NOTE: `parseInvite` was removed with the `POST/GET /invites` surface
+// (invite-redemption Phase 1 — `docs/invite-redemption.md` §8). The
+// redemption receipt's shape gate, `parseRedemption`, lives in
+// `@understoria/shared/crypto` (design note §14 PR 1a) because the
+// PWA pull applies the identical checks before the shared verifier.
 
 export type ParseCoOrganizerInvitationResult =
   | { ok: true; value: CoOrganizerInvitation }
@@ -353,62 +354,6 @@ export function parsePost(input: unknown): ParsePostResult {
       expiresAt: r.expiresAt as number | null,
       locationZone: r.locationZone as string,
       nodeId: r.nodeId as string,
-      signature: r.signature as string,
-    },
-  };
-}
-
-const INVITE_STRING_FIELDS = [
-  "token",
-  "inviterKey",
-  "inviterName",
-  "nodeId",
-  "signature",
-] as const;
-
-export function parseInvite(input: unknown): ParseInviteResult {
-  if (typeof input !== "object" || input === null) {
-    return { ok: false, error: "body must be a JSON object" };
-  }
-  const r = input as Record<string, unknown>;
-  for (const f of INVITE_STRING_FIELDS) {
-    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
-      return { ok: false, error: `${f} must be a non-empty string` };
-    }
-  }
-  if (
-    typeof r.createdAt !== "number" ||
-    !Number.isInteger(r.createdAt) ||
-    r.createdAt <= 0
-  ) {
-    return {
-      ok: false,
-      error: "createdAt must be a positive integer (ms epoch)",
-    };
-  }
-  if (
-    typeof r.expiresAt !== "number" ||
-    !Number.isInteger(r.expiresAt) ||
-    r.expiresAt <= 0
-  ) {
-    return {
-      ok: false,
-      error: "expiresAt must be a positive integer (ms epoch)",
-    };
-  }
-  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
-  if ((r.createdAt as number) > oneDayFromNow) {
-    return { ok: false, error: "createdAt is too far in the future" };
-  }
-  return {
-    ok: true,
-    value: {
-      token: r.token as string,
-      inviterKey: r.inviterKey as string,
-      inviterName: r.inviterName as string,
-      nodeId: r.nodeId as string,
-      createdAt: r.createdAt as number,
-      expiresAt: r.expiresAt as number,
       signature: r.signature as string,
     },
   };

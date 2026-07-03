@@ -24,12 +24,20 @@
 
 ## §1 Status
 
-- **Phase 0** (client-only, no wire change): accepted, not started.
-- **Phase 1** (redemption propagation, new wire surface): accepted
-  shape (§6), pending the three operator rulings in §15.
-- Threat-model §7 entries: shipped in this PR, marked
-  *(design only; not yet shipped)* per the `auto-confirm-key.md`
-  precedent.
+- **Phase 0** (client-only, no wire change): **shipped** (PR #303 —
+  §5.1 honest exits + paste recovery, §5.2 attach-don't-mint, §5.3
+  origin-derived node suggestion).
+- **Phase 1** (redemption propagation, new wire surface):
+  **shipped** — §14's PRs 1a–1d landed as one PR (shared
+  `RedemptionReceipt` types/crypto, server `redemptions` table +
+  `POST/GET /redemptions` + removal of the `/invites` surface, web
+  outbox kind + `pullFederatedRedemptions` + §6 merge rules +
+  Invites-page states, and the §9 `pullFederatedVouches` companion
+  leg). The three §15 operator rulings resolved to their recommended
+  defaults (displayName rides in the receipt; prefill + explicit
+  confirm; node-lifetime retention with a 7-day delivery grace).
+- Threat-model §7 entries: flipped to *Shipped* alongside the
+  Phase 1 implementation, per the `auto-confirm-key.md` precedent.
 
 ## §2 The incident, and why now
 

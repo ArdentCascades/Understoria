@@ -27,7 +27,6 @@ import {
   createEventCancellationStore,
   createEventStore,
   createExchangeStore,
-  createInviteStore,
   createPeerPullStore,
   createPostStore,
   createTaskCommentStore,
@@ -48,7 +47,6 @@ async function main(): Promise<void> {
     store: createExchangeStore(database),
     vouchStore: createVouchStore(database),
     postStore: createPostStore(database),
-    inviteStore: createInviteStore(database),
     taskCommentStore: createTaskCommentStore(database),
     coorgInvitationStore: createCoOrganizerInvitationStore(database),
     coorgInvitationResponseStore:

@@ -1792,6 +1792,8 @@
       "shareTitle": "Comparte este enlace con una sola persona",
       "shareNote": "El enlace es de un solo uso y caduca en 14 días. Si se filtra antes de canjearse, revócalo abajo.",
       "redeemed": "Canjeado {{when}}",
+      "redeemedBy": "Canjeada {{when}} por {{name}}",
+      "usedAfterRevoke": "Usada {{when}} por {{name}}, después de que la revocaras. Sigue sin admitir a nadie — pero quizá valga una conversación.",
       "expires": "Caduca {{date}}",
       "revoke": "Revocar",
       "statusOpen": "Abierta",

@@ -25,6 +25,7 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  RedemptionReceipt,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
@@ -209,6 +210,23 @@ export async function submitEventCancellationToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/event-cancellations", record, config, deps);
+}
+
+/**
+ * Push a signed redemption receipt to the configured community node
+ * (`POST /redemptions`, `docs/invite-redemption.md` §7). Same
+ * best-effort semantics as the other submitters. A 409 means the
+ * token was already redeemed by a DIFFERENT key — first-writer-wins
+ * on the server; the outbox treats it as poison (retrying a lost
+ * race never succeeds) and the poisoned row surfacing in the UI is
+ * how the losing member learns her link was redeemed twice.
+ */
+export async function submitRedemptionReceiptToNode(
+  receipt: RedemptionReceipt,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/redemptions", receipt, config, deps);
 }
 
 // NOTE: there is intentionally no `submitEventRsvpToNode`. RSVPs are

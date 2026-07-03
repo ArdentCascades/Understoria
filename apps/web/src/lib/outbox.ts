@@ -30,6 +30,7 @@ import {
   submitEventToNode,
   submitExchangeToNode,
   submitPostToNode,
+  submitRedemptionReceiptToNode,
   submitTaskCommentToNode,
   submitVouchToNode,
   type SubmitResult,
@@ -41,6 +42,7 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  RedemptionReceipt,
 } from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 
@@ -212,13 +214,40 @@ export async function enqueueEventCancellation(
 // NOTE: EventRsvpRow has no outbox enqueue helper — RSVPs are
 // local-only by design (docs/community-events.md §4).
 
+/**
+ * Insert an outbox row for a signed redemption receipt — Phase 1 of
+ * `docs/invite-redemption.md` (§7). Called inside the redeemInvite
+ * transaction so the invite row and its receipt land atomically.
+ *
+ * DELIBERATE DEVIATION from every other enqueue helper: the receipt
+ * is enqueued EVEN WHEN no community-node URL is configured. A fresh
+ * device typically redeems first and configures the node afterwards
+ * (the §5.3 origin suggestion fires on the invite-accept success
+ * path — after redemption). Dropping the receipt at enqueue time
+ * would re-create incident finding #4 permanently: the receipt is
+ * the member's only proof-of-joining. The row simply waits in the
+ * outbox — flushOutboxOnce still refuses to POST anywhere until the
+ * member has explicitly confirmed a node URL, so nothing crosses any
+ * wire before consent.
+ */
+export async function enqueueRedemptionReceiptOutbox(
+  receipt: RedemptionReceipt,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("redemption_receipt", receipt.invite.token, receipt, {
+    requireNodeUrl: false,
+  });
+}
+
 async function enqueueOutbox(
   kind: OutboxRow["kind"],
   recordId: string,
   payload: unknown,
+  opts: { requireNodeUrl?: boolean } = {},
 ): Promise<OutboxRow | null> {
-  const urlRow = await db.settings.get("communityNodeUrl");
-  if (!urlRow?.value?.trim()) return null;
+  if (opts.requireNodeUrl !== false) {
+    const urlRow = await db.settings.get("communityNodeUrl");
+    if (!urlRow?.value?.trim()) return null;
+  }
 
   // Dedup: if a row with this recordId is already in the outbox,
   // leave it alone. Re-enqueuing would clobber retry state.
@@ -331,7 +360,8 @@ export async function flushOutboxOnce(
       | CoOrganizerInvitationResponse
       | CoOrganizerInvitationRevocation
       | Event
-      | EventCancellation;
+      | EventCancellation
+      | RedemptionReceipt;
     try {
       payload = JSON.parse(row.payload) as
         | Exchange
@@ -342,7 +372,8 @@ export async function flushOutboxOnce(
         | CoOrganizerInvitationResponse
         | CoOrganizerInvitationRevocation
         | Event
-        | EventCancellation;
+        | EventCancellation
+        | RedemptionReceipt;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -395,6 +426,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "event_cancellation") {
       result = await submitEventCancellationToNode(
         payload as EventCancellation,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "redemption_receipt") {
+      result = await submitRedemptionReceiptToNode(
+        payload as RedemptionReceipt,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

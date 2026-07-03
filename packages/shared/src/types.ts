@@ -367,6 +367,56 @@ export interface SignedInvite extends InvitePayload {
 }
 
 /**
+ * Redemption receipt — Phase 1 of `docs/invite-redemption.md` (§6).
+ * Signed by the NEW member and embedding the inviter's original
+ * `SignedInvite` verbatim, so one record carries two independently
+ * verifiable attestations: the inviter's intent to admit a
+ * token-holder, and the token-holder's proof of key possession plus
+ * consent to appear on the roster under a chosen name.
+ *
+ * Identity / dedup key is `invite.token` — an invite is single-use
+ * and the receipt inherits that. The server enforces first-writer-
+ * wins on the token (`POST /redemptions` → 409 for a different
+ * `redeemedBy`), which is the server-side single-use enforcement the
+ * local-only design never had.
+ *
+ * The receipt is deliberately NOT a `SignedVouch`: a vouch is signed
+ * by the voucher, and the inviter is not present at redemption. The
+ * redeemed-invite row this receipt materializes on every device is
+ * what `trustStatusWithInvites` already consumes as the implicit
+ * first vouch (design note §9).
+ *
+ * `displayName` rides in the receipt by operator ruling (§15.1):
+ * the member types it on the accept screen knowing it is her
+ * community-facing name; a roster of bare keys would fail the
+ * incident's actual complaint.
+ *
+ * FIELD ORDER IS THE WIRE CONTRACT — the canonical serializer emits
+ * the properties in declared order and the signature covers exactly
+ * those bytes. Do NOT alphabetize. Do NOT reorder.
+ */
+export interface RedemptionPayload {
+  /** Embedded verbatim: token, inviterKey, inviterName, nodeId,
+   *  createdAt, expiresAt, signature. Verifies independently against
+   *  `invite.inviterKey` via `verifyInvite`. */
+  invite: SignedInvite;
+  /** New member's Ed25519 public key — the outer signer. */
+  redeemedBy: string;
+  /** ≤ 60 chars (matches the InviteAccept input's maxLength). */
+  displayName: string;
+  /** Epoch ms, redeeming device's clock. Client-claimed — see the
+   *  back-dating analysis in `docs/invite-redemption.md` §11; the
+   *  server-side cursor is its own `receivedAt`, never this. */
+  redeemedAt: number;
+}
+
+export interface RedemptionReceipt extends RedemptionPayload {
+  /** Ed25519 detached signature by `redeemedBy` over
+   *  `canonicalRedemptionPayload(payload)`. */
+  signature: string;
+}
+
+/**
  * Lightweight claim notification — pushed to the outbox when a member
  * claims a cross-node post so the poster's node learns about it.
  * Unsigned for v1 (the exchange itself is the authoritative signed

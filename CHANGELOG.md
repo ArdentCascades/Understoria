@@ -9,6 +9,44 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Invite redemption Phase 1: redemption receipts — invite status
+  and roster convergence** (`docs/invite-redemption.md` §6–§9; new
+  wire surface, covered by the three now-shipped threat-model §7
+  entries). Redeeming an invite now signs a `RedemptionReceipt` —
+  the new member's Ed25519 signature over a payload embedding the
+  inviter's original `SignedInvite` verbatim (two independently
+  verifiable attestations) — and enqueues it in the same transaction
+  as the invite row, in both mint and attach modes. Uniquely among
+  outbox kinds, the receipt is enqueued even before a community-node
+  URL is configured (a fresh device redeems first and confirms the
+  node afterwards); nothing crosses any wire until the member
+  explicitly confirms a URL, after which the queued receipt delivers
+  retroactively. The server gains a `redemptions` table (schema v11,
+  node-lifetime retention) and `POST /redemptions` (verifies both
+  signatures + self-redeem + expiry; first-writer-wins on the
+  token — the server-side single-use enforcement the local-only
+  design never had; a 7-day delivery-grace window bounds late
+  arrivals) plus `GET /redemptions?since=` cursored by the
+  server-assigned `receivedAt` (the deliberate deviation from
+  sibling routes: convergence for an inviter offline a week must not
+  depend on client clocks). The web app pulls receipts
+  (`pullFederatedRedemptions`): a verified receipt flips the
+  inviter's invite row open→redeemed (her Invites page finally shows
+  it, with who and when), records redeemed-despite-revocation on
+  revoked rows as information for a conversation, and materializes a
+  member row on every device so rosters and member counts converge —
+  never clobbering a richer local member row. The §9 companion
+  `pullFederatedVouches` ends the manual-vouch dead end so trust
+  status converges across devices. Receipts deliberately do NOT
+  peer-replicate (the roster stays off the inter-node wire), and the
+  never-wired `POST/GET /invites` routes + `pullInvitesFromPeer` are
+  REMOVED — `GET /invites` served full `SignedInvite` rows (token +
+  signature: a live redeemable-link feed) to any caller (§10.1). Net
+  wire surface: +2 endpoints, −2 endpoints. Operators redeploying
+  the node: the v11 schema migration runs automatically on boot
+  (new `redemptions` table; drops the always-empty `invites` table).
+
 ### Fixed
 - **Invite redemption Phase 0: honest error exits, paste recovery,
   attach-don't-mint, origin-derived node suggestion**

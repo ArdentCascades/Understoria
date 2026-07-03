@@ -1074,8 +1074,14 @@ We are not trying to protect against:
   this entry is superseded by a new entry that enumerates the
   wire fields.
 
-- **Federated `RedemptionReceipt` records (design only; not yet
-  shipped).** The invite-redemption design
+- **Federated `RedemptionReceipt` records.**
+  *Shipped — Phase 1 of `docs/invite-redemption.md` (§14 PRs 1a–1d,
+  landed as one PR): `RedemptionPayload` / `RedemptionReceipt` +
+  `canonicalRedemptionPayload` / `verifyRedemptionReceipt` /
+  `parseRedemption` in `@understoria/shared`, the `redemptions`
+  table (server schema v11), `POST/GET /redemptions`, the outbox
+  kind `redemption_receipt`, and `pullFederatedRedemptions` in
+  `federationSync.ts`.* The invite-redemption design
   (`docs/invite-redemption.md`) introduces one new federated, signed
   record type — `RedemptionReceipt` — so that redeeming an invite
   stops being invisible outside the redeeming device (the incident:
@@ -1140,22 +1146,24 @@ We are not trying to protect against:
   play is evidence-producing. Retention is node-lifetime (receipts
   are trust edges; bounded retention would break trust convergence
   for every future fresh device), with purge tooling deleting a
-  hard-purged member's `redeemed_by` rows. Until the implementation
-  PRs land (`invite-redemption.md` §14, PRs 1a–1c), no receipt
-  exists on any wire and this entry tracks design intent only.
+  hard-purged member's `redeemed_by` rows. The same PR removed the
+  `POST/GET /invites` routes and `pullInvitesFromPeer` as designed
+  (mitigation (c) above), and a negative test in `peerPull.test.ts`
+  locks receipts and invites off the inter-node wire.
 
-- **PWA vouch pull puts the vouch graph on every member device
-  (design only; not yet shipped).** Companion leg of the
-  invite-redemption design (`docs/invite-redemption.md` §9). Today
-  manual vouches are pushed device→node (`POST /vouches`) and
-  replicate node↔node (`pullVouchesFromPeer`), but NO member device
-  ever pulls them down — `federationSync.ts` has no vouch pull — so
-  a vouch is visible only on the device that authored it and trust
-  status diverges per device. The design adds
-  `pullFederatedVouches()` so trust computation converges. NO new
-  server surface: `GET /vouches?since=` already exists and already
-  serves the full vouch graph, unauthenticated, to any caller. The
-  change is a new exposure LOCATION: every member's Dexie will hold
+- **PWA vouch pull puts the vouch graph on every member device.**
+  *Shipped — `pullFederatedVouches()` in `federationSync.ts`, landed
+  with the invite-redemption Phase 1 PR.* Companion leg of the
+  invite-redemption design (`docs/invite-redemption.md` §9). Before
+  this landed, manual vouches were pushed device→node
+  (`POST /vouches`) and replicated node↔node (`pullVouchesFromPeer`),
+  but NO member device ever pulled them down — `federationSync.ts`
+  had no vouch pull — so a vouch was visible only on the device that
+  authored it and trust status diverged per device.
+  `pullFederatedVouches()` makes trust computation converge. NO new
+  server surface: `GET /vouches?since=` already existed and already
+  served the full vouch graph, unauthenticated, to any caller. The
+  change is a new exposure LOCATION: every member's Dexie now holds
   the node's who-vouched-for-whom graph, readable by anyone with
   device-level storage access. This normalizes onto member devices
   a graph that was already one `curl` away for a §3 row-6
@@ -1168,8 +1176,11 @@ We are not trying to protect against:
   surface that renders per-member voucher lists from the newly
   local data must supersede this entry.
 
-- **Origin-derived community-node suggestion (design only; not yet
-  shipped).** Phase 0 of `docs/invite-redemption.md` (§5.3): when
+- **Origin-derived community-node suggestion.**
+  *Shipped (PR #303, invite-redemption Phase 0 —
+  `lib/nodeOriginSuggest.ts` + the consent card on the invite-accept
+  success path and Board).* Phase 0 of `docs/invite-redemption.md`
+  (§5.3): when
   the PWA was served from a community node's origin (the canonical
   `deploy/Caddyfile` topology puts the API at
   `${location.origin}/api`), the app probes `GET /api/health`

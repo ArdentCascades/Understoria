@@ -25,13 +25,19 @@ import {
   type InviteRow,
 } from "./database";
 import { createMember } from "./seed";
-import { generateKeyPair } from "@/lib/crypto";
+import { generateKeyPair, sign } from "@/lib/crypto";
 import {
   createInvite,
   decodeAndVerifyInvite,
   encodeInviteToken,
 } from "@/lib/invite";
 import { getSecretKey } from "./secrets";
+import { enqueueRedemptionReceiptOutbox } from "@/lib/outbox";
+import { canonicalRedemptionPayload } from "@understoria/shared/crypto";
+import type {
+  RedemptionPayload,
+  RedemptionReceipt,
+} from "@understoria/shared/types";
 import type { Member } from "@/types";
 
 export interface IssueInviteInput {
@@ -189,12 +195,17 @@ export function decideRedeemMode(input: {
  * only fresh devices — or the explicit shared-device escape hatch —
  * mint a new keypair. `docs/invite-redemption.md` §5.2.
  *
- * Redemption consumes the invite on *this* node only. In a federated
- * deployment, redemption status is gossiped between peers so a
- * compromised token shared twice fails the second time on any synced
- * node. That propagation is Phase 1 of `docs/invite-redemption.md`
- * (the `RedemptionReceipt`, §6–§7); Phase 0 deliberately enqueues
- * nothing — zero new bytes cross any wire.
+ * Redemption consumes the invite on *this* node — and, since Phase 1
+ * of `docs/invite-redemption.md` (§6–§7), signs a `RedemptionReceipt`
+ * with the redeeming member's key (both modes) and enqueues it for
+ * the community node in the same transaction that writes the invite
+ * row. The receipt is what flips the inviter's row open→redeemed on
+ * her next pull, materializes the member on every device's roster,
+ * and lets the server enforce single-use across devices
+ * (first-writer-wins on the token). The receipt is enqueued even
+ * when no node URL is configured yet — see
+ * `enqueueRedemptionReceiptOutbox` — but nothing crosses any wire
+ * until the member explicitly confirms a node URL.
  */
 export async function redeemInvite(
   encoded: string,
@@ -242,6 +253,7 @@ export async function redeemInvite(
   });
 
   let member: Member;
+  let signingSecret: string | null = null;
   if (mode === "attach") {
     // Attach: no keypair minting, no member creation — and critically
     // no second starting balance (createMember would seed one). The
@@ -252,6 +264,21 @@ export async function redeemInvite(
     if (name && name !== member.displayName) {
       await db.members.update(member.publicKey, { displayName: name });
       member = { ...member, displayName: name };
+    }
+    // Phase 1: the receipt is signed by the ATTACHED key (§5.2). The
+    // key may be passphrase-wrapped; getSecretKey handles unwrapping
+    // and throws if the session is locked — in that edge case the
+    // local redemption still lands and only the receipt is skipped
+    // (best-effort, logged below).
+    try {
+      signingSecret = await getSecretKey(member.publicKey);
+    } catch (err) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] could not load the secret key to sign the redemption receipt; redemption stays local-only",
+          err,
+        );
+      }
     }
   } else {
     const kp = generateKeyPair();
@@ -265,18 +292,47 @@ export async function redeemInvite(
       publicKey: kp.publicKey,
       secretKey: kp.secretKey,
     });
+    signingSecret = kp.secretKey;
   }
 
-  await db.invites.put({
-    token: invite.token,
-    inviterKey: invite.inviterKey,
-    nodeId: invite.nodeId,
-    createdAt: invite.createdAt,
-    expiresAt: invite.expiresAt,
-    status: "redeemed",
-    redeemedBy: member.publicKey,
-    redeemedAt: Date.now(),
-    encoded,
+  const redeemedAt = Date.now();
+
+  // Phase 1 (`docs/invite-redemption.md` §6): sign the redemption
+  // receipt — the new member's attestation over the inviter's
+  // original signed invite, embedded verbatim. Signed in BOTH modes;
+  // the only difference is which key holds the pen.
+  let receipt: RedemptionReceipt | null = null;
+  if (signingSecret) {
+    const payload: RedemptionPayload = {
+      invite,
+      redeemedBy: member.publicKey,
+      displayName: member.displayName,
+      redeemedAt,
+    };
+    receipt = {
+      ...payload,
+      signature: sign(canonicalRedemptionPayload(payload), signingSecret),
+    };
+  }
+
+  // The invite row and its receipt land atomically (§7) — a crash
+  // between the two would otherwise leave a consumed token whose
+  // proof-of-joining can never be delivered.
+  await db.transaction("rw", [db.invites, db.outbox], async () => {
+    await db.invites.put({
+      token: invite.token,
+      inviterKey: invite.inviterKey,
+      nodeId: invite.nodeId,
+      createdAt: invite.createdAt,
+      expiresAt: invite.expiresAt,
+      status: "redeemed",
+      redeemedBy: member.publicKey,
+      redeemedAt,
+      encoded,
+    });
+    if (receipt) {
+      await enqueueRedemptionReceiptOutbox(receipt);
+    }
   });
 
   return {
