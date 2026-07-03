@@ -1555,6 +1555,7 @@
   "profile": {
     "title": "Your profile",
     "identity": "Identity: {{key}}",
+    "sidebarAriaLabel": "Profile summary",
     "addDevice": {
       "title": "Add another device",
       "subtitle": "Use the same identity on a second device — phone, laptop, or both.",
@@ -1618,7 +1619,10 @@
       "pendingBadge": "pending",
       "awaitingYouBadge": "awaiting you",
       "taskWorkingOn": "Working on",
-      "taskRow": "{{taskTitle}} — {{projectTitle}}"
+      "taskRow": "{{taskTitle}} — {{projectTitle}}",
+      "showOlderOne": "Show {{count}} older exchange",
+      "showOlderOther": "Show {{count}} older exchanges",
+      "showFewer": "Show fewer exchanges"
     },
     "memberSwitcher": {
       "title": "Switch member (local dev)",
@@ -1634,8 +1638,12 @@
       "intro": "Everything you see is stored locally on this device. No server. No analytics. No account to sign up for.",
       "export": "Export my data"
     },
+    "communityAccount": {
+      "title": "Community & account"
+    },
     "learn": {
       "title": "Learn",
+      "rowDescription": "Guides, common questions, and design principles — everything works offline.",
       "intro": "The welcome flow, common questions, a condensed member guide, and prompts for study groups. Everything here works offline.",
       "revisitWelcome": "Revisit the welcome",
       "helpFaq": "Common questions",
@@ -1651,6 +1659,7 @@
     },
     "communitySettings": {
       "title": "Community settings",
+      "rowDescription": "Open to review or tune the community's thresholds.",
       "intro": "Thresholds the community can tune to fit its own context. Defaults work for most groups.",
       "bootstrapNote": "These changes take effect immediately for everyone on this device. Once the in-app proposal system ships, edits here will route through a community vote instead.",
       "proposeLink": "Or propose a change for the community to discuss →",

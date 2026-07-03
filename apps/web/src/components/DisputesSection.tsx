@@ -14,14 +14,14 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 
-// Small Profile-level entry card linking to /disputes. Lives
-// alongside CommunitySettingsSection because both are
-// community-level concerns. The chip shows a live count so a
-// member can tell at a glance whether anything needs the
-// community's attention without opening the page.
+// A row in Profile's "Community & account" index linking to
+// /disputes (it was a standalone card before the index landed).
+// The description keeps the live open-dispute count so a member can
+// tell at a glance whether anything needs the community's attention
+// without opening the page — attention-on-open, not a notification.
 //
 // Counts open dispute proposals (kind: "dispute", status: "open"),
-// matching the data shape the disputes page now reads.
+// matching the data shape the disputes page reads.
 
 export function DisputesSection() {
   const { proposals } = useApp();
@@ -35,15 +35,18 @@ export function DisputesSection() {
   );
 
   return (
-    <section className="card mb-4" aria-labelledby="disputes-entry-title">
-      <div className="flex items-center justify-between gap-3">
+    <div className="py-2">
+      <Link
+        to="/disputes"
+        className="-m-2 flex min-h-[44px] items-center justify-between gap-3 rounded-xl p-2 hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
         <div className="min-w-0 flex-1">
-          <h2
+          <h3
             id="disputes-entry-title"
-            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+            className="text-sm font-semibold text-moss-800 dark:text-moss-100"
           >
             {t("disputes.entry.title")}
-          </h2>
+          </h3>
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {count === 0
               ? t("disputes.entry.descriptionNone")
@@ -55,10 +58,13 @@ export function DisputesSection() {
                 )}
           </p>
         </div>
-        <Link to="/disputes" className="btn-secondary shrink-0 text-sm">
-          {t("disputes.entry.open")}
-        </Link>
-      </div>
-    </section>
+        <span
+          aria-hidden="true"
+          className="shrink-0 text-lg text-moss-400 dark:text-moss-500"
+        >
+          ›
+        </span>
+      </Link>
+    </div>
   );
 }
