@@ -1618,7 +1618,10 @@
       "pendingBadge": "pendiente",
       "awaitingYouBadge": "te espera",
       "taskWorkingOn": "Trabajando en",
-      "taskRow": "{{taskTitle}} — {{projectTitle}}"
+      "taskRow": "{{taskTitle}} — {{projectTitle}}",
+      "showOlderOne": "Ver {{count}} intercambio anterior",
+      "showOlderOther": "Ver {{count}} intercambios anteriores",
+      "showFewer": "Ver menos intercambios"
     },
     "memberSwitcher": {
       "title": "Cambiar de integrante (modo desarrollo local)",

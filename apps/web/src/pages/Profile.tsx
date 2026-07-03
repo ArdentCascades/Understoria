@@ -38,6 +38,7 @@ import type {
   TransactionEntry,
 } from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
+import { clampNewestFirst } from "@/lib/historyClamp";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { MyTasksSummary } from "@/pages/MyTasks";
@@ -611,6 +612,14 @@ function RolesEarnedSection({
 // settled rows newest-first (transactionHistory's order). Extracted
 // from the page body so the stack reorder (history now sits directly
 // under the balance) keeps the page component readable.
+//
+// The settled list is clamped to its newest HISTORY_CLAMP_VISIBLE
+// rows behind a "Show N older exchanges" toggle (the announcements /
+// task-comments house pattern). Clamping happens HERE, at the render
+// layer — `transactionHistory` stays unbounded because the full
+// signed ledger is the member's auditable record. In-motion entries
+// never clamp: they're few, they're the most recent activity, and
+// the awaiting-you rows are actionable.
 function ExchangeHistorySection({
   history,
   pending,
@@ -629,6 +638,11 @@ function ExchangeHistorySection({
   disputeIdByPostId: Map<string, string>;
 }) {
   const { t } = useTranslation();
+  const [showAll, setShowAll] = useState(false);
+  const { visible: visibleHistory, hiddenCount } = clampNewestFirst(
+    history,
+    showAll,
+  );
   return (
     <section className="card mb-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
@@ -681,7 +695,7 @@ function ExchangeHistorySection({
               />
             );
           })}
-          {history.map(({ exchange, delta, counterparty }) => {
+          {visibleHistory.map(({ exchange, delta, counterparty }) => {
             const other = memberMap.get(counterparty);
             return (
               <li
@@ -733,6 +747,22 @@ function ExchangeHistorySection({
             );
           })}
         </ul>
+      )}
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          className="mt-2 text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll
+            ? t("profile.history.showFewer")
+            : t(
+                hiddenCount === 1
+                  ? "profile.history.showOlderOne"
+                  : "profile.history.showOlderOther",
+                { count: hiddenCount },
+              )}
+        </button>
       )}
     </section>
   );

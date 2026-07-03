@@ -249,3 +249,47 @@ describe("ProfilePage — mobile reading order (WCAG 2.4.3)", () => {
     expect(offenders.length).toBe(0);
   });
 });
+
+describe("ProfilePage — exchange history clamp", () => {
+  function historyRows(): Element[] {
+    const heading = headingByText("Your exchange history");
+    const section = heading.closest("section")!;
+    return Array.from(section.querySelectorAll("li"));
+  }
+
+  function toggleButton(): HTMLButtonElement | undefined {
+    const section = headingByText("Your exchange history").closest("section")!;
+    return Array.from(section.querySelectorAll("button")).find((b) =>
+      /older exchange|fewer exchanges/i.test(b.textContent ?? ""),
+    );
+  }
+
+  it("renders every settled row (and no toggle) at or below the limit", () => {
+    mockState.exchanges = Array.from({ length: 10 }, (_, i) =>
+      exchange(`e${i}`, 1000 + i),
+    );
+    render();
+    expect(historyRows().length).toBe(10);
+    expect(toggleButton()).toBeUndefined();
+  });
+
+  it("clamps to the newest 10 rows with a 'Show N older exchanges' toggle", () => {
+    mockState.exchanges = Array.from({ length: 13 }, (_, i) =>
+      exchange(`e${i}`, 1000 + i),
+    );
+    render();
+    const rows = historyRows();
+    expect(rows.length).toBe(10);
+    // Newest first: the top row is the most recent exchange (e12).
+    expect(rows[0]!.textContent).toContain("Oli Other");
+    const btn = toggleButton();
+    expect(btn).toBeDefined();
+    expect(btn!.textContent).toBe("Show 3 older exchanges");
+
+    act(() => {
+      btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(historyRows().length).toBe(13);
+    expect(toggleButton()!.textContent).toBe("Show fewer exchanges");
+  });
+});

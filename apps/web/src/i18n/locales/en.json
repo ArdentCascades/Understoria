@@ -1618,7 +1618,10 @@
       "pendingBadge": "pending",
       "awaitingYouBadge": "awaiting you",
       "taskWorkingOn": "Working on",
-      "taskRow": "{{taskTitle}} — {{projectTitle}}"
+      "taskRow": "{{taskTitle}} — {{projectTitle}}",
+      "showOlderOne": "Show {{count}} older exchange",
+      "showOlderOther": "Show {{count}} older exchanges",
+      "showFewer": "Show fewer exchanges"
     },
     "memberSwitcher": {
       "title": "Switch member (local dev)",
