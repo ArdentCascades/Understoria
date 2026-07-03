@@ -9,6 +9,32 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Event ↔ need bridge (design note,
+  [`docs/event-need-bridge.md`](./docs/event-need-bridge.md)).**
+  Docs-only predicate for connecting board Needs with community
+  events — a member's many-hands need becomes a scheduled
+  gathering, the need card shows "a gathering is planned," and
+  the event page shows the ask it answers. The recommended shape
+  is a local-only `EventNeedLinkRow` Dexie row in the
+  `EventProjectLinkRow` posture: never signed, never enqueued,
+  never pulled, `"event_need_link"` rejected at the
+  `OutboxRow.kind` type level — **zero new wire bytes**, so no
+  threat-model §7 entry ships with the note (the federated-
+  pointer alternative is analyzed and rejected in §7: needs do
+  federate, but the pointer would be a breaking canonical-payload
+  change and a permanent public correlator binding a vulnerable
+  ask to a gathering's place and time). Links may be created only
+  by the need's author, in phase 1 only at event creation
+  (`EventNew ?needId=` deep link mirroring the `?projectId=`
+  work-day gate, plus an own-needs picker). Event completion
+  suggests — never triggers — need fulfillment via an
+  author-only inline line; no new attention-rail items; no
+  volunteer counts, staleness nudges, or pressure mechanics
+  (permanently rejected in §11). Three operator rulings surfaced
+  with recommended defaults (§14). Implementation not started;
+  PR ladder in §13 with the server slot loudly skipped.
+
 ### Changed
 - **Dev-toolchain migration: vite 5 → 8, vitest 2 → 4.** Bumped the
   build/test chain together — `vite` 5.4.21 → 8.1.3, `vitest` 2.1.9 →
