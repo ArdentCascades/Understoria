@@ -9,6 +9,21 @@ include breaking changes.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-03
+
+Third development release. Community life beyond one-to-one
+exchange: a community events calendar with RSVPs, project work
+days, and .ics export; local-only member blocking (softblock,
+never federated); task ordering with "Follows" dependencies; and
+a three-tier UX pass that reorganized ProjectDetail, Board,
+Calendar, Dashboard, EventNew, and Profile around every-visit
+content. Onboarding now mints the identity in the welcome flow
+and states the no-recovery tradeoff before the point of no
+return; the demo community seeds in dev builds only, so
+production first-run is an empty node. en/es locale parity and
+the accessibility DOM-order rule held throughout. Full suite:
+1,858 web + 135 server tests (was 215 at 0.2.0).
+
 ### Fixed
 - **Community-settings auto-confirm control shows its real strings
   again.** Both locale files declared the top-level `"community"`
