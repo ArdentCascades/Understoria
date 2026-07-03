@@ -1074,6 +1074,118 @@ We are not trying to protect against:
   this entry is superseded by a new entry that enumerates the
   wire fields.
 
+- **Federated `RedemptionReceipt` records (design only; not yet
+  shipped).** The invite-redemption design
+  (`docs/invite-redemption.md`) introduces one new federated, signed
+  record type — `RedemptionReceipt` — so that redeeming an invite
+  stops being invisible outside the redeeming device (the incident:
+  the inviter's invite row never left "open," the roster never
+  gained the member, the implicit first vouch never reached anyone's
+  trust computation). The receipt is signed by the NEW member and
+  embeds the inviter's original `SignedInvite` verbatim, so it
+  carries two independently verifiable attestations. New wire fields,
+  in the shape this §7 uses:
+  - the embedded `SignedInvite` (`token`, `inviterKey`,
+    `inviterName`, `nodeId`, `createdAt`, `expiresAt`,
+    `signature`) — the token is DEAD once the receipt exists
+    (replay of the invite yields already-redeemed); the inviter key
+    and name were already handed by the inviter to the invitee
+    inside the invite link itself.
+  - `redeemedBy` (new member's pubkey), `displayName` (≤ 60 chars,
+    the name the member typed on the accept screen knowing it is
+    community-facing), `redeemedAt` (client clock), `signature`
+    (by `redeemedBy`).
+  Endpoints: `POST /redemptions` (verify-then-idempotent-store;
+  409 first-writer-wins on the token is the server-side single-use
+  enforcement the local-only design never had) and
+  `GET /redemptions?since=&limit=` (cursor is server-assigned
+  `receivedAt` — a deliberate deviation from the sibling routes'
+  client-timestamp cursors, required for offline/out-of-order
+  convergence; arrival time is something the server inherently
+  observes, so storing it adds no new observation).
+  Adversary mapping (§3): rows 3/4/5 — the community's own node now
+  holds the roster and the invite graph explicitly (asset #1 and #2)
+  rather than partially inferably from vouches/posts/exchanges it
+  already stores; this is the priced cost of the design, held under
+  the same minimal-logging/purge posture as everything else on the
+  node. Row 6 — any member-level actor can read the invite graph
+  via `GET /redemptions`, which grants nothing beyond what
+  `GET /vouches` (unauthenticated, already shipped) grants for the
+  manual-vouch graph; the web-of-trust graph is community-visible by
+  design. Rows 1/2/7 — the receipt carries no location, no
+  availability, no activity; roster enumeration by an adversary who
+  can reach the node URL is bounded by the deployment posture and
+  the tracked allowlist work (`docs/federated-node-allowlist.md`).
+  Mitigations baked in (full analysis in `invite-redemption.md`
+  §§10–11): (a) OPEN invites never cross any wire — only
+  consummated redemptions do, so recruitment intent, cadence, and
+  volume stay off the server (the registration-at-creation
+  alternative is rejected in §10.1); (b) receipts do NOT
+  peer-replicate — the roster stays off the inter-node wire and a
+  malicious peer or foreign operator learns nothing new; (c) the
+  same PR REMOVES the unwired `POST /invites` / `GET /invites`
+  routes and `pullInvitesFromPeer` — `GET /invites` returns full
+  `SignedInvite` rows (token + signature) to any caller, i.e. every
+  field needed to reconstruct a live redeemable invite link; today
+  its store is empty so the leak is theoretical, and removal keeps
+  it that way (net wire surface: +2 endpoints, −2 endpoints);
+  (d) forgery requires forging one of two Ed25519 signatures;
+  byte-identical replay is idempotent; a double-redeemed (stolen)
+  link becomes VISIBLE (409 on the loser, unexpected name on the
+  inviter's Invites page) instead of today's silent divergence.
+  Residual risk acknowledged honestly: `redeemedAt` is
+  client-claimed — a holder of an expired-but-unredeemed invite can
+  back-date within the delivery-grace window (default 7 days on
+  `receivedAt`); the receipt stays signed and attributable, so the
+  play is evidence-producing. Retention is node-lifetime (receipts
+  are trust edges; bounded retention would break trust convergence
+  for every future fresh device), with purge tooling deleting a
+  hard-purged member's `redeemed_by` rows. Until the implementation
+  PRs land (`invite-redemption.md` §14, PRs 1a–1c), no receipt
+  exists on any wire and this entry tracks design intent only.
+
+- **PWA vouch pull puts the vouch graph on every member device
+  (design only; not yet shipped).** Companion leg of the
+  invite-redemption design (`docs/invite-redemption.md` §9). Today
+  manual vouches are pushed device→node (`POST /vouches`) and
+  replicate node↔node (`pullVouchesFromPeer`), but NO member device
+  ever pulls them down — `federationSync.ts` has no vouch pull — so
+  a vouch is visible only on the device that authored it and trust
+  status diverges per device. The design adds
+  `pullFederatedVouches()` so trust computation converges. NO new
+  server surface: `GET /vouches?since=` already exists and already
+  serves the full vouch graph, unauthenticated, to any caller. The
+  change is a new exposure LOCATION: every member's Dexie will hold
+  the node's who-vouched-for-whom graph, readable by anyone with
+  device-level storage access. This normalizes onto member devices
+  a graph that was already one `curl` away for a §3 row-6
+  infiltrator; device-level compromise exposure follows the standard
+  local-Dexie posture (passphrase-wrapped keys, soft/hard purge).
+  Display discipline is unchanged and load-bearing: per the existing
+  operator ruling + `no-leaderboards` (`lib/vouch.ts:139-145`),
+  voucher sets/counts render only on one's OWN profile; other
+  members' pages show only the qualitative trust status. Any future
+  surface that renders per-member voucher lists from the newly
+  local data must supersede this entry.
+
+- **Origin-derived community-node suggestion (design only; not yet
+  shipped).** Phase 0 of `docs/invite-redemption.md` (§5.3): when
+  the PWA was served from a community node's origin (the canonical
+  `deploy/Caddyfile` topology puts the API at
+  `${location.origin}/api`), the app probes `GET /api/health`
+  (same-origin only; localhost/dev origins excluded; no third-party
+  request) and, on success, PREFILLS the community-node settings and
+  presents the existing informed-consent card. Zero new wire bytes.
+  This entry exists to amend the "Configurable node URL can leak
+  counterparty public keys" entry above: the consent gate there is
+  load-bearing, so auto-configuration is auto-SUGGEST, never
+  auto-enable — the member still explicitly confirms, and the card
+  names the origin so a member who intends a different node than
+  the serving origin declines. Mis-derivation cases (PWA-only
+  static hosting, dev servers) fail the health probe and produce no
+  suggestion; failure is silent because an unconfigured node is a
+  normal state, not an error.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
