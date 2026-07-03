@@ -79,10 +79,11 @@ Wait for `VITE … ready` and `Local: http://localhost:5173/`.
 
 Open Firefox in your VM and visit <http://localhost:5173>. You'll
 see the Community board with five demo posts (Rosa's ride request,
-Marcus's bike tune-ups, etc.). The seed data is intentional —
-walking through it gives you something to interact with on first
-launch. Wipe it later via Profile → Emergency → Hard purge if you
-want a clean slate.
+Marcus's bike tune-ups, etc.). The seed data is **dev-mode only** —
+`npm run dev` seeds it so you have something to interact with while
+developing; production builds start with an empty node and the
+welcome flow mints the first identity. Wipe the dev data via
+Profile → Emergency → Hard purge if you want a clean slate.
 
 ## 6. Start the community node (separate terminal)
 

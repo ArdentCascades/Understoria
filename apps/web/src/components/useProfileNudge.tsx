@@ -22,8 +22,10 @@ import {
 
 // One-time, dismissible nudge that surfaces on Board when the
 // member never filled in zone / skills / availability — either
-// because they Skipped the profile-setup step during onboarding
-// or because they joined before that step existed.
+// because they left those (optional) fields blank at the
+// profile-setup step during onboarding or because they joined
+// before that step existed. (Only the display name is required
+// there; everything else can legitimately arrive empty.)
 //
 // Disappears automatically once any of the fields is set; the
 // dismissed-setting only matters for members who want to ignore

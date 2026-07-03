@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -21,8 +21,23 @@ import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
 import { currentInstallEnvironment } from "@/lib/installGuide";
 import { db } from "@/db/database";
+import { createMember } from "@/db/seed";
 import { useApp } from "@/state/AppContext";
+import {
+  required,
+  useFieldValidation,
+  type Validator,
+} from "@/lib/validation";
 import type { AvailabilityChip } from "@/types";
+
+// Same validation shape as InviteAccept — the display name is the one
+// required field of the whole flow: onboarding can't finish without an
+// identity, and an identity needs a name.
+type FieldName = "displayName";
+
+const VALIDATORS: Record<FieldName, Validator> = {
+  displayName: required("welcome.profileSetup.nameRequired"),
+};
 
 // Per-step shape. `concept` screens are static intros; the `install`
 // step offers the optional home-screen install (auto-skipped when the
@@ -100,7 +115,8 @@ const STEPS: readonly Step[] = [
 export default function WelcomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentMember, refreshOnboarded, nodeConfig, nodeId } = useApp();
+  const { currentMember, setCurrentMember, refreshOnboarded, nodeConfig, nodeId } =
+    useApp();
   const [stepIndex, setStepIndex] = useState(0);
 
   // Auto-skip the install step when we're already running as an
@@ -140,18 +156,32 @@ export default function WelcomePage() {
   // count. Defaulting to "loading" (not `false`) when invite-only is on
   // avoids flashing the landing on the bootstrap path; defaulting to
   // `true` when invite-only is off is safe (open mode never gates).
+  //
+  // A member who already HAS an identity always passes: the gate exists
+  // to stop strangers from minting themselves an identity on an
+  // invite-only node, and profileSetup with a current member only
+  // UPDATES that member. Without this bypass an invited member (whose
+  // own row makes localMemberCount ≥ 1) would hit the dead-end landing
+  // at the final step and could never complete onboarding.
   const selfOnboardingAllowed: boolean | "loading" = useMemo(() => {
+    if (currentMember) return true;
     if (!nodeConfig.inviteOnly) return true;
     if (localMemberCount === undefined) return "loading";
     if (localMemberCount === 0) return true;
     return false;
-  }, [nodeConfig.inviteOnly, localMemberCount]);
+  }, [currentMember, nodeConfig.inviteOnly, localMemberCount]);
 
   // Profile-setup state lives here (not in the step component) so
   // typing it and stepping Back to a concept screen doesn't lose
   // what was entered. Initialized from the current member so a
   // returning user who re-opens /welcome via the LearnSection link
-  // sees their existing values, not empty fields.
+  // sees their existing values, not empty fields. The display name
+  // prefills too — an invited member sees the name they chose at
+  // InviteAccept; the dev seed's "You" founder gets renamed to
+  // whatever real name is typed here.
+  const [displayName, setDisplayName] = useState(
+    currentMember?.displayName ?? "",
+  );
   const [zone, setZone] = useState(currentMember?.locationZone ?? "");
   const [skills, setSkills] = useState(
     (currentMember?.skills ?? []).join(", "),
@@ -164,45 +194,96 @@ export default function WelcomePage() {
   >(currentMember?.availabilityChips ?? []);
   const [saving, setSaving] = useState(false);
 
+  // /welcome renders OUTSIDE Layout's `ready` gate, so a hard page
+  // load can mount this component before AppContext has resolved the
+  // current member — the useState initializers above then captured
+  // null and the prefill stays empty. When the member arrives late,
+  // hydrate any field the visitor hasn't typed into yet (never
+  // clobber in-progress input). Runs once per mount.
+  const hydratedFromMember = useRef(false);
+  useEffect(() => {
+    if (hydratedFromMember.current || !currentMember) return;
+    hydratedFromMember.current = true;
+    setDisplayName((v) => (v.trim() ? v : currentMember.displayName));
+    setZone((v) => (v.trim() ? v : currentMember.locationZone ?? ""));
+    setSkills((v) => (v.trim() ? v : (currentMember.skills ?? []).join(", ")));
+    setAvailability((v) => (v.trim() ? v : currentMember.availability ?? ""));
+    setAvailabilityChips((v) =>
+      v.length > 0 ? v : currentMember.availabilityChips ?? [],
+    );
+  }, [currentMember]);
+
+  const validation = useFieldValidation<FieldName>(
+    { displayName },
+    VALIDATORS,
+  );
+
   async function finish() {
     await markOnboarded();
     await refreshOnboarded();
     navigate("/", { replace: true });
   }
 
+  // The ONLY route to "onboarded". Runs from the profileSetup step and
+  // requires a valid display name, so the flag can never be true
+  // without an identity behind it: with no current member it MINTS the
+  // real Ed25519 identity (fresh device on an open node, or the
+  // invite-only bootstrap); with one it UPDATES that member's profile
+  // (invited member arriving from InviteAccept, or the dev seed's
+  // founder) — never a second identity for the same person.
   async function saveProfileAndFinish() {
-    if (!currentMember) {
-      await finish();
-      return;
-    }
-    const updates: Parameters<typeof updateMemberProfile>[1] = {};
+    validation.markAllTouched();
+    if (validation.hasErrors) return;
+    const name = displayName.trim();
     const trimmedZone = zone.trim();
     const parsedSkills = skills
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
     const trimmedAvail = availability.trim();
-    if (trimmedZone) updates.locationZone = trimmedZone;
-    if (parsedSkills.length > 0) updates.skills = parsedSkills;
-    if (trimmedAvail) updates.availability = trimmedAvail;
-    if (availabilityChips.length > 0) {
-      updates.availabilityChips = availabilityChips;
-    }
-
-    if (Object.keys(updates).length > 0) {
-      setSaving(true);
-      try {
+    setSaving(true);
+    try {
+      if (currentMember) {
+        const updates: Parameters<typeof updateMemberProfile>[1] = {
+          displayName: name,
+        };
+        if (trimmedZone) updates.locationZone = trimmedZone;
+        if (parsedSkills.length > 0) updates.skills = parsedSkills;
+        if (trimmedAvail) updates.availability = trimmedAvail;
+        if (availabilityChips.length > 0) {
+          updates.availabilityChips = availabilityChips;
+        }
         await updateMemberProfile(currentMember.publicKey, updates);
-      } finally {
-        setSaving(false);
+      } else {
+        // createMember generates the keypair and stores the secret key
+        // locally — the same machinery redeemInvite and the dev seed
+        // ride on. No hand-rolled crypto here.
+        const member = await createMember(
+          {
+            displayName: name,
+            locationZone: trimmedZone,
+            skills: parsedSkills,
+            availability: trimmedAvail,
+            availabilityChips,
+          },
+          nodeId,
+        );
+        await setCurrentMember(member.publicKey);
       }
+      await finish();
+    } finally {
+      setSaving(false);
     }
-    await finish();
   }
 
   const step = visibleSteps[stepIndex];
-  const isLast = stepIndex === visibleSteps.length - 1;
   const onBack = stepIndex === 0 ? null : () => setStepIndex(stepIndex - 1);
+  // Skip jumps to the profileSetup step (always the last visible step),
+  // never straight to "onboarded": the concept tour is skippable,
+  // identity creation is not. Nobody is trapped — Back and leaving the
+  // page both still work; the device just isn't "onboarded" until a
+  // named identity exists.
+  const skipToProfileSetup = () => setStepIndex(visibleSteps.length - 1);
 
   if (step.kind === "concept") {
     // On the FIRST concept screen only, surface a small affordance
@@ -239,24 +320,22 @@ export default function WelcomePage() {
         stepIndex={stepIndex}
         stepCount={visibleSteps.length}
         onBack={onBack}
-        onNext={() => {
-          if (isLast) {
-            void finish();
-          } else {
-            setStepIndex(stepIndex + 1);
-          }
-        }}
-        onSkip={() => void finish()}
-        nextLabel={isLast ? t("welcome.start") : t("welcome.next")}
+        // Concept screens are never the last visible step — the
+        // profileSetup step always follows — so Next only ever
+        // advances; finishing happens exclusively from profileSetup.
+        onNext={() => setStepIndex(stepIndex + 1)}
+        onSkip={skipToProfileSetup}
+        nextLabel={t("welcome.next")}
       />
     );
   }
 
   // The optional install step. Non-blocking: Next advances to
   // profileSetup (install is never the last visible step — profileSetup
-  // always follows), Skip finishes onboarding outright, Back works like
-  // any other step. When the app is already installed this branch never
-  // renders — the step was filtered out of `visibleSteps` above.
+  // always follows), Skip jumps to profileSetup like everywhere else,
+  // Back works like any other step. When the app is already installed
+  // this branch never renders — the step was filtered out of
+  // `visibleSteps` above.
   if (step.kind === "install") {
     return (
       <OnboardingScreen
@@ -274,7 +353,7 @@ export default function WelcomePage() {
         stepCount={visibleSteps.length}
         onBack={onBack}
         onNext={() => setStepIndex(stepIndex + 1)}
-        onSkip={() => void finish()}
+        onSkip={skipToProfileSetup}
         nextLabel={t("welcome.next")}
       />
     );
@@ -299,8 +378,43 @@ export default function WelcomePage() {
       body={
         <div className="space-y-4 text-left">
           <p className="text-center text-sm text-moss-600 dark:text-moss-300">
-            {t("welcome.profileSetup.intro")}
+            {currentMember
+              ? t("welcome.profileSetup.introExisting", {
+                  name: currentMember.displayName,
+                })
+              : t("welcome.profileSetup.intro")}
           </p>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              {t("welcome.profileSetup.nameLabel")}
+            </span>
+            <input
+              className="input"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              onBlur={() => validation.onBlur("displayName")}
+              aria-invalid={
+                validation.shouldShowError("displayName") || undefined
+              }
+              aria-describedby={
+                validation.shouldShowError("displayName")
+                  ? "welcome-displayName-error"
+                  : undefined
+              }
+              maxLength={60}
+              required
+              disabled={saving}
+            />
+            {validation.shouldShowError("displayName") && (
+              <p
+                id="welcome-displayName-error"
+                role="alert"
+                className="text-xs text-rose-700 dark:text-rose-300"
+              >
+                {t(validation.errors.displayName!.key)}
+              </p>
+            )}
+          </label>
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">{t("profile.about.area")}</span>
             <input
@@ -367,7 +481,11 @@ export default function WelcomePage() {
       stepCount={visibleSteps.length}
       onBack={onBack}
       onNext={() => void saveProfileAndFinish()}
-      onSkip={() => void finish()}
+      // No Skip here: identity creation is the one non-skippable step.
+      // "Onboarded" must never be true without a named identity behind
+      // it. Back / leaving the page remain available — nobody is
+      // trapped, the device just stays un-onboarded.
+      onSkip={null}
       nextLabel={saving ? t("common.working") : t("welcome.start")}
       busy={saving}
     />

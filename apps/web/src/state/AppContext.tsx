@@ -35,7 +35,7 @@ import {
   SETTING_KEYS,
   setSetting,
 } from "@/db/database";
-import { ensureNodeId, seedDemoCommunityIfEmpty } from "@/db/seed";
+import { ensureNodeId, seedDemoCommunityIfDev } from "@/db/seed";
 import {
   backfillOnboardedForExistingUsers,
   isOnboarded,
@@ -257,19 +257,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDensityPreferenceState(densPref);
       applyDensity(densPref);
       cacheDensity(densPref);
-      // Only seed the demo community when the node isn't locked. Seeding
-      // writes plaintext secret keys for demo members, which we don't want
-      // to run while a user's real wrapped keys are present but sealed.
+      // Demo-community seed is DEV-MODE ONLY (operator ruling R1): dev
+      // builds get a demo community to poke at; real deployments start
+      // with an empty node, and the first identity is minted by
+      // onboarding (Welcome's profile-setup step, InviteAccept, or
+      // PairDevice) — never by the seed. The seed also only runs when
+      // the node isn't locked: it writes plaintext secret keys for demo
+      // members, which we don't want while a user's real wrapped keys
+      // are present but sealed. In every non-seeding path the current
+      // member is simply whatever the settings row says — possibly null
+      // on a fresh device, which the app tolerates pre-onboarding.
       if (initialLock !== "locked") {
-        const member = await seedDemoCommunityIfEmpty();
-        const storedKey = await getSetting(SETTING_KEYS.currentMember);
-        if (cancelled) return;
-        setCurrentMemberKey(storedKey ?? member.publicKey);
-      } else {
-        const storedKey = await getSetting(SETTING_KEYS.currentMember);
-        if (cancelled) return;
-        setCurrentMemberKey(storedKey ?? null);
+        await seedDemoCommunityIfDev();
       }
+      const storedKey = await getSetting(SETTING_KEYS.currentMember);
+      if (cancelled) return;
+      setCurrentMemberKey(storedKey ?? null);
       // Devices that have used Understoria before Agent 16 had members
       // but never set the onboarded flag — backfill so they don't see
       // a welcome flow for software they already know.
