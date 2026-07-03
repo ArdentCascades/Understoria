@@ -327,6 +327,26 @@ describe("WelcomePage — identity minting at profileSetup", () => {
     expect(await getSetting(SETTING_KEYS.onboarded)).toBe("1");
   });
 
+  it("hydrates the prefill when the member resolves AFTER mount (hard page load)", async () => {
+    // /welcome renders outside Layout's `ready` gate, so a hard page
+    // load can mount the page before AppContext has resolved the
+    // current member. The late-hydration effect must still prefill.
+    mockState.currentMember = null;
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 1;
+    render(<WelcomePage />);
+    // Member arrives after the first render…
+    mockState.currentMember = await createMember(
+      { displayName: "Late Larry" },
+      "node-local",
+    );
+    // …and any subsequent re-render (stepping through the tour)
+    // triggers the hydration effect.
+    clickNextNTimes(6);
+    expect(container.textContent).toContain("A little about you");
+    expect(nameInput().value).toBe("Late Larry");
+  });
+
   it("invited member on an invite-only node reaches profileSetup (no dead-end landing)", async () => {
     const invited = await createMember({ displayName: "Nadia" }, "node-local");
     mockState.currentMember = invited;

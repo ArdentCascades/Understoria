@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -193,6 +193,25 @@ export default function WelcomePage() {
     AvailabilityChip[]
   >(currentMember?.availabilityChips ?? []);
   const [saving, setSaving] = useState(false);
+
+  // /welcome renders OUTSIDE Layout's `ready` gate, so a hard page
+  // load can mount this component before AppContext has resolved the
+  // current member — the useState initializers above then captured
+  // null and the prefill stays empty. When the member arrives late,
+  // hydrate any field the visitor hasn't typed into yet (never
+  // clobber in-progress input). Runs once per mount.
+  const hydratedFromMember = useRef(false);
+  useEffect(() => {
+    if (hydratedFromMember.current || !currentMember) return;
+    hydratedFromMember.current = true;
+    setDisplayName((v) => (v.trim() ? v : currentMember.displayName));
+    setZone((v) => (v.trim() ? v : currentMember.locationZone ?? ""));
+    setSkills((v) => (v.trim() ? v : (currentMember.skills ?? []).join(", ")));
+    setAvailability((v) => (v.trim() ? v : currentMember.availability ?? ""));
+    setAvailabilityChips((v) =>
+      v.length > 0 ? v : currentMember.availabilityChips ?? [],
+    );
+  }, [currentMember]);
 
   const validation = useFieldValidation<FieldName>(
     { displayName },
