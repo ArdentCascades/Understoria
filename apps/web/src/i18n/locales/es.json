@@ -2056,7 +2056,7 @@
       "identity": {
         "title": "Tú guardas tu propia llave",
         "body": "Sin correo, sin contraseña. Tienes una llave privada que solo tú guardas.",
-        "bodyMore": "Ninguna empresa es su dueña, así que nadie puede bloquearte. Cuida tu llave."
+        "bodyMore": "Ninguna empresa es su dueña, así que nadie puede bloquearte. El otro lado de ese trato: no hay restablecimiento ni empresa que pueda recuperarla — si pierdes este dispositivo sin otro dispositivo vinculado de respaldo, la identidad se pierde."
       },
       "community": {
         "title": "La comunidad decide",

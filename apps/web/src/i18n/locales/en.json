@@ -2056,7 +2056,7 @@
       "identity": {
         "title": "You hold your own key",
         "body": "No email, no password. You have a private key that only you hold.",
-        "bodyMore": "No company owns it, so no one can lock you out. Keep your key safe."
+        "bodyMore": "No company owns it, so no one can lock you out. The other side of that trade: there's no reset and no company that can restore it — if this device is lost without a paired backup device, the identity is gone."
       },
       "community": {
         "title": "The community decides",
