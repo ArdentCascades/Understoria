@@ -27,7 +27,7 @@ import { LearnSection } from "./LearnSection";
 
 let container: HTMLDivElement;
 let root: Root;
-let scrollSpy: ReturnType<typeof vi.fn>;
+let scrollSpy: ReturnType<typeof vi.fn<typeof Element.prototype.scrollIntoView>>;
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
@@ -35,7 +35,7 @@ let scrollSpy: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   // jsdom doesn't implement `scrollIntoView` — spy on it so the
   // hash-handling effect is observable.
-  scrollSpy = vi.fn();
+  scrollSpy = vi.fn<typeof Element.prototype.scrollIntoView>();
   Element.prototype.scrollIntoView = scrollSpy;
   container = document.createElement("div");
   document.body.appendChild(container);
