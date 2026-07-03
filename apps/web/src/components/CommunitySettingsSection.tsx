@@ -87,18 +87,33 @@ export function CommunitySettingsSection() {
     }
   }
 
+  // Collapsed-by-default <details>, following the ProjectDetail
+  // "Manage project" disclosure precedent. Community-authority
+  // principle: this editor stays ON the Profile page and reachable
+  // by every member — collapsed to stop a 500px threshold form from
+  // hogging every visit, never removed or relocated behind an admin
+  // wall. Nothing deep-links or getElementById's into this section
+  // (verified: `community-settings-title` is only referenced here;
+  // ProposalNew reuses the field LABELS, not the DOM), so the
+  // disclosure needs no auto-open path.
   return (
-    <section
+    <details
       className="card mb-4"
       aria-labelledby="community-settings-title"
     >
-      <h2
-        id="community-settings-title"
-        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
-      >
-        {t("profile.communitySettings.title")}
-      </h2>
-      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+      <summary className="-m-2 cursor-pointer rounded-xl p-2 marker:hidden hover:bg-moss-50 dark:hover:bg-moss-900">
+        <h2
+          id="community-settings-title"
+          className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+        >
+          {t("profile.communitySettings.title")}
+        </h2>
+        <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+          {t("profile.communitySettings.rowDescription")}
+        </p>
+      </summary>
+
+      <p className="mb-3 mt-3 text-sm text-moss-600 dark:text-moss-300">
         {t("profile.communitySettings.intro")}
         <WhyTooltip principleId="community-authority" />
       </p>
@@ -380,7 +395,7 @@ export function CommunitySettingsSection() {
           )}
         </div>
       </form>
-    </section>
+    </details>
   );
 }
 

@@ -1658,6 +1658,7 @@
     },
     "communitySettings": {
       "title": "Configuración comunitaria",
+      "rowDescription": "Abre para revisar o ajustar los umbrales de la comunidad.",
       "intro": "Umbrales que la comunidad puede ajustar a su propio contexto. Los valores predeterminados funcionan para la mayoría de los grupos.",
       "bootstrapNote": "Estos cambios entran en efecto de inmediato para todas las personas en este dispositivo. Cuando llegue el sistema de propuestas en la aplicación, las ediciones aquí pasarán por una votación comunitaria.",
       "proposeLink": "O propón un cambio para que la comunidad lo discuta →",

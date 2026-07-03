@@ -1658,6 +1658,7 @@
     },
     "communitySettings": {
       "title": "Community settings",
+      "rowDescription": "Open to review or tune the community's thresholds.",
       "intro": "Thresholds the community can tune to fit its own context. Defaults work for most groups.",
       "bootstrapNote": "These changes take effect immediately for everyone on this device. Once the in-app proposal system ships, edits here will route through a community vote instead.",
       "proposeLink": "Or propose a change for the community to discuss →",
