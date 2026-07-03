@@ -883,14 +883,10 @@ function AddDeviceSection() {
             {t("profile.addDevice.subtitle")}
           </p>
         </div>
-        {/* `+` (discloses in place) rather than the `›` the index's
-            navigation rows carry. */}
-        <span
-          aria-hidden="true"
-          className="shrink-0 text-lg text-moss-400 dark:text-moss-500"
-        >
-          +
-        </span>
+        {/* No trailing glyph of our own: the global stylesheet already
+            appends the house ▾/▴ disclosure chevron to every
+            `details > summary` (index.css), which distinguishes this
+            row from the index's `›` navigation rows. */}
       </summary>
       <div className="mt-3">
         <button

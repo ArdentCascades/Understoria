@@ -101,16 +101,21 @@ export function CommunitySettingsSection() {
       className="card mb-4"
       aria-labelledby="community-settings-title"
     >
-      <summary className="-m-2 cursor-pointer rounded-xl p-2 marker:hidden hover:bg-moss-50 dark:hover:bg-moss-900">
-        <h2
-          id="community-settings-title"
-          className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
-        >
-          {t("profile.communitySettings.title")}
-        </h2>
-        <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
-          {t("profile.communitySettings.rowDescription")}
-        </p>
+      {/* Flex summary so the house ▾/▴ chevron (a global
+          `details > summary::after`, see index.css) sits beside the
+          two-line label block instead of wrapping under it. */}
+      <summary className="-m-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl p-2 marker:hidden hover:bg-moss-50 dark:hover:bg-moss-900">
+        <div className="min-w-0 flex-1">
+          <h2
+            id="community-settings-title"
+            className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+          >
+            {t("profile.communitySettings.title")}
+          </h2>
+          <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+            {t("profile.communitySettings.rowDescription")}
+          </p>
+        </div>
       </summary>
 
       <p className="mb-3 mt-3 text-sm text-moss-600 dark:text-moss-300">
