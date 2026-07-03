@@ -341,6 +341,63 @@ describe("WelcomePage — identity minting at profileSetup", () => {
   });
 });
 
+function clickSkip() {
+  const skip = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent === "Skip",
+  );
+  if (!skip) throw new Error("No Skip button on this step");
+  act(() => {
+    skip.click();
+  });
+}
+
+describe("WelcomePage — Skip lands on profile setup, not the board", () => {
+  it("Skip from the first concept screen jumps to profileSetup and does NOT onboard", async () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    expect(container.textContent).toContain("This is a timebank");
+    clickSkip();
+    // The tour is skippable; identity creation is not — Skip lands on
+    // the profileSetup step instead of finishing outright.
+    expect(container.textContent).toContain("A little about you");
+    expect(await getSetting(SETTING_KEYS.onboarded)).toBeUndefined();
+    // And the name is still required to actually finish.
+    await clickFinish();
+    expect(container.textContent).toContain(
+      "Pick a display name or pseudonym to continue.",
+    );
+    expect(await getSetting(SETTING_KEYS.onboarded)).toBeUndefined();
+  });
+
+  it("Skip from the install step also jumps to profileSetup", () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    clickNextNTimes(5);
+    expect(container.textContent).toContain("Optional, but handy");
+    clickSkip();
+    expect(container.textContent).toContain("A little about you");
+  });
+
+  it("profileSetup itself offers no Skip affordance", () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    clickNextNTimes(6);
+    expect(container.textContent).toContain("A little about you");
+    const skip = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Skip",
+    );
+    expect(skip).toBeUndefined();
+    // Back still works — nobody is trapped on the step.
+    const back = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Back"),
+    );
+    expect(back).toBeDefined();
+  });
+});
+
 describe("WelcomePage — optional install step", () => {
   it("renders the install step after the concept screens, and Next → profileSetup", () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };

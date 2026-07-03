@@ -258,8 +258,13 @@ export default function WelcomePage() {
   }
 
   const step = visibleSteps[stepIndex];
-  const isLast = stepIndex === visibleSteps.length - 1;
   const onBack = stepIndex === 0 ? null : () => setStepIndex(stepIndex - 1);
+  // Skip jumps to the profileSetup step (always the last visible step),
+  // never straight to "onboarded": the concept tour is skippable,
+  // identity creation is not. Nobody is trapped — Back and leaving the
+  // page both still work; the device just isn't "onboarded" until a
+  // named identity exists.
+  const skipToProfileSetup = () => setStepIndex(visibleSteps.length - 1);
 
   if (step.kind === "concept") {
     // On the FIRST concept screen only, surface a small affordance
@@ -296,24 +301,22 @@ export default function WelcomePage() {
         stepIndex={stepIndex}
         stepCount={visibleSteps.length}
         onBack={onBack}
-        onNext={() => {
-          if (isLast) {
-            void finish();
-          } else {
-            setStepIndex(stepIndex + 1);
-          }
-        }}
-        onSkip={() => void finish()}
-        nextLabel={isLast ? t("welcome.start") : t("welcome.next")}
+        // Concept screens are never the last visible step — the
+        // profileSetup step always follows — so Next only ever
+        // advances; finishing happens exclusively from profileSetup.
+        onNext={() => setStepIndex(stepIndex + 1)}
+        onSkip={skipToProfileSetup}
+        nextLabel={t("welcome.next")}
       />
     );
   }
 
   // The optional install step. Non-blocking: Next advances to
   // profileSetup (install is never the last visible step — profileSetup
-  // always follows), Skip finishes onboarding outright, Back works like
-  // any other step. When the app is already installed this branch never
-  // renders — the step was filtered out of `visibleSteps` above.
+  // always follows), Skip jumps to profileSetup like everywhere else,
+  // Back works like any other step. When the app is already installed
+  // this branch never renders — the step was filtered out of
+  // `visibleSteps` above.
   if (step.kind === "install") {
     return (
       <OnboardingScreen
@@ -331,7 +334,7 @@ export default function WelcomePage() {
         stepCount={visibleSteps.length}
         onBack={onBack}
         onNext={() => setStepIndex(stepIndex + 1)}
-        onSkip={() => void finish()}
+        onSkip={skipToProfileSetup}
         nextLabel={t("welcome.next")}
       />
     );
@@ -459,7 +462,11 @@ export default function WelcomePage() {
       stepCount={visibleSteps.length}
       onBack={onBack}
       onNext={() => void saveProfileAndFinish()}
-      onSkip={() => void finish()}
+      // No Skip here: identity creation is the one non-skippable step.
+      // "Onboarded" must never be true without a named identity behind
+      // it. Back / leaving the page remain available — nobody is
+      // trapped, the device just stays un-onboarded.
+      onSkip={null}
       nextLabel={saving ? t("common.working") : t("welcome.start")}
       busy={saving}
     />

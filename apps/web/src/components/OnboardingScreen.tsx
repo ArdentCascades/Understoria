@@ -36,9 +36,13 @@ export interface OnboardingScreenProps {
   stepCount: number;
   onBack: (() => void) | null;
   onNext: () => void;
-  onSkip: () => void;
+  /** Skip handler, or `null` to hide the Skip affordance entirely.
+   *  The concept/install steps pass a jump-to-profile-setup handler
+   *  (the tour is skippable); the profile-setup step passes `null` —
+   *  identity creation is the one step onboarding can't skip. */
+  onSkip: (() => void) | null;
   nextLabel: string;
-  /** When true, both Next and Skip become disabled + aria-busy.
+  /** When true, Next and Skip become disabled + aria-busy.
    *  Used by the profile-setup step while the async save is
    *  in flight so the member can't double-tap. */
   busy?: boolean;
@@ -62,14 +66,20 @@ export function OnboardingScreen({
     <div className="flex min-h-[calc(100dvh-5rem)] flex-col px-6 pb-6 pt-8">
       <header className="mb-6 flex items-center justify-between">
         <ProgressDots current={stepIndex} total={stepCount} />
-        <button
-          type="button"
-          onClick={onSkip}
-          disabled={busy}
-          className="text-sm text-moss-600 underline-offset-2 hover:underline disabled:opacity-50 dark:text-moss-300"
-        >
-          {t("welcome.skip")}
-        </button>
+        {onSkip ? (
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={busy}
+            className="text-sm text-moss-600 underline-offset-2 hover:underline disabled:opacity-50 dark:text-moss-300"
+          >
+            {t("welcome.skip")}
+          </button>
+        ) : (
+          /* Keeps the header's space-between geometry stable when the
+             Skip affordance is absent (profile-setup step). */
+          <span aria-hidden="true" />
+        )}
       </header>
 
       <div className="flex flex-1 flex-col items-center justify-center text-center">
