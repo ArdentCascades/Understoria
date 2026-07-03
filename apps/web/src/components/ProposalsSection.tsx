@@ -13,10 +13,14 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 
-// Small Profile-level entry card linking to /proposals. Lives next
-// to CommunitySettingsSection because both are community-level
-// concerns — and once Agent 13 voting lands, settings changes will
-// route through proposals rather than direct edit.
+// A row in Profile's "Community & account" index linking to
+// /proposals (it was a standalone card before the index landed).
+// Once Agent 13 voting lands, settings changes will route through
+// proposals rather than direct edit.
+//
+// The open-count chip is attention-on-open — a fact about what the
+// community is deciding right now — not a notification; it never
+// pulses, pushes, or demands.
 
 export function ProposalsSection() {
   const { proposals } = useApp();
@@ -24,15 +28,23 @@ export function ProposalsSection() {
   const openCount = proposals.filter((p) => p.status === "open").length;
 
   return (
-    <section className="card mb-4" aria-labelledby="proposals-entry-title">
-      <div className="flex items-center justify-between gap-3">
+    <div className="py-2">
+      <Link
+        to="/proposals"
+        className="-m-2 flex min-h-[44px] items-center justify-between gap-3 rounded-xl p-2 hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
         <div className="min-w-0 flex-1">
-          <h2
+          <h3
             id="proposals-entry-title"
-            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+            className="flex items-center gap-2 text-sm font-semibold text-moss-800 dark:text-moss-100"
           >
             {t("proposals.entry.title")}
-          </h2>
+            {openCount > 0 && (
+              <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+                {openCount}
+              </span>
+            )}
+          </h3>
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {openCount === 0
               ? t("proposals.entry.descriptionNone")
@@ -44,10 +56,13 @@ export function ProposalsSection() {
                 )}
           </p>
         </div>
-        <Link to="/proposals" className="btn-secondary shrink-0 text-sm">
-          {t("proposals.entry.open")}
-        </Link>
-      </div>
-    </section>
+        <span
+          aria-hidden="true"
+          className="shrink-0 text-lg text-moss-400 dark:text-moss-500"
+        >
+          ›
+        </span>
+      </Link>
+    </div>
   );
 }

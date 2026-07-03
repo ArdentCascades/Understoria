@@ -504,53 +504,72 @@ export default function ProfilePage() {
         onFocusHandled={clearEditParam}
       />
 
-      {/* Community-governance cluster. CSS columns at lg+ for the
-          same uneven-heights reason as the cluster above. After the
-          Settings extraction this cluster holds Learn, Disputes,
-          Proposals, and CommunitySettings — all community-level
-          surfaces. (CommunitySettings is about community-level
-          safeguard thresholds, not device preferences — the "Settings"
-          in its name notwithstanding.) */}
-      <div className="mt-6 lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
-        <LearnSection />
+      {/* "Community & account" index — one compact section of labeled
+          rows replacing the five standalone cards that used to sprawl
+          here (Learn, Disputes, Proposals, the Settings row, Add
+          device). Rare-need surfaces index into a row each; the
+          every-visit surfaces live above. Disputes and Proposals keep
+          their open counts (attention-on-open, not a notification).
+          CommunitySettings stays OUT of the index as its own card
+          below — it's about community-level safeguard thresholds, not
+          device preferences (the "Settings" in its name
+          notwithstanding), and the community-authority principle
+          wants it on the page in its own right. */}
+      <section
+        className="card mb-4 mt-6"
+        aria-labelledby="profile-communityAccount-title"
+      >
+        <h2
+          id="profile-communityAccount-title"
+          className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+        >
+          {t("profile.communityAccount.title")}
+        </h2>
+        <div className="divide-y divide-moss-100 dark:divide-moss-800">
+          <LearnSection />
 
-        <DisputesSection />
+          <DisputesSection />
 
-        <ProposalsSection />
+          <ProposalsSection />
 
-        <CommunitySettingsSection />
+          {/* Labeled doorway to device-local Settings — discoverable
+              by reading, not just by recognizing the header gear
+              (which stays, for muscle memory). */}
+          <SettingsRowSection />
 
-        {/* Labeled doorway to device-local Settings — a peer of the
-            Learn/Disputes/Proposals cards so it's discoverable by
-            reading, not just by recognizing the header gear (which
-            stays, for muscle memory). Placed after CommunitySettings
-            so "community-level settings" and "this-device settings"
-            sit adjacent and the naming collision resolves itself. */}
-        <SettingsRowSection />
-      </div>
+          {/* AddDevice ships in the device-pairing series (design
+              note: docs/device-pairing.md). Its entry point is an
+              index row whose disclosure keeps one deliberate step
+              before the sensitive pairing flow — pairing a device is
+              weightier than sharing an invite. The paired-device
+              inventory (PairingLogSection) is what keeps the
+              Emergency adjacency now: its only remediation path IS
+              Emergency → Hard purge. */}
+          <AddDeviceSection />
+        </div>
+      </section>
 
-      {/* AddDevice ships in the device-pairing series (design note:
-          docs/device-pairing.md). Placed alongside Emergency rather
-          than next to invites or "share my profile" — pairing a
-          device is more sensitive than either and the visual
-          adjacency to the panic-button section reinforces that. */}
-      <AddDeviceSection />
+      <CommunitySettingsSection />
 
       {/* Paired-device inventory. Renders null until the member has
           completed at least one pair from this device (as source or
           destination), so the section is invisible on a fresh
-          install and grows in over time. Placed between AddDevice
-          and Emergency because the inventory's only remediation
-          path IS Emergency → Hard purge (Ed25519 has no revocation
-          primitive). See `docs/device-pairing.md` §9.x. */}
+          install and grows in over time. Placed directly before
+          Emergency (AddDevice moved into the index above; this
+          section keeps the adjacency alone) because the inventory's
+          only remediation path IS Emergency → Hard purge (Ed25519
+          has no revocation primitive). See `docs/device-pairing.md`
+          §9.x. */}
       <PairingLogSection />
 
-      {/* Emergency stays on Profile — NOT in Settings — per the
+      {/* Emergency stays on Profile — NOT in Settings, and NEVER
+          inside the index or any disclosure — per the
           privacy-as-precondition principle. Panic buttons need to
           stay reachable in a stress moment; burying them behind a
-          Settings tap would weaken that affordance in exactly the
-          moment it matters most. Standalone card after the
-          governance cluster so it's the last thing the eye lands on
+          Settings tap or a collapsed row would weaken that
+          affordance in exactly the moment it matters most.
+          Standalone top-level card after the index and
+          CommunitySettings so it's the last thing the eye lands on
           before the dev MemberSwitcher below. */}
       <EmergencySection />
 
@@ -770,24 +789,25 @@ function ExchangeHistorySection({
 
 // The labeled route to /settings (Language, Appearance, Blocked
 // contacts, Node, Security, Export). The header gear was the ONLY
-// doorway before this row — a 20px icon with no label. The whole row
-// is the link (44px+ touch target) with the house `›` chevron; no
-// counts, no badges.
+// doorway before this row — a 20px icon with no label. Now a row in
+// the "Community & account" index (formerly a standalone card): the
+// whole row is the link (44px+ touch target) with the house `›`
+// chevron; no counts, no badges.
 function SettingsRowSection() {
   const { t } = useTranslation();
   return (
-    <section className="card mb-4" aria-labelledby="profile-settings-row-title">
+    <div className="py-2">
       <Link
         to="/settings"
         className="-m-2 flex min-h-[44px] items-center justify-between gap-3 rounded-xl p-2 hover:bg-moss-50 dark:hover:bg-moss-900"
       >
         <div className="min-w-0 flex-1">
-          <h2
+          <h3
             id="profile-settings-row-title"
-            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+            className="text-sm font-semibold text-moss-800 dark:text-moss-100"
           >
             {t("profile.settingsRow.label")}
-          </h2>
+          </h3>
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("profile.settingsRow.description")}
           </p>
@@ -799,35 +819,51 @@ function SettingsRowSection() {
           ›
         </span>
       </Link>
-    </section>
+    </div>
   );
 }
 
+// Entry point for the device-pairing flow (docs/device-pairing.md).
+// A disclosure row, not a navigation row: the summary keeps one
+// deliberate step between browsing the index and the sensitive
+// pairing flow at /add-device. The flow itself is unchanged — the
+// disclosed CTA navigates to the same page as the old card's button.
 function AddDeviceSection() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <section
-      className="card mb-4"
-      aria-labelledby="profile-addDevice-heading"
-    >
-      <h2
-        id="profile-addDevice-heading"
-        className="page-title text-base"
-      >
-        {t("profile.addDevice.title")}
-      </h2>
-      <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
-        {t("profile.addDevice.subtitle")}
-      </p>
-      <button
-        type="button"
-        className="btn-secondary mt-3"
-        onClick={() => navigate("/add-device")}
-      >
-        {t("profile.addDevice.cta")}
-      </button>
-    </section>
+    <details className="py-2">
+      <summary className="-m-2 flex min-h-[44px] cursor-pointer items-center justify-between gap-3 rounded-xl p-2 marker:hidden hover:bg-moss-50 dark:hover:bg-moss-900">
+        <div className="min-w-0 flex-1">
+          <h3
+            id="profile-addDevice-heading"
+            className="text-sm font-semibold text-moss-800 dark:text-moss-100"
+          >
+            {t("profile.addDevice.title")}
+          </h3>
+          <p className="text-sm text-moss-600 dark:text-moss-300">
+            {t("profile.addDevice.subtitle")}
+          </p>
+        </div>
+        {/* `+` (discloses in place) rather than the `›` the index's
+            navigation rows carry. */}
+        <span
+          aria-hidden="true"
+          className="shrink-0 text-lg text-moss-400 dark:text-moss-500"
+        >
+          +
+        </span>
+      </summary>
+      <div className="mt-3">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => navigate("/add-device")}
+        >
+          {t("profile.addDevice.cta")}
+        </button>
+      </div>
+    </details>
   );
 }
 

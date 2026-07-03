@@ -1637,8 +1637,12 @@
       "intro": "Everything you see is stored locally on this device. No server. No analytics. No account to sign up for.",
       "export": "Export my data"
     },
+    "communityAccount": {
+      "title": "Community & account"
+    },
     "learn": {
       "title": "Learn",
+      "rowDescription": "Guides, common questions, and design principles — everything works offline.",
       "intro": "The welcome flow, common questions, a condensed member guide, and prompts for study groups. Everything here works offline.",
       "revisitWelcome": "Revisit the welcome",
       "helpFaq": "Common questions",

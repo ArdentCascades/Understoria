@@ -250,6 +250,45 @@ describe("ProfilePage — mobile reading order (WCAG 2.4.3)", () => {
   });
 });
 
+describe("ProfilePage — 'Community & account' index", () => {
+  it("renders one index section between the editor and Emergency", () => {
+    render();
+    const index = headingByText("Community & account");
+    const editor = headingByText("About you");
+    const emergency = headingByText("Emergency");
+    expect(precedes(editor, index)).toBe(true);
+    expect(precedes(index, emergency)).toBe(true);
+  });
+
+  it("hosts the Settings row inside the index", () => {
+    render();
+    const index = headingByText("Community & account").closest("section")!;
+    const settingsRow = Array.from(
+      index.querySelectorAll<HTMLAnchorElement>('a[href="/settings"]'),
+    ).find((a) => (a.textContent ?? "").includes("Settings"));
+    expect(settingsRow).toBeDefined();
+  });
+
+  it("keeps the Add-device flow behind a default-closed disclosure row", () => {
+    render();
+    const heading = headingByText("Add another device");
+    const details = heading.closest("details");
+    expect(details).not.toBeNull();
+    expect(details!.open).toBe(false);
+    // The flow's entry CTA survives inside the disclosure.
+    const cta = Array.from(details!.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === "Start pairing",
+    );
+    expect(cta).toBeDefined();
+    // ...and the row lives inside the index section.
+    expect(
+      headingByText("Community & account").closest("section")!.contains(
+        details!,
+      ),
+    ).toBe(true);
+  });
+});
+
 describe("ProfilePage — exchange history clamp", () => {
   function historyRows(): Element[] {
     const heading = headingByText("Your exchange history");
