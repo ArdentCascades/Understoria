@@ -28,25 +28,48 @@ items below — never bundled into unrelated work.
 
 ### Dev-tooling security upgrade: vite 5 → 8, vitest 2 → 4 (deferred)
 
-**Status:** deferred (2026-06-14). Low urgency while no one depends on the
-software yet; **revisit before a real deployment / real users**, or when
-vitest 4 has settled enough to migrate cleanly.
+**Status:** deferred (2026-06-14; decision still pending as of
+2026-07-03). Low urgency while no one depends on the software yet;
+**revisit before a real deployment / real users**, or when vitest 4 has
+settled enough to migrate cleanly.
 
-**What.** `npm audit` reports 6 advisories (GitHub Dependabot counts ~14
-on the default branch). **All are dev/build tooling**, none touch the
-production PWA or the runtime:
+**What.** Before the 2026-07-03 cleanup below, `npm audit` reported 10
+advisories across 9 packages (GitHub Dependabot counted 25 alerts on the
+default branch). **All are dev/build tooling**, none touch the production
+PWA or the runtime.
 
-- `esbuild` ≤ 0.28.0 (pulled in by `vite` and `tsx`) — dev-server can be
-  asked to return arbitrary responses (GHSA-67mh-4wv8-2f99), a Deno-install
-  RCE via `NPM_CONFIG_REGISTRY` (GHSA-gv7w-rqvm-qjhr), and a Windows
-  dev-server file read (GHSA-g7r4-m6w7-qqqr). Fixed in esbuild 0.28.1.
-- `vite` ≤ 6.4.1 — dev-server path traversal in optimized-deps `.map`
-  handling (GHSA-4w7w-66w2-5vf9). Propagates to `@vitest/mocker`,
-  `vitest`, `vite-node`.
+**2026-07-03 cleanup (semver-safe subset).** A lockfile-only pass cleared
+5 of the 10 advisories, including both standalone highs:
+
+- `npm audit fix` (no `--force`): `form-data` 4.0.5 → 4.0.6 (high, CRLF
+  injection), `ws` 8.20.1 → 8.21.0 (high, fragment-flood DoS), `js-yaml`
+  4.1.1 → 4.3.0 (moderate, merge-key DoS), `@babel/core` and its
+  `@babel/*` sub-packages 7.29.0 → 7.29.7 (low, sourceMappingURL file
+  read), plus `hasown` 2.0.3 → 2.0.4.
+- `npm update tsx`: 4.21.0 → 4.23.0 within `^4.19.2`, which moves the
+  tsx-owned `esbuild` node to 0.28.1 and clears that esbuild advisory.
+
+No `package.json` manifest changed; full gate verified green.
+
+**What remains.** 5 advisories, all on the vite/vitest chain (`esbuild`
+nested under vite, `vite`, `@vitest/mocker`, `vitest`, `vite-node`):
+
+- `esbuild` ≤ 0.28.0 (vite's bundled copy) — dev-server can be asked to
+  return arbitrary responses (GHSA-67mh-4wv8-2f99). Fixed in esbuild
+  0.28.1.
+- `vite` ≤ 6.4.2 — dev-server path traversal in optimized-deps `.map`
+  handling (GHSA-4w7w-66w2-5vf9) and related dev-server advisories
+  (GHSA-fx2h-pf6j-xcff, GHSA-v6wh-96g9-6wx3). Propagates to
+  `@vitest/mocker` and `vite-node`.
+- `vitest` ≤ 3.2.5 — UI-mode API server RCE (GHSA-5xrq-8626-4rwp).
+  Rated critical, but **unreachable here**: it requires running vitest
+  with `--ui` or an `api:` server config, and neither appears anywhere in
+  our configs or CI.
 
 These are exploitable only against a developer running the local dev
 server who is then specifically targeted. The deployed app does not run
-vite/esbuild/vitest.
+vite/esbuild/vitest. All five clear only with the vite 8 / vitest 4
+migration below.
 
 **Why deferred (the surgical fix doesn't work).** The only esbuild that
 fixes the advisories is 0.28.1, and the only vite that bundles it (and
