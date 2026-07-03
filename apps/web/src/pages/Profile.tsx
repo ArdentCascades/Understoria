@@ -35,6 +35,7 @@ import type {
   PendingEntry,
   PendingTaskCredit,
   PendingTaskEntry,
+  TransactionEntry,
 } from "@/lib/timebank";
 import { humanizeError } from "@/lib/humanizeError";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
@@ -67,10 +68,13 @@ import { ProposalsSection } from "@/components/ProposalsSection";
 import { LearnSection } from "@/components/LearnSection";
 import { PairingLogSection } from "@/components/PairingLogSection";
 import type {
+  Achievement,
   AchievementType,
   AvailabilityChip,
   FlagReason,
   Member,
+  Project,
+  ProjectTask,
 } from "@/types";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 
@@ -389,34 +393,37 @@ export default function ProfilePage() {
         learnMoreLabel={t("hints.balance.learnMoreLabel")}
       />
 
-      <ProfileEditor
-        member={currentMember}
-        focusOnMount={editRequested}
-        onFocusHandled={clearEditParam}
+      {/* Exchange history is promoted to sit directly under the
+          balance it itemizes — the every-visit pair (the number and
+          the ledger behind it) stays within one screen instead of
+          3–4 swipes apart. The About editor, touched rarely after
+          first setup, now lives below the participation rows rather
+          than between balance and history. */}
+      <ExchangeHistorySection
+        history={history}
+        pending={pending}
+        pendingTask={pendingTask}
+        memberMap={memberMap}
+        taskMap={taskMap}
+        projectMap={projectMap}
+        disputeIdByPostId={disputeIdByPostId}
       />
 
-      <ContextualHint
-        settingKey="inviteHintDismissed"
-        ariaLabel={t("hints.invite.label")}
-        message={t("hints.invite.message")}
-        learnMoreTo="/help#invite-someone"
-        learnMoreLabel={t("hints.invite.learnMoreLabel")}
-      />
       {/* Community-participation cluster. CSS columns at lg+ because
           the cards have uneven heights — Invites can be tall
           (many tokens) or short (none); Roles earned grows with
-          achievements; Exchange history grows with completed
-          exchanges. Columns balance the fill so cards don't sit next
-          to ragged empty space the way grid rows would.
+          achievements. Columns balance the fill so cards don't sit
+          next to ragged empty space the way grid rows would.
           `[&>*]:break-inside-avoid` keeps each card whole. Below lg
           the columns classes are inert and each card's own `mb-4`
           provides the spacing. DOM order is preserved so tab and
           screen-reader navigation are unaffected by the column
-          layout. After the Settings extraction this cluster is the
-          "what you're doing / what you've done" surfaces — a
-          conditional tasks-you're-carrying jump-off plus Invites,
-          Roles earned, and Exchange history. Data export moved to
-          Settings, MemberSwitcher to page bottom. */}
+          layout. This cluster is the "what you're doing / what
+          you've done" surfaces — a conditional tasks-you're-carrying
+          jump-off plus the organizer twin, Invites, and Roles
+          earned. Exchange history moved up beside the balance it
+          explains; data export lives in Settings, MemberSwitcher at
+          the page bottom. */}
       <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
         {/* Cross-project commitments jump-off. Rendered only when the
             member is actually carrying something — at zero the card
@@ -468,138 +475,33 @@ export default function ProfilePage() {
           invites={myInvites}
         />
 
-        <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
-          {t("profile.rolesEarned.title")}
-          <WhyTooltip principleId="no-leaderboards" />
-        </h2>
-        {myAchievements.length === 0 ? (
-          <EmptyState
-            illustration="basket"
-            variant="inset"
-            message={t("profile.rolesEarned.empty")}
-          />
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {myAchievements.map((a) => (
-              <li key={a.id}>
-                <AchievementBadge
-                  type={a.achievementType as AchievementType}
-                  earnedAt={a.earnedAt}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        {/* The invite hint sits adjacent to the Invites card it
+            explains — it used to float above the whole cluster,
+            several cards away from the Generate button it talks
+            about. `break-inside-avoid` keeps it in the same column
+            as its card at lg+. */}
+        <ContextualHint
+          settingKey="inviteHintDismissed"
+          ariaLabel={t("hints.invite.label")}
+          message={t("hints.invite.message")}
+          learnMoreTo="/help#invite-someone"
+          learnMoreLabel={t("hints.invite.learnMoreLabel")}
+        />
 
-      <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
-          {t("profile.history.title")}
-        </h2>
-        {history.length === 0 &&
-        pending.entries.length === 0 &&
-        pendingTask.entries.length === 0 ? (
-          <EmptyState
-            illustration="path"
-            variant="inset"
-            title={t("profile.history.emptyTitle")}
-            message={t("profile.history.empty")}
-            action={{ label: t("nav.board"), to: "/" }}
-          />
-        ) : (
-          <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
-            {/* In-motion entries first — they're the most recent
-                activity and the credit column explains the gap
-                between the list and the balance above. Distinguished
-                by a text badge plus muted/italic treatment, never by
-                color alone. */}
-            {pending.entries.map((entry) => (
-              <PendingHistoryRow
-                key={entry.postId}
-                entry={entry}
-                counterpartyName={
-                  memberMap.get(entry.counterparty)?.displayName ??
-                  t("common.memberFallback")
-                }
-              />
-            ))}
-            {/* Project-task pending — claimer-side incoming credit
-                only. The row links to the project page so a claimer
-                can nudge a stalled confirmation in-place (pull
-                recourse, no new notification surface). Helped-side
-                task pending is deliberately omitted per PR #221's
-                "indeterminate before confirmation" reasoning. */}
-            {pendingTask.entries.map((entry) => {
-              const task = taskMap.get(entry.taskId);
-              const project = projectMap.get(entry.projectId);
-              return (
-                <PendingTaskHistoryRow
-                  key={entry.taskId}
-                  entry={entry}
-                  taskTitle={task?.title ?? ""}
-                  projectTitle={
-                    project?.title ?? t("common.memberFallback")
-                  }
-                />
-              );
-            })}
-            {history.map(({ exchange, delta, counterparty }) => {
-              const other = memberMap.get(counterparty);
-              return (
-                <li
-                  key={exchange.id}
-                  className="flex items-center gap-3 py-3"
-                >
-                  <CategoryBadge category={exchange.category} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm">
-                      {delta > 0
-                        ? t("profile.history.helped")
-                        : t("profile.history.received")}{" "}
-                      <span className="font-medium">
-                        {other?.displayName ?? t("common.memberFallback")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
-                      <span>{formatRelativeTime(exchange.completedAt)}</span>
-                      {/* The chip links to the review conversation it
-                          names — anchored to the matching dispute card
-                          when one is resolvable, the disputes list
-                          otherwise. Same chip styling; the link is
-                          context, not alarm. */}
-                      {exchange.flaggedForReview && (
-                        <Link
-                          to={
-                            disputeIdByPostId.has(exchange.postId)
-                              ? `/disputes#${disputeIdByPostId.get(exchange.postId)}`
-                              : "/disputes"
-                          }
-                          title={t(flagReasonKey(exchange.flagReason))}
-                          className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
-                        >
-                          {t("profile.history.flag")}
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                  <span
-                    className={`text-sm font-semibold ${
-                      delta > 0
-                        ? "text-canopy-700 dark:text-canopy-300"
-                        : "text-moss-600 dark:text-moss-300"
-                    }`}
-                  >
-                    {formatSignedHours(delta)}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
+        <RolesEarnedSection achievements={myAchievements} />
       </div>
+
+      {/* About editor — touched rarely after first setup, so it sits
+          below the every-visit surfaces (balance, history,
+          participation) instead of between balance and history.
+          `/profile?edit=1` (the Board profile-nudge CTA) still lands
+          here: the editor scrolls itself into view via its own
+          section ref, so its stack position is free to change. */}
+      <ProfileEditor
+        member={currentMember}
+        focusOnMount={editRequested}
+        onFocusHandled={clearEditParam}
+      />
 
       {/* Community-governance cluster. CSS columns at lg+ for the
           same uneven-heights reason as the cluster above. After the
@@ -664,6 +566,175 @@ export default function ProfilePage() {
         onSwitch={setCurrentMember}
       />
     </div>
+  );
+}
+
+// The member's own roles/achievements list. Own-page stats are
+// explicitly allowed (operator ruling) — the no-leaderboards
+// principle forbids COMPARABLE stats, and this list never renders
+// anyone else's.
+function RolesEarnedSection({
+  achievements,
+}: {
+  achievements: Achievement[];
+}) {
+  const { t } = useTranslation();
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        {t("profile.rolesEarned.title")}
+        <WhyTooltip principleId="no-leaderboards" />
+      </h2>
+      {achievements.length === 0 ? (
+        <EmptyState
+          illustration="basket"
+          variant="inset"
+          message={t("profile.rolesEarned.empty")}
+        />
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {achievements.map((a) => (
+            <li key={a.id}>
+              <AchievementBadge
+                type={a.achievementType as AchievementType}
+                earnedAt={a.earnedAt}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// The member's exchange ledger — in-motion entries first, then
+// settled rows newest-first (transactionHistory's order). Extracted
+// from the page body so the stack reorder (history now sits directly
+// under the balance) keeps the page component readable.
+function ExchangeHistorySection({
+  history,
+  pending,
+  pendingTask,
+  memberMap,
+  taskMap,
+  projectMap,
+  disputeIdByPostId,
+}: {
+  history: TransactionEntry[];
+  pending: PendingBalance;
+  pendingTask: PendingTaskCredit;
+  memberMap: Map<string, Member>;
+  taskMap: Map<string, ProjectTask>;
+  projectMap: Map<string, Project>;
+  disputeIdByPostId: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        {t("profile.history.title")}
+      </h2>
+      {history.length === 0 &&
+      pending.entries.length === 0 &&
+      pendingTask.entries.length === 0 ? (
+        <EmptyState
+          illustration="path"
+          variant="inset"
+          title={t("profile.history.emptyTitle")}
+          message={t("profile.history.empty")}
+          action={{ label: t("nav.board"), to: "/" }}
+        />
+      ) : (
+        <ul className="flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
+          {/* In-motion entries first — they're the most recent
+              activity and the credit column explains the gap
+              between the list and the balance above. Distinguished
+              by a text badge plus muted/italic treatment, never by
+              color alone. */}
+          {pending.entries.map((entry) => (
+            <PendingHistoryRow
+              key={entry.postId}
+              entry={entry}
+              counterpartyName={
+                memberMap.get(entry.counterparty)?.displayName ??
+                t("common.memberFallback")
+              }
+            />
+          ))}
+          {/* Project-task pending — claimer-side incoming credit
+              only. The row links to the project page so a claimer
+              can nudge a stalled confirmation in-place (pull
+              recourse, no new notification surface). Helped-side
+              task pending is deliberately omitted per PR #221's
+              "indeterminate before confirmation" reasoning. */}
+          {pendingTask.entries.map((entry) => {
+            const task = taskMap.get(entry.taskId);
+            const project = projectMap.get(entry.projectId);
+            return (
+              <PendingTaskHistoryRow
+                key={entry.taskId}
+                entry={entry}
+                taskTitle={task?.title ?? ""}
+                projectTitle={
+                  project?.title ?? t("common.memberFallback")
+                }
+              />
+            );
+          })}
+          {history.map(({ exchange, delta, counterparty }) => {
+            const other = memberMap.get(counterparty);
+            return (
+              <li
+                key={exchange.id}
+                className="flex items-center gap-3 py-3"
+              >
+                <CategoryBadge category={exchange.category} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm">
+                    {delta > 0
+                      ? t("profile.history.helped")
+                      : t("profile.history.received")}{" "}
+                    <span className="font-medium">
+                      {other?.displayName ?? t("common.memberFallback")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
+                    <span>{formatRelativeTime(exchange.completedAt)}</span>
+                    {/* The chip links to the review conversation it
+                        names — anchored to the matching dispute card
+                        when one is resolvable, the disputes list
+                        otherwise. Same chip styling; the link is
+                        context, not alarm. */}
+                    {exchange.flaggedForReview && (
+                      <Link
+                        to={
+                          disputeIdByPostId.has(exchange.postId)
+                            ? `/disputes#${disputeIdByPostId.get(exchange.postId)}`
+                            : "/disputes"
+                        }
+                        title={t(flagReasonKey(exchange.flagReason))}
+                        className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+                      >
+                        {t("profile.history.flag")}
+                      </Link>
+                    )}
+                  </div>
+                </div>
+                <span
+                  className={`text-sm font-semibold ${
+                    delta > 0
+                      ? "text-canopy-700 dark:text-canopy-300"
+                      : "text-moss-600 dark:text-moss-300"
+                  }`}
+                >
+                  {formatSignedHours(delta)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 
