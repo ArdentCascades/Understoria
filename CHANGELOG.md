@@ -9,6 +9,33 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Profile page reordered around every-visit content, with rare-need
+  sections indexed and a two-pane layout at lg+.** (1) Mobile stack:
+  balance (+ its hint) → exchange history → participation rows
+  (carrying / organizing / Invites, with the invite hint now adjacent
+  to the Invites card) → Roles earned → the About editor (rarely
+  touched; it no longer separates the balance from the ledger that
+  itemizes it). The `?edit=1` Board-nudge deep link still lands on
+  the editor. (2) Exchange history clamps to its newest 10 settled
+  rows behind a "Show N older exchanges" toggle (render-layer only —
+  `transactionHistory` stays unbounded; pending rows never clamp).
+  (3) Learn, Disputes, Proposals, the Settings row, and Add device
+  fold into one "Community & account" index of labeled rows; Learn
+  and Add device disclose in place (the `/profile#design-principles`
+  deep link now auto-opens Learn's principles panel), Disputes /
+  Proposals keep their open counts. (4) CommunitySettings collapses
+  behind a default-closed `<details>` — still on the page per
+  `community-authority`, no longer ~500px of every visit. (5) At lg+
+  a sticky 320px rail (header/identity, balance + hint, Roles
+  earned) docks beside the main column, ProjectDetail-rail style:
+  two render sites for Roles earned, never CSS `order-*`, so DOM
+  order equals visual order at every breakpoint (WCAG 2.4.3).
+  Emergency stays a top-level card — never inside any disclosure
+  (privacy-as-precondition); the page above it is strictly shorter
+  than before. New `Profile.reflow.test.tsx`, `historyClamp` unit
+  tests, and disclosure default-closed tests lock the invariants.
+
 ### Removed
 - **Member pages carry no comparable stats or badges (operator
   ruling + `no-leaderboards`).** MemberDetail — the page for viewing
