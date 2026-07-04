@@ -217,15 +217,36 @@ export async function softPurge(): Promise<PurgeResult> {
   //   - `eventRsvps`: a member-attendance graph (who plans to be in
   //     which room) — precisely what the events design promises never
   //     to aggregate.
+  //   - `outbox`: rows hold the VERBATIM JSON payload of every pending
+  //     federated record — post titles/descriptions, task-comment
+  //     bodies, event text — the exact linkable text this purge blanks
+  //     one table over. Leaving it turned the scrub into theatre.
+  //   - `invites`: an open invite's `encoded` field is a live,
+  //     redeemable credential; a seized device must not keep working
+  //     invite links.
+  //   - `votes`: voterKey↔choice rows are a governance-participation
+  //     graph, same personal-relief class as the RSVPs.
   await db.transaction(
     "rw",
-    [db.blocks, db.previouslyBlocked, db.messages, db.drafts, db.eventRsvps],
+    [
+      db.blocks,
+      db.previouslyBlocked,
+      db.messages,
+      db.drafts,
+      db.eventRsvps,
+      db.outbox,
+      db.invites,
+      db.votes,
+    ],
     async () => {
       await db.blocks.clear();
       await db.previouslyBlocked.clear();
       await db.messages.clear();
       await db.drafts.clear();
       await db.eventRsvps.clear();
+      await db.outbox.clear();
+      await db.invites.clear();
+      await db.votes.clear();
     },
   );
   tables.push("blocks");
@@ -233,6 +254,9 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("messages");
   tables.push("drafts");
   tables.push("eventRsvps");
+  tables.push("outbox");
+  tables.push("invites");
+  tables.push("votes");
 
   // Settings deliberately survive: under the threat-model contract
   // ("anonymize all linkable text while preserving the signed exchange

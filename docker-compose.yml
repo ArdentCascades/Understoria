@@ -43,6 +43,13 @@ services:
       HOST: "0.0.0.0"
       PORT: "8787"
       DATABASE_PATH: "/data/understoria.db"
+      # Stable identifier for this node, stamped on every federated
+      # record and bound to the published system key in GET /config
+      # (autoConfirmedBy: "system:<NODE_ID>"). MUST be unique per node
+      # in a federation — if left unset every node defaults to
+      # "node_local", colliding the §4 nodeId↔key binding and
+      # misattributing records. Set it in .env before federating.
+      NODE_ID: "${NODE_ID:-node_local}"
       # MUST be your real PWA origin in production. A wildcard here is
       # a real bug: /auto-confirm is the system-key endpoint and a
       # permissive CORS in front of it widens its attack surface for
@@ -61,11 +68,18 @@ services:
       # .env. An empty string disables the auto-confirm endpoint
       # entirely (members never auto-credit; manual confirm still works).
       NODE_SYSTEM_SECRET_KEY: "${NODE_SYSTEM_SECRET_KEY:-}"
+      # Retired system pubkeys from past rotations, published in
+      # GET /config so pulling peers keep verifying pre-rotation
+      # records. JSON array of {"pubkey","retiredAt"}. Empty until you
+      # rotate. See docs/system-key-rotation.md.
+      NODE_SYSTEM_KEY_HISTORY: "${NODE_SYSTEM_KEY_HISTORY:-}"
       AUTO_CONFIRM_MIN_HOURS: "${AUTO_CONFIRM_MIN_HOURS:-168}"
       # Comma-separated list of peer node URLs (each MUST include the
       # /api prefix if the peer follows the same single-domain layout).
       # Leave empty for a solo launch.
       PEER_NODE_URLS: "${PEER_NODE_URLS:-}"
+      # How often the pull worker hits each peer (ms). Default 5 min.
+      PEER_PULL_INTERVAL_MS: "${PEER_PULL_INTERVAL_MS:-300000}"
     volumes:
       - understoria-data:/data
     cap_drop:

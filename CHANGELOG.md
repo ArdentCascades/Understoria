@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Round-2 review, purge/federation correctness.** softPurge now
+  clears `outbox` (verbatim payload text), `invites` (live redeemable
+  tokens), and `votes` (governance graph) — the sensitive tables it
+  had been leaving intact. `NODE_ID`, `NODE_SYSTEM_KEY_HISTORY`, and
+  `PEER_PULL_INTERVAL_MS` are plumbed through `docker-compose.yml`
+  (and `NODE_ID` documented in `.env.example`) — previously a Docker
+  deployment silently defaulted `NODE_ID` to `node_local` (colliding
+  the §4 nodeId↔key binding) and ignored any rotation history. The
+  outbox flush no longer marks a row delivered when its payload was
+  replaced mid-POST (which lost task-comment tombstones), and
+  auto-confirmed exchanges are no longer enqueued to `/exchanges`
+  (which 422-poisoned one outbox row per auto-confirm).
+
+### Fixed
 - **Round-2 review, production-breaking set.** (1) A single request
   could wedge task-comment federation mesh-wide: `deletedAt` is
   excluded from the signed payload and the federation cursor is

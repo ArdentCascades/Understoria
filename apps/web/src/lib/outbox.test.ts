@@ -126,6 +126,25 @@ describe("enqueueExchangeOutbox", () => {
     expect(await db.outbox.count()).toBe(1);
   });
 
+  it("never enqueues an auto-confirmed exchange (would 422-poison)", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    // POST /exchanges rejects autoConfirmed rows with 422; the node
+    // already has the row from POST /auto-confirm. Enqueuing one
+    // guaranteed a poisoned outbox entry per auto-confirm.
+    const auto: Exchange = {
+      ...fakeExchange("ex_auto"),
+      autoConfirmed: true,
+      autoConfirmedBy: "system:node_test",
+      autoConfirmedAt: 1_700_000_000_000,
+    };
+    const r = await enqueueExchangeOutbox(auto);
+    expect(r).toBeNull();
+    expect(await db.outbox.count()).toBe(0);
+  });
+
   it("identical re-enqueue preserves the pending row's retry state", async () => {
     await writeSubmitConfig({
       url: "https://node.example/api",
@@ -282,6 +301,33 @@ describe("flushOutboxOnce", () => {
     const row = (await db.outbox.toArray())[0];
     expect(row.status).toBe("delivered");
     expect(row.lastError).toBeUndefined();
+  });
+
+  it("does NOT mark delivered a row whose payload was replaced mid-flight", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const enq = await enqueueExchangeOutbox(fakeExchange("ex_race"));
+    // Simulate a concurrent in-place payload replacement (a tombstone
+    // superseding the insert) DURING the POST: the fetch handler
+    // rewrites the row's payload before returning 201. The flush must
+    // notice the payload changed and leave the row pending so the new
+    // payload ships next time — not mark the unsent payload delivered
+    // (which the dedup would then block from re-sending).
+    const fetchImpl = vi.fn(async () => {
+      await db.outbox.update(enq!.id, {
+        payload: JSON.stringify({ id: "ex_race", superseded: true }),
+      });
+      return new Response('{"stored":true}', { status: 201 });
+    });
+    const r = await flushOutboxOnce({
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(r).toEqual({ attempted: 1, delivered: 0, poisoned: 0, retried: 0 });
+    const row = await db.outbox.get(enq!.id);
+    expect(row!.status).toBe("pending");
+    expect(JSON.parse(row!.payload).superseded).toBe(true);
   });
 
   it("retries on 5xx with bumped attempts and a future nextAttemptAt", async () => {

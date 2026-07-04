@@ -280,6 +280,34 @@ describe("softPurge covers member-authored content tables", () => {
       status: "going",
       updatedAt: 1,
     } as never);
+    await db.outbox.put({
+      id: "ob_1",
+      kind: "post",
+      // Verbatim payload holds the same linkable text the scrub blanks
+      // in the source tables — must not survive one table over.
+      payload: JSON.stringify({ title: "Sensitive outbox title" }),
+      recordId: "p1",
+      createdAt: 1,
+      attempts: 0,
+      nextAttemptAt: 1,
+      status: "pending",
+    } as never);
+    await db.invites.put({
+      token: "inv_1",
+      inviterKey: "pk_a",
+      nodeId: NODE,
+      createdAt: 1,
+      expiresAt: 9_999_999_999_999,
+      status: "open",
+      encoded: "LIVE-REDEEMABLE-CREDENTIAL",
+    } as never);
+    await db.votes.put({
+      id: "vote_1",
+      proposalId: "prop_1",
+      voterKey: "pk_a",
+      choice: "yes",
+      createdAt: 1,
+    } as never);
     await db.eventCancellations.put({
       id: "ec_1",
       kind: "event_cancellation",
@@ -360,10 +388,17 @@ describe("softPurge covers member-authored content tables", () => {
     expect(act.data.hours).toBe(3);
     expect(act.data.edited).toBe(true);
 
-    // Relationship tables cleared outright.
+    // Relationship / credential tables cleared outright.
     expect(await db.messages.count()).toBe(0);
     expect(await db.drafts.count()).toBe(0);
     expect(await db.eventRsvps.count()).toBe(0);
+    expect(await db.outbox.count()).toBe(0);
+    expect(await db.invites.count()).toBe(0);
+    expect(await db.votes.count()).toBe(0);
+    // The outbox's verbatim payload text is gone with it.
+    expect(JSON.stringify(await db.outbox.toArray())).not.toContain(
+      "Sensitive outbox title",
+    );
 
     // The report lists only what was actually scrubbed — settings are
     // deliberately untouched and must not be claimed.
@@ -377,6 +412,9 @@ describe("softPurge covers member-authored content tables", () => {
       "eventCancellations",
       "proposals",
       "projectActivity",
+      "outbox",
+      "invites",
+      "votes",
     ]) {
       expect(result.tablesTouched).toContain(name);
     }

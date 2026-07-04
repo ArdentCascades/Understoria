@@ -114,6 +114,16 @@ const worker: WorkerHandle = {
  * configured — we don't want the outbox to accumulate rows for members
  * who have never opted into federation.
  *
+ * Auto-confirmed exchanges are NOT enqueued: they were finalized on
+ * the node by POST /auto-confirm (which inserts server-side and
+ * returns the signed row), so there is nothing to mirror — and
+ * POST /exchanges deliberately rejects `autoConfirmed` rows with 422
+ * (they must route through the dedicated endpoint, docs/auto-confirm-key.md
+ * §4). Enqueuing one therefore produced a guaranteed 422 → a
+ * permanently poisoned outbox row per auto-confirm, surfaced to the
+ * member as a delivery error. The node already has the row; the
+ * mirror is a no-op by construction.
+ *
  * The settings table must be in the calling transaction's scope. The
  * helper reads `communityNodeUrl` directly to avoid pulling the full
  * nodeSubmit module into the transaction scope.
@@ -121,6 +131,7 @@ const worker: WorkerHandle = {
 export async function enqueueExchangeOutbox(
   exchange: Exchange,
 ): Promise<OutboxRow | null> {
+  if (exchange.autoConfirmed) return null;
   return enqueueOutbox("exchange", exchange.id, exchange);
 }
 
@@ -480,35 +491,49 @@ export async function flushOutboxOnce(
       });
     }
 
-    if (result.ok) {
-      await db.outbox.update(row.id, {
-        status: "delivered",
-        lastAttemptAt: now,
-        lastError: undefined,
-      });
-      delivered += 1;
-      continue;
-    }
-
-    if (isPoisonResult(result)) {
-      await db.outbox.update(row.id, {
-        status: "poisoned",
-        attempts: row.attempts + 1,
-        lastAttemptAt: now,
-        lastError: result.error ?? `http_${result.status}`,
-      });
-      poisoned += 1;
-      continue;
-    }
-
-    const nextAttempts = row.attempts + 1;
-    await db.outbox.update(row.id, {
-      attempts: nextAttempts,
-      nextAttemptAt: now + nextBackoffMs(nextAttempts),
-      lastAttemptAt: now,
-      lastError: result.error ?? `http_${result.status}`,
+    // Apply the outcome ONLY if the row still carries the payload we
+    // just sent. `row` is a pre-fetch snapshot; while the POST was in
+    // flight, enqueueOutbox may have replaced this pending row's
+    // payload in place (e.g. a task-comment tombstone superseding the
+    // original insert). Blindly marking such a row "delivered" would
+    // record an UNSENT payload as sent — the identical-payload dedup
+    // then blocks any re-enqueue and the tombstone is lost, the exact
+    // failure the in-place replacement was meant to fix. The
+    // transactional compare-then-write leaves a superseded row
+    // pending (enqueueOutbox already pulled its nextAttemptAt to now),
+    // so the new payload ships on the next flush.
+    const applied = await db.transaction("rw", db.outbox, async () => {
+      const current = await db.outbox.get(row.id);
+      if (!current || current.payload !== row.payload) return false;
+      if (result.ok) {
+        await db.outbox.update(row.id, {
+          status: "delivered",
+          lastAttemptAt: now,
+          lastError: undefined,
+        });
+      } else if (isPoisonResult(result)) {
+        await db.outbox.update(row.id, {
+          status: "poisoned",
+          attempts: row.attempts + 1,
+          lastAttemptAt: now,
+          lastError: result.error ?? `http_${result.status}`,
+        });
+      } else {
+        const nextAttempts = row.attempts + 1;
+        await db.outbox.update(row.id, {
+          attempts: nextAttempts,
+          nextAttemptAt: now + nextBackoffMs(nextAttempts),
+          lastAttemptAt: now,
+          lastError: result.error ?? `http_${result.status}`,
+        });
+      }
+      return true;
     });
-    retried += 1;
+
+    if (!applied) continue; // superseded mid-flight; new payload pending
+    if (result.ok) delivered += 1;
+    else if (isPoisonResult(result)) poisoned += 1;
+    else retried += 1;
   }
 
   return { attempted: due.length, delivered, poisoned, retried };
