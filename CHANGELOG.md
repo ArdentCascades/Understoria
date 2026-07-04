@@ -48,6 +48,54 @@ include breaking changes.
   (new `redemptions` table; drops the always-empty `invites` table).
 
 ### Fixed
+- **Code-review sweep: federation data loss, double credit, purge
+  coverage, and six smaller correctness bugs.** (1) Server federation
+  cursor pagination could permanently skip records: the `list()`
+  queries for exchanges, vouches, posts, invites, claims, task
+  comments and the three co-organizer record kinds returned the
+  NEWEST page while pullers advance a max-cursor, so any backlog
+  larger than one page (new node onboarding, >500-row bursts)
+  orphaned everything below the newest page forever. All eleven
+  stores now page oldest-first with an inclusive cursor and id
+  tiebreak (timestamp ties at a page boundary can no longer be
+  lost). (2) The PWA ingested federated posts without verifying
+  their signatures — a compromised node or MITM could inject posts
+  attributed to any member's key; `pullFederatedPosts` now
+  shape-checks strictly and runs `verifyPost` like every other pull.
+  (3) Task-comment soft-delete tombstones never reached peers: the
+  outbox deduped on recordId alone (dropping the re-enqueued
+  tombstone), the pull window used `created_at` (a late tombstone
+  fell behind the cursor), and comment writes weren't atomic with
+  their outbox rows. Dedup is now on (recordId, payload), the pull
+  window/cursor use `max(created_at, deleted_at)`, and the writes
+  are transactional. (4) Project-task confirmation validated
+  eligibility outside its write transaction: two concurrent
+  confirmations (double-click, second tab, sweep racing a manual
+  confirm) each wrote a distinct signed Exchange — double credit —
+  and confirmations of different tasks clobbered each other's
+  `contributedHours`. The write path now re-reads and re-validates
+  task + project in-transaction. (5) The server never persisted the
+  §4 auto-confirm provenance columns, so system-signed exchanges
+  were served stripped of their `autoConfirmed*` markers and
+  REJECTED by every pulling peer (server schema v11 adds the
+  columns); the auto-confirm route's idempotent re-submission also
+  now returns the stored row via a point lookup instead of a broken
+  `list({limit:1}).find()`. (6) `hardPurge` had drifted ten tables
+  behind the schema — messages, task comments, drafts, proposals,
+  votes, events, RSVPs, cancellations, event-project links and node
+  config all survived the emergency wipe; it now enumerates
+  `db.tables` so nothing can drift again. `softPurge` gains the
+  missing content scrubs (comment bodies, event text, proposal text,
+  activity text; messages/drafts/RSVPs cleared) and no longer
+  falsely reports settings as scrubbed. (7) `disputeExchange`
+  accepted never-claimed, cancelled and already-disputed posts.
+  (8) The auto-confirm sweep measured a post's waiting window from
+  `createdAt` instead of when it entered `awaiting_confirmation`,
+  collapsing the dispute grace period for old posts; posts now stamp
+  `awaitingSince` at the transition. (9) `milestoneProgress` showed
+  the first milestone as reached before it was; below-first-threshold
+  now reports `current: null`. (10) The outbox worker scheduled its
+  wake from an arbitrary pending row instead of the earliest-due one.
 - **Invite redemption Phase 0: honest error exits, paste recovery,
   attach-don't-mint, origin-derived node suggestion**
   (`docs/invite-redemption.md` §5, client-only — zero new wire
