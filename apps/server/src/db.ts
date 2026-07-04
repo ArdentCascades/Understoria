@@ -50,6 +50,8 @@ import type {
 
 export interface ExchangeStore {
   insert(exchange: Exchange): void;
+  /** Point lookup by exchange id, or undefined when absent. */
+  get(id: string): Exchange | undefined;
   list(opts?: { since?: number; limit?: number }): Exchange[];
   count(): number;
   has(id: string): boolean;
@@ -693,6 +695,29 @@ function migrate(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '11')",
     ).run();
   }
+
+  // Schema v12 — persist the §4 auto-confirm provenance markers.
+  // The wire layer (parseExchange) and the /auto-confirm route both
+  // carry autoConfirmed / autoConfirmedBy / autoConfirmedAt, but the
+  // store had no columns for them, so insert() silently dropped the
+  // markers. Every system-signed exchange was then served by
+  // GET /exchanges stripped of its provenance — pulling peers took
+  // the member-signed verify path, checked the SYSTEM signature
+  // against the member's helpedKey, and rejected the row. Auto-
+  // confirmed exchanges therefore never federated at all, and the
+  // §4 "distinct label per provenance" contract was unverifiable
+  // downstream.
+  if (current < 12) {
+    db.exec(`
+      ALTER TABLE exchanges
+        ADD COLUMN auto_confirmed INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE exchanges ADD COLUMN auto_confirmed_by TEXT;
+      ALTER TABLE exchanges ADD COLUMN auto_confirmed_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '12')",
+    ).run();
+  }
 }
 
 export function createExchangeStore(db: DatabaseType): ExchangeStore {
@@ -700,15 +725,18 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
     INSERT INTO exchanges (
       id, post_id, helper_key, helped_key, hours_exchanged,
       helper_signature, helped_signature, completed_at, category, node_id,
-      flagged_for_review, flag_reason
+      flagged_for_review, flag_reason,
+      auto_confirmed, auto_confirmed_by, auto_confirmed_at
     ) VALUES (
       @id, @postId, @helperKey, @helpedKey, @hoursExchanged,
       @helperSignature, @helpedSignature, @completedAt, @category, @nodeId,
-      @flaggedForReview, @flagReason
+      @flaggedForReview, @flagReason,
+      @autoConfirmed, @autoConfirmedBy, @autoConfirmedAt
     )
   `);
 
   const hasStmt = db.prepare("SELECT 1 FROM exchanges WHERE id = ?");
+  const getStmt = db.prepare("SELECT * FROM exchanges WHERE id = ?");
   const countStmt = db.prepare("SELECT COUNT(*) AS n FROM exchanges");
 
   return {
@@ -726,7 +754,15 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
         nodeId: exchange.nodeId,
         flaggedForReview: exchange.flaggedForReview ? 1 : 0,
         flagReason: exchange.flagReason ?? null,
+        autoConfirmed: exchange.autoConfirmed ? 1 : 0,
+        autoConfirmedBy: exchange.autoConfirmedBy ?? null,
+        autoConfirmedAt: exchange.autoConfirmedAt ?? null,
       });
+    },
+
+    get(id) {
+      const row = getStmt.get(id) as ExchangeRow | undefined;
+      return row ? rowToExchange(row) : undefined;
     },
 
     list({ since, limit } = {}) {
@@ -1279,6 +1315,9 @@ interface ExchangeRow {
   node_id: string;
   flagged_for_review: number;
   flag_reason: string | null;
+  auto_confirmed: number;
+  auto_confirmed_by: string | null;
+  auto_confirmed_at: number | null;
 }
 
 function rowToExchange(r: ExchangeRow): Exchange {
@@ -1297,6 +1336,13 @@ function rowToExchange(r: ExchangeRow): Exchange {
   if (r.flagged_for_review) {
     out.flaggedForReview = true;
     if (r.flag_reason) out.flagReason = r.flag_reason as FlagReason;
+  }
+  // §4 provenance markers — restored exactly as inserted so peers can
+  // run verifyExchangeLabel on rows served by GET /exchanges.
+  if (r.auto_confirmed) {
+    out.autoConfirmed = true;
+    if (r.auto_confirmed_by) out.autoConfirmedBy = r.auto_confirmed_by;
+    if (r.auto_confirmed_at !== null) out.autoConfirmedAt = r.auto_confirmed_at;
   }
   return out;
 }
