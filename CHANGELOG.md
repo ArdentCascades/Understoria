@@ -9,6 +9,29 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Invite revocation now converges across devices (Phase 1).** A
+  revoked invite that was redeemed anyway used to show `revoked` only
+  on the inviter's device and `redeemed` everywhere else — a permanent
+  per-device split of the newcomer's trust state, contradicting the
+  redemption receipt's own "arrival order never matters" contract. A
+  new signed `InviteRevocation` record (single signer: the inviter,
+  over `{token, inviterKey, revokedAt, nodeId}`) now federates PWA↔node
+  like a redemption receipt: `revokeInvite` signs and enqueues it, a
+  new `POST/GET /invite-revocations` route stores it first-writer-wins
+  on a server-monotonic `receivedAt` cursor, and both devices pull it.
+  The merge is presence-based and commutative — a token's terminal
+  state is a pure function of which records exist for it, so a receipt
+  and a revocation may arrive in any order on any device and all land
+  on the same `redeemed_despite_revocation` state. The revocation is
+  authority-bound (§3.1): it only acts when its `inviterKey` matches
+  the redemption receipt's embedded, inviter-signed invite, so a third
+  party cannot revoke someone else's invite. This is the
+  convergence-only half of `docs/invite-revocation.md` §10; the trust
+  effect is unchanged (the implicit vouch still counts, "behaves as
+  today"), with vouch withdrawal deferred to Phase 2 behind the §9
+  governance ruling.
+
 ### Fixed
 - **Round-2 review, UI batch.** Co-organizer project actions
   (complete/resume/launch/pause/archive/add-task/bulk-add) are now

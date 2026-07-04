@@ -1525,7 +1525,13 @@ function InvitesSummaryLine({ invites }: { invites: InviteRow[] }) {
   const { t } = useTranslation();
   const counts = useMemo(() => {
     const c = { open: 0, redeemed: 0, revoked: 0, expired: 0 };
-    for (const inv of invites) c[inv.status] += 1;
+    for (const inv of invites) {
+      // A redeemed-despite-revocation invite is still a redemption for
+      // the one-line summary; the /invites page shows the fuller state.
+      const bucket =
+        inv.status === "redeemed_despite_revocation" ? "redeemed" : inv.status;
+      c[bucket] += 1;
+    }
     return c;
   }, [invites]);
   // Order matches the /invites page sort tier: open first, then

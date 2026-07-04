@@ -1798,6 +1798,7 @@
       "revoke": "Revocar",
       "statusOpen": "Abierta",
       "statusRedeemed": "Canjeada",
+      "statusRedeemedDespiteRevocation": "Canjeada tras revocarla",
       "statusRevoked": "Revocada",
       "statusExpired": "Caducada",
       "showShareSheet": "Mostrar código QR",

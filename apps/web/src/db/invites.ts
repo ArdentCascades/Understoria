@@ -32,9 +32,17 @@ import {
   encodeInviteToken,
 } from "@/lib/invite";
 import { getSecretKey } from "./secrets";
-import { enqueueRedemptionReceiptOutbox } from "@/lib/outbox";
-import { canonicalRedemptionPayload } from "@understoria/shared/crypto";
+import {
+  enqueueInviteRevocationOutbox,
+  enqueueRedemptionReceiptOutbox,
+  flushOutboxNow,
+} from "@/lib/outbox";
+import {
+  canonicalInviteRevocationPayload,
+  canonicalRedemptionPayload,
+} from "@understoria/shared/crypto";
 import type {
+  InviteRevocation,
   RedemptionPayload,
   RedemptionReceipt,
 } from "@understoria/shared/types";
@@ -115,9 +123,42 @@ export async function revokeInvite(
   if (!row) throw new Error("Invite not found on this node.");
   if (row.inviterKey !== inviterKey)
     throw new Error("Only the issuing member can revoke this invite.");
-  if (row.status === "redeemed")
+  if (
+    row.status === "redeemed" ||
+    row.status === "redeemed_despite_revocation"
+  )
     throw new Error("A redeemed invite cannot be revoked.");
-  await db.invites.put({ ...row, status: "revoked" });
+
+  // Sign the revocation BEFORE the transaction — the inviter's key may
+  // be passphrase-wrapped and getSecretKey may prompt/unwrap, which
+  // must not run inside the Dexie write transaction.
+  const secret = await getSecretKey(inviterKey);
+  const revokedAt = Date.now();
+  const payload = {
+    token,
+    inviterKey,
+    revokedAt,
+    nodeId: row.nodeId,
+  };
+  const revocation: InviteRevocation = {
+    ...payload,
+    signature: sign(canonicalInviteRevocationPayload(payload), secret),
+  };
+
+  // Flip the local row and enqueue the federated revocation atomically,
+  // so the inviter's device never ends up "revoked locally but never
+  // told anyone" — the exact per-device-divergence bug this closes.
+  await db.transaction(
+    "rw",
+    [db.invites, db.outbox, db.settings],
+    async () => {
+      await db.invites.put({ ...row, status: "revoked", revokedAt });
+      await enqueueInviteRevocationOutbox(revocation);
+    },
+  );
+  void flushOutboxNow().catch(() => {
+    // Errors surface via the outbox worker's own retry path.
+  });
 }
 
 export type RedeemError =

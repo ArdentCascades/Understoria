@@ -25,6 +25,7 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  InviteRevocation,
   RedemptionReceipt,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
@@ -227,6 +228,20 @@ export async function submitRedemptionReceiptToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/redemptions", receipt, config, deps);
+}
+
+/**
+ * Push a signed invite revocation. Mirrors the redemption-receipt
+ * submit; a 409 (token already revoked by a different inviter) is a
+ * poison status, same as the receipt route. See
+ * `docs/invite-revocation.md` §4.
+ */
+export async function submitInviteRevocationToNode(
+  revocation: InviteRevocation,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/invite-revocations", revocation, config, deps);
 }
 
 // NOTE: there is intentionally no `submitEventRsvpToNode`. RSVPs are

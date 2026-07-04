@@ -23,6 +23,7 @@ import { createMember } from "@/db/seed";
 import { verifyTaskComment } from "@/lib/crypto";
 import { encodeInviteToken } from "@/lib/invite";
 import {
+  parseInviteRevocation,
   parseRedemption,
   verifyCoOrganizerInvitation,
   verifyCoOrganizerInvitationResponse,
@@ -30,6 +31,7 @@ import {
   verifyEvent,
   verifyEventCancellation,
   verifyExchange,
+  verifyInviteRevocation,
   verifyPost,
   verifyRedemptionReceipt,
   verifyVouch,
@@ -1100,13 +1102,41 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
       });
       changed = true;
     } else if (existing.status === "revoked") {
-      if (!existing.redemptionObservedAt) {
-        await db.invites.update(receipt.invite.token, {
-          redemptionObservedAt: receipt.redeemedAt,
-          redemptionObservedBy: receipt.redeemedBy,
-        });
-        changed = true;
-      }
+      // Revocation arrived first (locally revoked, or a federated
+      // revocation converged here before the receipt). If the
+      // revocation is AUTHORITATIVE — its inviterKey matches the
+      // receipt's embedded, inviter-signed invite (docs/invite-
+      // revocation.md §3.1) — the terminal state is
+      // redeemed_despite_revocation on every device. If it does NOT
+      // match, the local "revoked" was never a real inviter's
+      // revocation, so the genuine redemption wins and we correct the
+      // row to plain redeemed.
+      const authoritative =
+        existing.revokedAt != null &&
+        existing.inviterKey === receipt.invite.inviterKey;
+      await db.invites.update(receipt.invite.token, {
+        status: authoritative ? "redeemed_despite_revocation" : "redeemed",
+        redeemedBy: receipt.redeemedBy,
+        redeemedAt: receipt.redeemedAt,
+        // Keep the older §6 observation fields populated for the
+        // Invites page's "used after you revoked it" line.
+        redemptionObservedAt: authoritative
+          ? existing.redemptionObservedAt ?? receipt.redeemedAt
+          : existing.redemptionObservedAt,
+        redemptionObservedBy: authoritative
+          ? existing.redemptionObservedBy ?? receipt.redeemedBy
+          : existing.redemptionObservedBy,
+        revokedAt: authoritative ? existing.revokedAt : null,
+        // Correct the authoritative invite fields from the receipt —
+        // a revocation-only placeholder row carried only guesses for
+        // these until the real embedded invite arrived.
+        inviterKey: receipt.invite.inviterKey,
+        nodeId: receipt.invite.nodeId,
+        createdAt: receipt.invite.createdAt,
+        expiresAt: receipt.invite.expiresAt,
+        encoded: encodeInviteToken(receipt.invite),
+      });
+      changed = true;
     } else if (
       existing.status === "redeemed" &&
       existing.redeemedBy !== receipt.redeemedBy
@@ -1148,6 +1178,148 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
   if (maxReceivedAt !== null) {
     await setSetting(
       SETTING_KEYS.federationLastRedemptionPull,
+      String(maxReceivedAt),
+    );
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull invite revocations from the community node — Phase 1 of
+ * `docs/invite-revocation.md`. Converges the newcomer's trust state
+ * across devices: without this leg, a revoked-then-redeemed invite
+ * showed `revoked` only on the inviter's device and `redeemed`
+ * (counting the implicit vouch) everywhere else.
+ *
+ * Cursor: the server-assigned `receivedAt`, same skew-safe deviation
+ * as the redemption pull. Verification: `verifyInviteRevocation` per
+ * row; bad signatures skipped WITHOUT advancing the cursor.
+ *
+ * Merge — presence-based and commutative (§5). The revocation is
+ * AUTHORITY-BOUND only when its `inviterKey` matches the local
+ * redeemed row's inviterKey (which came from the receipt's embedded,
+ * inviter-signed invite, §3.1); an unauthoritative revocation for a
+ * redeemed token is ignored. A revocation with no local row is stored
+ * as a placeholder so a later receipt converges to
+ * `redeemed_despite_revocation`.
+ */
+export async function pullFederatedInviteRevocations(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since =
+    (await getSetting(SETTING_KEYS.federationLastInviteRevocationPull)) ?? "0";
+  const params = new URLSearchParams({ limit: "200", since });
+  const url = `${baseUrl.replace(/\/+$/, "")}/invite-revocations?${params.toString()}`;
+
+  let body: { inviteRevocations?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { inviteRevocations?: unknown[] };
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(body.inviteRevocations)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxReceivedAt: number | null = Number(since);
+
+  for (const raw of body.inviteRevocations) {
+    const r = raw as Record<string, unknown>;
+    const receivedAt = r.receivedAt;
+    const parsed = parseInviteRevocation(raw);
+    if (!parsed.ok || typeof receivedAt !== "number") {
+      skipped += 1;
+      continue;
+    }
+    const revocation = parsed.value;
+    if (!verifyInviteRevocation(revocation)) {
+      skipped += 1;
+      // Do NOT advance the cursor past a rejected row.
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxReceivedAt === null || receivedAt > maxReceivedAt) {
+        maxReceivedAt = receivedAt;
+      }
+    };
+
+    const existing = await db.invites.get(revocation.token);
+    let changed = false;
+
+    if (!existing) {
+      // Revocation arrived before any receipt on this device. Store a
+      // placeholder revoked row so a later receipt converges to
+      // redeemed_despite_revocation. createdAt/expiresAt/encoded are
+      // unknown here (we never saw the invite) — corrected from the
+      // receipt's embedded invite if one arrives.
+      await db.invites.put({
+        token: revocation.token,
+        inviterKey: revocation.inviterKey,
+        nodeId: revocation.nodeId,
+        createdAt: revocation.revokedAt,
+        expiresAt: revocation.revokedAt,
+        status: "revoked",
+        redeemedBy: null,
+        redeemedAt: null,
+        encoded: "",
+        revokedAt: revocation.revokedAt,
+      });
+      changed = true;
+    } else if (existing.inviterKey !== revocation.inviterKey) {
+      // Authority binding (§3.1): a revocation can only act on a token
+      // whose real inviter it names. A mismatch is a third party
+      // trying to revoke someone else's invite — inert.
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped invite revocation whose inviterKey does not match the local invite",
+          { token: revocation.token },
+        );
+      }
+      skipped += 1;
+      advanceCursor();
+      continue;
+    } else if (
+      existing.status === "redeemed" ||
+      existing.status === "redeemed_despite_revocation"
+    ) {
+      // Receipt already seen — the terminal state is
+      // redeemed_despite_revocation. Idempotent once revokedAt is set.
+      if (
+        existing.status !== "redeemed_despite_revocation" ||
+        existing.revokedAt == null
+      ) {
+        await db.invites.update(revocation.token, {
+          status: "redeemed_despite_revocation",
+          revokedAt: revocation.revokedAt,
+        });
+        changed = true;
+      }
+    } else if (existing.revokedAt == null) {
+      // Open / already-revoked row without the marker — record the
+      // revocation. (The inviter's own device already set this locally;
+      // this is the idempotent / other-device path.)
+      await db.invites.update(revocation.token, {
+        status: "revoked",
+        revokedAt: revocation.revokedAt,
+      });
+      changed = true;
+    }
+
+    if (changed) inserted += 1;
+    else skipped += 1;
+    advanceCursor();
+  }
+
+  if (maxReceivedAt !== null) {
+    await setSetting(
+      SETTING_KEYS.federationLastInviteRevocationPull,
       String(maxReceivedAt),
     );
   }

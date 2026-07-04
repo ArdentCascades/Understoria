@@ -424,6 +424,34 @@ export interface RedemptionReceipt extends RedemptionPayload {
 }
 
 /**
+ * Signed record propagating an inviter's revocation of one invite
+ * token. See `docs/invite-revocation.md`. Single-signer (the original
+ * inviter). Names one token only, and only ever after the inviter
+ * chose to kill it, so it leaks nothing about unused invites. The
+ * revocation is authoritative only when its `(token, inviterKey)`
+ * matches a redemption receipt's embedded, inviter-signed invite —
+ * that binding lives in the merge layer, not this signature.
+ */
+export interface InviteRevocationPayload {
+  /** The invite being revoked — dedup / identity key. */
+  token: string;
+  /** The original inviter's Ed25519 public key (the signer). */
+  inviterKey: string;
+  /** Epoch ms, inviter's device clock. Display-only: the merge is
+   *  keyed on record presence, never on comparing this to redeemedAt,
+   *  so a backdated value buys nothing. */
+  revokedAt: number;
+  /** The invite's node — mirrors the receipt's embedded invite. */
+  nodeId: string;
+}
+
+export interface InviteRevocation extends InviteRevocationPayload {
+  /** Ed25519 detached signature by `inviterKey` over
+   *  `canonicalInviteRevocationPayload(payload)`. */
+  signature: string;
+}
+
+/**
  * Lightweight claim notification — pushed to the outbox when a member
  * claims a cross-node post so the poster's node learns about it.
  * Unsigned for v1 (the exchange itself is the authoritative signed

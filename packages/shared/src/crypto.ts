@@ -37,6 +37,8 @@ import type {
   InvitePayload,
   Post,
   PostPayload,
+  InviteRevocation,
+  InviteRevocationPayload,
   RedemptionPayload,
   RedemptionReceipt,
   SignedInvite,
@@ -491,6 +493,90 @@ export function parseRedemption(input: unknown): ParseRedemptionResult {
       redeemedBy: r.redeemedBy as string,
       displayName,
       redeemedAt: r.redeemedAt as number,
+      signature: r.signature as string,
+    },
+  };
+}
+
+/**
+ * Canonical, stable serialization of an invite-revocation payload —
+ * the bytes the inviter's secret key signs. Field order is fixed for
+ * cross-engine JSON stability, same discipline as
+ * `canonicalCoOrganizerInvitationRevocationPayload`. `signature` is
+ * NOT part of the canonical payload. See `docs/invite-revocation.md`
+ * §3.
+ */
+export function canonicalInviteRevocationPayload(
+  p: InviteRevocationPayload,
+): string {
+  return JSON.stringify({
+    token: p.token,
+    inviterKey: p.inviterKey,
+    revokedAt: p.revokedAt,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Verify an invite revocation's signature against the inviter's
+ * public key. Single-signer discipline: the inviter is the only valid
+ * signer.
+ *
+ * This proves the holder of `inviterKey`'s secret asked to revoke this
+ * token while claiming to be its inviter. It does NOT prove
+ * `inviterKey` actually issued the token — invites are not registered
+ * server-side (`docs/invite-revocation.md` §3.1). The authority
+ * binding (matching the redeemed invite's embedded, inviter-signed
+ * `inviterKey`) lives in the merge layer, not here.
+ */
+export function verifyInviteRevocation(rec: InviteRevocation): boolean {
+  if (!rec.signature) return false;
+  const payload = canonicalInviteRevocationPayload(rec);
+  return verify(payload, rec.signature, rec.inviterKey);
+}
+
+export type ParseInviteRevocationResult =
+  | { ok: true; value: InviteRevocation }
+  | { ok: false; error: string };
+
+/**
+ * Shape-level validation for an invite revocation, in the shared
+ * package so the server route and the PWA pull gate on the identical
+ * check (same rationale as `parseRedemption`).
+ */
+export function parseInviteRevocation(
+  input: unknown,
+): ParseInviteRevocationResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["token", "inviterKey", "nodeId", "signature"] as const) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.revokedAt !== "number" ||
+    !Number.isInteger(r.revokedAt) ||
+    r.revokedAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "revokedAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.revokedAt as number) > oneDayFromNow) {
+    return { ok: false, error: "revokedAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      token: r.token as string,
+      inviterKey: r.inviterKey as string,
+      revokedAt: r.revokedAt as number,
+      nodeId: r.nodeId as string,
       signature: r.signature as string,
     },
   };

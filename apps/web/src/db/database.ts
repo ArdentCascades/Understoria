@@ -113,7 +113,11 @@ export interface OutboxRow {
     // yet (see enqueueRedemptionReceiptOutbox in lib/outbox.ts) —
     // the receipt is the member's only proof-of-joining, and fresh
     // devices typically configure the node AFTER redeeming.
-    | "redemption_receipt";
+    | "redemption_receipt"
+    // docs/invite-revocation.md §4: the signed InviteRevocation pushed
+    // to POST /invite-revocations. Like the receipt, enqueued even
+    // without a configured node URL.
+    | "invite_revocation";
   // Intentionally NOT a member of this union: "event_rsvp". EventRsvpRow
   // is local-only by design (docs/community-events.md §4 + §7); RSVPs
   // never enter the outbox. The union rejects "event_rsvp" at the
@@ -161,7 +165,15 @@ export interface InviteRow {
   nodeId: string;
   createdAt: number;
   expiresAt: number;
-  status: "open" | "redeemed" | "revoked" | "expired";
+  status:
+    | "open"
+    | "redeemed"
+    | "revoked"
+    | "expired"
+    // docs/invite-revocation.md §5.1: the inviter revoked, but a
+    // receipt for the same token also converged. An honest, neutral
+    // state — never an ejection control.
+    | "redeemed_despite_revocation";
   redeemedBy: string | null;
   redeemedAt: number | null;
   /** URL-encoded token string (base64url of the signed invite JSON). */
@@ -181,6 +193,16 @@ export interface InviteRow {
   /** Who used the revoked invite — companion to
    *  `redemptionObservedAt`. */
   redemptionObservedBy?: string | null;
+  /**
+   * When a revocation for this token is KNOWN on this device — set by
+   * the local `revokeInvite` and by `pullFederatedInviteRevocations`
+   * (docs/invite-revocation.md). Presence of this alongside a
+   * `redeemedBy` is what derives the `redeemed_despite_revocation`
+   * terminal status uniformly on every device, independent of which
+   * federation leg (receipt or revocation) arrived first. Absent on
+   * rows never revoked and on rows pre-dating this feature.
+   */
+  revokedAt?: number | null;
 }
 
 /**
@@ -936,6 +958,11 @@ export const SETTING_KEYS = {
    *  back-dated `redeemedAt` must never strand a receipt below this
    *  cursor forever. */
   federationLastRedemptionPull: "federationLastRedemptionPull",
+  /** Cursor for `pullFederatedInviteRevocations` — highest
+   *  server-assigned `receivedAt` observed so far. Same skew-safe
+   *  server-monotonic cursor as the redemption pull
+   *  (`docs/invite-revocation.md` §4). */
+  federationLastInviteRevocationPull: "federationLastInviteRevocationPull",
   /** Cursor for `pullFederatedVouches` — highest `createdAt` observed
    *  so far on vouch pulls. The §9 companion leg of
    *  `docs/invite-redemption.md`: manual vouches previously pushed up
