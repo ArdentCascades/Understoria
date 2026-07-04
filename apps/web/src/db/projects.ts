@@ -849,8 +849,12 @@ export async function _systemAutoConfirmTask(
  * Private — the shared write path used by both
  * `confirmProjectTaskCompletion` (member-signed) and
  * `_systemAutoConfirmTask` (system-signed). Caller has already done
- * eligibility / signing; this function only persists, increments
- * project hours, fires milestones, and recomputes achievements.
+ * eligibility / signing on a pre-transaction snapshot; this function
+ * RE-VALIDATES that snapshot against fresh rows inside its write
+ * transaction (status still awaiting_confirmation, completer and
+ * hours unchanged) so concurrent confirmations can't both land, then
+ * persists, increments project hours, fires milestones, and
+ * recomputes achievements.
  *
  * Not exported. Tests exercise it through the two public entry
  * points so the guard chain (self-confirm, organizer role) is part
@@ -883,11 +887,42 @@ async function _writeTaskConfirmation(
       db.achievements,
     ],
     async () => {
+      // Re-read BOTH rows inside the transaction and re-validate.
+      // The public entry points checked eligibility on a
+      // pre-transaction snapshot (the signing keys must load outside
+      // the txn scope), so a concurrent confirmation — a
+      // double-clicked button, a second tab, or the auto-confirm
+      // sweep racing a manual confirm — could pass the outside check
+      // twice and write two distinct Exchange rows for one task:
+      // double credit. The re-check makes the loser abort here, and
+      // Dexie rolls its transaction back with nothing written.
+      const freshTask = await db.projectTasks.get(task.id);
+      if (!freshTask) throw new Error("Task not found.");
+      if (freshTask.status !== "awaiting_confirmation") {
+        throw new Error("Task was already confirmed.");
+      }
+      if (freshTask.completedBy !== exchange.helperKey) {
+        throw new Error(
+          "Task's completer changed while confirming — please retry.",
+        );
+      }
+      // The exchange was signed over creditHoursForTask(task). If the
+      // claimer restated their hours between snapshot and write, the
+      // signed figure no longer matches the task we'd be closing —
+      // abort rather than record a mismatched amount.
+      if (creditHoursForTask(freshTask) !== exchange.hoursExchanged) {
+        throw new Error(
+          "Task's hours changed while confirming — please retry.",
+        );
+      }
+      const freshProject = await db.projects.get(project.id);
+      if (!freshProject) throw new Error("Parent project not found.");
+
       await db.exchanges.put(exchange);
       await enqueueExchangeOutbox(exchange);
 
       const updatedTask: ProjectTask = {
-        ...task,
+        ...freshTask,
         status: "completed",
         completedAt: now,
         exchangeId: exchange.id,
@@ -897,29 +932,32 @@ async function _writeTaskConfirmation(
       // Project progress is the sum of its signed exchanges, so it
       // counts the recorded (actual) hours — `creditHoursForTask`,
       // which equals `exchange.hoursExchanged`. Milestones fire against
-      // that truth; `targetHours` stays an estimate.
-      const creditHours = creditHoursForTask(task);
+      // that truth; `targetHours` stays an estimate. Summed from the
+      // FRESH project row: two tasks of the same project confirmed
+      // concurrently must both land in the total (a stale snapshot
+      // here made the second write clobber the first).
+      const creditHours = creditHoursForTask(freshTask);
       const newContributed = roundHours(
-        project.contributedHours + creditHours,
+        freshProject.contributedHours + creditHours,
       );
       const milestones = milestonesCrossed(
-        project.contributedHours,
+        freshProject.contributedHours,
         newContributed,
-        project.targetHours,
+        freshProject.targetHours,
       );
       const updatedProject: Project = {
-        ...project,
+        ...freshProject,
         contributedHours: newContributed,
       };
       await db.projects.put(updatedProject);
 
       const confirmActivityData: Record<string, unknown> = {
-        taskId: task.id,
+        taskId: freshTask.id,
         exchangeId: exchange.id,
         helperKey: exchange.helperKey,
         hours: creditHours,
-        estimatedHours: task.estimatedHours,
-        actualHours: task.actualHours,
+        estimatedHours: freshTask.estimatedHours,
+        actualHours: freshTask.actualHours,
       };
       if (exchange.autoConfirmed) {
         confirmActivityData.autoConfirmed = true;
@@ -928,19 +966,19 @@ async function _writeTaskConfirmation(
         confirmActivityData.acknowledgment = acknowledgment.trim();
       }
       await logActivity(
-        project.id,
+        freshProject.id,
         "task_confirmed",
         organizerKey,
         confirmActivityData,
-        project.nodeId,
+        freshProject.nodeId,
       );
       for (const m of milestones) {
         await logActivity(
-          project.id,
+          freshProject.id,
           "milestone_reached",
           organizerKey,
           { milestone: m },
-          project.nodeId,
+          freshProject.nodeId,
         );
       }
 
