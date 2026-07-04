@@ -40,8 +40,21 @@ import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { OverflowMenu } from "@/components/OverflowMenu";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 
+/**
+ * Route wrapper that REMOUNTS the conversation when `:memberKey`
+ * changes. In the lg+ split pane, React Router reuses the same
+ * component instance across a param change, so without a key the
+ * composer text drafted for member A stayed addressed to member B
+ * (a wrong-recipient send risk), the in-conversation search state
+ * persisted, and A's decrypted messages briefly rendered under B's
+ * header. Keying on the param resets all of that cleanly.
+ */
 export default function ConversationPage() {
   const { memberKey } = useParams<{ memberKey: string }>();
+  return <ConversationView key={memberKey ?? ""} memberKey={memberKey} />;
+}
+
+function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   const { currentMember, members, posts, lockState, blockedKeys } = useApp();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();

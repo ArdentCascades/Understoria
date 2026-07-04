@@ -325,6 +325,14 @@ export default function ProjectDetailPage() {
   }
 
   const isPrimaryOrganizer = currentMember?.publicKey === project.organizerKey;
+  // The acting member's key for organizer actions — the ACTOR recorded
+  // in logActivity and checked by requireOrganizer, so a co-organizer's
+  // action is attributed to them (not silently to the primary, which
+  // corrupted the project history and the adoption "organizer gone
+  // quiet" signal). Empty-string placeholder for the null-member case
+  // is never reached: every action affordance below is gated on `isOrg`
+  // / `isPrimaryOrganizer`, both false when `currentMember` is null.
+  const actorKey = currentMember?.publicKey ?? "";
   const showCoOrgManagement =
     isPrimaryOrganizer && project.status !== "completed" && project.status !== "archived";
   const showHandoff =
@@ -425,7 +433,7 @@ export default function ProjectDetailPage() {
       key: "complete",
       label: t("projects.detail.markComplete"),
       onSelect: () => {
-        void run(() => completeProject(project.id, project.organizerKey));
+        void run(() => completeProject(project.id, actorKey));
       },
     });
   }
@@ -434,7 +442,7 @@ export default function ProjectDetailPage() {
       key: "resume",
       label: t("projects.detail.resume"),
       onSelect: () => {
-        void run(() => resumeProject(project.id, project.organizerKey));
+        void run(() => resumeProject(project.id, actorKey));
       },
     });
   }
@@ -443,7 +451,7 @@ export default function ProjectDetailPage() {
       key: "archive",
       label: t("projects.archive.button"),
       onSelect: () => {
-        void run(() => archiveProject(project.id, project.organizerKey));
+        void run(() => archiveProject(project.id, actorKey));
       },
     });
   }
@@ -452,7 +460,7 @@ export default function ProjectDetailPage() {
       key: "unarchive",
       label: t("projects.archive.unarchive"),
       onSelect: () => {
-        void run(() => unarchiveProject(project.id, project.organizerKey));
+        void run(() => unarchiveProject(project.id, actorKey));
       },
     });
   }
@@ -468,7 +476,12 @@ export default function ProjectDetailPage() {
       </button>
 
       {project.status === "planning" && (
-        <PlanningBanner project={project} isOrganizer={isOrg} onRun={run} />
+        <PlanningBanner
+          project={project}
+          isOrganizer={isOrg}
+          actorKey={actorKey}
+          onRun={run}
+        />
       )}
 
       {/* Phase 2.2: 2-pane layout at lg+ — meta (overview card +
@@ -802,13 +815,22 @@ export default function ProjectDetailPage() {
           {isOrg &&
             project.status !== "completed" &&
             project.status !== "archived" && (
-              <AddTaskForm project={project} onRun={run} />
+              <AddTaskForm
+                project={project}
+                actorKey={actorKey}
+                onRun={run}
+              />
             )}
 
           {isOrg &&
             project.status !== "completed" &&
             project.status !== "archived" && (
-              <BulkTaskForm project={project} nodeId={nodeId} onRun={run} />
+              <BulkTaskForm
+                project={project}
+                nodeId={nodeId}
+                actorKey={actorKey}
+                onRun={run}
+              />
             )}
 
           <WorkDaysSection project={project} isOrg={isOrg} />
@@ -863,7 +885,11 @@ export default function ProjectDetailPage() {
               </summary>
               <div className="mt-3 flex flex-col gap-4">
                 {showLifecycleControls && (
-                  <OrganizerControls project={project} onRun={run} />
+                  <OrganizerControls
+          project={project}
+          actorKey={actorKey}
+          onRun={run}
+        />
                 )}
                 {showCoOrgManagement && (
                   <CoOrganizerSection
@@ -1191,8 +1217,10 @@ function CompletionMoment({
 function PlanningBanner({
   project,
   isOrganizer,
+  actorKey,
   onRun,
 }: {
+  actorKey: string;
   project: Project;
   isOrganizer: boolean;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
@@ -1225,7 +1253,7 @@ function PlanningBanner({
             aria-busy={pending}
             onClick={() =>
               dispatch(() =>
-                launchProject(project.id, project.organizerKey),
+                launchProject(project.id, actorKey),
               )
             }
           >
@@ -1348,9 +1376,11 @@ function WorkingAlongsideCard({
 // overflow menu.
 function OrganizerControls({
   project,
+  actorKey,
   onRun,
 }: {
   project: Project;
+  actorKey: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
@@ -1425,7 +1455,7 @@ function OrganizerControls({
           onSubmit={async (e) => {
             e.preventDefault();
             const ok = await dispatch(() =>
-              pauseProject(project.id, project.organizerKey, pauseNote),
+              pauseProject(project.id, actorKey, pauseNote),
             );
             if (ok) {
               setShowPauseForm(false);
@@ -1984,9 +2014,11 @@ function SortableTaskRow({
 
 function AddTaskForm({
   project,
+  actorKey,
   onRun,
 }: {
   project: Project;
+  actorKey: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
@@ -2015,7 +2047,7 @@ function AddTaskForm({
     if (!Number.isFinite(h) || h <= 0) return;
     setSubmitting(true);
     const ok = await onRun(() =>
-      addProjectTask(project.id, project.organizerKey, {
+      addProjectTask(project.id, actorKey, {
         title,
         description,
         category,
@@ -2890,10 +2922,12 @@ function CoOrganizerStepDownSection({
 function BulkTaskForm({
   project,
   nodeId,
+  actorKey,
   onRun,
 }: {
   project: Project;
   nodeId: string;
+  actorKey: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
 }) {
   const { t } = useTranslation();
@@ -2913,7 +2947,7 @@ function BulkTaskForm({
     const ok = await onRun(() =>
       bulkAddTasks(
         project.id,
-        project.organizerKey,
+        actorKey,
         text.split("\n"),
         nodeId,
       ),

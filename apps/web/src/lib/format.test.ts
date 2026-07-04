@@ -79,6 +79,22 @@ describe("formatRelativeTime", () => {
     expect(typeof result).toBe("string");
     expect(result.length).toBeGreaterThan(0);
   });
+
+  it("does not render '0 years' in the 360–364-day boundary window", () => {
+    // months=floor(days/30) reaches 12 at day 360 (failing months<12),
+    // while years=floor(days/365) is still 0 — the old code rendered
+    // "0y ago". Every timestamp ages through this window.
+    for (const days of [359, 360, 362, 364]) {
+      const out = formatRelativeTime(NOW - days * ONE_DAY_MS, NOW);
+      // Months tier (e.g. "11mo ago" / "12mo ago"), never the buggy
+      // "0y ago".
+      expect(out).toMatch(/mo|month|mes/i);
+      expect(out).not.toMatch(/0\s*(y|year|año)/i);
+    }
+    // At 365 days it becomes 1 year, not 0.
+    const oneYear = formatRelativeTime(NOW - 365 * ONE_DAY_MS, NOW);
+    expect(oneYear).toMatch(/1\s*(y|year|año)/i);
+  });
 });
 
 describe("formatAbsoluteDate", () => {

@@ -9,6 +9,22 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Round-2 review, UI batch.** Co-organizer project actions
+  (complete/resume/launch/pause/archive/add-task/bulk-add) are now
+  attributed to the acting member, not the primary organizer — the
+  misattribution corrupted project history and the adoption
+  "organizer gone quiet" signal. The repost form no longer loses the
+  member's edits when a background posts write re-runs its prefill
+  (one-shot seed). Switching conversations in the split pane now
+  remounts the view (keyed on the member), fixing a wrong-recipient
+  draft carryover, stale search state, and a cross-thread message
+  flash. PostForm's "matching needs" links land on the Needs tab
+  (were `?tab=NEED`, which parsed to Projects). `useDraftAutosave`
+  flushes its pending write on unmount instead of dropping the last
+  ≤600ms of edits. `formatRelativeTime` no longer renders "0y ago"
+  for timestamps 360–364 days old.
+
 ### Security
 - **§4 auto-confirm: fail closed on nodeId shadowing.** A compromised
   peer could serve `GET /config` claiming another node's `nodeId`

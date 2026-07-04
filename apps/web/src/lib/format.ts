@@ -57,7 +57,12 @@ export function formatRelativeTime(
   const weeks = Math.floor(days / 7);
   if (weeks < 5) return t("format.weeksAgo", { count: weeks });
   const months = Math.floor(days / 30);
-  if (months < 12) return t("format.monthsAgo", { count: months });
+  // Gate the year handoff on DAYS, not on `months < 12`. With a 30-day
+  // month and a 365-day year, days 360–364 give months=12 (failing
+  // `months < 12`) but years=0 — rendering a nonsensical "0y ago". Any
+  // timestamp ages through that 5-day window. Handing off at 365 days
+  // shows "12 months ago" there instead, then "1 year" at day 365.
+  if (days < 365) return t("format.monthsAgo", { count: months });
   const years = Math.floor(days / 365);
   return t("format.yearsAgo", { count: years });
 }
