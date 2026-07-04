@@ -111,6 +111,11 @@ function jsonResponse(body: unknown, status = 200): ReturnType<Fetcher> {
  *  while the worker now calls every kind's endpoint per peer. */
 function exchangeOnly(inner: Fetcher): Fetcher {
   return (url) => {
+    // "/config" answers `{}` — "peer publishes no system key" — so
+    // member-signed exchange pulls proceed under the strict resolver.
+    if (/\/config\b/.test(url)) {
+      return jsonResponse({});
+    }
     if (/\/vouches\b/.test(url)) {
       return jsonResponse({ count: 0, vouches: [] });
     }
@@ -304,6 +309,123 @@ describe("pullFromPeer", () => {
     });
     expect(result.latestCompletedAt).toBeNull();
     expect(result.insertedCount).toBe(0);
+  });
+});
+
+describe("pullFromPeer — §4 strict verification of auto-confirmed rows", () => {
+  /** A system-signed exchange: the helper signs the canonical payload
+   *  with their member key; the NODE's system key signs the same
+   *  bytes as the helped side. */
+  function makeSystemSignedExchange(opts: {
+    systemSecretKey: string;
+    nodeId: string;
+    completedAt?: number;
+  }): Exchange {
+    const helper = generateKeyPair();
+    const helped = generateKeyPair();
+    const base = {
+      id: `x_${Math.random().toString(36).slice(2)}`,
+      postId: "p_auto",
+      helperKey: helper.publicKey,
+      helpedKey: helped.publicKey,
+      hoursExchanged: 1,
+      category: "other" as const,
+      completedAt: opts.completedAt ?? Date.now(),
+      nodeId: opts.nodeId,
+    };
+    const payload = canonicalExchangePayload({
+      postId: base.postId,
+      helperKey: base.helperKey,
+      helpedKey: base.helpedKey,
+      hours: base.hoursExchanged,
+      category: base.category,
+      completedAt: base.completedAt,
+    });
+    return {
+      ...base,
+      helperSignature: sign(payload, helper.secretKey),
+      helpedSignature: sign(payload, opts.systemSecretKey),
+      autoConfirmed: true,
+      autoConfirmedBy: `system:${opts.nodeId}`,
+      autoConfirmedAt: base.completedAt,
+    };
+  }
+
+  it("accepts a system-signed row when the resolver knows the origin node's key", async () => {
+    const store = createExchangeStore(db);
+    const systemKp = generateKeyPair();
+    const row = makeSystemSignedExchange({
+      systemSecretKey: systemKp.secretKey,
+      nodeId: "node_peer",
+    });
+    const result = await pullFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher: () => jsonResponse({ count: 1, exchanges: [row] }),
+      store,
+      resolveSystemPubkey: (nodeId) =>
+        nodeId === "node_peer" ? systemKp.publicKey : null,
+    });
+    expect(result.insertedCount).toBe(1);
+    expect(result.rejectedCount).toBe(0);
+    expect(store.has(row.id)).toBe(true);
+  });
+
+  it("REJECTS an auto-confirmed row on helper signature alone (the old lenient hole)", async () => {
+    // An attacker controlling one member key fabricates an
+    // "auto-confirmed" exchange: valid helper signature, garbage
+    // helped-side signature. The lenient verifyExchange accepted
+    // this; the strict label must not.
+    const store = createExchangeStore(db);
+    const attacker = generateKeyPair();
+    const forged = makeSystemSignedExchange({
+      systemSecretKey: attacker.secretKey, // NOT the node's system key
+      nodeId: "node_peer",
+    });
+    const realSystem = generateKeyPair();
+    const result = await pullFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher: () => jsonResponse({ count: 1, exchanges: [forged] }),
+      store,
+      resolveSystemPubkey: (nodeId) =>
+        nodeId === "node_peer" ? realSystem.publicKey : null,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.rejectedCount).toBe(1);
+    expect(store.has(forged.id)).toBe(false);
+  });
+
+  it("REJECTS an auto-confirmed row whose origin node is outside the resolver's mesh", async () => {
+    const store = createExchangeStore(db);
+    const strangerSystem = generateKeyPair();
+    const row = makeSystemSignedExchange({
+      systemSecretKey: strangerSystem.secretKey,
+      nodeId: "node_stranger",
+    });
+    const result = await pullFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher: () => jsonResponse({ count: 1, exchanges: [row] }),
+      store,
+      // Resolver knows only node_peer; node_stranger resolves null.
+      resolveSystemPubkey: () => null,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.rejectedCount).toBe(1);
+  });
+
+  it("member-signed rows are unaffected by the resolver", async () => {
+    const store = createExchangeStore(db);
+    const row = makeSignedExchange();
+    const result = await pullFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher: () => jsonResponse({ count: 1, exchanges: [row] }),
+      store,
+      resolveSystemPubkey: () => null,
+    });
+    expect(result.insertedCount).toBe(1);
   });
 });
 
@@ -642,6 +764,203 @@ describe("startPeerPullWorker", () => {
     expect(requested.length).toBeGreaterThan(0);
     expect(requested.some((u) => /\/redemptions\b/.test(u))).toBe(false);
     expect(requested.some((u) => /\/invites\b/.test(u))).toBe(false);
+  });
+});
+
+describe("startPeerPullWorker — peer system-key lifecycle (§4)", () => {
+  function makeWorker(fetcher: Fetcher, peerUrls: string[]) {
+    const store = createExchangeStore(db);
+    const pullStore = createPeerPullStore(db);
+    const worker = startPeerPullWorker({
+      peerUrls,
+      intervalMs: 60_000,
+      store,
+      vouchStore: createVouchStore(db),
+      postStore: createPostStore(db),
+      taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
+      pullStore,
+      fetcher,
+      onError: () => {},
+    });
+    return { worker, store, pullStore };
+  }
+
+  /** A fetcher whose /config publishes the given system key and whose
+   *  /exchanges serves the given rows; everything else is empty. */
+  function peerWithKey(opts: {
+    nodeId: string;
+    systemPubkey: string;
+    exchanges: Exchange[];
+    configFails?: () => boolean;
+  }): Fetcher {
+    // /config must be handled OUTSIDE exchangeOnly — that wrapper
+    // answers /config itself (with "no system key") before any inner
+    // fetcher runs.
+    const rest = exchangeOnly(() =>
+      jsonResponse({
+        count: opts.exchanges.length,
+        exchanges: opts.exchanges,
+      }),
+    );
+    return (url) => {
+      if (/\/config\b/.test(url)) {
+        if (opts.configFails?.()) return jsonResponse({ error: "down" }, 503);
+        return jsonResponse({
+          nodeId: opts.nodeId,
+          systemKey: { current: opts.systemPubkey, history: [] },
+        });
+      }
+      return rest(url);
+    };
+  }
+
+  function systemSigned(systemKp: { publicKey: string; secretKey: string }, nodeId: string): Exchange {
+    const helper = generateKeyPair();
+    const helped = generateKeyPair();
+    const base = {
+      id: `x_${Math.random().toString(36).slice(2)}`,
+      postId: "p_auto",
+      helperKey: helper.publicKey,
+      helpedKey: helped.publicKey,
+      hoursExchanged: 1,
+      category: "other" as const,
+      completedAt: Date.now(),
+      nodeId,
+    };
+    const payload = canonicalExchangePayload({
+      postId: base.postId,
+      helperKey: base.helperKey,
+      helpedKey: base.helpedKey,
+      hours: base.hoursExchanged,
+      category: base.category,
+      completedAt: base.completedAt,
+    });
+    return {
+      ...base,
+      helperSignature: sign(payload, helper.secretKey),
+      helpedSignature: sign(payload, systemKp.secretKey),
+      autoConfirmed: true,
+      autoConfirmedBy: `system:${nodeId}`,
+      autoConfirmedAt: base.completedAt,
+    };
+  }
+
+  it("verifies auto-confirmed rows against the key published in the peer's /config", async () => {
+    const systemKp = generateKeyPair();
+    const row = systemSigned(systemKp, "node_b");
+    const fetcher = peerWithKey({
+      nodeId: "node_b",
+      systemPubkey: systemKp.publicKey,
+      exchanges: [row],
+    });
+    const { worker, store } = makeWorker(fetcher, ["https://b.example"]);
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    const exchangeResult = results.find((r) => r.kind === "exchange");
+    expect(exchangeResult?.insertedCount).toBe(1);
+    expect(store.has(row.id)).toBe(true);
+  });
+
+  it("resolves keys ACROSS the mesh: a row relayed via peer B but signed by peer C's system key verifies", async () => {
+    const systemC = generateKeyPair();
+    const relayedRow = systemSigned(systemC, "node_c");
+    // Peer B serves C's row; B itself publishes a different key.
+    const systemB = generateKeyPair();
+    const fetchB = peerWithKey({
+      nodeId: "node_b",
+      systemPubkey: systemB.publicKey,
+      exchanges: [relayedRow],
+    });
+    const fetchC = peerWithKey({
+      nodeId: "node_c",
+      systemPubkey: systemC.publicKey,
+      exchanges: [],
+    });
+    const routed: Fetcher = (url) =>
+      url.startsWith("https://c.example") ? fetchC(url) : fetchB(url);
+    const { worker, store } = makeWorker(routed, [
+      "https://b.example",
+      "https://c.example",
+    ]);
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    const inserted = results
+      .filter((r) => r.kind === "exchange")
+      .reduce((n, r) => n + r.insertedCount, 0);
+    expect(inserted).toBe(1);
+    expect(store.has(relayedRow.id)).toBe(true);
+  });
+
+  it("SKIPS the exchange pull (no cursor movement) while /config has never been reachable, then converges once it recovers", async () => {
+    const systemKp = generateKeyPair();
+    const row = systemSigned(systemKp, "node_b");
+    let configDown = true;
+    const fetcher = peerWithKey({
+      nodeId: "node_b",
+      systemPubkey: systemKp.publicKey,
+      exchanges: [row],
+      configFails: () => configDown,
+    });
+    const { worker, store, pullStore } = makeWorker(fetcher, [
+      "https://b.example",
+    ]);
+
+    // Cycle 1: config down since boot → the exchange pull must FAIL
+    // (not run with an empty resolver, which would reject the row
+    // while the cursor advances past it — a permanent skip).
+    let results = await worker.pullAllOnce();
+    expect(results.find((r) => r.kind === "exchange")).toBeUndefined();
+    expect(store.has(row.id)).toBe(false);
+    const state = pullStore.get("https://b.example");
+    expect(state?.lastCompletedAt ?? null).toBeNull();
+    expect(state?.lastError).toMatch(/503/);
+
+    // Cycle 2: config recovers → the row verifies and inserts.
+    configDown = false;
+    results = await worker.pullAllOnce();
+    worker.stop();
+    expect(results.find((r) => r.kind === "exchange")?.insertedCount).toBe(1);
+    expect(store.has(row.id)).toBe(true);
+  });
+
+  it("falls back to the last-known-good key on a transient config failure", async () => {
+    const systemKp = generateKeyPair();
+    const row = systemSigned(systemKp, "node_b");
+    let configDown = false;
+    let served = false;
+    const fetcher = peerWithKey({
+      nodeId: "node_b",
+      systemPubkey: systemKp.publicKey,
+      exchanges: [],
+      configFails: () => configDown,
+    });
+    const routed: Fetcher = (url) => {
+      if (/\/exchanges\b/.test(url)) {
+        const rows = served ? [] : [row];
+        served = true;
+        return jsonResponse({ count: rows.length, exchanges: rows });
+      }
+      return fetcher(url);
+    };
+    const { worker, store } = makeWorker(routed, ["https://b.example"]);
+
+    // Cycle 1 caches the key but serves no relevant row yet (the row
+    // arrives in cycle 2, after config has gone down).
+    served = true;
+    await worker.pullAllOnce();
+    configDown = true;
+    served = false;
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    expect(results.find((r) => r.kind === "exchange")?.insertedCount).toBe(1);
+    expect(store.has(row.id)).toBe(true);
   });
 });
 

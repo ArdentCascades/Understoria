@@ -161,22 +161,37 @@ export async function softPurge(): Promise<PurgeResult> {
 
   // Project activity `data` blobs stash free text for the history
   // timeline (announcement bodies, pause notes, acknowledgments,
-  // task titles). Blank the known text keys, keep the structure.
-  const ACTIVITY_TEXT_KEYS = [
-    "body",
-    "note",
-    "acknowledgment",
-    "taskTitle",
-    "title",
-    "reason",
-  ] as const;
+  // task/event titles). Scrub by ALLOWLIST, not denylist: every
+  // string-valued key that is not a known structural identifier is
+  // blanked, so a future activity type that stashes a new free-text
+  // key is scrubbed by default instead of silently escaping the
+  // purge. Numbers and booleans (hours, timestamps, flags) pass
+  // through — free text is always a string.
+  const ACTIVITY_STRUCTURAL_STRING_KEYS = new Set([
+    // ids / keys
+    "taskId",
+    "exchangeId",
+    "eventId",
+    "proposalId",
+    "clonedFrom",
+    // member public keys (the ledger keeps keys by design)
+    "helperKey",
+    "fromKey",
+    "toKey",
+    // enum-like lifecycle values
+    "to",
+  ]);
   await db.transaction("rw", db.projectActivity, async () => {
     const rows = await db.projectActivity.toArray();
     for (const row of rows) {
       const data = { ...row.data } as Record<string, unknown>;
       let touched = false;
-      for (const key of ACTIVITY_TEXT_KEYS) {
-        if (typeof data[key] === "string" && data[key] !== "") {
+      for (const [key, value] of Object.entries(data)) {
+        if (
+          typeof value === "string" &&
+          value !== "" &&
+          !ACTIVITY_STRUCTURAL_STRING_KEYS.has(key)
+        ) {
           data[key] = "";
           touched = true;
         }

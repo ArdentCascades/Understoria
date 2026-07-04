@@ -86,6 +86,15 @@ const FLUSH_BATCH_SIZE = 16;
 /** Schedule on which the worker re-checks for due rows when idle. */
 const IDLE_TICK_MS = 30_000;
 
+/** Retention for delivered rows. Delivered rows only serve as the
+ *  "identical payload already shipped" dedup guard; after this window
+ *  they are deleted. A re-enqueue of an identical payload after the
+ *  window re-sends it, which the node answers idempotently (200) —
+ *  harmless, and far better than the table growing without bound for
+ *  the life of the device. Pending and poisoned rows are NEVER pruned:
+ *  pending is undelivered work, poisoned is surfaced to the UI. */
+const DELIVERED_RETENTION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 interface WorkerHandle {
   timer: ReturnType<typeof setTimeout> | null;
   running: boolean;
@@ -546,10 +555,28 @@ async function scheduleNextTick(): Promise<void> {
   worker.timer = setTimeout(() => void tick(), delay);
 }
 
+/**
+ * Delete delivered rows whose last activity is older than the
+ * retention window. Exported for tests; the worker calls it on every
+ * tick (a no-op scan of an index range when there is nothing to
+ * prune). Returns the number of rows deleted.
+ */
+export async function pruneDeliveredOutbox(
+  now: number = Date.now(),
+): Promise<number> {
+  const cutoff = now - DELIVERED_RETENTION_MS;
+  return db.outbox
+    .where("status")
+    .equals("delivered")
+    .filter((row) => (row.lastAttemptAt ?? row.createdAt) < cutoff)
+    .delete();
+}
+
 async function tick(): Promise<void> {
   if (!worker.running) return;
   try {
     await flushOutboxOnce({ fetchImpl: worker.fetchImpl });
+    await pruneDeliveredOutbox();
   } catch (err) {
     if (typeof console !== "undefined" && console.warn) {
       console.warn("[understoria] outbox flush crashed", err);

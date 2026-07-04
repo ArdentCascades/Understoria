@@ -15,7 +15,7 @@ import {
   verifyCoOrganizerInvitationRevocation,
   verifyEvent,
   verifyEventCancellation,
-  verifyExchange,
+  verifyExchangeLabel,
   verifyPost,
   verifyTaskComment,
   verifyVouch,
@@ -101,9 +101,22 @@ export async function pullFromPeer(opts: {
   /** Cap the response size so a misbehaving peer can't OOM us. The
    *  GET endpoint also caps; this is defence in depth. */
   maxRows?: number;
+  /**
+   * System-pubkey resolver for `autoConfirmed` rows — the §4 strict
+   * gate (`docs/auto-confirm-key.md`). Peer ingestion is exactly the
+   * caller `verifyExchangeLabel`'s contract names as needing full
+   * trust: a row whose helped-side signature we cannot verify against
+   * a known system pubkey MUST NOT be accepted as authentic. The
+   * worker builds this from each peer's published `GET /config`
+   * (systemKey.current + nodeId); the default resolver knows no keys,
+   * so auto-confirmed rows are REJECTED unless a resolver is supplied.
+   * Member-signed rows never consult it.
+   */
+  resolveSystemPubkey?: (nodeId: string) => string | null;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
   const maxRows = opts.maxRows ?? 500;
+  const resolveSystemPubkey = opts.resolveSystemPubkey ?? (() => null);
 
   const url = buildUrl(peerUrl, "exchanges", since, maxRows);
   const rows = await fetchAndExtract(fetcher, url, peerUrl, "exchanges");
@@ -120,7 +133,15 @@ export async function pullFromPeer(opts: {
       continue;
     }
     const exchange = parsed.value;
-    if (!verifyExchange(exchange)) {
+    // Strict §4 verification: "member-signed" (both member sigs
+    // verify) or "system-signed" (helped side verifies against the
+    // resolved system pubkey) are accepted; "invalid" — including an
+    // auto-confirmed row whose origin node's key we cannot resolve —
+    // is rejected. This replaces the lenient `verifyExchange`, which
+    // accepted auto-confirmed rows on the helper signature alone and
+    // let anyone who controls a single member key fabricate
+    // "auto-confirmed" hours into a peer's ledger.
+    if (verifyExchangeLabel(exchange, resolveSystemPubkey) === "invalid") {
       rejectedCount += 1;
       continue;
     }
@@ -813,6 +834,80 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     }
   }
 
+  // --- §4 strict-verification support (docs/auto-confirm-key.md) ---
+  //
+  // Each peer's published system key, refreshed from GET /config at
+  // the start of every pull cycle. Map value semantics:
+  //   { nodeId, pubkey } — the peer publishes a system key
+  //   null               — the peer answered /config with NO system
+  //                        key (a known state, not a failure)
+  //   (absent)           — /config has never been reachable; exchange
+  //                        pulls for that peer are SKIPPED (thrown as
+  //                        a pull failure) rather than run with an
+  //                        empty resolver, because a rejected-but-
+  //                        cursor-passed auto-confirmed row would be
+  //                        skipped permanently. Transient config
+  //                        failures after a first success fall back
+  //                        to the last-known-good key.
+  const systemKeys = new Map<
+    string,
+    { nodeId: string; pubkey: string } | null
+  >();
+  const configErrors = new Map<string, Error>();
+
+  async function refreshPeerSystemKey(peerUrl: string): Promise<void> {
+    const base = peerUrl.replace(/\/+$/, "");
+    try {
+      const response = await fetcher(`${base}/config`);
+      if (!response.ok) {
+        throw new Error(
+          `peer ${peerUrl} config returned status ${response.status}`,
+        );
+      }
+      const body = (await response.json()) as {
+        systemKey?: { current?: unknown };
+        nodeId?: unknown;
+      } | null;
+      if (
+        body !== null &&
+        typeof body === "object" &&
+        body.systemKey !== undefined &&
+        typeof body.systemKey === "object" &&
+        body.systemKey !== null &&
+        typeof body.systemKey.current === "string" &&
+        typeof body.nodeId === "string"
+      ) {
+        systemKeys.set(peerUrl, {
+          nodeId: body.nodeId,
+          pubkey: body.systemKey.current,
+        });
+      } else {
+        systemKeys.set(peerUrl, null);
+      }
+      configErrors.delete(peerUrl);
+    } catch (err) {
+      configErrors.set(
+        peerUrl,
+        err instanceof Error ? err : new Error(String(err)),
+      );
+      // Keep any last-known-good entry — a stale key beats stalling
+      // the pull, and rotation is an explicit multi-step operator
+      // procedure, not something that flips between cycles.
+    }
+  }
+
+  // Resolver spans EVERY configured peer's published key, so a row
+  // relayed through peer B but auto-confirmed by peer C still
+  // verifies as long as C is part of this node's mesh. A nodeId
+  // outside the mesh resolves to null and the row is rejected — the
+  // §4 posture: what this node cannot verify, it does not relay.
+  function resolveSystemPubkey(nodeId: string): string | null {
+    for (const entry of systemKeys.values()) {
+      if (entry !== null && entry.nodeId === nodeId) return entry.pubkey;
+    }
+    return null;
+  }
+
   async function runPull(
     kind: PullRecordKind,
     peerUrl: string,
@@ -820,7 +915,24 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   ): Promise<PullResult> {
     switch (kind) {
       case "exchange":
-        return pullFromPeer({ peerUrl, since, fetcher, store });
+        if (!systemKeys.has(peerUrl)) {
+          // Never seen this peer's /config. Running the pull anyway
+          // would reject its auto-confirmed rows while OTHER rows in
+          // the same page advance the cursor past them — permanent
+          // skips caused by a transient outage. Fail the pull instead;
+          // the cursor stays put and the next cycle retries.
+          throw (
+            configErrors.get(peerUrl) ??
+            new Error(`peer ${peerUrl} config has not been fetched yet`)
+          );
+        }
+        return pullFromPeer({
+          peerUrl,
+          since,
+          fetcher,
+          store,
+          resolveSystemPubkey,
+        });
       case "vouch":
         return pullVouchesFromPeer({
           peerUrl,
@@ -910,8 +1022,18 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   }
 
   async function pullAllOnce(): Promise<PullResult[]> {
-    // Run all three kinds for each peer in parallel. One kind
-    // failing doesn't prevent the others from succeeding.
+    // Phase 0: refresh every peer's published system key BEFORE any
+    // exchange pull runs, so the §4 resolver spans the whole mesh —
+    // a row relayed through peer B but auto-confirmed by peer C must
+    // find C's key already loaded, or it would be rejected while
+    // sibling rows advance the cursor past it. Failures are recorded
+    // per peer (last-known-good keys stay usable); a peer whose
+    // config has NEVER been reachable fails its exchange pull loudly
+    // in runPull.
+    await Promise.all(peerUrls.map((url) => refreshPeerSystemKey(url)));
+
+    // Run every kind for each peer in parallel. One kind failing
+    // doesn't prevent the others from succeeding.
     const tasks = peerUrls.flatMap((url) => [
       pullKind(url, "exchange"),
       pullKind(url, "vouch"),

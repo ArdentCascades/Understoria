@@ -580,6 +580,42 @@ describe("GET /config with operator info", () => {
   });
 });
 
+describe("GET /config with a system key", () => {
+  let withKey: FastifyInstance;
+  let withKeyDb: DatabaseType;
+
+  beforeEach(async () => {
+    withKeyDb = openDatabase(":memory:");
+    const kp = generateKeyPair();
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      NODE_ID: "node_keyed",
+      NODE_SYSTEM_SECRET_KEY: kp.secretKey,
+    } as NodeJS.ProcessEnv);
+    const built = await buildServer({ config, database: withKeyDb });
+    withKey = built.app;
+    await withKey.ready();
+  });
+
+  afterEach(async () => {
+    await withKey.close();
+    withKeyDb.close();
+  });
+
+  it("publishes nodeId alongside systemKey so peers can bind autoConfirmedBy claims", async () => {
+    const res = await withKey.inject({ method: "GET", url: "/config" });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as {
+      systemKey?: { current: string };
+      nodeId?: string;
+    };
+    // A peer verifying `autoConfirmedBy: "system:<nodeId>"` needs the
+    // authenticated nodeId↔pubkey binding this response provides.
+    expect(body.systemKey?.current).toBeTruthy();
+    expect(body.nodeId).toBe("node_keyed");
+  });
+});
+
 describe("POST /task-comments", () => {
   it("accepts a well-signed comment and returns 201", async () => {
     const c = makeSignedTaskComment();
