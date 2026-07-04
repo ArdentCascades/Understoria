@@ -10,6 +10,31 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **System-key rotation is now operable end-to-end.** The verifier
+  side shipped previously, but `GET /config` hardcoded
+  `systemKey.history: []` — an operator had no way to publish a
+  retired key, so rotating would still have orphaned every
+  pre-rotation system-signed record on pulling peers. New
+  `NODE_SYSTEM_KEY_HISTORY` env var (JSON array of
+  `{pubkey, retiredAt}` entries, validated loudly at boot, sorted
+  ascending) is served verbatim in `GET /config.systemKey.history`.
+  `docs/system-key-rotation.md` is the operator runbook: procedure,
+  what peers experience, and the recovery paths for
+  rotated-without-publishing and lost-old-pubkey; deploy and
+  incident-template docs now route to it (including the correction
+  that a node which ever system-signed records must disable via
+  `AUTO_CONFIRM_MIN_HOURS=0`, not by removing the key — removing the
+  key also unpublishes the history peers need).
+
+### Fixed
+- **Redemptions cursor is inclusive with a token tiebreak.** Two
+  receipts sharing a `received_at` millisecond could straddle a page
+  boundary and the strict `>` cursor skipped the un-served one
+  forever — the same tie class fixed for the other federated stores.
+  Pullers merge idempotently by token, so re-served boundary rows are
+  no-ops; the §7 server-monotonic cursor design is unchanged.
+
+### Added
 - **Rotation-aware system-key verification (§4).** The strict
   auto-confirm gate on peer ingestion would have rejected every
   historical system-signed exchange the moment an operator rotated

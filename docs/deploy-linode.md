@@ -242,9 +242,18 @@ NODE_SYSTEM_SECRET_KEY=<base64 64-byte secret>
 Copy the `NODE_SYSTEM_SECRET_KEY=` line. Do NOT log it, paste it into
 chat, or commit it.
 
-**If you ever want to disable auto-confirm,** leave the key empty in
-`.env`. Members will then confirm manually only; the auto-confirm
-endpoint will refuse all requests.
+**If you ever want to disable auto-confirm** on a node that has
+never system-signed anything, leave the key empty in `.env`. Members
+will then confirm manually only; the auto-confirm endpoint will
+refuse all requests. If the node HAS already system-signed records,
+set `AUTO_CONFIRM_MIN_HOURS=0` instead — removing the key also
+unpublishes the verification history peers need for the existing
+records (see [`system-key-rotation.md`](./system-key-rotation.md) §5).
+
+**Rotating an existing key** is its own procedure with an
+audit-continuity requirement — follow
+[`system-key-rotation.md`](./system-key-rotation.md), not this
+section.
 
 ## 7. Fill in `.env` (manual)
 

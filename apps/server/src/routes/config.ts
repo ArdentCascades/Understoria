@@ -49,15 +49,12 @@ export interface PublicConfigResponse {
    * rotation trail. Omitted when the operator hasn't supplied
    * `NODE_SYSTEM_SECRET_KEY`. See `docs/auto-confirm-key.md` §4.
    *
-   * Rotation note: `history` is always `[]` today — rotating the
-   * key is a deploy-time procedure (regenerate, archive the old
-   * pubkey into a static history list, restart) that no operator UI
-   * wires yet. The VERIFIER side is already live, though: the peer
-   * pull worker consumes this array and selects the key that was
-   * current at each record's `autoConfirmedAt`, so once an operator
-   * populates the history, past records verify against the retired
-   * key and post-retirement claims of it fail. Publish the trail
-   * here and rotation Just Works for pulling peers.
+   * Rotation: `history` serves the operator-published trail from
+   * `NODE_SYSTEM_KEY_HISTORY` (see `docs/system-key-rotation.md` for
+   * the procedure). The verifier side is live on pulling peers: they
+   * select the key that was current at each record's
+   * `autoConfirmedAt`, so past records verify against the retired
+   * key and post-retirement claims of it fail.
    */
   systemKey?: {
     current: string;
@@ -80,7 +77,10 @@ export async function registerConfigRoutes(
     const response: PublicConfigResponse = {};
     if (operator) response.operator = operator;
     if (signer) {
-      response.systemKey = { current: signer.publicKey, history: [] };
+      response.systemKey = {
+        current: signer.publicKey,
+        history: config.systemKeyHistory,
+      };
       response.nodeId = config.nodeId;
     }
     return response;
