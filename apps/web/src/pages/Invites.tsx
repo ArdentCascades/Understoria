@@ -36,6 +36,7 @@ import { InviteShareSheet } from "@/components/InviteShareSheet";
 const STATUS_TIER: Record<InviteRow["status"], number> = {
   open: 1,
   redeemed: 2,
+  redeemed_despite_revocation: 2,
   revoked: 3,
   expired: 4,
 };
@@ -43,6 +44,7 @@ const STATUS_TIER: Record<InviteRow["status"], number> = {
 const INVITE_STATUS_KEY: Record<InviteRow["status"], string> = {
   open: "profile.invites.statusOpen",
   redeemed: "profile.invites.statusRedeemed",
+  redeemed_despite_revocation: "profile.invites.statusRedeemedDespiteRevocation",
   revoked: "profile.invites.statusRevoked",
   expired: "profile.invites.statusExpired",
 };

@@ -33,6 +33,7 @@ import {
   createExchangeStore,
   createPeerPullStore,
   createPostStore,
+  createInviteRevocationStore,
   createRedemptionStore,
   createTaskCommentStore,
   createVouchStore,
@@ -45,6 +46,7 @@ import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
 import { registerRedemptionRoutes } from "./routes/redemptions.js";
+import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
@@ -155,6 +157,7 @@ export async function buildServer({
   const vouchStore = createVouchStore(db);
   const postStore = createPostStore(db);
   const redemptionStore = createRedemptionStore(db);
+  const inviteRevocationStore = createInviteRevocationStore(db);
   const claimStore = createClaimStore(db);
   const taskCommentStore = createTaskCommentStore(db);
   const coorgInvitationStore = createCoOrganizerInvitationStore(db);
@@ -189,6 +192,7 @@ export async function buildServer({
   // Redemption receipts (below) are the only invite-adjacent wire
   // surface: open invites never cross any wire.
   await registerRedemptionRoutes(app, { store: redemptionStore });
+  await registerInviteRevocationRoutes(app, { store: inviteRevocationStore });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });
   await registerCoOrganizerInvitationRoutes(app, {

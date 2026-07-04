@@ -29,6 +29,7 @@ import {
   submitEventCancellationToNode,
   submitEventToNode,
   submitExchangeToNode,
+  submitInviteRevocationToNode,
   submitPostToNode,
   submitRedemptionReceiptToNode,
   submitTaskCommentToNode,
@@ -42,6 +43,7 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  InviteRevocation,
   RedemptionReceipt,
 } from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
@@ -258,6 +260,21 @@ export async function enqueueRedemptionReceiptOutbox(
   });
 }
 
+/**
+ * Insert an outbox row for a signed invite revocation
+ * (docs/invite-revocation.md §4). Dedup key is the token — one
+ * revocation per token. Enqueued even without a configured node URL,
+ * same as the receipt: the inviter may not have a node configured at
+ * revoke time, and the revocation must eventually reach the mesh.
+ */
+export async function enqueueInviteRevocationOutbox(
+  revocation: InviteRevocation,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("invite_revocation", revocation.token, revocation, {
+    requireNodeUrl: false,
+  });
+}
+
 async function enqueueOutbox(
   kind: OutboxRow["kind"],
   recordId: string,
@@ -411,7 +428,8 @@ export async function flushOutboxOnce(
       | CoOrganizerInvitationRevocation
       | Event
       | EventCancellation
-      | RedemptionReceipt;
+      | RedemptionReceipt
+      | InviteRevocation;
     try {
       payload = JSON.parse(row.payload) as
         | Exchange
@@ -423,7 +441,8 @@ export async function flushOutboxOnce(
         | CoOrganizerInvitationRevocation
         | Event
         | EventCancellation
-        | RedemptionReceipt;
+        | RedemptionReceipt
+        | InviteRevocation;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -482,6 +501,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "redemption_receipt") {
       result = await submitRedemptionReceiptToNode(
         payload as RedemptionReceipt,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "invite_revocation") {
+      result = await submitInviteRevocationToNode(
+        payload as InviteRevocation,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

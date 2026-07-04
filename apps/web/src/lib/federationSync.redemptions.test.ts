@@ -181,7 +181,46 @@ describe("pullFederatedRedemptions", () => {
     expect(invite?.encoded).toBe("local_encoded");
   });
 
-  it("keeps a revoked row revoked but records redemption-observed (§6 — a conversation, not an ejection)", async () => {
+  it("converges an authoritatively-revoked row to redeemed_despite_revocation when its receipt arrives (docs/invite-revocation.md §5)", async () => {
+    // The inviter's own device: they revoked the token (revokedAt set,
+    // inviterKey matches the embedded invite), then it was redeemed
+    // anyway. The commutative terminal state is
+    // redeemed_despite_revocation — the honest label every device now
+    // shares instead of the old per-device divergence.
+    const { receipt } = makeReceipt();
+    await db.invites.put({
+      token: receipt.invite.token,
+      inviterKey: receipt.invite.inviterKey,
+      nodeId: receipt.invite.nodeId,
+      createdAt: receipt.invite.createdAt,
+      expiresAt: receipt.invite.expiresAt,
+      status: "revoked",
+      redeemedBy: null,
+      redeemedAt: null,
+      encoded: "local_encoded",
+      revokedAt: 5_000,
+    });
+    stubRedemptions([{ ...receipt, receivedAt: 42 }]);
+
+    await pullFederatedRedemptions();
+
+    const invite = await db.invites.get(receipt.invite.token);
+    expect(invite?.status).toBe("redeemed_despite_revocation");
+    expect(invite?.redeemedBy).toBe(receipt.redeemedBy);
+    expect(invite?.redeemedAt).toBe(receipt.redeemedAt);
+    // The revocation timestamp is preserved so the Invites page can
+    // render the "redeemed after you revoked it" line.
+    expect(invite?.revokedAt).toBe(5_000);
+    expect(invite?.redemptionObservedAt).toBe(receipt.redeemedAt);
+    expect(invite?.redemptionObservedBy).toBe(receipt.redeemedBy);
+  });
+
+  it("corrects a non-authoritative revoked row (no revokedAt) to plain redeemed when its receipt arrives", async () => {
+    // A revoked row that carries no signed-revocation marker (e.g. a
+    // legacy local revoke, or a placeholder whose inviterKey never
+    // matched) is not authority-bound, so a genuine redemption wins and
+    // the row becomes plain redeemed — never stranded revoked-only on
+    // one device.
     const { receipt } = makeReceipt();
     await db.invites.put({
       token: receipt.invite.token,
@@ -199,11 +238,9 @@ describe("pullFederatedRedemptions", () => {
     await pullFederatedRedemptions();
 
     const invite = await db.invites.get(receipt.invite.token);
-    expect(invite?.status).toBe("revoked");
-    // Never a trust edge — vouchersFor only counts status="redeemed".
-    expect(invite?.redeemedBy).toBeNull();
-    expect(invite?.redemptionObservedAt).toBe(receipt.redeemedAt);
-    expect(invite?.redemptionObservedBy).toBe(receipt.redeemedBy);
+    expect(invite?.status).toBe("redeemed");
+    expect(invite?.redeemedBy).toBe(receipt.redeemedBy);
+    expect(invite?.revokedAt ?? null).toBeNull();
   });
 
   it("is idempotent: re-pulling the same receipt changes nothing", async () => {

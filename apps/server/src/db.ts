@@ -29,6 +29,7 @@ import type {
   Exchange,
   FlagReason,
   Post,
+  InviteRevocation,
   RedemptionReceipt,
   SignedVouch,
   TaskComment,
@@ -157,6 +158,23 @@ export interface RedemptionStore {
   has(token: string): boolean;
   /** Existing receipt for a token — first-writer-wins arbitration. */
   getByToken(token: string): StoredRedemption | null;
+}
+
+export interface StoredInviteRevocation {
+  revocation: InviteRevocation;
+  /** Server clock at ingestion — the GET cursor (same §7 reasoning as
+   *  the redemptions store). */
+  receivedAt: number;
+}
+
+export interface InviteRevocationStore {
+  insert(revocation: InviteRevocation, receivedAt: number): void;
+  /** Rows with `received_at >= since`, ascending (+ token tiebreak),
+   *  capped like the sibling stores. */
+  list(opts?: { since?: number; limit?: number }): StoredInviteRevocation[];
+  count(): number;
+  has(token: string): boolean;
+  getByToken(token: string): StoredInviteRevocation | null;
 }
 
 /**
@@ -716,6 +734,35 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '12')",
+    ).run();
+  }
+
+  // Schema v13 — invite-revocation propagation (docs/invite-revocation.md).
+  // One row per revoked token, signed by the inviter. Mirrors the
+  // redemptions store: `token` is the PRIMARY KEY (one revocation per
+  // token, first-writer-wins), and the GET cursor is the
+  // server-assigned `received_at`, not the client-claimed `revoked_at`
+  // (same §7 skew-safety reasoning). Like redemptions, revocations are
+  // PWA↔node only — no peer-replication leg, so no peer_pull_state
+  // column. The authority binding (matching a redemption's embedded
+  // invite) is enforced at the client merge, not here.
+  if (current < 13) {
+    db.exec(`
+      CREATE TABLE invite_revocations (
+        token TEXT PRIMARY KEY,
+        inviter_key TEXT NOT NULL,
+        revoked_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        received_at INTEGER NOT NULL
+      );
+      CREATE INDEX invite_revocations_received_at_idx
+        ON invite_revocations (received_at);
+      CREATE INDEX invite_revocations_inviter_idx
+        ON invite_revocations (inviter_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '13')",
     ).run();
   }
 }
@@ -1455,6 +1502,93 @@ function rowToRedemption(r: RedemptionRowSqlite): StoredRedemption {
       redeemedBy: r.redeemed_by,
       displayName: r.display_name,
       redeemedAt: r.redeemed_at,
+      signature: r.signature,
+    },
+    receivedAt: r.received_at,
+  };
+}
+
+export function createInviteRevocationStore(
+  db: DatabaseType,
+): InviteRevocationStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO invite_revocations (
+      token, inviter_key, revoked_at, node_id, signature, received_at
+    ) VALUES (
+      @token, @inviterKey, @revokedAt, @nodeId, @signature, @receivedAt
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM invite_revocations WHERE token = ?");
+  const getByTokenStmt = db.prepare(
+    "SELECT * FROM invite_revocations WHERE token = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM invite_revocations",
+  );
+
+  return {
+    insert(revocation, receivedAt) {
+      insertStmt.run({
+        token: revocation.token,
+        inviterKey: revocation.inviterKey,
+        revokedAt: revocation.revokedAt,
+        nodeId: revocation.nodeId,
+        signature: revocation.signature,
+        receivedAt,
+      });
+    },
+    // Inclusive received_at cursor + token tiebreak — same reasoning as
+    // the redemptions store's list().
+    list({ since, limit } = {}) {
+      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      const rows = since
+        ? db
+            .prepare(
+              `SELECT * FROM invite_revocations WHERE received_at >= ?
+               ORDER BY received_at ASC, token ASC LIMIT ?`,
+            )
+            .all(since, safeLimit)
+        : db
+            .prepare(
+              `SELECT * FROM invite_revocations
+               ORDER BY received_at ASC, token ASC LIMIT ?`,
+            )
+            .all(safeLimit);
+      return (rows as InviteRevocationRowSqlite[]).map(rowToInviteRevocation);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+    has(token) {
+      return hasStmt.get(token) !== undefined;
+    },
+    getByToken(token) {
+      const r = getByTokenStmt.get(token) as
+        | InviteRevocationRowSqlite
+        | undefined;
+      return r ? rowToInviteRevocation(r) : null;
+    },
+  };
+}
+
+interface InviteRevocationRowSqlite {
+  token: string;
+  inviter_key: string;
+  revoked_at: number;
+  node_id: string;
+  signature: string;
+  received_at: number;
+}
+
+function rowToInviteRevocation(
+  r: InviteRevocationRowSqlite,
+): StoredInviteRevocation {
+  return {
+    revocation: {
+      token: r.token,
+      inviterKey: r.inviter_key,
+      revokedAt: r.revoked_at,
+      nodeId: r.node_id,
       signature: r.signature,
     },
     receivedAt: r.received_at,

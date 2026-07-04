@@ -327,6 +327,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pullFederatedEvents,
         pullFederatedEventCancellations,
         pullFederatedRedemptions,
+        pullFederatedInviteRevocations,
         pullFederatedVouches,
       }) => {
         void pullFederatedPosts();
@@ -342,6 +343,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // (invite-row flip + roster materialization, §6) and the §9
         // companion vouch pull (trust-status convergence).
         void pullFederatedRedemptions();
+        // docs/invite-revocation.md: converge revoked-then-redeemed
+        // invites to one honest state across every device.
+        void pullFederatedInviteRevocations();
         void pullFederatedVouches();
       },
     );

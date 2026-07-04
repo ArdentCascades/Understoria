@@ -101,7 +101,12 @@ export function vouchesFor(
  * `inviterKey` for `redeemedBy`.
  */
 export interface RedeemedInviteLike {
-  status: "redeemed" | "open" | "revoked" | "expired";
+  status:
+    | "redeemed"
+    | "open"
+    | "revoked"
+    | "expired"
+    | "redeemed_despite_revocation";
   inviterKey: string;
   redeemedBy: string | null;
 }
@@ -153,7 +158,14 @@ export function vouchersFor(
 ): Map<string, VoucherRef> {
   const map = new Map<string, VoucherRef>();
   for (const inv of ctx.invites) {
-    if (inv.status !== "redeemed") continue;
+    // Phase 1 of docs/invite-revocation.md: a redeemed_despite_revocation
+    // row still counts the inviter's implicit vouch, exactly as a plain
+    // redeemed row does — "behaves as today" (§10). Withdrawing the vouch
+    // in that state is the Phase 2 behavior, gated behind a governance
+    // ruling (§9); until then, counting it is what makes every device
+    // agree on the newcomer's trust after the revocation converges.
+    if (inv.status !== "redeemed" && inv.status !== "redeemed_despite_revocation")
+      continue;
     if (inv.redeemedBy !== memberKey) continue;
     map.set(inv.inviterKey, {
       voucherKey: inv.inviterKey,

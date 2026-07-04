@@ -1798,6 +1798,7 @@
       "revoke": "Revoke",
       "statusOpen": "Open",
       "statusRedeemed": "Redeemed",
+      "statusRedeemedDespiteRevocation": "Redeemed after you revoked it",
       "statusRevoked": "Revoked",
       "statusExpired": "Expired",
       "showShareSheet": "Show QR code",
