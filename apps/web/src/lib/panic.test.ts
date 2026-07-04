@@ -312,7 +312,18 @@ describe("softPurge covers member-authored content tables", () => {
       projectId: "proj_1",
       type: "announcement",
       actorKey: "pk_org",
-      data: { body: "announcement words", taskTitle: "Haul soil" },
+      data: {
+        body: "announcement words",
+        taskTitle: "Haul soil",
+        // A hypothetical FUTURE text key the scrub has never heard of —
+        // the allowlist model must scrub it by default.
+        organizerMood: "furious at the landlord",
+        // Structural values that must survive.
+        taskId: "task_1",
+        helperKey: "pk_helper",
+        hours: 3,
+        edited: true,
+      },
       createdAt: 1,
       nodeId: NODE,
     } as never);
@@ -341,6 +352,13 @@ describe("softPurge covers member-authored content tables", () => {
     };
     expect(act.data.body).toBe("");
     expect(act.data.taskTitle).toBe("");
+    // Fail-safe allowlist: an unknown string key is scrubbed by
+    // default; structural ids, keys, numbers and booleans survive.
+    expect(act.data.organizerMood).toBe("");
+    expect(act.data.taskId).toBe("task_1");
+    expect(act.data.helperKey).toBe("pk_helper");
+    expect(act.data.hours).toBe(3);
+    expect(act.data.edited).toBe(true);
 
     // Relationship tables cleared outright.
     expect(await db.messages.count()).toBe(0);
