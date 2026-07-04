@@ -112,7 +112,7 @@ export async function pullFromPeer(opts: {
    * so auto-confirmed rows are REJECTED unless a resolver is supplied.
    * Member-signed rows never consult it.
    */
-  resolveSystemPubkey?: (nodeId: string) => string | null;
+  resolveSystemPubkey?: (nodeId: string, signedAt: number) => string | null;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
   const maxRows = opts.maxRows ?? 500;
@@ -851,7 +851,13 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   //                        to the last-known-good key.
   const systemKeys = new Map<
     string,
-    { nodeId: string; pubkey: string } | null
+    {
+      nodeId: string;
+      current: string;
+      /** Rotation trail, ascending by retiredAt (sorted on ingest).
+       *  Each entry was the node's system key UNTIL its retiredAt. */
+      history: { pubkey: string; retiredAt: number }[];
+    } | null
   >();
   const configErrors = new Map<string, Error>();
 
@@ -865,7 +871,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         );
       }
       const body = (await response.json()) as {
-        systemKey?: { current?: unknown };
+        systemKey?: { current?: unknown; history?: unknown };
         nodeId?: unknown;
       } | null;
       if (
@@ -877,9 +883,25 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         typeof body.systemKey.current === "string" &&
         typeof body.nodeId === "string"
       ) {
+        // Rotation trail: keep only well-formed entries, ascending by
+        // retiredAt so the resolver's "first entry retired AFTER the
+        // signing time" scan finds the key that was current then.
+        const rawHistory = Array.isArray(body.systemKey.history)
+          ? body.systemKey.history
+          : [];
+        const history = rawHistory
+          .filter(
+            (h): h is { pubkey: string; retiredAt: number } =>
+              h !== null &&
+              typeof h === "object" &&
+              typeof (h as { pubkey?: unknown }).pubkey === "string" &&
+              typeof (h as { retiredAt?: unknown }).retiredAt === "number",
+          )
+          .sort((a, b) => a.retiredAt - b.retiredAt);
         systemKeys.set(peerUrl, {
           nodeId: body.nodeId,
-          pubkey: body.systemKey.current,
+          current: body.systemKey.current,
+          history,
         });
       } else {
         systemKeys.set(peerUrl, null);
@@ -901,9 +923,21 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   // verifies as long as C is part of this node's mesh. A nodeId
   // outside the mesh resolves to null and the row is rejected — the
   // §4 posture: what this node cannot verify, it does not relay.
-  function resolveSystemPubkey(nodeId: string): string | null {
+  //
+  // `signedAt` selects across the node's rotation trail (§4): the
+  // key current at signing time is the first history entry retired
+  // AFTER that moment, else `current`. Past records therefore stay
+  // verifiable after a rotation, while a record claiming a retired
+  // key for a post-retirement timestamp resolves to the newer key
+  // and fails verification — the point of retiring a compromised
+  // key.
+  function resolveSystemPubkey(nodeId: string, signedAt: number): string | null {
     for (const entry of systemKeys.values()) {
-      if (entry !== null && entry.nodeId === nodeId) return entry.pubkey;
+      if (entry === null || entry.nodeId !== nodeId) continue;
+      for (const h of entry.history) {
+        if (h.retiredAt > signedAt) return h.pubkey;
+      }
+      return entry.current;
     }
     return null;
   }

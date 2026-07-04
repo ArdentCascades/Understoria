@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Rotation-aware system-key verification (§4).** The strict
+  auto-confirm gate on peer ingestion would have rejected every
+  historical system-signed exchange the moment an operator rotated
+  their node's system key — §4 requires verifiers to "accept
+  signatures from any previously-published system pubkey," and the
+  verifier side must exist before any rotation happens.
+  `verifyExchangeLabel`'s resolver now receives the record's signing
+  time (`autoConfirmedAt`, falling back to `completedAt`), and the
+  peer pull worker consumes `systemKey.history` from each peer's
+  `GET /config`, selecting the key that was current at that moment:
+  pre-rotation records verify against the retired key forever, while
+  a record claiming a retired key for a post-retirement timestamp
+  resolves to the newer key and fails — retiring a compromised key
+  actually disarms it. `history` is still `[]` until a rotation
+  procedure ships; publishing the trail is now all an operator needs
+  for pulling peers to keep converging.
 - **Strict §4 verification of auto-confirmed exchanges on peer
   ingestion** (`docs/auto-confirm-key.md` §4). The server's peer pull
   previously used the lenient `verifyExchange`, which accepts an
