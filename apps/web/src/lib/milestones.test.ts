@@ -10,6 +10,7 @@ import type { NodeConfig } from "@/types";
 import {
   effectiveMilestones,
   MILESTONES,
+  milestoneProgress,
   milestonesForType,
   reachedMilestones,
 } from "./milestones";
@@ -86,6 +87,39 @@ describe("reachedMilestones with config", () => {
     ]);
     const reached = reachedMilestones("hours", 100, config);
     expect(reached.some((m) => m.label === "5000 hours")).toBe(false);
+  });
+});
+
+describe("milestoneProgress", () => {
+  it("reports current=null before the first milestone is reached", () => {
+    // A community at 5 hours has NOT reached the 10-hour milestone.
+    // The old implementation initialized current to the first
+    // milestone, presenting an unreached milestone as achieved.
+    const p = milestoneProgress("hours", 5);
+    expect(p.current).toBeNull();
+    expect(p.next?.threshold).toBe(10);
+    expect(p.progress).toBeCloseTo(0.5);
+  });
+
+  it("reports the highest reached milestone as current", () => {
+    const p = milestoneProgress("hours", 60);
+    expect(p.current?.threshold).toBe(50);
+    expect(p.next?.threshold).toBe(100);
+    expect(p.progress).toBeCloseTo((60 - 50) / (100 - 50));
+  });
+
+  it("progress is 1 past the final milestone", () => {
+    const p = milestoneProgress("hours", 2000);
+    expect(p.current?.threshold).toBe(1000);
+    expect(p.next).toBeNull();
+    expect(p.progress).toBe(1);
+  });
+
+  it("exact threshold counts as reached", () => {
+    const p = milestoneProgress("hours", 10);
+    expect(p.current?.threshold).toBe(10);
+    expect(p.next?.threshold).toBe(50);
+    expect(p.progress).toBe(0);
   });
 });
 

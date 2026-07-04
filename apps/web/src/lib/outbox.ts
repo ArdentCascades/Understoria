@@ -523,9 +523,13 @@ async function scheduleNextTick(): Promise<void> {
   }
   if (!worker.running) return;
 
+  // Earliest-due pending row via the [status+nextAttemptAt] compound
+  // index — .where("status").first() returned an arbitrary pending
+  // row (primary-key order), so a due row could wait a full idle tick
+  // behind a long-backoff sibling.
   const upcoming = await db.outbox
-    .where("status")
-    .equals("pending")
+    .where("[status+nextAttemptAt]")
+    .between(["pending", -Infinity], ["pending", Infinity], true, true)
     .first();
 
   if (!upcoming) {

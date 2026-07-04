@@ -268,6 +268,13 @@ export async function confirmExchange(
           ...post,
           status: "awaiting_confirmation",
           confirmedBy,
+          // Stamp the transition moment (first confirmation only — a
+          // repeat confirm by the same party must not slide the
+          // window). The auto-confirm sweep measures its waiting
+          // period from this, NOT from createdAt: an old post claimed
+          // and completed today has been "awaiting" for hours, not
+          // weeks, and the helped party's dispute window starts now.
+          awaitingSince: post.awaitingSince ?? Date.now(),
         };
         await db.posts.put(updated);
         return { post: updated, exchange: null, newAchievements: [] };

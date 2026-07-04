@@ -61,7 +61,11 @@ export function effectiveMilestones(config: NodeConfig): Milestone[] {
 }
 
 export interface MilestoneProgress {
-  current: Milestone;
+  /** The highest milestone actually reached, or null when the value
+   *  is still below the lowest threshold — a community at 5 hours has
+   *  not "reached" the 10-hour milestone and must not be shown it as
+   *  achieved. */
+  current: Milestone | null;
   next: Milestone | null;
   value: number;
   progress: number;
@@ -76,15 +80,15 @@ export function milestoneProgress(
   const typed = source
     .filter((m) => m.type === type)
     .sort((a, b) => a.threshold - b.threshold);
-  let current: Milestone = typed[0];
-  let next: Milestone | null = typed[0];
+  let current: Milestone | null = null;
+  let next: Milestone | null = typed[0] ?? null;
   for (let i = 0; i < typed.length; i++) {
     if (value >= typed[i].threshold) {
       current = typed[i];
       next = typed[i + 1] ?? null;
     }
   }
-  const prevThreshold = value >= current.threshold ? current.threshold : 0;
+  const prevThreshold = current ? current.threshold : 0;
   const span = next ? next.threshold - prevThreshold : 1;
   const progress = next
     ? Math.max(0, Math.min(1, (value - prevThreshold) / span))

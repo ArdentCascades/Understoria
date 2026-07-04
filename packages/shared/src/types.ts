@@ -80,6 +80,13 @@ export interface Post {
   locationZone: string;
   /** Public keys of members who have confirmed completion. */
   confirmedBy: string[];
+  /** When the post entered `awaiting_confirmation` — set by
+   *  confirmExchange on the first party's confirmation. A mutable
+   *  lifecycle field like `status` / `claimedBy` / `confirmedBy`:
+   *  local to each node, NOT part of the signed canonical payload.
+   *  Absent on rows that predate the field; the auto-confirm sweep
+   *  falls back to `createdAt` for those. */
+  awaitingSince?: number | null;
   /** Which node this post originated from. Set by createPost at
    *  creation time; preserved across federation so peer nodes see
    *  which community a post came from. Posts created before Agent 3
