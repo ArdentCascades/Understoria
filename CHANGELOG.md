@@ -10,6 +10,41 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Strict §4 verification of auto-confirmed exchanges on peer
+  ingestion** (`docs/auto-confirm-key.md` §4). The server's peer pull
+  previously used the lenient `verifyExchange`, which accepts an
+  `autoConfirmed` row on the helper signature alone — anyone
+  controlling a single member key could fabricate "auto-confirmed"
+  hours into a peer's ledger. The pull worker now refreshes each
+  peer's published system key from `GET /config` every cycle (the
+  response gains a `nodeId` field alongside `systemKey`, providing
+  the authenticated nodeId↔pubkey binding) and verifies every pulled
+  exchange with `verifyExchangeLabel`: member-signed and
+  system-signed rows are accepted, anything else — including an
+  auto-confirmed row whose origin node's key is outside the mesh —
+  is rejected. The resolver spans all configured peers, so rows
+  relayed through one peer but signed by another's system key still
+  verify. Safety property: while a peer's `/config` has never been
+  reachable its exchange pull FAILS (cursor stays put, next cycle
+  retries) rather than running with an empty resolver, which would
+  reject auto-confirmed rows while sibling rows advance the cursor
+  past them — a permanent skip; after a first success, transient
+  config failures fall back to the last-known-good key. The PWA's
+  own-node pull keeps its documented lenient path — it now inherits
+  the strict gate transitively, since its node ingests strictly.
+
+### Changed
+- **Delivered outbox rows are pruned after 7 days.** They only serve
+  as the "identical payload already shipped" dedup guard; pending and
+  poisoned rows are never touched. Previously delivered rows
+  accumulated for the life of the device.
+- **Soft-purge scrubs project-activity text by allowlist.** Every
+  string-valued key in an activity `data` blob that is not a known
+  structural identifier (ids, member keys, lifecycle enums) is now
+  blanked, so a future activity type stashing a new free-text key is
+  scrubbed by default instead of silently escaping the purge.
+
+### Added
 - **Invite redemption Phase 1: redemption receipts — invite status
   and roster convergence** (`docs/invite-redemption.md` §6–§9; new
   wire surface, covered by the three now-shipped threat-model §7

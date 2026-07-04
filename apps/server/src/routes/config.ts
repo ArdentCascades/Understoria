@@ -18,12 +18,18 @@ import type { SystemSigner } from "../systemSigner.js";
 // runs the node and how it's sustained without authenticating.
 //
 // Deliberately not exposed:
-// - Internal `nodeId` (used in stored exchanges, not a public secret
-//   but not a useful thing to show either)
 // - Database path, rate-limit values, log settings, CORS origin
 //   (operational details that don't belong on the public surface)
 // - Member or exchange counts (would leak community size to passive
 //   observers; "minimal surface" per docs/threat-model.md §6)
+//
+// `nodeId` IS exposed, but only alongside a published system key: a
+// system-signed exchange carries `autoConfirmedBy: "system:<nodeId>"`,
+// and a verifying peer needs an authenticated binding from that
+// nodeId to the pubkey — which is exactly "this URL, whose records I
+// pull, says it is node N with key K". The id was never a secret (it
+// is stamped on every federated record); without a system key there
+// is no verification need, so it stays unpublished in that case.
 //
 // When the operator hasn't set any of the OPERATOR_* env vars, the
 // response is `{}` rather than `{operator: null}`. Empty-object is
@@ -54,6 +60,10 @@ export interface PublicConfigResponse {
     current: string;
     history: { pubkey: string; retiredAt: number }[];
   };
+  /** Present exactly when `systemKey` is — the node id the key signs
+   *  for, binding `autoConfirmedBy: "system:<nodeId>"` claims to the
+   *  published pubkey. */
+  nodeId?: string;
 }
 
 export async function registerConfigRoutes(
@@ -68,6 +78,7 @@ export async function registerConfigRoutes(
     if (operator) response.operator = operator;
     if (signer) {
       response.systemKey = { current: signer.publicKey, history: [] };
+      response.nodeId = config.nodeId;
     }
     return response;
   });
