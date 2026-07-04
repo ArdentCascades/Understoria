@@ -110,6 +110,82 @@ export async function softPurge(): Promise<PurgeResult> {
     tables.push("projectTasks");
   });
 
+  // Task-comment bodies are member-authored free text. Structure
+  // (ids, author keys, timestamps, tombstones) stays — the ledger
+  // model preserves keys — but the words go.
+  await db.transaction("rw", db.taskComments, async () => {
+    const comments = await db.taskComments.toArray();
+    for (const c of comments) {
+      await db.taskComments.put({ ...c, body: "" });
+    }
+    tables.push("taskComments");
+  });
+
+  // Community events: same shape as posts — title, description and
+  // the free-text location are linkable; the rest is structural.
+  await db.transaction("rw", db.events, async () => {
+    const events = await db.events.toArray();
+    for (const e of events) {
+      await db.events.put({ ...e, title: "", description: "", location: "" });
+    }
+    tables.push("events");
+  });
+  await db.transaction("rw", db.eventCancellations, async () => {
+    const cancellations = await db.eventCancellations.toArray();
+    for (const c of cancellations) {
+      await db.eventCancellations.put({ ...c, reason: "" });
+    }
+    tables.push("eventCancellations");
+  });
+
+  // Proposals carry member-authored free text: the flagger's reason
+  // (description), the flagged post's title, and — for comment
+  // disputes — a verbatim body snapshot inside the payload.
+  await db.transaction("rw", db.proposals, async () => {
+    const proposals = await db.proposals.toArray();
+    for (const p of proposals) {
+      let payload = p.payload;
+      try {
+        const parsed = JSON.parse(payload) as Record<string, unknown>;
+        if (typeof parsed.postTitle === "string") parsed.postTitle = "";
+        if (typeof parsed.body === "string") parsed.body = "";
+        payload = JSON.stringify(parsed);
+      } catch {
+        // Unparseable payload: blank it rather than keep unknown text.
+        payload = "";
+      }
+      await db.proposals.put({ ...p, title: "", description: "", payload });
+    }
+    tables.push("proposals");
+  });
+
+  // Project activity `data` blobs stash free text for the history
+  // timeline (announcement bodies, pause notes, acknowledgments,
+  // task titles). Blank the known text keys, keep the structure.
+  const ACTIVITY_TEXT_KEYS = [
+    "body",
+    "note",
+    "acknowledgment",
+    "taskTitle",
+    "title",
+    "reason",
+  ] as const;
+  await db.transaction("rw", db.projectActivity, async () => {
+    const rows = await db.projectActivity.toArray();
+    for (const row of rows) {
+      const data = { ...row.data } as Record<string, unknown>;
+      let touched = false;
+      for (const key of ACTIVITY_TEXT_KEYS) {
+        if (typeof data[key] === "string" && data[key] !== "") {
+          data[key] = "";
+          touched = true;
+        }
+      }
+      if (touched) await db.projectActivity.put({ ...row, data });
+    }
+    tables.push("projectActivity");
+  });
+
   // docs/blocking.md §3 (privacy-policy.md §3): block list + history
   // are local-only personal-relief data and are cleared on soft-purge.
   // Unlike the tables above, every column on a BlockRow /
@@ -118,21 +194,37 @@ export async function softPurge(): Promise<PurgeResult> {
   // table clear rather than a field rewrite. This also matches the
   // threat-model §7 entry naming `previouslyBlocked` as a device-access
   // residual that soft-purge resolves.
+  //
+  // The same "the row IS the relationship" reasoning clears:
+  //   - `messages`: sender/recipient keys + timing are a communication
+  //     graph; there is no structural half worth keeping.
+  //   - `drafts`: verbatim in-progress free text, nothing structural.
+  //   - `eventRsvps`: a member-attendance graph (who plans to be in
+  //     which room) — precisely what the events design promises never
+  //     to aggregate.
   await db.transaction(
     "rw",
-    [db.blocks, db.previouslyBlocked],
+    [db.blocks, db.previouslyBlocked, db.messages, db.drafts, db.eventRsvps],
     async () => {
       await db.blocks.clear();
       await db.previouslyBlocked.clear();
+      await db.messages.clear();
+      await db.drafts.clear();
+      await db.eventRsvps.clear();
     },
   );
   tables.push("blocks");
   tables.push("previouslyBlocked");
+  tables.push("messages");
+  tables.push("drafts");
+  tables.push("eventRsvps");
 
-  // Settings that could leak identity are rewritten; the node identity
-  // and celebrated-milestones cache survive so the UI doesn't behave
-  // erratically afterward.
-  tables.push("settings");
+  // Settings deliberately survive: under the threat-model contract
+  // ("anonymize all linkable text while preserving the signed exchange
+  // ledger and keypair") public keys are not linkable text, and the
+  // node identity / display preferences keep the UI stable afterward.
+  // NOT pushed to tablesTouched — this report must list only what was
+  // actually scrubbed.
 
   return {
     mode: "soft",
@@ -143,55 +235,20 @@ export async function softPurge(): Promise<PurgeResult> {
 
 export async function hardPurge(): Promise<PurgeResult> {
   const start = performance.now();
-  const tables = [
-    "posts",
-    "exchanges",
-    "achievements",
-    "members",
-    "secretKeys",
-    "settings",
-    "invites",
-    "vouches",
-    "outbox",
-    "projects",
-    "projectTasks",
-    "projectActivity",
-    "pairingLog",
-    "coorgInvitations",
-    "coorgInvitationResponses",
-    "coorgInvitationRevocations",
-    "blocks",
-    "previouslyBlocked",
-  ];
 
-  await Promise.all([
-    db.posts.clear(),
-    db.exchanges.clear(),
-    db.achievements.clear(),
-    db.members.clear(),
-    db.secretKeys.clear(),
-    db.settings.clear(),
-    db.invites.clear(),
-    db.vouches.clear(),
-    db.outbox.clear(),
-    db.projects.clear(),
-    db.projectTasks.clear(),
-    db.projectActivity.clear(),
-    // Paired-device inventory: clears alongside the identity itself
-    // so a rotated node doesn't inherit the old node's pair history.
-    db.pairingLog.clear(),
-    // Co-organizer invitations (PR A): wipe the three signed-record
-    // tables. A rotated identity should not retain pending or
-    // accepted invitations from the previous one.
-    db.coorgInvitations.clear(),
-    db.coorgInvitationResponses.clear(),
-    db.coorgInvitationRevocations.clear(),
-    // docs/blocking.md §3: block list + history are local-only
-    // personal-relief data. A rotated identity should not inherit
-    // the pre-rotation blocker's list.
-    db.blocks.clear(),
-    db.previouslyBlocked.clear(),
-  ]);
+  // Enumerate the LIVE schema rather than hand-maintaining a table
+  // list. The hand-maintained list drifted: ten tables added after it
+  // was written (messages, taskComments, drafts, proposals, votes,
+  // events, eventRsvps, eventCancellations, eventProjectLinks,
+  // nodeConfig) were silently surviving the "wipe every table" purge —
+  // direct-message rows, comment plaintext and form drafts were all
+  // recoverable from a device after a member had triggered the
+  // emergency wipe. Deriving the list from `db.tables` makes every
+  // future table wipe-by-default; the threat-model contract is "wipe
+  // every table, rotate to a fresh node identity", with no exceptions
+  // to encode.
+  const tables = db.tables.map((t) => t.name);
+  await Promise.all(db.tables.map((t) => t.clear()));
 
   // Rotate to a fresh node identity so the post-purge node is
   // cryptographically independent of the pre-purge one.
