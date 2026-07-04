@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **§4 auto-confirm: fail closed on nodeId shadowing.** A compromised
+  peer could serve `GET /config` claiming another node's `nodeId`
+  with its own key and forge "auto-confirmed by" that node. The
+  resolver now refuses to verify any record for a `nodeId` that two
+  peers claim with different keys (a legitimate key comes from the one
+  peer that IS that node), downgrading a would-be forgery to a
+  detectable denial. Separately, the rotation docs are corrected to
+  state honestly that a leaked *retired* key can still sign a
+  *backdated* record (the attacker controls both key and self-declared
+  timestamp, so signing the timestamp does not help); the real fix —
+  receive-time retirement enforcement — is documented and deferred
+  (`docs/system-key-rotation.md` §6).
+
 ### Fixed
 - **Round-2 review, purge/federation correctness.** softPurge now
   clears `outbox` (verbatim payload text), `invites` (live redeemable
