@@ -302,23 +302,21 @@ export async function runAutoConfirmSweep(
   return result;
 }
 
-/** When a post entered `awaiting_confirmation`. Today the Post row
- *  doesn't store this explicitly; the best signal we have is the
- *  latest entry in `confirmedBy` (the first party's confirmation,
- *  which transitions the row out of `claimed`). On a row with no
- *  confirmedBy entries — pathological — fall back to `createdAt`,
- *  which the §4 server-side floor will reject as too old (a sane
- *  community has never seen this state if claims and completions
- *  work). */
+/** When a post entered `awaiting_confirmation`. `confirmExchange`
+ *  stamps `awaitingSince` on the first party's confirmation — that is
+ *  the moment the waiting window starts, and the value the server's
+ *  window check receives.
+ *
+ *  Rows that predate the field fall back to `createdAt`. The fallback
+ *  is LOOSER, not stricter: an old post claimed and completed
+ *  recently looks like it has been waiting since creation, so it
+ *  clears the window early. The server cannot catch that — its §4
+ *  check runs against the client-supplied `awaitingSince` — which is
+ *  exactly why the stamped transition timestamp, not `createdAt`,
+ *  must be the primary source. The legacy fallback shrinks to nothing
+ *  as pre-field rows finish their lifecycle. */
 function inferAwaitingSinceForPost(post: Post): number {
-  // Posts don't have a transition timestamp; the closest proxy is
-  // the post's createdAt (the original "this got going" moment).
-  // A future schema bump can add an explicit `awaitingSince` field;
-  // for PR-A the conservative choice is to use the timestamp we
-  // already have and let the §4 server floor act as the real
-  // gating. The §5 abuse model already names "post-hoc detection,
-  // not preventative" — this matches it.
-  return post.createdAt;
+  return post.awaitingSince ?? post.createdAt;
 }
 
 function verifyHelperSignatureMatches(

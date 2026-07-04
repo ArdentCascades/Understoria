@@ -132,9 +132,14 @@ export interface OutboxRow {
   // cross the wire — the link is local-only by construction, never
   // enqueued, never pulled. eventProjectLinks.test.ts asserts the
   // rejection with `// @ts-expect-error`.
-  /** JSON-stringified signed payload. Immutable once enqueued. */
+  /** JSON-stringified signed payload. While the row is `pending` a
+   *  re-enqueue of the same record with NEW mutable state (e.g. a
+   *  task-comment tombstone) replaces this in place; once delivered
+   *  or poisoned it is immutable. */
   payload: string;
-  /** Id of the wrapped record; lets us avoid double-enqueue on retry. */
+  /** Id of the wrapped record. Dedup is on (recordId, payload bytes):
+   *  an identical re-enqueue is a no-op, a changed payload for the
+   *  same record ships (replacing a still-pending row in place). */
   recordId: string;
   createdAt: number;
   attempts: number;

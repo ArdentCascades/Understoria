@@ -10,6 +10,7 @@ import {
   canonicalCoOrganizerInvitationResponsePayload,
   canonicalCoOrganizerInvitationRevocationPayload,
   canonicalExchangePayload,
+  canonicalPostPayload,
   generateKeyPair,
   sign,
 } from "@understoria/shared/crypto";
@@ -25,6 +26,7 @@ import {
   pullFederatedCoOrgResponses,
   pullFederatedCoOrgRevocations,
   pullFederatedExchanges,
+  pullFederatedPosts,
 } from "./federationSync";
 
 async function reset() {
@@ -224,6 +226,126 @@ function makeSignedCoOrgRevocation(opts: {
     ),
   };
 }
+
+/** The signed immutable wire subset of a post, as the node serves it. */
+function makeSignedWirePost(opts: {
+  id: string;
+  nodeId: string;
+  createdAt: number;
+  title?: string;
+}) {
+  const poster = generateKeyPair();
+  const immutable = {
+    id: opts.id,
+    type: "NEED" as const,
+    category: "other" as const,
+    title: opts.title ?? "Need a hand",
+    description: "Wire post",
+    estimatedHours: 1,
+    urgency: "low" as const,
+    postedBy: poster.publicKey,
+    createdAt: opts.createdAt,
+    expiresAt: null,
+    locationZone: "",
+    nodeId: opts.nodeId,
+  };
+  return {
+    ...immutable,
+    signature: sign(canonicalPostPayload(immutable), poster.secretKey),
+  };
+}
+
+describe("pullFederatedPosts", () => {
+  beforeEach(async () => {
+    await reset();
+    await db.posts.clear();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  function stubPostsResponse(posts: unknown[]) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts }),
+      }),
+    );
+  }
+
+  it("inserts a validly signed peer post with lifecycle defaults", async () => {
+    const wire = makeSignedWirePost({
+      id: "post_ok",
+      nodeId: "peer_node",
+      createdAt: 1000,
+    });
+    stubPostsResponse([wire]);
+    const result = await pullFederatedPosts();
+    expect(result).toEqual({ inserted: 1, skipped: 0 });
+    expect(await db.posts.get("post_ok")).toMatchObject({
+      status: "open",
+      claimedBy: null,
+      confirmedBy: [],
+      nodeId: "peer_node",
+      signature: wire.signature,
+    });
+  });
+
+  it("rejects a post whose signature does not verify (forged attribution)", async () => {
+    const wire = makeSignedWirePost({
+      id: "post_forged",
+      nodeId: "peer_node",
+      createdAt: 1000,
+    });
+    // A malicious node re-attributes the post to a victim's key. The
+    // signature no longer matches postedBy — must never reach the Board.
+    const victim = generateKeyPair();
+    stubPostsResponse([{ ...wire, postedBy: victim.publicKey }]);
+    const result = await pullFederatedPosts();
+    expect(result).toEqual({ inserted: 0, skipped: 1 });
+    expect(await db.posts.get("post_forged")).toBeUndefined();
+  });
+
+  it("rejects a post whose signed content was tampered with", async () => {
+    const wire = makeSignedWirePost({
+      id: "post_tampered",
+      nodeId: "peer_node",
+      createdAt: 1000,
+      title: "Original title",
+    });
+    stubPostsResponse([{ ...wire, title: "MITM-replaced title" }]);
+    const result = await pullFederatedPosts();
+    expect(result).toEqual({ inserted: 0, skipped: 1 });
+    expect(await db.posts.get("post_tampered")).toBeUndefined();
+  });
+
+  it("rejects unsigned rows and rows with missing fields instead of patching them", async () => {
+    const wire = makeSignedWirePost({
+      id: "post_unsigned",
+      nodeId: "peer_node",
+      createdAt: 1000,
+    });
+    stubPostsResponse([
+      { ...wire, signature: "" },
+      { id: "post_partial", createdAt: 1000 },
+    ]);
+    const result = await pullFederatedPosts();
+    expect(result).toEqual({ inserted: 0, skipped: 2 });
+    expect(await db.posts.get("post_unsigned")).toBeUndefined();
+    expect(await db.posts.get("post_partial")).toBeUndefined();
+  });
+
+  it("dedups on id across repeated pulls", async () => {
+    const wire = makeSignedWirePost({
+      id: "post_dup",
+      nodeId: "peer_node",
+      createdAt: 2000,
+    });
+    stubPostsResponse([wire]);
+    expect(await pullFederatedPosts()).toEqual({ inserted: 1, skipped: 0 });
+    expect(await pullFederatedPosts()).toEqual({ inserted: 0, skipped: 1 });
+    expect(await db.posts.where("id").equals("post_dup").count()).toBe(1);
+  });
+});
 
 describe("pullFederatedCoOrgInvitations", () => {
   beforeEach(resetCoOrg);

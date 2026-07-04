@@ -50,6 +50,8 @@ import type {
 
 export interface ExchangeStore {
   insert(exchange: Exchange): void;
+  /** Point lookup by exchange id, or undefined when absent. */
+  get(id: string): Exchange | undefined;
   list(opts?: { since?: number; limit?: number }): Exchange[];
   count(): number;
   has(id: string): boolean;
@@ -693,6 +695,29 @@ function migrate(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '11')",
     ).run();
   }
+
+  // Schema v12 — persist the §4 auto-confirm provenance markers.
+  // The wire layer (parseExchange) and the /auto-confirm route both
+  // carry autoConfirmed / autoConfirmedBy / autoConfirmedAt, but the
+  // store had no columns for them, so insert() silently dropped the
+  // markers. Every system-signed exchange was then served by
+  // GET /exchanges stripped of its provenance — pulling peers took
+  // the member-signed verify path, checked the SYSTEM signature
+  // against the member's helpedKey, and rejected the row. Auto-
+  // confirmed exchanges therefore never federated at all, and the
+  // §4 "distinct label per provenance" contract was unverifiable
+  // downstream.
+  if (current < 12) {
+    db.exec(`
+      ALTER TABLE exchanges
+        ADD COLUMN auto_confirmed INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE exchanges ADD COLUMN auto_confirmed_by TEXT;
+      ALTER TABLE exchanges ADD COLUMN auto_confirmed_at INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '12')",
+    ).run();
+  }
 }
 
 export function createExchangeStore(db: DatabaseType): ExchangeStore {
@@ -700,15 +725,18 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
     INSERT INTO exchanges (
       id, post_id, helper_key, helped_key, hours_exchanged,
       helper_signature, helped_signature, completed_at, category, node_id,
-      flagged_for_review, flag_reason
+      flagged_for_review, flag_reason,
+      auto_confirmed, auto_confirmed_by, auto_confirmed_at
     ) VALUES (
       @id, @postId, @helperKey, @helpedKey, @hoursExchanged,
       @helperSignature, @helpedSignature, @completedAt, @category, @nodeId,
-      @flaggedForReview, @flagReason
+      @flaggedForReview, @flagReason,
+      @autoConfirmed, @autoConfirmedBy, @autoConfirmedAt
     )
   `);
 
   const hasStmt = db.prepare("SELECT 1 FROM exchanges WHERE id = ?");
+  const getStmt = db.prepare("SELECT * FROM exchanges WHERE id = ?");
   const countStmt = db.prepare("SELECT COUNT(*) AS n FROM exchanges");
 
   return {
@@ -726,22 +754,38 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
         nodeId: exchange.nodeId,
         flaggedForReview: exchange.flaggedForReview ? 1 : 0,
         flagReason: exchange.flagReason ?? null,
+        autoConfirmed: exchange.autoConfirmed ? 1 : 0,
+        autoConfirmedBy: exchange.autoConfirmedBy ?? null,
+        autoConfirmedAt: exchange.autoConfirmedAt ?? null,
       });
+    },
+
+    get(id) {
+      const row = getStmt.get(id) as ExchangeRow | undefined;
+      return row ? rowToExchange(row) : undefined;
     },
 
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first with an INCLUSIVE cursor filter. Pullers advance
+      // their cursor to max(completed_at) of each page, so ASC is the
+      // only order under which a page boundary can't permanently skip
+      // rows (with DESC, >limit new rows meant the cursor jumped past
+      // everything below the newest page). `>=` re-serves boundary
+      // rows that share the cursor timestamp; pullers dedup by id, so
+      // ties can never be lost either. The id tiebreak keeps paging
+      // deterministic.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM exchanges WHERE completed_at > ?
-               ORDER BY completed_at DESC LIMIT ?`,
+              `SELECT * FROM exchanges WHERE completed_at >= ?
+               ORDER BY completed_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM exchanges
-               ORDER BY completed_at DESC LIMIT ?`,
+               ORDER BY completed_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as ExchangeRow[]).map(rowToExchange);
@@ -782,17 +826,19 @@ export function createVouchStore(db: DatabaseType): VouchStore {
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM vouches WHERE created_at > ?
-               ORDER BY created_at DESC LIMIT ?`,
+              `SELECT * FROM vouches WHERE created_at >= ?
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM vouches
-               ORDER BY created_at DESC LIMIT ?`,
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as VouchRow[]).map(rowToVouch);
@@ -860,17 +906,19 @@ export function createPostStore(db: DatabaseType): PostStore {
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM posts WHERE created_at > ?
-               ORDER BY created_at DESC LIMIT ?`,
+              `SELECT * FROM posts WHERE created_at >= ?
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM posts
-               ORDER BY created_at DESC LIMIT ?`,
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as PostRowSqlite[]).map(rowToPost);
@@ -963,17 +1011,29 @@ export function createTaskCommentStore(db: DatabaseType): TaskCommentStore {
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale.
+      //
+      // A task comment's effective cursor position is
+      // max(created_at, deleted_at): a tombstone applied AFTER a
+      // puller's cursor passed the row's created_at must re-enter the
+      // window, or soft deletes never converge for peers that already
+      // pulled the live row. Pullers advance their cursor by the same
+      // max, and dedup/merge by id.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM task_comments WHERE created_at > ?
-               ORDER BY created_at DESC LIMIT ?`,
+              `SELECT * FROM task_comments
+               WHERE MAX(created_at, COALESCE(deleted_at, 0)) >= ?
+               ORDER BY MAX(created_at, COALESCE(deleted_at, 0)) ASC, id ASC
+               LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM task_comments
-               ORDER BY created_at DESC LIMIT ?`,
+               ORDER BY MAX(created_at, COALESCE(deleted_at, 0)) ASC, id ASC
+               LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as TaskCommentRowSqlite[]).map(rowToTaskComment);
@@ -1255,6 +1315,9 @@ interface ExchangeRow {
   node_id: string;
   flagged_for_review: number;
   flag_reason: string | null;
+  auto_confirmed: number;
+  auto_confirmed_by: string | null;
+  auto_confirmed_at: number | null;
 }
 
 function rowToExchange(r: ExchangeRow): Exchange {
@@ -1273,6 +1336,13 @@ function rowToExchange(r: ExchangeRow): Exchange {
   if (r.flagged_for_review) {
     out.flaggedForReview = true;
     if (r.flag_reason) out.flagReason = r.flag_reason as FlagReason;
+  }
+  // §4 provenance markers — restored exactly as inserted so peers can
+  // run verifyExchangeLabel on rows served by GET /exchanges.
+  if (r.auto_confirmed) {
+    out.autoConfirmed = true;
+    if (r.auto_confirmed_by) out.autoConfirmedBy = r.auto_confirmed_by;
+    if (r.auto_confirmed_at !== null) out.autoConfirmedAt = r.auto_confirmed_at;
   }
   return out;
 }
@@ -1402,16 +1472,20 @@ export function createClaimStore(db: DatabaseType): ClaimStore {
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale. The PWA's
+      // claim pull advances a max(claimed_at) cursor, so it has the
+      // same page-skip failure mode as the peer pulls.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM claims WHERE claimed_at > ?
-               ORDER BY claimed_at DESC LIMIT ?`,
+              `SELECT * FROM claims WHERE claimed_at >= ?
+               ORDER BY claimed_at ASC, post_id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
-              `SELECT * FROM claims ORDER BY claimed_at DESC LIMIT ?`,
+              `SELECT * FROM claims ORDER BY claimed_at ASC, post_id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as ClaimRow[]).map(rowToClaim);
@@ -1468,17 +1542,19 @@ export function createCoOrganizerInvitationStore(
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM coorg_invitations WHERE created_at > ?
-               ORDER BY created_at DESC LIMIT ?`,
+              `SELECT * FROM coorg_invitations WHERE created_at >= ?
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM coorg_invitations
-               ORDER BY created_at DESC LIMIT ?`,
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as CoOrganizerInvitationRowSqlite[]).map(
@@ -1553,17 +1629,19 @@ export function createCoOrganizerInvitationResponseStore(
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM coorg_invitation_responses WHERE decided_at > ?
-               ORDER BY decided_at DESC LIMIT ?`,
+              `SELECT * FROM coorg_invitation_responses WHERE decided_at >= ?
+               ORDER BY decided_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM coorg_invitation_responses
-               ORDER BY decided_at DESC LIMIT ?`,
+               ORDER BY decided_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as CoOrganizerInvitationResponseRowSqlite[]).map(
@@ -1633,17 +1711,19 @@ export function createCoOrganizerInvitationRevocationStore(
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Oldest-first + inclusive cursor — see the exchanges store's
+      // list() for the pagination-correctness rationale.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM coorg_invitation_revocations WHERE revoked_at > ?
-               ORDER BY revoked_at DESC LIMIT ?`,
+              `SELECT * FROM coorg_invitation_revocations WHERE revoked_at >= ?
+               ORDER BY revoked_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM coorg_invitation_revocations
-               ORDER BY revoked_at DESC LIMIT ?`,
+               ORDER BY revoked_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as CoOrganizerInvitationRevocationRowSqlite[]).map(
@@ -1715,17 +1795,20 @@ export function createEventStore(db: DatabaseType): EventStore {
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Inclusive cursor + id tiebreak — see the exchanges store's
+      // list() for the tie-at-page-boundary rationale (this store was
+      // already ASC).
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM events WHERE created_at > ?
-               ORDER BY created_at ASC LIMIT ?`,
+              `SELECT * FROM events WHERE created_at >= ?
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM events
-               ORDER BY created_at ASC LIMIT ?`,
+               ORDER BY created_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as EventRowSqlite[]).map(rowToEvent);
@@ -1801,17 +1884,20 @@ export function createEventCancellationStore(
     },
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Inclusive cursor + id tiebreak — see the exchanges store's
+      // list() for the tie-at-page-boundary rationale (this store was
+      // already ASC).
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM event_cancellations WHERE cancelled_at > ?
-               ORDER BY cancelled_at ASC LIMIT ?`,
+              `SELECT * FROM event_cancellations WHERE cancelled_at >= ?
+               ORDER BY cancelled_at ASC, id ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM event_cancellations
-               ORDER BY cancelled_at ASC LIMIT ?`,
+               ORDER BY cancelled_at ASC, id ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as EventCancellationRowSqlite[]).map(rowToEventCancellation);

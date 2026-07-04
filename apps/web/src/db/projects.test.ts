@@ -468,6 +468,95 @@ describe("task confirmation transfers credit and surfaces milestones", () => {
   });
 });
 
+describe("concurrent confirmation safety", () => {
+  beforeEach(reset);
+
+  async function setupTask(estimatedHours: number) {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org, 10);
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Haul soil",
+      description: "",
+      category: "transport",
+      estimatedHours,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    await markProjectTaskComplete(task.id, helper.publicKey);
+    return { org, helper, p, task };
+  }
+
+  it("two racing confirmations of the SAME task write exactly one exchange (no double credit)", async () => {
+    const { org, helper, p, task } = await setupTask(3);
+
+    // Both entry points validate on a pre-transaction snapshot, so
+    // both pass the outer eligibility check; the in-transaction
+    // re-check must make the loser abort. Before that re-check
+    // existed, both wrote distinct Exchange rows (fresh uuid each)
+    // and the helper was credited twice.
+    const results = await Promise.allSettled([
+      confirmProjectTaskCompletion(task.id, org.publicKey, NODE),
+      confirmProjectTaskCompletion(task.id, org.publicKey, NODE),
+    ]);
+    const fulfilled = results.filter((r) => r.status === "fulfilled");
+    expect(fulfilled).toHaveLength(1);
+
+    const exchanges = await db.exchanges.toArray();
+    expect(exchanges).toHaveLength(1);
+    expect(balanceFor(helper, exchanges)).toBe(8); // 5 seed + 3, once
+    expect(balanceFor(org, exchanges)).toBe(2); // 5 seed - 3, once
+
+    const fresh = await db.projects.get(p.id);
+    expect(fresh!.contributedHours).toBe(3); // counted once
+
+    const confirmActivity = (await db.projectActivity.toArray()).filter(
+      (a) => a.type === "task_confirmed",
+    );
+    expect(confirmActivity).toHaveLength(1);
+  });
+
+  it("confirming two DIFFERENT tasks concurrently lands both in contributedHours", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org, 10);
+    await launchProject(p.id, org.publicKey);
+    const mkTask = async (estimatedHours: number) => {
+      const t = await addProjectTask(p.id, org.publicKey, {
+        title: `task ${estimatedHours}h`,
+        description: "",
+        category: "other",
+        estimatedHours,
+        urgency: "low",
+        requiredSkills: [],
+        dependencies: [],
+      });
+      await claimProjectTask(t.id, helper.publicKey);
+      await markProjectTaskComplete(t.id, helper.publicKey);
+      return t;
+    };
+    const t2 = await mkTask(2);
+    const t3 = await mkTask(3);
+
+    // Each confirmation must sum contributedHours from the FRESH
+    // project row inside its transaction. With the old pre-read
+    // snapshot, the second writer clobbered the first and the total
+    // undercounted (2 or 3 instead of 5).
+    const results = await Promise.allSettled([
+      confirmProjectTaskCompletion(t2.id, org.publicKey, NODE),
+      confirmProjectTaskCompletion(t3.id, org.publicKey, NODE),
+    ]);
+    expect(results.every((r) => r.status === "fulfilled")).toBe(true);
+
+    const fresh = await db.projects.get(p.id);
+    expect(fresh!.contributedHours).toBe(5);
+    expect((await db.exchanges.toArray())).toHaveLength(2);
+  });
+});
+
 describe("actual hours at completion", () => {
   beforeEach(reset);
 

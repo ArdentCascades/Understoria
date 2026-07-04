@@ -13,6 +13,7 @@ import {
   generateKeyPair,
   sign,
 } from "@understoria/shared/crypto";
+import type { Exchange } from "@understoria/shared/types";
 import {
   createExchangeStore,
   openDatabase,
@@ -87,6 +88,48 @@ describe("POST /auto-confirm — endpoint-level enforcement", () => {
     expect(body.results[0].status).toBe("signed");
     expect(body.results[0].exchange?.autoConfirmed).toBe(true);
     expect(body.results[0].exchange?.autoConfirmedBy).toBe(`system:${NODE_ID}`);
+  });
+
+  it("re-submission returns the stored row even when it is not the newest exchange", async () => {
+    const reqA = { ...makeRequest(), exchangeId: "ex_a" };
+    const reqB = { ...makeRequest(), exchangeId: "ex_b" };
+    const first = await app.inject({
+      method: "POST",
+      url: "/auto-confirm",
+      payload: { requests: [reqA] },
+    });
+    const firstRow = (first.json() as {
+      results: Array<{ exchange?: Exchange }>;
+    }).results[0].exchange!;
+    // A second, more recent exchange lands after ex_a. The old
+    // list({limit:1}).find lookup only ever saw the newest row, so a
+    // re-submission of ex_a came back with no exchange attached.
+    await app.inject({
+      method: "POST",
+      url: "/auto-confirm",
+      payload: { requests: [reqB] },
+    });
+
+    const again = await app.inject({
+      method: "POST",
+      url: "/auto-confirm",
+      payload: { requests: [reqA] },
+    });
+    const body = again.json() as {
+      results: Array<{ status: string; exchange?: Exchange }>;
+    };
+    expect(body.results[0].status).toBe("signed");
+    // The stored row comes back — same signature, same
+    // autoConfirmedAt: the server did NOT re-sign (that would mint a
+    // fresh timestamp and amount to an audit lie).
+    expect(body.results[0].exchange).toBeDefined();
+    expect(body.results[0].exchange!.id).toBe("ex_a");
+    expect(body.results[0].exchange!.helpedSignature).toBe(
+      firstRow.helpedSignature,
+    );
+    expect(body.results[0].exchange!.autoConfirmedAt).toBe(
+      firstRow.autoConfirmedAt,
+    );
   });
 
   it("server independently rejects window-not-elapsed (client claim is not trusted)", async () => {

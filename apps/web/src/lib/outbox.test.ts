@@ -25,12 +25,13 @@ import {
   __resetOutboxWorkerForTests,
   enqueueExchangeOutbox,
   enqueueRedemptionReceiptOutbox,
+  enqueueTaskCommentOutbox,
   flushOutboxOnce,
   isPoisonResult,
   nextBackoffMs,
   readOutboxSummary,
 } from "./outbox";
-import type { Exchange } from "@/types";
+import type { Exchange, TaskComment } from "@/types";
 import type { RedemptionReceipt } from "@understoria/shared/types";
 
 const NODE = "node_test";
@@ -114,13 +115,88 @@ describe("enqueueExchangeOutbox", () => {
     expect(await db.outbox.count()).toBe(1);
   });
 
-  it("dedupes by recordId — re-enqueue is a no-op", async () => {
+  it("dedupes by recordId — identical re-enqueue is a no-op", async () => {
     await writeSubmitConfig({
       url: "https://node.example/api",
       enabled: true,
     });
     await enqueueExchangeOutbox(fakeExchange("ex_dup"));
     await enqueueExchangeOutbox(fakeExchange("ex_dup"));
+    expect(await db.outbox.count()).toBe(1);
+  });
+
+  it("identical re-enqueue preserves the pending row's retry state", async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const first = await enqueueExchangeOutbox(fakeExchange("ex_retry"));
+    // Simulate the worker having backed off after failures.
+    await db.outbox.update(first!.id, {
+      attempts: 3,
+      nextAttemptAt: Date.now() + 60_000,
+    });
+    const again = await enqueueExchangeOutbox(fakeExchange("ex_retry"));
+    expect(again!.id).toBe(first!.id);
+    const row = await db.outbox.get(first!.id);
+    expect(row!.attempts).toBe(3);
+    expect(row!.nextAttemptAt).toBeGreaterThan(Date.now());
+  });
+});
+
+describe("enqueueTaskCommentOutbox — tombstone re-enqueue", () => {
+  function fakeComment(deletedAt: number | null = null): TaskComment {
+    return {
+      id: "tc_1",
+      projectId: "proj_1",
+      taskId: "task_1",
+      authorKey: "author_pk",
+      body: "hello",
+      createdAt: 1_700_000_000_000,
+      deletedAt,
+      nodeId: NODE,
+      signature: "sig_tc",
+    };
+  }
+
+  beforeEach(async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+  });
+
+  it("replaces a still-pending insert's payload with the tombstone", async () => {
+    const insert = await enqueueTaskCommentOutbox(fakeComment(null));
+    const tombstone = await enqueueTaskCommentOutbox(fakeComment(123456));
+    // Same row, updated in place — the newest state ships once.
+    expect(tombstone!.id).toBe(insert!.id);
+    expect(await db.outbox.count()).toBe(1);
+    const row = await db.outbox.get(insert!.id);
+    expect(row!.status).toBe("pending");
+    expect(JSON.parse(row!.payload).deletedAt).toBe(123456);
+  });
+
+  it("enqueues a fresh row for the tombstone when the insert already delivered", async () => {
+    const insert = await enqueueTaskCommentOutbox(fakeComment(null));
+    await db.outbox.update(insert!.id, { status: "delivered" });
+
+    // This was the bug: dedup keyed on recordId alone found the
+    // delivered insert row and silently dropped the tombstone, so
+    // peers kept rendering a comment the author deleted.
+    const tombstone = await enqueueTaskCommentOutbox(fakeComment(999999));
+    expect(tombstone).not.toBeNull();
+    expect(tombstone!.id).not.toBe(insert!.id);
+    expect(tombstone!.status).toBe("pending");
+    expect(JSON.parse(tombstone!.payload).deletedAt).toBe(999999);
+    expect(await db.outbox.count()).toBe(2);
+  });
+
+  it("re-enqueueing an already-delivered identical payload is a no-op", async () => {
+    const insert = await enqueueTaskCommentOutbox(fakeComment(null));
+    await db.outbox.update(insert!.id, { status: "delivered" });
+    const again = await enqueueTaskCommentOutbox(fakeComment(null));
+    expect(again!.id).toBe(insert!.id);
     expect(await db.outbox.count()).toBe(1);
   });
 });

@@ -30,6 +30,7 @@ import {
   verifyEvent,
   verifyEventCancellation,
   verifyExchange,
+  verifyPost,
   verifyRedemptionReceipt,
   verifyVouch,
 } from "@understoria/shared/crypto";
@@ -85,11 +86,32 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
 
   for (const raw of body.posts) {
     const r = raw as Record<string, unknown>;
-    if (typeof r.id !== "string" || typeof r.createdAt !== "number") {
+    // Strict shape check — no defaulting. A row missing any signed
+    // field can't verify, and patching fields with fallbacks would
+    // store attacker-chosen content under a "repaired" shape. The
+    // response body is UNTRUSTED (a compromised node, or a MITM on a
+    // plain-HTTP pilot deployment, controls it): the signature check
+    // below is the only thing that makes a row attributable.
+    if (
+      typeof r.id !== "string" ||
+      typeof r.createdAt !== "number" ||
+      (r.type !== "NEED" && r.type !== "OFFER") ||
+      typeof r.category !== "string" ||
+      typeof r.title !== "string" ||
+      typeof r.description !== "string" ||
+      typeof r.estimatedHours !== "number" ||
+      typeof r.urgency !== "string" ||
+      typeof r.postedBy !== "string" ||
+      (typeof r.expiresAt !== "number" && r.expiresAt !== null) ||
+      typeof r.locationZone !== "string" ||
+      typeof r.nodeId !== "string" ||
+      typeof r.signature !== "string" ||
+      r.signature === ""
+    ) {
       skipped += 1;
       continue;
     }
-    const existing = await db.posts.get(r.id as string);
+    const existing = await db.posts.get(r.id);
     if (existing) {
       skipped += 1;
       if (maxCreatedAt === null || r.createdAt > maxCreatedAt) {
@@ -98,23 +120,31 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
       continue;
     }
     const post: Post = {
-      id: r.id as string,
-      type: (r.type as Post["type"]) ?? "NEED",
-      category: (r.category as Post["category"]) ?? "other",
-      title: (r.title as string) ?? "",
-      description: (r.description as string) ?? "",
-      estimatedHours: (r.estimatedHours as number) ?? 1,
-      urgency: (r.urgency as Post["urgency"]) ?? "low",
-      postedBy: (r.postedBy as string) ?? "",
+      id: r.id,
+      type: r.type,
+      category: r.category as Post["category"],
+      title: r.title,
+      description: r.description,
+      estimatedHours: r.estimatedHours,
+      urgency: r.urgency as Post["urgency"],
+      postedBy: r.postedBy,
       claimedBy: null,
       status: "open",
       createdAt: r.createdAt,
-      expiresAt: (r.expiresAt as number | null) ?? null,
-      locationZone: (r.locationZone as string) ?? "",
+      expiresAt: r.expiresAt,
+      locationZone: r.locationZone,
       confirmedBy: [],
-      nodeId: (r.nodeId as string) ?? "",
-      signature: (r.signature as string) ?? "",
+      nodeId: r.nodeId,
+      signature: r.signature,
     };
+    // Same gate the server's POST /posts route and peer pull apply:
+    // the poster's signature must verify over the canonical immutable
+    // payload. A forged or tampered row is dropped WITHOUT advancing
+    // the cursor (matching peerPull's rejected-row semantics).
+    if (!verifyPost(post)) {
+      skipped += 1;
+      continue;
+    }
     await db.posts.put(post);
     inserted += 1;
     if (maxCreatedAt === null || post.createdAt > maxCreatedAt) {
@@ -265,9 +295,17 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
       continue;
     }
 
+    // Effective cursor position is max(createdAt, deletedAt): the
+    // node windows and orders /task-comments by that value so late
+    // tombstones re-enter the pull window. Advancing by createdAt
+    // alone would jump the cursor past a tombstone in the same page.
+    const effectiveCursorAt = Math.max(
+      comment.createdAt,
+      comment.deletedAt ?? 0,
+    );
     const advanceCursor = () => {
-      if (maxCreatedAt === null || comment.createdAt > maxCreatedAt) {
-        maxCreatedAt = comment.createdAt;
+      if (maxCreatedAt === null || effectiveCursorAt > maxCreatedAt) {
+        maxCreatedAt = effectiveCursorAt;
       }
     };
 

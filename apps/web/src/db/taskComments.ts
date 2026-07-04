@@ -101,8 +101,19 @@ export async function postTaskComment(
     signature,
   };
 
-  await db.taskComments.put(comment);
-  await enqueueTaskCommentOutbox(comment);
+  // Row + outbox land atomically (same discipline as createPost /
+  // confirmExchange): a crash between the two must not leave a
+  // comment that will never federate, or an outbox row for a comment
+  // that was never persisted. `settings` is in scope because the
+  // enqueue helper reads `communityNodeUrl`.
+  await db.transaction(
+    "rw",
+    [db.taskComments, db.outbox, db.settings],
+    async () => {
+      await db.taskComments.put(comment);
+      await enqueueTaskCommentOutbox(comment);
+    },
+  );
   // Best-effort kick. The worker also runs on its own schedule, so a
   // disabled / down community node just means the row sits pending.
   void flushOutboxNow().catch(() => {
@@ -148,7 +159,6 @@ export async function deleteTaskComment(
     throw new Error("Only the author can delete this comment.");
   }
   const deletedAt = Date.now();
-  await db.taskComments.update(commentId, { deletedAt });
   // Note: a flagged-then-deleted comment keeps its open dispute
   // proposal. That's intentional — the flag's purpose is community
   // accountability, which survives the author's choice to remove
@@ -156,9 +166,20 @@ export async function deleteTaskComment(
   // disputes view still has something to show.
   // Federate the tombstone — re-push the same signed row with
   // `deletedAt` populated. The signature still verifies because
-  // `deletedAt` is excluded from the canonical payload.
+  // `deletedAt` is excluded from the canonical payload. The outbox's
+  // (recordId, payload) dedup ships this as an update: it replaces a
+  // still-pending insert row in place, or enqueues a fresh row when
+  // the original insert already delivered.
+  // Tombstone + outbox land atomically, same as postTaskComment.
   const tombstoned: TaskComment = { ...comment, deletedAt };
-  await enqueueTaskCommentOutbox(tombstoned);
+  await db.transaction(
+    "rw",
+    [db.taskComments, db.outbox, db.settings],
+    async () => {
+      await db.taskComments.update(commentId, { deletedAt });
+      await enqueueTaskCommentOutbox(tombstoned);
+    },
+  );
   void flushOutboxNow().catch(() => {
     // Errors surface via the outbox worker's own retry path.
   });

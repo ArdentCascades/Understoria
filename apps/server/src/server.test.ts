@@ -248,32 +248,46 @@ describe("GET /exchanges", () => {
     expect(res.json()).toEqual({ count: 0, exchanges: [] });
   });
 
-  it("returns stored exchanges newest first", async () => {
+  it("returns stored exchanges oldest first (cursor pagination order)", async () => {
     const older = makeSignedExchange(Date.now() - 60_000);
     const newer = makeSignedExchange(Date.now());
-    await app.inject({ method: "POST", url: "/exchanges", payload: older });
     await app.inject({ method: "POST", url: "/exchanges", payload: newer });
+    await app.inject({ method: "POST", url: "/exchanges", payload: older });
     const res = await app.inject({ method: "GET", url: "/exchanges" });
     const body = res.json() as { count: number; exchanges: Exchange[] };
     expect(body.count).toBe(2);
-    expect(body.exchanges[0].id).toBe(newer.id);
-    expect(body.exchanges[1].id).toBe(older.id);
+    // Oldest first: a cursor-advancing puller that pages through a
+    // backlog must receive the backlog bottom-up, or rows past the
+    // first page are skipped forever.
+    expect(body.exchanges[0].id).toBe(older.id);
+    expect(body.exchanges[1].id).toBe(newer.id);
   });
 
-  it("supports ?since= for federation pull", async () => {
+  it("supports ?since= for federation pull (inclusive of the cursor)", async () => {
     const t1 = Date.now() - 60_000;
     const t2 = Date.now();
     const old = makeSignedExchange(t1);
     const fresh = makeSignedExchange(t2);
     await app.inject({ method: "POST", url: "/exchanges", payload: old });
     await app.inject({ method: "POST", url: "/exchanges", payload: fresh });
+    // `since` is inclusive: a row sharing the cursor timestamp is
+    // re-served (pullers dedup by id) so a tie at a page boundary can
+    // never be lost. Anything strictly newer is served as well.
     const res = await app.inject({
       method: "GET",
       url: `/exchanges?since=${t1}`,
     });
     const body = res.json() as { count: number; exchanges: Exchange[] };
-    expect(body.count).toBe(1);
-    expect(body.exchanges[0].id).toBe(fresh.id);
+    expect(body.count).toBe(2);
+    expect(body.exchanges[0].id).toBe(old.id);
+    expect(body.exchanges[1].id).toBe(fresh.id);
+    const after = await app.inject({
+      method: "GET",
+      url: `/exchanges?since=${t1 + 1}`,
+    });
+    const afterBody = after.json() as { count: number; exchanges: Exchange[] };
+    expect(afterBody.count).toBe(1);
+    expect(afterBody.exchanges[0].id).toBe(fresh.id);
   });
 
   it("returned rows are independently verifiable", async () => {
@@ -692,6 +706,39 @@ describe("GET /task-comments", () => {
     expect(
       (since.json().taskComments as TaskComment[])[0].id,
     ).toBe(later.id);
+  });
+
+  it("a late tombstone re-enters the since window (effective cursor = max(createdAt, deletedAt))", async () => {
+    const comment = makeSignedTaskComment({ createdAt: 1_000 });
+    await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: comment,
+    });
+
+    // A puller whose cursor is already past createdAt sees nothing…
+    const before = await app.inject({
+      method: "GET",
+      url: "/task-comments?since=5000",
+    });
+    expect(before.json().count).toBe(0);
+
+    // …then the author soft-deletes. The tombstoned row must be
+    // served in the deletedAt window, or peers that already pulled
+    // the live row keep rendering a comment the author deleted.
+    await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: { ...comment, deletedAt: 9_000 },
+    });
+    const after = await app.inject({
+      method: "GET",
+      url: "/task-comments?since=5000",
+    });
+    expect(after.json().count).toBe(1);
+    const served = (after.json().taskComments as TaskComment[])[0];
+    expect(served.id).toBe(comment.id);
+    expect(served.deletedAt).toBe(9_000);
   });
 });
 

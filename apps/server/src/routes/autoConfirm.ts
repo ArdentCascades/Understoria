@@ -70,9 +70,12 @@ export async function registerAutoConfirmRoutes(
       // autoConfirmedAt and amount to an audit lie. We return the
       // already-stored row so the client can converge.
       if (deps.store.has(request.exchangeId)) {
-        const existing = deps.store
-          .list({ limit: 1 })
-          .find((e) => e.id === request.exchangeId);
+        // Point lookup — the previous list({limit:1}).find(...) only
+        // matched when the requested id happened to be the single row
+        // that one-row page returned, so re-submissions usually got
+        // status:"signed" with no exchange attached and the client
+        // couldn't converge on the stored row.
+        const existing = deps.store.get(request.exchangeId);
         results.push({
           exchangeId: request.exchangeId,
           status: "signed",

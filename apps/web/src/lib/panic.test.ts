@@ -32,26 +32,9 @@ import {
 const NODE = "node_panic_test";
 
 async function reset() {
-  await Promise.all([
-    db.members.clear(),
-    db.posts.clear(),
-    db.exchanges.clear(),
-    db.achievements.clear(),
-    db.settings.clear(),
-    db.secretKeys.clear(),
-    db.invites.clear(),
-    db.vouches.clear(),
-    db.outbox.clear(),
-    db.projects.clear(),
-    db.projectTasks.clear(),
-    db.projectActivity.clear(),
-    db.pairingLog.clear(),
-    db.coorgInvitations.clear(),
-    db.coorgInvitationResponses.clear(),
-    db.coorgInvitationRevocations.clear(),
-    db.blocks.clear(),
-    db.previouslyBlocked.clear(),
-  ]);
+  // Clear the live schema — this test file asserts full-schema purge
+  // coverage, so its reset must never lag behind new tables either.
+  await Promise.all(db.tables.map((t) => t.clear()));
 }
 
 async function populate(memberCount: number, postCount: number) {
@@ -161,6 +144,44 @@ describe("hardPurge", () => {
     expect(prePurgeKeys).not.toContain(postKeys[0].publicKey);
   });
 
+  it("wipes EVERY table in the live schema — no hand-list drift", async () => {
+    // Seed one minimal row into every declared table, generically, so
+    // a future table addition is covered by this test automatically.
+    // (This is the regression test for the drifted hand-maintained
+    // list: messages, taskComments, drafts, proposals, votes, events,
+    // eventRsvps, eventCancellations, eventProjectLinks and nodeConfig
+    // all survived the "wipe every table" purge.)
+    for (const t of db.tables) {
+      const kp = t.schema.primKey.keyPath;
+      const row: Record<string, unknown> = {};
+      if (typeof kp === "string") {
+        row[kp] = `seed_${t.name}`;
+      } else if (Array.isArray(kp)) {
+        for (const part of kp) row[part] = `seed_${t.name}_${part}`;
+      }
+      await t.put(row as never);
+    }
+    for (const t of db.tables) {
+      expect(await t.count()).toBeGreaterThan(0);
+    }
+
+    const result = await hardPurge();
+    expect([...result.tablesTouched].sort()).toEqual(
+      db.tables.map((t) => t.name).sort(),
+    );
+
+    for (const t of db.tables) {
+      // The rotation tail re-creates exactly one fresh identity row
+      // and the fresh nodeId setting; everything else must be empty.
+      const expected =
+        t.name === "secretKeys" || t.name === "settings" ? 1 : 0;
+      expect({ table: t.name, count: await t.count() }).toEqual({
+        table: t.name,
+        count: expected,
+      });
+    }
+  });
+
   it("completes well under the 60-second acceptance target", async () => {
     // Populate with a realistic-ish small-community dataset.
     await populate(50, 200);
@@ -204,5 +225,142 @@ describe("softPurge clears blocking tables (docs/blocking.md §3)", () => {
 
     expect(await db.blocks.count()).toBe(0);
     expect(await db.previouslyBlocked.count()).toBe(0);
+  });
+});
+
+describe("softPurge covers member-authored content tables", () => {
+  beforeEach(reset);
+
+  it("scrubs comment bodies, event text, proposal text and activity text; clears messages, drafts and RSVPs", async () => {
+    await db.taskComments.put({
+      id: "tc_1",
+      projectId: "proj_1",
+      taskId: "task_1",
+      authorKey: "pk_author",
+      body: "identifying words",
+      createdAt: 1,
+      deletedAt: null,
+      nodeId: NODE,
+      signature: "sig",
+    });
+    await db.messages.put({
+      id: "m_1",
+      conversationId: "a|b",
+      senderKey: "pk_a",
+      recipientKey: "pk_b",
+      nonce: "n",
+      ciphertext: "c",
+      createdAt: 1,
+    });
+    await db.drafts.put({
+      key: "post_new",
+      payload: JSON.stringify({ title: "secret draft" }),
+      updatedAt: 1,
+    });
+    await db.events.put({
+      id: "ev_1",
+      kind: "event",
+      title: "March meetup",
+      description: "at the union hall",
+      category: "other",
+      startsAt: 1,
+      endsAt: null,
+      location: "123 Main St",
+      capacity: null,
+      templateId: null,
+      createdAt: 1,
+      createdBy: "pk_org",
+      nodeId: NODE,
+      signature: "sig",
+    } as never);
+    await db.eventRsvps.put({
+      id: "rsvp_1",
+      eventId: "ev_1",
+      memberKey: "pk_a",
+      status: "going",
+      updatedAt: 1,
+    } as never);
+    await db.eventCancellations.put({
+      id: "ec_1",
+      kind: "event_cancellation",
+      eventId: "ev_1",
+      reason: "venue raided",
+      cancelledAt: 2,
+      createdBy: "pk_org",
+      nodeId: NODE,
+      signature: "sig",
+    } as never);
+    await db.proposals.put({
+      id: "prop_1",
+      nodeId: NODE,
+      kind: "dispute",
+      category: "dispute",
+      reversibilityTier: "easy",
+      title: "Sensitive post title",
+      description: "flagger's reason text",
+      payload: JSON.stringify({ postTitle: "Sensitive post title", body: "comment words" }),
+      proposerKey: "pk_a",
+      status: "open",
+      createdAt: 1,
+      closedAt: null,
+      closedReason: null,
+      impactReflection: null,
+      disputePostId: "post_1",
+    } as never);
+    await db.projectActivity.put({
+      id: "act_1",
+      projectId: "proj_1",
+      type: "announcement",
+      actorKey: "pk_org",
+      data: { body: "announcement words", taskTitle: "Haul soil" },
+      createdAt: 1,
+      nodeId: NODE,
+    } as never);
+
+    const result = await softPurge();
+
+    // Free text gone, structure kept.
+    expect((await db.taskComments.get("tc_1"))!.body).toBe("");
+    const ev = (await db.events.get("ev_1")) as {
+      title: string;
+      description: string;
+      location: string;
+    };
+    expect(ev.title).toBe("");
+    expect(ev.description).toBe("");
+    expect(ev.location).toBe("");
+    expect(
+      ((await db.eventCancellations.get("ec_1")) as { reason: string }).reason,
+    ).toBe("");
+    const prop = (await db.proposals.get("prop_1"))!;
+    expect(prop.title).toBe("");
+    expect(prop.description).toBe("");
+    expect(JSON.parse(prop.payload)).toEqual({ postTitle: "", body: "" });
+    const act = (await db.projectActivity.get("act_1")) as {
+      data: Record<string, unknown>;
+    };
+    expect(act.data.body).toBe("");
+    expect(act.data.taskTitle).toBe("");
+
+    // Relationship tables cleared outright.
+    expect(await db.messages.count()).toBe(0);
+    expect(await db.drafts.count()).toBe(0);
+    expect(await db.eventRsvps.count()).toBe(0);
+
+    // The report lists only what was actually scrubbed — settings are
+    // deliberately untouched and must not be claimed.
+    expect(result.tablesTouched).not.toContain("settings");
+    for (const name of [
+      "taskComments",
+      "messages",
+      "drafts",
+      "events",
+      "eventRsvps",
+      "eventCancellations",
+      "proposals",
+      "projectActivity",
+    ]) {
+      expect(result.tablesTouched).toContain(name);
+    }
   });
 });

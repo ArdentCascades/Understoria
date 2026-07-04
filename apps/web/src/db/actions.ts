@@ -268,6 +268,13 @@ export async function confirmExchange(
           ...post,
           status: "awaiting_confirmation",
           confirmedBy,
+          // Stamp the transition moment (first confirmation only — a
+          // repeat confirm by the same party must not slide the
+          // window). The auto-confirm sweep measures its waiting
+          // period from this, NOT from createdAt: an old post claimed
+          // and completed today has been "awaiting" for hours, not
+          // weeks, and the helped party's dispute window starts now.
+          awaitingSince: post.awaitingSince ?? Date.now(),
         };
         await db.posts.put(updated);
         return { post: updated, exchange: null, newAchievements: [] };
@@ -506,6 +513,17 @@ export async function disputeExchange(
   return db.transaction("rw", db.posts, db.proposals, async () => {
     const post = await db.posts.get(postId);
     if (!post) throw new Error("Post not found");
+    // A dispute is about an exchange, so the post must have entered
+    // the claim flow: without a claimer there is no second party (the
+    // proposal's recipientKey would be empty), and a cancelled or
+    // already-disputed post has nothing new to flag. Same in-txn
+    // lifecycle discipline as claimPost / confirmExchange.
+    if (post.status === "open" || post.claimedBy === null)
+      throw new Error("Only a claimed exchange can be disputed");
+    if (post.status === "cancelled")
+      throw new Error("A cancelled post has no exchange to dispute");
+    if (post.status === "disputed")
+      throw new Error("This exchange is already disputed");
     if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
       throw new Error("Only the two parties can dispute this exchange");
     const updated: Post = { ...post, status: "disputed" };

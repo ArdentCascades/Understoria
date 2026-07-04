@@ -129,3 +129,86 @@ describe("runAutoConfirmSweep — task credit hours", () => {
     expect(postedHours(fetchSpy)).toBe(2);
   });
 });
+
+describe("runAutoConfirmSweep — post waiting window starts at awaitingSince", () => {
+  beforeEach(reset);
+  afterEach(() => vi.unstubAllGlobals());
+
+  async function awaitingPost(overrides: {
+    createdAt: number;
+    awaitingSince?: number | null;
+  }) {
+    const poster = await createMember({ displayName: "Poster" }, NODE);
+    const claimer = await createMember({ displayName: "Claimer" }, NODE);
+    await db.posts.put({
+      id: "post-sweep",
+      type: "NEED",
+      category: "transport",
+      title: "Ride",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      postedBy: poster.publicKey,
+      claimedBy: claimer.publicKey,
+      status: "awaiting_confirmation",
+      createdAt: overrides.createdAt,
+      expiresAt: null,
+      locationZone: "",
+      confirmedBy: [claimer.publicKey],
+      awaitingSince: overrides.awaitingSince,
+      nodeId: NODE,
+      signature: "",
+    });
+  }
+
+  it("does NOT sweep an old post that only just entered awaiting_confirmation", async () => {
+    // Created 400h ago, but the first confirmation happened one hour
+    // ago. Measured from createdAt this clears the 168h window
+    // instantly — bypassing the dispute grace period, which the
+    // server cannot catch since its check runs on the client-supplied
+    // awaitingSince. Measured from the stamped transition it must
+    // wait.
+    const now = Date.now();
+    await awaitingPost({
+      createdAt: now - 400 * 60 * 60 * 1000,
+      awaitingSince: now - 1 * 60 * 60 * 1000,
+    });
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: false });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await runAutoConfirmSweep(NODE);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("sweeps once the window has elapsed from awaitingSince, and sends that timestamp", async () => {
+    const now = Date.now();
+    const awaitingSince = now - 200 * 60 * 60 * 1000;
+    await awaitingPost({
+      createdAt: now - 400 * 60 * 60 * 1000,
+      awaitingSince,
+    });
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: false });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await runAutoConfirmSweep(NODE);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(fetchSpy.mock.calls[0][1].body as string);
+    expect(body.requests[0].awaitingSince).toBe(awaitingSince);
+  });
+
+  it("legacy rows without awaitingSince fall back to createdAt", async () => {
+    const now = Date.now();
+    const createdAt = now - 400 * 60 * 60 * 1000;
+    await awaitingPost({ createdAt, awaitingSince: undefined });
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: false });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await runAutoConfirmSweep(NODE);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(fetchSpy.mock.calls[0][1].body as string);
+    expect(body.requests[0].awaitingSince).toBe(createdAt);
+  });
+});
