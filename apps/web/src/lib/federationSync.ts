@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, Post, TaskComment } from "@/types";
+import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -19,14 +19,19 @@ import type {
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
+import { createMember } from "@/db/seed";
 import { verifyTaskComment } from "@/lib/crypto";
+import { encodeInviteToken } from "@/lib/invite";
 import {
+  parseRedemption,
   verifyCoOrganizerInvitation,
   verifyCoOrganizerInvitationResponse,
   verifyCoOrganizerInvitationRevocation,
   verifyEvent,
   verifyEventCancellation,
   verifyExchange,
+  verifyRedemptionReceipt,
+  verifyVouch,
 } from "@understoria/shared/crypto";
 
 const POST_CURSOR_KEY = "federationLastPostPull";
@@ -905,6 +910,284 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
     await setSetting(
       SETTING_KEYS.federationLastEventCancellationPull,
       String(maxCancelledAt),
+    );
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull redemption receipts from the community node — Phase 1 of
+ * `docs/invite-redemption.md` (§6–§7). This is the leg that ends the
+ * incident: the inviter's invite row flips open→redeemed on her next
+ * pull, and the new member materializes on EVERY member device's
+ * roster, not just her own.
+ *
+ * Cursor: the server-assigned `receivedAt` riding on each row — the
+ * §7 deviation from the sibling pulls' client-timestamp cursors. A
+ * skewed or back-dated `redeemedAt` must never strand a receipt
+ * below the cursor forever ("inviter offline for a week must still
+ * converge").
+ *
+ * Verification: `parseRedemption` + `verifyRedemptionReceipt` — the
+ * exact shape-and-crypto gate the server route runs (both
+ * signatures, self-redeem, redeemedAt-vs-expiry). Bad rows are
+ * skipped WITHOUT advancing the cursor past them, same posture as
+ * `pullFederatedEvents`.
+ *
+ * Merge rules (§6 — commutative and idempotent; every receipt is
+ * self-contained so arrival order never matters):
+ *   - no local row for the token → insert a redeemed InviteRow and
+ *     materialize a member row for `redeemedBy` if none exists
+ *   - local row "open" (the inviter's device) → flip to redeemed
+ *   - local row "revoked" → keep revoked (never a trust edge), but
+ *     record redemption-observed so the Invites page can surface
+ *     "used after you revoked it" — a community conversation, not an
+ *     automatic ejection (`community-authority`)
+ *   - local row "redeemed", same redeemedBy → no-op
+ *   - local row "redeemed", different redeemedBy → keep the local
+ *     row and log; the server's first-writer-wins makes this
+ *     unreachable in practice
+ *
+ * Member materialization deliberately NEVER clobbers an existing
+ * member row: the invitee's own device (skills, availability, edited
+ * name) and any later profile state must win over the receipt's
+ * skeleton. New rows go through `createMember` so every device
+ * computes identical starting balances from the same constants.
+ */
+export async function pullFederatedRedemptions(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since =
+    (await getSetting(SETTING_KEYS.federationLastRedemptionPull)) ?? "0";
+  const params = new URLSearchParams({ limit: "200", since });
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/redemptions?${params.toString()}`;
+  let body: { redemptions?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { redemptions?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.redemptions)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxReceivedAt: number | null = Number(since);
+
+  for (const raw of body.redemptions) {
+    const r = raw as Record<string, unknown>;
+    const receivedAt = r.receivedAt;
+    const parsed = parseRedemption(raw);
+    if (!parsed.ok || typeof receivedAt !== "number") {
+      skipped += 1;
+      continue;
+    }
+    const receipt = parsed.value;
+
+    if (!verifyRedemptionReceipt(receipt)) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped federated redemption receipt that failed verification",
+          { token: receipt.invite.token },
+        );
+      }
+      skipped += 1;
+      // Do NOT advance the cursor past a rejected row.
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxReceivedAt === null || receivedAt > maxReceivedAt) {
+        maxReceivedAt = receivedAt;
+      }
+    };
+
+    const existing = await db.invites.get(receipt.invite.token);
+    let changed = false;
+
+    if (!existing) {
+      // Every other member's device: the invite was never seen here.
+      await db.invites.put({
+        token: receipt.invite.token,
+        inviterKey: receipt.invite.inviterKey,
+        nodeId: receipt.invite.nodeId,
+        createdAt: receipt.invite.createdAt,
+        expiresAt: receipt.invite.expiresAt,
+        status: "redeemed",
+        redeemedBy: receipt.redeemedBy,
+        redeemedAt: receipt.redeemedAt,
+        // Reconstructable from the embedded invite; the token is dead
+        // post-redemption, so this is display/bookkeeping only.
+        encoded: encodeInviteToken(receipt.invite),
+      });
+      changed = true;
+    } else if (existing.status === "open") {
+      // The inviter's device — the row that stayed "open" forever in
+      // the incident.
+      await db.invites.update(receipt.invite.token, {
+        status: "redeemed",
+        redeemedBy: receipt.redeemedBy,
+        redeemedAt: receipt.redeemedAt,
+      });
+      changed = true;
+    } else if (existing.status === "revoked") {
+      if (!existing.redemptionObservedAt) {
+        await db.invites.update(receipt.invite.token, {
+          redemptionObservedAt: receipt.redeemedAt,
+          redemptionObservedBy: receipt.redeemedBy,
+        });
+        changed = true;
+      }
+    } else if (
+      existing.status === "redeemed" &&
+      existing.redeemedBy !== receipt.redeemedBy
+    ) {
+      // Should be unreachable — the server enforces first-writer-wins
+      // on the token (§7). Keep the local row; log for triage.
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] pulled redemption receipt conflicts with local redeemed row; keeping local",
+          { token: receipt.invite.token },
+        );
+      }
+    }
+
+    // Roster materialization — the §3 commitment 2. Skeleton row only
+    // when the member is unknown here; an existing row (the invitee's
+    // own device, or one enriched by later edits) always wins.
+    const knownMember = await db.members.get(receipt.redeemedBy);
+    if (!knownMember) {
+      await createMember(
+        {
+          publicKey: receipt.redeemedBy,
+          displayName: receipt.displayName,
+          createdAt: receipt.redeemedAt,
+        },
+        receipt.invite.nodeId,
+      );
+      changed = true;
+    }
+
+    if (changed) {
+      inserted += 1;
+    } else {
+      skipped += 1;
+    }
+    advanceCursor();
+  }
+
+  if (maxReceivedAt !== null) {
+    await setSetting(
+      SETTING_KEYS.federationLastRedemptionPull,
+      String(maxReceivedAt),
+    );
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull manual vouches from the community node — the §9 companion leg
+ * of `docs/invite-redemption.md`. The server route
+ * (`GET /vouches?since=`) has existed since vouch federation shipped
+ * and already serves this data to any peer node; what never existed
+ * was a device-side pull, so a manual vouch was visible only on the
+ * device that authored it and trust status diverged per device.
+ * Without this leg the receipt work would let everyone SEE the new
+ * member but nobody see her become trusted.
+ *
+ * Same house shape as the sibling pulls: verify (`verifyVouch`)
+ * before insert, dedup on `id`, cursor on `createdAt`, bad
+ * signatures skipped without advancing the cursor.
+ */
+export async function pullFederatedVouches(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(SETTING_KEYS.federationLastVouchPull);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/vouches?${params.toString()}`;
+  let body: { vouches?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { vouches?: unknown[] };
+  } catch {
+    return null;
+  }
+
+  if (!Array.isArray(body.vouches)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.vouches) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.voucherKey !== "string" ||
+      typeof r.voucheeKey !== "string" ||
+      typeof r.createdAt !== "number" ||
+      (r.kind !== "invite" && r.kind !== "manual") ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const vouch: SignedVouch = {
+      id: r.id,
+      voucherKey: r.voucherKey,
+      voucheeKey: r.voucheeKey,
+      createdAt: r.createdAt,
+      kind: r.kind,
+      signature: r.signature,
+    };
+
+    if (!verifyVouch(vouch)) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped federated vouch with bad signature",
+          { id: vouch.id },
+        );
+      }
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxCreatedAt === null || vouch.createdAt > maxCreatedAt) {
+        maxCreatedAt = vouch.createdAt;
+      }
+    };
+
+    const existing = await db.vouches.get(vouch.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.vouches.put(vouch);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(
+      SETTING_KEYS.federationLastVouchPull,
+      String(maxCreatedAt),
     );
   }
 

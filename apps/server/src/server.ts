@@ -31,9 +31,9 @@ import {
   createEventCancellationStore,
   createEventStore,
   createExchangeStore,
-  createInviteStore,
   createPeerPullStore,
   createPostStore,
+  createRedemptionStore,
   createTaskCommentStore,
   createVouchStore,
   openDatabase,
@@ -44,7 +44,7 @@ import { registerConfigRoutes } from "./routes/config.js";
 import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
-import { registerInviteRoutes } from "./routes/invites.js";
+import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
@@ -154,7 +154,7 @@ export async function buildServer({
   const store = createExchangeStore(db);
   const vouchStore = createVouchStore(db);
   const postStore = createPostStore(db);
-  const inviteStore = createInviteStore(db);
+  const redemptionStore = createRedemptionStore(db);
   const claimStore = createClaimStore(db);
   const taskCommentStore = createTaskCommentStore(db);
   const coorgInvitationStore = createCoOrganizerInvitationStore(db);
@@ -183,7 +183,12 @@ export async function buildServer({
   await registerExchangeRoutes(app, { store });
   await registerVouchRoutes(app, { store: vouchStore });
   await registerPostRoutes(app, { store: postStore });
-  await registerInviteRoutes(app, { store: inviteStore });
+  // NOTE: no invite routes. `POST/GET /invites` was removed in the
+  // invite-redemption Phase 1 PR — the GET served full SignedInvite
+  // rows (a live-credential feed, `docs/invite-redemption.md` §10.1).
+  // Redemption receipts (below) are the only invite-adjacent wire
+  // surface: open invites never cross any wire.
+  await registerRedemptionRoutes(app, { store: redemptionStore });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });
   await registerCoOrganizerInvitationRoutes(app, {

@@ -24,12 +24,14 @@ import { writeSubmitConfig } from "@/lib/nodeSubmit";
 import {
   __resetOutboxWorkerForTests,
   enqueueExchangeOutbox,
+  enqueueRedemptionReceiptOutbox,
   flushOutboxOnce,
   isPoisonResult,
   nextBackoffMs,
   readOutboxSummary,
 } from "./outbox";
 import type { Exchange } from "@/types";
+import type { RedemptionReceipt } from "@understoria/shared/types";
 
 const NODE = "node_test";
 
@@ -282,6 +284,93 @@ describe("flushOutboxOnce", () => {
     const row = await db.outbox.get("corrupt_row");
     expect(row?.status).toBe("poisoned");
     expect(row?.lastError).toContain("unparseable_payload");
+  });
+});
+
+// docs/invite-redemption.md §7 — the redemption receipt is the one
+// outbox kind enqueued even when no community-node URL is configured:
+// a fresh device redeems FIRST and configures the node AFTERWARDS
+// (the §5.3 suggestion fires on the accept success path). The queued
+// row must then deliver retroactively once the member confirms a URL.
+describe("redemption receipts — enqueue before configuration, deliver after", () => {
+  function fakeReceipt(token = "tok_test"): RedemptionReceipt {
+    return {
+      invite: {
+        token,
+        inviterKey: "inviter_pk",
+        inviterName: "Rosa",
+        nodeId: NODE,
+        createdAt: 1_700_000_000_000,
+        expiresAt: 1_700_000_000_000 + 14 * 24 * 60 * 60 * 1000,
+        signature: "sig_invite",
+      },
+      redeemedBy: "newcomer_pk",
+      displayName: "Newcomer",
+      redeemedAt: 1_700_000_100_000,
+      signature: "sig_receipt",
+    };
+  }
+
+  it("enqueues a pending row with NO node URL configured (unlike every other kind)", async () => {
+    const row = await enqueueRedemptionReceiptOutbox(fakeReceipt());
+    expect(row).not.toBeNull();
+    expect(row!.kind).toBe("redemption_receipt");
+    expect(row!.status).toBe("pending");
+    expect(await db.outbox.count()).toBe(1);
+  });
+
+  it("dedupes on the invite token", async () => {
+    await enqueueRedemptionReceiptOutbox(fakeReceipt("tok_dup"));
+    await enqueueRedemptionReceiptOutbox(fakeReceipt("tok_dup"));
+    expect(await db.outbox.count()).toBe(1);
+  });
+
+  it("does NOT flush while unconfigured, then delivers to /redemptions after the member confirms a node URL", async () => {
+    await enqueueRedemptionReceiptOutbox(fakeReceipt("tok_retro"));
+
+    // Unconfigured: nothing crosses any wire — the consent gate holds.
+    const before = await flushOutboxOnce();
+    expect(before.attempted).toBe(0);
+    expect((await db.outbox.toArray())[0].status).toBe("pending");
+
+    // The member confirms a node URL (the Phase 0 §5.3 card or
+    // Settings). The already-queued receipt now delivers.
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const fetchImpl = vi.fn(async () =>
+      new Response('{"stored":true}', { status: 201 }),
+    );
+    const after = await flushOutboxOnce({
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(after).toEqual({
+      attempted: 1,
+      delivered: 1,
+      poisoned: 0,
+      retried: 0,
+    });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    const url = (fetchImpl.mock.calls[0] as unknown as [string])[0];
+    expect(url).toBe("https://node.example/api/redemptions");
+    expect((await db.outbox.toArray())[0].status).toBe("delivered");
+  });
+
+  it("poisons on 409 — a lost first-writer-wins race will never succeed on retry (the stolen-link tell)", async () => {
+    await enqueueRedemptionReceiptOutbox(fakeReceipt("tok_race"));
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+    const fetchImpl = vi.fn(async () =>
+      new Response('{"error":"token_already_redeemed"}', { status: 409 }),
+    );
+    const r = await flushOutboxOnce({
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(r.poisoned).toBe(1);
+    expect((await db.outbox.toArray())[0].status).toBe("poisoned");
   });
 });
 

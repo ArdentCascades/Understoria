@@ -37,6 +37,8 @@ import type {
   InvitePayload,
   Post,
   PostPayload,
+  RedemptionPayload,
+  RedemptionReceipt,
   SignedInvite,
   SignedVouch,
   TaskComment,
@@ -318,6 +320,166 @@ export function canonicalInvitePayload(p: InvitePayload): string {
 export function verifyInvite(invite: SignedInvite): boolean {
   const payload = canonicalInvitePayload(invite);
   return verify(payload, invite.signature, invite.inviterKey);
+}
+
+// -- Redemption receipts (see docs/invite-redemption.md §6–§7) --------------
+
+/**
+ * Canonical, stable serialization of a redemption payload — the bytes
+ * the NEW member's secret key signs at redemption time. Field order is
+ * fixed for cross-engine JSON stability, same discipline as
+ * `canonicalVouchPayload` / `canonicalEventPayload`. The embedded
+ * invite is re-serialized field-by-field (never `JSON.stringify` of
+ * the object as received) so signer and verifier byte-agree even when
+ * the transport reordered keys. The outer `signature` is NOT part of
+ * the canonical payload; the embedded invite's own `signature` IS —
+ * the receipt attests to the exact signed invite that was redeemed.
+ */
+export function canonicalRedemptionPayload(p: RedemptionPayload): string {
+  return JSON.stringify({
+    invite: {
+      token: p.invite.token,
+      inviterKey: p.invite.inviterKey,
+      inviterName: p.invite.inviterName,
+      nodeId: p.invite.nodeId,
+      createdAt: p.invite.createdAt,
+      expiresAt: p.invite.expiresAt,
+      signature: p.invite.signature,
+    },
+    redeemedBy: p.redeemedBy,
+    displayName: p.displayName,
+    redeemedAt: p.redeemedAt,
+  });
+}
+
+/**
+ * Verify a redemption receipt. Used identically by the server route
+ * (`POST /redemptions`) and the PWA pull (`pullFederatedRedemptions`)
+ * — design note §6. Four checks, all of which must pass:
+ *
+ * 1. The embedded invite verifies against `invite.inviterKey`
+ *    (`verifyInvite`) — the inviter's intent to admit a token-holder.
+ * 2. The outer signature verifies against `redeemedBy` — the new
+ *    member's proof of key possession.
+ * 3. `redeemedBy !== invite.inviterKey` — self-redeem, mirroring the
+ *    local guard in `apps/web/src/db/invites.ts`.
+ * 4. `redeemedAt <= invite.expiresAt` — client-claimed, so this only
+ *    stops naive late redemption; §11 of the design note covers what
+ *    back-dating can and cannot buy (the server additionally bounds
+ *    arrival time with a delivery-grace window on `receivedAt`).
+ */
+export function verifyRedemptionReceipt(rec: RedemptionReceipt): boolean {
+  if (!rec.signature) return false;
+  if (!verifyInvite(rec.invite)) return false;
+  if (rec.redeemedBy === rec.invite.inviterKey) return false;
+  if (rec.redeemedAt > rec.invite.expiresAt) return false;
+  const payload = canonicalRedemptionPayload(rec);
+  return verify(payload, rec.signature, rec.redeemedBy);
+}
+
+export type ParseRedemptionResult =
+  | { ok: true; value: RedemptionReceipt }
+  | { ok: false; error: string };
+
+/** Maximum permitted displayName length on the wire. Matches the
+ *  InviteAccept input's maxLength (design note §6). */
+export const MAX_REDEMPTION_DISPLAY_NAME = 60;
+
+/**
+ * Shape-level validation for a redemption receipt. Lives in the
+ * shared package — unlike the sibling parsers in
+ * `apps/server/src/validate.ts` — because the design note (§14 PR 1a)
+ * places it here deliberately: the client-side effects of a pulled
+ * receipt are heavier than for any sibling record (invite-row flip +
+ * member materialization), so the server route and the PWA pull gate
+ * on the exact same shape check before the shared verifier runs.
+ * Cryptographic checks stay separate in `verifyRedemptionReceipt`.
+ */
+export function parseRedemption(input: unknown): ParseRedemptionResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+
+  const inviteRaw = r.invite;
+  if (typeof inviteRaw !== "object" || inviteRaw === null) {
+    return { ok: false, error: "invite must be an embedded SignedInvite object" };
+  }
+  const inv = inviteRaw as Record<string, unknown>;
+  for (const f of [
+    "token",
+    "inviterKey",
+    "inviterName",
+    "nodeId",
+    "signature",
+  ] as const) {
+    if (typeof inv[f] !== "string" || (inv[f] as string).length === 0) {
+      return { ok: false, error: `invite.${f} must be a non-empty string` };
+    }
+  }
+  for (const f of ["createdAt", "expiresAt"] as const) {
+    if (
+      typeof inv[f] !== "number" ||
+      !Number.isInteger(inv[f]) ||
+      (inv[f] as number) <= 0
+    ) {
+      return {
+        ok: false,
+        error: `invite.${f} must be a positive integer (ms epoch)`,
+      };
+    }
+  }
+
+  for (const f of ["redeemedBy", "signature"] as const) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.displayName !== "string") {
+    return { ok: false, error: "displayName must be a string" };
+  }
+  const displayName = r.displayName as string;
+  if (
+    displayName.trim().length === 0 ||
+    displayName.length > MAX_REDEMPTION_DISPLAY_NAME
+  ) {
+    return {
+      ok: false,
+      error: `displayName must be 1..${MAX_REDEMPTION_DISPLAY_NAME} characters`,
+    };
+  }
+  if (
+    typeof r.redeemedAt !== "number" ||
+    !Number.isInteger(r.redeemedAt) ||
+    r.redeemedAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "redeemedAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.redeemedAt as number) > oneDayFromNow) {
+    return { ok: false, error: "redeemedAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      invite: {
+        token: inv.token as string,
+        inviterKey: inv.inviterKey as string,
+        inviterName: inv.inviterName as string,
+        nodeId: inv.nodeId as string,
+        createdAt: inv.createdAt as number,
+        expiresAt: inv.expiresAt as number,
+        signature: inv.signature as string,
+      },
+      redeemedBy: r.redeemedBy as string,
+      displayName,
+      redeemedAt: r.redeemedAt as number,
+      signature: r.signature as string,
+    },
+  };
 }
 
 // -- E2E messaging (Agent 2 task 5) ----------------------------------------

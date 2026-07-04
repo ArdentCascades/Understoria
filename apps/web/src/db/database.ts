@@ -106,7 +106,14 @@ export interface OutboxRow {
     | "coorg_invitation_response"
     | "coorg_invitation_revocation"
     | "event"
-    | "event_cancellation";
+    | "event_cancellation"
+    // Phase 1 of docs/invite-redemption.md (§7): the signed
+    // RedemptionReceipt pushed to POST /redemptions. Unique among the
+    // kinds: enqueued EVEN WHEN no community-node URL is configured
+    // yet (see enqueueRedemptionReceiptOutbox in lib/outbox.ts) —
+    // the receipt is the member's only proof-of-joining, and fresh
+    // devices typically configure the node AFTER redeeming.
+    | "redemption_receipt";
   // Intentionally NOT a member of this union: "event_rsvp". EventRsvpRow
   // is local-only by design (docs/community-events.md §4 + §7); RSVPs
   // never enter the outbox. The union rejects "event_rsvp" at the
@@ -154,6 +161,21 @@ export interface InviteRow {
   redeemedAt: number | null;
   /** URL-encoded token string (base64url of the signed invite JSON). */
   encoded: string;
+  /**
+   * Redemption-observed-despite-revocation marker — the §6 merge rule
+   * of `docs/invite-redemption.md`: when a pulled RedemptionReceipt
+   * lands against a locally-REVOKED row (revocation is local-only
+   * today, so the race is real), the status stays "revoked" — the row
+   * never counts as a trust edge — but the observation is recorded so
+   * the inviter's Invites page can say "this invite was used after
+   * you revoked it." Information for a community conversation, not an
+   * automatic ejection (`community-authority`). Absent on rows that
+   * pre-date Phase 1 and on every ordinary row.
+   */
+  redemptionObservedAt?: number | null;
+  /** Who used the revoked invite — companion to
+   *  `redemptionObservedAt`. */
+  redemptionObservedBy?: string | null;
 }
 
 /**
@@ -903,6 +925,18 @@ export const SETTING_KEYS = {
    *  `cancelledAt` observed so far on event-cancellation pulls.
    *  Defaults to epoch 0 when absent. */
   federationLastEventCancellationPull: "federationLastEventCancellationPull",
+  /** Cursor for `pullFederatedRedemptions` — highest server-assigned
+   *  `receivedAt` observed so far. Deliberately NOT a client
+   *  timestamp: `docs/invite-redemption.md` §7 — a skewed or
+   *  back-dated `redeemedAt` must never strand a receipt below this
+   *  cursor forever. */
+  federationLastRedemptionPull: "federationLastRedemptionPull",
+  /** Cursor for `pullFederatedVouches` — highest `createdAt` observed
+   *  so far on vouch pulls. The §9 companion leg of
+   *  `docs/invite-redemption.md`: manual vouches previously pushed up
+   *  and replicated node-to-node but never reached other members'
+   *  devices, so trust status diverged per device. */
+  federationLastVouchPull: "federationLastVouchPull",
   /** The calendar page's last explicitly-picked view: "agenda" |
    *  "month" | "week". Absent or invalid reads as the breakpoint-derived
    *  default. Device-local display state only — never federated. */

@@ -16,7 +16,6 @@ import {
   verifyEvent,
   verifyEventCancellation,
   verifyExchange,
-  verifyInvite,
   verifyPost,
   verifyTaskComment,
   verifyVouch,
@@ -29,7 +28,6 @@ import {
   parseEvent,
   parseEventCancellation,
   parseExchange,
-  parseInvite,
   parsePost,
   parseTaskComment,
   parseVouch,
@@ -41,7 +39,6 @@ import type {
   EventCancellationStore,
   EventStore,
   ExchangeStore,
-  InviteStore,
   PeerPullStore,
   PostStore,
   PullRecordKind,
@@ -279,58 +276,16 @@ export async function pullPostsFromPeer(opts: {
   };
 }
 
-export async function pullInvitesFromPeer(opts: {
-  peerUrl: string;
-  since: number | null;
-  fetcher: Fetcher;
-  store: InviteStore;
-  maxRows?: number;
-}): Promise<PullResult> {
-  const { peerUrl, since, fetcher, store } = opts;
-  const maxRows = opts.maxRows ?? 500;
-
-  const url = buildUrl(peerUrl, "invites", since, maxRows);
-  const rows = await fetchAndExtract(fetcher, url, peerUrl, "invites");
-
-  let insertedCount = 0;
-  let duplicateCount = 0;
-  let rejectedCount = 0;
-  let latestCreatedAt: number | null = null;
-
-  for (const raw of rows) {
-    const parsed = parseInvite(raw);
-    if (!parsed.ok) {
-      rejectedCount += 1;
-      continue;
-    }
-    const invite = parsed.value;
-    if (!verifyInvite(invite)) {
-      rejectedCount += 1;
-      continue;
-    }
-    if (store.has(invite.token)) {
-      duplicateCount += 1;
-      if (latestCreatedAt === null || invite.createdAt > latestCreatedAt) {
-        latestCreatedAt = invite.createdAt;
-      }
-      continue;
-    }
-    store.insert(invite);
-    insertedCount += 1;
-    if (latestCreatedAt === null || invite.createdAt > latestCreatedAt) {
-      latestCreatedAt = invite.createdAt;
-    }
-  }
-
-  return {
-    peerUrl,
-    kind: "invite",
-    insertedCount,
-    duplicateCount,
-    rejectedCount,
-    latestCompletedAt: latestCreatedAt,
-  };
-}
+// NOTE: `pullInvitesFromPeer` was REMOVED in the invite-redemption
+// Phase 1 PR. It replicated an always-empty store (no web-side caller
+// of `POST /invites` ever existed) and its `GET /invites` source was
+// a live-credential feed — see `docs/invite-redemption.md` §8 / §10.1.
+// There is deliberately no `pullRedemptionsFromPeer` replacing it:
+// redemption receipts do NOT peer-replicate in Phase 1 — cross-node
+// membership is out of scope and the roster stays off the inter-node
+// wire (§8). Receipts move only device→node (`POST /redemptions`) and
+// node→device (`GET /redemptions`, `pullFederatedRedemptions` in the
+// PWA).
 
 /**
  * Pull signed task comments from a peer's GET /task-comments endpoint.
@@ -723,7 +678,6 @@ function buildUrl(
     | "exchanges"
     | "vouches"
     | "posts"
-    | "invites"
     | "task-comments"
     | "coorg-invitations"
     | "coorg-invitation-responses"
@@ -750,7 +704,6 @@ async function fetchAndExtract(
     | "exchanges"
     | "vouches"
     | "posts"
-    | "invites"
     | "taskComments"
     | "coorgInvitations"
     | "coorgInvitationResponses"
@@ -789,7 +742,6 @@ export interface PullWorkerOptions {
   store: ExchangeStore;
   vouchStore: VouchStore;
   postStore: PostStore;
-  inviteStore: InviteStore;
   taskCommentStore: TaskCommentStore;
   coorgInvitationStore: CoOrganizerInvitationStore;
   coorgInvitationResponseStore: CoOrganizerInvitationResponseStore;
@@ -812,7 +764,6 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     store,
     vouchStore,
     postStore,
-    inviteStore,
     taskCommentStore,
     coorgInvitationStore,
     coorgInvitationResponseStore,
@@ -838,8 +789,6 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return state?.lastVouchCreatedAt ?? null;
       case "post":
         return state?.lastPostCreatedAt ?? null;
-      case "invite":
-        return state?.lastInviteCreatedAt ?? null;
       case "task_comment":
         return state?.lastTaskCommentCreatedAt ?? null;
       case "coorg_invitation":
@@ -876,13 +825,6 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
           since,
           fetcher,
           store: postStore,
-        });
-      case "invite":
-        return pullInvitesFromPeer({
-          peerUrl,
-          since,
-          fetcher,
-          store: inviteStore,
         });
       case "task_comment":
         return pullTaskCommentsFromPeer({
@@ -965,7 +907,6 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
       pullKind(url, "exchange"),
       pullKind(url, "vouch"),
       pullKind(url, "post"),
-      pullKind(url, "invite"),
       pullKind(url, "task_comment"),
       pullKind(url, "coorg_invitation"),
       pullKind(url, "coorg_invitation_response"),

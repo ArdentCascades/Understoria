@@ -1792,6 +1792,8 @@
       "shareTitle": "Share this link with one person",
       "shareNote": "The link is single-use and expires in 14 days. If it leaks before redemption, revoke it below.",
       "redeemed": "Redeemed {{when}}",
+      "redeemedBy": "Redeemed {{when}} by {{name}}",
+      "usedAfterRevoke": "Used {{when}} by {{name}}, after you revoked it. It still admits no one — but it may be worth a conversation.",
       "expires": "Expires {{date}}",
       "revoke": "Revoke",
       "statusOpen": "Open",

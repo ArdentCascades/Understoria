@@ -326,6 +326,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pullFederatedCoOrgRevocations,
         pullFederatedEvents,
         pullFederatedEventCancellations,
+        pullFederatedRedemptions,
+        pullFederatedVouches,
       }) => {
         void pullFederatedPosts();
         void pullFederatedClaims();
@@ -336,6 +338,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         void pullFederatedCoOrgRevocations();
         void pullFederatedEvents();
         void pullFederatedEventCancellations();
+        // Phase 1 of docs/invite-redemption.md: redemption receipts
+        // (invite-row flip + roster materialization, §6) and the §9
+        // companion vouch pull (trust-status convergence).
+        void pullFederatedRedemptions();
+        void pullFederatedVouches();
       },
     );
   }, [ready]);

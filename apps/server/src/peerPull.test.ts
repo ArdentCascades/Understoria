@@ -38,7 +38,6 @@ import {
   createEventStore,
   createExchangeStore,
   createPeerPullStore,
-  createInviteStore,
   createPostStore,
   createTaskCommentStore,
   createVouchStore,
@@ -114,9 +113,6 @@ function exchangeOnly(inner: Fetcher): Fetcher {
     }
     if (/\/posts\b/.test(url)) {
       return jsonResponse({ count: 0, posts: [] });
-    }
-    if (/\/invites\b/.test(url)) {
-      return jsonResponse({ count: 0, invites: [] });
     }
     if (/\/task-comments\b/.test(url)) {
       return jsonResponse({ count: 0, taskComments: [] });
@@ -321,7 +317,6 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -354,7 +349,6 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -389,7 +383,6 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -432,7 +425,6 @@ describe("startPeerPullWorker", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -449,6 +441,53 @@ describe("startPeerPullWorker", () => {
     worker.stop();
     expect(exchangeUrls[0]).not.toContain("since=");
     expect(exchangeUrls[1]).toContain("since=999");
+  });
+
+  // Negative lock — docs/invite-redemption.md §8: redemption receipts
+  // do NOT peer-replicate (the roster stays off the inter-node wire),
+  // and the removed live-credential /invites surface must not creep
+  // back into the pull cycle. A future contributor adding either leg
+  // has to consciously delete this test and reopen the threat-model
+  // §7 entry.
+  it("never requests /redemptions or /invites from a peer", async () => {
+    const requested: string[] = [];
+    const fetcher: Fetcher = (url) => {
+      requested.push(url);
+      return jsonResponse({
+        count: 0,
+        exchanges: [],
+        vouches: [],
+        posts: [],
+        taskComments: [],
+        coorgInvitations: [],
+        coorgInvitationResponses: [],
+        coorgInvitationRevocations: [],
+        events: [],
+        eventCancellations: [],
+      });
+    };
+    const worker = startPeerPullWorker({
+      peerUrls: ["https://peer.example"],
+      intervalMs: 60_000,
+      store: createExchangeStore(db),
+      vouchStore: createVouchStore(db),
+      postStore: createPostStore(db),
+      taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
+      pullStore: createPeerPullStore(db),
+      fetcher,
+    });
+    await worker.pullAllOnce();
+    worker.stop();
+    expect(requested.length).toBeGreaterThan(0);
+    expect(requested.some((u) => /\/redemptions\b/.test(u))).toBe(false);
+    expect(requested.some((u) => /\/invites\b/.test(u))).toBe(false);
   });
 });
 
@@ -520,8 +559,6 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ count: 1, vouches: [vouch] });
       if (/\/posts\b/.test(url))
         return jsonResponse({ count: 0, posts: [] });
-      if (/\/invites\b/.test(url))
-        return jsonResponse({ count: 0, invites: [] });
       if (/\/task-comments\b/.test(url))
         return jsonResponse({ count: 0, taskComments: [] });
       if (/\/coorg-invitation-responses\b/.test(url))
@@ -542,7 +579,6 @@ describe("startPeerPullWorker — vouches", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -556,9 +592,9 @@ describe("startPeerPullWorker — vouches", () => {
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    // Three kinds attempted; posts returned empty so it's still a
-    // successful pull with no insertions.
-    expect(results).toHaveLength(10);
+    // Every federated kind attempted; posts returned empty so it's
+    // still a successful pull with no insertions.
+    expect(results).toHaveLength(9);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "coorg_invitation",
       "coorg_invitation_response",
@@ -566,7 +602,6 @@ describe("startPeerPullWorker — vouches", () => {
       "event",
       "event_cancellation",
       "exchange",
-      "invite",
       "post",
       "task_comment",
       "vouch",
@@ -588,8 +623,6 @@ describe("startPeerPullWorker — vouches", () => {
         return jsonResponse({ error: "x" }, 500);
       if (/\/posts\b/.test(url))
         return jsonResponse({ count: 0, posts: [] });
-      if (/\/invites\b/.test(url))
-        return jsonResponse({ count: 0, invites: [] });
       if (/\/task-comments\b/.test(url))
         return jsonResponse({ count: 0, taskComments: [] });
       if (/\/coorg-invitation-responses\b/.test(url))
@@ -610,7 +643,6 @@ describe("startPeerPullWorker — vouches", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -720,8 +752,6 @@ describe("startPeerPullWorker — posts", () => {
         return jsonResponse({ count: 1, vouches: [vouch] });
       if (/\/posts\b/.test(url))
         return jsonResponse({ count: 1, posts: [post] });
-      if (/\/invites\b/.test(url))
-        return jsonResponse({ count: 0, invites: [] });
       if (/\/task-comments\b/.test(url))
         return jsonResponse({ count: 0, taskComments: [] });
       if (/\/coorg-invitation-responses\b/.test(url))
@@ -742,7 +772,6 @@ describe("startPeerPullWorker — posts", () => {
       store,
       vouchStore,
       postStore,
-      inviteStore: createInviteStore(db),
       taskCommentStore: createTaskCommentStore(db),
       coorgInvitationStore: createCoOrganizerInvitationStore(db),
       coorgInvitationResponseStore:
@@ -756,7 +785,7 @@ describe("startPeerPullWorker — posts", () => {
     });
     const results = await worker.pullAllOnce();
     worker.stop();
-    expect(results).toHaveLength(10);
+    expect(results).toHaveLength(9);
     expect(results.map((r) => r.kind).sort()).toEqual([
       "coorg_invitation",
       "coorg_invitation_response",
@@ -764,7 +793,6 @@ describe("startPeerPullWorker — posts", () => {
       "event",
       "event_cancellation",
       "exchange",
-      "invite",
       "post",
       "task_comment",
       "vouch",

@@ -29,7 +29,7 @@ import type {
   Exchange,
   FlagReason,
   Post,
-  SignedInvite,
+  RedemptionReceipt,
   SignedVouch,
   TaskComment,
 } from "@understoria/shared/types";
@@ -120,11 +120,41 @@ export interface TaskCommentStore {
   deletedAt(id: string): number | null | undefined;
 }
 
-export interface InviteStore {
-  insert(invite: SignedInvite): void;
-  list(opts?: { since?: number; limit?: number }): SignedInvite[];
+// NOTE: there is deliberately no InviteStore. The unwired
+// `POST /invites` / `GET /invites` surface (and `pullInvitesFromPeer`)
+// was REMOVED in the invite-redemption Phase 1 PR: `GET /invites`
+// returned full `SignedInvite` rows — token and signature included —
+// to any unauthenticated caller, i.e. every field needed to
+// reconstruct a live, redeemable invite link. Open invites never
+// cross any wire; only consummated redemptions do (RedemptionStore
+// below). See `docs/invite-redemption.md` §8 / §10.1.
+
+/**
+ * Storage for redemption receipts — `docs/invite-redemption.md` §8.
+ * Keyed by the invite token (single-use: the first receipt for a
+ * token wins; the route arbitrates via `getByToken`). Each row keeps
+ * the server-assigned `receivedAt`, which is the GET cursor — a
+ * deliberate deviation from the sibling stores' client-timestamp
+ * cursors (§7): an inviter offline for a week must still converge,
+ * and only arrival time is monotonic at the only place ordering
+ * exists. Receipts do NOT peer-replicate (no `pullRedemptions...`
+ * leg in `peerPull.ts`) — the roster stays off the inter-node wire.
+ */
+export interface StoredRedemption {
+  receipt: RedemptionReceipt;
+  /** Server clock at ingestion. The §7 cursor. */
+  receivedAt: number;
+}
+
+export interface RedemptionStore {
+  insert(receipt: RedemptionReceipt, receivedAt: number): void;
+  /** Rows with `received_at > since`, ascending, capped like the
+   *  sibling stores (default 200, ceiling 1000). */
+  list(opts?: { since?: number; limit?: number }): StoredRedemption[];
   count(): number;
   has(token: string): boolean;
+  /** Existing receipt for a token — first-writer-wins arbitration. */
+  getByToken(token: string): StoredRedemption | null;
 }
 
 /**
@@ -234,7 +264,6 @@ export interface PeerPullStateRow {
   lastCompletedAt: number | null;
   lastVouchCreatedAt: number | null;
   lastPostCreatedAt: number | null;
-  lastInviteCreatedAt: number | null;
   lastTaskCommentCreatedAt: number | null;
   lastCoOrgInvitationCreatedAt: number | null;
   lastCoOrgInvitationResponseDecidedAt: number | null;
@@ -245,11 +274,16 @@ export interface PeerPullStateRow {
   lastPulledCount: number;
 }
 
+// NOTE: "invite" is deliberately NOT a member of this union (removed
+// alongside `pullInvitesFromPeer` — see the InviteStore removal note
+// above), and "redemption" is deliberately NOT a member either:
+// receipts do not peer-replicate in Phase 1
+// (`docs/invite-redemption.md` §8) — cross-node membership is out of
+// scope and the roster stays off the inter-node wire.
 export type PullRecordKind =
   | "exchange"
   | "vouch"
   | "post"
-  | "invite"
   | "task_comment"
   | "coorg_invitation"
   | "coorg_invitation_response"
@@ -599,6 +633,64 @@ function migrate(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '10')",
+    ).run();
+  }
+
+  // Schema v11 — invite-redemption Phase 1 (`docs/invite-redemption.md`
+  // §7–§8). Two coupled changes shipped in one migration because the
+  // design note ships them in one PR (§8 "Removal shipped in the same
+  // PR"):
+  //
+  // 1. New `redemptions` table — one row per admitted member: the
+  //    embedded invite's fields flattened (inviter_name included so
+  //    the embedded invite signature can be re-verified from storage),
+  //    the redeeming member's key + chosen display name + signature,
+  //    and the server-assigned `received_at`, which is the GET cursor
+  //    (§7's named deviation from the sibling routes' client-timestamp
+  //    cursors: convergence for an inviter offline a week requires a
+  //    server-monotonic cursor; arrival time is something the server
+  //    inherently observes, so storing it adds no new observation).
+  //    `token` is the PRIMARY KEY — the schema-level single-use /
+  //    first-writer-wins guard. Retention is node-lifetime (§15
+  //    ruling 3): receipts are trust edges and bounded retention would
+  //    break trust convergence for every future fresh device.
+  //
+  // 2. Removal of the never-wired invites surface: `GET /invites`
+  //    served full `SignedInvite` rows (token + signature) to any
+  //    caller — every field needed to reconstruct a live redeemable
+  //    invite link (§10.1). The store was always empty (no web-side
+  //    caller ever existed), so dropping the table loses nothing;
+  //    wire surface that serves live credentials gets removed, not
+  //    mothballed. The per-peer invite cursor column goes with it.
+  if (current < 11) {
+    db.exec(`
+      CREATE TABLE redemptions (
+        token TEXT PRIMARY KEY,
+        inviter_key TEXT NOT NULL,
+        inviter_name TEXT NOT NULL,
+        invite_node_id TEXT NOT NULL,
+        invite_created_at INTEGER NOT NULL,
+        invite_expires_at INTEGER NOT NULL,
+        invite_signature TEXT NOT NULL,
+        redeemed_by TEXT NOT NULL,
+        display_name TEXT NOT NULL,
+        redeemed_at INTEGER NOT NULL,
+        signature TEXT NOT NULL,
+        received_at INTEGER NOT NULL
+      );
+      CREATE INDEX redemptions_received_at_idx
+        ON redemptions (received_at);
+      CREATE INDEX redemptions_inviter_idx
+        ON redemptions (inviter_key);
+      CREATE INDEX redemptions_redeemed_by_idx
+        ON redemptions (redeemed_by);
+
+      DROP TABLE IF EXISTS invites;
+      ALTER TABLE peer_pull_state
+        DROP COLUMN last_invite_created_at;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '11')",
     ).run();
   }
 }
@@ -982,19 +1074,6 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       last_post_created_at = COALESCE(@latestSeenAt, last_post_created_at),
       last_pulled_count = @pulledCount
   `);
-  const successInviteStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at, last_invite_created_at,
-      last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_invite_created_at = COALESCE(@latestSeenAt, last_invite_created_at),
-      last_pulled_count = @pulledCount
-  `);
   const successTaskCommentStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_success_at,
@@ -1106,19 +1185,17 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
             ? successVouchStmt
             : kind === "post"
               ? successPostStmt
-              : kind === "invite"
-                ? successInviteStmt
-                : kind === "task_comment"
-                  ? successTaskCommentStmt
-                  : kind === "coorg_invitation"
-                    ? successCoOrgInvitationStmt
-                    : kind === "coorg_invitation_response"
-                      ? successCoOrgInvitationResponseStmt
-                      : kind === "coorg_invitation_revocation"
-                        ? successCoOrgInvitationRevocationStmt
-                        : kind === "event"
-                          ? successEventStmt
-                          : successEventCancellationStmt;
+              : kind === "task_comment"
+                ? successTaskCommentStmt
+                : kind === "coorg_invitation"
+                  ? successCoOrgInvitationStmt
+                  : kind === "coorg_invitation_response"
+                    ? successCoOrgInvitationResponseStmt
+                    : kind === "coorg_invitation_revocation"
+                      ? successCoOrgInvitationRevocationStmt
+                      : kind === "event"
+                        ? successEventStmt
+                        : successEventCancellationStmt;
       stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
     },
     recordFailure({ peerUrl, at, error }) {
@@ -1134,7 +1211,6 @@ interface PeerPullStateRowSqlite {
   last_completed_at: number | null;
   last_vouch_created_at: number | null;
   last_post_created_at: number | null;
-  last_invite_created_at: number | null;
   last_task_comment_created_at: number | null;
   last_coorg_invitation_created_at: number | null;
   last_coorg_invitation_response_decided_at: number | null;
@@ -1153,7 +1229,6 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
     lastCompletedAt: r.last_completed_at,
     lastVouchCreatedAt: r.last_vouch_created_at,
     lastPostCreatedAt: r.last_post_created_at,
-    lastInviteCreatedAt: r.last_invite_created_at,
     lastTaskCommentCreatedAt: r.last_task_comment_created_at,
     lastCoOrgInvitationCreatedAt: r.last_coorg_invitation_created_at,
     lastCoOrgInvitationResponseDecidedAt:
@@ -1202,80 +1277,110 @@ function rowToExchange(r: ExchangeRow): Exchange {
   return out;
 }
 
-export function createInviteStore(db: DatabaseType): InviteStore {
+export function createRedemptionStore(db: DatabaseType): RedemptionStore {
   const insertStmt = db.prepare(`
-    INSERT INTO invites (
-      token, inviter_key, inviter_name, node_id,
-      created_at, expires_at, signature
+    INSERT INTO redemptions (
+      token, inviter_key, inviter_name, invite_node_id,
+      invite_created_at, invite_expires_at, invite_signature,
+      redeemed_by, display_name, redeemed_at, signature, received_at
     ) VALUES (
-      @token, @inviterKey, @inviterName, @nodeId,
-      @createdAt, @expiresAt, @signature
+      @token, @inviterKey, @inviterName, @inviteNodeId,
+      @inviteCreatedAt, @inviteExpiresAt, @inviteSignature,
+      @redeemedBy, @displayName, @redeemedAt, @signature, @receivedAt
     )
   `);
-
-  const hasStmt = db.prepare("SELECT 1 FROM invites WHERE token = ?");
-  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM invites");
+  const hasStmt = db.prepare("SELECT 1 FROM redemptions WHERE token = ?");
+  const getByTokenStmt = db.prepare(
+    "SELECT * FROM redemptions WHERE token = ?",
+  );
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM redemptions");
 
   return {
-    insert(invite) {
+    insert(receipt, receivedAt) {
       insertStmt.run({
-        token: invite.token,
-        inviterKey: invite.inviterKey,
-        inviterName: invite.inviterName,
-        nodeId: invite.nodeId,
-        createdAt: invite.createdAt,
-        expiresAt: invite.expiresAt,
-        signature: invite.signature,
+        token: receipt.invite.token,
+        inviterKey: receipt.invite.inviterKey,
+        inviterName: receipt.invite.inviterName,
+        inviteNodeId: receipt.invite.nodeId,
+        inviteCreatedAt: receipt.invite.createdAt,
+        inviteExpiresAt: receipt.invite.expiresAt,
+        inviteSignature: receipt.invite.signature,
+        redeemedBy: receipt.redeemedBy,
+        displayName: receipt.displayName,
+        redeemedAt: receipt.redeemedAt,
+        signature: receipt.signature,
+        receivedAt,
       });
     },
-
+    // Cursor is the server-assigned `received_at`, ascending — the §7
+    // deviation from the sibling stores, so a client that was offline
+    // for a week resumes exactly where it left off regardless of what
+    // `redeemedAt` any device claimed.
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM invites WHERE created_at > ?
-               ORDER BY created_at DESC LIMIT ?`,
+              `SELECT * FROM redemptions WHERE received_at > ?
+               ORDER BY received_at ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
-              `SELECT * FROM invites
-               ORDER BY created_at DESC LIMIT ?`,
+              `SELECT * FROM redemptions
+               ORDER BY received_at ASC LIMIT ?`,
             )
             .all(safeLimit);
-      return (rows as InviteRow[]).map(rowToInvite);
+      return (rows as RedemptionRowSqlite[]).map(rowToRedemption);
     },
-
     count() {
       return (countStmt.get() as { n: number }).n;
     },
-
     has(token) {
       return hasStmt.get(token) !== undefined;
+    },
+    getByToken(token) {
+      const r = getByTokenStmt.get(token) as
+        | RedemptionRowSqlite
+        | undefined;
+      return r ? rowToRedemption(r) : null;
     },
   };
 }
 
-interface InviteRow {
+interface RedemptionRowSqlite {
   token: string;
   inviter_key: string;
   inviter_name: string;
-  node_id: string;
-  created_at: number;
-  expires_at: number;
+  invite_node_id: string;
+  invite_created_at: number;
+  invite_expires_at: number;
+  invite_signature: string;
+  redeemed_by: string;
+  display_name: string;
+  redeemed_at: number;
   signature: string;
+  received_at: number;
 }
 
-function rowToInvite(r: InviteRow): SignedInvite {
+function rowToRedemption(r: RedemptionRowSqlite): StoredRedemption {
   return {
-    token: r.token,
-    inviterKey: r.inviter_key,
-    inviterName: r.inviter_name,
-    nodeId: r.node_id,
-    createdAt: r.created_at,
-    expiresAt: r.expires_at,
-    signature: r.signature,
+    receipt: {
+      invite: {
+        token: r.token,
+        inviterKey: r.inviter_key,
+        inviterName: r.inviter_name,
+        nodeId: r.invite_node_id,
+        createdAt: r.invite_created_at,
+        expiresAt: r.invite_expires_at,
+        signature: r.invite_signature,
+      },
+      redeemedBy: r.redeemed_by,
+      displayName: r.display_name,
+      redeemedAt: r.redeemed_at,
+      signature: r.signature,
+    },
+    receivedAt: r.received_at,
   };
 }
 

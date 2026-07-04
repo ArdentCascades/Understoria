@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { humanizeError } from "@/lib/humanizeError";
-import { formatDeadline, formatRelativeTime } from "@/lib/format";
+import { formatDeadline, formatRelativeTime, shortKey } from "@/lib/format";
 import { revokeInvite } from "@/db/invites";
 import type { InviteRow } from "@/db/database";
 import { EmptyState } from "@/components/EmptyState";
@@ -48,7 +48,7 @@ const INVITE_STATUS_KEY: Record<InviteRow["status"], string> = {
 };
 
 export default function InvitesPage() {
-  const { currentMember, invites } = useApp();
+  const { currentMember, invites, members } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
@@ -106,6 +106,16 @@ export default function InvitesPage() {
     return `${window.location.origin}/invite#${inv.encoded}`;
   }
 
+  // Who redeemed — resolvable since Phase 1 of
+  // docs/invite-redemption.md materializes a member row from the
+  // pulled receipt (§6). Falls back to the short key for rows that
+  // pre-date the pull or whose member row is not (yet) here.
+  function nameFor(publicKey: string | null): string {
+    if (!publicKey) return "";
+    const member = members.find((m) => m.publicKey === publicKey);
+    return member?.displayName || shortKey(publicKey);
+  }
+
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
@@ -158,13 +168,31 @@ export default function InvitesPage() {
                 </div>
                 <div className="text-xs text-moss-600 dark:text-moss-300">
                   {inv.status === "redeemed"
-                    ? t("profile.invites.redeemed", {
-                        when: formatRelativeTime(inv.redeemedAt ?? 0),
-                      })
+                    ? inv.redeemedBy
+                      ? t("profile.invites.redeemedBy", {
+                          when: formatRelativeTime(inv.redeemedAt ?? 0),
+                          name: nameFor(inv.redeemedBy),
+                        })
+                      : t("profile.invites.redeemed", {
+                          when: formatRelativeTime(inv.redeemedAt ?? 0),
+                        })
                     : t("profile.invites.expires", {
                         date: formatDeadline(inv.expiresAt),
                       })}
                 </div>
+                {/* Redeemed-despite-revocation (docs/invite-redemption.md
+                    §6): the status stays "revoked" — never a trust
+                    edge — and this line surfaces the observation as
+                    information for a community conversation, not an
+                    alarm (community-authority, solidarity-not-shame). */}
+                {inv.status === "revoked" && inv.redemptionObservedAt && (
+                  <div className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
+                    {t("profile.invites.usedAfterRevoke", {
+                      when: formatRelativeTime(inv.redemptionObservedAt),
+                      name: nameFor(inv.redemptionObservedBy ?? null),
+                    })}
+                  </div>
+                )}
               </div>
               {inv.status === "open" && (
                 <div className="flex flex-wrap gap-2">

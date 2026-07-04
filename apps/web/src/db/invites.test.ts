@@ -30,6 +30,8 @@ import { createMember } from "./seed";
 import { db, SETTING_KEYS, setSetting } from "./database";
 import { generateKeyPair } from "@/lib/crypto";
 import { createVouch, trustStatusWithInvites } from "@/lib/vouch";
+import { verifyRedemptionReceipt } from "@understoria/shared/crypto";
+import type { RedemptionReceipt } from "@understoria/shared/types";
 
 const NODE = "node_invites";
 const ORIGIN = "https://example.test";
@@ -344,6 +346,109 @@ describe("redeemInvite — attach, don't mint (§5.2)", () => {
     const result = await redeemInvite(encoded, "Rosa", NODE);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toBe("self_redeem");
+  });
+});
+
+// docs/invite-redemption.md §7 — Phase 1: redeeming signs a
+// RedemptionReceipt and enqueues it in the same transaction as the
+// invite row, in BOTH modes, and — uniquely among outbox kinds —
+// even when no community-node URL is configured yet.
+describe("redeemInvite — redemption receipt (Phase 1)", () => {
+  beforeEach(reset);
+
+  async function inviteFromElsewhere(): Promise<string> {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    await db.secretKeys.delete(inviter.publicKey);
+    return shareUrl.split("#")[1];
+  }
+
+  async function onlyReceiptRow(): Promise<RedemptionReceipt> {
+    const rows = await db.outbox
+      .where("kind")
+      .equals("redemption_receipt")
+      .toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].status).toBe("pending");
+    return JSON.parse(rows[0].payload) as RedemptionReceipt;
+  }
+
+  it("mint mode: enqueues a verifiable receipt signed by the freshly-minted key — with NO node URL configured", async () => {
+    const encoded = await inviteFromElsewhere();
+    // Deliberately no communityNodeUrl: the incident's fresh-device
+    // ordering. The receipt must be enqueued anyway (§7) so that
+    // configuring a node later delivers it retroactively.
+    const result = await redeemInvite(encoded, "Newcomer", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const receipt = await onlyReceiptRow();
+    expect(receipt.redeemedBy).toBe(result.value.member.publicKey);
+    expect(receipt.displayName).toBe("Newcomer");
+    expect(receipt.invite.inviterKey).toBe(result.value.inviterKey);
+    // Both signatures verify: embedded invite AND outer receipt.
+    expect(verifyRedemptionReceipt(receipt)).toBe(true);
+
+    // The outbox row is keyed on the token so a retry can't
+    // double-enqueue.
+    const [row] = await db.outbox.toArray();
+    expect(row.recordId).toBe(receipt.invite.token);
+  });
+
+  it("attach mode: the receipt is signed by the EXISTING identity's key", async () => {
+    const resident = await createMember({ displayName: "Ash" }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, resident.publicKey);
+    const encoded = await inviteFromElsewhere();
+
+    const result = await redeemInvite(encoded, "Ash", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("attach");
+
+    const receipt = await onlyReceiptRow();
+    expect(receipt.redeemedBy).toBe(resident.publicKey);
+    expect(verifyRedemptionReceipt(receipt)).toBe(true);
+  });
+
+  it("attach mode: the receipt carries the EDITED display name (the community-facing one)", async () => {
+    const resident = await createMember({ displayName: "Ash" }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, resident.publicKey);
+    const encoded = await inviteFromElsewhere();
+
+    const result = await redeemInvite(encoded, "Ash Grove", NODE);
+    expect(result.ok).toBe(true);
+
+    const receipt = await onlyReceiptRow();
+    expect(receipt.displayName).toBe("Ash Grove");
+    expect(verifyRedemptionReceipt(receipt)).toBe(true);
+  });
+
+  it("the receipt and the invite row agree on redeemedAt", async () => {
+    const encoded = await inviteFromElsewhere();
+    const result = await redeemInvite(encoded, "Newcomer", NODE);
+    expect(result.ok).toBe(true);
+
+    const receipt = await onlyReceiptRow();
+    const [invite] = await db.invites.toArray();
+    expect(invite.redeemedAt).toBe(receipt.redeemedAt);
+  });
+
+  it("a failed redemption enqueues nothing", async () => {
+    const encoded = await inviteFromElsewhere();
+    const first = await redeemInvite(encoded, "Newcomer", NODE);
+    expect(first.ok).toBe(true);
+    await db.outbox.clear();
+
+    const second = await redeemInvite(encoded, "Latecomer", NODE);
+    expect(second.ok).toBe(false);
+    expect(await db.outbox.count()).toBe(0);
   });
 });
 
