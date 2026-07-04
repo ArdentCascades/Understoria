@@ -287,6 +287,26 @@ export default function ProjectDetailPage() {
     return people;
   }, [tasks, nodeConfig, blockedKeys, memberMap]);
 
+  // Closure aggregates — distinct contributors and hours moved — read
+  // from the signed exchange ledger (the immutable truth), not the
+  // mutable task rows. Feeds the completion moment, the permanent
+  // banner line, and the sidebar "Contributors" field, so the page can
+  // never show two different counts. Aggregate-only by construction;
+  // see lib/projectClosure.ts. Computed here (above the early return,
+  // null-safe) because the completion-moment HOOK below consumes it and
+  // must run on every render to keep the hook order stable.
+  const closure = useMemo(
+    () =>
+      project
+        ? computeProjectClosure({ project, exchanges })
+        : { contributorCount: 0, hoursMoved: 0 },
+    [project, exchanges],
+  );
+  const showCompletionMoment = useNewlyCompletedProjectMoment(
+    project,
+    closure.contributorCount,
+  );
+
   if (!project) {
     return (
       <div className="px-4 pt-6">
@@ -331,17 +351,6 @@ export default function ProjectDetailPage() {
     tasks,
     exchanges,
   });
-  // Closure aggregates — distinct contributors and hours moved — read
-  // from the signed exchange ledger (the immutable truth), not the
-  // mutable task rows. Feeds the completion moment, the permanent banner
-  // line, and the sidebar "Contributors" field, so the page can never
-  // show two different counts. Aggregate-only by construction; see
-  // lib/projectClosure.ts.
-  const closure = computeProjectClosure({ project, exchanges });
-  const showCompletionMoment = useNewlyCompletedProjectMoment(
-    project,
-    closure.contributorCount,
-  );
 
   async function run<T>(action: () => Promise<T>): Promise<T | null> {
     try {
@@ -1072,13 +1081,19 @@ function NextWorkDayGlance({ project }: { project: Project }) {
 // permanent banner line. A zero-contributor completion is never marked,
 // so if exchanges arrive later the moment can still land on a real
 // total (no-notifications: nothing buzzes; the moment waits to be seen).
+// Accepts a nullable project so the CALL SITE can place it above the
+// page's `if (!project)` early return — a hook after that return would
+// change the hook count on the cold-load null→hydrated transition and
+// crash the app. Null / not-yet-completed simply yields false.
 function useNewlyCompletedProjectMoment(
-  project: Project,
+  project: Project | null,
   contributorCount: number,
 ): boolean {
   const [show, setShow] = useState(false);
+  const projectId = project?.id ?? null;
+  const projectStatus = project?.status ?? null;
   useEffect(() => {
-    if (project.status !== "completed" || contributorCount <= 0) {
+    if (projectId === null || projectStatus !== "completed" || contributorCount <= 0) {
       setShow(false);
       return;
     }
@@ -1091,12 +1106,12 @@ function useNewlyCompletedProjectMoment(
       const celebrated = new Set<string>(
         stored ? (JSON.parse(stored) as string[]) : [],
       );
-      if (celebrated.has(project.id)) {
+      if (celebrated.has(projectId)) {
         setShow(false);
         return;
       }
       setShow(true);
-      celebrated.add(project.id);
+      celebrated.add(projectId);
       await setSetting(
         SETTING_KEYS.celebratedProjectCompletions,
         JSON.stringify(Array.from(celebrated)),
@@ -1105,7 +1120,7 @@ function useNewlyCompletedProjectMoment(
     return () => {
       cancelled = true;
     };
-  }, [project.id, project.status, contributorCount]);
+  }, [projectId, projectStatus, contributorCount]);
   return show;
 }
 

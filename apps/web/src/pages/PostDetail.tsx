@@ -81,6 +81,27 @@ export default function PostDetailPage() {
     [members],
   );
 
+  // If this post is disputed, find the most recent matching dispute
+  // proposal so the operational pointer can deep-link to its card on
+  // /disputes. Multiple dispute rows for the same post are possible
+  // in principle (re-flags after partial resolution); the most recent
+  // one is the live conversation. If none has synced locally yet, the
+  // narrative falls back to plain /disputes — never breaks.
+  //
+  // MUST stay above the `if (!post)` early return: on a cold load /
+  // deep link, `post` is null on the first render (AppContext live
+  // queries start empty) and non-null a tick later. A hook placed
+  // after the return would change the hook count between those two
+  // renders — "rendered more hooks than during the previous render",
+  // which unmounts the whole app.
+  const disputeProposalId = useMemo<string | null>(() => {
+    if (!post || post.status !== "disputed") return null;
+    const match = proposals
+      .filter((p) => p.kind === "dispute" && p.disputePostId === post.id)
+      .sort((a, b) => b.createdAt - a.createdAt)[0];
+    return match?.id ?? null;
+  }, [proposals, post]);
+
   if (!post) {
     return (
       <div className="px-4 pt-6">
@@ -100,20 +121,6 @@ export default function PostDetailPage() {
 
   const poster = memberMap.get(post.postedBy);
   const claimer = post.claimedBy ? memberMap.get(post.claimedBy) : null;
-
-  // If this post is disputed, find the most recent matching dispute
-  // proposal so the operational pointer can deep-link to its card on
-  // /disputes. Multiple dispute rows for the same post are possible
-  // in principle (re-flags after partial resolution); the most recent
-  // one is the live conversation. If none has synced locally yet, the
-  // narrative falls back to plain /disputes — never breaks.
-  const disputeProposalId = useMemo<string | null>(() => {
-    if (post.status !== "disputed") return null;
-    const match = proposals
-      .filter((p) => p.kind === "dispute" && p.disputePostId === post.id)
-      .sort((a, b) => b.createdAt - a.createdAt)[0];
-    return match?.id ?? null;
-  }, [proposals, post.status, post.id]);
   const me = currentMember;
   const isPoster = me?.publicKey === post.postedBy;
   const isClaimer = me?.publicKey === post.claimedBy;

@@ -196,8 +196,25 @@ function PendingTaskHistoryRow({
 }
 
 export default function ProfilePage() {
+  const { currentMember } = useApp();
+  // Gate here so the authenticated body's ~13 hooks live in a child
+  // that only mounts with a non-null member. Placing those hooks after
+  // an early return in THIS component crashed the app on a cold load /
+  // deep link to /profile: `currentMember` is null on the first render
+  // (the members live-query + current-member setting resolve async),
+  // non-null a tick later, and the changing hook count between those
+  // renders throws "rendered more hooks than during the previous
+  // render". The child receives a non-null member as a prop, so its
+  // hook order is stable from its first render.
+  if (!currentMember) return null;
+  return <ProfileBody member={currentMember} />;
+}
+
+function ProfileBody({ member }: { member: Member }) {
+  // Shim so the existing `currentMember` references below read from the
+  // non-null prop without a file-wide rename.
+  const currentMember = member;
   const {
-    currentMember,
     members,
     exchanges,
     posts,
@@ -230,8 +247,6 @@ export default function ProfilePage() {
       { replace: true },
     );
   }, [setSearchParams]);
-
-  if (!currentMember) return null;
 
   const trust = trustStatusWithInvites(currentMember.publicKey, {
     vouches,

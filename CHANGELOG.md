@@ -9,6 +9,31 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Round-2 review, production-breaking set.** (1) A single request
+  could wedge task-comment federation mesh-wide: `deletedAt` is
+  excluded from the signed payload and the federation cursor is
+  `max(created_at, deleted_at)`, so a replayed signed comment with an
+  unbounded `deletedAt` jumped every puller's high-water mark to the
+  far future and hid all later comments. `parseTaskComment` (and the
+  web puller) now bound `deletedAt` to `≤ now + 24h` and `≥ createdAt`.
+  (2) The cross-node claims pull advanced its cursor only on APPLIED
+  rows, so under oldest-first paging a full page of non-applicable
+  claims stalled the cursor and newer claims were never fetched; it now
+  advances on every well-formed row like the other pullers. (3) Three
+  pages (`PostDetail`, `ProjectDetail`, `Profile`) called hooks after
+  an `if (!entity) return` early return, so any cold load / deep link
+  crashed the whole app when the entity hydrated a tick later; the
+  hooks now run unconditionally (Profile's authenticated body split
+  into a child that only mounts with a non-null member). A top-level
+  `ErrorBoundary` is added as defense-in-depth so a future render throw
+  shows a recovery card instead of a blank screen. (4) Data export had
+  drifted to a hand-maintained 5-table include-list, silently dropping
+  20 tables of the member's own data (projects, tasks, messages,
+  governance, events, trust) from their backup; it now enumerates
+  `db.tables` minus a documented exclusion set (adding live invite
+  tokens and the device-pairing log to the security/privacy exclusions).
+
 ### Added
 - **System-key rotation is now operable end-to-end.** The verifier
   side shipped previously, but `GET /config` hardcoded

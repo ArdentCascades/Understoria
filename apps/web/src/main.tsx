@@ -23,6 +23,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AppProvider } from "@/state/AppContext";
 import { ToastProvider } from "@/state/ToastContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import App from "./App";
 import { initInstallCapture } from "@/lib/installGuide";
 import "./i18n";
@@ -39,12 +40,14 @@ initInstallCapture();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AppProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </AppProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </AppProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>,
 );
