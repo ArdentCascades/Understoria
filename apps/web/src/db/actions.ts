@@ -506,6 +506,17 @@ export async function disputeExchange(
   return db.transaction("rw", db.posts, db.proposals, async () => {
     const post = await db.posts.get(postId);
     if (!post) throw new Error("Post not found");
+    // A dispute is about an exchange, so the post must have entered
+    // the claim flow: without a claimer there is no second party (the
+    // proposal's recipientKey would be empty), and a cancelled or
+    // already-disputed post has nothing new to flag. Same in-txn
+    // lifecycle discipline as claimPost / confirmExchange.
+    if (post.status === "open" || post.claimedBy === null)
+      throw new Error("Only a claimed exchange can be disputed");
+    if (post.status === "cancelled")
+      throw new Error("A cancelled post has no exchange to dispute");
+    if (post.status === "disputed")
+      throw new Error("This exchange is already disputed");
     if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
       throw new Error("Only the two parties can dispute this exchange");
     const updated: Post = { ...post, status: "disputed" };

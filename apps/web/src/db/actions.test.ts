@@ -50,6 +50,7 @@ async function reset() {
     db.coorgInvitations.clear(),
     db.coorgInvitationResponses.clear(),
     db.coorgInvitationRevocations.clear(),
+    db.proposals.clear(),
   ]);
 }
 
@@ -270,6 +271,49 @@ describe("exchange flow (integration)", () => {
     expect(disputed.status).toBe("disputed");
     const exchanges = await db.exchanges.toArray();
     expect(exchanges).toHaveLength(0);
+  });
+
+  it("refuses to dispute a post that was never claimed", async () => {
+    const a = await createMember({ displayName: "A" }, NODE);
+    const post = await createPost(a.publicKey, "", {
+      type: "NEED",
+      category: "other",
+      title: "help",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      expiresAt: null,
+    }, NODE);
+    // No claim flow → no second party → nothing to dispute. Before
+    // the guard, this flipped an open post to "disputed" and built a
+    // proposal with an empty recipientKey.
+    await expect(
+      disputeExchange(post.id, a.publicKey),
+    ).rejects.toThrow(/claimed exchange/i);
+    expect((await db.posts.get(post.id))!.status).toBe("open");
+    expect(await db.proposals.count()).toBe(0);
+  });
+
+  it("refuses to dispute a cancelled or already-disputed post", async () => {
+    const a = await createMember({ displayName: "A" }, NODE);
+    const b = await createMember({ displayName: "B" }, NODE);
+    const post = await createPost(a.publicKey, "", {
+      type: "NEED",
+      category: "other",
+      title: "help",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      expiresAt: null,
+    }, NODE);
+    await claimPost(post.id, b.publicKey);
+    await disputeExchange(post.id, a.publicKey);
+    // Second dispute of the same post: loud error, not a silent
+    // duplicate flip.
+    await expect(
+      disputeExchange(post.id, b.publicKey),
+    ).rejects.toThrow(/already disputed/i);
+    expect(await db.proposals.count()).toBe(1);
   });
 });
 
