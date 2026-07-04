@@ -1388,17 +1388,24 @@ export function createRedemptionStore(db: DatabaseType): RedemptionStore {
     // `redeemedAt` any device claimed.
     list({ since, limit } = {}) {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+      // Inclusive cursor + token tiebreak — same tie-at-page-boundary
+      // reasoning as the exchanges store's list(): two receipts can
+      // share a received_at millisecond, and a strict `>` cursor that
+      // lands between them skips the un-served one forever. Pullers
+      // merge idempotently by token, so a re-served boundary row is a
+      // harmless no-op. The server-monotonic received_at cursor itself
+      // (the §7 design ruling) is unchanged.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM redemptions WHERE received_at > ?
-               ORDER BY received_at ASC LIMIT ?`,
+              `SELECT * FROM redemptions WHERE received_at >= ?
+               ORDER BY received_at ASC, token ASC LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM redemptions
-               ORDER BY received_at ASC LIMIT ?`,
+               ORDER BY received_at ASC, token ASC LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as RedemptionRowSqlite[]).map(rowToRedemption);

@@ -334,9 +334,13 @@ describe("GET /redemptions — receivedAt cursor", () => {
     };
     expect(body.redemptions.map((r) => r.receivedAt)).toEqual([1_000, 2_000]);
 
+    // `since` is INCLUSIVE — a row sharing the cursor timestamp is
+    // re-served so a tie at a page boundary can never be lost;
+    // pullers merge idempotently by token, so re-served rows are
+    // no-ops. Same contract as the exchanges GET.
     const afterFirst = await app.inject({
       method: "GET",
-      url: "/redemptions?since=1000",
+      url: "/redemptions?since=1001",
     });
     const page = afterFirst.json() as {
       count: number;
@@ -345,9 +349,16 @@ describe("GET /redemptions — receivedAt cursor", () => {
     expect(page.count).toBe(1);
     expect(page.redemptions[0].invite.token).toBe(late.invite.token);
 
-    const afterAll = await app.inject({
+    const atBoundary = await app.inject({
       method: "GET",
       url: "/redemptions?since=2000",
+    });
+    const boundaryPage = atBoundary.json() as { count: number };
+    expect(boundaryPage.count).toBe(1);
+
+    const afterAll = await app.inject({
+      method: "GET",
+      url: "/redemptions?since=2001",
     });
     expect((afterAll.json() as { count: number }).count).toBe(0);
   });

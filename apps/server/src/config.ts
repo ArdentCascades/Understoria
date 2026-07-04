@@ -88,6 +88,22 @@ export interface Config {
    */
   systemSecretKey: string | null;
   /**
+   * Retired system pubkeys, published verbatim in
+   * `GET /config.systemKey.history` so pulling peers can verify
+   * records signed before a rotation (§4 of
+   * `docs/auto-confirm-key.md`; procedure in
+   * `docs/system-key-rotation.md`).
+   *
+   * Set via `NODE_SYSTEM_KEY_HISTORY`: a JSON array of
+   * `{ "pubkey": "<base64>", "retiredAt": <epoch ms> }` entries.
+   * Each entry is a key this node PREVIOUSLY published as current,
+   * with the moment it stopped signing. Malformed JSON or entries
+   * fail the boot loudly — a silently-dropped history entry would
+   * make peers reject this node's pre-rotation records. Empty /
+   * unset means "never rotated" (the common case).
+   */
+  systemKeyHistory: { pubkey: string; retiredAt: number }[];
+  /**
    * Minimum hours the server requires to have elapsed before it
    * will sign an auto-confirm record. Independent of (and a floor
    * over) the PWA's community-configurable `autoConfirmHours` — the
@@ -140,6 +156,7 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       5 * 60 * 1000,
     ),
     systemSecretKey: nonEmpty(env.NODE_SYSTEM_SECRET_KEY),
+    systemKeyHistory: parseSystemKeyHistory(env.NODE_SYSTEM_KEY_HISTORY),
     // Non-negative so 0 is accepted (operator can lock the server's
     // floor at "off" even if the community config says otherwise —
     // defense-in-depth knob).
@@ -193,4 +210,44 @@ function parsePeerUrls(raw: string | undefined): readonly string[] {
     urls.push(trimmed);
   }
   return urls;
+}
+
+function parseSystemKeyHistory(
+  raw: string | undefined,
+): { pubkey: string; retiredAt: number }[] {
+  if (raw === undefined || raw.trim() === "") return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("NODE_SYSTEM_KEY_HISTORY is not valid JSON");
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error("NODE_SYSTEM_KEY_HISTORY must be a JSON array");
+  }
+  const history = parsed.map((entry, i) => {
+    if (
+      entry === null ||
+      typeof entry !== "object" ||
+      typeof (entry as { pubkey?: unknown }).pubkey !== "string" ||
+      (entry as { pubkey: string }).pubkey.trim() === "" ||
+      typeof (entry as { retiredAt?: unknown }).retiredAt !== "number" ||
+      !Number.isInteger((entry as { retiredAt: number }).retiredAt) ||
+      (entry as { retiredAt: number }).retiredAt <= 0
+    ) {
+      // Loud, not lenient: a silently-dropped entry would make peers
+      // reject every record this node system-signed before that
+      // rotation. Refusing to boot is the safer failure.
+      throw new Error(
+        `NODE_SYSTEM_KEY_HISTORY entry ${i} must be {"pubkey": "<base64>", "retiredAt": <epoch ms>}`,
+      );
+    }
+    return {
+      pubkey: (entry as { pubkey: string }).pubkey,
+      retiredAt: (entry as { retiredAt: number }).retiredAt,
+    };
+  });
+  // Ascending by retiredAt — the order verifiers scan ("first entry
+  // retired after the signing time is the key current then").
+  return history.sort((a, b) => a.retiredAt - b.retiredAt);
 }

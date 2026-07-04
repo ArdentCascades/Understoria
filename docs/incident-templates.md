@@ -47,10 +47,15 @@ last 30 days (those rows depend on the rotated key for verification).
 
 **Pre-flight checklist.**
 - [ ] New keypair generated (`scripts/generate-system-key.mjs`)
-- [ ] Old `NODE_SYSTEM_SECRET_KEY` saved offline as `previous-key.txt`
-      for the rotation-history field
-- [ ] `.env` updated, `docker compose up -d` restarted
-- [ ] `GET /api/config` returns the new public key
+- [ ] Old PUBLIC key recorded (the history needs the pubkey, not the
+      secret — destroy the old secret once the switch is verified)
+- [ ] `.env` updated per
+      [`system-key-rotation.md`](./system-key-rotation.md) §3 — BOTH
+      `NODE_SYSTEM_SECRET_KEY` (new) and `NODE_SYSTEM_KEY_HISTORY`
+      (old pubkey + retirement timestamp, append-only)
+- [ ] `docker compose up -d` restarted
+- [ ] `GET /api/config` returns the new public key AND the old one
+      in `systemKey.history`
 - [ ] Threat-model entry for this incident drafted (you'll publish
       it within 7 days; see §7)
 

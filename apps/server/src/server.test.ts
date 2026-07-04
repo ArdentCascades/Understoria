@@ -616,6 +616,73 @@ describe("GET /config with a system key", () => {
   });
 });
 
+describe("GET /config — rotation history (NODE_SYSTEM_KEY_HISTORY)", () => {
+  it("serves the operator-published retired keys", async () => {
+    const historyDb = openDatabase(":memory:");
+    const kp = generateKeyPair();
+    const retired = generateKeyPair();
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      NODE_ID: "node_rotated",
+      NODE_SYSTEM_SECRET_KEY: kp.secretKey,
+      NODE_SYSTEM_KEY_HISTORY: JSON.stringify([
+        { pubkey: retired.publicKey, retiredAt: 1_700_000_000_000 },
+      ]),
+    } as NodeJS.ProcessEnv);
+    const built = await buildServer({ config, database: historyDb });
+    await built.app.ready();
+    try {
+      const res = await built.app.inject({ method: "GET", url: "/config" });
+      const body = res.json() as {
+        systemKey?: { current: string; history: unknown[] };
+      };
+      expect(body.systemKey?.history).toEqual([
+        { pubkey: retired.publicKey, retiredAt: 1_700_000_000_000 },
+      ]);
+    } finally {
+      await built.app.close();
+      historyDb.close();
+    }
+  });
+
+  it("refuses to boot on malformed history (silent drop would un-verify past records)", () => {
+    expect(() =>
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        NODE_SYSTEM_KEY_HISTORY: "not json",
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/NODE_SYSTEM_KEY_HISTORY/);
+    expect(() =>
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        NODE_SYSTEM_KEY_HISTORY: JSON.stringify([{ pubkey: "", retiredAt: 1 }]),
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/entry 0/);
+    expect(() =>
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        NODE_SYSTEM_KEY_HISTORY: JSON.stringify([
+          { pubkey: "abc", retiredAt: "yesterday" },
+        ]),
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/entry 0/);
+  });
+
+  it("sorts history ascending by retiredAt regardless of input order", () => {
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      NODE_SYSTEM_KEY_HISTORY: JSON.stringify([
+        { pubkey: "newer_retiree", retiredAt: 2_000 },
+        { pubkey: "older_retiree", retiredAt: 1_000 },
+      ]),
+    } as NodeJS.ProcessEnv);
+    expect(config.systemKeyHistory.map((h) => h.pubkey)).toEqual([
+      "older_retiree",
+      "newer_retiree",
+    ]);
+  });
+});
+
 describe("POST /task-comments", () => {
   it("accepts a well-signed comment and returns 201", async () => {
     const c = makeSignedTaskComment();
