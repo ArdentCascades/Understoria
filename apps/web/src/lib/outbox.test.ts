@@ -29,6 +29,7 @@ import {
   flushOutboxOnce,
   isPoisonResult,
   nextBackoffMs,
+  pruneDeliveredOutbox,
   readOutboxSummary,
 } from "./outbox";
 import type { Exchange, TaskComment } from "@/types";
@@ -198,6 +199,53 @@ describe("enqueueTaskCommentOutbox — tombstone re-enqueue", () => {
     const again = await enqueueTaskCommentOutbox(fakeComment(null));
     expect(again!.id).toBe(insert!.id);
     expect(await db.outbox.count()).toBe(1);
+  });
+});
+
+describe("pruneDeliveredOutbox", () => {
+  beforeEach(async () => {
+    await writeSubmitConfig({
+      url: "https://node.example/api",
+      enabled: true,
+    });
+  });
+
+  const WEEK = 7 * 24 * 60 * 60 * 1000;
+
+  it("deletes delivered rows past the retention window, keeps recent ones", async () => {
+    const now = Date.now();
+    const old = await enqueueExchangeOutbox(fakeExchange("ex_old"));
+    await db.outbox.update(old!.id, {
+      status: "delivered",
+      lastAttemptAt: now - WEEK - 60_000,
+    });
+    const recent = await enqueueExchangeOutbox(fakeExchange("ex_recent"));
+    await db.outbox.update(recent!.id, {
+      status: "delivered",
+      lastAttemptAt: now - 60_000,
+    });
+
+    const deleted = await pruneDeliveredOutbox(now);
+    expect(deleted).toBe(1);
+    expect(await db.outbox.get(old!.id)).toBeUndefined();
+    expect(await db.outbox.get(recent!.id)).toBeDefined();
+  });
+
+  it("never touches pending or poisoned rows, however old", async () => {
+    const now = Date.now();
+    const pending = await enqueueExchangeOutbox(fakeExchange("ex_pending"));
+    await db.outbox.update(pending!.id, {
+      lastAttemptAt: now - 10 * WEEK,
+    });
+    const poisoned = await enqueueExchangeOutbox(fakeExchange("ex_poisoned"));
+    await db.outbox.update(poisoned!.id, {
+      status: "poisoned",
+      lastAttemptAt: now - 10 * WEEK,
+    });
+
+    expect(await pruneDeliveredOutbox(now)).toBe(0);
+    expect(await db.outbox.get(pending!.id)).toBeDefined();
+    expect(await db.outbox.get(poisoned!.id)).toBeDefined();
   });
 });
 
