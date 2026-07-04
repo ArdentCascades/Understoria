@@ -709,10 +709,12 @@ two phases are ordered but not interleaved.
 
 1. **Revocation propagation.** Revocation is local-only today; the
    §6 revoked-vs-redeemed race is surfaced but not prevented. A
-   signed `InviteRevocation` record could propagate revocations
-   without registering open invites (it names one token only, after
-   the inviter chose to kill it) — future note if pilots hit the
-   race in practice.
+   signed `InviteRevocation` record propagates revocations without
+   registering open invites (it names one token only, after the
+   inviter chose to kill it). Designed in
+   [`invite-revocation.md`](./invite-revocation.md): commutative merge
+   to a `redeemed_despite_revocation` state, never ejection, with the
+   trust-withdrawal half behind a governance ruling.
 2. **Cross-node membership.** Receipts deliberately do not
    peer-replicate. When cross-node membership is designed, receipt
    replay across nodes (§11) must be re-examined — likely by
