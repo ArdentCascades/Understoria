@@ -304,6 +304,101 @@ describe("pullFromPeer", () => {
   });
 });
 
+describe("pullFromPeer — cursor pagination over a multi-page backlog", () => {
+  /** Serve /exchanges from a REAL peer-side store so the test couples
+   *  the store's list() ordering to the puller's cursor advancement —
+   *  the exact interaction that used to lose rows (DESC ordering with
+   *  a max-based cursor skipped everything below the newest page). */
+  function storeBackedFetcher(peerDb: DatabaseType): Fetcher {
+    const peerStore = createExchangeStore(peerDb);
+    return (url) => {
+      const u = new URL(url);
+      const sinceParam = u.searchParams.get("since");
+      const limitParam = u.searchParams.get("limit");
+      const exchanges = peerStore.list({
+        since: sinceParam ? Number(sinceParam) : undefined,
+        limit: limitParam ? Number(limitParam) : undefined,
+      });
+      return jsonResponse({ count: exchanges.length, exchanges });
+    };
+  }
+
+  it("converges on a backlog larger than one page, including ties at a page boundary", async () => {
+    const peerDb = openDatabase(":memory:");
+    try {
+      const peerStore = createExchangeStore(peerDb);
+      const base = 1_000_000;
+      const all: Exchange[] = [];
+      // 13 rows, page size 5. Rows 3..6 share one timestamp so the
+      // first page boundary falls inside a tie run.
+      for (let i = 0; i < 13; i++) {
+        const tied = i >= 3 && i <= 6;
+        const completedAt = base + (tied ? 3 : i) * 1000;
+        const x = makeSignedExchange({ completedAt });
+        peerStore.insert(x);
+        all.push(x);
+      }
+
+      const localStore = createExchangeStore(db);
+      const fetcher = storeBackedFetcher(peerDb);
+
+      // Replicate the worker's cursor behavior: advance to the pull's
+      // latestCompletedAt after each page, exactly as recordSuccess /
+      // sinceFor do.
+      let since: number | null = null;
+      let pulls = 0;
+      for (; pulls < 20; pulls++) {
+        const result = await pullFromPeer({
+          peerUrl: "https://peer.example",
+          since,
+          fetcher,
+          store: localStore,
+          maxRows: 5,
+        });
+        expect(result.rejectedCount).toBe(0);
+        since = result.latestCompletedAt ?? since;
+        if (result.insertedCount === 0) break;
+      }
+
+      expect(pulls).toBeLessThan(20);
+      expect(localStore.count()).toBe(all.length);
+      for (const x of all) {
+        expect(localStore.has(x.id)).toBe(true);
+      }
+    } finally {
+      peerDb.close();
+    }
+  });
+
+  it("first bootstrap page is the OLDEST rows, so history replicates bottom-up", async () => {
+    const peerDb = openDatabase(":memory:");
+    try {
+      const peerStore = createExchangeStore(peerDb);
+      const oldest = makeSignedExchange({ completedAt: 1_000 });
+      const newest = makeSignedExchange({ completedAt: 2_000 });
+      peerStore.insert(newest);
+      peerStore.insert(oldest);
+
+      const localStore = createExchangeStore(db);
+      const result = await pullFromPeer({
+        peerUrl: "https://peer.example",
+        since: null,
+        fetcher: storeBackedFetcher(peerDb),
+        store: localStore,
+        maxRows: 1,
+      });
+      // With one-row pages the bootstrap page must be the oldest row;
+      // a newest-first page would put the cursor past the other row
+      // and orphan it forever.
+      expect(result.insertedCount).toBe(1);
+      expect(localStore.has(oldest.id)).toBe(true);
+      expect(localStore.has(newest.id)).toBe(false);
+    } finally {
+      peerDb.close();
+    }
+  });
+});
+
 describe("startPeerPullWorker", () => {
   it("does nothing when no peers are configured", async () => {
     const store = createExchangeStore(db);
