@@ -1151,6 +1151,78 @@ We are not trying to protect against:
   (mitigation (c) above), and a negative test in `peerPull.test.ts`
   locks receipts and invites off the inter-node wire.
 
+- **Federated `InviteRevocation` records.**
+  *Shipped — Phase 1 of `docs/invite-revocation.md` (§10, the
+  convergence-only half): `InviteRevocationPayload` /
+  `InviteRevocation` + `canonicalInviteRevocationPayload` /
+  `verifyInviteRevocation` / `parseInviteRevocation` in
+  `@understoria/shared`, the `invite_revocations` table (server schema
+  v13), `POST/GET /invite-revocations`, the outbox kind
+  `invite_revocation`, and `pullFederatedInviteRevocations` in
+  `federationSync.ts`.* Pairs with the `RedemptionReceipt` entry
+  above. Before this, `revokeInvite` wrote only the inviter's local
+  Dexie row, so a revoked-then-redeemed invite showed `revoked` on the
+  inviter's device and `redeemed` (counting the implicit first vouch)
+  on every other device — the newcomer's trust state diverged per
+  device, permanently. The new record is signed by the ORIGINAL
+  INVITER (a single signer, unlike the receipt's two attestations) and
+  names one already-killed token. New wire fields, in the shape this
+  §7 uses:
+  - `token` (identity/dedup key — the same token the DEAD invite
+    named; the invite is already unredeemable-or-redeemed by the time
+    a revocation exists), `inviterKey` (the signer, and the authority
+    anchor — see below), `revokedAt` (client clock, display-only:
+    "revoked on …"), `nodeId`, `signature` (by `inviterKey`).
+  Endpoints: `POST /invite-revocations` (verify-then-idempotent-store;
+  409 first-writer-wins on the token blocks a third party from
+  claiming an already-revoked token — poison for the outbox, never
+  succeeds on retry) and `GET /invite-revocations?since=&limit=`
+  (cursor is server-assigned `receivedAt`, inclusive with a token
+  tiebreak — the same skew-safe deviation the redemptions route uses).
+  Like `/redemptions`, this is PWA↔node only — NO peer-replication
+  leg, so the revocation graph stays off the inter-node wire exactly
+  as the roster does.
+  Adversary mapping (§3): rows 3/4/5 — the node now holds, explicitly,
+  which invites their inviter took back; this is strictly LESS than
+  the redemption graph it already stores (a revocation names a token
+  the node already saw redeemed, or one it never will), held under the
+  same minimal-logging/purge posture. Row 6 — any member-level actor
+  can read the revocation feed via `GET /invite-revocations`; it
+  reveals only that an inviter retracted an admission the same actor
+  could already see in `GET /redemptions`, no new subject data (no
+  location, availability, or activity). Rows 1/2/7 — carries no PII
+  beyond the two pubkeys already on the paired receipt.
+  Mitigations baked in (full analysis in `invite-revocation.md`
+  §§5,7): (a) **authority binding** (§3.1) — a revocation acts only
+  when its `inviterKey` matches the redemption receipt's embedded,
+  inviter-signed invite; a third party who signs a revocation for
+  someone else's token produces no match and the client merge drops it
+  (`federationSync.ts`, "dropped … does not match the local invite"),
+  so revocation cannot be turned against an invite one did not issue;
+  (b) the merge is **presence-based and commutative** — the terminal
+  state is a pure function of which records exist for a token, never a
+  `revokedAt`-vs-`redeemedAt` comparison, so a **backdated `revokedAt`
+  buys nothing** (it is retained for display only); (c) forgery
+  requires forging the inviter's Ed25519 signature; byte-identical
+  replay is idempotent (dedup by token); (d) revocation is **never
+  ejection** (§2) — the worst it does is move the member to
+  `redeemed_despite_revocation` and, once the §9 ruling ships Phase 2,
+  withdraw the one implicit vouch; it never reverses credit or removes
+  the account, and the member reaches full trust again with one
+  ordinary vouch. Residual risk acknowledged honestly: an
+  un-redeemed token's revocation is inert on every device but the
+  inviter's own (nothing to bind to), so it federates a few dead rows
+  — accepted over the alternative (enqueue only once a receipt is
+  known) which would break the "each record self-contained" property
+  (`invite-revocation.md` §12). Retention/purge: the
+  `invite_revocations` store gets the same soft/hard purge hooks as the
+  redemptions store, and the local `invites` table is already cleared
+  by both purges. **Phase 2 (trust withdrawal) is not yet shipped** —
+  the `vouchersFor` filter that drops the implicit vouch for
+  `redeemed_despite_revocation` is gated behind a `GOVERNANCE.md`
+  modified-consensus ruling (§9); until then the vouch counts as today
+  and the only visible change is the converged label.
+
 - **PWA vouch pull puts the vouch graph on every member device.**
   *Shipped — `pullFederatedVouches()` in `federationSync.ts`, landed
   with the invite-redemption Phase 1 PR.* Companion leg of the
