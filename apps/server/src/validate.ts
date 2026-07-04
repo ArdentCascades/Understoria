@@ -406,6 +406,7 @@ export function parseTaskComment(input: unknown): ParseTaskCommentResult {
       error: "createdAt must be a positive integer (ms epoch)",
     };
   }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
   if (r.deletedAt !== null) {
     if (
       typeof r.deletedAt !== "number" ||
@@ -417,8 +418,22 @@ export function parseTaskComment(input: unknown): ParseTaskCommentResult {
         error: "deletedAt must be null or a positive integer (ms epoch)",
       };
     }
+    // BOUND deletedAt the same way createdAt is bounded. deletedAt is
+    // excluded from the signed canonical payload (so soft-delete
+    // doesn't re-sign), which means a replayer can set it to anything
+    // on an otherwise-valid signed row. Because the federation cursor
+    // for task comments is max(created_at, deleted_at), an unbounded
+    // deletedAt (e.g. Number.MAX_SAFE_INTEGER) would jump every
+    // puller's high-water mark to the far future and filter out ALL
+    // subsequent comments mesh-wide — one request wedges the whole
+    // task-comment federation. It also cannot precede creation.
+    if ((r.deletedAt as number) > oneDayFromNow) {
+      return { ok: false, error: "deletedAt is too far in the future" };
+    }
+    if ((r.deletedAt as number) < (r.createdAt as number)) {
+      return { ok: false, error: "deletedAt precedes createdAt" };
+    }
   }
-  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
   if ((r.createdAt as number) > oneDayFromNow) {
     return { ok: false, error: "createdAt is too far in the future" };
   }

@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -116,10 +116,19 @@ export default function PostFormPage() {
     };
   }, []);
 
+  // One-shot repost prefill. `posts` is a fresh array on every
+  // posts-table change (a federation pull, an auto-confirm sweep, any
+  // other write), so without this guard a background write while the
+  // member is editing a repost re-ran the effect and silently reset
+  // their edits to the source post's values. Seed exactly once, the
+  // same pattern EventNew uses.
+  const repostSeededRef = useRef(false);
   useEffect(() => {
+    if (repostSeededRef.current) return;
     if (!repostId || !posts.length) return;
     const source = posts.find((p) => p.id === repostId);
     if (!source) return;
+    repostSeededRef.current = true;
     setType(source.type);
     setTitle(source.title);
     setDescription(source.description);
@@ -353,7 +362,7 @@ export default function PostFormPage() {
         {matchingNeeds.length > 0 && (
           <p className="text-xs text-canopy-700 dark:text-canopy-300 lg:hidden">
             <Link
-              to={`/?tab=NEED&category=${category}`}
+              to={`/?tab=needs&category=${category}`}
               className="underline-offset-2 hover:underline"
             >
               {t("postForm.matchingNeeds", { count: matchingNeeds.length })}
@@ -502,7 +511,7 @@ export default function PostFormPage() {
             </ul>
             {matchingNeeds.length > 3 && (
               <Link
-                to={`/?tab=NEED&category=${category}`}
+                to={`/?tab=needs&category=${category}`}
                 className="mt-2 inline-block text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
               >
                 {t("postForm.matchingNeedsAside.seeAll", {

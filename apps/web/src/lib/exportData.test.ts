@@ -75,5 +75,36 @@ describe("buildExportBundle excludes local-only privacy tables", () => {
     expect(EXPORT_EXCLUDED_TABLES).toContain("secretKeys");
     expect(EXPORT_EXCLUDED_TABLES).toContain("blocks");
     expect(EXPORT_EXCLUDED_TABLES).toContain("previouslyBlocked");
+    expect(EXPORT_EXCLUDED_TABLES).toContain("invites");
+    expect(EXPORT_EXCLUDED_TABLES).toContain("pairingLog");
+  });
+
+  it("exports EVERY table that is not explicitly excluded (no silent drift)", () => {
+    // The bug this guards: the export had drifted to a hand-maintained
+    // 5-table include-list and silently dropped 20 tables of the
+    // member's own data. Completeness is now derived from db.tables.
+    const excluded = new Set<string>(EXPORT_EXCLUDED_TABLES);
+    const expected = db.tables
+      .map((t) => t.name)
+      .filter((name) => !excluded.has(name))
+      .sort();
+    // buildExportBundle is async; assert the key set against a fresh
+    // (empty) DB — presence of the key, not row count, is the contract.
+    return buildExportBundle().then((bundle) => {
+      expect(Object.keys(bundle.data).sort()).toEqual(expected);
+      // Spot-check tables the old include-list dropped.
+      for (const name of [
+        "projects",
+        "projectTasks",
+        "messages",
+        "events",
+        "proposals",
+        "votes",
+        "taskComments",
+        "vouches",
+      ]) {
+        expect(Object.keys(bundle.data)).toContain(name);
+      }
+    });
   });
 });

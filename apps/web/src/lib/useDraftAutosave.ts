@@ -37,6 +37,11 @@ export function useDraftAutosave<T>(
   { enabled, debounceMs = 600 }: UseDraftAutosaveOptions,
 ): void {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // True while a debounced write is scheduled but not yet persisted.
+  const pending = useRef(false);
+  // Latest inputs, so the unmount flush writes the most recent value.
+  const latest = useRef({ key, value, enabled });
+  latest.current = { key, value, enabled };
 
   useEffect(() => {
     if (!enabled) {
@@ -44,11 +49,14 @@ export function useDraftAutosave<T>(
         clearTimeout(timer.current);
         timer.current = null;
       }
+      pending.current = false;
       return;
     }
     if (timer.current !== null) clearTimeout(timer.current);
+    pending.current = true;
     timer.current = setTimeout(() => {
       void saveDraft(key, value);
+      pending.current = false;
       timer.current = null;
     }, debounceMs);
     return () => {
@@ -58,4 +66,21 @@ export function useDraftAutosave<T>(
       }
     };
   }, [key, value, enabled, debounceMs]);
+
+  // Unmount-only flush. The per-value cleanup above clears the pending
+  // timer on every change (correct — it reschedules), but on UNMOUNT
+  // that would silently drop the last ≤debounceMs of edits, which is
+  // exactly the "a quick navigate still flushes recent edits" promise
+  // in this file's docstring. Persist the latest value immediately if
+  // a write was still pending when the form unmounted.
+  useEffect(
+    () => () => {
+      if (pending.current) {
+        const l = latest.current;
+        if (l.enabled) void saveDraft(l.key, l.value);
+        pending.current = false;
+      }
+    },
+    [],
+  );
 }

@@ -27,14 +27,29 @@ afterwards:
    rows on every future pull — a new node onboarding into the
    federation would silently drop your community's auto-confirmed
    history.
-2. **The old key stops working for NEW records.** If you rotated
-   because the key may be compromised, an attacker holding it must
-   not be able to sign records dated after the rotation.
+2. **The old key stops working for records dated after the rotation.**
+   Peers reject a record that claims the retired key for an
+   `autoConfirmedAt` after `retiredAt`.
 
 Both are achieved by *publishing the retired key with its retirement
 timestamp* rather than deleting it. Peers pick the key that was
 current at each record's `autoConfirmedAt`: before `retiredAt` →
 the old key verifies; after → only the new key does.
+
+> **What rotation does NOT do — read this if you rotated because the
+> key leaked.** A leaked *retired* key can still forge a **backdated**
+> record: the attacker sets `autoConfirmedAt` to just before
+> `retiredAt` and signs with the key they hold, and the resolver
+> honors it. This is inherent to the current scheme — the record's
+> timestamp is author-declared, and the attacker controls both the
+> key and the timestamp, so signing the timestamp would not help.
+> Rotation limits *ongoing* exposure (new-dated forgeries stop, and
+> the community moves to a key the attacker lacks), but it is **not**
+> a clean revocation of a leaked key against backdated records.
+> Treat a leaked system key as a governance incident (announce, and
+> scrutinize auto-confirmed records near the leak window), not
+> something rotation silently cleans up. Closing the backdating gap
+> needs receive-time retirement enforcement (§6).
 
 **The failure mode this runbook exists to prevent:** rotating the
 secret in `.env` *without* adding the old public key to
@@ -131,12 +146,20 @@ your restart sees the new `current` + history and:
   signed before `retiredAt`;
 - verifies new records against the new key;
 - rejects any record that claims the old key for a timestamp after
-  `retiredAt` — which is precisely the compromised-key scenario the
-  rotation exists to disarm.
+  `retiredAt`.
 
 A peer whose pull lands *during* your restart records a transient
 failure and retries next cycle; its cursor does not move, so nothing
 is skipped.
+
+Peers also **fail closed on a nodeId conflict**: if two different
+peer URLs both claim to be your `nodeId` with different keys (an
+impersonation attempt, or the same node listed under two URLs by
+mistake), the resolver refuses to verify *any* record for that
+nodeId until the operator resolves the conflict. A key legitimately
+comes from the one peer that IS that node, so a second claimant is
+never authoritative — the ambiguity downgrades a would-be forgery to
+a visible denial.
 
 ## 5. Edge cases
 
@@ -162,3 +185,24 @@ is skipped.
   setting `AUTO_CONFIRM_MIN_HOURS=0` instead: the endpoint refuses
   to sign anything new while the published history keeps the past
   verifiable.
+
+## 6. Known limitation — backdated forgery with a leaked key (future work)
+
+The rotation scheme selects the verifying key by the record's
+self-declared `autoConfirmedAt`. That makes past records verifiable
+across a rotation, but it means a leaked **retired** key can still
+sign a record backdated to before its `retiredAt`, and peers will
+honor it. Signing the timestamp does not close this — the attacker
+who holds the key also controls the timestamp.
+
+Closing it requires **receive-time retirement enforcement**: once a
+node learns a key has been retired (sees it move into the published
+history), it should reject any *first-seen* record signed by that
+retired key, regardless of the record's own timestamp — a legitimate
+pre-rotation record would already have propagated before the
+retirement was announced. That needs the exchange store to track a
+per-record `receivedAt` (as the redemptions store already does), and
+a policy for the propagation-race window. It is deferred: the pilot
+mesh is small and operator-trusted, and a leaked key is handled as a
+governance incident (announce + scrutinize the leak window) under the
+current scheme. Tracked in the roadmap deferred-items table.

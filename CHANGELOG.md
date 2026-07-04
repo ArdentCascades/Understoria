@@ -9,6 +9,75 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Round-2 review, UI batch.** Co-organizer project actions
+  (complete/resume/launch/pause/archive/add-task/bulk-add) are now
+  attributed to the acting member, not the primary organizer — the
+  misattribution corrupted project history and the adoption
+  "organizer gone quiet" signal. The repost form no longer loses the
+  member's edits when a background posts write re-runs its prefill
+  (one-shot seed). Switching conversations in the split pane now
+  remounts the view (keyed on the member), fixing a wrong-recipient
+  draft carryover, stale search state, and a cross-thread message
+  flash. PostForm's "matching needs" links land on the Needs tab
+  (were `?tab=NEED`, which parsed to Projects). `useDraftAutosave`
+  flushes its pending write on unmount instead of dropping the last
+  ≤600ms of edits. `formatRelativeTime` no longer renders "0y ago"
+  for timestamps 360–364 days old.
+
+### Security
+- **§4 auto-confirm: fail closed on nodeId shadowing.** A compromised
+  peer could serve `GET /config` claiming another node's `nodeId`
+  with its own key and forge "auto-confirmed by" that node. The
+  resolver now refuses to verify any record for a `nodeId` that two
+  peers claim with different keys (a legitimate key comes from the one
+  peer that IS that node), downgrading a would-be forgery to a
+  detectable denial. Separately, the rotation docs are corrected to
+  state honestly that a leaked *retired* key can still sign a
+  *backdated* record (the attacker controls both key and self-declared
+  timestamp, so signing the timestamp does not help); the real fix —
+  receive-time retirement enforcement — is documented and deferred
+  (`docs/system-key-rotation.md` §6).
+
+### Fixed
+- **Round-2 review, purge/federation correctness.** softPurge now
+  clears `outbox` (verbatim payload text), `invites` (live redeemable
+  tokens), and `votes` (governance graph) — the sensitive tables it
+  had been leaving intact. `NODE_ID`, `NODE_SYSTEM_KEY_HISTORY`, and
+  `PEER_PULL_INTERVAL_MS` are plumbed through `docker-compose.yml`
+  (and `NODE_ID` documented in `.env.example`) — previously a Docker
+  deployment silently defaulted `NODE_ID` to `node_local` (colliding
+  the §4 nodeId↔key binding) and ignored any rotation history. The
+  outbox flush no longer marks a row delivered when its payload was
+  replaced mid-POST (which lost task-comment tombstones), and
+  auto-confirmed exchanges are no longer enqueued to `/exchanges`
+  (which 422-poisoned one outbox row per auto-confirm).
+
+### Fixed
+- **Round-2 review, production-breaking set.** (1) A single request
+  could wedge task-comment federation mesh-wide: `deletedAt` is
+  excluded from the signed payload and the federation cursor is
+  `max(created_at, deleted_at)`, so a replayed signed comment with an
+  unbounded `deletedAt` jumped every puller's high-water mark to the
+  far future and hid all later comments. `parseTaskComment` (and the
+  web puller) now bound `deletedAt` to `≤ now + 24h` and `≥ createdAt`.
+  (2) The cross-node claims pull advanced its cursor only on APPLIED
+  rows, so under oldest-first paging a full page of non-applicable
+  claims stalled the cursor and newer claims were never fetched; it now
+  advances on every well-formed row like the other pullers. (3) Three
+  pages (`PostDetail`, `ProjectDetail`, `Profile`) called hooks after
+  an `if (!entity) return` early return, so any cold load / deep link
+  crashed the whole app when the entity hydrated a tick later; the
+  hooks now run unconditionally (Profile's authenticated body split
+  into a child that only mounts with a non-null member). A top-level
+  `ErrorBoundary` is added as defense-in-depth so a future render throw
+  shows a recovery card instead of a blank screen. (4) Data export had
+  drifted to a hand-maintained 5-table include-list, silently dropping
+  20 tables of the member's own data (projects, tasks, messages,
+  governance, events, trust) from their backup; it now enumerates
+  `db.tables` minus a documented exclusion set (adding live invite
+  tokens and the device-pairing log to the security/privacy exclusions).
+
 ### Added
 - **System-key rotation is now operable end-to-end.** The verifier
   side shipped previously, but `GET /config` hardcoded

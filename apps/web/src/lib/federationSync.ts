@@ -200,6 +200,19 @@ export async function pullFederatedClaims(): Promise<number> {
     )
       continue;
 
+    // Advance the cursor for EVERY well-formed row, whether or not it
+    // applies. Most claims legitimately don't apply on this device —
+    // the post is unknown here, or already past "open" (including the
+    // claimer's own post, which is already "claimed"). Advancing only
+    // on applied rows meant that once a page filled with
+    // non-applicable claims (server now serves oldest-first), the
+    // cursor never moved and newer claims were never fetched — a
+    // permanent stall. The claim record is immutable, so re-observing
+    // a row we've already processed is a harmless no-op.
+    if (maxClaimedAt === null || r.claimedAt > maxClaimedAt) {
+      maxClaimedAt = r.claimedAt;
+    }
+
     const post = await db.posts.get(r.postId as string);
     if (!post) continue;
     if (post.status !== "open") continue;
@@ -210,10 +223,6 @@ export async function pullFederatedClaims(): Promise<number> {
       claimedBy: r.claimerKey as string,
     });
     applied += 1;
-
-    if (maxClaimedAt === null || r.claimedAt > maxClaimedAt) {
-      maxClaimedAt = r.claimedAt;
-    }
   }
 
   if (maxClaimedAt !== null) {
@@ -279,6 +288,21 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
       skipped += 1;
       continue;
     }
+    const deletedAt = (r.deletedAt as number | null | undefined) ?? null;
+    // Bound deletedAt defensively — it is NOT signature-covered, and
+    // the cursor advances by max(createdAt, deletedAt), so an
+    // unbounded value from a malicious/compromised node would jump
+    // our high-water mark to the far future and hide every later
+    // comment. Mirrors the server's parseTaskComment bound. A day of
+    // clock slop matches the createdAt tolerance used elsewhere.
+    const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+    if (
+      deletedAt !== null &&
+      (deletedAt > oneDayFromNow || deletedAt < r.createdAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
     const comment: TaskComment = {
       id: r.id,
       projectId: r.projectId,
@@ -286,7 +310,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
       authorKey: r.authorKey,
       body: r.body,
       createdAt: r.createdAt,
-      deletedAt: (r.deletedAt as number | null | undefined) ?? null,
+      deletedAt,
       nodeId: r.nodeId,
       signature: r.signature,
     };

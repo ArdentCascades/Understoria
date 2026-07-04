@@ -898,6 +898,46 @@ describe("startPeerPullWorker — peer system-key lifecycle (§4)", () => {
     expect(store.has(relayedRow.id)).toBe(true);
   });
 
+  it("FAILS CLOSED when two peers claim the same nodeId with different keys (no shadowing forgery)", async () => {
+    // The real node_c and its honest key.
+    const systemC = generateKeyPair();
+    const honest = systemSigned(systemC, "node_c");
+    // A compromised peer B impersonates node_c with ITS OWN key and
+    // serves a forged "auto-confirmed by node_c" row. On first-match
+    // resolution B could shadow C depending on map order.
+    const systemB = generateKeyPair();
+    const forged = systemSigned(systemB, "node_c");
+
+    const fetchC = peerWithKey({
+      nodeId: "node_c",
+      systemPubkey: systemC.publicKey,
+      exchanges: [honest],
+    });
+    const fetchB = peerWithKey({
+      nodeId: "node_c", // <-- B lies about being node_c
+      systemPubkey: systemB.publicKey,
+      exchanges: [forged],
+    });
+    const routed: Fetcher = (url) =>
+      url.startsWith("https://c.example") ? fetchC(url) : fetchB(url);
+    const { worker, store } = makeWorker(routed, [
+      "https://b.example",
+      "https://c.example",
+    ]);
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    // Ambiguous nodeId → resolver returns null → BOTH rows rejected.
+    // The forgery is never accepted; the honest row is collateral
+    // (a detectable denial the operator resolves by removing the
+    // impostor peer), never a silent shadow.
+    const inserted = results
+      .filter((r) => r.kind === "exchange")
+      .reduce((n, r) => n + r.insertedCount, 0);
+    expect(inserted).toBe(0);
+    expect(store.has(forged.id)).toBe(false);
+    expect(store.has(honest.id)).toBe(false);
+  });
+
   it("SKIPS the exchange pull (no cursor movement) while /config has never been reachable, then converges once it recovers", async () => {
     const systemKp = generateKeyPair();
     const row = systemSigned(systemKp, "node_b");

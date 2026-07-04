@@ -22,6 +22,7 @@ import type {
 import type { Exchange } from "@/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import {
+  pullFederatedClaims,
   pullFederatedCoOrgInvitations,
   pullFederatedCoOrgResponses,
   pullFederatedCoOrgRevocations,
@@ -344,6 +345,77 @@ describe("pullFederatedPosts", () => {
     expect(await pullFederatedPosts()).toEqual({ inserted: 1, skipped: 0 });
     expect(await pullFederatedPosts()).toEqual({ inserted: 0, skipped: 1 });
     expect(await db.posts.where("id").equals("post_dup").count()).toBe(1);
+  });
+});
+
+describe("pullFederatedClaims — cursor advances on every row", () => {
+  beforeEach(async () => {
+    await Promise.all([
+      db.posts.clear(),
+      db.settings.clear(),
+    ]);
+    await setSetting(SETTING_KEYS.communityNodeEnabled, "1");
+    await setSetting(SETTING_KEYS.communityNodeUrl, "http://node.test");
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  function stubClaims(pages: Array<Array<Record<string, unknown>>>) {
+    let call = 0;
+    const spy = vi.fn().mockImplementation(() => {
+      const claims = pages[Math.min(call, pages.length - 1)];
+      call += 1;
+      return Promise.resolve({ ok: true, json: async () => ({ claims }) });
+    });
+    vi.stubGlobal("fetch", spy);
+    return spy;
+  }
+
+  it("advances the cursor past a full page of NON-applicable claims so newer claims are reached", async () => {
+    // No local posts → none of these claims apply. Under the previous
+    // advance-only-on-applied logic, the cursor never moved and the
+    // newer claim (page 2) was never fetched — a permanent stall.
+    const stale = Array.from({ length: 3 }, (_, i) => ({
+      postId: `absent_${i}`,
+      claimerKey: "claimer",
+      claimedAt: 1000 + i,
+    }));
+    // A local open post whose claim arrives only on the SECOND pull.
+    await db.posts.put({
+      id: "mine",
+      type: "NEED",
+      category: "other",
+      title: "t",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low",
+      postedBy: "poster",
+      claimedBy: null,
+      status: "open",
+      createdAt: 0,
+      expiresAt: null,
+      locationZone: "",
+      confirmedBy: [],
+      nodeId: "n",
+      signature: "",
+    });
+    const fresh = { postId: "mine", claimerKey: "helper", claimedAt: 2000 };
+
+    const spy = stubClaims([stale, [fresh]]);
+
+    // Pull 1: 3 non-applicable claims. Cursor MUST advance to 1002.
+    const first = await pullFederatedClaims();
+    expect(first).toBe(0); // nothing applied
+    expect(await getSetting("federationLastClaimPull")).toBe("1002");
+
+    // Pull 2 uses since=1002 and reaches the fresh claim.
+    const second = await pullFederatedClaims();
+    expect(second).toBe(1);
+    expect((await db.posts.get("mine"))!.status).toBe("claimed");
+
+    // The second request carried the advanced cursor, proving pull 1
+    // didn't stall.
+    const secondUrl = spy.mock.calls[1][0] as string;
+    expect(secondUrl).toContain("since=1002");
   });
 });
 

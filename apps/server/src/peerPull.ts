@@ -924,22 +924,49 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   // outside the mesh resolves to null and the row is rejected — the
   // §4 posture: what this node cannot verify, it does not relay.
   //
+  // FAIL CLOSED on nodeId conflict. Nothing binds a peer URL to the
+  // nodeId it self-reports, so a compromised peer B could serve
+  // `GET /config` claiming `nodeId: node_c` with B's OWN key and, on
+  // first-match iteration, shadow the real node_c — letting B forge
+  // exchanges "auto-confirmed by C". A node's key legitimately comes
+  // only from the ONE peer that IS that node (the full-mesh
+  // requirement in docs/federated-key-discovery.md), so two distinct
+  // peers declaring the same nodeId is either an impersonation attempt
+  // or a duplicate-URL misconfiguration. Either way we refuse to
+  // resolve it — records for that nodeId are rejected until the
+  // operator resolves the conflict. That downgrades a would-be forgery
+  // to a detectable denial, never an accepted fake.
+  //
   // `signedAt` selects across the node's rotation trail (§4): the
   // key current at signing time is the first history entry retired
-  // AFTER that moment, else `current`. Past records therefore stay
-  // verifiable after a rotation, while a record claiming a retired
-  // key for a post-retirement timestamp resolves to the newer key
-  // and fails verification — the point of retiring a compromised
-  // key.
+  // AFTER that moment, else `current`.
+  //
+  // LIMITATION (not closed here): rotation contains a key compromise
+  // only for records the mesh has not already accepted. A leaked
+  // RETIRED key can still sign a BACKDATED record (autoConfirmedAt <
+  // retiredAt) that this resolver honors, because the attacker
+  // controls both the key and the self-declared timestamp — signing
+  // the timestamp would not help. Closing it requires receive-time
+  // retirement enforcement (reject first-seen retired-key records
+  // after a retirement is published), which needs per-record
+  // receivedAt tracking the exchange store does not yet keep. See
+  // docs/auto-confirm-key.md §4 and docs/system-key-rotation.md §6.
   function resolveSystemPubkey(nodeId: string, signedAt: number): string | null {
+    let match: { current: string; history: { pubkey: string; retiredAt: number }[] } | null =
+      null;
     for (const entry of systemKeys.values()) {
       if (entry === null || entry.nodeId !== nodeId) continue;
-      for (const h of entry.history) {
-        if (h.retiredAt > signedAt) return h.pubkey;
+      if (match !== null && entry.current !== match.current) {
+        // Two peers claim this nodeId with different keys — ambiguous.
+        return null;
       }
-      return entry.current;
+      if (match === null) match = { current: entry.current, history: entry.history };
     }
-    return null;
+    if (match === null) return null;
+    for (const h of match.history) {
+      if (h.retiredAt > signedAt) return h.pubkey;
+    }
+    return match.current;
   }
 
   async function runPull(

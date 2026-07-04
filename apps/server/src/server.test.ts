@@ -754,6 +754,36 @@ describe("POST /task-comments", () => {
     expect(res.statusCode).toBe(400);
   });
 
+  it("rejects a far-future deletedAt (cursor-poisoning guard)", async () => {
+    // deletedAt is NOT in the signed payload, and the federation
+    // cursor is max(created_at, deleted_at). An unbounded deletedAt
+    // would jump every puller's high-water mark to the far future and
+    // hide all subsequent comments mesh-wide. The row's signature is
+    // valid; parseTaskComment must reject it on the bound.
+    const c = makeSignedTaskComment();
+    const poison: TaskComment = {
+      ...c,
+      deletedAt: Number.MAX_SAFE_INTEGER,
+    };
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: poison,
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("rejects a deletedAt that precedes createdAt", async () => {
+    const c = makeSignedTaskComment({ createdAt: 1_000_000 });
+    const backwards: TaskComment = { ...c, deletedAt: 500_000 };
+    const res = await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: backwards,
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
   it("applies a tombstone on second submission with deletedAt set", async () => {
     // Author signs the immutable subset, then re-posts the same row
     // later with deletedAt populated. The signature still verifies

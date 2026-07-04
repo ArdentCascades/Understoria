@@ -13,8 +13,12 @@ import { db } from "@/db/database";
 
 /**
  * Tables that are deliberately excluded from the data export bundle.
- * Exported as a const so tests can assert the exclusion list without
- * inspecting the assembled payload by table name.
+ * Everything NOT on this list is exported — the bundle is derived from
+ * `db.tables` (see `buildExportBundle`), so a newly-added table is
+ * included by default rather than silently dropped. This inverts the
+ * previous hand-maintained include-list, which had drifted to 5 of the
+ * ~28 tables and silently omitted the member's projects, tasks,
+ * messages, events, governance, and trust data from their own backup.
  *
  *   - `secretKeys` — private keys never leave the device via export.
  *     Key backup / recovery is a separate passphrase-wrapped flow
@@ -26,36 +30,51 @@ import { db } from "@/db/database";
  *     surface §11.1 rejected federation to avoid. Settled — block state
  *     rides the device-pairing transfer envelope (see
  *     `lib/devicePairing.ts`), never the export bundle.
+ *   - `invites` — rows carry the `encoded` field, a LIVE redeemable
+ *     invite credential. A backup file the member may share must not
+ *     hand out working invite links; issued-invite state is
+ *     reconstructable on a paired device via the pairing envelope.
+ *   - `pairingLog` — the "which devices I have authorized" history is
+ *     device-graph metadata in the same personal-relief class as
+ *     blocks; it does not belong in a shareable file.
  */
 export const EXPORT_EXCLUDED_TABLES = [
   "secretKeys",
   "blocks",
   "previouslyBlocked",
+  "invites",
+  "pairingLog",
 ] as const;
 
 /**
  * Build the in-memory export bundle without serialising or triggering a
  * download. Split out from `exportData` so tests can assert the shape
- * (specifically the exclusion list above) without faking a DOM.
+ * without faking a DOM.
+ *
+ * Completeness is enforced by enumerating `db.tables` and subtracting
+ * the exclusion list — the same drift-proof pattern `hardPurge` uses —
+ * so this can never again quietly lose a table's worth of the member's
+ * data.
  */
 export async function buildExportBundle(): Promise<{
   exportedAt: string;
   schemaVersion: number;
   data: Record<string, unknown>;
 }> {
-  const [members, posts, exchanges, achievements, settings] = await Promise.all(
-    [
-      db.members.toArray(),
-      db.posts.toArray(),
-      db.exchanges.toArray(),
-      db.achievements.toArray(),
-      db.settings.toArray(),
-    ],
-  );
+  const excluded = new Set<string>(EXPORT_EXCLUDED_TABLES);
+  const tables = db.tables.filter((t) => !excluded.has(t.name));
+  const arrays = await Promise.all(tables.map((t) => t.toArray()));
+  const data: Record<string, unknown> = {};
+  tables.forEach((t, i) => {
+    data[t.name] = arrays[i];
+  });
   return {
     exportedAt: new Date().toISOString(),
-    schemaVersion: 1,
-    data: { members, posts, exchanges, achievements, settings },
+    // Bumped from 1: the bundle now spans the member's full local
+    // dataset (minus the documented exclusions), not the prior
+    // 5-table subset.
+    schemaVersion: 2,
+    data,
   };
 }
 
