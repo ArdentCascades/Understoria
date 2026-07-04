@@ -930,6 +930,84 @@ describe("startPeerPullWorker — peer system-key lifecycle (§4)", () => {
     expect(store.has(row.id)).toBe(true);
   });
 
+  it("rotation: history-published keys verify old records; a retired key cannot sign new ones", async () => {
+    const T_ROTATE = 1_700_000_000_000;
+    const oldKp = generateKeyPair();
+    const newKp = generateKeyPair();
+
+    const signedWith = (
+      kp: { secretKey: string },
+      signedAt: number,
+    ): Exchange => {
+      const helper = generateKeyPair();
+      const helped = generateKeyPair();
+      const base = {
+        id: `x_${signedAt}_${Math.random().toString(36).slice(2)}`,
+        postId: "p_rotate",
+        helperKey: helper.publicKey,
+        helpedKey: helped.publicKey,
+        hoursExchanged: 1,
+        category: "other" as const,
+        completedAt: signedAt,
+        nodeId: "node_b",
+      };
+      const payload = canonicalExchangePayload({
+        postId: base.postId,
+        helperKey: base.helperKey,
+        helpedKey: base.helpedKey,
+        hours: base.hoursExchanged,
+        category: base.category,
+        completedAt: base.completedAt,
+      });
+      return {
+        ...base,
+        helperSignature: sign(payload, helper.secretKey),
+        helpedSignature: sign(payload, kp.secretKey),
+        autoConfirmed: true,
+        autoConfirmedBy: "system:node_b",
+        autoConfirmedAt: signedAt,
+      };
+    };
+
+    const preRotation = signedWith(oldKp, T_ROTATE - 60_000);
+    const staleKeyAfterRotation = signedWith(oldKp, T_ROTATE + 60_000);
+    const postRotation = signedWith(newKp, T_ROTATE + 60_000);
+
+    const rest = exchangeOnly(() =>
+      jsonResponse({
+        count: 3,
+        exchanges: [preRotation, staleKeyAfterRotation, postRotation],
+      }),
+    );
+    const fetcher: Fetcher = (url) => {
+      if (/\/config\b/.test(url)) {
+        return jsonResponse({
+          nodeId: "node_b",
+          systemKey: {
+            current: newKp.publicKey,
+            history: [{ pubkey: oldKp.publicKey, retiredAt: T_ROTATE }],
+          },
+        });
+      }
+      return rest(url);
+    };
+    const { worker, store } = makeWorker(fetcher, ["https://b.example"]);
+    const results = await worker.pullAllOnce();
+    worker.stop();
+
+    const exchangeResult = results.find((r) => r.kind === "exchange");
+    // The pre-rotation record verifies against the RETIRED key (past
+    // records stay valid forever, §4 rotation contract); the post-
+    // rotation record verifies against the live key; a record that
+    // claims the retired key for a post-retirement timestamp is
+    // rejected — retiring a compromised key must actually disarm it.
+    expect(exchangeResult?.insertedCount).toBe(2);
+    expect(exchangeResult?.rejectedCount).toBe(1);
+    expect(store.has(preRotation.id)).toBe(true);
+    expect(store.has(postRotation.id)).toBe(true);
+    expect(store.has(staleKeyAfterRotation.id)).toBe(false);
+  });
+
   it("falls back to the last-known-good key on a transient config failure", async () => {
     const systemKp = generateKeyPair();
     const row = systemSigned(systemKp, "node_b");

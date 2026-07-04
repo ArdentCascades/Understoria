@@ -164,11 +164,22 @@ export function verifyExchange(exchange: Exchange): boolean {
  * - `"invalid"` — anything else (signatures don't verify, fields
  *   contradict each other, system pubkey unavailable).
  *
- * The caller supplies a `resolveSystemPubkey(nodeId)` function so this
- * remains a pure crypto helper — the shared package does not fetch
- * `GET /config`. Pass `null` from the resolver to indicate "no key
- * known for this node," which produces `"invalid"`: a peer that
- * cannot verify the system signature MUST NOT label it as authentic.
+ * The caller supplies a `resolveSystemPubkey(nodeId, signedAt)`
+ * function so this remains a pure crypto helper — the shared package
+ * does not fetch `GET /config`. Pass `null` from the resolver to
+ * indicate "no key known for this node," which produces `"invalid"`:
+ * a peer that cannot verify the system signature MUST NOT label it
+ * as authentic.
+ *
+ * `signedAt` is the §4 rotation hook: the record's `autoConfirmedAt`
+ * (falling back to `completedAt` for rows predating that field) —
+ * the moment the system key produced the helped-side signature. A
+ * rotation-aware resolver selects the pubkey that was CURRENT at
+ * that moment from the node's published `systemKey.history`, so past
+ * records stay verifiable after a rotation while a record claiming a
+ * retired key for a post-retirement timestamp resolves to the newer
+ * key and fails — which is the point of retiring a compromised key.
+ * Resolvers that predate rotation support may ignore the argument.
  *
  * This is the §4 testable property the implementation PR ships with;
  * the labels are intentionally distinct strings so a downstream
@@ -178,7 +189,7 @@ export type ExchangeLabel = "member-signed" | "system-signed" | "invalid";
 
 export function verifyExchangeLabel(
   exchange: Exchange,
-  resolveSystemPubkey: (nodeId: string) => string | null,
+  resolveSystemPubkey: (nodeId: string, signedAt: number) => string | null,
 ): ExchangeLabel {
   const payload = canonicalExchangePayload({
     postId: exchange.postId,
@@ -205,7 +216,10 @@ export function verifyExchangeLabel(
     }
     const expectedNodeId = exchange.autoConfirmedBy.slice("system:".length);
     if (expectedNodeId.length === 0) return "invalid";
-    const pubkey = resolveSystemPubkey(expectedNodeId);
+    const pubkey = resolveSystemPubkey(
+      expectedNodeId,
+      exchange.autoConfirmedAt ?? exchange.completedAt,
+    );
     if (pubkey === null) return "invalid";
     // The system key MUST NOT be a member's key. The label
     // distinction is only meaningful if the helped-side identity is

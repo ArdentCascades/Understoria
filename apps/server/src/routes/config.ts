@@ -49,12 +49,15 @@ export interface PublicConfigResponse {
    * rotation trail. Omitted when the operator hasn't supplied
    * `NODE_SYSTEM_SECRET_KEY`. See `docs/auto-confirm-key.md` §4.
    *
-   * Rotation note: `history` is always `[]` in PR-A. Rotating the
-   * key requires a deploy-time procedure (regenerate, archive the
-   * old pubkey into a static history list, restart) that is
-   * documented separately and intentionally out of scope for code
-   * in this PR. A future agent that wires rotation into the
-   * operator UI will fill this array.
+   * Rotation note: `history` is always `[]` today — rotating the
+   * key is a deploy-time procedure (regenerate, archive the old
+   * pubkey into a static history list, restart) that no operator UI
+   * wires yet. The VERIFIER side is already live, though: the peer
+   * pull worker consumes this array and selects the key that was
+   * current at each record's `autoConfirmedAt`, so once an operator
+   * populates the history, past records verify against the retired
+   * key and post-retirement claims of it fail. Publish the trail
+   * here and rotation Just Works for pulling peers.
    */
   systemKey?: {
     current: string;

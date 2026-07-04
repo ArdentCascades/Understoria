@@ -302,6 +302,59 @@ describe("contract 2: verifier distinguishability (§4)", () => {
       generateKeyPair().publicKey; // unrelated pubkey
     expect(verifyExchangeLabel(lying, resolve)).toBe("invalid");
   });
+
+  it("rotation: the resolver receives the record's signing time and selects across the key history (§4)", () => {
+    // Operator rotates the system key at T_ROTATE. A record signed by
+    // the OLD key before rotation must stay verifiable forever; a
+    // record claiming the old key AFTER its retirement must fail —
+    // that's the point of retiring a (possibly compromised) key.
+    const T_ROTATE = 1_700_000_000_000;
+    const oldKp = generateKeyPair();
+    const newKp = generateKeyPair();
+    const oldSigner = createSystemSignerFromSecret(oldKp.secretKey)!;
+
+    const buildAutoConfirmed = (signedAt: number): Exchange => {
+      const helper = generateKeyPair();
+      const helped = generateKeyPair();
+      const base = {
+        postId: "post_rotate",
+        helperKey: helper.publicKey,
+        helpedKey: helped.publicKey,
+        hours: 1,
+        category: "transport" as const,
+        completedAt: signedAt,
+      };
+      const canonical = canonicalExchangePayload(base);
+      return {
+        id: `ex_${signedAt}`,
+        postId: base.postId,
+        helperKey: base.helperKey,
+        helpedKey: base.helpedKey,
+        hoursExchanged: base.hours,
+        helperSignature: sign(canonical, helper.secretKey),
+        helpedSignature: oldSigner.signPayload(canonical),
+        completedAt: base.completedAt,
+        category: base.category,
+        nodeId: NODE_ID,
+        autoConfirmed: true,
+        autoConfirmedBy: `system:${NODE_ID}`,
+        autoConfirmedAt: signedAt,
+      };
+    };
+
+    // §4's "minimal scheme": history entry {pubkey, retiredAt}; the
+    // key current at `signedAt` is the first entry retired after it,
+    // else the live key.
+    const resolve = (nodeId: string, signedAt: number): string | null => {
+      if (nodeId !== NODE_ID) return null;
+      return signedAt < T_ROTATE ? oldKp.publicKey : newKp.publicKey;
+    };
+
+    const before = buildAutoConfirmed(T_ROTATE - 1_000);
+    const after = buildAutoConfirmed(T_ROTATE + 1_000);
+    expect(verifyExchangeLabel(before, resolve)).toBe("system-signed");
+    expect(verifyExchangeLabel(after, resolve)).toBe("invalid");
+  });
 });
 
 describe("autoConfirmProjectTaskCompletion is identical to autoConfirmExchange (single signer surface)", () => {
