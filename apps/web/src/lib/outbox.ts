@@ -249,19 +249,49 @@ async function enqueueOutbox(
     if (!urlRow?.value?.trim()) return null;
   }
 
-  // Dedup: if a row with this recordId is already in the outbox,
-  // leave it alone. Re-enqueuing would clobber retry state.
+  const serialized = JSON.stringify(payload);
   const existing = await db.outbox
     .where("recordId")
     .equals(recordId)
-    .first();
-  if (existing) return existing;
+    .toArray();
+
+  // Dedup on (recordId, payload bytes) — NOT on recordId alone. The
+  // same record can legitimately need a second delivery with new
+  // mutable state: a task-comment tombstone re-enqueues the original
+  // comment id with `deletedAt` set. Keying dedup on recordId alone
+  // silently dropped that tombstone whenever the original insert's
+  // row was still in the table (delivered rows are never pruned), so
+  // peers kept rendering a comment the author deleted.
+  const identical = existing.find((row) => row.payload === serialized);
+  if (identical) {
+    // True duplicate — leave it alone. Re-enqueuing would clobber
+    // retry state (pending), re-send a payload the node already has
+    // (delivered), or re-poison (poisoned).
+    return identical;
+  }
 
   const now = Date.now();
+
+  // Same record, new payload, and the old payload hasn't shipped yet:
+  // replace it in place. The newest state is the one that must ship,
+  // and the server's merge rules (e.g. tombstone-wins) don't need the
+  // intermediate version. Retry count carries over; the next attempt
+  // is pulled forward so the update isn't stuck behind a long backoff.
+  const pending = existing.find((row) => row.status === "pending");
+  if (pending) {
+    const changes = {
+      kind,
+      payload: serialized,
+      nextAttemptAt: now,
+    } as const;
+    await db.outbox.update(pending.id, changes);
+    return { ...pending, ...changes };
+  }
+
   const row: OutboxRow = {
     id: uuid(),
     kind,
-    payload: JSON.stringify(payload),
+    payload: serialized,
     recordId,
     createdAt: now,
     attempts: 0,

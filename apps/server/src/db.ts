@@ -977,17 +977,27 @@ export function createTaskCommentStore(db: DatabaseType): TaskCommentStore {
       const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
       // Oldest-first + inclusive cursor — see the exchanges store's
       // list() for the pagination-correctness rationale.
+      //
+      // A task comment's effective cursor position is
+      // max(created_at, deleted_at): a tombstone applied AFTER a
+      // puller's cursor passed the row's created_at must re-enter the
+      // window, or soft deletes never converge for peers that already
+      // pulled the live row. Pullers advance their cursor by the same
+      // max, and dedup/merge by id.
       const rows = since
         ? db
             .prepare(
-              `SELECT * FROM task_comments WHERE created_at >= ?
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
+              `SELECT * FROM task_comments
+               WHERE MAX(created_at, COALESCE(deleted_at, 0)) >= ?
+               ORDER BY MAX(created_at, COALESCE(deleted_at, 0)) ASC, id ASC
+               LIMIT ?`,
             )
             .all(since, safeLimit)
         : db
             .prepare(
               `SELECT * FROM task_comments
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
+               ORDER BY MAX(created_at, COALESCE(deleted_at, 0)) ASC, id ASC
+               LIMIT ?`,
             )
             .all(safeLimit);
       return (rows as TaskCommentRowSqlite[]).map(rowToTaskComment);

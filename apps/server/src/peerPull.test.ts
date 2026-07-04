@@ -18,6 +18,7 @@ import {
   canonicalEventPayload,
   canonicalExchangePayload,
   canonicalPostPayload,
+  canonicalTaskCommentPayload,
   canonicalVouchPayload,
   generateKeyPair,
   sign,
@@ -28,6 +29,7 @@ import type {
   CoOrganizerInvitationRevocation,
   Exchange,
   SignedVouch,
+  TaskComment,
 } from "@understoria/shared/types";
 import type { Database as DatabaseType } from "better-sqlite3";
 import {
@@ -52,6 +54,7 @@ import {
   pullEventsFromPeer,
   pullFromPeer,
   pullPostsFromPeer,
+  pullTaskCommentsFromPeer,
   pullVouchesFromPeer,
   startPeerPullWorker,
   type Fetcher,
@@ -396,6 +399,62 @@ describe("pullFromPeer — cursor pagination over a multi-page backlog", () => {
     } finally {
       peerDb.close();
     }
+  });
+});
+
+describe("pullTaskCommentsFromPeer — tombstone convergence", () => {
+  function makeSignedTaskComment(overrides: {
+    id: string;
+    createdAt: number;
+    deletedAt?: number | null;
+  }): TaskComment {
+    const author = generateKeyPair();
+    const immutable = {
+      id: overrides.id,
+      projectId: "proj_x",
+      taskId: "task_x",
+      authorKey: author.publicKey,
+      body: "hello",
+      createdAt: overrides.createdAt,
+      nodeId: "node_peer",
+    };
+    return {
+      ...immutable,
+      deletedAt: overrides.deletedAt ?? null,
+      signature: sign(
+        canonicalTaskCommentPayload(immutable),
+        author.secretKey,
+      ),
+    };
+  }
+
+  it("applies a late tombstone and advances the cursor by deletedAt", async () => {
+    const store = createTaskCommentStore(db);
+    const live = makeSignedTaskComment({ id: "tc_late", createdAt: 1_000 });
+
+    // Pull 1: the live comment arrives; cursor lands on createdAt.
+    const first = await pullTaskCommentsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher: () => jsonResponse({ count: 1, taskComments: [live] }),
+      store,
+    });
+    expect(first.insertedCount).toBe(1);
+    expect(first.latestCompletedAt).toBe(1_000);
+
+    // Pull 2, cursor past createdAt: the author has since deleted.
+    // The tombstoned row must be applied (not counted duplicate) and
+    // the cursor must advance by deletedAt, not stay at createdAt.
+    const tombstoned = { ...live, deletedAt: 9_000 };
+    const second = await pullTaskCommentsFromPeer({
+      peerUrl: "https://peer.example",
+      since: first.latestCompletedAt,
+      fetcher: () => jsonResponse({ count: 1, taskComments: [tombstoned] }),
+      store,
+    });
+    expect(second.insertedCount).toBe(1);
+    expect(second.latestCompletedAt).toBe(9_000);
+    expect(store.deletedAt("tc_late")).toBe(9_000);
   });
 });
 

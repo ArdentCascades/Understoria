@@ -295,9 +295,17 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
       continue;
     }
 
+    // Effective cursor position is max(createdAt, deletedAt): the
+    // node windows and orders /task-comments by that value so late
+    // tombstones re-enter the pull window. Advancing by createdAt
+    // alone would jump the cursor past a tombstone in the same page.
+    const effectiveCursorAt = Math.max(
+      comment.createdAt,
+      comment.deletedAt ?? 0,
+    );
     const advanceCursor = () => {
-      if (maxCreatedAt === null || comment.createdAt > maxCreatedAt) {
-        maxCreatedAt = comment.createdAt;
+      if (maxCreatedAt === null || effectiveCursorAt > maxCreatedAt) {
+        maxCreatedAt = effectiveCursorAt;
       }
     };
 

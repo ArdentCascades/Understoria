@@ -707,6 +707,39 @@ describe("GET /task-comments", () => {
       (since.json().taskComments as TaskComment[])[0].id,
     ).toBe(later.id);
   });
+
+  it("a late tombstone re-enters the since window (effective cursor = max(createdAt, deletedAt))", async () => {
+    const comment = makeSignedTaskComment({ createdAt: 1_000 });
+    await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: comment,
+    });
+
+    // A puller whose cursor is already past createdAt sees nothing…
+    const before = await app.inject({
+      method: "GET",
+      url: "/task-comments?since=5000",
+    });
+    expect(before.json().count).toBe(0);
+
+    // …then the author soft-deletes. The tombstoned row must be
+    // served in the deletedAt window, or peers that already pulled
+    // the live row keep rendering a comment the author deleted.
+    await app.inject({
+      method: "POST",
+      url: "/task-comments",
+      payload: { ...comment, deletedAt: 9_000 },
+    });
+    const after = await app.inject({
+      method: "GET",
+      url: "/task-comments?since=5000",
+    });
+    expect(after.json().count).toBe(1);
+    const served = (after.json().taskComments as TaskComment[])[0];
+    expect(served.id).toBe(comment.id);
+    expect(served.deletedAt).toBe(9_000);
+  });
 });
 
 function makeSignedCoOrgInvitation(

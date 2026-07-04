@@ -324,9 +324,18 @@ export async function pullTaskCommentsFromPeer(opts: {
       rejectedCount += 1;
       continue;
     }
+    // A comment's effective cursor position is max(createdAt,
+    // deletedAt) — the peer's GET /task-comments windows and orders
+    // rows by that value so late tombstones re-enter the window.
+    // Advancing by createdAt alone would jump the cursor past a
+    // tombstone served later in the same page.
+    const effectiveCursorAt = Math.max(
+      comment.createdAt,
+      comment.deletedAt ?? 0,
+    );
     const advanceCursor = () => {
-      if (latestCreatedAt === null || comment.createdAt > latestCreatedAt) {
-        latestCreatedAt = comment.createdAt;
+      if (latestCreatedAt === null || effectiveCursorAt > latestCreatedAt) {
+        latestCreatedAt = effectiveCursorAt;
       }
     };
     if (store.has(comment.id)) {
