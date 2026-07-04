@@ -260,6 +260,11 @@ tension and can land first; until the ruling, the implicit vouch
 behaves as today (counts) and the only visible change is the honest
 `redeemed_despite_revocation` label converging across devices.
 
+> **Ruling drafted for ratification:** the modified-consensus proposal
+> that settles this question (recommending "yes") is written up at
+> [`docs/proposals/invite-revocation-phase-2-vouch-withdrawal.md`](./proposals/invite-revocation-phase-2-vouch-withdrawal.md).
+> Phase 2 (§10.2) ships only after that proposal is adopted.
+
 ## §10 Phased rollout
 
 1. **Record + convergence** (no trust change): the `InviteRevocation`
@@ -269,7 +274,8 @@ behaves as today (counts) and the only visible change is the honest
    same honest state. Ships behind no ruling.
 2. **Trust withdrawal** (§9 ruling): the `vouchersFor` filter that
    drops the implicit vouch for `redeemed_despite_revocation`. Ships
-   after modified-consensus ratification.
+   after modified-consensus ratification of
+   [`docs/proposals/invite-revocation-phase-2-vouch-withdrawal.md`](./proposals/invite-revocation-phase-2-vouch-withdrawal.md).
 
 ## §11 Threat-model / roadmap hooks
 
