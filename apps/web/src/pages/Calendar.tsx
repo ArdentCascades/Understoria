@@ -567,13 +567,15 @@ export default function CalendarPage() {
       )}
 
       {/* "+" FAB linking to /events/new. Matches the Board FAB's
-          bottom-20 anchor + pb-36 page clearance discipline from
+          anchor (5rem + the safe-area inset, so the home-indicator
+          band that also heightens the BottomNav can't swallow the
+          pill's bottom edge) + pb-36 page clearance discipline from
           PR #181 so the last calendar cell never tucks under the
           floating button. Hidden while the on-screen keyboard is up —
           the fixed anchor would float detached mid-screen (see
           useVirtualKeyboard.ts). */}
       {!keyboardOpen && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4">
           <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
             <Link
               to="/events/new"
