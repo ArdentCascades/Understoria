@@ -713,6 +713,24 @@ describe("buildCalendar — event", () => {
     expect(result).toHaveLength(0);
   });
 
+  it("does NOT filter an event whose cancellation was forged by a non-organizer (Round-4 authority binding)", () => {
+    const ev = event({ id: "ev_forge", startsAt: NOW + 2 * DAY });
+    const forged: EventCancellation = {
+      ...cancellation("ev_forge"),
+      createdBy: "attacker", // not the event's "organizer"
+    };
+    const result = buildCalendar({
+      projects: [],
+      posts: [],
+      exchanges: [],
+      events: [ev],
+      eventCancellations: [forged],
+      ...defaultWindow(),
+    });
+    // The forged cancellation is inert — the event still renders.
+    expect(result.filter((e) => e.kind === "event")).toHaveLength(1);
+  });
+
   it("produces one entry per event when multiple share a day", () => {
     const day = NOW + 5 * DAY;
     const result = buildCalendar({

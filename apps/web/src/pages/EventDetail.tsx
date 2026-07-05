@@ -24,6 +24,7 @@ import {
 } from "@/db/events";
 import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { getSecretKey } from "@/db/secrets";
+import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { humanizeError } from "@/lib/humanizeError";
 import { shortKey } from "@/lib/format";
 import { eventCategoryMeta } from "@/lib/categories";
@@ -140,7 +141,10 @@ export default function EventDetailPage() {
   }
 
   const isOrganizer = memberKey === event.createdBy;
-  const isCancelled = !!cancellation;
+  // A cancellation only counts if the organizer signed it — a
+  // non-organizer's forged cancellation must not mark the event
+  // cancelled (Round-4 review; lib/eventCancellation.ts).
+  const isCancelled = isAuthoritativeCancellation(cancellation, event);
   const organizerName = memberMap.get(event.createdBy) ?? null;
   // Only render the project back-link when BOTH the link row and the
   // project it points at exist locally. (The project always exists on

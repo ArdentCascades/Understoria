@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Security
+- **Only an event's organizer can cancel it (Round-4 review).** An
+  `EventCancellation` is signed, but its signature proves only that
+  *whoever* `createdBy` names signed it — not that they organize the
+  event. Nothing re-checked `createdBy === event.createdBy`, so anyone
+  could sign a cancellation over a victim's `eventId` with their own
+  key and make the gathering vanish from every calendar, the detail
+  page, "Coming up", and every RSVP'er's notifications. Every client
+  surface that renders cancellation state now re-asserts organizer
+  authority via a shared `isAuthoritativeCancellation` helper (a
+  non-organizer's cancellation is inert), the client federation pull
+  drops a mismatched cancellation when it already holds the event, and
+  the server peer-pull applies the same organizer check the POST route
+  already had — so a forged cancellation can't be laundered node to
+  node either.
+
 - **Auto-confirm can no longer mint credit against an arbitrary victim
   (Round-4 review).** `POST /auto-confirm` was unauthenticated and took
   the confirmation's `helpedKey`, `hours`, `category`, and pending-age

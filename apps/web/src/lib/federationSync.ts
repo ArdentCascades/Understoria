@@ -996,6 +996,25 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
       continue;
     }
 
+    // Authority binding (Round-4 review): when we already hold the
+    // event, only its organizer may cancel it. Drop a non-organizer's
+    // forged cancellation rather than store it. When the event hasn't
+    // federated here yet we still store (accept-and-reconcile), but the
+    // render-time guard (lib/eventCancellation.ts) keeps that row inert
+    // until an event proves authority — so a forgery can never act.
+    const localEvent = await db.events.get(record.eventId);
+    if (localEvent && localEvent.createdBy !== record.createdBy) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped event cancellation whose createdBy does not match the local event's organizer",
+          { eventId: record.eventId },
+        );
+      }
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
     await db.eventCancellations.put(record);
     inserted += 1;
     advanceCursor();

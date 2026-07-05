@@ -638,9 +638,12 @@ export async function pullEventCancellationsFromPeer(opts: {
   since: number | null;
   fetcher: Fetcher;
   store: EventCancellationStore;
+  /** Consulted for the organizer-authority check — a cancellation may
+   *  only come from the event's `createdBy` (Round-4 review). */
+  eventStore: EventStore;
   maxRows?: number;
 }): Promise<PullResult> {
-  const { peerUrl, since, fetcher, store } = opts;
+  const { peerUrl, since, fetcher, store, eventStore } = opts;
   const maxRows = opts.maxRows ?? 500;
 
   const url = buildUrl(peerUrl, "event-cancellations", since, maxRows);
@@ -664,6 +667,17 @@ export async function pullEventCancellationsFromPeer(opts: {
     }
     const record = parsed.value;
     if (!verifyEventCancellation(record)) {
+      rejectedCount += 1;
+      continue;
+    }
+    // Organizer-authority check (Round-4 review), same posture as the
+    // POST /event-cancellations route: when we hold the event, only its
+    // organizer may cancel it — reject a non-organizer's forged
+    // cancellation rather than laundering it onward. When the event
+    // isn't local yet we accept-and-reconcile (the render layer stays
+    // authority-bound), matching the route's documented behavior.
+    const localEvent = eventStore.get(record.eventId);
+    if (localEvent !== null && localEvent.createdBy !== record.createdBy) {
       rejectedCount += 1;
       continue;
     }
@@ -1083,6 +1097,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
           since,
           fetcher,
           store: eventCancellationStore,
+          eventStore,
         });
     }
   }

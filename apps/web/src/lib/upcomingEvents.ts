@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { Event, EventCancellation, EventRsvpRow } from "@/types";
+import { authoritativeCancelledEventIds } from "./eventCancellation";
 
 // "Coming up" — the next few community events, for a quiet Dashboard
 // glance that helps fun gatherings find people who weren't already
@@ -43,8 +44,12 @@ export function selectUpcomingGatherings(
   input: UpcomingGatheringsInput,
 ): UpcomingGathering[] {
   const limit = input.limit ?? 4;
-  const cancelled = new Set<string>();
-  for (const c of input.eventCancellations ?? []) cancelled.add(c.eventId);
+  // Only organizer-authored cancellations hide an event (Round-4
+  // review; lib/eventCancellation.ts).
+  const cancelled = authoritativeCancelledEventIds(
+    input.events,
+    input.eventCancellations ?? [],
+  );
 
   const going = new Set<string>();
   if (input.currentMemberKey) {
