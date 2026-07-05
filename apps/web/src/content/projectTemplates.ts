@@ -90,42 +90,53 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A donated fridge, a sheltered outdoor spot with an outlet, a host site, and a small cleaning rota.",
     setupHours: 23,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find a host site with power and foot traffic",
         description:
           "Approach small businesses, churches, clinics, or community centers. Ask if they'll let you place a fridge under their awning and plug it in (electricity cost is usually a few dollars a month — offer to cover it). Get a simple written okay.",
         hours: 3,
+        skills: ["outreach"],
       },
       {
         name: "Source a fridge and a weatherproof shelter",
         description:
           "Put out a call for a working fridge on local groups. Build or buy a simple wooden cabinet/lean-to around it to protect it from rain and sun. Anchor it so it can't tip. Includes locating, transporting, and building.",
         hours: 8,
+        skills: ["carpentry", "driving"],
+        follows: [0],
       },
       {
         name: "Set the ground rules and label everything",
         description:
           "Post a clear, multilingual sign: take what you need, leave what you can, no expired/home-canned/raw meat. Add labels and a marker so people can date items.",
         hours: 2,
+        skills: ["writing", "translation"],
+        follows: [1],
       },
       {
         name: "Recruit a cleaning and restocking rota",
         description:
           "Make a shared weekly schedule. Each shift is ~15 minutes: wipe surfaces, toss anything spoiled or past-date, and note what's running low. Keep cleaning supplies on site.",
         hours: 2,
+        skills: ["organizing"],
+        follows: [1],
       },
       {
         name: "Build supply relationships",
         description:
           "Ask bakeries, grocers, restaurants, and farmers' markets for regular end-of-day donations. Coordinate a pickup volunteer. Track which sources are reliable.",
         hours: 4,
+        skills: ["outreach"],
       },
       {
         name: "Spread the word",
         description:
           "Make a small flyer and a map pin/social post. Tell nearby shelters, schools, and clinics it exists. Word of mouth from current users matters most.",
         hours: 3,
+        skills: ["graphic design", "outreach"],
+        follows: [2],
       },
       {
         name: "Set up a problem contact",
@@ -146,48 +157,60 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A plot of land (even a vacant lot or rooftop), soil/beds, water access, seeds, and a core group of 5–10 regulars.",
     setupHours: 27,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Secure land and permission",
         description:
           "Identify a vacant lot, church yard, school ground, or unused park corner. Find the owner (city land records, or just ask). Get a written license or lease, even a one-year handshake-in-writing, and confirm water access.",
         hours: 6,
+        skills: ["outreach"],
       },
       {
         name: "Test the soil and plan beds",
         description:
           "Send a cheap soil test to a local extension service to rule out lead/contaminants. If soil is bad, plan raised beds with clean soil. Sketch where beds, paths, and a tool spot will go.",
         hours: 3,
+        skills: ["gardening"],
+        follows: [0],
       },
       {
         name: "Gather materials and build",
         description:
           "Collect lumber or use straw-bale/keyhole beds, compost, and mulch. Host a build day; many hands raise beds quickly. Set up a hose or rain barrels.",
         hours: 8,
+        skills: ["carpentry"],
+        follows: [0, 1],
       },
       {
         name: "Decide the sharing model",
         description:
           "Agree as a group: individual plots, fully communal harvest, or a hybrid. Write down how produce is divided and how decisions get made.",
         hours: 2,
+        skills: ["facilitation"],
       },
       {
         name: "Plant for your climate and season",
         description:
           "Pick easy, high-yield crops for your zone (greens, beans, squash, tomatoes, herbs). Stagger planting so harvests don't all hit at once. Label rows.",
         hours: 4,
+        skills: ["gardening"],
+        follows: [2],
       },
       {
         name: "Set a watering and weeding rota",
         description:
           "Plants die from neglect more than anything. Build a simple shared calendar; tie tasks to easy reminders. Keep it low-commitment so people don't burn out.",
         hours: 2,
+        skills: ["organizing"],
+        follows: [4],
       },
       {
         name: "Plan the harvest and surplus",
         description:
           "Decide harvest days. Route extra produce to the community fridge, neighbors, or a free stand at the gate. Save some seeds for next year.",
         hours: 2,
+        follows: [4],
       },
     ],
   },
@@ -208,42 +231,53 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "A shed, garage, closet at a community center, or shipping container works. Pick 2–4 predictable open hours a week so people know when to come.",
         hours: 3,
+        skills: ["outreach"],
       },
       {
         name: "Collect and sort the inventory",
         description:
           "Put out a donation call (people have duplicate drills and ladders everywhere). Clean, test, and label each tool. Discard or repair anything unsafe.",
         hours: 6,
+        skills: ["driving"],
+        follows: [0],
       },
       {
         name: "Catalog everything",
         description:
           "Use a free spreadsheet or lending-library app. Record each item, its condition, and a photo. Number tools so they're easy to track.",
         hours: 4,
+        skills: ["data entry"],
+        follows: [1],
       },
       {
         name: "Write borrowing rules",
         description:
           "Set loan length (e.g., one week), how many items at once, and a return/late policy. Keep it forgiving — this is about trust. Note any tool that needs a safety briefing.",
         hours: 2,
+        skills: ["writing"],
       },
       {
         name: "Set up sign-out",
         description:
           "A clipboard or simple form: name, contact, item, date out, due date. Take a quick photo of the tool's condition at checkout to avoid disputes.",
         hours: 2,
+        skills: ["data entry"],
+        follows: [2, 3],
       },
       {
         name: "Train your librarians",
         description:
           "Walk volunteers through the catalog, checkout steps, and basic safety (eye protection, ladder use). Have a one-page cheat sheet at the desk.",
         hours: 2,
+        skills: ["teaching"],
+        follows: [4],
       },
       {
         name: "Maintain and grow",
         description:
           "Inspect returned tools, sharpen and oil regularly, and track what people request most so you know what to add next.",
         hours: 2,
+        skills: ["tool repair"],
         recurringCadence: "session",
       },
     ],
@@ -372,6 +406,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A space (even pop-up), tables or racks, sorting volunteers, and a regular schedule.",
     setupHours: 19,
     defaultCategory: "other",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Pick a format and space",
@@ -384,24 +419,30 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Accept clean, working, usable items only. Post a clear \"yes\" and \"no\" list (no broken electronics, no soiled clothing, no recalled baby gear). This saves enormous sorting time.",
         hours: 1,
+        skills: ["writing"],
       },
       {
         name: "Organize intake and sorting",
         description:
           "Set up stations: receive, sort by category, and stage for display. Have a plan for items you can't use (donate onward or recycle).",
         hours: 4,
+        skills: ["organizing"],
+        follows: [0, 1],
       },
       {
         name: "Display so people can browse with dignity",
         description:
           "Hang clothes by size, group household goods, keep it tidy and welcoming. No application, no proof of need — just take what you'll use.",
         hours: 3,
+        skills: ["design"],
+        follows: [2],
       },
       {
         name: "Staff the event",
         description:
           "Assign greeters, sorters, and someone for questions. A friendly, no-judgment tone is the whole point.",
         hours: 4,
+        skills: ["organizing"],
         recurringCadence: "event",
       },
       {
@@ -409,12 +450,14 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Pre-arrange where unclaimed items go after each event (a partner charity, textile recycling) so the space resets clean.",
         hours: 2,
+        skills: ["driving"],
       },
       {
         name: "Promote and repeat",
         description:
           "Flyer locally, post the next date, and ask attendees to spread the word. Consistency turns a one-off into a reliable resource.",
         hours: 2,
+        skills: ["graphic design", "outreach"],
       },
     ],
   },
@@ -435,12 +478,15 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Ask members two questions: what could you teach, and what would you love to learn? Collect answers in a simple form. The overlap is your curriculum.",
         hours: 2,
+        skills: ["outreach"],
       },
       {
         name: "Recruit and prep teachers",
         description:
           "Reassure people that \"teaching\" can be informal. Help them outline a one-hour session and gather any materials. Pair nervous first-timers with a co-host.",
         hours: 4,
+        skills: ["teaching", "facilitation"],
+        follows: [0],
       },
       {
         name: "Find space and time",
@@ -453,24 +499,29 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "List sessions with date, topic, teacher, and what to bring. Publish it where members already look. Keep sign-ups light or drop-in.",
         hours: 2,
+        skills: ["organizing"],
+        follows: [1, 2],
       },
       {
         name: "Gather materials",
         description:
           "Note what each class needs and source it through donations or a tiny shared budget. Keep reusable kits for popular classes.",
         hours: 2,
+        follows: [3],
       },
       {
         name: "Make it accessible",
         description:
           "Consider language needs, childcare, physical access, and timing for people who work. Ask attendees what would help them come.",
         hours: 2,
+        skills: ["accessibility", "translation"],
       },
       {
         name: "Capture and pass on knowledge",
         description:
           "Take notes or short handouts so a class can be re-run by someone new. This keeps the project alive when a teacher moves on.",
         hours: 2,
+        skills: ["writing"],
       },
     ],
   },
@@ -542,18 +593,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Handy volunteers, basic tools, a space with tables and power, and a recurring date.",
     setupHours: 16,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Recruit fixers by specialty",
         description:
           "Find people good with sewing, small electronics, bikes, appliances, and woodwork. You only need one or two per category to start.",
         hours: 4,
+        skills: ["repair", "electronics", "sewing"],
       },
       {
         name: "Set up repair stations",
         description:
           "Each station needs a table, the right tools, good light, and power. Group similar repairs together. Label stations clearly.",
         hours: 3,
+        skills: ["organizing"],
       },
       {
         name: "Schedule a recurring date",
@@ -566,6 +620,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "A greeter logs each visitor and item, then routes them to the right fixer. Set the expectation: visitors stay and help with their own repair when they can; it's a learning space, not a drop-off.",
         hours: 2,
+        skills: ["writing"],
       },
       {
         name: "Manage safety and expectations",
@@ -578,12 +633,14 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Keep thread, fuses, glue, fasteners, tubes, and patches on hand. Track what gets used so you can restock.",
         hours: 2,
+        follows: [0],
       },
       {
         name: "Track impact and follow up",
         description:
           "Count items fixed and roughly what was saved/diverted. Share the numbers — it motivates volunteers and helps with any future funding.",
         hours: 1,
+        follows: [2],
       },
     ],
   },
@@ -604,42 +661,50 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Confirm each driver has a valid license, insurance, and a safe vehicle. For rides with vulnerable people, do reference or background checks per your local norms.",
         hours: 5,
+        skills: ["driving"],
       },
       {
         name: "Sort out insurance and liability",
         description:
           "Check what each driver's personal insurance covers for volunteer driving. Consider a simple waiver and consult a local legal aid clinic — this protects everyone.",
         hours: 4,
+        skills: ["paperwork"],
       },
       {
         name: "Set up a request system",
         description:
           "Pick one channel for ride requests (phone line, form, group chat) with a lead time (e.g., 48 hours). Capture pickup time, locations, mobility needs, and contact info.",
         hours: 2,
+        skills: ["organizing", "tech"],
       },
       {
         name: "Build a dispatch routine",
         description:
           "Have one coordinator (rotating) match requests to available drivers and confirm with both sides the day before. Keep a backup driver list for cancellations.",
         hours: 2,
+        skills: ["organizing"],
+        follows: [0, 2],
       },
       {
         name: "Define what's covered",
         description:
           "Decide which trips qualify (medical, groceries, essential errands) and your service area. Be clear about wait times and whether drivers help carry bags.",
         hours: 1,
+        skills: ["facilitation"],
       },
       {
         name: "Handle costs",
         description:
           "Decide how gas is covered — a small shared fund, optional rider contributions, or nothing. Keep it transparent and never let it become a barrier for the rider.",
         hours: 2,
+        follows: [4],
       },
       {
         name: "Keep riders and drivers safe",
         description:
           "Set norms: drivers don't enter homes alone, no handling of money beyond agreed costs, and a check-in after rides with vulnerable people. Log each ride.",
         hours: 2,
+        follows: [0],
       },
     ],
   },
@@ -766,48 +831,61 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A composting site, collection bins, basic equipment, and a small maintenance rota.",
     setupHours: 20,
     defaultCategory: "infrastructure",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find a composting site",
         description:
           "Secure a spot with space and some sun — a community garden corner, vacant lot, or willing backyard. Confirm permission and check local rules on composting.",
         hours: 4,
+        skills: ["outreach"],
       },
       {
         name: "Choose a composting method",
         description:
           "Pick what fits your scale: a three-bin hot-compost system, tumblers, or worm bins. Match the method to how much material you expect and how much turning you can manage.",
         hours: 3,
+        skills: ["composting"],
+        follows: [0],
       },
       {
         name: "Source bins and equipment",
         description:
           "Build or buy collection bins and the composting structure. Gather a pitchfork, thermometer, and brown material (leaves, cardboard) to balance the food scraps.",
         hours: 4,
+        skills: ["carpentry", "driving"],
+        follows: [1],
       },
       {
         name: "Set up a collection system",
         description:
           "Decide how scraps arrive: a drop-off bin with set hours, or a volunteer pickup route. Give participants small countertop pails and a clear drop schedule.",
         hours: 4,
+        skills: ["organizing"],
+        follows: [2],
       },
       {
         name: "Make clear what's accepted",
         description:
           "Post a simple yes/no list (yes: fruit, veg, coffee, eggshells; no: meat, dairy, oils, pet waste). Clear signage prevents contamination that ruins a batch.",
         hours: 2,
+        skills: ["writing", "translation"],
+        follows: [1],
       },
       {
         name: "Recruit and train a maintenance rota",
         description:
           "Compost needs regular turning, moisture checks, and balancing greens and browns. Build a shared schedule and teach volunteers the basics so piles don't smell or stall.",
         hours: 3,
+        skills: ["composting", "teaching"],
+        follows: [2],
       },
       {
         name: "Distribute finished compost",
         description:
           "Once compost is ready, share it free with contributors and community gardens. Announce pickup days and bring bags or buckets.",
         hours: 2,
+        skills: ["driving"],
         recurringCadence: "cycle",
       },
     ],
@@ -1217,48 +1295,60 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A kitchen, cooks, an ingredient pipeline, a serving space, and a volunteer crew.",
     setupHours: 21,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find a kitchen and serving space",
         description:
           "Secure a kitchen large enough to cook at scale — a church hall, community center, or commercial kitchen — plus space to serve. Confirm availability on your planned days.",
         hours: 4,
+        skills: ["outreach"],
       },
       {
         name: "Sort out food safety and permits",
         description:
           "Check local rules for serving food to the public. You may need a permit, a certified food-handler present, or a licensed kitchen. Learn safe storage and temperature handling.",
         hours: 4,
+        skills: ["food safety"],
+        follows: [0],
       },
       {
         name: "Build a food supply pipeline",
         description:
           "Combine grocery and restaurant donations, bulk purchases, and any garden or gleaning surplus. Track reliable sources so you can plan menus around what you'll have.",
         hours: 4,
+        skills: ["outreach", "driving"],
       },
       {
         name: "Plan menus for scale, diet, and allergies",
         description:
           "Design simple, nutritious meals that cook in volume and stretch ingredients. Offer vegetarian options and label common allergens clearly.",
         hours: 3,
+        skills: ["cooking"],
+        follows: [2],
       },
       {
         name: "Recruit a cooking and serving crew",
         description:
           "Gather volunteers for prep, cooking, serving, and cleanup. Assign a lead cook per meal and keep roles clear so service runs smoothly.",
         hours: 3,
+        skills: ["cooking", "organizing"],
       },
       {
         name: "Set a schedule and spread the word",
         description:
           "Pick a regular day and time so people can rely on it. Promote through flyers, shelters, and word of mouth, keeping the tone warm and open to all.",
         hours: 3,
+        skills: ["graphic design"],
+        follows: [0, 1],
       },
       {
         name: "Run the meal and clean up",
         description:
           "Cook, serve with dignity (table service feels better than a line where possible), and clean the kitchen to required standards. Pack leftovers safely for redistribution.",
         hours: 5,
+        skills: ["cooking"],
+        follows: [3, 4, 5],
         recurringCadence: "session",
       },
     ],
@@ -1387,42 +1477,52 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Skilled volunteers, materials, tools, and a request system. Stick to work within volunteer competence — route electrical, gas, structural, and roofing jobs to licensed professionals.",
     setupHours: 18,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Recruit skilled volunteers",
         description:
           "Find people comfortable with basic carpentry, caulking, insulation, and weather-stripping. A couple of more experienced leads can guide the rest.",
         hours: 4,
+        skills: ["carpentry", "home repair"],
       },
       {
         name: "Set the scope of work",
         description:
           "Define what you will and won't do. Stick to safe, simple jobs (weatherproofing, grab bars, minor fixes) and rule out anything requiring a licensed trade, like major electrical or gas work.",
         hours: 2,
+        skills: ["home repair"],
+        follows: [0],
       },
       {
         name: "Build a request and assessment system",
         description:
           "Create a way for neighbors to request help, then do a quick visit to scope the job, list materials, and confirm it's within your skills and safety limits.",
         hours: 3,
+        skills: ["organizing"],
       },
       {
         name: "Source materials and tools",
         description:
           "Gather caulk, weather-stripping, insulation, and basic hardware through donations, discounts, or a small budget. Maintain a shared tool kit.",
         hours: 4,
+        skills: ["driving"],
+        follows: [1],
       },
       {
         name: "Sort out safety and liability",
         description:
           "Use simple waivers, carry first-aid supplies, require proper safety gear, and never attempt work beyond your competence. Consult on liability coverage for volunteer repairs.",
         hours: 3,
+        skills: ["paperwork"],
       },
       {
         name: "Schedule and run work days",
         description:
           "Match jobs to volunteer teams, confirm with the homeowner, and complete the work in a focused session. Respect the home and the resident's wishes throughout.",
         hours: 5,
+        skills: ["organizing", "home repair"],
+        follows: [1, 2, 3, 4],
         recurringCadence: "event",
       },
       {
@@ -1430,6 +1530,8 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Check that repairs held and the resident is satisfied. Track homes served and rough energy or safety improvements for volunteers and future support.",
         hours: 2,
+        skills: ["writing"],
+        follows: [5],
       },
     ],
   },
@@ -1895,6 +1997,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteers, supplies, site permissions, and a disposal plan.",
     setupHours: 17,
     defaultCategory: "infrastructure",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Identify and prioritize sites",
@@ -2912,42 +3015,53 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un refrigerador donado, un lugar exterior protegido con un enchufe, un sitio anfitrión y una pequeña rotación de limpieza.",
     setupHours: 23,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentra un sitio anfitrión con electricidad y tránsito de gente",
         description:
           "Acércate a pequeños negocios, iglesias, clínicas o centros comunitarios. Pregunta si dejan colocar un refrigerador bajo su alero y enchufarlo (la electricidad suele costar unos pocos dólares al mes — ofrece cubrirlo). Consigue un sí por escrito, aunque sea sencillo.",
         hours: 3,
+        skills: ["difusión"],
       },
       {
         name: "Consigue un refrigerador y un refugio resistente al clima",
         description:
           "Pide un refrigerador en buen estado en grupos locales. Construye o consigue un mueble o cobertizo de madera sencillo a su alrededor para protegerlo de la lluvia y el sol. Ánclalo para que no se vuelque. Incluye buscarlo, transportarlo y armar el refugio.",
         hours: 8,
+        skills: ["carpintería", "conducir"],
+        follows: [0],
       },
       {
         name: "Define las reglas y etiqueta todo",
         description:
           "Coloca un cartel claro y multilingüe: toma lo que necesites, deja lo que puedas, nada caducado, ni conservas caseras, ni carne cruda. Añade etiquetas y un marcador para que la gente pueda anotar la fecha en los productos.",
         hours: 2,
+        skills: ["redacción", "traducción"],
+        follows: [1],
       },
       {
         name: "Arma una rotación de limpieza y reabastecimiento",
         description:
           "Crea un calendario semanal compartido. Cada turno son unos 15 minutos: limpia las superficies, retira lo dañado o vencido y anota lo que se está acabando. Mantén productos de limpieza en el sitio.",
         hours: 2,
+        skills: ["organización"],
+        follows: [1],
       },
       {
         name: "Construye relaciones con quienes donan",
         description:
           "Pide a panaderías, tiendas, restaurantes y mercados de productores donaciones regulares al final del día. Coordina a una persona voluntaria para recogerlas. Lleva nota de qué fuentes son confiables.",
         hours: 4,
+        skills: ["difusión"],
       },
       {
         name: "Corre la voz",
         description:
           "Haz un pequeño volante y un punto en el mapa o una publicación en redes. Cuéntales a refugios, escuelas y clínicas cercanas que existe. El boca a boca de quienes ya lo usan es lo que más importa.",
         hours: 3,
+        skills: ["diseño gráfico", "difusión"],
+        follows: [2],
       },
       {
         name: "Establece un contacto para problemas",
@@ -2968,48 +3082,60 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un terreno (puede ser un lote baldío o una azotea), tierra o camas de cultivo, acceso a agua, semillas y un grupo base de 5 a 10 personas constantes.",
     setupHours: 27,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Asegura el terreno y el permiso",
         description:
           "Identifica un lote baldío, un patio de iglesia, un terreno escolar o una esquina de parque sin uso. Encuentra a quien sea dueña o dueño (registros municipales, o simplemente pregunta). Consigue un permiso o contrato por escrito, aunque sea un acuerdo de un año estrechado por escrito, y confirma el acceso al agua.",
         hours: 6,
+        skills: ["difusión"],
       },
       {
         name: "Analiza el suelo y planea las camas",
         description:
           "Envía una prueba de suelo económica a un servicio de extensión local para descartar plomo u otros contaminantes. Si el suelo está mal, planea camas elevadas con tierra limpia. Esboza dónde irán camas, caminos y un rincón de herramientas.",
         hours: 3,
+        skills: ["jardinería"],
+        follows: [0],
       },
       {
         name: "Reúne materiales y construye",
         description:
           "Junta madera o usa camas de pacas de paja o tipo \"keyhole\", composta y mantillo. Organiza un día de construcción; muchas manos levantan camas rápido. Instala una manguera o barriles de lluvia.",
         hours: 8,
+        skills: ["carpintería"],
+        follows: [0, 1],
       },
       {
         name: "Decidan cómo se comparte",
         description:
           "Acuerden en grupo: parcelas individuales, cosecha completamente comunal, o una mezcla. Pongan por escrito cómo se reparte lo cosechado y cómo se toman las decisiones.",
         hours: 2,
+        skills: ["facilitación"],
       },
       {
         name: "Siembra según el clima y la temporada",
         description:
           "Elige cultivos fáciles y de buen rendimiento para tu zona (verduras de hoja, frijoles, calabaza, tomate, hierbas). Escalona las siembras para que las cosechas no caigan todas al mismo tiempo. Etiqueta los surcos.",
         hours: 4,
+        skills: ["jardinería"],
+        follows: [2],
       },
       {
         name: "Organiza una rotación de riego y deshierbe",
         description:
           "Las plantas mueren más por descuido que por otra cosa. Arma un calendario compartido sencillo; liga las tareas a recordatorios fáciles. Mantén el compromiso ligero para que nadie se queme.",
         hours: 2,
+        skills: ["organización"],
+        follows: [4],
       },
       {
         name: "Planea la cosecha y los excedentes",
         description:
           "Decidan los días de cosecha. Manden lo que sobre al refrigerador comunitario, a vecinas y vecinos o a un puesto gratuito en la entrada. Guarden algunas semillas para el año siguiente.",
         hours: 2,
+        follows: [4],
       },
     ],
   },
@@ -3030,42 +3156,53 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Sirve una caseta, una cochera, un clóset en un centro comunitario o un contenedor. Elige de 2 a 4 horas fijas a la semana para que la gente sepa cuándo ir.",
         hours: 3,
+        skills: ["difusión"],
       },
       {
         name: "Reúne y ordena el inventario",
         description:
           "Haz una convocatoria de donaciones (la gente tiene taladros y escaleras duplicados por todos lados). Limpia, prueba y etiqueta cada herramienta. Descarta o repara lo que esté inseguro.",
         hours: 6,
+        skills: ["conducir"],
+        follows: [0],
       },
       {
         name: "Cataloga todo",
         description:
           "Usa una hoja de cálculo gratuita o una app de biblioteca de préstamos. Registra cada artículo, su estado y una foto. Numera las herramientas para que sea fácil seguirles la pista.",
         hours: 4,
+        skills: ["captura de datos"],
+        follows: [1],
       },
       {
         name: "Escribe las reglas de préstamo",
         description:
           "Define el plazo (por ejemplo, una semana), cuántas piezas a la vez y la política de devolución o retraso. Que sea flexible — esto se trata de confianza. Anota qué herramientas requieren una breve explicación de seguridad.",
         hours: 2,
+        skills: ["redacción"],
       },
       {
         name: "Arma el registro de salida",
         description:
           "Una tablilla o un formulario sencillo: nombre, contacto, artículo, fecha de salida, fecha de devolución. Toma una foto rápida del estado de la herramienta al salir para evitar disputas.",
         hours: 2,
+        skills: ["captura de datos"],
+        follows: [2, 3],
       },
       {
         name: "Capacita a quienes atienden",
         description:
           "Lleva a las personas voluntarias por el catálogo, los pasos de préstamo y la seguridad básica (lentes de protección, uso de escaleras). Ten una hoja de referencia de una sola página en el mostrador.",
         hours: 2,
+        skills: ["enseñanza"],
+        follows: [4],
       },
       {
         name: "Mantén y haz crecer la biblioteca",
         description:
           "Revisa las herramientas devueltas, afila y aceita con regularidad, y observa qué piden más para saber qué sumar después.",
         hours: 2,
+        skills: ["reparación de herramientas"],
         recurringCadence: "session",
       },
     ],
@@ -3194,6 +3331,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un espacio (incluso temporal), mesas o percheros, personas voluntarias para clasificar y un horario regular.",
     setupHours: 19,
     defaultCategory: "other",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Elige el formato y el espacio",
@@ -3206,24 +3344,30 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Acepten solo cosas limpias, funcionales y usables. Publica una lista clara de \"sí\" y \"no\" (sin aparatos descompuestos, sin ropa manchada, sin artículos de bebé retirados del mercado). Esto ahorra muchísimo tiempo de clasificación.",
         hours: 1,
+        skills: ["redacción"],
       },
       {
         name: "Organiza recepción y clasificación",
         description:
           "Arma estaciones: recibir, clasificar por categoría y preparar para exhibir. Ten un plan para lo que no puedan usar (donar a otra parte o reciclar).",
         hours: 4,
+        skills: ["organización"],
+        follows: [0, 1],
       },
       {
         name: "Exhibe para que la gente elija con dignidad",
         description:
           "Cuelga la ropa por talla, agrupa los artículos del hogar, mantén el espacio ordenado y acogedor. Sin solicitud, sin pruebas de necesidad — solo toma lo que vayas a usar.",
         hours: 3,
+        skills: ["diseño"],
+        follows: [2],
       },
       {
         name: "Cubran el evento",
         description:
           "Asigna a personas que reciban, clasifiquen y respondan preguntas. Un trato amable, sin juicios, es todo el punto.",
         hours: 4,
+        skills: ["organización"],
         recurringCadence: "event",
       },
       {
@@ -3231,12 +3375,14 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Acuerden con anticipación a dónde van los artículos que nadie tomó tras cada evento (una organización aliada, reciclaje textil) para que el espacio quede limpio.",
         hours: 2,
+        skills: ["conducir"],
       },
       {
         name: "Difunde y repite",
         description:
           "Reparte volantes en tu zona, publica la próxima fecha y pide a quienes asistieron que corran la voz. La constancia convierte un evento aislado en un recurso confiable.",
         hours: 2,
+        skills: ["diseño gráfico", "difusión"],
       },
     ],
   },
@@ -3257,12 +3403,15 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hazles dos preguntas a las personas integrantes: ¿qué podrías enseñar? y ¿qué te encantaría aprender? Reúne las respuestas en un formulario sencillo. Donde se cruzan está tu programa.",
         hours: 2,
+        skills: ["difusión"],
       },
       {
         name: "Convoca y acompaña a quienes enseñan",
         description:
           "Recuérdales que \"enseñar\" puede ser informal. Ayúdales a esbozar una sesión de una hora y reunir materiales. Empareja a quien dé clase por primera vez con alguien que la acompañe.",
         hours: 4,
+        skills: ["enseñanza", "facilitación"],
+        follows: [0],
       },
       {
         name: "Encuentra espacio y horario",
@@ -3275,24 +3424,29 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Lista las sesiones con fecha, tema, persona que enseña y qué llevar. Publícalo donde la gente ya mira. Mantén la inscripción ligera o de entrada libre.",
         hours: 2,
+        skills: ["organización"],
+        follows: [1, 2],
       },
       {
         name: "Reúne materiales",
         description:
           "Anota qué necesita cada clase y consíguelo con donaciones o con un pequeño fondo común. Guarda kits reutilizables para las clases más populares.",
         hours: 2,
+        follows: [3],
       },
       {
         name: "Hazlo accesible",
         description:
           "Considera necesidades de idioma, cuidado de infancias, acceso físico y horarios para personas que trabajan. Pregúntales a quienes asisten qué les ayudaría a llegar.",
         hours: 2,
+        skills: ["accesibilidad", "traducción"],
       },
       {
         name: "Recoge y transmite el conocimiento",
         description:
           "Toma notas o haz pequeños folletos para que alguien nuevo pueda volver a dar la clase. Eso mantiene viva la iniciativa cuando una persona que enseña se va.",
         hours: 2,
+        skills: ["redacción"],
       },
     ],
   },
@@ -3364,18 +3518,21 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias con buena mano, herramientas básicas, un espacio con mesas y electricidad, y una fecha recurrente.",
     setupHours: 16,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Convoca a quienes reparan, por especialidad",
         description:
           "Busca a personas buenas para coser, electrónica pequeña, bicis, electrodomésticos y carpintería. Solo necesitas una o dos por categoría para empezar.",
         hours: 4,
+        skills: ["reparación", "electrónica", "costura"],
       },
       {
         name: "Arma estaciones de reparación",
         description:
           "Cada estación necesita una mesa, las herramientas adecuadas, buena luz y electricidad. Agrupa reparaciones parecidas. Identifica las estaciones con claridad.",
         hours: 3,
+        skills: ["organización"],
       },
       {
         name: "Pon una fecha recurrente",
@@ -3388,6 +3545,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Una persona recibe a cada visitante y su objeto, y los canaliza con quien repara. Aclara desde el inicio: las personas se quedan y ayudan con su propia reparación cuando pueden; es un espacio para aprender, no un buzón de objetos.",
         hours: 2,
+        skills: ["redacción"],
       },
       {
         name: "Gestiona seguridad y expectativas",
@@ -3400,12 +3558,14 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ten a la mano hilo, fusibles, pegamento, sujetadores, cámaras y parches. Anota qué se usa para reabastecer.",
         hours: 2,
+        follows: [0],
       },
       {
         name: "Lleva cuenta del impacto y dale seguimiento",
         description:
           "Cuenten cuántos objetos se arreglaron y, a grandes rasgos, lo que se evitó tirar. Compartan los números — motiva a quienes participan y ayuda a conseguir apoyo a futuro.",
         hours: 1,
+        follows: [2],
       },
     ],
   },
@@ -3426,42 +3586,50 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Confirma que cada persona tenga licencia vigente, seguro y un vehículo seguro. Para viajes con personas vulnerables, haz revisiones de referencias o de antecedentes según las normas de tu zona.",
         hours: 5,
+        skills: ["conducir"],
       },
       {
         name: "Resuelve seguros y responsabilidad",
         description:
           "Revisa qué cubre el seguro personal de cada persona en un trayecto voluntario. Considera un consentimiento sencillo y consulta a una clínica de asistencia legal local — esto protege a todas las partes.",
         hours: 4,
+        skills: ["trámites"],
       },
       {
         name: "Arma un sistema de solicitudes",
         description:
           "Elige un solo canal para pedir viajes (línea telefónica, formulario, chat de grupo) con un tiempo de anticipación (por ejemplo, 48 horas). Registra hora de recogida, ubicaciones, necesidades de movilidad y datos de contacto.",
         hours: 2,
+        skills: ["organización", "tecnología"],
       },
       {
         name: "Define una rutina de despacho",
         description:
           "Ten a una persona coordinadora (que rote) que empareje solicitudes con personas que manejen y confirme con ambas partes el día anterior. Mantén una lista de respaldo para cancelaciones.",
         hours: 2,
+        skills: ["organización"],
+        follows: [0, 2],
       },
       {
         name: "Define qué se cubre",
         description:
           "Decidan qué viajes entran (médicos, súper, trámites esenciales) y su zona de servicio. Sean claras y claros sobre tiempos de espera y si quienes manejan ayudan con las bolsas.",
         hours: 1,
+        skills: ["facilitación"],
       },
       {
         name: "Maneja los gastos",
         description:
           "Decidan cómo se cubre la gasolina — un pequeño fondo común, aportes opcionales de quien viaja o nada. Que sea transparente y que nunca se vuelva una barrera para quien necesita el viaje.",
         hours: 2,
+        follows: [4],
       },
       {
         name: "Mantén seguras a quienes viajan y a quienes manejan",
         description:
           "Establezcan normas: quien maneja no entra a casas sin acompañamiento, no se maneja dinero más allá de los gastos acordados, y se hace un seguimiento después de viajes con personas vulnerables. Registren cada viaje.",
         hours: 2,
+        follows: [0],
       },
     ],
   },
@@ -3588,48 +3756,61 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un sitio de compostaje, contenedores de recolección, equipo básico y una pequeña rotación de mantenimiento.",
     setupHours: 20,
     defaultCategory: "infrastructure",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentra un sitio de compostaje",
         description:
           "Asegura un lugar con espacio y algo de sol — una esquina de un huerto comunitario, un lote baldío o un patio dispuesto. Confirma el permiso y revisa las reglas locales sobre compostaje.",
         hours: 4,
+        skills: ["difusión"],
       },
       {
         name: "Elige un método de compostaje",
         description:
           "Escoge lo que sea adecuado a tu escala: un sistema caliente de tres compartimentos, tambores o composta con lombrices. Que el método coincida con el material que esperas y con lo que puedas voltear.",
         hours: 3,
+        skills: ["compostaje"],
+        follows: [0],
       },
       {
         name: "Consigue contenedores y equipo",
         description:
           "Construye o compra contenedores de recolección y la estructura de compostaje. Junta un bieldo, un termómetro y material café (hojas, cartón) para equilibrar los restos de comida.",
         hours: 4,
+        skills: ["carpintería", "conducir"],
+        follows: [1],
       },
       {
         name: "Arma un sistema de recolección",
         description:
           "Decidan cómo llegan los restos: un contenedor de entrega con horarios o una ruta voluntaria de recogida. Den a quienes participen pequeños botes para la cocina y un calendario claro de entrega.",
         hours: 4,
+        skills: ["organización"],
+        follows: [2],
       },
       {
         name: "Dejen claro qué se acepta",
         description:
           "Pongan una lista sencilla de sí y no (sí: fruta, verdura, café, cáscaras de huevo; no: carne, lácteos, aceites, excremento de mascotas). Una señalización clara evita la contaminación que arruina una tanda.",
         hours: 2,
+        skills: ["redacción", "traducción"],
+        follows: [1],
       },
       {
         name: "Convoca y capacita una rotación de mantenimiento",
         description:
           "La composta necesita voltearse, revisarse la humedad y equilibrar verdes y cafés. Hagan un calendario compartido y enseñen lo básico a quienes participen para que las pilas no huelan ni se estanquen.",
         hours: 3,
+        skills: ["compostaje", "enseñanza"],
+        follows: [2],
       },
       {
         name: "Distribuye la composta terminada",
         description:
           "Una vez lista la composta, compártanla gratis con quienes aportaron y con huertos comunitarios. Anuncien los días de recogida y que lleven bolsas o cubetas.",
         hours: 2,
+        skills: ["conducir"],
         recurringCadence: "cycle",
       },
     ],
@@ -4039,48 +4220,60 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una cocina, personas que cocinen, una cadena de ingredientes, un espacio para servir y un equipo voluntario.",
     setupHours: 21,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentren una cocina y un espacio para servir",
         description:
           "Consigan una cocina lo bastante grande para cocinar a escala — un salón parroquial, centro comunitario o cocina comercial — además de un espacio para servir. Confirmen disponibilidad en los días previstos.",
         hours: 4,
+        skills: ["difusión"],
       },
       {
         name: "Resuelvan seguridad alimentaria y permisos",
         description:
           "Revisen las reglas locales para servir comida al público. Puede que necesiten un permiso, una persona certificada en manejo de alimentos presente, o una cocina con licencia. Aprendan almacenamiento seguro y manejo de temperaturas.",
         hours: 4,
+        skills: ["seguridad alimentaria"],
+        follows: [0],
       },
       {
         name: "Construyan una cadena de suministro de alimentos",
         description:
           "Combinen donaciones de tiendas y restaurantes, compras al por mayor y cualquier excedente de huertas o gleaning. Lleven registro de fuentes confiables para planear menús según lo que tendrán.",
         hours: 4,
+        skills: ["difusión", "conducir"],
       },
       {
         name: "Planeen menús para escala, dieta y alergias",
         description:
           "Diseñen comidas sencillas y nutritivas que se cocinen en volumen y rindan los ingredientes. Ofrezcan opciones vegetarianas y etiqueten con claridad los alérgenos comunes.",
         hours: 3,
+        skills: ["cocina"],
+        follows: [2],
       },
       {
         name: "Convoquen un equipo de cocina y servicio",
         description:
           "Reúnan personas voluntarias para preparación, cocción, servicio y limpieza. Asignen una persona líder de cocina por comida y mantengan los roles claros para que el servicio fluya.",
         hours: 3,
+        skills: ["cocina", "organización"],
       },
       {
         name: "Definan un horario y corran la voz",
         description:
           "Elijan un día y hora regulares para que la gente pueda contar con ello. Difundan con volantes, en albergues y de boca en boca, con un tono cálido y abierto para todas las personas.",
         hours: 3,
+        skills: ["diseño gráfico"],
+        follows: [0, 1],
       },
       {
         name: "Sirvan la comida y limpien",
         description:
           "Cocinen, sirvan con dignidad (servir en mesa se siente mejor que una fila, cuando sea posible) y dejen la cocina con los estándares requeridos. Empaquen las sobras de forma segura para redistribuirlas.",
         hours: 5,
+        skills: ["cocina"],
+        follows: [3, 4, 5],
         recurringCadence: "session",
       },
     ],
@@ -4209,42 +4402,52 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias con habilidades, materiales, herramientas y un sistema de solicitudes. Quédense dentro de la competencia voluntaria — deriven trabajos eléctricos, de gas, estructurales y de techos a profesionales con licencia.",
     setupHours: 18,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Convoquen a personas voluntarias con habilidades",
         description:
           "Encuentren gente cómoda con carpintería básica, sellado, aislamiento y burletes. Un par de personas con más experiencia pueden guiar al resto.",
         hours: 4,
+        skills: ["carpintería", "reparaciones del hogar"],
       },
       {
         name: "Definan el alcance del trabajo",
         description:
           "Definan qué harán y qué no. Quédense en trabajos seguros y sencillos (impermeabilización, barras de apoyo, arreglos menores) y descarten todo lo que requiera un oficio con licencia, como trabajos mayores de electricidad o gas.",
         hours: 2,
+        skills: ["reparaciones del hogar"],
+        follows: [0],
       },
       {
         name: "Armen un sistema de solicitudes y evaluación",
         description:
           "Creen una forma para que las vecinas y vecinos pidan ayuda; luego hagan una visita corta para dimensionar la obra, listar materiales y confirmar que está dentro de sus habilidades y límites de seguridad.",
         hours: 3,
+        skills: ["organización"],
       },
       {
         name: "Consigan materiales y herramientas",
         description:
           "Reúnan masilla, burletes, aislamiento y ferretería básica mediante donaciones, descuentos o un pequeño presupuesto. Mantengan un kit de herramientas compartido.",
         hours: 4,
+        skills: ["conducir"],
+        follows: [1],
       },
       {
         name: "Resuelvan seguridad y responsabilidad",
         description:
           "Usen renuncias sencillas, lleven primeros auxilios, exijan equipo de protección adecuado y nunca intenten trabajos fuera de su competencia. Asesórense sobre cobertura de responsabilidad para reparaciones voluntarias.",
         hours: 3,
+        skills: ["trámites"],
       },
       {
         name: "Programen y realicen días de trabajo",
         description:
           "Asignen los trabajos a equipos voluntarios, confirmen con la persona del hogar y completen la obra en una sesión enfocada. Respeten la casa y los deseos de quien la habita en todo momento.",
         hours: 5,
+        skills: ["organización", "reparaciones del hogar"],
+        follows: [1, 2, 3, 4],
         recurringCadence: "event",
       },
       {
@@ -4252,6 +4455,8 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Verifiquen que las reparaciones aguantaron y que la persona está satisfecha. Lleven cuenta de hogares atendidos y mejoras aproximadas de energía o seguridad, para el equipo voluntario y para apoyos futuros.",
         hours: 2,
+        skills: ["redacción"],
+        follows: [5],
       },
     ],
   },
@@ -4717,6 +4922,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias, insumos, permisos del sitio y un plan de disposición de residuos.",
     setupHours: 17,
     defaultCategory: "infrastructure",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Identifiquen y prioricen sitios",
