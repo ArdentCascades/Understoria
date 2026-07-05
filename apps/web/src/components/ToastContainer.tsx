@@ -11,6 +11,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/state/ToastContext";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 
 // Renders the current toast (if any) in a fixed position above the
 // bottom nav.
@@ -30,10 +31,22 @@ const TONE_CLASSES: Record<"success" | "info" | "error", string> = {
 export function ToastContainer() {
   const { toast, dismissToast } = useToast();
   const { t } = useTranslation();
+  // While the on-screen keyboard is up, the fixed anchor floats
+  // detached mid-screen (see useVirtualKeyboard.ts). Hide with
+  // opacity — NOT unmount — so a toast firing mid-typing still
+  // announces to screen readers immediately and is simply visible
+  // once the keyboard closes (error toasts persist until dismissed).
+  // Inner pointer-events are gated too so nothing invisible stays
+  // tappable.
+  const keyboardOpen = useVirtualKeyboardOpen();
   if (!toast) return null;
 
   const tone = TONE_CLASSES[toast.tone];
   const isError = toast.tone === "error";
+  const wrapperVisibility = keyboardOpen ? "opacity-0" : "";
+  const innerPointer = keyboardOpen
+    ? "pointer-events-none"
+    : "pointer-events-auto";
 
   // Error toasts use a richer layout (message + action + dismiss)
   // so plain-tap-to-dismiss isn't viable — they need explicit
@@ -42,12 +55,12 @@ export function ToastContainer() {
   if (isError || toast.action) {
     return (
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4"
+        className={`pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4 ${wrapperVisibility}`}
         role={isError ? "alert" : "status"}
         aria-live={isError ? "assertive" : "polite"}
       >
         <div
-          className={`pointer-events-auto flex max-w-md items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium shadow-lg ${tone}`}
+          className={`${innerPointer} flex max-w-md items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium shadow-lg ${tone}`}
         >
           <span className="flex-1">{toast.message}</span>
           {toast.action && (
@@ -77,7 +90,7 @@ export function ToastContainer() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4"
+      className={`pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4 ${wrapperVisibility}`}
       aria-live="polite"
       role="status"
     >
@@ -85,7 +98,7 @@ export function ToastContainer() {
         type="button"
         onClick={dismissToast}
         aria-label={t("toast.dismiss")}
-        className={`pointer-events-auto max-w-md rounded-full px-4 py-2 text-sm font-medium shadow-lg transition-opacity ${tone}`}
+        className={`${innerPointer} max-w-md rounded-full px-4 py-2 text-sm font-medium shadow-lg transition-opacity ${tone}`}
       >
         {toast.message}
       </button>

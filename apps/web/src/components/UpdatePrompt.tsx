@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useToast } from "@/state/ToastContext";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 
 // This is an infrastructure-reliability notice, not an engagement
 // notification. It renders only while the member already has the app
@@ -38,6 +39,7 @@ export function UpdatePrompt() {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const [dismissed, setDismissed] = useState(false);
+  const keyboardOpen = useVirtualKeyboardOpen();
 
   const {
     needRefresh: [needRefresh],
@@ -50,7 +52,12 @@ export function UpdatePrompt() {
     },
   });
 
-  if (!needRefresh || dismissed) return null;
+  // Also unmount while the on-screen keyboard is up — the fixed
+  // anchor floats detached mid-screen otherwise (see
+  // useVirtualKeyboard.ts). This card already mounts conditionally,
+  // so there is no stable live-region contract to preserve; it
+  // re-renders (and politely re-announces) once the keyboard closes.
+  if (!needRefresh || dismissed || keyboardOpen) return null;
 
   return (
     <div

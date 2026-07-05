@@ -31,6 +31,7 @@ import { ContextualHint } from "@/components/ContextualHint";
 import { BoardNudges } from "@/components/BoardNudges";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { myOrganizedProjects } from "@/lib/myProjects";
 import { hasOpenTasks, projectNeedsMoreHands } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
@@ -58,6 +59,7 @@ export default function BoardPage() {
     blockedKeys,
   } = useApp();
   const { t } = useTranslation();
+  const keyboardOpen = useVirtualKeyboardOpen();
   // Tab lives in the URL as `?tab=needs|offers|projects` so back-
   // buttons elsewhere in the app can deep-link to a specific tab
   // (e.g. ProjectDetail → `/?tab=projects`), browser back/forward
@@ -765,6 +767,10 @@ export default function BoardPage() {
         )}
       </div>
 
+      {/* Hidden while the on-screen keyboard is up — the fixed anchor
+          would float detached mid-screen (see useVirtualKeyboard.ts),
+          and it sat directly over the Board search box's typing area. */}
+      {!keyboardOpen && (
       <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (
@@ -797,6 +803,7 @@ export default function BoardPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

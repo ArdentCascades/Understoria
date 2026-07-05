@@ -29,6 +29,7 @@ import {
   IconProfile,
   type IconProps,
 } from "@/components/visual";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 
 interface NavItem {
   to: string;
@@ -86,6 +87,14 @@ function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
 
 export function BottomNav() {
   const { t } = useTranslation();
+  const keyboardOpen = useVirtualKeyboardOpen();
+  // While the on-screen keyboard is up, `fixed bottom-0` pins to the
+  // LAYOUT viewport that iOS/Android refuse to resize, so the bar
+  // would float detached mid-screen above the keyboard (see
+  // useVirtualKeyboard.ts). Navigation is useless mid-typing anyway —
+  // remove it entirely (layout, a11y tree, tab order) and restore on
+  // keyboard close.
+  if (keyboardOpen) return null;
   return (
     <nav
       aria-label={t("nav.primaryNav")}

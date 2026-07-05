@@ -9,6 +9,21 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Bottom nav no longer detaches while typing.** `position: fixed`
+  pins to the layout viewport, and iOS Safari (and Android Chrome
+  since 108) only pans the VISUAL viewport when the on-screen keyboard
+  opens — so the tab bar, the offline banner, toasts, the update
+  prompt, and the Board/Calendar floating buttons all floated
+  detached mid-screen above the keyboard on every page with an input.
+  A new `useVirtualKeyboardOpen` hook (VisualViewport-based,
+  scale-corrected so pinch-zoom never triggers it, 150px floor so
+  URL-bar chrome never does, and hardware keyboards unaffected) now
+  hides that fixed-bottom chrome while the keyboard is up and restores
+  it on close. Live-region surfaces (offline banner, toasts) hide via
+  opacity with pointer-events gated, so screen-reader announcements
+  still fire mid-typing and nothing invisible stays tappable.
+
 ### Security
 - **Round-3 review: federation cursor poisoning closed.**
   `pullFederatedExchanges` and the three co-organizer pulls advanced

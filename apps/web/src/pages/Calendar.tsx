@@ -30,6 +30,7 @@ import {
   startOfUTCWeek,
   type CalendarEntry,
 } from "@/lib/calendar";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { isOrganizer } from "@/db/projects";
 import { getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { EmptyState } from "@/components/EmptyState";
@@ -98,6 +99,7 @@ export default function CalendarPage() {
     eventRsvps,
   } = useApp();
   const { t, i18n } = useTranslation();
+  const keyboardOpen = useVirtualKeyboardOpen();
 
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     defaultViewForWidth(
@@ -567,18 +569,22 @@ export default function CalendarPage() {
       {/* "+" FAB linking to /events/new. Matches the Board FAB's
           bottom-20 anchor + pb-36 page clearance discipline from
           PR #181 so the last calendar cell never tucks under the
-          floating button. */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
-        <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
-          <Link
-            to="/events/new"
-            aria-label={t("events.calendar.fabAriaLabel")}
-            className="btn-primary"
-          >
-            <span aria-hidden="true">+</span> {t("events.new.title")}
-          </Link>
+          floating button. Hidden while the on-screen keyboard is up —
+          the fixed anchor would float detached mid-screen (see
+          useVirtualKeyboard.ts). */}
+      {!keyboardOpen && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
+          <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
+            <Link
+              to="/events/new"
+              aria-label={t("events.calendar.fabAriaLabel")}
+              className="btn-primary"
+            >
+              <span aria-hidden="true">+</span> {t("events.new.title")}
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
