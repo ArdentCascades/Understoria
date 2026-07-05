@@ -83,6 +83,21 @@ include breaking changes.
   traffic; `0` disables.
 
 ### Fixed
+- **The bottom navigation no longer detaches from the bottom of the
+  screen after the on-screen keyboard closes (iOS).** Fixed-bottom
+  chrome pins to the layout viewport, and iOS sometimes leaves that
+  viewport shrunken or panned for a while after the keyboard
+  dismisses — so the nav (and the offline strip, toasts, update card,
+  and the Board/Calendar action pills) rendered mid-screen with page
+  content visible below them, even though the existing
+  hide-while-typing behavior correctly saw the keyboard as closed.
+  All fixed-bottom chrome now measures the divergence between the
+  layout and visual viewports (on visual-viewport resize AND scroll)
+  and translates itself back onto the bottom the member actually
+  sees. Pinch-zoom keeps classic fixed behavior, and small keyboard
+  accessory bars under the hide threshold now tuck the chrome above
+  themselves instead of behind.
+
 - **Federation cursors can no longer wedge inside a timestamp tie
   (composite-cursor phase 1, server side).** Every federation store
   and GET route now accepts an optional `sinceId` pair component:

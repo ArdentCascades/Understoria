@@ -30,7 +30,11 @@ import {
   startOfUTCWeek,
   type CalendarEntry,
 } from "@/lib/calendar";
-import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
+import {
+  useVirtualKeyboardOpen,
+  useVisualViewportBottomGap,
+  visualViewportGlueStyle,
+} from "@/lib/useVirtualKeyboard";
 import { isOrganizer } from "@/db/projects";
 import { getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { EmptyState } from "@/components/EmptyState";
@@ -100,6 +104,10 @@ export default function CalendarPage() {
   } = useApp();
   const { t, i18n } = useTranslation();
   const keyboardOpen = useVirtualKeyboardOpen();
+  // Same visual-viewport correction as the BottomNav (see
+  // useVirtualKeyboard.ts) so the FAB never floats mid-screen in
+  // iOS's post-keyboard stuck state.
+  const bottomGap = useVisualViewportBottomGap();
 
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     defaultViewForWidth(
@@ -575,7 +583,10 @@ export default function CalendarPage() {
           the fixed anchor would float detached mid-screen (see
           useVirtualKeyboard.ts). */}
       {!keyboardOpen && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4">
+        <div
+        style={visualViewportGlueStyle(bottomGap)}
+        className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4"
+      >
           <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
             <Link
               to="/events/new"
