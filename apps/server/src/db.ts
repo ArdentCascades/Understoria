@@ -333,6 +333,8 @@ export function openDatabase(path: string): DatabaseType {
 }
 
 function migrate(db: DatabaseType): void {
+  // meta must exist before the version read; IF NOT EXISTS makes this
+  // statement idempotent, so it is safe outside the transaction.
   db.exec(`
     CREATE TABLE IF NOT EXISTS meta (
       key TEXT PRIMARY KEY,
@@ -340,6 +342,20 @@ function migrate(db: DatabaseType): void {
     )
   `);
 
+  // ATOMIC: run every pending block — each block's DDL and its
+  // schema_version bump — inside ONE transaction. SQLite DDL
+  // auto-commits per statement, so without this a crash between a
+  // block's `db.exec(...)` and its version-bump `run()` left the
+  // schema applied but the version stale; the next boot re-ran the
+  // block and its bare `CREATE TABLE` / `CREATE INDEX` / `ALTER TABLE
+  // ADD COLUMN` threw "already exists", bricking startup. With the
+  // transaction, a crash rolls everything back to the last recorded
+  // version and the rerun starts clean. (SQLite DDL is transactional,
+  // and the blocks contain no BEGIN/COMMIT of their own.)
+  db.transaction(() => applyMigrations(db))();
+}
+
+function applyMigrations(db: DatabaseType): void {
   const row = db
     .prepare("SELECT value FROM meta WHERE key = 'schema_version'")
     .get() as { value: string } | undefined;
