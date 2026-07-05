@@ -21,6 +21,7 @@
 import Database from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type {
+  AwaitingTransition,
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
@@ -181,6 +182,31 @@ export interface InviteRevocationStore {
   count(): number;
   has(token: string): boolean;
   getByToken(token: string): StoredInviteRevocation | null;
+}
+
+export interface StoredAwaitingTransition {
+  record: AwaitingTransition;
+  /** Server clock at ingestion — the age anchor the /auto-confirm
+   *  window is measured from (docs/auto-confirm-key.md §5). Never
+   *  client-influenced. */
+  receivedAt: number;
+}
+
+/**
+ * Storage for signed awaiting-transition artifacts. Deliberately
+ * NARROW: no list() and no GET route — the artifact is only ever
+ * consulted by this node's own /auto-confirm handler, keyed by
+ * post_id. First-writer-wins per post_id: `insert` is
+ * INSERT-OR-IGNORE, so a re-push (client retry, outbox redelivery,
+ * or a second party attesting) is idempotent and can never reset
+ * the `received_at` age anchor.
+ */
+export interface AwaitingTransitionStore {
+  /** Returns true when a row was inserted, false when the post_id
+   *  already had one (idempotent no-op). */
+  insert(record: AwaitingTransition, receivedAt: number): boolean;
+  getByPostId(postId: string): StoredAwaitingTransition | null;
+  count(): number;
 }
 
 /**
@@ -787,6 +813,35 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '13')",
+    ).run();
+  }
+
+  // Schema v14 — signed awaiting-transition artifacts
+  // (docs/auto-confirm-key.md §5; roadmap "signed awaiting-transition
+  // artifact" row). One row per pending exchange, keyed by post_id
+  // (post id or `project:<id>/task:<id>` label), FIRST-WRITER-WINS —
+  // the PRIMARY KEY plus insert-or-ignore semantics in the store mean
+  // a re-push can never reset the age anchor. `received_at` is the
+  // node's own ingestion clock: the value the /auto-confirm window is
+  // measured from, which no client can backdate. PWA↔node only — no
+  // peer-replication leg (the artifact only matters at the node whose
+  // system key will sign), so no GET route and no peer_pull_state
+  // column.
+  if (current < 14) {
+    db.exec(`
+      CREATE TABLE awaiting_transitions (
+        post_id TEXT PRIMARY KEY,
+        helper_key TEXT NOT NULL,
+        helped_key TEXT NOT NULL,
+        signed_by TEXT NOT NULL,
+        entered_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        received_at INTEGER NOT NULL
+      );
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '14')",
     ).run();
   }
 }
@@ -1533,6 +1588,77 @@ function rowToRedemption(r: RedemptionRowSqlite): StoredRedemption {
       signature: r.signature,
     },
     receivedAt: r.received_at,
+  };
+}
+
+export function createAwaitingTransitionStore(
+  db: DatabaseType,
+): AwaitingTransitionStore {
+  // INSERT OR IGNORE = first-writer-wins on post_id. A retry, an
+  // outbox redelivery, or the second party attesting the same pending
+  // exchange is an idempotent no-op — nothing can reset the
+  // received_at age anchor once the node has one.
+  const insertStmt = db.prepare(`
+    INSERT OR IGNORE INTO awaiting_transitions (
+      post_id, helper_key, helped_key, signed_by,
+      entered_at, node_id, signature, received_at
+    ) VALUES (
+      @postId, @helperKey, @helpedKey, @signedBy,
+      @enteredAt, @nodeId, @signature, @receivedAt
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM awaiting_transitions WHERE post_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM awaiting_transitions",
+  );
+
+  interface Row {
+    post_id: string;
+    helper_key: string;
+    helped_key: string;
+    signed_by: string;
+    entered_at: number;
+    node_id: string;
+    signature: string;
+    received_at: number;
+  }
+
+  return {
+    insert(record, receivedAt) {
+      const info = insertStmt.run({
+        postId: record.postId,
+        helperKey: record.helperKey,
+        helpedKey: record.helpedKey,
+        signedBy: record.signedBy,
+        enteredAt: record.enteredAt,
+        nodeId: record.nodeId,
+        signature: record.signature,
+        receivedAt,
+      });
+      return info.changes > 0;
+    },
+    getByPostId(postId) {
+      const r = getStmt.get(postId) as Row | undefined;
+      if (!r) return null;
+      return {
+        record: {
+          kind: "awaiting_transition",
+          postId: r.post_id,
+          helperKey: r.helper_key,
+          helpedKey: r.helped_key,
+          signedBy: r.signed_by,
+          enteredAt: r.entered_at,
+          nodeId: r.node_id,
+          signature: r.signature,
+        },
+        receivedAt: r.received_at,
+      };
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
   };
 }
 

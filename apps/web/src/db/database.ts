@@ -119,7 +119,12 @@ export interface OutboxRow {
     // docs/invite-revocation.md §4: the signed InviteRevocation pushed
     // to POST /invite-revocations. Like the receipt, enqueued even
     // without a configured node URL.
-    | "invite_revocation";
+    | "invite_revocation"
+    // docs/auto-confirm-key.md §5: the signed AwaitingTransition
+    // pushed to POST /awaiting-transitions when an exchange enters
+    // awaiting_confirmation. The node's received_at stamp for it is
+    // the age anchor the /auto-confirm window is enforced from.
+    | "awaiting_transition";
   // Intentionally NOT a member of this union: "event_rsvp". EventRsvpRow
   // is local-only by design (docs/community-events.md §4 + §7); RSVPs
   // never enter the outbox. The union rejects "event_rsvp" at the

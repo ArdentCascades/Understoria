@@ -24,6 +24,7 @@ import rateLimit from "@fastify/rate-limit";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
 import {
+  createAwaitingTransitionStore,
   createClaimStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
@@ -47,6 +48,7 @@ import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
 import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
+import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
@@ -172,6 +174,7 @@ export async function buildServer({
   const eventStore = createEventStore(db);
   const eventCancellationStore = createEventCancellationStore(db);
   const pullStore = createPeerPullStore(db);
+  const awaitingTransitionStore = createAwaitingTransitionStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -214,12 +217,17 @@ export async function buildServer({
     eventStore,
   });
   await registerConfigRoutes(app, { config, signer });
+  await registerAwaitingTransitionRoutes(app, {
+    store: awaitingTransitionStore,
+  });
   await registerAutoConfirmRoutes(app, {
     store,
     postStore,
+    transitionStore: awaitingTransitionStore,
     signer,
     nodeId: config.nodeId,
     autoConfirmMinHours: config.autoConfirmMinHours,
+    requireTransition: config.autoConfirmRequireTransition,
   });
   await registerPeersRoutes(app, {
     pullStore,

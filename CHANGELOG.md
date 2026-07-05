@@ -9,6 +9,35 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **The auto-confirm waiting window is now server-enforceable
+  (signed awaiting-transition artifact).** Previously the age gate at
+  `POST /auto-confirm` trusted the client-claimed `awaitingSince`, so
+  a caller could always claim an old value and skip the window — and
+  project-task confirmations had no age gate at all. Now, when an
+  exchange enters `awaiting_confirmation` (first confirmation of a
+  post exchange; a claimer marking a project task complete), the
+  acting party signs a small `AwaitingTransition` record that the
+  client pushes to a new `POST /awaiting-transitions` endpoint. The
+  node stamps its OWN clock at ingestion (first-writer-wins per post),
+  and `/auto-confirm` measures the window from that stamp — wall-clock
+  waiting on the node's clock that no client can backdate, covering
+  the project-task path via its label. Rollout knob:
+  `AUTO_CONFIRM_REQUIRE_TRANSITION` (default off) controls whether a
+  request with no artifact is refused (`missing_transition`) or falls
+  back to the legacy advisory behavior while clients upgrade.
+
+### Fixed
+- **Federation cursors can no longer wedge inside a timestamp tie
+  (composite-cursor phase 1, server side).** Every federation store
+  and GET route now accepts an optional `sinceId` pair component:
+  with `(since, sinceId)` the page is strictly after that exact
+  position, so even a batch of hundreds of rows sharing one
+  millisecond pages through cleanly. The legacy `since`-only inclusive
+  cursor is preserved byte-for-byte for existing pullers. Client-side
+  adoption (peer pull + PWA pulls) is specced as phases 2–3 in
+  `docs/composite-federation-cursors.md`.
+
 ### Added
 - **Shift signups (phase 1).** Events can now be broken into
   time-boxed, optionally-capped shifts ("Setup crew, 9–12, 4 spots")

@@ -1108,3 +1108,54 @@ export interface EventCancellation extends EventCancellationPayload {
    *  `canonicalEventCancellationPayload(payload)`. */
   signature: string;
 }
+
+/**
+ * Signed awaiting-transition artifact — the record that makes the
+ * `/auto-confirm` waiting window server-enforceable. See
+ * `docs/auto-confirm-key.md` §5 and the roadmap row it closes.
+ *
+ * When an exchange enters `awaiting_confirmation` (the first party
+ * confirms a post exchange, or a claimer marks a project task
+ * complete), the party who performed that action signs this artifact
+ * and the client pushes it to the community node. The node stamps its
+ * OWN clock (`received_at`) at ingestion; that stamp — not any
+ * client-claimed value — is the age anchor the auto-confirm window is
+ * measured from. A fabricated artifact therefore still has to sit on
+ * the node for the full window before the system key will sign:
+ * wall-clock waiting on the node's clock, which no client can
+ * fast-forward.
+ *
+ * Keyed by `postId` (the post id, or the `project:<id>/task:<id>`
+ * label for project tasks — which is what finally covers the
+ * previously-unbindable project-task path). First-writer-wins per
+ * `postId`: re-pushes are idempotent and cannot reset the anchor.
+ *
+ * FIELD ORDER IS THE WIRE CONTRACT — the canonical serializer emits
+ * the properties in declared order and the signature covers exactly
+ * those bytes. Do NOT alphabetize. Do NOT reorder.
+ */
+export interface AwaitingTransitionPayload {
+  kind: "awaiting_transition";
+  /** Post id, or `project:<projectId>/task:<taskId>` label. The
+   *  lookup key at `/auto-confirm`. */
+  postId: string;
+  /** Helper side of the pending exchange. */
+  helperKey: string;
+  /** Helped side of the pending exchange. */
+  helpedKey: string;
+  /** The party attesting the transition — MUST equal `helperKey` or
+   *  `helpedKey`; the signature verifies against this key. */
+  signedBy: string;
+  /** Epoch ms, the signing device's clock. Client-claimed and
+   *  therefore display/advisory only — the node's `received_at` is
+   *  the enforcement anchor, never this. */
+  enteredAt: number;
+  /** Origin node id. */
+  nodeId: string;
+}
+
+export interface AwaitingTransition extends AwaitingTransitionPayload {
+  /** Ed25519 detached signature by `signedBy` over
+   *  `canonicalAwaitingTransitionPayload(payload)`. */
+  signature: string;
+}

@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import type { Database as DatabaseType } from "better-sqlite3";
 import {
+  canonicalAwaitingTransitionPayload,
   canonicalExchangePayload,
   canonicalPostPayload,
   generateKeyPair,
@@ -16,9 +17,11 @@ import {
 } from "@understoria/shared/crypto";
 import type { Category, Exchange } from "@understoria/shared/types";
 import {
+  createAwaitingTransitionStore,
   createExchangeStore,
   createPostStore,
   openDatabase,
+  type AwaitingTransitionStore,
   type ExchangeStore,
   type PostRecord,
   type PostStore,
@@ -36,6 +39,7 @@ let app: FastifyInstance;
 let db: DatabaseType;
 let store: ExchangeStore;
 let postStore: PostStore;
+let transitionStore: AwaitingTransitionStore;
 let signer: SystemSigner;
 let nowMs: number;
 
@@ -43,6 +47,7 @@ beforeEach(async () => {
   db = openDatabase(":memory:");
   store = createExchangeStore(db);
   postStore = createPostStore(db);
+  transitionStore = createAwaitingTransitionStore(db);
   const sysKp = generateKeyPair();
   signer = createSystemSignerFromSecret(sysKp.secretKey)!;
   nowMs = 1_700_000_000_000;
@@ -50,9 +55,11 @@ beforeEach(async () => {
   await registerAutoConfirmRoutes(app, {
     store,
     postStore,
+    transitionStore,
     signer,
     nodeId: NODE_ID,
     autoConfirmMinHours: 168,
+    requireTransition: false,
     now: () => nowMs,
   });
   await app.ready();
@@ -315,5 +322,224 @@ describe("POST /auto-confirm — authority binding (Round-4)", () => {
       payload: { requests: [bad] },
     });
     expect(res.statusCode).toBe(400);
+  });
+});
+
+/** Sign and store an awaiting-transition artifact for a bound
+ *  request's postId, server-stamped at `receivedAt`. */
+function storeArtifact(opts: {
+  postId: string;
+  helper: KeyPair;
+  helped: KeyPair;
+  receivedAt: number;
+  signer?: "helper" | "helped";
+  helperKeyOverride?: string;
+}): void {
+  const signedBy =
+    (opts.signer ?? "helper") === "helper"
+      ? opts.helper.publicKey
+      : opts.helped.publicKey;
+  const payload = {
+    kind: "awaiting_transition" as const,
+    postId: opts.postId,
+    helperKey: opts.helperKeyOverride ?? opts.helper.publicKey,
+    helpedKey: opts.helped.publicKey,
+    signedBy,
+    enteredAt: 1_000, // deliberately ancient — proves it is IGNORED
+    nodeId: NODE_ID,
+  };
+  const secret =
+    signedBy === opts.helper.publicKey
+      ? opts.helper.secretKey
+      : opts.helped.secretKey;
+  const signature = sign(canonicalAwaitingTransitionPayload(payload), secret);
+  transitionStore.insert({ ...payload, signature }, opts.receivedAt);
+}
+
+describe("POST /auto-confirm — §5 server-anchored window (awaiting-transition artifact)", () => {
+  it("enforces the window from the artifact's received_at, IGNORING both awaitingSince and enteredAt", async () => {
+    // Client claims an ancient awaitingSince AND the artifact carries
+    // an ancient enteredAt — but the node only received the artifact
+    // an hour ago, so the window has NOT elapsed on the node's clock.
+    const { request, helper, helped } = makeBoundRequest({
+      postId: "post_anchor",
+      awaitingSince: nowMs - 400 * 24 * HOUR,
+    });
+    storeArtifact({
+      postId: "post_anchor",
+      helper,
+      helped,
+      receivedAt: nowMs - 1 * HOUR,
+    });
+    const body = await post([request]);
+    expect(body.results[0].status).toBe("ineligible");
+    expect(body.results[0].reason).toBe("window_not_elapsed");
+  });
+
+  it("signs once the artifact has aged past the window on the node's clock", async () => {
+    const { request, helper, helped } = makeBoundRequest({
+      postId: "post_aged",
+      // Client-claimed age is too YOUNG — the trusted anchor wins in
+      // both directions.
+      awaitingSince: nowMs - 1 * HOUR,
+    });
+    storeArtifact({
+      postId: "post_aged",
+      helper,
+      helped,
+      receivedAt: nowMs - 8 * 24 * HOUR,
+    });
+    const body = await post([request]);
+    expect(body.results[0].status).toBe("signed");
+  });
+
+  it("accepts an artifact attested by the HELPED party too", async () => {
+    const { request, helper, helped } = makeBoundRequest({
+      postId: "post_helped_signed",
+    });
+    storeArtifact({
+      postId: "post_helped_signed",
+      helper,
+      helped,
+      receivedAt: nowMs - 8 * 24 * HOUR,
+      signer: "helped",
+    });
+    const body = await post([request]);
+    expect(body.results[0].status).toBe("signed");
+  });
+
+  it("rejects when the artifact's parties do not match the request (no borrowed age)", async () => {
+    const { request, helped } = makeBoundRequest({
+      postId: "post_mismatch",
+    });
+    const stranger = generateKeyPair();
+    storeArtifact({
+      postId: "post_mismatch",
+      helper: stranger, // artifact names a different helper
+      helped,
+      receivedAt: nowMs - 8 * 24 * HOUR,
+    });
+    const body = await post([request]);
+    expect(body.results[0].status).toBe("ineligible");
+    expect(body.results[0].reason).toBe("transition_mismatch");
+  });
+
+  it("first-writer-wins: a re-push cannot reset the age anchor", async () => {
+    const { request, helper, helped } = makeBoundRequest({
+      postId: "post_first_wins",
+    });
+    storeArtifact({
+      postId: "post_first_wins",
+      helper,
+      helped,
+      receivedAt: nowMs - 8 * 24 * HOUR,
+    });
+    // Attacker (or a retry) pushes again with a fresh received_at —
+    // the store keeps the FIRST row, so the aged anchor stands.
+    storeArtifact({
+      postId: "post_first_wins",
+      helper,
+      helped,
+      receivedAt: nowMs - 1,
+    });
+    const body = await post([request]);
+    expect(body.results[0].status).toBe("signed");
+  });
+
+  it("legacy mode (requireTransition=false): no artifact falls back to advisory awaitingSince", async () => {
+    const { request } = makeBoundRequest({ postId: "post_legacy" });
+    const body = await post([request]);
+    expect(body.results[0].status).toBe("signed");
+  });
+
+  it("enforced mode (requireTransition=true): no artifact is refused outright", async () => {
+    const strictApp = Fastify({ logger: false });
+    await registerAutoConfirmRoutes(strictApp, {
+      store,
+      postStore,
+      transitionStore,
+      signer,
+      nodeId: NODE_ID,
+      autoConfirmMinHours: 168,
+      requireTransition: true,
+      now: () => nowMs,
+    });
+    await strictApp.ready();
+    try {
+      const { request } = makeBoundRequest({ postId: "post_strict" });
+      const res = await strictApp.inject({
+        method: "POST",
+        url: "/auto-confirm",
+        payload: { requests: [request] },
+      });
+      const body = res.json() as {
+        results: Array<{ status: string; reason?: string }>;
+      };
+      expect(body.results[0].status).toBe("ineligible");
+      expect(body.results[0].reason).toBe("missing_transition");
+    } finally {
+      await strictApp.close();
+    }
+  });
+
+  it("enforced mode still signs when a properly-aged artifact exists (project-task path included)", async () => {
+    const strictApp = Fastify({ logger: false });
+    await registerAutoConfirmRoutes(strictApp, {
+      store,
+      postStore,
+      transitionStore,
+      signer,
+      nodeId: NODE_ID,
+      autoConfirmMinHours: 168,
+      requireTransition: true,
+      now: () => nowMs,
+    });
+    await strictApp.ready();
+    try {
+      // Project-task label — the previously-unbindable path the
+      // artifact finally covers: the window is enforceable from
+      // received_at even though no post exists to bind to.
+      const helper = generateKeyPair();
+      const helped = generateKeyPair();
+      const postId = "project:p1/task:t1";
+      const payload = {
+        postId,
+        helperKey: helper.publicKey,
+        helpedKey: helped.publicKey,
+        hours: 2,
+        category: "other" as Category,
+        completedAt: nowMs,
+      };
+      const helperSignature = sign(
+        canonicalExchangePayload(payload),
+        helper.secretKey,
+      );
+      storeArtifact({
+        postId,
+        helper,
+        helped,
+        receivedAt: nowMs - 8 * 24 * HOUR,
+      });
+      const res = await strictApp.inject({
+        method: "POST",
+        url: "/auto-confirm",
+        payload: {
+          requests: [
+            {
+              exchangeId: "ex_task",
+              awaitingSince: nowMs - 8 * 24 * HOUR,
+              helperSignature,
+              payload,
+            },
+          ],
+        },
+      });
+      const body = res.json() as {
+        results: Array<{ status: string; reason?: string }>;
+      };
+      expect(body.results[0].status).toBe("signed");
+    } finally {
+      await strictApp.close();
+    }
   });
 });

@@ -20,9 +20,17 @@
  */
 import { db } from "./database";
 import { uuid } from "@/lib/id";
-import { canonicalExchangePayload, sign } from "@/lib/crypto";
+import {
+  canonicalAwaitingTransitionPayload,
+  canonicalExchangePayload,
+  sign,
+} from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
-import { enqueueExchangeOutbox, flushOutboxNow } from "@/lib/outbox";
+import {
+  enqueueAwaitingTransition,
+  enqueueExchangeOutbox,
+  flushOutboxNow,
+} from "@/lib/outbox";
 import { diffAchievements } from "@/lib/achievements";
 import { evaluateSafeguards, exceedsDailyLimit } from "@/lib/safeguards";
 import { getNodeConfig } from "./nodeConfig";
@@ -649,9 +657,20 @@ export async function markProjectTaskComplete(
       throw new Error("Actual hours must be a positive number.");
     actual = roundHours(actualHours);
   }
+  // Completer's secret, resolved BEFORE the transaction (the unwrap
+  // touches secretKeys, which must stay off the rw scope). Used to
+  // sign the §5 awaiting-transition artifact. Soft-degrade: a locked
+  // session marks the task complete exactly as before — the artifact
+  // is an enforcement upgrade, not a gate on the member's own action.
+  let completerSecret: string | null = null;
+  try {
+    completerSecret = await getSecretKey(memberKey);
+  } catch {
+    completerSecret = null;
+  }
   return db.transaction(
     "rw",
-    [db.projects, db.projectTasks, db.projectActivity],
+    [db.projects, db.projectTasks, db.projectActivity, db.outbox, db.settings],
     async () => {
       const task = await db.projectTasks.get(taskId);
       if (!task) throw new Error("Task not found.");
@@ -677,6 +696,33 @@ export async function markProjectTaskComplete(
         { taskId, estimatedHours: task.estimatedHours, actualHours: actual },
         project?.nodeId ?? "",
       );
+
+      // Signed awaiting-transition artifact (auto-confirm-key.md §5).
+      // This is what finally makes the auto-confirm window enforceable
+      // for the PROJECT-TASK path — the one /auto-confirm can't bind
+      // to a signed post (projects don't federate): the node stamps
+      // received_at at ingestion and measures the window from its own
+      // clock. Signed by the completer (the helper side of the
+      // eventual exchange); helped side is the project's primary
+      // organizer, matching the sweep's request construction.
+      if (completerSecret && project) {
+        const transitionPayload = {
+          kind: "awaiting_transition" as const,
+          postId: `project:${task.projectId}/task:${taskId}`,
+          helperKey: memberKey,
+          helpedKey: project.organizerKey,
+          signedBy: memberKey,
+          enteredAt: Date.now(),
+          nodeId: project.nodeId ?? "",
+        };
+        await enqueueAwaitingTransition({
+          ...transitionPayload,
+          signature: sign(
+            canonicalAwaitingTransitionPayload(transitionPayload),
+            completerSecret,
+          ),
+        });
+      }
       return updated;
     },
   );

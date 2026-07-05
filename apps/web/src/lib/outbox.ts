@@ -29,6 +29,7 @@ import {
   submitEventCancellationToNode,
   submitEventToNode,
   submitExchangeToNode,
+  submitAwaitingTransitionToNode,
   submitInviteRevocationToNode,
   submitPostToNode,
   submitRedemptionReceiptToNode,
@@ -37,6 +38,7 @@ import {
   type SubmitResult,
 } from "@/lib/nodeSubmit";
 import type {
+  AwaitingTransition,
   ClaimRecord,
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -275,6 +277,22 @@ export async function enqueueInviteRevocationOutbox(
   });
 }
 
+
+/**
+ * Insert an outbox row for a signed awaiting-transition artifact —
+ * docs/auto-confirm-key.md §5. Called inside the transaction that
+ * moves an exchange into `awaiting_confirmation` (confirmExchange's
+ * first-confirm branch; markProjectTaskComplete), so the status flip
+ * and its artifact land atomically. Record id is the postId (or the
+ * project-task label) — the artifact's identity/dedup key, matching
+ * the server's first-writer-wins primary key.
+ */
+export async function enqueueAwaitingTransition(
+  record: AwaitingTransition,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("awaiting_transition", record.postId, record);
+}
+
 async function enqueueOutbox(
   kind: OutboxRow["kind"],
   recordId: string,
@@ -429,7 +447,8 @@ export async function flushOutboxOnce(
       | Event
       | EventCancellation
       | RedemptionReceipt
-      | InviteRevocation;
+      | InviteRevocation
+      | AwaitingTransition;
     try {
       payload = JSON.parse(row.payload) as
         | Exchange
@@ -442,7 +461,8 @@ export async function flushOutboxOnce(
         | Event
         | EventCancellation
         | RedemptionReceipt
-        | InviteRevocation;
+        | InviteRevocation
+        | AwaitingTransition;
     } catch (err) {
       await db.outbox.update(row.id, {
         status: "poisoned",
@@ -507,6 +527,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "invite_revocation") {
       result = await submitInviteRevocationToNode(
         payload as InviteRevocation,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "awaiting_transition") {
+      result = await submitAwaitingTransitionToNode(
+        payload as AwaitingTransition,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

@@ -122,6 +122,18 @@ export interface Config {
    * matching the design note's pilot recommendation.
    */
   autoConfirmMinHours: number;
+  /**
+   * When true, `POST /auto-confirm` REFUSES to sign a request whose
+   * `postId` has no stored awaiting-transition artifact
+   * (`missing_transition`) — the fully-enforced mode of
+   * `docs/auto-confirm-key.md` §5. Default false for rollout: clients
+   * must first ship the artifact-pushing build and existing pending
+   * confirmations must drain through, or every in-flight auto-confirm
+   * would strand. When an artifact IS present the window is enforced
+   * from its server-stamped `received_at` regardless of this flag —
+   * the flag only controls what happens when one is absent.
+   */
+  autoConfirmRequireTransition: boolean;
 }
 
 function asInt(name: string, raw: string | undefined, fallback: number): number {
@@ -175,6 +187,10 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       "AUTO_CONFIRM_MIN_HOURS",
       env.AUTO_CONFIRM_MIN_HOURS,
       168,
+    ),
+    autoConfirmRequireTransition: asBool(
+      env.AUTO_CONFIRM_REQUIRE_TRANSITION,
+      false,
     ),
   };
 }
