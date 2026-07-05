@@ -120,6 +120,79 @@ export async function createProject(
   return project;
 }
 
+/**
+ * One staged task for `createProjectWithTasks`. `follows` holds
+ * INDEXES into the same staged array (earlier entries only) — the
+ * creator remaps them to the real task ids it mints, so template
+ * content can express "task 2 follows task 0" without knowing ids.
+ */
+export interface StagedTaskInput {
+  title: string;
+  description: string;
+  category?: ProjectCategory;
+  estimatedHours: number;
+  urgency?: Urgency;
+  requiredSkills?: readonly string[];
+  /** Indexes of earlier staged tasks this one follows (soft-block
+   *  dependencies per docs/task-ordering-and-dependencies.md). A
+   *  forward or self reference is a programming error and throws. */
+  follows?: readonly number[];
+}
+
+/**
+ * Create a project AND its staged tasks in ONE transaction — the
+ * template flow's creator. The previous shape (createProject, then an
+ * addProjectTask loop from the page) left a documented partial-write
+ * window: a crash mid-loop produced a project with half its template
+ * tasks. Composing the existing helpers inside one ambient
+ * transaction removes that state entirely — either the project lands
+ * with every included task (and its dependency edges), or nothing
+ * lands.
+ */
+export async function createProjectWithTasks(
+  organizerKey: string,
+  input: CreateProjectInput,
+  nodeId: string,
+  tasks: readonly StagedTaskInput[],
+): Promise<{ project: Project; tasks: ProjectTask[] }> {
+  // Validate follows references before opening the transaction — a
+  // bad index is a bug in the caller (template content), not a
+  // runtime condition to half-apply.
+  tasks.forEach((task, i) => {
+    for (const dep of task.follows ?? []) {
+      if (!Number.isInteger(dep) || dep < 0 || dep >= i) {
+        throw new Error(
+          `Staged task ${i} follows invalid index ${dep} — follows may only reference earlier staged tasks.`,
+        );
+      }
+    }
+  });
+  return db.transaction(
+    "rw",
+    [db.projects, db.projectTasks, db.projectActivity],
+    async () => {
+      const project = await createProject(organizerKey, input, nodeId);
+      const created: ProjectTask[] = [];
+      for (const task of tasks) {
+        const row = await addProjectTask(project.id, organizerKey, {
+          title: task.title,
+          description: task.description,
+          category: task.category ?? project.category,
+          estimatedHours: task.estimatedHours,
+          urgency: task.urgency ?? "low",
+          requiredSkills: [...(task.requiredSkills ?? [])],
+          // Remap staged indexes to the ids just minted. follows only
+          // references earlier entries (validated above), so every
+          // dependency id exists by the time we need it.
+          dependencies: (task.follows ?? []).map((i) => created[i].id),
+        });
+        created.push(row);
+      }
+      return { project, tasks: created };
+    },
+  );
+}
+
 export async function launchProject(
   projectId: string,
   organizerKey: string,
