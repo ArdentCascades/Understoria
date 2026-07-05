@@ -9,6 +9,57 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **Round-3 review: federation cursor poisoning closed.**
+  `pullFederatedExchanges` and the three co-organizer pulls advanced
+  their persisted cursor past rows whose signature FAILED verification,
+  using the rejected row's own attacker-chosen timestamp — one forged
+  row from a compromised node or plain-HTTP MITM wedged that pull
+  forever. Refused rows never move the cursor now. Defense in depth:
+  every client pull bounds its cursor timestamp (positive integer,
+  ≤ now+24h) so a fabricated-signer row — self-consistently signed by
+  keypairs a malicious node invents — cannot wedge the cursor either;
+  claims (unsigned by design) get the same bound server-side, where
+  `claimedAt` previously accepted `Infinity`/`1e18` and one stored row
+  hid all subsequent claims from every puller.
+- **§4 rotation-history smuggling closed.** The same-nodeId
+  fail-closed guard compared only the `current` key — which is public
+  and can be echoed verbatim by an impostor peer smuggling its own key
+  in a forged `history` entry, letting fabricated exchanges verify as
+  "auto-confirmed by" the victim node. The guard now requires the full
+  published trail (current AND history) to agree, and peer-served
+  `retiredAt` values are bounded at parse time (positive integer,
+  ≤ now+24h).
+
+### Fixed
+- **Round-3 review: invite-revocation regressions.** `redeemInvite`
+  did not treat `redeemed_despite_revocation` as terminal, so a
+  converged token could be redeemed again on a shared device — minting
+  a ghost identity with a fresh seed balance and clobbering the
+  converged state. And the revocation pull advanced its cursor past an
+  authority-mismatch drop, permanently stranding a genuine revocation
+  when an attacker's placeholder landed first; the drop now leaves the
+  cursor untouched so the genuine record re-applies once the receipt
+  corrects the row.
+- **Never-exported tables were exported.** `eventRsvps` (the member's
+  event-attendance graph) and `eventProjectLinks` (local-project
+  pointers) are declared "never synced, never exported, never
+  federated" by the schema but were missing from
+  `EXPORT_EXCLUDED_TABLES`; both now stay out of the shareable backup
+  bundle, and `softPurge` clears `eventProjectLinks` (it already
+  cleared `eventRsvps`).
+- **Crash-atomicity.** Server schema migrations now run DDL + version
+  bump in one transaction (a crash mid-migration bricked the next boot
+  with "table already exists"); `createMember` writes the key and the
+  member row atomically; `redeemInvite`'s mint mode joins the member/
+  key writes to the invite+receipt transaction, closing the
+  orphan-identity crash window §5.2 exists to prevent.
+- **Doc drift.** Three stale references describing the redemptions
+  cursor as exclusive (`> since`) corrected to the actual inclusive
+  `>=`-with-token-tiebreak contract; the theoretical >page-size
+  same-timestamp tie wedge is filed as a roadmap deferred item
+  (composite cursors need their own design pass).
+
 ### Added
 - **Invite revocation now converges across devices (Phase 1).** A
   revoked invite that was redeemed anyway used to show `revoked` only

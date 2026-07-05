@@ -262,7 +262,15 @@ export async function redeemInvite(
 
   const existing = await db.invites.get(invite.token);
   if (existing) {
-    if (existing.status === "redeemed") {
+    if (
+      existing.status === "redeemed" ||
+      // Terminal too: the token was consumed (redeemed despite the
+      // inviter's revocation, docs/invite-revocation.md §5). Without
+      // this arm the row fell through the guard and a second redeem
+      // on a shared device could mint a fresh identity + seed balance
+      // and clobber the converged state back to plain "redeemed".
+      existing.status === "redeemed_despite_revocation"
+    ) {
       return { ok: false, error: "already_redeemed" };
     }
     if (existing.status === "revoked") {
@@ -293,26 +301,31 @@ export async function redeemInvite(
     forceNewIdentity: opts.forceNewIdentity,
   });
 
-  let member: Member;
+  let attachedMember: Member | null = null;
   let signingSecret: string | null = null;
+  let mintKp: { publicKey: string; secretKey: string } | null = null;
   if (mode === "attach") {
     // Attach: no keypair minting, no member creation — and critically
     // no second starting balance (createMember would seed one). The
     // invite screen's name field is an EDIT of the existing display
     // name; an unchanged (or blank) name is a no-op.
-    member = currentMemberRow as Member;
+    attachedMember = currentMemberRow as Member;
     const name = displayName.trim();
-    if (name && name !== member.displayName) {
-      await db.members.update(member.publicKey, { displayName: name });
-      member = { ...member, displayName: name };
+    if (name && name !== attachedMember.displayName) {
+      await db.members.update(attachedMember.publicKey, {
+        displayName: name,
+      });
+      attachedMember = { ...attachedMember, displayName: name };
     }
     // Phase 1: the receipt is signed by the ATTACHED key (§5.2). The
     // key may be passphrase-wrapped; getSecretKey handles unwrapping
     // and throws if the session is locked — in that edge case the
     // local redemption still lands and only the receipt is skipped
-    // (best-effort, logged below).
+    // (best-effort, logged below). It stays OUTSIDE the transaction
+    // below: Dexie commits on any non-DB await, and unwrapping is
+    // WebCrypto work.
     try {
-      signingSecret = await getSecretKey(member.publicKey);
+      signingSecret = await getSecretKey(attachedMember.publicKey);
     } catch (err) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn(
@@ -322,59 +335,76 @@ export async function redeemInvite(
       }
     }
   } else {
-    const kp = generateKeyPair();
-    member = await createMember(
-      { publicKey: kp.publicKey, displayName },
-      nodeId,
-    );
-    // createMember skips secret-key generation when a publicKey is
-    // supplied, so we persist it explicitly.
-    await db.secretKeys.put({
-      publicKey: kp.publicKey,
-      secretKey: kp.secretKey,
-    });
-    signingSecret = kp.secretKey;
+    mintKp = generateKeyPair();
+    signingSecret = mintKp.secretKey;
   }
 
   const redeemedAt = Date.now();
 
-  // Phase 1 (`docs/invite-redemption.md` §6): sign the redemption
-  // receipt — the new member's attestation over the inviter's
-  // original signed invite, embedded verbatim. Signed in BOTH modes;
-  // the only difference is which key holds the pen.
-  let receipt: RedemptionReceipt | null = null;
-  if (signingSecret) {
-    const payload: RedemptionPayload = {
-      invite,
-      redeemedBy: member.publicKey,
-      displayName: member.displayName,
-      redeemedAt,
-    };
-    receipt = {
-      ...payload,
-      signature: sign(canonicalRedemptionPayload(payload), signingSecret),
-    };
-  }
+  // EVERYTHING lands atomically (§7): the minted member row + its
+  // secret key (mint mode), the consumed invite row, and the enqueued
+  // receipt. Before the member/key writes joined this transaction, a
+  // crash after them but before the invite flip left a minted
+  // identity (with a seed balance) beside a still-"open" invite; the
+  // retry then minted a SECOND keypair — the exact orphan-identity
+  // sequence §5.2 exists to prevent. Signing is synchronous tweetnacl,
+  // so building the receipt inside the transaction is safe (no non-DB
+  // await to trigger Dexie's premature commit).
+  const member = await db.transaction(
+    "rw",
+    [db.invites, db.outbox, db.members, db.secretKeys],
+    async () => {
+      let m: Member;
+      if (mintKp) {
+        m = await createMember(
+          { publicKey: mintKp.publicKey, displayName },
+          nodeId,
+        );
+        // createMember skips secret-key generation when a publicKey
+        // is supplied, so we persist it explicitly.
+        await db.secretKeys.put({
+          publicKey: mintKp.publicKey,
+          secretKey: mintKp.secretKey,
+        });
+      } else {
+        m = attachedMember as Member;
+      }
 
-  // The invite row and its receipt land atomically (§7) — a crash
-  // between the two would otherwise leave a consumed token whose
-  // proof-of-joining can never be delivered.
-  await db.transaction("rw", [db.invites, db.outbox], async () => {
-    await db.invites.put({
-      token: invite.token,
-      inviterKey: invite.inviterKey,
-      nodeId: invite.nodeId,
-      createdAt: invite.createdAt,
-      expiresAt: invite.expiresAt,
-      status: "redeemed",
-      redeemedBy: member.publicKey,
-      redeemedAt,
-      encoded,
-    });
-    if (receipt) {
-      await enqueueRedemptionReceiptOutbox(receipt);
-    }
-  });
+      // Phase 1 (`docs/invite-redemption.md` §6): sign the redemption
+      // receipt — the new member's attestation over the inviter's
+      // original signed invite, embedded verbatim. Signed in BOTH
+      // modes; the only difference is which key holds the pen.
+      let receipt: RedemptionReceipt | null = null;
+      if (signingSecret) {
+        const payload: RedemptionPayload = {
+          invite,
+          redeemedBy: m.publicKey,
+          displayName: m.displayName,
+          redeemedAt,
+        };
+        receipt = {
+          ...payload,
+          signature: sign(canonicalRedemptionPayload(payload), signingSecret),
+        };
+      }
+
+      await db.invites.put({
+        token: invite.token,
+        inviterKey: invite.inviterKey,
+        nodeId: invite.nodeId,
+        createdAt: invite.createdAt,
+        expiresAt: invite.expiresAt,
+        status: "redeemed",
+        redeemedBy: m.publicKey,
+        redeemedAt,
+        encoded,
+      });
+      if (receipt) {
+        await enqueueRedemptionReceiptOutbox(receipt);
+      }
+      return m;
+    },
+  );
 
   return {
     ok: true,

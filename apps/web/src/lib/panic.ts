@@ -226,6 +226,9 @@ export async function softPurge(): Promise<PurgeResult> {
   //     invite links.
   //   - `votes`: voterKey↔choice rows are a governance-participation
   //     graph, same personal-relief class as the RSVPs.
+  //   - `eventProjectLinks`: linkedBy↔event↔project rows tie the
+  //     member to a local-only project and a physical gathering — the
+  //     schema declares it the same posture as `eventRsvps`/`blocks`.
   await db.transaction(
     "rw",
     [
@@ -234,6 +237,7 @@ export async function softPurge(): Promise<PurgeResult> {
       db.messages,
       db.drafts,
       db.eventRsvps,
+      db.eventProjectLinks,
       db.outbox,
       db.invites,
       db.votes,
@@ -244,6 +248,7 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.messages.clear();
       await db.drafts.clear();
       await db.eventRsvps.clear();
+      await db.eventProjectLinks.clear();
       await db.outbox.clear();
       await db.invites.clear();
       await db.votes.clear();
@@ -254,6 +259,7 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("messages");
   tables.push("drafts");
   tables.push("eventRsvps");
+  tables.push("eventProjectLinks");
   tables.push("outbox");
   tables.push("invites");
   tables.push("votes");

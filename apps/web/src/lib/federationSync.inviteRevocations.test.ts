@@ -219,10 +219,80 @@ describe("pullFederatedInviteRevocations", () => {
     const row = await db.invites.get(invite.token);
     expect(row?.status).toBe("redeemed");
     expect(row?.revokedAt ?? null).toBeNull();
-    // Cursor still advances past the (rejected-on-authority) row.
+    // The cursor does NOT advance past an authority-mismatch drop
+    // (same posture as a bad signature): the mismatch can be
+    // transient — an attacker's placeholder landing first makes the
+    // REAL inviter's revocation mismatch until the receipt corrects
+    // the row — so the dropped row stays below the high-water mark
+    // and is re-evaluated on every pull.
     expect(await getSetting(SETTING_KEYS.federationLastInviteRevocationPull)).toBe(
-      "200",
+      "0",
     );
+  });
+
+  it("recovers the genuine revocation once the receipt corrects an attacker's placeholder (mismatch is transient)", async () => {
+    // Adversarial ordering: an attacker who learned the token signs a
+    // revocation FIRST, so the placeholder row carries the attacker's
+    // inviterKey and the real inviter's revocation initially
+    // mismatches. Because the mismatch drop does not advance the
+    // cursor, the genuine revocation is re-served after the receipt
+    // corrects the row, and the device still converges to
+    // redeemed_despite_revocation.
+    const realInviter = generateKeyPair();
+    const attacker = generateKeyPair();
+    const { invite } = makeSignedInvite({ inviter: realInviter });
+    const { receipt } = makeReceipt({ invite });
+    const forged = makeRevocation({ inviter: attacker, token: invite.token });
+    const genuine = makeRevocation({
+      inviter: realInviter,
+      token: invite.token,
+      revokedAt: 7_777,
+    });
+
+    // Pull 1: both revocations, no receipt yet. The forged one lands
+    // as the placeholder; the genuine one mismatches and is dropped
+    // WITHOUT advancing past receivedAt=105.
+    stubFeeds({
+      inviteRevocations: [
+        { ...forged, receivedAt: 100 },
+        { ...genuine, receivedAt: 105 },
+      ],
+    });
+    await pullFederatedInviteRevocations();
+    expect((await db.invites.get(invite.token))?.inviterKey).toBe(
+      attacker.publicKey,
+    );
+    expect(
+      await getSetting(SETTING_KEYS.federationLastInviteRevocationPull),
+    ).toBe("100");
+
+    // The receipt arrives: the placeholder was NOT authoritative
+    // (attacker key ≠ embedded inviter key), so the row corrects to
+    // plain redeemed with the REAL inviterKey.
+    vi.unstubAllGlobals();
+    stubFeeds({ redemptions: [{ ...receipt, receivedAt: 1 }] });
+    await pullFederatedRedemptions();
+    const corrected = await db.invites.get(invite.token);
+    expect(corrected?.status).toBe("redeemed");
+    expect(corrected?.inviterKey).toBe(realInviter.publicKey);
+
+    // Pull 2: the inclusive >= cursor re-serves both revocations. The
+    // forged one now mismatches (inert); the genuine one matches and
+    // converges the row.
+    vi.unstubAllGlobals();
+    stubFeeds({
+      inviteRevocations: [
+        { ...forged, receivedAt: 100 },
+        { ...genuine, receivedAt: 105 },
+      ],
+    });
+    await pullFederatedInviteRevocations();
+    const final = await db.invites.get(invite.token);
+    expect(final?.status).toBe("redeemed_despite_revocation");
+    expect(final?.revokedAt).toBe(7_777);
+    expect(
+      await getSetting(SETTING_KEYS.federationLastInviteRevocationPull),
+    ).toBe("105");
   });
 
   it("skips a revocation whose signature does not verify without advancing the cursor", async () => {

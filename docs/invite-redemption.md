@@ -344,8 +344,12 @@ surfaces the poisoned row — which is exactly how the redeeming
 member finds out her link was redeemed twice (a stolen-link tell).
 
 **`GET /redemptions?since=<ms>&limit=<n>`** — returns receipts with
-`receivedAt > since`, ascending, capped at 200/1000 like the sibling
-routes. **Deviation from the siblings, named deliberately:** the
+`receivedAt >= since` (INCLUSIVE, with a `token` tiebreak in the
+ordering), ascending, capped at 200/1000 like the sibling routes. The
+inclusive cursor is deliberate: two receipts sharing a `receivedAt`
+millisecond could otherwise straddle a page boundary and the strict
+`>` cursor skipped the un-served one forever. Pullers merge
+idempotently by token, so a re-served boundary row is a no-op. **Deviation from the siblings, named deliberately:** the
 cursor is the server-assigned `receivedAt`, not the client-claimed
 `redeemedAt`. The convergence requirement ("inviter offline for a
 week must still converge") makes client-clock cursors unacceptable

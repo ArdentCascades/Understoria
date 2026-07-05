@@ -37,6 +37,15 @@ import { db } from "@/db/database";
  *   - `pairingLog` — the "which devices I have authorized" history is
  *     device-graph metadata in the same personal-relief class as
  *     blocks; it does not belong in a shareable file.
+ *   - `eventRsvps` — the member's event-attendance graph (who went
+ *     where), which `docs/community-events.md` §4.2/§7 and the schema
+ *     declare "never synced, never exported, never federated"; the
+ *     events design promises never to aggregate attendance, and a
+ *     shareable backup file is exactly such an aggregation surface.
+ *   - `eventProjectLinks` — same posture as `eventRsvps` and `blocks`
+ *     per the schema: ties a federated event to a LOCAL-ONLY project
+ *     with the linker's key; a project pointer must never leave the
+ *     device in a file the member may hand to someone else.
  */
 export const EXPORT_EXCLUDED_TABLES = [
   "secretKeys",
@@ -44,6 +53,8 @@ export const EXPORT_EXCLUDED_TABLES = [
   "previouslyBlocked",
   "invites",
   "pairingLog",
+  "eventRsvps",
+  "eventProjectLinks",
 ] as const;
 
 /**

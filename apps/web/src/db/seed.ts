@@ -63,10 +63,11 @@ export async function createMember(
   nodeId: string,
 ): Promise<Member> {
   let publicKey = partial.publicKey;
+  let mintedSecret: string | null = null;
   if (!publicKey) {
     const kp = generateKeyPair();
     publicKey = kp.publicKey;
-    await db.secretKeys.put({ publicKey, secretKey: kp.secretKey });
+    mintedSecret = kp.secretKey;
   }
   const member: Member = {
     publicKey,
@@ -80,7 +81,20 @@ export async function createMember(
     nodeId: partial.nodeId ?? nodeId,
     locationZone: partial.locationZone ?? "",
   };
-  await db.members.put(member);
+  // The key and the member row land together — a crash between the
+  // two writes otherwise leaves either an orphan secret key or a
+  // member who owns no key and can never sign anything. Dexie joins
+  // this to a surrounding transaction when the caller already opened
+  // one over these tables (e.g. redeemInvite's mint path).
+  await db.transaction("rw", [db.secretKeys, db.members], async () => {
+    if (mintedSecret !== null) {
+      await db.secretKeys.put({
+        publicKey: member.publicKey,
+        secretKey: mintedSecret,
+      });
+    }
+    await db.members.put(member);
+  });
   return member;
 }
 

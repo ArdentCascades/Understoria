@@ -48,6 +48,32 @@ export interface FederationSyncResult {
 }
 
 /**
+ * A pulled row's CURSOR timestamp must be a plausible epoch-ms value:
+ * a positive integer no further than a day in the future (the same
+ * clock-skew grace the server-side validators and `parseInviteRevocation`
+ * allow).
+ *
+ * This is the client half of the cursor-poisoning defense. The server
+ * bounds these fields at ingestion (`validate.ts`), but a compromised
+ * community node — or a plain-HTTP MITM on a pilot deployment — does
+ * not need its store: it can serve fabricated rows directly, signed by
+ * keypairs it invents (self-consistent signatures verify). One such
+ * row with a far-future timestamp would jump the persisted high-water
+ * mark past every legitimate later record, silently wedging that pull
+ * forever. Rows failing this bound are skipped WITHOUT advancing the
+ * cursor, exactly like a bad signature.
+ */
+const CURSOR_STAMP_MAX_FUTURE_MS = 24 * 60 * 60 * 1000;
+function plausibleCursorStamp(v: unknown): v is number {
+  return (
+    typeof v === "number" &&
+    Number.isInteger(v) &&
+    v > 0 &&
+    v <= Date.now() + CURSOR_STAMP_MAX_FUTURE_MS
+  );
+}
+
+/**
  * Pull posts from the configured community node that originated from
  * peer nodes. Inserts them into the local posts table with lifecycle
  * defaults (open, unclaimed) so they appear on the Board alongside
@@ -96,7 +122,7 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
     // below is the only thing that makes a row attributable.
     if (
       typeof r.id !== "string" ||
-      typeof r.createdAt !== "number" ||
+      !plausibleCursorStamp(r.createdAt) ||
       (r.type !== "NEED" && r.type !== "OFFER") ||
       typeof r.category !== "string" ||
       typeof r.title !== "string" ||
@@ -198,7 +224,9 @@ export async function pullFederatedClaims(): Promise<number> {
     if (
       typeof r.postId !== "string" ||
       typeof r.claimerKey !== "string" ||
-      typeof r.claimedAt !== "number"
+      // Claims are unsigned by design, so the timestamp bound is the
+      // ONLY thing keeping a malicious node from wedging this cursor.
+      !plausibleCursorStamp(r.claimedAt)
     )
       continue;
 
@@ -283,7 +311,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
       typeof r.taskId !== "string" ||
       typeof r.authorKey !== "string" ||
       typeof r.body !== "string" ||
-      typeof r.createdAt !== "number" ||
+      !plausibleCursorStamp(r.createdAt) ||
       typeof r.nodeId !== "string" ||
       typeof r.signature !== "string"
     ) {
@@ -418,7 +446,7 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
       typeof r.hoursExchanged !== "number" ||
       typeof r.helperSignature !== "string" ||
       typeof r.helpedSignature !== "string" ||
-      typeof r.completedAt !== "number" ||
+      !plausibleCursorStamp(r.completedAt) ||
       typeof r.category !== "string" ||
       typeof r.nodeId !== "string"
     ) {
@@ -452,8 +480,11 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
     };
 
     if (!verifyExchange(exchange)) {
+      // A row we refused must never move the high-water mark — its
+      // completedAt is attacker-chosen and one forged row would strand
+      // every legitimate later exchange behind the poisoned cursor.
+      // Same posture as pullFederatedPosts.
       skipped += 1;
-      advanceCursor();
       continue;
     }
 
@@ -516,7 +547,7 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
       typeof r.projectId !== "string" ||
       typeof r.inviterKey !== "string" ||
       typeof r.inviteeKey !== "string" ||
-      typeof r.createdAt !== "number" ||
+      !plausibleCursorStamp(r.createdAt) ||
       typeof r.expiresAt !== "number" ||
       typeof r.nodeId !== "string" ||
       typeof r.signature !== "string"
@@ -542,8 +573,8 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
     };
 
     if (!verifyCoOrganizerInvitation(record)) {
+      // Never advance past a refused row — see pullFederatedExchanges.
       skipped += 1;
-      advanceCursor();
       continue;
     }
 
@@ -613,7 +644,7 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
       typeof r.invitationId !== "string" ||
       typeof r.inviteeKey !== "string" ||
       (r.decision !== "accept" && r.decision !== "decline") ||
-      typeof r.decidedAt !== "number" ||
+      !plausibleCursorStamp(r.decidedAt) ||
       typeof r.nodeId !== "string" ||
       typeof r.signature !== "string"
     ) {
@@ -637,8 +668,8 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
     };
 
     if (!verifyCoOrganizerInvitationResponse(record)) {
+      // Never advance past a refused row — see pullFederatedExchanges.
       skipped += 1;
-      advanceCursor();
       continue;
     }
 
@@ -708,7 +739,7 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
       typeof r.id !== "string" ||
       typeof r.invitationId !== "string" ||
       typeof r.inviterKey !== "string" ||
-      typeof r.revokedAt !== "number" ||
+      !plausibleCursorStamp(r.revokedAt) ||
       typeof r.nodeId !== "string" ||
       typeof r.signature !== "string"
     ) {
@@ -731,8 +762,8 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
     };
 
     if (!verifyCoOrganizerInvitationRevocation(record)) {
+      // Never advance past a refused row — see pullFederatedExchanges.
       skipped += 1;
-      advanceCursor();
       continue;
     }
 
@@ -813,7 +844,7 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
       typeof r.location !== "string" ||
       (r.capacity !== null && typeof r.capacity !== "number") ||
       (r.templateId !== null && typeof r.templateId !== "string") ||
-      typeof r.createdAt !== "number" ||
+      !plausibleCursorStamp(r.createdAt) ||
       typeof r.createdBy !== "string" ||
       typeof r.nodeId !== "string" ||
       typeof r.signature !== "string"
@@ -922,7 +953,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
       r.kind !== "event_cancellation" ||
       typeof r.eventId !== "string" ||
       typeof r.reason !== "string" ||
-      typeof r.cancelledAt !== "number" ||
+      !plausibleCursorStamp(r.cancelledAt) ||
       typeof r.createdBy !== "string" ||
       typeof r.nodeId !== "string" ||
       typeof r.signature !== "string"
@@ -1049,7 +1080,7 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
     const r = raw as Record<string, unknown>;
     const receivedAt = r.receivedAt;
     const parsed = parseRedemption(raw);
-    if (!parsed.ok || typeof receivedAt !== "number") {
+    if (!parsed.ok || !plausibleCursorStamp(receivedAt)) {
       skipped += 1;
       continue;
     }
@@ -1233,7 +1264,7 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
     const r = raw as Record<string, unknown>;
     const receivedAt = r.receivedAt;
     const parsed = parseInviteRevocation(raw);
-    if (!parsed.ok || typeof receivedAt !== "number") {
+    if (!parsed.ok || !plausibleCursorStamp(receivedAt)) {
       skipped += 1;
       continue;
     }
@@ -1275,7 +1306,15 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
     } else if (existing.inviterKey !== revocation.inviterKey) {
       // Authority binding (§3.1): a revocation can only act on a token
       // whose real inviter it names. A mismatch is a third party
-      // trying to revoke someone else's invite — inert.
+      // trying to revoke someone else's invite — inert. Do NOT advance
+      // the cursor past it (same posture as a bad signature): the
+      // mismatch may be TRANSIENT — e.g. an attacker's revocation
+      // landed first as the placeholder row, making the REAL inviter's
+      // revocation mismatch until the receipt corrects inviterKey —
+      // and an advanced cursor would strand the genuine revocation
+      // forever. Left below the high-water mark, it is re-served and
+      // re-evaluated on every pull, and applies as soon as the row's
+      // inviterKey converges to the receipt's embedded truth.
       if (typeof console !== "undefined" && console.warn) {
         console.warn(
           "[understoria] dropped invite revocation whose inviterKey does not match the local invite",
@@ -1283,7 +1322,6 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
         );
       }
       skipped += 1;
-      advanceCursor();
       continue;
     } else if (
       existing.status === "redeemed" ||
@@ -1373,7 +1411,7 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
       typeof r.id !== "string" ||
       typeof r.voucherKey !== "string" ||
       typeof r.voucheeKey !== "string" ||
-      typeof r.createdAt !== "number" ||
+      !plausibleCursorStamp(r.createdAt) ||
       (r.kind !== "invite" && r.kind !== "manual") ||
       typeof r.signature !== "string"
     ) {
