@@ -90,7 +90,6 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A donated fridge, a sheltered outdoor spot with an outlet, a host site, and a small cleaning rota.",
     setupHours: 23,
     defaultCategory: "food",
-    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find a host site with power and foot traffic",
@@ -120,6 +119,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Make a shared weekly schedule. Each shift is ~15 minutes: wipe surfaces, toss anything spoiled or past-date, and note what's running low. Keep cleaning supplies on site.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organizing"],
         follows: [1],
       },
@@ -194,6 +194,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Pick easy, high-yield crops for your zone (greens, beans, squash, tomatoes, herbs). Stagger planting so harvests don't all hit at once. Label rows.",
         hours: 4,
+        recurringCadence: "cycle",
         skills: ["gardening"],
         follows: [2],
       },
@@ -210,6 +211,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Decide harvest days. Route extra produce to the community fridge, neighbors, or a free stand at the gate. Save some seeds for next year.",
         hours: 2,
+        recurringCadence: "cycle",
         follows: [4],
       },
     ],
@@ -335,6 +337,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Track recurring needs — rides to appointments, prescription pickups, snow shoveling — and connect them to other volunteers or projects in your program.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organizing"],
       },
       {
@@ -474,6 +477,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Flyer locally, post the next date, and ask attendees to spread the word. Consistency turns a one-off into a reliable resource.",
         hours: 2,
+        recurringCadence: "event",
         skills: ["graphic design", "outreach"],
       },
     ],
@@ -516,6 +520,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "List sessions with date, topic, teacher, and what to bring. Publish it where members already look. Keep sign-ups light or drop-in.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organizing"],
         follows: [1, 2],
       },
@@ -538,6 +543,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Take notes or short handouts so a class can be re-run by someone new. This keeps the project alive when a teacher moves on.",
         hours: 2,
+        recurringCadence: "session",
         skills: ["writing"],
       },
     ],
@@ -553,6 +559,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A group of committed households, a wholesale source, a pickup/sort space, and someone to manage orders.",
     setupHours: 20,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Gather your buying group",
@@ -605,6 +612,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Coordinating, sorting, and pickup duties should rotate so no one person carries it all. Review pricing and supplier reliability each cycle.",
         hours: 1,
+        recurringCadence: "cycle",
       },
     ],
   },
@@ -633,6 +641,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Each station needs a table, the right tools, good light, and power. Group similar repairs together. Label stations clearly.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["organizing"],
       },
       {
@@ -659,6 +668,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Keep thread, fuses, glue, fasteners, tubes, and patches on hand. Track what gets used so you can restock.",
         hours: 2,
+        recurringCadence: "session",
         follows: [0],
       },
       {
@@ -666,6 +676,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Count items fixed and roughly what was saved/diverted. Share the numbers — it motivates volunteers and helps with any future funding.",
         hours: 1,
+        recurringCadence: "session",
         follows: [2],
       },
     ],
@@ -708,6 +719,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Have one coordinator (rotating) match requests to available drivers and confirm with both sides the day before. Keep a backup driver list for cancellations.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organizing"],
         follows: [0, 2],
       },
@@ -779,6 +791,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Run a session (ideally with a legal aid partner) walking tenants through their rights and what to do if served papers. Provide printed take-home guides in relevant languages.",
         hours: 4,
+        recurringCadence: "event",
         skills: ["teaching", "facilitation"],
         follows: [2],
       },
@@ -810,6 +823,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A group of vetted families, a safe space (or rotating homes), a scheduling system, and clear safety rules. Caring for other people's children is a serious responsibility — keep firm supervision rules, screen caregivers, and follow your local rules on informal childcare.",
     setupHours: 26,
     defaultCategory: "childcare",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Gather founding families and agree on a model",
@@ -991,6 +1005,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Stock books that fit your neighborhood — multiple languages, children's books if there are families, practical guides. Quietly remove worn or unsuitable items.",
         hours: 2,
+        recurringCadence: "month",
         follows: [2],
       },
       {
@@ -1057,6 +1072,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Send trained people home with a first-aid kit and naloxone where available. Schedule periodic refreshers so skills stay sharp.",
         hours: 2,
+        recurringCadence: "session",
         follows: [4],
       },
       {
@@ -1064,6 +1080,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Keep an opt-in list of trained neighbors and where supplies are kept. Replace used or expired naloxone and kit contents.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
     ],
@@ -1122,6 +1139,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Have a coordinator help match needs to offers, especially early on, and nudge quiet members. Over time members connect directly.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organizing"],
         follows: [4],
       },
@@ -1197,6 +1215,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Share regular summaries — money in, money out, number of neighbors helped — without exposing recipients' identities. Transparency keeps donors giving.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["writing", "accounting"],
       },
     ],
@@ -1212,6 +1231,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Storage, a supply stream, distribution points, and volunteers.",
     setupHours: 17,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find storage and a distribution point",
@@ -1256,6 +1276,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Hold periodic drives at schools, workplaces, and faith groups. Give a specific wish list (especially larger diaper sizes and period products) so donations match needs.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["outreach", "graphic design"],
       },
       {
@@ -1263,6 +1284,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Watch which items move fastest and reorder ahead of shortages. Note recurring gaps to guide your next drive or bulk order.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
     ],
@@ -1278,6 +1300,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A space, tools, donated bikes and parts, and volunteer mechanics.",
     setupHours: 23,
     defaultCategory: "transport",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find a workshop space",
@@ -1328,6 +1351,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Spread the word through schools, shelters, and transit-poor areas. Count repairs done and bikes rehomed — useful for volunteers' morale and any future funding.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["outreach", "data entry"],
         follows: [4],
       },
@@ -1380,6 +1404,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Arrange for volunteers to go with people to medical, school, or service appointments to interpret and support. Brief volunteers to interpret faithfully, not to give advice they're not qualified for.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["translation"],
         follows: [0, 2],
       },
@@ -1388,6 +1413,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Hold regular informal events where newcomers meet each other and longtime residents. Connection and belonging matter as much as paperwork.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["facilitation"],
       },
       {
@@ -1439,6 +1465,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Design simple, nutritious meals that cook in volume and stretch ingredients. Offer vegetarian options and label common allergens clearly.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["cooking"],
         follows: [2],
       },
@@ -1521,6 +1548,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Hold seasonal events where growers trade seeds and tips. Late winter, before planting, is ideal. These build the community around the library.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["organizing"],
       },
       {
@@ -1587,6 +1615,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Offer both structured classes and open \"tech help\" hours. Vary times for people who work, and keep groups small.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["organizing"],
         follows: [3, 4],
       },
@@ -1663,6 +1692,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Check that repairs held and the resident is satisfied. Track homes served and rough energy or safety improvements for volunteers and future support.",
         hours: 2,
+        recurringCadence: "event",
         skills: ["writing"],
         follows: [5],
       },
@@ -1679,6 +1709,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Storage, a pet food supply stream, a distribution point, and vet partnerships.",
     setupHours: 18,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find storage and a distribution point",
@@ -1730,6 +1761,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Hold periodic food drives with a clear wish list, and watch which items run short so you can target future drives and orders.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["outreach", "data entry"],
       },
     ],
@@ -1745,6 +1777,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A safe space, vetted mentors, activities, and snacks. Working with youth carries serious responsibility — vet adults, keep the two-adult rule, follow mandatory-reporting laws, and comply with local rules for youth programs.",
     setupHours: 23,
     defaultCategory: "education",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Secure a safe space and set hours",
@@ -1787,6 +1820,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Provide a healthy snack (many kids arrive hungry) and gather books, art materials, and games through donations or a small budget.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["outreach"],
       },
       {
@@ -1811,6 +1845,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteers, transport, grower relationships, and short-term storage.",
     setupHours: 19,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Find produce sources",
@@ -1926,6 +1961,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Note resolution rates (without breaching confidentiality) and debrief mediators regularly. The work is draining, so rotate cases and offer support.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["data entry", "facilitation"],
       },
     ],
@@ -1968,6 +2004,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Assist with replacing ID and Social Security cards, applying for benefits, and other paperwork that's hard to do without an address or internet access.",
         hours: 4,
+        recurringCadence: "month",
         skills: ["paperwork"],
       },
       {
@@ -1975,6 +2012,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Make warm introductions to fair-chance employers and housing options, and help with applications, resumes, and interview prep.",
         hours: 4,
+        recurringCadence: "month",
         skills: ["outreach", "writing"],
         follows: [0],
       },
@@ -1983,6 +2021,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Where possible, pair people with mentors who have lived through reentry themselves. That shared experience builds trust faster than anything.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["facilitation"],
       },
       {
@@ -2005,6 +2044,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A wood source, a processing and storage site, equipment, a trained crew, and a delivery plan. Chainsaws and splitters are dangerous — allow only trained operators, require protective gear, and brief the crew on safety before every session.",
     setupHours: 24,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Secure a wood source",
@@ -2053,6 +2093,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Plan cutting and splitting well ahead of winter, because green wood must dry for months before it burns safely. Track what's seasoned and ready.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["organizing"],
         follows: [0, 1, 2, 3],
       },
@@ -2119,6 +2160,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Check nodes regularly, replace failed hardware, and add coverage as new hosts join. Document the setup so others can help maintain it.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["tech support"],
         follows: [3, 4],
       },
@@ -2185,6 +2227,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Hold regular check-ins for facilitators to debrief and decompress. Rotate who leads, and make sure they have their own support too.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["facilitation"],
       },
     ],
@@ -2267,12 +2310,14 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Trained and certified preparers, a space, computers, and a scheduling system. Tax returns must be prepared by certified volunteers through a recognized program — this clinic helps with standard filings, not complex situations that need a tax professional.",
     setupHours: 25,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Get preparers trained and certified",
         description:
           "Have volunteers complete a recognized free-tax-prep certification (such as the IRS VITA program) so returns are accurate and properly authorized. This is non-negotiable.",
         hours: 6,
+        recurringCadence: "cycle",
         skills: ["accounting"],
       },
       {
@@ -2301,6 +2346,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Get the word out, emphasizing that filing can unlock refunds and credits many people miss. Reach workers, families, and elders who often qualify.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["outreach", "graphic design"],
         follows: [3],
       },
@@ -2331,6 +2377,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A produce supply, a stand or location, volunteers, and a regular schedule.",
     setupHours: 18,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Secure produce and goods supply",
@@ -2419,6 +2466,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Put together useful items — pantry basics, household goods, and for new parents, a few baby essentials or a home-cooked meal. Source through donations.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["outreach", "organizing"],
         follows: [0],
       },
@@ -2442,6 +2490,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Introduce people to the projects and resources that fit their needs, turning a one-time welcome into ongoing belonging.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["outreach"],
         follows: [4],
       },
@@ -2450,6 +2499,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Check in a few weeks later to see how people are settling and what else would help. Use what you learn to improve the welcome.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["interviewing"],
         follows: [5],
       },
@@ -2533,6 +2583,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Access to machines and showers (a partner site or mobile unit), supplies, and volunteers. Guests' dignity and privacy come first — require no personal information to use the service, keep shower areas private and secure, and follow local health rules for shared or mobile facilities.",
     setupHours: 21,
     defaultCategory: "infrastructure",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Secure laundry and shower access",
@@ -2585,6 +2636,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Note how many people you serve and what runs low, so you can keep supplies stocked and plan capacity.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
     ],
@@ -2652,6 +2704,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Keep simple records (respecting privacy), confirm forms were submitted, and remind newly registered neighbors of upcoming deadlines.",
         hours: 2,
+        recurringCadence: "event",
         skills: ["data entry"],
         follows: [4],
       },
@@ -2695,6 +2748,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Assist people in understanding and applying for coverage they qualify for (such as Medicaid or marketplace plans) and gathering the needed documents.",
         hours: 4,
+        recurringCadence: "month",
         skills: ["paperwork"],
         follows: [2],
       },
@@ -2703,6 +2757,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Help schedule appointments, set reminders, navigate prescription costs, and link to the rides program for transportation to care.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["organizing"],
         follows: [2],
       },
@@ -2799,6 +2854,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A kitchen, canning and preserving equipment, knowledgeable leads, and produce. Home preservation carries real food-safety risks, including botulism, when done incorrectly — always follow current, tested guidelines from a reputable source and never improvise processing times or methods.",
     setupHours: 20,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Secure a suitable kitchen",
@@ -2826,6 +2882,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Bring in seasonal surplus from gleaning, gardens, farms, or bulk buys. Time sessions to when produce is abundant and cheap.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["outreach"],
       },
       {
@@ -2833,6 +2890,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Pick recipes suited to the produce and the group's skill level, and organize stations so the work flows safely and efficiently.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["cooking", "organizing"],
         follows: [1, 3],
       },
@@ -2850,6 +2908,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Divide the preserved goods among participants and projects like the fridge or pantry. Label every jar with contents and date, and note what worked for next time.",
         hours: 2,
+        recurringCadence: "session",
         skills: ["organizing"],
         follows: [5],
       },
@@ -2866,6 +2925,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteer licensed stylists and barbers, a space, supplies, and sanitation.",
     setupHours: 18,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Recruit licensed stylists and barbers",
@@ -2933,6 +2993,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteers with vehicles and strength, moving supplies, and clear safety practices. For anyone leaving an unsafe situation, keep the new address, dates, and details strictly confidential, and follow that person's lead on timing and safety.",
     setupHours: 18,
     defaultCategory: "transport",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Recruit a crew and vehicles",
@@ -3041,6 +3102,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Help members navigate benefits, accommodations, and services. Share information and accompaniment, and refer legal and medical questions to qualified professionals.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["paperwork"],
         follows: [2],
       },
@@ -3064,6 +3126,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Donated books, volunteers, postage, and knowledge of each facility's mail rules. Every facility's mail rules are strict and different — packages that break them get rejected, so follow them exactly, and have volunteers always use the program's address, never a home address.",
     setupHours: 23,
     defaultCategory: "education",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Learn facility mailing rules",
@@ -3100,6 +3163,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Postage is the main ongoing cost. Fundraise for it, use the cheapest compliant shipping, and arrange regular mailing days.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["outreach"],
       },
       {
@@ -3114,6 +3178,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Keep records of requests filled and books needed, and maintain relationships with donors and facilities so the program keeps running.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
     ],
@@ -3163,6 +3228,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Offer beginner lessons and open jams for all levels. Keep sign-up easy and times varied for people who work or are in school.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["organizing"],
         follows: [2, 3],
       },
@@ -3179,6 +3245,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Hold informal showcases where learners share what they've made. Performing builds confidence and draws in new participants.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["music", "organizing"],
         follows: [4],
       },
@@ -3194,6 +3261,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Supply donations or funds, storage, a distribution point, and volunteers.",
     setupHours: 17,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Get supply lists and gauge need",
@@ -3207,6 +3275,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Combine donation drives with bulk purchases for the most-needed items. Bulk buying stretches money furthest on basics like notebooks and pencils.",
         hours: 4,
+        recurringCadence: "cycle",
         skills: ["outreach", "driving"],
         follows: [0],
       },
@@ -3246,6 +3315,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Note what ran short and keep a small reserve for mid-year restocks, since supplies run out long before June.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
     ],
@@ -3261,6 +3331,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteer lawyers and law students, a space, partner legal aid organizations, and scheduling. Individual legal advice must come from qualified, licensed attorneys (or supervised law students) — this program organizes access and shares general rights information, it is not itself a source of legal advice.",
     setupHours: 24,
     defaultCategory: "other",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Partner with lawyers and legal aid",
@@ -3296,6 +3367,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Create clear, accurate guides and run workshops on common rights (tenant, worker, immigration, encounters with authorities). Frame these as general information, not individual legal advice.",
         hours: 4,
+        recurringCadence: "event",
         skills: ["writing", "teaching"],
       },
       {
@@ -3354,6 +3426,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Keep a living directory of all your projects plus external services (shelters, clinics, food, legal aid) so the hub can route people anywhere help exists.",
         hours: 5,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
       {
@@ -3376,6 +3449,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
         description:
           "Log requests you couldn't fill. Recurring gaps reveal where your program should start its next project — turning the hub into a planning tool, not just a switchboard.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["data entry"],
       },
     ],
@@ -3620,7 +3694,6 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un refrigerador donado, un lugar exterior protegido con un enchufe, un sitio anfitrión y una pequeña rotación de limpieza.",
     setupHours: 23,
     defaultCategory: "food",
-    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentra un sitio anfitrión con electricidad y tránsito de gente",
@@ -3650,6 +3723,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Crea un calendario semanal compartido. Cada turno son unos 15 minutos: limpia las superficies, retira lo dañado o vencido y anota lo que se está acabando. Mantén productos de limpieza en el sitio.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organización"],
         follows: [1],
       },
@@ -3724,6 +3798,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Elige cultivos fáciles y de buen rendimiento para tu zona (verduras de hoja, frijoles, calabaza, tomate, hierbas). Escalona las siembras para que las cosechas no caigan todas al mismo tiempo. Etiqueta los surcos.",
         hours: 4,
+        recurringCadence: "cycle",
         skills: ["jardinería"],
         follows: [2],
       },
@@ -3740,6 +3815,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Decidan los días de cosecha. Manden lo que sobre al refrigerador comunitario, a vecinas y vecinos o a un puesto gratuito en la entrada. Guarden algunas semillas para el año siguiente.",
         hours: 2,
+        recurringCadence: "cycle",
         follows: [4],
       },
     ],
@@ -3865,6 +3941,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Lleva nota de necesidades recurrentes — traslados a citas, recoger recetas, palear nieve — y conéctalas con otras personas voluntarias o proyectos de tu red.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organización"],
       },
       {
@@ -4004,6 +4081,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Reparte volantes en tu zona, publica la próxima fecha y pide a quienes asistieron que corran la voz. La constancia convierte un evento aislado en un recurso confiable.",
         hours: 2,
+        recurringCadence: "event",
         skills: ["diseño gráfico", "difusión"],
       },
     ],
@@ -4046,6 +4124,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Lista las sesiones con fecha, tema, persona que enseña y qué llevar. Publícalo donde la gente ya mira. Mantén la inscripción ligera o de entrada libre.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organización"],
         follows: [1, 2],
       },
@@ -4068,6 +4147,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Toma notas o haz pequeños folletos para que alguien nuevo pueda volver a dar la clase. Eso mantiene viva la iniciativa cuando una persona que enseña se va.",
         hours: 2,
+        recurringCadence: "session",
         skills: ["redacción"],
       },
     ],
@@ -4083,6 +4163,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un grupo comprometido de hogares, una fuente mayorista, un espacio para recibir y clasificar, y alguien que gestione los pedidos.",
     setupHours: 20,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Junta a tu grupo de compra",
@@ -4135,6 +4216,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "La coordinación, la clasificación y la recogida deben rotar para que ninguna persona cargue con todo. Revisen los precios y la confiabilidad del proveedor cada ciclo.",
         hours: 1,
+        recurringCadence: "cycle",
       },
     ],
   },
@@ -4163,6 +4245,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Cada estación necesita una mesa, las herramientas adecuadas, buena luz y electricidad. Agrupa reparaciones parecidas. Identifica las estaciones con claridad.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["organización"],
       },
       {
@@ -4189,6 +4272,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ten a la mano hilo, fusibles, pegamento, sujetadores, cámaras y parches. Anota qué se usa para reabastecer.",
         hours: 2,
+        recurringCadence: "session",
         follows: [0],
       },
       {
@@ -4196,6 +4280,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Cuenten cuántos objetos se arreglaron y, a grandes rasgos, lo que se evitó tirar. Compartan los números — motiva a quienes participan y ayuda a conseguir apoyo a futuro.",
         hours: 1,
+        recurringCadence: "session",
         follows: [2],
       },
     ],
@@ -4238,6 +4323,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ten a una persona coordinadora (que rote) que empareje solicitudes con personas que manejen y confirme con ambas partes el día anterior. Mantén una lista de respaldo para cancelaciones.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organización"],
         follows: [0, 2],
       },
@@ -4309,6 +4395,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Realicen una sesión (idealmente con una persona aliada de asistencia legal) que recorra los derechos y qué hacer si reciben papeles. Entreguen guías impresas para llevar a casa en los idiomas que correspondan.",
         hours: 4,
+        recurringCadence: "event",
         skills: ["enseñanza", "facilitación"],
         follows: [2],
       },
@@ -4340,6 +4427,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un grupo de familias revisadas, un espacio seguro (o casas que rotan), un sistema de calendario y reglas claras de seguridad. Cuidar a las hijas y los hijos de otras personas es una responsabilidad seria — mantén reglas firmes de supervisión, revisa a quienes cuidan y respeta las normas locales sobre cuidado infantil informal.",
     setupHours: 26,
     defaultCategory: "childcare",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Reúne a las familias fundadoras y acuerden un modelo",
@@ -4521,6 +4609,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Surtan libros que encajen con su barrio — varios idiomas, libros infantiles si hay familias, guías prácticas. Retiren con discreción lo gastado o lo que no encaje.",
         hours: 2,
+        recurringCadence: "month",
         follows: [2],
       },
       {
@@ -4587,6 +4676,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Que las personas capacitadas se lleven un botiquín de primeros auxilios y naloxona donde esté disponible. Programen repasos periódicos para que las habilidades no se enmohezcan.",
         hours: 2,
+        recurringCadence: "session",
         follows: [4],
       },
       {
@@ -4594,6 +4684,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Mantén una lista opcional de vecinas y vecinos capacitados y dónde se guardan los insumos. Reemplaza la naloxona y el contenido del botiquín cuando se use o caduque.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
     ],
@@ -4652,6 +4743,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Que una persona coordinadora ayude a emparejar necesidades con ofrecimientos, sobre todo al inicio, y dé un empujón a quienes están en silencio. Con el tiempo, las personas integrantes se conectan directo.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["organización"],
         follows: [4],
       },
@@ -4727,6 +4819,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Compartan resúmenes regulares — dinero que entra, dinero que sale, número de vecinas y vecinos apoyados — sin exponer la identidad de quienes recibieron. La transparencia mantiene la donación.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["redacción", "contabilidad"],
       },
     ],
@@ -4742,6 +4835,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Almacenamiento, un flujo de insumos, puntos de distribución y personas voluntarias.",
     setupHours: 17,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentra almacenamiento y un punto de distribución",
@@ -4786,6 +4880,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hagan campañas periódicas en escuelas, lugares de trabajo y grupos de fe. Den una lista de deseos específica (especialmente tallas grandes de pañales y productos menstruales) para que las donaciones coincidan con las necesidades.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["difusión", "diseño gráfico"],
       },
       {
@@ -4793,6 +4888,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Observen qué artículos salen más rápido y pidan antes de que se acaben. Anoten los huecos recurrentes para guiar la siguiente campaña o compra al mayoreo.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
     ],
@@ -4808,6 +4904,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un espacio, herramientas, bicicletas y refacciones donadas, y personas mecánicas voluntarias.",
     setupHours: 23,
     defaultCategory: "transport",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentra un espacio de taller",
@@ -4858,6 +4955,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Corran la voz en escuelas, refugios y zonas con poco transporte. Cuenten las reparaciones hechas y las bicicletas reubicadas — sirve para el ánimo de quienes participan y para apoyos futuros.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["difusión", "captura de datos"],
         follows: [4],
       },
@@ -4910,6 +5008,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Coordinen para que personas voluntarias acompañen a la gente a citas médicas, escolares o de servicios para interpretar y apoyar. Indiquen a quienes acompañan que interpreten con fidelidad, no que den consejos para los que no están calificadas.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["traducción"],
         follows: [0, 2],
       },
@@ -4918,6 +5017,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hagan encuentros informales regulares donde las personas recién llegadas conozcan a otras y a quienes llevan tiempo en el lugar. El vínculo y la pertenencia importan tanto como los trámites.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["facilitación"],
       },
       {
@@ -4969,6 +5069,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Diseñen comidas sencillas y nutritivas que se cocinen en volumen y rindan los ingredientes. Ofrezcan opciones vegetarianas y etiqueten con claridad los alérgenos comunes.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["cocina"],
         follows: [2],
       },
@@ -5051,6 +5152,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hagan eventos de temporada donde las personas que cultivan intercambien semillas y consejos. El final del invierno, antes de sembrar, es ideal. Tejen comunidad alrededor de la biblioteca.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["organización"],
       },
       {
@@ -5117,6 +5219,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ofrezcan tanto clases estructuradas como horarios abiertos de \"ayuda tecnológica\". Varíen los horarios para quienes trabajan y mantengan grupos pequeños.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["organización"],
         follows: [3, 4],
       },
@@ -5193,6 +5296,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Verifiquen que las reparaciones aguantaron y que la persona está satisfecha. Lleven cuenta de hogares atendidos y mejoras aproximadas de energía o seguridad, para el equipo voluntario y para apoyos futuros.",
         hours: 2,
+        recurringCadence: "event",
         skills: ["redacción"],
         follows: [5],
       },
@@ -5209,6 +5313,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Almacenamiento, una cadena de suministro de comida para mascotas, un punto de distribución y aliados veterinarios.",
     setupHours: 18,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentren almacenamiento y un punto de distribución",
@@ -5260,6 +5365,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Organicen colectas periódicas con una lista de deseos clara y observen qué artículos se agotan para apuntar las siguientes colectas y pedidos.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["difusión", "captura de datos"],
       },
     ],
@@ -5275,6 +5381,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un espacio seguro, mentoras y mentores con verificación, actividades y refrigerios. Trabajar con juventud conlleva una responsabilidad seria — verifiquen a las personas adultas, mantengan la regla de dos personas adultas, cumplan las leyes de reporte obligatorio y respeten las reglas locales para programas juveniles.",
     setupHours: 23,
     defaultCategory: "education",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Consigan un espacio seguro y fijen un horario",
@@ -5317,6 +5424,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ofrezcan un refrigerio saludable (muchas niñas y niños llegan con hambre) y reúnan libros, materiales de arte y juegos por donaciones o con un presupuesto pequeño.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["difusión"],
       },
       {
@@ -5341,6 +5449,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias, transporte, vínculos con quienes cultivan y almacenamiento de corto plazo.",
     setupHours: 19,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Encuentren fuentes de cosecha",
@@ -5456,6 +5565,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Anoten tasas de resolución (sin romper la confidencialidad) y hagan debriefs regulares con quienes median. El trabajo agota, así que roten casos y ofrezcan apoyo.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["captura de datos", "facilitación"],
       },
     ],
@@ -5498,6 +5608,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ayuden a reponer identificación y tarjetas de seguro social, a solicitar beneficios y con otros trámites difíciles de hacer sin domicilio ni acceso a internet.",
         hours: 4,
+        recurringCadence: "month",
         skills: ["trámites"],
       },
       {
@@ -5505,6 +5616,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hagan presentaciones cálidas con empleadores de oportunidad justa y opciones de vivienda, y apoyen con postulaciones, currículums y preparación de entrevistas.",
         hours: 4,
+        recurringCadence: "month",
         skills: ["difusión", "redacción"],
         follows: [0],
       },
@@ -5513,6 +5625,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Cuando sea posible, emparejen a las personas con mentoras y mentores que han vivido el reingreso. Esa experiencia compartida construye confianza más rápido que cualquier otra cosa.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["facilitación"],
       },
       {
@@ -5535,6 +5648,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una fuente de leña, un sitio de procesamiento y almacenamiento, equipo, una cuadrilla capacitada y un plan de entrega. Las motosierras y las hendidoras son peligrosas — permitan operar sólo a personas capacitadas, exijan equipo de protección y hagan una charla de seguridad antes de cada sesión.",
     setupHours: 24,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Aseguren una fuente de leña",
@@ -5583,6 +5697,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Planeen el corte y la partición con mucha antelación al invierno, porque la leña verde debe secar meses antes de quemar de forma segura. Lleven registro de lo que ya está seco y listo.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["organización"],
         follows: [0, 1, 2, 3],
       },
@@ -5649,6 +5764,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Revisen los nodos con regularidad, reemplacen hardware que falle y sumen cobertura cuando se incorporen nuevos anfitriones. Documenten la instalación para que otras personas puedan ayudar a mantenerla.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["soporte técnico"],
         follows: [3, 4],
       },
@@ -5715,6 +5831,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hagan reuniones regulares para que las personas facilitadoras descarguen y descompriman. Roten quién guía y asegúrense de que también tengan su propio apoyo.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["facilitación"],
       },
     ],
@@ -5797,12 +5914,14 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas preparadoras capacitadas y certificadas, un espacio, computadoras y un sistema de citas. Las declaraciones deben ser preparadas por personas voluntarias certificadas a través de un programa reconocido — esta clínica ayuda con declaraciones estándar, no con situaciones complejas que requieren a un profesional fiscal.",
     setupHours: 25,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Capaciten y certifiquen a las personas preparadoras",
         description:
           "Hagan que las personas voluntarias completen una certificación reconocida de preparación gratuita de impuestos (como el programa VITA del IRS) para que las declaraciones sean correctas y estén debidamente autorizadas. Esto no es negociable.",
         hours: 6,
+        recurringCadence: "cycle",
         skills: ["contabilidad"],
       },
       {
@@ -5831,6 +5950,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Corran la voz, resaltando que presentar puede destrabar reembolsos y créditos que muchas personas se pierden. Lleguen a trabajadores, familias y personas mayores que con frecuencia califican.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["difusión", "diseño gráfico"],
         follows: [3],
       },
@@ -5861,6 +5981,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una fuente de productos, un puesto o ubicación, personas voluntarias y un horario regular.",
     setupHours: 18,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Aseguren suministro de productos y artículos",
@@ -5949,6 +6070,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Junten cosas útiles — básicos de despensa, artículos del hogar, y para madres y padres nuevos, algunos esenciales de bebé o una comida casera. Consíganlas con donaciones.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["difusión", "organización"],
         follows: [0],
       },
@@ -5972,6 +6094,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Preséntenles los proyectos y recursos que les sirvan, convirtiendo una bienvenida única en una pertenencia continua.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["difusión"],
         follows: [4],
       },
@@ -5980,6 +6103,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Vuelvan a contactar unas semanas después para ver cómo se están instalando y qué más ayudaría. Usen lo aprendido para mejorar la bienvenida.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["entrevistas"],
         follows: [5],
       },
@@ -6063,6 +6187,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Acceso a máquinas y duchas (un sitio aliado o una unidad móvil), insumos y personas voluntarias. La dignidad y la privacidad de quienes llegan van primero — no pidan información personal para usar el servicio, mantengan las duchas privadas y seguras, y sigan las reglas locales de salud para instalaciones compartidas o móviles.",
     setupHours: 21,
     defaultCategory: "infrastructure",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Aseguren acceso a lavandería y duchas",
@@ -6115,6 +6240,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Anoten a cuántas personas atienden y qué se está acabando, para mantener los insumos abastecidos y planear la capacidad.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
     ],
@@ -6182,6 +6308,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Mantengan registros simples (respetando la privacidad), confirmen que los formularios fueron entregados y recuerden los próximos plazos a las personas recién registradas.",
         hours: 2,
+        recurringCadence: "event",
         skills: ["captura de datos"],
         follows: [4],
       },
@@ -6225,6 +6352,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Acompañen a las personas a entender y solicitar la cobertura para la que califican (como Medicaid o planes del mercado de seguros) y a reunir los documentos necesarios.",
         hours: 4,
+        recurringCadence: "month",
         skills: ["trámites"],
         follows: [2],
       },
@@ -6233,6 +6361,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ayuden a agendar citas, fijar recordatorios, navegar los costos de recetas y conectar con el programa de transporte para llegar a la atención.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["organización"],
         follows: [2],
       },
@@ -6329,6 +6458,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una cocina, equipo de enlatado y conservación, personas líderes con conocimiento y productos. La conservación casera implica riesgos reales para la seguridad alimentaria, incluyendo botulismo, cuando se hace mal — sigan siempre guías actualizadas y probadas de una fuente confiable y nunca improvisen tiempos ni métodos de procesamiento.",
     setupHours: 20,
     defaultCategory: "food",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Aseguren una cocina adecuada",
@@ -6356,6 +6486,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Traigan excedente de temporada de espigueo, huertos, granjas o compras al por mayor. Programen las sesiones para cuando los productos abunden y sean baratos.",
         hours: 3,
+        recurringCadence: "cycle",
         skills: ["difusión"],
       },
       {
@@ -6363,6 +6494,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Elijan recetas adecuadas a los productos y al nivel del grupo, y organicen estaciones para que el trabajo fluya con seguridad y eficiencia.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["cocina", "organización"],
         follows: [1, 3],
       },
@@ -6380,6 +6512,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Repartan los productos conservados entre participantes y proyectos como el refrigerador o la despensa. Etiqueten cada frasco con contenido y fecha, y anoten qué funcionó para la próxima.",
         hours: 2,
+        recurringCadence: "session",
         skills: ["organización"],
         follows: [5],
       },
@@ -6396,6 +6529,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Estilistas y barberas y barberos licenciados voluntarios, un espacio, materiales y sanitización.",
     setupHours: 18,
     defaultCategory: "skilled_labor",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Convoquen estilistas y barberas y barberos licenciados",
@@ -6463,6 +6597,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias con vehículos y fuerza, materiales de mudanza y prácticas claras de seguridad. Para quien deja una situación insegura, mantengan la nueva dirección, las fechas y los detalles en estricta confidencialidad, y sigan las decisiones de esa persona sobre los tiempos y su seguridad.",
     setupHours: 18,
     defaultCategory: "transport",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Convoquen una cuadrilla y vehículos",
@@ -6572,6 +6707,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ayuden a las personas miembro a navegar prestaciones, adaptaciones y servicios. Compartan información y acompañamiento, y deriven preguntas legales y médicas a profesionales calificados.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["trámites"],
         follows: [2],
       },
@@ -6595,6 +6731,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Libros donados, personas voluntarias, franqueo y conocimiento de las reglas de correo de cada institución. Las reglas de correo de cada institución son estrictas y distintas — los paquetes que las incumplen son rechazados, así que síganlas al pie de la letra, y que las personas voluntarias usen siempre la dirección del programa, nunca la de su casa.",
     setupHours: 23,
     defaultCategory: "education",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Aprendan las reglas de correo de cada institución",
@@ -6631,6 +6768,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "El franqueo es el principal costo continuo. Recauden para él, usen el envío más barato que cumpla las reglas y organicen días regulares de envío.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["difusión"],
       },
       {
@@ -6645,6 +6783,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Lleven registros de solicitudes atendidas y libros necesarios, y mantengan las relaciones con donantes e instituciones para que el programa siga funcionando.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
     ],
@@ -6695,6 +6834,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Ofrezcan clases para principiantes y jams abiertas para todos los niveles. Mantengan la inscripción sencilla y horarios variados para quienes trabajan o estudian.",
         hours: 3,
+        recurringCadence: "session",
         skills: ["organización"],
         follows: [2, 3],
       },
@@ -6711,6 +6851,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Hagan muestras informales donde quienes aprenden compartan lo que han hecho. Presentarse construye confianza y atrae a nuevas participantes.",
         hours: 3,
+        recurringCadence: "event",
         skills: ["música", "organización"],
         follows: [4],
       },
@@ -6726,6 +6867,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Donaciones de útiles o fondos, almacenamiento, un punto de distribución y personas voluntarias.",
     setupHours: 17,
     defaultCategory: "mutual_aid_drive",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Consigan las listas de útiles y midan la necesidad",
@@ -6739,6 +6881,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Combinen colectas de donación con compras al por mayor de los artículos más necesarios. La compra al por mayor estira el dinero al máximo en básicos como cuadernos y lápices.",
         hours: 4,
+        recurringCadence: "cycle",
         skills: ["difusión", "conducir"],
         follows: [0],
       },
@@ -6778,6 +6921,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Anoten qué faltó y guarden una pequeña reserva para reabastecer a mitad de año, ya que los útiles se agotan mucho antes de junio.",
         hours: 2,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
     ],
@@ -6793,6 +6937,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Abogadas y abogados y estudiantes de derecho voluntarias y voluntarios, un espacio, organizaciones aliadas de ayuda legal y agendamiento. El consejo legal individual debe venir de abogadas y abogados calificados y con licencia (o de estudiantes de derecho supervisadas y supervisados) — este programa organiza el acceso y comparte información general sobre derechos, no es en sí mismo una fuente de consejo legal.",
     setupHours: 24,
     defaultCategory: "other",
+    suggestsWorkDays: true,
     tasks: [
       {
         name: "Aliense con abogadas y abogados y ayuda legal",
@@ -6828,6 +6973,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Creen guías claras y precisas y dicten talleres sobre derechos comunes (inquilinas e inquilinos, trabajadoras y trabajadores, migración, encuentros con autoridades). Enmárquenlos como información general, no como consejo legal individual.",
         hours: 4,
+        recurringCadence: "event",
         skills: ["redacción", "enseñanza"],
       },
       {
@@ -6886,6 +7032,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Lleven un directorio vivo de todos los proyectos más servicios externos (refugios, clínicas, comida, ayuda legal) para que el centro pueda enrutar a la gente donde sea que exista la ayuda.",
         hours: 5,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
       {
@@ -6908,6 +7055,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Anoten las solicitudes que no pudieron cubrir. Las brechas recurrentes revelan dónde el programa debería arrancar su próximo proyecto — convirtiendo al centro en una herramienta de planeación, no sólo una central de despacho.",
         hours: 3,
+        recurringCadence: "month",
         skills: ["captura de datos"],
       },
     ],
