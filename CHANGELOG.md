@@ -10,6 +10,27 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Project template content overhaul: four new templates and an
+  honest-hours audit across all fifty.** New templates in both
+  locales: harm-reduction supply distribution, court support &
+  accompaniment, pop-up cooling/warming center, and community oral
+  history — each with the boundary/safety language its subject
+  demands. The original fifty templates got a per-template audit
+  applied from single authoring tables (so EN and ES cannot drift):
+  thirteen recategorized out of the catch-all buckets into the
+  categories members actually filter by; ten sensitive templates
+  (mediation, reentry, peer support, …) gained explicit
+  scope-and-safety notes in "What you'll need"; every template's
+  padding tasks were cut (31 dropped per locale) and remaining hours
+  re-estimated individually, so the setup-effort filter's "quick"
+  bucket — empty since launch — now holds 12 real templates (12
+  quick / 30 medium / 12 bigger overall); 58 genuinely recurring
+  tasks per locale are now tagged with their cadence instead of
+  reading as one-shot setup; skill tags and advisory `follows`
+  orderings now cover all templates, not just the ten flagships; and
+  the work-day hint flag extends to 24 rota-shaped templates (the
+  community fridge lost it — fridge upkeep is a solo-shift rota, not
+  a crew event).
 - **Project templates: review the task list before anything is
   created.** Picking a template now stages its tasks into an editable
   checklist — untick what your community already has, tune the hours,

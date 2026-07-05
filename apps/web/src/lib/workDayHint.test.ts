@@ -11,7 +11,7 @@ import {
 } from "./workDayHint";
 
 const BASE = {
-  templateId: "community-fridge", // flagged rota-shaped
+  templateId: "community-garden", // flagged rota-shaped
   upcomingWorkDays: 0,
   canSchedule: true,
   dismissed: false,
@@ -19,7 +19,7 @@ const BASE = {
 
 describe("projectSuggestsWorkDays", () => {
   it("is true for a rota-shaped template and false otherwise", () => {
-    expect(projectSuggestsWorkDays("community-fridge")).toBe(true);
+    expect(projectSuggestsWorkDays("community-garden")).toBe(true);
     // skill-share is deliberately unflagged (sessions, not rotas that
     // need many hands at once).
     expect(projectSuggestsWorkDays("skill-share")).toBe(false);

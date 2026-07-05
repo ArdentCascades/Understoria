@@ -31,18 +31,22 @@ import {
 // template's defaultCategory and don't update this map, the test will
 // flag it — keeping content drift visible.
 const EXPECTED_CATEGORY: Record<string, string> = {
+  "harm-reduction-supplies": "other",
+  "court-support": "other",
+  "cooling-warming-center": "other",
+  "community-oral-history": "education",
   "community-fridge": "food",
   "community-garden": "food",
-  "tool-lending-library": "skilled_labor",
+  "tool-lending-library": "infrastructure",
   "neighborhood-care-network": "emotional_support",
-  "emergency-preparedness": "other",
-  "free-store": "other",
+  "emergency-preparedness": "organizing",
+  "free-store": "mutual_aid_drive",
   "skill-share": "education",
   "bulk-buying-coop": "food",
   "repair-cafe": "skilled_labor",
   "rides-transportation": "transport",
   // Set 2
-  "tenant-union": "organizing",
+  "tenant-union": "housing",
   "childcare-collective": "childcare",
   "community-composting": "infrastructure",
   "free-little-library": "education",
@@ -55,29 +59,29 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   // Set 3
   "community-meal": "food",
   "seed-library": "food",
-  "digital-literacy": "education",
-  "weatherization-brigade": "skilled_labor",
+  "digital-literacy": "tech",
+  "weatherization-brigade": "housing",
   "pet-food-bank": "mutual_aid_drive",
   "youth-mentorship": "education",
   "gleaning-network": "food",
   "community-mediation": "other",
   "reentry-support": "other",
-  "community-wood-bank": "infrastructure",
+  "community-wood-bank": "mutual_aid_drive",
   // Set 4
-  "community-wifi-mesh": "infrastructure",
+  "community-wifi-mesh": "tech",
   "mental-health-peer-support": "emotional_support",
   "community-cleanup": "infrastructure",
-  "free-tax-prep": "other",
+  "free-tax-prep": "skilled_labor",
   "community-market": "food",
-  "welcome-wagon": "other",
-  "library-of-things": "other",
-  "laundry-shower-access": "other",
+  "welcome-wagon": "emotional_support",
+  "library-of-things": "infrastructure",
+  "laundry-shower-access": "infrastructure",
   "voter-registration": "organizing",
   "health-navigation": "other",
   // Set 5
   "toy-library": "childcare",
   "food-preservation": "food",
-  "free-haircut": "other",
+  "free-haircut": "skilled_labor",
   "mutual-aid-moving-crew": "transport",
   "disability-support-network": "organizing",
   "books-to-prisoners": "education",
@@ -95,12 +99,12 @@ const VALID_CADENCES: readonly RecurringCadence[] = [
 ];
 
 describe("projectTemplates", () => {
-  it("ships exactly 50 templates in English", () => {
-    expect(PROJECT_TEMPLATES_EN.length).toBe(50);
+  it("ships exactly 54 templates in English", () => {
+    expect(PROJECT_TEMPLATES_EN.length).toBe(54);
   });
 
-  it("ships exactly 50 templates in Spanish", () => {
-    expect(PROJECT_TEMPLATES_ES.length).toBe(50);
+  it("ships exactly 54 templates in Spanish", () => {
+    expect(PROJECT_TEMPLATES_ES.length).toBe(54);
   });
 
   it("en and es share the same id set in the same order", () => {
