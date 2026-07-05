@@ -913,6 +913,12 @@ export const SETTING_KEYS = {
    *  Mirrors `celebratedMilestones`; survives soft purge, cleared by
    *  hard purge with the rest of `settings`. */
   celebratedProjectCompletions: "celebratedProjectCompletions",
+  /** JSON array of project ids whose organizer dismissed the one-time
+   *  "this template's work is rota-shaped — you can schedule a work
+   *  day with shifts" hint (lib/workDayHint.ts). Dismissed = dismissed
+   *  forever for that project; the hint also retires on its own once
+   *  a first work day exists. */
+  workDayHintDismissed: "workDayHintDismissed",
   onboarded: "onboarded",
   /** Base URL of the community node to mirror finalized exchanges to.
    *  Empty / unset means "do not mirror." */

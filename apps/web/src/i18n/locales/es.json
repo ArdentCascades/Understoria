@@ -1053,7 +1053,9 @@
       "scheduleButton": "Programar una jornada de trabajo",
       "itemAt": "en {{location}}",
       "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto.",
-      "nextGlanceHeading": "Próxima jornada de trabajo"
+      "nextGlanceHeading": "Próxima jornada de trabajo",
+      "templateHint": "La plantilla de este proyecto incluye trabajo recurrente en equipo — una jornada de trabajo con turnos es una forma fácil de reunir manos.",
+      "templateHintDismiss": "Entendido"
     },
     "adoptionBanner": "La comunidad está decidiendo sobre una nueva custodia para este proyecto."
   },

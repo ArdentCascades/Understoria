@@ -1053,7 +1053,9 @@
       "scheduleButton": "Schedule a work day",
       "itemAt": "at {{location}}",
       "localLinkHint": "Work days are community events connected to this project on this node only. Peer nodes see the event — never the project connection.",
-      "nextGlanceHeading": "Next work day"
+      "nextGlanceHeading": "Next work day",
+      "templateHint": "This project's template has recurring crew work — a work day with shifts is an easy way to gather hands for it.",
+      "templateHintDismiss": "Got it"
     },
     "adoptionBanner": "The community is deciding on new stewardship for this project."
   },
