@@ -1275,7 +1275,15 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
     } else if (existing.inviterKey !== revocation.inviterKey) {
       // Authority binding (§3.1): a revocation can only act on a token
       // whose real inviter it names. A mismatch is a third party
-      // trying to revoke someone else's invite — inert.
+      // trying to revoke someone else's invite — inert. Do NOT advance
+      // the cursor past it (same posture as a bad signature): the
+      // mismatch may be TRANSIENT — e.g. an attacker's revocation
+      // landed first as the placeholder row, making the REAL inviter's
+      // revocation mismatch until the receipt corrects inviterKey —
+      // and an advanced cursor would strand the genuine revocation
+      // forever. Left below the high-water mark, it is re-served and
+      // re-evaluated on every pull, and applies as soon as the row's
+      // inviterKey converges to the receipt's embedded truth.
       if (typeof console !== "undefined" && console.warn) {
         console.warn(
           "[understoria] dropped invite revocation whose inviterKey does not match the local invite",
@@ -1283,7 +1291,6 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
         );
       }
       skipped += 1;
-      advanceCursor();
       continue;
     } else if (
       existing.status === "redeemed" ||

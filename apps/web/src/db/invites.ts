@@ -262,7 +262,15 @@ export async function redeemInvite(
 
   const existing = await db.invites.get(invite.token);
   if (existing) {
-    if (existing.status === "redeemed") {
+    if (
+      existing.status === "redeemed" ||
+      // Terminal too: the token was consumed (redeemed despite the
+      // inviter's revocation, docs/invite-revocation.md §5). Without
+      // this arm the row fell through the guard and a second redeem
+      // on a shared device could mint a fresh identity + seed balance
+      // and clobber the converged state back to plain "redeemed".
+      existing.status === "redeemed_despite_revocation"
+    ) {
       return { ok: false, error: "already_redeemed" };
     }
     if (existing.status === "revoked") {

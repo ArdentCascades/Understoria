@@ -142,6 +142,42 @@ describe("redeemInvite", () => {
     if (!second.ok) expect(second.error).toBe("already_redeemed");
   });
 
+  it("rejects re-redemption of a redeemed_despite_revocation token (terminal, docs/invite-revocation.md §5)", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+    const first = await redeemInvite(encoded, "Newcomer1", NODE);
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    const row = await db.invites.toArray();
+    const redeemed = row.find((r) => r.status === "redeemed");
+    expect(redeemed).toBeDefined();
+    // Simulate the federated convergence: the inviter's revocation
+    // arrived and the row settled in its terminal state.
+    await db.invites.update(redeemed!.token, {
+      status: "redeemed_despite_revocation",
+      revokedAt: Date.now(),
+    });
+    const membersBefore = await db.members.count();
+
+    const second = await redeemInvite(encoded, "Ghost", NODE);
+    expect(second.ok).toBe(false);
+    if (!second.ok) expect(second.error).toBe("already_redeemed");
+    // No ghost identity minted, converged state not clobbered.
+    expect(await db.members.count()).toBe(membersBefore);
+    const after = await db.invites.get(redeemed!.token);
+    expect(after?.status).toBe("redeemed_despite_revocation");
+    expect(after?.redeemedBy).toBe(first.value.member.publicKey);
+  });
+
   it("rejects a revoked invite", async () => {
     const inviter = await createMember({ displayName: "Rosa" }, NODE);
     const { shareUrl, row } = await issueInvite(
