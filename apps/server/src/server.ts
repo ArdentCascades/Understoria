@@ -58,6 +58,7 @@ import { registerCoOrganizerInvitationRevocationRoutes } from "./routes/coorgInv
 import { registerEventRoutes } from "./routes/events.js";
 import { registerEventCancellationRoutes } from "./routes/eventCancellations.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
+import { registerInsertCapGuard } from "./insertCaps.js";
 
 export interface BuildOptions {
   config: Config;
@@ -188,6 +189,17 @@ export async function buildServer({
       "auto-confirm window is configured (AUTO_CONFIRM_MIN_HOURS > 0) but no NODE_SYSTEM_SECRET_KEY is set; /auto-confirm will refuse to sign.",
     );
   }
+
+  // Disk-fill backstop — one preHandler covering every federation
+  // POST (insertCaps.ts). Registered before the routes so the check
+  // runs ahead of each handler.
+  registerInsertCapGuard(app, {
+    db,
+    config: {
+      tableRowCeiling: config.tableRowCeiling,
+      perKeyRowCeiling: config.perKeyRowCeiling,
+    },
+  });
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });

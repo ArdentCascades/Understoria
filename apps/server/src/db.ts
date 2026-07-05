@@ -844,6 +844,28 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '14')",
     ).run();
   }
+
+  // Schema v15 — per-key insert-cap backstop (roadmap "per-key /
+  // per-table insert caps"; see apps/server/src/insertCaps.ts). The
+  // cap guard runs a COUNT(... WHERE <key_column> = ?) before every
+  // federation POST; these indexes cover the key columns that did not
+  // already have one, so the check stays O(log n) as tables grow.
+  if (current < 15) {
+    db.exec(`
+      CREATE INDEX claims_claimer_idx ON claims (claimer_key);
+      CREATE INDEX coorg_invitations_inviter_idx
+        ON coorg_invitations (inviter_key);
+      CREATE INDEX coorg_invitation_responses_invitee_idx
+        ON coorg_invitation_responses (invitee_key);
+      CREATE INDEX coorg_invitation_revocations_inviter_idx
+        ON coorg_invitation_revocations (inviter_key);
+      CREATE INDEX awaiting_transitions_signed_by_idx
+        ON awaiting_transitions (signed_by);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '15')",
+    ).run();
+  }
 }
 
 /**

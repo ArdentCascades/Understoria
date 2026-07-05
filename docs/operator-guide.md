@@ -262,6 +262,8 @@ Two things to know:
 | `RATE_LIMIT_MAX` | `60` | Per-client requests per minute (see `TRUST_PROXY`) |
 | `TRUST_PROXY` | *(unset)* | Set to `loopback` when behind the Caddy reverse proxy above. WITHOUT it, every request arrives from the proxy's loopback address and all clients share ONE rate-limit bucket — one abuser then throttles the whole community. With it, the real client IP (hashed to a bucket, never stored raw) drives per-client limiting. Leave unset only if the node is exposed directly with no proxy. |
 | `AUTO_CONFIRM_REQUIRE_TRANSITION` | *(unset)* | When set to `1`/`true`, `/auto-confirm` refuses any request whose post/task has no stored awaiting-transition artifact — the fully-enforced waiting window. Leave unset until every member runs a build that pushes artifacts (the server enforces the window from artifacts whenever they exist, regardless of this flag) |
+| `TABLE_ROW_CEILING` | `500000` | Disk-fill backstop: max rows per federated table. At the ceiling, POSTs answer 507 (honest clients' outboxes retry; nothing is deleted) until you raise the knob or prune. `0` disables |
+| `PER_KEY_ROW_CEILING` | `10000` | Max rows per signing key per table — a LIFETIME count (record timestamps are client-claimed, so a rolling window would be dodgeable by backdating). Far above any honest member's output; raise it for legitimately high-volume communities. `0` disables |
 | `LOG_LEVEL` | `info` | One of fatal/error/warn/info/debug/trace |
 | `LOG_REQUEST_PATHS` | `false` | Set to `true` ONLY during triage |
 | `NODE_ID` | `node_local` | Stable identifier for federation |

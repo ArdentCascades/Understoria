@@ -27,6 +27,19 @@ include breaking changes.
   request with no artifact is refused (`missing_transition`) or falls
   back to the legacy advisory behavior while clients upgrade.
 
+### Security
+- **Disk-fill backstop: per-table and per-key insert ceilings.** A
+  node accepts any validly-signed record and attackers own the keys
+  they generate, so row growth was bounded only by the rate limiter.
+  Two env knobs now cap it: `TABLE_ROW_CEILING` (total rows per
+  federated table) and `PER_KEY_ROW_CEILING` (lifetime rows per
+  signing key per table — lifetime, not rolling, because record
+  timestamps are client-claimed and a window could be dodged by
+  backdating). One preHandler covers every federation POST; breaches
+  answer 507 so honest members' outboxes retry rather than poison,
+  and the node never deletes anything. Defaults are far above pilot
+  traffic; `0` disables.
+
 ### Fixed
 - **Federation cursors can no longer wedge inside a timestamp tie
   (composite-cursor phase 1, server side).** Every federation store
