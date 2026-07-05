@@ -36,6 +36,21 @@ switch a one-place change (see "What ships if adopted"). What cannot be
 delegated to code is the value judgment. That is why Phase 1 stopped
 here and why this goes through modified consensus (`GOVERNANCE.md` §2).
 
+## Scope: only the implicit invite-edge
+
+This proposal is narrow on purpose. The only thing it can withdraw is
+the **implicit** vouch a member gets automatically from having invited
+someone — and the **only way to withdraw it is to revoke the invite you
+issued**. That is a deliberate, bounded act, not a free-floating
+"un-endorse this person" button.
+
+A general **manual-vouch retraction** feature — a standing control to
+drop any endorsement at will — is explicitly **out of scope** here. That
+is where the "endorsement held over someone's head" risk is sharpest
+(see the next section), and if the community ever wants it, it deserves
+its own proposal with its own, more skeptical scrutiny. Keeping this
+decision to the invite-tied implicit edge is part of what makes it safe.
+
 ## Recommendation: yes, withdraw the vouch
 
 - A vouch that its author has explicitly retracted should not keep
@@ -92,6 +107,43 @@ proposal does not touch any of the following:
   and manually vouched, then revoked only the invite, still counts via
   the manual vouch, as they should.)
 
+## Why withdrawal can't be held over someone's head
+
+The hard part of "yes, you can withdraw" is making sure withdrawal is a
+*real* correction to the record without becoming a *lever* — a standing
+threat of "do what I want or I pull my vouch." A retraction that hurts a
+lot is exactly what makes the threat of it powerful. The design defuses
+this not by weakening withdrawal but by making it **weak as a weapon**:
+
+- **It self-heals.** A single withdrawal drops at most one edge, and
+  **any one ordinary vouch fully restores** the member — from the same
+  inviter or anyone else. The community routes around a bad-faith
+  retraction almost trivially. The lever is weakest exactly when a
+  member is well-embedded, which is when you most want it to be.
+- **The resulting state carries no stigma.** A member whose implicit
+  edge was withdrawn reads as an ordinary *un-endorsed* member — "new,
+  could use a vouch" — **not** as someone flagged or marked. The trust
+  computation places them exactly where a member with no inviter edge
+  sits, never below it (see "What changes"). Withdrawing an endorsement
+  corrects the record; it does not brand the person. An endorsement is a
+  statement the voucher makes, not a possession the endorsee holds.
+- **A pattern of withdrawals reflects on the withdrawer.** The
+  anti-coercion move that actually bites: if one member repeatedly yanks
+  vouches, that pattern is a moderation signal about *them*, not their
+  targets. Weaponizing withdrawal exposes the person doing it. A threat
+  that can only be carried out in a legible, accountable way is a much
+  weaker threat.
+
+**The sharpest residual risk — the sole-edge newcomer.** Maximum
+leverage falls on the most vulnerable person: a brand-new member whose
+*only* trust edge is that one inviter. For them a withdrawal is not "one
+of several"; it is back to zero. The answer is **not** to weaken
+withdrawal (that just re-forces the endorsement) but to (a) keep the
+resulting state stigma-free, as above, and (b) treat "get every
+newcomer a second trust edge quickly" as an onboarding goal, so no
+member's standing hangs on a single relationship for long. Flagged here
+so the decision meeting weighs it with eyes open.
+
 ## What ships if adopted (so the community knows the cost is small)
 
 A single filter in `vouchersFor` / `trustStatusWithInvites`
@@ -117,6 +169,51 @@ the vouch counts again — no data migration either way, because the
 are unchanged by this decision. Only the *interpretation* of that state
 moves. This makes the decision genuinely reversible, which should lower
 the stakes of adopting it.
+
+## Alternatives considered and rejected
+
+- **Do nothing — the vouch always counts (the "no" position).** Covered
+  under "Recommendation" above. Removes any unilateral trust lever, but
+  forces a member to keep endorsing someone they have explicitly stopped
+  standing behind, and makes revocation hollow. Recommended against; a
+  member may still bring it at the decision meeting.
+
+- **Charge the withdrawer a vouch (make withdrawal "cost" something).**
+  The instinct — withdrawal should not be *costless*, so it cannot be
+  used casually or as a threat — is sound, but attaching the cost to the
+  member's own trust standing backfires and is rejected:
+  - **It taxes honesty.** The point of withdrawal is to keep the graph
+    *accurate*. If retracting costs you, you are incentivized to leave a
+    *false* endorsement standing to avoid the toll — penalizing the
+    person who corrects the record and rewarding the one who lets a
+    stale vouch ride. Backwards.
+  - **It does not fix the asymmetry it targets.** A flat "lose one"
+    barely scratches a well-embedded member (nine edges left, still
+    trusted) while a newcomer with a single edge still drops to zero.
+    Coercion is a *power-asymmetry* problem; a flat cost bites the
+    vulnerable, not the powerful.
+  - **It breaks the trust model.** Your standing is the count of *other
+    people's signed statements about you*, not a balance you own. To
+    "cost you a vouch," the system would have to delete a third party's
+    honest, signed attestation for reasons that party never consented
+    to — impossible in the signed-record model — or bolt on a separate
+    mutable "penalty score." The latter discards the property that makes
+    trust converge commutatively across devices with no coordination
+    (it is just *which signed records exist*), replacing it with a
+    ledger that must be synchronized and reconciled. A real regression.
+  - **It chills vouching and invites retaliation.** If giving a vouch
+    creates a future exit cost, members vouch *less* — raising the price
+    of the thing the community wants more of — and coupling the give
+    side to the receive side turns retraction into a two-way weapon
+    (you withdraw from me, I retaliate-withdraw from you).
+
+  The legitimate version of the instinct is handled by "Why withdrawal
+  can't be held over someone's head" instead: the cost on a bad-faith
+  withdrawal is **reputational and pattern-based, applied to the
+  withdrawer**, plus the fact that any single retraction self-heals with
+  one ordinary vouch. And the implicit edge already carries natural
+  friction — the only way to withdraw it is to revoke the invite you
+  issued, a deliberate act, not a costless click.
 
 ## Process (`GOVERNANCE.md` §2, modified consensus)
 
