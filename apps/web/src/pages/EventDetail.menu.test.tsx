@@ -78,6 +78,13 @@ vi.mock("@/db/secrets", () => ({ getSecretKey: vi.fn(async () => "secret") }));
 vi.mock("@/components/EventRsvpControl", () => ({
   EventRsvpControl: () => null,
 }));
+// Stubbed for the same reason as EventRsvpControl: the shifts section
+// runs its own live queries, which would desync this suite's
+// fixed-order useLiveQuery sequence. Covered in
+// EventShiftsSection.test.tsx.
+vi.mock("@/components/EventShiftsSection", () => ({
+  EventShiftsSection: () => null,
+}));
 
 import "@/i18n";
 import EventDetailPage from "./EventDetail";

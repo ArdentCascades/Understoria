@@ -372,6 +372,18 @@ export async function listSignupsForShift(
   return rows.sort((a, b) => a.signedUpAt - b.signedUpAt);
 }
 
+/** All signups across an event's shifts, in signup order — one live
+ *  query for the event page instead of one per shift. */
+export async function listSignupsForEvent(
+  eventId: string,
+): Promise<ShiftSignupRow[]> {
+  const rows = await db.shiftSignups
+    .where("eventId")
+    .equals(eventId)
+    .toArray();
+  return rows.sort((a, b) => a.signedUpAt - b.signedUpAt);
+}
+
 /** Spot-count helper for the §6.4 rendering ("2 spots open"). */
 export async function signupCountForShift(shiftId: string): Promise<number> {
   return db.shiftSignups.where("shiftId").equals(shiftId).count();
