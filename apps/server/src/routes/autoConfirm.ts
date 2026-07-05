@@ -22,10 +22,18 @@
  * file touches the system key.
  */
 import type { FastifyInstance } from "fastify";
-import type { ExchangeStore, PostRecord, PostStore } from "../db.js";
+import type {
+  AwaitingTransitionStore,
+  ExchangeStore,
+  PostRecord,
+  PostStore,
+} from "../db.js";
 import { CATEGORIES, type Category } from "@understoria/shared/types";
 import type { Exchange } from "@understoria/shared/types";
-import { verifyPost } from "@understoria/shared/crypto";
+import {
+  verifyAwaitingTransition,
+  verifyPost,
+} from "@understoria/shared/crypto";
 import {
   autoConfirmExchange,
   type AutoConfirmRequest,
@@ -37,9 +45,16 @@ interface Deps {
   /** The post store, consulted to bind a system-signed confirmation
    *  to the poster-signed post it finalizes (see `bindToPost`). */
   postStore: PostStore;
+  /** Awaiting-transition artifacts (docs/auto-confirm-key.md §5) —
+   *  the server-anchored age gate. See `resolveWindowAnchor`. */
+  transitionStore: AwaitingTransitionStore;
   signer: SystemSigner | null;
   nodeId: string;
   autoConfirmMinHours: number;
+  /** When true, a request whose postId has no stored artifact is
+   *  refused (`missing_transition`). See Config.autoConfirmRequireTransition
+   *  for the rollout rationale behind the default-off. */
+  requireTransition: boolean;
   /** Test seam — defaults to Date.now. Pure value, so the system-
    *  clock abuse path in §5 is reproducible in tests without
    *  monkey-patching globals. */
@@ -124,6 +139,43 @@ function bindToPost(
   return null;
 }
 
+/**
+ * The §5 window anchor. Returns either the request to hand the signer
+ * (with `awaitingSince` replaced by the artifact's server-stamped
+ * `received_at` when one exists) or an ineligible-reason string.
+ *
+ * Binding rules when an artifact exists for the postId:
+ *   - its parties must match the request's (`transition_mismatch`) —
+ *     an artifact for someone ELSE's pending exchange on a recycled
+ *     label must not lend its age to this one;
+ *   - its signature must still verify (`transition_signature_invalid`,
+ *     defense in depth — the POST route already verified it once);
+ *   - the substituted anchor is `received_at`, never the artifact's
+ *     client-claimed `enteredAt`. A client that was offline for days
+ *     before pushing under-credits its own age — the safe direction:
+ *     the window only ever gets LONGER, never shorter.
+ */
+function resolveWindowAnchor(
+  request: AutoConfirmRequest,
+  transitionStore: AwaitingTransitionStore,
+  requireTransition: boolean,
+): AutoConfirmRequest | string {
+  const stored = transitionStore.getByPostId(request.payload.postId);
+  if (stored === null) {
+    return requireTransition ? "missing_transition" : request;
+  }
+  if (
+    stored.record.helperKey !== request.payload.helperKey ||
+    stored.record.helpedKey !== request.payload.helpedKey
+  ) {
+    return "transition_mismatch";
+  }
+  if (!verifyAwaitingTransition(stored.record)) {
+    return "transition_signature_invalid";
+  }
+  return { ...request, awaitingSince: stored.receivedAt };
+}
+
 export async function registerAutoConfirmRoutes(
   app: FastifyInstance,
   deps: Deps,
@@ -177,7 +229,31 @@ export async function registerAutoConfirmRoutes(
         continue;
       }
 
-      const result = autoConfirmExchange(request, {
+      // Server-anchored age gate (docs/auto-confirm-key.md §5). When
+      // the node holds a signed awaiting-transition artifact for this
+      // postId, the window is measured from the artifact's
+      // server-stamped received_at — a clock no client can backdate —
+      // by substituting it for the client-claimed awaitingSince before
+      // the signer's window check. A fabricated request must therefore
+      // WAIT the full window on this node's clock. Absent an artifact,
+      // requireTransition decides: refuse (fully-enforced mode) or
+      // fall through to the legacy advisory awaitingSince (rollout
+      // mode — clients that predate the artifact keep working).
+      const anchored = resolveWindowAnchor(
+        request,
+        deps.transitionStore,
+        deps.requireTransition,
+      );
+      if (typeof anchored === "string") {
+        results.push({
+          exchangeId: request.exchangeId,
+          status: "ineligible",
+          reason: anchored,
+        });
+        continue;
+      }
+
+      const result = autoConfirmExchange(anchored, {
         signer: deps.signer,
         nodeId: deps.nodeId,
         autoConfirmHours: deps.autoConfirmMinHours,
@@ -279,17 +355,15 @@ function parseOne(
   // Defense in depth (Round-4 review): neither timestamp may be far in
   // the future (the one-day skew grace used across the codebase).
   //
-  // NOTE on the window: the age gate (`now - awaitingSince >=
-  // autoConfirmHours`) CANNOT be server-verified — the node holds no
-  // signed record of when the post entered `awaiting_confirmation`
-  // (that transition is PWA-local, and `completedAt` is stamped to the
-  // sweep's `now`, so awaitingSince is legitimately far below it). A
-  // caller can therefore always claim an old `awaitingSince`. The
-  // window is honest-client advisory; the real gate is `bindToPost`
-  // (a fabricated exchange can't name an arbitrary victim) plus the
-  // safeguards + dispute layer. Making the window itself enforceable
-  // needs a signed awaiting-transition artifact — see
-  // docs/auto-confirm-key.md §5 / the roadmap deferred row.
+  // NOTE on the window: the client-claimed `awaitingSince` here is
+  // advisory. When the node holds a signed awaiting-transition
+  // artifact for the postId (docs/auto-confirm-key.md §5), the route
+  // SUBSTITUTES the artifact's server-stamped received_at before the
+  // signer's window check — see resolveWindowAnchor — making the
+  // window enforceable on the node's own clock. Without an artifact
+  // (legacy clients), requireTransition decides between refusal and
+  // the advisory fallback; the real gates in that fallback remain
+  // `bindToPost` plus the safeguards + dispute layer.
   const oneDayFromNow = now + 24 * 60 * 60 * 1000;
   if ((p.completedAt as number) > oneDayFromNow) {
     return { ok: false, error: "payload.completedAt is too far in the future" };

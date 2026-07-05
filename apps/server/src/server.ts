@@ -24,6 +24,7 @@ import rateLimit from "@fastify/rate-limit";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
 import {
+  createAwaitingTransitionStore,
   createClaimStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
@@ -47,6 +48,7 @@ import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
 import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
+import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
 import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
@@ -56,6 +58,7 @@ import { registerCoOrganizerInvitationRevocationRoutes } from "./routes/coorgInv
 import { registerEventRoutes } from "./routes/events.js";
 import { registerEventCancellationRoutes } from "./routes/eventCancellations.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
+import { registerInsertCapGuard } from "./insertCaps.js";
 
 export interface BuildOptions {
   config: Config;
@@ -172,6 +175,7 @@ export async function buildServer({
   const eventStore = createEventStore(db);
   const eventCancellationStore = createEventCancellationStore(db);
   const pullStore = createPeerPullStore(db);
+  const awaitingTransitionStore = createAwaitingTransitionStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -185,6 +189,17 @@ export async function buildServer({
       "auto-confirm window is configured (AUTO_CONFIRM_MIN_HOURS > 0) but no NODE_SYSTEM_SECRET_KEY is set; /auto-confirm will refuse to sign.",
     );
   }
+
+  // Disk-fill backstop — one preHandler covering every federation
+  // POST (insertCaps.ts). Registered before the routes so the check
+  // runs ahead of each handler.
+  registerInsertCapGuard(app, {
+    db,
+    config: {
+      tableRowCeiling: config.tableRowCeiling,
+      perKeyRowCeiling: config.perKeyRowCeiling,
+    },
+  });
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store });
@@ -214,12 +229,17 @@ export async function buildServer({
     eventStore,
   });
   await registerConfigRoutes(app, { config, signer });
+  await registerAwaitingTransitionRoutes(app, {
+    store: awaitingTransitionStore,
+  });
   await registerAutoConfirmRoutes(app, {
     store,
     postStore,
+    transitionStore: awaitingTransitionStore,
     signer,
     nodeId: config.nodeId,
     autoConfirmMinHours: config.autoConfirmMinHours,
+    requireTransition: config.autoConfirmRequireTransition,
   });
   await registerPeersRoutes(app, {
     pullStore,

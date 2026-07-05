@@ -22,6 +22,8 @@ import nacl from "tweetnacl";
 import ed2curve from "ed2curve";
 import { b64decode, b64encode, utf8decode, utf8encode } from "./bytes.js";
 import type {
+  AwaitingTransition,
+  AwaitingTransitionPayload,
   Category,
   CoOrganizerInvitation,
   CoOrganizerInvitationPayload,
@@ -881,4 +883,42 @@ export function verifyEventCancellation(rec: EventCancellation): boolean {
   if (!rec.signature) return false;
   const payload = canonicalEventCancellationPayload(rec);
   return verify(payload, rec.signature, rec.createdBy);
+}
+
+/**
+ * Canonical, stable serialization of an awaiting-transition payload —
+ * the bytes the attesting party's secret key signs. Field order is
+ * fixed for cross-engine JSON stability; `signature` is NOT part of
+ * the canonical payload. See the `AwaitingTransitionPayload` doc in
+ * types.ts for what this record is for.
+ */
+export function canonicalAwaitingTransitionPayload(
+  p: AwaitingTransitionPayload,
+): string {
+  return JSON.stringify({
+    kind: p.kind,
+    postId: p.postId,
+    helperKey: p.helperKey,
+    helpedKey: p.helpedKey,
+    signedBy: p.signedBy,
+    enteredAt: p.enteredAt,
+    nodeId: p.nodeId,
+  });
+}
+
+/**
+ * Verify an awaiting-transition artifact: the signature must verify
+ * against `signedBy`, and `signedBy` must be one of the two parties
+ * it attests for. The AGE of the transition is deliberately NOT part
+ * of what this proves — the node's own `received_at` ingestion stamp
+ * is the enforcement anchor (`docs/auto-confirm-key.md` §5).
+ */
+export function verifyAwaitingTransition(rec: AwaitingTransition): boolean {
+  if (!rec.signature) return false;
+  if (rec.kind !== "awaiting_transition") return false;
+  if (rec.signedBy !== rec.helperKey && rec.signedBy !== rec.helpedKey) {
+    return false;
+  }
+  const payload = canonicalAwaitingTransitionPayload(rec);
+  return verify(payload, rec.signature, rec.signedBy);
 }

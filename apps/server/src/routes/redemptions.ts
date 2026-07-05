@@ -122,7 +122,7 @@ export async function registerRedemptionRoutes(
     return { stored: true, token: receipt.invite.token };
   });
 
-  app.get<{ Querystring: { since?: string; limit?: string } }>(
+  app.get<{ Querystring: { since?: string; sinceId?: string; limit?: string } }>(
     "/redemptions",
     async (req) => {
       const since = req.query.since
@@ -139,7 +139,14 @@ export async function registerRedemptionRoutes(
         limit !== undefined && Number.isFinite(limit) && limit > 0
           ? limit
           : undefined;
-      const rows = store.list({ since: safeSince, limit: safeLimit });
+      // Composite pair cursor (docs/composite-federation-cursors.md §2):
+      // strictly-after-(since,sinceId) paging when both are present;
+      // ignored without `since`, so it degrades to the legacy cursor.
+      const safeSinceId =
+        req.query.sinceId && req.query.sinceId.length > 0
+          ? req.query.sinceId
+          : undefined;
+      const rows = store.list({ since: safeSince, sinceId: safeSinceId, limit: safeLimit });
       return {
         count: rows.length,
         redemptions: rows.map((row) => ({

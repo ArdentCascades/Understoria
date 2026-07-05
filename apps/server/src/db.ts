@@ -21,6 +21,7 @@
 import Database from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";
 import type {
+  AwaitingTransition,
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
@@ -53,7 +54,7 @@ export interface ExchangeStore {
   insert(exchange: Exchange): void;
   /** Point lookup by exchange id, or undefined when absent. */
   get(id: string): Exchange | undefined;
-  list(opts?: { since?: number; limit?: number }): Exchange[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): Exchange[];
   count(): number;
   has(id: string): boolean;
 }
@@ -67,7 +68,7 @@ export interface ExchangeStore {
  */
 export interface VouchStore {
   insert(vouch: SignedVouch): void;
-  list(opts?: { since?: number; limit?: number }): SignedVouch[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): SignedVouch[];
   count(): number;
   has(id: string): boolean;
 }
@@ -97,7 +98,7 @@ export type PostRecord = Pick<
 
 export interface PostStore {
   insert(post: PostRecord): void;
-  list(opts?: { since?: number; limit?: number }): PostRecord[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): PostRecord[];
   count(): number;
   has(id: string): boolean;
   /** The stored post for `id`, or null. Used by /auto-confirm to bind
@@ -121,7 +122,7 @@ export interface TaskCommentStore {
   /** Set `deleted_at` for an existing row. Returns true if a row was
    *  updated (i.e. it existed and wasn't already tombstoned). */
   upsertTombstone(id: string, deletedAt: number): boolean;
-  list(opts?: { since?: number; limit?: number }): TaskComment[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): TaskComment[];
   count(): number;
   has(id: string): boolean;
   /** Returns the stored row's deleted_at, or undefined if not present. */
@@ -159,7 +160,7 @@ export interface RedemptionStore {
   /** Rows with `received_at >= since` (inclusive, token tiebreak),
    *  ascending, capped like the sibling stores (default 200,
    *  ceiling 1000). */
-  list(opts?: { since?: number; limit?: number }): StoredRedemption[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): StoredRedemption[];
   count(): number;
   has(token: string): boolean;
   /** Existing receipt for a token — first-writer-wins arbitration. */
@@ -177,10 +178,35 @@ export interface InviteRevocationStore {
   insert(revocation: InviteRevocation, receivedAt: number): void;
   /** Rows with `received_at >= since`, ascending (+ token tiebreak),
    *  capped like the sibling stores. */
-  list(opts?: { since?: number; limit?: number }): StoredInviteRevocation[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): StoredInviteRevocation[];
   count(): number;
   has(token: string): boolean;
   getByToken(token: string): StoredInviteRevocation | null;
+}
+
+export interface StoredAwaitingTransition {
+  record: AwaitingTransition;
+  /** Server clock at ingestion — the age anchor the /auto-confirm
+   *  window is measured from (docs/auto-confirm-key.md §5). Never
+   *  client-influenced. */
+  receivedAt: number;
+}
+
+/**
+ * Storage for signed awaiting-transition artifacts. Deliberately
+ * NARROW: no list() and no GET route — the artifact is only ever
+ * consulted by this node's own /auto-confirm handler, keyed by
+ * post_id. First-writer-wins per post_id: `insert` is
+ * INSERT-OR-IGNORE, so a re-push (client retry, outbox redelivery,
+ * or a second party attesting) is idempotent and can never reset
+ * the `received_at` age anchor.
+ */
+export interface AwaitingTransitionStore {
+  /** Returns true when a row was inserted, false when the post_id
+   *  already had one (idempotent no-op). */
+  insert(record: AwaitingTransition, receivedAt: number): boolean;
+  getByPostId(postId: string): StoredAwaitingTransition | null;
+  count(): number;
 }
 
 /**
@@ -193,7 +219,7 @@ export interface InviteRevocationStore {
  */
 export interface CoOrganizerInvitationStore {
   insert(record: CoOrganizerInvitation): void;
-  list(opts?: { since?: number; limit?: number }): CoOrganizerInvitation[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): CoOrganizerInvitation[];
   count(): number;
   has(id: string): boolean;
 }
@@ -202,6 +228,7 @@ export interface CoOrganizerInvitationResponseStore {
   insert(record: CoOrganizerInvitationResponse): void;
   list(opts?: {
     since?: number;
+    sinceId?: string;
     limit?: number;
   }): CoOrganizerInvitationResponse[];
   count(): number;
@@ -212,6 +239,7 @@ export interface CoOrganizerInvitationRevocationStore {
   insert(record: CoOrganizerInvitationRevocation): void;
   list(opts?: {
     since?: number;
+    sinceId?: string;
     limit?: number;
   }): CoOrganizerInvitationRevocation[];
   count(): number;
@@ -228,7 +256,7 @@ export interface CoOrganizerInvitationRevocationStore {
  */
 export interface EventStore {
   insert(record: Event): void;
-  list(opts?: { since?: number; limit?: number }): Event[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): Event[];
   count(): number;
   has(id: string): boolean;
   get(id: string): Event | null;
@@ -243,7 +271,7 @@ export interface EventStore {
  */
 export interface EventCancellationStore {
   insert(record: EventCancellation): void;
-  list(opts?: { since?: number; limit?: number }): EventCancellation[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): EventCancellation[];
   count(): number;
   has(id: string): boolean;
   /** Returns the existing cancellation row for an event, if any.
@@ -261,7 +289,7 @@ export interface ClaimRecord {
 
 export interface ClaimStore {
   insert(claim: ClaimRecord): void;
-  list(opts?: { since?: number; limit?: number }): ClaimRecord[];
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): ClaimRecord[];
   has(postId: string): boolean;
 }
 
@@ -787,6 +815,117 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '13')",
     ).run();
   }
+
+  // Schema v14 — signed awaiting-transition artifacts
+  // (docs/auto-confirm-key.md §5; roadmap "signed awaiting-transition
+  // artifact" row). One row per pending exchange, keyed by post_id
+  // (post id or `project:<id>/task:<id>` label), FIRST-WRITER-WINS —
+  // the PRIMARY KEY plus insert-or-ignore semantics in the store mean
+  // a re-push can never reset the age anchor. `received_at` is the
+  // node's own ingestion clock: the value the /auto-confirm window is
+  // measured from, which no client can backdate. PWA↔node only — no
+  // peer-replication leg (the artifact only matters at the node whose
+  // system key will sign), so no GET route and no peer_pull_state
+  // column.
+  if (current < 14) {
+    db.exec(`
+      CREATE TABLE awaiting_transitions (
+        post_id TEXT PRIMARY KEY,
+        helper_key TEXT NOT NULL,
+        helped_key TEXT NOT NULL,
+        signed_by TEXT NOT NULL,
+        entered_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        received_at INTEGER NOT NULL
+      );
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '14')",
+    ).run();
+  }
+
+  // Schema v15 — per-key insert-cap backstop (roadmap "per-key /
+  // per-table insert caps"; see apps/server/src/insertCaps.ts). The
+  // cap guard runs a COUNT(... WHERE <key_column> = ?) before every
+  // federation POST; these indexes cover the key columns that did not
+  // already have one, so the check stays O(log n) as tables grow.
+  if (current < 15) {
+    db.exec(`
+      CREATE INDEX claims_claimer_idx ON claims (claimer_key);
+      CREATE INDEX coorg_invitations_inviter_idx
+        ON coorg_invitations (inviter_key);
+      CREATE INDEX coorg_invitation_responses_invitee_idx
+        ON coorg_invitation_responses (invitee_key);
+      CREATE INDEX coorg_invitation_revocations_inviter_idx
+        ON coorg_invitation_revocations (inviter_key);
+      CREATE INDEX awaiting_transitions_signed_by_idx
+        ON awaiting_transitions (signed_by);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '15')",
+    ).run();
+  }
+}
+
+/**
+ * Shared federation-feed page query — the composite `(timestamp, id)`
+ * cursor from `docs/composite-federation-cursors.md` §2.
+ *
+ * Ordering is always `tsExpr ASC, idCol ASC`. Three cursor modes:
+ *
+ *   - `since` + `sinceId`: EXCLUSIVE pair cursor — strictly after the
+ *     `(since, sinceId)` position: `(ts > since) OR (ts = since AND
+ *     id > sinceId)`. The pair pins a total position in the feed, so
+ *     pagination can never re-serve or skip within a timestamp tie,
+ *     regardless of tie size. This closes the round-3 "KNOWN LIMIT"
+ *     wedge: with a bare-timestamp cursor, more than `limit` rows
+ *     sharing one millisecond re-served the same lowest-id page
+ *     forever.
+ *   - `since` alone: the legacy INCLUSIVE `>=` cursor, byte-for-byte
+ *     the old behavior — old pullers keep working, and the wedge
+ *     remains only for them (still unreachable through normal
+ *     one-at-a-time writes).
+ *   - neither: first page from the beginning of the feed.
+ *
+ * `tsExpr` may be a SQL expression (task comments cursor on
+ * `MAX(created_at, COALESCE(deleted_at, 0))` so tombstones re-enter
+ * the window). `idCol` is the signed-payload id / primary key of the
+ * store (`token` for redemptions + invite revocations, `post_id` for
+ * claims) — nothing new for a malicious node to choose that it could
+ * not already choose. Both arguments are compile-time constants at
+ * every call site, never user input.
+ */
+function pagedRows<Row>(
+  db: DatabaseType,
+  table: string,
+  tsExpr: string,
+  idCol: string,
+  {
+    since,
+    sinceId,
+    limit,
+  }: { since?: number; sinceId?: string; limit?: number } = {},
+): Row[] {
+  const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
+  const order = `ORDER BY ${tsExpr} ASC, ${idCol} ASC LIMIT ?`;
+  if (since && sinceId) {
+    return db
+      .prepare(
+        `SELECT * FROM ${table}
+         WHERE (${tsExpr} > ?) OR (${tsExpr} = ? AND ${idCol} > ?)
+         ${order}`,
+      )
+      .all(since, since, sinceId, safeLimit) as Row[];
+  }
+  if (since) {
+    return db
+      .prepare(
+        `SELECT * FROM ${table} WHERE ${tsExpr} >= ? ${order}`,
+      )
+      .all(since, safeLimit) as Row[];
+  }
+  return db.prepare(`SELECT * FROM ${table} ${order}`).all(safeLimit) as Row[];
 }
 
 export function createExchangeStore(db: DatabaseType): ExchangeStore {
@@ -834,41 +973,16 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
       return row ? rowToExchange(row) : undefined;
     },
 
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first with an INCLUSIVE cursor filter. Pullers advance
-      // their cursor to max(completed_at) of each page, so ASC is the
-      // only order under which a page boundary can't permanently skip
-      // rows (with DESC, >limit new rows meant the cursor jumped past
-      // everything below the newest page). `>=` re-serves boundary
-      // rows that share the cursor timestamp; pullers dedup by id, so
-      // ties can never be lost either. The id tiebreak keeps paging
-      // deterministic.
-      //
-      // KNOWN LIMIT (all sibling stores too, roadmap "composite
-      // federation cursors"): pullers track only max(timestamp), so if
-      // MORE THAN `limit` rows share one timestamp the page fills with
-      // the same lowest-id ties every pull and the cursor cannot move
-      // past them. Unreachable through normal one-at-a-time writes;
-      // only batch tooling stamping >page-size rows in a single ms
-      // could trigger it. The fix is a composite (timestamp, id)
-      // cursor across every store, client pull, and peer_pull_state —
-      // a wire-protocol change deferred to its own design pass:
-      // docs/composite-federation-cursors.md.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM exchanges WHERE completed_at >= ?
-               ORDER BY completed_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM exchanges
-               ORDER BY completed_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as ExchangeRow[]).map(rowToExchange);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<ExchangeRow>(
+        db,
+        "exchanges",
+        "completed_at",
+        "id",
+        opts,
+      ).map(rowToExchange);
     },
 
     count() {
@@ -904,24 +1018,16 @@ export function createVouchStore(db: DatabaseType): VouchStore {
         signature: vouch.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM vouches WHERE created_at >= ?
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM vouches
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as VouchRow[]).map(rowToVouch);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<VouchRow>(
+        db,
+        "vouches",
+        "created_at",
+        "id",
+        opts,
+      ).map(rowToVouch);
     },
     count() {
       const r = countStmt.get() as { n: number };
@@ -985,24 +1091,16 @@ export function createPostStore(db: DatabaseType): PostStore {
         signature: post.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM posts WHERE created_at >= ?
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM posts
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as PostRowSqlite[]).map(rowToPost);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<PostRowSqlite>(
+        db,
+        "posts",
+        "created_at",
+        "id",
+        opts,
+      ).map(rowToPost);
     },
     count() {
       const r = countStmt.get() as { n: number };
@@ -1094,34 +1192,16 @@ export function createTaskCommentStore(db: DatabaseType): TaskCommentStore {
       const info = tombstoneStmt.run({ id, deletedAt });
       return info.changes > 0;
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale.
-      //
-      // A task comment's effective cursor position is
-      // max(created_at, deleted_at): a tombstone applied AFTER a
-      // puller's cursor passed the row's created_at must re-enter the
-      // window, or soft deletes never converge for peers that already
-      // pulled the live row. Pullers advance their cursor by the same
-      // max, and dedup/merge by id.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM task_comments
-               WHERE MAX(created_at, COALESCE(deleted_at, 0)) >= ?
-               ORDER BY MAX(created_at, COALESCE(deleted_at, 0)) ASC, id ASC
-               LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM task_comments
-               ORDER BY MAX(created_at, COALESCE(deleted_at, 0)) ASC, id ASC
-               LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as TaskCommentRowSqlite[]).map(rowToTaskComment);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<TaskCommentRowSqlite>(
+        db,
+        "task_comments",
+        "MAX(created_at, COALESCE(deleted_at, 0))",
+        "id",
+        opts,
+      ).map(rowToTaskComment);
     },
     count() {
       const r = countStmt.get() as { n: number };
@@ -1471,29 +1551,16 @@ export function createRedemptionStore(db: DatabaseType): RedemptionStore {
     // deviation from the sibling stores, so a client that was offline
     // for a week resumes exactly where it left off regardless of what
     // `redeemedAt` any device claimed.
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Inclusive cursor + token tiebreak — same tie-at-page-boundary
-      // reasoning as the exchanges store's list(): two receipts can
-      // share a received_at millisecond, and a strict `>` cursor that
-      // lands between them skips the un-served one forever. Pullers
-      // merge idempotently by token, so a re-served boundary row is a
-      // harmless no-op. The server-monotonic received_at cursor itself
-      // (the §7 design ruling) is unchanged.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM redemptions WHERE received_at >= ?
-               ORDER BY received_at ASC, token ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM redemptions
-               ORDER BY received_at ASC, token ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as RedemptionRowSqlite[]).map(rowToRedemption);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<RedemptionRowSqlite>(
+        db,
+        "redemptions",
+        "received_at",
+        "token",
+        opts,
+      ).map(rowToRedemption);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
@@ -1546,6 +1613,77 @@ function rowToRedemption(r: RedemptionRowSqlite): StoredRedemption {
   };
 }
 
+export function createAwaitingTransitionStore(
+  db: DatabaseType,
+): AwaitingTransitionStore {
+  // INSERT OR IGNORE = first-writer-wins on post_id. A retry, an
+  // outbox redelivery, or the second party attesting the same pending
+  // exchange is an idempotent no-op — nothing can reset the
+  // received_at age anchor once the node has one.
+  const insertStmt = db.prepare(`
+    INSERT OR IGNORE INTO awaiting_transitions (
+      post_id, helper_key, helped_key, signed_by,
+      entered_at, node_id, signature, received_at
+    ) VALUES (
+      @postId, @helperKey, @helpedKey, @signedBy,
+      @enteredAt, @nodeId, @signature, @receivedAt
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM awaiting_transitions WHERE post_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM awaiting_transitions",
+  );
+
+  interface Row {
+    post_id: string;
+    helper_key: string;
+    helped_key: string;
+    signed_by: string;
+    entered_at: number;
+    node_id: string;
+    signature: string;
+    received_at: number;
+  }
+
+  return {
+    insert(record, receivedAt) {
+      const info = insertStmt.run({
+        postId: record.postId,
+        helperKey: record.helperKey,
+        helpedKey: record.helpedKey,
+        signedBy: record.signedBy,
+        enteredAt: record.enteredAt,
+        nodeId: record.nodeId,
+        signature: record.signature,
+        receivedAt,
+      });
+      return info.changes > 0;
+    },
+    getByPostId(postId) {
+      const r = getStmt.get(postId) as Row | undefined;
+      if (!r) return null;
+      return {
+        record: {
+          kind: "awaiting_transition",
+          postId: r.post_id,
+          helperKey: r.helper_key,
+          helpedKey: r.helped_key,
+          signedBy: r.signed_by,
+          enteredAt: r.entered_at,
+          nodeId: r.node_id,
+          signature: r.signature,
+        },
+        receivedAt: r.received_at,
+      };
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
 export function createInviteRevocationStore(
   db: DatabaseType,
 ): InviteRevocationStore {
@@ -1577,22 +1715,16 @@ export function createInviteRevocationStore(
     },
     // Inclusive received_at cursor + token tiebreak — same reasoning as
     // the redemptions store's list().
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM invite_revocations WHERE received_at >= ?
-               ORDER BY received_at ASC, token ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM invite_revocations
-               ORDER BY received_at ASC, token ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as InviteRevocationRowSqlite[]).map(rowToInviteRevocation);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<InviteRevocationRowSqlite>(
+        db,
+        "invite_revocations",
+        "received_at",
+        "token",
+        opts,
+      ).map(rowToInviteRevocation);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
@@ -1649,25 +1781,16 @@ export function createClaimStore(db: DatabaseType): ClaimStore {
         nodeId: claim.nodeId,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale. The PWA's
-      // claim pull advances a max(claimed_at) cursor, so it has the
-      // same page-skip failure mode as the peer pulls.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM claims WHERE claimed_at >= ?
-               ORDER BY claimed_at ASC, post_id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM claims ORDER BY claimed_at ASC, post_id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as ClaimRow[]).map(rowToClaim);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<ClaimRow>(
+        db,
+        "claims",
+        "claimed_at",
+        "post_id",
+        opts,
+      ).map(rowToClaim);
     },
     has(postId) {
       return hasStmt.get(postId) !== undefined;
@@ -1719,26 +1842,16 @@ export function createCoOrganizerInvitationStore(
         signature: record.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM coorg_invitations WHERE created_at >= ?
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM coorg_invitations
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as CoOrganizerInvitationRowSqlite[]).map(
-        rowToCoOrganizerInvitation,
-      );
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<CoOrganizerInvitationRowSqlite>(
+        db,
+        "coorg_invitations",
+        "created_at",
+        "id",
+        opts,
+      ).map(rowToCoOrganizerInvitation);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
@@ -1806,26 +1919,16 @@ export function createCoOrganizerInvitationResponseStore(
         signature: record.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM coorg_invitation_responses WHERE decided_at >= ?
-               ORDER BY decided_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM coorg_invitation_responses
-               ORDER BY decided_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as CoOrganizerInvitationResponseRowSqlite[]).map(
-        rowToCoOrganizerInvitationResponse,
-      );
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<CoOrganizerInvitationResponseRowSqlite>(
+        db,
+        "coorg_invitation_responses",
+        "decided_at",
+        "id",
+        opts,
+      ).map(rowToCoOrganizerInvitationResponse);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
@@ -1888,26 +1991,16 @@ export function createCoOrganizerInvitationRevocationStore(
         signature: record.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Oldest-first + inclusive cursor — see the exchanges store's
-      // list() for the pagination-correctness rationale.
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM coorg_invitation_revocations WHERE revoked_at >= ?
-               ORDER BY revoked_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM coorg_invitation_revocations
-               ORDER BY revoked_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as CoOrganizerInvitationRevocationRowSqlite[]).map(
-        rowToCoOrganizerInvitationRevocation,
-      );
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<CoOrganizerInvitationRevocationRowSqlite>(
+        db,
+        "coorg_invitation_revocations",
+        "revoked_at",
+        "id",
+        opts,
+      ).map(rowToCoOrganizerInvitationRevocation);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
@@ -1972,25 +2065,16 @@ export function createEventStore(db: DatabaseType): EventStore {
         signature: record.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Inclusive cursor + id tiebreak — see the exchanges store's
-      // list() for the tie-at-page-boundary rationale (this store was
-      // already ASC).
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM events WHERE created_at >= ?
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM events
-               ORDER BY created_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as EventRowSqlite[]).map(rowToEvent);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<EventRowSqlite>(
+        db,
+        "events",
+        "created_at",
+        "id",
+        opts,
+      ).map(rowToEvent);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
@@ -2061,25 +2145,16 @@ export function createEventCancellationStore(
         signature: record.signature,
       });
     },
-    list({ since, limit } = {}) {
-      const safeLimit = Math.max(1, Math.min(limit ?? 200, 1000));
-      // Inclusive cursor + id tiebreak — see the exchanges store's
-      // list() for the tie-at-page-boundary rationale (this store was
-      // already ASC).
-      const rows = since
-        ? db
-            .prepare(
-              `SELECT * FROM event_cancellations WHERE cancelled_at >= ?
-               ORDER BY cancelled_at ASC, id ASC LIMIT ?`,
-            )
-            .all(since, safeLimit)
-        : db
-            .prepare(
-              `SELECT * FROM event_cancellations
-               ORDER BY cancelled_at ASC, id ASC LIMIT ?`,
-            )
-            .all(safeLimit);
-      return (rows as EventCancellationRowSqlite[]).map(rowToEventCancellation);
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<EventCancellationRowSqlite>(
+        db,
+        "event_cancellations",
+        "cancelled_at",
+        "id",
+        opts,
+      ).map(rowToEventCancellation);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

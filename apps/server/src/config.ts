@@ -122,6 +122,29 @@ export interface Config {
    * matching the design note's pilot recommendation.
    */
   autoConfirmMinHours: number;
+  /**
+   * When true, `POST /auto-confirm` REFUSES to sign a request whose
+   * `postId` has no stored awaiting-transition artifact
+   * (`missing_transition`) — the fully-enforced mode of
+   * `docs/auto-confirm-key.md` §5. Default false for rollout: clients
+   * must first ship the artifact-pushing build and existing pending
+   * confirmations must drain through, or every in-flight auto-confirm
+   * would strand. When an artifact IS present the window is enforced
+   * from its server-stamped `received_at` regardless of this flag —
+   * the flag only controls what happens when one is absent.
+   */
+  autoConfirmRequireTransition: boolean;
+  /**
+   * Disk-fill backstop ceilings (see `apps/server/src/insertCaps.ts`).
+   * `tableRowCeiling` bounds total rows per federated table;
+   * `perKeyRowCeiling` bounds rows per signing key per table
+   * (a LIFETIME count — record timestamps are client-claimed, so a
+   * rolling window would be dodgeable by backdating). 0 disables a
+   * check. Breaches answer 507 so honest clients' outboxes retry
+   * rather than poison.
+   */
+  tableRowCeiling: number;
+  perKeyRowCeiling: number;
 }
 
 function asInt(name: string, raw: string | undefined, fallback: number): number {
@@ -175,6 +198,20 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       "AUTO_CONFIRM_MIN_HOURS",
       env.AUTO_CONFIRM_MIN_HOURS,
       168,
+    ),
+    autoConfirmRequireTransition: asBool(
+      env.AUTO_CONFIRM_REQUIRE_TRANSITION,
+      false,
+    ),
+    tableRowCeiling: asNonNegativeInt(
+      "TABLE_ROW_CEILING",
+      env.TABLE_ROW_CEILING,
+      500_000,
+    ),
+    perKeyRowCeiling: asNonNegativeInt(
+      "PER_KEY_ROW_CEILING",
+      env.PER_KEY_ROW_CEILING,
+      10_000,
     ),
   };
 }

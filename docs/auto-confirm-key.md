@@ -311,18 +311,31 @@ not skip it on a re-read.
 > category to MATCH what the poster signed. The claims below hold
 > *given that binding*. Two residuals remain, named honestly:
 >
-> - **The time window is advisory, not enforced.** `awaitingSince` is
->   client-supplied and the node holds no signed record of when a post
->   entered `awaiting_confirmation` (that transition is PWA-local), so
->   a caller can always claim an old value to pass the window. The
->   real gates are the post-binding, the safeguards flags, and
->   dispute. Making the window itself enforceable needs a signed
->   awaiting-transition artifact — a roadmap deferred item.
-> - **Project-task auto-confirms can't be bound.** Projects are
->   local-only and don't federate (`threat-model.md` §7), so the node
->   holds no artifact for a `project:<id>/task:<id>` request. That path
->   is bounded only by a generous hours cap and remains an
->   operator-trust surface; the deferred artifact would cover it too.
+> - **The time window is now enforceable via the signed
+>   awaiting-transition artifact** (this closes the residual as
+>   originally filed). When an exchange enters `awaiting_confirmation`,
+>   the acting party signs an `AwaitingTransition` record and the
+>   client pushes it to `POST /awaiting-transitions`, where the node
+>   stamps its OWN clock (`received_at`, first-writer-wins per
+>   postId). `/auto-confirm` substitutes that stamp for the
+>   client-claimed `awaitingSince` before the window check — so the
+>   window is wall-clock waiting on the node's clock, which no client
+>   can backdate; a fabricated artifact still has to SIT on the node
+>   for the full window. What remains client-shaped: with
+>   `AUTO_CONFIRM_REQUIRE_TRANSITION` unset (the rollout default), a
+>   request with NO artifact falls back to the old advisory
+>   `awaitingSince` so legacy clients keep working — the flip to
+>   `missing_transition` refusal is the operator's rollout step, and
+>   until it is flipped an attacker can simply omit the artifact. The
+>   binding gates (below) hold either way.
+> - **Project-task auto-confirms are covered by the artifact too.**
+>   Projects are local-only and don't federate (`threat-model.md` §7),
+>   so `bindToPost` still can't check hours/parties against a signed
+>   post for a `project:<id>/task:<id>` request — that path keeps the
+>   generous hours cap as its bound. But the artifact is keyed on the
+>   LABEL, so the waiting window is now enforceable for tasks exactly
+>   as for posts (and in enforced mode a task confirmation with no
+>   artifact is refused outright).
 
 - **Invent exchanges against an arbitrary victim.** With `bindToPost`,
   a post-based confirmation can only name as the confirmed-for party

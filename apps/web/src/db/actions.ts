@@ -26,7 +26,10 @@ import { computeZoneReachForHelper } from "@/lib/flow";
 import { getNodeConfig } from "./nodeConfig";
 import { uuid } from "@/lib/id";
 import { canonicalExchangePayload, sign } from "@/lib/crypto";
-import { canonicalPostPayload } from "@understoria/shared/crypto";
+import {
+  canonicalAwaitingTransitionPayload,
+  canonicalPostPayload,
+} from "@understoria/shared/crypto";
 import { enqueueClaimOutbox } from "@/lib/outbox";
 import {
   assertWithinDailyLimit,
@@ -35,6 +38,7 @@ import {
 } from "@/lib/safeguards";
 import { getSecretKey } from "./secrets";
 import {
+  enqueueAwaitingTransition,
   enqueueExchangeOutbox,
   enqueuePostOutbox,
   flushOutboxNow,
@@ -265,6 +269,8 @@ export async function confirmExchange(
         confirmedBy.includes(post.claimedBy);
 
       if (!bothConfirmed) {
+        const firstTransition = post.awaitingSince === undefined ||
+          post.awaitingSince === null;
         const updated: Post = {
           ...post,
           status: "awaiting_confirmation",
@@ -278,6 +284,43 @@ export async function confirmExchange(
           awaitingSince: post.awaitingSince ?? Date.now(),
         };
         await db.posts.put(updated);
+
+        // Signed awaiting-transition artifact (auto-confirm-key.md §5):
+        // attest the transition to the node so the /auto-confirm window
+        // becomes enforceable from the node's own received_at clock.
+        // First transition only — the server is first-writer-wins on
+        // postId anyway, so a repeat would be a wire no-op. Signed by
+        // the confirming party (they're present with their key); if
+        // their secret isn't unwrappable right now the artifact is
+        // SKIPPED rather than failing the confirmation — the artifact
+        // is an enforcement upgrade, and the legacy advisory path
+        // still works without it.
+        if (firstTransition) {
+          const confirmerSecret = preflight.get(memberKey);
+          if (confirmerSecret) {
+            const helperK =
+              post.type === "NEED" ? post.claimedBy : post.postedBy;
+            const helpedK =
+              post.type === "NEED" ? post.postedBy : post.claimedBy;
+            const transitionPayload = {
+              kind: "awaiting_transition" as const,
+              postId: post.id,
+              helperKey: helperK,
+              helpedKey: helpedK,
+              signedBy: memberKey,
+              enteredAt: updated.awaitingSince ?? Date.now(),
+              nodeId: post.nodeId,
+            };
+            await enqueueAwaitingTransition({
+              ...transitionPayload,
+              signature: sign(
+                canonicalAwaitingTransitionPayload(transitionPayload),
+                confirmerSecret,
+              ),
+            });
+          }
+        }
+
         return { post: updated, exchange: null, newAchievements: [] };
       }
 

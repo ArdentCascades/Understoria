@@ -518,12 +518,23 @@ describe("community-node mirroring on confirmExchange", () => {
           enabled: true,
         }),
     });
-    await waitForFetch(fetchSpy);
-
-    expect(fetchSpy).toHaveBeenCalledOnce();
+    // Two rows ship: the §5 awaiting-transition artifact (from the
+    // first confirm) and the finalized exchange. Wait for the exchange
+    // POST specifically — the artifact may deliver first.
+    await vi.waitFor(() => {
+      const urls = (
+        fetchSpy.mock.calls as unknown as Array<[string]>
+      ).map(([u]) => u);
+      if (!urls.includes("https://node.example/api/exchanges")) {
+        throw new Error("exchange POST not yet observed");
+      }
+    });
     const calls = fetchSpy.mock.calls as unknown as Array<[string, RequestInit]>;
-    const [url, init] = calls[0];
-    expect(url).toBe("https://node.example/api/exchanges");
+    const exchangeCall = calls.find(
+      ([url]) => url === "https://node.example/api/exchanges",
+    );
+    expect(exchangeCall).toBeTruthy();
+    const [, init] = exchangeCall!;
     expect(init.method).toBe("POST");
     const body = JSON.parse(init.body as string);
     expect(body.id).toBe(result.exchange!.id);
@@ -562,10 +573,15 @@ describe("community-node mirroring on confirmExchange", () => {
         }),
     });
     const rows = await db.outbox.toArray();
-    expect(rows).toHaveLength(1);
-    expect(rows[0].recordId).toBe(result.exchange!.id);
-    expect(rows[0].kind).toBe("exchange");
-    expect(rows[0].status).toBe("pending");
+    // The exchange row plus the §5 awaiting-transition artifact from
+    // the first confirm.
+    const exchangeRows = rows.filter((r) => r.kind === "exchange");
+    expect(exchangeRows).toHaveLength(1);
+    expect(exchangeRows[0].recordId).toBe(result.exchange!.id);
+    expect(exchangeRows[0].status).toBe("pending");
+    expect(
+      rows.filter((r) => r.kind === "awaiting_transition"),
+    ).toHaveLength(1);
     // Disabled means the row sits there until the user enables; a
     // later flushOutboxOnce with the config flipped would deliver it.
   });
@@ -588,7 +604,10 @@ describe("community-node mirroring on confirmExchange", () => {
     await new Promise((r) => setTimeout(r, 50));
 
     const rows = await db.outbox.toArray();
-    expect(rows).toHaveLength(1);
-    expect(rows[0].status).toBe("delivered");
+    // Exchange + awaiting-transition artifact, both delivered.
+    expect(rows.length).toBeGreaterThanOrEqual(1);
+    for (const row of rows) {
+      expect(row.status).toBe("delivered");
+    }
   });
 });

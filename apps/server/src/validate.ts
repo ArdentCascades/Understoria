@@ -20,6 +20,7 @@
  */
 import {
   CATEGORIES,
+  type AwaitingTransition,
   type Category,
   type CoOrganizerInvitation,
   type CoOrganizerInvitationResponse,
@@ -858,6 +859,82 @@ export function parseEventCancellation(
       reason: r.reason as string,
       cancelledAt: r.cancelledAt as number,
       createdBy: r.createdBy as string,
+      nodeId: r.nodeId as string,
+      signature: r.signature as string,
+    },
+  };
+}
+
+export type ParseAwaitingTransitionResult =
+  | { ok: true; value: AwaitingTransition }
+  | { ok: false; error: string };
+
+const AWAITING_TRANSITION_STRING_FIELDS = [
+  "postId",
+  "helperKey",
+  "helpedKey",
+  "signedBy",
+  "nodeId",
+  "signature",
+] as const;
+
+/** Post ids are UUIDs or `project:<id>/task:<id>` labels; a generous
+ *  ceiling keeps a signed artifact from smuggling free text. */
+const AWAITING_TRANSITION_POSTID_MAX = 300;
+
+export function parseAwaitingTransition(
+  input: unknown,
+): ParseAwaitingTransitionResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  if (r.kind !== "awaiting_transition") {
+    return { ok: false, error: "kind must be 'awaiting_transition'" };
+  }
+  for (const f of AWAITING_TRANSITION_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if ((r.postId as string).length > AWAITING_TRANSITION_POSTID_MAX) {
+    return {
+      ok: false,
+      error: `postId exceeds ${AWAITING_TRANSITION_POSTID_MAX} characters`,
+    };
+  }
+  // Authority shape: the attesting party must be one of the two the
+  // artifact names. The signature check against signedBy happens at
+  // the route via verifyAwaitingTransition; this is the shape half.
+  if (r.signedBy !== r.helperKey && r.signedBy !== r.helpedKey) {
+    return {
+      ok: false,
+      error: "signedBy must be helperKey or helpedKey",
+    };
+  }
+  if (
+    typeof r.enteredAt !== "number" ||
+    !Number.isInteger(r.enteredAt) ||
+    r.enteredAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "enteredAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if ((r.enteredAt as number) > oneDayFromNow) {
+    return { ok: false, error: "enteredAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      kind: "awaiting_transition",
+      postId: r.postId as string,
+      helperKey: r.helperKey as string,
+      helpedKey: r.helpedKey as string,
+      signedBy: r.signedBy as string,
+      enteredAt: r.enteredAt as number,
       nodeId: r.nodeId as string,
       signature: r.signature as string,
     },

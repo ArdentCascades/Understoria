@@ -18,7 +18,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
+import type {
+  AwaitingTransition,
+  Exchange,
+  Post,
+  SignedVouch,
+  TaskComment,
+} from "@/types";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -236,6 +242,21 @@ export async function submitRedemptionReceiptToNode(
  * poison status, same as the receipt route. See
  * `docs/invite-revocation.md` §4.
  */
+/**
+ * Push a signed awaiting-transition artifact to the community node —
+ * docs/auto-confirm-key.md §5. The node stamps its own clock at
+ * ingestion; that stamp is the age anchor the /auto-confirm window is
+ * enforced from, so delivering this promptly is what starts the
+ * clock. Same best-effort semantics as every other submitter.
+ */
+export async function submitAwaitingTransitionToNode(
+  record: AwaitingTransition,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/awaiting-transitions", record, config, deps);
+}
+
 export async function submitInviteRevocationToNode(
   revocation: InviteRevocation,
   config: SubmitConfig,

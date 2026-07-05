@@ -1,12 +1,19 @@
 # Understoria — Composite `(timestamp, id)` Federation Cursors (design note)
 
-> **Status:** design note, deferred. Filed at the round-3 review
-> (roadmap deferred-items row "Composite `(timestamp, id)` federation
-> cursors"); pairs with the `KNOWN LIMIT` comment on the exchanges
-> store's `list()` in `apps/server/src/db.ts`. Nothing is broken
-> today — the wedge below is unreachable through normal writes — so
-> this ships behind its own design pass and review, not as a rider on
-> a bug-fix PR.
+> **Status:** **phase 1 shipped** (server-side). Every federation
+> store's `list()` now routes through a shared `pagedRows` helper in
+> `apps/server/src/db.ts` that accepts the optional `sinceId` pair
+> component, and every federation GET route parses it. The legacy
+> `since`-only inclusive cursor is preserved byte-for-byte (it is the
+> absent-parameter path, not a fork), locked in place by
+> `db.cursors.test.ts` — the §4 wedge regression suite, run against
+> all 12 stores (250 rows sharing one millisecond, page cap 50,
+> full convergence under the pair cursor). Phases 2 (peerPull +
+> `peer_pull_state` id columns) and 3 (PWA pullers persisting
+> `"<ms>:<id>"`) remain specced below and unshipped; until they land,
+> pullers still track bare timestamps and the wedge remains for them —
+> still unreachable through normal one-at-a-time writes. Originally
+> filed at the round-3 review.
 
 ---
 
