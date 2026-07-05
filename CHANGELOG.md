@@ -83,20 +83,24 @@ include breaking changes.
   traffic; `0` disables.
 
 ### Fixed
-- **The bottom navigation no longer detaches from the bottom of the
-  screen after the on-screen keyboard closes (iOS).** Fixed-bottom
-  chrome pins to the layout viewport, and iOS sometimes leaves that
-  viewport shrunken or panned for a while after the keyboard
-  dismisses — so the nav (and the offline strip, toasts, update card,
-  and the Board/Calendar action pills) rendered mid-screen with page
-  content visible below them, even though the existing
-  hide-while-typing behavior correctly saw the keyboard as closed.
-  All fixed-bottom chrome now measures the divergence between the
-  layout and visual viewports (on visual-viewport resize AND scroll)
-  and translates itself back onto the bottom the member actually
-  sees. Pinch-zoom keeps classic fixed behavior, and small keyboard
-  accessory bars under the hide threshold now tuck the chrome above
-  themselves instead of behind.
+- **The bottom navigation is now always at the bottom of the screen,
+  structurally, on every page (iOS detachment fixed for real).** The
+  app is now a non-scrolling 100dvh shell: all scrolling happens
+  inside the main content area, and the nav is a plain in-flow flex
+  footer — it sits at the screen's bottom edge because layout puts it
+  there, with no `position: fixed` and no viewport measurement
+  involved. This replaces two prior attempts that both trusted iOS
+  viewport metrics: hide-while-typing alone left the nav adrift when
+  iOS failed to restore the layout viewport after keyboard dismissal,
+  and the follow-up translate-correction consulted exactly the
+  numbers iOS gets wrong in that stuck state, so it could push the
+  nav off the bottom in the other direction. With the document
+  unscrollable there is no document scroll state for iOS to corrupt.
+  Forward navigation now resets the inner scroller (not the window),
+  and reaching the end of a page no longer chains into a rubber-band
+  that drags the shell. The hide-while-typing behavior for the nav
+  and the floating overlays (banners, toasts, action pills) is
+  unchanged.
 
 - **Federation cursors can no longer wedge inside a timestamp tie
   (composite-cursor phase 1, server side).** Every federation store

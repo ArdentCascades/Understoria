@@ -12,14 +12,20 @@
 import { useEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 
-// Resets window scroll to the top on every forward route change so a
+// Resets scroll to the top on every forward route change so a
 // member who's scrolled mid-page on (say) Profile and taps a link to
 // another route lands at the top of the destination page instead of
 // at whatever Y-offset the browser was holding.
 //
-// Skips POP navigations (browser back/forward) so the browser's
-// native scroll restoration wins — pressing Back should return to
-// the previous scroll position, not jump to the top. REPLACE
+// The app shell scrolls INSIDE `<main id="main">` (the document
+// itself never scrolls — see Layout.tsx), so this resets the main
+// scroller; the window call stays as a belt-and-braces no-op for any
+// environment where the document somehow scrolled.
+//
+// Skips POP navigations (browser back/forward). NOTE: with an inner
+// scroller the browser no longer restores scroll on Back natively —
+// Back simply keeps the current scroll position of the container,
+// which for same-container navigation reads as "don't jump". REPLACE
 // navigations stay at the current pathname (e.g. Board's `?tab=`
 // toggle) and don't trigger the effect because pathname is the
 // dependency.
@@ -44,8 +50,10 @@ export function ScrollToTop() {
   const navType = useNavigationType();
   useEffect(() => {
     if (navType === "PUSH") {
+      const main = document.getElementById("main");
+      main?.scrollTo(0, 0);
       window.scrollTo(0, 0);
-      document.getElementById("main")?.focus();
+      main?.focus();
     }
   }, [pathname, navType]);
   return null;

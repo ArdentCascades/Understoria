@@ -11,11 +11,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/state/ToastContext";
-import {
-  useVirtualKeyboardOpen,
-  useVisualViewportBottomGap,
-  visualViewportGlueStyle,
-} from "@/lib/useVirtualKeyboard";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 
 // Renders the current toast (if any) in a fixed position above the
 // bottom nav.
@@ -43,10 +39,6 @@ export function ToastContainer() {
   // Inner pointer-events are gated too so nothing invisible stays
   // tappable.
   const keyboardOpen = useVirtualKeyboardOpen();
-  // Same visual-viewport correction as the BottomNav (see
-  // useVirtualKeyboard.ts) so a toast never floats mid-screen in
-  // iOS's post-keyboard stuck state.
-  const bottomGap = useVisualViewportBottomGap();
   if (!toast) return null;
 
   const tone = TONE_CLASSES[toast.tone];
@@ -63,7 +55,6 @@ export function ToastContainer() {
   if (isError || toast.action) {
     return (
       <div
-        style={visualViewportGlueStyle(bottomGap)}
         className={`pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 flex justify-center px-4 ${wrapperVisibility}`}
         role={isError ? "alert" : "status"}
         aria-live={isError ? "assertive" : "polite"}
@@ -99,7 +90,6 @@ export function ToastContainer() {
 
   return (
     <div
-      style={visualViewportGlueStyle(bottomGap)}
       className={`pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 flex justify-center px-4 ${wrapperVisibility}`}
       aria-live="polite"
       role="status"
