@@ -140,11 +140,21 @@ export function wrap(
  * if authentication fails (wrong passphrase, truncation, corruption).
  */
 export function unwrap(blob: WrappedBlob, masterKey: Uint8Array): string | null {
-  const nonce = b64decode(blob.nonce);
-  const ct = b64decode(blob.ciphertext);
-  const plaintext = nacl.secretbox.open(ct, nonce, masterKey);
-  if (!plaintext) return null;
-  return b64encode(plaintext);
+  // Corruption/truncation must surface as null, not a throw (Round-4
+  // review): `b64decode` (atob) throws on invalid base64 and
+  // `secretbox.open` throws on a wrong-length nonce/key. `unlockSession`
+  // calls this with no try/catch, so an uncaught throw crashed the
+  // whole unlock path instead of reading as `wrong_passphrase`. The
+  // docstring already promises null on corruption — honor it.
+  try {
+    const nonce = b64decode(blob.nonce);
+    const ct = b64decode(blob.ciphertext);
+    const plaintext = nacl.secretbox.open(ct, nonce, masterKey);
+    if (!plaintext) return null;
+    return b64encode(plaintext);
+  } catch {
+    return null;
+  }
 }
 
 export function newSalt(): Uint8Array {

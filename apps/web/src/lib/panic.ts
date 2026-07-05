@@ -229,6 +229,10 @@ export async function softPurge(): Promise<PurgeResult> {
   //   - `eventProjectLinks`: linkedBy↔event↔project rows tie the
   //     member to a local-only project and a physical gathering — the
   //     schema declares it the same posture as `eventRsvps`/`blocks`.
+  //   - `pairingLog`: member-authored device labels ("Dan's phone")
+  //     plus the pairing history are device-graph metadata the schema
+  //     classes too sensitive even for the member's own export — a
+  //     seized device must not keep them (Round-4 review).
   await db.transaction(
     "rw",
     [
@@ -241,6 +245,7 @@ export async function softPurge(): Promise<PurgeResult> {
       db.outbox,
       db.invites,
       db.votes,
+      db.pairingLog,
     ],
     async () => {
       await db.blocks.clear();
@@ -252,6 +257,7 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.outbox.clear();
       await db.invites.clear();
       await db.votes.clear();
+      await db.pairingLog.clear();
     },
   );
   tables.push("blocks");
@@ -263,6 +269,7 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("outbox");
   tables.push("invites");
   tables.push("votes");
+  tables.push("pairingLog");
 
   // Settings deliberately survive: under the threat-model contract
   // ("anonymize all linkable text while preserving the signed exchange

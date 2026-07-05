@@ -315,6 +315,13 @@ describe("softPurge covers member-authored content tables", () => {
       choice: "yes",
       createdAt: 1,
     } as never);
+    await db.pairingLog.put({
+      id: "pl_1",
+      // Member-authored device label — device-graph metadata a seized
+      // device must not keep (Round-4).
+      label: "Dan's phone",
+      pairedAt: 1,
+    } as never);
     await db.eventCancellations.put({
       id: "ec_1",
       kind: "event_cancellation",
@@ -403,6 +410,7 @@ describe("softPurge covers member-authored content tables", () => {
     expect(await db.outbox.count()).toBe(0);
     expect(await db.invites.count()).toBe(0);
     expect(await db.votes.count()).toBe(0);
+    expect(await db.pairingLog.count()).toBe(0);
     // The outbox's verbatim payload text is gone with it.
     expect(JSON.stringify(await db.outbox.toArray())).not.toContain(
       "Sensitive outbox title",
@@ -424,6 +432,7 @@ describe("softPurge covers member-authored content tables", () => {
       "outbox",
       "invites",
       "votes",
+      "pairingLog",
     ]) {
       expect(result.tablesTouched).toContain(name);
     }

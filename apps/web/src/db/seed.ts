@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db, SETTING_KEYS, setSetting, getSetting } from "./database";
+import { persistSecretKey } from "./secrets";
 import { uuid } from "@/lib/id";
 import { generateKeyPair, sign } from "@/lib/crypto";
 import { canonicalPostPayload } from "@understoria/shared/crypto";
@@ -85,13 +86,14 @@ export async function createMember(
   // two writes otherwise leaves either an orphan secret key or a
   // member who owns no key and can never sign anything. Dexie joins
   // this to a surrounding transaction when the caller already opened
-  // one over these tables (e.g. redeemInvite's mint path).
+  // one over these tables (e.g. redeemInvite's mint path). The key is
+  // persisted through `persistSecretKey`, which WRAPS it when the
+  // device has passphrase protection unlocked (Round-4 review) — a
+  // freshly-minted identity must not land as plaintext on a protected
+  // device.
   await db.transaction("rw", [db.secretKeys, db.members], async () => {
     if (mintedSecret !== null) {
-      await db.secretKeys.put({
-        publicKey: member.publicKey,
-        secretKey: mintedSecret,
-      });
+      await persistSecretKey(member.publicKey, mintedSecret);
     }
     await db.members.put(member);
   });

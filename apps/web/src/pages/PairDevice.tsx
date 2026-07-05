@@ -16,7 +16,11 @@ import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
 import { createMember } from "@/db/seed";
 import { markOnboarded } from "@/db/onboarding";
-import { enablePassphrase } from "@/db/secrets";
+import {
+  currentLockState,
+  enablePassphrase,
+  persistSecretKey,
+} from "@/db/secrets";
 import { validatePassphrase } from "@/lib/passphrase";
 import { keyFingerprint } from "@/lib/keyFingerprint";
 import type { AvailabilityChip } from "@/types";
@@ -444,49 +448,104 @@ async function importPayload(
   nodeId: string,
   sessionPassphrase: string | null,
 ): Promise<void> {
-  // `availabilityChips` is typed as `string[]` on the wire
-  // (`TransferProfile`) but Member requires the narrower
-  // `AvailabilityChip[]` enum. The source device only ever produces
-  // valid chips (they came from a Member row), so the cast is a
-  // type-presentation issue. A future hardened-import path could
-  // filter to known chip values; for v1 the trust boundary is the
-  // signed envelope itself, which is enforced by the secretbox tag
-  // long before we reach this line.
-  await createMember(
-    {
-      publicKey: payload.publicKey,
-      displayName: payload.profile.displayName,
-      skills: payload.profile.skills,
-      availability: payload.profile.availability,
-      availabilityChips:
-        payload.profile.availabilityChips as AvailabilityChip[],
-      locationZone: payload.profile.locationZone,
+  // Resolve the device's protection state BEFORE writing anything
+  // (Round-4 review). Previously the imported secret key was written in
+  // plaintext and THEN `enablePassphrase` was called — which (a) threw
+  // on an already-protected+locked device, leaving the plaintext key
+  // committed, and (b) on a protected+unlocked device rewrapped EVERY
+  // identity's key under the new member's passphrase, locking the other
+  // member out of their own key.
+  const lockState = await currentLockState();
+  if (lockState === "locked") {
+    // Can't wrap the imported key (no live master key) and mustn't
+    // leave it plaintext on a protected device — refuse cleanly with
+    // nothing written.
+    throw new Error(
+      "This device is locked. Unlock it before importing another identity.",
+    );
+  }
+
+  const existingMember = await db.members.get(payload.publicKey);
+  await db.transaction(
+    "rw",
+    [db.members, db.secretKeys, db.blocks, db.previouslyBlocked],
+    async () => {
+      if (existingMember) {
+        // Re-pair onto a device that already holds this identity: MERGE
+        // profile fields only. A full `createMember` put would reset
+        // seedBalance / createdAt / nodeId / vouchedBy from the thin
+        // transfer profile, silently changing the member's timebank
+        // balance across their own devices (Round-4 review).
+        await db.members.update(payload.publicKey, {
+          displayName: payload.profile.displayName,
+          skills: payload.profile.skills,
+          availability: payload.profile.availability,
+          // `availabilityChips` is `string[]` on the wire but Member
+          // wants the narrower enum; the source only ever emits valid
+          // chips (they came from a Member row).
+          availabilityChips:
+            payload.profile.availabilityChips as AvailabilityChip[],
+          locationZone: payload.profile.locationZone,
+        });
+      } else {
+        await createMember(
+          {
+            publicKey: payload.publicKey,
+            displayName: payload.profile.displayName,
+            skills: payload.profile.skills,
+            availability: payload.profile.availability,
+            availabilityChips:
+              payload.profile.availabilityChips as AvailabilityChip[],
+            locationZone: payload.profile.locationZone,
+          },
+          nodeId,
+        );
+      }
+      // Persist the imported key WRAPPED when the device is unlocked
+      // (persistSecretKey handles the wrap under the existing master
+      // key) — never via a full-device `enablePassphrase` rewrap.
+      await persistSecretKey(payload.publicKey, payload.secretKey);
+
+      // Merge the block bundle without resurrecting local unblocks or
+      // creating duplicate rows (Round-4 review). Skip any incoming
+      // block for a pair this device already has an opinion on — an
+      // active block (dedup) or a local unblock in previouslyBlocked
+      // (respect the newer local decision).
+      if (payload.blocks && payload.blocks.length > 0) {
+        for (const b of payload.blocks) {
+          const activeDup = await db.blocks
+            .where("[blockerKey+blockedKey]")
+            .equals([b.blockerKey, b.blockedKey])
+            .first();
+          if (activeDup) continue;
+          const unblocked = await db.previouslyBlocked
+            .where("[blockerKey+blockedKey]")
+            .equals([b.blockerKey, b.blockedKey])
+            .first();
+          if (unblocked) continue;
+          await db.blocks.put(b);
+        }
+      }
+      if (payload.previouslyBlocked && payload.previouslyBlocked.length > 0) {
+        // History rows are keyed 1:1 per pair; bulkPut is safe (it
+        // updates an existing row rather than duplicating).
+        for (const h of payload.previouslyBlocked) {
+          const existing = await db.previouslyBlocked
+            .where("[blockerKey+blockedKey]")
+            .equals([h.blockerKey, h.blockedKey])
+            .first();
+          await db.previouslyBlocked.put(existing ? { ...h, id: existing.id } : h);
+        }
+      }
     },
-    nodeId,
   );
-  // createMember skips secret-key generation when a publicKey is
-  // supplied; persist it explicitly.
-  await db.secretKeys.put({
-    publicKey: payload.publicKey,
-    secretKey: payload.secretKey,
-  });
-  // Import the blocker's block + history bundle if the source device
-  // included it. Pre-PR-C source devices omit these fields entirely
-  // — the optionality is the cross-version compatibility hook per
-  // `docs/blocking.md` §14.1 and the TransferPayload docstring.
-  // `bulkPut` is idempotent on the primary key, so a re-pair (where
-  // the source has changed nothing) is a no-op rather than a
-  // duplicate-key error.
-  if (payload.blocks && payload.blocks.length > 0) {
-    await db.blocks.bulkPut(payload.blocks);
-  }
-  if (payload.previouslyBlocked && payload.previouslyBlocked.length > 0) {
-    await db.previouslyBlocked.bulkPut(payload.previouslyBlocked);
-  }
-  if (sessionPassphrase) {
-    // Re-wraps every secret key on this device under the new
-    // master derived from the session passphrase. With just the
-    // imported key in the table this is exactly the right shape.
+
+  // Turn ON protection only when the device was UNPROTECTED and the
+  // user typed a session passphrase — this wraps the just-written
+  // plaintext key (and any other local plaintext identity) under one
+  // passphrase. On an already-unlocked device the key was wrapped
+  // above and we must NOT rewrap everyone.
+  if (lockState === "unprotected" && sessionPassphrase) {
     await enablePassphrase(sessionPassphrase);
   }
 }

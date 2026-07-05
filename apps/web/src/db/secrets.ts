@@ -51,9 +51,19 @@ export type LockState = "unprotected" | "locked" | "unlocked";
 
 interface SessionState {
   masterKey: Uint8Array | null;
+  /** The salt + iterations the active masterKey was derived from. New
+   *  keys minted while unlocked must be wrapped with the SAME salt so
+   *  the one session masterKey unwraps every row (see persistSecretKey).
+   */
+  salt: Uint8Array | null;
+  iterations: number | null;
 }
 
-const session: SessionState = { masterKey: null };
+const session: SessionState = {
+  masterKey: null,
+  salt: null,
+  iterations: null,
+};
 
 export async function currentLockState(): Promise<LockState> {
   const rows = await db.secretKeys.toArray();
@@ -121,6 +131,8 @@ export async function unlockSession(
   const decrypted = unwrap(sample.wrapped, masterKey);
   if (!decrypted) return "wrong_passphrase";
   session.masterKey = masterKey;
+  session.salt = saltFromBlob(sample.wrapped);
+  session.iterations = sample.wrapped.iterations;
   return "unlocked";
 }
 
@@ -129,6 +141,38 @@ export function lockSession(): void {
     session.masterKey.fill(0);
   }
   session.masterKey = null;
+  session.salt = null;
+  session.iterations = null;
+}
+
+/**
+ * Persist a freshly-minted secret key, WRAPPING it when the device has
+ * passphrase protection unlocked (Round-4 review). Before this, new
+ * identities (invite-redeem mint, device pairing) always wrote plaintext
+ * even on a protected device, and `getSecretKey` returns any plaintext
+ * row while "locked" — so a key minted after enabling a passphrase sat
+ * readable in IndexedDB and the app signed with it while nominally
+ * locked. Route ALL secret-key writes through here.
+ *
+ * If the session is unprotected/locked (no live masterKey), the key is
+ * stored plaintext — the same as before, and correct: a locked device
+ * can't wrap (no key), and enabling protection later wraps it then.
+ */
+export async function persistSecretKey(
+  publicKey: string,
+  secretKey: string,
+): Promise<void> {
+  if (session.masterKey && session.salt && session.iterations !== null) {
+    const wrapped = wrap(
+      secretKey,
+      session.masterKey,
+      session.salt,
+      session.iterations,
+    );
+    await db.secretKeys.put({ publicKey, wrapped });
+    return;
+  }
+  await db.secretKeys.put({ publicKey, secretKey });
 }
 
 /**
@@ -174,6 +218,8 @@ export async function enablePassphrase(
   });
 
   session.masterKey = masterKey;
+  session.salt = salt;
+  session.iterations = DEFAULT_ITERATIONS;
 }
 
 export async function changePassphrase(
@@ -228,6 +274,8 @@ export async function disablePassphrase(): Promise<void> {
   });
 
   session.masterKey = null;
+  session.salt = null;
+  session.iterations = null;
 }
 
 /** Test-only: forcibly clear session state between tests. */

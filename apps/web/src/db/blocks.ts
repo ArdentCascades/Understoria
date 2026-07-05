@@ -228,12 +228,17 @@ export async function unblockMember(
     "rw",
     [db.blocks, db.previouslyBlocked],
     async () => {
+      // Delete ALL active rows for the pair, not just `.first()`
+      // (Round-4 review): a device-pairing bulkPut could historically
+      // land two block rows for one pair (different UUIDs, same
+      // [blockerKey+blockedKey]); a single-row delete then left the
+      // member "still blocked" with nothing left in the unblock UI.
       const active = await db.blocks
         .where("[blockerKey+blockedKey]")
         .equals([input.blockerKey, input.blockedKey])
-        .first();
-      if (active) {
-        await db.blocks.delete(active.id);
+        .toArray();
+      for (const row of active) {
+        await db.blocks.delete(row.id);
       }
       // Note: we continue past the `!active` case so a stray history
       // row gets its `lastUnblockedAt` refreshed even if the active
@@ -248,7 +253,7 @@ export async function unblockMember(
           ...history,
           lastUnblockedAt: now,
         });
-      } else if (active) {
+      } else if (active.length > 0) {
         // No history row but there was an active block — synthesise a
         // history row so the unblock leaves a trace. See docstring.
         const historyRow: PreviouslyBlockedRow = {

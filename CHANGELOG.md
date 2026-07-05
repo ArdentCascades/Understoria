@@ -10,6 +10,38 @@ include breaking changes.
 ## [Unreleased]
 
 ### Security
+- **Passphrase protection now covers keys minted after it was enabled
+  (Round-4 review).** `getSecretKey` returns any plaintext row before
+  checking the session lock, and new identities (invite-redeem mint,
+  device pairing) always wrote plaintext — so a key created after a
+  member enabled a passphrase sat readable in IndexedDB and the app
+  signed with it while nominally "locked". All secret-key writes now go
+  through a new `persistSecretKey`, which WRAPS the key under the live
+  session master key on a protected device. Device pairing was also
+  reworked: it resolves the protection state before writing (refusing
+  cleanly on a locked device instead of committing a plaintext key),
+  wraps the imported key under the EXISTING passphrase rather than
+  calling `enablePassphrase` (which rewrapped every identity under the
+  new member's passphrase, locking others out of their own keys), and
+  `softPurge` now clears `pairingLog` (device labels + pairing graph
+  survived a scrub). `randomBytes` fails closed when Web Crypto is
+  absent instead of silently using `Math.random()` for nonces/salts/
+  the transfer passphrase.
+
+### Fixed
+- **Device-pairing data-integrity fixes (Round-4 review).** A re-pair
+  now MERGES an existing member row's profile fields instead of a full
+  `createMember` replace that reset `seedBalance`/`createdAt`/`nodeId`
+  and silently changed the member's timebank balance across their own
+  devices. The imported block bundle is merged with per-pair dedup and
+  no longer resurrects a locally-unblocked pair or creates duplicate
+  block rows; `unblockMember` deletes ALL rows for a pair (not just the
+  first), so a duplicate could no longer leave someone "still blocked"
+  with nothing to unblock. `passphrase.unwrap` returns `null` on a
+  corrupt/truncated blob instead of throwing, so the unlock path
+  surfaces `wrong_passphrase` rather than crashing.
+
+### Security
 - **Only an event's organizer can cancel it (Round-4 review).** An
   `EventCancellation` is signed, but its signature proves only that
   *whoever* `createdBy` names signed it — not that they organize the
