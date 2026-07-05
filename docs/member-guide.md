@@ -541,6 +541,33 @@ organizer cannot see RSVPs you made from a different node. If you
 opened the PWA on another community's node, you'd have to RSVP
 there separately.
 
+### Shifts — signing up for a slice of the day
+
+Some events are broken into **shifts**: "Setup crew 9–12, 4
+spots," "Driver at 8:30, 1 spot." Shifts show what the day needs
+so you can give the two hours you have instead of guessing whether
+a whole day is expected of you.
+
+- **Signing up for a shift also RSVPs you "Going"** to the event —
+  one tap does both, and the card tells you so before you commit.
+- **Who sees your name:** the organizer, and members who RSVP'd
+  going or maybe, see the roster of each shift. Everyone else in
+  your community sees spot counts only ("2 spots open"), and other
+  communities see nothing at all — shifts, like RSVPs, never leave
+  this node.
+- **Removing yourself is one tap, any time.** Your name comes off
+  the roster immediately, nobody is notified, and your "Going"
+  RSVP stays (you might still come by). Plans change; the app
+  doesn't keep score. If you change your event RSVP to **Not
+  going**, your shift signups clear with it.
+- **A signup is an intention, not a contract.** There is no
+  check-in, no attendance record, and no "no-show" anything —
+  permanently. Whether you made it is between you and the people
+  in the room.
+- **A full shift isn't a locked door.** The cap is the organizer's
+  planning number. If a shift shows Full and you can still help,
+  just ask them.
+
 ### Adding an event to your device calendar
 
 On an event's page, **Add to calendar** (in the event-actions menu)

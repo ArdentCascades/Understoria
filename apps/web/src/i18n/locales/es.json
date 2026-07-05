@@ -527,6 +527,7 @@
       "confirmButton": "Anotarme",
       "recorded": "Ya estás en el turno. Guardado en este dispositivo.",
       "removed": "Inscripción quitada.",
+      "recordTimeLink": "Registrar el tiempo compartido — {{project}}",
       "addButton": "Agregar un turno",
       "addConfirm": "Agregar turno",
       "added": "Turno agregado.",

@@ -392,6 +392,8 @@ export default function EventDetailPage() {
         isCancelled={isCancelled}
         canSeeRoster={canSeeRoster}
         labelFor={labelFor}
+        creditHref={linkedProject ? `/project/${linkedProject.id}` : null}
+        creditProjectTitle={linkedProject?.title ?? null}
       />
 
       <section

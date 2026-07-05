@@ -11,6 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   SHIFT_LABEL_MAX,
@@ -40,6 +41,21 @@ export interface EventShiftsSectionProps {
   canSeeRoster: boolean;
   /** Display-name resolver shared with the attendee roster. */
   labelFor: (key: string) => string;
+  /**
+   * §9.3 credit bridge — prefill, not plumbing. When the event is a
+   * project work day (a local `eventProjectLinks` row resolves), this
+   * is the linked project's route; a quiet "record time together"
+   * affordance renders on PASSED shifts, to the organizer and to
+   * members on the shift, deep-linking to the project whose existing
+   * task flows record credit with claimer-stated hours (equal-time).
+   * `null` for plain events — §14 ruling 1 deliberately ships no
+   * credit affordance there. NOTHING structural links the resulting
+   * Exchange to the event or shift (§9.2, permanent boundary), and
+   * nothing ever reconciles this roster against exchanges.
+   */
+  creditHref: string | null;
+  /** Linked project title for the affordance copy. */
+  creditProjectTitle: string | null;
 }
 
 // Same local-clock rendering discipline as EventDetail's
@@ -96,6 +112,8 @@ export function EventShiftsSection({
   isCancelled,
   canSeeRoster,
   labelFor,
+  creditHref,
+  creditProjectTitle,
 }: EventShiftsSectionProps) {
   const { t, i18n } = useTranslation();
   const { showToast } = useToast();
@@ -379,6 +397,28 @@ export function EventShiftsSection({
                   {t("events.shifts.deleteButton")}
                 </button>
               )}
+
+              {/* §9.3 credit bridge, prefill-only: a passed shift on a
+                  work-day event offers the organizer and its own
+                  members the path to the project, whose task flows
+                  record credit with claimer-stated hours. A quiet
+                  affordance — never a prompt, never a completeness
+                  meter, never a roster-vs-exchange diff (§9.2). */}
+              {passed &&
+                !isCancelled &&
+                creditHref &&
+                (isOrganizer || mine) && (
+                  <p className="mt-2 text-sm">
+                    <Link
+                      to={creditHref}
+                      className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                    >
+                      {t("events.shifts.recordTimeLink", {
+                        project: creditProjectTitle ?? "",
+                      })}
+                    </Link>
+                  </p>
+                )}
             </li>
           );
         })}
