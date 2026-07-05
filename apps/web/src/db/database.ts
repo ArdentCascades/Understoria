@@ -31,6 +31,7 @@ import type {
   EventCancellation,
   EventProjectLinkRow,
   EventRsvpRow,
+  EventShiftRow,
   Exchange,
   Member,
   NodeConfig,
@@ -40,6 +41,7 @@ import type {
   ProjectActivity,
   ProjectTask,
   Proposal,
+  ShiftSignupRow,
   TaskComment,
   Vote,
 } from "@/types";
@@ -136,6 +138,16 @@ export interface OutboxRow {
   // cross the wire — the link is local-only by construction, never
   // enqueued, never pulled. eventProjectLinks.test.ts asserts the
   // rejection with `// @ts-expect-error`.
+  //
+  // Intentionally NOT members of this union: "event_shift" and
+  // "shift_signup". EventShiftRow and ShiftSignupRow are the local-only
+  // shift-signup layer (docs/shift-signups.md §4 + §7): shift structure
+  // is a finer-grained time-and-place signal than the signed Event and
+  // a signup is a member-attendance intent — both are exactly the
+  // surveillance shapes the events design keeps off the wire. Never
+  // enqueued, never pulled; no enqueueEventShift / enqueueShiftSignup
+  // exists in lib/outbox.ts. eventShifts.test.ts asserts both
+  // rejections with `// @ts-expect-error`.
   /** JSON-stringified signed payload. While the row is `pending` a
    *  re-enqueue of the same record with NEW mutable state (e.g. a
    *  task-comment tombstone) replaces this in place; once delivered
@@ -350,6 +362,25 @@ export class UnderstoriaDB extends Dexie {
    * federation posture as `eventRsvps` and `blocks`.
    */
   eventProjectLinks!: Table<EventProjectLinkRow, string>;
+  /**
+   * Local-only shift definitions — see `docs/shift-signups.md` §4.1.
+   * Time-boxed, optionally-capped slots on a community event. Never
+   * synced, never exported, never federated; cleared by soft-purge.
+   * Read and written only by `db/eventShifts.ts`. The `OutboxRow.kind`
+   * union above rejects `"event_shift"` at the type level; there is no
+   * `enqueueEventShift` helper in `lib/outbox.ts`. Same federation
+   * posture as `eventRsvps`, `blocks`, and `eventProjectLinks`.
+   */
+  eventShifts!: Table<EventShiftRow, string>;
+  /**
+   * Local-only shift signups — see `docs/shift-signups.md` §4.2.
+   * A member's declared INTENT to fill a shift; NOT an attendance
+   * record, and nothing may ever reconcile this table against
+   * exchanges (docs/community-events.md §11.6, permanent). Same
+   * federation posture as `eventShifts`; the union rejects
+   * `"shift_signup"`, and there is no `enqueueShiftSignup`.
+   */
+  shiftSignups!: Table<ShiftSignupRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -849,6 +880,18 @@ export class UnderstoriaDB extends Dexie {
     this.version(27).stores({
       eventProjectLinks:
         "id, eventId, projectId, createdAt, [projectId+eventId]",
+    });
+    // v28: local-only shift signups (docs/shift-signups.md). Two pure
+    // new tables, no backfill. Both are the EventRsvpRow posture —
+    // never federated, never exported, cleared by soft-purge. The
+    // `[shiftId+memberKey]` compound index backs the signup dedupe
+    // (signing up twice is a no-op) and the `[eventId+memberKey]`
+    // compound backs the RSVP-downgrade clear (a member going
+    // "not_going" drops all their signups for that event in one query).
+    this.version(28).stores({
+      eventShifts: "id, eventId, startsAt, createdAt",
+      shiftSignups:
+        "id, shiftId, eventId, memberKey, [shiftId+memberKey], [eventId+memberKey]",
     });
   }
 }

@@ -287,6 +287,23 @@ describe("softPurge covers member-authored content tables", () => {
       linkedBy: "pk_a",
       createdAt: 1,
     } as never);
+    await db.eventShifts.put({
+      id: "shift_1",
+      eventId: "ev_1",
+      label: "Setup crew",
+      startsAt: 1,
+      endsAt: 2,
+      capacity: 4,
+      createdBy: "pk_org",
+      createdAt: 1,
+    } as never);
+    await db.shiftSignups.put({
+      id: "ss_1",
+      shiftId: "shift_1",
+      eventId: "ev_1",
+      memberKey: "pk_a",
+      signedUpAt: 1,
+    } as never);
     await db.outbox.put({
       id: "ob_1",
       kind: "post",
@@ -407,6 +424,8 @@ describe("softPurge covers member-authored content tables", () => {
     expect(await db.drafts.count()).toBe(0);
     expect(await db.eventRsvps.count()).toBe(0);
     expect(await db.eventProjectLinks.count()).toBe(0);
+    expect(await db.eventShifts.count()).toBe(0);
+    expect(await db.shiftSignups.count()).toBe(0);
     expect(await db.outbox.count()).toBe(0);
     expect(await db.invites.count()).toBe(0);
     expect(await db.votes.count()).toBe(0);
@@ -426,6 +445,8 @@ describe("softPurge covers member-authored content tables", () => {
       "events",
       "eventRsvps",
       "eventProjectLinks",
+      "eventShifts",
+      "shiftSignups",
       "eventCancellations",
       "proposals",
       "projectActivity",
