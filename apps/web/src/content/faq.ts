@@ -358,6 +358,13 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "communities never see your RSVP at all. If you change " +
             "your answer to 'not going', your name comes off the " +
             "list right away.",
+          "Some events also have shifts — time slots where the " +
+            "organizer needs a certain number of hands, like a " +
+            "setup crew or a serving rota. Signing up for a shift " +
+            "also RSVPs you 'going' to the event. The shift roster " +
+            "works like the RSVP list: it stays on this " +
+            "community's node, and changing your RSVP to 'not " +
+            "going' takes you off any shifts too.",
           "Events can't be edited after they're created — a signed " +
             "event stays exactly what people said yes to. If the " +
             "details change, the organizer cancels it and posts a " +
