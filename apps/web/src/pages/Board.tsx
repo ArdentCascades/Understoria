@@ -348,9 +348,11 @@ export default function BoardPage() {
   };
 
   // pb-36 (page wrapper) reserves clearance under the fixed FAB —
-  // which sits at bottom-20 ≈ 5rem with ≈3rem of its own height — so
-  // the last card in the scroll never tucks behind the floating
-  // button on any tab.
+  // which sits at 5rem + the safe-area inset (the home-indicator band
+  // also heightens the BottomNav, so a plain 5rem let the nav swallow
+  // the pill's bottom edge) with ≈3rem of its own height — so the
+  // last card in the scroll never tucks behind the floating button on
+  // any tab.
   return (
     <div className="px-4 pb-36 pt-4">
       <header className="mb-4">
@@ -771,7 +773,7 @@ export default function BoardPage() {
           would float detached mid-screen (see useVirtualKeyboard.ts),
           and it sat directly over the Board search box's typing area. */}
       {!keyboardOpen && (
-      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20 flex justify-center px-4">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (
             <button

@@ -10,6 +10,17 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Floating pill buttons no longer clipped by the bottom nav.** The
+  BottomNav's height includes `env(safe-area-inset-bottom)` (the
+  home-indicator band on modern iPhones), but the floating action
+  pills (Board's post buttons, Calendar's "+ Create event"), toasts,
+  and the update prompt were anchored at plain `bottom-20`/`bottom-24`
+  offsets that ignored it — so the nav swallowed their bottom edge by
+  roughly the inset. All four anchors now add the safe-area inset,
+  the same treatment the offline banner already had; on desktop the
+  inset is 0 and nothing moves.
+
+### Fixed
 - **Bottom nav no longer detaches while typing.** `position: fixed`
   pins to the layout viewport, and iOS Safari (and Android Chrome
   since 108) only pans the VISUAL viewport when the on-screen keyboard

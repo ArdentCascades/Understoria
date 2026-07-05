@@ -63,7 +63,7 @@ export function UpdatePrompt() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-24 z-20 flex
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-20 flex
                  justify-center px-4 lg:inset-x-auto lg:right-6"
     >
       <div
