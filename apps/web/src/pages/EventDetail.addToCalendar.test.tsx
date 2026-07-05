@@ -133,6 +133,7 @@ interface MockState {
   nodeId: string;
   lockState: "unprotected" | "locked" | "unlocked";
   projects: unknown[];
+  blockedKeys: ReadonlySet<string>;
 }
 
 let mockState: MockState;
@@ -161,6 +162,7 @@ beforeEach(() => {
     nodeId,
     lockState: "unprotected",
     projects: [],
+    blockedKeys: new Set<string>(),
   };
   setLiveQueries(event(), null);
   buildEventIcsMock.mockClear();

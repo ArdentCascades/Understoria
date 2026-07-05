@@ -10,6 +10,28 @@ include breaking changes.
 ## [Unreleased]
 
 ### Security
+- **A blocker can no longer pass a proposal over a hidden block vote
+  (Round-4 review).** The per-viewer governance-hide filter (`hideGovernance`)
+  also fed the auto-close eligibility math, so a member who hid a
+  blocking voter's vote computed "passes" and could close the proposal
+  over a standing block. Eligibility is now computed from the UNFILTERED
+  vote set, and `closeProposal` refuses to record "passed" while any
+  block vote stands (server-of-record) — a block changes what a member
+  SEES, never what they can ENACT (docs/blocking.md §6.3).
+
+### Fixed
+- **Block-filter leaks on deep-linked / project surfaces (Round-4
+  review).** A blocked organizer's event rendered in full via a direct
+  `/event/<id>` link (EventDetail read Dexie raw instead of the
+  block-filtered context); a blocked member's project announcements and
+  history-timeline rows rendered in ProjectDetail/TaskDetail unlike the
+  already-filtered task comments. All now honor the block filter. And a
+  project-adoption proposal about the viewer's OWN project is no longer
+  governance-hidden — the attention rail deep-links a sitting primary to
+  it to warn of a stewardship transfer, which they must be able to read
+  and contest.
+
+### Security
 - **Passphrase protection now covers keys minted after it was enabled
   (Round-4 review).** `getSecretKey` returns any plaintext row before
   checking the session lock, and new identities (invite-redeem mint,

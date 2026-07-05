@@ -62,14 +62,24 @@ export default function EventDetailPage() {
   // that used to dump members onto /calendar and lose the project.
   const goBack = useHistoryAwareBack("/calendar");
   const { t, i18n } = useTranslation();
-  const { currentMember, members, nodeId, lockState, projects } = useApp();
+  const { currentMember, members, nodeId, lockState, projects, blockedKeys } =
+    useApp();
   const { showToast } = useToast();
 
-  const event = useLiveQuery(
+  const rawEvent = useLiveQuery(
     () => (eventId ? getEvent(eventId) : Promise.resolve(null)),
     [eventId],
     undefined,
   );
+  // Gate visibility through the block filter (Round-4 review): a blocked
+  // organizer's event must render not-found on a deep link, the same way
+  // PostDetail resolves from the block-filtered context. `undefined` =
+  // still loading; `null` = filtered out / not found.
+  const event = useMemo(() => {
+    if (rawEvent === undefined) return undefined;
+    if (!rawEvent) return null;
+    return blockedKeys.has(rawEvent.createdBy) ? null : rawEvent;
+  }, [rawEvent, blockedKeys]);
   const cancellation = useLiveQuery(
     () =>
       eventId
