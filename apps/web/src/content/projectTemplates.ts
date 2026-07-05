@@ -3001,6 +3001,232 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       },
     ],
   },
+  {
+    id: "harm-reduction-supplies",
+    name: "Harm Reduction Supply Distribution",
+    purpose:
+      "Get naloxone, test strips, and safer-use supplies into the hands of people who may need them — meeting neighbors where they are, no judgment attached.",
+    whoItServes:
+      "People who use drugs, their friends and families, and anyone likely to witness an overdose — which, in most neighborhoods, is anyone.",
+    whatYoullNeed:
+      "Overdose-response training, a naloxone source (state program, pharmacy, or partner org), kit supplies, and a small distribution crew. Handing out supplies is not medical care — everyone distributing must complete overdose-response training first, and the law on what you can carry (test strips, syringes) varies a lot by place, so confirm yours before you stock anything. Keep local crisis and treatment lines printed in every kit.",
+    setupHours: 20,
+    defaultCategory: "other",
+    suggestsWorkDays: true,
+    tasks: [
+      {
+        name: "Get trained and find a harm reduction partner",
+        description:
+          "Have your core crew complete an overdose-response and naloxone training — many health departments and harm reduction orgs run them free. Partner with an established program; they've already solved supply, legal, and trust problems you don't need to re-solve.",
+        hours: 4,
+        skills: ["outreach"],
+      },
+      {
+        name: "Check the local law on supplies",
+        description:
+          "Naloxone access is protected almost everywhere, but test strips and syringes are still classed as paraphernalia in some places. Find out exactly what you can legally carry and hand out — your partner org or a legal aid clinic can tell you quickly. Write it down for volunteers.",
+        hours: 3,
+        skills: ["research"],
+      },
+      {
+        name: "Source naloxone and kit supplies",
+        description:
+          "Order naloxone through a state distribution program, a pharmacy standing order, or your partner org. Add whatever else is legal where you are: fentanyl and xylazine test strips, wound care, hygiene items.",
+        hours: 4,
+        follows: [1],
+      },
+      {
+        name: "Assemble kits with plain-language inserts",
+        description:
+          "Pack kits with simple, multilingual instructions: how to recognize an overdose, how to give naloxone, call emergency services, never use alone. Include local crisis and treatment lines in every kit. Assembly goes fast with a table full of people.",
+        hours: 3,
+        skills: ["translation"],
+        follows: [2],
+        recurringCadence: "cycle",
+      },
+      {
+        name: "Set up distribution rounds and fixed points",
+        description:
+          "Plan regular walking or driving rounds through the places people actually are, and ask bars, corner stores, libraries, and venues to keep a no-questions-asked box. Low barrier is the whole point — no forms, no lecture.",
+        hours: 4,
+        skills: ["outreach", "driving"],
+      },
+      {
+        name: "Restock, track, and keep training fresh",
+        description:
+          "Note what runs out and what sits, log expiration dates on the naloxone, and hold refresher trainings as new volunteers join. If a kit reverses an overdose, that's worth (gently) recording.",
+        hours: 2,
+        recurringCadence: "month",
+      },
+    ],
+  },
+  {
+    id: "court-support",
+    name: "Court Support & Accompaniment",
+    purpose:
+      "Make sure no neighbor faces a court date alone — company in the courtroom, a ride there, childcare during the hearing, and letters of support when the defense asks for them.",
+    whoItServes:
+      "Neighbors facing criminal, immigration, eviction, or family court dates, and their families — getting to court alone can cost people jobs, childcare, and hope.",
+    whatYoullNeed:
+      "Reliable volunteers, a hearing calendar, and ties to public defenders. Court support is presence and logistics, not legal advice — volunteers never advise on a case and always follow the lead of the person's own attorney. Courtrooms have strict conduct rules, so everyone attending needs to know them cold.",
+    setupHours: 16,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Connect with defenders and existing court groups",
+        description:
+          "Introduce yourselves to the public defender's office, immigration legal aid, and any court-watch or bail-fund groups already working. They'll tell you where support is most needed and how to plug in without getting in the way.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Write the ground rules: support, not law",
+        description:
+          "Put it in writing: volunteers never give legal advice, never discuss case details in public areas of the courthouse, and always defer to the person's own lawyer. Add courtroom conduct — arrive early, dress plainly, phones off, no reactions from the gallery.",
+        hours: 2,
+        skills: ["writing"],
+      },
+      {
+        name: "Build an intake and hearing calendar",
+        description:
+          "Create a simple way for people to ask for support and a shared calendar of dates, courtrooms, and what each person needs — company, a ride, childcare, or all three. Court dates move constantly, so confirm the day before.",
+        hours: 3,
+        skills: ["organizing"],
+      },
+      {
+        name: "Train accompaniment volunteers",
+        description:
+          "Walk volunteers through a courthouse visit: security, finding the room, where to sit, and how to just be steady, warm company through a stressful wait. Pair every new volunteer with an experienced one for their first date.",
+        hours: 3,
+        skills: ["teaching"],
+        follows: [1],
+      },
+      {
+        name: "Coordinate rides and childcare for hearings",
+        description:
+          "Line up drivers for court mornings and childcare pairs who can watch kids during hearings — many courtrooms don't allow children, and a hearing missed over childcare can mean a warrant.",
+        hours: 3,
+        skills: ["driving", "childcare"],
+        recurringCadence: "event",
+      },
+      {
+        name: "Organize support letters when the defense asks",
+        description:
+          "When someone's attorney requests character or community-support letters, coordinate neighbors to write them — following the lawyer's guidance on content, tone, and deadline exactly.",
+        hours: 2,
+        skills: ["writing"],
+      },
+    ],
+  },
+  {
+    id: "cooling-warming-center",
+    name: "Pop-Up Cooling & Warming Center",
+    purpose:
+      "Open a neighborhood climate refuge — a cool room in a heat wave, a warm one in a cold snap — ready before the weather turns dangerous, not after.",
+    whoItServes:
+      "Elders, unhoused neighbors, people without working AC or heat, outdoor workers, and anyone whose housing can't keep up with the weather.",
+    whatYoullNeed:
+      "A host site with climate control and bathrooms, supplies, and trained hosts on shifts. Hosts are neighbors, not medics — train everyone to spot heat exhaustion and hypothermia and to call emergency services early rather than late, and settle the host site's insurance and liability question before the first activation, not during it.",
+    setupHours: 21,
+    defaultCategory: "other",
+    suggestsWorkDays: true,
+    tasks: [
+      {
+        name: "Find a host site with climate control",
+        description:
+          "Ask libraries, faith sites, union halls, and community centers for a room with reliable AC and heat, bathrooms, and step-free access. Get a written okay covering hours, who holds keys, and what happens if it's needed overnight.",
+        hours: 4,
+        skills: ["outreach"],
+      },
+      {
+        name: "Set activation triggers and an alert plan",
+        description:
+          "Decide in advance exactly what opens the center — a forecast temperature, a heat index, a wind chill — so nobody has to make a judgment call at midnight. Set up a phone tree or group chat that puts hosts on standby a day ahead.",
+        hours: 2,
+      },
+      {
+        name: "Stock supplies",
+        description:
+          "Gather water, electrolyte packets, blankets, folding cots or comfortable chairs, fans, phone chargers, and a first-aid kit. Store it all at the site in labeled bins so any host can find things.",
+        hours: 3,
+        skills: ["driving"],
+        follows: [0],
+      },
+      {
+        name: "Recruit and train shift hosts",
+        description:
+          "Find enough volunteers for two per shift and train them: greeting people without paperwork, spotting heat exhaustion and hypothermia, when to call emergency services, and de-escalation basics. Warmth in the human sense matters as much as the thermostat.",
+        hours: 4,
+        skills: ["teaching"],
+      },
+      {
+        name: "Build the shift rota",
+        description:
+          "Prepare a shift schedule you can trigger on a day's notice — openers, closers, and overnight coverage if you offer it. Keep a reserve list, since heat waves flatten volunteers too.",
+        hours: 2,
+        skills: ["organizing"],
+        follows: [3],
+        recurringCadence: "event",
+      },
+      {
+        name: "Spread the word before the season",
+        description:
+          "Make multilingual flyers with the triggers and location, and get them to clinics, senior buildings, outreach workers, and corner stores before the first heat wave or cold snap — not during.",
+        hours: 3,
+        skills: ["graphic design", "translation"],
+      },
+      {
+        name: "Open, host, and reset each activation",
+        description:
+          "Run the center for the duration of the weather event: sign people in loosely (a count, not IDs), keep supplies flowing, and check on anyone sleeping. Afterward, clean, restock, and note what ran short.",
+        hours: 3,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "community-oral-history",
+    name: "Community Oral History Project",
+    purpose:
+      "Record elders' and neighbors' stories before they're lost — and keep the tellers in charge of what happens to them.",
+    whoItServes:
+      "Elders with stories nobody has asked to hear, longtime residents watching the neighborhood change, and every neighbor who comes after.",
+    whatYoullNeed:
+      "A phone or simple recorder, a quiet spot, consent forms, and a safe place to keep files. Recordings are personal data — each participant owns their story, decides where it's shared, and can change their mind later. Nothing goes public without their written okay.",
+    setupHours: 10,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Write a plain-language consent form",
+        description:
+          "One page, no legalese: what's being recorded, where it might be shared, and the participant's right to pause, skip questions, or withdraw the recording later. Translate it into the languages your storytellers actually speak.",
+        hours: 2,
+        skills: ["writing", "translation"],
+      },
+      {
+        name: "Gather gear and a question list",
+        description:
+          "A phone with a voice memo app is plenty; add a cheap lapel mic if you can. Draft open questions that invite stories — \"tell me about the street when you arrived\" — and practice on each other once.",
+        hours: 2,
+      },
+      {
+        name: "Record story sessions",
+        description:
+          "Sit with one storyteller at a time in a quiet, comfortable place. Go over the consent form together first, then mostly listen — the best interviews are the ones where you talk least.",
+        hours: 4,
+        skills: ["listening"],
+        follows: [0, 1],
+        recurringCadence: "session",
+      },
+      {
+        name: "Archive and share back, on their terms",
+        description:
+          "Label each recording with the date, names, and what was agreed about sharing. Keep two copies somewhere safe, give every storyteller their own copy, and share publicly only the pieces each person approved.",
+        hours: 2,
+        follows: [2],
+      },
+    ],
+  },
 ];
 
 export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
@@ -5925,6 +6151,232 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
         description:
           "Anoten las solicitudes que no pudieron cubrir. Las brechas recurrentes revelan dónde el programa debería arrancar su próximo proyecto — convirtiendo al centro en una herramienta de planeación, no sólo una central de despacho.",
         hours: 3,
+      },
+    ],
+  },
+  {
+    id: "harm-reduction-supplies",
+    name: "Distribución de insumos de reducción de daños",
+    purpose:
+      "Poner naloxona, tiras reactivas e insumos de uso más seguro en manos de quienes puedan necesitarlos — encontrando a las vecinas y vecinos donde están, sin juicios.",
+    whoItServes:
+      "Personas que usan drogas, sus amistades y familias, y cualquiera que pueda presenciar una sobredosis — que, en la mayoría de los barrios, es cualquiera.",
+    whatYoullNeed:
+      "Capacitación en respuesta a sobredosis, una fuente de naloxona (programa estatal, farmacia u organización aliada), insumos para los kits y un pequeño equipo de distribución. Repartir insumos no es atención médica — toda persona que distribuya debe completar primero una capacitación en respuesta a sobredosis, y la ley sobre lo que puedes portar (tiras reactivas, jeringas) varía mucho según el lugar, así que confirma la tuya antes de abastecer nada. Incluye líneas locales de crisis y de tratamiento impresas en cada kit.",
+    setupHours: 20,
+    defaultCategory: "other",
+    suggestsWorkDays: true,
+    tasks: [
+      {
+        name: "Capacítense y encuentren una organización aliada de reducción de daños",
+        description:
+          "Pidan a su equipo base que complete una capacitación en respuesta a sobredosis y uso de naloxona — muchos departamentos de salud y organizaciones de reducción de daños las ofrecen gratis. Alíense con un programa establecido; ya resolvieron problemas de suministro, legales y de confianza que ustedes no necesitan volver a resolver.",
+        hours: 4,
+        skills: ["difusión"],
+      },
+      {
+        name: "Revisa la ley local sobre insumos",
+        description:
+          "El acceso a la naloxona está protegido casi en todas partes, pero las tiras reactivas y las jeringas todavía se clasifican como parafernalia en algunos lugares. Averigua exactamente qué puedes portar y entregar legalmente — tu organización aliada o una clínica de ayuda legal te lo dirá rápido. Déjalo por escrito para las personas voluntarias.",
+        hours: 3,
+        skills: ["investigación"],
+      },
+      {
+        name: "Consigue naloxona e insumos para los kits",
+        description:
+          "Pide naloxona a través de un programa estatal de distribución, una orden permanente de farmacia o tu organización aliada. Añade lo demás que sea legal donde estás: tiras reactivas de fentanilo y xilacina, material para cuidado de heridas, artículos de higiene.",
+        hours: 4,
+        follows: [1],
+      },
+      {
+        name: "Armen kits con instrucciones en lenguaje sencillo",
+        description:
+          "Empaquen los kits con instrucciones simples y multilingües: cómo reconocer una sobredosis, cómo administrar naloxona, llamar a los servicios de emergencia, nunca usar en soledad. Incluyan líneas locales de crisis y de tratamiento en cada kit. El armado avanza rápido con una mesa llena de gente.",
+        hours: 3,
+        skills: ["traducción"],
+        follows: [2],
+        recurringCadence: "cycle",
+      },
+      {
+        name: "Establece rondas de distribución y puntos fijos",
+        description:
+          "Planea rondas regulares a pie o en auto por los lugares donde la gente realmente está, y pide a bares, tienditas, bibliotecas y locales que mantengan una caja sin preguntas. La barrera baja es todo el punto — sin formularios, sin sermones.",
+        hours: 4,
+        skills: ["difusión", "conducir"],
+      },
+      {
+        name: "Reabastece, lleva registro y mantén fresca la capacitación",
+        description:
+          "Anota qué se acaba y qué se queda, registra las fechas de caducidad de la naloxona y organiza capacitaciones de repaso cuando se sumen nuevas personas voluntarias. Si un kit revierte una sobredosis, vale la pena registrarlo (con delicadeza).",
+        hours: 2,
+        recurringCadence: "month",
+      },
+    ],
+  },
+  {
+    id: "court-support",
+    name: "Apoyo y acompañamiento en cortes",
+    purpose:
+      "Asegurar que nadie del barrio enfrente una fecha en corte en soledad — compañía en la sala, un aventón para llegar, cuidado infantil durante la audiencia y cartas de apoyo cuando la defensa las pida.",
+    whoItServes:
+      "Vecinas y vecinos con audiencias penales, migratorias, de desalojo o de familia, y sus familias — llegar a la corte sin compañía puede costar empleos, cuidado infantil y esperanza.",
+    whatYoullNeed:
+      "Personas voluntarias confiables, un calendario de audiencias y vínculos con las defensorías públicas. El apoyo en cortes es presencia y logística, no asesoría legal — las personas voluntarias nunca opinan sobre el caso y siempre siguen la pauta del abogado o abogada de la propia persona. Las salas de audiencia tienen reglas de conducta estrictas, así que quien asista debe conocerlas al dedillo.",
+    setupHours: 16,
+    defaultCategory: "other",
+    tasks: [
+      {
+        name: "Conecten con defensorías y grupos de corte existentes",
+        description:
+          "Preséntense ante la defensoría pública, la ayuda legal migratoria y cualquier grupo de observación de cortes o fondo de fianzas que ya esté trabajando. Ellos les dirán dónde hace más falta el apoyo y cómo sumarse sin estorbar.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Escribe las reglas base: apoyo, no derecho",
+        description:
+          "Ponlo por escrito: las personas voluntarias nunca dan asesoría legal, nunca comentan detalles del caso en las áreas públicas del juzgado y siempre se remiten al abogado o abogada de la propia persona. Añade la conducta en sala — llegar temprano, vestir sencillo, teléfonos apagados, sin reacciones desde la galería.",
+        hours: 2,
+        skills: ["redacción"],
+      },
+      {
+        name: "Arma una recepción de solicitudes y un calendario de audiencias",
+        description:
+          "Crea una forma sencilla de pedir apoyo y un calendario compartido con fechas, salas y lo que cada persona necesita — compañía, un aventón, cuidado infantil, o las tres cosas. Las fechas de corte cambian todo el tiempo, así que confirma el día anterior.",
+        hours: 3,
+        skills: ["organización"],
+      },
+      {
+        name: "Capacita a las personas voluntarias de acompañamiento",
+        description:
+          "Recorre con ellas una visita al juzgado: el control de seguridad, encontrar la sala, dónde sentarse y cómo simplemente ser compañía serena y cálida durante una espera estresante. Empareja a cada persona nueva con alguien con experiencia para su primera fecha.",
+        hours: 3,
+        skills: ["enseñanza"],
+        follows: [1],
+      },
+      {
+        name: "Coordina aventones y cuidado infantil para las audiencias",
+        description:
+          "Consigue conductores para las mañanas de corte y parejas de cuidado que atiendan a niñas y niños durante las audiencias — muchas salas no permiten menores, y una audiencia perdida por falta de cuidado infantil puede significar una orden de arresto.",
+        hours: 3,
+        skills: ["conducir", "cuidado infantil"],
+        recurringCadence: "event",
+      },
+      {
+        name: "Organiza cartas de apoyo cuando la defensa las pida",
+        description:
+          "Cuando el abogado o abogada de alguien solicite cartas de carácter o de apoyo comunitario, coordina a vecinas y vecinos para escribirlas — siguiendo al pie de la letra la pauta de la defensa sobre contenido, tono y plazo.",
+        hours: 2,
+        skills: ["redacción"],
+      },
+    ],
+  },
+  {
+    id: "cooling-warming-center",
+    name: "Centro emergente de enfriamiento y abrigo",
+    purpose:
+      "Abrir un refugio climático del barrio — una sala fresca en una ola de calor, una cálida en una helada — listo antes de que el clima se vuelva peligroso, no después.",
+    whoItServes:
+      "Personas mayores, vecinas y vecinos sin techo, gente sin aire acondicionado o calefacción que funcione, quienes trabajan a la intemperie y cualquiera cuya vivienda no aguante el clima.",
+    whatYoullNeed:
+      "Un sitio anfitrión con climatización y baños, insumos y personas anfitrionas capacitadas por turnos. Las anfitrionas y anfitriones son vecinos, no personal médico — capaciten a todo el mundo para reconocer el agotamiento por calor y la hipotermia y para llamar a los servicios de emergencia temprano y no tarde, y resuelvan la cuestión del seguro y la responsabilidad civil del sitio antes de la primera activación, no durante.",
+    setupHours: 21,
+    defaultCategory: "other",
+    suggestsWorkDays: true,
+    tasks: [
+      {
+        name: "Encuentra un sitio anfitrión con climatización",
+        description:
+          "Pregunta en bibliotecas, sitios de fe, salones sindicales y centros comunitarios por una sala con aire acondicionado y calefacción confiables, baños y acceso sin escalones. Consigue un acuerdo por escrito que cubra horarios, quién tiene las llaves y qué pasa si se necesita de noche.",
+        hours: 4,
+        skills: ["difusión"],
+      },
+      {
+        name: "Definan los umbrales de activación y un plan de aviso",
+        description:
+          "Decidan por adelantado qué abre exactamente el centro — una temperatura pronosticada, un índice de calor, una sensación térmica — para que nadie tenga que tomar la decisión a medianoche. Armen una cadena telefónica o un chat grupal que ponga a las personas anfitrionas en alerta con un día de anticipación.",
+        hours: 2,
+      },
+      {
+        name: "Abastece los insumos",
+        description:
+          "Reúne agua, sobres de electrolitos, cobijas, catres plegables o sillas cómodas, ventiladores, cargadores de teléfono y un botiquín de primeros auxilios. Guárdalo todo en el sitio, en cajas etiquetadas, para que cualquier anfitrión encuentre las cosas.",
+        hours: 3,
+        skills: ["conducir"],
+        follows: [0],
+      },
+      {
+        name: "Convoca y capacita a anfitrionas y anfitriones de turno",
+        description:
+          "Consigue suficientes personas voluntarias para tener dos por turno y capacítalas: recibir a la gente sin papeleo, reconocer el agotamiento por calor y la hipotermia, cuándo llamar a los servicios de emergencia y nociones básicas de desescalada. La calidez en el sentido humano importa tanto como el termostato.",
+        hours: 4,
+        skills: ["enseñanza"],
+      },
+      {
+        name: "Arma la rotación de turnos",
+        description:
+          "Prepara un calendario de turnos que puedas activar con un día de aviso — quién abre, quién cierra y cobertura nocturna si la ofrecen. Mantén una lista de reserva, porque las olas de calor también tumban a las personas voluntarias.",
+        hours: 2,
+        skills: ["organización"],
+        follows: [3],
+        recurringCadence: "event",
+      },
+      {
+        name: "Corre la voz antes de la temporada",
+        description:
+          "Haz volantes multilingües con los umbrales y la ubicación, y llévalos a clínicas, edificios de personas mayores, equipos de trabajo en calle y tienditas antes de la primera ola de calor o helada — no durante.",
+        hours: 3,
+        skills: ["diseño gráfico", "traducción"],
+      },
+      {
+        name: "Abre, acompaña y reinicia en cada activación",
+        description:
+          "Mantén el centro abierto mientras dure el evento climático: registra a la gente sin rigidez (un conteo, no identificaciones), mantén los insumos circulando y revisa cómo está quien duerma. Después, limpia, reabastece y anota qué se acabó.",
+        hours: 3,
+        recurringCadence: "event",
+      },
+    ],
+  },
+  {
+    id: "community-oral-history",
+    name: "Historia oral comunitaria",
+    purpose:
+      "Grabar las historias de las personas mayores y del vecindario antes de que se pierdan — y dejar a quienes las cuentan al mando de lo que pase con ellas.",
+    whoItServes:
+      "Personas mayores con historias que nadie ha pedido escuchar, residentes de toda la vida que ven cambiar el barrio y cada vecina y vecino que venga después.",
+    whatYoullNeed:
+      "Un teléfono o una grabadora sencilla, un lugar tranquilo, formularios de consentimiento y un sitio seguro para guardar los archivos. Las grabaciones son datos personales — cada participante es dueña o dueño de su historia, decide dónde se comparte y puede cambiar de opinión más adelante. Nada se hace público sin su visto bueno por escrito.",
+    setupHours: 10,
+    defaultCategory: "education",
+    tasks: [
+      {
+        name: "Escribe un formulario de consentimiento en lenguaje sencillo",
+        description:
+          "Una página, sin jerga legal: qué se está grabando, dónde podría compartirse y el derecho de quien participa a pausar, saltarse preguntas o retirar la grabación después. Tradúcelo a los idiomas que de verdad hablan tus narradoras y narradores.",
+        hours: 2,
+        skills: ["redacción", "traducción"],
+      },
+      {
+        name: "Reúne el equipo y una lista de preguntas",
+        description:
+          "Un teléfono con una app de notas de voz basta; suma un micrófono de solapa barato si puedes. Redacta preguntas abiertas que inviten historias — \"cuéntame cómo era la calle cuando llegaste\" — y practiquen una vez entre ustedes.",
+        hours: 2,
+      },
+      {
+        name: "Graba las sesiones de historias",
+        description:
+          "Siéntate con una persona narradora a la vez en un lugar tranquilo y cómodo. Repasen juntos el formulario de consentimiento primero, y luego sobre todo escucha — las mejores entrevistas son aquellas en las que menos hablas.",
+        hours: 4,
+        skills: ["escucha"],
+        follows: [0, 1],
+        recurringCadence: "session",
+      },
+      {
+        name: "Archiva y devuelve, en sus términos",
+        description:
+          "Etiqueta cada grabación con la fecha, los nombres y lo acordado sobre compartirla. Guarda dos copias en un lugar seguro, entrega a cada narradora o narrador su propia copia y comparte públicamente solo los fragmentos que cada persona aprobó.",
+        hours: 2,
+        follows: [2],
       },
     ],
   },

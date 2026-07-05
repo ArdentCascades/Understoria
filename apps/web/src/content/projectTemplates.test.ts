@@ -31,6 +31,10 @@ import {
 // template's defaultCategory and don't update this map, the test will
 // flag it — keeping content drift visible.
 const EXPECTED_CATEGORY: Record<string, string> = {
+  "harm-reduction-supplies": "other",
+  "court-support": "other",
+  "cooling-warming-center": "other",
+  "community-oral-history": "education",
   "community-fridge": "food",
   "community-garden": "food",
   "tool-lending-library": "infrastructure",
@@ -95,12 +99,12 @@ const VALID_CADENCES: readonly RecurringCadence[] = [
 ];
 
 describe("projectTemplates", () => {
-  it("ships exactly 50 templates in English", () => {
-    expect(PROJECT_TEMPLATES_EN.length).toBe(50);
+  it("ships exactly 54 templates in English", () => {
+    expect(PROJECT_TEMPLATES_EN.length).toBe(54);
   });
 
-  it("ships exactly 50 templates in Spanish", () => {
-    expect(PROJECT_TEMPLATES_ES.length).toBe(50);
+  it("ships exactly 54 templates in Spanish", () => {
+    expect(PROJECT_TEMPLATES_ES.length).toBe(54);
   });
 
   it("en and es share the same id set in the same order", () => {
