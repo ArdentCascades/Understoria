@@ -886,6 +886,13 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         // Rotation trail: keep only well-formed entries, ascending by
         // retiredAt so the resolver's "first entry retired AFTER the
         // signing time" scan finds the key that was current then.
+        // retiredAt must be a plausible PAST moment (a retirement is
+        // an event that happened; one day of clock skew is the same
+        // grace config.ts's own-history validation allows). A
+        // far-future retiredAt is the forged-history shape: an entry
+        // with retiredAt beyond every plausible signing time would
+        // capture ALL records in the resolver's rotation scan.
+        const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
         const rawHistory = Array.isArray(body.systemKey.history)
           ? body.systemKey.history
           : [];
@@ -895,7 +902,10 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
               h !== null &&
               typeof h === "object" &&
               typeof (h as { pubkey?: unknown }).pubkey === "string" &&
-              typeof (h as { retiredAt?: unknown }).retiredAt === "number",
+              typeof (h as { retiredAt?: unknown }).retiredAt === "number" &&
+              Number.isInteger((h as { retiredAt: number }).retiredAt) &&
+              (h as { retiredAt: number }).retiredAt > 0 &&
+              (h as { retiredAt: number }).retiredAt <= oneDayFromNow,
           )
           .sort((a, b) => a.retiredAt - b.retiredAt);
         systemKeys.set(peerUrl, {
@@ -951,13 +961,37 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
   // after a retirement is published), which needs per-record
   // receivedAt tracking the exchange store does not yet keep. See
   // docs/auto-confirm-key.md §4 and docs/system-key-rotation.md §6.
+  // Rotation trails are sorted ascending at ingest, so an index-wise
+  // compare is an equality check on the whole published trail.
+  function sameHistory(
+    a: { pubkey: string; retiredAt: number }[],
+    b: { pubkey: string; retiredAt: number }[],
+  ): boolean {
+    if (a.length !== b.length) return false;
+    return a.every(
+      (h, i) => h.pubkey === b[i].pubkey && h.retiredAt === b[i].retiredAt,
+    );
+  }
+
   function resolveSystemPubkey(nodeId: string, signedAt: number): string | null {
     let match: { current: string; history: { pubkey: string; retiredAt: number }[] } | null =
       null;
     for (const entry of systemKeys.values()) {
       if (entry === null || entry.nodeId !== nodeId) continue;
-      if (match !== null && entry.current !== match.current) {
-        // Two peers claim this nodeId with different keys — ambiguous.
+      if (
+        match !== null &&
+        (entry.current !== match.current ||
+          // The HISTORY must agree too, not just `current`. `current`
+          // is public — a compromised peer can echo the real node's
+          // current key verbatim and smuggle its own key inside a
+          // forged history entry, which the rotation scan below would
+          // then select for any record whose signedAt precedes the
+          // forged retiredAt. Any divergence in the claimed trail is
+          // the same ambiguity as a divergent current key: refuse.
+          !sameHistory(entry.history, match.history))
+      ) {
+        // Two peers claim this nodeId with different key material —
+        // ambiguous. Fail closed.
         return null;
       }
       if (match === null) match = { current: entry.current, history: entry.history };

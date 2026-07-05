@@ -799,6 +799,7 @@ describe("startPeerPullWorker — peer system-key lifecycle (§4)", () => {
     systemPubkey: string;
     exchanges: Exchange[];
     configFails?: () => boolean;
+    history?: { pubkey: string; retiredAt: number }[];
   }): Fetcher {
     // /config must be handled OUTSIDE exchangeOnly — that wrapper
     // answers /config itself (with "no system key") before any inner
@@ -814,7 +815,10 @@ describe("startPeerPullWorker — peer system-key lifecycle (§4)", () => {
         if (opts.configFails?.()) return jsonResponse({ error: "down" }, 503);
         return jsonResponse({
           nodeId: opts.nodeId,
-          systemKey: { current: opts.systemPubkey, history: [] },
+          systemKey: {
+            current: opts.systemPubkey,
+            history: opts.history ?? [],
+          },
         });
       }
       return rest(url);
@@ -936,6 +940,86 @@ describe("startPeerPullWorker — peer system-key lifecycle (§4)", () => {
     expect(inserted).toBe(0);
     expect(store.has(forged.id)).toBe(false);
     expect(store.has(honest.id)).toBe(false);
+  });
+
+  it("FAILS CLOSED when an impostor echoes the real node's CURRENT key but forges the history (no history smuggling)", async () => {
+    // `current` is public — an impostor can copy it verbatim, so
+    // current-equality alone cannot distinguish the real node from
+    // the impostor. The smuggled key rides in a forged history entry
+    // whose retiredAt post-dates every record's signedAt, making the
+    // rotation scan select it. The trails disagree → refuse both.
+    const systemC = generateKeyPair();
+    const honest = systemSigned(systemC, "node_c");
+    const systemB = generateKeyPair();
+    const forged = systemSigned(systemB, "node_c");
+
+    const fetchC = peerWithKey({
+      nodeId: "node_c",
+      systemPubkey: systemC.publicKey,
+      exchanges: [honest],
+    });
+    const fetchB = peerWithKey({
+      nodeId: "node_c",
+      systemPubkey: systemC.publicKey, // <-- echoed, matches C exactly
+      history: [
+        // In-grace future retiredAt (parse bound allows a day of
+        // skew), so ONLY the trail-equality check can catch this.
+        { pubkey: systemB.publicKey, retiredAt: Date.now() + 12 * 60 * 60 * 1000 },
+      ],
+      exchanges: [forged],
+    });
+    const routed: Fetcher = (url) =>
+      url.startsWith("https://c.example") ? fetchC(url) : fetchB(url);
+    const { worker, store } = makeWorker(routed, [
+      "https://b.example",
+      "https://c.example",
+    ]);
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    const inserted = results
+      .filter((r) => r.kind === "exchange")
+      .reduce((n, r) => n + r.insertedCount, 0);
+    expect(inserted).toBe(0);
+    expect(store.has(forged.id)).toBe(false);
+    expect(store.has(honest.id)).toBe(false);
+  });
+
+  it("drops a far-future forged history entry at parse, neutralizing the impostor WITHOUT collateral damage", async () => {
+    // With retiredAt beyond the one-day skew grace the forged entry
+    // never survives ingestion: the impostor's config collapses to
+    // exactly the honest one (echoed current, empty history), no
+    // ambiguity arises, and only the forged row — which fails
+    // verification against the honest key — is rejected.
+    const systemC = generateKeyPair();
+    const honest = systemSigned(systemC, "node_c");
+    const systemB = generateKeyPair();
+    const forged = systemSigned(systemB, "node_c");
+
+    const fetchC = peerWithKey({
+      nodeId: "node_c",
+      systemPubkey: systemC.publicKey,
+      exchanges: [honest],
+    });
+    const fetchB = peerWithKey({
+      nodeId: "node_c",
+      systemPubkey: systemC.publicKey,
+      history: [{ pubkey: systemB.publicKey, retiredAt: 9_999_999_999_999 }],
+      exchanges: [forged],
+    });
+    const routed: Fetcher = (url) =>
+      url.startsWith("https://c.example") ? fetchC(url) : fetchB(url);
+    const { worker, store } = makeWorker(routed, [
+      "https://b.example",
+      "https://c.example",
+    ]);
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    expect(store.has(forged.id)).toBe(false);
+    expect(store.has(honest.id)).toBe(true);
+    const inserted = results
+      .filter((r) => r.kind === "exchange")
+      .reduce((n, r) => n + r.insertedCount, 0);
+    expect(inserted).toBe(1);
   });
 
   it("SKIPS the exchange pull (no cursor movement) while /config has never been reachable, then converges once it recovers", async () => {
