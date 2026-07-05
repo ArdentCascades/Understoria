@@ -568,7 +568,13 @@ export async function disputeExchange(
       throw new Error("This exchange is already disputed");
     if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
       throw new Error("Only the two parties can dispute this exchange");
-    const updated: Post = { ...post, status: "disputed" };
+    // Remember the pre-dispute status so resolveDispute can restore it
+    // if the community finds the flag baseless (Round-4 review).
+    const updated: Post = {
+      ...post,
+      status: "disputed",
+      preDisputeStatus: post.status,
+    };
     await db.posts.put(updated);
     // Agent 13 dispute migration — every flagged exchange gets a
     // matching governance-layer Proposal so the Decisions surface

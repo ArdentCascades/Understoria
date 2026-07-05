@@ -306,7 +306,7 @@ export async function closeProposal(
   outcome: "passed" | "rejected" | "withdrawn",
   reason: string,
 ): Promise<Proposal> {
-  return db.transaction("rw", [db.proposals, db.votes], async () => {
+  return db.transaction("rw", [db.proposals, db.votes, db.posts], async () => {
     const proposal = await db.proposals.get(proposalId);
     if (!proposal) throw new Error("Proposal not found");
     if (proposal.status !== "open") {
@@ -338,6 +338,37 @@ export async function closeProposal(
       closedReason: reason.trim() || null,
     };
     await db.proposals.put(updated);
+
+    // Apply a dispute outcome back to the flagged post (Round-4 review).
+    // Before this, closing a dispute proposal only stamped the proposal
+    // row and the post stayed "disputed" forever — so a REJECTED
+    // (baseless) dispute permanently denied the helper credit. Now:
+    //   - rejected / withdrawn → the flag did not stand: restore the
+    //     post to its pre-dispute status so the normal flow (and credit)
+    //     resumes.
+    //   - passed (upheld) → the exchange is repudiated. Credit is NEVER
+    //     reversed (docs/invite-redemption.md §2 / the never-reverse-
+    //     credit principle), so a post that had already COMPLETED stays
+    //     completed (the dispute record is the accountability signal);
+    //     a pre-completion post is cancelled so credit never flows.
+    if (proposal.kind === "dispute" && proposal.disputePostId) {
+      const post = await db.posts.get(proposal.disputePostId);
+      if (post && post.status === "disputed") {
+        const prior = post.preDisputeStatus ?? "claimed";
+        const nextStatus =
+          outcome === "passed"
+            ? prior === "completed"
+              ? "completed"
+              : "cancelled"
+            : prior;
+        await db.posts.put({
+          ...post,
+          status: nextStatus,
+          preDisputeStatus: null,
+        });
+      }
+    }
+
     return updated;
   });
 }

@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Disputes now resolve (Round-4 review).** Closing a dispute proposal
+  only stamped the proposal row; nothing transitioned the flagged post
+  out of `"disputed"`, so a REJECTED (baseless) dispute stranded the
+  post forever and permanently denied the helper credit. `closeProposal`
+  now applies the outcome to the post: rejected/withdrawn restores the
+  pre-dispute status (normal flow and credit resume); an upheld dispute
+  cancels a pre-completion post (no credit flows) and leaves an
+  already-completed one alone (credit is never reversed — see the new
+  `docs/dispute-resolution.md`). The `/disputes` list shows only OPEN
+  disputes, so a resolved one no longer renders a live "Flagged" chip
+  contradicting Profile's count. `castVote` refuses a vote on a closed
+  proposal.
+
 ### Security
 - **A blocker can no longer pass a proposal over a hidden block vote
   (Round-4 review).** The per-viewer governance-hide filter (`hideGovernance`)
