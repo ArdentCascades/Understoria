@@ -440,9 +440,9 @@ We are not trying to protect against:
   decide whether to pair before identity material is rendered.
   (b) **Camera-awareness gate**, identical to the invite-QR
   gate but with sharper copy naming the 5-minute replay window.
-  No "send without showing" hatch — the envelope is several
-  hundred base64 bytes and the no-hatch decision is documented
-  in `device-pairing.md` §6.3.
+  No "send without showing" hatch of the invite kind; a narrower
+  **envelope-only copy hatch** exists behind its own disclosure
+  (see the revision note below and `device-pairing.md` §6.3).
   (c) **Fresh per-transfer passphrase.** Source device generates
   a 6-word BIP39 passphrase, ~66 bits of entropy. Member never
   picks it; clipboard-copy is not offered (clipboard managers
@@ -472,9 +472,26 @@ We are not trying to protect against:
     confirmation; the 5-minute auto-dismiss is the actual
     security property.
   - **"Send without showing" hatch** of the kind the invite QR
-    uses. The envelope is too large to type, and clipboard /
-    `navigator.share` routing re-introduces the persistence
-    problem we removed from the invite flow.
+    uses — REVISED, partially. v1 rejected all clipboard routing,
+    but that left the destination's paste fallback with no
+    sanctioned source and made phone→desktop pairing
+    camera-or-nothing. As shipped: the display screen offers a
+    gated **copy hatch for the wrapped envelope only** — the
+    passphrase is never copyable, so both halves cannot travel one
+    channel by our hand. The disclosure names clipboard-manager
+    persistence and cross-device clipboard sync before the button
+    exists; on expiry / wizard exit the clipboard is cleared
+    best-effort (read-compare-clear — never clobbers a later
+    copy; browsers may deny both calls, and the clear is hygiene
+    on top of the passphrase wrapping + expiry, not the boundary).
+    Accepted residual: a synced clipboard (e.g. OS cloud
+    clipboard) may relay the wrapped envelope through its vendor;
+    the envelope is scrypt-wrapped under ~66 bits of passphrase
+    the vendor never sees. Still rejected: any *shareable URL*
+    form of the envelope — links transit chat threads (persistent
+    logs, previews, and the near-certainty the six words follow in
+    the same thread); copy-paste is device-local, a link is a
+    message.
   After successful pairing, both devices hold the same identity.
   This is a deliberate design choice, not a bug:
   Ed25519 has no in-protocol revocation, so a stolen paired

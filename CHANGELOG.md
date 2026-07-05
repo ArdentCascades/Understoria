@@ -9,6 +9,23 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Device pairing: a "copy pairing code" hatch for phone→desktop.**
+  The pairing display screen can now copy the wrapped envelope to
+  the clipboard — behind a disclosure that plainly names clipboard
+  history and cross-device clipboard sync — feeding the capture
+  screen's existing paste fallback, which previously had no
+  sanctioned source (pairing a cameraless desktop was impossible;
+  pairing any desktop meant holding your phone up to a webcam).
+  The envelope only: the six-word passphrase stays speak-or-type,
+  so both halves can never travel the same channel, and the
+  clipboard is cleared best-effort when the five-minute timer ends
+  or the wizard closes (only if it still holds the pairing code —
+  a later copy is never clobbered). A shareable pairing *link* was
+  considered and rejected: links transit chat threads, and chat
+  logs are forever; the design-note §6.3 revision and the
+  threat-model pairing entry record the reasoning.
+
 ### Changed
 - **Documentation synced to the last several shipped rounds.** The
   threat model gains the two entries recent server work created:
