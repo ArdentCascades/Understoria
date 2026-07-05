@@ -46,6 +46,11 @@ import { db } from "@/db/database";
  *     per the schema: ties a federated event to a LOCAL-ONLY project
  *     with the linker's key; a project pointer must never leave the
  *     device in a file the member may hand to someone else.
+ *   - `eventShifts` + `shiftSignups` — the shift-signup layer
+ *     (`docs/shift-signups.md` §4): signups are a per-slot
+ *     attendance-intent graph, strictly finer-grained than the
+ *     `eventRsvps` rows already excluded, and shift definitions carry
+ *     the member's organizing pattern. Neither may leave the device.
  */
 export const EXPORT_EXCLUDED_TABLES = [
   "secretKeys",
@@ -55,6 +60,8 @@ export const EXPORT_EXCLUDED_TABLES = [
   "pairingLog",
   "eventRsvps",
   "eventProjectLinks",
+  "eventShifts",
+  "shiftSignups",
 ] as const;
 
 /**
