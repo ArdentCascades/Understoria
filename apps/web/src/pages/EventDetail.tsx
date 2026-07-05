@@ -32,6 +32,7 @@ import { BackLink, useHistoryAwareBack } from "@/components/BackLink";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EventRsvpControl } from "@/components/EventRsvpControl";
+import { EventShiftsSection } from "@/components/EventShiftsSection";
 import { EventCancellationCard } from "@/components/EventCancellationCard";
 import { Markdown } from "@/components/Markdown";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
@@ -377,6 +378,21 @@ export default function EventDetailPage() {
           rsvp={myRsvp ?? null}
         />
       )}
+
+      {/* Shift list (docs/shift-signups.md §6). Renders on the
+          organizer's node only — shifts are local rows, so a
+          federated copy of this event simply has none, which is the
+          honest UI statement of the §7 federation posture. On a
+          cancelled event it renders inert (settled roster, no
+          controls). */}
+      <EventShiftsSection
+        event={event}
+        memberKey={memberKey}
+        isOrganizer={isOrganizer}
+        isCancelled={isCancelled}
+        canSeeRoster={canSeeRoster}
+        labelFor={labelFor}
+      />
 
       <section
         aria-labelledby="event-attendees-heading"
