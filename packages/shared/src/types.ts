@@ -87,6 +87,13 @@ export interface Post {
    *  Absent on rows that predate the field; the auto-confirm sweep
    *  falls back to `createdAt` for those. */
   awaitingSince?: number | null;
+  /** The status this post held immediately BEFORE it was disputed.
+   *  Local-only lifecycle field (not in the signed payload). Lets a
+   *  REJECTED dispute restore the post to its pre-dispute state so the
+   *  normal flow (and credit) can resume; an UPHELD dispute reads it to
+   *  decide whether credit had already flowed. Absent unless the post
+   *  is (or was) disputed. */
+  preDisputeStatus?: PostStatus | null;
   /** Which node this post originated from. Set by createPost at
    *  creation time; preserved across federation so peer nodes see
    *  which community a post came from. Posts created before Agent 3

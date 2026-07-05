@@ -23,6 +23,7 @@ import {
   verifyEventCancellation,
 } from "@/lib/crypto";
 import { enqueueEvent, enqueueEventCancellation } from "@/lib/outbox";
+import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
 import type {
   Event,
@@ -301,11 +302,27 @@ export async function rsvpToEvent(
   // design doc). Look up the event's organizer for the block check;
   // if the event doesn't exist we let the existing flow handle it.
   const eventRow = await db.events.get(input.eventId);
-  if (
-    eventRow &&
-    (await isMutuallyBlocked(input.memberKey, eventRow.createdBy))
-  ) {
+  // The event must exist (Round-4 review): without this, a stray call
+  // wrote a ghost RSVP row for an event that isn't here.
+  if (!eventRow) {
+    throw new Error("That event no longer exists.");
+  }
+  if (await isMutuallyBlocked(input.memberKey, eventRow.createdBy)) {
     throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
+  // Don't RSVP to an organizer-cancelled event (Round-4 review): the
+  // view gates this, but the two live queries update independently, so
+  // a click in the window before re-render could still land. Bind to
+  // organizer authority the same way the calendar does.
+  const cancellation = await db.eventCancellations
+    .where("eventId")
+    .equals(input.eventId)
+    .first();
+  if (
+    cancellation &&
+    isAuthoritativeCancellation(cancellation, eventRow)
+  ) {
+    throw new Error("That event was cancelled.");
   }
   const existing = await db.eventRsvps
     .where("[eventId+memberKey]")

@@ -75,6 +75,29 @@ describe("castVote", () => {
     expect(rows[0].choice).toBe("affirm");
     expect(rows[0].reason).toBeNull();
   });
+
+  it("refuses to record a vote on a CLOSED proposal (Round-4 L4)", async () => {
+    const { createProposal, closeProposal } = await import("./proposals");
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey: "proposer",
+      nodeId: NODE,
+    });
+    await closeProposal(p.id, "rejected", "done");
+    await expect(
+      castVote({
+        proposalId: p.id,
+        voterKey: "latecomer",
+        choice: "affirm",
+        nodeId: NODE,
+      }),
+    ).rejects.toThrow(/closed/i);
+    expect(await listVotesFor(p.id)).toHaveLength(0);
+  });
 });
 
 describe("listVotesFor", () => {

@@ -841,10 +841,15 @@ export default function ProjectDetailPage() {
             memberMap={memberMap}
             nodeId={nodeId}
             currentKey={currentMember?.publicKey}
+            blockedKeys={blockedKeys}
           />
 
           {(project.status === "archived" || project.status === "completed") && (
-            <HistoryTimeline projectId={project.id} memberMap={memberMap} />
+            <HistoryTimeline
+              projectId={project.id}
+              memberMap={memberMap}
+              blockedKeys={blockedKeys}
+            />
           )}
 
           {/* Community stewardship offer — shown to anyone who isn't the
@@ -2359,12 +2364,14 @@ function AnnouncementSection({
   memberMap,
   nodeId,
   currentKey,
+  blockedKeys,
 }: {
   project: Project;
   isOrg: boolean;
   memberMap: Map<string, string>;
   nodeId: string;
   currentKey: string | undefined;
+  blockedKeys: ReadonlySet<string>;
 }) {
   const { t } = useTranslation();
   const [body, setBody] = useState("");
@@ -2378,10 +2385,16 @@ function AnnouncementSection({
   // by id, open the disclosure, and focus it.
   const composeRef = useRef<HTMLDetailsElement>(null);
   const bodyInputRef = useRef<HTMLTextAreaElement>(null);
-  const announcements = useLiveQuery(
+  const allAnnouncements = useLiveQuery(
     () => listAnnouncements(project.id),
     [project.id],
     [],
+  );
+  // Hide announcements authored by a blocked member (Round-4 review) —
+  // the same one-way hide docs/blocking.md §6 applies to task comments.
+  const announcements = useMemo(
+    () => allAnnouncements.filter((a) => !blockedKeys.has(a.actorKey)),
+    [allAnnouncements, blockedKeys],
   );
   const hiddenCount = Math.max(
     0,
@@ -3044,15 +3057,22 @@ function activityTaskId(data: Record<string, unknown>): string | null {
 export function HistoryTimeline({
   projectId,
   memberMap,
+  blockedKeys,
 }: {
   projectId: string;
   memberMap: Map<string, string>;
+  blockedKeys: ReadonlySet<string>;
 }) {
   const { t } = useTranslation();
-  const activities = useLiveQuery(
+  const allActivities = useLiveQuery(
     () => listActivityForProject(projectId),
     [projectId],
     [],
+  );
+  // Hide activity rows authored by a blocked member (Round-4 review).
+  const activities = useMemo(
+    () => allActivities.filter((a) => !blockedKeys.has(a.actorKey)),
+    [allActivities, blockedKeys],
   );
   if (activities.length === 0) return null;
   return (

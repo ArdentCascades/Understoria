@@ -17,7 +17,7 @@ describe("keyFingerprint", () => {
   });
 
   it("produces distinct fingerprints for distinct keys", () => {
-    // Two real keypairs. Collisions in the 32-bit space are
+    // Two real keypairs. Collisions in the 64-bit space are
     // astronomically unlikely; if this ever fails it's a bug, not
     // bad luck.
     const a = b64encode(nacl.sign.keyPair().publicKey);
@@ -25,31 +25,32 @@ describe("keyFingerprint", () => {
     expect(keyFingerprint(a)).not.toBe(keyFingerprint(b));
   });
 
-  it("matches the documented format: XXXX XXXX uppercase hex", () => {
+  it("matches the documented format: XXXX XXXX XXXX XXXX uppercase hex (64-bit)", () => {
     const kp = nacl.sign.keyPair();
     const fp = keyFingerprint(b64encode(kp.publicKey));
-    expect(fp).toMatch(/^[0-9A-F]{4} [0-9A-F]{4}$/);
+    expect(fp).toMatch(/^[0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4}$/);
   });
 
-  it("uses the first 4 bytes of the decoded key", () => {
-    // Hand-picked bytes so the assertion is obvious.
-    // 0xDE 0xAD 0xBE 0xEF -> "DEAD BEEF"
-    const bytes = new Uint8Array([0xde, 0xad, 0xbe, 0xef, 0x00, 0x00]);
-    expect(keyFingerprint(b64encode(bytes))).toBe("DEAD BEEF");
+  it("uses the first 8 bytes of the decoded key", () => {
+    // 0xDE 0xAD 0xBE 0xEF 0x01 0x23 0x45 0x67 -> "DEAD BEEF 0123 4567"
+    const bytes = new Uint8Array([
+      0xde, 0xad, 0xbe, 0xef, 0x01, 0x23, 0x45, 0x67, 0x00, 0x00,
+    ]);
+    expect(keyFingerprint(b64encode(bytes))).toBe("DEAD BEEF 0123 4567");
   });
 
   it("throws on malformed base64", () => {
     expect(() => keyFingerprint("not!!!valid$$$base64")).toThrow();
   });
 
-  it("throws on input shorter than 4 bytes after decode", () => {
+  it("throws on input shorter than 8 bytes after decode", () => {
     const shortBytes = new Uint8Array([0x01, 0x02, 0x03]);
     expect(() => keyFingerprint(b64encode(shortBytes))).toThrow(
-      /at least 4 bytes/,
+      /at least 8 bytes/,
     );
   });
 
   it("throws on empty input", () => {
-    expect(() => keyFingerprint("")).toThrow(/at least 4 bytes/);
+    expect(() => keyFingerprint("")).toThrow(/at least 8 bytes/);
   });
 });

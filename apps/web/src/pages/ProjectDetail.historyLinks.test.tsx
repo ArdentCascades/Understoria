@@ -79,7 +79,11 @@ function render() {
     root = createRoot(container);
     root.render(
       <MemoryRouter>
-        <HistoryTimeline projectId={projectId} memberMap={memberMap} />
+        <HistoryTimeline
+          projectId={projectId}
+          memberMap={memberMap}
+          blockedKeys={new Set()}
+        />
       </MemoryRouter>,
     );
   });

@@ -117,6 +117,20 @@ describe("wrap + unwrap", () => {
     expect(unwrap(tampered, master)).toBeNull();
   });
 
+  it("returns null (not throw) on corrupt base64 — the unlock path must not crash (Round-4)", async () => {
+    const { secretKey } = generateKeyPair();
+    const salt = newSalt();
+    const master = await deriveMasterKey("pass1234", salt, TEST_ITERATIONS);
+    const blob = wrap(secretKey, master, salt, TEST_ITERATIONS);
+    // A mangled base64 nonce makes atob throw; unwrap must swallow it.
+    const corruptNonce: WrappedBlob = { ...blob, nonce: "!!!not base64!!!" };
+    expect(() => unwrap(corruptNonce, master)).not.toThrow();
+    expect(unwrap(corruptNonce, master)).toBeNull();
+    // A wrong-length nonce makes tweetnacl throw; also swallowed.
+    const shortNonce: WrappedBlob = { ...blob, nonce: "AAAA" };
+    expect(unwrap(shortNonce, master)).toBeNull();
+  });
+
   it("produces distinct ciphertexts for repeated wraps of the same key", async () => {
     const { secretKey } = generateKeyPair();
     const salt = newSalt();

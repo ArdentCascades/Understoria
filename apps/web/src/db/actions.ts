@@ -31,6 +31,7 @@ import { enqueueClaimOutbox } from "@/lib/outbox";
 import {
   assertWithinDailyLimit,
   evaluateSafeguards,
+  exceedsDailyLimit,
 } from "@/lib/safeguards";
 import { getSecretKey } from "./secrets";
 import {
@@ -428,6 +429,10 @@ export async function applyAutoConfirmedExchange(
       "applyAutoConfirmedExchange: exchange must carry autoConfirmed + autoConfirmedBy",
     );
   }
+  // nodeConfig lives in `db.nodeConfig`, out of the transaction scope
+  // below — read it first (a non-scoped await inside a Dexie
+  // transaction commits it early).
+  const nodeConfig = await getNodeConfig(exchange.nodeId);
   return db.transaction(
     "rw",
     [
@@ -456,8 +461,45 @@ export async function applyAutoConfirmedExchange(
           "applyAutoConfirmedExchange: post must be awaiting_confirmation",
         );
       }
-      await db.exchanges.put(exchange);
-      await enqueueExchangeOutbox(exchange);
+      // Anti-gaming safeguards apply to auto-confirmed exchanges too
+      // (Round-4 review; docs/auto-confirm-key.md §5 claims the
+      // safeguards module "still applies"). Unlike the manual path we
+      // FLAG rather than throw — the row is already node-signed, so
+      // discarding it would strand valid credit; the flag surfaces the
+      // short-duration / reciprocal / over-limit pattern for review.
+      // Flag fields sit OUTSIDE the canonical payload, so setting them
+      // does not disturb the system signature.
+      const priorExchanges = await db.exchanges.toArray();
+      const evalNow = exchange.autoConfirmedAt ?? Date.now();
+      const safeguard = evaluateSafeguards(
+        {
+          helperKey: exchange.helperKey,
+          helpedKey: exchange.helpedKey,
+          hoursExchanged: exchange.hoursExchanged,
+          completedAt: exchange.completedAt,
+        },
+        priorExchanges,
+        nodeConfig,
+      );
+      const overLimit = exceedsDailyLimit(
+        exchange.helperKey,
+        priorExchanges,
+        evalNow,
+        nodeConfig,
+      );
+      const flagged = exchange.flaggedForReview || safeguard.flaggedForReview || overLimit;
+      const exchangeToStore: Exchange = flagged
+        ? {
+            ...exchange,
+            flaggedForReview: true,
+            flagReason:
+              exchange.flagReason ??
+              safeguard.flagReason ??
+              (overLimit ? "daily_limit_warning" : undefined),
+          }
+        : exchange;
+      await db.exchanges.put(exchangeToStore);
+      await enqueueExchangeOutbox(exchangeToStore);
       const updatedPost: Post = {
         ...post,
         status: "completed",
@@ -500,7 +542,7 @@ export async function applyAutoConfirmedExchange(
         newAchievements.push(...diff);
       }
 
-      return { post: updatedPost, exchange, newAchievements };
+      return { post: updatedPost, exchange: exchangeToStore, newAchievements };
     },
   );
 }
@@ -526,7 +568,13 @@ export async function disputeExchange(
       throw new Error("This exchange is already disputed");
     if (memberKey !== post.postedBy && memberKey !== post.claimedBy)
       throw new Error("Only the two parties can dispute this exchange");
-    const updated: Post = { ...post, status: "disputed" };
+    // Remember the pre-dispute status so resolveDispute can restore it
+    // if the community finds the flag baseless (Round-4 review).
+    const updated: Post = {
+      ...post,
+      status: "disputed",
+      preDisputeStatus: post.status,
+    };
     await db.posts.put(updated);
     // Agent 13 dispute migration — every flagged exchange gets a
     // matching governance-layer Proposal so the Decisions surface

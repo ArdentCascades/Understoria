@@ -20,53 +20,53 @@
  */
 import { b64decode } from "./bytes";
 
+/** Bytes of the public key rendered into the fingerprint. */
+const FINGERPRINT_BYTES = 8;
+
 /**
  * Short human-readable fingerprint of an Ed25519 public key.
  *
- * Shape: 8 uppercase hex characters, grouped `XXXX XXXX` (one space).
+ * Shape: 16 uppercase hex characters, grouped `XXXX XXXX XXXX XXXX`.
  *
- * Why 4 bytes / 32 bits? This fingerprint is for human-eye verification
- * — "are these two devices the same identity" — not for cryptographic
- * identity matching. The cryptographic check already happens inside
- * `unwrapTransfer`'s `publickey_mismatch` path (see
- * `lib/devicePairing.ts`), which constant-time-compares the embedded
- * publicKey against the one derived from the secretKey.
+ * Why 8 bytes / 64 bits (Round-4 review)? This is the member's eyeball
+ * check that the device they just paired holds the intended identity —
+ * "do these two numbers match?". It is the ONLY defense against a
+ * mid-flow QR swap: the downstream `publickey_mismatch` check in
+ * `unwrapTransfer` only confirms the envelope's secretKey and publicKey
+ * are a consistent PAIR — an attacker who supplies their OWN valid
+ * keypair passes it trivially, so it does NOT catch a swap. That makes
+ * the fingerprint load-bearing, and a 32-bit prefix was grindable
+ * offline (~2^32 keygens to forge a matching prefix given the victim's
+ * public key). 64 bits pushes a pre-grinding attack out of practical
+ * reach while still reading aloud in one breath.
  *
- * The threats this string mitigates are:
- *   - Mistaken pairing — at a workshop with several devices on tables,
- *     a member could scan the wrong QR. The numbers won't match.
- *   - Social-engineering swap — an attacker swaps a different QR in
- *     mid-flow. The numbers won't match what the source is showing.
+ * Threats mitigated:
+ *   - Mistaken pairing — the wrong QR at a table full of devices. The
+ *     numbers won't match.
+ *   - Social-engineering / MITM swap — an attacker substitutes their
+ *     own envelope. They cannot cheaply produce a key whose 64-bit
+ *     fingerprint matches the one the source device is showing.
  *
- * Both of those are caught reliably by 32 bits at human glance-speed:
- * collisions in the 4-billion space won't show up by accident, and an
- * attacker who needed to grind out a colliding identity to fool the
- * eyeball check would still fail the cryptographic check downstream
- * (publickey_mismatch). 32 bits is the smallest size that's both
- * short enough to read aloud in one breath AND large enough that
- * accidental collisions don't matter.
+ * Mirrors Signal's safety-number convention in shape (hex groups,
+ * monospace), shorter because our threat model is in-room (the QR is
+ * read locally, once) rather than a per-conversation network MITM.
  *
- * Mirrors Signal's safety-number convention in shape (hex pairs,
- * monospace) but is much shorter — Signal's 60-digit number protects
- * against a network-MITM adversary on every conversation. Our threat
- * model is in-room (the QR is read locally) and the cryptographic
- * check is separate, so a glance-sized hint is the right tool.
- *
- * Throws on invalid base64 input or on a public key shorter than 4
- * bytes after decode. Callers should already have validated the
- * input (e.g. via `nacl.sign.publicKeyLength` checks) — the throws
- * are defence-in-depth, not the primary validation path.
+ * Throws on invalid base64 input or a public key shorter than
+ * `FINGERPRINT_BYTES` after decode. Callers should already have
+ * validated the input (e.g. via `nacl.sign.publicKeyLength`) — the
+ * throws are defence-in-depth, not the primary validation path.
  */
 export function keyFingerprint(publicKeyBase64: string): string {
   const bytes = b64decode(publicKeyBase64);
-  if (bytes.length < 4) {
+  if (bytes.length < FINGERPRINT_BYTES) {
     throw new Error(
-      `keyFingerprint: public key must be at least 4 bytes, got ${bytes.length}`,
+      `keyFingerprint: public key must be at least ${FINGERPRINT_BYTES} bytes, got ${bytes.length}`,
     );
   }
   let hex = "";
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < FINGERPRINT_BYTES; i++) {
     hex += bytes[i].toString(16).padStart(2, "0").toUpperCase();
   }
-  return `${hex.slice(0, 4)} ${hex.slice(4, 8)}`;
+  // 16 hex chars → four groups of four.
+  return hex.replace(/(.{4})(?=.)/g, "$1 ");
 }

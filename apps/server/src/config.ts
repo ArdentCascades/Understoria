@@ -37,6 +37,16 @@ export interface Config {
   corsOrigin: string;
   /** Per-IP requests per minute. */
   rateLimitMax: number;
+  /**
+   * Value passed to Fastify's `trustProxy` (Round-4 review). Empty
+   * string / undefined → `false` (direct exposure). Set `TRUST_PROXY`
+   * to `loopback` (or the proxy's address) when behind the documented
+   * Caddy reverse proxy, so `req.ip` resolves the REAL client IP from
+   * `X-Forwarded-For` instead of the proxy's loopback address — without
+   * which every client collapses into one rate-limit bucket. The IP is
+   * still only ever HASHED to a bucket, never stored raw.
+   */
+  trustProxy: string;
   /** Stable identifier for this node. Embedded in stored exchanges. */
   nodeId: string;
   /** Pino log level. `info` by default; flip to `debug` for triage only. */
@@ -143,6 +153,7 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     databasePath: env.DATABASE_PATH ?? "./understoria.db",
     corsOrigin: env.CORS_ORIGIN ?? "*",
     rateLimitMax: asInt("RATE_LIMIT_MAX", env.RATE_LIMIT_MAX, 60),
+    trustProxy: env.TRUST_PROXY ?? "",
     nodeId: env.NODE_ID ?? "node_local",
     logLevel: logLevelRaw as Config["logLevel"],
     logRequestPaths: asBool(env.LOG_REQUEST_PATHS, false),

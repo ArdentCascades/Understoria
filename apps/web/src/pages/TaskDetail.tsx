@@ -16,6 +16,7 @@ import { useToast } from "@/state/ToastContext";
 import { humanizeError } from "@/lib/humanizeError";
 import { taskCheckInState } from "@/lib/taskCheckInState";
 import { useProjectTaskContext } from "@/lib/useProjectTaskContext";
+import { useApp } from "@/state/AppContext";
 import { formatHours } from "@/lib/format";
 import { creditHoursForTask } from "@/lib/timebank";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
@@ -36,6 +37,7 @@ import { HistoryTimeline } from "@/pages/ProjectDetail";
 export default function TaskDetailPage() {
   const { id, taskId } = useParams<{ id: string; taskId: string }>();
   const ctx = useProjectTaskContext(id);
+  const { blockedKeys } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -178,7 +180,11 @@ export default function TaskDetailPage() {
           the task page too. */}
       {(project.status === "archived" || project.status === "completed") && (
         <div className="mt-4">
-          <HistoryTimeline projectId={project.id} memberMap={ctx.memberMap} />
+          <HistoryTimeline
+            projectId={project.id}
+            memberMap={ctx.memberMap}
+            blockedKeys={blockedKeys}
+          />
         </div>
       )}
     </div>

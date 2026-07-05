@@ -9,6 +9,161 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **Rate limiting no longer collapses to one bucket behind the reverse
+  proxy (Round-4 review).** `trustProxy` was hard-off, so behind the
+  documented Caddy proxy every request carried the proxy's loopback
+  address and the whole community shared ONE per-minute rate-limit
+  bucket — one noisy client throttled everyone, and per-client limits
+  were unenforceable. A new `TRUST_PROXY` env var (default off, so a
+  spoofed `X-Forwarded-For` on a direct connection still can't influence
+  `req.ip`) lets the operator set `loopback` when fronted by the proxy,
+  restoring real per-client buckets. The IP is still only ever HASHED to
+  a bucket, never stored raw. Documented in `docs/operator-guide.md`.
+- **Pairing fingerprint widened to 64 bits (Round-4 review).** The
+  device-pairing safety number rendered only the first 4 bytes (32 bits)
+  of the public key. Because the downstream `publickey_mismatch` check
+  confirms only that the envelope's key pair is internally consistent —
+  an attacker's own valid keypair passes it — the fingerprint is the
+  sole defense against a mid-flow QR swap, and a 32-bit prefix was
+  grindable offline (~2^32 keygens to forge a match). It now renders 8
+  bytes as `XXXX XXXX XXXX XXXX`, pushing a pre-grinding attack out of
+  practical reach while still reading aloud in one breath.
+
+### Fixed
+- **Posts now cap their free-text fields on the wire (Round-4 review).**
+  Events and task comments already bounded their free text, but a signed
+  post's `title`/`description`/`locationZone` were length-unchecked, so a
+  validly-signed post carrying a ~60 KB title (bounded only by the 64 KB
+  body cap) was accepted and federated verbatim. `parsePost` now enforces
+  the same ceilings the event validator uses (title/location 200,
+  description 2000), rejecting oversize posts at the shape gate before
+  signature verification.
+- **RSVP writes are guarded against ghost and cancelled events (Round-4
+  review).** `rsvpToEvent` never checked the event exists, so a stray
+  call wrote a dangling RSVP row for an event not on this node; it now
+  refuses. It also re-asserts organizer-authoritative cancellation (the
+  same check the calendar uses) so a tap landing in the render window
+  after an event is cancelled can no longer record an RSVP to it.
+- **Daily exchange limit counts a rolling 24 hours, not a UTC calendar
+  bucket (Round-4 review).** The hard-stop `dailyHelperLimit` was
+  evaluated against a fixed UTC day, so a helper could hit the limit at
+  23:50 UTC and the limit again at 00:10 — double the cap in twenty
+  minutes, and the window reset mid-afternoon for a US-west community.
+  It now counts exchanges completed within the trailing 24 hours, which
+  the config field already described.
+
+### Fixed
+- **Disputes now resolve (Round-4 review).** Closing a dispute proposal
+  only stamped the proposal row; nothing transitioned the flagged post
+  out of `"disputed"`, so a REJECTED (baseless) dispute stranded the
+  post forever and permanently denied the helper credit. `closeProposal`
+  now applies the outcome to the post: rejected/withdrawn restores the
+  pre-dispute status (normal flow and credit resume); an upheld dispute
+  cancels a pre-completion post (no credit flows) and leaves an
+  already-completed one alone (credit is never reversed — see the new
+  `docs/dispute-resolution.md`). The `/disputes` list shows only OPEN
+  disputes, so a resolved one no longer renders a live "Flagged" chip
+  contradicting Profile's count. `castVote` refuses a vote on a closed
+  proposal.
+
+### Security
+- **A blocker can no longer pass a proposal over a hidden block vote
+  (Round-4 review).** The per-viewer governance-hide filter (`hideGovernance`)
+  also fed the auto-close eligibility math, so a member who hid a
+  blocking voter's vote computed "passes" and could close the proposal
+  over a standing block. Eligibility is now computed from the UNFILTERED
+  vote set, and `closeProposal` refuses to record "passed" while any
+  block vote stands (server-of-record) — a block changes what a member
+  SEES, never what they can ENACT (docs/blocking.md §6.3).
+
+### Fixed
+- **Block-filter leaks on deep-linked / project surfaces (Round-4
+  review).** A blocked organizer's event rendered in full via a direct
+  `/event/<id>` link (EventDetail read Dexie raw instead of the
+  block-filtered context); a blocked member's project announcements and
+  history-timeline rows rendered in ProjectDetail/TaskDetail unlike the
+  already-filtered task comments. All now honor the block filter. And a
+  project-adoption proposal about the viewer's OWN project is no longer
+  governance-hidden — the attention rail deep-links a sitting primary to
+  it to warn of a stewardship transfer, which they must be able to read
+  and contest.
+
+### Security
+- **Passphrase protection now covers keys minted after it was enabled
+  (Round-4 review).** `getSecretKey` returns any plaintext row before
+  checking the session lock, and new identities (invite-redeem mint,
+  device pairing) always wrote plaintext — so a key created after a
+  member enabled a passphrase sat readable in IndexedDB and the app
+  signed with it while nominally "locked". All secret-key writes now go
+  through a new `persistSecretKey`, which WRAPS the key under the live
+  session master key on a protected device. Device pairing was also
+  reworked: it resolves the protection state before writing (refusing
+  cleanly on a locked device instead of committing a plaintext key),
+  wraps the imported key under the EXISTING passphrase rather than
+  calling `enablePassphrase` (which rewrapped every identity under the
+  new member's passphrase, locking others out of their own keys), and
+  `softPurge` now clears `pairingLog` (device labels + pairing graph
+  survived a scrub). `randomBytes` fails closed when Web Crypto is
+  absent instead of silently using `Math.random()` for nonces/salts/
+  the transfer passphrase.
+
+### Fixed
+- **Device-pairing data-integrity fixes (Round-4 review).** A re-pair
+  now MERGES an existing member row's profile fields instead of a full
+  `createMember` replace that reset `seedBalance`/`createdAt`/`nodeId`
+  and silently changed the member's timebank balance across their own
+  devices. The imported block bundle is merged with per-pair dedup and
+  no longer resurrects a locally-unblocked pair or creates duplicate
+  block rows; `unblockMember` deletes ALL rows for a pair (not just the
+  first), so a duplicate could no longer leave someone "still blocked"
+  with nothing to unblock. `passphrase.unwrap` returns `null` on a
+  corrupt/truncated blob instead of throwing, so the unlock path
+  surfaces `wrong_passphrase` rather than crashing.
+
+### Security
+- **Only an event's organizer can cancel it (Round-4 review).** An
+  `EventCancellation` is signed, but its signature proves only that
+  *whoever* `createdBy` names signed it — not that they organize the
+  event. Nothing re-checked `createdBy === event.createdBy`, so anyone
+  could sign a cancellation over a victim's `eventId` with their own
+  key and make the gathering vanish from every calendar, the detail
+  page, "Coming up", and every RSVP'er's notifications. Every client
+  surface that renders cancellation state now re-asserts organizer
+  authority via a shared `isAuthoritativeCancellation` helper (a
+  non-organizer's cancellation is inert), the client federation pull
+  drops a mismatched cancellation when it already holds the event, and
+  the server peer-pull applies the same organizer check the POST route
+  already had — so a forged cancellation can't be laundered node to
+  node either.
+
+- **Auto-confirm can no longer mint credit against an arbitrary victim
+  (Round-4 review).** `POST /auto-confirm` was unauthenticated and took
+  the confirmation's `helpedKey`, `hours`, `category`, and pending-age
+  (`awaitingSince`) straight from the request body without consulting
+  any signed artifact — so a caller could get the node system key to
+  sign an exchange debiting anyone for any amount. The endpoint now
+  **binds** each post-based request to the poster-signed post it
+  finalizes: the confirmed-for party must be the real poster (helped
+  side of a NEED / helper side of an OFFER), and the hours and category
+  must match what the poster signed; unbindable project-task requests
+  (projects don't federate) are bounded by a generous hours cap.
+  `completedAt`/`awaitingSince` are also future-bounded. Two residuals
+  are documented honestly in `docs/auto-confirm-key.md` §5 and filed on
+  the roadmap: the age *window* stays client-advisory (the node holds
+  no signed awaiting-transition record), and the project-task path
+  stays an operator-trust surface — both closed by a future signed
+  awaiting-transition artifact.
+- **Anti-gaming safeguards now apply to auto-confirmed and project-task
+  exchanges.** `applyAutoConfirmedExchange` and `_writeTaskConfirmation`
+  previously skipped the short-duration / reciprocal-pattern / daily
+  hard-stop checks that the manual board path enforces, contradicting
+  `docs/auto-confirm-key.md`. They now evaluate the same safeguards and
+  **flag** (rather than throw — the row is already signed, so credit is
+  not discarded) any short/reciprocal/over-daily-limit pattern for
+  community review.
+
+
 ### Fixed
 - **Floating pill buttons no longer clipped by the bottom nav.** The
   BottomNav's height includes `env(safe-area-inset-bottom)` (the

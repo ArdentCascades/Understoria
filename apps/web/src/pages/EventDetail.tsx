@@ -24,6 +24,7 @@ import {
 } from "@/db/events";
 import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { getSecretKey } from "@/db/secrets";
+import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { humanizeError } from "@/lib/humanizeError";
 import { shortKey } from "@/lib/format";
 import { eventCategoryMeta } from "@/lib/categories";
@@ -61,14 +62,24 @@ export default function EventDetailPage() {
   // that used to dump members onto /calendar and lose the project.
   const goBack = useHistoryAwareBack("/calendar");
   const { t, i18n } = useTranslation();
-  const { currentMember, members, nodeId, lockState, projects } = useApp();
+  const { currentMember, members, nodeId, lockState, projects, blockedKeys } =
+    useApp();
   const { showToast } = useToast();
 
-  const event = useLiveQuery(
+  const rawEvent = useLiveQuery(
     () => (eventId ? getEvent(eventId) : Promise.resolve(null)),
     [eventId],
     undefined,
   );
+  // Gate visibility through the block filter (Round-4 review): a blocked
+  // organizer's event must render not-found on a deep link, the same way
+  // PostDetail resolves from the block-filtered context. `undefined` =
+  // still loading; `null` = filtered out / not found.
+  const event = useMemo(() => {
+    if (rawEvent === undefined) return undefined;
+    if (!rawEvent) return null;
+    return blockedKeys.has(rawEvent.createdBy) ? null : rawEvent;
+  }, [rawEvent, blockedKeys]);
   const cancellation = useLiveQuery(
     () =>
       eventId
@@ -140,7 +151,10 @@ export default function EventDetailPage() {
   }
 
   const isOrganizer = memberKey === event.createdBy;
-  const isCancelled = !!cancellation;
+  // A cancellation only counts if the organizer signed it — a
+  // non-organizer's forged cancellation must not mark the event
+  // cancelled (Round-4 review; lib/eventCancellation.ts).
+  const isCancelled = isAuthoritativeCancellation(cancellation, event);
   const organizerName = memberMap.get(event.createdBy) ?? null;
   // Only render the project back-link when BOTH the link row and the
   // project it points at exist locally. (The project always exists on

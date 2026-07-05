@@ -117,6 +117,7 @@ interface MockState {
   nodeId: string;
   lockState: "unprotected" | "locked" | "unlocked";
   projects: unknown[];
+  blockedKeys: ReadonlySet<string>;
 }
 
 let mockState: MockState;
@@ -133,6 +134,7 @@ function freshState(): MockState {
     nodeId,
     lockState: "unprotected",
     projects: [],
+    blockedKeys: new Set<string>(),
   };
 }
 

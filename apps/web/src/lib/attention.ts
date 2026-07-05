@@ -27,6 +27,7 @@ import type {
 import { canClaimTask, isOrganizer } from "@/db/projects";
 import type { SignedVouch } from "@/lib/vouch";
 import { startOfUTCDay } from "./calendar";
+import { isAuthoritativeCancellation } from "./eventCancellation";
 import { taskCheckInState } from "./taskCheckInState";
 
 // "Needs your attention" — things waiting on the current member to
@@ -596,17 +597,22 @@ export function computeAttentionItems(
   // (per §8 dismissal lifecycle) live in the same local-storage layer
   // the existing items use (we don't add new dismissal plumbing here).
   if (input.events && input.events.length > 0) {
+    const eventById = new Map<string, Event>();
+    for (const e of input.events) eventById.set(e.id, e);
+    // Only organizer-authored cancellations count — a non-organizer's
+    // forged cancellation must not suppress `event_today` nor raise a
+    // spurious `event_cancelled` (Round-4 review; lib/eventCancellation).
     const cancellationByEventId = new Map<string, EventCancellation>();
     for (const c of input.eventCancellations ?? []) {
-      cancellationByEventId.set(c.eventId, c);
+      if (isAuthoritativeCancellation(c, eventById.get(c.eventId))) {
+        cancellationByEventId.set(c.eventId, c);
+      }
     }
     const myRsvpByEventId = new Map<string, EventRsvpRow>();
     for (const r of input.eventRsvps ?? []) {
       if (r.memberKey !== currentMember.publicKey) continue;
       myRsvpByEventId.set(r.eventId, r);
     }
-    const eventById = new Map<string, Event>();
-    for (const e of input.events) eventById.set(e.id, e);
 
     const todayStart = startOfUTCDay(now);
     const todayEnd = todayStart + DAY_MS;
@@ -651,6 +657,9 @@ export function computeAttentionItems(
       // quietly — same shape as the coorg-invitation missing-project
       // branch above.
       if (!ev) continue;
+      // Authority binding: only the organizer's own cancellation raises
+      // this notice — a forged one must not alarm RSVP'ers (Round-4).
+      if (!isAuthoritativeCancellation(cancellation, ev)) continue;
       // PR F: skip cancellations of events organized by a blocked member.
       if (blockedKeys.has(ev.createdBy)) continue;
       items.push({

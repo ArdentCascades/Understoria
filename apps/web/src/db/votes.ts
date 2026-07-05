@@ -38,8 +38,18 @@ export async function castVote(input: CastVoteInput): Promise<Vote> {
     createdAt: Date.now(),
     nodeId: input.nodeId,
   };
-  await db.votes.put(row);
-  return row;
+  // Reject a vote on a closed proposal (Round-4 review): read the
+  // proposal in the same transaction and refuse if it is no longer
+  // open, so a stale second tab can't amend a sealed decision with a
+  // vote dated after `closedAt`.
+  return db.transaction("rw", [db.votes, db.proposals], async () => {
+    const proposal = await db.proposals.get(input.proposalId);
+    if (proposal && proposal.status !== "open") {
+      throw new Error("This proposal is closed — voting has ended.");
+    }
+    await db.votes.put(row);
+    return row;
+  });
 }
 
 export async function listVotesFor(proposalId: string): Promise<Vote[]> {

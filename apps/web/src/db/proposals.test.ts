@@ -11,6 +11,7 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "./database";
+import { castVote } from "./votes";
 import {
   buildDisputeProposal,
   closeProposal,
@@ -224,6 +225,31 @@ describe("closeProposal", () => {
     await expect(closeProposal("nope", "passed", "")).rejects.toThrow(
       /not found/i,
     );
+  });
+
+  it("refuses to close as PASSED while a standing block vote exists (Round-4 — decision math can't be censored by a viewer's block)", async () => {
+    const p = await createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey: PROPOSER,
+      nodeId: NODE,
+    });
+    await castVote({
+      proposalId: p.id,
+      voterKey: "blocker_key",
+      choice: "block",
+      nodeId: NODE,
+    });
+    await expect(closeProposal(p.id, "passed", "Consensus?")).rejects.toThrow(
+      /standing block/i,
+    );
+    // Rejected/withdrawn are unaffected — a block doesn't force passage,
+    // it only prevents it.
+    const closed = await closeProposal(p.id, "rejected", "sent back");
+    expect(closed.status).toBe("rejected");
   });
 });
 

@@ -79,8 +79,28 @@ export default function ProposalsPage() {
   // load-bearing system invariant from blocking.consumers.test.ts.
   const governanceFilteredProposals = useMemo(() => {
     if (governanceHiddenKeys.size === 0) return proposals;
-    return proposals.filter((p) => !governanceHiddenKeys.has(p.proposerKey));
-  }, [proposals, governanceHiddenKeys]);
+    const myKey = currentMember?.publicKey ?? null;
+    return proposals.filter((p) => {
+      if (!governanceHiddenKeys.has(p.proposerKey)) return true;
+      // Never governance-hide an adoption proposal that targets the
+      // VIEWER'S OWN project (Round-4 review, L6). The attention rail
+      // deep-links here to warn a sitting primary that a stewardship
+      // transfer is open "over their head"; hiding it because they
+      // blocked the proposer would blind them to a role transfer they
+      // must be able to read and contest — the notice window is
+      // load-bearing (docs/project-adoption.md). Its author is exposed
+      // only for this one proposal about the viewer.
+      if (p.category === "project_adoption" && myKey) {
+        try {
+          const payload = JSON.parse(p.payload) as { sittingPrimaryKey?: string };
+          if (payload.sittingPrimaryKey === myKey) return true;
+        } catch {
+          // fall through to the hide
+        }
+      }
+      return false;
+    });
+  }, [proposals, governanceHiddenKeys, currentMember]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return governanceFilteredProposals;
@@ -109,6 +129,23 @@ export default function ProposalsPage() {
     }
     return map;
   }, [votes, governanceHiddenKeys]);
+
+  // The DECISION vote set is UNFILTERED (Round-4 review). The
+  // governance-hide filter above is a per-viewer DISPLAY concern; it
+  // must never drive `autoCloseEligibility`, or a blocker could hide a
+  // block vote from their own view and then close the proposal as
+  // passed over it. A block changes what you SEE, not what you can
+  // ENACT (docs/blocking.md §6.3). `closeProposal` re-checks this
+  // server-of-record too.
+  const decisionVotesByProposal = useMemo(() => {
+    const map = new Map<string, Vote[]>();
+    for (const v of votes) {
+      const arr = map.get(v.proposalId) ?? [];
+      arr.push(v);
+      map.set(v.proposalId, arr);
+    }
+    return map;
+  }, [votes]);
 
   return (
     <div className="px-4 pb-8 pt-4">
@@ -188,9 +225,11 @@ export default function ProposalsPage() {
         <ul className="flex flex-col gap-3">
           {filtered.map((p) => {
             const proposalVotes = votesByProposal.get(p.id) ?? [];
+            // Eligibility is computed from the UNFILTERED decision set,
+            // never the viewer's display-filtered slice (Round-4).
             const eligibility = autoCloseEligibility({
               proposal: p,
-              votes: proposalVotes,
+              votes: decisionVotesByProposal.get(p.id) ?? [],
               config: nodeConfig,
             });
             return (

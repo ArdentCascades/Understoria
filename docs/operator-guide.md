@@ -259,7 +259,8 @@ Two things to know:
 | `PORT` | `8787` | TCP port |
 | `DATABASE_PATH` | `./understoria.db` (`/data/understoria.db` in Docker) | SQLite file |
 | `CORS_ORIGIN` | `*` | Set this to your PWA origin for production |
-| `RATE_LIMIT_MAX` | `60` | Per-bucket requests per minute |
+| `RATE_LIMIT_MAX` | `60` | Per-client requests per minute (see `TRUST_PROXY`) |
+| `TRUST_PROXY` | *(unset)* | Set to `loopback` when behind the Caddy reverse proxy above. WITHOUT it, every request arrives from the proxy's loopback address and all clients share ONE rate-limit bucket — one abuser then throttles the whole community. With it, the real client IP (hashed to a bucket, never stored raw) drives per-client limiting. Leave unset only if the node is exposed directly with no proxy. |
 | `LOG_LEVEL` | `info` | One of fatal/error/warn/info/debug/trace |
 | `LOG_REQUEST_PATHS` | `false` | Set to `true` ONLY during triage |
 | `NODE_ID` | `node_local` | Stable identifier for federation |

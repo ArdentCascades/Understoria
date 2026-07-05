@@ -66,10 +66,17 @@ export function utf8decode(bytes: Uint8Array): string {
 
 export function randomBytes(n: number): Uint8Array {
   const out = freshBytes(n);
-  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    crypto.getRandomValues(out);
-  } else {
-    for (let i = 0; i < n; i++) out[i] = Math.floor(Math.random() * 256);
+  if (typeof crypto === "undefined" || !crypto.getRandomValues) {
+    // FAIL CLOSED (Round-4 review). This helper backs every secretbox
+    // nonce, KDF salt, and the device-transfer passphrase; falling
+    // back to Math.random() (a non-cryptographic PRNG) would silently
+    // hand an attacker predictable nonces/salts and a guessable
+    // transfer passphrase. A runtime with no Web Crypto cannot safely
+    // generate any of them — throw, exactly as `getSubtle()` does.
+    throw new Error(
+      "Web Crypto (crypto.getRandomValues) is unavailable — cannot generate secure random bytes.",
+    );
   }
+  crypto.getRandomValues(out);
   return out;
 }

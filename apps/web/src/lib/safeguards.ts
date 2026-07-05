@@ -68,16 +68,41 @@ export function assertWithinDailyLimit(
   config: NodeConfig = DEFAULT_NODE_CONFIG,
 ): void {
   const limit = config.dailyHelperLimit;
-  const dayStart = Math.floor(now / MS_PER_DAY) * MS_PER_DAY;
+  // Rolling 24-hour window, not a fixed UTC calendar day (Round-4
+  // review). The config field documents "a 24-hour window", but a UTC
+  // bucket let a helper do `limit` exchanges at 23:50 UTC and `limit`
+  // more at 00:10 — double the hard stop in 20 minutes (and it reset
+  // mid-afternoon for a US-west community).
+  const windowStart = now - MS_PER_DAY;
   const count = existingExchanges.filter(
-    (x) =>
-      x.helperKey === helperKey &&
-      x.completedAt >= dayStart &&
-      x.completedAt < dayStart + MS_PER_DAY,
+    (x) => x.helperKey === helperKey && x.completedAt >= windowStart,
   ).length;
   if (count >= limit) {
     throw new DailyLimitExceededError(limit);
   }
+}
+
+/**
+ * Non-throwing daily-limit check for the auto-confirm path. A
+ * system-signed exchange is already built and signed by the time it
+ * reaches the client, so the hard-stop `assertWithinDailyLimit` (which
+ * throws) is wrong there — it would strand a valid node-signed row.
+ * Instead the sweep FLAGS an over-limit auto-confirm for review
+ * (`daily_limit_warning`), so the anti-gaming signal still surfaces
+ * without discarding credit the node legitimately confirmed.
+ */
+export function exceedsDailyLimit(
+  helperKey: string,
+  existingExchanges: readonly Exchange[],
+  now: number,
+  config: NodeConfig = DEFAULT_NODE_CONFIG,
+): boolean {
+  const limit = config.dailyHelperLimit;
+  const windowStart = now - MS_PER_DAY;
+  const count = existingExchanges.filter(
+    (x) => x.helperKey === helperKey && x.completedAt >= windowStart,
+  ).length;
+  return count >= limit;
 }
 
 export interface SafeguardEvaluation {

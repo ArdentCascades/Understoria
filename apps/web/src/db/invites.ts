@@ -31,7 +31,7 @@ import {
   decodeAndVerifyInvite,
   encodeInviteToken,
 } from "@/lib/invite";
-import { getSecretKey } from "./secrets";
+import { getSecretKey, persistSecretKey } from "./secrets";
 import {
   enqueueInviteRevocationOutbox,
   enqueueRedemptionReceiptOutbox,
@@ -361,11 +361,10 @@ export async function redeemInvite(
           nodeId,
         );
         // createMember skips secret-key generation when a publicKey
-        // is supplied, so we persist it explicitly.
-        await db.secretKeys.put({
-          publicKey: mintKp.publicKey,
-          secretKey: mintKp.secretKey,
-        });
+        // is supplied, so we persist it explicitly — through
+        // persistSecretKey, which WRAPS it on a protected device
+        // (Round-4 review).
+        await persistSecretKey(mintKp.publicKey, mintKp.secretKey);
       } else {
         m = attachedMember as Member;
       }

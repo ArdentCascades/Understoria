@@ -52,6 +52,12 @@ export default function DisputesPage() {
     () =>
       proposals
         .filter((p) => p.kind === "dispute")
+        // Only OPEN disputes are active flags (Round-4 review). A
+        // resolved dispute kept rendering a live "Flagged" chip here
+        // forever, contradicting Profile's DisputesSection, which
+        // counts only `status === "open"`. Resolved disputes remain
+        // visible with their outcome on the Decisions page.
+        .filter((p) => p.status === "open")
         .filter((p) => !governanceHiddenKeys.has(p.proposerKey))
         .sort((a, b) => b.createdAt - a.createdAt),
     [proposals, governanceHiddenKeys],

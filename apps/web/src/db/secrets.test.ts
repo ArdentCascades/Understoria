@@ -30,6 +30,7 @@ import {
   getSecretKey,
   isUnlocked,
   lockSession,
+  persistSecretKey,
   unlockSession,
 } from "./secrets";
 import {
@@ -37,6 +38,7 @@ import {
   confirmExchange,
   createPost,
 } from "./actions";
+import { generateKeyPair } from "@/lib/crypto";
 
 const NODE = "node_pass";
 
@@ -252,5 +254,40 @@ describe("signing flows with passphrase protection", () => {
         nodeId: NODE,
       }),
     ).rejects.toThrow(/locked/);
+  });
+});
+
+describe("persistSecretKey — wrap on write (Round-4)", () => {
+  beforeEach(reset);
+
+  it("wraps a key minted AFTER protection is enabled; it is unreadable while locked", async () => {
+    const { publicKey, secretKey } = generateKeyPair();
+    // Enable protection with one identity present.
+    await createMember({ displayName: "First" }, NODE);
+    await enablePassphrase("shared-passphrase");
+    // A second identity is minted while unlocked (invite-redeem / pair).
+    await persistSecretKey(publicKey, secretKey);
+
+    // The new row is WRAPPED, not plaintext.
+    const row = await db.secretKeys.get(publicKey);
+    expect(row?.secretKey).toBeUndefined();
+    expect(row?.wrapped).toBeDefined();
+
+    // While unlocked it reads back; after locking it does NOT (the old
+    // bug: getSecretKey returned a plaintext row regardless of lock).
+    expect(await getSecretKey(publicKey)).toBe(secretKey);
+    lockSession();
+    await expect(getSecretKey(publicKey)).rejects.toThrow(/locked/);
+    // And it re-unlocks with the shared passphrase.
+    await unlockSession("shared-passphrase");
+    expect(await getSecretKey(publicKey)).toBe(secretKey);
+  });
+
+  it("stores plaintext when the device is unprotected (unchanged default)", async () => {
+    const { publicKey, secretKey } = generateKeyPair();
+    await persistSecretKey(publicKey, secretKey);
+    const row = await db.secretKeys.get(publicKey);
+    expect(row?.secretKey).toBe(secretKey);
+    expect(row?.wrapped).toBeUndefined();
   });
 });

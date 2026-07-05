@@ -29,6 +29,7 @@ import type {
   Project,
   ProjectCategory,
 } from "@/types";
+import { authoritativeCancelledEventIds } from "./eventCancellation";
 
 /**
  * Community calendar data layer — aggregates date-shaped fields from
@@ -278,8 +279,13 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   // The window check is per-day below — an event that began before
   // `windowStart` but continues into the window still surfaces its
   // in-window days.
-  const cancelledIds = new Set<string>();
-  for (const c of input.eventCancellations ?? []) cancelledIds.add(c.eventId);
+  // Only AUTHORITATIVE cancellations (signed by the event's organizer)
+  // hide an event — a non-organizer's forged cancellation is inert
+  // (Round-4 review; lib/eventCancellation.ts).
+  const cancelledIds = authoritativeCancelledEventIds(
+    input.events ?? [],
+    input.eventCancellations ?? [],
+  );
   // The viewer's OWN "going" events — read only when we know who the
   // viewer is. Never another member's status; never a count.
   const viewerGoingIds = new Set<string>();

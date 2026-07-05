@@ -306,11 +306,30 @@ export async function closeProposal(
   outcome: "passed" | "rejected" | "withdrawn",
   reason: string,
 ): Promise<Proposal> {
-  return db.transaction("rw", db.proposals, async () => {
+  return db.transaction("rw", [db.proposals, db.votes, db.posts], async () => {
     const proposal = await db.proposals.get(proposalId);
     if (!proposal) throw new Error("Proposal not found");
     if (proposal.status !== "open") {
       throw new Error("Proposal is already closed");
+    }
+    // Server-of-record guard (Round-4 review): a proposal cannot be
+    // recorded as PASSED while any standing block vote exists — one
+    // block stops passage under modified consensus (GOVERNANCE.md §2).
+    // This runs on the FULL vote set, so the close decision can never
+    // depend on the closer's per-viewer governance filter — a block
+    // must change what a blocker SEES, not what they can ENACT
+    // (docs/blocking.md §6.3).
+    if (outcome === "passed") {
+      const blocked = await db.votes
+        .where("proposalId")
+        .equals(proposalId)
+        .filter((v) => v.choice === "block")
+        .count();
+      if (blocked > 0) {
+        throw new Error(
+          "This proposal has a standing block and cannot be closed as passed.",
+        );
+      }
     }
     const updated: Proposal = {
       ...proposal,
@@ -319,6 +338,37 @@ export async function closeProposal(
       closedReason: reason.trim() || null,
     };
     await db.proposals.put(updated);
+
+    // Apply a dispute outcome back to the flagged post (Round-4 review).
+    // Before this, closing a dispute proposal only stamped the proposal
+    // row and the post stayed "disputed" forever — so a REJECTED
+    // (baseless) dispute permanently denied the helper credit. Now:
+    //   - rejected / withdrawn → the flag did not stand: restore the
+    //     post to its pre-dispute status so the normal flow (and credit)
+    //     resumes.
+    //   - passed (upheld) → the exchange is repudiated. Credit is NEVER
+    //     reversed (docs/invite-redemption.md §2 / the never-reverse-
+    //     credit principle), so a post that had already COMPLETED stays
+    //     completed (the dispute record is the accountability signal);
+    //     a pre-completion post is cancelled so credit never flows.
+    if (proposal.kind === "dispute" && proposal.disputePostId) {
+      const post = await db.posts.get(proposal.disputePostId);
+      if (post && post.status === "disputed") {
+        const prior = post.preDisputeStatus ?? "claimed";
+        const nextStatus =
+          outcome === "passed"
+            ? prior === "completed"
+              ? "completed"
+              : "cancelled"
+            : prior;
+        await db.posts.put({
+          ...post,
+          status: nextStatus,
+          preDisputeStatus: null,
+        });
+      }
+    }
+
     return updated;
   });
 }

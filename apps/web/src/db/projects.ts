@@ -24,6 +24,8 @@ import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
 import { enqueueExchangeOutbox, flushOutboxNow } from "@/lib/outbox";
 import { diffAchievements } from "@/lib/achievements";
+import { evaluateSafeguards, exceedsDailyLimit } from "@/lib/safeguards";
+import { getNodeConfig } from "./nodeConfig";
 import { creditHoursForTask } from "@/lib/timebank";
 import type {
   Exchange,
@@ -875,6 +877,11 @@ async function _writeTaskConfirmation(
   input: WriteTaskConfirmationInput,
 ): Promise<ConfirmTaskResult> {
   const { task, project, exchange, organizerKey, now, acknowledgment } = input;
+  // nodeConfig lives in `db.nodeConfig`, which is NOT in the
+  // transaction scope below — read it BEFORE opening the transaction
+  // (awaiting an out-of-scope read inside a Dexie transaction commits
+  // it early and would break the double-credit re-read guard).
+  const nodeConfig = await getNodeConfig(exchange.nodeId);
   return db.transaction(
     "rw",
     [
@@ -918,8 +925,46 @@ async function _writeTaskConfirmation(
       const freshProject = await db.projects.get(project.id);
       if (!freshProject) throw new Error("Parent project not found.");
 
-      await db.exchanges.put(exchange);
-      await enqueueExchangeOutbox(exchange);
+      // Anti-gaming safeguards apply to project-task exchanges too
+      // (Round-4 review): the completer's task credit was escaping the
+      // short-duration / reciprocal / daily-limit checks that the
+      // board exchange path enforces. We FLAG rather than throw here —
+      // the exchange is already signed (member- or system-side), and a
+      // hard stop would block a legitimate organizer confirmation just
+      // because the completer hit a limit elsewhere. Flag fields sit
+      // outside the canonical payload, so the signature is untouched.
+      const priorExchanges = await db.exchanges.toArray();
+      const safeguard = evaluateSafeguards(
+        {
+          helperKey: exchange.helperKey,
+          helpedKey: exchange.helpedKey,
+          hoursExchanged: exchange.hoursExchanged,
+          completedAt: exchange.completedAt,
+        },
+        priorExchanges,
+        nodeConfig,
+      );
+      const overLimit = exceedsDailyLimit(
+        exchange.helperKey,
+        priorExchanges,
+        now,
+        nodeConfig,
+      );
+      const flagged =
+        exchange.flaggedForReview || safeguard.flaggedForReview || overLimit;
+      const exchangeToStore: Exchange = flagged
+        ? {
+            ...exchange,
+            flaggedForReview: true,
+            flagReason:
+              exchange.flagReason ??
+              safeguard.flagReason ??
+              (overLimit ? "daily_limit_warning" : undefined),
+          }
+        : exchange;
+
+      await db.exchanges.put(exchangeToStore);
+      await enqueueExchangeOutbox(exchangeToStore);
 
       const updatedTask: ProjectTask = {
         ...freshTask,
@@ -1035,7 +1080,7 @@ async function _writeTaskConfirmation(
       return {
         task: updatedTask,
         project: updatedProject,
-        exchange,
+        exchange: exchangeToStore,
         milestonesReached: milestones,
       };
     },

@@ -297,10 +297,40 @@ not skip it on a re-read.
 
 ### What the key *cannot* do
 
-- **Invent exchanges.** The helper's signature on the canonical
-  completion payload is required to reach `awaiting_confirmation`
-  in the first place. The system key cannot synthesize a record;
-  it can only finalize one that a member already started.
+> **Round-4 correction — read this first.** The guarantees below were
+> originally argued from the *honest sweep's* behavior, but the
+> `POST /auto-confirm` endpoint is unauthenticated and takes the
+> confirmation's fields (`helpedKey`, `hours`, `category`, and the age
+> via `awaitingSince`) from the request body. As first shipped it did
+> not consult any signed artifact, so a caller could mint a
+> node-signed exchange debiting an arbitrary victim for arbitrary
+> hours. That hole is now closed by **authority binding**
+> (`routes/autoConfirm.ts` `bindToPost`): for a real post the endpoint
+> requires the poster-signed post to exist and the confirmed-for party
+> (helped side of a NEED, helper side of an OFFER), the hours, and the
+> category to MATCH what the poster signed. The claims below hold
+> *given that binding*. Two residuals remain, named honestly:
+>
+> - **The time window is advisory, not enforced.** `awaitingSince` is
+>   client-supplied and the node holds no signed record of when a post
+>   entered `awaiting_confirmation` (that transition is PWA-local), so
+>   a caller can always claim an old value to pass the window. The
+>   real gates are the post-binding, the safeguards flags, and
+>   dispute. Making the window itself enforceable needs a signed
+>   awaiting-transition artifact — a roadmap deferred item.
+> - **Project-task auto-confirms can't be bound.** Projects are
+>   local-only and don't federate (`threat-model.md` §7), so the node
+>   holds no artifact for a `project:<id>/task:<id>` request. That path
+>   is bounded only by a generous hours cap and remains an
+>   operator-trust surface; the deferred artifact would cover it too.
+
+- **Invent exchanges against an arbitrary victim.** With `bindToPost`,
+  a post-based confirmation can only name as the confirmed-for party
+  the actual poster of a real, poster-signed post — the system key
+  cannot fabricate a debit against someone who never posted. (The
+  claimer side stays unverifiable — claims are unsigned — so a bogus
+  *claim* of a real post is still possible; that is the attributable,
+  disputable, safeguard-flagged residual, not a silent forgery.)
 
 - **Change category, hours, parties, or completion time.** All
   five fields are inside the canonical payload signed by the
@@ -313,10 +343,11 @@ not skip it on a re-read.
   redirect a confirmation to a different `helpedKey`; that field
   is signed by the helper.
 
-- **Confirm on a member's behalf without that member's prior
-  action.** A member who never claimed, never participated, never
-  appeared in a payload cannot have an exchange attributed to them
-  by the system key alone.
+- **Confirm on a member's behalf without a poster-signed post.** With
+  `bindToPost`, the confirmed-for party must be the poster of a real
+  signed post; a member who never posted cannot be debited by the
+  system key. (Before the Round-4 binding this was NOT true for the
+  raw endpoint — it is now.)
 
 - **Act on records older than what an honest sweep would touch.**
   The sweep operates on `awaiting_confirmation` records. An

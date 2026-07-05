@@ -1870,6 +1870,7 @@ describe("pullEventCancellationsFromPeer", () => {
       since: null,
       fetcher,
       store,
+      eventStore: createEventStore(db),
     });
     expect(result.kind).toBe("event_cancellation");
     expect(result.insertedCount).toBe(2);
@@ -1900,6 +1901,7 @@ describe("pullEventCancellationsFromPeer", () => {
       since: null,
       fetcher,
       store,
+      eventStore: createEventStore(db),
     });
     expect(result.insertedCount).toBe(1);
     expect(result.rejectedCount).toBe(1);
@@ -1923,6 +1925,7 @@ describe("pullEventCancellationsFromPeer", () => {
       since: null,
       fetcher,
       store,
+      eventStore: createEventStore(db),
     });
     expect(result.insertedCount).toBe(0);
     expect(result.duplicateCount).toBe(1);
@@ -1952,6 +1955,7 @@ describe("pullEventCancellationsFromPeer", () => {
       since: null,
       fetcher,
       store,
+      eventStore: createEventStore(db),
     });
     expect(result.insertedCount).toBe(0);
     expect(result.duplicateCount).toBe(1);
@@ -1971,8 +1975,55 @@ describe("pullEventCancellationsFromPeer", () => {
       since: 9001,
       fetcher,
       store,
+      eventStore: createEventStore(db),
     });
     expect(seen[0]).toMatch(/\/event-cancellations\?/);
     expect(seen[0]).toContain("since=9001");
+  });
+
+  it("rejects a forged cancellation whose createdBy is NOT the local event's organizer (Round-4 authority binding)", async () => {
+    const store = createEventCancellationStore(db);
+    const eventStore = createEventStore(db);
+    const organizer = generateKeyPair();
+    const attacker = generateKeyPair();
+    // The real event is on this node.
+    const event = makeSignedEventForPull({
+      id: "ev_victim",
+      organizer,
+      createdAt: 100,
+    });
+    eventStore.insert(event);
+    // The attacker signs a cancellation over the victim's event.
+    const forged = makeSignedCancellationForPull({
+      eventId: "ev_victim",
+      organizer: attacker,
+      cancelledAt: 500,
+    });
+    const fetcher: Fetcher = () =>
+      jsonResponse({ count: 1, eventCancellations: [forged] });
+    const result = await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher,
+      store,
+      eventStore,
+    });
+    expect(result.insertedCount).toBe(0);
+    expect(result.rejectedCount).toBe(1);
+    expect(store.count()).toBe(0);
+    // The genuine organizer's cancellation for the same event is accepted.
+    const genuine = makeSignedCancellationForPull({
+      eventId: "ev_victim",
+      organizer,
+      cancelledAt: 600,
+    });
+    const result2 = await pullEventCancellationsFromPeer({
+      peerUrl: "https://peer.example",
+      since: null,
+      fetcher: () => jsonResponse({ count: 1, eventCancellations: [genuine] }),
+      store,
+      eventStore,
+    });
+    expect(result2.insertedCount).toBe(1);
   });
 });
