@@ -70,7 +70,7 @@ export async function registerPostRoutes(
     return { stored: true, id: record.id };
   });
 
-  app.get<{ Querystring: { since?: string; limit?: string } }>(
+  app.get<{ Querystring: { since?: string; sinceId?: string; limit?: string } }>(
     "/posts",
     async (req) => {
       const since = req.query.since
@@ -87,7 +87,14 @@ export async function registerPostRoutes(
         limit !== undefined && Number.isFinite(limit) && limit > 0
           ? limit
           : undefined;
-      const posts = store.list({ since: safeSince, limit: safeLimit });
+      // Composite pair cursor (docs/composite-federation-cursors.md §2):
+      // strictly-after-(since,sinceId) paging when both are present;
+      // ignored without `since`, so it degrades to the legacy cursor.
+      const safeSinceId =
+        req.query.sinceId && req.query.sinceId.length > 0
+          ? req.query.sinceId
+          : undefined;
+      const posts = store.list({ since: safeSince, sinceId: safeSinceId, limit: safeLimit });
       return { count: posts.length, posts };
     },
   );
