@@ -118,6 +118,66 @@ describe("pullFederatedExchanges", () => {
     expect(await db.exchanges.get("bad_1")).toBeUndefined();
   });
 
+  it("a rejected row never advances the cursor (forged far-future completedAt cannot wedge the pull)", async () => {
+    // The MITM/compromised-node wedge: one forged row with an
+    // attacker-chosen far-future completedAt used to jump the
+    // persisted high-water mark past every legitimate later exchange.
+    const poison = makeSignedExchange({
+      id: "poison_1",
+      nodeId: "peer_node",
+      completedAt: 5000, // in-bounds; the SIGNATURE is what fails
+    });
+    poison.helperSignature = sign("tampered", generateKeyPair().secretKey);
+    const good = makeSignedExchange({
+      id: "good_1",
+      nodeId: "peer_node",
+      completedAt: 1000,
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ exchanges: [poison, good] }),
+      }),
+    );
+    const result = await pullFederatedExchanges();
+    expect(result).toEqual({ inserted: 1, skipped: 1 });
+    // Cursor reflects the GOOD row only — the rejected row left no mark.
+    expect(await getSetting(SETTING_KEYS.federationLastExchangePull)).toBe(
+      "1000",
+    );
+  });
+
+  it("skips a validly-signed fabricated row whose completedAt is implausibly far in the future, without advancing the cursor", async () => {
+    // A malicious node does not need its store: it can invent
+    // keypairs and serve a self-consistent signed exchange with
+    // completedAt in the far future. The timestamp bound is the only
+    // defense for that shape.
+    const fabricated = makeSignedExchange({
+      id: "fab_1",
+      nodeId: "peer_node",
+      completedAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    });
+    const good = makeSignedExchange({
+      id: "good_2",
+      nodeId: "peer_node",
+      completedAt: 1234,
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ exchanges: [fabricated, good] }),
+      }),
+    );
+    const result = await pullFederatedExchanges();
+    expect(result).toEqual({ inserted: 1, skipped: 1 });
+    expect(await db.exchanges.get("fab_1")).toBeUndefined();
+    expect(await getSetting(SETTING_KEYS.federationLastExchangePull)).toBe(
+      "1234",
+    );
+  });
+
   it("dedups on id across repeated pulls (idempotent)", async () => {
     const peer = makeSignedExchange({
       id: "peer_dup",
@@ -460,6 +520,36 @@ describe("pullFederatedCoOrgInvitations", () => {
     const result = await pullFederatedCoOrgInvitations();
     expect(result).toEqual({ inserted: 0, skipped: 1 });
     expect(await db.coorgInvitations.get("ci_bad")).toBeUndefined();
+  });
+
+  it("a rejected row never advances the cursor; an implausible far-future createdAt is skipped outright", async () => {
+    // Same wedge class as the exchanges pull: who-holds-project-
+    // authority records must not be freezable by one forged row.
+    const forged = makeSignedCoOrgInvitation({
+      id: "ci_forged",
+      createdAt: 900,
+    });
+    forged.signature = sign("tampered", generateKeyPair().secretKey);
+    const fabricated = makeSignedCoOrgInvitation({
+      id: "ci_future",
+      createdAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    });
+    const good = makeSignedCoOrgInvitation({ id: "ci_good", createdAt: 400 });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          coorgInvitations: [forged, fabricated, good],
+        }),
+      }),
+    );
+    const result = await pullFederatedCoOrgInvitations();
+    expect(result).toEqual({ inserted: 1, skipped: 2 });
+    expect(await db.coorgInvitations.get("ci_future")).toBeUndefined();
+    expect(
+      await getSetting(SETTING_KEYS.federationLastCoOrgInvitationPull),
+    ).toBe("400");
   });
 
   it("dedupes on id across repeated pulls", async () => {
