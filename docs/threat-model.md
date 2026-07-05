@@ -975,40 +975,56 @@ We are not trying to protect against:
   its own entry that supersedes this paragraph for those
   specific routes.
 
-- **Node system key for auto-confirmation (design only; not yet
-  shipped).** A per-node Ed25519 signing key, held by the node
-  operator, will sign the helped-side signature on `Exchange`
-  records when neither party has confirmed within a community-
-  configured window (default proposal: 7 days; `0` disables).
-  Introduced because today an unresponsive partner blocks credit
-  permanently, and the project-task confirmation flow deliberately
-  forbids the completer from confirming themselves
-  (`apps/web/src/db/projects.ts` ~line 600) — so for organizer-
-  is-completer tasks with no co-organizer, credit cannot flow at
-  all. This is **the closest the codebase has to admin authority**,
-  and the design doc (`auto-confirm-key.md`) does not soften that.
-  What makes it acceptable is the bound: the key only signs
-  records the helper has already signed (cannot invent exchanges),
-  cannot modify hours / category / parties / completion time (all
-  inside the helper's signed canonical payload), and every record
-  it touches is audit-tagged (`autoConfirmed: true`, `confirmedBy:
-  "system:<nodeId>"`) so any verifier can distinguish a system-
-  signed auto-confirm from a member-signed mutual confirm. The
-  threshold is community-configurable through the existing Agent
-  11 / Agent 13 surfaces, including `0 = off`.
-  Accepted residual risks: the operator can change the threshold
-  to fire earlier than the community expects (detectable post-hoc
-  by comparing `autoConfirmedAt` to the original
-  `awaiting_confirmation` transition); the operator can refuse to
-  run the sweep entirely, which is a denial-of-service against
-  credit flow but is equivalent to today's status quo where
-  unresponsive partners block credit forever; the operator can
-  collude with a member who files bogus completions, but the
-  helper's signature is still on the bogus record so the
-  attribution is public and the existing safeguards module still
-  applies. Full abuse model: `auto-confirm-key.md` §5. Until that
-  PR lands, no system key exists in the codebase and this entry
-  tracks design intent only.
+- **Node system key for auto-confirmation.**
+  *Shipped — `apps/server/src/systemSigner.ts`, the
+  `NODE_SYSTEM_SECRET_KEY` / `AUTO_CONFIRM_MIN_HOURS` env config
+  (absent/`0` = off, and the server warns loudly when a window is
+  configured with no key), the sweep, the `GET /api/config`
+  advertisement of `systemKey.current` + the `NODE_SYSTEM_KEY_HISTORY`
+  rotation trail + `nodeId`, and the peer-side verification chain in
+  `peerPull.ts`. Operator procedure: `docs/system-key-rotation.md`;
+  design + abuse model: `auto-confirm-key.md` §5.* A per-node Ed25519
+  signing key, held by the node operator, signs the helped-side
+  signature on `Exchange` records when neither party has confirmed
+  within the configured window. Introduced because an unresponsive
+  partner otherwise blocks credit permanently, and the project-task
+  confirmation flow deliberately forbids the completer from
+  confirming themselves — so for organizer-is-completer tasks with
+  no co-organizer, credit could not flow at all. This is **the
+  closest the codebase has to admin authority**, and the design doc
+  does not soften that. What makes it acceptable is the bound: the
+  key only signs records the helper has already signed (cannot
+  invent exchanges), cannot modify hours / category / parties /
+  completion time (all inside the helper's signed canonical
+  payload), and every record it touches is audit-tagged
+  (`autoConfirmed: true`, `autoConfirmedBy: "system:<nodeId>"`,
+  `autoConfirmedAt`) so any verifier can distinguish a system-signed
+  auto-confirm from a member-signed mutual confirm.
+  Verification chain as shipped (hardened across review rounds 2–3):
+  peers verify every auto-confirmed row STRICTLY on ingestion
+  against the key the claimed node advertises — what cannot be
+  verified is rejected, never relayed; key selection is
+  rotation-aware (the key current at the record's `autoConfirmedAt`,
+  from the published history); nodeId conflicts fail closed on the
+  FULL key material — a second peer claiming the same nodeId with a
+  different `current` key *or a different rotation history* poisons
+  resolution for that nodeId into a visible denial (`current` is
+  public and can be echoed; a forged history entry was the smuggling
+  path), and peer-served `retiredAt` values are bounded at parse
+  (past events; one day of skew).
+  Accepted residual risks, updated: a leaked *retired* key can still
+  sign a **backdated** record (`autoConfirmedAt` before `retiredAt`)
+  — the attacker controls both the key and the self-declared
+  timestamp, so signing the timestamp would not help; treat a leaked
+  system key as a governance incident (`system-key-rotation.md` §1),
+  with receive-time retirement enforcement tracked as the closing
+  fix (roadmap deferred row). The operator can fire the threshold
+  earlier than the community expects (detectable post-hoc against
+  the `awaiting_confirmation` transition); can refuse to run the
+  sweep (a credit-flow denial equivalent to the pre-feature status
+  quo); can collude with a member filing bogus completions — but the
+  helper's signature stays on the record, so attribution is public
+  and the safeguards module still applies.
 
 - **`ProjectTask.orderIndex` and `dependencies` remain local;
   widening would need a wire-surface review.**

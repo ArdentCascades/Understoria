@@ -153,13 +153,20 @@ failure and retries next cycle; its cursor does not move, so nothing
 is skipped.
 
 Peers also **fail closed on a nodeId conflict**: if two different
-peer URLs both claim to be your `nodeId` with different keys (an
+peer URLs both claim to be your `nodeId` with different key material
+— a different `current` key **or a different rotation history** (an
 impersonation attempt, or the same node listed under two URLs by
 mistake), the resolver refuses to verify *any* record for that
-nodeId until the operator resolves the conflict. A key legitimately
-comes from the one peer that IS that node, so a second claimant is
-never authoritative — the ambiguity downgrades a would-be forgery to
-a visible denial.
+nodeId until the operator resolves the conflict. The history must
+agree because `current` is public: an impostor can echo it verbatim
+and smuggle its own key inside a forged history entry, so any
+divergence in the published trail is the same ambiguity as a
+divergent current key. (Peer-served `retiredAt` values are also
+bounded at ingestion — a retirement is a past event, so entries more
+than a day in the future are dropped before they reach the
+resolver.) A key legitimately comes from the one peer that IS that
+node, so a second claimant is never authoritative — the ambiguity
+downgrades a would-be forgery to a visible denial.
 
 ## 5. Edge cases
 
