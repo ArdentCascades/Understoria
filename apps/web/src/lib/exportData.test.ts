@@ -19,6 +19,8 @@ async function reset() {
     db.secretKeys.clear(),
     db.blocks.clear(),
     db.previouslyBlocked.clear(),
+    db.eventRsvps.clear(),
+    db.eventProjectLinks.clear(),
   ]);
 }
 
@@ -47,11 +49,29 @@ describe("buildExportBundle excludes local-only privacy tables", () => {
       blockerKey: "alice_key",
       blockedKey: "carol_key",
     });
+    // The attendance graph + the local-project pointer — both declared
+    // never-exported by the schema (docs/community-events.md §4.2/§7).
+    await db.eventRsvps.put({
+      id: "rsvp_export_1",
+      eventId: "evt_export",
+      memberKey: "rsvp_member_key",
+      status: "going",
+      respondedAt: 111,
+    });
+    await db.eventProjectLinks.put({
+      id: "epl_export_1",
+      eventId: "evt_export",
+      projectId: "local_project_ptr",
+      linkedBy: "linker_key",
+      createdAt: 222,
+    });
 
     // Sanity: the rows we just populated really are there before export.
     expect(await db.secretKeys.count()).toBeGreaterThan(0);
     expect(await db.blocks.count()).toBeGreaterThan(0);
     expect(await db.previouslyBlocked.count()).toBeGreaterThan(0);
+    expect(await db.eventRsvps.count()).toBeGreaterThan(0);
+    expect(await db.eventProjectLinks.count()).toBeGreaterThan(0);
 
     const bundle = await buildExportBundle();
     const json = JSON.stringify(bundle);
@@ -69,6 +89,8 @@ describe("buildExportBundle excludes local-only privacy tables", () => {
     expect(json).not.toContain("carol_key");
     expect(json).not.toContain("secret note");
     expect(json).not.toContain("secret_seckey");
+    expect(json).not.toContain("rsvp_member_key");
+    expect(json).not.toContain("local_project_ptr");
   });
 
   it("declares the excluded table list (lock the exclusion in code)", () => {
@@ -77,6 +99,8 @@ describe("buildExportBundle excludes local-only privacy tables", () => {
     expect(EXPORT_EXCLUDED_TABLES).toContain("previouslyBlocked");
     expect(EXPORT_EXCLUDED_TABLES).toContain("invites");
     expect(EXPORT_EXCLUDED_TABLES).toContain("pairingLog");
+    expect(EXPORT_EXCLUDED_TABLES).toContain("eventRsvps");
+    expect(EXPORT_EXCLUDED_TABLES).toContain("eventProjectLinks");
   });
 
   it("exports EVERY table that is not explicitly excluded (no silent drift)", () => {

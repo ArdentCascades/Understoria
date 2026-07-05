@@ -280,6 +280,13 @@ describe("softPurge covers member-authored content tables", () => {
       status: "going",
       updatedAt: 1,
     } as never);
+    await db.eventProjectLinks.put({
+      id: "epl_1",
+      eventId: "ev_1",
+      projectId: "proj_local",
+      linkedBy: "pk_a",
+      createdAt: 1,
+    } as never);
     await db.outbox.put({
       id: "ob_1",
       kind: "post",
@@ -392,6 +399,7 @@ describe("softPurge covers member-authored content tables", () => {
     expect(await db.messages.count()).toBe(0);
     expect(await db.drafts.count()).toBe(0);
     expect(await db.eventRsvps.count()).toBe(0);
+    expect(await db.eventProjectLinks.count()).toBe(0);
     expect(await db.outbox.count()).toBe(0);
     expect(await db.invites.count()).toBe(0);
     expect(await db.votes.count()).toBe(0);
@@ -409,6 +417,7 @@ describe("softPurge covers member-authored content tables", () => {
       "drafts",
       "events",
       "eventRsvps",
+      "eventProjectLinks",
       "eventCancellations",
       "proposals",
       "projectActivity",
