@@ -100,6 +100,11 @@ export interface PostStore {
   list(opts?: { since?: number; limit?: number }): PostRecord[];
   count(): number;
   has(id: string): boolean;
+  /** The stored post for `id`, or null. Used by /auto-confirm to bind
+   *  a system-signed confirmation to the poster-signed post it claims
+   *  to finalize (roles / hours / category), so the system key can
+   *  never confirm a fabricated exchange against an arbitrary victim. */
+  get(id: string): PostRecord | null;
 }
 
 /**
@@ -959,6 +964,7 @@ export function createPostStore(db: DatabaseType): PostStore {
     )
   `);
   const hasStmt = db.prepare("SELECT 1 FROM posts WHERE id = ?");
+  const getStmt = db.prepare("SELECT * FROM posts WHERE id = ?");
   const countStmt = db.prepare("SELECT COUNT(*) AS n FROM posts");
 
   return {
@@ -1004,6 +1010,10 @@ export function createPostStore(db: DatabaseType): PostStore {
     },
     has(id) {
       return hasStmt.get(id) !== undefined;
+    },
+    get(id) {
+      const row = getStmt.get(id) as PostRowSqlite | undefined;
+      return row ? rowToPost(row) : null;
     },
   };
 }

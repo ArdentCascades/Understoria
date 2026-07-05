@@ -212,6 +212,7 @@ export async function buildServer({
   await registerConfigRoutes(app, { config, signer });
   await registerAutoConfirmRoutes(app, {
     store,
+    postStore,
     signer,
     nodeId: config.nodeId,
     autoConfirmMinHours: config.autoConfirmMinHours,

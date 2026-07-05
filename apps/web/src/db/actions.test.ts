@@ -20,12 +20,14 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  applyAutoConfirmedExchange,
   cancelPost,
   claimPost,
   confirmExchange,
   createPost,
   disputeExchange,
 } from "./actions";
+import type { Exchange } from "@/types";
 import { db } from "./database";
 import { createMember } from "./seed";
 import { writeSubmitConfig } from "@/lib/nodeSubmit";
@@ -252,6 +254,52 @@ describe("exchange flow (integration)", () => {
     const [exchange] = await db.exchanges.toArray();
     expect(exchange.flaggedForReview).toBe(true);
     expect(exchange.flagReason).toBe("short_duration");
+  });
+
+  it("flags an auto-confirmed short exchange for review (safeguards apply on the auto-confirm path)", async () => {
+    // Round-4: applyAutoConfirmedExchange previously skipped the
+    // safeguards entirely. A short-duration auto-confirm must still be
+    // flagged — without throwing, since the row is already node-signed.
+    const a = await createMember({ displayName: "A" }, NODE);
+    const b = await createMember({ displayName: "B" }, NODE);
+    const post = await createPost(
+      a.publicKey,
+      "",
+      {
+        type: "NEED",
+        category: "emotional_support",
+        title: "quick check-in",
+        description: "",
+        estimatedHours: 0.1,
+        urgency: "low",
+        expiresAt: null,
+      },
+      NODE,
+    );
+    await claimPost(post.id, b.publicKey);
+    // One party confirms → awaiting_confirmation.
+    await confirmExchange(post.id, a.publicKey, NODE);
+
+    const systemExchange: Exchange = {
+      id: "ex_auto_short",
+      postId: post.id,
+      helperKey: b.publicKey,
+      helpedKey: a.publicKey,
+      hoursExchanged: 0.1,
+      helperSignature: "sig_helper",
+      helpedSignature: "sig_system",
+      completedAt: Date.now(),
+      category: "emotional_support",
+      nodeId: NODE,
+      autoConfirmed: true,
+      autoConfirmedBy: `system:${NODE}`,
+      autoConfirmedAt: Date.now(),
+    };
+    const { exchange } = await applyAutoConfirmedExchange(post.id, systemExchange);
+    expect(exchange.flaggedForReview).toBe(true);
+    expect(exchange.flagReason).toBe("short_duration");
+    const stored = await db.exchanges.get("ex_auto_short");
+    expect(stored?.flaggedForReview).toBe(true);
   });
 
   it("flags disputed exchanges without transferring credit", async () => {

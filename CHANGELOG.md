@@ -9,6 +9,34 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **Auto-confirm can no longer mint credit against an arbitrary victim
+  (Round-4 review).** `POST /auto-confirm` was unauthenticated and took
+  the confirmation's `helpedKey`, `hours`, `category`, and pending-age
+  (`awaitingSince`) straight from the request body without consulting
+  any signed artifact — so a caller could get the node system key to
+  sign an exchange debiting anyone for any amount. The endpoint now
+  **binds** each post-based request to the poster-signed post it
+  finalizes: the confirmed-for party must be the real poster (helped
+  side of a NEED / helper side of an OFFER), and the hours and category
+  must match what the poster signed; unbindable project-task requests
+  (projects don't federate) are bounded by a generous hours cap.
+  `completedAt`/`awaitingSince` are also future-bounded. Two residuals
+  are documented honestly in `docs/auto-confirm-key.md` §5 and filed on
+  the roadmap: the age *window* stays client-advisory (the node holds
+  no signed awaiting-transition record), and the project-task path
+  stays an operator-trust surface — both closed by a future signed
+  awaiting-transition artifact.
+- **Anti-gaming safeguards now apply to auto-confirmed and project-task
+  exchanges.** `applyAutoConfirmedExchange` and `_writeTaskConfirmation`
+  previously skipped the short-duration / reciprocal-pattern / daily
+  hard-stop checks that the manual board path enforces, contradicting
+  `docs/auto-confirm-key.md`. They now evaluate the same safeguards and
+  **flag** (rather than throw — the row is already signed, so credit is
+  not discarded) any short/reciprocal/over-daily-limit pattern for
+  community review.
+
+
 ### Fixed
 - **Floating pill buttons no longer clipped by the bottom nav.** The
   BottomNav's height includes `env(safe-area-inset-bottom)` (the

@@ -22,9 +22,10 @@
  * file touches the system key.
  */
 import type { FastifyInstance } from "fastify";
-import type { ExchangeStore } from "../db.js";
+import type { ExchangeStore, PostRecord, PostStore } from "../db.js";
 import { CATEGORIES, type Category } from "@understoria/shared/types";
 import type { Exchange } from "@understoria/shared/types";
+import { verifyPost } from "@understoria/shared/crypto";
 import {
   autoConfirmExchange,
   type AutoConfirmRequest,
@@ -33,6 +34,9 @@ import {
 
 interface Deps {
   store: ExchangeStore;
+  /** The post store, consulted to bind a system-signed confirmation
+   *  to the poster-signed post it finalizes (see `bindToPost`). */
+  postStore: PostStore;
   signer: SystemSigner | null;
   nodeId: string;
   autoConfirmMinHours: number;
@@ -44,6 +48,82 @@ interface Deps {
 
 const CATEGORY_SET: ReadonlySet<Category> = new Set(CATEGORIES);
 
+/** Project-task auto-confirms use a synthetic postId that is NOT a
+ *  federated post (projects are local-only, docs/threat-model.md §7),
+ *  so the node has no artifact to bind them to. */
+const PROJECT_TASK_POSTID = /^project:[^/]+\/task:.+$/;
+
+/** Generous finite ceiling for the ONLY path the node can't bind to a
+ *  signed post (project tasks). Post-based requests are bound exactly
+ *  to `post.estimatedHours`, so they need no separate cap. This is the
+ *  sole defense against a fabricated project-task request minting an
+ *  absurd (or overflow) `hours` against a named victim. */
+const MAX_UNBOUND_AUTO_CONFIRM_HOURS = 1000;
+
+/**
+ * Authority binding for `/auto-confirm` (Round-4 review). The system
+ * key signs the HELPED side of an exchange — i.e. it confirms *on the
+ * helped party's behalf*. Without this check the caller supplied every
+ * field (`helpedKey`, `hours`, `category`, and the age via
+ * `awaitingSince`), so anyone could mint a node-signed exchange
+ * debiting an arbitrary victim for arbitrary hours. The doc's "cannot
+ * invent exchanges / cannot confirm on a member's behalf without their
+ * prior action" guarantees (auto-confirm-key.md §5) require this bind.
+ *
+ * For a real post the node holds the poster's SIGNED post, so it can
+ * require: the poster is the party the system is confirming for
+ * (helped side for a NEED, helper side for an OFFER), and the hours /
+ * category match what the poster signed. The claimer side stays
+ * unverifiable here (claims are unsigned and may not be on this node),
+ * which is the documented, attributable, disputable residual.
+ *
+ * Returns an ineligible reason string, or null when the request is
+ * authorized to proceed to signing.
+ */
+function bindToPost(
+  request: AutoConfirmRequest,
+  postStore: PostStore,
+): string | null {
+  const { payload } = request;
+
+  if (PROJECT_TASK_POSTID.test(payload.postId)) {
+    // Unbindable path — projects don't federate. Bound the one field a
+    // fabricated request could weaponize; the residual (a same-node
+    // organizer-trust surface) is documented in auto-confirm-key.md §5.
+    if (payload.hours > MAX_UNBOUND_AUTO_CONFIRM_HOURS) {
+      return "hours_exceeds_cap";
+    }
+    return null;
+  }
+
+  const post: PostRecord | null = postStore.get(payload.postId);
+  if (post === null) {
+    // The post has not federated to this node yet (or never existed).
+    // Distinct from a mismatch so the client sweep can retry rather
+    // than treat it as permanent.
+    return "post_not_found";
+  }
+  // Re-verify the poster's signature — a stored row should already be
+  // verified, but the system key is the privileged surface; do not
+  // assume.
+  if (!verifyPost(post as Parameters<typeof verifyPost>[0])) {
+    return "post_signature_invalid";
+  }
+  // Bind the confirmed-for party to the real poster.
+  const posterSide =
+    post.type === "NEED" ? payload.helpedKey : payload.helperKey;
+  if (posterSide !== post.postedBy) {
+    return "poster_mismatch";
+  }
+  if (payload.hours !== post.estimatedHours) {
+    return "hours_mismatch";
+  }
+  if (payload.category !== post.category) {
+    return "category_mismatch";
+  }
+  return null;
+}
+
 export async function registerAutoConfirmRoutes(
   app: FastifyInstance,
   deps: Deps,
@@ -51,7 +131,7 @@ export async function registerAutoConfirmRoutes(
   const now = deps.now ?? (() => Date.now());
 
   app.post("/auto-confirm", async (req, reply) => {
-    const parsed = parseBatch(req.body);
+    const parsed = parseBatch(req.body, now());
     if (!parsed.ok) {
       reply.code(400);
       return { error: "invalid_body", reason: parsed.error };
@@ -80,6 +160,19 @@ export async function registerAutoConfirmRoutes(
           exchangeId: request.exchangeId,
           status: "signed",
           ...(existing ? { exchange: existing } : {}),
+        });
+        continue;
+      }
+
+      // Authority binding BEFORE the window/signature checks: the
+      // system key must never confirm for a party who never authored
+      // the post being finalized (Round-4 review). See bindToPost.
+      const bindError = bindToPost(request, deps.postStore);
+      if (bindError !== null) {
+        results.push({
+          exchangeId: request.exchangeId,
+          status: "ineligible",
+          reason: bindError,
         });
         continue;
       }
@@ -114,7 +207,7 @@ type ParseBatchResult =
   | { ok: true; value: AutoConfirmRequest[] }
   | { ok: false; error: string };
 
-function parseBatch(input: unknown): ParseBatchResult {
+function parseBatch(input: unknown, now: number): ParseBatchResult {
   if (typeof input !== "object" || input === null) {
     return { ok: false, error: "body must be a JSON object" };
   }
@@ -130,7 +223,7 @@ function parseBatch(input: unknown): ParseBatchResult {
   }
   const out: AutoConfirmRequest[] = [];
   for (const raw of r.requests) {
-    const parsed = parseOne(raw);
+    const parsed = parseOne(raw, now);
     if (!parsed.ok) return parsed;
     out.push(parsed.value);
   }
@@ -139,6 +232,7 @@ function parseBatch(input: unknown): ParseBatchResult {
 
 function parseOne(
   input: unknown,
+  now: number,
 ): { ok: true; value: AutoConfirmRequest } | { ok: false; error: string } {
   if (typeof input !== "object" || input === null) {
     return { ok: false, error: "each request must be an object" };
@@ -181,6 +275,27 @@ function parseOne(
       ok: false,
       error: "payload.completedAt must be a positive integer",
     };
+  }
+  // Defense in depth (Round-4 review): neither timestamp may be far in
+  // the future (the one-day skew grace used across the codebase).
+  //
+  // NOTE on the window: the age gate (`now - awaitingSince >=
+  // autoConfirmHours`) CANNOT be server-verified — the node holds no
+  // signed record of when the post entered `awaiting_confirmation`
+  // (that transition is PWA-local, and `completedAt` is stamped to the
+  // sweep's `now`, so awaitingSince is legitimately far below it). A
+  // caller can therefore always claim an old `awaitingSince`. The
+  // window is honest-client advisory; the real gate is `bindToPost`
+  // (a fabricated exchange can't name an arbitrary victim) plus the
+  // safeguards + dispute layer. Making the window itself enforceable
+  // needs a signed awaiting-transition artifact — see
+  // docs/auto-confirm-key.md §5 / the roadmap deferred row.
+  const oneDayFromNow = now + 24 * 60 * 60 * 1000;
+  if ((p.completedAt as number) > oneDayFromNow) {
+    return { ok: false, error: "payload.completedAt is too far in the future" };
+  }
+  if ((r.awaitingSince as number) > oneDayFromNow) {
+    return { ok: false, error: "awaitingSince is too far in the future" };
   }
   if (
     typeof p.category !== "string" ||

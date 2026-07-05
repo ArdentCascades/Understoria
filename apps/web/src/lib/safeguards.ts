@@ -80,6 +80,29 @@ export function assertWithinDailyLimit(
   }
 }
 
+/**
+ * Non-throwing daily-limit check for the auto-confirm path. A
+ * system-signed exchange is already built and signed by the time it
+ * reaches the client, so the hard-stop `assertWithinDailyLimit` (which
+ * throws) is wrong there — it would strand a valid node-signed row.
+ * Instead the sweep FLAGS an over-limit auto-confirm for review
+ * (`daily_limit_warning`), so the anti-gaming signal still surfaces
+ * without discarding credit the node legitimately confirmed.
+ */
+export function exceedsDailyLimit(
+  helperKey: string,
+  existingExchanges: readonly Exchange[],
+  now: number,
+  config: NodeConfig = DEFAULT_NODE_CONFIG,
+): boolean {
+  const limit = config.dailyHelperLimit;
+  const windowStart = now - MS_PER_DAY;
+  const count = existingExchanges.filter(
+    (x) => x.helperKey === helperKey && x.completedAt >= windowStart,
+  ).length;
+  return count >= limit;
+}
+
 export interface SafeguardEvaluation {
   flaggedForReview: boolean;
   flagReason?: FlagReason;
