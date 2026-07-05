@@ -339,13 +339,19 @@ onboard — are prioritized; the rest confirm the page is navigable.
 - **Entry:** any route. The bottom nav is global.
 - **Steps:** `Tab` into the nav (or jump by landmark to the
   `<nav>`), then arrow between tab buttons. Resize the viewport
-  from 320px to desktop; on iOS Safari, scroll a long page and
-  check that the nav stays pinned to the bottom edge through the
-  URL-bar resize. *(PR #185 made the labels always visible — they
-  no longer collapse to icon-only below `sm`. PR #201 pins the
-  nav to the viewport on mobile via `fixed` + an
-  `env(safe-area-inset-bottom)` pad so it clears the iPhone home
-  indicator.)*
+  from 320px to desktop; on iOS, scroll a long page to its very
+  end and check the nav stays seamlessly at the screen's bottom
+  edge — then focus a form field, type, dismiss the keyboard, and
+  check the nav returns and is still flush with the bottom.
+  *(PR #185 made the labels always visible — they no longer
+  collapse to icon-only below `sm`. PR #326 replaced the old
+  `fixed`-position nav with a non-scrolling 100dvh app shell:
+  the document never scrolls, all scrolling happens inside
+  `<main>`, and the nav is an in-flow flex footer with an
+  `env(safe-area-inset-bottom)` pad clearing the iPhone home
+  indicator. The nav intentionally unmounts while the on-screen
+  keyboard is open — mid-typing, its absence from the a11y tree
+  and tab order is the expected state, not a failure.)*
 - **Expected:** every tab announces its name plus icon decoration
   (`aria-hidden` on the glyph); the selected tab announces
   selected; labels stay rem-based and scale with the text-size

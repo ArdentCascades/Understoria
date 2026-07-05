@@ -55,8 +55,20 @@ through.
 | Routing | `react-router-dom` v6 | Standard |
 | Tests | `vitest` + `fake-indexeddb` + `jsdom` | Fast, same transformer as the app |
 
-No backend yet. Everything runs in the browser; all state is the
-user's own.
+The PWA is local-first: everything a member does runs in the
+browser and all state is the member's own. A Fastify community node
+(`apps/server/`) now exists as the federation relay — it accepts
+signed records, verifies them with the shared crypto, and serves
+them to peers — but it holds no authority over member state; see
+`operator-guide.md`.
+
+The PWA is also a **non-scrolling app shell** (`Layout.tsx`): a
+100dvh flex column whose document never scrolls (`overflow: clip`
+on the root), with all scrolling inside `<main>` and the bottom nav
+as an in-flow flex footer. Never reintroduce `position: fixed;
+bottom: 0` chrome or a document scroll range — the iOS keyboard
+corrupts exactly that state (see `lib/useVirtualKeyboard.ts` for
+the history).
 
 ## 3. Module map
 
@@ -195,17 +207,18 @@ Adding a test:
 
 ## 7. Federation readiness
 
-Although no server exists yet, code is written with federation in
-mind:
+Federation is live (the server's peer pull loop syncs exchanges,
+vouches, posts, claims, task comments, and events between configured
+peers), and the same discipline that made that possible still
+applies to every new record type:
 
 - Exchanges are signed and verifiable by `verifyExchange()` without
   DB access.
 - Vouches are signed and verifiable by `verifyVouch()`.
 - Invites are signed and verifiable by `decodeAndVerifyInvite()`.
-- Everything carries a `nodeId` so a future peer-to-peer gossip
-  layer can resolve "who said this."
-- The seed of `nodeId` is local to this install; when two nodes
-  peer, they'll exchange node identities via a separate handshake.
+- Everything carries a `nodeId` so peers can resolve "who said
+  this" — node identity is advertised via `GET /config` and bound
+  to the peer URL on pull.
 
 When you add a new record type, ask: "If I federate two nodes' copies
 of this table, what does the merged state look like?" If the answer
