@@ -60,8 +60,10 @@ export const REDEMPTION_DELIVERY_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
  *
  * GET /redemptions
  *   - Query: ?since=<ms>&limit=<n>
- *   - Returns receipts with `receivedAt > since`, ASCENDING, capped
- *     at `limit` (default 200, hard ceiling 1000). Deviation from
+ *   - Returns receipts with `receivedAt >= since` (INCLUSIVE, token
+ *     tiebreak — a shared-millisecond row at a page boundary must be
+ *     re-served, not skipped; pullers dedup by token), ASCENDING,
+ *     capped at `limit` (default 200, hard ceiling 1000). Deviation from
  *     the sibling routes, named deliberately (§7): the cursor is the
  *     server-assigned `receivedAt`, not the client-claimed
  *     `redeemedAt` — a skewed or back-dated device clock must never

@@ -151,8 +151,9 @@ export interface StoredRedemption {
 
 export interface RedemptionStore {
   insert(receipt: RedemptionReceipt, receivedAt: number): void;
-  /** Rows with `received_at > since`, ascending, capped like the
-   *  sibling stores (default 200, ceiling 1000). */
+  /** Rows with `received_at >= since` (inclusive, token tiebreak),
+   *  ascending, capped like the sibling stores (default 200,
+   *  ceiling 1000). */
   list(opts?: { since?: number; limit?: number }): StoredRedemption[];
   count(): number;
   has(token: string): boolean;
@@ -838,6 +839,16 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
       // rows that share the cursor timestamp; pullers dedup by id, so
       // ties can never be lost either. The id tiebreak keeps paging
       // deterministic.
+      //
+      // KNOWN LIMIT (all sibling stores too, roadmap "composite
+      // federation cursors"): pullers track only max(timestamp), so if
+      // MORE THAN `limit` rows share one timestamp the page fills with
+      // the same lowest-id ties every pull and the cursor cannot move
+      // past them. Unreachable through normal one-at-a-time writes;
+      // only batch tooling stamping >page-size rows in a single ms
+      // could trigger it. The fix is a composite (timestamp, id)
+      // cursor across every store, client pull, and peer_pull_state —
+      // a wire-protocol change deferred to its own design pass.
       const rows = since
         ? db
             .prepare(
