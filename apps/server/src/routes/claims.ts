@@ -44,11 +44,27 @@ export async function registerClaimRoutes(
     if (
       typeof r.postId !== "string" || !r.postId ||
       typeof r.claimerKey !== "string" || !r.claimerKey ||
-      typeof r.claimedAt !== "number" || r.claimedAt <= 0 ||
+      typeof r.claimedAt !== "number" ||
+      !Number.isInteger(r.claimedAt) ||
+      r.claimedAt <= 0 ||
       typeof r.nodeId !== "string" || !r.nodeId
     ) {
       reply.code(400);
       return { error: "invalid_body", reason: "missing or invalid fields" };
+    }
+    // Bound claimedAt exactly like validate.ts bounds deletedAt:
+    // claims are the CURSOR for GET /claims, so one unbounded value
+    // (1e18, or `1e999` which JSON-parses to Infinity — caught by the
+    // isInteger check above) would jump every puller's high-water mark
+    // to the far future and hide all subsequent claims forever. Claims
+    // are unsigned by design, making this the only ingestion gate.
+    const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+    if (r.claimedAt > oneDayFromNow) {
+      reply.code(400);
+      return {
+        error: "invalid_body",
+        reason: "claimedAt is too far in the future",
+      };
     }
     if (store.has(r.postId as string)) {
       reply.code(200);
