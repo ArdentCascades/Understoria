@@ -848,7 +848,8 @@ export function createExchangeStore(db: DatabaseType): ExchangeStore {
       // only batch tooling stamping >page-size rows in a single ms
       // could trigger it. The fix is a composite (timestamp, id)
       // cursor across every store, client pull, and peer_pull_state —
-      // a wire-protocol change deferred to its own design pass.
+      // a wire-protocol change deferred to its own design pass:
+      // docs/composite-federation-cursors.md.
       const rows = since
         ? db
             .prepare(
