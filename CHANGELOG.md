@@ -9,6 +9,27 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Project templates: review the task list before anything is
+  created.** Picking a template now stages its tasks into an editable
+  checklist — untick what your community already has, tune the hours,
+  and the target-hours field tracks the included sum live ("Templates
+  are NOT prescriptions" finally has the UI to match). Creation is now
+  atomic: the project and its reviewed tasks land in one transaction,
+  so a crash can no longer leave a half-populated project. Template
+  tasks gained optional per-locale `skills` (staged into the task's
+  required-skills, lighting up the existing skills UI) and `follows`
+  orderings (the advisory "Follows:" framing from the task-ordering
+  design — edges pointing at a task you excluded are dropped, never
+  invented). Ten flagship templates got the content pass in both
+  locales, authored from one table so EN/ES can't drift for these
+  fields; the rest inherit incrementally. Rota-shaped templates
+  (fridge, garden, repair café, community meal, composting, free
+  store, weatherization, cleanup) now show the project organizer one
+  quiet, dismissible line pointing at work days with shifts — inline
+  on the project page, gone on its own once a first work day exists,
+  never a rail item or badge.
+
 ### Security
 - **The auto-confirm waiting window is now server-enforceable
   (signed awaiting-transition artifact).** Previously the age gate at

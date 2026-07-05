@@ -715,7 +715,15 @@
           "bigger": "Mayor (25 h+)"
         },
         "empty": "Ninguna plantilla coincide. Prueba quitar un filtro o empieza desde cero a continuación."
-      }
+      },
+      "stagedHeading": "Tareas que creará esta plantilla",
+      "stagedHint": "Las plantillas son un punto de partida, no una receta — desmarca lo que tu comunidad ya tiene y ajusta las horas a tu realidad.",
+      "stagedIncludeAria": "Incluir tarea: {{name}}",
+      "stagedHoursAria": "Horas estimadas para {{name}}",
+      "stagedHoursUnit": "h",
+      "stagedSkills": "Habilidades útiles: {{skills}}",
+      "stagedSum_one": "{{count}} tarea · unas {{hours}}h de puesta en marcha",
+      "stagedSum_other": "{{count}} tareas · unas {{hours}}h de puesta en marcha"
     },
     "detail": {
       "back": "← Volver a proyectos",
@@ -1045,7 +1053,9 @@
       "scheduleButton": "Programar una jornada de trabajo",
       "itemAt": "en {{location}}",
       "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto.",
-      "nextGlanceHeading": "Próxima jornada de trabajo"
+      "nextGlanceHeading": "Próxima jornada de trabajo",
+      "templateHint": "La plantilla de este proyecto incluye trabajo recurrente en equipo — una jornada de trabajo con turnos es una forma fácil de reunir manos.",
+      "templateHintDismiss": "Entendido"
     },
     "adoptionBanner": "La comunidad está decidiendo sobre una nueva custodia para este proyecto."
   },

@@ -228,3 +228,26 @@ describe("getTemplate", () => {
     expect(getTemplate("does-not-exist", "en")).toBeUndefined();
   });
 });
+
+// Structural invariant on the NEW `follows` field: every entry must
+// reference a strictly earlier task in the same template.
+// createProjectWithTasks throws on a violation at project-creation
+// time — this moves that discovery to CI, where a content author sees
+// it, instead of to a member's create button.
+describe.each([
+  ["EN", PROJECT_TEMPLATES_EN],
+  ["ES", PROJECT_TEMPLATES_ES],
+] as const)("template follows invariant (%s)", (_locale, templates) => {
+  it("every follows entry references a strictly earlier task", () => {
+    for (const tpl of templates) {
+      tpl.tasks.forEach((task, i) => {
+        for (const dep of task.follows ?? []) {
+          expect(
+            Number.isInteger(dep) && dep >= 0 && dep < i,
+            `${tpl.id} task ${i} ("${task.name}") follows invalid index ${dep}`,
+          ).toBe(true);
+        }
+      });
+    }
+  });
+});

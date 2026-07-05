@@ -57,6 +57,7 @@ import {
 } from "@/db/coorgInvitations";
 import { getSecretKey, type LockState } from "@/db/secrets";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
+import { shouldShowWorkDayHint } from "@/lib/workDayHint";
 import { listLinksForProject } from "@/db/eventProjectLinks";
 import { fileAdoptionProposal, lastOrganizerActivityAt } from "@/db/adoption";
 import { ADOPTION_MIN_DELIBERATION_DAYS } from "@/lib/autoCloseProposals";
@@ -1019,6 +1020,42 @@ function WorkDaysSection({
   const canSchedule =
     isOrg && project.status !== "completed" && project.status !== "archived";
 
+  // One quiet, dismissible bridge from rota-shaped templates to the
+  // work-day + shifts machinery (lib/workDayHint.ts). Dismissal is a
+  // per-project settings entry, written on the member's tap — never
+  // auto-marked on render, so a glance at the page doesn't count as
+  // having read it.
+  const [hintDismissed, setHintDismissed] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void getSetting(SETTING_KEYS.workDayHintDismissed).then((stored) => {
+      if (cancelled) return;
+      const ids = stored ? (JSON.parse(stored) as string[]) : [];
+      setHintDismissed(ids.includes(project.id));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [project.id]);
+
+  async function dismissWorkDayHint() {
+    setHintDismissed(true);
+    const stored = await getSetting(SETTING_KEYS.workDayHintDismissed);
+    const ids = new Set<string>(stored ? (JSON.parse(stored) as string[]) : []);
+    ids.add(project.id);
+    await setSetting(
+      SETTING_KEYS.workDayHintDismissed,
+      JSON.stringify(Array.from(ids)),
+    );
+  }
+
+  const showHint = shouldShowWorkDayHint({
+    templateId: project.templateId,
+    upcomingWorkDays: upcoming.length,
+    canSchedule,
+    dismissed: hintDismissed !== false,
+  });
+
   if (upcoming.length === 0 && !canSchedule) return null;
 
   return (
@@ -1037,6 +1074,20 @@ function WorkDaysSection({
           </button>
         )}
       </div>
+      {showHint && (
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-canopy-200 bg-canopy-50 px-3 py-2 text-sm text-canopy-900 dark:border-canopy-900/50 dark:bg-canopy-950/30 dark:text-canopy-100">
+          <p className="min-w-0 flex-1">
+            {t("projects.workDays.templateHint")}
+          </p>
+          <button
+            type="button"
+            className="btn-ghost shrink-0 text-xs"
+            onClick={() => void dismissWorkDayHint()}
+          >
+            {t("projects.workDays.templateHintDismiss")}
+          </button>
+        </div>
+      )}
       {upcoming.length > 0 && (
         <ul className="flex flex-col gap-2">
           {upcoming.map((e) => (
