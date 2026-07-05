@@ -52,6 +52,17 @@ include breaking changes.
   `docs/composite-federation-cursors.md`.
 
 ### Added
+- **Two follow-up design notes (proposed — awaiting ratification).**
+  `docs/direct-exchange-label.md`: a `direct:<uuid>` namespace for
+  `Exchange.postId` so help with no post and no project — a plain
+  event's setup crew, spontaneous in-person help — can become credit
+  through the unchanged mutual-signature ceremony, with the uuid
+  deliberately random so no gathering correlator ever reaches the
+  wire, and no auto-confirm path by construction.
+  `docs/ways-to-plug-in.md`: a local-read-only discovery shelf
+  matching a member's offer categories/skills to open shifts, needs,
+  and tasks — deliberately dumb token matching, browsable never a
+  queue, nothing stored about what was browsed, pull-only.
 - **Shift signups (phase 1).** Events can now be broken into
   time-boxed, optionally-capped shifts ("Setup crew, 9–12, 4 spots")
   that members sign themselves up for — the coordination layer
