@@ -38,23 +38,54 @@ export function Layout() {
   // While the offline banner is visible it hovers above the BottomNav,
   // so <main> reserves extra bottom clearance — content scrolled to the
   // very end must never hide behind the strip. Back online, the usual
-  // nav-only clearance returns.
+  // clearance (floating FAB pills) returns.
   const mainPad =
     !locked && !online
-      ? "flex-1 pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-36"
-      : "flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-20";
+      ? "pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-36"
+      : "pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-20";
+  // App-shell layout: the shell is exactly one screen tall (100dvh)
+  // and the DOCUMENT NEVER SCROLLS — all scrolling happens inside
+  // <main>. The BottomNav is a plain flex footer in normal flow, so
+  // it is at the bottom of the screen by construction, on every page,
+  // with nothing measured and nothing to drift. This exists because
+  // iOS pans/shrinks the layout viewport around the on-screen
+  // keyboard and sometimes fails to restore it after dismissal, which
+  // made `position: fixed; bottom: 0` chrome float mid-screen; and
+  // the metric-based correction (measuring visualViewport divergence
+  // and translating) trusted exactly the numbers iOS gets wrong, so
+  // it could detach the nav in the OTHER direction. In-flow layout
+  // consults no viewport metrics at all — and with the document
+  // unscrollable, iOS has no document scroll state to corrupt in the
+  // first place.
   return (
-    <div className="mx-auto flex min-h-dvh max-w-screen-md flex-col lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
-      <main id="main" className={mainPad} tabIndex={-1}>
-        {!ready ? (
-          <Splash />
-        ) : locked ? (
-          <LockScreen />
-        ) : (
-          <Outlet />
-        )}
+      <main
+        id="main"
+        // overscroll-contain: reaching the top/bottom of the inner
+        // scroller must not chain into a document rubber-band that
+        // drags the whole shell (nav included) off the screen edge.
+        // relative: absolutely-positioned descendants (e.g. Tailwind
+        // `sr-only`, which is position:absolute) must resolve their
+        // containing block HERE, inside the scroller — anchored to
+        // the document they escape the shell's clipping and quietly
+        // re-open a document scroll range (found the hard way via an
+        // sr-only <legend> deep in the Profile page).
+        className="relative flex-1 overflow-y-auto overscroll-contain"
+        tabIndex={-1}
+      >
+        <div
+          className={`mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px] ${mainPad}`}
+        >
+          {!ready ? (
+            <Splash />
+          ) : locked ? (
+            <LockScreen />
+          ) : (
+            <Outlet />
+          )}
+        </div>
       </main>
       {!locked && <OfflineBanner />}
       {!locked && <BottomNav />}

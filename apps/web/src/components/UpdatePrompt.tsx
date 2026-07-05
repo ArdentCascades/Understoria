@@ -13,11 +13,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useToast } from "@/state/ToastContext";
-import {
-  useVirtualKeyboardOpen,
-  useVisualViewportBottomGap,
-  visualViewportGlueStyle,
-} from "@/lib/useVirtualKeyboard";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 
 // This is an infrastructure-reliability notice, not an engagement
 // notification. It renders only while the member already has the app
@@ -44,10 +40,6 @@ export function UpdatePrompt() {
   const { showToast } = useToast();
   const [dismissed, setDismissed] = useState(false);
   const keyboardOpen = useVirtualKeyboardOpen();
-  // Same visual-viewport correction as the BottomNav (see
-  // useVirtualKeyboard.ts) so the card never floats mid-screen in
-  // iOS's post-keyboard stuck state.
-  const bottomGap = useVisualViewportBottomGap();
 
   const {
     needRefresh: [needRefresh],
@@ -71,7 +63,6 @@ export function UpdatePrompt() {
     <div
       role="status"
       aria-live="polite"
-      style={visualViewportGlueStyle(bottomGap)}
       className="pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-20 flex
                  justify-center px-4 lg:inset-x-auto lg:right-6"
     >

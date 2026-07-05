@@ -29,11 +29,7 @@ import {
   IconProfile,
   type IconProps,
 } from "@/components/visual";
-import {
-  useVirtualKeyboardOpen,
-  useVisualViewportBottomGap,
-  visualViewportGlueStyle,
-} from "@/lib/useVirtualKeyboard";
+import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 
 interface NavItem {
   to: string;
@@ -92,26 +88,26 @@ function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
 export function BottomNav() {
   const { t } = useTranslation();
   const keyboardOpen = useVirtualKeyboardOpen();
-  // Keyboard CLOSED but viewports diverged (iOS's post-dismissal
-  // stuck state): translate the bar back onto the bottom the member
-  // sees. See useVirtualKeyboard.ts for the two-part strategy.
-  const bottomGap = useVisualViewportBottomGap();
-  // While the on-screen keyboard is up, `fixed bottom-0` pins to the
-  // LAYOUT viewport that iOS/Android refuse to resize, so the bar
-  // would float detached mid-screen above the keyboard (see
-  // useVirtualKeyboard.ts). Navigation is useless mid-typing anyway —
-  // remove it entirely (layout, a11y tree, tab order) and restore on
-  // keyboard close.
+  // The nav is a plain in-flow footer of the 100dvh app shell
+  // (Layout.tsx) — NOT position:fixed. It sits at the bottom of the
+  // screen because flexbox puts it there, so there is no viewport
+  // metric to drift when iOS mangles the layout viewport around the
+  // on-screen keyboard (the cause of the "detached menu floating
+  // mid-screen" reports; see useVirtualKeyboard.ts).
+  //
+  // While the keyboard is up it is removed entirely (layout, a11y
+  // tree, tab order): navigation is useless mid-typing, iOS draws the
+  // keyboard over the shell's bottom edge anyway, and <main> gains
+  // the freed row of space for the form being typed into.
   if (keyboardOpen) return null;
   return (
     <nav
       aria-label={t("nav.primaryNav")}
-      style={visualViewportGlueStyle(bottomGap)}
-      className="fixed inset-x-0 bottom-0 z-30 transform-gpu border-t
+      className="z-30 shrink-0 border-t
                  border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
-                 lg:sticky lg:pb-0"
+                 lg:pb-0"
     >
       <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
         {ITEMS.map((item) => (

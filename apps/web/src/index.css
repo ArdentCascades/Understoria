@@ -36,9 +36,22 @@
     min-width: 52px;
   }
 
+  /* The app is a non-scrolling 100dvh shell (see Layout.tsx) — all
+   * scrolling happens inside <main>. `overflow: clip` on the root is
+   * the hard backstop: even if some element escapes the shell (an
+   * absolutely-positioned box anchored to the document, a portal, a
+   * future regression), the DOCUMENT can never gain a scroll range —
+   * not by gesture, not programmatically. A scrollable document is
+   * exactly the state iOS corrupts around the on-screen keyboard,
+   * detaching bottom-anchored chrome from the visible bottom. */
+  html {
+    overflow: clip;
+  }
+
   body {
     min-height: 100vh;
     min-height: 100dvh;
+    overflow: clip;
   }
 
   :focus-visible {
