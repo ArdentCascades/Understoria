@@ -9,6 +9,21 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Shift-signups design note (`docs/shift-signups.md`).** Proposed
+  design for time-boxed, capped slots on a community event ("Setup
+  crew, 9–12, 4 spots") with member self-signups — the coordination
+  layer between "a work day is on the calendar" and "we have enough
+  hands." Shifts and signups are local-only Dexie rows in the
+  `EventRSVP` posture (zero new wire bytes, no threat-model widening);
+  signups compose with the existing RSVP, block-gate, and
+  attention-rail machinery. Documents one permanent boundary: no
+  event-derived identifier may ever appear in a federated
+  `Exchange.postId` label, which would rebuild the rejected
+  federated-attendance graph through a side door. Design only — no
+  implementation yet; four open questions carry recommended defaults
+  for operator ruling.
+
 ### Security
 - **Rate limiting no longer collapses to one bucket behind the reverse
   proxy (Round-4 review).** `trustProxy` was hard-off, so behind the
