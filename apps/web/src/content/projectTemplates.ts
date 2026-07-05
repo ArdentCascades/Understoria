@@ -290,7 +290,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Elderly people, disabled and chronically ill neighbors, new parents, and anyone living alone.",
     whatYoullNeed:
-      "A list of volunteers, a way to match them to neighbors, and a check-in routine.",
+      "A list of volunteers, a way to match them to neighbors, and a check-in routine. Volunteers are neighbors, not care professionals — screen anyone making home visits, never let a volunteer handle a neighbor's money alone, and agree in advance on when to call family or emergency services.",
     setupHours: 18,
     defaultCategory: "emotional_support",
     tasks: [
@@ -347,7 +347,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Everyone, with priority to people who can't easily evacuate or who depend on power for medical equipment.",
     whatYoullNeed:
-      "A contact list, a meeting spot, basic supplies, and a communication plan that works without internet.",
+      "A contact list, a meeting spot, basic supplies, and a communication plan that works without internet. This network complements official emergency services — it doesn't replace them. In a life-threatening situation, always call emergency services first.",
     setupHours: 24,
     defaultCategory: "organizing",
     tasks: [
@@ -652,7 +652,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "People without cars, disabled neighbors, elders, and anyone in a transit gap.",
     whatYoullNeed:
-      "Volunteer drivers, a request/dispatch method, and clear safety and insurance ground rules.",
+      "Volunteer drivers, a request/dispatch method, and clear safety and insurance ground rules. Driving neighbors is a serious responsibility — confirm every driver's license and insurance, screen anyone who'll drive vulnerable riders, and never use a volunteer ride in place of an ambulance in a medical emergency.",
     setupHours: 18,
     defaultCategory: "transport",
     tasks: [
@@ -1292,7 +1292,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Anyone hungry, isolated, or food-insecure; it also builds connection across the neighborhood.",
     whatYoullNeed:
-      "A kitchen, cooks, an ingredient pipeline, a serving space, and a volunteer crew.",
+      "A kitchen, cooks, an ingredient pipeline, a serving space, and a volunteer crew. Serving food to the public carries real food-safety responsibilities — check your local rules on permits and certified food handlers, and follow safe storage and temperature practices every time.",
     setupHours: 21,
     defaultCategory: "food",
     suggestsWorkDays: true,
@@ -1994,7 +1994,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "The whole neighborhood — cleaner, safer, greener space benefits everyone.",
     whatYoullNeed:
-      "Volunteers, supplies, site permissions, and a disposal plan.",
+      "Volunteers, supplies, site permissions, and a disposal plan. Neglected sites can hold real hazards — never pick up needles or unknown chemicals by hand; use tools and a sharps container, and dispose of hazardous finds under local rules.",
     setupHours: 17,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
@@ -2278,7 +2278,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Unhoused neighbors, people without working facilities, and low-income families.",
     whatYoullNeed:
-      "Access to machines and showers (a partner site or mobile unit), supplies, and volunteers.",
+      "Access to machines and showers (a partner site or mobile unit), supplies, and volunteers. Guests' dignity and privacy come first — require no personal information to use the service, keep shower areas private and secure, and follow local health rules for shared or mobile facilities.",
     setupHours: 21,
     defaultCategory: "infrastructure",
     tasks: [
@@ -2618,7 +2618,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Low-income neighbors, people fleeing unsafe homes, elders, and disabled neighbors.",
     whatYoullNeed:
-      "Volunteers with vehicles and strength, moving supplies, and clear safety practices.",
+      "Volunteers with vehicles and strength, moving supplies, and clear safety practices. For anyone leaving an unsafe situation, keep the new address, dates, and details strictly confidential, and follow that person's lead on timing and safety.",
     setupHours: 18,
     defaultCategory: "transport",
     tasks: [
@@ -2674,7 +2674,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Organize disabled neighbors and allies for mutual support, accessibility, and advocacy — led by disabled people themselves.",
     whoItServes: "Disabled and chronically ill neighbors.",
     whatYoullNeed:
-      "An accessible communication system, peer leaders, and a resource directory.",
+      "An accessible communication system, peer leaders, and a resource directory. Peer support complements professional care — refer medical, personal-care, and legal questions to qualified providers, and treat members' health information as private.",
     setupHours: 24,
     defaultCategory: "organizing",
     tasks: [
@@ -2730,7 +2730,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Incarcerated people and, through them, their families and communities.",
     whatYoullNeed:
-      "Donated books, volunteers, postage, and knowledge of each facility's mail rules.",
+      "Donated books, volunteers, postage, and knowledge of each facility's mail rules. Every facility's mail rules are strict and different — packages that break them get rejected, so follow them exactly, and have volunteers always use the program's address, never a home address.",
     setupHours: 23,
     defaultCategory: "education",
     tasks: [
@@ -2953,7 +2953,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whoItServes:
       "Everyone in the program — members seeking help, volunteers offering it, and project leads needing coordination.",
     whatYoullNeed:
-      "An intake system, a volunteer and resource roster, coordinators, and a master directory.",
+      "An intake system, a volunteer and resource roster, coordinators, and a master directory. The hub holds sensitive information about neighbors' lives — collect only what's needed, guard it carefully, and share details only with the people who need them to help.",
     setupHours: 26,
     defaultCategory: "organizing",
     tasks: [
@@ -3215,7 +3215,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Personas mayores, vecinas y vecinos con discapacidad o enfermedad crónica, madres y padres recientes, y cualquiera que viva en soledad.",
     whatYoullNeed:
-      "Una lista de personas voluntarias, una forma de emparejarlas con quienes necesitan compañía y una rutina de contacto.",
+      "Una lista de personas voluntarias, una forma de emparejarlas con quienes necesitan compañía y una rutina de contacto. Las personas voluntarias son vecinas, no profesionales del cuidado — revisen a quien haga visitas a domicilio, nunca dejen que una persona voluntaria maneje sola el dinero de alguien, y acuerden de antemano cuándo llamar a la familia o a los servicios de emergencia.",
     setupHours: 18,
     defaultCategory: "emotional_support",
     tasks: [
@@ -3272,7 +3272,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Todas y todos, con prioridad a quienes no pueden evacuar fácilmente o dependen de la electricidad para equipo médico.",
     whatYoullNeed:
-      "Una lista de contactos, un punto de encuentro, insumos básicos y un plan de comunicación que funcione sin internet.",
+      "Una lista de contactos, un punto de encuentro, insumos básicos y un plan de comunicación que funcione sin internet. Esta red complementa a los servicios oficiales de emergencia — no los sustituye. En una situación que ponga en riesgo la vida, llamen siempre primero a los servicios de emergencia.",
     setupHours: 24,
     defaultCategory: "organizing",
     tasks: [
@@ -3577,7 +3577,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Personas sin auto, vecinas y vecinos con discapacidad, personas mayores y cualquiera atrapada en un hueco de transporte.",
     whatYoullNeed:
-      "Personas voluntarias que manejen, un método para pedir y despachar viajes, y reglas claras de seguridad y seguros.",
+      "Personas voluntarias que manejen, un método para pedir y despachar viajes, y reglas claras de seguridad y seguros. Manejar llevando a vecinas y vecinos es una responsabilidad seria — confirmen la licencia y el seguro de cada persona que maneje, revisen a quienes llevarán a personas vulnerables y nunca usen un aventón voluntario en lugar de una ambulancia en una emergencia médica.",
     setupHours: 18,
     defaultCategory: "transport",
     tasks: [
@@ -4217,7 +4217,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Cualquier persona con hambre, aislada o con inseguridad alimentaria; también teje vínculos en el barrio.",
     whatYoullNeed:
-      "Una cocina, personas que cocinen, una cadena de ingredientes, un espacio para servir y un equipo voluntario.",
+      "Una cocina, personas que cocinen, una cadena de ingredientes, un espacio para servir y un equipo voluntario. Servir comida al público conlleva responsabilidades reales de seguridad alimentaria — revisen las reglas locales sobre permisos y personas certificadas en manejo de alimentos, y sigan siempre prácticas seguras de almacenamiento y temperatura.",
     setupHours: 21,
     defaultCategory: "food",
     suggestsWorkDays: true,
@@ -4919,7 +4919,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Todo el barrio — un espacio más limpio, seguro y verde beneficia a todas las personas.",
     whatYoullNeed:
-      "Personas voluntarias, insumos, permisos del sitio y un plan de disposición de residuos.",
+      "Personas voluntarias, insumos, permisos del sitio y un plan de disposición de residuos. Los sitios abandonados pueden esconder peligros reales — nunca recojan agujas ni químicos desconocidos con la mano; usen herramientas y un contenedor rígido para objetos punzantes, y desechen los hallazgos peligrosos según las reglas locales.",
     setupHours: 17,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
@@ -5203,7 +5203,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Vecinas y vecinos sin hogar, personas sin instalaciones funcionales y familias de bajos ingresos.",
     whatYoullNeed:
-      "Acceso a máquinas y duchas (un sitio aliado o una unidad móvil), insumos y personas voluntarias.",
+      "Acceso a máquinas y duchas (un sitio aliado o una unidad móvil), insumos y personas voluntarias. La dignidad y la privacidad de quienes llegan van primero — no pidan información personal para usar el servicio, mantengan las duchas privadas y seguras, y sigan las reglas locales de salud para instalaciones compartidas o móviles.",
     setupHours: 21,
     defaultCategory: "infrastructure",
     tasks: [
@@ -5543,7 +5543,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Vecinas y vecinos de bajos ingresos, personas huyendo de hogares inseguros, personas mayores y vecinas y vecinos con discapacidad.",
     whatYoullNeed:
-      "Personas voluntarias con vehículos y fuerza, materiales de mudanza y prácticas claras de seguridad.",
+      "Personas voluntarias con vehículos y fuerza, materiales de mudanza y prácticas claras de seguridad. Para quien deja una situación insegura, mantengan la nueva dirección, las fechas y los detalles en estricta confidencialidad, y sigan las decisiones de esa persona sobre los tiempos y su seguridad.",
     setupHours: 18,
     defaultCategory: "transport",
     tasks: [
@@ -5600,7 +5600,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Vecinas y vecinos con discapacidad y enfermedades crónicas.",
     whatYoullNeed:
-      "Un sistema de comunicación accesible, liderazgos pares y un directorio de recursos.",
+      "Un sistema de comunicación accesible, liderazgos pares y un directorio de recursos. El apoyo entre pares complementa la atención profesional — deriven las preguntas médicas, de cuidado personal y legales a profesionales calificados, y traten la información de salud de las personas integrantes como privada.",
     setupHours: 24,
     defaultCategory: "organizing",
     tasks: [
@@ -5656,7 +5656,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Personas encarceladas y, a través de ellas, sus familias y comunidades.",
     whatYoullNeed:
-      "Libros donados, personas voluntarias, franqueo y conocimiento de las reglas de correo de cada institución.",
+      "Libros donados, personas voluntarias, franqueo y conocimiento de las reglas de correo de cada institución. Las reglas de correo de cada institución son estrictas y distintas — los paquetes que las incumplen son rechazados, así que síganlas al pie de la letra, y que las personas voluntarias usen siempre la dirección del programa, nunca la de su casa.",
     setupHours: 23,
     defaultCategory: "education",
     tasks: [
@@ -5880,7 +5880,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Todas las personas del programa — quienes buscan ayuda, quienes la ofrecen y quienes lideran proyectos y necesitan coordinación.",
     whatYoullNeed:
-      "Un sistema de admisión, un listado de personas voluntarias y recursos, personas coordinadoras y un directorio maestro.",
+      "Un sistema de admisión, un listado de personas voluntarias y recursos, personas coordinadoras y un directorio maestro. El centro guarda información sensible sobre la vida de vecinas y vecinos — recojan sólo lo necesario, cuídenla bien y compartan los detalles únicamente con quienes los necesitan para ayudar.",
     setupHours: 26,
     defaultCategory: "organizing",
     tasks: [
