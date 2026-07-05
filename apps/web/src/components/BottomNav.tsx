@@ -29,7 +29,11 @@ import {
   IconProfile,
   type IconProps,
 } from "@/components/visual";
-import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
+import {
+  useVirtualKeyboardOpen,
+  useVisualViewportBottomGap,
+  visualViewportGlueStyle,
+} from "@/lib/useVirtualKeyboard";
 
 interface NavItem {
   to: string;
@@ -88,6 +92,10 @@ function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
 export function BottomNav() {
   const { t } = useTranslation();
   const keyboardOpen = useVirtualKeyboardOpen();
+  // Keyboard CLOSED but viewports diverged (iOS's post-dismissal
+  // stuck state): translate the bar back onto the bottom the member
+  // sees. See useVirtualKeyboard.ts for the two-part strategy.
+  const bottomGap = useVisualViewportBottomGap();
   // While the on-screen keyboard is up, `fixed bottom-0` pins to the
   // LAYOUT viewport that iOS/Android refuse to resize, so the bar
   // would float detached mid-screen above the keyboard (see
@@ -98,6 +106,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label={t("nav.primaryNav")}
+      style={visualViewportGlueStyle(bottomGap)}
       className="fixed inset-x-0 bottom-0 z-30 transform-gpu border-t
                  border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70

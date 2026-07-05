@@ -24,7 +24,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
 import { flushOutboxNow } from "@/lib/outbox";
 import { useOnlineStatus } from "@/lib/useOnlineStatus";
-import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
+import {
+  useVirtualKeyboardOpen,
+  useVisualViewportBottomGap,
+  visualViewportGlueStyle,
+} from "@/lib/useVirtualKeyboard";
 import { useToast } from "@/state/ToastContext";
 
 // Ambient state, not a notification. The banner reflects a condition
@@ -54,6 +58,10 @@ export function OfflineBanner() {
   const online = useOnlineStatus();
   const { showToast } = useToast();
   const keyboardOpen = useVirtualKeyboardOpen();
+  // Rides the same visual-viewport correction as the BottomNav it
+  // hovers above, so the pair never splits apart in iOS's
+  // post-keyboard stuck state (see useVirtualKeyboard.ts).
+  const bottomGap = useVisualViewportBottomGap();
 
   // Read-only view of the outbox: rows the worker hasn't delivered
   // yet. Live so a post created while offline bumps the count
@@ -94,6 +102,7 @@ export function OfflineBanner() {
       // mid-screen (see useVirtualKeyboard.ts), but the live region
       // must stay in the a11y tree so offline transitions announce
       // exactly once regardless of keyboard state.
+      style={visualViewportGlueStyle(bottomGap)}
       className={`pointer-events-none fixed inset-x-0 z-20 px-4
                  bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-16
                  ${keyboardOpen ? "opacity-0" : ""}`}
