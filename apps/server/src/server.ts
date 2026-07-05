@@ -97,10 +97,14 @@ export async function buildServer({
     // 64 KB body cap: an Exchange JSON is well under 2 KB; oversize
     // bodies are abuse.
     bodyLimit: 64 * 1024,
-    // Disable Fastify's default trustProxy so X-Forwarded-For from a
-    // misconfigured upstream doesn't put member IPs into the rate
-    // limiter's keys (that would be a logged identifier in disguise).
-    trustProxy: false,
+    // trustProxy is OFF by default so a spoofed X-Forwarded-For from a
+    // direct connection can't influence `req.ip`. Behind the documented
+    // Caddy reverse proxy (which terminates on the same host), set
+    // TRUST_PROXY=loopback so `req.ip` becomes the REAL client IP —
+    // otherwise every client shares the proxy's loopback address and
+    // collapses into ONE rate-limit bucket (Round-4 review). The IP is
+    // still only ever hashed to a bucket, never stored raw.
+    trustProxy: config.trustProxy === "" ? false : config.trustProxy,
   });
 
   // Security headers per docs/operator-guide.md §4 (Caddyfile shows the

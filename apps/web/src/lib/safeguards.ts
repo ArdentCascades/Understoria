@@ -68,12 +68,14 @@ export function assertWithinDailyLimit(
   config: NodeConfig = DEFAULT_NODE_CONFIG,
 ): void {
   const limit = config.dailyHelperLimit;
-  const dayStart = Math.floor(now / MS_PER_DAY) * MS_PER_DAY;
+  // Rolling 24-hour window, not a fixed UTC calendar day (Round-4
+  // review). The config field documents "a 24-hour window", but a UTC
+  // bucket let a helper do `limit` exchanges at 23:50 UTC and `limit`
+  // more at 00:10 — double the hard stop in 20 minutes (and it reset
+  // mid-afternoon for a US-west community).
+  const windowStart = now - MS_PER_DAY;
   const count = existingExchanges.filter(
-    (x) =>
-      x.helperKey === helperKey &&
-      x.completedAt >= dayStart &&
-      x.completedAt < dayStart + MS_PER_DAY,
+    (x) => x.helperKey === helperKey && x.completedAt >= windowStart,
   ).length;
   if (count >= limit) {
     throw new DailyLimitExceededError(limit);

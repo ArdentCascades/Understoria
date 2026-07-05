@@ -469,6 +469,66 @@ describe("POST /posts", () => {
     });
     expect(res.statusCode).toBe(400);
   });
+
+  it("rejects a post whose title exceeds the length cap", async () => {
+    // A properly-signed post with a ~60 KB title must be refused at the
+    // shape gate (400) BEFORE signature verification (422) — the cap
+    // exists so a valid signature can't smuggle unbounded free text
+    // onto the wire and into federation (Round-4 review).
+    const poster = generateKeyPair();
+    const immutable = {
+      id: `p_oversize_title_${Date.now()}`,
+      type: "NEED" as const,
+      category: "transport" as const,
+      title: "x".repeat(60_000),
+      description: "short",
+      estimatedHours: 1,
+      urgency: "medium" as const,
+      postedBy: poster.publicKey,
+      createdAt: Date.now(),
+      expiresAt: null,
+      locationZone: "north",
+      nodeId: "node_test",
+    };
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: {
+        ...immutable,
+        signature: sign(canonicalPostPayload(immutable), poster.secretKey),
+      },
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toMatchObject({ error: "invalid_body" });
+  });
+
+  it("rejects a post whose description exceeds the length cap", async () => {
+    const poster = generateKeyPair();
+    const immutable = {
+      id: `p_oversize_desc_${Date.now()}`,
+      type: "NEED" as const,
+      category: "transport" as const,
+      title: "Help getting to clinic",
+      description: "x".repeat(60_000),
+      estimatedHours: 1,
+      urgency: "medium" as const,
+      postedBy: poster.publicKey,
+      createdAt: Date.now(),
+      expiresAt: null,
+      locationZone: "north",
+      nodeId: "node_test",
+    };
+    const res = await app.inject({
+      method: "POST",
+      url: "/posts",
+      payload: {
+        ...immutable,
+        signature: sign(canonicalPostPayload(immutable), poster.secretKey),
+      },
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toMatchObject({ error: "invalid_body" });
+  });
 });
 
 describe("GET /posts", () => {

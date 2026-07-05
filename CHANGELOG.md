@@ -9,6 +9,50 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **Rate limiting no longer collapses to one bucket behind the reverse
+  proxy (Round-4 review).** `trustProxy` was hard-off, so behind the
+  documented Caddy proxy every request carried the proxy's loopback
+  address and the whole community shared ONE per-minute rate-limit
+  bucket — one noisy client throttled everyone, and per-client limits
+  were unenforceable. A new `TRUST_PROXY` env var (default off, so a
+  spoofed `X-Forwarded-For` on a direct connection still can't influence
+  `req.ip`) lets the operator set `loopback` when fronted by the proxy,
+  restoring real per-client buckets. The IP is still only ever HASHED to
+  a bucket, never stored raw. Documented in `docs/operator-guide.md`.
+- **Pairing fingerprint widened to 64 bits (Round-4 review).** The
+  device-pairing safety number rendered only the first 4 bytes (32 bits)
+  of the public key. Because the downstream `publickey_mismatch` check
+  confirms only that the envelope's key pair is internally consistent —
+  an attacker's own valid keypair passes it — the fingerprint is the
+  sole defense against a mid-flow QR swap, and a 32-bit prefix was
+  grindable offline (~2^32 keygens to forge a match). It now renders 8
+  bytes as `XXXX XXXX XXXX XXXX`, pushing a pre-grinding attack out of
+  practical reach while still reading aloud in one breath.
+
+### Fixed
+- **Posts now cap their free-text fields on the wire (Round-4 review).**
+  Events and task comments already bounded their free text, but a signed
+  post's `title`/`description`/`locationZone` were length-unchecked, so a
+  validly-signed post carrying a ~60 KB title (bounded only by the 64 KB
+  body cap) was accepted and federated verbatim. `parsePost` now enforces
+  the same ceilings the event validator uses (title/location 200,
+  description 2000), rejecting oversize posts at the shape gate before
+  signature verification.
+- **RSVP writes are guarded against ghost and cancelled events (Round-4
+  review).** `rsvpToEvent` never checked the event exists, so a stray
+  call wrote a dangling RSVP row for an event not on this node; it now
+  refuses. It also re-asserts organizer-authoritative cancellation (the
+  same check the calendar uses) so a tap landing in the render window
+  after an event is cancelled can no longer record an RSVP to it.
+- **Daily exchange limit counts a rolling 24 hours, not a UTC calendar
+  bucket (Round-4 review).** The hard-stop `dailyHelperLimit` was
+  evaluated against a fixed UTC day, so a helper could hit the limit at
+  23:50 UTC and the limit again at 00:10 — double the cap in twenty
+  minutes, and the window reset mid-afternoon for a US-west community.
+  It now counts exchanges completed within the trailing 24 hours, which
+  the config field already described.
+
 ### Fixed
 - **Disputes now resolve (Round-4 review).** Closing a dispute proposal
   only stamped the proposal row; nothing transitioned the flagged post

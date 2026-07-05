@@ -269,6 +269,15 @@ const POST_STRING_FIELDS = [
   "signature",
 ] as const;
 
+// Free-text length ceilings for posts (Round-4 review). Events and
+// task comments already cap their free text; posts did not, so a
+// signed post with a ~60 KB title/description sailed through (bounded
+// only by the 64 KB body cap) and federated verbatim. Mirrors the
+// event ceilings.
+const POST_TITLE_MAX = 200;
+const POST_DESCRIPTION_MAX = 2000;
+const POST_LOCATION_MAX = 200;
+
 export function parsePost(input: unknown): ParsePostResult {
   if (typeof input !== "object" || input === null) {
     return { ok: false, error: "body must be a JSON object" };
@@ -284,6 +293,22 @@ export function parsePost(input: unknown): ParsePostResult {
   // just a title. Required to be a string, not non-empty.
   if (typeof r.description !== "string") {
     return { ok: false, error: "description must be a string" };
+  }
+  // Free-text length caps (Round-4 review).
+  if ((r.title as string).length > POST_TITLE_MAX) {
+    return { ok: false, error: `title exceeds ${POST_TITLE_MAX} characters` };
+  }
+  if ((r.description as string).length > POST_DESCRIPTION_MAX) {
+    return {
+      ok: false,
+      error: `description exceeds ${POST_DESCRIPTION_MAX} characters`,
+    };
+  }
+  if ((r.locationZone as string).length > POST_LOCATION_MAX) {
+    return {
+      ok: false,
+      error: `locationZone exceeds ${POST_LOCATION_MAX} characters`,
+    };
   }
   if (
     typeof r.estimatedHours !== "number" ||

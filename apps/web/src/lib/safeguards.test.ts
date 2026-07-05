@@ -23,6 +23,7 @@ import {
   assertWithinDailyLimit,
   DailyLimitExceededError,
   evaluateSafeguards,
+  exceedsDailyLimit,
 } from "./safeguards";
 import type { Exchange } from "@/types";
 
@@ -92,6 +93,70 @@ describe("assertWithinDailyLimit", () => {
       exchange("3", "d", "a", now - 3 * 60 * 60 * 1000),
     ];
     expect(() => assertWithinDailyLimit("a", existing, now)).not.toThrow();
+  });
+
+  it("counts across a rolling 24h window, not a UTC calendar bucket", () => {
+    // A UTC-bucket check reset at midnight, so a helper could do the
+    // whole limit late one evening and the whole limit again just after
+    // midnight — double the hard stop in minutes (Round-4 review, L5).
+    // The rolling window still sees the earlier exchanges, so the cap
+    // holds regardless of where the calendar day boundary falls.
+    const midnight = 100 * DAY; // exactly a UTC day boundary
+    const existing = [
+      exchange("1", "a", "b", midnight - 20 * 60 * 1000), // 23:40 prev day
+      exchange("2", "a", "c", midnight - 15 * 60 * 1000), // 23:45 prev day
+      exchange("3", "a", "d", midnight - 10 * 60 * 1000), // 23:50 prev day
+    ];
+    // Ten minutes into the new UTC day — a bucket check would see zero.
+    const justAfterMidnight = midnight + 10 * 60 * 1000;
+    expect(() =>
+      assertWithinDailyLimit("a", existing, justAfterMidnight),
+    ).toThrow(DailyLimitExceededError);
+  });
+
+  it("drops an exchange that has just aged past the 24h window", () => {
+    // Two still count (23h and 12h ago); the third is 24h + 1min old and
+    // falls outside the rolling window, so the helper is back under the
+    // limit of three.
+    const existing = [
+      exchange("1", "a", "b", now - (DAY + 60 * 1000)),
+      exchange("2", "a", "c", now - 23 * 60 * 60 * 1000),
+      exchange("3", "a", "d", now - 12 * 60 * 60 * 1000),
+    ];
+    expect(() => assertWithinDailyLimit("a", existing, now)).not.toThrow();
+  });
+});
+
+describe("exceedsDailyLimit", () => {
+  const now = 100 * DAY + 12 * 60 * 60 * 1000;
+
+  it("is false under the limit", () => {
+    const existing = [
+      exchange("1", "a", "b", now - 1 * 60 * 60 * 1000),
+      exchange("2", "a", "c", now - 2 * 60 * 60 * 1000),
+    ];
+    expect(exceedsDailyLimit("a", existing, now)).toBe(false);
+  });
+
+  it("is true at the limit — the non-throwing auto-confirm variant", () => {
+    const existing = [
+      exchange("1", "a", "b", now - 1 * 60 * 60 * 1000),
+      exchange("2", "a", "c", now - 2 * 60 * 60 * 1000),
+      exchange("3", "a", "d", now - 3 * 60 * 60 * 1000),
+    ];
+    // Same rolling-window arithmetic as the hard stop, but returns a
+    // boolean instead of throwing so a system-signed exchange can be
+    // flagged rather than stranded.
+    expect(exceedsDailyLimit("a", existing, now)).toBe(true);
+  });
+
+  it("uses the rolling window, dropping exchanges older than 24h", () => {
+    const existing = [
+      exchange("1", "a", "b", now - (DAY + 60 * 1000)),
+      exchange("2", "a", "c", now - 2 * 60 * 60 * 1000),
+      exchange("3", "a", "d", now - 3 * 60 * 60 * 1000),
+    ];
+    expect(exceedsDailyLimit("a", existing, now)).toBe(false);
   });
 });
 
