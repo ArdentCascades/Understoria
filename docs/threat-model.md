@@ -715,6 +715,33 @@ We are not trying to protect against:
   a project↔event correlation is the organizer's own editable
   free-text title, decided in front of the §3 signing card; no
   `projectId` correlator is ever published.
+  Shift signups (`docs/shift-signups.md`) likewise do NOT widen this
+  surface: shift definitions and signups are local-only Dexie rows in
+  the `EventRSVP` posture — the `"event_shift"` and `"shift_signup"`
+  discriminators are rejected at the `OutboxRow.kind` type level,
+  there is no route, no cursor, no pull helper, and an event with
+  twelve shifts federates byte-for-byte identical to one with none.
+  This matters doubly here: shift structure is an operational
+  schedule (who is expected where, in which time slot) — a sharper
+  version of the location+time signal this entry already carries —
+  and a signup is per-slot attendance INTENT, strictly finer-grained
+  than the RSVP rows already kept off the wire. The only
+  member-chosen channel by which shift structure can reach the wire
+  is the organizer's own free-text description, decided in front of
+  the §3 signing card.
+  One permanent boundary, recorded here so it stays visible to
+  contributors reading the threat model rather than the design note:
+  **no `Exchange.postId` label may ever encode an event id, shift
+  id, or any event-derived identifier.** Exchanges federate, and
+  such a label would publish "member X exchanged hours in connection
+  with event Y, slot Z" — signed by both parties, permanent, public:
+  the federated attendance graph rejected in `community-events.md`
+  §11.1, rebuilt through a side door. The shift credit bridge is
+  prefill-only (`shift-signups.md` §9.3): the resulting exchange is
+  indistinguishable on the wire from one recorded with no shifts
+  involved, and nothing may ever reconcile the signup roster against
+  exchanges (that comparison is the attendance tracking
+  `community-events.md` §11.6 permanently rejected).
 
 - **Member blocking is a local-only personal-relief surface.**
   *Shipped — `Block` and `previouslyBlocked` are local Dexie rows;

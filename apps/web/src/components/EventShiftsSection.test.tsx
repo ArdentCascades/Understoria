@@ -26,6 +26,7 @@
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Event, EventShiftRow, ShiftSignupRow } from "@/types";
 
@@ -130,6 +131,8 @@ interface RenderProps {
   isOrganizer?: boolean;
   isCancelled?: boolean;
   canSeeRoster?: boolean;
+  creditHref?: string | null;
+  creditProjectTitle?: string | null;
 }
 
 let container: HTMLDivElement;
@@ -144,14 +147,18 @@ function renderSection(
   liveCursor = 0;
   act(() => {
     root.render(
-      <EventShiftsSection
-        event={props.event ?? makeEvent()}
-        memberKey={props.memberKey === undefined ? "viewer-key" : props.memberKey}
-        isOrganizer={props.isOrganizer ?? false}
-        isCancelled={props.isCancelled ?? false}
-        canSeeRoster={props.canSeeRoster ?? false}
-        labelFor={(key) => `name:${key}`}
-      />,
+      <MemoryRouter>
+        <EventShiftsSection
+          event={props.event ?? makeEvent()}
+          memberKey={props.memberKey === undefined ? "viewer-key" : props.memberKey}
+          isOrganizer={props.isOrganizer ?? false}
+          isCancelled={props.isCancelled ?? false}
+          canSeeRoster={props.canSeeRoster ?? false}
+          labelFor={(key) => `name:${key}`}
+          creditHref={props.creditHref ?? null}
+          creditProjectTitle={props.creditProjectTitle ?? null}
+        />
+      </MemoryRouter>,
     );
   });
 }
@@ -356,5 +363,59 @@ describe("EventShiftsSection — §5.2 lifecycle surfaces", () => {
     });
     click(buttons().find((b) => b.textContent === "Remove this shift"));
     expect(deleteShiftMock).toHaveBeenCalledWith("shift_1", "organizer-key");
+  });
+});
+
+describe("EventShiftsSection — §9.3 credit bridge (prefill, not plumbing)", () => {
+  const passedShift = () =>
+    makeShift({
+      startsAt: NOW - 3 * 60 * 60 * 1000,
+      endsAt: NOW - 60 * 60 * 1000,
+    });
+
+  it("offers the project path on a passed work-day shift to a member on it", () => {
+    renderSection(
+      [passedShift()],
+      [makeSignup({ memberKey: "viewer-key" })],
+      { creditHref: "/project/p1", creditProjectTitle: "Community Fridge" },
+    );
+    const link = container.querySelector('a[href="/project/p1"]');
+    expect(link).toBeTruthy();
+    expect(link?.textContent).toContain("Community Fridge");
+  });
+
+  it("offers it to the organizer even when they are not on the shift", () => {
+    renderSection([passedShift()], [makeSignup({ memberKey: "member-a" })], {
+      isOrganizer: true,
+      creditHref: "/project/p1",
+      creditProjectTitle: "Community Fridge",
+    });
+    expect(container.querySelector('a[href="/project/p1"]')).toBeTruthy();
+  });
+
+  it("shows nothing to a member who was not on the shift", () => {
+    renderSection([passedShift()], [makeSignup({ memberKey: "member-a" })], {
+      creditHref: "/project/p1",
+      creditProjectTitle: "Community Fridge",
+    });
+    expect(container.querySelector('a[href="/project/p1"]')).toBeNull();
+  });
+
+  it("shows nothing before the shift has passed", () => {
+    renderSection(
+      [makeShift()],
+      [makeSignup({ memberKey: "viewer-key" })],
+      { creditHref: "/project/p1", creditProjectTitle: "Community Fridge" },
+    );
+    expect(container.querySelector('a[href="/project/p1"]')).toBeNull();
+  });
+
+  it("shows nothing on a plain event (no credit path — §14 ruling 1)", () => {
+    renderSection(
+      [passedShift()],
+      [makeSignup({ memberKey: "viewer-key" })],
+      { creditHref: null },
+    );
+    expect(container.querySelector("a")).toBeNull();
   });
 });

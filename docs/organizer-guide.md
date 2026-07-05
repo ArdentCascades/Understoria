@@ -311,8 +311,50 @@ A few things to be deliberate about when you create one:
   optional reason text reaches the RSVP'd members' attention
   rails, and the re-created event is its own consent moment.
 
+### Shifts — structuring the day
+
+Once an event exists, you can break it into **shifts** on the
+event page: a label ("Setup crew", "Driver"), a time window, and
+an optional spot count. Members sign themselves up; signing up
+also RSVPs them "Going," so your attendee list and the day-of
+attention item stay coherent without extra bookkeeping. Shifts,
+like RSVPs, live only on your node — a peer community sees a plain
+event, and if you want cross-node readers to know the day has
+structure, say so in the description (that free text is the one
+channel you control, decided in front of the signing card).
+
+Things to be deliberate about:
+
+- **Spots are invitations, not scoreboards.** The app renders
+  "2 spots open," never "only 2 of 4 filled." Match that register
+  when you talk about it in the group — an unfilled shift is an
+  open door, not a failure. Two people is still a work party.
+- **You can't edit or delete a shift people have joined.** Times
+  and labels are fixed at creation (an edit would silently move
+  the people who said yes — same reasoning as events), and a
+  shift with signups can't be deleted. If the plan changes, talk
+  to the people on it (they can move themselves in one tap), or
+  cancel and re-create the event, which notifies everyone who
+  RSVP'd. Capacity can always be raised; it can never drop below
+  the people already signed up.
+- **Members place themselves.** There is no "add member to
+  shift" — putting someone else's name on a slot is their tap to
+  make, on their device. If someone asks you aloud, hand the
+  moment back to them: "sign up on the event page so it's your
+  choice on your device."
+- **A signup is intent, not attendance.** There is no check-in
+  and no reconciliation of who signed up versus who came or who
+  recorded hours — permanently. After a work-day shift passes,
+  the app offers the people on it (and you) a quiet link back to
+  the project, where hours flow through the same task
+  confirmation you already use, with the helper stating their own
+  actual time. Nothing about that exchange references the event
+  or the shift on the wire, and the app never compares the roster
+  to the credit.
+
 The full design and the values reasoning live in
-[`community-events.md`](community-events.md); the threat-model
+[`community-events.md`](community-events.md) and
+[`shift-signups.md`](shift-signups.md); the threat-model
 entry covering the wire surface is in `threat-model.md` §7
 ("Federated `Event` records widen the public wire surface").
 

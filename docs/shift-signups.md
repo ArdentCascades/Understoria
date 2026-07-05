@@ -1,33 +1,38 @@
 # Understoria — Shift signups (design note)
 
-> **Status:** **proposed** — design only; no implementation PRs
-> yet. This note is the predicate for the implementation work, the
-> same way `docs/community-events.md` (PR #186) and
-> `docs/event-need-bridge.md` were predicates for theirs. Read
-> alongside `docs/community-events.md` (whose `Event` + `EventRSVP`
+> **Status:** **phase 1 shipped.** The §14 rulings were settled by
+> operator adoption of every recommended default; implementation
+> landed as PRs B, C, E, F per §13 (D loudly skipped, as designed),
+> with the threat-model §7 paragraphs and the member/organizer
+> guide sections in PR F. Read alongside
+> `docs/community-events.md` (whose `Event` + `EventRSVP`
 > primitives this design extends, and whose §11.6
-> attendance-tracking rejection this design must honor at every
-> turn), `docs/community-events.md` §10.1 (project work days — the
+> attendance-tracking rejection this design honors at every turn),
+> `docs/community-events.md` §10.1 (project work days — the
 > local-only event⇄project link shifts compose with),
 > `docs/event-need-bridge.md` (the proposed need⇄event bridge,
 > whose federation analysis §7 borrows), and
 > `docs/task-ordering-and-dependencies.md` (the task-side
 > organizing surface this complements). No threat-model §7 entry
-> ships with this note because the recommended shape adds **zero
-> new wire bytes** — see §7 and §12. One genuinely new hazard this
-> note documents as a permanent boundary: the federated
+> shipped with this work because the shape adds **zero new wire
+> bytes** — see §7 and §12. One genuinely new hazard this note
+> documents as a permanent boundary: the federated
 > `Exchange.postId` label as an attendance side-channel (§9.2).
 
 ---
 
 ## §1 Status
 
-Proposed. This doc answers the design questions (what a shift is,
-who defines one, signup semantics and visibility, federation
-posture, the credit bridge and its wire trap) and sketches the
-implementation phases in §13. Nothing in this note is code yet.
-Four genuinely open decisions are marked "Operator ruling needed"
-in §14, each with a recommended default.
+**Phase 1 shipped.** The doc answered the design questions (what a
+shift is, who defines one, signup semantics and visibility,
+federation posture, the credit bridge and its wire trap); the four
+§14 open decisions were settled by operator ruling — each adopted
+its recommended default (all four defer/skip, so nothing in the
+shipped surface depends on an unsettled question). Per-PR shipping
+notes live in §13. What remains open is only the §14 follow-up
+work those rulings deferred: a direct-exchange label design (its
+own note), organizer-assisted signup, skill-matched discovery, and
+co-organizer shift authority — each awaiting pilot signal.
 
 ## §2 Why now
 
@@ -637,54 +642,77 @@ obligations instead:
 ## §13 Implementation phases
 
 Following the house PR-ladder convention, with the loud skip
-named:
+named. All four phases have shipped; each entry records what
+actually landed where it drifted from the sketch.
 
-- **PR B — types + schema + locks.** `EventShiftRow` +
+- **PR B — types + schema + locks.** *Shipped.* `EventShiftRow` +
   `ShiftSignupRow` in `apps/web/src/types/index.ts` with the full
-  negative-space doc-comments; Dexie tables at the next free
-  version; `OutboxRow.kind` doc-comment gains both
-  intentional-absence notes; negative tests (`@ts-expect-error`
-  on the kind union, no-enqueue-helpers, no-pull-helpers,
-  no-roster-reconciliation-helper per §9.3); soft-purge + data-
-  export exclusion wiring + tests. No UI.
-- **PR C — data layer.** `apps/web/src/db/eventShifts.ts`:
-  `addShift` (organizer re-validation, endsAt > startsAt, label
-  1..100), `deleteShift` (refuses with signups, §5.2),
-  `raiseShiftCapacity` (floor at current signups), `signUpForShift`
-  (one transaction: dedupe on `[shiftId+memberKey]`, compose
-  `rsvpToEvent` — inheriting its block/ghost/cancelled guards —
-  then write the signup), `removeSignup`, RSVP-downgrade hook
-  (not_going clears that member's signups for the event, §6.1),
-  query helpers (`listShiftsForEvent`, `listSignupsForShift`,
-  `mySignups`). Tests including the forged-authority, cancelled-
-  event, and blocked-pair degradation cases.
+  negative-space doc-comments; Dexie v28 (`eventShifts`,
+  `shiftSignups` — the `[shiftId+memberKey]` compound backs the
+  signup dedupe and `[eventId+memberKey]` backs the RSVP-downgrade
+  clear); `OutboxRow.kind` doc-comment gained both
+  intentional-absence notes; soft-purge + data-export exclusion
+  wiring + tests. The negative tests (`@ts-expect-error` on the
+  kind union, no-enqueue-helpers, no-pull-helpers,
+  no-roster-reconciliation-helper per §9.3) landed in
+  `eventShifts.test.ts` alongside PR C's behavioral suite.
+- **PR C — data layer.** *Shipped.*
+  `apps/web/src/db/eventShifts.ts`: `addShift` (organizer
+  re-validation, refuses cancelled and passed events,
+  endsAt > startsAt, label 1..100), `deleteShift` (refuses with
+  signups, §5.2), `setShiftCapacity` (named for what it does — it
+  can also *lower* to any value ≥ the current roster per §5.2, so
+  the sketch's `raiseShiftCapacity` name was wrong), `signUpForShift`
+  (one transaction: compose `rsvpToEvent` — inheriting its
+  block/ghost/cancelled guards — then the signup write, deduped on
+  `[shiftId+memberKey]`; also refuses a shift whose `endsAt` has
+  passed — intent for a finished slot is meaningless), `removeSignup`,
+  the RSVP-downgrade hook (a `not_going` clears that member's
+  signups for the event atomically, §6.1 — `rsvpToEvent` became
+  transactional to guarantee it), and query helpers
+  (`listShiftsForEvent`, `listSignupsForShift`,
+  `listSignupsForEvent`, `signupCountForShift`,
+  `listSignupsForMember`). Tests cover the forged-authority,
+  cancelled-event, and blocked-pair degradation cases.
 - **PR D — server federation. LOUDLY SKIPPED.** No server work
   exists for this feature; the skip is the design (§7). Same
   loud-skip pattern as `blocking.md` §13, the task-ordering
-  workstream, and the event↔need bridge. The PR-C description
-  links this section so nobody goes looking for the missing PR.
-- **PR E — UI: define + sign up + rosters.** Shift list on the
-  event detail page (times, labels, spot counts per §6.4 copy
-  discipline); organizer's add-shift form (and the same form
-  reachable from `EventNew` post-creation success state — shifts
-  are added *after* the signed event exists, keeping the signing
-  card unchanged); the §6.2 extended consent card; per-shift
-  roster rendering per the §6.3 tiers; "my shifts" on the
-  member's own event-page view; cancelled-event inert rendering.
-  i18n en/es parity; accessibility DOM order per
-  `docs/accessibility.md`.
-- **PR F — composition + credit prefill.** The §9.3 "Record time
-  together" deep-links where a credit path exists (need claims,
-  project-task confirmation), hours/category prefilled in-form
-  only; the negative reconciliation test; the two §12 threat-model
-  paragraph obligations; member-guide + organizer-guide sections
-  (the organizer guide gets the §6.4 copy discipline as guidance:
-  spots are invitations).
+  workstream, and the event↔need bridge.
+- **PR E — UI: define + sign up + rosters.** *Shipped.*
+  `EventShiftsSection` on the event detail page: shift list
+  (times, labels, spot counts per §6.4 copy discipline), the §6.2
+  extended consent card, per-shift roster per the §6.3 tiers,
+  signed-up state + one-tap removal, organizer add-shift form
+  (dates seeded from the event's day, times deliberately empty)
+  and empty-shift delete, cancelled-event inert rendering. i18n
+  en/es parity. Two deliberate narrowings: shifts are added from
+  the event page only (`EventNew` navigates there on success, so
+  the sketch's "reachable from the success state" is satisfied by
+  navigation, not a second form), and a capacity-EDIT control
+  shipped in the data layer but not the UI — pilot signal will
+  say whether organizers actually reach for it.
+- **PR F — composition + credit prefill.** *Shipped.* The §9.3
+  "Record time together" affordance renders on PASSED shifts of a
+  project-linked (work-day) event, to the organizer and to each
+  member on the shift, deep-linking to the linked project — where
+  the existing task-confirmation flow records credit with
+  claimer-stated actual hours (`equal-time` already lives there,
+  so no in-form hours prefill was needed on this path; the
+  in-form-prefill language in §9.3 applies to the need-claim path
+  when the event↔need bridge ships). Plain events render no
+  credit affordance (§14 ruling 1). Plus: the negative
+  reconciliation test, the two §12 threat-model paragraph
+  obligations, and the member-guide + organizer-guide sections
+  (the organizer guide carries the §6.4 copy discipline as
+  guidance: spots are invitations).
 
-## §14 Open questions — Operator ruling needed
+## §14 Open questions — RULED (operator adopted every
+recommended default)
 
-Four, each with a recommended default; everything else in this
-note is decided.
+All four rulings were settled at implementation time: the operator
+adopted each recommended default. The entries below keep the full
+option analysis as historical record, with the ruling stamped
+inline.
 
 1. **Credit for plain-event shifts (§9.3, §10.3).** A potluck
    setup crew has no need or project to hang an exchange on, and
@@ -692,27 +720,23 @@ note is decided.
    affordance for plain events (phase-1 recommendation); (b) a
    generic direct-exchange label (e.g. `"direct:<uuid>"`) with no
    event linkage, designed as its own small wire-scope addition
-   to `verifyExchangeLabel`. **Recommended default: (a), and
-   file (b) as its own follow-up design** — a direct-exchange
-   label is useful far beyond shifts and deserves its own
-   ingestion-scope review rather than riding this ladder.
-2. **Organizer signs up a member who asked aloud (§11.6).** Ship
-   phase 1 without it and watch for pilot signal. **Recommended
-   default: defer** — the member tapping on their own device is
-   the consent floor, and the in-person workaround (hand them
-   the organizer's phone? no: they open their own) costs
-   seconds.
+   to `verifyExchangeLabel`. **RULED: (a).** Plain events ship no
+   credit affordance; (b) is filed as its own follow-up design —
+   a direct-exchange label is useful far beyond shifts and
+   deserves its own ingestion-scope review rather than riding
+   this ladder.
+2. **Organizer signs up a member who asked aloud (§11.6).**
+   **RULED: deferred.** The member tapping on their own device is
+   the consent floor, and the in-person workaround costs seconds:
+   they open their own phone. Revisit only on real pilot signal.
 3. **Skill-matched discovery (§10.4).** "Open shifts matching
-   your offers" as a Board-adjacent surface. **Recommended
-   default: defer to its own design note** ("ways to plug in"),
-   which should also weigh the quiet-pressure risk of
-   recommendation surfaces against `asking-never-gated`'s
-   receiving-side twin: browsing stays browsing, never a queue
-   assigned to you.
-4. **Shift authority for project co-organizers (§5.1).** Should
-   any co-organizer of a linked project hold shift authority on a
-   work-day event, not just the event's creator? **Recommended
-   default: defer** — one-organizer-per-event matches the event
+   your offers" as a Board-adjacent surface. **RULED: deferred to
+   its own design note** ("ways to plug in"), which must weigh
+   the quiet-pressure risk of recommendation surfaces against
+   `asking-never-gated`'s receiving-side twin: browsing stays
+   browsing, never a queue assigned to you.
+4. **Shift authority for project co-organizers (§5.1).**
+   **RULED: deferred.** One-organizer-per-event matches the event
    authority model everywhere else; widening it is a coherent
    later step if pilots show work-day scheduling bottlenecking on
    one person.

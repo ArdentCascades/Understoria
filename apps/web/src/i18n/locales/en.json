@@ -527,6 +527,7 @@
       "confirmButton": "Sign up",
       "recorded": "You're signed up. Saved on this device.",
       "removed": "Signup removed.",
+      "recordTimeLink": "Record time together — {{project}}",
       "addButton": "Add a shift",
       "addConfirm": "Add shift",
       "added": "Shift added.",
