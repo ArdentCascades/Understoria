@@ -14,7 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
-import { addProjectTask, createProject } from "@/db/projects";
+import { createProjectWithTasks } from "@/db/projects";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
@@ -28,6 +28,12 @@ import {
   type RecurringCadence,
 } from "@/content/projectTemplates";
 import { getActiveProjectsForTemplate } from "@/lib/templateUsage";
+import {
+  buildStagedTasks,
+  includedStagedTasks,
+  sumIncludedHours,
+  type StagedTemplateTask,
+} from "@/lib/templateStaging";
 import {
   combine,
   optional,
@@ -101,6 +107,39 @@ export default function ProjectNewPage() {
   // expand-again affordance. Desktop (lg+) ignores this state — the
   // sticky left rail stays open. */
   const [pickerExpanded, setPickerExpanded] = useState(true);
+  // Staged-task review rows for the selected template — the member
+  // trims/tunes the list BEFORE anything is created ("Templates are
+  // NOT prescriptions"). Rebuilt fresh on template (re)selection and
+  // on draft restore; per-row edits are deliberately NOT part of the
+  // draft payload (the draft carries templateId; restoring re-stages
+  // the pristine template — a bounded, documented loss).
+  const [stagedTasks, setStagedTasks] = useState<StagedTemplateTask[]>([]);
+
+  /** Apply a staged-row change and keep the target-hours field
+   *  tracking the included sum. The field was seeded from the
+   *  template's setupHours anyway; live-tracking it as the member
+   *  trims keeps the promise ("target = the work you're planning")
+   *  honest, and it stays editable afterwards. */
+  function updateStagedTasks(next: StagedTemplateTask[]) {
+    setStagedTasks(next);
+    setTargetHours(String(sumIncludedHours(next)));
+  }
+
+  function toggleStagedTask(index: number) {
+    updateStagedTasks(
+      stagedTasks.map((row) =>
+        row.index === index ? { ...row, included: !row.included } : row,
+      ),
+    );
+  }
+
+  function setStagedTaskHours(index: number, hours: string) {
+    updateStagedTasks(
+      stagedTasks.map((row) =>
+        row.index === index ? { ...row, hours } : row,
+      ),
+    );
+  }
 
   const validation = useFieldValidation<FieldName>(
     { title, targetHours, deadlineDays },
@@ -161,6 +200,16 @@ export default function ProjectNewPage() {
     // `?? null` covers drafts persisted before templateId joined the
     // payload — see the field's comment on ProjectDraftPayload.
     setSelectedTemplateId(p.templateId ?? null);
+    // Re-stage the pristine template task list. Per-row staging edits
+    // aren't in the draft payload (documented trade-off on the
+    // stagedTasks state) — but targetHours IS restored above, so the
+    // member's tuned total survives even though row toggles reset.
+    if (p.templateId) {
+      const tpl = getTemplate(p.templateId, i18n.resolvedLanguage ?? "en");
+      setStagedTasks(tpl ? buildStagedTasks(tpl) : []);
+    } else {
+      setStagedTasks([]);
+    }
     setPendingDraft(null);
     // Mirror handleSelectTemplate's collapse — the member has made a
     // decision (continue their draft) and the form is the next thing
@@ -184,6 +233,7 @@ export default function ProjectNewPage() {
     if (templateId === null) {
       // "Start from scratch" — leave the form alone. Clearing fields
       // here would surprise a member who already typed something.
+      setStagedTasks([]);
       return;
     }
     const tpl = getTemplate(templateId, i18n.resolvedLanguage ?? "en");
@@ -194,6 +244,7 @@ export default function ProjectNewPage() {
     );
     setCategory(tpl.defaultCategory);
     setTargetHours(String(tpl.setupHours));
+    setStagedTasks(buildStagedTasks(tpl));
   }
 
   // Clearing from the selected-banner is a different intent than the
@@ -204,6 +255,7 @@ export default function ProjectNewPage() {
   // re-expand to actually browse.
   function handleClearTemplate() {
     setSelectedTemplateId(null);
+    setStagedTasks([]);
     setPickerExpanded(true);
   }
 
@@ -235,7 +287,11 @@ export default function ProjectNewPage() {
         : null;
     try {
       setSubmitting(true);
-      const project = await createProject(
+      // One transaction for the project AND its staged tasks — either
+      // everything lands (with skills + remapped dependency edges) or
+      // nothing does. The staged rows already reflect the member's
+      // include/exclude + hours edits from the review step.
+      const { project } = await createProjectWithTasks(
         currentMember!.publicKey,
         {
           title,
@@ -248,38 +304,8 @@ export default function ProjectNewPage() {
           templateId: selectedTemplateId,
         },
         nodeId,
+        includedStagedTasks(stagedTasks, applyRecurringSuffix),
       );
-      // If the member picked a template, stage its tasks now. We loop
-      // addProjectTask rather than wrapping createProject + tasks in
-      // one Dexie transaction so the existing project-creation path
-      // stays untouched — the trade-off is that a crash mid-loop
-      // could leave a partially-populated project, which is
-      // recoverable: the organizer lands on the project page and can
-      // edit or add the rest. The toast still fires after the loop so
-      // the member sees the project as "created" only once the
-      // template is fully applied.
-      if (selectedTemplateId) {
-        const tpl = getTemplate(
-          selectedTemplateId,
-          i18n.resolvedLanguage ?? "en",
-        );
-        if (tpl) {
-          for (const task of tpl.tasks) {
-            await addProjectTask(project.id, currentMember!.publicKey, {
-              title: task.name,
-              description: applyRecurringSuffix(
-                task.description,
-                task.recurringCadence,
-              ),
-              category: project.category,
-              estimatedHours: task.hours,
-              urgency: "low",
-              requiredSkills: [],
-              dependencies: [],
-            });
-          }
-        }
-      }
       await clearDraft(DRAFT_KEY);
       showToast(t("toast.projectCreated"));
       navigate(`/project/${project.id}`);
@@ -427,6 +453,83 @@ export default function ProjectNewPage() {
                 </div>
               );
             })()}
+
+          {/* Staged-task review (templates are not prescriptions):
+              trim and tune the template's task list BEFORE anything
+              is created. Excluded rows are simply not created;
+              dependency edges pointing at excluded tasks are dropped
+              (never rewired — see lib/templateStaging.ts). The
+              target-hours field live-tracks the included sum and
+              stays editable. */}
+          {selectedTemplateId && stagedTasks.length > 0 && (
+            <section
+              aria-labelledby="staged-tasks-heading"
+              className="card mb-4"
+            >
+              <h2
+                id="staged-tasks-heading"
+                className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+              >
+                {t("projects.templates.stagedHeading")}
+              </h2>
+              <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.templates.stagedHint")}
+              </p>
+              <ul className="mt-3 flex flex-col gap-2">
+                {stagedTasks.map((row) => (
+                  <li
+                    key={row.index}
+                    className={`flex items-start gap-3 rounded-lg border border-moss-200 p-3 dark:border-moss-800 ${
+                      row.included ? "" : "opacity-50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-5 w-5 shrink-0"
+                      checked={row.included}
+                      onChange={() => toggleStagedTask(row.index)}
+                      aria-label={t("projects.templates.stagedIncludeAria", {
+                        name: row.name,
+                      })}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{row.name}</p>
+                      {row.skills.length > 0 && (
+                        <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
+                          {t("projects.templates.stagedSkills", {
+                            skills: row.skills.join(", "),
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <label className="flex shrink-0 items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
+                      <input
+                        type="number"
+                        className="input w-16 px-2 py-1 text-sm"
+                        value={row.hours}
+                        min={0.5}
+                        step={0.5}
+                        disabled={!row.included}
+                        onChange={(e) =>
+                          setStagedTaskHours(row.index, e.target.value)
+                        }
+                        aria-label={t("projects.templates.stagedHoursAria", {
+                          name: row.name,
+                        })}
+                      />
+                      {t("projects.templates.stagedHoursUnit")}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.templates.stagedSum", {
+                  count: stagedTasks.filter((r) => r.included).length,
+                  hours: sumIncludedHours(stagedTasks),
+                })}
+              </p>
+            </section>
+          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
             <label className="flex flex-col gap-1">

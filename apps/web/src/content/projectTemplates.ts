@@ -43,6 +43,20 @@ export interface TemplateTask {
   description: string;
   hours: number;
   recurringCadence?: RecurringCadence;
+  /** Suggested skills for the task, localized per template locale.
+   *  Staged into `ProjectTask.requiredSkills`, which feeds the task
+   *  UI's skills rendering (and the proposed ways-to-plug-in
+   *  matching). Plain everyday words — "carpentry", "driving" — the
+   *  same register members use in their own profile skills. */
+  skills?: readonly string[];
+  /** Indexes of EARLIER tasks in this template that should complete
+   *  first — the soft-block "Follows:" framing from
+   *  docs/task-ordering-and-dependencies.md, never a hard gate.
+   *  Remapped to real task ids at creation (and past any tasks the
+   *  member excluded in the staging step). Must reference strictly
+   *  earlier indexes; the drift between locales is prevented by
+   *  authoring both locales from one table (see the content pass). */
+  follows?: readonly number[];
 }
 
 export interface ProjectTemplate {
@@ -56,6 +70,12 @@ export interface ProjectTemplate {
   setupHours: number;
   defaultCategory: ProjectCategory;
   tasks: readonly TemplateTask[];
+  /** True for templates whose recurring crew work (rotas, sessions,
+   *  service days) is the shape the work-day + shifts machinery
+   *  coordinates. Feeds ONE quiet, dismissible, organizer-only line
+   *  on a freshly created project — never a rail item or badge
+   *  (no-notifications). */
+  suggestsWorkDays?: boolean;
 }
 
 export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [

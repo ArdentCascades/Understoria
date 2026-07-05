@@ -715,7 +715,15 @@
           "bigger": "Bigger (25h+)"
         },
         "empty": "No templates match. Try clearing a filter, or start from scratch below."
-      }
+      },
+      "stagedHeading": "Tasks this template will create",
+      "stagedHint": "Templates are a starting point, not a prescription — untick anything your community already has, and tune the hours to your reality.",
+      "stagedIncludeAria": "Include task: {{name}}",
+      "stagedHoursAria": "Estimated hours for {{name}}",
+      "stagedHoursUnit": "h",
+      "stagedSkills": "Helpful skills: {{skills}}",
+      "stagedSum_one": "{{count}} task · about {{hours}}h of setup",
+      "stagedSum_other": "{{count}} tasks · about {{hours}}h of setup"
     },
     "detail": {
       "back": "← Back to projects",
