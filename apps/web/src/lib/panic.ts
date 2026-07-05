@@ -233,6 +233,10 @@ export async function softPurge(): Promise<PurgeResult> {
   //     plus the pairing history are device-graph metadata the schema
   //     classes too sensitive even for the member's own export — a
   //     seized device must not keep them (Round-4 review).
+  //   - `eventShifts` + `shiftSignups`: the shift layer is the
+  //     member's organizing pattern and a per-slot attendance-intent
+  //     graph — the same personal-relief class as `eventRsvps`, only
+  //     finer-grained (docs/shift-signups.md §4).
   await db.transaction(
     "rw",
     [
@@ -242,6 +246,8 @@ export async function softPurge(): Promise<PurgeResult> {
       db.drafts,
       db.eventRsvps,
       db.eventProjectLinks,
+      db.eventShifts,
+      db.shiftSignups,
       db.outbox,
       db.invites,
       db.votes,
@@ -254,6 +260,8 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.drafts.clear();
       await db.eventRsvps.clear();
       await db.eventProjectLinks.clear();
+      await db.eventShifts.clear();
+      await db.shiftSignups.clear();
       await db.outbox.clear();
       await db.invites.clear();
       await db.votes.clear();
@@ -266,6 +274,8 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("drafts");
   tables.push("eventRsvps");
   tables.push("eventProjectLinks");
+  tables.push("eventShifts");
+  tables.push("shiftSignups");
   tables.push("outbox");
   tables.push("invites");
   tables.push("votes");

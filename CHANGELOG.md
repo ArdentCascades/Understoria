@@ -9,6 +9,31 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Shift signups (phase 1).** Events can now be broken into
+  time-boxed, optionally-capped shifts ("Setup crew, 9–12, 4 spots")
+  that members sign themselves up for — the coordination layer
+  between "a work day is on the calendar" and "we have enough hands."
+  Signing up also RSVPs the member "Going" (one transaction), so the
+  block gates, cancelled-event guards, and the existing
+  `event_today` / `event_cancelled` attention items all compose with
+  zero new rail machinery; RSVP'ing "not going" clears the member's
+  signups atomically. Shifts and signups are local-only Dexie rows in
+  the `EventRSVP` posture — never signed, never federated, never
+  exported, cleared by soft-purge; an event with twelve shifts
+  federates byte-for-byte identical to one with none. Spot counts
+  render as invitation ("2 spots open"), never deficit; capacity is
+  soft; there is no check-in, no attendance record, and no
+  roster-vs-exchange reconciliation, permanently. After a work-day
+  shift passes, a quiet link offers the path back to the linked
+  project, where credit flows through the existing claimer-stated
+  task confirmation — nothing on the wire references the event or
+  shift (a permanent boundary now recorded in the threat model: no
+  event-derived identifier may ever appear in an `Exchange.postId`
+  label). Design: `docs/shift-signups.md` (all four §14 rulings
+  adopted their recommended defaults); member/organizer guides
+  updated.
+
 ### Security
 - **Rate limiting no longer collapses to one bucket behind the reverse
   proxy (Round-4 review).** `trustProxy` was hard-off, so behind the

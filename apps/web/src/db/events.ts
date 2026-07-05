@@ -295,56 +295,85 @@ export async function rsvpToEvent(
   input: RsvpToEventInput,
 ): Promise<EventRsvpRow> {
   const now = input.now ?? Date.now();
-  // PR F: Events (RSVP) is a (c) bidirectional gate per
-  // docs/blocking.md §6 — reject the RSVP write in either direction.
-  // Generic-error discipline (§6.1): same not-available copy
-  // cross-node RSVP uses (cited from community-events.md §7.3 in the
-  // design doc). Look up the event's organizer for the block check;
-  // if the event doesn't exist we let the existing flow handle it.
-  const eventRow = await db.events.get(input.eventId);
-  // The event must exist (Round-4 review): without this, a stray call
-  // wrote a ghost RSVP row for an event that isn't here.
-  if (!eventRow) {
-    throw new Error("That event no longer exists.");
-  }
-  if (await isMutuallyBlocked(input.memberKey, eventRow.createdBy)) {
-    throw new Error(BLOCKED_ACTION_MESSAGE);
-  }
-  // Don't RSVP to an organizer-cancelled event (Round-4 review): the
-  // view gates this, but the two live queries update independently, so
-  // a click in the window before re-render could still land. Bind to
-  // organizer authority the same way the calendar does.
-  const cancellation = await db.eventCancellations
-    .where("eventId")
-    .equals(input.eventId)
-    .first();
-  if (
-    cancellation &&
-    isAuthoritativeCancellation(cancellation, eventRow)
-  ) {
-    throw new Error("That event was cancelled.");
-  }
-  const existing = await db.eventRsvps
-    .where("[eventId+memberKey]")
-    .equals([input.eventId, input.memberKey])
-    .first();
-
-  const row: EventRsvpRow = existing
-    ? {
-        ...existing,
-        status: input.status,
-        respondedAt: now,
+  // One transaction so the RSVP write and the not_going signup clear
+  // (below) are atomic — no render window may show a shift signup
+  // without a live RSVP (docs/shift-signups.md §6.1). The scope is a
+  // superset of what signUpForShift composes in, so Dexie nests it.
+  return db.transaction(
+    "rw",
+    [
+      db.events,
+      db.eventCancellations,
+      db.eventRsvps,
+      db.blocks,
+      db.shiftSignups,
+    ],
+    async () => {
+      // PR F: Events (RSVP) is a (c) bidirectional gate per
+      // docs/blocking.md §6 — reject the RSVP write in either direction.
+      // Generic-error discipline (§6.1): same not-available copy
+      // cross-node RSVP uses (cited from community-events.md §7.3 in the
+      // design doc). Look up the event's organizer for the block check;
+      // if the event doesn't exist we let the existing flow handle it.
+      const eventRow = await db.events.get(input.eventId);
+      // The event must exist (Round-4 review): without this, a stray call
+      // wrote a ghost RSVP row for an event that isn't here.
+      if (!eventRow) {
+        throw new Error("That event no longer exists.");
       }
-    : {
-        id: uuid(),
-        eventId: input.eventId,
-        memberKey: input.memberKey,
-        status: input.status,
-        respondedAt: now,
-      };
+      if (await isMutuallyBlocked(input.memberKey, eventRow.createdBy)) {
+        throw new Error(BLOCKED_ACTION_MESSAGE);
+      }
+      // Don't RSVP to an organizer-cancelled event (Round-4 review): the
+      // view gates this, but the two live queries update independently, so
+      // a click in the window before re-render could still land. Bind to
+      // organizer authority the same way the calendar does.
+      const cancellation = await db.eventCancellations
+        .where("eventId")
+        .equals(input.eventId)
+        .first();
+      if (
+        cancellation &&
+        isAuthoritativeCancellation(cancellation, eventRow)
+      ) {
+        throw new Error("That event was cancelled.");
+      }
+      const existing = await db.eventRsvps
+        .where("[eventId+memberKey]")
+        .equals([input.eventId, input.memberKey])
+        .first();
 
-  await db.eventRsvps.put(row);
-  return row;
+      const row: EventRsvpRow = existing
+        ? {
+            ...existing,
+            status: input.status,
+            respondedAt: now,
+          }
+        : {
+            id: uuid(),
+            eventId: input.eventId,
+            memberKey: input.memberKey,
+            status: input.status,
+            respondedAt: now,
+          };
+
+      await db.eventRsvps.put(row);
+
+      // "I'm not coming" must not leave the member's name on any slot
+      // roster: going not_going clears their shift signups for this
+      // event, atomically with the RSVP write
+      // (docs/shift-signups.md §6.1). Removing a single SIGNUP does
+      // NOT downgrade the RSVP — that asymmetry is deliberate.
+      if (input.status === "not_going") {
+        await db.shiftSignups
+          .where("[eventId+memberKey]")
+          .equals([input.eventId, input.memberKey])
+          .delete();
+      }
+
+      return row;
+    },
+  );
 }
 
 /**

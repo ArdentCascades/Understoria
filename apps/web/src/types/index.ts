@@ -150,3 +150,67 @@ export interface EventProjectLinkRow {
   /** Epoch milliseconds, UTC. */
   createdAt: number;
 }
+
+/**
+ * Local-only shift definition — see `docs/shift-signups.md` §4.1.
+ * A time-boxed, optionally-capped slot belonging to a community event
+ * ("Setup crew, 9–12, 4 spots"), on this node only. Never signed,
+ * never enqueued, never pulled, never exported — peer nodes see a
+ * plain event. Same posture as `EventRsvpRow`, `BlockRow`, and
+ * `EventProjectLinkRow`; deliberately NO `signature` and NO `nodeId`,
+ * both absences structural. The `OutboxRow.kind` union in
+ * `db/database.ts` rejects `"event_shift"` at the type level;
+ * `lib/outbox.ts` exposes no `enqueueEventShift`.
+ * `eventShifts.test.ts` locks the negatives in.
+ */
+export interface EventShiftRow {
+  /** UUID for this shift. */
+  id: string;
+  /** References `Event.id` — the federated event this shift
+   *  structures. The pointer never crosses the wire. */
+  eventId: string;
+  /** Free text, 1..100 chars: "Setup crew", "Driver". The label is
+   *  the whole role model — `docs/shift-signups.md` §11.7 rejects a
+   *  structured role registry. */
+  label: string;
+  /** Epoch ms, UTC. Not validated against the event window — a
+   *  driver shift at 8:30 before a 9:00 event is normal. */
+  startsAt: number;
+  /** Epoch ms, UTC. Must be > `startsAt`. */
+  endsAt: number;
+  /** Soft cap on signups; `null` = uncapped. Never enforced as a
+   *  hard limit — same posture as `Event.capacity`
+   *  (`docs/shift-signups.md` §11.5). */
+  capacity: number | null;
+  /** Organizer's pubkey. Re-validated against the parent
+   *  `Event.createdBy` at write time (§5.1). */
+  createdBy: string;
+  /** Epoch ms, UTC. */
+  createdAt: number;
+}
+
+/**
+ * Local-only shift signup — see `docs/shift-signups.md` §4.2.
+ * A member's declared INTENT to fill a shift. Same posture as
+ * `EventRsvpRow`: never signed, never enqueued, never pulled, never
+ * exported; cleared by soft-purge. NOT an attendance record —
+ * nothing may ever compare this table against exchanges or presence
+ * (`docs/community-events.md` §11.6, permanent;
+ * `docs/shift-signups.md` §9). The `OutboxRow.kind` union rejects
+ * `"shift_signup"` at the type level; `lib/outbox.ts` exposes no
+ * `enqueueShiftSignup`.
+ */
+export interface ShiftSignupRow {
+  /** UUID for this signup. */
+  id: string;
+  /** References `EventShiftRow.id`. */
+  shiftId: string;
+  /** Denormalized `Event.id` for query convenience (roster per
+   *  event; RSVP-downgrade clearing). */
+  eventId: string;
+  /** The signing-up member's own pubkey — always the local member,
+   *  same as `EventRSVP.memberKey`. */
+  memberKey: string;
+  /** Epoch ms, UTC. */
+  signedUpAt: number;
+}
