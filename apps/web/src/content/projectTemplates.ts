@@ -224,7 +224,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Storage space, donated tools, a simple check-out system, and a couple of \"librarians.\"",
     setupHours: 21,
-    defaultCategory: "skilled_labor",
+    defaultCategory: "infrastructure",
     tasks: [
       {
         name: "Find storage and open hours",
@@ -349,7 +349,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "A contact list, a meeting spot, basic supplies, and a communication plan that works without internet.",
     setupHours: 24,
-    defaultCategory: "other",
+    defaultCategory: "organizing",
     tasks: [
       {
         name: "Map your neighborhood's risks",
@@ -405,7 +405,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "A space (even pop-up), tables or racks, sorting volunteers, and a regular schedule.",
     setupHours: 19,
-    defaultCategory: "other",
+    defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
     tasks: [
       {
@@ -718,7 +718,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "A core organizing group, accurate local tenant-rights info, a connection to legal aid, and a fast contact system. This project supports tenants and shares public legal information; it does not replace legal advice. Always route individual cases to qualified legal aid before deadlines.",
     setupHours: 26,
-    defaultCategory: "organizing",
+    defaultCategory: "housing",
     tasks: [
       {
         name: "Recruit a core organizing committee",
@@ -1420,7 +1420,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Donated devices, internet access, volunteer tutors, and a space.",
     setupHours: 25,
-    defaultCategory: "education",
+    defaultCategory: "tech",
     tasks: [
       {
         name: "Collect and refurbish devices",
@@ -1476,7 +1476,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Skilled volunteers, materials, tools, and a request system. Stick to work within volunteer competence — route electrical, gas, structural, and roofing jobs to licensed professionals.",
     setupHours: 18,
-    defaultCategory: "skilled_labor",
+    defaultCategory: "housing",
     suggestsWorkDays: true,
     tasks: [
       {
@@ -1828,7 +1828,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "A wood source, a processing and storage site, equipment, a trained crew, and a delivery plan. Chainsaws and splitters are dangerous — allow only trained operators, require protective gear, and brief the crew on safety before every session.",
     setupHours: 24,
-    defaultCategory: "infrastructure",
+    defaultCategory: "mutual_aid_drive",
     tasks: [
       {
         name: "Secure a wood source",
@@ -1884,7 +1884,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "A backhaul internet connection, routers/mesh nodes, technical volunteers, and host sites.",
     setupHours: 26,
-    defaultCategory: "infrastructure",
+    defaultCategory: "tech",
     tasks: [
       {
         name: "Map coverage needs and gaps",
@@ -2054,7 +2054,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Trained and certified preparers, a space, computers, and a scheduling system. Tax returns must be prepared by certified volunteers through a recognized program — this clinic helps with standard filings, not complex situations that need a tax professional.",
     setupHours: 25,
-    defaultCategory: "other",
+    defaultCategory: "skilled_labor",
     tasks: [
       {
         name: "Get preparers trained and certified",
@@ -2167,7 +2167,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Volunteers, info packets, donated welcome items, and a referral system.",
     setupHours: 19,
-    defaultCategory: "other",
+    defaultCategory: "emotional_support",
     tasks: [
       {
         name: "Decide who you'll welcome and how",
@@ -2223,7 +2223,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Storage, donated items, a catalog and checkout system, and a couple of librarians.",
     setupHours: 19,
-    defaultCategory: "other",
+    defaultCategory: "infrastructure",
     tasks: [
       {
         name: "Survey what the community wants to borrow",
@@ -2280,7 +2280,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Access to machines and showers (a partner site or mobile unit), supplies, and volunteers.",
     setupHours: 21,
-    defaultCategory: "other",
+    defaultCategory: "infrastructure",
     tasks: [
       {
         name: "Secure laundry and shower access",
@@ -2563,7 +2563,7 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Volunteer licensed stylists and barbers, a space, supplies, and sanitation.",
     setupHours: 18,
-    defaultCategory: "other",
+    defaultCategory: "skilled_labor",
     tasks: [
       {
         name: "Recruit licensed stylists and barbers",
@@ -3149,7 +3149,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Un espacio de almacenamiento, herramientas donadas, un sistema sencillo de préstamo y un par de \"bibliotecarias\" o \"bibliotecarios\".",
     setupHours: 21,
-    defaultCategory: "skilled_labor",
+    defaultCategory: "infrastructure",
     tasks: [
       {
         name: "Encuentra dónde guardar y un horario de atención",
@@ -3274,7 +3274,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Una lista de contactos, un punto de encuentro, insumos básicos y un plan de comunicación que funcione sin internet.",
     setupHours: 24,
-    defaultCategory: "other",
+    defaultCategory: "organizing",
     tasks: [
       {
         name: "Mapea los riesgos de tu vecindario",
@@ -3330,7 +3330,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Un espacio (incluso temporal), mesas o percheros, personas voluntarias para clasificar y un horario regular.",
     setupHours: 19,
-    defaultCategory: "other",
+    defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
     tasks: [
       {
@@ -3643,7 +3643,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Un grupo organizador base, información local precisa sobre derechos de inquilinas e inquilinos, un vínculo con asistencia legal y un sistema de contacto rápido. Este proyecto apoya a inquilinas e inquilinos y comparte información legal pública; no sustituye la asesoría legal. Siempre canaliza los casos individuales a asistencia legal calificada antes de las fechas límite.",
     setupHours: 26,
-    defaultCategory: "organizing",
+    defaultCategory: "housing",
     tasks: [
       {
         name: "Convoca un comité organizador base",
@@ -4345,7 +4345,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Dispositivos donados, acceso a internet, personas voluntarias para tutorías y un espacio.",
     setupHours: 25,
-    defaultCategory: "education",
+    defaultCategory: "tech",
     tasks: [
       {
         name: "Recolecten y reacondicionen dispositivos",
@@ -4401,7 +4401,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Personas voluntarias con habilidades, materiales, herramientas y un sistema de solicitudes. Quédense dentro de la competencia voluntaria — deriven trabajos eléctricos, de gas, estructurales y de techos a profesionales con licencia.",
     setupHours: 18,
-    defaultCategory: "skilled_labor",
+    defaultCategory: "housing",
     suggestsWorkDays: true,
     tasks: [
       {
@@ -4753,7 +4753,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Una fuente de leña, un sitio de procesamiento y almacenamiento, equipo, una cuadrilla capacitada y un plan de entrega. Las motosierras y las hendidoras son peligrosas — permitan operar sólo a personas capacitadas, exijan equipo de protección y hagan una charla de seguridad antes de cada sesión.",
     setupHours: 24,
-    defaultCategory: "infrastructure",
+    defaultCategory: "mutual_aid_drive",
     tasks: [
       {
         name: "Aseguren una fuente de leña",
@@ -4809,7 +4809,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Una conexión de internet de respaldo, routers y nodos en malla, personas voluntarias con conocimientos técnicos y sitios anfitriones.",
     setupHours: 26,
-    defaultCategory: "infrastructure",
+    defaultCategory: "tech",
     tasks: [
       {
         name: "Mapeen las necesidades y los vacíos de cobertura",
@@ -4979,7 +4979,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Personas preparadoras capacitadas y certificadas, un espacio, computadoras y un sistema de citas. Las declaraciones deben ser preparadas por personas voluntarias certificadas a través de un programa reconocido — esta clínica ayuda con declaraciones estándar, no con situaciones complejas que requieren a un profesional fiscal.",
     setupHours: 25,
-    defaultCategory: "other",
+    defaultCategory: "skilled_labor",
     tasks: [
       {
         name: "Capaciten y certifiquen a las personas preparadoras",
@@ -5092,7 +5092,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Personas voluntarias, paquetes de información, artículos de bienvenida donados y un sistema de referencias.",
     setupHours: 19,
-    defaultCategory: "other",
+    defaultCategory: "emotional_support",
     tasks: [
       {
         name: "Definan a quién darán la bienvenida y cómo",
@@ -5148,7 +5148,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Almacenamiento, artículos donados, un catálogo y sistema de préstamos, y un par de personas bibliotecarias.",
     setupHours: 19,
-    defaultCategory: "other",
+    defaultCategory: "infrastructure",
     tasks: [
       {
         name: "Pregunten a la comunidad qué quiere pedir prestado",
@@ -5205,7 +5205,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Acceso a máquinas y duchas (un sitio aliado o una unidad móvil), insumos y personas voluntarias.",
     setupHours: 21,
-    defaultCategory: "other",
+    defaultCategory: "infrastructure",
     tasks: [
       {
         name: "Aseguren acceso a lavandería y duchas",
@@ -5488,7 +5488,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whatYoullNeed:
       "Estilistas y barberas y barberos licenciados voluntarios, un espacio, materiales y sanitización.",
     setupHours: 18,
-    defaultCategory: "other",
+    defaultCategory: "skilled_labor",
     tasks: [
       {
         name: "Convoquen estilistas y barberas y barberos licenciados",
