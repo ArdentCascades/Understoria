@@ -40,9 +40,6 @@ const TPL: ProjectTemplate = {
   ],
 };
 
-const suffix = (d: string, c: string | undefined) =>
-  c ? `${d} [every ${c}]` : d;
-
 describe("buildStagedTasks", () => {
   it("stages every task included with template hours, skills, and follows", () => {
     const staged = buildStagedTasks(TPL);
@@ -82,15 +79,20 @@ describe("sumIncludedHours / stagedHours", () => {
 });
 
 describe("includedStagedTasks — the exclusion/remap projection", () => {
-  it("keeps template order, applies the cadence suffix, and remaps follows to included indexes", () => {
+  it("keeps template order, carries the cadence as a real field, and remaps follows to included indexes", () => {
     const staged = buildStagedTasks(TPL);
-    const out = includedStagedTasks(staged, suffix);
+    const out = includedStagedTasks(staged);
     expect(out.map((t) => t.title)).toEqual([
       "A: host site",
       "B: source fridge",
       "C: rota",
     ]);
-    expect(out[2].description).toBe("c [every month]");
+    // The cadence is a field the confirm flow acts on (respawn),
+    // NOT a description suffix — the description stays the
+    // author's text.
+    expect(out[2].description).toBe("c");
+    expect(out[2].recurringCadence).toBe("month");
+    expect(out[0].recurringCadence).toBeNull();
     expect(out[1].follows).toEqual([0]);
     expect(out[2].follows).toEqual([0, 1]);
     expect(out[1].requiredSkills).toEqual(["carpentry"]);
@@ -99,7 +101,7 @@ describe("includedStagedTasks — the exclusion/remap projection", () => {
   it("drops edges that point at an excluded task instead of inventing transitive ones", () => {
     const staged = buildStagedTasks(TPL);
     staged[1].included = false; // exclude B
-    const out = includedStagedTasks(staged, suffix);
+    const out = includedStagedTasks(staged);
     expect(out.map((t) => t.title)).toEqual(["A: host site", "C: rota"]);
     // C followed [A, B]; B is gone. The A edge remaps to included
     // index 0; the B edge is DROPPED, not rewired.
@@ -109,7 +111,7 @@ describe("includedStagedTasks — the exclusion/remap projection", () => {
   it("remaps correctly when an earlier task is excluded (index shift)", () => {
     const staged = buildStagedTasks(TPL);
     staged[0].included = false; // exclude A
-    const out = includedStagedTasks(staged, suffix);
+    const out = includedStagedTasks(staged);
     expect(out.map((t) => t.title)).toEqual(["B: source fridge", "C: rota"]);
     // B followed [A] → dropped entirely. C followed [A, B] → only the
     // B edge survives, remapped to included index 0.
@@ -120,7 +122,7 @@ describe("includedStagedTasks — the exclusion/remap projection", () => {
   it("defaults an emptied hours field to 1 at submit rather than staging a zero-hour task", () => {
     const staged = buildStagedTasks(TPL);
     staged[0].hours = "";
-    const out = includedStagedTasks(staged, suffix);
+    const out = includedStagedTasks(staged);
     expect(out[0].estimatedHours).toBe(1);
   });
 });

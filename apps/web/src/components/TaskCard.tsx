@@ -234,6 +234,23 @@ export function TaskCard({
               : task.estimatedHours,
           )}
         </span>
+        {task.recurringCadence && (
+          <span
+            className="chip bg-moss-100 text-moss-800 dark:bg-moss-800 dark:text-moss-100"
+            aria-label={t("projects.task.recurring.chipAria", {
+              cadence: t(
+                `projects.task.recurring.${task.recurringCadence}` as "projects.task.recurring.month",
+              ),
+            })}
+          >
+            <span aria-hidden="true" className="mr-1">
+              {"\u21BB"}
+            </span>
+            {t(
+              `projects.task.recurring.${task.recurringCadence}` as "projects.task.recurring.month",
+            )}
+          </span>
+        )}
         {needsMoreHands && !hasUnmetDeps && (
           <span
             className="chip bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"

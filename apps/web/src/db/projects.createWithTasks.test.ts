@@ -86,6 +86,20 @@ describe("createProjectWithTasks", () => {
     expect(tasks[1].urgency).toBe("low");
   });
 
+  it("carries a staged recurringCadence onto the task row (one-shot rows get null)", async () => {
+    const { tasks } = await createProjectWithTasks(
+      ORGANIZER,
+      PROJECT_INPUT,
+      NODE,
+      [
+        staged({ title: "Find a host site" }),
+        staged({ title: "Restock rota", recurringCadence: "month" }),
+      ],
+    );
+    expect(tasks[0].recurringCadence).toBeNull();
+    expect(tasks[1].recurringCadence).toBe("month");
+  });
+
   it("rolls back EVERYTHING when a mid-list task fails — no partial project", async () => {
     const poisoned = staged();
     Object.defineProperty(poisoned, "title", {

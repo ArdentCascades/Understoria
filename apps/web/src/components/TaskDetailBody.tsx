@@ -367,6 +367,18 @@ export function TaskDetailBody({
           className="text-sm text-moss-600 dark:text-moss-300"
         />
       )}
+      {task.recurringCadence && (
+        <p className="text-xs text-moss-600 dark:text-moss-300">
+          <span aria-hidden="true" className="mr-1">
+            {"\u21BB"}
+          </span>
+          {t(
+            `projects.task.recurring.${task.recurringCadence}` as "projects.task.recurring.month",
+          )}
+          {" — "}
+          {t("projects.task.recurring.detailHint")}
+        </p>
+      )}
       {task.assignedTo &&
         (task.status === "awaiting_confirmation" ? (
           <p className="text-xs text-moss-600 dark:text-moss-300">

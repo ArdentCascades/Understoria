@@ -612,6 +612,13 @@ export interface ProjectTask {
   actualHours: number | null;
   /** Set on confirmation. Mirrors the Exchange record's id. */
   exchangeId: string | null;
+  /** Rhythm for genuinely recurring work ("restock rota", "monthly
+   *  reconciliation"). When set, CONFIRMING this task mints a fresh
+   *  open copy in the same project — the rota slot re-opens once the
+   *  round is done. Absent/null = one-shot (every pre-existing row).
+   *  Local-only like every other task field: tasks never federate.
+   *  Values match `RecurringCadence` in the template content. */
+  recurringCadence?: "session" | "month" | "event" | "cycle" | null;
   /** When the current claim happened. Stamped by
    *  `claimProjectTask`, cleared by release/completion.
    *  Backfilled to `now()` for pre-existing claimed tasks in the

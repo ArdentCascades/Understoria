@@ -137,6 +137,9 @@ export interface StagedTaskInput {
    *  dependencies per docs/task-ordering-and-dependencies.md). A
    *  forward or self reference is a programming error and throws. */
   follows?: readonly number[];
+  /** Rhythm for recurring work, carried from the template's cadence
+   *  tag — see ProjectTask.recurringCadence. */
+  recurringCadence?: ProjectTask["recurringCadence"];
 }
 
 /**
@@ -181,6 +184,7 @@ export async function createProjectWithTasks(
           estimatedHours: task.estimatedHours,
           urgency: task.urgency ?? "low",
           requiredSkills: [...(task.requiredSkills ?? [])],
+          recurringCadence: task.recurringCadence ?? null,
           // Remap staged indexes to the ids just minted. follows only
           // references earlier entries (validated above), so every
           // dependency id exists by the time we need it.
@@ -532,6 +536,9 @@ export interface AddTaskInput {
   urgency: Urgency;
   requiredSkills: string[];
   dependencies: string[];
+  /** Rhythm for recurring work — see ProjectTask.recurringCadence.
+   *  Omitted/null = one-shot. */
+  recurringCadence?: ProjectTask["recurringCadence"];
 }
 
 export async function addProjectTask(
@@ -569,6 +576,7 @@ export async function addProjectTask(
         exchangeId: null,
         claimedAt: null,
         checkInAcknowledgedAt: null,
+        recurringCadence: input.recurringCadence ?? null,
       };
       await db.projectTasks.put(task);
       await logActivity(
@@ -1092,6 +1100,66 @@ async function _writeTaskConfirmation(
         exchangeId: exchange.id,
       };
       await db.projectTasks.put(updatedTask);
+
+      // Recurring tasks: confirming a cadenced task re-opens the rota
+      // slot — a FRESH open task with the same shape, minted inside
+      // this same transaction so a crash can't credit the round
+      // without re-opening it. Deliberate bounds:
+      //   - Only while the project is ACTIVE. A paused/completed
+      //     project's rota stops with it; resuming does not backfill
+      //     missed rounds.
+      //   - Skipped when an open task with the same title + cadence
+      //     already exists in the project (an organizer may have
+      //     hand-added next round early; and it caps any conceivable
+      //     re-entry at one open copy — no runaway spawning).
+      //   - The copy resets every per-round field (claim, completion,
+      //     actual hours, exchange, check-in) and lands at the bottom
+      //     of the list. `dependencies` carry over: the edges point at
+      //     tasks that are by now complete, so they render as
+      //     satisfied context, not blocks.
+      // This runs on BOTH confirm paths (member confirm and the
+      // system-key auto-confirm sweep) because both funnel through
+      // this writer.
+      if (freshTask.recurringCadence && freshProject.status === "active") {
+        const openTwin = await db.projectTasks
+          .where("[projectId+status]")
+          .equals([freshProject.id, "open"])
+          .filter(
+            (t) =>
+              t.title === freshTask.title &&
+              t.recurringCadence === freshTask.recurringCadence,
+          )
+          .count();
+        if (openTwin === 0) {
+          const respawned: ProjectTask = {
+            ...freshTask,
+            id: uuid(),
+            status: "open",
+            assignedTo: null,
+            orderIndex: await nextOrderIndexForProject(freshProject.id),
+            createdAt: now,
+            completedAt: null,
+            completedBy: null,
+            actualHours: null,
+            exchangeId: null,
+            claimedAt: null,
+            checkInAcknowledgedAt: null,
+          };
+          await db.projectTasks.put(respawned);
+          await logActivity(
+            freshProject.id,
+            "task_added",
+            organizerKey,
+            {
+              taskId: respawned.id,
+              hours: respawned.estimatedHours,
+              recurring: true,
+              respawnedFromTaskId: freshTask.id,
+            },
+            freshProject.nodeId,
+          );
+        }
+      }
 
       // Project progress is the sum of its signed exchanges, so it
       // counts the recorded (actual) hours — `creditHoursForTask`,

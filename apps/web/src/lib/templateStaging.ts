@@ -93,13 +93,17 @@ export function sumIncludedHours(tasks: readonly StagedTemplateTask[]): number {
  * soft-blocks, and inventing an edge the template author never wrote
  * is worse than losing one the member decided against. The member
  * can add edges later from the task page.
+ *
+ * The template's cadence tag rides through as the task's REAL
+ * `recurringCadence` field (confirming such a task re-opens it — see
+ * the respawn hook in db/projects.ts), not a description suffix. The
+ * cadence used to be deliberately text-only; that ruling predates
+ * templates carrying cadence tags at scale — 58 tagged tasks per
+ * locale that the product displayed but never acted on became the
+ * bigger dishonesty.
  */
 export function includedStagedTasks(
   tasks: readonly StagedTemplateTask[],
-  applyCadenceSuffix: (
-    description: string,
-    cadence: TemplateTask["recurringCadence"],
-  ) => string,
 ): StagedTaskInput[] {
   const includedIndexByTemplateIndex = new Map<number, number>();
   const included = tasks.filter((task) => task.included);
@@ -108,9 +112,10 @@ export function includedStagedTasks(
   });
   return included.map((task) => ({
     title: task.name,
-    description: applyCadenceSuffix(task.description, task.recurringCadence),
+    description: task.description,
     estimatedHours: stagedHours(task) || 1,
     requiredSkills: task.skills,
+    recurringCadence: task.recurringCadence ?? null,
     follows: task.follows
       .map((templateIndex) => includedIndexByTemplateIndex.get(templateIndex))
       .filter((i): i is number => i !== undefined),
