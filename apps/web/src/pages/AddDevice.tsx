@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { wordlist } from "@scure/bip39/wordlists/english";
@@ -28,15 +28,24 @@ import { DevicePairingComparisonCard } from "@/components/DevicePairingCompariso
 import { DevicePairingDisplay } from "@/components/DevicePairingDisplay";
 import { DeviceLinkCodeDisplay } from "@/components/DeviceLinkCodeDisplay";
 import {
+  badgeForPubkey,
   deriveLinkChannelId,
+  grantChannelIdForPubkey,
   LINK_EXPIRY_MS,
+  LINK_POLL_INTERVAL_MS,
+  listLinkRequests,
   publishLinkEnvelope,
   resolveLinkApiBase,
+  sealGrant,
+  type PendingLinkRequest,
 } from "@/lib/deviceLink";
+import { buildTransferPayload } from "@/lib/devicePairing";
 import { recordPairing } from "@/db/pairing";
 
 type Stage =
-  | "comparison"
+  | "listen"
+  | "sent"
+  | "other-ways"
   | "gate"
   | "link-display"
   | "display"
@@ -77,7 +86,9 @@ export default function AddDevicePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [stage, setStage] = useState<Stage>("comparison");
+  // Tap-to-link listening screen is the default (design doc §6.7):
+  // the new device raises its hand and this screen sees it appear.
+  const [stage, setStage] = useState<Stage>("listen");
   // Only the encoded envelope (QR payload string) is kept in state;
   // the structured `TransferEnvelope` object is local to the wrap
   // step. Both pieces drop on `reset()` regardless.
@@ -91,9 +102,23 @@ export default function AddDevicePage() {
   // Set when the link path was attempted and failed (node down,
   // mailbox full) — shown as an honest banner on the QR gate.
   const [fallbackNotice, setFallbackNotice] = useState(false);
-  // Busy flag for the comparison Continue button — the link probe +
-  // PBKDF2 + upload take a couple of seconds.
+  // Busy flag for the words-relay path — the link probe + PBKDF2 +
+  // upload take a couple of seconds.
   const [preparing, setPreparing] = useState(false);
+
+  // --- Tap-to-link listening state --------------------------------------
+  // "starting" = resolving the node; "listening" = live poll running;
+  // "no-node" = nothing to listen to (QR flow offered instead).
+  const [listenState, setListenState] = useState<
+    "starting" | "listening" | "no-node"
+  >("starting");
+  const [pending, setPending] = useState<PendingLinkRequest[]>([]);
+  // Which request's grant is being sealed/sent (its pubkey), for the
+  // per-card busy state.
+  const [granting, setGranting] = useState<string | null>(null);
+  // Re-render tick so the "asked N min ago" lines stay honest.
+  const [listenTick, setListenTick] = useState(() => Date.now());
+  const apiBaseRef = useRef<string | null>(null);
   // Free-text label captured at the post-pair "want to label this?"
   // prompt. Stays empty when the member skips. Not sensitive — the
   // inventory it feeds is local-only.
@@ -106,6 +131,102 @@ export default function AddDevicePage() {
     setPassphrase(null);
     setExpiresAt(null);
   }, []);
+
+  // Live poll while on the listening screen: "any device on my
+  // network asking to be linked?" The response carries only ephemeral
+  // public keys — nothing sensitive rides this loop.
+  useEffect(() => {
+    if (stage !== "listen") return;
+    let cancelled = false;
+    let pollId: number | null = null;
+    setListenState("starting");
+    setPending([]);
+
+    const run = async () => {
+      const base = await resolveLinkApiBase();
+      if (cancelled) return;
+      if (!base) {
+        setListenState("no-node");
+        return;
+      }
+      apiBaseRef.current = base;
+      setListenState("listening");
+      const poll = async () => {
+        const res = await listLinkRequests(base);
+        if (cancelled || res.kind !== "ok") return;
+        setPending(res.requests);
+        setListenTick(Date.now());
+      };
+      void poll();
+      pollId = window.setInterval(() => {
+        void poll();
+      }, LINK_POLL_INTERVAL_MS);
+    };
+    void run();
+
+    return () => {
+      cancelled = true;
+      if (pollId !== null) window.clearInterval(pollId);
+    };
+  }, [stage]);
+
+  // The one tap that moves an identity: seal the transfer payload to
+  // the chosen request's one-time key and park it in the mailbox. The
+  // approval semantics live in the card copy — by the time this runs,
+  // the member has read what linking means and checked the badge.
+  const handleGrant = useCallback(
+    async (requestPubkey: string) => {
+      if (!currentMember) return;
+      if (lockState === "locked") {
+        setErrorMessage(t("addDevice.errors.locked"));
+        setStage("error");
+        return;
+      }
+      const apiBase = apiBaseRef.current;
+      if (!apiBase) return;
+      setGranting(requestPubkey);
+      try {
+        const secretKeyB64 = await getSecretKey(currentMember.publicKey);
+        const blockBundle = await assembleBlocksForTransfer(
+          currentMember.publicKey,
+        );
+        const payload = buildTransferPayload({
+          secretKey: b64decode(secretKeyB64),
+          publicKey: b64decode(currentMember.publicKey),
+          profile: {
+            displayName: currentMember.displayName,
+            skills: currentMember.skills,
+            availability: currentMember.availability,
+            availabilityChips: currentMember.availabilityChips,
+            locationZone: currentMember.locationZone,
+          },
+          expiryMs: LINK_EXPIRY_MS,
+          blocks: blockBundle.blocks,
+          previouslyBlocked: blockBundle.previouslyBlocked,
+        });
+        const sealed = sealGrant(payload, requestPubkey);
+        const published = await publishLinkEnvelope(
+          apiBase,
+          grantChannelIdForPubkey(requestPubkey),
+          sealed,
+        );
+        if (published.kind !== "ok") {
+          setErrorMessage(t("addDevice.errors.generic"));
+          setStage("error");
+          return;
+        }
+        setStage("sent");
+      } catch (err) {
+        setErrorMessage(
+          err instanceof Error ? err.message : t("addDevice.errors.generic"),
+        );
+        setStage("error");
+      } finally {
+        setGranting(null);
+      }
+    },
+    [currentMember, lockState, t],
+  );
 
   const handleCancel = useCallback(() => {
     reset();
@@ -231,7 +352,7 @@ export default function AddDevicePage() {
   const handleStartOver = useCallback(() => {
     reset();
     setFallbackNotice(false);
-    setStage("comparison");
+    setStage("listen");
   }, [reset]);
 
   // "Done" on the display screen no longer navigates straight to
@@ -291,31 +412,201 @@ export default function AddDevicePage() {
         </p>
       </header>
 
-      {stage === "comparison" && (
-        <section className="card flex flex-col gap-6">
-          <DevicePairingComparisonCard />
+      {stage === "listen" && (
+        <section className="flex flex-col gap-4">
+          {listenState === "starting" && (
+            <div className="card">
+              <p className="text-sm text-moss-600 dark:text-moss-300">
+                {t("addDevice.listen.starting")}
+              </p>
+            </div>
+          )}
+
+          {listenState === "listening" && pending.length === 0 && (
+            <div className="card flex flex-col gap-2">
+              <h2 className="text-base font-semibold">
+                {t("addDevice.listen.emptyTitle")}
+              </h2>
+              <p className="text-sm text-moss-700 dark:text-moss-200">
+                {t("addDevice.listen.emptyBody")}
+              </p>
+              <p
+                aria-live="polite"
+                className="text-xs text-moss-600 dark:text-moss-300"
+              >
+                {t("addDevice.listen.listening")}
+              </p>
+            </div>
+          )}
+
+          {listenState === "listening" && pending.length > 1 && (
+            <p
+              role="alert"
+              className="rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+            >
+              {t("addDevice.listen.multiWarning")}
+            </p>
+          )}
+
+          {listenState === "listening" &&
+            pending.map((req) => {
+              const [b1, b2] = badgeForPubkey(req.pubkey);
+              const ageMs = listenTick - req.createdAt;
+              const stale = ageMs > 2 * 60_000;
+              const busy = granting === req.pubkey;
+              return (
+                <div
+                  key={req.pubkey}
+                  className="card flex flex-col gap-3 border-canopy-300 dark:border-canopy-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      aria-label={t("addDevice.listen.badgeAriaLabel")}
+                      className="rounded-xl bg-moss-100 px-3 py-2 text-3xl dark:bg-moss-800"
+                    >
+                      <span aria-hidden="true">{b1} {b2}</span>
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-semibold">
+                        {t("addDevice.listen.requestTitle")}
+                      </span>
+                      <span
+                        className={
+                          stale
+                            ? "text-sm font-medium text-amber-700 dark:text-amber-300"
+                            : "text-sm text-moss-600 dark:text-moss-300"
+                        }
+                      >
+                        {ageMs < 90_000
+                          ? t("addDevice.listen.askedJustNow")
+                          : t("addDevice.listen.askedMinutesAgo", {
+                              count: Math.round(ageMs / 60_000),
+                            })}
+                        {stale && ` — ${t("addDevice.listen.staleHint")}`}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-moss-700 dark:text-moss-200">
+                    {t("addDevice.listen.requestBody")}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    disabled={busy || granting !== null}
+                    aria-busy={busy}
+                    onClick={() => {
+                      void handleGrant(req.pubkey);
+                    }}
+                  >
+                    {busy
+                      ? t("common.working")
+                      : t("addDevice.listen.linkIt")}
+                  </button>
+                  <p className="text-xs text-moss-600 dark:text-moss-300">
+                    {t("addDevice.listen.safetyLine")}
+                  </p>
+                </div>
+              );
+            })}
+
+          {listenState === "no-node" && (
+            <div className="card flex flex-col gap-3">
+              <p className="text-sm text-moss-700 dark:text-moss-200">
+                {t("addDevice.listen.noNode")}
+              </p>
+              <button
+                type="button"
+                className="btn-primary self-start"
+                onClick={() => setStage("gate")}
+              >
+                {t("addDevice.listen.useQr")}
+              </button>
+            </div>
+          )}
+
+          {/* What moves across — the informed-consent content, one
+              tap away instead of a mandatory wizard page. */}
+          <details className="card">
+            <summary className="cursor-pointer text-sm font-medium">
+              {t("addDevice.listen.whatMoves")}
+            </summary>
+            <div className="pt-4">
+              <DevicePairingComparisonCard />
+            </div>
+          </details>
+
+          <button
+            type="button"
+            className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+            onClick={() => setStage("other-ways")}
+          >
+            {t("addDevice.otherWays.link")}
+          </button>
+        </section>
+      )}
+
+      {stage === "sent" && (
+        <section className="card flex flex-col gap-4">
+          <h2 className="page-title text-base">
+            {t("addDevice.sent.title")}
+          </h2>
+          <p className="text-sm text-moss-700 dark:text-moss-200">
+            {t("addDevice.sent.body")}
+          </p>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
-              className="btn-secondary"
-              onClick={handleCancel}
-            >
-              {t("common.cancel")}
-            </button>
-            <button
-              type="button"
               className="btn-primary"
-              disabled={preparing}
-              aria-busy={preparing}
-              onClick={() => {
-                void handleContinue();
-              }}
+              onClick={handleDoneShowingQR}
             >
-              {preparing
-                ? t("common.working")
-                : t("addDevice.comparison.continue")}
+              {t("addDevice.display.done")}
             </button>
           </div>
+        </section>
+      )}
+
+      {stage === "other-ways" && (
+        <section className="card flex flex-col gap-4">
+          <h2 className="page-title text-base">
+            {t("addDevice.otherWays.title")}
+          </h2>
+          <button
+            type="button"
+            disabled={preparing}
+            aria-busy={preparing}
+            onClick={() => {
+              void handleContinue();
+            }}
+            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+          >
+            <span className="font-semibold">
+              {preparing
+                ? t("common.working")
+                : t("addDevice.otherWays.wordsTitle")}
+            </span>
+            <span className="text-sm text-moss-600 dark:text-moss-300">
+              {t("addDevice.otherWays.wordsBody")}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStage("gate")}
+            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+          >
+            <span className="font-semibold">
+              {t("addDevice.otherWays.qrTitle")}
+            </span>
+            <span className="text-sm text-moss-600 dark:text-moss-300">
+              {t("addDevice.otherWays.qrBody")}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+            onClick={() => setStage("listen")}
+          >
+            {t("common.back")}
+          </button>
         </section>
       )}
 

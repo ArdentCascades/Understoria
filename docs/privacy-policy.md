@@ -97,7 +97,8 @@ types are:
 | Invite someone to co-organize a project | `CoOrganizerInvitation`, `CoOrganizerInvitationResponse`, `CoOrganizerInvitationRevocation` | Inviter and invitee public keys, project id, decision (accept / decline) or revocation, timestamps |
 | Create a community event | `Event` | Title, description, category, location (free text — no GPS pin), start time, optional end time, optional capacity, organizer public key, signature |
 | Cancel a community event you organized | `EventCancellation` | Event id, optional reason text, cancellation time, organizer public key, signature |
-| Link a new device (word code) | Device-link mailbox row | **Ciphertext only, and unlike everything above it does NOT federate.** An opaque channel id plus your identity bundle encrypted under the 6-word code (which never crosses any wire). Held at most 15 minutes, deleted the moment the new device claims it. The node cannot read it; see the threat model for the brute-force bound. The QR pairing option stores nothing on the node at all |
+| Link a new device (tap-to-link) | Link request + device-link mailbox row | **Neither federates and the node can read neither.** The new device stores one throwaway public key for up to 10 minutes, filed under a salted, deliberately lossy fold of its network address (4096 buckets shared by many households — never the address itself, which is not stored or logged). Your approval stores your identity bundle sealed to that key — ciphertext the node cannot open — for at most 15 minutes, deleted the instant the new device collects it |
+| Link a new device (word-code fallback) | Device-link mailbox row | Same mailbox, encrypted under the 6-word code instead (which never crosses any wire). The QR pairing option stores nothing on the node at all |
 
 **Public keys are not human identities by themselves.** A peer node
 sees the keys but does not learn your display name unless you've

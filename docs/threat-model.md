@@ -451,23 +451,35 @@ We are not trying to protect against:
   plaintext and enforced on the destination after a successful
   unwrap. A captured QR is useless after the window even with
   the passphrase.
-  (e) **No server-side state — REVISED for the link transport**
-  (`device-pairing.md` §6.6): the now-default word-linking path
-  parks the passphrase-wrapped envelope on the community node as a
-  one-shot mailbox row under an opaque channel id, for at most 15
-  minutes, deleted on first claim. The node holds ciphertext only:
-  the code never crosses the wire, testing a candidate code against
-  a DB snapshot costs a full PBKDF2-600k per guess against ~66 bits,
-  and rows never federate. New residuals, named: (1) the node
-  operator (or a DB thief) holds a brute-force target for the
-  transfer window — same offline-attack class the QR already
-  conceded to anyone who photographs it, with a far smaller exposed
-  population; (2) in link mode the six words alone are a bearer
-  credential while the row lives — they locate AND decrypt — so the
-  display copy warns exactly that, and the one-shot delete turns a
-  hijacked code into a visible failure on the member's own device
-  rather than a silent fork. The QR path retains the original
-  no-server-state property and remains one tap away.
+  (e) **No server-side state — REVISED TWICE.** The default
+  transport is now tap-to-link (`device-pairing.md` §6.7): the new
+  device posts an ephemeral PUBLIC key (nothing else) as a link
+  request bucketed by a salted 4096-way fold of its network address
+  (10-minute TTL; raw IPs never stored — same posture as the rate
+  limiter); the member's signed-in device lists same-bucket
+  requests and, on an explicit tap, seals the transfer payload to
+  that key through the one-shot mailbox (ciphertext only, atomic
+  take, 15-minute TTL, non-federating). Named residuals, ranked:
+  (1) **a malicious node operator can substitute the fetched public
+  key and capture a transfer the member approves** — the two-emoji
+  recognition badge is 12 bits and grindable, so it defends against
+  same-network pranksters, NOT the server itself; linking therefore
+  trusts the community's own node for those minutes, and members
+  who don't extend that trust are pointed at the QR path (zero
+  server involvement), which remains one tap away. (2) Same-bucket
+  strangers can surface an impersonation request (guards: badge
+  match named in the approve copy, request age, explicit-choice
+  list when several are pending, 3-per-bucket cap) or send the
+  waiting device a junk identity — never the member's own, which
+  this direction cannot leak (guard: the success screen leads with
+  the imported display name + a two-tap full local wipe). (3) The
+  §6.6 word-relay fallback keeps its own residual: while its
+  mailbox row lives, the six words are a bearer credential, and the
+  node holds a PBKDF2-600k × ~66-bit brute-force target. The
+  positive flip side, also named: in tap-to-link **nothing shown on
+  either screen is sensitive** — the QR-era camera-capture threat
+  does not exist on the default path, and no identity moves without
+  a deliberate tap on the already-trusted device.
   (f) **Component-state-only on the source.** Envelope and
   passphrase live in React state only. No localStorage,
   sessionStorage, or IndexedDB write. Cancel / route-change /

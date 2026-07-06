@@ -889,6 +889,29 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '16')",
     ).run();
   }
+
+  // Schema v17 — tap-to-link rendezvous (docs/device-pairing.md §6.7).
+  // A link request is the NEW device's hand raised: one ephemeral
+  // public key, bucketed by a salted hash of the requester's network
+  // address so the member's signed-in device can discover it. Rows
+  // carry no identity material and die in minutes; cancel_token lets
+  // only the creator withdraw a request early.
+  if (current < 17) {
+    db.exec(`
+      CREATE TABLE link_requests (
+        pubkey TEXT PRIMARY KEY,
+        bucket TEXT NOT NULL,
+        cancel_token TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL
+      );
+      CREATE INDEX link_requests_bucket_idx ON link_requests (bucket);
+      CREATE INDEX link_requests_expires_idx ON link_requests (expires_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '17')",
+    ).run();
+  }
 }
 
 /**
@@ -2275,6 +2298,85 @@ export function createDeviceLinkStore(db: DatabaseType): DeviceLinkStore {
     },
     pruneExpired(now) {
       pruneStmt.run(now);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+// --- Link-request rendezvous (docs/device-pairing.md §6.7) -----------
+
+export interface LinkRequestRow {
+  pubkey: string;
+  createdAt: number;
+}
+
+export interface LinkRequestStore {
+  /** Insert a fresh request. Throws on duplicate pubkey. */
+  insert(row: {
+    pubkey: string;
+    bucket: string;
+    cancelToken: string;
+    createdAt: number;
+    expiresAt: number;
+  }): void;
+  /** Live (unexpired) requests for one bucket, newest first. Only
+   *  pubkey + createdAt leave the store — the bucket and cancel
+   *  token never appear in any response body. */
+  listByBucket(bucket: string, now: number): LinkRequestRow[];
+  /** Creator-only withdrawal: deletes iff the cancel token matches.
+   *  Returns whether a row was removed. */
+  remove(pubkey: string, cancelToken: string): boolean;
+  /** Unconditional delete (route-internal use on grant completion is
+   *  NOT done server-side — the requester cancels; this exists for
+   *  prune symmetry and tests). */
+  pruneExpired(now: number): void;
+  countByBucket(bucket: string, now: number): number;
+  count(): number;
+}
+
+export function createLinkRequestStore(db: DatabaseType): LinkRequestStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO link_requests (pubkey, bucket, cancel_token, created_at, expires_at)
+    VALUES (@pubkey, @bucket, @cancelToken, @createdAt, @expiresAt)
+  `);
+  const listStmt = db.prepare(`
+    SELECT pubkey, created_at FROM link_requests
+    WHERE bucket = ? AND expires_at >= ?
+    ORDER BY created_at DESC
+  `);
+  const removeStmt = db.prepare(
+    "DELETE FROM link_requests WHERE pubkey = ? AND cancel_token = ?",
+  );
+  const pruneStmt = db.prepare(
+    "DELETE FROM link_requests WHERE expires_at < ?",
+  );
+  const countBucketStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM link_requests WHERE bucket = ? AND expires_at >= ?",
+  );
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM link_requests");
+
+  return {
+    insert(row) {
+      insertStmt.run(row);
+    },
+    listByBucket(bucket, now) {
+      return (
+        listStmt.all(bucket, now) as Array<{
+          pubkey: string;
+          created_at: number;
+        }>
+      ).map((r) => ({ pubkey: r.pubkey, createdAt: r.created_at }));
+    },
+    remove(pubkey, cancelToken) {
+      return removeStmt.run(pubkey, cancelToken).changes > 0;
+    },
+    pruneExpired(now) {
+      pruneStmt.run(now);
+    },
+    countByBucket(bucket, now) {
+      return (countBucketStmt.get(bucket, now) as { n: number }).n;
     },
     count() {
       return (countStmt.get() as { n: number }).n;

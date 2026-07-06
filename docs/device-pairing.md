@@ -390,6 +390,76 @@ no-clipboard, type-6-words UX possible. Both accept "the relay
 stores ciphertext" as the price of linking that ordinary people
 complete.
 
+### 6.7 Tap-to-link (the shipped default)
+
+**Revision of the revision.** Field use of §6.6 showed that
+same-phone word entry still forces per-word app switching (the
+words display in one app and are typed in the other) and still ends
+in a fingerprint quiz against a screen the member can no longer
+see. The shipped default eliminates typing entirely by reversing
+who carries information: **the new device asks; the member
+approves with one tap on the device that already holds the
+identity.**
+
+Flow:
+
+1. The NEW device generates a one-time X25519 keypair and POSTs
+   only the public key to `POST /api/link-request`. The node files
+   it under a salted, 4096-bucket fold of the requester's network
+   address (same non-reversible posture as the rate limiter's
+   buckets; raw IPs are never stored) with a 10-minute TTL. The
+   screen shows a **two-emoji recognition badge** derived from the
+   key, the "go approve it" steps, and a countdown, then polls its
+   grant channel.
+2. The member's SIGNED-IN device, on Profile → Add another device,
+   polls `GET /api/link-request` — which returns pending requests
+   *from the same address bucket only* — and renders each as a card
+   with its badge and age. One tap on **Link it** seals the
+   standard TransferPayload to the request's key (fresh-sender
+   NaCl box) and parks it in the §6.6 one-shot mailbox under
+   `hash(pubkey)`.
+3. The new device's poll finds the grant, opens it with its
+   one-time secret key, imports, and lands on **"You're in as
+   {name}"** — no fingerprint stage (approval already happened on
+   the trusted device), no mandatory lock-passphrase stage
+   (Settings → Security offers locking later).
+
+The rendezvous needs both devices behind the same public address —
+always true on one phone, true at home for two devices. Different
+networks (or iCloud Private Relay splitting the phone's own
+traffic) fall back to §6.6 words / §6 QR behind "Other ways to
+link."
+
+Security properties, honestly ranked:
+
+- The link request contains a public key and nothing else; a
+  shoulder-surfer of the badge learns nothing usable. **Nothing on
+  either screen is sensitive**, so the camera-awareness gate does
+  not apply to this path.
+- **No identity moves without the member's explicit tap on their
+  signed-in device.** The waiting app can receive only what someone
+  chooses to send it.
+- Same-bucket strangers (shared Wi-Fi, CGNAT) can make a request
+  APPEAR on the member's screen — the impersonation race. Guards:
+  the badge match named in the card copy, visible request age, an
+  explicit-choice list when more than one request is pending (no
+  default), the 3-per-bucket cap, and the 10-minute TTL.
+- Same-bucket strangers can also send the waiting app a **junk
+  grant** (their own identity — never the member's, which they
+  cannot obtain this way). Guard: the success screen leads with the
+  imported display name and offers a two-tap full local wipe.
+- **A malicious node operator can substitute the public key the
+  member's device fetches** and thereby capture a transfer the
+  member approves. The badge cannot prevent this (12 bits is
+  grindable offline in milliseconds); no human-comparable string
+  can. This is the named trust cost of tap-to-link, identical in
+  kind to §6.6's brute-force residual but sharper: linking trusts
+  the community's own node for those minutes. Members who do not
+  extend that trust use the QR path, which involves no server.
+- Grant transport inherits every §6.6 mailbox property: ciphertext
+  only, one-shot atomic take, 15-minute TTL, non-federating,
+  capped, pruned on write.
+
 ## 7. UX — destination device (the new device)
 
 ### 7.1 Entry point

@@ -9,7 +9,38 @@
   },
   "addDevice": {
     "title": "Add another device",
-    "subtitle": "Use the same identity on a second device. The transfer happens locally — no server sees your key.",
+    "subtitle": "Use the same identity on a second device. The transfer is sealed end-to-end — no server can read it.",
+    "listen": {
+      "starting": "Looking for your community node…",
+      "emptyTitle": "Nothing is asking to be linked yet.",
+      "emptyBody": "On your new device, open Understoria and choose \"Bring my identity over.\" It will show up here by itself — keep this page open.",
+      "listening": "Listening…",
+      "multiWarning": "More than one device is asking. Approve ONLY the one whose emoji match the screen in front of you. If none match, don't approve any of them.",
+      "requestTitle": "A device is asking to be linked",
+      "requestBody": "Linking hands that device your full identity — it will act as you. Check the emoji above match the screen on your new device.",
+      "askedJustNow": "asked just now",
+      "askedMinutesAgo_one": "asked {{count}} minute ago",
+      "askedMinutesAgo_other": "asked {{count}} minutes ago",
+      "staleHint": "if your app shows different emoji, tap 'ask again' there and use the newest",
+      "linkIt": "Link it",
+      "safetyLine": "Only link a device you're holding. Not trying to link anything right now? Don't tap — someone on your network could be trying their luck.",
+      "badgeAriaLabel": "Recognition emoji for this link request",
+      "noNode": "This device can't reach your community node, so tap-to-link isn't available right now. The QR method works without any server.",
+      "useQr": "Show a QR instead",
+      "whatMoves": "What moves to the new device (and what doesn't)"
+    },
+    "otherWays": {
+      "link": "Other ways to link",
+      "title": "Other ways to link",
+      "wordsTitle": "Linking a device that's somewhere else?",
+      "wordsBody": "Get a 6-word code to read out loud — whoever holds the new device types it there. Needs your community node.",
+      "qrTitle": "No community server, or don't want it involved?",
+      "qrBody": "Show a QR the new device scans. Nothing is stored anywhere — the two devices must be in the same room."
+    },
+    "sent": {
+      "title": "Sent.",
+      "body": "Flip back to the app — it signs in by itself. You can leave this page."
+    },
     "comparison": {
       "transfersTitle": "What follows you to the new device",
       "transfers": {
@@ -95,6 +126,38 @@
     "title": "Pair this device",
     "subtitle": "Bring your identity over from the device that has it.",
     "subtitleSamePhone": "Bring your identity over from this phone's browser.",
+    "wait": {
+      "starting": "Getting ready…",
+      "badgeCaption": "Your matching emoji",
+      "badgeAriaLabel": "Recognition emoji for this device's link request",
+      "title": "Approve from where you're signed in",
+      "step1": "On the device that has your identity, open Understoria.",
+      "samePhoneStep1": "Open Understoria in your browser — the one where you're signed in.",
+      "step2": "Go to Profile → \"Add another device.\"",
+      "step3": "Tap \"Link it\" when you see {{badge}}.",
+      "waitingLine": "Waiting for your approval… this ask expires in {{mmss}}.",
+      "expired": "This ask expired.",
+      "askAgain": "Ask again",
+      "noNode": "This device can't reach a community node, so tap-to-link isn't available. The QR method works without one.",
+      "useQr": "Use the QR method",
+      "busyNode": "A few devices are already asking to be linked from your network. Wait a minute for them to expire, then try again.",
+      "nodeError": "Your community's server isn't answering. Check your connection and try again.",
+      "interfered": "Something interfered with the transfer — what arrived wasn't from your approval, or was damaged. Nothing about your identity was exposed. Ask again — you'll get fresh emoji."
+    },
+    "linkIn": {
+      "title": "You're in as {{name}}.",
+      "notMe": "This isn't me",
+      "notMeConfirmBody": "If that name isn't you, this device just received someone else's identity — likely someone on your network fooling around. Wiping clears this device completely (it held nothing of yours yet) so you can start over.",
+      "wipeButton": "Wipe this device and start over"
+    },
+    "otherWays": {
+      "link": "Other ways to link",
+      "title": "Other ways to link",
+      "wordsTitle": "Your other device is somewhere else?",
+      "wordsBody": "On that device, choose \"Other ways to link\" and get a 6-word code — then type the words here.",
+      "qrTitle": "No community server, or don't trust it?",
+      "qrBody": "Scan a QR straight off the other device's screen. Nothing touches any server."
+    },
     "link": {
       "directionsTitle": "Get the 6 words from the device that has your identity.",
       "step1": "On that device, open Profile, then \"Add another device,\" and Continue.",
@@ -2187,7 +2250,7 @@
       "title": "The app is on your home screen",
       "intro": "One question before we start:",
       "bringTitle": "I already use Understoria in this phone's browser",
-      "bringBody": "The installed app starts with its own empty storage, so it can't see your browser sign-in. Bring your identity over — type 6 words, takes about a minute.",
+      "bringBody": "The installed app starts with its own empty storage, so it can't see your browser sign-in. Bring your identity over — two taps, no typing, under a minute.",
       "newTitle": "I'm new — set me up fresh",
       "newBody": "Take the short tour, then create your identity."
     },

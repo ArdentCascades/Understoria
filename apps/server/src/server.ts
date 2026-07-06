@@ -26,6 +26,7 @@ import type { Config } from "./config.js";
 import {
   createAwaitingTransitionStore,
   createDeviceLinkStore,
+  createLinkRequestStore,
   createClaimStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
@@ -59,6 +60,7 @@ import { registerCoOrganizerInvitationRevocationRoutes } from "./routes/coorgInv
 import { registerEventRoutes } from "./routes/events.js";
 import { registerEventCancellationRoutes } from "./routes/eventCancellations.js";
 import { registerDeviceLinkRoutes } from "./routes/deviceLink.js";
+import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard } from "./insertCaps.js";
 
@@ -179,6 +181,7 @@ export async function buildServer({
   const pullStore = createPeerPullStore(db);
   const awaitingTransitionStore = createAwaitingTransitionStore(db);
   const deviceLinkStore = createDeviceLinkStore(db);
+  const linkRequestStore = createLinkRequestStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -236,6 +239,9 @@ export async function buildServer({
   // route carries its own row ceiling + prune (routes/deviceLink.ts),
   // so it sits outside the insert-cap guard's SURFACES map.
   await registerDeviceLinkRoutes(app, { store: deviceLinkStore });
+  // Tap-to-link rendezvous — same non-federating, ephemeral posture
+  // as the mailbox above; carries only ephemeral PUBLIC keys.
+  await registerLinkRequestRoutes(app, { store: linkRequestStore });
   await registerConfigRoutes(app, { config, signer });
   await registerAwaitingTransitionRoutes(app, {
     store: awaitingTransitionStore,

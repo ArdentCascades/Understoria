@@ -194,6 +194,39 @@ export function generateTransferPassphrase(
  * below reads the two tables from Dexie scoped to one blocker; UI
  * callers typically use it rather than passing rows directly.
  */
+/**
+ * Assemble the plaintext TransferPayload — shared by BOTH transports:
+ * wrapForTransfer secretboxes it under the passphrase (QR / word-relay
+ * paths), sealGrant in deviceLink.ts boxes it to a link request's
+ * one-time public key (tap-to-link). Callers validate key lengths
+ * before calling (wrapForTransfer does; tap-to-link reads the same
+ * stored keys).
+ */
+export function buildTransferPayload(opts: {
+  secretKey: Uint8Array;
+  publicKey: Uint8Array;
+  profile: TransferProfile;
+  now?: number;
+  expiryMs?: number;
+  blocks?: BlockRow[];
+  previouslyBlocked?: PreviouslyBlockedRow[];
+}): TransferPayload {
+  const now = opts.now ?? Date.now();
+  const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;
+  return {
+    v: PAYLOAD_VERSION,
+    secretKey: b64encode(opts.secretKey),
+    publicKey: b64encode(opts.publicKey),
+    profile: opts.profile,
+    issuedAt: now,
+    expiresAt: now + expiryMs,
+    ...(opts.blocks !== undefined ? { blocks: opts.blocks } : {}),
+    ...(opts.previouslyBlocked !== undefined
+      ? { previouslyBlocked: opts.previouslyBlocked }
+      : {}),
+  };
+}
+
 export async function wrapForTransfer(opts: {
   secretKey: Uint8Array; // 64-byte NaCl Ed25519 secretKey
   publicKey: Uint8Array; // 32-byte Ed25519 publicKey
@@ -225,18 +258,7 @@ export async function wrapForTransfer(opts: {
     );
   }
 
-  const payload: TransferPayload = {
-    v: PAYLOAD_VERSION,
-    secretKey: b64encode(opts.secretKey),
-    publicKey: b64encode(opts.publicKey),
-    profile: opts.profile,
-    issuedAt: now,
-    expiresAt: now + expiryMs,
-    ...(opts.blocks !== undefined ? { blocks: opts.blocks } : {}),
-    ...(opts.previouslyBlocked !== undefined
-      ? { previouslyBlocked: opts.previouslyBlocked }
-      : {}),
-  };
+  const payload = buildTransferPayload({ ...opts, now, expiryMs });
 
   const salt = randomBytes(16);
   const nonce = randomBytes(nacl.secretbox.nonceLength);
@@ -311,6 +333,20 @@ export async function unwrapTransfer(
     return { ok: false, reason: "wrong_passphrase" };
   }
 
+  return validateDecryptedPayload(plaintextBytes, now);
+}
+
+/**
+ * Validate decrypted payload bytes into a TransferPayload — shared by
+ * both transports (passphrase secretbox above; the tap-to-link sealed
+ * box in deviceLink.ts). Checks shape, version, expiry, and that the
+ * embedded publicKey matches what the secretKey derives to (guards
+ * against a corrupt or hostile payload that survived decryption).
+ */
+export function validateDecryptedPayload(
+  plaintextBytes: Uint8Array,
+  now: number = Date.now(),
+): UnwrapResult {
   let payload: TransferPayload;
   try {
     payload = JSON.parse(utf8decode(plaintextBytes)) as TransferPayload;
@@ -337,10 +373,6 @@ export async function unwrapTransfer(
     return { ok: false, reason: "expired" };
   }
 
-  // Sanity-check that the embedded publicKey matches what the secretKey
-  // derives to. Guards against a malformed payload that survived
-  // secretbox.open (e.g. a corrupt payload someone tampered with at
-  // serialization time on the source).
   let secretKeyBytes: Uint8Array;
   let claimedPublicBytes: Uint8Array;
   try {
