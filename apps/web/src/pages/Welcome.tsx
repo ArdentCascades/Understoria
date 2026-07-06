@@ -128,9 +128,25 @@ const STEPS: readonly Step[] = [
 export default function WelcomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentMember, setCurrentMember, refreshOnboarded, nodeConfig, nodeId } =
-    useApp();
+  const {
+    currentMember,
+    setCurrentMember,
+    onboarded,
+    refreshOnboarded,
+    nodeConfig,
+    nodeId,
+  } = useApp();
   const [stepIndex, setStepIndex] = useState(0);
+
+  // An already-onboarded device has no business on the welcome flow —
+  // send it to the board. Belt for the post-link trap (PairDevice now
+  // refreshes the in-memory flag itself, but any stale navigation,
+  // back-button, or bookmark that lands here again must not show a
+  // finished member the fork/tour). Safe against the flow's own
+  // finish(): that navigates away in the same breath it refreshes.
+  useEffect(() => {
+    if (onboarded) navigate("/", { replace: true });
+  }, [onboarded, navigate]);
 
   // Auto-skip the install step when we're already running as an
   // installed app — offering "add to home screen" inside the installed
