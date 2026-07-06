@@ -46,6 +46,11 @@ interface EventDraftPayload {
   endDate: string;
   endTime: string;
   hasEnd: boolean;
+  /** Whether the end date differs from the start date (the end
+   *  fieldset's "Ends on a different day" toggle). Optional because
+   *  drafts saved before the same-day-end default existed lack it —
+   *  restore derives it from `endDate !== startDate` then. */
+  endsOtherDay?: boolean;
   location: string;
   capacity: string;
   /** Selected template at save time, `null` for "from scratch".
@@ -157,6 +162,11 @@ export default function EventNewPage() {
   const [hasEnd, setHasEnd] = useState(false);
   const [endDate, setEndDate] = useState(initialDate);
   const [endTime, setEndTime] = useState("");
+  // Same-day is the default: with this false, the end DATE field is
+  // hidden and the effective end date is the start date, live — a
+  // member who moves the start date never has to re-enter it on the
+  // end side. The rare overnight event opts in via the toggle.
+  const [endsOtherDay, setEndsOtherDay] = useState(false);
   const [location, setLocation] = useState("");
   const [capacity, setCapacity] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -232,6 +242,7 @@ export default function EventNewPage() {
       endDate,
       endTime,
       hasEnd,
+      endsOtherDay,
       location,
       capacity,
       templateId: selectedTemplateId,
@@ -252,6 +263,9 @@ export default function EventNewPage() {
     setHasEnd(true);
     setEndDate(end.date);
     setEndTime(end.time);
+    // A suggestion that crosses midnight must surface the date field —
+    // otherwise the visible time would silently mean the wrong day.
+    setEndsOtherDay(end.date !== startDate);
     setPendingDurationMinutes(null);
   }, [pendingDurationMinutes, startDate, startTime]);
 
@@ -273,6 +287,9 @@ export default function EventNewPage() {
     setEndDate(p.endDate);
     setEndTime(p.endTime);
     setHasEnd(p.hasEnd);
+    // Legacy drafts predate the toggle: an end date that differs from
+    // the start date is the only signal they carried.
+    setEndsOtherDay(p.endsOtherDay ?? (p.hasEnd && p.endDate !== p.startDate));
     setLocation(p.location);
     setCapacity(p.capacity);
     setSelectedTemplateId(p.templateId ?? null);
@@ -318,6 +335,7 @@ export default function EventNewPage() {
       setHasEnd(true);
       setEndDate(end.date);
       setEndTime(end.time);
+      setEndsOtherDay(end.date !== startDate);
       setPendingDurationMinutes(null);
     } else {
       setPendingDurationMinutes(tpl.suggestedDurationMinutes);
@@ -349,7 +367,34 @@ export default function EventNewPage() {
     : startInPast
       ? "events.new.errorStartInPast"
       : null;
-  const endMsNow = hasEnd ? combineDateAndTime(endDate, endTime) : null;
+  // Effective end date: the start date unless the member opted into a
+  // different day — so the inline check and the submit guard agree.
+  const effectiveEndDate = endsOtherDay ? endDate : startDate;
+  const endMsNow = hasEnd
+    ? combineDateAndTime(effectiveEndDate, endTime)
+    : null;
+
+  // Rendered in two spots (beside the time input in same-day mode,
+  // below the date+time row in different-day mode) — a plain element,
+  // not a nested component, so the checkbox doesn't remount and drop
+  // focus when the mode flips.
+  const endsOtherDayToggle = (
+    <label className="inline-flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
+      <input
+        type="checkbox"
+        checked={endsOtherDay}
+        onChange={(e) => {
+          setEndsOtherDay(e.target.checked);
+          // Opting in starts from the same day the member picked —
+          // an overnight event is usually start-date + 1 tweak away.
+          if (e.target.checked) setEndDate(startDate);
+          setPendingDurationMinutes(null);
+        }}
+        className="h-4 w-4 rounded border-moss-300"
+      />
+      {t("events.new.endsOtherDay")}
+    </label>
+  );
   const endBeforeStart =
     hasEnd && startMsNow !== null && endMsNow !== null && endMsNow <= startMsNow;
 
@@ -386,7 +431,10 @@ export default function EventNewPage() {
     }
     let endsAt: number | null = null;
     if (hasEnd) {
-      const candidate = combineDateAndTime(endDate, endTime);
+      const candidate = combineDateAndTime(
+        endsOtherDay ? endDate : startDate,
+        endTime,
+      );
       if (candidate === null) {
         setError(t("events.new.errorEndInvalid"));
         return;
@@ -532,10 +580,15 @@ export default function EventNewPage() {
         <legend className="text-sm font-medium">
           {t("events.new.startsAt")}
         </legend>
-        <div className="grid gap-2 sm:grid-cols-2">
+        {/* Two columns at every width EXCEPT under the largest-text
+            preference, where the fields stack full-width: at 125% font
+            the native pickers cannot render their values un-clipped
+            side by side on narrow phones, and largest-text members
+            have already chosen legibility over density. */}
+        <div className="grid grid-cols-[1.4fr_1fr] gap-2 [.text-largest_&]:grid-cols-1">
           <input
             type="date"
-            className="input"
+            className="input min-w-0"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             onBlur={() => validation.onBlur("startDate")}
@@ -548,7 +601,7 @@ export default function EventNewPage() {
           />
           <input
             type="time"
-            className="input"
+            className="input min-w-0"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             onBlur={() => validation.onBlur("startTime")}
@@ -578,6 +631,10 @@ export default function EventNewPage() {
             checked={hasEnd}
             onChange={(e) => {
               setHasEnd(e.target.checked);
+              // Manual enable starts from the common case: ends the
+              // same day. (Template suggestions set the flag
+              // themselves when their duration crosses midnight.)
+              if (e.target.checked) setEndsOtherDay(false);
               // The member is taking over the end fields — a parked
               // template duration must not clobber them later.
               setPendingDurationMinutes(null);
@@ -589,24 +646,37 @@ export default function EventNewPage() {
         {hasEnd && (
           <fieldset className="flex flex-col gap-2">
             <legend className="sr-only">{t("events.new.endsAt")}</legend>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <input
-                type="date"
-                className="input"
-                value={endDate}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
-                  setPendingDurationMinutes(null);
-                }}
-                aria-label={t("events.new.endDateAria")}
-                aria-invalid={endBeforeStart || undefined}
-                aria-describedby={
-                  endBeforeStart ? "event-end-error" : undefined
-                }
-              />
+            {/* Same-day is the default: one row of [end time | the
+                different-day toggle]. Opting in swaps the toggle's
+                cell for the date input and moves the (checked) toggle
+                below — the common case costs one row, the overnight
+                case two. */}
+            <div
+              className={
+                endsOtherDay
+                  ? "grid grid-cols-[1.4fr_1fr] items-center gap-2 [.text-largest_&]:grid-cols-1"
+                  : "grid grid-cols-2 items-center gap-2 [.text-largest_&]:grid-cols-1"
+              }
+            >
+              {endsOtherDay && (
+                <input
+                  type="date"
+                  className="input min-w-0"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setPendingDurationMinutes(null);
+                  }}
+                  aria-label={t("events.new.endDateAria")}
+                  aria-invalid={endBeforeStart || undefined}
+                  aria-describedby={
+                    endBeforeStart ? "event-end-error" : undefined
+                  }
+                />
+              )}
               <input
                 type="time"
-                className="input"
+                className="input min-w-0"
                 value={endTime}
                 onChange={(e) => {
                   setEndTime(e.target.value);
@@ -618,7 +688,9 @@ export default function EventNewPage() {
                   endBeforeStart ? "event-end-error" : undefined
                 }
               />
+              {!endsOtherDay && endsOtherDayToggle}
             </div>
+            {endsOtherDay && endsOtherDayToggle}
             {endBeforeStart && (
               <p
                 id="event-end-error"
@@ -626,6 +698,9 @@ export default function EventNewPage() {
                 className="text-xs text-rose-700 dark:text-rose-300"
               >
                 {t("events.new.errorEndBeforeStart")}
+                {!endsOtherDay && (
+                  <> {t("events.new.errorEndBeforeStartMidnightHint")}</>
+                )}
               </p>
             )}
           </fieldset>

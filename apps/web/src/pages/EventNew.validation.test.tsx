@@ -208,7 +208,7 @@ describe("EventNew — inline validation", () => {
     );
   });
 
-  it("shows end-before-start inline at the end group without submit", async () => {
+  it("shows end-before-start inline at the end group without submit (same-day default, with the midnight hint)", async () => {
     render();
     const tomorrow = dateString(Date.now() + 24 * 60 * 60 * 1000);
     act(() => {
@@ -225,14 +225,15 @@ describe("EventNew — inline validation", () => {
     });
     await flush();
 
+    // Same-day mode: exactly one date input (the start's) and no end
+    // date field — the end date is implicitly the start date.
+    expect(
+      container.querySelectorAll('form input[type="date"]').length,
+    ).toBe(1);
     const [, endTime] = Array.from(
       container.querySelectorAll<HTMLInputElement>('form input[type="time"]'),
     );
-    const [, endDate] = Array.from(
-      container.querySelectorAll<HTMLInputElement>('form input[type="date"]'),
-    );
     act(() => {
-      setInput(endDate, tomorrow);
       setInput(endTime, "09:00");
     });
     await flush();
@@ -240,7 +241,89 @@ describe("EventNew — inline validation", () => {
     const endError = container.querySelector("#event-end-error");
     expect(endError).not.toBeNull();
     expect(endError!.textContent ?? "").toContain(END_BEFORE_COPY);
+    // Same-day mode adds the past-midnight hint pointing at the toggle.
+    expect(endError!.textContent ?? "").toContain("midnight");
     expect(createEventMock).not.toHaveBeenCalled();
+  });
+
+  it("'ends on a different day' reveals the end date and clears a same-day end-before-start", async () => {
+    render();
+    const tomorrow = dateString(Date.now() + 24 * 60 * 60 * 1000);
+    const dayAfter = dateString(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    act(() => {
+      setInput(startDateInput(), tomorrow);
+      setInput(startTimeInput(), "22:00");
+    });
+    await flush();
+
+    // Enable end time; overnight event ends 02:00 — same-day mode
+    // correctly flags it...
+    const [hasEndBox] = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    act(() => hasEndBox.click());
+    await flush();
+    const [, endTime] = Array.from(
+      container.querySelectorAll<HTMLInputElement>('form input[type="time"]'),
+    );
+    act(() => setInput(endTime, "02:00"));
+    await flush();
+    expect(container.querySelector("#event-end-error")).not.toBeNull();
+
+    // ...ticking the different-day toggle reveals the date (seeded from
+    // the start date), and moving it one day forward clears the error.
+    const [, otherDayBox] = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    act(() => otherDayBox.click());
+    await flush();
+    const dates = Array.from(
+      container.querySelectorAll<HTMLInputElement>('form input[type="date"]'),
+    );
+    expect(dates.length).toBe(2);
+    expect(dates[1].value).toBe(tomorrow);
+    act(() => setInput(dates[1], dayAfter));
+    await flush();
+    expect(container.querySelector("#event-end-error")).toBeNull();
+  });
+
+  it("submits the same-day end against the START date even after the start date moves", async () => {
+    render();
+    const tomorrow = dateString(Date.now() + 24 * 60 * 60 * 1000);
+    const dayAfter = dateString(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    const [titleInput, locationInput] = textInputs();
+    setInput(titleInput, "My event");
+    setInput(locationInput, "Somewhere");
+    act(() => {
+      setInput(startDateInput(), tomorrow);
+      setInput(startTimeInput(), "10:00");
+    });
+    await flush();
+    const [hasEndBox] = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    act(() => hasEndBox.click());
+    await flush();
+    const [, endTime] = Array.from(
+      container.querySelectorAll<HTMLInputElement>('form input[type="time"]'),
+    );
+    act(() => setInput(endTime, "12:00"));
+    await flush();
+    // The member reconsiders the day AFTER filling the end time; the
+    // implicit end date must follow the start date, not the day the
+    // end time was typed on.
+    act(() => setInput(startDateInput(), dayAfter));
+    await flush();
+
+    submitForm();
+    await flush();
+    expect(createEventMock).toHaveBeenCalledTimes(1);
+    const arg = createEventMock.mock.calls[0][0] as {
+      startsAt: number;
+      endsAt: number | null;
+    };
+    expect(arg.endsAt).not.toBeNull();
+    expect(arg.endsAt! - arg.startsAt).toBe(2 * 60 * 60 * 1000);
   });
 
   it("submit guard stays: a start that was valid at fill time but past at submit time is refused", async () => {

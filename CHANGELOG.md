@@ -27,6 +27,22 @@ include breaking changes.
   threat-model pairing entry record the reasoning.
 
 ### Changed
+- **Create-event: the date and time pickers take a third of the
+  space.** Date and time now share one row at every viewport width
+  (previously they stacked full-width on phones), and the end of an
+  event is assumed to be the same day it starts: ticking "Add an end
+  time" shows just the end time beside an "Ends on a different day"
+  toggle, with the end date implicitly following the start date —
+  move the start date and the end follows, no re-entry. The rare
+  overnight event opts in via the toggle (template durations that
+  cross midnight opt in automatically), and the end-before-start
+  error gains a past-midnight hint pointing at it. Under the
+  largest-text preference the fields stack full-width instead — at
+  125% font the native pickers can't render un-clipped side by side
+  on narrow phones, and largest-text members have already chosen
+  legibility over density. Worst case the section is six rows
+  shorter; drafts saved before the change restore correctly.
+
 - **Documentation synced to the last several shipped rounds.** The
   threat model gains the two entries recent server work created:
   the auto-confirm §7 entry now records the awaiting-transition
