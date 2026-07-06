@@ -61,6 +61,20 @@ include breaking changes.
   read words in browser → type words in app.
 
 ### Fixed
+- **A freshly linked device no longer arrives to an empty
+  community.** The transfer moved your identity but not your
+  community connection, and every sync is gated on that setting — so
+  the new device showed no posts, projects, events, or members, and
+  the dashboard counted one member while the browser counted five.
+  The connection (which server to sync with, and whether mirroring
+  is on) now travels inside the same sealed transfer as your
+  identity — it's your own prior choice following you — and the new
+  device runs its first sync the moment it signs in, so the board is
+  populated by the time you reach it. Adoption never overwrites a
+  connection the device already has, all three transports carry it
+  (tap-to-link, words, QR), and the "what moves across" list now
+  names it honestly.
+
 - **Finishing a device link no longer traps you back on the welcome
   screen.** After importing an identity, the pairing page wrote the
   "this device is set up" flag to storage but never told the running

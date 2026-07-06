@@ -50,7 +50,9 @@
         "profile": "Your profile",
         "profileDetail": "Display name, skills, availability, area.",
         "balance": "Your balance and history",
-        "balanceDetail": "Visible on both devices — these live in the community ledger, not on your device."
+        "balanceDetail": "Visible on both devices — these live in the community ledger, not on your device.",
+        "connection": "Your community connection",
+        "connectionDetail": "The new device learns which community server to sync with and fills in posts, projects, events, and members right away."
       },
       "staysTitle": "What stays on this device",
       "stays": {

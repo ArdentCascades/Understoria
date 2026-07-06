@@ -30,6 +30,10 @@ export function DevicePairingComparisonCard() {
       label: t("addDevice.comparison.transfers.balance"),
       detail: t("addDevice.comparison.transfers.balanceDetail"),
     },
+    {
+      label: t("addDevice.comparison.transfers.connection"),
+      detail: t("addDevice.comparison.transfers.connectionDetail"),
+    },
   ];
 
   const stays = [

@@ -120,6 +120,15 @@ export interface TransferPayload {
   /** Block history rows. Same federation posture as `blocks` — local
    *  device-cluster-only, never crosses a peer-node wire. */
   previouslyBlocked?: PreviouslyBlockedRow[];
+  /** The member's community-node connection, when configured on the
+   *  source device. This is the member's OWN prior consent following
+   *  their identity: without it a freshly linked device arrives to an
+   *  empty community — no posts, projects, events, members, or stats —
+   *  because every federation pull is gated on this setting. The
+   *  destination adopts it only when it has no connection of its own,
+   *  then runs an immediate first sync. Optional on the wire (older
+   *  sources omit it) — no PAYLOAD_VERSION bump needed. */
+  communityNode?: { url: string; enabled: boolean };
 }
 
 export type UnwrapResult =
@@ -210,6 +219,7 @@ export function buildTransferPayload(opts: {
   expiryMs?: number;
   blocks?: BlockRow[];
   previouslyBlocked?: PreviouslyBlockedRow[];
+  communityNode?: { url: string; enabled: boolean };
 }): TransferPayload {
   const now = opts.now ?? Date.now();
   const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;
@@ -223,6 +233,9 @@ export function buildTransferPayload(opts: {
     ...(opts.blocks !== undefined ? { blocks: opts.blocks } : {}),
     ...(opts.previouslyBlocked !== undefined
       ? { previouslyBlocked: opts.previouslyBlocked }
+      : {}),
+    ...(opts.communityNode !== undefined
+      ? { communityNode: opts.communityNode }
       : {}),
   };
 }
@@ -244,6 +257,9 @@ export async function wrapForTransfer(opts: {
    *  `blocks` — local device-cluster-only, never crosses a peer-node
    *  wire. */
   previouslyBlocked?: PreviouslyBlockedRow[];
+  /** Optional: the source's community-node connection (see
+   *  TransferPayload.communityNode). */
+  communityNode?: { url: string; enabled: boolean };
 }): Promise<TransferEnvelope> {
   const now = opts.now ?? Date.now();
   const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;

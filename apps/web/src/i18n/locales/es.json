@@ -50,7 +50,9 @@
         "profile": "Tu perfil",
         "profileDetail": "Nombre, habilidades, disponibilidad, zona.",
         "balance": "Tu saldo e historial",
-        "balanceDetail": "Visibles en ambos dispositivos — viven en el registro de la comunidad, no en tu dispositivo."
+        "balanceDetail": "Visibles en ambos dispositivos — viven en el registro de la comunidad, no en tu dispositivo.",
+        "connection": "Tu conexión comunitaria",
+        "connectionDetail": "El dispositivo nuevo aprende con qué servidor comunitario sincronizar y llena publicaciones, proyectos, eventos y miembros de inmediato."
       },
       "staysTitle": "Lo que se queda en este dispositivo",
       "stays": {
