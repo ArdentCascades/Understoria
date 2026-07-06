@@ -37,6 +37,8 @@ import {
   generateLinkKeypair,
   grantChannelIdForPubkey,
   LINK_POLL_INTERVAL_MS,
+  LINK_REQUEST_TTL_MS,
+  LINK_STALL_HINT_MS,
   normalizeLinkCode,
   openGrant,
   postLinkRequest,
@@ -527,14 +529,28 @@ export default function PairDevicePage() {
 
               {requestExpiresAt !== null &&
                 (nowTick < requestExpiresAt ? (
-                  <p
-                    aria-live="polite"
-                    className="text-center text-sm text-moss-600 dark:text-moss-300"
-                  >
-                    {t("pairDevice.wait.waitingLine", {
-                      mmss: formatMmss(requestExpiresAt - nowTick),
-                    })}
-                  </p>
+                  <>
+                    <p
+                      aria-live="polite"
+                      className="text-center text-sm text-moss-600 dark:text-moss-300"
+                    >
+                      {t("pairDevice.wait.waitingLine", {
+                        mmss: formatMmss(requestExpiresAt - nowTick),
+                      })}
+                    </p>
+                    {/* Stall hint: the rendezvous fails SILENTLY when a
+                        VPN / Private Relay makes the two apps present
+                        different addresses — after a while, name it. */}
+                    {LINK_REQUEST_TTL_MS - (requestExpiresAt - nowTick) >
+                      LINK_STALL_HINT_MS && (
+                      <p
+                        role="status"
+                        className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+                      >
+                        {t("pairDevice.wait.vpnHint")}
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <div
                     role="status"

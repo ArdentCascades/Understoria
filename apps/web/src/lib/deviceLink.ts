@@ -187,6 +187,13 @@ export const LINK_REQUEST_TTL_MS = 10 * 60_000;
  *  address. */
 export const LINK_POLL_INTERVAL_MS = 3000;
 
+/** How long either side waits with nothing happening before naming
+ *  the likely invisible cause: a VPN or iCloud Private Relay making
+ *  the two apps look like different networks, which breaks the
+ *  address rendezvous silently. Long enough that a normal app-flip
+ *  never sees the hint; short enough to catch someone stuck. */
+export const LINK_STALL_HINT_MS = 45_000;
+
 const GRANT_CHANNEL_TAG = "understoria-link-grant-v2|";
 
 /** 64 visually distinct emoji for the recognition badge. Curated to

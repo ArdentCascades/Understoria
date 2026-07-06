@@ -237,6 +237,11 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "confías en quien lo administra, usa el método QR en " +
             "'Otras formas de vincular'. El QR va de pantalla a cámara " +
             "sin ningún servidor de por medio.",
+          "Una nota práctica: vincular con un toque necesita que " +
+            "ambos dispositivos parezcan estar en la misma red. Una " +
+            "VPN o iCloud Private Relay puede interponerse sin que lo " +
+            "notes — si la solicitud nunca aparece, páusala un minuto " +
+            "y pide de nuevo, o usa 'Otras formas de vincular'.",
         ],
       },
     ],

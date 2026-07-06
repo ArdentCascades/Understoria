@@ -31,7 +31,10 @@ include breaking changes.
   community's own server during those minutes — members who don't
   extend that trust keep the QR method, one tap away under "Other
   ways to link," alongside the spoken 6-word code for faraway
-  devices.
+  devices. And because a VPN or iCloud Private Relay can silently
+  make one phone's two apps look like different networks (the one
+  way the rendezvous fails invisibly), both screens name that cause
+  after 45 quiet seconds and point at the fix.
 
 - **Device linking, Signal-style: type six words, done.** Adding a
   device no longer involves QR codes, cameras, or copy-paste. The

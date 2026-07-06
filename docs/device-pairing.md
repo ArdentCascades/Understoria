@@ -427,8 +427,12 @@ Flow:
 The rendezvous needs both devices behind the same public address —
 always true on one phone, true at home for two devices. Different
 networks (or iCloud Private Relay splitting the phone's own
-traffic) fall back to §6.6 words / §6 QR behind "Other ways to
-link."
+traffic; a whole-device VPN is fine since both apps share its exit)
+fall back to §6.6 words / §6 QR behind "Other ways to link."
+Because this failure is otherwise SILENT — each side just sees
+nothing happen — both screens surface a hint after 45 quiet seconds
+naming the VPN/Private-Relay cause and pointing at the pause-it or
+other-ways fixes.
 
 Security properties, honestly ranked:
 
