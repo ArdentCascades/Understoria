@@ -110,10 +110,12 @@ The app won't catch exploitation; the community will.
 
 ### "Who runs the server?"
 
-Whoever the community trusts to. In the current release there's no
-server at all — everyone's data lives on their own device. Once the
-Agent 3 server lands, a community can run its own node; it can also
-join someone else's. Nobody is obligated to federate.
+Whoever the community trusts to. Everyone's data lives first on
+their own device; the community node is a relay the community can
+run itself (a $5 VPS or a Raspberry Pi — see the operator guide)
+or borrow from a neighboring community. It stores only the signed
+records members already chose to publish, and nobody is obligated
+to federate with anyone.
 
 ## 5. The first month
 

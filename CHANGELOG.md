@@ -72,6 +72,40 @@ include breaking changes.
   the shell's main area.
 
 ### Changed
+- **The install FAQ now warns about the iPhone storage split.**
+  "Installing changes nothing about your data" was false on iOS:
+  a home-screen app gets its own separate storage, so it starts
+  signed out even though the browser copy is signed in (member
+  report). The FAQ (EN + ES) now explains the two-devices-on-one-
+  phone reality and walks through the device-pairing fix — welcome
+  screen's "bring an existing identity" link on the installed app,
+  Profile → Add another device in the browser.
+
+- **Documentation accuracy round: sixteen verified doc↔code
+  mismatches fixed.** A full audit (four verification passes over
+  docs/, the in-app guide, and the FAQ, each claim checked against
+  code) found three patterns of drift, now corrected. "Coming
+  soon" claims for long-shipped features: the README, organizer
+  guide, and operator guide no longer say the community server is
+  unbuilt; the in-app Learn guide's governance section now
+  describes the real proposals/disputes machinery instead of a
+  moderator/suspension model that never existed; messages and the
+  app lock are no longer "a future release"; invite-revocation's
+  design note and community-events' templateId rules read as
+  shipped. Security-doc precision: the pairing envelope's KDF is
+  documented as what the code does (PBKDF2-SHA256 600k, 16-byte
+  salt — not scrypt) in both the design note and threat model; the
+  privacy policy's federation table drops the nonexistent Invite
+  push and gains the RedemptionReceipt and InviteRevocation rows;
+  the FAQ's "who sees what" answer (EN+ES) now states honestly
+  that signed exchanges federate under your public key and what
+  never leaves the node. Numbers: the developer guide's bundle
+  budget is marked violated (~433 KB gzip vs the 200 KB target)
+  with the lazy-load follow-up named; dist-size and Dexie-schema
+  descriptions match reality; the operator env table gains the
+  system-key variable set; quickstart's Docker section stops
+  promising a localhost port the production stack never binds.
+
 - **The projects empty state looks like mutual aid, not a laptop.**
   The "No active projects" illustration was the open-book-on-a-stump
   drawing, which at a glance read as an open laptop on a dock — a

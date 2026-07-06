@@ -25,9 +25,11 @@
 Shipped. The doc + threat-model addendum + privacy-policy amendment
 + incident template + calendar.md §9 update were the predicate
 (PR #186); implementation PRs B through F (see §13) shipped in
-sequence — see the per-PR notes in §13. The `templateId` forward
-slot, phase-2 templates, opt-in iCal export, and browser push
-reminders remain deferred per §10 / §11.
+sequence — see the per-PR notes in §13. Phase-2 event templates have since SHIPPED
+(`docs/event-templates-plan.md`, PRs #254–#256): the `templateId`
+forward slot is live and the verifier accepts a non-null value.
+Opt-in iCal export and browser push reminders remain deferred per
+§10 / §11.
 
 ## §2 Why now
 
@@ -179,10 +181,12 @@ Field-by-field rationale:
   coordinate pair would expose a stalking-grade location signal on a
   public wire. "Community room, 3rd floor" is fine; "47.6062 N,
   122.3321 W" is not the shape this field is for.
-- `templateId` is reserved for phase 2 (see §10) and **must be
-  `null` in phase 1**. The verifier rejects events with a non-null
-  `templateId` until the phase-2 template registry lands; this gives
-  us an audit-trail-safe forward slot without designing templates now.
+- `templateId` began as a phase-1 forward slot (must-be-null,
+  verifier-rejected) so the wire shape wouldn't need a breaking
+  change later. Phase 2 has since shipped: the template registry
+  lives in `apps/web/src/content/eventTemplates.ts`, and both
+  `createEvent` and the server verifier accept a non-null
+  `templateId` (1–50 chars). See `docs/event-templates-plan.md`.
 - `capacity` is **soft** — the UI suggests RSVPs stop when the cap
   is hit, but the server never enforces a count (counts are local
   per node — see §4.2). When the cap is reached on the organizer's

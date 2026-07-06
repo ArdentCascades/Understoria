@@ -1044,9 +1044,10 @@ gets a "Quiet" momentum chip. It's not a judgment — it's a signal
 the community might want to bump it, regroup, or pause it.
 
 **Where does my data live?** On your device, in the browser's
-storage. Nothing leaves this device without you knowing — the only
-thing that does is encrypted messages to people you explicitly
-message, in a future release.
+storage. What leaves it is only what you deliberately publish —
+signed posts, confirmed exchanges, events — plus end-to-end
+encrypted messages to people you explicitly message (the node
+relays ciphertext it cannot read).
 
 **Is it really free?** Yes. The software is AGPL-3.0-or-later. No
 advertisements, no subscriptions, no data sale. If your community

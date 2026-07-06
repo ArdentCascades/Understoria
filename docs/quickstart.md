@@ -42,12 +42,6 @@ git clone https://github.com/ardentcascades/understoria.git
 cd understoria
 ```
 
-> If you're following this before PR #3 has merged into `main`,
-> also check out the feature branch:
-> ```sh
-> git checkout claude/mutual-aid-timebank-LV7nj
-> ```
-
 ## 3. Install dependencies
 
 ```sh
@@ -78,8 +72,9 @@ npm run dev
 Wait for `VITE … ready` and `Local: http://localhost:5173/`.
 
 Open Firefox in your VM and visit <http://localhost:5173>. You'll
-see the Community board with five demo posts (Rosa's ride request,
-Marcus's bike tune-ups, etc.). The seed data is **dev-mode only** —
+land on the Community board's **Projects** tab (the default);
+switch to the Needs / Offers tabs to see the five demo posts
+(Rosa's ride request, Marcus's bike tune-ups, etc.). The seed data is **dev-mode only** —
 `npm run dev` seeds it so you have something to interact with while
 developing; production builds start with an empty node and the
 welcome flow mints the first identity. Wipe the dev data via
@@ -175,8 +170,16 @@ sudo usermod -aG docker $USER
 cd ~/understoria
 docker compose up -d
 docker compose logs -f understoria   # Ctrl-C to detach
-curl http://localhost:8787/health
 ```
+
+> **Heads up:** `docker-compose.yml` is the PRODUCTION stack (server
+> + built PWA + Caddy on ports 80/443, expecting `DOMAIN` and
+> `ACME_EMAIL` in `.env`). The server container deliberately has no
+> host port binding, so `curl localhost:8787` will NOT work from the
+> host — inside the compose network Caddy fronts it. For local
+> development use §6's `npm run dev:server` instead; for a real
+> deployment follow [`deploy-linode.md`](./deploy-linode.md), which
+> walks this stack end to end.
 
 The first build takes ~3 minutes (it pulls the Node image, installs
 build tools, compiles the native binding, and prunes dev deps from

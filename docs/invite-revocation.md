@@ -1,9 +1,14 @@
 # Understoria — Invite Revocation Propagation (design note)
 
-> **Status:** design note, decision pending (one operator ruling in
-> §9). Extends [`invite-redemption.md`](./invite-redemption.md) — read
-> its §6 (the `RedemptionReceipt` and its merge rules) and §16.1 (this
-> note is the "future note if pilots hit the race" it anticipates)
+> **Status:** **shipped.** Signed `InviteRevocation` records
+> federate: `revokeInvite` signs and enqueues in one transaction,
+> `POST/GET /invite-revocations` live on the server, and
+> `pullFederatedInviteRevocations` merges on every client (revoked
+> beats open; redeemed-before-revocation stands — the §9 operator
+> ruling as ratified). Extends
+> [`invite-redemption.md`](./invite-redemption.md) — read its §6
+> (the `RedemptionReceipt` and its merge rules) and §16.1 (this
+> note is the "future note if pilots hit the race" it anticipated).
 > first. Mirrors the federation shape of the co-organizer invitation
 > revocation (`CoOrganizerInvitationRevocation` in
 > `@understoria/shared`) and the receipt-cursor discipline of the
@@ -12,12 +17,14 @@
 
 ---
 
-## §1 The problem
+## §1 The problem (as it stood before this shipped)
 
-`revokeInvite` (`apps/web/src/db/invites.ts`) writes only the local
-Dexie row: it flips the inviter's own copy to `status: "revoked"` and
-stops. Nothing signs the revocation and nothing enqueues it. So a
-revocation is invisible to every other device.
+`revokeInvite` (`apps/web/src/db/invites.ts`) originally wrote only
+the local Dexie row: it flipped the inviter's own copy to
+`status: "revoked"` and stopped. Nothing signed the revocation and
+nothing enqueued it. So a revocation was invisible to every other
+device. (Today `revokeInvite` signs an `InviteRevocation` and
+enqueues it in the same transaction — the design below, as built.)
 
 That is fine as long as the token is never used. It is not fine when
 the token is redeemed anyway — the exact race

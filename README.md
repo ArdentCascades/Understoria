@@ -112,9 +112,10 @@ A Caddy reverse-proxy config, VPS notes, Raspberry Pi walk-through,
 and full env-var reference are in the
 [Node Operator Guide](docs/operator-guide.md).
 
-The Node.js server with federation, cross-node exchanges, and
-Docker deployment is the next major workstream
-(Agent 3 on the roadmap).
+The Node.js community server is shipped: signed-record ingestion
+with verification, the federation pull loop between peer nodes,
+and Docker deployment (see the operator guide above and
+[deploy-linode.md](docs/deploy-linode.md) for the full runbook).
 
 ## Architecture
 
@@ -171,10 +172,8 @@ understoria/
 │   ├── web/                 # React PWA (main client)
 │   └── server/              # Node.js community server
 ├── packages/
-│   ├── crypto/              # Key management, signing, encryption
-│   ├── federation/          # Node-to-node protocol
-│   ├── shared/              # Shared types and utilities
-│   └── timebank/            # Credit system logic
+│   └── shared/              # Shared types, crypto (signing,
+│                            #   E2E encryption), canonical payloads
 ├── docs/
 │   ├── member-guide.md      # How to use the app
 │   ├── operator-guide.md    # How to deploy a node

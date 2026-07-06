@@ -165,8 +165,17 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "aplicación.'",
           "En un navegador de escritorio, busca el icono de instalación " +
             "al final derecho de la barra de direcciones.",
-          "Instalarla no cambia nada de tus datos — todo sigue viviendo " +
-            "en tu dispositivo, exactamente igual que antes.",
+          "Algo que debes saber antes de instalar: en iPhone y iPad la " +
+            "app instalada tiene su PROPIO almacenamiento separado, así " +
+            "que arranca sin sesión aunque la copia del navegador sí " +
+            "tenga tu identidad — no se pierde nada, simplemente tienes " +
+            "dos 'dispositivos' separados en un mismo teléfono. Trata " +
+            "la app instalada como un dispositivo nuevo: en su pantalla " +
+            "de bienvenida toca el enlace para traer una identidad " +
+            "existente, y en tu navegador ve a Perfil → Añadir otro " +
+            "dispositivo para emparejarlos. (En Android y en " +
+            "computadora la app instalada comparte el almacenamiento " +
+            "del navegador, así que tu sesión se mantiene.)",
         ],
       },
       {
@@ -286,9 +295,14 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Todo el mundo en el nodo de tu comunidad puede ver tus " +
             "publicaciones, tu nombre visible, tu zona (si pusiste una) y " +
-            "tu historial de intercambios. Las otras comunidades pueden " +
-            "ver las publicaciones federadas que publicas, pero no pueden " +
-            "ver tu saldo ni tu historial de actividad.",
+            "tu historial de intercambios. Las comunidades vecinas " +
+            "reciben los registros firmados que publicas — publicaciones, " +
+            "intercambios confirmados, eventos — bajo tu llave pública, " +
+            "no tu nombre visible. Como los intercambios se federan, un " +
+            "nodo vecino puede ver la actividad de intercambios de tu " +
+            "llave y deducir su saldo; lo que nunca sale de tu comunidad " +
+            "son las confirmaciones de asistencia, los turnos, las tareas " +
+            "de proyectos, los bloqueos, los borradores y los mensajes.",
           "Los mensajes directos son distintos: están cifrados de extremo " +
             "a extremo entre tu dispositivo y el de la otra persona, así " +
             "que solo ustedes dos pueden leerlos — ni el nodo, ni las " +

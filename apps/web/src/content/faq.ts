@@ -177,8 +177,16 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "app.'",
           "On a desktop browser, look for the install icon at the " +
             "right end of the address bar.",
-          "Installing changes nothing about your data — everything " +
-            "still lives on your device, exactly as before.",
+          "One thing to know before you install: on iPhone and iPad " +
+            "the installed app gets its OWN separate storage, so it " +
+            "starts out signed out even though the browser copy is " +
+            "signed in — nothing is lost, you just have two separate " +
+            "'devices' on one phone. Treat the installed app like a " +
+            "new device: on its welcome screen tap the link about " +
+            "bringing an existing identity, then in your browser go " +
+            "to Profile → Add another device and pair the two. (On " +
+            "Android and desktop the installed app shares the " +
+            "browser's storage, so you stay signed in.)",
         ],
       },
       {
@@ -278,9 +286,13 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "Everyone in your community node can see your posts, your " +
             "display name, your neighborhood (if you set one), and your " +
-            "exchange history. Other communities can see federated " +
-            "posts you publish, but they can't see your balance or " +
-            "your activity history.",
+            "exchange history. Peer communities receive the signed " +
+            "records you publish — posts, confirmed exchanges, events — " +
+            "under your public key, not your display name. Because " +
+            "exchanges federate, a peer node can see your key's " +
+            "exchange activity and work out its balance; what never " +
+            "leaves your community are RSVPs, shift signups, project " +
+            "tasks, blocks, drafts, and messages.",
           "Direct messages are different: they're end-to-end encrypted " +
             "between your device and the other person's, so only the " +
             "two of you can read them — not the node, not other " +

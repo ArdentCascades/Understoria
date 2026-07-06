@@ -60,12 +60,10 @@ broader answer for after pilot signal lands. The calendar in v1
 renders them in a familiar grid. No new federated record type,
 no new server endpoint, no schema migration.
 
-The federated `Event` record (a first-class "thing happening at
-a time and place" with its own signature, push-and-pull surface,
-and governance question of "who can post events") is **deferred**
-to a future design note. If pilot signal shows members wanting
-events that aren't already shaped by an existing post or project,
-that's the trigger to take up the broader design.
+The federated `Event` record was deferred here and has since
+SHIPPED via its own design note (`docs/community-events.md`, §9's
+trigger having fired) — events are now the calendar's fourth
+source, alongside an "Events only" filter chip.
 
 ## 4. What appears on the calendar
 
@@ -75,8 +73,10 @@ that's the trigger to take up the broader design.
 | `Post.expiresAt` (status = open) | Marker on the expiry day, visually distinct from project deadlines | Already on the Board; the calendar makes scanning faster, doesn't expose new fields |
 | Completed exchanges, per UTC day | Sparkline density indicator — count per day, no member names, no hours total | Echoes `no-leaderboards`: community metabolism, not individual contest; gives the calendar visible texture even with no future events |
 
-That's the full list. Three sources, each with a clear shape
-constraint.
+Plus the fourth source that shipped later: federated `Event`
+records (`docs/community-events.md`), rendered as event entries
+with their own "Events only" filter chip. Each source keeps a
+clear shape constraint.
 
 ## 5. What deliberately does not appear
 
@@ -128,6 +128,9 @@ Filtering is scoped to surfaces members already know about:
   exchanges I'm a party to. Defaults off. This is the only
   filter that produces a per-member view, and it's per-member
   for the viewing member only (their own data).
+- **"Events only"** toggle — added when federated events shipped
+  (`docs/community-events.md`); narrows the calendar to event
+  entries.
 
 ## 7. Empty state
 

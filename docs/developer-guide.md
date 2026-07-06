@@ -102,15 +102,16 @@ pure data to `lib/`).
 
 | Module | Responsibility |
 |--------|---------------|
-| `database.ts` | Dexie schema (`members`, `posts`, `exchanges`, `achievements`, `settings`, `secretKeys`, `invites`, `vouches`) |
+| `database.ts` | Dexie schema — 28 versions deep. Core stores (`members`, `posts`, `exchanges`, `invites`, `vouches`, `secretKeys`, `settings`, `achievements`) plus the later families: projects (`projects`, `projectTasks`, `projectActivity`), events (`events`, `eventRsvps`, `eventShifts`, `shiftSignups`, `eventProjectLinks`), governance (`proposals`, `votes`), messaging (`messages`), federation (`outbox`, `nodeConfig`), and safety (`blocks`, `previouslyBlocked`, `pairingLog`, `drafts`, `coorgInvitations` + responses/revocations). The schema comments in the file are the canonical ledger; `docs/roadmap.md` "Migration strategy" tracks version reservations |
 | `seed.ts` | First-launch demo community (dev builds only) |
 | `actions.ts` | Post lifecycle (`createPost`, `claimPost`, `confirmExchange`, …) |
 | `secrets.ts` | Session-aware `getSecretKey`, enable / change / disable passphrase |
 | `invites.ts` | `issueInvite`, `redeemInvite`, `revokeInvite`, `listInvitesFrom` |
+| `projects.ts`, `events.ts`, `eventShifts.ts`, `messages.ts`, `proposals.ts`, `blocks.ts`, `adoption.ts`, `coorgInvitations.ts`, … | Each later feature family carries its own write path in its own module, same transaction discipline |
 
-All write paths go through `actions.ts`, `secrets.ts`, or
-`invites.ts`. Components and pages should never call
-`db.table.put()` directly — route it through an action.
+Every write path lives in a `db/` module. Components and pages
+should never call `db.table.put()` directly — route it through the
+feature's action module.
 
 ### `state/AppContext.tsx`
 
@@ -227,7 +228,14 @@ is "it depends on which came first," you need a CRDT strategy.
 ## 8. Performance targets
 
 - Cold load on a mid-range 3G connection: **< 3 seconds.**
-- Bundle size after gzip: **< 200 KB** main + a small PWA shell.
+- Bundle size after gzip: **< 200 KB** main + a small PWA shell —
+  **currently violated**: the main chunk is ~433 KB gzip (~1.5 MB
+  raw) as of v0.3.0, with no route-level code splitting and the
+  full bilingual template content (~111 KB gzip) statically
+  imported. Lazy-loading the template content and splitting the
+  heaviest routes (`ProjectDetail` is 3,200+ lines) is the tracked
+  follow-up; until that lands, treat the 200 KB line as the target
+  to climb back down to, not a passing check.
 - Time-to-interactive on a 2020-era budget Android: **< 5 seconds.**
 - Hard purge over a populated node (50 members, 200 posts): **< 60
   seconds** (measured: ~500 ms).
