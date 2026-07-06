@@ -455,6 +455,8 @@
       "errorStartInPast": "Event start time is in the past. Pick a time later than now.",
       "errorEndInvalid": "End time isn't valid. Pick a date and time, or remove the end-time toggle.",
       "errorEndBeforeStart": "End time has to be after the start time.",
+      "endsOtherDay": "Ends on a different day",
+      "errorEndBeforeStartMidnightHint": "Runs past midnight? Tick “Ends on a different day.”",
       "errorCapacityInvalid": "Capacity must be a positive whole number, or leave it empty for uncapped.",
       "errorLocked": "Unlock this device with your passphrase before signing the event."
     },

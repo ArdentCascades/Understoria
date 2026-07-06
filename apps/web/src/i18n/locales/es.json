@@ -455,6 +455,8 @@
       "errorStartInPast": "La hora de inicio del evento está en el pasado. Elige una hora posterior a ahora.",
       "errorEndInvalid": "La hora de fin no es válida. Elige una fecha y hora, o quita la opción de hora de fin.",
       "errorEndBeforeStart": "La hora de fin tiene que ser después de la de inicio.",
+      "endsOtherDay": "Termina otro día",
+      "errorEndBeforeStartMidnightHint": "¿Termina pasada la medianoche? Marca “Termina otro día”.",
       "errorCapacityInvalid": "El cupo debe ser un número entero positivo, o déjalo vacío para cupo abierto.",
       "errorLocked": "Desbloquea este dispositivo con tu frase de acceso antes de firmar el evento."
     },

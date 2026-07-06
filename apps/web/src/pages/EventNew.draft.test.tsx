@@ -223,6 +223,51 @@ describe("EventNew draft round-trip", () => {
     expect(resaved?.payload.templateId).toBe("potluck");
   });
 
+  it("legacy same-day draft (no endsOtherDay field) restores into same-day mode and re-saves the derived flag", async () => {
+    // draftPayload's endDate equals its startDate and carries no
+    // endsOtherDay — the exact shape drafts saved before the
+    // same-day-end default existed have.
+    await saveDraft(DRAFT_KEY, draftPayload());
+
+    render();
+    await waitFor(() =>
+      (container.textContent ?? "").includes("Continue draft"),
+    );
+    act(() => {
+      buttonByText("Continue draft").click();
+    });
+
+    // Same-day mode: only the start's date input renders.
+    expect(
+      container.querySelectorAll('form input[type="date"]').length,
+    ).toBe(1);
+
+    // The autosave after restore writes the derived flag explicitly.
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 700));
+    });
+    const resaved = await loadDraft<{ endsOtherDay?: boolean }>(DRAFT_KEY);
+    expect(resaved?.payload.endsOtherDay).toBe(false);
+  });
+
+  it("legacy cross-day draft restores into different-day mode with the end date intact", async () => {
+    await saveDraft(DRAFT_KEY, draftPayload({ endDate: "2099-06-22" }));
+
+    render();
+    await waitFor(() =>
+      (container.textContent ?? "").includes("Continue draft"),
+    );
+    act(() => {
+      buttonByText("Continue draft").click();
+    });
+
+    const dates = Array.from(
+      container.querySelectorAll<HTMLInputElement>('form input[type="date"]'),
+    );
+    expect(dates.length).toBe(2);
+    expect(dates[1].value).toBe("2099-06-22");
+  });
+
   it("discard clears the stored draft", async () => {
     await saveDraft(DRAFT_KEY, draftPayload());
 
