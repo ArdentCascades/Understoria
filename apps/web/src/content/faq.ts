@@ -177,8 +177,16 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "app.'",
           "On a desktop browser, look for the install icon at the " +
             "right end of the address bar.",
-          "Installing changes nothing about your data — everything " +
-            "still lives on your device, exactly as before.",
+          "One thing to know before you install: on iPhone and iPad " +
+            "the installed app gets its OWN separate storage, so it " +
+            "starts out signed out even though the browser copy is " +
+            "signed in — nothing is lost, you just have two separate " +
+            "'devices' on one phone. Treat the installed app like a " +
+            "new device: on its welcome screen tap the link about " +
+            "bringing an existing identity, then in your browser go " +
+            "to Profile → Add another device and pair the two. (On " +
+            "Android and desktop the installed app shares the " +
+            "browser's storage, so you stay signed in.)",
         ],
       },
       {

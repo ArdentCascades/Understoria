@@ -72,6 +72,15 @@ include breaking changes.
   the shell's main area.
 
 ### Changed
+- **The install FAQ now warns about the iPhone storage split.**
+  "Installing changes nothing about your data" was false on iOS:
+  a home-screen app gets its own separate storage, so it starts
+  signed out even though the browser copy is signed in (member
+  report). The FAQ (EN + ES) now explains the two-devices-on-one-
+  phone reality and walks through the device-pairing fix — welcome
+  screen's "bring an existing identity" link on the installed app,
+  Profile → Add another device in the browser.
+
 - **Documentation accuracy round: sixteen verified doc↔code
   mismatches fixed.** A full audit (four verification passes over
   docs/, the in-app guide, and the FAQ, each claim checked against
