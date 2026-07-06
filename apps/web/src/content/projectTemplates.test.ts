@@ -255,3 +255,65 @@ describe.each([
     }
   });
 });
+
+// The context pass: firstSteps / commonPitfalls prose in both
+// locales, plus locale-INVARIANT pairsWith (template ids) and
+// learnMore (FAQ entry ids). Structure is CI-pinned so a content
+// edit can't strand a dangling reference or silently drop a locale.
+import { FAQ_SECTIONS } from "./faq";
+
+const FAQ_ENTRY_IDS = new Set(
+  FAQ_SECTIONS.flatMap((s) => s.entries.map((e) => e.id)),
+);
+
+describe.each([
+  ["EN", PROJECT_TEMPLATES_EN],
+  ["ES", PROJECT_TEMPLATES_ES],
+] as const)("template context fields (%s)", (_locale, templates) => {
+  const idsInLocale = new Set(templates.map((t) => t.id));
+
+  it("every template carries non-empty firstSteps and commonPitfalls", () => {
+    for (const tpl of templates) {
+      expect(
+        (tpl.firstSteps ?? "").trim().length,
+        `${tpl.id} firstSteps`,
+      ).toBeGreaterThan(0);
+      expect(
+        (tpl.commonPitfalls ?? "").trim().length,
+        `${tpl.id} commonPitfalls`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("pairsWith references existing templates and never itself", () => {
+    for (const tpl of templates) {
+      const pairs = tpl.pairsWith ?? [];
+      expect(pairs.length, `${tpl.id} pairsWith count`).toBeGreaterThan(0);
+      expect(pairs.length).toBeLessThanOrEqual(3);
+      for (const pid of pairs) {
+        expect(idsInLocale.has(pid), `${tpl.id} → unknown ${pid}`).toBe(true);
+        expect(pid, `${tpl.id} self-reference`).not.toBe(tpl.id);
+      }
+    }
+  });
+
+  it("learnMore points only at real FAQ entry ids", () => {
+    for (const tpl of templates) {
+      for (const faqId of tpl.learnMore ?? []) {
+        expect(
+          FAQ_ENTRY_IDS.has(faqId),
+          `${tpl.id} → unknown FAQ id ${faqId}`,
+        ).toBe(true);
+      }
+      expect((tpl.learnMore ?? []).length).toBeLessThanOrEqual(2);
+    }
+  });
+});
+
+it("pairsWith and learnMore are locale-invariant (identical EN/ES)", () => {
+  for (const enTpl of PROJECT_TEMPLATES_EN) {
+    const esTpl = PROJECT_TEMPLATES_ES.find((t) => t.id === enTpl.id)!;
+    expect(esTpl.pairsWith).toEqual(enTpl.pairsWith);
+    expect(esTpl.learnMore).toEqual(enTpl.learnMore);
+  }
+});

@@ -105,6 +105,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A donated fridge, a sheltered outdoor spot with an outlet, a host site, and a small cleaning rota.",
     setupHours: 18,
     defaultCategory: "food",
+    firstSteps:
+      "Start with the host, not the fridge. Sit down with the " +
+      "shop owner, church, or clinic you have in mind and talk " +
+      "through the unglamorous parts — the power bill, what " +
+      "happens when someone leaves a mess, who they call when it " +
+      "breaks — before you source a single appliance. While " +
+      "you're at it, ask the food pantries and mutual aid groups " +
+      "already working nearby what gaps they see, so the fridge " +
+      "fills one instead of duplicating them.",
+    commonPitfalls:
+      "Community fridges almost never die from a lack of " +
+      "donations — they die when nobody clearly owns the " +
+      "cleaning, the fridge gets grim, and the host quietly asks " +
+      "for it to go. Put names on the rota before opening day, " +
+      "and treat the host relationship as the thing you're " +
+      "maintaining, not just the appliance.",
+    pairsWith: ["gleaning-network", "food-preservation", "community-meal"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Find a host site with power and foot traffic",
@@ -165,6 +183,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 25,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Before you touch the soil, talk to two groups of people: " +
+      "whoever owns the land, and the neighbors who live right " +
+      "next to it — their blessing matters as much as the lease. " +
+      "Then gather your likely regulars and have the " +
+      "sharing-model conversation early; knowing whether this is " +
+      "individual plots or a communal harvest changes everything " +
+      "you build.",
+    commonPitfalls:
+      "Gardens don't usually die in spring — they die in the " +
+      "hottest weeks, when the watering rota quietly collapses " +
+      "and the beds go brown. The other slow killer is one person " +
+      "treating it as their garden with helpers; write down how " +
+      "decisions get made while everyone still likes each other.",
+    pairsWith: ["seed-library", "community-composting", "food-preservation"],
     tasks: [
       {
         name: "Secure land and permission",
@@ -234,6 +267,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Storage space, donated tools, a simple check-out system, and a couple of \"librarians.\"",
     setupHours: 20,
     defaultCategory: "infrastructure",
+    firstSteps:
+      "Before collecting a single drill, talk to the person " +
+      "offering the space about what living with a tool library " +
+      "actually means — noise, storage creep, strangers at the " +
+      "door during open hours. Then ask neighbors what they'd " +
+      "actually borrow; a list of ten requested tools beats a " +
+      "garage of donated ones nobody wants.",
+    commonPitfalls:
+      "Tool libraries die from silence after the due date: nobody " +
+      "follows up, tools drift into permanent loans, and the " +
+      "shelves empty out. A friendly reminder routine matters " +
+      "more than a strict late policy — and be ready to say no to " +
+      "donations, or you'll become the neighborhood's dump for " +
+      "broken gear.",
+    pairsWith: ["library-of-things", "repair-cafe", "weatherization-brigade"],
+    learnMore: ["confirm-exchange"],
     tasks: [
       {
         name: "Find storage and open hours",
@@ -302,6 +351,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A list of volunteers, a way to match them to neighbors, and a check-in routine. Volunteers are neighbors, not care professionals — screen anyone making home visits, never let a volunteer handle a neighbor's money alone, and agree in advance on when to call family or emergency services.",
     setupHours: 18,
     defaultCategory: "emotional_support",
+    firstSteps:
+      "Start by listening, not recruiting: talk with the " +
+      "neighbors you hope to support about what they actually " +
+      "want — a weekly call, a ride, company — because a network " +
+      "built on assumptions feels like surveillance. At the same " +
+      "time, have the honest conversation with early volunteers " +
+      "about screening and boundaries, so the rules in place feel " +
+      "like care, not suspicion, when the first match happens.",
+    commonPitfalls:
+      "Care networks rarely fail from too few volunteers — they " +
+      "burn out the three people who always say yes while " +
+      "everyone else waits to be asked. Spread the matches " +
+      "deliberately, hold the volunteer debriefs even when things " +
+      "seem fine, and don't let check-ins turn into treating a " +
+      "neighbor as a case instead of a person.",
+    pairsWith: ["rides-transportation", "disability-support-network", "welcome-wagon"],
+    learnMore: ["message-someone"],
     tasks: [
       {
         name: "Map who's around",
@@ -368,6 +434,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A contact list, a meeting spot, basic supplies, and a communication plan that works without internet. This network complements official emergency services — it doesn't replace them. In a life-threatening situation, always call emergency services first.",
     setupHours: 30,
     defaultCategory: "organizing",
+    firstSteps:
+      "Build the plan around the people it's for: knock on the " +
+      "doors of neighbors on oxygen, refrigerated meds, or upper " +
+      "floors without elevators, and ask what a bad week looks " +
+      "like for them. Then talk to whoever controls your likely " +
+      "safe spot and to any existing emergency group (CERT, the " +
+      "fire department's outreach) so your network fills the gaps " +
+      "around official response instead of duplicating it.",
+    commonPitfalls:
+      "These networks don't fail during the disaster — they fail " +
+      "in the quiet years before it, when the contact tree goes " +
+      "stale, phone numbers change, and the plan lives on one " +
+      "person's laptop. Print everything, refresh the list on a " +
+      "calendar rhythm, and drill at least once; the first real " +
+      "use should never be the first use.",
+    pairsWith: ["cooling-warming-center", "community-first-aid-training", "community-wifi-mesh"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Map your neighborhood's risks",
@@ -434,6 +517,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Talk first with the space host about the honest realities " +
+      "— donation piles, foot traffic, what the room looks like " +
+      "the morning after — and then with a nearby thrift store or " +
+      "charity about what already floods in, so you know what " +
+      "your neighborhood actually lacks. If you can, spend an " +
+      "hour at an existing free store before your first event; " +
+      "the flow of intake and display is easier to copy than to " +
+      "invent.",
+    commonPitfalls:
+      "Free stores drown before they starve: without a firm " +
+      "yes/no list at the door, volunteers spend every hour " +
+      "sorting broken and soiled donations instead of welcoming " +
+      "people. And decide where leftovers go before the first " +
+      "event ends — a pile of unclaimed goods with no exit plan " +
+      "is how host spaces get lost.",
+    pairsWith: ["repair-cafe", "library-of-things", "mutual-aid-moving-crew"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Pick a format and space",
@@ -492,6 +593,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A space, people willing to teach, and a way to publish a schedule.",
     setupHours: 9,
     defaultCategory: "education",
+    firstSteps:
+      "The project starts with the two-question conversations, " +
+      "not the venue: ask people what they could teach and what " +
+      "they'd love to learn, and pay special attention to " +
+      "neighbors whose knowledge is rarely treated as expertise. " +
+      "Your first real task is reassuring one nervous would-be " +
+      "teacher over coffee that their session doesn't need to be " +
+      "a lecture.",
+    commonPitfalls:
+      "Skill shares fade when the same two confident people end " +
+      "up teaching everything and the schedule quietly bends to " +
+      "the organizers' free evenings instead of the attendees'. " +
+      "Keep recruiting first-time teachers, ask who's missing " +
+      "from the room, and treat a five-person session as a " +
+      "success, because it is.",
+    pairsWith: ["time-bank", "digital-literacy", "repair-cafe"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Survey skills and interests",
@@ -544,6 +662,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 20,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Gather your households before you call any supplier, and " +
+      "have the awkward money conversation first: what people can " +
+      "commit to, how payment happens before orders go in, and " +
+      "what a missed cycle means. A call with an existing buying " +
+      "club — most are happy to share their spreadsheet and their " +
+      "scars — will save you a season of trial and error.",
+    commonPitfalls:
+      "Buying co-ops die from money friction and coordinator " +
+      "fatigue: someone fronts cash and resents it, an order goes " +
+      "unpaid, or one person quietly runs every cycle until they " +
+      "quit and the whole thing stops. Collect payment before " +
+      "ordering without exception, and rotate the coordinator " +
+      "role from cycle two, not someday.",
+    pairsWith: ["community-market", "food-preservation"],
     tasks: [
       {
         name: "Gather your buying group",
@@ -612,6 +745,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 14,
     defaultCategory: "skilled_labor",
     suggestsWorkDays: true,
+    firstSteps:
+      "Recruit your first two or three fixers before anything " +
+      "else — the neighbor who sews, the bike tinkerer — because " +
+      "a date and venue mean nothing without them. Then walk the " +
+      "venue with them, talking through tables, power, and light, " +
+      "and if there's a repair café in a nearby town, visit one " +
+      "session; the intake flow is the part worth stealing.",
+    commonPitfalls:
+      "Repair cafés quietly turn into free drop-off repair shops: " +
+      "visitors leave items and walk away, fixers become unpaid " +
+      "technicians, and the one electronics person burns out " +
+      "first. Hold the line that owners stay with their repair, " +
+      "and post clearly that some things can't be saved — " +
+      "disappointment handled up front is easier than blame " +
+      "afterward.",
+    pairsWith: ["tool-lending-library", "community-bike-workshop", "free-store"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Recruit fixers by specialty",
@@ -668,6 +818,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteer drivers, a request/dispatch method, and clear safety and insurance ground rules. Driving neighbors is a serious responsibility — confirm every driver's license and insurance, screen anyone who'll drive vulnerable riders, and never use a volunteer ride in place of an ambulance in a medical emergency.",
     setupHours: 18,
     defaultCategory: "transport",
+    firstSteps:
+      "Two sets of conversations come before the first ride: sit " +
+      "down with each would-be driver to confirm license and " +
+      "insurance and talk honestly about screening, and talk with " +
+      "the people who need rides — and the senior centers and " +
+      "clinics that know them — about real destinations, times, " +
+      "and mobility needs. The vetting conversation is easier as " +
+      "a founding norm than as a rule imposed later.",
+    commonPitfalls:
+      "Ride networks fail at dispatch, not driving: requests land " +
+      "on one person's phone until that person is exhausted, and " +
+      "the same two reliable drivers get every ask while others " +
+      "are never called again after one no. Rotate the " +
+      "coordinator role, spread requests deliberately, and never " +
+      "let the insurance question wait until after the first " +
+      "fender-bender.",
+    pairsWith: ["health-navigation", "community-bike-workshop", "court-support"],
+    learnMore: ["claim-post"],
     tasks: [
       {
         name: "Recruit and vet drivers",
@@ -733,6 +901,25 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A core organizing group, accurate local tenant-rights info, a connection to legal aid, and a fast contact system. This project supports tenants and shares public legal information; it does not replace legal advice. Always route individual cases to qualified legal aid before deadlines.",
     setupHours: 30,
     defaultCategory: "housing",
+    firstSteps:
+      "Talk to affected tenants before any contact with a " +
+      "landlord, ever — door-knock, listen to what people " +
+      "actually fear and want, and let the tenants in each " +
+      "building set the pace, because they carry the retaliation " +
+      "risk, not the organizers. In parallel, introduce yourself " +
+      "to the local legal aid clinic early; you'll want that " +
+      "relationship before the first eviction notice arrives, not " +
+      "after.",
+    commonPitfalls:
+      "The way tenant unions hurt people is by moving faster than " +
+      "the tenants themselves: a confrontation launched before a " +
+      "building is ready exposes the most vulnerable neighbors to " +
+      "retaliation they didn't sign up for. The quieter failure " +
+      "is drift into giving legal advice instead of legal " +
+      "information — route individual cases to qualified legal " +
+      "aid before deadlines, every time.",
+    pairsWith: ["legal-aid-clinic", "mutual-aid-moving-crew", "solidarity-fund"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Recruit a core organizing committee",
@@ -800,6 +987,25 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 28,
     defaultCategory: "childcare",
     suggestsWorkDays: true,
+    firstSteps:
+      "This project is built in living rooms before it's built " +
+      "anywhere else: gather the founding families and talk " +
+      "through the uncomfortable specifics — screening, " +
+      "supervision, discipline styles, what happens when a kid " +
+      "gets hurt — before anyone schedules a single hour of care. " +
+      "Check your local rules on informal childcare in that same " +
+      "first stretch, so the model you agree on is one you can " +
+      "actually run.",
+    commonPitfalls:
+      "Two things quietly break childcare collectives: credit " +
+      "imbalance, where the same families always host until they " +
+      "resent it, and safety rules that soften as everyone gets " +
+      "comfortable — the just-this-once exception to never-alone " +
+      "is exactly how trust gets destroyed. Track the balance " +
+      "openly and treat the safety rules as most important with " +
+      "the families you know best.",
+    pairsWith: ["toy-library", "time-bank", "youth-mentorship"],
+    learnMore: ["what-is-balance"],
     tasks: [
       {
         name: "Gather founding families and agree on a model",
@@ -868,6 +1074,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 22,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
+    firstSteps:
+      "Talk to the site host and to the neighbors within smelling " +
+      "distance before the first bin arrives — fear of odor and " +
+      "rats kills compost sites, and an early honest conversation " +
+      "defuses it better than any pamphlet. Then find your " +
+      "compost's future home (a community garden that wants it) " +
+      "and at least one person who's actually kept a hot pile " +
+      "alive; their judgment will shape which method you pick.",
+    commonPitfalls:
+      "Compost projects die when nobody owns the turning: the " +
+      "pile stalls or starts to smell, a neighbor complains, and " +
+      "the host pulls permission — that chain moves faster than " +
+      "you'd think. Match how many scraps you collect to what " +
+      "your rota can actually process, and treat one contaminated " +
+      "batch as a signage problem to fix, not a volunteer to " +
+      "blame.",
+    pairsWith: ["community-garden", "community-meal"],
     tasks: [
       {
         name: "Find a composting site",
@@ -937,6 +1160,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A weatherproof book box, a starting collection, a host spot, and light upkeep.",
     setupHours: 7.5,
     defaultCategory: "education",
+    firstSteps:
+      "Start with two short conversations: one with whoever's " +
+      "wall or yard will host the box, about placement and what " +
+      "happens if it gets shabby, and one with the families and " +
+      "school nearby about what books they'd actually take home. " +
+      "Line up your steward — the person who'll check it weekly — " +
+      "before the box goes up, not after.",
+    commonPitfalls:
+      "Little libraries don't die from a shortage of books — they " +
+      "die from the wrong ones: someone dumps a box of outdated " +
+      "textbooks, the good titles get buried, rain gets in, and " +
+      "people quietly stop looking. A five-minute weekly steward " +
+      "visit prevents almost all of it; the box needs a person " +
+      "more than it needs donations.",
+    pairsWith: ["seed-library", "books-to-prisoners"],
     tasks: [
       {
         name: "Build or get a weatherproof book box",
@@ -989,6 +1227,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Certified trainers, supplies, a space, and a recurring schedule. All medical training should be delivered by certified instructors; this project organizes and hosts that training, it doesn't replace it.",
     setupHours: 17,
     defaultCategory: "education",
+    firstSteps:
+      "Your first conversation is with the people who'll actually " +
+      "teach — a Red Cross chapter, your health department, or a " +
+      "harm-reduction group. Ask what they need from a host and " +
+      "which dates they can offer, then talk with the folks most " +
+      "likely to witness an emergency — family of people who use " +
+      "drugs, staff at nearby businesses — so the first sessions " +
+      "get built around them.",
+    commonPitfalls:
+      "This project fades when it becomes one big training event " +
+      "that never repeats — skills rust and naloxone expires with " +
+      "nobody noticing. And resist the urge to teach the medical " +
+      "content yourselves; your job is hosting certified " +
+      "instructors, not standing in for them.",
+    pairsWith: ["harm-reduction-supplies", "emergency-preparedness"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Partner with certified trainers",
@@ -1049,6 +1303,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A member list, a tracking system, a coordinator, and agreed rules.",
     setupHours: 27,
     defaultCategory: "organizing",
+    firstSteps:
+      "Start with conversations, not software: sit down with ten " +
+      "or fifteen neighbors and ask each one what they'd offer " +
+      "and what they'd ask for. If those conversations don't " +
+      "surface variety — rides, tutoring, repairs, cooking — keep " +
+      "recruiting before you build the system.",
+    commonPitfalls:
+      "Time banks rarely die of scandal; they die of silence — " +
+      "people sign up, nobody makes the first request, and it all " +
+      "goes quiet. Have a coordinator actively broker matches for " +
+      "the first months, and hold the one-hour-equals-one-hour " +
+      "line: the moment you debate whether a plumber's hour " +
+      "outranks a babysitter's, it stops being a time bank.",
+    pairsWith: ["skill-share", "childcare-collective"],
+    learnMore: ["what-is-balance", "negative-balance"],
     tasks: [
       {
         name: "Recruit founding members and inventory skills",
@@ -1116,6 +1385,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A transparent money system, a small stewardship team, a fundraising plan, and clear criteria. Handling pooled money carries real responsibility — use dual sign-off, keep clean records, protect recipient privacy, and get advice on the legal and tax treatment of your fund.",
     setupHours: 23,
     defaultCategory: "mutual_aid_drive",
+    firstSteps:
+      "Before you collect a dollar, sit down with the few people " +
+      "you'd trust with pooled money and talk honestly: how dual " +
+      "sign-off will work, what gets published, and what happens " +
+      "when requests outrun the fund. Then find a local nonprofit " +
+      "resource or accountant to walk you through the legal and " +
+      "tax side before the account opens.",
+    commonPitfalls:
+      "Money breaks trust faster than anything else — one " +
+      "unexplained payout or a sloppy ledger can end the fund " +
+      "even when nobody did anything wrong. And there will almost " +
+      "always be more requests than money; if the criteria " +
+      "weren't agreed in advance, saying no case by case burns " +
+      "out the team and breeds resentment.",
+    pairsWith: ["resource-hub-dispatch", "tenant-union", "free-tax-prep"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Form a small stewardship team",
@@ -1185,6 +1470,20 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Talk first with the people who already see the families — " +
+      "the pediatric clinic, the food pantry, the church — and " +
+      "ask which sizes and products actually run short and " +
+      "whether they'd host distribution. That one conversation " +
+      "saves you months of guessing.",
+    commonPitfalls:
+      "What hurts most is unpredictability: one big drive, full " +
+      "shelves, then empty months right when families have " +
+      "started counting on you. Watch the real inventory too — " +
+      "newborn sizes pile up while the big sizes run out — and " +
+      "never ask for proof of need; dignity is part of the " +
+      "service.",
+    pairsWith: ["welcome-wagon", "laundry-shower-access"],
     tasks: [
       {
         name: "Find storage and a distribution point",
@@ -1238,6 +1537,20 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 20,
     defaultCategory: "transport",
     suggestsWorkDays: true,
+    firstSteps:
+      "Before hunting for a space, talk with the people who'd use " +
+      "the workshop and the mechanics who'd teach — and if " +
+      "there's a community bike shop in a nearby city, visit it " +
+      "and ask what they'd do differently. With your site host, " +
+      "settle storage, access, and insurance up front.",
+    commonPitfalls:
+      "The workshop dies when volunteers fix bikes instead of " +
+      "teaching people to fix them: it becomes a free repair " +
+      "shop, the line grows, and your mechanics burn out. Watch " +
+      "out for drowning in donated junk bikes too — triage " +
+      "ruthlessly — and never let a bike roll out without a " +
+      "brakes-and-tires safety check.",
+    pairsWith: ["repair-cafe", "rides-transportation", "tool-lending-library"],
     tasks: [
       {
         name: "Find a workshop space",
@@ -1296,6 +1609,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Bilingual volunteers, partner organizations, orientation materials, and a request system. Be especially careful with privacy: don't collect immigration status, route legal questions to qualified immigration lawyers, and let community members lead on what support they actually want.",
     setupHours: 22,
     defaultCategory: "other",
+    firstSteps:
+      "Start by talking with newcomer communities themselves and " +
+      "the organizations already walking alongside them — let " +
+      "them say what support they want rather than designing it " +
+      "for them. And before the first request arrives, have your " +
+      "handoff ready: qualified immigration lawyers you can route " +
+      "every legal question to.",
+    commonPitfalls:
+      "The most serious risk is well-meaning volunteers sliding " +
+      "from interpreting into giving legal or medical advice " +
+      "they're not qualified for — bad immigration guidance can " +
+      "cost someone dearly. And collect the bare minimum of data: " +
+      "one careless record about someone's status can put them in " +
+      "real danger.",
+    pairsWith: ["welcome-wagon", "legal-aid-clinic", "health-navigation"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Recruit bilingual and multilingual volunteers",
@@ -1357,6 +1686,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 22,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Your first two conversations are with the kitchen host — a " +
+      "church hall or community center — about the days you're " +
+      "planning, and with your local health authority about " +
+      "permits and food handling; those shape everything else. " +
+      "Then ask the people who'd come to eat which day and time " +
+      "actually works for them.",
+    commonPitfalls:
+      "A food-safety slip can hurt someone and end the project — " +
+      "temperature and storage rules don't get skipped, not once. " +
+      "The slower death is the same three people cooking every " +
+      "meal until they burn out, so widen the crew and rotate the " +
+      "lead cook from the start.",
+    pairsWith: ["gleaning-network", "community-garden", "community-fridge"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Find a kitchen and serving space",
@@ -1426,6 +1770,20 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A storage and catalog system, donated seeds, a host spot, and a few stewards.",
     setupHours: 8,
     defaultCategory: "food",
+    firstSteps:
+      "Talk with the library or community center about hosting " +
+      "the cabinet, and with experienced local gardeners about " +
+      "what genuinely grows in your region — beginners' success " +
+      "rides on regionally suited seed. A nearby nursery or " +
+      "community garden will often gladly donate the starter " +
+      "stock.",
+    commonPitfalls:
+      "A seed library dies quietly: old seed that won't " +
+      "germinate, beginners who conclude they can't garden and " +
+      "never come back. Rotate stock without sentimentality, and " +
+      "don't count on returns — almost nobody saves seed back — " +
+      "so plan restocking around donations, not deposits.",
+    pairsWith: ["community-garden", "free-little-library"],
     tasks: [
       {
         name: "Find a host and storage system",
@@ -1478,6 +1836,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Donated devices, internet access, volunteer tutors, and a space.",
     setupHours: 27,
     defaultCategory: "tech",
+    firstSteps:
+      "Talk first with the people you want to reach — at the " +
+      "library, the senior center, the pantry line — and ask what " +
+      "they actually want to do: telehealth, job applications, " +
+      "photos of the grandkids. Then talk with the library about " +
+      "space and connectivity before you collect a single device.",
+    commonPitfalls:
+      "Lending a device without solving internet access is " +
+      "lending a paperweight — connectivity is half the project. " +
+      "In sessions, the classic mistake is tutors grabbing the " +
+      "mouse and talking in jargon; and never re-lend a device " +
+      "without wiping it, because leaking one borrower's data " +
+      "breaks all the trust you've built.",
+    pairsWith: ["community-wifi-mesh", "skill-share"],
+    learnMore: ["install-app", "new-device"],
     tasks: [
       {
         name: "Collect and refurbish devices",
@@ -1545,6 +1918,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "housing",
     suggestsWorkDays: true,
+    firstSteps:
+      "Gather your most experienced volunteers first and agree on " +
+      "the scope line together — which jobs you'll take and which " +
+      "go to licensed professionals — before you accept a single " +
+      "request. Treat the first visit to each home as a " +
+      "conversation, not an inspection: the resident decides what " +
+      "gets touched in their house.",
+    commonPitfalls:
+      "The danger is scope creep: the 'small fix' that turns out " +
+      "to be electrical, gas, or roof work beyond volunteer " +
+      "competence — that's where someone gets hurt. And don't " +
+      "promise more visits than the crew can deliver; leaving an " +
+      "elder waiting on help they'd counted on hurts more than an " +
+      "honest no up front.",
+    pairsWith: ["community-wood-bank", "tool-lending-library"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Recruit skilled volunteers",
@@ -1606,6 +1995,18 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Talk first with the existing food pantry about " +
+      "distributing together — the same households often need " +
+      "both — and with local vets and pet stores about donations " +
+      "and maybe a vaccine or discount partnership.",
+    commonPitfalls:
+      "Unpredictability does the most damage: one big drive, then " +
+      "empty shelves, when pet owners need to be able to count on " +
+      "you. And watch the tone — any judgment about whether 'poor " +
+      "people should have pets' kills this project faster than " +
+      "running out of kibble.",
+    pairsWith: ["diaper-hygiene-bank", "community-fridge"],
     tasks: [
       {
         name: "Find storage and a distribution point",
@@ -1659,6 +2060,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 28,
     defaultCategory: "education",
     suggestsWorkDays: true,
+    firstSteps:
+      "Before recruiting a single mentor, talk with parents and " +
+      "with young people themselves about what they need, and put " +
+      "your safety policies in writing — background checks, the " +
+      "two-adult rule, mandatory reporting. No adult spends time " +
+      "with kids until they've cleared that bar.",
+    commonPitfalls:
+      "The worst failure is a safety shortcut: an unvetted adult, " +
+      "or an adult alone with a child — that's never negotiable. " +
+      "The second is mentor churn; for kids who've already been " +
+      "let down, an adult who disappears does harm, so start " +
+      "small and grow only as far as you can supervise and " +
+      "sustain.",
+    pairsWith: ["school-supply-program", "childcare-collective", "community-music"],
+    learnMore: ["how-vouching-works"],
     tasks: [
       {
         name: "Secure a safe space and set hours",
@@ -1727,6 +2143,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Start with the growers: farms, orchards, and market " +
+      "vendors. Ask what surplus they have and what worries them " +
+      "about hosting volunteers — liability, crop damage — and " +
+      "lock in where the food will go (fridges, pantries, " +
+      "community meals) before the first harvest.",
+    commonPitfalls:
+      "The classic failure is rescuing fruit that then rots in " +
+      "someone's garage — distribution gets arranged before you " +
+      "pick, not after. Harvest windows are short, so a small " +
+      "crew that moves fast beats a long list of names; and one " +
+      "careless glean that damages a field can lose you that " +
+      "grower for good.",
+    pairsWith: ["community-fridge", "food-preservation", "community-meal"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Find produce sources",
@@ -1793,6 +2224,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Trained mediators, a neutral space, and a request process. Mediation is for disputes between willing parties — screen out and refer any situation involving violence, abuse, or danger to the appropriate professional or emergency services.",
     setupHours: 22,
     defaultCategory: "other",
+    firstSteps:
+      "Talk first with an existing community mediation center or " +
+      "trainer — this craft isn't improvised — and before the " +
+      "first case, put your screening line in writing: which " +
+      "disputes you'll take, and where you refer anything " +
+      "involving violence or abuse.",
+    commonPitfalls:
+      "The dangerous failure is mediating what shouldn't be " +
+      "mediated: a 'neighbor dispute' that's really abuse puts " +
+      "someone at risk, so screen every intake. And " +
+      "confidentiality is the project's whole capital — one " +
+      "leaked detail and nobody trusts the service again; look " +
+      "after your mediators too, because this work wears people " +
+      "down.",
+    pairsWith: ["legal-aid-clinic", "tenant-union"],
+    learnMore: ["disagree-with-member"],
     tasks: [
       {
         name: "Recruit and train mediators",
@@ -1858,6 +2305,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteers, partner organizations, and a solid resource directory. Treat people's records and histories as private — lead with respect, follow people's own goals, and refer legal matters to qualified counsel.",
     setupHours: 28,
     defaultCategory: "other",
+    firstSteps:
+      "Before building anything, sit down with people who have " +
+      "come home themselves and with the reentry organizations, " +
+      "parole offices, and fair-chance employers already working " +
+      "in your area — ask what actually blocks people in the " +
+      "first weeks and where your network fits. Line up a " +
+      "legal-aid contact or qualified attorney now, so when legal " +
+      "questions come up you have somewhere real to send them.",
+    commonPitfalls:
+      "This project dies when it becomes gatekeeping — volunteers " +
+      "deciding who deserves help — or when someone's history " +
+      "leaks and costs them a job or an apartment. It also fails " +
+      "quietly when enthusiasm outpaces follow-through; a broken " +
+      "promise lands harder on someone rebuilding trust than no " +
+      "promise at all.",
+    pairsWith: ["court-support", "books-to-prisoners"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Build a resource and partner directory",
@@ -1926,6 +2390,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 24,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Start by talking with the households who heat with wood — " +
+      "rural elders, families the fuel-assistance office already " +
+      "knows — to learn how much they burn and when they run " +
+      "short, then call local tree services about where their " +
+      "wood goes now. Before any saw starts, decide who owns " +
+      "safety: someone experienced enough to train the crew and " +
+      "comfortable telling a volunteer no.",
+    commonPitfalls:
+      "The two ways this hurts people: an untrained volunteer on " +
+      "a chainsaw, and delivering green wood that smokes, coats " +
+      "chimneys with creosote, and doesn't heat. Cutting in " +
+      "October for December means wet wood — the calendar failure " +
+      "is as real as the safety one.",
+    pairsWith: ["weatherization-brigade", "cooling-warming-center"],
     tasks: [
       {
         name: "Secure a wood source",
@@ -1991,6 +2470,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A backhaul internet connection, routers/mesh nodes, technical volunteers, and host sites.",
     setupHours: 32,
     defaultCategory: "tech",
+    firstSteps:
+      "Walk the blocks you want to cover and knock on doors — " +
+      "talk with the households without service about what they'd " +
+      "actually use it for, and with the people whose rooftops " +
+      "and upper windows could host a node. Before buying " +
+      "hardware, have the bandwidth conversation: find the " +
+      "business, library, or ISP willing to share a line, and " +
+      "confirm in writing that redistribution is allowed.",
+    commonPitfalls:
+      "Mesh networks usually die of maintenance, not construction " +
+      "— the founding techie moves away and nobody else can log " +
+      "into the routers, so document everything and train a " +
+      "second person from day one. The other quiet failure is " +
+      "building where the signal reaches easily instead of where " +
+      "people actually lack access.",
+    pairsWith: ["digital-literacy", "emergency-preparedness"],
     tasks: [
       {
         name: "Map coverage needs and gaps",
@@ -2058,6 +2553,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Trained facilitators, a private space, and clear boundaries with a crisis-referral plan. Peer support complements professional mental health care — it doesn't replace it. Facilitators are not therapists, and there must always be a clear plan to connect anyone in crisis to qualified professional or emergency resources.",
     setupHours: 21,
     defaultCategory: "emotional_support",
+    firstSteps:
+      "Your first conversations are with the people who might " +
+      "facilitate and with local mental health providers — a " +
+      "clinic, crisis line, or counselor who agrees to be your " +
+      "referral path before the first circle ever meets. Don't " +
+      "open the doors until facilitators are trained and everyone " +
+      "can say plainly what the circle is and isn't.",
+    commonPitfalls:
+      "The dangerous failure is drift: a warm circle slowly " +
+      "becomes the only support someone has, facilitators start " +
+      "playing therapist, and there's no plan for the night " +
+      "someone is in real crisis. The quieter one is facilitator " +
+      "burnout — if the people holding space have no support of " +
+      "their own, the circle folds within a year.",
+    pairsWith: ["neighborhood-care-network", "disability-support-network", "harm-reduction-supplies"],
+    learnMore: ["who-sees-what", "lurking-ok"],
     tasks: [
       {
         name: "Recruit and train facilitators",
@@ -2125,6 +2636,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
+    firstSteps:
+      "Walk the neighborhood with the people who live closest to " +
+      "the neglected spots — they know which lots matter, who " +
+      "owns them, and what's been tried before — and check " +
+      "whether the city or a friends-of-the-park group already " +
+      "runs cleanups you can plug into. Sort out ownership, " +
+      "permission, and where the trash goes before you pick a " +
+      "date.",
+    commonPitfalls:
+      "Cleanups fail in two ways: bags of collected trash sit on " +
+      "the curb for weeks because nobody arranged disposal, and a " +
+      "beautifully cleared lot is waist-high again by fall " +
+      "because there was no plan past the one big day. And a " +
+      "volunteer reaching bare-handed for a needle can turn a " +
+      "good morning into a hospital visit.",
+    pairsWith: ["community-garden", "community-composting"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Identify and prioritize sites",
@@ -2177,6 +2705,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 28,
     defaultCategory: "skilled_labor",
     suggestsWorkDays: true,
+    firstSteps:
+      "Your first call is to an established free-filing program " +
+      "like VITA — talk with their coordinator about " +
+      "certification timelines, software, and what a new site " +
+      "needs, because you shouldn't run this alone. Then talk " +
+      "with the neighbors you hope to serve about when they can " +
+      "actually come and what's kept them from filing before.",
+    commonPitfalls:
+      "One wrong return can cost a family their refund or trigger " +
+      "an audit — that's why uncertified volunteers preparing " +
+      "taxes is the line this project must never cross. The " +
+      "gentler failures: launching in March when certification " +
+      "takes months, and someone making the bus trip only to be " +
+      "turned away over a document nobody told them to bring.",
+    pairsWith: ["legal-aid-clinic", "solidarity-fund"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Get preparers trained and certified",
@@ -2244,6 +2788,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 15,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Start with the supply conversations — visit farms, " +
+      "grocers, and community gardens to learn what surplus " +
+      "actually exists and on what rhythm — and talk with " +
+      "neighbors in the area you'd serve about where they already " +
+      "walk and what food they'd actually take home. Pick the " +
+      "spot with the people who'll use it, not for them.",
+    commonPitfalls:
+      "A stand that shows up erratically teaches people to stop " +
+      "counting on it — consistency matters more than abundance. " +
+      "The other failures: supply that dries up after the first " +
+      "enthusiastic month, and anything at the table (forms, " +
+      "questions, sorting people) that makes taking food feel " +
+      "like applying for it.",
+    pairsWith: ["gleaning-network", "bulk-buying-coop", "community-garden"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Secure produce and goods supply",
@@ -2311,6 +2871,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Volunteers, info packets, donated welcome items, and a referral system.",
     setupHours: 10,
     defaultCategory: "emotional_support",
+    firstSteps:
+      "Talk first with the people who meet newcomers before you " +
+      "do — landlords, school front offices, clinics, midwives " +
+      "and pediatric nurses — about how they'd refer someone with " +
+      "consent. Then ask a few recent arrivals and new parents " +
+      "what would have actually helped in their first month, and " +
+      "build the packet and the basket around their answers.",
+    commonPitfalls:
+      "The way this goes wrong is by feeling like surveillance — " +
+      "showing up uninvited at a stranger's door, or passing " +
+      "along names without consent, turns a welcome into an " +
+      "intrusion. It also fades quietly when the founding " +
+      "greeters burn out and newcomers go unnoticed for months at " +
+      "a stretch.",
+    pairsWith: ["newcomer-translation-network", "diaper-hygiene-bank", "neighborhood-care-network"],
+    learnMore: ["invite-someone"],
     tasks: [
       {
         name: "Decide who you'll welcome and how",
@@ -2364,6 +2940,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Storage, donated items, a catalog and checkout system, and a couple of librarians.",
     setupHours: 21,
     defaultCategory: "infrastructure",
+    firstSteps:
+      "Before collecting a single item, ask members what they'd " +
+      "actually borrow — that survey is the project's foundation " +
+      "— and talk with the public library or a community center " +
+      "about hosting, since a trusted institution solves your " +
+      "storage and credibility problems at once. Recruit your two " +
+      "librarians before the donations arrive, not after.",
+    commonPitfalls:
+      "Libraries of things die of clutter: saying yes to every " +
+      "donation fills the room with broken breadmakers nobody " +
+      "wants, while the pressure washer everyone asked for is " +
+      "still missing. The other killer is unpredictable hours — " +
+      "if people can't count on when to pick up and return, they " +
+      "quietly go back to buying.",
+    pairsWith: ["tool-lending-library", "toy-library", "free-store"],
+    learnMore: ["confirm-exchange"],
     tasks: [
       {
         name: "Survey what the community wants to borrow",
@@ -2432,6 +3024,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 19,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
+    firstSteps:
+      "Start with two sets of conversations: with unhoused " +
+      "neighbors and the outreach workers who know them, about " +
+      "which hours and locations would actually work — and with a " +
+      "laundromat owner, gym, or faith site about hosting. That " +
+      "host conversation is delicate; be honest about who's " +
+      "coming and settle privacy, cleaning, and scheduling " +
+      "expectations before the first guest arrives.",
+    commonPitfalls:
+      "This program dies when the host relationship sours — one " +
+      "bad interaction with no protocol behind it, and the space " +
+      "is gone — or when hours shift so often that people cross " +
+      "town to find a locked door. And every piece of paperwork " +
+      "you require at the door turns away someone who needed a " +
+      "shower more than you needed their name.",
+    pairsWith: ["free-haircut", "cooling-warming-center", "diaper-hygiene-bank"],
     tasks: [
       {
         name: "Secure laundry and shower access",
@@ -2492,6 +3100,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Trained volunteers, registration materials, accurate rules, and good locations. Keep the drive strictly nonpartisan and follow all election and registration laws precisely — provide accurate information only and never advocate for a party or candidate.",
     setupHours: 16,
     defaultCategory: "organizing",
+    firstSteps:
+      "Before anyone tables, talk with your local election office " +
+      "— they'll tell you exactly what drives may and may not do, " +
+      "and some areas require training or registration first. " +
+      "Then connect with the League of Women Voters or another " +
+      "established nonpartisan group; borrowing their materials " +
+      "and experience beats learning election law by trial and " +
+      "error.",
+    commonPitfalls:
+      "The unforgivable failures are legal ones: a stack of " +
+      "completed forms forgotten in someone's trunk past the " +
+      "deadline disenfranchises every person who trusted you, and " +
+      "one volunteer talking up a candidate can taint the whole " +
+      "drive. The subtler miss is handing out registration cards " +
+      "without ever mentioning where or how to actually vote.",
+    pairsWith: ["newcomer-translation-network", "legal-aid-clinic"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Learn the rules for registration drives",
@@ -2552,6 +3177,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Trained navigators, a resource directory, provider partnerships, and a request system. Navigators connect people to care — they don't provide medical advice or diagnosis. Refer all clinical questions to qualified healthcare professionals.",
     setupHours: 26,
     defaultCategory: "other",
+    firstSteps:
+      "Start by visiting the free and sliding-scale clinics " +
+      "you'll refer to — introduce yourselves, ask which " +
+      "referrals help them and which swamp them, and let those " +
+      "conversations seed your directory. Settle the boundary " +
+      "before the first request comes in: navigators handle " +
+      "logistics and paperwork, every clinical question goes to a " +
+      "professional, so know exactly which nurse line or clinic " +
+      "you'll hand those to.",
+    commonPitfalls:
+      "The sharp edge is a well-meaning navigator sliding into " +
+      "medical advice — a casual 'that doesn't sound serious' can " +
+      "cost someone weeks of needed care. This also fails when " +
+      "the directory quietly goes stale, sending people to " +
+      "clinics that closed or programs that ended; a wrong number " +
+      "costs someone who was already on their last try.",
+    pairsWith: ["rides-transportation", "newcomer-translation-network", "mental-health-peer-support"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Build a healthcare resource directory",
@@ -2619,6 +3262,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Storage, donated toys, a catalog and checkout, cleaning supplies, and librarians.",
     setupHours: 10,
     defaultCategory: "childcare",
+    firstSteps:
+      "Talk with the families you hope to serve — at daycare " +
+      "pickup, a storytime, a playgroup — about which toys their " +
+      "kids outgrow fastest and which hours they could actually " +
+      "make, then ask a community center, church, or branch " +
+      "library about a shelf or a room. Line up a childcare-savvy " +
+      "volunteer to own safety checks before donations start " +
+      "arriving.",
+    commonPitfalls:
+      "Toy libraries fail on safety and on pieces: one recalled " +
+      "toy or choking hazard that slips through breaks families' " +
+      "trust for good, and puzzles that come back short a piece " +
+      "make the whole collection feel junky within months. Strict " +
+      "inspection and counted bags are the whole game.",
+    pairsWith: ["library-of-things", "childcare-collective", "school-supply-program"],
     tasks: [
       {
         name: "Find storage and open hours",
@@ -2672,6 +3330,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 18,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Find your knowledge before your kitchen: call the local " +
+      "extension service or a certified master food preserver and " +
+      "ask them to train your leads or review your plans, and " +
+      "talk with gardeners and gleaners about which surplus " +
+      "actually peaks when. Book the kitchen around the harvest " +
+      "calendar, not the other way around.",
+    commonPitfalls:
+      "The failure that matters is invisible: a jar sealed with " +
+      "an improvised method or a grandmother's untested recipe " +
+      "can carry botulism and look perfectly fine on the shelf. " +
+      "The ordinary failure is timing — tomatoes ripen on their " +
+      "own schedule, and a collective that holds its first " +
+      "session in November preserves nothing.",
+    pairsWith: ["gleaning-network", "community-garden", "community-fridge"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Secure a suitable kitchen",
@@ -2743,6 +3417,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "skilled_labor",
     suggestsWorkDays: true,
+    firstSteps:
+      "Start with two conversations: one with a licensed stylist " +
+      "or barber willing to bring a colleague, and one with the " +
+      "people you hope to serve — a shelter, day center, or " +
+      "workforce program can tell you which days and settings " +
+      "would actually feel comfortable. Once a stylist and a host " +
+      "site both say yes, the rest is supplies and scheduling.",
+    commonPitfalls:
+      "This project stumbles when it feels like a charity line " +
+      "instead of a salon — rushed cuts, no say in the style, " +
+      "cameras out for social media. Ask each person what they " +
+      "want, skip the photos unless they offer, and never let " +
+      "unlicensed volunteers cut to stretch capacity; one hygiene " +
+      "problem can end the whole program.",
+    pairsWith: ["laundry-shower-access", "reentry-support"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Recruit licensed stylists and barbers",
@@ -2796,6 +3486,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 14,
     defaultCategory: "transport",
     suggestsWorkDays: true,
+    firstSteps:
+      "Before recruiting a single truck, talk with the people who " +
+      "already field these calls — domestic violence advocates, " +
+      "tenant organizers, senior services — about how requests " +
+      "should reach you and what confidentiality they'll expect, " +
+      "since some moves mean someone leaving an unsafe home. Then " +
+      "gather three or four volunteers with strong backs and one " +
+      "vehicle, and scope your first small move together.",
+    commonPitfalls:
+      "Moving crews get hurt or burned out fast: an " +
+      "over-ambitious job with too few hands, a volunteer lifting " +
+      "wrong, an address shared in a group chat that should never " +
+      "have left the coordinator's phone. Keep moves inside your " +
+      "stated limits, and treat the details of every " +
+      "safety-related move like they could put someone in danger " +
+      "— because they could.",
+    pairsWith: ["tenant-union", "free-store"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Recruit a crew and vehicles",
@@ -2862,6 +3570,25 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "An accessible communication system, peer leaders, and a resource directory. Peer support complements professional care — refer medical, personal-care, and legal questions to qualified providers, and treat members' health information as private.",
     setupHours: 24,
     defaultCategory: "organizing",
+    firstSteps:
+      "This network only works if disabled neighbors are at the " +
+      "table from the very first conversation — not consulted " +
+      "later, but deciding what it is. Start by asking two or " +
+      "three disabled people you know to co-found it with you " +
+      "(or, if you're disabled yourself, to share the load), and " +
+      "let their access needs shape how the first meeting " +
+      "happens: format, location, and pace included.",
+    commonPitfalls:
+      "The classic failure is well-meaning allies building a " +
+      "program for disabled people that disabled people didn't " +
+      "ask for, in formats they can't use. The quieter one is " +
+      "drifting into an informal care service: peer support can't " +
+      "safely substitute for medical or personal care, so keep " +
+      "referring those needs to qualified providers and guard " +
+      "members' health details like the private information they " +
+      "are.",
+    pairsWith: ["neighborhood-care-network", "rides-transportation", "health-navigation"],
+    learnMore: ["lurking-ok"],
     tasks: [
       {
         name: "Center disabled leadership",
@@ -2929,6 +3656,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "education",
     suggestsWorkDays: true,
+    firstSteps:
+      "Before collecting a single book, call an established " +
+      "books-to-prisoners group — most will gladly share which " +
+      "facilities they cover, which rules trip people up, and " +
+      "where requests go unanswered. Then get the current mail " +
+      "policy in writing for the one or two facilities you'll " +
+      "start with; what incarcerated people actually request " +
+      "should shape your collection, not whatever donors clear " +
+      "off their shelves.",
+    commonPitfalls:
+      "This project dies by rejected packages: a used book where " +
+      "only new is allowed, a hardcover, a forgotten labeling " +
+      "rule — postage wasted and someone's long-awaited parcel " +
+      "sent back. It can also hurt volunteers who write from " +
+      "home; every letter goes out on the program's address, no " +
+      "exceptions, however warm the correspondence becomes.",
+    pairsWith: ["reentry-support", "free-little-library"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Learn facility mailing rules",
@@ -2987,6 +3732,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Donated instruments, volunteer teachers, a space, and a lending system.",
     setupHours: 15,
     defaultCategory: "education",
+    firstSteps:
+      "Start with the musicians already around you — the " +
+      "guitarist at the corner church, the retired band director, " +
+      "the teens who play — and ask what they'd enjoy teaching " +
+      "and when. One conversation with a music shop about " +
+      "discounted repairs and one with a space that tolerates " +
+      "noise, and you're most of the way to your first jam.",
+    commonPitfalls:
+      "The lending pool quietly empties when instruments go out " +
+      "faster than they come back playable, so budget repair time " +
+      "from the start and keep the return policy forgiving but " +
+      "real. And watch for lessons drifting toward the " +
+      "already-confident: the kid who has never touched an " +
+      "instrument needs the warmest welcome, not the shortest " +
+      "slot.",
+    pairsWith: ["library-of-things", "skill-share", "youth-mentorship"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Collect and repair instruments",
@@ -3047,6 +3809,21 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Your first conversation is with a school — a counselor, " +
+      "family liaison, or parent coordinator who knows the real " +
+      "supply lists and which families quietly go without. Let " +
+      "them shape what you collect and how families hear about " +
+      "it; a giveaway routed through people parents already trust " +
+      "reaches kids a flyer never will.",
+    commonPitfalls:
+      "The predictable failure is a mountain of donated folders " +
+      "and none of the notebooks the lists actually ask for — " +
+      "collecting what's easy to give instead of what's needed. " +
+      "The one that stings is a distribution that feels like a " +
+      "means test; skip the income paperwork, let kids pick their " +
+      "own backpack, and nobody leaves feeling inspected.",
+    pairsWith: ["youth-mentorship", "toy-library"],
     tasks: [
       {
         name: "Get supply lists and gauge need",
@@ -3102,6 +3879,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 26,
     defaultCategory: "other",
     suggestsWorkDays: true,
+    firstSteps:
+      "Nothing here starts before you have lawyers: your first " +
+      "calls are to the local legal aid office, the bar " +
+      "association's pro bono program, and a law school clinic, " +
+      "asking what they'd need to show up — and where the gaps " +
+      "are that a neighborhood clinic could actually fill. Let " +
+      "those partners define the clinic's scope with you before " +
+      "you announce anything to neighbors.",
+    commonPitfalls:
+      "The dangerous failure is a caring volunteer sliding from " +
+      "information into advice — a well-meant \"you should just " +
+      "sign it\" can wreck someone's case, so keep that line " +
+      "bright and rehearsed. The slower one is intake outpacing " +
+      "attorneys: a waitlist of desperate people with no lawyer " +
+      "in the room breaks trust faster than never opening at all.",
+    pairsWith: ["tenant-union", "court-support", "newcomer-translation-network"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Partner with lawyers and legal aid",
@@ -3168,6 +3962,22 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "An intake system, a volunteer and resource roster, coordinators, and a master directory. The hub holds sensitive information about neighbors' lives — collect only what's needed, guard it carefully, and share details only with the people who need them to help.",
     setupHours: 27,
     defaultCategory: "organizing",
+    firstSteps:
+      "The hub coordinates projects, so start by sitting down " +
+      "with each project's lead: what requests do they get, what " +
+      "do they wish they could hand off, and how do they want to " +
+      "receive matches. Agree together on one shared intake and a " +
+      "privacy baseline — a hub imposed on projects gets routed " +
+      "around; one built with them becomes the front door.",
+    commonPitfalls:
+      "Hubs die two ways: the intake fills with requests nobody " +
+      "follows to completion, so word spreads that calling does " +
+      "nothing; or one heroic coordinator holds every thread " +
+      "until they burn out and the program loses its memory. " +
+      "Track each request to a real close, rotate shifts early, " +
+      "and collect less information than you think you need.",
+    pairsWith: ["emergency-preparedness", "rides-transportation", "solidarity-fund"],
+    learnMore: ["post-something", "claim-post"],
     tasks: [
       {
         name: "Set up a single intake for needs and offers",
@@ -3236,6 +4046,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 20,
     defaultCategory: "other",
     suggestsWorkDays: true,
+    firstSteps:
+      "Don't buy anything yet: your first step is a conversation " +
+      "with the nearest established harm reduction program and " +
+      "with people who actually use these supplies — they'll tell " +
+      "you what's needed, what's already covered, and how to show " +
+      "up without judgment. Get your core crew through " +
+      "overdose-response training and confirm your local law on " +
+      "strips and syringes before a single kit is packed.",
+    commonPitfalls:
+      "This goes wrong when you show up as strangers — " +
+      "distributing where you have no relationships, or attaching " +
+      "lectures and conditions that teach people to avoid you — " +
+      "and when you get ahead of the law or your training, which " +
+      "can cost a volunteer a paraphernalia charge. Slower and " +
+      "partnered beats fast and alone here, every time.",
+    pairsWith: ["community-first-aid-training", "mental-health-peer-support"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Get trained and find a harm reduction partner",
@@ -3294,6 +4121,24 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "Reliable volunteers, a hearing calendar, and ties to public defenders. Court support is presence and logistics, not legal advice — volunteers never advise on a case and always follow the lead of the person's own attorney. Courtrooms have strict conduct rules, so everyone attending needs to know them cold.",
     setupHours: 16,
     defaultCategory: "other",
+    firstSteps:
+      "Start with the people whose dates these are: support " +
+      "happens only at the invitation of the person facing court, " +
+      "and in step with their attorney. Introduce yourselves " +
+      "first to the public defender's office and any court-watch " +
+      "or bail-fund groups already at the courthouse, and let " +
+      "them tell you which hearings need company and how to be " +
+      "useful without ever touching the legal side.",
+    commonPitfalls:
+      "The harm here comes from freelancing: a volunteer " +
+      "\"explaining\" a plea in the hallway, case details " +
+      "discussed where a prosecutor can overhear, a visible " +
+      "gallery reaction that irritates a judge — any of which can " +
+      "hurt the very person you came for. The quieter failure is " +
+      "logistics: an unconfirmed court date or a ride that falls " +
+      "through can mean a missed hearing and a warrant.",
+    pairsWith: ["legal-aid-clinic", "reentry-support", "rides-transportation"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Connect with defenders and existing court groups",
@@ -3353,6 +4198,25 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "other",
     suggestsWorkDays: true,
+    firstSteps:
+      "The host site is the relationship everything rests on, so " +
+      "start there: sit down with the librarian, pastor, or hall " +
+      "manager and work through the uncomfortable questions " +
+      "together — hours, keys, insurance, what happens if someone " +
+      "needs to stay overnight — before the first forecast forces " +
+      "them. At the same time, ask outreach workers and " +
+      "senior-building staff who actually needs the refuge, so " +
+      "the location and hours fit the people it's for.",
+    commonPitfalls:
+      "This project fails in the gap between planning and " +
+      "weather: a trigger nobody quite agreed on, so the center " +
+      "opens a day late, or a liability question left vague until " +
+      "someone collapses and the host pulls out for good. Put the " +
+      "activation threshold in writing, run one practice opening " +
+      "before the season, and make sure every host knows to call " +
+      "emergency services early, not last.",
+    pairsWith: ["emergency-preparedness", "community-wood-bank", "laundry-shower-access"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Find a host site with climate control",
@@ -3418,6 +4282,23 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       "A phone or simple recorder, a quiet spot, consent forms, and a safe place to keep files. Recordings are personal data — each participant owns their story, decides where it's shared, and can change their mind later. Nothing goes public without their written okay.",
     setupHours: 10,
     defaultCategory: "education",
+    firstSteps:
+      "Start with one elder who trusts you and ask if they'd " +
+      "share a story — that first recording teaches you more than " +
+      "any plan, and their word vouches for you with the next " +
+      "storyteller. Before you press record with anyone, go " +
+      "through the consent form together and ask what they'd want " +
+      "to happen to the recording; that conversation is the " +
+      "project.",
+    commonPitfalls:
+      "The way this hurts someone is a story traveling further " +
+      "than its teller agreed to — a clip posted, a name " +
+      "attached, a detail that was meant for you alone. The way " +
+      "it quietly dies is recordings piling up unlabeled on one " +
+      "person's phone until a lost device erases years of voices; " +
+      "label and back up each session the week it happens.",
+    pairsWith: ["neighborhood-care-network", "digital-literacy"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Write a plain-language consent form",
@@ -3464,6 +4345,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un refrigerador donado, un lugar exterior protegido con un enchufe, un sitio anfitrión y una pequeña rotación de limpieza.",
     setupHours: 18,
     defaultCategory: "food",
+    firstSteps:
+      "Empieza por el sitio anfitrión, no por el refrigerador. " +
+      "Siéntate con la dueña de la tienda, la iglesia o la " +
+      "clínica que tienes en mente y hablen de lo menos glamoroso " +
+      "— el recibo de luz, qué pasa cuando alguien deja un " +
+      "desastre, a quién llaman cuando se descompone — antes de " +
+      "conseguir aparato alguno. De paso, pregunta a las " +
+      "despensas y grupos de apoyo mutuo que ya trabajan cerca " +
+      "qué huecos ven, para que el refrigerador llene uno en vez " +
+      "de duplicarlos.",
+    commonPitfalls:
+      "Los refrigeradores comunitarios casi nunca mueren por " +
+      "falta de donaciones — mueren cuando nadie es claramente " +
+      "responsable de la limpieza, el refrigerador se pone feo y " +
+      "el sitio anfitrión pide en voz baja que se lo lleven. Pon " +
+      "nombres en la rotación antes del día de apertura, y cuida " +
+      "la relación con el sitio anfitrión como lo que realmente " +
+      "estás manteniendo, no sólo el aparato.",
+    pairsWith: ["gleaning-network", "food-preservation", "community-meal"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Encuentra un sitio anfitrión con electricidad y tránsito de gente",
@@ -3524,6 +4425,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 25,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Antes de tocar la tierra, habla con dos grupos de " +
+      "personas: quien sea dueña del terreno, y las vecinas y " +
+      "vecinos que viven justo al lado — su bendición pesa tanto " +
+      "como el contrato. Después reúne a tu grupo base y tengan " +
+      "pronto la conversación sobre cómo se comparte; saber si " +
+      "serán parcelas individuales o cosecha comunal cambia todo " +
+      "lo que van a construir.",
+    commonPitfalls:
+      "Los huertos no suelen morir en primavera — mueren en las " +
+      "semanas más calurosas, cuando la rotación de riego se " +
+      "desmorona en silencio y las camas se secan. El otro " +
+      "peligro lento es que una sola persona lo trate como su " +
+      "huerto con ayudantes; pongan por escrito cómo se toman las " +
+      "decisiones mientras todavía se llevan bien.",
+    pairsWith: ["seed-library", "community-composting", "food-preservation"],
     tasks: [
       {
         name: "Asegura el terreno y el permiso",
@@ -3593,6 +4510,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un espacio de almacenamiento, herramientas donadas, un sistema sencillo de préstamo y un par de \"bibliotecarias\" o \"bibliotecarios\".",
     setupHours: 20,
     defaultCategory: "infrastructure",
+    firstSteps:
+      "Antes de juntar un solo taladro, habla con la persona que " +
+      "ofrece el espacio sobre lo que de verdad implica convivir " +
+      "con una biblioteca de herramientas — ruido, cosas que se " +
+      "acumulan, gente desconocida en la puerta durante el " +
+      "horario. Luego pregunta a tus vecinas y vecinos qué " +
+      "pedirían prestado en realidad; una lista de diez " +
+      "herramientas solicitadas vale más que un garaje lleno de " +
+      "donaciones que nadie quiere.",
+    commonPitfalls:
+      "Las bibliotecas de herramientas mueren del silencio " +
+      "después de la fecha de devolución: nadie da seguimiento, " +
+      "las herramientas se vuelven préstamos permanentes y los " +
+      "estantes se vacían. Una rutina amable de recordatorios " +
+      "importa más que una política estricta de retrasos — y " +
+      "aprendan a decir que no a las donaciones, o se convertirán " +
+      "en el tiradero de herramientas rotas del barrio.",
+    pairsWith: ["library-of-things", "repair-cafe", "weatherization-brigade"],
+    learnMore: ["confirm-exchange"],
     tasks: [
       {
         name: "Encuentra dónde guardar y un horario de atención",
@@ -3661,6 +4597,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una lista de personas voluntarias, una forma de emparejarlas con quienes necesitan compañía y una rutina de contacto. Las personas voluntarias son vecinas, no profesionales del cuidado — revisen a quien haga visitas a domicilio, nunca dejen que una persona voluntaria maneje sola el dinero de alguien, y acuerden de antemano cuándo llamar a la familia o a los servicios de emergencia.",
     setupHours: 18,
     defaultCategory: "emotional_support",
+    firstSteps:
+      "Empieza escuchando, no reclutando: habla con las vecinas y " +
+      "vecinos que esperas apoyar sobre lo que realmente quieren " +
+      "— una llamada semanal, un aventón, compañía — porque una " +
+      "red construida sobre suposiciones se siente como " +
+      "vigilancia. Al mismo tiempo, ten la conversación honesta " +
+      "con las primeras personas voluntarias sobre revisión de " +
+      "referencias y límites, para que cuando llegue el primer " +
+      "emparejamiento las reglas se sientan como cuidado y no " +
+      "como desconfianza.",
+    commonPitfalls:
+      "Las redes de cuidado rara vez fracasan por falta de gente " +
+      "voluntaria — queman a las tres personas que siempre dicen " +
+      "que sí mientras las demás esperan a que les pidan. Reparte " +
+      "los emparejamientos a propósito, sostén los espacios de " +
+      "desahogo para voluntarias y voluntarios aunque todo " +
+      "parezca bien, y no dejes que los contactos conviertan a " +
+      "una vecina en un expediente en vez de una persona.",
+    pairsWith: ["rides-transportation", "disability-support-network", "welcome-wagon"],
+    learnMore: ["message-someone"],
     tasks: [
       {
         name: "Identifica quién vive cerca",
@@ -3727,6 +4683,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una lista de contactos, un punto de encuentro, insumos básicos y un plan de comunicación que funcione sin internet. Esta red complementa a los servicios oficiales de emergencia — no los sustituye. En una situación que ponga en riesgo la vida, llamen siempre primero a los servicios de emergencia.",
     setupHours: 30,
     defaultCategory: "organizing",
+    firstSteps:
+      "Construye el plan alrededor de la gente para quien es: " +
+      "toca las puertas de vecinas y vecinos que dependen de " +
+      "oxígeno, de medicinas refrigeradas o que viven en pisos " +
+      "altos sin elevador, y pregúntales cómo se ve una semana " +
+      "mala para ellas. Después habla con quien controle tu " +
+      "posible punto seguro y con cualquier grupo de emergencias " +
+      "que ya exista (protección civil, los bomberos) para que tu " +
+      "red llene los huecos alrededor de la respuesta oficial en " +
+      "vez de duplicarla.",
+    commonPitfalls:
+      "Estas redes no fallan durante el desastre — fallan en los " +
+      "años tranquilos de antes, cuando la cadena de contactos se " +
+      "vuelve vieja, los teléfonos cambian y el plan vive en la " +
+      "laptop de una sola persona. Impriman todo, refresquen la " +
+      "lista con un ritmo fijo en el calendario y practiquen al " +
+      "menos una vez; el primer uso real nunca debería ser el " +
+      "primer uso.",
+    pairsWith: ["cooling-warming-center", "community-first-aid-training", "community-wifi-mesh"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Mapea los riesgos de tu vecindario",
@@ -3793,6 +4769,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Habla primero con el sitio anfitrión sobre las realidades " +
+      "honestas — montones de donaciones, gente entrando y " +
+      "saliendo, cómo queda el salón a la mañana siguiente — y " +
+      "luego con una tienda de segunda mano o una organización " +
+      "cercana sobre lo que ya les llega de sobra, para saber qué " +
+      "le falta de verdad a tu barrio. Si puedes, pasa una hora " +
+      "en una tienda gratuita que ya funcione antes de tu primer " +
+      "evento; el flujo de recepción y exhibición es más fácil de " +
+      "copiar que de inventar.",
+    commonPitfalls:
+      "Las tiendas gratuitas se ahogan antes de pasar hambre: sin " +
+      "una lista firme de sí y no en la puerta, las personas " +
+      "voluntarias se pasan cada hora clasificando donaciones " +
+      "rotas y sucias en vez de recibir a la gente. Y decidan a " +
+      "dónde va lo que sobra antes de que termine el primer " +
+      "evento — un montón de cosas sin reclamar y sin plan de " +
+      "salida es la forma clásica de perder el espacio anfitrión.",
+    pairsWith: ["repair-cafe", "library-of-things", "mutual-aid-moving-crew"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Elige el formato y el espacio",
@@ -3851,6 +4847,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un espacio, personas con ganas de enseñar y una manera de publicar el calendario.",
     setupHours: 9,
     defaultCategory: "education",
+    firstSteps:
+      "El proyecto empieza con las conversaciones de dos " +
+      "preguntas, no con el local: pregunta a la gente qué podría " +
+      "enseñar y qué le encantaría aprender, y pon especial " +
+      "atención a las vecinas y vecinos cuyo conocimiento rara " +
+      "vez se trata como experiencia valiosa. Tu primera tarea " +
+      "real es tomarte un café con esa persona nerviosa que " +
+      "podría enseñar y convencerla de que su sesión no tiene que " +
+      "ser una cátedra.",
+    commonPitfalls:
+      "Los intercambios de saberes se apagan cuando las mismas " +
+      "dos personas seguras terminan enseñándolo todo y el " +
+      "calendario se acomoda en silencio a las tardes libres de " +
+      "quienes organizan y no a las de quienes asisten. Sigue " +
+      "invitando a personas que enseñan por primera vez, pregunta " +
+      "quién falta en la sala, y trata una sesión de cinco " +
+      "personas como un éxito, porque lo es.",
+    pairsWith: ["time-bank", "digital-literacy", "repair-cafe"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Pregunta por saberes e intereses",
@@ -3903,6 +4918,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 20,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Reúne a tus hogares antes de llamar a proveedor alguno, y " +
+      "ten primero la conversación incómoda sobre el dinero: " +
+      "cuánto puede comprometer cada quien, cómo se paga antes de " +
+      "hacer el pedido y qué significa saltarse un ciclo. Una " +
+      "llamada con un club de compras que ya funcione — la " +
+      "mayoría comparte con gusto su hoja de cálculo y sus " +
+      "cicatrices — te ahorrará una temporada de prueba y error.",
+    commonPitfalls:
+      "Las cooperativas de compra mueren por fricciones de dinero " +
+      "y por agotamiento de quien coordina: alguien pone el " +
+      "dinero por adelantado y lo resiente, un pedido queda sin " +
+      "pagar, o una sola persona carga cada ciclo en silencio " +
+      "hasta que renuncia y todo se detiene. Cobren antes de " +
+      "pedir, sin excepciones, y roten la coordinación desde el " +
+      "segundo ciclo, no algún día.",
+    pairsWith: ["community-market", "food-preservation"],
     tasks: [
       {
         name: "Junta a tu grupo de compra",
@@ -3971,6 +5003,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 14,
     defaultCategory: "skilled_labor",
     suggestsWorkDays: true,
+    firstSteps:
+      "Recluta a tus primeras dos o tres personas reparadoras " +
+      "antes que nada — la vecina que cose, el que arregla bicis " +
+      "— porque una fecha y un local no significan nada sin " +
+      "ellas. Después recorran juntos el espacio hablando de " +
+      "mesas, electricidad y luz, y si hay un café de reparación " +
+      "en un pueblo cercano, visita una sesión; el flujo de " +
+      "recepción es la parte que vale la pena copiar.",
+    commonPitfalls:
+      "Los cafés de reparación se convierten sin querer en " +
+      "talleres gratuitos de encargo: la gente deja sus cosas y " +
+      "se va, las personas reparadoras se vuelven técnicas sin " +
+      "paga, y quien sabe de electrónica se quema primero. Sostén " +
+      "la regla de que cada quien acompaña su propia reparación, " +
+      "y avisa con claridad que algunas cosas no tienen arreglo — " +
+      "una decepción manejada desde el inicio es más fácil que un " +
+      "reclamo después.",
+    pairsWith: ["tool-lending-library", "community-bike-workshop", "free-store"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Convoca a quienes reparan, por especialidad",
@@ -4027,6 +5078,27 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias que manejen, un método para pedir y despachar viajes, y reglas claras de seguridad y seguros. Manejar llevando a vecinas y vecinos es una responsabilidad seria — confirmen la licencia y el seguro de cada persona que maneje, revisen a quienes llevarán a personas vulnerables y nunca usen un aventón voluntario en lugar de una ambulancia en una emergencia médica.",
     setupHours: 18,
     defaultCategory: "transport",
+    firstSteps:
+      "Dos rondas de conversaciones van antes del primer viaje: " +
+      "siéntate con cada persona que quiera manejar para " +
+      "confirmar licencia y seguro y hablar con honestidad de la " +
+      "revisión de antecedentes, y habla con quienes necesitan " +
+      "los viajes — y con los centros de personas mayores y las " +
+      "clínicas que las conocen — sobre destinos, horarios y " +
+      "necesidades de movilidad reales. La conversación de " +
+      "revisión es más fácil como norma fundadora que como regla " +
+      "impuesta después.",
+    commonPitfalls:
+      "Las redes de aventones fallan en el despacho, no al " +
+      "volante: las solicitudes caen en el teléfono de una sola " +
+      "persona hasta agotarla, y las mismas dos personas " +
+      "confiables reciben cada pedido mientras a otras no se les " +
+      "vuelve a llamar después de un solo no. Roten la " +
+      "coordinación, repartan las solicitudes a propósito y nunca " +
+      "dejen la pregunta del seguro para después del primer " +
+      "golpe.",
+    pairsWith: ["health-navigation", "community-bike-workshop", "court-support"],
+    learnMore: ["claim-post"],
     tasks: [
       {
         name: "Convoca y revisa a quienes manejan",
@@ -4092,6 +5164,27 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un grupo organizador base, información local precisa sobre derechos de inquilinas e inquilinos, un vínculo con asistencia legal y un sistema de contacto rápido. Este proyecto apoya a inquilinas e inquilinos y comparte información legal pública; no sustituye la asesoría legal. Siempre canaliza los casos individuales a asistencia legal calificada antes de las fechas límite.",
     setupHours: 30,
     defaultCategory: "housing",
+    firstSteps:
+      "Habla con las inquilinas e inquilinos afectados antes de " +
+      "cualquier contacto con el casero, siempre — toca puertas, " +
+      "escucha lo que la gente teme y quiere de verdad, y deja " +
+      "que quienes viven en cada edificio marquen el ritmo, " +
+      "porque son ellas quienes cargan el riesgo de represalias, " +
+      "no quienes organizan. En paralelo, preséntate pronto con " +
+      "la clínica de asistencia legal local; vas a querer esa " +
+      "relación antes de que llegue el primer aviso de desalojo, " +
+      "no después.",
+    commonPitfalls:
+      "La forma en que un sindicato de inquilinos lastima a la " +
+      "gente es moviéndose más rápido que las propias inquilinas: " +
+      "una confrontación lanzada antes de que un edificio esté " +
+      "listo expone a las vecinas más vulnerables a represalias " +
+      "que no eligieron. El fracaso más silencioso es deslizarse " +
+      "de compartir información legal a dar asesoría legal — " +
+      "canaliza cada caso individual a asistencia legal " +
+      "calificada antes de las fechas límite, todas las veces.",
+    pairsWith: ["legal-aid-clinic", "mutual-aid-moving-crew", "solidarity-fund"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Convoca un comité organizador base",
@@ -4159,6 +5252,27 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 28,
     defaultCategory: "childcare",
     suggestsWorkDays: true,
+    firstSteps:
+      "Este proyecto se construye en las salas de las casas antes " +
+      "que en ningún otro lado: reúne a las familias fundadoras y " +
+      "hablen de lo específico e incómodo — revisión de " +
+      "antecedentes, supervisión, estilos de disciplina, qué pasa " +
+      "cuando una criatura se lastima — antes de que alguien " +
+      "agende una sola hora de cuidado. Revisa en ese mismo " +
+      "arranque las normas locales sobre cuidado infantil " +
+      "informal, para que el modelo que acuerden sea uno que de " +
+      "verdad puedan sostener.",
+    commonPitfalls:
+      "Dos cosas rompen en silencio a los colectivos de cuidado: " +
+      "el desequilibrio de créditos, donde las mismas familias " +
+      "siempre reciben en casa hasta resentirlo, y las reglas de " +
+      "seguridad que se aflojan conforme crece la confianza — la " +
+      "excepción de sólo por esta vez a la regla de nunca a solas " +
+      "es exactamente como se destruye la confianza. Lleven el " +
+      "balance a la vista y tomen las reglas de seguridad más en " +
+      "serio justamente con las familias que mejor conocen.",
+    pairsWith: ["toy-library", "time-bank", "youth-mentorship"],
+    learnMore: ["what-is-balance"],
     tasks: [
       {
         name: "Reúne a las familias fundadoras y acuerden un modelo",
@@ -4227,6 +5341,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 22,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
+    firstSteps:
+      "Habla con el sitio anfitrión y con las vecinas y vecinos " +
+      "que viven a distancia de olfato antes de que llegue el " +
+      "primer contenedor — el miedo al olor y a las ratas mata " +
+      "los sitios de compostaje, y una conversación honesta a " +
+      "tiempo lo desactiva mejor que cualquier folleto. Después " +
+      "encuentra el destino de tu composta (un huerto comunitario " +
+      "que la quiera) y al menos una persona que de verdad haya " +
+      "mantenido viva una pila caliente; su criterio va a definir " +
+      "qué método elegir.",
+    commonPitfalls:
+      "Los proyectos de composta mueren cuando nadie es " +
+      "responsable de voltear la pila: se estanca o empieza a " +
+      "oler, una vecina se queja y el sitio anfitrión retira el " +
+      "permiso — esa cadena avanza más rápido de lo que crees. " +
+      "Ajusta la cantidad de restos que recolectan a lo que su " +
+      "rotación puede procesar de verdad, y trata una tanda " +
+      "contaminada como un problema de señalización por arreglar, " +
+      "no como una persona voluntaria a quien culpar.",
+    pairsWith: ["community-garden", "community-meal"],
     tasks: [
       {
         name: "Encuentra un sitio de compostaje",
@@ -4296,6 +5430,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una caja de libros resistente al clima, una colección inicial, un sitio anfitrión y un mantenimiento ligero.",
     setupHours: 7.5,
     defaultCategory: "education",
+    firstSteps:
+      "Empieza con dos conversaciones cortas: una con la persona " +
+      "cuya pared o jardín va a recibir la caja, sobre dónde " +
+      "ponerla y qué pasa si se deteriora, y otra con las " +
+      "familias y la escuela cercanas sobre qué libros se " +
+      "llevarían de verdad a casa. Consigue a tu persona " +
+      "guardiana — quien la revisará cada semana — antes de " +
+      "instalar la caja, no después.",
+    commonPitfalls:
+      "Las bibliotecas libres no mueren por falta de libros — " +
+      "mueren por los equivocados: alguien deja una caja de " +
+      "manuales viejos, los buenos títulos quedan enterrados, " +
+      "entra la lluvia y la gente deja de asomarse sin decir " +
+      "nada. Una visita semanal de cinco minutos de la persona " +
+      "guardiana lo previene casi todo; la caja necesita a una " +
+      "persona más de lo que necesita donaciones.",
+    pairsWith: ["seed-library", "books-to-prisoners"],
     tasks: [
       {
         name: "Construye o consigue una caja de libros resistente al clima",
@@ -4348,6 +5499,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas instructoras certificadas, insumos, un espacio y un calendario recurrente. Toda capacitación médica debe darla personal certificado; este proyecto organiza y aloja esa capacitación, no la sustituye.",
     setupHours: 17,
     defaultCategory: "education",
+    firstSteps:
+      "Tu primera conversación es con quienes darían la " +
+      "capacitación — la Cruz Roja, la secretaría de salud o un " +
+      "grupo de reducción de daños. Pregúntales qué necesitan de " +
+      "un espacio anfitrión y qué fechas pueden ofrecer, y luego " +
+      "platica con las personas que más probablemente presencien " +
+      "una emergencia — familiares de personas que usan drogas, " +
+      "personal de negocios cercanos — para que las primeras " +
+      "sesiones se armen alrededor de ellas.",
+    commonPitfalls:
+      "Este proyecto se apaga cuando se queda en un solo evento " +
+      "grande que nunca se repite: las habilidades se oxidan y la " +
+      "naloxona caduca sin que nadie lo note. Y resistan la " +
+      "tentación de enseñar el contenido médico por su cuenta — " +
+      "su papel es alojar a instructoras e instructores " +
+      "certificados, no sustituirlos.",
+    pairsWith: ["harm-reduction-supplies", "emergency-preparedness"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Asóciate con personas instructoras certificadas",
@@ -4408,6 +5577,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una lista de personas integrantes, un sistema de registro, una persona coordinadora y reglas acordadas.",
     setupHours: 27,
     defaultCategory: "organizing",
+    firstSteps:
+      "Empieza con conversaciones, no con software: siéntate con " +
+      "diez o quince vecinas y vecinos y pregúntale a cada quien " +
+      "qué ofrecería y qué pediría. Si de esas pláticas no sale " +
+      "variedad — aventones, tutoría, reparaciones, cocina — " +
+      "sigue convocando antes de montar el sistema.",
+    commonPitfalls:
+      "Los bancos de tiempo rara vez mueren por escándalo; mueren " +
+      "por silencio — la gente se inscribe, nadie hace la primera " +
+      "solicitud y todo se enfría. Que una persona coordinadora " +
+      "empareje intercambios activamente los primeros meses, y " +
+      "sostengan la línea de una hora = una hora: en cuanto se " +
+      "debate si la hora de plomería vale más que la de cuidado " +
+      "infantil, deja de ser un banco de tiempo.",
+    pairsWith: ["skill-share", "childcare-collective"],
+    learnMore: ["what-is-balance", "negative-balance"],
     tasks: [
       {
         name: "Convoca a integrantes fundadoras e inventaríen habilidades",
@@ -4475,6 +5660,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un sistema transparente de manejo de dinero, un pequeño equipo responsable, un plan de recaudación y criterios claros. Manejar dinero en común conlleva responsabilidad real — usen doble firma, mantengan registros limpios, protejan la privacidad de quien recibe y busquen asesoría sobre el tratamiento legal y fiscal del fondo.",
     setupHours: 23,
     defaultCategory: "mutual_aid_drive",
+    firstSteps:
+      "Antes de juntar un solo peso, siéntate con las pocas " +
+      "personas a quienes confiarías dinero en común y hablen con " +
+      "honestidad: cómo funcionará la doble firma, qué se publica " +
+      "y qué pasa cuando las solicitudes superen el fondo. Luego " +
+      "busca una asesoría contable o de organizaciones sin fines " +
+      "de lucro para entender el lado legal y fiscal antes de " +
+      "abrir la cuenta.",
+    commonPitfalls:
+      "El dinero rompe la confianza más rápido que cualquier otra " +
+      "cosa — un pago sin explicar o un registro descuidado puede " +
+      "acabar con el fondo aunque nadie haya hecho nada malo. Y " +
+      "casi siempre habrá más solicitudes que dinero; si los " +
+      "criterios no se acordaron de antemano, decir que no caso " +
+      "por caso quema al equipo y siembra resentimiento.",
+    pairsWith: ["resource-hub-dispatch", "tenant-union", "free-tax-prep"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Forma un pequeño equipo responsable",
@@ -4544,6 +5746,20 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Habla primero con quienes ya ven a las familias — la " +
+      "clínica pediátrica, la despensa de alimentos, la iglesia — " +
+      "y pregúntales qué tallas y productos realmente escasean y " +
+      "si aceptarían alojar la distribución. Esa sola " +
+      "conversación te ahorra meses de adivinar.",
+    commonPitfalls:
+      "Lo que más daña es la irregularidad: una colecta grande, " +
+      "estantes llenos, y luego meses vacíos justo cuando las " +
+      "familias ya contaban contigo. Cuida también el inventario " +
+      "real — se acumulan pañales de recién nacido mientras " +
+      "faltan las tallas grandes — y nunca pidas pruebas de " +
+      "necesidad; la dignidad es parte del servicio.",
+    pairsWith: ["welcome-wagon", "laundry-shower-access"],
     tasks: [
       {
         name: "Encuentra almacenamiento y un punto de distribución",
@@ -4597,6 +5813,21 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 20,
     defaultCategory: "transport",
     suggestsWorkDays: true,
+    firstSteps:
+      "Antes de buscar local, habla con quienes usarían el taller " +
+      "y con las personas mecánicas que enseñarían — y si hay un " +
+      "taller comunitario de bicis en una ciudad cercana, " +
+      "visítalo y pregunta qué harían distinto. Con quien preste " +
+      "el espacio, aclara desde el inicio almacenamiento, acceso " +
+      "y seguros.",
+    commonPitfalls:
+      "El taller muere cuando las personas voluntarias arreglan " +
+      "bicis en lugar de enseñar a arreglarlas: se vuelve un " +
+      "taller gratis, la fila crece y las mecánicas se queman. " +
+      "Cuidado también con ahogarse en bicis chatarra donadas — " +
+      "clasifiquen sin piedad — y que ninguna bici salga sin " +
+      "revisión de frenos y llantas.",
+    pairsWith: ["repair-cafe", "rides-transportation", "tool-lending-library"],
     tasks: [
       {
         name: "Encuentra un espacio de taller",
@@ -4655,6 +5886,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias bilingües, organizaciones aliadas, materiales de orientación y un sistema de solicitudes. Tengan especial cuidado con la privacidad: no recojan estatus migratorio, canalicen preguntas legales a abogadas y abogados de inmigración calificados, y dejen que las personas de la comunidad guíen qué apoyo realmente quieren.",
     setupHours: 22,
     defaultCategory: "other",
+    firstSteps:
+      "Empieza hablando con las propias comunidades recién " +
+      "llegadas y con las organizaciones que ya las acompañan — " +
+      "que ellas digan qué apoyo quieren, en vez de diseñárselo " +
+      "desde fuera. Y antes de que llegue la primera solicitud, " +
+      "deja lista la canalización: abogadas y abogados de " +
+      "inmigración calificados a quienes derivar toda pregunta " +
+      "legal.",
+    commonPitfalls:
+      "El riesgo más serio es que personas voluntarias con buena " +
+      "intención pasen de interpretar a dar consejos legales o " +
+      "médicos para los que no están calificadas — una mala " +
+      "orientación migratoria puede costarle carísimo a alguien. " +
+      "Y recojan el mínimo de datos: un registro descuidado sobre " +
+      "el estatus de una persona puede ponerla en peligro real.",
+    pairsWith: ["welcome-wagon", "legal-aid-clinic", "health-navigation"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Convoca a personas voluntarias bilingües y multilingües",
@@ -4716,6 +5964,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 22,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Tus dos primeras conversaciones son con quien prestaría la " +
+      "cocina — un salón de iglesia o centro comunitario — sobre " +
+      "los días que planeas, y con la autoridad sanitaria local " +
+      "sobre permisos y manejo de alimentos; eso define todo lo " +
+      "demás. Después pregunta a quienes vendrían a comer qué día " +
+      "y hora les sirve de verdad.",
+    commonPitfalls:
+      "Un descuido de seguridad alimentaria puede lastimar a " +
+      "alguien y acabar con el proyecto — las reglas de " +
+      "temperatura y almacenamiento no se saltan ni una vez. La " +
+      "muerte lenta es que las mismas tres personas cocinen cada " +
+      "comida hasta quemarse, así que amplíen el equipo y roten " +
+      "quién dirige la cocina desde el inicio.",
+    pairsWith: ["gleaning-network", "community-garden", "community-fridge"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Encuentren una cocina y un espacio para servir",
@@ -4785,6 +6049,21 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un sistema de almacenamiento y catálogo, semillas donadas, un lugar anfitrión y unas pocas personas cuidadoras.",
     setupHours: 8,
     defaultCategory: "food",
+    firstSteps:
+      "Habla con la biblioteca o el centro comunitario sobre " +
+      "alojar el mueble, y con jardineras y jardineros con " +
+      "experiencia local sobre qué crece de verdad en tu región — " +
+      "el éxito de quienes empiezan depende de semillas adecuadas " +
+      "al clima. Un vivero o una huerta comunitaria cercana suele " +
+      "donar con gusto el arranque.",
+    commonPitfalls:
+      "Una biblioteca de semillas muere en silencio: semilla " +
+      "vieja que no germina, gente que concluye que no sabe " +
+      "sembrar y no vuelve. Rota el inventario sin nostalgia, y " +
+      "no cuentes con que devuelvan semilla — casi nadie la " +
+      "guarda — así que planea el resurtido con donaciones, no " +
+      "con retornos.",
+    pairsWith: ["community-garden", "free-little-library"],
     tasks: [
       {
         name: "Encuentren un anfitrión y sistema de almacenamiento",
@@ -4837,6 +6116,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Dispositivos donados, acceso a internet, personas voluntarias para tutorías y un espacio.",
     setupHours: 27,
     defaultCategory: "tech",
+    firstSteps:
+      "Habla primero con las personas que quieres acompañar — en " +
+      "la biblioteca, el centro de personas mayores, la fila de " +
+      "la despensa — y pregúntales qué quieren lograr: telesalud, " +
+      "solicitudes de empleo, las fotos de la familia. Luego " +
+      "platica con la biblioteca sobre espacio y conectividad " +
+      "antes de juntar un solo dispositivo.",
+    commonPitfalls:
+      "Prestar un dispositivo sin resolver el internet es prestar " +
+      "un pisapapeles — la conectividad es la mitad del proyecto. " +
+      "En las sesiones, el error clásico es que quien da la " +
+      "tutoría tome el ratón y hable en jerga; y nunca vuelvas a " +
+      "prestar un equipo sin borrarlo, porque filtrar los datos " +
+      "de alguien rompe toda la confianza construida.",
+    pairsWith: ["community-wifi-mesh", "skill-share"],
+    learnMore: ["install-app", "new-device"],
     tasks: [
       {
         name: "Recolecten y reacondicionen dispositivos",
@@ -4904,6 +6199,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "housing",
     suggestsWorkDays: true,
+    firstSteps:
+      "Reúne primero a tus personas voluntarias más " +
+      "experimentadas y acuerden juntas la línea de alcance — qué " +
+      "trabajos toman y cuáles se derivan a profesionales con " +
+      "licencia — antes de aceptar una sola solicitud. Trata la " +
+      "primera visita a cada hogar como una conversación, no una " +
+      "inspección: la persona residente decide qué se toca en su " +
+      "casa.",
+    commonPitfalls:
+      "El peligro es el alcance que crece solo: la 'reparación " +
+      "chiquita' que resulta ser trabajo eléctrico, de gas o de " +
+      "techo, fuera de la competencia voluntaria — ahí es donde " +
+      "alguien sale lastimado. Y no prometan más visitas de las " +
+      "que el equipo puede cumplir; dejar esperando a una persona " +
+      "mayor que contaba con ustedes duele más que un no honesto " +
+      "desde el inicio.",
+    pairsWith: ["community-wood-bank", "tool-lending-library"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Convoquen a personas voluntarias con habilidades",
@@ -4965,6 +6278,20 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Habla primero con la despensa de alimentos existente sobre " +
+      "distribuir juntos — las mismas familias suelen necesitar " +
+      "ambas cosas — y con veterinarias y tiendas de mascotas " +
+      "locales sobre donaciones y algún convenio de vacunas o " +
+      "descuentos.",
+    commonPitfalls:
+      "La irregularidad es lo que más daña: una colecta grande y " +
+      "luego estantes vacíos, cuando quienes tienen mascotas " +
+      "necesitan poder contar contigo. Y vigila el tono — " +
+      "cualquier juicio sobre si 'la gente pobre debería tener " +
+      "mascotas' mata el proyecto más rápido que quedarse sin " +
+      "croquetas.",
+    pairsWith: ["diaper-hygiene-bank", "community-fridge"],
     tasks: [
       {
         name: "Encuentren almacenamiento y un punto de distribución",
@@ -5018,6 +6345,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 28,
     defaultCategory: "education",
     suggestsWorkDays: true,
+    firstSteps:
+      "Antes de convocar a una sola persona mentora, habla con " +
+      "madres, padres y con la propia juventud sobre qué " +
+      "necesitan, y deja por escrito las políticas de seguridad — " +
+      "verificación de antecedentes, regla de dos personas " +
+      "adultas, reporte obligatorio. Ninguna persona adulta pasa " +
+      "tiempo con niñas y niños antes de pasar por ese filtro.",
+    commonPitfalls:
+      "La peor falla es el atajo en seguridad: una persona adulta " +
+      "sin verificar, o a solas con una niña o niño — eso no se " +
+      "negocia nunca. La segunda es la rotación de mentores; para " +
+      "juventud que ya ha vivido abandonos, un adulto que " +
+      "desaparece hace daño, así que empieza en pequeño y crece " +
+      "solo hasta donde puedas supervisar y sostener.",
+    pairsWith: ["school-supply-program", "childcare-collective", "community-music"],
+    learnMore: ["how-vouching-works"],
     tasks: [
       {
         name: "Consigan un espacio seguro y fijen un horario",
@@ -5086,6 +6429,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Empieza por quienes cultivan: granjas, huertos y puestos " +
+      "del mercado. Pregúntales qué excedente tienen y qué les " +
+      "preocupa de recibir voluntarios — responsabilidad, daños " +
+      "al cultivo — y deja amarrado a dónde irá la comida " +
+      "(neveras, despensas, comidas comunitarias) antes de la " +
+      "primera cosecha.",
+    commonPitfalls:
+      "La falla clásica es rescatar fruta que luego se pudre en " +
+      "la cochera de alguien — la distribución se acuerda antes " +
+      "de cosechar, no después. Las ventanas de cosecha son " +
+      "cortas, así que un equipo chico que responde rápido vale " +
+      "más que una lista larga de nombres; y un solo rescate " +
+      "descuidado que dañe el campo te puede costar a esa persona " +
+      "cultivadora para siempre.",
+    pairsWith: ["community-fridge", "food-preservation", "community-meal"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Encuentren fuentes de cosecha",
@@ -5152,6 +6512,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas mediadoras capacitadas, un espacio neutral y un proceso de solicitud. La mediación es para disputas entre partes dispuestas — descarten y deriven cualquier situación con violencia, abuso o peligro a la o el profesional adecuado o a servicios de emergencia.",
     setupHours: 22,
     defaultCategory: "other",
+    firstSteps:
+      "Habla primero con un centro de mediación comunitaria " +
+      "existente o con quien capacite a mediadores — este oficio " +
+      "no se improvisa — y antes del primer caso dejen por " +
+      "escrito el filtro: qué disputas toman y a dónde derivan " +
+      "cualquier situación con violencia o abuso.",
+    commonPitfalls:
+      "La falla peligrosa es mediar lo que no debe mediarse: una " +
+      "'disputa vecinal' que en realidad es abuso pone a alguien " +
+      "en riesgo, así que filtren cada solicitud. Y la " +
+      "confidencialidad es todo el capital del proyecto — un solo " +
+      "detalle filtrado y nadie vuelve a confiar; cuiden también " +
+      "a sus mediadoras y mediadores, porque este trabajo " +
+      "desgasta.",
+    pairsWith: ["legal-aid-clinic", "tenant-union"],
+    learnMore: ["disagree-with-member"],
     tasks: [
       {
         name: "Convoquen y capaciten a personas mediadoras",
@@ -5217,6 +6593,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias, organizaciones aliadas y un directorio sólido de recursos. Traten los antecedentes e historias de las personas como privados — guíense por el respeto, sigan los objetivos propios de cada persona y deriven asuntos legales a asesoría calificada.",
     setupHours: 28,
     defaultCategory: "other",
+    firstSteps:
+      "Antes de armar nada, siéntense con personas que ya " +
+      "vivieron el regreso y con las organizaciones de reingreso, " +
+      "oficinas de libertad condicional y empleadores de " +
+      "oportunidad justa que ya trabajan en su zona — pregunten " +
+      "qué traba de verdad a la gente en las primeras semanas y " +
+      "dónde encaja su red. Consigan desde ya un contacto de " +
+      "asesoría legal calificada, para que cuando surjan " +
+      "preguntas legales tengan a dónde derivarlas de verdad.",
+    commonPitfalls:
+      "Este proyecto muere cuando se vuelve un filtro — personas " +
+      "voluntarias decidiendo quién merece ayuda — o cuando la " +
+      "historia de alguien se filtra y le cuesta un trabajo o una " +
+      "vivienda. También falla en silencio cuando el entusiasmo " +
+      "supera al seguimiento; una promesa rota golpea más fuerte " +
+      "a quien está reconstruyendo confianza que ninguna promesa.",
+    pairsWith: ["court-support", "books-to-prisoners"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Armen un directorio de recursos y aliadas y aliados",
@@ -5285,6 +6679,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 24,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Empiecen hablando con los hogares que se calientan con " +
+      "leña — personas mayores rurales, familias que la oficina " +
+      "de asistencia de combustible ya conoce — para saber cuánto " +
+      "queman y cuándo se quedan cortos, y luego llamen a los " +
+      "servicios de poda locales para preguntar a dónde va su " +
+      "madera ahora. Antes de encender una sola motosierra, " +
+      "definan quién se hace cargo de la seguridad: alguien con " +
+      "suficiente experiencia para capacitar a la cuadrilla y sin " +
+      "miedo a decirle que no a una persona voluntaria.",
+    commonPitfalls:
+      "Las dos formas en que esto lastima: una persona sin " +
+      "capacitación operando una motosierra, y entregar leña " +
+      "verde que humea, tapa las chimeneas con creosota y no " +
+      "calienta. Cortar en octubre para diciembre significa leña " +
+      "húmeda — el fracaso de calendario es tan real como el de " +
+      "seguridad.",
+    pairsWith: ["weatherization-brigade", "cooling-warming-center"],
     tasks: [
       {
         name: "Aseguren una fuente de leña",
@@ -5350,6 +6762,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Una conexión de internet de respaldo, routers y nodos en malla, personas voluntarias con conocimientos técnicos y sitios anfitriones.",
     setupHours: 32,
     defaultCategory: "tech",
+    firstSteps:
+      "Recorran las cuadras que quieren cubrir y toquen puertas — " +
+      "hablen con los hogares sin servicio sobre para qué lo " +
+      "usarían de verdad, y con quienes tienen techos y ventanas " +
+      "altas que podrían alojar un nodo. Antes de comprar equipo, " +
+      "tengan la conversación del ancho de banda: encuentren el " +
+      "negocio, biblioteca o ISP dispuesto a compartir una línea " +
+      "y confirmen por escrito que se permite redistribuir.",
+    commonPitfalls:
+      "Las redes en malla suelen morir de mantenimiento, no de " +
+      "construcción — la persona técnica fundadora se muda y " +
+      "nadie más puede entrar a los routers, así que documenten " +
+      "todo y capaciten a una segunda persona desde el primer " +
+      "día. El otro fracaso silencioso es construir donde la " +
+      "señal llega fácil en vez de donde la gente de verdad no " +
+      "tiene acceso.",
+    pairsWith: ["digital-literacy", "emergency-preparedness"],
     tasks: [
       {
         name: "Mapeen las necesidades y los vacíos de cobertura",
@@ -5417,6 +6846,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas facilitadoras capacitadas, un espacio privado, y límites claros junto con un plan de derivación en crisis. El apoyo entre pares complementa la atención profesional en salud mental — no la reemplaza. Las personas facilitadoras no son terapeutas, y siempre debe existir un plan claro para conectar a quien esté en crisis con recursos profesionales o de emergencia calificados.",
     setupHours: 21,
     defaultCategory: "emotional_support",
+    firstSteps:
+      "Sus primeras conversaciones son con las personas que " +
+      "podrían facilitar y con proveedores locales de salud " +
+      "mental — una clínica, línea de crisis o terapeuta que " +
+      "acepte ser su ruta de derivación antes de que el primer " +
+      "círculo se reúna. No abran las puertas hasta que las " +
+      "personas facilitadoras estén capacitadas y todas puedan " +
+      "decir con claridad qué es y qué no es el círculo.",
+    commonPitfalls:
+      "El fracaso peligroso es la deriva: un círculo cálido se " +
+      "convierte poco a poco en el único apoyo de alguien, " +
+      "quienes facilitan empiezan a hacer de terapeutas, y no hay " +
+      "plan para la noche en que alguien está en crisis de " +
+      "verdad. El más silencioso es el desgaste — si las personas " +
+      "que sostienen el espacio no tienen su propio apoyo, el " +
+      "círculo se apaga en un año.",
+    pairsWith: ["neighborhood-care-network", "disability-support-network", "harm-reduction-supplies"],
+    learnMore: ["who-sees-what", "lurking-ok"],
     tasks: [
       {
         name: "Convoquen y capaciten a personas facilitadoras",
@@ -5484,6 +6931,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
+    firstSteps:
+      "Recorran el barrio con quienes viven más cerca de los " +
+      "puntos descuidados — saben qué lotes importan, de quién " +
+      "son y qué se intentó antes — y averigüen si el municipio o " +
+      "un grupo de amigas y amigos del parque ya organiza " +
+      "limpiezas a las que puedan sumarse. Resuelvan propiedad, " +
+      "permisos y a dónde va la basura antes de elegir la fecha.",
+    commonPitfalls:
+      "Las limpiezas fracasan de dos maneras: las bolsas de " +
+      "basura recolectada se quedan semanas en la banqueta porque " +
+      "nadie coordinó la disposición, y el lote hermosamente " +
+      "despejado vuelve a estar cubierto de maleza para el otoño " +
+      "porque no hubo plan más allá del gran día. Y una persona " +
+      "voluntaria que agarra una aguja con la mano puede " +
+      "convertir una buena mañana en una visita al hospital.",
+    pairsWith: ["community-garden", "community-composting"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Identifiquen y prioricen sitios",
@@ -5536,6 +7000,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 28,
     defaultCategory: "skilled_labor",
     suggestsWorkDays: true,
+    firstSteps:
+      "Su primera llamada es a un programa establecido de " +
+      "presentación gratuita como VITA — hablen con su " +
+      "coordinación sobre plazos de certificación, software y qué " +
+      "necesita un sitio nuevo, porque esto no conviene hacerlo " +
+      "por su cuenta. Después hablen con las vecinas y vecinos a " +
+      "quienes esperan servir sobre cuándo pueden venir de verdad " +
+      "y qué les ha impedido declarar antes.",
+    commonPitfalls:
+      "Una declaración mal hecha puede costarle a una familia su " +
+      "reembolso o provocar una auditoría — por eso la línea que " +
+      "este proyecto nunca debe cruzar es que personas sin " +
+      "certificación preparen impuestos. Los fracasos más suaves: " +
+      "lanzar en marzo cuando la certificación toma meses, y que " +
+      "alguien haga todo el viaje sólo para ser rechazado por un " +
+      "documento que nadie le dijo que trajera.",
+    pairsWith: ["legal-aid-clinic", "solidarity-fund"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Capaciten y certifiquen a las personas preparadoras",
@@ -5603,6 +7085,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 15,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Empiecen con las conversaciones de suministro — visiten " +
+      "granjas, tiendas y huertas comunitarias para saber qué " +
+      "excedente existe de verdad y con qué ritmo — y hablen con " +
+      "las vecinas y vecinos de la zona sobre por dónde ya " +
+      "caminan y qué comida se llevarían de verdad a casa. Elijan " +
+      "el lugar con las personas que lo van a usar, no por ellas.",
+    commonPitfalls:
+      "Un puesto que aparece de forma errática le enseña a la " +
+      "gente a dejar de contar con él — la constancia importa más " +
+      "que la abundancia. Los otros fracasos: un suministro que " +
+      "se seca después del primer mes de entusiasmo, y cualquier " +
+      "cosa en la mesa (formularios, preguntas, clasificar a la " +
+      "gente) que haga que llevarse comida se sienta como " +
+      "solicitarla.",
+    pairsWith: ["gleaning-network", "bulk-buying-coop", "community-garden"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Aseguren suministro de productos y artículos",
@@ -5670,6 +7169,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias, paquetes de información, artículos de bienvenida donados y un sistema de referencias.",
     setupHours: 10,
     defaultCategory: "emotional_support",
+    firstSteps:
+      "Hablen primero con quienes conocen a las personas recién " +
+      "llegadas antes que ustedes — arrendadores, oficinas " +
+      "escolares, clínicas, parteras y personal de pediatría — " +
+      "sobre cómo referirían a alguien con su consentimiento. " +
+      "Después pregúntenle a algunas personas recién mudadas y a " +
+      "madres y padres recientes qué les habría ayudado de verdad " +
+      "en su primer mes, y armen el paquete y la canasta " +
+      "alrededor de sus respuestas.",
+    commonPitfalls:
+      "La forma en que esto sale mal es cuando se siente como " +
+      "vigilancia — presentarse sin invitación en la puerta de " +
+      "una persona desconocida, o pasar nombres sin " +
+      "consentimiento, convierte una bienvenida en una intrusión. " +
+      "También se apaga en silencio cuando las personas " +
+      "fundadoras se agotan y nadie nota a las recién llegadas " +
+      "durante meses.",
+    pairsWith: ["newcomer-translation-network", "diaper-hygiene-bank", "neighborhood-care-network"],
+    learnMore: ["invite-someone"],
     tasks: [
       {
         name: "Definan a quién darán la bienvenida y cómo",
@@ -5723,6 +7241,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Almacenamiento, artículos donados, un catálogo y sistema de préstamos, y un par de personas bibliotecarias.",
     setupHours: 21,
     defaultCategory: "infrastructure",
+    firstSteps:
+      "Antes de recolectar un solo artículo, pregúntenle a la " +
+      "gente qué pediría prestado de verdad — esa encuesta es el " +
+      "cimiento del proyecto — y hablen con la biblioteca pública " +
+      "o un centro comunitario sobre alojarla, porque una " +
+      "institución de confianza resuelve de una vez el " +
+      "almacenamiento y la credibilidad. Consigan a sus dos " +
+      "personas bibliotecarias antes de que lleguen las " +
+      "donaciones, no después.",
+    commonPitfalls:
+      "Las bibliotecas de cosas mueren de desorden: decirle que " +
+      "sí a cada donación llena la sala de panificadoras rotas " +
+      "que nadie quiere, mientras la hidrolavadora que todo el " +
+      "mundo pidió sigue faltando. El otro asesino son los " +
+      "horarios impredecibles — si la gente no puede contar con " +
+      "cuándo recoger y devolver, vuelve en silencio a comprar.",
+    pairsWith: ["tool-lending-library", "toy-library", "free-store"],
+    learnMore: ["confirm-exchange"],
     tasks: [
       {
         name: "Pregunten a la comunidad qué quiere pedir prestado",
@@ -5791,6 +7327,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 19,
     defaultCategory: "infrastructure",
     suggestsWorkDays: true,
+    firstSteps:
+      "Empiecen con dos rondas de conversaciones: con vecinas y " +
+      "vecinos sin hogar y las personas de trabajo de calle que " +
+      "los conocen, sobre qué horarios y lugares funcionarían de " +
+      "verdad — y con la dueña de una lavandería, un gimnasio o " +
+      "un sitio religioso sobre ser anfitrión. Esa conversación " +
+      "es delicada; sean honestos sobre quiénes van a venir y " +
+      "acuerden expectativas de privacidad, limpieza y horarios " +
+      "antes de que llegue la primera persona.",
+    commonPitfalls:
+      "Este programa muere cuando la relación con el sitio " +
+      "anfitrión se agria — una mala interacción sin protocolo " +
+      "detrás, y el espacio se pierde — o cuando los horarios " +
+      "cambian tanto que la gente cruza la ciudad para encontrar " +
+      "la puerta cerrada. Y cada papel que exijan en la entrada " +
+      "aleja a alguien que necesitaba una ducha más de lo que " +
+      "ustedes necesitaban su nombre.",
+    pairsWith: ["free-haircut", "cooling-warming-center", "diaper-hygiene-bank"],
     tasks: [
       {
         name: "Aseguren acceso a lavandería y duchas",
@@ -5851,6 +7405,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias capacitadas, materiales de registro, reglas precisas y buenas ubicaciones. Mantengan la campaña estrictamente apartidista y sigan al pie de la letra todas las leyes electorales y de registro — entreguen sólo información precisa y nunca aboguen por un partido o candidatura.",
     setupHours: 16,
     defaultCategory: "organizing",
+    firstSteps:
+      "Antes de que alguien ponga mesa, hablen con su oficina " +
+      "electoral local — les dirán exactamente qué pueden y no " +
+      "pueden hacer las campañas, y algunas zonas exigen " +
+      "capacitación o registro previo. Luego conéctense con la " +
+      "Liga de Mujeres Votantes u otro grupo apartidista " +
+      "establecido; apoyarse en sus materiales y experiencia es " +
+      "mejor que aprender la ley electoral a prueba y error.",
+    commonPitfalls:
+      "Los fracasos imperdonables son los legales: una pila de " +
+      "formularios llenos olvidada en la cajuela de alguien hasta " +
+      "pasado el plazo le quita el voto a cada persona que confió " +
+      "en ustedes, y una sola persona voluntaria promoviendo una " +
+      "candidatura puede manchar toda la campaña. El error más " +
+      "sutil es repartir formularios de registro sin mencionar " +
+      "nunca dónde ni cómo se vota de verdad.",
+    pairsWith: ["newcomer-translation-network", "legal-aid-clinic"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Aprendan las reglas para campañas de registro",
@@ -5911,6 +7483,27 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas navegadoras capacitadas, un directorio de recursos, alianzas con proveedores y un sistema de solicitudes. Las personas navegadoras conectan a la gente con la atención — no dan consejo médico ni diagnósticos. Deriven todas las preguntas clínicas a profesionales de salud calificados.",
     setupHours: 26,
     defaultCategory: "other",
+    firstSteps:
+      "Empiecen visitando las clínicas gratuitas y de tarifa " +
+      "escalonada a las que van a derivar — preséntense, " +
+      "pregunten qué derivaciones les ayudan y cuáles los " +
+      "saturan, y dejen que esas conversaciones siembren su " +
+      "directorio. Acuerden el límite antes de que llegue la " +
+      "primera solicitud: las personas navegadoras se encargan de " +
+      "logística y trámites, y cada pregunta clínica va a un " +
+      "profesional, así que sepan exactamente a qué línea de " +
+      "enfermería o clínica se las van a pasar.",
+    commonPitfalls:
+      "El filo peligroso es una persona navegadora " +
+      "bienintencionada que se desliza hacia el consejo médico — " +
+      "un 'eso no suena grave' dicho al pasar puede costarle a " +
+      "alguien semanas de atención necesaria. Esto también falla " +
+      "cuando el directorio envejece en silencio y manda a la " +
+      "gente a clínicas cerradas o programas que ya terminaron; " +
+      "un número equivocado le cuesta el último intento a alguien " +
+      "que ya venía agotado.",
+    pairsWith: ["rides-transportation", "newcomer-translation-network", "mental-health-peer-support"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Armen un directorio de recursos de salud",
@@ -5978,6 +7571,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Almacenamiento, juguetes donados, un catálogo y sistema de préstamo, materiales de limpieza y personas bibliotecarias.",
     setupHours: 10,
     defaultCategory: "childcare",
+    firstSteps:
+      "Hablen con las familias a las que esperan servir — a la " +
+      "salida de la guardería, en una hora de cuentos, en un " +
+      "grupo de juego — sobre qué juguetes sus hijas e hijos " +
+      "dejan atrás más rápido y qué horarios realmente les " +
+      "quedan, y luego pregunten en un centro comunitario, " +
+      "iglesia o biblioteca por un estante o una sala. Consigan a " +
+      "una persona voluntaria con experiencia en cuidado infantil " +
+      "que se encargue de las revisiones de seguridad antes de " +
+      "que empiecen a llegar donaciones.",
+    commonPitfalls:
+      "Las jugueterías comunitarias fallan por seguridad y por " +
+      "piezas: un solo juguete retirado del mercado o un riesgo " +
+      "de asfixia que se cuela rompe la confianza de las familias " +
+      "para siempre, y los rompecabezas que vuelven incompletos " +
+      "hacen que toda la colección se sienta de segunda en pocos " +
+      "meses. La inspección estricta y las bolsas con conteo lo " +
+      "son todo.",
+    pairsWith: ["library-of-things", "childcare-collective", "school-supply-program"],
     tasks: [
       {
         name: "Consigan almacenamiento y horarios de apertura",
@@ -6031,6 +7643,22 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 18,
     defaultCategory: "food",
     suggestsWorkDays: true,
+    firstSteps:
+      "Encuentren primero el conocimiento, no la cocina: llamen " +
+      "al servicio de extensión local o a una persona certificada " +
+      "en conservación de alimentos y pídanle que capacite a sus " +
+      "líderes o revise sus planes, y hablen con quienes cultivan " +
+      "y espigan sobre qué excedente llega y cuándo. Reserven la " +
+      "cocina alrededor del calendario de cosecha, no al revés.",
+    commonPitfalls:
+      "El fracaso que importa es invisible: un frasco sellado con " +
+      "un método improvisado o con la receta no probada de la " +
+      "abuela puede cargar botulismo y verse perfecto en el " +
+      "estante. El fracaso ordinario es el calendario — los " +
+      "tomates maduran a su ritmo, y un colectivo que organiza su " +
+      "primera sesión en noviembre no conserva nada.",
+    pairsWith: ["gleaning-network", "community-garden", "community-fridge"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Aseguren una cocina adecuada",
@@ -6102,6 +7730,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "skilled_labor",
     suggestsWorkDays: true,
+    firstSteps:
+      "Empieza con dos conversaciones: una con una estilista o " +
+      "barbero con licencia dispuesto a traer a un colega, y otra " +
+      "con las personas a las que quieres servir — un albergue, " +
+      "un centro de día o un programa de empleo te dirán qué días " +
+      "y qué ambiente les resultarían cómodos de verdad. Cuando " +
+      "un profesional y un sitio anfitrión digan que sí, lo demás " +
+      "es cuestión de materiales y agenda.",
+    commonPitfalls:
+      "Este proyecto tropieza cuando se siente como fila de " +
+      "caridad y no como salón — cortes apurados, sin poder " +
+      "elegir el estilo, cámaras afuera para las redes. Pregunta " +
+      "a cada persona qué quiere, deja las fotos salvo que ella " +
+      "las ofrezca, y nunca permitas que alguien sin licencia " +
+      "corte por estirar la capacidad; un solo problema de " +
+      "higiene puede acabar con todo el programa.",
+    pairsWith: ["laundry-shower-access", "reentry-support"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Convoquen estilistas y barberas y barberos licenciados",
@@ -6155,6 +7801,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 14,
     defaultCategory: "transport",
     suggestsWorkDays: true,
+    firstSteps:
+      "Antes de conseguir un solo camión, habla con quienes ya " +
+      "reciben estas llamadas — defensoras de sobrevivientes de " +
+      "violencia doméstica, organizadores de inquilinos, " +
+      "servicios para personas mayores — sobre cómo deberían " +
+      "llegarte las solicitudes y qué confidencialidad van a " +
+      "esperar, porque algunas mudanzas son de alguien saliendo " +
+      "de un hogar inseguro. Luego junta a tres o cuatro personas " +
+      "voluntarias con fuerza y un vehículo, y dimensionen juntas " +
+      "la primera mudanza pequeña.",
+    commonPitfalls:
+      "Las cuadrillas se lastiman o se queman rápido: un trabajo " +
+      "demasiado ambicioso con pocas manos, alguien levantando " +
+      "mal, una dirección compartida en un chat grupal que nunca " +
+      "debió salir del teléfono de quien coordina. Mantén las " +
+      "mudanzas dentro de los límites que fijaron, y trata los " +
+      "detalles de cada mudanza delicada como si pudieran poner a " +
+      "alguien en peligro — porque pueden.",
+    pairsWith: ["tenant-union", "free-store"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Convoquen una cuadrilla y vehículos",
@@ -6222,6 +7888,27 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un sistema de comunicación accesible, liderazgos pares y un directorio de recursos. El apoyo entre pares complementa la atención profesional — deriven las preguntas médicas, de cuidado personal y legales a profesionales calificados, y traten la información de salud de las personas integrantes como privada.",
     setupHours: 24,
     defaultCategory: "organizing",
+    firstSteps:
+      "Esta red solo funciona si las vecinas y vecinos con " +
+      "discapacidad están en la mesa desde la primerísima " +
+      "conversación — no consultados después, sino decidiendo qué " +
+      "es. Empieza pidiendo a dos o tres personas con " +
+      "discapacidad que conozcas que la cofunden contigo (o, si " +
+      "tú misma vives con discapacidad, que compartan la carga), " +
+      "y deja que sus necesidades de acceso definan cómo se hace " +
+      "la primera reunión: formato, lugar y ritmo incluidos.",
+    commonPitfalls:
+      "El fracaso clásico es que personas aliadas " +
+      "bienintencionadas construyan un programa para la gente con " +
+      "discapacidad que nadie pidió, en formatos que no pueden " +
+      "usar. El más silencioso es irse convirtiendo en un " +
+      "servicio informal de cuidados: el apoyo entre pares no " +
+      "puede sustituir con seguridad la atención médica ni el " +
+      "cuidado personal, así que sigue derivando esas necesidades " +
+      "a profesionales calificados y cuida la información de " +
+      "salud como lo privado que es.",
+    pairsWith: ["neighborhood-care-network", "rides-transportation", "health-navigation"],
+    learnMore: ["lurking-ok"],
     tasks: [
       {
         name: "Centren el liderazgo de personas con discapacidad",
@@ -6289,6 +7976,27 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "education",
     suggestsWorkDays: true,
+    firstSteps:
+      "Antes de recolectar un solo libro, llama a un grupo " +
+      "establecido de libros para personas encarceladas — la " +
+      "mayoría comparte con gusto qué instituciones cubren, qué " +
+      "reglas hacen tropezar a la gente y dónde quedan " +
+      "solicitudes sin respuesta. Luego consigue por escrito la " +
+      "política de correo vigente de la una o dos instituciones " +
+      "con las que van a empezar; lo que las personas " +
+      "encarceladas realmente piden debería definir el acervo, no " +
+      "lo que las donantes limpien de sus estantes.",
+    commonPitfalls:
+      "Este proyecto muere por paquetes rechazados: un libro " +
+      "usado donde solo aceptan nuevos, una pasta dura, una regla " +
+      "de etiquetado olvidada — franqueo desperdiciado y el " +
+      "paquete tan esperado de alguien devuelto. También puede " +
+      "lastimar a las personas voluntarias que escriben desde su " +
+      "casa; toda carta sale con la dirección del programa, sin " +
+      "excepciones, por más cálida que se vuelva la " +
+      "correspondencia.",
+    pairsWith: ["reentry-support", "free-little-library"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Aprendan las reglas de correo de cada institución",
@@ -6348,6 +8056,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Instrumentos donados, docentes voluntarias y voluntarios, un espacio y un sistema de préstamo.",
     setupHours: 15,
     defaultCategory: "education",
+    firstSteps:
+      "Empieza con las músicas y músicos que ya tienes cerca — la " +
+      "guitarrista de la iglesia de la esquina, el director de " +
+      "banda jubilado, las y los adolescentes que tocan — y " +
+      "pregúntales qué les gustaría enseñar y cuándo. Una " +
+      "conversación con una tienda de música sobre reparaciones " +
+      "con descuento, y otra con un espacio que tolere el ruido, " +
+      "y ya recorriste la mayor parte del camino hacia la primera " +
+      "jam.",
+    commonPitfalls:
+      "El fondo de préstamo se vacía en silencio cuando los " +
+      "instrumentos salen más rápido de lo que vuelven en " +
+      "condiciones de tocarse, así que presupuesta tiempo de " +
+      "reparación desde el inicio y mantén una política de " +
+      "devolución flexible pero real. Y cuida que las clases no " +
+      "se inclinen hacia quienes ya tocan con confianza: la niña " +
+      "que nunca ha tocado un instrumento necesita la bienvenida " +
+      "más cálida, no el espacio más corto.",
+    pairsWith: ["library-of-things", "skill-share", "youth-mentorship"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Recolecten y reparen instrumentos",
@@ -6408,6 +8136,23 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 10,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
+    firstSteps:
+      "Tu primera conversación es con una escuela — una " +
+      "consejera, un enlace con familias o una coordinadora de " +
+      "madres y padres que conozca las listas reales de útiles y " +
+      "qué familias se quedan sin ellos en silencio. Deja que " +
+      "definan qué recolectas y cómo se enteran las familias; una " +
+      "entrega que pasa por gente en la que las madres y los " +
+      "padres ya confían llega a niñas y niños a los que un " +
+      "volante nunca llegará.",
+    commonPitfalls:
+      "El fracaso predecible es una montaña de fólders donados y " +
+      "ni uno de los cuadernos que las listas sí piden — juntar " +
+      "lo fácil de dar en vez de lo que hace falta. El que duele " +
+      "es una entrega que se siente como examen de pobreza; " +
+      "sáltate el papeleo de ingresos, deja que cada niña y niño " +
+      "elija su mochila, y nadie se va sintiéndose inspeccionado.",
+    pairsWith: ["youth-mentorship", "toy-library"],
     tasks: [
       {
         name: "Consigan las listas de útiles y midan la necesidad",
@@ -6463,6 +8208,26 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 26,
     defaultCategory: "other",
     suggestsWorkDays: true,
+    firstSteps:
+      "Aquí nada arranca antes de tener abogadas y abogados: tus " +
+      "primeras llamadas son a la oficina local de ayuda legal, " +
+      "al programa pro bono del colegio de abogados y a una " +
+      "clínica de facultad de derecho, preguntando qué " +
+      "necesitarían para presentarse — y qué vacíos podría llenar " +
+      "de verdad una clínica de barrio. Deja que esas alianzas " +
+      "definan contigo el alcance de la clínica antes de anunciar " +
+      "nada al vecindario.",
+    commonPitfalls:
+      "El fracaso peligroso es que una persona voluntaria con " +
+      "buenas intenciones pase de la información al consejo — un " +
+      "\"tú fírmalo y ya\" bienintencionado puede arruinar el " +
+      "caso de alguien, así que mantén esa línea clara y " +
+      "ensayada. El más lento es una admisión que rebasa a las " +
+      "abogadas y abogados: una lista de espera de gente " +
+      "desesperada sin abogado en la sala rompe la confianza más " +
+      "rápido que nunca haber abierto.",
+    pairsWith: ["tenant-union", "court-support", "newcomer-translation-network"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Aliense con abogadas y abogados y ayuda legal",
@@ -6529,6 +8294,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un sistema de admisión, un listado de personas voluntarias y recursos, personas coordinadoras y un directorio maestro. El centro guarda información sensible sobre la vida de vecinas y vecinos — recojan sólo lo necesario, cuídenla bien y compartan los detalles únicamente con quienes los necesitan para ayudar.",
     setupHours: 27,
     defaultCategory: "organizing",
+    firstSteps:
+      "El centro coordina proyectos, así que empieza sentándote " +
+      "con quien lidera cada uno: qué solicitudes reciben, qué " +
+      "quisieran poder derivar y cómo quieren recibir los " +
+      "emparejamientos. Acuerden juntas una sola admisión y una " +
+      "base común de privacidad — un centro impuesto a los " +
+      "proyectos termina siendo rodeado; uno construido con ellos " +
+      "se vuelve la puerta de entrada.",
+    commonPitfalls:
+      "Los centros mueren de dos formas: la admisión se llena de " +
+      "solicitudes que nadie sigue hasta el final, y se corre la " +
+      "voz de que llamar no sirve de nada; o una coordinadora " +
+      "heroica sostiene todos los hilos hasta quemarse y el " +
+      "programa entero pierde la memoria. Da seguimiento a cada " +
+      "solicitud hasta un cierre real, rota los turnos desde " +
+      "temprano y recoge menos información de la que crees " +
+      "necesitar.",
+    pairsWith: ["emergency-preparedness", "rides-transportation", "solidarity-fund"],
+    learnMore: ["post-something", "claim-post"],
     tasks: [
       {
         name: "Armen una única admisión para necesidades y ofrecimientos",
@@ -6597,6 +8381,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 20,
     defaultCategory: "other",
     suggestsWorkDays: true,
+    firstSteps:
+      "Todavía no compres nada: tu primer paso es una " +
+      "conversación con el programa de reducción de daños " +
+      "establecido más cercano y con las personas que realmente " +
+      "usan estos insumos — te dirán qué hace falta, qué ya está " +
+      "cubierto y cómo llegar sin juicios. Haz que tu equipo base " +
+      "complete la capacitación en respuesta a sobredosis y " +
+      "confirma la ley local sobre tiras y jeringas antes de " +
+      "empacar un solo kit.",
+    commonPitfalls:
+      "Esto sale mal cuando llegan como extraños — repartiendo " +
+      "donde no tienen relaciones, o sumando sermones y " +
+      "condiciones que enseñan a la gente a evitarlos — y cuando " +
+      "se adelantan a la ley o a su capacitación, lo que puede " +
+      "costarle a una persona voluntaria un cargo por " +
+      "parafernalia. Aquí, ir despacio y acompañados le gana " +
+      "siempre a ir rápido y solos.",
+    pairsWith: ["community-first-aid-training", "mental-health-peer-support"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Capacítense y encuentren una organización aliada de reducción de daños",
@@ -6655,6 +8458,25 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Personas voluntarias confiables, un calendario de audiencias y vínculos con las defensorías públicas. El apoyo en cortes es presencia y logística, no asesoría legal — las personas voluntarias nunca opinan sobre el caso y siempre siguen la pauta del abogado o abogada de la propia persona. Las salas de audiencia tienen reglas de conducta estrictas, así que quien asista debe conocerlas al dedillo.",
     setupHours: 16,
     defaultCategory: "other",
+    firstSteps:
+      "Empieza con las personas dueñas de esas fechas: el apoyo " +
+      "solo ocurre por invitación de quien enfrenta la corte, y " +
+      "en sintonía con su abogada o abogado. Preséntense primero " +
+      "ante la defensoría pública y los grupos de observación de " +
+      "cortes o fondos de fianza que ya estén en el juzgado, y " +
+      "deja que ellos te digan qué audiencias necesitan compañía " +
+      "y cómo ser útiles sin tocar jamás el lado legal.",
+    commonPitfalls:
+      "El daño aquí viene de actuar por cuenta propia: una " +
+      "voluntaria \"explicando\" un acuerdo en el pasillo, " +
+      "detalles del caso comentados donde un fiscal puede oír, " +
+      "una reacción visible desde la galería que irrite al juez — " +
+      "cualquiera puede perjudicar justo a la persona por la que " +
+      "vinieron. El fracaso más silencioso es la logística: una " +
+      "fecha sin confirmar o un aventón que falla puede " +
+      "significar una audiencia perdida y una orden de arresto.",
+    pairsWith: ["legal-aid-clinic", "reentry-support", "rides-transportation"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Conecten con defensorías y grupos de corte existentes",
@@ -6714,6 +8536,29 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     setupHours: 21,
     defaultCategory: "other",
     suggestsWorkDays: true,
+    firstSteps:
+      "El sitio anfitrión es la relación de la que todo depende, " +
+      "así que empieza ahí: siéntate con la bibliotecaria, el " +
+      "pastor o quien administra el salón y resuelvan juntas las " +
+      "preguntas incómodas — horarios, llaves, seguro, qué pasa " +
+      "si alguien necesita quedarse de noche — antes de que el " +
+      "primer pronóstico las fuerce. Al mismo tiempo, pregunta a " +
+      "los equipos de trabajo en calle y al personal de edificios " +
+      "de personas mayores quién necesita de verdad el refugio, " +
+      "para que la ubicación y los horarios le queden a la gente " +
+      "para la que es.",
+    commonPitfalls:
+      "Este proyecto fracasa en la brecha entre el plan y el " +
+      "clima: un umbral que nadie terminó de acordar, y el centro " +
+      "abre un día tarde, o una pregunta de responsabilidad civil " +
+      "que quedó vaga hasta que alguien se desmaya y el sitio " +
+      "anfitrión se retira para siempre. Dejen el umbral de " +
+      "activación por escrito, hagan una apertura de práctica " +
+      "antes de la temporada y asegúrate de que cada anfitrión " +
+      "sepa llamar temprano a los servicios de emergencia, no al " +
+      "final.",
+    pairsWith: ["emergency-preparedness", "community-wood-bank", "laundry-shower-access"],
+    learnMore: ["community-events"],
     tasks: [
       {
         name: "Encuentra un sitio anfitrión con climatización",
@@ -6779,6 +8624,24 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "Un teléfono o una grabadora sencilla, un lugar tranquilo, formularios de consentimiento y un sitio seguro para guardar los archivos. Las grabaciones son datos personales — cada participante es dueña o dueño de su historia, decide dónde se comparte y puede cambiar de opinión más adelante. Nada se hace público sin su visto bueno por escrito.",
     setupHours: 10,
     defaultCategory: "education",
+    firstSteps:
+      "Empieza con una persona mayor que confíe en ti y " +
+      "pregúntale si compartiría una historia — esa primera " +
+      "grabación te enseña más que cualquier plan, y su palabra " +
+      "te abre la puerta con la siguiente narradora. Antes de " +
+      "apretar grabar con cualquiera, repasen juntos el " +
+      "formulario de consentimiento y pregúntale qué quisiera que " +
+      "pase con la grabación; esa conversación es el proyecto.",
+    commonPitfalls:
+      "La forma en que esto lastima a alguien es una historia que " +
+      "viaja más lejos de lo que su narradora acordó — un clip " +
+      "publicado, un nombre añadido, un detalle que era solo para " +
+      "ti. La forma en que muere en silencio es con grabaciones " +
+      "acumulándose sin etiquetar en el teléfono de una sola " +
+      "persona hasta que un aparato perdido borra años de voces; " +
+      "etiqueta y respalda cada sesión la misma semana.",
+    pairsWith: ["neighborhood-care-network", "digital-literacy"],
+    learnMore: ["who-sees-what"],
     tasks: [
       {
         name: "Escribe un formulario de consentimiento en lenguaje sencillo",

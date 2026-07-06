@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Project templates carry real context: first steps, honest
+  pitfalls, related templates, and Learn links.** Every one of the
+  54 templates (both locales) now answers the questions the task
+  list can't: **First steps** — who to talk to before any task
+  starts, always leading with the people served and the orgs
+  already doing adjacent work; **What trips people up** — the
+  specific way each project actually dies or hurts someone
+  (fridges die from unowned cleaning rotas; court support harms by
+  freelancing; free stores drown in unsorted donations before they
+  starve); **Pairs well with** — one to three complementary
+  templates, tappable; and **Learn more** — links into the in-app
+  FAQ, labeled by the FAQ question in the viewer's language so
+  they're translated for free and CI-pinned against the real help
+  anchors. All of it renders in a "Before you start" section of
+  the selected-template banner — the decision point where the
+  sensitive templates' boundary guidance is finally readable.
+  Structural references (pairsWith, learnMore) are locale-invariant
+  and test-enforced: a dangling template id or FAQ anchor fails CI.
+
 - **Recurring project tasks actually recur.** A task can now carry a
   real cadence (each session / monthly / per event / each cycle):
   the moment a round is confirmed, a fresh open copy appears at the
