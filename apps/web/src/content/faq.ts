@@ -278,9 +278,13 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "Everyone in your community node can see your posts, your " +
             "display name, your neighborhood (if you set one), and your " +
-            "exchange history. Other communities can see federated " +
-            "posts you publish, but they can't see your balance or " +
-            "your activity history.",
+            "exchange history. Peer communities receive the signed " +
+            "records you publish — posts, confirmed exchanges, events — " +
+            "under your public key, not your display name. Because " +
+            "exchanges federate, a peer node can see your key's " +
+            "exchange activity and work out its balance; what never " +
+            "leaves your community are RSVPs, shift signups, project " +
+            "tasks, blocks, drafts, and messages.",
           "Direct messages are different: they're end-to-end encrypted " +
             "between your device and the other person's, so only the " +
             "two of you can read them — not the node, not other " +

@@ -286,9 +286,14 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Todo el mundo en el nodo de tu comunidad puede ver tus " +
             "publicaciones, tu nombre visible, tu zona (si pusiste una) y " +
-            "tu historial de intercambios. Las otras comunidades pueden " +
-            "ver las publicaciones federadas que publicas, pero no pueden " +
-            "ver tu saldo ni tu historial de actividad.",
+            "tu historial de intercambios. Las comunidades vecinas " +
+            "reciben los registros firmados que publicas — publicaciones, " +
+            "intercambios confirmados, eventos — bajo tu llave pública, " +
+            "no tu nombre visible. Como los intercambios se federan, un " +
+            "nodo vecino puede ver la actividad de intercambios de tu " +
+            "llave y deducir su saldo; lo que nunca sale de tu comunidad " +
+            "son las confirmaciones de asistencia, los turnos, las tareas " +
+            "de proyectos, los bloqueos, los borradores y los mensajes.",
           "Los mensajes directos son distintos: están cifrados de extremo " +
             "a extremo entre tu dispositivo y el de la otra persona, así " +
             "que solo ustedes dos pueden leerlos — ni el nodo, ni las " +

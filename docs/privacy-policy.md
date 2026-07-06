@@ -63,8 +63,9 @@ the community node or to any third party:
   do **not** federate.
 - Your **achievements**, settings, onboarding state, theme, and
   preference flags.
-- Your **personal index** for message search — built locally on
-  demand, never persisted in plaintext.
+- Message search works by **decrypting and scanning on the spot**
+  when you type a query — no search index is ever built or
+  persisted, in plaintext or otherwise.
 - **Member blocks.** A list of members you have chosen to block,
   along with any private notes you've written for your own
   reference, your governance-visibility choice per block, and the
@@ -91,7 +92,8 @@ types are:
 | Vouch for another member | `Vouch` | Your public key, their public key, timestamp |
 | Claim a post | `Claim` | Your public key, the post id, claim time |
 | Comment on a task | `TaskComment` | Your public key, project + task ids, the comment body |
-| Send an invite | `Invite` | Your public key (as inviter), invite code, expiry |
+| Someone redeems your invite | `RedemptionReceipt` | Signed by the **new member** at redemption: the invite id, inviter and new-member public keys, redemption time. The open invite itself never leaves your device — there is deliberately no invite endpoint on the node |
+| Revoke an invite you issued | `InviteRevocation` | Your public key (as inviter), the invite id, revocation time, signature |
 | Invite someone to co-organize a project | `CoOrganizerInvitation`, `CoOrganizerInvitationResponse`, `CoOrganizerInvitationRevocation` | Inviter and invitee public keys, project id, decision (accept / decline) or revocation, timestamps |
 | Create a community event | `Event` | Title, description, category, location (free text — no GPS pin), start time, optional end time, optional capacity, organizer public key, signature |
 | Cancel a community event you organized | `EventCancellation` | Event id, optional reason text, cancellation time, organizer public key, signature |

@@ -69,8 +69,10 @@ npm install
 npm run build
 ```
 
-The output goes to `apps/web/dist/` — five files and some hashed
-assets, about 400 KB total. That's what you serve.
+The output goes to `apps/web/dist/` — an `index.html`, hashed JS
+chunks (the main one is ~1.5 MB raw / ~430 KB gzip), CSS, fonts,
+and the service-worker precache manifest; roughly 2 MB on disk
+all-in. That's what you serve.
 
 ### First-time install on a fresh Debian / Ubuntu host
 
@@ -277,6 +279,9 @@ Two things to know:
 | `OPERATOR_CONTACT` | unset | Preferred operator contact (Matrix room, email, URL) |
 | `PEER_NODE_URLS` | unset | Comma-separated base URLs of nodes to pull from. Each must be `http://` or `https://`; trailing slashes are stripped |
 | `PEER_PULL_INTERVAL_MS` | `300000` (5 min) | How often the pull worker hits each peer |
+| `NODE_SYSTEM_SECRET_KEY` | unset | Base64 Ed25519 secret for the §4 auto-confirm system key. Unset = auto-confirm signing off (the server warns loudly if a window is configured with no key). Generate via `scripts/generate-system-key.mjs`; rotation procedure in `system-key-rotation.md` |
+| `NODE_SYSTEM_KEY_HISTORY` | unset | JSON array of retired system public keys (`[{"publicKey":"…","retiredAt":…}]`). Append-only across rotations — peers verify old auto-confirmed records against it. The server refuses to boot on a malformed entry |
+| `AUTO_CONFIRM_MIN_HOURS` | `0` | Server-side floor under the community's `autoConfirmHours` setting. `0` = no auto-confirm via this node regardless of community config; also the safe way to disable auto-confirm without unpublishing key history |
 
 The rate limiter uses a non-reversible bucket id (FNV-1a hash of the
 IP, modulo 1024) so client IPs never reach memory or logs even
@@ -363,7 +368,7 @@ storing on third-party infrastructure.
 | Federation between nodes | Shipped (§6 pull loop: exchanges, vouches, posts, claims, task comments, events, invitations) | Configure `PEER_NODE_URLS`; proposals/disputes remain local-only by design |
 | Direct messaging | Shipped in the PWA (end-to-end encrypted; the node never sees plaintext) | — |
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
-| Posts / vouches / invites endpoints | Pending | Members exchange invite tokens out of band |
+| Open-invite server storage | Intentionally absent | Invites never cross any wire (the old `POST/GET /invites` surface was removed); only signed redemption receipts and revocations federate |
 | Automated dependency scanning | Manual | Run `npm audit` weekly; subscribe to advisories |
 
 Each of these is tracked in the [Threat Model](threat-model.md) §7.
@@ -431,5 +436,5 @@ node down.
 
 ---
 
-*This guide will grow as Agent 3 lands the proper server. Flag
-anything here that's already stale: <https://github.com/ardentcascades/understoria/issues>.*
+*Flag anything here that's stale:
+<https://github.com/ardentcascades/understoria/issues>.*

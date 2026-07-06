@@ -87,16 +87,20 @@ export const MEMBER_GUIDE: readonly GuideSection[] = [
     id: "governance",
     title: "Decisions and conflict",
     body: [
-      "Decisions in the community are made together, not by admins. " +
-        "Currently this happens on whatever channel your community " +
-        "uses — a meeting, a thread, a shared doc. In-app proposal and " +
-        "dispute tooling is on the roadmap.",
-      "If a moderator role exists in your community, they can issue " +
-        "warnings and temporary suspensions with two co-signatures, " +
-        "and propose permanent removals to the full group. Every " +
-        "moderation action is logged publicly.",
-      "Appeals go to a different set of members than the original " +
-        "decision. See GOVERNANCE.md for the full process.",
+      "Decisions in the community are made together, not by admins — " +
+        "there is deliberately no admin or moderator role in the app. " +
+        "Community-wide choices go through open proposals: anyone can " +
+        "raise one from Profile → Community proposals, everyone can " +
+        "see it, and it stays open for a deliberation period before " +
+        "it closes.",
+      "Conflicts about a specific exchange go through the same " +
+        "machinery: open a dispute from Profile → Community disputes " +
+        "and it becomes a proposal the community weighs in on, with " +
+        "the outcome applied automatically when it closes.",
+      "Anything the app doesn't decide — norms, meeting rhythms, how " +
+        "you talk to each other — happens on whatever channel your " +
+        "community already uses. The app records decisions; it " +
+        "doesn't replace the conversation.",
     ],
   },
   {

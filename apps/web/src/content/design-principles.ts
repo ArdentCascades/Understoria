@@ -80,7 +80,7 @@ export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
     statement:
       "Proposals stay open for a configurable period. Consensus needs time, not just a quorum.",
     example:
-      "Rapid online votes in cooperatives consistently left night-shift workers, caregivers, and members with limited internet access unheard. A 3-day minimum gives everyone a real chance to weigh in.",
+      "Rapid online votes in cooperatives consistently left night-shift workers, caregivers, and members with limited internet access unheard. The 3-day default deliberation window gives everyone a real chance to weigh in (communities can tune it, down to a 1-day floor).",
   },
   {
     id: "no-post-editing",

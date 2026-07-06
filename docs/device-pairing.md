@@ -114,9 +114,10 @@ signal in hand, not in the abstract.
 ```
 envelope = {
   version:    1,                      // version byte for forward compat
-  salt:       32 random bytes,        // fresh per transfer
+  salt:       16 random bytes,        // fresh per transfer
   nonce:      24 random bytes,        // fresh per transfer
-  ciphertext: nacl.secretbox(plaintext, nonce, scrypt(passphrase, salt))
+  ciphertext: nacl.secretbox(plaintext, nonce,
+              pbkdf2_sha256(passphrase, salt, 600k iters))
 }
 
 plaintext (JSON, parsed after unwrap) = {
@@ -137,11 +138,14 @@ plaintext (JSON, parsed after unwrap) = {
 
 ### 5.2 Why these primitives
 
-- **scrypt for passphrase wrapping** matches the existing
-  per-device passphrase wrapping in `apps/web/src/lib/passphrase.ts`.
-  Same parameters (N=32768, r=8, p=1, 32-byte derived key). Reusing
-  the helper is mandatory — a second wrapping scheme would
-  proliferate the surface a future security review has to cover.
+- **PBKDF2-HMAC-SHA256 for passphrase wrapping** — the transfer
+  envelope reuses `deriveMasterKey` from
+  `apps/web/src/lib/passphrase.ts` verbatim: PBKDF2-HMAC-SHA256 at
+  600,000 iterations (NIST current guidance), 16-byte salt, 32-byte
+  derived key. Reusing the helper is mandatory — a second wrapping
+  scheme would proliferate the surface a future security review has
+  to cover. (Earlier drafts of this note said scrypt; the shipped
+  shared helper is PBKDF2, and the doc follows the code.)
 - **NaCl secretbox** (XSalsa20-Poly1305) over the resulting key.
   Authenticated encryption end-to-end on the envelope; tampering
   with the ciphertext is detectable on unwrap.
@@ -155,7 +159,7 @@ plaintext (JSON, parsed after unwrap) = {
 
 The source device generates a **6-word BIP39-style passphrase**
 from a 2048-word wordlist. ~66 bits of entropy; combined with
-scrypt's cost, offline cracking inside the 5-minute window is not
+the 600k-iteration KDF cost, offline cracking inside the 5-minute window is not
 feasible. The member never picks this passphrase — it's generated,
 displayed, and conveyed to the destination by reading aloud or
 typing.
@@ -171,7 +175,7 @@ Specifically, we do NOT:
   The flow has to feel awkward enough that members type or read it
   rather than paste it.
 - Allow member-chosen passphrases. Weak choices would defeat the
-  scrypt cost; entropy has to be guaranteed.
+  KDF cost; entropy has to be guaranteed.
 
 ### 5.4 Sizing
 
@@ -181,7 +185,7 @@ Approximate ciphertext size:
   framing (~80) → plaintext ~376 bytes.
 - + secretbox auth tag 16, base64 inflation ~1.33x → ~520 chars
   for the ciphertext.
-- + salt 32 + nonce 24, base64 + framing → envelope ~620 chars total.
+- + salt 16 + nonce 24, base64 + framing → envelope ~600 chars total.
 
 Fits comfortably in a medium-density QR (alphanumeric ~2900 char
 ceiling). No tiling, no multi-QR sequencing.
@@ -378,7 +382,7 @@ help).
 
 On submit, the destination:
 
-1. Re-derives the scrypt key from passphrase + envelope salt.
+1. Re-derives the PBKDF2 key from passphrase + envelope salt.
 2. Calls `nacl.secretbox.open` on the ciphertext.
 3. If unwrap fails: "These words don't match. Check each one."
    (Distinct error: malformed input vs. wrong passphrase. Both

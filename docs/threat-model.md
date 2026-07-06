@@ -486,7 +486,8 @@ We are not trying to protect against:
     on top of the passphrase wrapping + expiry, not the boundary).
     Accepted residual: a synced clipboard (e.g. OS cloud
     clipboard) may relay the wrapped envelope through its vendor;
-    the envelope is scrypt-wrapped under ~66 bits of passphrase
+    the envelope is PBKDF2-wrapped (HMAC-SHA256, 600k iterations,
+    the shared `deriveMasterKey` helper) under ~66 bits of passphrase
     the vendor never sees. Still rejected: any *shareable URL*
     form of the envelope — links transit chat threads (persistent
     logs, previews, and the near-certainty the six words follow in
@@ -539,12 +540,12 @@ We are not trying to protect against:
   from members exercising the role in good faith. No new key
   material, no new public exposure. Pairs with the complementary
   self-removal fix (`fix/coorganizer-self-removal`), which addresses
-  the trapped-co-organizer half of this values gap. Until the
-  implementation PRs land (PR A data + types; PR B server
-  federation; PR C UI — see
-  `docs/co-organizer-invitations.md` §11), no signed-acceptance
-  flow exists in the codebase and this entry tracks design intent
-  only.
+  the trapped-co-organizer half of this values gap. The full flow
+  is shipped: signed invitations, responses, and revocations in
+  `apps/web/src/db/coorgInvitations.ts` with matching server routes
+  and federation pull, authority reads reconciled onto the
+  materialized signed-acceptance array, and the legacy unilateral
+  `addCoOrganizer` removed (PR #218).
 
 - **Calendar aggregation as a faster surveillance surface.**
   The community calendar (`docs/calendar.md`) collapses

@@ -24,9 +24,9 @@ changes.
 - **Keep your OS updated.** Most real-world attacks exploit bugs that
   have been patched; the people who didn't update are the ones who get
   hit.
-- **Lock the app itself** if your device is ever handed around. (In
-  settings: enable app lock — coming in a future release; for now use
-  your phone's per-app lock if supported.)
+- **Lock the app itself** if your device is ever handed around:
+  Profile → Settings → Security — set a passphrase, then "Lock now"
+  (the session also relocks when the tab closes).
 - **Trust the device, or don't open the app.** Understoria runs in
   the browser, which means it can defend against people who *don't*
   have access to your device (the threat model is built for that)
