@@ -10,8 +10,13 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import nacl from "tweetnacl";
-import { utf8encode } from "@/lib/bytes";
+import { b64decode, b64encode, randomBytes, utf8encode } from "@/lib/bytes";
 import { DEFAULT_ITERATIONS, deriveMasterKey } from "@/lib/passphrase";
+import {
+  validateDecryptedPayload,
+  type TransferPayload,
+  type UnwrapResult,
+} from "@/lib/devicePairing";
 import { readSubmitConfig } from "@/lib/nodeSubmit";
 import {
   deriveCandidateNodeUrl,
@@ -158,5 +163,261 @@ export async function fetchLinkEnvelope(
     return { kind: "found", envelope: body.envelope };
   } catch {
     return { kind: "error" };
+  }
+}
+
+// --- Tap-to-link (docs/device-pairing.md §6.7) ------------------------
+//
+// The zero-typing default. The NEW device posts a one-time X25519
+// public key as a "link request" bucketed by network address on the
+// node; the member's SIGNED-IN device sees the request appear on its
+// Add-device screen and approves with one tap, sealing the transfer
+// payload to that one-time key through the same one-shot mailbox the
+// word-relay uses. Nothing human-carried: the two-emoji badge below
+// exists for recognition ("is this MY app asking?"), not as a secret.
+
+/** How long a link request stays visible/answerable. Mirrors the
+ *  server's LINK_REQUEST_TTL_MS (routes/linkRequests.ts). Long enough
+ *  to flip apps at leisure; short enough that stale strangers'
+ *  requests age out of shared-network buckets. */
+export const LINK_REQUEST_TTL_MS = 10 * 60_000;
+
+/** How often each side polls. Chosen well under the node's default
+ *  60-req/min rate limit even with both ends polling from one
+ *  address. */
+export const LINK_POLL_INTERVAL_MS = 3000;
+
+const GRANT_CHANNEL_TAG = "understoria-link-grant-v2|";
+
+/** 64 visually distinct emoji for the recognition badge. Curated to
+ *  avoid near-twins (one canine, one feline, …) so two badges never
+ *  differ by a squint. Order is part of the wire contract — append
+ *  only, never reorder. */
+export const BADGE_EMOJI: readonly string[] = [
+  "🦊", "🐢", "🦉", "🐙", "🦔", "🐝", "🦋", "🐌",
+  "🌵", "🌻", "🍄", "🌙", "⭐", "🌈", "🔥", "❄️",
+  "🍎", "🍋", "🍇", "🥕", "🌽", "🍞", "🧀", "🥚",
+  "⚓", "🪁", "🎈", "🧭", "🔔", "🎺", "🥁", "🪕",
+  "🚲", "⛵", "🚀", "🛖", "🏔", "🌊", "🌋", "🏝",
+  "🪴", "🍂", "🌾", "🍯", "🧵", "🧶", "🪡", "🧲",
+  "🔑", "🛠", "⚙️", "🖌", "📦", "📯", "🎁", "🕯",
+  "☂️", "🥾", "🎒", "🪣", "🧺", "🪞", "🕰", "🧊",
+];
+
+/** Two-emoji recognition badge derived from a link request's public
+ *  key: the first 12 bits of SHA-512 pick two table entries. Shown on
+ *  BOTH screens so the approving member can recognize their own app
+ *  at a glance and tell simultaneous requests apart. */
+export function badgeForPubkey(pubkeyB64: string): [string, string] {
+  const digest = nacl.hash(utf8encode("understoria-link-badge-v2|" + pubkeyB64));
+  const first = digest[0] >> 2; // top 6 bits
+  const second = ((digest[0] & 0x03) << 4) | (digest[1] >> 4); // next 6
+  return [BADGE_EMOJI[first], BADGE_EMOJI[second]];
+}
+
+/** One-time keypair for a link request. X25519 (nacl.box) — the
+ *  request side never signs anything; it only needs to receive. */
+export function generateLinkKeypair(): nacl.BoxKeyPair {
+  return nacl.box.keyPair();
+}
+
+/** Mailbox channel for the grant addressed to `pubkeyB64`. Plain hash
+ *  (no KDF): the public key is high-entropy, so the channel id is
+ *  unguessable without it, and the key is not a secret to stretch. */
+export function grantChannelIdForPubkey(pubkeyB64: string): string {
+  const digest = nacl.hash(utf8encode(GRANT_CHANNEL_TAG + pubkeyB64));
+  let out = "";
+  for (const b of digest.subarray(0, 32)) out += b.toString(16).padStart(2, "0");
+  return out;
+}
+
+interface GrantEnvelope {
+  v: 2;
+  senderPub: string;
+  nonce: string;
+  box: string;
+}
+
+/**
+ * Seal a TransferPayload to a link request's public key. Fresh sender
+ * keypair per grant (sealed-box construction): the sender's secret is
+ * dropped on return, so only the request keypair's holder can open
+ * it — including against us later.
+ */
+export function sealGrant(
+  payload: TransferPayload,
+  recipientPubkeyB64: string,
+): string {
+  const recipientPub = b64decode(recipientPubkeyB64);
+  if (recipientPub.length !== nacl.box.publicKeyLength) {
+    throw new Error("sealGrant: bad recipient public key");
+  }
+  const sender = nacl.box.keyPair();
+  const nonce = randomBytes(nacl.box.nonceLength);
+  const boxed = nacl.box(
+    utf8encode(JSON.stringify(payload)),
+    nonce,
+    recipientPub,
+    sender.secretKey,
+  );
+  const envelope: GrantEnvelope = {
+    v: 2,
+    senderPub: b64encode(sender.publicKey),
+    nonce: b64encode(nonce),
+    box: b64encode(boxed),
+  };
+  return b64encode(utf8encode(JSON.stringify(envelope)));
+}
+
+/**
+ * Open a grant with the request keypair. Returns the same
+ * discriminated result as unwrapTransfer so error handling matches:
+ * `malformed_envelope` doubles as "someone posted junk to our
+ * channel" — the UI treats that as interference and re-asks with a
+ * fresh key.
+ */
+export function openGrant(
+  encoded: string,
+  keypair: nacl.BoxKeyPair,
+  now: number = Date.now(),
+): UnwrapResult {
+  let env: GrantEnvelope;
+  try {
+    env = JSON.parse(
+      new TextDecoder().decode(b64decode(encoded)),
+    ) as GrantEnvelope;
+  } catch {
+    return { ok: false, reason: "malformed_envelope" };
+  }
+  if (
+    typeof env !== "object" ||
+    env === null ||
+    env.v !== 2 ||
+    typeof env.senderPub !== "string" ||
+    typeof env.nonce !== "string" ||
+    typeof env.box !== "string"
+  ) {
+    return { ok: false, reason: "malformed_envelope" };
+  }
+  let senderPub: Uint8Array;
+  let nonce: Uint8Array;
+  let boxed: Uint8Array;
+  try {
+    senderPub = b64decode(env.senderPub);
+    nonce = b64decode(env.nonce);
+    boxed = b64decode(env.box);
+  } catch {
+    return { ok: false, reason: "malformed_envelope" };
+  }
+  if (
+    senderPub.length !== nacl.box.publicKeyLength ||
+    nonce.length !== nacl.box.nonceLength ||
+    boxed.length === 0
+  ) {
+    return { ok: false, reason: "malformed_envelope" };
+  }
+  const plaintext = nacl.box.open(boxed, nonce, senderPub, keypair.secretKey);
+  if (!plaintext) return { ok: false, reason: "malformed_envelope" };
+  return validateDecryptedPayload(plaintext, now);
+}
+
+// --- Link-request HTTP client -----------------------------------------
+
+export type PostLinkRequestResult =
+  | { kind: "ok"; cancelToken: string; expiresAt: number }
+  | { kind: "too_many" }
+  | { kind: "error" };
+
+export async function postLinkRequest(
+  apiBase: string,
+  pubkeyB64: string,
+  fetchImpl: typeof fetch | undefined = globalThis.fetch,
+): Promise<PostLinkRequestResult> {
+  if (!fetchImpl) return { kind: "error" };
+  try {
+    const res = await fetchImpl(`${apiBase}/link-request`, {
+      method: "POST",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pubkey: pubkeyB64 }),
+    });
+    if (res.status === 429) return { kind: "too_many" };
+    if (!res.ok) return { kind: "error" };
+    const body = (await res.json()) as {
+      cancelToken?: unknown;
+      expiresAt?: unknown;
+    };
+    if (
+      typeof body.cancelToken !== "string" ||
+      typeof body.expiresAt !== "number"
+    ) {
+      return { kind: "error" };
+    }
+    return {
+      kind: "ok",
+      cancelToken: body.cancelToken,
+      expiresAt: body.expiresAt,
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+export interface PendingLinkRequest {
+  pubkey: string;
+  createdAt: number;
+}
+
+export type ListLinkRequestsResult =
+  | { kind: "ok"; requests: PendingLinkRequest[] }
+  | { kind: "error" };
+
+/** The signed-in side's poll: "anything asking from my network?" */
+export async function listLinkRequests(
+  apiBase: string,
+  fetchImpl: typeof fetch | undefined = globalThis.fetch,
+): Promise<ListLinkRequestsResult> {
+  if (!fetchImpl) return { kind: "error" };
+  try {
+    const res = await fetchImpl(`${apiBase}/link-request`, {
+      method: "GET",
+      credentials: "omit",
+    });
+    if (!res.ok) return { kind: "error" };
+    const body = (await res.json()) as { requests?: unknown };
+    if (!Array.isArray(body.requests)) return { kind: "error" };
+    const requests: PendingLinkRequest[] = [];
+    for (const r of body.requests as Array<{
+      pubkey?: unknown;
+      createdAt?: unknown;
+    }>) {
+      if (typeof r?.pubkey === "string" && typeof r?.createdAt === "number") {
+        requests.push({ pubkey: r.pubkey, createdAt: r.createdAt });
+      }
+    }
+    return { kind: "ok", requests };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/** Best-effort cleanup when the requesting screen is cancelled or the
+ *  import completes — failures are ignored (TTL cleans up anyway). */
+export async function cancelLinkRequest(
+  apiBase: string,
+  pubkeyB64: string,
+  cancelToken: string,
+  fetchImpl: typeof fetch | undefined = globalThis.fetch,
+): Promise<void> {
+  if (!fetchImpl) return;
+  try {
+    await fetchImpl(`${apiBase}/link-request/cancel`, {
+      method: "POST",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pubkey: pubkeyB64, cancelToken }),
+    });
+  } catch {
+    // TTL is the real cleanup.
   }
 }

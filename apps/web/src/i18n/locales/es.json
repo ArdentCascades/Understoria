@@ -9,7 +9,38 @@
   },
   "addDevice": {
     "title": "Vincular otro dispositivo",
-    "subtitle": "Usa la misma identidad en un segundo dispositivo. La transferencia ocurre localmente — ningún servidor ve tu clave.",
+    "listen": {
+      "starting": "Buscando tu nodo comunitario…",
+      "emptyTitle": "Todavía nada pide vincularse.",
+      "emptyBody": "En tu dispositivo nuevo, abre Understoria y elige \"Traer mi identidad\". Aparecerá aquí solo — mantén esta página abierta.",
+      "listening": "Escuchando…",
+      "multiWarning": "Más de un dispositivo está pidiendo. Aprueba SOLO el que tenga los emoji que ves en la pantalla frente a ti. Si ninguno coincide, no apruebes ninguno.",
+      "requestTitle": "Un dispositivo pide vincularse",
+      "requestBody": "Vincular le entrega a ese dispositivo tu identidad completa — actuará como tú. Revisa que los emoji de arriba coincidan con la pantalla de tu dispositivo nuevo.",
+      "askedJustNow": "pidió hace un momento",
+      "askedMinutesAgo_one": "pidió hace {{count}} minuto",
+      "askedMinutesAgo_other": "pidió hace {{count}} minutos",
+      "staleHint": "si tu app muestra otros emoji, toca 'pedir de nuevo' ahí y usa el más reciente",
+      "linkIt": "Vincularlo",
+      "safetyLine": "Solo vincula un dispositivo que tengas en la mano. ¿No estás vinculando nada ahora? No toques — alguien en tu red podría estar probando suerte.",
+      "badgeAriaLabel": "Emoji de reconocimiento de esta solicitud de vinculación",
+      "noNode": "Este dispositivo no puede contactar tu nodo comunitario, así que vincular con un toque no está disponible ahora. El método QR funciona sin ningún servidor.",
+      "useQr": "Mostrar un QR",
+      "whatMoves": "Qué pasa al dispositivo nuevo (y qué no)"
+    },
+    "otherWays": {
+      "link": "Otras formas de vincular",
+      "title": "Otras formas de vincular",
+      "wordsTitle": "¿Vinculas un dispositivo que está en otro lugar?",
+      "wordsBody": "Consigue un código de 6 palabras para leer en voz alta — quien tenga el dispositivo nuevo las escribe ahí. Requiere tu nodo comunitario.",
+      "qrTitle": "¿Sin servidor comunitario, o prefieres no involucrarlo?",
+      "qrBody": "Muestra un QR que el dispositivo nuevo escanea. No se guarda nada en ninguna parte — los dos dispositivos deben estar en la misma habitación."
+    },
+    "sent": {
+      "title": "Enviado.",
+      "body": "Vuelve a la app — inicia sesión sola. Puedes salir de esta página."
+    },
+    "subtitle": "Usa la misma identidad en un segundo dispositivo. La transferencia va sellada de extremo a extremo — ningún servidor puede leerla.",
     "comparison": {
       "transfersTitle": "Lo que viaja al nuevo dispositivo",
       "transfers": {
@@ -95,6 +126,38 @@
     "title": "Vincular este dispositivo",
     "subtitle": "Trae tu identidad desde el dispositivo que la tiene.",
     "subtitleSamePhone": "Trae tu identidad desde el navegador de este teléfono.",
+    "wait": {
+      "starting": "Preparando…",
+      "badgeCaption": "Tus emoji de reconocimiento",
+      "badgeAriaLabel": "Emoji de reconocimiento de la solicitud de este dispositivo",
+      "title": "Aprueba desde donde tienes tu sesión",
+      "step1": "En el dispositivo que tiene tu identidad, abre Understoria.",
+      "samePhoneStep1": "Abre Understoria en tu navegador — donde tienes tu sesión.",
+      "step2": "Ve a Perfil → \"Vincular otro dispositivo\".",
+      "step3": "Toca \"Vincularlo\" cuando veas {{badge}}.",
+      "waitingLine": "Esperando tu aprobación… esta solicitud caduca en {{mmss}}.",
+      "expired": "Esta solicitud caducó.",
+      "askAgain": "Pedir de nuevo",
+      "noNode": "Este dispositivo no puede contactar un nodo comunitario, así que vincular con un toque no está disponible. El método QR funciona sin nodo.",
+      "useQr": "Usar el método QR",
+      "busyNode": "Ya hay varios dispositivos pidiendo vincularse desde tu red. Espera un minuto a que caduquen y vuelve a intentar.",
+      "nodeError": "El servidor de tu comunidad no responde. Revisa tu conexión e intenta otra vez.",
+      "interfered": "Algo interfirió con la transferencia — lo que llegó no venía de tu aprobación, o llegó dañado. Nada de tu identidad quedó expuesto. Pide de nuevo — tendrás emoji frescos."
+    },
+    "linkIn": {
+      "title": "Ya estás dentro como {{name}}.",
+      "notMe": "Esta no soy yo",
+      "notMeConfirmBody": "Si ese nombre no es tuyo, este dispositivo acaba de recibir la identidad de otra persona — probablemente alguien en tu red haciendo travesuras. Borrar limpia este dispositivo por completo (todavía no tenía nada tuyo) para que empieces de nuevo.",
+      "wipeButton": "Borrar este dispositivo y empezar de nuevo"
+    },
+    "otherWays": {
+      "link": "Otras formas de vincular",
+      "title": "Otras formas de vincular",
+      "wordsTitle": "¿Tu otro dispositivo está en otro lugar?",
+      "wordsBody": "En ese dispositivo, elige \"Otras formas de vincular\" y consigue un código de 6 palabras — luego escribe las palabras aquí.",
+      "qrTitle": "¿Sin servidor comunitario, o no confías en él?",
+      "qrBody": "Escanea un QR directo de la pantalla del otro dispositivo. Nada toca ningún servidor."
+    },
     "link": {
       "directionsTitle": "Consigue las 6 palabras del dispositivo que tiene tu identidad.",
       "step1": "En ese dispositivo, abre Perfil, luego \"Vincular otro dispositivo\" y Continuar.",
@@ -2187,7 +2250,7 @@
       "title": "La app ya está en tu pantalla de inicio",
       "intro": "Una pregunta antes de empezar:",
       "bringTitle": "Ya uso Understoria en el navegador de este teléfono",
-      "bringBody": "La app instalada empieza con su propio almacenamiento vacío, así que no ve tu sesión del navegador. Trae tu identidad — escribe 6 palabras, toma un minuto.",
+      "bringBody": "La app instalada empieza con su propio almacenamiento vacío, así que no ve tu sesión del navegador. Trae tu identidad — dos toques, sin escribir nada, menos de un minuto.",
       "newTitle": "Soy nueva aquí — empezar de cero",
       "newBody": "Haz el recorrido corto y luego crea tu identidad."
     },

@@ -14,11 +14,22 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import {
+  BADGE_EMOJI,
+  badgeForPubkey,
   deriveLinkChannelId,
   fetchLinkEnvelope,
+  generateLinkKeypair,
+  grantChannelIdForPubkey,
+  listLinkRequests,
   normalizeLinkCode,
+  openGrant,
+  postLinkRequest,
   publishLinkEnvelope,
+  sealGrant,
 } from "./deviceLink";
+import { b64encode } from "./bytes";
+import { buildTransferPayload } from "./devicePairing";
+import nacl from "tweetnacl";
 
 // PBKDF2 at production iterations is deliberately slow; tests use a
 // low count — determinism, not cost, is under test here.
@@ -138,5 +149,146 @@ describe("fetchLinkEnvelope", () => {
         throwing as unknown as typeof fetch,
       ),
     ).toEqual({ kind: "error" });
+  });
+});
+
+// --- Tap-to-link primitives -------------------------------------------
+
+function samplePayload(overrides: { expiresAt?: number } = {}) {
+  const identity = nacl.sign.keyPair();
+  const payload = buildTransferPayload({
+    secretKey: identity.secretKey,
+    publicKey: identity.publicKey,
+    profile: {
+      displayName: "Rosa P.",
+      skills: ["cooking"],
+      availability: "evenings",
+      availabilityChips: [],
+      locationZone: "north",
+    },
+    expiryMs: 15 * 60_000,
+  });
+  return overrides.expiresAt !== undefined
+    ? { ...payload, expiresAt: overrides.expiresAt }
+    : payload;
+}
+
+describe("badgeForPubkey", () => {
+  it("uses a table of 64 unique emoji", () => {
+    expect(BADGE_EMOJI.length).toBe(64);
+    expect(new Set(BADGE_EMOJI).size).toBe(64);
+  });
+
+  it("is deterministic and key-dependent", () => {
+    const a = b64encode(generateLinkKeypair().publicKey);
+    const b = b64encode(generateLinkKeypair().publicKey);
+    expect(badgeForPubkey(a)).toEqual(badgeForPubkey(a));
+    // 12 bits of badge space — two random keys COULD collide, but
+    // the derivation must at least depend on the input; assert via
+    // channel ids, which are full-width.
+    expect(grantChannelIdForPubkey(a)).not.toBe(grantChannelIdForPubkey(b));
+    for (const e of badgeForPubkey(a)) expect(BADGE_EMOJI).toContain(e);
+  });
+});
+
+describe("grantChannelIdForPubkey", () => {
+  it("emits 64 lowercase hex chars, stable per key", () => {
+    const pk = b64encode(generateLinkKeypair().publicKey);
+    const id = grantChannelIdForPubkey(pk);
+    expect(id).toMatch(/^[0-9a-f]{64}$/);
+    expect(grantChannelIdForPubkey(pk)).toBe(id);
+  });
+});
+
+describe("sealGrant / openGrant", () => {
+  it("round-trips a transfer payload to the request keypair", () => {
+    const kp = generateLinkKeypair();
+    const payload = samplePayload();
+    const sealed = sealGrant(payload, b64encode(kp.publicKey));
+    const opened = openGrant(sealed, kp);
+    expect(opened.ok).toBe(true);
+    if (opened.ok) {
+      expect(opened.payload.profile.displayName).toBe("Rosa P.");
+      expect(opened.payload.publicKey).toBe(payload.publicKey);
+    }
+  });
+
+  it("cannot be opened by a different keypair", () => {
+    const kp = generateLinkKeypair();
+    const other = generateLinkKeypair();
+    const sealed = sealGrant(samplePayload(), b64encode(kp.publicKey));
+    const opened = openGrant(sealed, other);
+    expect(opened).toEqual({ ok: false, reason: "malformed_envelope" });
+  });
+
+  it("rejects tampered ciphertext and junk", () => {
+    const kp = generateLinkKeypair();
+    const sealed = sealGrant(samplePayload(), b64encode(kp.publicKey));
+    const parsed = JSON.parse(atob(sealed)) as { box: string };
+    parsed.box = parsed.box.slice(0, -4) + "AAAA";
+    const tampered = btoa(JSON.stringify(parsed));
+    expect(openGrant(tampered, kp).ok).toBe(false);
+    expect(openGrant("complete-garbage", kp).ok).toBe(false);
+  });
+
+  it("rejects an expired payload even when decryption succeeds", () => {
+    const kp = generateLinkKeypair();
+    const sealed = sealGrant(
+      samplePayload({ expiresAt: Date.now() - 1000 }),
+      b64encode(kp.publicKey),
+    );
+    expect(openGrant(sealed, kp)).toEqual({ ok: false, reason: "expired" });
+  });
+});
+
+describe("link-request client", () => {
+  it("posts the pubkey and maps the created response", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({ ok: true, cancelToken: "tok", expiresAt: 99 }),
+        { status: 201 },
+      ),
+    );
+    const res = await postLinkRequest(
+      "https://node.example/api",
+      "PUBKEY",
+      fetchImpl as unknown as typeof fetch,
+    );
+    expect(res).toEqual({ kind: "ok", cancelToken: "tok", expiresAt: 99 });
+    const [url] = fetchImpl.mock.calls[0] as [string];
+    expect(url).toBe("https://node.example/api/link-request");
+  });
+
+  it("maps 429 to too_many and failures to error", async () => {
+    const busy = vi.fn().mockResolvedValue(new Response("", { status: 429 }));
+    expect(
+      await postLinkRequest("https://n/api", "PK", busy as unknown as typeof fetch),
+    ).toEqual({ kind: "too_many" });
+    const down = vi.fn().mockRejectedValue(new Error("offline"));
+    expect(
+      await postLinkRequest("https://n/api", "PK", down as unknown as typeof fetch),
+    ).toEqual({ kind: "error" });
+  });
+
+  it("lists pending requests, dropping malformed entries", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          requests: [
+            { pubkey: "A", createdAt: 1 },
+            { pubkey: 42, createdAt: "bad" },
+          ],
+        }),
+        { status: 200 },
+      ),
+    );
+    const res = await listLinkRequests(
+      "https://n/api",
+      fetchImpl as unknown as typeof fetch,
+    );
+    expect(res).toEqual({
+      kind: "ok",
+      requests: [{ pubkey: "A", createdAt: 1 }],
+    });
   });
 });

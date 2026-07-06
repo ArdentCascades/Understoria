@@ -10,6 +10,29 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Tap-to-link: adding a device is now two taps and zero typing.**
+  The new device shows two emoji and waits; on the device that has
+  your identity, Profile → Add another device sees the ask appear by
+  itself — check the emoji match, tap "Link it," flip back, and the
+  new device greets you by name. No QR, no camera, no clipboard, no
+  words, no fingerprint quiz, no forced lock-passphrase (locking
+  stays in Settings → Security). Under the hood the new device
+  raises one throwaway public key on the community node, bucketed by
+  a salted fold of its network address for 10 minutes; your tap
+  seals your identity end-to-end to that key through the existing
+  one-shot mailbox. Nothing on either screen is sensitive, and no
+  identity moves without your explicit tap on the device you already
+  trust. Honest costs, in the threat model and the new FAQ entry
+  ("What should I watch for when linking devices?"): someone on your
+  network could surface a look-alike ask (the emoji badge, request
+  age, and explicit-choice list are the guards) or slip a junk
+  identity to the waiting device (the "You're in as {name}" screen
+  plus a two-tap wipe is the guard), and tap-to-link trusts your
+  community's own server during those minutes — members who don't
+  extend that trust keep the QR method, one tap away under "Other
+  ways to link," alongside the spoken 6-word code for faraway
+  devices.
+
 - **Device linking, Signal-style: type six words, done.** Adding a
   device no longer involves QR codes, cameras, or copy-paste. The
   device with your identity shows six words; the new device asks

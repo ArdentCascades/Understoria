@@ -193,21 +193,44 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "new-device",
         question: "How do I move to a new device?",
         answer: [
-          "On the device that already has your identity, go to " +
-            "Profile → Add another device. It shows six words. On the " +
-            "new device, pick the pairing option on the welcome screen " +
-            "and type those six words, in order — that's the whole " +
-            "transfer. The words are good for 15 minutes and work " +
-            "exactly once; your community node relays the encrypted " +
-            "bundle but can never read it. (No node, or offline? " +
-            "There's a QR option one tap away that goes device to " +
-            "device with nothing stored anywhere.)",
+          "Nothing to type. On the new device, open Understoria and " +
+            "choose 'Bring my identity over' — it shows two emoji and " +
+            "waits. On the device that already has your identity, go " +
+            "to Profile → Add another device: the ask appears there by " +
+            "itself. Check the emoji match, tap 'Link it,' and the new " +
+            "device signs itself in. Both devices need to be on the " +
+            "same network (on one phone they always are). Somewhere " +
+            "else, or no community server? 'Other ways to link' has a " +
+            "spoken 6-word code and a QR that skips servers entirely.",
           "Two things don't come along: your message history (messages " +
             "are encrypted to each device's own keys, so they stay " +
             "where they were received) and per-device settings like " +
             "theme and text size. Everything that lives on the shared " +
             "community record — posts, exchanges, vouches — shows up " +
             "on the new device through the normal sync.",
+        ],
+      },
+      {
+        id: "link-safety",
+        question: "What should I watch for when linking devices?",
+        answer: [
+          "Three simple habits keep linking safe. First: only tap " +
+            "'Link it' when YOU are holding the device that's asking, " +
+            "and the two emoji on your screen match the two on its " +
+            "screen. If an ask appears when you're not linking " +
+            "anything, ignore it — someone on your network may be " +
+            "trying their luck, and nothing happens unless you tap.",
+          "Second: after the new device signs in, glance at the name " +
+            "it greets you with. If it isn't you, someone slipped " +
+            "their own identity into your transfer — nothing of yours " +
+            "was taken, and the 'This isn't me' button wipes the " +
+            "device clean so you can start over.",
+          "Third, the honest fine print: tap-to-link runs through " +
+            "your community's own server, which relays only sealed " +
+            "data it cannot read — but if you don't trust whoever " +
+            "runs that server, use the QR method under 'Other ways " +
+            "to link' instead. The QR goes screen-to-camera with no " +
+            "server involved at all.",
         ],
       },
     ],

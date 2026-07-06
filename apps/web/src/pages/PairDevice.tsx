@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -30,11 +30,19 @@ import {
   type TransferPayload,
 } from "@/lib/devicePairing";
 import {
+  badgeForPubkey,
+  cancelLinkRequest,
   deriveLinkChannelId,
   fetchLinkEnvelope,
+  generateLinkKeypair,
+  grantChannelIdForPubkey,
+  LINK_POLL_INTERVAL_MS,
   normalizeLinkCode,
+  openGrant,
+  postLinkRequest,
   resolveLinkApiBase,
 } from "@/lib/deviceLink";
+import { b64encode } from "@/lib/bytes";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { PairDevicePassphraseEntry } from "@/components/PairDevicePassphraseEntry";
 import { PairDeviceBootstrapReminder } from "@/components/PairDeviceBootstrapReminder";
@@ -42,6 +50,9 @@ import { DevicePairingFingerprintConfirm } from "@/components/DevicePairingFinge
 import { recordPairing } from "@/db/pairing";
 
 type Stage =
+  | "link-wait"
+  | "link-in"
+  | "other-ways"
   | "link-entry"
   | "capture"
   | "passphrase"
@@ -50,6 +61,17 @@ type Stage =
   | "bootstrap"
   | "label-destination"
   | "success-redirect";
+
+/** Sub-states of the tap-to-link waiting screen. `waiting` is the
+ *  normal case; everything else is an honest dead-end with a next
+ *  step on screen. */
+type WaitState =
+  | "starting"
+  | "waiting"
+  | "no-node"
+  | "busy-node"
+  | "node-error"
+  | "interfered";
 
 /**
  * Destination-side device-pairing flow. Reached via the Welcome
@@ -87,15 +109,38 @@ export default function PairDevicePage() {
   const [searchParams] = useSearchParams();
   const samePhone = searchParams.get("samePhone") === "1";
 
-  // Word-linking is the default entry (design doc §6.6) — the node
-  // relays the envelope, so the member types only the 6 words. The
-  // QR/capture path stays one tap away for offline communities.
-  const [stage, setStage] = useState<Stage>("link-entry");
+  // Tap-to-link is the default entry (design doc §6.7): this device
+  // raises its hand and the member approves from their signed-in
+  // device — zero typing. The word-relay and QR paths live behind
+  // "Other ways to link".
+  const [stage, setStage] = useState<Stage>("link-wait");
   const [encoded, setEncoded] = useState<string | null>(null);
   const [payload, setPayload] = useState<TransferPayload | null>(null);
   const [unwrapError, setUnwrapError] = useState<string | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
   const [linkBusy, setLinkBusy] = useState(false);
+
+  // --- Tap-to-link waiting screen state --------------------------------
+  const [waitState, setWaitState] = useState<WaitState>("starting");
+  const [badge, setBadge] = useState<[string, string] | null>(null);
+  const [requestExpiresAt, setRequestExpiresAt] = useState<number | null>(
+    null,
+  );
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  // Bumping restarts the whole ask with a fresh key + badge ("Ask
+  // again" after expiry or interference).
+  const [askAttempt, setAskAttempt] = useState(0);
+  const [importedName, setImportedName] = useState("");
+  // Two-tap arming for the "this isn't me" wipe.
+  const [wipeArmed, setWipeArmed] = useState(false);
+  // Pending request bookkeeping for best-effort withdrawal. Cleared
+  // after a successful import (already cancelled) so the unmount
+  // cleanup doesn't cancel twice.
+  const linkCancelRef = useRef<{
+    apiBase: string;
+    pubkey: string;
+    token: string;
+  } | null>(null);
   const [sessionPassphrase, setSessionPassphrase] = useState("");
   const [sessionConfirm, setSessionConfirm] = useState("");
   const [sessionError, setSessionError] = useState<string | null>(null);
@@ -131,6 +176,117 @@ export default function PairDevicePage() {
   const handleCaptured = useCallback((value: string) => {
     setEncoded(value);
     setStage("passphrase");
+  }, []);
+
+  // --- Tap-to-link lifecycle -------------------------------------------
+  // On entering link-wait (or tapping "Ask again"): find the node,
+  // raise a fresh one-time key as a link request, show its badge, and
+  // poll the grant mailbox until the member approves from their
+  // signed-in device. The grant import path skips the fingerprint and
+  // session-passphrase stages on purpose: the approval already
+  // happened on the trusted device, and locking stays available in
+  // Settings → Security.
+  useEffect(() => {
+    if (stage !== "link-wait") return;
+    let cancelled = false;
+    let pollId: number | null = null;
+    let tickId: number | null = null;
+    setWaitState("starting");
+    setBadge(null);
+    setRequestExpiresAt(null);
+
+    const run = async () => {
+      const apiBase = await resolveLinkApiBase();
+      if (cancelled) return;
+      if (!apiBase) {
+        setWaitState("no-node");
+        return;
+      }
+      const keypair = generateLinkKeypair();
+      const pubkey = b64encode(keypair.publicKey);
+      const posted = await postLinkRequest(apiBase, pubkey);
+      if (cancelled) return;
+      if (posted.kind === "too_many") {
+        setWaitState("busy-node");
+        return;
+      }
+      if (posted.kind !== "ok") {
+        setWaitState("node-error");
+        return;
+      }
+      linkCancelRef.current = {
+        apiBase,
+        pubkey,
+        token: posted.cancelToken,
+      };
+      setBadge(badgeForPubkey(pubkey));
+      setRequestExpiresAt(posted.expiresAt);
+      setWaitState("waiting");
+      tickId = window.setInterval(() => setNowTick(Date.now()), 500);
+
+      const channel = grantChannelIdForPubkey(pubkey);
+      pollId = window.setInterval(() => {
+        void (async () => {
+          if (cancelled) return;
+          const res = await fetchLinkEnvelope(apiBase, channel);
+          if (cancelled) return;
+          // not_found = still waiting; error = transient network
+          // blip — both just wait for the next tick. (Polling keeps
+          // running even past the request's expiry: an approval sent
+          // in the final seconds should still land.)
+          if (res.kind !== "found") return;
+          if (pollId !== null) {
+            window.clearInterval(pollId);
+            pollId = null;
+          }
+          const opened = openGrant(res.envelope, keypair);
+          if (!opened.ok) {
+            // Junk in our mailbox — someone posted a grant that
+            // isn't for our key (or is malformed). The one-shot row
+            // is consumed either way; honest message + fresh ask.
+            setWaitState("interfered");
+            return;
+          }
+          try {
+            await importPayload(opened.payload, nodeId, null);
+            await setCurrentMember(opened.payload.publicKey);
+            await markOnboarded();
+            setImportedName(opened.payload.profile.displayName);
+            const c = linkCancelRef.current;
+            linkCancelRef.current = null;
+            if (c) void cancelLinkRequest(c.apiBase, c.pubkey, c.token);
+            if (!cancelled) {
+              setWipeArmed(false);
+              setStage("link-in");
+            }
+          } catch {
+            if (!cancelled) setWaitState("interfered");
+          }
+        })();
+      }, LINK_POLL_INTERVAL_MS);
+    };
+    void run();
+
+    return () => {
+      cancelled = true;
+      if (pollId !== null) window.clearInterval(pollId);
+      if (tickId !== null) window.clearInterval(tickId);
+      // Withdraw the standing request when leaving the screen —
+      // best-effort; the TTL is the real cleanup. Skipped after a
+      // successful import (the ref was cleared post-cancel).
+      const c = linkCancelRef.current;
+      linkCancelRef.current = null;
+      if (c) void cancelLinkRequest(c.apiBase, c.pubkey, c.token);
+    };
+  }, [stage, askAttempt, nodeId, setCurrentMember]);
+
+  // "This isn't me" on the link-in screen: a fresh device that just
+  // imported a stranger's identity (see the junk-grant vector in
+  // docs/device-pairing.md §6.7) has nothing of its own to lose —
+  // wipe the local database entirely and restart the welcome flow.
+  const handleWipeAndStartOver = useCallback(async () => {
+    await db.delete();
+    window.location.href = "/welcome";
   }, []);
 
   // Link path: the 6 words locate the node's mailbox AND decrypt the
@@ -330,6 +486,250 @@ export default function PairDevicePage() {
         </p>
       </header>
 
+      {stage === "link-wait" && (
+        <section className="card flex flex-col gap-5">
+          {waitState === "starting" && (
+            <p className="text-sm text-moss-600 dark:text-moss-300">
+              {t("pairDevice.wait.starting")}
+            </p>
+          )}
+
+          {waitState === "waiting" && badge && (
+            <>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div
+                  aria-label={t("pairDevice.wait.badgeAriaLabel")}
+                  className="rounded-2xl bg-moss-100 px-6 py-4 text-5xl dark:bg-moss-800"
+                >
+                  <span aria-hidden="true">{badge[0]} {badge[1]}</span>
+                </div>
+                <p className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
+                  {t("pairDevice.wait.badgeCaption")}
+                </p>
+              </div>
+
+              <h2 className="page-title text-center text-base">
+                {t("pairDevice.wait.title")}
+              </h2>
+              <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+                <li>
+                  {samePhone
+                    ? t("pairDevice.wait.samePhoneStep1")
+                    : t("pairDevice.wait.step1")}
+                </li>
+                <li>{t("pairDevice.wait.step2")}</li>
+                <li>
+                  {t("pairDevice.wait.step3", {
+                    badge: `${badge[0]} ${badge[1]}`,
+                  })}
+                </li>
+              </ol>
+
+              {requestExpiresAt !== null &&
+                (nowTick < requestExpiresAt ? (
+                  <p
+                    aria-live="polite"
+                    className="text-center text-sm text-moss-600 dark:text-moss-300"
+                  >
+                    {t("pairDevice.wait.waitingLine", {
+                      mmss: formatMmss(requestExpiresAt - nowTick),
+                    })}
+                  </p>
+                ) : (
+                  <div
+                    role="status"
+                    className="flex flex-col items-center gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+                  >
+                    <p>{t("pairDevice.wait.expired")}</p>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={() => setAskAttempt((n) => n + 1)}
+                    >
+                      {t("pairDevice.wait.askAgain")}
+                    </button>
+                  </div>
+                ))}
+            </>
+          )}
+
+          {waitState === "no-node" && (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-moss-700 dark:text-moss-200">
+                {t("pairDevice.wait.noNode")}
+              </p>
+              <button
+                type="button"
+                className="btn-primary self-start"
+                onClick={() => setStage("capture")}
+              >
+                {t("pairDevice.wait.useQr")}
+              </button>
+            </div>
+          )}
+
+          {waitState === "busy-node" && (
+            <p className="text-sm text-moss-700 dark:text-moss-200">
+              {t("pairDevice.wait.busyNode")}
+            </p>
+          )}
+
+          {waitState === "node-error" && (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-moss-700 dark:text-moss-200">
+                {t("pairDevice.wait.nodeError")}
+              </p>
+              <button
+                type="button"
+                className="btn-primary self-start"
+                onClick={() => setAskAttempt((n) => n + 1)}
+              >
+                {t("common.tryAgain")}
+              </button>
+            </div>
+          )}
+
+          {waitState === "interfered" && (
+            <div
+              role="alert"
+              className="flex flex-col gap-3 rounded-xl bg-rose-50 p-4 dark:bg-rose-950/40"
+            >
+              <p className="text-sm text-rose-800 dark:text-rose-100">
+                {t("pairDevice.wait.interfered")}
+              </p>
+              <button
+                type="button"
+                className="btn-primary self-start"
+                onClick={() => setAskAttempt((n) => n + 1)}
+              >
+                {t("pairDevice.wait.askAgain")}
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2 border-t border-moss-100 pt-3 dark:border-moss-800">
+            <button
+              type="button"
+              className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+              onClick={() => setStage("other-ways")}
+            >
+              {t("pairDevice.otherWays.link")}
+            </button>
+            <button
+              type="button"
+              className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+              onClick={handleCancelToWelcome}
+            >
+              {t("common.cancel")}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {stage === "link-in" && (
+        <section className="card flex flex-col gap-4">
+          <h2 className="page-title text-base">
+            {t("pairDevice.linkIn.title", { name: importedName })}
+          </h2>
+          <p className="text-sm text-moss-600 dark:text-moss-300">
+            {t("pairDevice.bootstrap.intro")}
+          </p>
+          <ul className="ml-5 list-disc space-y-1 text-sm text-moss-700 dark:text-moss-200">
+            <li>{t("pairDevice.bootstrap.bullets.noDms")}</li>
+            <li>{t("pairDevice.bootstrap.bullets.noDrafts")}</li>
+            <li>{t("pairDevice.bootstrap.bullets.noPrefs")}</li>
+          </ul>
+          <p className="text-sm text-moss-600 dark:text-moss-300">
+            {t("pairDevice.bootstrap.outro")}
+          </p>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => {
+                setLabelDraft("");
+                setStage("label-destination");
+              }}
+            >
+              {t("pairDevice.bootstrap.continue")}
+            </button>
+          </div>
+          {/* The junk-grant escape (design doc §6.7): if the name
+              above isn't the member, this fresh device imported a
+              stranger's identity — wipe local state and start over.
+              Two taps on purpose: arm, then confirm. */}
+          {!wipeArmed ? (
+            <button
+              type="button"
+              className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+              onClick={() => setWipeArmed(true)}
+            >
+              {t("pairDevice.linkIn.notMe")}
+            </button>
+          ) : (
+            <div
+              role="alert"
+              className="flex flex-col gap-2 rounded-xl bg-rose-50 p-3 dark:bg-rose-950/40"
+            >
+              <p className="text-sm text-rose-800 dark:text-rose-100">
+                {t("pairDevice.linkIn.notMeConfirmBody")}
+              </p>
+              <button
+                type="button"
+                className="btn-secondary self-start"
+                onClick={() => {
+                  void handleWipeAndStartOver();
+                }}
+              >
+                {t("pairDevice.linkIn.wipeButton")}
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+      {stage === "other-ways" && (
+        <section className="card flex flex-col gap-4">
+          <h2 className="page-title text-base">
+            {t("pairDevice.otherWays.title")}
+          </h2>
+          <button
+            type="button"
+            onClick={() => {
+              setLinkError(null);
+              setStage("link-entry");
+            }}
+            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+          >
+            <span className="font-semibold">
+              {t("pairDevice.otherWays.wordsTitle")}
+            </span>
+            <span className="text-sm text-moss-600 dark:text-moss-300">
+              {t("pairDevice.otherWays.wordsBody")}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStage("capture")}
+            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+          >
+            <span className="font-semibold">
+              {t("pairDevice.otherWays.qrTitle")}
+            </span>
+            <span className="text-sm text-moss-600 dark:text-moss-300">
+              {t("pairDevice.otherWays.qrBody")}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+            onClick={() => setStage("link-wait")}
+          >
+            {t("common.back")}
+          </button>
+        </section>
+      )}
+
       {stage === "link-entry" && (
         <section className="card flex flex-col gap-4">
           {/* Where-do-the-words-come-from directions, phrased for the
@@ -362,7 +762,7 @@ export default function PairDevicePage() {
             onSubmit={(code) => {
               void handleSubmitLinkCode(code);
             }}
-            onCancel={handleCancelToWelcome}
+            onCancel={() => setStage("other-ways")}
             unwrapError={linkError}
             busy={linkBusy}
             submitLabel={t("pairDevice.link.submit")}
@@ -385,9 +785,9 @@ export default function PairDevicePage() {
           <PairDeviceCapture
             onCaptured={handleCaptured}
             onCancel={() => {
-              // Back from the QR path returns to word entry, not all
-              // the way out — the member chose QR from there.
-              setStage("link-entry");
+              // Back from the QR path returns to the method list, not
+              // all the way out — the member chose QR from there.
+              setStage("other-ways");
             }}
             samePhone={samePhone}
           />
@@ -559,6 +959,14 @@ export default function PairDevicePage() {
       {stage === "success-redirect" && null}
     </div>
   );
+}
+
+/** mm:ss for the link-request countdown. */
+function formatMmss(remainingMs: number): string {
+  const clamped = Math.max(0, remainingMs);
+  const minutes = Math.floor(clamped / 60_000);
+  const seconds = Math.floor((clamped % 60_000) / 1000);
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 /**

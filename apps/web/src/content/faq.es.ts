@@ -196,16 +196,16 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "new-device",
         question: "¿Cómo paso a un dispositivo nuevo?",
         answer: [
-          "En el dispositivo que ya tiene tu identidad, ve a Perfil → " +
-            "Vincular otro dispositivo. Te muestra seis palabras. En el " +
-            "dispositivo nuevo, elige la opción de vinculación en la " +
-            "pantalla de bienvenida y escribe esas seis palabras, en " +
-            "orden — esa es toda la transferencia. Las palabras valen " +
-            "15 minutos y funcionan exactamente una vez; tu nodo " +
-            "comunitario transmite el paquete cifrado pero nunca puede " +
-            "leerlo. (¿Sin nodo, o sin conexión? Hay una opción de QR a " +
-            "un toque que va de dispositivo a dispositivo sin guardar " +
-            "nada en ninguna parte.)",
+          "Nada que escribir. En el dispositivo nuevo, abre Understoria " +
+            "y elige 'Traer mi identidad' — muestra dos emoji y espera. " +
+            "En el dispositivo que ya tiene tu identidad, ve a Perfil → " +
+            "Vincular otro dispositivo: la solicitud aparece ahí sola. " +
+            "Revisa que los emoji coincidan, toca 'Vincularlo', y el " +
+            "dispositivo nuevo inicia sesión solo. Ambos dispositivos " +
+            "deben estar en la misma red (en un mismo teléfono siempre " +
+            "lo están). ¿En otro lugar, o sin servidor comunitario? " +
+            "'Otras formas de vincular' tiene un código hablado de 6 " +
+            "palabras y un QR que no pasa por ningún servidor.",
           "Dos cosas no viajan: tu historial de mensajes (los mensajes " +
             "están cifrados a las claves propias de cada dispositivo, así " +
             "que se quedan donde fueron recibidos) y los ajustes por " +
@@ -213,6 +213,30 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "vive en el registro compartido de la comunidad — " +
             "publicaciones, intercambios, avales — aparece en el " +
             "dispositivo nuevo por la sincronización normal.",
+        ],
+      },
+      {
+        id: "link-safety",
+        question: "¿Qué debo vigilar al vincular dispositivos?",
+        answer: [
+          "Tres hábitos simples mantienen segura la vinculación. " +
+            "Primero: solo toca 'Vincularlo' cuando TÚ tengas en la " +
+            "mano el dispositivo que está pidiendo, y los dos emoji de " +
+            "tu pantalla coincidan con los dos de la suya. Si aparece " +
+            "una solicitud cuando no estás vinculando nada, ignórala — " +
+            "alguien en tu red podría estar probando suerte, y no pasa " +
+            "nada a menos que tú toques.",
+          "Segundo: cuando el dispositivo nuevo inicie sesión, mira el " +
+            "nombre con que te saluda. Si no eres tú, alguien coló su " +
+            "propia identidad en tu transferencia — no se llevaron " +
+            "nada tuyo, y el botón 'Esta no soy yo' limpia el " +
+            "dispositivo para que empieces de nuevo.",
+          "Tercero, la letra pequeña honesta: vincular con un toque " +
+            "pasa por el servidor de tu propia comunidad, que solo " +
+            "transmite datos sellados que no puede leer — pero si no " +
+            "confías en quien lo administra, usa el método QR en " +
+            "'Otras formas de vincular'. El QR va de pantalla a cámara " +
+            "sin ningún servidor de por medio.",
         ],
       },
     ],

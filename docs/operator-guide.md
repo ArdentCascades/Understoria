@@ -369,7 +369,7 @@ storing on third-party infrastructure.
 | Direct messaging | Shipped in the PWA (end-to-end encrypted; the node never sees plaintext) | — |
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
 | Open-invite server storage | Intentionally absent | Invites never cross any wire (the old `POST/GET /invites` surface was removed); only signed redemption receipts and revocations federate |
-| Device-link relay | Shipped (`POST/GET /device-link`) | Ephemeral encrypted mailbox for member device linking: ciphertext only, one-shot, 15-minute TTL, never federates, capped at 512 live rows and pruned on every write — nothing to operate or back up |
+| Device-link relay | Shipped (`POST/GET /device-link`, `POST/GET /link-request`) | Ephemeral device-linking surfaces: a one-shot encrypted mailbox (ciphertext only, 15-minute TTL) plus tap-to-link rendezvous rows (one throwaway public key each, 10-minute TTL, bucketed by a salted address fold). Neither federates; both are capped and pruned on every write — nothing to operate or back up. **Tap-to-link needs `TRUST_PROXY` set as documented in §4**: without it every client shares the proxy's address, so all members land in ONE rendezvous bucket and see each other's link requests (harmless but confusing — approval still requires the member's own tap) |
 | Automated dependency scanning | Manual | Run `npm audit` weekly; subscribe to advisories |
 
 Each of these is tracked in the [Threat Model](threat-model.md) §7.
