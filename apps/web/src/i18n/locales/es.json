@@ -45,8 +45,11 @@
       "passphraseAriaLabel": "Contraseña de transferencia",
       "spokenInstructions": "Lee estas seis palabras en voz alta, o tipéalas en el nuevo dispositivo. El orden importa. No pegues — los gestores de portapapeles recuerdan cosas.",
       "qrAriaLabel": "Código QR para vincular dispositivo",
-      "copyHatchToggle": "¿Emparejas una computadora que no puede escanear? Copia el código",
-      "copyHatchWarning": "Copiar pone el código de emparejamiento en tu portapapeles, que puede sincronizarse entre tus dispositivos o quedar guardado en el historial de un gestor de portapapeles. El código solo funciona durante los próximos minutos y no sirve de nada sin las seis palabras — síguelas diciendo en voz alta o escribiéndolas, nunca las envíes junto con el código. Intentaremos limpiar el portapapeles cuando el temporizador termine.",
+      "copyHatchToggle": "¿No puedes escanear — instalas la app en este mismo teléfono, o una computadora? Copia el código",
+      "copyHatchStep1": "PRIMERO anota las 6 palabras de arriba en papel. Si sales de esta pantalla y se recarga, se genera un código nuevo y las palabras viejas dejan de funcionar.",
+      "copyHatchStep2": "Toca \"Copiar código de emparejamiento\" abajo.",
+      "copyHatchStep3": "Abre la app (o la pantalla de captura del otro dispositivo) y pega. Luego escribe las 6 palabras de tu papel.",
+      "copyHatchWarning": "Copiar pone el código de emparejamiento en tu portapapeles, que puede sincronizarse entre tus dispositivos o quedar guardado en el historial de un gestor de portapapeles. El código solo funciona durante los próximos minutos y no sirve de nada sin las seis palabras — dilas en voz alta, escríbelas o tenlas en papel; nunca las envíes junto con el código. Intentaremos limpiar el portapapeles cuando el temporizador termine.",
       "copyButton": "Copiar código de emparejamiento",
       "copied": "Copiado. En el dispositivo nuevo, elige pegar en la pantalla de captura.",
       "copyFailed": "No se pudo copiar — este navegador bloqueó el acceso al portapapeles. Usa el QR.",
@@ -82,6 +85,7 @@
   "pairDevice": {
     "title": "Vincular este dispositivo",
     "subtitle": "Escanea el QR del otro dispositivo y luego escribe las 6 palabras que muestra.",
+    "subtitleSamePhone": "Copia el código de emparejamiento desde el navegador de este teléfono y luego escribe las 6 palabras que mostró.",
     "capture": {
       "directions": {
         "title": "¿Necesitas un QR? Genera uno desde tu otro dispositivo.",
@@ -96,7 +100,18 @@
       "videoAriaLabel": "Vista en vivo de la cámara, buscando un código QR",
       "pasteLabel": "O pega el contenido del QR",
       "pastePlaceholder": "Pega el sobre base64 aquí…",
-      "continue": "Continuar"
+      "continue": "Continuar",
+      "samePhone": {
+        "title": "Trae tu identidad desde el navegador de este teléfono",
+        "step1": "Abre Understoria en tu navegador — donde ya tienes tu sesión. Ve a Perfil y luego \"Vincular otro dispositivo\".",
+        "step2": "Anota las 6 palabras que muestra. Las escribirás aquí después — volver a mirar puede generar un código nuevo, así que el papel es más seguro que la memoria.",
+        "step3": "Toca \"Copia el código\" y luego \"Copiar código de emparejamiento\".",
+        "step4": "Vuelve aquí y toca el botón de pegar de abajo.",
+        "pasteButton": "Pegar código de emparejamiento",
+        "clipboardFailed": "No se pudo leer el portapapeles. Mantén presionado el cuadro de abajo y pega ahí.",
+        "switchToScan": "¿Traes tu identidad desde otro dispositivo? Escanea su QR",
+        "switchToSamePhone": "¿Tu identidad está en el navegador de este mismo teléfono? Sigue los pasos para el mismo teléfono"
+      }
     },
     "passphrase": {
       "instructions": "Escribe las {{count}} palabras del otro dispositivo, en orden. Se autocompletan al escribir.",
@@ -108,8 +123,8 @@
       "body": "El otro dispositivo debería mostrar el mismo código de 8 caracteres bajo \"Confirma en el otro dispositivo\". Si no coincide, detente — algo está mal con el escaneo.",
       "fingerprintAriaLabel": "Huella de identidad del dispositivo que escaneaste",
       "confirm": "Sí, coinciden",
-      "mismatch": "No — no coinciden",
-      "mismatchHint": "Si tocas \"No\" reiniciaremos el escaneo en este dispositivo. Pide al otro dispositivo que empiece de nuevo también."
+      "mismatch": "No — empezar de nuevo",
+      "mismatchHint": "\"Empezar de nuevo\" reinicia la captura en este dispositivo. Pide al otro dispositivo que empiece de nuevo también."
     },
     "session": {
       "title": "Bloquea este dispositivo con una contraseña",
@@ -134,7 +149,7 @@
     "errors": {
       "lostEnvelope": "Faltan los datos del QR. Captúralo de nuevo.",
       "malformed": "Eso no parece un QR de vinculación. Captúralo de nuevo.",
-      "wrongPassphrase": "Estas palabras no coinciden. Revisa cada una — el orden importa.",
+      "wrongPassphrase": "Estas palabras no coinciden. Revisa cada una — el orden importa. Si la otra pantalla se reabrió o se recargó, generó un código NUEVO con palabras nuevas: copia ambos otra vez desde la pantalla que muestra ahora.",
       "expired": "Esta transferencia pasó la ventana de 5 minutos. Pide al otro dispositivo que empiece de nuevo.",
       "versionMismatch": "El otro dispositivo está en una versión distinta. Actualiza ambos y prueba otra vez.",
       "publickeyMismatch": "La verificación de identidad del QR no cuadró. Pide al otro dispositivo que empiece de nuevo.",
@@ -2147,6 +2162,14 @@
     "start": "Abrir el tablero",
     "nextSteps": "Después: mira qué necesitan tus vecinas, o publica una oferta tuya.",
     "pairDeviceLink": "¿Ya tienes tu identidad en otro dispositivo? Vincula este →",
+    "installedArrival": {
+      "title": "La app ya está en tu pantalla de inicio",
+      "intro": "Una pregunta antes de empezar:",
+      "bringTitle": "Ya uso Understoria en el navegador de este teléfono",
+      "bringBody": "La app instalada empieza con su propio almacenamiento vacío, así que no ve tu sesión del navegador. Trae tu identidad — toma un minuto y nada sale de tu teléfono.",
+      "newTitle": "Soy nueva aquí — empezar de cero",
+      "newBody": "Haz el recorrido corto y luego crea tu identidad."
+    },
     "screens": {
       "timebank": {
         "title": "Esto es un banco de tiempo",

@@ -355,6 +355,18 @@ path). After this change:
 - **I have another device** *(new)*
 - Start a new community
 
+**Installed-arrival fork.** When the app launches as an *installed*
+copy (home-screen app) with no identity, the Welcome flow prepends a
+fork screen before the concept tour: "I already use Understoria in
+this phone's browser" vs. "I'm new." Installed web apps get their
+own isolated storage container, so a member who onboarded in the
+browser lands in the installed copy signed out — without the fork,
+the natural path is accidentally minting a duplicate identity. The
+bring-my-identity card routes to `/pair-device?samePhone=1`, which
+starts capture in same-phone mode (below). The fork has no Skip:
+defaulting a returning member into a second identity is the failure
+the screen exists to prevent.
+
 ### 7.2 Capture
 
 The "I have another device" screen offers two capture modes,
@@ -368,6 +380,19 @@ detected at runtime:
   payload is base64url and pastes cleanly even on devices that
   can't activate the camera. The sanctioned source is the display
   screen's gated copy hatch (§6.3) — the phone→desktop path.
+
+**Same-phone mode** (`?samePhone=1`, reached from the installed-
+arrival fork; both modes offer a link to the other): a phone cannot
+scan its own screen, so this mode never opens the camera. It shows
+numbered steps — open the browser, **write down the six words on
+paper first** (leaving the source tab can cause a reload, which
+regenerates the envelope and invalidates memorised words), copy the
+code via the §6.3 hatch, return — and a one-tap paste button
+(`navigator.clipboard.readText`, needs a user gesture) with the
+manual paste box as the fallback when clipboard read is denied. The
+security posture is unchanged from the copy hatch's: the clipboard
+carries the wrapped envelope only; the passphrase travels on paper
+or in the member's head, never alongside it.
 
 ### 7.3 Passphrase entry
 
@@ -386,7 +411,11 @@ On submit, the destination:
 2. Calls `nacl.secretbox.open` on the ciphertext.
 3. If unwrap fails: "These words don't match. Check each one."
    (Distinct error: malformed input vs. wrong passphrase. Both
-   tell the member to verify what they typed.)
+   tell the member to verify what they typed.) The wrong-passphrase
+   copy also names the stale-envelope trap: if the source screen
+   was reopened or reloaded, it generated a NEW envelope and new
+   words, so a correctly-typed *old* passphrase fails here — the
+   fix is to re-copy both from the screen the source shows now.
 4. Parses the plaintext JSON.
 5. Checks `expiresAt`. If past: "This transfer is more than 5
    minutes old. Ask the other device to start over."

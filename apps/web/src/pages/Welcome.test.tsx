@@ -11,7 +11,7 @@
  */
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock `useApp` BEFORE importing the page. Lets each test dial in
@@ -119,6 +119,16 @@ function render(node: ReactNode) {
     root = createRoot(container);
     root.render(<MemoryRouter>{node}</MemoryRouter>);
   });
+}
+
+// Records the router's current path+search so tests can assert on
+// navigate() calls (the fork's bring-identity card). Rendered as a
+// sibling of the page inside the same MemoryRouter.
+let lastLocation = "";
+function LocationProbe() {
+  const location = useLocation();
+  lastLocation = location.pathname + location.search;
+  return null;
 }
 
 // Concept screens (5) render, then the optional install step, then
@@ -439,17 +449,102 @@ describe("WelcomePage — optional install step", () => {
 
   it("skips the install step entirely when the app is already installed", () => {
     // Report standalone so currentInstallEnvironment() → installed; the
-    // install step is filtered out of the visible tour.
+    // install step is filtered out of the visible tour (and the
+    // installed-arrival fork is prepended — see the describe below).
     stubStandaloneMatchMedia();
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
     mockMemberCount = 0;
     render(<WelcomePage />);
-    // Original step count: 5 concept + profileSetup, so FIVE Nexts reach
-    // profileSetup (no install step in between).
+    // Step 0 is the installed-arrival fork — it has no Next button;
+    // the "I'm new" card advances into the concept tour.
+    clickNewHereCard();
+    // Then 5 concept Nexts reach profileSetup (no install step between).
     clickNextNTimes(5);
     expect(container.textContent).toContain("A little about you");
     // The install step never appeared along the way.
     expect(container.textContent).not.toContain("Add Understoria to your phone");
     expect(container.textContent).not.toContain("Optional, but handy");
+  });
+});
+
+// The fork's "I'm new" card. Card buttons are not btn-primary on
+// purpose (neither choice is "the default"), so clickNextNTimes can't
+// reach them.
+function clickNewHereCard() {
+  const card = Array.from(container.querySelectorAll("button")).find((b) =>
+    b.textContent?.includes("I'm new — set me up fresh"),
+  );
+  if (!card) throw new Error("No 'I'm new' card on the fork screen");
+  act(() => {
+    card.click();
+  });
+}
+
+describe("WelcomePage — installed-arrival fork", () => {
+  it("running installed → first screen is the fork with both cards and no Next/Skip", () => {
+    stubStandaloneMatchMedia();
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    expect(container.textContent).toContain("The app is on your home screen");
+    expect(container.textContent).toContain(
+      "I already use Understoria in this phone's browser",
+    );
+    expect(container.textContent).toContain("I'm new — set me up fresh");
+    // The two cards ARE the navigation: no Next, no Skip.
+    expect(container.querySelector("button.btn-primary")).toBeNull();
+    const skip = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Skip",
+    );
+    expect(skip).toBeUndefined();
+  });
+
+  it("'I'm new' advances into the concept tour; Back returns to the fork", () => {
+    stubStandaloneMatchMedia();
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    clickNewHereCard();
+    expect(container.textContent).toContain("This is a timebank");
+    const back = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Back"),
+    );
+    expect(back).toBeDefined();
+    act(() => {
+      back!.click();
+    });
+    expect(container.textContent).toContain("The app is on your home screen");
+  });
+
+  it("'bring my identity' navigates to /pair-device?samePhone=1", () => {
+    stubStandaloneMatchMedia();
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(
+      <>
+        <WelcomePage />
+        <LocationProbe />
+      </>,
+    );
+    const card = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes(
+        "I already use Understoria in this phone's browser",
+      ),
+    );
+    expect(card).toBeDefined();
+    act(() => {
+      card!.click();
+    });
+    expect(lastLocation).toBe("/pair-device?samePhone=1");
+  });
+
+  it("browser (not installed) → no fork; the tour starts at the first concept screen", () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    expect(container.textContent).toContain("This is a timebank");
+    expect(container.textContent).not.toContain(
+      "The app is on your home screen",
+    );
   });
 });

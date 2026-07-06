@@ -10,6 +10,26 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Installing the app on your phone now has its own guided
+  workflow.** When the installed (home-screen) copy launches with
+  no identity, the welcome flow opens on a fork instead of the
+  tour: "I already use Understoria in this phone's browser" or
+  "I'm new — set me up fresh." The first card starts a same-phone
+  pairing mode built for one device: no camera (a phone can't scan
+  its own screen), numbered steps that say to write the six words
+  on paper FIRST, and a one-tap "Paste pairing code" button — with
+  the manual paste box and a switch-to-QR link still there for the
+  two-device case. The source screen's copy-code hatch gained the
+  matching 1-2-3 (words on paper, then copy, then switch apps),
+  the fingerprint screen's reject button is now "No — start over"
+  (both buttons previously contained the word "match"), and the
+  wrong-words error explains the stale-code trap: reopening the
+  source screen generates a NEW code, so correctly-typed old words
+  fail. This exists because iPhone home-screen apps get their own
+  isolated storage — members who installed the app landed in it
+  signed out, and the old path to bring their identity over was
+  buried and two-device-shaped.
+
 - **Project templates carry real context: first steps, honest
   pitfalls, related templates, and Learn links.** Every one of the
   54 templates (both locales) now answers the questions the task

@@ -35,13 +35,18 @@ export interface OnboardingScreenProps {
   stepIndex: number;
   stepCount: number;
   onBack: (() => void) | null;
-  onNext: () => void;
+  /** Primary-action handler, or `null` to hide the Next button —
+   *  the installed-arrival fork's two cards ARE the navigation, so
+   *  that screen renders no footer button of its own. */
+  onNext: (() => void) | null;
   /** Skip handler, or `null` to hide the Skip affordance entirely.
    *  The concept/install steps pass a jump-to-profile-setup handler
    *  (the tour is skippable); the profile-setup step passes `null` —
    *  identity creation is the one step onboarding can't skip. */
   onSkip: (() => void) | null;
-  nextLabel: string;
+  /** Label for the Next button. Only meaningful when `onNext` is
+   *  set — screens that pass `onNext={null}` omit it. */
+  nextLabel?: string;
   /** When true, Next and Skip become disabled + aria-busy.
    *  Used by the profile-setup step while the async save is
    *  in flight so the member can't double-tap. */
@@ -118,15 +123,19 @@ export function OnboardingScreen({
         ) : (
           <span aria-hidden="true" />
         )}
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={busy}
-          aria-busy={busy}
-          className="btn-primary"
-        >
-          {nextLabel}
-        </button>
+        {onNext ? (
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={busy}
+            aria-busy={busy}
+            className="btn-primary"
+          >
+            {nextLabel}
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
       </footer>
     </div>
   );

@@ -181,10 +181,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "the installed app gets its OWN separate storage, so it " +
             "starts out signed out even though the browser copy is " +
             "signed in — nothing is lost, you just have two separate " +
-            "'devices' on one phone. Treat the installed app like a " +
-            "new device: on its welcome screen tap the link about " +
-            "bringing an existing identity, then in your browser go " +
-            "to Profile → Add another device and pair the two. (On " +
+            "'devices' on one phone. The installed app asks about " +
+            "this on its very first screen: choose 'I already use " +
+            "Understoria in this phone's browser' and it walks you " +
+            "through bringing your identity over, step by step. (On " +
             "Android and desktop the installed app shares the " +
             "browser's storage, so you stay signed in.)",
         ],

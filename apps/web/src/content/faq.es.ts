@@ -169,11 +169,10 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "app instalada tiene su PROPIO almacenamiento separado, así " +
             "que arranca sin sesión aunque la copia del navegador sí " +
             "tenga tu identidad — no se pierde nada, simplemente tienes " +
-            "dos 'dispositivos' separados en un mismo teléfono. Trata " +
-            "la app instalada como un dispositivo nuevo: en su pantalla " +
-            "de bienvenida toca el enlace para traer una identidad " +
-            "existente, y en tu navegador ve a Perfil → Añadir otro " +
-            "dispositivo para emparejarlos. (En Android y en " +
+            "dos 'dispositivos' separados en un mismo teléfono. La app " +
+            "instalada lo pregunta en su primera pantalla: elige 'Ya " +
+            "uso Understoria en el navegador de este teléfono' y te " +
+            "guía paso a paso para traer tu identidad. (En Android y en " +
             "computadora la app instalada comparte el almacenamiento " +
             "del navegador, así que tu sesión se mantiene.)",
         ],

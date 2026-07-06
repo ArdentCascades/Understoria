@@ -54,7 +54,20 @@ type Step =
       bodyMoreKey: string;
     }
   | { kind: "install"; key: "install"; icon: string }
-  | { kind: "profileSetup"; key: "profileSetup"; icon: string };
+  | { kind: "profileSetup"; key: "profileSetup"; icon: string }
+  /** First screen ONLY when launched as an installed app with no
+   *  identity: "are you new, or do you already use Understoria in
+   *  this phone's browser?" — the installed copy has its own
+   *  isolated storage, so a member who onboarded in the browser
+   *  lands here signed-out and needs pairing, not a second
+   *  identity. */
+  | { kind: "installedArrival"; key: "installedArrival"; icon: string };
+
+const INSTALLED_ARRIVAL_STEP: Step = {
+  kind: "installedArrival",
+  key: "installedArrival",
+  icon: "\u{1F4F1}",
+};
 
 const STEPS: readonly Step[] = [
   {
@@ -130,7 +143,10 @@ export default function WelcomePage() {
     [],
   );
   const visibleSteps = useMemo(
-    () => (installed ? STEPS.filter((s) => s.kind !== "install") : STEPS),
+    () =>
+      installed
+        ? [INSTALLED_ARRIVAL_STEP, ...STEPS.filter((s) => s.kind !== "install")]
+        : STEPS,
     [installed],
   );
 
@@ -326,6 +342,60 @@ export default function WelcomePage() {
         onNext={() => setStepIndex(stepIndex + 1)}
         onSkip={skipToProfileSetup}
         nextLabel={t("welcome.next")}
+      />
+    );
+  }
+
+  // The installed-arrival fork. Renders only as the first step of an
+  // installed launch: the installed copy has isolated storage, so a
+  // member who already onboarded in this phone's browser lands here
+  // signed-out. The two cards ARE the navigation — bring-my-identity
+  // leaves for the same-phone pairing wizard, I'm-new continues into
+  // the normal tour.
+  if (step.kind === "installedArrival") {
+    return (
+      <OnboardingScreen
+        icon={step.icon}
+        title={t("welcome.installedArrival.title")}
+        body={
+          <div className="flex flex-col gap-3 text-left">
+            <p className="text-center text-sm text-moss-600 dark:text-moss-300">
+              {t("welcome.installedArrival.intro")}
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/pair-device?samePhone=1")}
+              className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+            >
+              <span className="font-semibold text-canopy-900 dark:text-canopy-100">
+                {t("welcome.installedArrival.bringTitle")}
+              </span>
+              <span className="text-sm text-moss-600 dark:text-moss-300">
+                {t("welcome.installedArrival.bringBody")}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStepIndex(stepIndex + 1)}
+              className="card flex flex-col gap-1 text-left hover:border-moss-400"
+            >
+              <span className="font-semibold">
+                {t("welcome.installedArrival.newTitle")}
+              </span>
+              <span className="text-sm text-moss-600 dark:text-moss-300">
+                {t("welcome.installedArrival.newBody")}
+              </span>
+            </button>
+          </div>
+        }
+        stepIndex={stepIndex}
+        stepCount={visibleSteps.length}
+        onBack={null}
+        // The two cards ARE the navigation — no Next/Skip on this
+        // screen (skipping the fork would mean silently defaulting a
+        // returning member into creating a duplicate identity).
+        onNext={null}
+        onSkip={null}
       />
     );
   }

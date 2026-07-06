@@ -45,8 +45,11 @@
       "passphraseAriaLabel": "Transfer passphrase",
       "spokenInstructions": "Read these six words aloud, or type them on the new device. The order matters. Don't paste — clipboard apps remember things.",
       "qrAriaLabel": "Device-pairing QR code",
-      "copyHatchToggle": "Pairing a computer that can't scan? Copy the code instead",
-      "copyHatchWarning": "Copying puts the pairing code in your clipboard, which may sync across your devices or be kept in a clipboard manager's history. The code only works for the next few minutes and is useless without the six words — keep saying those out loud or typing them, never send them alongside the code. We'll try to clear the clipboard when the timer runs out.",
+      "copyHatchToggle": "Can't scan — setting up the app on this same phone, or a computer? Copy the code instead",
+      "copyHatchStep1": "Write the 6 words above on paper FIRST. If you leave this screen and it reloads, a new code is generated and the old words stop working.",
+      "copyHatchStep2": "Tap \"Copy pairing code\" below.",
+      "copyHatchStep3": "Open the app (or the other device's capture screen) and paste. Then type the 6 words from your paper.",
+      "copyHatchWarning": "Copying puts the pairing code in your clipboard, which may sync across your devices or be kept in a clipboard manager's history. The code only works for the next few minutes and is useless without the six words — say them aloud, type them, or keep them on paper; never send them alongside the code. We'll try to clear the clipboard when the timer runs out.",
       "copyButton": "Copy pairing code",
       "copied": "Copied. On the new device, choose paste on the capture screen.",
       "copyFailed": "Couldn't copy — this browser blocked clipboard access. Use the QR instead.",
@@ -82,6 +85,7 @@
   "pairDevice": {
     "title": "Pair this device",
     "subtitle": "Scan the QR from your other device, then type the 6 words it's showing.",
+    "subtitleSamePhone": "Copy the pairing code from this phone's browser, then type the 6 words it showed.",
     "capture": {
       "directions": {
         "title": "Need a QR? Get one from your other device.",
@@ -96,7 +100,18 @@
       "videoAriaLabel": "Live camera view, looking for a QR code",
       "pasteLabel": "Or paste the QR contents",
       "pastePlaceholder": "Paste base64 envelope here…",
-      "continue": "Continue"
+      "continue": "Continue",
+      "samePhone": {
+        "title": "Bring your identity over from this phone's browser",
+        "step1": "Open Understoria in your browser — the one where you're signed in. Go to Profile, then \"Add another device.\"",
+        "step2": "Write down the 6 words it shows. You'll type them here next — going back for another look can generate a new code, so paper beats memory.",
+        "step3": "Tap \"Copy the code instead,\" then \"Copy pairing code.\"",
+        "step4": "Come back here and tap the paste button below.",
+        "pasteButton": "Paste pairing code",
+        "clipboardFailed": "Couldn't read the clipboard. Long-press the box below and paste there instead.",
+        "switchToScan": "Bringing your identity from a different device? Scan its QR instead",
+        "switchToSamePhone": "Is your identity in this same phone's browser? Follow the same-phone steps instead"
+      }
     },
     "passphrase": {
       "instructions": "Type the {{count}} words from the other device, in order. They auto-complete as you type.",
@@ -108,8 +123,8 @@
       "body": "The other device should be showing the same 8-character code under \"Confirm on the other device.\" If it doesn't match, stop — something is wrong with the scan.",
       "fingerprintAriaLabel": "Identity fingerprint from the device you scanned",
       "confirm": "Yes, they match",
-      "mismatch": "No — they don't match",
-      "mismatchHint": "If you tap \"No\" we'll restart the scan on this device. Ask the other device to start over too."
+      "mismatch": "No — start over",
+      "mismatchHint": "\"Start over\" restarts the capture on this device. Ask the other device to start over too."
     },
     "session": {
       "title": "Lock this device with a passphrase",
@@ -134,7 +149,7 @@
     "errors": {
       "lostEnvelope": "The QR data is missing. Capture it again.",
       "malformed": "That doesn't look like a pairing QR. Capture it again.",
-      "wrongPassphrase": "These words don't match. Check each one — order matters.",
+      "wrongPassphrase": "These words don't match. Check each one — order matters. If the other screen was reopened or refreshed, it generated a NEW code and new words: copy both again from the screen it's showing now.",
       "expired": "This transfer is past its 5-minute window. Ask the other device to start over.",
       "versionMismatch": "The other device is on a different version. Update both, then try again.",
       "publickeyMismatch": "The QR's identity check didn't add up. Ask the other device to start over.",
@@ -2147,6 +2162,14 @@
     "start": "Open the board",
     "nextSteps": "Next: browse what neighbors need, or post an offer of your own.",
     "pairDeviceLink": "Already have your identity on another device? Pair this one →",
+    "installedArrival": {
+      "title": "The app is on your home screen",
+      "intro": "One question before we start:",
+      "bringTitle": "I already use Understoria in this phone's browser",
+      "bringBody": "The installed app starts with its own empty storage, so it can't see your browser sign-in. Bring your identity over — it takes about a minute and nothing leaves your phone.",
+      "newTitle": "I'm new — set me up fresh",
+      "newBody": "Take the short tour, then create your identity."
+    },
     "screens": {
       "timebank": {
         "title": "This is a timebank",
