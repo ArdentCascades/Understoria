@@ -26,6 +26,16 @@ include breaking changes.
   logs are forever; the design-note §6.3 revision and the
   threat-model pairing entry record the reasoning.
 
+### Fixed
+- **The welcome flow scrolls again on desktop.** The non-scrolling
+  app shell (which fixed the iOS detached-menu bug) clips document
+  scrolling globally, and `/welcome` is the one route that renders
+  outside the shell — so a step taller than the window, like "A
+  little about you" in a short desktop window, was simply cut off
+  with no way to reach the fields below the fold. The welcome route
+  now brings its own full-height scroll container, same posture as
+  the shell's main area.
+
 ### Changed
 - **Create-event: the date and time pickers take a third of the
   space.** Date and time now share one row at every viewport width
