@@ -23,6 +23,7 @@ import { DraftBanner } from "@/components/DraftBanner";
 import { MarkdownHint } from "@/components/MarkdownHint";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import { getProjectTemplates, getTemplate } from "@/content/projectTemplates";
+import { findFaqEntry } from "@/lib/templateContext";
 import { getActiveProjectsForTemplate } from "@/lib/templateUsage";
 import {
   buildStagedTasks,
@@ -424,6 +425,85 @@ export default function ProjectNewPage() {
                       >
                         {t("projects.templates.seeActive")}
                       </Link>
+                    </div>
+                  )}
+                  {/* "Before you start" — the template's narrative
+                      context, rendered at the decision point where the
+                      boundary/safety-adjacent guidance is actually
+                      readable. Every piece hides when its field is
+                      absent, so partially-authored templates degrade
+                      to the plain banner. */}
+                  {(tpl.firstSteps ||
+                    tpl.commonPitfalls ||
+                    (tpl.pairsWith?.length ?? 0) > 0 ||
+                    (tpl.learnMore?.length ?? 0) > 0) && (
+                    <div className="mt-3 flex flex-col gap-2 border-t border-canopy-200 pt-3 dark:border-canopy-800">
+                      {tpl.firstSteps && (
+                        <p>
+                          <span className="font-semibold">
+                            {t("projects.templates.context.firstSteps")}
+                          </span>{" "}
+                          {tpl.firstSteps}
+                        </p>
+                      )}
+                      {tpl.commonPitfalls && (
+                        <p>
+                          <span className="font-semibold">
+                            {t("projects.templates.context.pitfalls")}
+                          </span>{" "}
+                          {tpl.commonPitfalls}
+                        </p>
+                      )}
+                      {(tpl.pairsWith?.length ?? 0) > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold">
+                            {t("projects.templates.context.pairsWith")}
+                          </span>
+                          {tpl.pairsWith!.map((pairId) => {
+                            const pair = getTemplate(
+                              pairId,
+                              i18n.resolvedLanguage ?? "en",
+                            );
+                            if (!pair) return null;
+                            return (
+                              <button
+                                key={pairId}
+                                type="button"
+                                className="chip bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100 dark:hover:bg-canopy-900"
+                                // Same semantics as picking the card in
+                                // the gallery — including the same
+                                // form-prefill behavior.
+                                onClick={() => handleSelectTemplate(pairId)}
+                              >
+                                {pair.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {(tpl.learnMore?.length ?? 0) > 0 && (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <span className="font-semibold">
+                            {t("projects.templates.context.learnMore")}
+                          </span>
+                          {tpl.learnMore!.map((faqId) => {
+                            const entry = findFaqEntry(
+                              faqId,
+                              i18n.resolvedLanguage ?? "en",
+                            );
+                            if (!entry) return null;
+                            return (
+                              <Link
+                                key={faqId}
+                                to={`/help#${faqId}`}
+                                className="text-canopy-700 underline underline-offset-2 dark:text-canopy-300"
+                              >
+                                {entry.question}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
                   <button

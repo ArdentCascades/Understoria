@@ -76,6 +76,21 @@ export interface ProjectTemplate {
    *  on a freshly created project — never a rail item or badge
    *  (no-notifications). */
   suggestsWorkDays?: boolean;
+  /** Narrative bridge from "picked a template" to "know what to do
+   *  this week" — who to talk to before any task starts. Locale
+   *  prose; rendered in the selected-template context block. */
+  firstSteps?: string;
+  /** Honest, specific failure modes — how this project actually
+   *  dies or hurts someone. Locale prose. */
+  commonPitfalls?: string;
+  /** Ids of complementary templates. Locale-INVARIANT (identical in
+   *  both arrays); every id must exist and never self-reference —
+   *  CI-pinned in projectTemplates.test.ts. */
+  pairsWith?: readonly string[];
+  /** FAQ entry ids (content/faq.ts) rendered as /help#<id> links,
+   *  labeled by the FAQ question in the viewer's language.
+   *  Locale-INVARIANT; membership CI-pinned against FAQ_SECTIONS. */
+  learnMore?: readonly string[];
 }
 
 export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [

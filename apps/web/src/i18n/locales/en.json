@@ -724,7 +724,13 @@
       "stagedHoursUnit": "h",
       "stagedSkills": "Helpful skills: {{skills}}",
       "stagedSum_one": "{{count}} task · about {{hours}}h of setup",
-      "stagedSum_other": "{{count}} tasks · about {{hours}}h of setup"
+      "stagedSum_other": "{{count}} tasks · about {{hours}}h of setup",
+      "context": {
+        "firstSteps": "First steps:",
+        "pitfalls": "What trips people up:",
+        "pairsWith": "Pairs well with:",
+        "learnMore": "Learn more:"
+      }
     },
     "detail": {
       "back": "← Back to projects",
