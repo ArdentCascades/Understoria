@@ -677,7 +677,7 @@ export default function ProjectDetailPage() {
             {tasks.length === 0 ? (
               <div className="card">
                 <EmptyState
-                  illustration="book"
+                  illustration="raising"
                   variant="inset"
                   title={t("projects.detail.noTasksTitle")}
                   message={t("projects.detail.noTasks")}

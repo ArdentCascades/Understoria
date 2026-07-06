@@ -930,7 +930,7 @@ function ProjectList({
     }
     return (
       <EmptyState
-        illustration="book"
+        illustration="raising"
         title={t("projects.emptyTitle")}
         message={t("projects.empty")}
       />

@@ -35,7 +35,8 @@ export type IllustrationName =
   | "hands"
   | "book"
   | "basket"
-  | "path";
+  | "path"
+  | "raising";
 
 // A young sapling cradled in cupped hands — the "beginning" image.
 export function IllustrationSapling({ className }: { className?: string }) {
@@ -139,6 +140,37 @@ export function IllustrationPath({ className }: { className?: string }) {
   );
 }
 
+// Many hands raising a beam together, a sprig growing from the
+// beam — collective work, the barn-raising image. The projects
+// empty state: "book" read as an open laptop at a glance (screen +
+// disc base), a tech object on a mutual-aid surface.
+export function IllustrationRaising({ className }: { className?: string }) {
+  return (
+    <svg {...SHARED_PROPS} className={className}>
+      {/* beam */}
+      <path d="M14 42c10-2 22-3 34-3s24 1 34 3" />
+      <path d="M14 48c10-2 22-3 34-3s24 1 34 3" />
+      <path d="M14 42v6M82 42v6" />
+      {/* sprig growing from the beam */}
+      <path d="M48 39v-12" />
+      <path d="M48 31c3-4 8-4 11-2-2 5-6 7-10 6" />
+      <path d="M48 34c-3-4-8-4-11-2 2 5 6 7 10 6" />
+      {/* left arm + hand */}
+      <path d="M24 80c0-9 1-16 4-22" />
+      <path d="M28 58c0-4 3-7 7-8" />
+      <path d="M33 52l1-4M37 51l1-4" />
+      {/* center arm + hand */}
+      <path d="M48 80V61" />
+      <path d="M48 61c0-4 2-6 5-7" />
+      <path d="M51 55l1-4M55 55l1-4" />
+      {/* right arm + hand */}
+      <path d="M72 80c0-9-1-16-4-22" />
+      <path d="M68 58c0-4-3-7-7-8" />
+      <path d="M63 52l-1-4M59 51l-1-4" />
+    </svg>
+  );
+}
+
 // Resolver used by EmptyState so callers can pass a name string.
 export function Illustration({
   name,
@@ -158,5 +190,7 @@ export function Illustration({
       return <IllustrationBasket className={className} />;
     case "path":
       return <IllustrationPath className={className} />;
+    case "raising":
+      return <IllustrationRaising className={className} />;
   }
 }

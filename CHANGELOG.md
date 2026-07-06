@@ -72,6 +72,18 @@ include breaking changes.
   the shell's main area.
 
 ### Changed
+- **The projects empty state looks like mutual aid, not a laptop.**
+  The "No active projects" illustration was the open-book-on-a-stump
+  drawing, which at a glance read as an open laptop on a dock — a
+  tech object fronting a community-aid surface. Projects now have
+  their own image in the same hand-drawn stroke language: many hands
+  raising a beam together, a sprig growing from the beam — the
+  barn-raising picture, matching the copy beside it ("a collective
+  goal — multiple tasks, multiple contributors"). The project page's
+  empty task list shares it, and the project archive switches to the
+  basket (whose meaning in the set is literally "the gathered, the
+  kept, the archive").
+
 - **Create-event: the date and time pickers take a third of the
   space.** Date and time now share one row at every viewport width
   (previously they stacked full-width on phones), and the end of an

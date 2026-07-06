@@ -62,7 +62,7 @@ export default function ProjectArchivePage() {
       </header>
       {archived.length === 0 ? (
         <EmptyState
-          illustration="book"
+          illustration="basket"
           title={t("projects.archive.emptyTitle")}
           message={t("projects.archive.empty")}
         />
