@@ -473,6 +473,15 @@ once they've accepted).
   descriptions, task comments, and updates — useful for supply
   lists and sign-up links. Plain text is always fine; the hint
   under each editor shows the basics.
+- **Recurring tasks re-open themselves.** A task marked with a
+  cadence ("Recurs monthly" — set from a template's tagged tasks
+  or the add-task form's "Recurs" field) mints a fresh open copy
+  at the bottom of the list the moment a round is confirmed: the
+  rota slot re-opens, credit for the finished round stays with
+  whoever did it. The rhythm stops with the project — pausing or
+  completing it stops the re-opening, and resuming doesn't
+  backfill missed rounds. If you add next round by hand early,
+  the app notices and won't double it up.
 
 ## 8. Bringing in the other workstreams
 

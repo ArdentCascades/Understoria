@@ -699,12 +699,6 @@
         "tasks_other": "{{count}} tareas",
         "setupHours": "~{{hours}}h de preparación"
       },
-      "recurringSuffix": {
-        "session": " Se repite cada sesión.",
-        "month": " Se repite mensualmente.",
-        "event": " Se repite por evento.",
-        "cycle": " Se repite cada ciclo."
-      },
       "filters": {
         "search": {
           "placeholder": "Buscar plantillas",
@@ -860,7 +854,14 @@
         "fieldSkills": "Habilidades sugeridas (separadas por comas)",
         "fieldSkillsPlaceholder": "carpintería, escucha",
         "submit": "Agregar tarea",
-        "submitting": "Agregando…"
+        "submitting": "Agregando…",
+        "fieldCadence": "Se repite (opcional)",
+        "cadenceNone": "Tarea única",
+        "cadenceSession": "Cada sesión",
+        "cadenceMonth": "Cada mes",
+        "cadenceEvent": "Por evento",
+        "cadenceCycle": "Cada ciclo de cultivo",
+        "cadenceHint": "Una tarea recurrente se reabre automáticamente al confirmarse."
       },
       "acknowledgment": {
         "toggle": "Agregar una nota para quien contribuyo",
@@ -910,6 +911,14 @@
         "showOlderOne": "Ver {{count}} comentario anterior",
         "showOlderOther": "Ver {{count}} comentarios anteriores",
         "showFewer": "Ver menos comentarios"
+      },
+      "recurring": {
+        "session": "Se repite cada sesión",
+        "month": "Se repite cada mes",
+        "event": "Se repite por evento",
+        "cycle": "Se repite cada ciclo",
+        "chipAria": "Tarea recurrente: {{cadence}}",
+        "detailHint": "Cuando esta tarea se confirma, aparece una copia abierta nueva al final de la lista — el turno se reabre para la próxima ronda."
       }
     },
     "milestone": {

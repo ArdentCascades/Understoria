@@ -1556,3 +1556,143 @@ describe("reorderProjectTask", () => {
     expect(t3Row.orderIndex).toBe(1500);
   });
 });
+
+describe("recurring tasks re-open on confirmation", () => {
+  beforeEach(reset);
+
+  async function setupRecurringConfirmed(overrides?: {
+    launch?: boolean;
+  }) {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org, 20);
+    if (overrides?.launch !== false) await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Restock rota",
+      description: "Walk the shelves, note gaps",
+      category: "food",
+      estimatedHours: 2,
+      urgency: "low",
+      requiredSkills: ["organizing"],
+      dependencies: [],
+      recurringCadence: "month",
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    await markProjectTaskComplete(task.id, helper.publicKey);
+    return { org, helper, p, task };
+  }
+
+  it("confirming a cadenced task mints a fresh open copy at the bottom", async () => {
+    const { org, p, task } = await setupRecurringConfirmed();
+    await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+
+    const tasks = await db.projectTasks
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    expect(tasks).toHaveLength(2);
+    const done = tasks.find((t) => t.id === task.id)!;
+    const respawned = tasks.find((t) => t.id !== task.id)!;
+    expect(done.status).toBe("completed");
+    // Same shape…
+    expect(respawned.title).toBe("Restock rota");
+    expect(respawned.description).toBe("Walk the shelves, note gaps");
+    expect(respawned.estimatedHours).toBe(2);
+    expect(respawned.requiredSkills).toEqual(["organizing"]);
+    expect(respawned.recurringCadence).toBe("month");
+    // …with every per-round field reset.
+    expect(respawned.status).toBe("open");
+    expect(respawned.assignedTo).toBeNull();
+    expect(respawned.completedAt).toBeNull();
+    expect(respawned.completedBy).toBeNull();
+    expect(respawned.actualHours).toBeNull();
+    expect(respawned.exchangeId).toBeNull();
+    expect(respawned.claimedAt).toBeNull();
+    expect(respawned.orderIndex).toBeGreaterThan(done.orderIndex);
+
+    // The respawn is logged as a task_added with lineage data.
+    const activity = await db.projectActivity
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    const respawnLog = activity.find(
+      (a) =>
+        a.type === "task_added" &&
+        (a.data as { respawnedFromTaskId?: string }).respawnedFromTaskId ===
+          task.id,
+    );
+    expect(respawnLog).toBeDefined();
+  });
+
+  it("a one-shot task does not respawn", async () => {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org);
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Build the first bed",
+      description: "",
+      category: "infrastructure",
+      estimatedHours: 3,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    await markProjectTaskComplete(task.id, helper.publicKey);
+    await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    expect(
+      await db.projectTasks.where("projectId").equals(p.id).count(),
+    ).toBe(1);
+  });
+
+  it("does not respawn while the project is paused", async () => {
+    const { org, p, task } = await setupRecurringConfirmed();
+    await pauseProject(p.id, org.publicKey, "winter break");
+    await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    expect(
+      await db.projectTasks.where("projectId").equals(p.id).count(),
+    ).toBe(1);
+  });
+
+  it("does not duplicate when an open twin already exists", async () => {
+    const { org, p, task } = await setupRecurringConfirmed();
+    // Organizer hand-added next month's round early.
+    await addProjectTask(p.id, org.publicKey, {
+      title: "Restock rota",
+      description: "Walk the shelves, note gaps",
+      category: "food",
+      estimatedHours: 2,
+      urgency: "low",
+      requiredSkills: ["organizing"],
+      dependencies: [],
+      recurringCadence: "month",
+    });
+    await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    const tasks = await db.projectTasks
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    // Completed original + the hand-added twin. No third row.
+    expect(tasks).toHaveLength(2);
+    expect(tasks.filter((t) => t.status === "open")).toHaveLength(1);
+  });
+
+  it("the respawned copy can itself be claimed, confirmed, and respawn again", async () => {
+    const { org, helper, p, task } = await setupRecurringConfirmed();
+    await confirmProjectTaskCompletion(task.id, org.publicKey, NODE);
+    const second = (
+      await db.projectTasks.where("projectId").equals(p.id).toArray()
+    ).find((t) => t.status === "open")!;
+    await claimProjectTask(second.id, helper.publicKey);
+    await markProjectTaskComplete(second.id, helper.publicKey);
+    await confirmProjectTaskCompletion(second.id, org.publicKey, NODE);
+    const tasks = await db.projectTasks
+      .where("projectId")
+      .equals(p.id)
+      .toArray();
+    expect(tasks).toHaveLength(3);
+    expect(tasks.filter((t) => t.status === "completed")).toHaveLength(2);
+    expect(tasks.filter((t) => t.status === "open")).toHaveLength(1);
+  });
+});

@@ -2088,6 +2088,9 @@ function AddTaskForm({
   const [urgency, setUrgency] = useState<Urgency>("low");
   const [category, setCategory] = useState<ProjectCategory>(project.category);
   const [skills, setSkills] = useState("");
+  const [cadence, setCadence] = useState<
+    NonNullable<ProjectTask["recurringCadence"]> | ""
+  >("");
   const [submitting, setSubmitting] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
   // Expanding is an explicit "I'm adding a task now" — drop focus into
@@ -2111,6 +2114,7 @@ function AddTaskForm({
         urgency,
         requiredSkills: skills.split(",").map((s) => s.trim()).filter(Boolean),
         dependencies: [],
+        recurringCadence: cadence === "" ? null : cadence,
       }),
     );
     setSubmitting(false);
@@ -2121,6 +2125,7 @@ function AddTaskForm({
       setUrgency("low");
       setCategory(project.category);
       setSkills("");
+      setCadence("");
       // Collapse after a successful add — the new task appearing in the
       // list above is the success feedback; the form has done its job.
       setOpen(false);
@@ -2229,6 +2234,41 @@ function AddTaskForm({
             onChange={(e) => setSkills(e.target.value)}
             placeholder={t("projects.task.addTask.fieldSkillsPlaceholder")}
           />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">
+            {t("projects.task.addTask.fieldCadence")}
+          </span>
+          <select
+            className="input"
+            value={cadence}
+            onChange={(e) =>
+              setCadence(
+                e.target.value as
+                  | NonNullable<ProjectTask["recurringCadence"]>
+                  | "",
+              )
+            }
+          >
+            <option value="">
+              {t("projects.task.addTask.cadenceNone")}
+            </option>
+            <option value="session">
+              {t("projects.task.addTask.cadenceSession")}
+            </option>
+            <option value="month">
+              {t("projects.task.addTask.cadenceMonth")}
+            </option>
+            <option value="event">
+              {t("projects.task.addTask.cadenceEvent")}
+            </option>
+            <option value="cycle">
+              {t("projects.task.addTask.cadenceCycle")}
+            </option>
+          </select>
+          <span className="text-xs text-moss-600 dark:text-moss-300">
+            {t("projects.task.addTask.cadenceHint")}
+          </span>
         </label>
         <div className="flex gap-2 self-end">
           <button

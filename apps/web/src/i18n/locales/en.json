@@ -699,12 +699,6 @@
         "tasks_other": "{{count}} tasks",
         "setupHours": "~{{hours}}h setup"
       },
-      "recurringSuffix": {
-        "session": " Recurs each session.",
-        "month": " Recurs monthly.",
-        "event": " Recurs per event.",
-        "cycle": " Recurs each cycle."
-      },
       "filters": {
         "search": {
           "placeholder": "Search templates",
@@ -860,7 +854,14 @@
         "fieldSkills": "Suggested skills (comma-separated)",
         "fieldSkillsPlaceholder": "carpentry, listening",
         "submit": "Add task",
-        "submitting": "Adding…"
+        "submitting": "Adding…",
+        "fieldCadence": "Recurs (optional)",
+        "cadenceNone": "One-time task",
+        "cadenceSession": "Each session",
+        "cadenceMonth": "Monthly",
+        "cadenceEvent": "Per event",
+        "cadenceCycle": "Each growing cycle",
+        "cadenceHint": "A recurring task re-opens automatically once it's confirmed."
       },
       "acknowledgment": {
         "toggle": "Add a note for the contributor",
@@ -910,6 +911,14 @@
         "showOlderOne": "Show {{count}} older comment",
         "showOlderOther": "Show {{count}} older comments",
         "showFewer": "Show fewer comments"
+      },
+      "recurring": {
+        "session": "Recurs each session",
+        "month": "Recurs monthly",
+        "event": "Recurs per event",
+        "cycle": "Recurs each cycle",
+        "chipAria": "Recurring task: {{cadence}}",
+        "detailHint": "When this task is confirmed, a fresh open copy appears at the bottom of the list — the rota slot re-opens for the next round."
       }
     },
     "milestone": {

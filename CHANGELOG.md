@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Recurring project tasks actually recur.** A task can now carry a
+  real cadence (each session / monthly / per event / each cycle):
+  the moment a round is confirmed, a fresh open copy appears at the
+  bottom of the task list — the rota slot re-opens, and credit for
+  the finished round stays with whoever did it. Template tasks
+  tagged with a cadence (58 per locale from the recurrence audit)
+  create recurring tasks automatically, and the add-task form gains
+  an optional "Recurs" field. Task cards and the task page show a
+  quiet ↻ badge. Deliberate bounds: re-opening happens on BOTH
+  confirm paths (organizer confirm and the system-key auto-confirm
+  sweep), only while the project is active (pausing stops the
+  rhythm; resuming doesn't backfill missed rounds), and never
+  duplicates a round the organizer already added by hand. This
+  replaces the old text-only treatment, where the cadence was a
+  description suffix the product displayed but never acted on.
+
 - **Device pairing: a "copy pairing code" hatch for phone→desktop.**
   The pairing display screen can now copy the wrapped envelope to
   the clipboard — behind a disclosure that plainly names clipboard

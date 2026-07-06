@@ -22,11 +22,7 @@ import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { MarkdownHint } from "@/components/MarkdownHint";
 import { TemplatePicker } from "@/components/TemplatePicker";
-import {
-  getProjectTemplates,
-  getTemplate,
-  type RecurringCadence,
-} from "@/content/projectTemplates";
+import { getProjectTemplates, getTemplate } from "@/content/projectTemplates";
 import { getActiveProjectsForTemplate } from "@/lib/templateUsage";
 import {
   buildStagedTasks,
@@ -259,19 +255,6 @@ export default function ProjectNewPage() {
     setPickerExpanded(true);
   }
 
-  /** Suffix the localized cadence sentence onto a task description.
-   *  Recurring tasks are intentionally NOT a schema field — the cadence
-   *  lives in the description so the rest of the project lifecycle
-   *  treats them like any other task. */
-  function applyRecurringSuffix(
-    description: string,
-    cadence: RecurringCadence | undefined,
-  ): string {
-    if (!cadence) return description;
-    const key = `projects.templates.recurringSuffix.${cadence}`;
-    return `${description}${t(key)}`;
-  }
-
   if (!currentMember) return null;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -304,7 +287,7 @@ export default function ProjectNewPage() {
           templateId: selectedTemplateId,
         },
         nodeId,
-        includedStagedTasks(stagedTasks, applyRecurringSuffix),
+        includedStagedTasks(stagedTasks),
       );
       await clearDraft(DRAFT_KEY);
       showToast(t("toast.projectCreated"));
