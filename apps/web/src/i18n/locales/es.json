@@ -26,7 +26,8 @@
       "badgeAriaLabel": "Emoji de reconocimiento de esta solicitud de vinculación",
       "noNode": "Este dispositivo no puede contactar tu nodo comunitario, así que vincular con un toque no está disponible ahora. El método QR funciona sin ningún servidor.",
       "useQr": "Mostrar un QR",
-      "whatMoves": "Qué pasa al dispositivo nuevo (y qué no)"
+      "whatMoves": "Qué pasa al dispositivo nuevo (y qué no)",
+      "vpnHint": "¿Todavía nada? Una VPN o iCloud Private Relay puede hacer que tus dos apps parezcan estar en redes distintas, y la solicitud nunca aparece aquí. Páusala un minuto y pide de nuevo desde el dispositivo nuevo — o usa \"Otras formas de vincular\" abajo."
     },
     "otherWays": {
       "link": "Otras formas de vincular",
@@ -142,7 +143,8 @@
       "useQr": "Usar el método QR",
       "busyNode": "Ya hay varios dispositivos pidiendo vincularse desde tu red. Espera un minuto a que caduquen y vuelve a intentar.",
       "nodeError": "El servidor de tu comunidad no responde. Revisa tu conexión e intenta otra vez.",
-      "interfered": "Algo interfirió con la transferencia — lo que llegó no venía de tu aprobación, o llegó dañado. Nada de tu identidad quedó expuesto. Pide de nuevo — tendrás emoji frescos."
+      "interfered": "Algo interfirió con la transferencia — lo que llegó no venía de tu aprobación, o llegó dañado. Nada de tu identidad quedó expuesto. Pide de nuevo — tendrás emoji frescos.",
+      "vpnHint": "¿Tarda mucho? Si este teléfono usa una VPN o iCloud Private Relay, tus dos apps pueden parecer estar en redes distintas y la solicitud nunca llega a tu otra pantalla. Páusala un minuto y toca \"Pedir de nuevo\" — o usa \"Otras formas de vincular\" abajo."
     },
     "linkIn": {
       "title": "Ya estás dentro como {{name}}.",

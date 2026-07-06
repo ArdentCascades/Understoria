@@ -33,6 +33,7 @@ import {
   grantChannelIdForPubkey,
   LINK_EXPIRY_MS,
   LINK_POLL_INTERVAL_MS,
+  LINK_STALL_HINT_MS,
   listLinkRequests,
   publishLinkEnvelope,
   resolveLinkApiBase,
@@ -118,6 +119,10 @@ export default function AddDevicePage() {
   const [granting, setGranting] = useState<string | null>(null);
   // Re-render tick so the "asked N min ago" lines stay honest.
   const [listenTick, setListenTick] = useState(() => Date.now());
+  // When live listening began — drives the VPN/Private-Relay hint
+  // after a stretch of silence (the rendezvous fails invisibly when
+  // the two apps present different network addresses).
+  const [listenSince, setListenSince] = useState<number | null>(null);
   const apiBaseRef = useRef<string | null>(null);
   // Free-text label captured at the post-pair "want to label this?"
   // prompt. Stays empty when the member skips. Not sensitive — the
@@ -151,6 +156,7 @@ export default function AddDevicePage() {
       }
       apiBaseRef.current = base;
       setListenState("listening");
+      setListenSince(Date.now());
       const poll = async () => {
         const res = await listLinkRequests(base);
         if (cancelled || res.kind !== "ok") return;
@@ -436,6 +442,15 @@ export default function AddDevicePage() {
               >
                 {t("addDevice.listen.listening")}
               </p>
+              {listenSince !== null &&
+                listenTick - listenSince > LINK_STALL_HINT_MS && (
+                  <p
+                    role="status"
+                    className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+                  >
+                    {t("addDevice.listen.vpnHint")}
+                  </p>
+                )}
             </div>
           )}
 

@@ -231,6 +231,11 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "runs that server, use the QR method under 'Other ways " +
             "to link' instead. The QR goes screen-to-camera with no " +
             "server involved at all.",
+          "One practical note: tap-to-link needs both devices to look " +
+            "like they're on the same network. A VPN or iCloud " +
+            "Private Relay can quietly get in the way — if the ask " +
+            "never shows up, pause it for a minute and ask again, or " +
+            "use 'Other ways to link.'",
         ],
       },
     ],

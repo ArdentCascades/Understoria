@@ -27,7 +27,8 @@
       "badgeAriaLabel": "Recognition emoji for this link request",
       "noNode": "This device can't reach your community node, so tap-to-link isn't available right now. The QR method works without any server.",
       "useQr": "Show a QR instead",
-      "whatMoves": "What moves to the new device (and what doesn't)"
+      "whatMoves": "What moves to the new device (and what doesn't)",
+      "vpnHint": "Still nothing? A VPN or iCloud Private Relay can make your two apps look like they're on different networks, so the ask never shows up here. Pause it for a minute and have the new device ask again — or use \"Other ways to link\" below."
     },
     "otherWays": {
       "link": "Other ways to link",
@@ -142,7 +143,8 @@
       "useQr": "Use the QR method",
       "busyNode": "A few devices are already asking to be linked from your network. Wait a minute for them to expire, then try again.",
       "nodeError": "Your community's server isn't answering. Check your connection and try again.",
-      "interfered": "Something interfered with the transfer — what arrived wasn't from your approval, or was damaged. Nothing about your identity was exposed. Ask again — you'll get fresh emoji."
+      "interfered": "Something interfered with the transfer — what arrived wasn't from your approval, or was damaged. Nothing about your identity was exposed. Ask again — you'll get fresh emoji.",
+      "vpnHint": "Taking a while? If this phone uses a VPN or iCloud Private Relay, your two apps can look like they're on different networks and the ask never reaches your other screen. Pause it for a minute and tap \"Ask again\" — or use \"Other ways to link\" below."
     },
     "linkIn": {
       "title": "You're in as {{name}}.",

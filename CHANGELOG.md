@@ -31,7 +31,10 @@ include breaking changes.
   community's own server during those minutes — members who don't
   extend that trust keep the QR method, one tap away under "Other
   ways to link," alongside the spoken 6-word code for faraway
-  devices.
+  devices. And because a VPN or iCloud Private Relay can silently
+  make one phone's two apps look like different networks (the one
+  way the rendezvous fails invisibly), both screens name that cause
+  after 45 quiet seconds and point at the fix.
 
 - **Device linking, Signal-style: type six words, done.** Adding a
   device no longer involves QR codes, cameras, or copy-paste. The
@@ -58,6 +61,17 @@ include breaking changes.
   read words in browser → type words in app.
 
 ### Fixed
+- **Finishing a device link no longer traps you back on the welcome
+  screen.** After importing an identity, the pairing page wrote the
+  "this device is set up" flag to storage but never told the running
+  app about it — so heading to the board bounced straight back to
+  "The app is on your home screen" with no way in. Both import paths
+  now refresh the app's in-memory state, and the welcome flow itself
+  gained a guard: a device that's already set up gets sent to the
+  board instead of ever seeing the tour or the fork again. Verified
+  end-to-end: link → label → board, and still on the board after a
+  reload.
+
 - **Same-phone pairing no longer depends on the JS clipboard API —
   the exact API that is broken on the platform it was built for.**
   On iOS, the async clipboard read can hang forever inside

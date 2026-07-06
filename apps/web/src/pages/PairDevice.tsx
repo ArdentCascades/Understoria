@@ -37,6 +37,8 @@ import {
   generateLinkKeypair,
   grantChannelIdForPubkey,
   LINK_POLL_INTERVAL_MS,
+  LINK_REQUEST_TTL_MS,
+  LINK_STALL_HINT_MS,
   normalizeLinkCode,
   openGrant,
   postLinkRequest,
@@ -100,7 +102,7 @@ type WaitState =
  * the design doc §7.4 invariant.
  */
 export default function PairDevicePage() {
-  const { nodeId, setCurrentMember } = useApp();
+  const { nodeId, setCurrentMember, refreshOnboarded } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   // The installed-app welcome fork links here with ?samePhone=1 —
@@ -251,6 +253,11 @@ export default function PairDevicePage() {
             await importPayload(opened.payload, nodeId, null);
             await setCurrentMember(opened.payload.publicKey);
             await markOnboarded();
+            // Flip the IN-MEMORY flag too: OnboardingGate routes on
+            // AppContext's `onboarded`, not the Dexie setting, and
+            // without this refresh the post-link navigate("/")
+            // bounces straight back to the welcome fork — a trap.
+            await refreshOnboarded();
             setImportedName(opened.payload.profile.displayName);
             const c = linkCancelRef.current;
             linkCancelRef.current = null;
@@ -278,7 +285,7 @@ export default function PairDevicePage() {
       linkCancelRef.current = null;
       if (c) void cancelLinkRequest(c.apiBase, c.pubkey, c.token);
     };
-  }, [stage, askAttempt, nodeId, setCurrentMember]);
+  }, [stage, askAttempt, nodeId, setCurrentMember, refreshOnboarded]);
 
   // "This isn't me" on the link-in screen: a fresh device that just
   // imported a stranger's identity (see the junk-grant vector in
@@ -441,6 +448,9 @@ export default function PairDevicePage() {
         await importPayload(payload, nodeId, setting || null);
         await setCurrentMember(payload.publicKey);
         await markOnboarded();
+        // Same in-memory refresh as the tap-to-link path — without it
+        // the gate bounces the finished member back to /welcome.
+        await refreshOnboarded();
         // Sensitive material — transfer passphrase, payload bytes —
         // dropped explicitly before navigating. Payload's secretKey
         // is already in IndexedDB (wrapped or not); React's GC will
@@ -464,6 +474,7 @@ export default function PairDevicePage() {
       sessionConfirm,
       nodeId,
       setCurrentMember,
+      refreshOnboarded,
       t,
     ],
   );
@@ -527,14 +538,28 @@ export default function PairDevicePage() {
 
               {requestExpiresAt !== null &&
                 (nowTick < requestExpiresAt ? (
-                  <p
-                    aria-live="polite"
-                    className="text-center text-sm text-moss-600 dark:text-moss-300"
-                  >
-                    {t("pairDevice.wait.waitingLine", {
-                      mmss: formatMmss(requestExpiresAt - nowTick),
-                    })}
-                  </p>
+                  <>
+                    <p
+                      aria-live="polite"
+                      className="text-center text-sm text-moss-600 dark:text-moss-300"
+                    >
+                      {t("pairDevice.wait.waitingLine", {
+                        mmss: formatMmss(requestExpiresAt - nowTick),
+                      })}
+                    </p>
+                    {/* Stall hint: the rendezvous fails SILENTLY when a
+                        VPN / Private Relay makes the two apps present
+                        different addresses — after a while, name it. */}
+                    {LINK_REQUEST_TTL_MS - (requestExpiresAt - nowTick) >
+                      LINK_STALL_HINT_MS && (
+                      <p
+                        role="status"
+                        className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+                      >
+                        {t("pairDevice.wait.vpnHint")}
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <div
                     role="status"
