@@ -724,7 +724,13 @@
       "stagedHoursUnit": "h",
       "stagedSkills": "Habilidades útiles: {{skills}}",
       "stagedSum_one": "{{count}} tarea · unas {{hours}}h de puesta en marcha",
-      "stagedSum_other": "{{count}} tareas · unas {{hours}}h de puesta en marcha"
+      "stagedSum_other": "{{count}} tareas · unas {{hours}}h de puesta en marcha",
+      "context": {
+        "firstSteps": "Primeros pasos:",
+        "pitfalls": "Dónde suele tropezar la gente:",
+        "pairsWith": "Combina bien con:",
+        "learnMore": "Aprende más:"
+      }
     },
     "detail": {
       "back": "← Volver a proyectos",
