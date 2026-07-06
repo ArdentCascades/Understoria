@@ -41,6 +41,7 @@ import {
   type PendingLinkRequest,
 } from "@/lib/deviceLink";
 import { buildTransferPayload } from "@/lib/devicePairing";
+import { buildCommunitySnapshot } from "@/lib/communitySnapshot";
 import { readSubmitConfig } from "@/lib/nodeSubmit";
 import { recordPairing } from "@/db/pairing";
 
@@ -205,6 +206,12 @@ export default function AddDevicePage() {
           submitCfg.url.trim() !== ""
             ? { url: submitCfg.url.trim(), enabled: submitCfg.enabled }
             : undefined;
+        // The community itself rides the relayed transfer: projects,
+        // tasks, proposals, and RSVPs never federate, and posts only
+        // reach the node when each posting device mirrored them — so
+        // sync alone would land the new device in a near-empty
+        // community. null = too large; identity-only + sync then.
+        const snapshot = await buildCommunitySnapshot();
         const payload = buildTransferPayload({
           secretKey: b64decode(secretKeyB64),
           publicKey: b64decode(currentMember.publicKey),
@@ -219,6 +226,7 @@ export default function AddDevicePage() {
           blocks: blockBundle.blocks,
           previouslyBlocked: blockBundle.previouslyBlocked,
           ...(communityNode !== undefined ? { communityNode } : {}),
+          ...(snapshot !== null ? { snapshot } : {}),
         });
         const sealed = sealGrant(payload, requestPubkey);
         const published = await publishLinkEnvelope(
@@ -258,7 +266,9 @@ export default function AddDevicePage() {
   // shared-device cluster doesn't leak one member's blocks into
   // another member's transfer.
   const buildWrappedTransfer = useCallback(
-    async (expiryMs: number) => {
+    // includeSnapshot: true on the RELAYED words path; false on the QR
+    // path — a snapshot-sized envelope cannot render as a scannable QR.
+    async (expiryMs: number, includeSnapshot: boolean) => {
       if (!currentMember) throw new Error("no current member");
       const secretKeyB64 = await getSecretKey(currentMember.publicKey);
       const secretKey = b64decode(secretKeyB64);
@@ -279,6 +289,7 @@ export default function AddDevicePage() {
       // Same community-connection passthrough as the tap-to-link
       // grant — the QR/words paths must not produce emptier devices.
       const submitCfg = await readSubmitConfig();
+      const snapshot = includeSnapshot ? await buildCommunitySnapshot() : null;
       const env = await wrapForTransfer({
         secretKey,
         publicKey,
@@ -295,6 +306,7 @@ export default function AddDevicePage() {
               },
             }
           : {}),
+        ...(snapshot !== null ? { snapshot } : {}),
       });
       return { encoded: encodeEnvelope(env), code: generated };
     },
@@ -320,7 +332,7 @@ export default function AddDevicePage() {
         return;
       }
       const { encoded: encodedEnv, code } =
-        await buildWrappedTransfer(LINK_EXPIRY_MS);
+        await buildWrappedTransfer(LINK_EXPIRY_MS, true);
       const channelId = await deriveLinkChannelId(code);
       const published = await publishLinkEnvelope(
         apiBase,
@@ -357,7 +369,7 @@ export default function AddDevicePage() {
     }
     try {
       const { encoded: encodedEnv, code } =
-        await buildWrappedTransfer(DEFAULT_EXPIRY_MS);
+        await buildWrappedTransfer(DEFAULT_EXPIRY_MS, false);
       setEncoded(encodedEnv);
       setPassphrase(code);
       setExpiresAt(Date.now() + DEFAULT_EXPIRY_MS);

@@ -61,6 +61,24 @@ include breaking changes.
   read words in browser → type words in app.
 
 ### Fixed
+- **Linking now carries the community itself, not just your
+  identity.** Field testing showed the previous fix (carrying the
+  sync connection) wasn't enough, because several kinds of records
+  never reach the community server at all — projects, tasks,
+  proposals, votes, and RSVPs are local-only by design, and posts
+  only get there when each posting device had mirroring on. So the
+  sealed transfer now also carries a snapshot of the shared
+  community data from your old device: members, posts, projects and
+  their tasks, events with RSVPs and shifts, exchanges, vouches,
+  proposals, and community settings. The linked device looks like
+  the device it came from the moment it signs in; sync remains the
+  ongoing top-up. Deliberately excluded, same as always: messages
+  (encrypted per-device), drafts, invites, secret keys, and
+  per-device settings. The snapshot rides only the relayed linking
+  methods (a QR can't hold it), applies only to fresh devices, and
+  degrades to identity-plus-sync if a very large community exceeds
+  the size cap.
+
 - **A freshly linked device no longer arrives to an empty
   community.** The transfer moved your identity but not your
   community connection, and every sync is gated on that setting — so

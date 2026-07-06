@@ -89,14 +89,23 @@ describe("POST /device-link", () => {
       });
       expect(res.statusCode).toBe(400);
     }
-    // The 33 KB envelope trips the route's own cap (the global 64 KB
-    // body cap sits above it).
+    // A 500 KB envelope trips the route's own cap (480 KB — sized for
+    // snapshot-bearing envelopes; the per-route 640 KB body limit
+    // sits above it).
     const res = await app.inject({
       method: "POST",
       url: "/device-link",
-      payload: { channelId: CHANNEL, envelope: "x".repeat(33 * 1024) },
+      payload: { channelId: CHANNEL, envelope: "x".repeat(500 * 1024) },
     });
     expect(res.statusCode).toBe(400);
+    // And a snapshot-sized envelope (well over the old 32 KB cap)
+    // is accepted.
+    const big = await app.inject({
+      method: "POST",
+      url: "/device-link",
+      payload: { channelId: "f".repeat(64), envelope: "y".repeat(300 * 1024) },
+    });
+    expect(big.statusCode).toBe(201);
   });
 
   it("409s a duplicate channel id — never silently overwrites", async () => {

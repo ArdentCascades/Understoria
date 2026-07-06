@@ -129,6 +129,12 @@ export interface TransferPayload {
    *  then runs an immediate first sync. Optional on the wire (older
    *  sources omit it) — no PAYLOAD_VERSION bump needed. */
   communityNode?: { url: string; enabled: boolean };
+  /** Shared-state slice of the source's local database (see
+   *  lib/communitySnapshot.ts for exactly what's in and out and why).
+   *  Rides the RELAYED transports only — far too large for a QR.
+   *  Applied on fresh devices only; federation sync remains the
+   *  ongoing top-up. Optional on the wire. */
+  snapshot?: Record<string, Record<string, unknown>[]>;
 }
 
 export type UnwrapResult =
@@ -220,6 +226,7 @@ export function buildTransferPayload(opts: {
   blocks?: BlockRow[];
   previouslyBlocked?: PreviouslyBlockedRow[];
   communityNode?: { url: string; enabled: boolean };
+  snapshot?: Record<string, Record<string, unknown>[]>;
 }): TransferPayload {
   const now = opts.now ?? Date.now();
   const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;
@@ -237,6 +244,7 @@ export function buildTransferPayload(opts: {
     ...(opts.communityNode !== undefined
       ? { communityNode: opts.communityNode }
       : {}),
+    ...(opts.snapshot !== undefined ? { snapshot: opts.snapshot } : {}),
   };
 }
 

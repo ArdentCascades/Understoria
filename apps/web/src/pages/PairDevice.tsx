@@ -1010,6 +1010,22 @@ export default function PairDevicePage() {
 async function adoptCommunityNodeAndSync(
   payload: TransferPayload,
 ): Promise<void> {
+  // Hydrate the community itself FIRST: projects, tasks, proposals,
+  // and RSVPs never federate, so the snapshot in the payload is the
+  // only way they reach this device (lib/communitySnapshot.ts). The
+  // apply is fresh-device-guarded and best-effort; the pulls below
+  // top up whatever does federate.
+  if (payload.snapshot) {
+    try {
+      const { applyCommunitySnapshot } = await import(
+        "@/lib/communitySnapshot"
+      );
+      await applyCommunitySnapshot(payload.snapshot);
+    } catch {
+      // Never let hydration sink the import — identity is already in.
+    }
+  }
+
   const node = payload.communityNode;
   if (
     node &&
