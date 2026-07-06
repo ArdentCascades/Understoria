@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
@@ -74,6 +74,11 @@ export default function PairDevicePage() {
   const { nodeId, setCurrentMember } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // The installed-app welcome fork links here with ?samePhone=1 —
+  // the identity lives in this phone's browser, so the capture step
+  // starts in copy/paste mode instead of asking for the camera.
+  const [searchParams] = useSearchParams();
+  const samePhone = searchParams.get("samePhone") === "1";
 
   const [stage, setStage] = useState<Stage>("capture");
   const [encoded, setEncoded] = useState<string | null>(null);
@@ -254,7 +259,9 @@ export default function PairDevicePage() {
         </button>
         <h1 className="page-title mt-2">{t("pairDevice.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
-          {t("pairDevice.subtitle")}
+          {samePhone
+            ? t("pairDevice.subtitleSamePhone")
+            : t("pairDevice.subtitle")}
         </p>
       </header>
 
@@ -263,6 +270,7 @@ export default function PairDevicePage() {
           <PairDeviceCapture
             onCaptured={handleCaptured}
             onCancel={handleCancelToWelcome}
+            samePhone={samePhone}
           />
         </section>
       )}
