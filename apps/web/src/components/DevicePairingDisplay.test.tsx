@@ -113,6 +113,20 @@ describe("DevicePairingDisplay copy hatch", () => {
     expect(container.textContent).toContain("Couldn't copy");
   });
 
+  it("offers the native select-and-copy box with the envelope — the path that needs no JS clipboard API", () => {
+    renderDisplay();
+    clickByText("Copy the code instead");
+    const box = container.querySelector(
+      "textarea[readonly]",
+    ) as HTMLTextAreaElement | null;
+    expect(box).not.toBeNull();
+    expect(box!.value).toBe(ENVELOPE);
+    // The passphrase never rides in the selectable box either.
+    for (const word of PASSPHRASE.split(" ")) {
+      expect(box!.value).not.toContain(word);
+    }
+  });
+
   it("clears the clipboard on unmount when it still holds this envelope", async () => {
     readText.mockResolvedValue(ENVELOPE);
     renderDisplay();

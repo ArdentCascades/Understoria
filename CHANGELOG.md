@@ -9,6 +9,23 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Same-phone pairing no longer depends on the JS clipboard API —
+  the exact API that is broken on the platform it was built for.**
+  On iOS, the async clipboard read can hang forever inside
+  home-screen web apps and Firefox can block programmatic copy, so
+  "Copy pairing code" + "Paste pairing code" could both silently do
+  nothing. Every step now has a path that needs no clipboard API
+  and no step can fail silently: the browser side shows the code in
+  a tap-to-select-all box next to the Copy button (native Select
+  All → Copy works everywhere); the app side bounds the one-tap
+  paste read at 3 seconds and drops focus into the manual paste box
+  with a plain hint on timeout, denial, or an empty clipboard;
+  pasted text is validated immediately — junk shows "that doesn't
+  look like a pairing code" on the spot instead of letting the
+  member type six words that could only fail; and pasting a valid
+  code into the box completes the step by itself, no Continue tap.
+
 ### Added
 - **Installing the app on your phone now has its own guided
   workflow.** When the installed (home-screen) copy launches with

@@ -394,6 +394,28 @@ security posture is unchanged from the copy hatch's: the clipboard
 carries the wrapped envelope only; the passphrase travels on paper
 or in the member's head, never alongside it.
 
+Because the async clipboard API is unreliable on exactly the
+platform this mode exists for (iOS standalone WebKit can leave
+`readText()` pending forever; iOS Firefox can block `writeText`),
+neither end may *depend* on it:
+
+- The one-tap paste read is bounded (3s); timeout, denial, and
+  empty clipboard all land on the manual paste box with focus and
+  an honest hint — the button can never silently do nothing.
+- Captured text is validated with `decodeEnvelope` at the capture
+  step. Garbage (a URL, a partial copy) shows "that doesn't look
+  like a pairing code" immediately instead of advancing the member
+  into six words that can only fail.
+- Pasting a valid code into the manual box captures on the paste
+  event itself — no Continue tap — since native long-press paste
+  works even where the JS API doesn't.
+- The §6.3 hatch shows the envelope in a read-only select-all
+  textarea alongside the Copy button, so native Select All → Copy
+  remains available when programmatic copy is blocked. Same
+  exposure posture as the QR (the envelope is already on screen);
+  a natively-copied envelope is outside the best-effort unmount
+  clear, which is hygiene, not the boundary.
+
 ### 7.3 Passphrase entry
 
 After capture succeeds, the destination prompts for the 6-word

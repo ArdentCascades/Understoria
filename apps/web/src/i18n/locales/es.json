@@ -52,7 +52,8 @@
       "copyHatchWarning": "Copiar pone el código de emparejamiento en tu portapapeles, que puede sincronizarse entre tus dispositivos o quedar guardado en el historial de un gestor de portapapeles. El código solo funciona durante los próximos minutos y no sirve de nada sin las seis palabras — dilas en voz alta, escríbelas o tenlas en papel; nunca las envíes junto con el código. Intentaremos limpiar el portapapeles cuando el temporizador termine.",
       "copyButton": "Copiar código de emparejamiento",
       "copied": "Copiado. En el dispositivo nuevo, elige pegar en la pantalla de captura.",
-      "copyFailed": "No se pudo copiar — este navegador bloqueó el acceso al portapapeles. Usa el QR.",
+      "copyFailed": "No se pudo copiar — este navegador bloqueó el acceso al portapapeles. Toca el código de abajo, Seleccionar todo y luego Copiar.",
+      "copySelectLabel": "Si el botón no funciona: toca el código de abajo, Seleccionar todo y Copiar",
       "afterImport": "Cuando el otro dispositivo diga que terminó, toca Listo. El QR también desaparecerá solo cuando el temporizador llegue a cero.",
       "done": "Listo",
       "fingerprintLabel": "Confirma en el otro dispositivo",
@@ -101,6 +102,7 @@
       "pasteLabel": "O pega el contenido del QR",
       "pastePlaceholder": "Pega el sobre base64 aquí…",
       "continue": "Continuar",
+      "invalidCode": "Eso no parece un código de emparejamiento. Cópialo otra vez desde la otra pantalla — asegúrate de copiarlo completo.",
       "samePhone": {
         "title": "Trae tu identidad desde el navegador de este teléfono",
         "step1": "Abre Understoria en tu navegador — donde ya tienes tu sesión. Ve a Perfil y luego \"Vincular otro dispositivo\".",

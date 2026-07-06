@@ -225,6 +225,34 @@ export function DevicePairingDisplay({
                 {copyState === "failed" && t("addDevice.display.copyFailed")}
               </span>
             </div>
+            {/* Native-copy fallback: the async clipboard API is
+                blocked or flaky in some mobile browsers (iOS Firefox,
+                standalone WebKit). Long-press → Select All → Copy on
+                a visible textarea works everywhere, so the copy
+                journey never dead-ends on a JS API. Same exposure
+                posture as the QR above — the envelope is already on
+                screen. Note: a natively-copied envelope isn't ours to
+                auto-clear on unmount (copiedRef stays false), which is
+                fine — the clear is hygiene, not the boundary. */}
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium">
+                {t("addDevice.display.copySelectLabel")}
+              </span>
+              <textarea
+                readOnly
+                rows={3}
+                value={encodedEnvelope}
+                className="input font-mono text-xs"
+                onFocus={(e) => {
+                  // iOS ignores select() on readonly fields;
+                  // setSelectionRange works.
+                  e.currentTarget.setSelectionRange(
+                    0,
+                    e.currentTarget.value.length,
+                  );
+                }}
+              />
+            </label>
           </div>
         )}
       </div>

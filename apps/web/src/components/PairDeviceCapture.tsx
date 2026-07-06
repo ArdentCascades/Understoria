@@ -6,6 +6,13 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { decodeEnvelope } from "@/lib/devicePairing";
+
+// iOS WebKit's async clipboard read can hang indefinitely in
+// home-screen web apps (the paste-permission callout never resolves).
+// Without a bound, the Paste button would "do nothing" forever — race
+// the read against this and fall back to the manual paste box.
+const CLIPBOARD_READ_TIMEOUT_MS = 3000;
 
 // The BarcodeDetector API isn't in TypeScript's lib.dom.d.ts as of
 // TS 5.x. Local type so we don't need a global ambient declaration.
@@ -72,6 +79,15 @@ export function PairDeviceCapture({
   const [cameraState, setCameraState] = useState<null | false | true>(null);
   const [pasted, setPasted] = useState("");
   const [clipboardFailed, setClipboardFailed] = useState(false);
+  // Captured input that doesn't decode as a pairing envelope. Caught
+  // HERE, not at the passphrase stage — advancing on garbage sends the
+  // member into typing six words that can only ever fail.
+  const [invalidCode, setInvalidCode] = useState(false);
+  // While the async clipboard read is in flight (needs a busy state
+  // because on iOS the read can take seconds or hang — see the
+  // timeout above).
+  const [pasting, setPasting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const stopCamera = useCallback(() => {
     if (intervalRef.current !== null) {
@@ -143,31 +159,125 @@ export function PairDeviceCapture({
     // capture/cancel.
   }, [mode]);
 
-  function handlePasteSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const value = pasted.trim();
-    if (!value) return;
+  // Single validated exit: only text that decodes as a pairing
+  // envelope leaves this component. Returns false (and flags the
+  // inline error) otherwise.
+  function tryCapture(raw: string): boolean {
+    const value = raw.trim();
+    if (!value || !decodeEnvelope(value)) {
+      setInvalidCode(true);
+      return false;
+    }
+    setInvalidCode(false);
+    setClipboardFailed(false);
     stopCamera();
     onCaptured(value);
+    return true;
+  }
+
+  function handlePasteSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (pasted.trim() === "") return;
+    tryCapture(pasted);
+  }
+
+  // Pasting a valid code into the box completes the step on its own —
+  // no Continue tap. This is the most reliable path on iOS, where the
+  // native long-press Paste always works even when the async clipboard
+  // API is blocked or hangs. Invalid text falls through to the normal
+  // change handler so the member can still edit it.
+  function handleTextareaPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const value = e.clipboardData.getData("text").trim();
+    if (value && decodeEnvelope(value)) {
+      e.preventDefault();
+      tryCapture(value);
+    }
   }
 
   // One-tap paste for the same-phone journey. Clipboard read needs a
-  // user gesture (this click) and may still be denied — the manual
-  // paste box below stays as the fallback.
+  // user gesture (this click), may be denied, and on iOS standalone
+  // may never settle — bounded by CLIPBOARD_READ_TIMEOUT_MS. Every
+  // failure path lands on the manual paste box with focus, so the
+  // member's next move is always visible.
   async function handleClipboardPaste() {
+    setPasting(true);
+    setClipboardFailed(false);
+    setInvalidCode(false);
     try {
-      const text = (await navigator.clipboard.readText()).trim();
-      if (!text) {
+      const text = await Promise.race([
+        navigator.clipboard.readText(),
+        new Promise<never>((_, reject) =>
+          window.setTimeout(
+            () => reject(new Error("clipboard-timeout")),
+            CLIPBOARD_READ_TIMEOUT_MS,
+          ),
+        ),
+      ]);
+      if (text.trim() === "") {
         setClipboardFailed(true);
+        textareaRef.current?.focus();
         return;
       }
-      setClipboardFailed(false);
-      stopCamera();
-      onCaptured(text);
+      tryCapture(text);
     } catch {
       setClipboardFailed(true);
+      textareaRef.current?.focus();
+    } finally {
+      setPasting(false);
     }
   }
+
+  // The manual paste form — shared verbatim by both modes; it is the
+  // universal fallback everything else degrades to.
+  const pasteForm = (
+    <form onSubmit={handlePasteSubmit} className="flex flex-col gap-2">
+      <label htmlFor="pair-paste" className="text-sm font-medium">
+        {t("pairDevice.capture.pasteLabel")}
+      </label>
+      <textarea
+        id="pair-paste"
+        ref={textareaRef}
+        className="input min-h-20 font-mono text-xs"
+        value={pasted}
+        onChange={(e) => {
+          setPasted(e.target.value);
+          setInvalidCode(false);
+        }}
+        onPaste={handleTextareaPaste}
+        placeholder={t("pairDevice.capture.pastePlaceholder")}
+        spellCheck={false}
+        autoCapitalize="off"
+        autoCorrect="off"
+      />
+      {invalidCode && (
+        <p
+          role="alert"
+          className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800 dark:bg-rose-950/40 dark:text-rose-100"
+        >
+          {t("pairDevice.capture.invalidCode")}
+        </p>
+      )}
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => {
+            stopCamera();
+            onCancel();
+          }}
+        >
+          {t("common.cancel")}
+        </button>
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={pasted.trim() === ""}
+        >
+          {t("pairDevice.capture.continue")}
+        </button>
+      </div>
+    </form>
+  );
 
   if (mode === "samePhone") {
     return (
@@ -193,11 +303,15 @@ export function PairDeviceCapture({
         <button
           type="button"
           className="btn-primary"
+          disabled={pasting}
+          aria-busy={pasting}
           onClick={() => {
             void handleClipboardPaste();
           }}
         >
-          {t("pairDevice.capture.samePhone.pasteButton")}
+          {pasting
+            ? t("common.working")
+            : t("pairDevice.capture.samePhone.pasteButton")}
         </button>
         {clipboardFailed && (
           <p
@@ -208,33 +322,7 @@ export function PairDeviceCapture({
           </p>
         )}
 
-        <form onSubmit={handlePasteSubmit} className="flex flex-col gap-2">
-          <label htmlFor="pair-paste" className="text-sm font-medium">
-            {t("pairDevice.capture.pasteLabel")}
-          </label>
-          <textarea
-            id="pair-paste"
-            className="input min-h-20 font-mono text-xs"
-            value={pasted}
-            onChange={(e) => setPasted(e.target.value)}
-            placeholder={t("pairDevice.capture.pastePlaceholder")}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoCorrect="off"
-          />
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button type="button" className="btn-secondary" onClick={onCancel}>
-              {t("common.cancel")}
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={pasted.trim() === ""}
-            >
-              {t("pairDevice.capture.continue")}
-            </button>
-          </div>
-        </form>
+        {pasteForm}
 
         <button
           type="button"
@@ -312,40 +400,7 @@ export function PairDeviceCapture({
       {/* Paste fallback always available — even when the camera is
           running — for the "I can read the QR but the camera isn't
           working from this angle" case. */}
-      <form onSubmit={handlePasteSubmit} className="flex flex-col gap-2">
-        <label htmlFor="pair-paste" className="text-sm font-medium">
-          {t("pairDevice.capture.pasteLabel")}
-        </label>
-        <textarea
-          id="pair-paste"
-          className="input min-h-20 font-mono text-xs"
-          value={pasted}
-          onChange={(e) => setPasted(e.target.value)}
-          placeholder={t("pairDevice.capture.pastePlaceholder")}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoCorrect="off"
-        />
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => {
-              stopCamera();
-              onCancel();
-            }}
-          >
-            {t("common.cancel")}
-          </button>
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={pasted.trim() === ""}
-          >
-            {t("pairDevice.capture.continue")}
-          </button>
-        </div>
-      </form>
+      {pasteForm}
 
       <button
         type="button"

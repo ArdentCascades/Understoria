@@ -18,7 +18,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "@/i18n";
 import { PairDeviceCapture } from "./PairDeviceCapture";
 
-const ENVELOPE = "dGVzdC1lbnZlbG9wZS1ieXRlcw";
+// Structurally valid envelope — capture now validates with
+// decodeEnvelope before advancing, so the fixture must decode.
+const ENVELOPE = btoa(
+  JSON.stringify({
+    v: 1,
+    alg: "test",
+    salt: "c2FsdA==",
+    nonce: "bm9uY2U=",
+    ciphertext: "Y2lwaGVydGV4dA==",
+    expiresAt: 4102444800000,
+  }),
+);
 
 let container: HTMLDivElement;
 let root: Root;
@@ -111,6 +122,74 @@ describe("PairDeviceCapture — same-phone mode", () => {
     await flush();
     expect(onCaptured).not.toHaveBeenCalled();
     expect(container.textContent).toContain("Couldn't read the clipboard");
+  });
+
+  it("clipboard text that isn't a pairing code shows the invalid-code error instead of advancing", async () => {
+    readText.mockResolvedValue("https://example.com/some-link");
+    renderCapture(true);
+    clickByText("Paste pairing code");
+    await flush();
+    expect(onCaptured).not.toHaveBeenCalled();
+    expect(container.textContent).toContain(
+      "That doesn't look like a pairing code",
+    );
+  });
+
+  it("a clipboard read that hangs (iOS standalone) times out into the manual-paste hint", async () => {
+    vi.useFakeTimers();
+    try {
+      readText.mockImplementation(() => new Promise(() => {}));
+      renderCapture(true);
+      clickByText("Paste pairing code");
+      // The button goes busy while the read is pending…
+      expect(container.textContent).toContain("Working");
+      // …and the 3s bound converts the hang into the visible fallback.
+      await act(async () => {
+        vi.advanceTimersByTime(3100);
+      });
+      expect(onCaptured).not.toHaveBeenCalled();
+      expect(container.textContent).toContain("Couldn't read the clipboard");
+      expect(container.textContent).not.toContain("Working");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("pasting a valid code into the box captures immediately — no Continue tap", () => {
+    renderCapture(true);
+    const textarea = container.querySelector(
+      "textarea#pair-paste",
+    ) as HTMLTextAreaElement;
+    const event = new Event("paste", { bubbles: true, cancelable: true });
+    Object.defineProperty(event, "clipboardData", {
+      value: { getData: () => `  ${ENVELOPE}\n` },
+    });
+    act(() => {
+      textarea.dispatchEvent(event);
+    });
+    expect(onCaptured).toHaveBeenCalledTimes(1);
+    expect(onCaptured).toHaveBeenCalledWith(ENVELOPE);
+  });
+
+  it("submitting garbage via Continue shows the invalid-code error", () => {
+    renderCapture(true);
+    const textarea = container.querySelector(
+      "textarea#pair-paste",
+    ) as HTMLTextAreaElement;
+    act(() => {
+      // React reads value through the native setter; simulate typing.
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(textarea, "not-a-pairing-code");
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    clickByText("Continue");
+    expect(onCaptured).not.toHaveBeenCalled();
+    expect(container.textContent).toContain(
+      "That doesn't look like a pairing code",
+    );
   });
 
   it("switches to scan mode via the link", () => {
