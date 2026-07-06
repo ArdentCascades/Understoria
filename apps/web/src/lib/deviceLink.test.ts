@@ -292,3 +292,31 @@ describe("link-request client", () => {
     });
   });
 });
+
+describe("community connection rides the transfer", () => {
+  it("sealGrant/openGrant preserve communityNode verbatim", () => {
+    const kp = generateLinkKeypair();
+    const payload = {
+      ...samplePayload(),
+      communityNode: { url: "https://coop.example/api", enabled: true },
+    };
+    const opened = openGrant(sealGrant(payload, b64encode(kp.publicKey)), kp);
+    expect(opened.ok).toBe(true);
+    if (opened.ok) {
+      expect(opened.payload.communityNode).toEqual({
+        url: "https://coop.example/api",
+        enabled: true,
+      });
+    }
+  });
+
+  it("stays optional — a payload without it round-trips as undefined", () => {
+    const kp = generateLinkKeypair();
+    const opened = openGrant(
+      sealGrant(samplePayload(), b64encode(kp.publicKey)),
+      kp,
+    );
+    expect(opened.ok).toBe(true);
+    if (opened.ok) expect(opened.payload.communityNode).toBeUndefined();
+  });
+});

@@ -41,6 +41,7 @@ import {
   type PendingLinkRequest,
 } from "@/lib/deviceLink";
 import { buildTransferPayload } from "@/lib/devicePairing";
+import { readSubmitConfig } from "@/lib/nodeSubmit";
 import { recordPairing } from "@/db/pairing";
 
 type Stage =
@@ -196,6 +197,14 @@ export default function AddDevicePage() {
         const blockBundle = await assembleBlocksForTransfer(
           currentMember.publicKey,
         );
+        // The member's community connection travels with their
+        // identity — without it the linked device arrives to an empty
+        // community (every federation pull is gated on this setting).
+        const submitCfg = await readSubmitConfig();
+        const communityNode =
+          submitCfg.url.trim() !== ""
+            ? { url: submitCfg.url.trim(), enabled: submitCfg.enabled }
+            : undefined;
         const payload = buildTransferPayload({
           secretKey: b64decode(secretKeyB64),
           publicKey: b64decode(currentMember.publicKey),
@@ -209,6 +218,7 @@ export default function AddDevicePage() {
           expiryMs: LINK_EXPIRY_MS,
           blocks: blockBundle.blocks,
           previouslyBlocked: blockBundle.previouslyBlocked,
+          ...(communityNode !== undefined ? { communityNode } : {}),
         });
         const sealed = sealGrant(payload, requestPubkey);
         const published = await publishLinkEnvelope(
@@ -266,6 +276,9 @@ export default function AddDevicePage() {
       const blockBundle = await assembleBlocksForTransfer(
         currentMember.publicKey,
       );
+      // Same community-connection passthrough as the tap-to-link
+      // grant — the QR/words paths must not produce emptier devices.
+      const submitCfg = await readSubmitConfig();
       const env = await wrapForTransfer({
         secretKey,
         publicKey,
@@ -274,6 +287,14 @@ export default function AddDevicePage() {
         expiryMs,
         blocks: blockBundle.blocks,
         previouslyBlocked: blockBundle.previouslyBlocked,
+        ...(submitCfg.url.trim() !== ""
+          ? {
+              communityNode: {
+                url: submitCfg.url.trim(),
+                enabled: submitCfg.enabled,
+              },
+            }
+          : {}),
       });
       return { encoded: encodeEnvelope(env), code: generated };
     },

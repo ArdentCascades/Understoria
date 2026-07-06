@@ -45,6 +45,7 @@ import {
   resolveLinkApiBase,
 } from "@/lib/deviceLink";
 import { b64encode } from "@/lib/bytes";
+import { readSubmitConfig, writeSubmitConfig } from "@/lib/nodeSubmit";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { PairDevicePassphraseEntry } from "@/components/PairDevicePassphraseEntry";
 import { PairDeviceBootstrapReminder } from "@/components/PairDeviceBootstrapReminder";
@@ -258,6 +259,9 @@ export default function PairDevicePage() {
             // without this refresh the post-link navigate("/")
             // bounces straight back to the welcome fork — a trap.
             await refreshOnboarded();
+            // Adopt the source's community connection + first sync,
+            // so the board isn't empty when the member lands on it.
+            await adoptCommunityNodeAndSync(opened.payload);
             setImportedName(opened.payload.profile.displayName);
             const c = linkCancelRef.current;
             linkCancelRef.current = null;
@@ -451,6 +455,9 @@ export default function PairDevicePage() {
         // Same in-memory refresh as the tap-to-link path — without it
         // the gate bounces the finished member back to /welcome.
         await refreshOnboarded();
+        // Same connection adoption + first sync as the tap-to-link
+        // path — the QR/words routes must not produce emptier devices.
+        await adoptCommunityNodeAndSync(payload);
         // Sensitive material — transfer passphrase, payload bytes —
         // dropped explicitly before navigating. Payload's secretKey
         // is already in IndexedDB (wrapped or not); React's GC will
@@ -984,6 +991,54 @@ export default function PairDevicePage() {
       {stage === "success-redirect" && null}
     </div>
   );
+}
+
+/**
+ * After a successful import: adopt the source device's community-node
+ * connection and run the first sync IMMEDIATELY. Without this the
+ * linked device arrives to an empty community — no posts, projects,
+ * events, members, or stats — because every federation pull is gated
+ * on the mirroring setting, and the app-startup sync already ran
+ * (and no-opped) before the member finished linking.
+ *
+ * The setting is the member's own prior consent traveling with their
+ * identity; it is adopted only when this device has no community-node
+ * URL of its own, so an explicit local choice is never overwritten.
+ * The pull fan-out mirrors the startup list in AppContext. All of it
+ * is fire-and-forget: a slow node must not delay "You're in."
+ */
+async function adoptCommunityNodeAndSync(
+  payload: TransferPayload,
+): Promise<void> {
+  const node = payload.communityNode;
+  if (
+    node &&
+    typeof node.url === "string" &&
+    node.url.trim() !== "" &&
+    typeof node.enabled === "boolean"
+  ) {
+    const existing = await readSubmitConfig();
+    if (existing.url.trim() === "") {
+      await writeSubmitConfig({
+        url: node.url.trim(),
+        enabled: node.enabled,
+      });
+    }
+  }
+  void import("@/lib/federationSync").then((sync) => {
+    void sync.pullFederatedPosts();
+    void sync.pullFederatedClaims();
+    void sync.pullFederatedTaskComments();
+    void sync.pullFederatedExchanges();
+    void sync.pullFederatedCoOrgInvitations();
+    void sync.pullFederatedCoOrgResponses();
+    void sync.pullFederatedCoOrgRevocations();
+    void sync.pullFederatedEvents();
+    void sync.pullFederatedEventCancellations();
+    void sync.pullFederatedRedemptions();
+    void sync.pullFederatedInviteRevocations();
+    void sync.pullFederatedVouches();
+  });
 }
 
 /** mm:ss for the link-request countdown. */

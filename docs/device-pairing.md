@@ -133,6 +133,22 @@ plaintext (JSON, parsed after unwrap) = {
   },
   issuedAt:   ms epoch,
   expiresAt:  issuedAt + 5*60*1000,                  // 5-minute window
+                                                     // (15 min on the
+                                                     // relayed paths)
+  blocks?:            BlockRow[],                    // blocking.md §14.1
+  previouslyBlocked?: PreviouslyBlockedRow[],
+  communityNode?: { url, enabled },  // the member's community-node
+                                     // connection. Their own prior
+                                     // consent traveling with their
+                                     // identity: adopted by the
+                                     // destination ONLY when it has no
+                                     // URL of its own, followed by an
+                                     // immediate first federation pull.
+                                     // Without this a linked device
+                                     // arrives to an empty community —
+                                     // every pull is gated on the
+                                     // setting. Optional on the wire
+                                     // (older sources omit it).
 }
 ```
 
