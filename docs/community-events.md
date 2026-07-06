@@ -598,7 +598,11 @@ cover:
 
 A *work day* is the one event shape that is about a project —
 "Saturday build day for Community Fridge." Phase 1 connects the two
-with a **local-only link table**, never a wire field. The contract,
+with a **local-only link table**, never a wire field. *(A work day's
+internal structure — setup crew, serving rota, teardown — is no
+longer limited to the event's single soft `capacity` number: events
+can now carry **shifts**, with the same local-only posture as RSVPs.
+See [`shift-signups.md`](./shift-signups.md).)* The contract,
 stated as negative space:
 
 - **`"event_project_link"` MUST NOT appear in `OutboxRow.kind`.** The

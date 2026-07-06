@@ -4,17 +4,19 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { keyFingerprint } from "@/lib/keyFingerprint";
 
 interface DevicePairingDisplayProps {
-  /** Base64-url-encoded envelope that the destination scans. */
+  /** Base64-url-encoded envelope that the destination scans — or,
+   *  via the gated hatch below, pastes. */
   encodedEnvelope: string;
   /** The 6-word transfer passphrase. Shown segmented for spoken
-   *  delivery; never copy-buttoned (per design doc §6.3 — clipboard
-   *  managers persist). */
+   *  delivery; NEVER copy-buttoned (design doc §5.3 — the passphrase
+   *  is the second channel; the envelope hatch below deliberately
+   *  excludes it so both halves can't travel the same route). */
   passphrase: string;
   /** The member's base64 Ed25519 public key. Rendered as a short
    *  fingerprint so the destination device can confirm it's looking
@@ -42,9 +44,16 @@ interface DevicePairingDisplayProps {
  *     sharing — black-on-white SVG, error correction level M, lazy-
  *     loaded `qrcode` chunk.
  *
- * No clipboard / share-sheet hatch. The envelope is too large to
- * type and clipboard routing reintroduces persistence; the design
- * doc §6.3 names this as a deliberate non-feature.
+ * Copy hatch (design doc §6.3, as revised): the ENVELOPE — never
+ * the passphrase — can be copied to the clipboard behind a
+ * disclosure with an honest warning about clipboard persistence
+ * and cross-device clipboard sync. It exists because the
+ * destination's paste fallback (§7.2) otherwise has no sanctioned
+ * source, and phone→desktop pairing was camera-or-nothing. The
+ * passphrase stays speak-or-type only, so the two halves cannot
+ * travel the same channel by our hand. On expiry/unmount the
+ * clipboard is cleared best-effort — only when it still holds this
+ * envelope, so a member's later copy is never clobbered.
  */
 export function DevicePairingDisplay({
   encodedEnvelope,
@@ -55,6 +64,14 @@ export function DevicePairingDisplay({
 }: DevicePairingDisplayProps) {
   const { t } = useTranslation();
   const [now, setNow] = useState(() => Date.now());
+  const [hatchOpen, setHatchOpen] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
+  // Whether WE put the envelope on the clipboard this mount — the
+  // predicate for the best-effort clear below. A ref (not state):
+  // read inside the unmount cleanup.
+  const copiedRef = useRef(false);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 500);
@@ -64,6 +81,38 @@ export function DevicePairingDisplay({
   useEffect(() => {
     if (now >= expiresAt) onExpired();
   }, [now, expiresAt, onExpired]);
+
+  // Best-effort clipboard hygiene: when this screen goes away (T=0
+  // auto-dismiss, Done, Cancel, route change — all unmount paths),
+  // clear the envelope from the clipboard IF it is still there.
+  // Read-then-compare keeps this non-destructive: whatever the
+  // member copied since is left alone. Both calls can be denied by
+  // the browser (focus/permission); that's fine — this is hygiene
+  // on top of the expiry, not the security boundary (the envelope
+  // is passphrase-wrapped either way).
+  useEffect(() => {
+    return () => {
+      if (!copiedRef.current) return;
+      void navigator.clipboard
+        ?.readText()
+        .then((text) =>
+          text === encodedEnvelope
+            ? navigator.clipboard.writeText("")
+            : undefined,
+        )
+        .catch(() => undefined);
+    };
+  }, [encodedEnvelope]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(encodedEnvelope);
+      copiedRef.current = true;
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
+  };
 
   const remaining = Math.max(0, expiresAt - now);
   const minutes = Math.floor(remaining / 60_000);
@@ -134,6 +183,39 @@ export function DevicePairingDisplay({
         size={288}
         ariaLabel={t("addDevice.display.qrAriaLabel")}
       />
+
+      {/* The copy hatch — envelope only, behind a disclosure so the
+          warning is read before the affordance exists. Feeds the
+          destination's paste capture (§7.2); the passphrase keeps
+          its speak-or-type-only channel. */}
+      <div className="w-full max-w-prose text-center">
+        <button
+          type="button"
+          aria-expanded={hatchOpen}
+          onClick={() => setHatchOpen((open) => !open)}
+          className="text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("addDevice.display.copyHatchToggle")}
+        </button>
+        {hatchOpen && (
+          <div className="mt-2 flex flex-col gap-3 rounded-xl border border-bark-200 bg-bark-100/60 p-4 text-left text-sm text-bark-800 dark:border-bark-700 dark:bg-bark-800/60 dark:text-bark-100">
+            <p>{t("addDevice.display.copyHatchWarning")}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => void handleCopy()}
+              >
+                {t("addDevice.display.copyButton")}
+              </button>
+              <span role="status" className="text-xs">
+                {copyState === "copied" && t("addDevice.display.copied")}
+                {copyState === "failed" && t("addDevice.display.copyFailed")}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
 
       <p className="max-w-prose text-center text-xs text-moss-600 dark:text-moss-300">
         {t("addDevice.display.afterImport")}

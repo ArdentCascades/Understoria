@@ -276,6 +276,25 @@ OPERATOR_NAME="Example Mutual Aid Network"
 OPERATOR_CONTACT=help@example.org
 ```
 
+Three optional hardening knobs are worth knowing about from day
+one (full reference: [`operator-guide.md`](./operator-guide.md)
+env table):
+
+```ini
+# Disk-fill backstop: refuse inserts with HTTP 507 once a table
+# (or one submitting key's share of it) reaches the ceiling.
+# Lifetime counts, not rolling windows — record timestamps are
+# client-claimed, so a time window would be gameable. Absent/0 = off.
+TABLE_ROW_CEILING=0
+PER_KEY_ROW_CEILING=0
+
+# Auto-confirm window enforcement: when on, an exchange with no
+# server-stamped awaiting-transition record is never auto-confirmed
+# (closes the client-claimed-timestamp gaming path). Leave off until
+# your members' PWAs are current enough to submit the artifact.
+AUTO_CONFIRM_REQUIRE_TRANSITION=false
+```
+
 > **Permissions matter.** `chmod 600 .env` means only root can read
 > the secret. If you create a `deploy` user later, narrow ownership
 > with `chown deploy:deploy .env` so docker compose can still read it.

@@ -180,11 +180,16 @@ PR must check whether such a key has landed and, if so, reuse it.
 
 ### Sweep
 
-A worker — PWA-side on app start, or server-side cron, decided
-during implementation (see §7) — walks the `awaiting_confirmation`
-records whose oldest pending-confirm timestamp is older than
-`autoConfirmHours`. For each, it calls a server endpoint
-(working name `POST /auto-confirm`) that:
+A worker — PWA-side on app start as shipped
+(`apps/web/src/lib/autoConfirmSweep.ts`; see §7 for the original
+either/or) — walks the `awaiting_confirmation` records whose oldest
+pending-confirm timestamp is older than `autoConfirmHours`. For
+each, it calls the server endpoint `POST /auto-confirm`, which
+anchors the age check on the **server-stamped `received_at`** of the
+signed awaiting-transition record where one exists (§5's Round-4
+correction; `resolveWindowAnchor`), falling back to the
+client-claimed timestamp only while `AUTO_CONFIRM_REQUIRE_TRANSITION`
+is off. The endpoint then:
 
 1. Re-verifies the helper's signature on the canonical completion
    payload (the same payload `confirmExchange` and
@@ -380,10 +385,10 @@ not skip it on a re-read.
   auto-confirm record is tagged and traceable. That is a small
   but real improvement over a silent ledger edit.
 
-## 6. What ships in code (PR-A)
+## 6. What shipped in code
 
-The next PR (referred to in conversation as PR-A) implements §4
-with the following surface:
+Shipped as designed in §4 (originally scoped as PR-A), with the §5
+Round-4 correction landing in a later round. The surface:
 
 - New env var `NODE_SYSTEM_SECRET_KEY` in
   `apps/server/src/config.ts`; new field on the `Config` type.
@@ -404,14 +409,35 @@ with the following surface:
   (a record signed by a now-retired key still verifies);
   disabled-state (sweep is a no-op when `autoConfirmHours === 0`);
   refusal to sign when the helper signature does not verify.
+- **Round-4 addition (§5):** the `AwaitingTransition` shared type +
+  canonical payload + verifier, `POST /awaiting-transitions` with
+  first-writer-wins `received_at` (server schema v14/v15), the
+  `awaiting_transition` outbox kind on the PWA (enqueued when an
+  exchange enters `awaiting_confirmation` or a project-task
+  completion is marked), `resolveWindowAnchor` substitution at
+  `POST /auto-confirm`, and the `AUTO_CONFIRM_REQUIRE_TRANSITION`
+  rollout knob (off = legacy fallback for artifact-less records,
+  on = no artifact, no auto-confirm).
 
-The threat-model entry added in this branch is the predicate; the
-implementation PR must cite it in its description.
+The threat-model §7 entry ("Node system key for auto-confirmation",
+including the window-anchor update) is the standing predicate.
 
 ## 7. Open questions / pilot validation
 
-Items the design is guessing about. Flagged so a pilot tunes them
-against real use:
+**Resolutions as shipped** (the discussions below are kept as the
+record of why): default `autoConfirmHours` is **168** (on by
+default, community can set 0 — the opt-out argument won); the sweep
+is **PWA-side on app start** (`autoConfirmSweep.ts`), with the
+server env floor `AUTO_CONFIRM_MIN_HOURS` bounding how low a
+community setting can take the window; the discriminator is the
+**explicit** `autoConfirmed` / `autoConfirmedBy` fields on
+`Exchange`; `autoConfirmedAt` ships as a field **inside the signed
+surface** (a later hardening round moved it under the system-key
+signature, per the recommendation); helper-requested opt-out of
+auto-confirm did not ship (default-no held).
+
+Items the design was guessing about, flagged so a pilot could tune
+them against real use:
 
 - **Default `autoConfirmHours`.** This doc proposes 0 (off by
   default, community opts in via proposal). The alternative is

@@ -13,9 +13,9 @@ This guide covers two deployment paths, both currently supported:
 2. **PWA + node server** — additionally run the Fastify community
    node from `apps/server/`. The node accepts signed Exchange records
    over HTTP, verifies them with the same cryptographic primitives
-   the PWA uses, and stores them in a local SQLite file. This is the
-   foundation for federation across communities (cross-node sync is
-   the next workstream).
+   the PWA uses, and stores them in a local SQLite file. Federation
+   across communities is live: the pull loop in §6 syncs verified
+   records between the peer nodes you configure.
 
 Pick PWA-only if you want to minimize what you operate. Pick
 PWA + node if you want a community-wide ledger and to be ready to
@@ -193,9 +193,14 @@ The Fastify node lives at `apps/server/`. It exposes:
   newest-first. Every row is signed and any peer can independently
   verify with the same code path.
 
+The exchange pair above is the original core; the same
+accept-verified-and-serve pattern has since grown to posts, vouches,
+claims, task comments, community events (+ cancellations),
+co-organizer invitations, invite redemptions/revocations, and
+awaiting-transition records — each with its own route file under
+`apps/server/src/routes/` and each covered by the §6 peer pull.
+
 It does **not** yet:
-- Speak federation protocol to peer nodes (next workstream).
-- Accept posts, vouches, invites, or messages — that's incremental.
 - Authenticate clients beyond the cryptographic signatures on each
   record. Authentication for non-record endpoints (e.g. an admin
   panel, when those land) is tracked work.
@@ -355,8 +360,8 @@ storing on third-party infrastructure.
 
 | Feature | Status | Operator workaround |
 |---------|--------|---------------------|
-| Federation between nodes | Pending (next workstream) | Run one node per community for now |
-| Direct messaging | Pending (Agent 2 task 5) | Members coordinate via Signal |
+| Federation between nodes | Shipped (§6 pull loop: exchanges, vouches, posts, claims, task comments, events, invitations) | Configure `PEER_NODE_URLS`; proposals/disputes remain local-only by design |
+| Direct messaging | Shipped in the PWA (end-to-end encrypted; the node never sees plaintext) | — |
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
 | Posts / vouches / invites endpoints | Pending | Members exchange invite tokens out of band |
 | Automated dependency scanning | Manual | Run `npm audit` weekly; subscribe to advisories |

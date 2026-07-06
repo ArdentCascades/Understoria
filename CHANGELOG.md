@@ -10,6 +10,43 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Device pairing: a "copy pairing code" hatch for phone→desktop.**
+  The pairing display screen can now copy the wrapped envelope to
+  the clipboard — behind a disclosure that plainly names clipboard
+  history and cross-device clipboard sync — feeding the capture
+  screen's existing paste fallback, which previously had no
+  sanctioned source (pairing a cameraless desktop was impossible;
+  pairing any desktop meant holding your phone up to a webcam).
+  The envelope only: the six-word passphrase stays speak-or-type,
+  so both halves can never travel the same channel, and the
+  clipboard is cleared best-effort when the five-minute timer ends
+  or the wizard closes (only if it still holds the pairing code —
+  a later copy is never clobbered). A shareable pairing *link* was
+  considered and rejected: links transit chat threads, and chat
+  logs are forever; the design-note §6.3 revision and the
+  threat-model pairing entry record the reasoning.
+
+### Changed
+- **Documentation synced to the last several shipped rounds.** The
+  threat model gains the two entries recent server work created:
+  the auto-confirm §7 entry now records the awaiting-transition
+  window anchor (server-stamped `received_at`, first-writer-wins,
+  `AUTO_CONFIRM_REQUIRE_TRANSITION` rollout knob), and a new entry
+  covers the insert-ceiling disk-fill backstop (`TABLE_ROW_CEILING`
+  / `PER_KEY_ROW_CEILING`, HTTP 507, lifetime-not-rolling
+  rationale). `auto-confirm-key.md` §4/§6/§7 are reconciled to what
+  shipped (PWA-side sweep, default 168h, explicit `autoConfirmed*`
+  fields, the §5 artifact surface). The operator guide and developer
+  guide stop calling federation "the next workstream"; the deploy
+  runbook documents the three new env knobs; the accessibility test
+  runbook's bottom-nav step is rewritten for the non-scrolling app
+  shell; `community-events.md` §10.1 cross-references shifts; the
+  events FAQ (EN + ES) now describes shift signups; and the
+  roadmap's schema/test facts and Agent 1/Agent 10 rows catch up
+  (PWA v28 / server v15, staged template review, the 54-template
+  content overhaul, shift signups, the app-shell nav fix).
+
+### Added
 - **Project template content overhaul: four new templates and an
   honest-hours audit across all fifty.** New templates in both
   locales: harm-reduction supply distribution, court support &

@@ -269,11 +269,32 @@ showing" escape hatch. For invites, the URL is small enough to type
 into Signal; the hatch routes it through `navigator.share` /
 clipboard so the URL never lands on a framebuffer. For device
 pairing the envelope is several hundred bytes of base64 — typing it
-defeats the purpose, and clipboard-routing into a second device's
-text field reintroduces the persistence problem the invite hatch
-was designed to avoid. The threat model concludes there is no safe
-non-QR channel for this transfer; the room-control discipline is
-the mitigation.
+defeats the purpose. v1 concluded there was no safe non-QR channel
+for this transfer at all.
+
+**Revision — the envelope copy hatch.** That v1 conclusion was
+internally inconsistent: the destination's capture screen has
+always offered paste-from-clipboard as a fallback (§7.2), which
+implies the clipboard channel while giving it no sanctioned source
+— and phone→desktop pairing (the common direction) was
+camera-or-nothing, with cameraless desktops locked out entirely.
+The revised position: the actual security boundary is the
+**wrapped envelope + out-of-band passphrase**, not pixels-only
+transport. The display screen therefore now offers a **copy
+hatch — for the envelope only, never the passphrase** — behind a
+disclosure that states plainly that clipboards can sync across
+devices and persist in clipboard-manager history. The passphrase
+keeps its speak-or-type-only channel, so the two halves cannot
+travel the same route by our hand; the 5-minute expiry bounds an
+honest client's use of a stale envelope; and on expiry / wizard
+exit the clipboard is cleared best-effort (read-compare-clear, so a
+member's later copy is never clobbered; both clipboard calls can be
+denied by the browser and the clear is hygiene, not the boundary).
+What remains deliberately out: a *shareable URL* form of the
+envelope. A pairing link invites transit through chat threads —
+persistent logs, notification previews, and the near-certainty
+that the six words get typed into the same thread. Copy-paste is a
+device-local act; a link is a message. Only the former ships.
 
 ### 6.4 Display screen
 
@@ -341,7 +362,8 @@ detected at runtime:
   to the paste path.
 - **Paste from clipboard** as the universal fallback. The QR
   payload is base64url and pastes cleanly even on devices that
-  can't activate the camera.
+  can't activate the camera. The sanctioned source is the display
+  screen's gated copy hatch (§6.3) — the phone→desktop path.
 
 ### 7.3 Passphrase entry
 

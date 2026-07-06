@@ -367,6 +367,13 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "confirmado ven solo los conteos, y las comunidades vecinas " +
             "no ven tu confirmación nunca. Si cambias tu respuesta a 'no " +
             "voy', tu nombre sale de la lista al momento.",
+          "Algunos eventos también tienen turnos — franjas horarias " +
+            "donde quien organiza necesita cierto número de manos, como " +
+            "un equipo de montaje o una rotación para servir. Apuntarte " +
+            "a un turno también confirma tu asistencia como 'voy'. La " +
+            "lista de turnos funciona como la lista de asistencia: se " +
+            "queda en el nodo de esta comunidad, y cambiar tu respuesta " +
+            "a 'no voy' te quita también de los turnos.",
           "Los eventos no se pueden editar después de creados — un " +
             "evento firmado se queda siendo exactamente aquello a lo que " +
             "la gente dijo que sí. Si cambian los detalles, quien " +

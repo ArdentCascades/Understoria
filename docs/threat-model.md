@@ -440,9 +440,9 @@ We are not trying to protect against:
   decide whether to pair before identity material is rendered.
   (b) **Camera-awareness gate**, identical to the invite-QR
   gate but with sharper copy naming the 5-minute replay window.
-  No "send without showing" hatch — the envelope is several
-  hundred base64 bytes and the no-hatch decision is documented
-  in `device-pairing.md` §6.3.
+  No "send without showing" hatch of the invite kind; a narrower
+  **envelope-only copy hatch** exists behind its own disclosure
+  (see the revision note below and `device-pairing.md` §6.3).
   (c) **Fresh per-transfer passphrase.** Source device generates
   a 6-word BIP39 passphrase, ~66 bits of entropy. Member never
   picks it; clipboard-copy is not offered (clipboard managers
@@ -472,9 +472,26 @@ We are not trying to protect against:
     confirmation; the 5-minute auto-dismiss is the actual
     security property.
   - **"Send without showing" hatch** of the kind the invite QR
-    uses. The envelope is too large to type, and clipboard /
-    `navigator.share` routing re-introduces the persistence
-    problem we removed from the invite flow.
+    uses — REVISED, partially. v1 rejected all clipboard routing,
+    but that left the destination's paste fallback with no
+    sanctioned source and made phone→desktop pairing
+    camera-or-nothing. As shipped: the display screen offers a
+    gated **copy hatch for the wrapped envelope only** — the
+    passphrase is never copyable, so both halves cannot travel one
+    channel by our hand. The disclosure names clipboard-manager
+    persistence and cross-device clipboard sync before the button
+    exists; on expiry / wizard exit the clipboard is cleared
+    best-effort (read-compare-clear — never clobbers a later
+    copy; browsers may deny both calls, and the clear is hygiene
+    on top of the passphrase wrapping + expiry, not the boundary).
+    Accepted residual: a synced clipboard (e.g. OS cloud
+    clipboard) may relay the wrapped envelope through its vendor;
+    the envelope is scrypt-wrapped under ~66 bits of passphrase
+    the vendor never sees. Still rejected: any *shareable URL*
+    form of the envelope — links transit chat threads (persistent
+    logs, previews, and the near-certainty the six words follow in
+    the same thread); copy-paste is device-local, a link is a
+    message.
   After successful pairing, both devices hold the same identity.
   This is a deliberate design choice, not a bug:
   Ed25519 has no in-protocol revocation, so a stolen paired
@@ -1052,6 +1069,49 @@ We are not trying to protect against:
   quo); can collude with a member filing bogus completions — but the
   helper's signature stays on the record, so attribution is public
   and the safeguards module still applies.
+  **Window-anchor update (awaiting-transition artifact, shipped):**
+  the age gate at `POST /auto-confirm` originally trusted the
+  client-claimed `awaitingSince`, so a caller could claim an old
+  value and skip the waiting window entirely — and project-task
+  confirmations had no age anchor at all. Now, when an exchange
+  enters `awaiting_confirmation` (or a project-task completion is
+  marked), the client signs and submits an `AwaitingTransition`
+  record; the server stores a **server-stamped `received_at`**
+  (INSERT OR IGNORE — first writer wins, so a later re-submission
+  cannot refresh or backdate the anchor) and the sweep substitutes
+  that server clock for the client claim when checking the window
+  (`resolveWindowAnchor` in `apps/server/src/routes/autoConfirm.ts`,
+  store in `db.ts` v14/v15). Rollout knob:
+  `AUTO_CONFIRM_REQUIRE_TRANSITION` — off, a missing artifact falls
+  back to the legacy client-claimed anchor (compatibility window for
+  fielded clients); on, no artifact means no auto-confirm. Residual
+  until the knob is flipped on: the legacy fallback preserves the
+  original gaming vector for records without artifacts, which is why
+  the flip is tracked as a pilot-gated operator action
+  (`operator-guide.md` env table) rather than a default.
+
+- **Server insert ceilings (disk-fill backstop).**
+  *Shipped — `apps/server/src/insertCaps.ts`, one `preHandler` over
+  a static path→{table, key column} map of the public insert
+  surfaces; env knobs `TABLE_ROW_CEILING` (per table) and
+  `PER_KEY_ROW_CEILING` (per submitting key per table), absent/`0` =
+  off.* Threat: any holder of a valid member key — or a compromised
+  peer relay — can submit records in a loop until the node's disk
+  fills, taking the community offline; nothing in the signature
+  model bounds *volume*. Mitigation: once a ceiling is reached the
+  server refuses further inserts on that surface with **HTTP 507**,
+  which the PWA outbox already treats as retryable — a member's
+  queued post survives the outage and delivers after the operator
+  raises the ceiling, so the failure mode is "pause", not "lose
+  data". Deliberate bounds: the ceilings are **lifetime counts, not
+  rolling windows** — record timestamps are client-claimed, so any
+  time-windowed rate limit could be dodged by backdating; a lifetime
+  ceiling is gameable by no clock. Residual: a determined key holder
+  can still exhaust their own per-key allowance (self-DoS of one
+  key) and a fleet of Sybil keys bounded only by invite redemption
+  can approach the table ceiling — both leave the node up and are
+  operator-visible; invite hygiene (revocation, redemption caps) is
+  the upstream control.
 
 - **`ProjectTask.orderIndex` and `dependencies` remain local;
   widening would need a wire-surface review.**
