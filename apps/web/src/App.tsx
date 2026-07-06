@@ -69,11 +69,35 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Scroll container for the one route that renders OUTSIDE the Layout
+// app shell. The document itself can never scroll (`overflow: clip`
+// on html/body — the fix for iOS detaching bottom-anchored chrome),
+// and Layout's <main> is the scroller everywhere else; a standalone
+// route must bring its own or any step taller than the viewport is
+// simply cut off (found live on the welcome flow's profile step on
+// desktop). `relative` for the same reason <main> is relative:
+// absolutely-positioned descendants (sr-only) must resolve their
+// containing block inside the scroller, not the clipped document.
+function StandaloneScroll({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative h-dvh overflow-y-auto overscroll-contain">
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <OnboardingGate>
       <Routes>
-        <Route path="/welcome" element={<WelcomePage />} />
+        <Route
+          path="/welcome"
+          element={
+            <StandaloneScroll>
+              <WelcomePage />
+            </StandaloneScroll>
+          }
+        />
         <Route element={<Layout />}>
           <Route index element={<BoardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
