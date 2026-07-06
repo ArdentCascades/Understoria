@@ -52,7 +52,8 @@
       "copyHatchWarning": "Copying puts the pairing code in your clipboard, which may sync across your devices or be kept in a clipboard manager's history. The code only works for the next few minutes and is useless without the six words — say them aloud, type them, or keep them on paper; never send them alongside the code. We'll try to clear the clipboard when the timer runs out.",
       "copyButton": "Copy pairing code",
       "copied": "Copied. On the new device, choose paste on the capture screen.",
-      "copyFailed": "Couldn't copy — this browser blocked clipboard access. Use the QR instead.",
+      "copyFailed": "Couldn't copy — this browser blocked clipboard access. Tap the code below, Select All, then Copy.",
+      "copySelectLabel": "If the button doesn't work: tap the code below, Select All, and Copy",
       "afterImport": "When the other device says it's done, tap Done. The QR will also clear on its own when the timer reaches zero.",
       "done": "Done",
       "fingerprintLabel": "Confirm on the other device",
@@ -101,6 +102,7 @@
       "pasteLabel": "Or paste the QR contents",
       "pastePlaceholder": "Paste base64 envelope here…",
       "continue": "Continue",
+      "invalidCode": "That doesn't look like a pairing code. Copy it again from the other screen — make sure you get the whole thing.",
       "samePhone": {
         "title": "Bring your identity over from this phone's browser",
         "step1": "Open Understoria in your browser — the one where you're signed in. Go to Profile, then \"Add another device.\"",
