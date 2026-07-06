@@ -193,13 +193,15 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "new-device",
         question: "How do I move to a new device?",
         answer: [
-          "Use device pairing. On the device that already has your " +
-            "identity, go to Profile → Add another device. It shows a " +
-            "QR code and a six-word phrase. On the new device, choose " +
-            "'I have another device' on the welcome screen, scan the " +
-            "code (or paste it), and type in the six words, in order. " +
-            "Your identity and profile move across directly, device to " +
-            "device — nothing passes through any server.",
+          "On the device that already has your identity, go to " +
+            "Profile → Add another device. It shows six words. On the " +
+            "new device, pick the pairing option on the welcome screen " +
+            "and type those six words, in order — that's the whole " +
+            "transfer. The words are good for 15 minutes and work " +
+            "exactly once; your community node relays the encrypted " +
+            "bundle but can never read it. (No node, or offline? " +
+            "There's a QR option one tap away that goes device to " +
+            "device with nothing stored anywhere.)",
           "Two things don't come along: your message history (messages " +
             "are encrypted to each device's own keys, so they stay " +
             "where they were received) and per-device settings like " +

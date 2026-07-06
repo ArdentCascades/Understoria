@@ -866,6 +866,29 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '15')",
     ).run();
   }
+
+  // Schema v16 — node-relayed device linking (docs/device-pairing.md
+  // §6.6). Ephemeral mailbox rows: an opaque channel id (derived
+  // client-side from the link code via the same PBKDF2 cost as the
+  // envelope key — the server cannot cheaply reverse it) mapping to a
+  // passphrase-wrapped TransferEnvelope. Rows are one-shot (deleted on
+  // first successful GET) and TTL-bounded; the expires index keeps the
+  // prune-on-write sweep O(log n).
+  if (current < 16) {
+    db.exec(`
+      CREATE TABLE device_link_blobs (
+        channel_id TEXT PRIMARY KEY,
+        envelope TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL
+      );
+      CREATE INDEX device_link_blobs_expires_idx
+        ON device_link_blobs (expires_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '16')",
+    ).run();
+  }
 }
 
 /**
@@ -2185,4 +2208,76 @@ function rowToEventCancellation(
   r: EventCancellationRowSqlite,
 ): EventCancellation {
   return JSON.parse(r.payload) as EventCancellation;
+}
+
+// --- Device-link mailbox (docs/device-pairing.md §6.6) ---------------
+//
+// The node's ONLY role in device linking is dumb ciphertext relay:
+// it stores a passphrase-wrapped TransferEnvelope under an opaque
+// channel id for up to the TTL, hands it out exactly once, and
+// forgets it. No signatures, no federation, no reads into the blob.
+
+export interface DeviceLinkStore {
+  /** Insert a fresh mailbox row. Throws on duplicate channel id (the
+   *  caller maps that to 409 — codes are freshly random per attempt,
+   *  so a collision in practice means replay, not accident). */
+  insert(row: {
+    channelId: string;
+    envelope: string;
+    createdAt: number;
+    expiresAt: number;
+  }): void;
+  /** One-shot read: returns the envelope AND deletes the row, or
+   *  null when absent/expired (expired rows are deleted on the way
+   *  out too). Atomic so two racing GETs can't both win. */
+  take(channelId: string, now: number): string | null;
+  /** Delete every expired row. Called on each insert so the table
+   *  can't accumulate stale ciphertext. */
+  pruneExpired(now: number): void;
+  count(): number;
+}
+
+export function createDeviceLinkStore(db: DatabaseType): DeviceLinkStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO device_link_blobs (channel_id, envelope, created_at, expires_at)
+    VALUES (@channelId, @envelope, @createdAt, @expiresAt)
+  `);
+  const getStmt = db.prepare(
+    "SELECT envelope, expires_at FROM device_link_blobs WHERE channel_id = ?",
+  );
+  const deleteStmt = db.prepare(
+    "DELETE FROM device_link_blobs WHERE channel_id = ?",
+  );
+  const pruneStmt = db.prepare(
+    "DELETE FROM device_link_blobs WHERE expires_at < ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM device_link_blobs",
+  );
+
+  const takeTx = db.transaction((channelId: string, now: number) => {
+    const row = getStmt.get(channelId) as
+      | { envelope: string; expires_at: number }
+      | undefined;
+    if (!row) return null;
+    // Expired or fresh, the row is consumed either way — a stale
+    // mailbox is never left behind for a later guess.
+    deleteStmt.run(channelId);
+    return row.expires_at < now ? null : row.envelope;
+  });
+
+  return {
+    insert(row) {
+      insertStmt.run(row);
+    },
+    take(channelId, now) {
+      return takeTx(channelId, now) as string | null;
+    },
+    pruneExpired(now) {
+      pruneStmt.run(now);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
 }

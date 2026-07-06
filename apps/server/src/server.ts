@@ -25,6 +25,7 @@ import type { Database as DatabaseType } from "better-sqlite3";
 import type { Config } from "./config.js";
 import {
   createAwaitingTransitionStore,
+  createDeviceLinkStore,
   createClaimStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
@@ -57,6 +58,7 @@ import { registerCoOrganizerInvitationResponseRoutes } from "./routes/coorgInvit
 import { registerCoOrganizerInvitationRevocationRoutes } from "./routes/coorgInvitationRevocations.js";
 import { registerEventRoutes } from "./routes/events.js";
 import { registerEventCancellationRoutes } from "./routes/eventCancellations.js";
+import { registerDeviceLinkRoutes } from "./routes/deviceLink.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard } from "./insertCaps.js";
 
@@ -176,6 +178,7 @@ export async function buildServer({
   const eventCancellationStore = createEventCancellationStore(db);
   const pullStore = createPeerPullStore(db);
   const awaitingTransitionStore = createAwaitingTransitionStore(db);
+  const deviceLinkStore = createDeviceLinkStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -228,6 +231,11 @@ export async function buildServer({
     store: eventCancellationStore,
     eventStore,
   });
+  // Device-link mailbox — NOT a federation surface: rows are opaque
+  // ciphertext, one-shot, TTL-bounded, never pulled by peers. The
+  // route carries its own row ceiling + prune (routes/deviceLink.ts),
+  // so it sits outside the insert-cap guard's SURFACES map.
+  await registerDeviceLinkRoutes(app, { store: deviceLinkStore });
   await registerConfigRoutes(app, { config, signer });
   await registerAwaitingTransitionRoutes(app, {
     store: awaitingTransitionStore,

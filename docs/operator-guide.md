@@ -369,6 +369,7 @@ storing on third-party infrastructure.
 | Direct messaging | Shipped in the PWA (end-to-end encrypted; the node never sees plaintext) | — |
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
 | Open-invite server storage | Intentionally absent | Invites never cross any wire (the old `POST/GET /invites` surface was removed); only signed redemption receipts and revocations federate |
+| Device-link relay | Shipped (`POST/GET /device-link`) | Ephemeral encrypted mailbox for member device linking: ciphertext only, one-shot, 15-minute TTL, never federates, capped at 512 live rows and pruned on every write — nothing to operate or back up |
 | Automated dependency scanning | Manual | Run `npm audit` weekly; subscribe to advisories |
 
 Each of these is tracked in the [Threat Model](threat-model.md) §7.
