@@ -59,9 +59,17 @@
       "fingerprintLabel": "Confirma en el otro dispositivo",
       "fingerprintAriaLabel": "Huella de identidad para confirmar en el otro dispositivo"
     },
+    "link": {
+      "intro": "En tu dispositivo nuevo, abre Understoria y elige la opción sobre ya tener tu identidad. Luego escribe estas 6 palabras ahí, en orden:",
+      "warning": "Estas palabras son la llave completa durante los próximos 15 minutos — quien las escriba primero obtiene tu identidad. No las digas cerca de otras personas y nunca las envíes por chat.",
+      "afterImport": "Cuando el dispositivo nuevo diga que ya entró, toca Listo. El código muere solo cuando el temporizador termina, y solo funciona una vez.",
+      "qrInstead": "¿El dispositivo nuevo está sin conexión, o prefieres no guardar nada en el nodo? Muestra un QR",
+      "fallbackNotice": "No se pudo contactar tu nodo comunitario ahora — usando el método QR en su lugar."
+    },
     "expired": {
       "title": "Se acabó el tiempo.",
       "body": "Pasaron cinco minutos. El QR ya no está y la contraseña tampoco. Si todavía quieres vincular el otro dispositivo, empieza de nuevo — se generará una contraseña fresca.",
+      "bodyLink": "Pasaron quince minutos, así que las palabras dejaron de funcionar y la transferencia cifrada se borró del nodo. Si todavía quieres vincular el otro dispositivo, empieza de nuevo — tendrás palabras frescas.",
       "startOver": "Empezar de nuevo",
       "close": "Cerrar"
     },
@@ -85,8 +93,19 @@
   },
   "pairDevice": {
     "title": "Vincular este dispositivo",
-    "subtitle": "Escanea el QR del otro dispositivo y luego escribe las 6 palabras que muestra.",
-    "subtitleSamePhone": "Copia el código de emparejamiento desde el navegador de este teléfono y luego escribe las 6 palabras que mostró.",
+    "subtitle": "Trae tu identidad desde el dispositivo que la tiene.",
+    "subtitleSamePhone": "Trae tu identidad desde el navegador de este teléfono.",
+    "link": {
+      "directionsTitle": "Consigue las 6 palabras del dispositivo que tiene tu identidad.",
+      "step1": "En ese dispositivo, abre Perfil, luego \"Vincular otro dispositivo\" y Continuar.",
+      "step2": "Muestra 6 palabras. Escríbelas abajo, en orden — valen durante 15 minutos.",
+      "samePhoneStep1": "En el navegador de este teléfono, abre Understoria y ve a Perfil → \"Vincular otro dispositivo\", luego Continuar.",
+      "samePhoneStep2": "Muestra 6 palabras. Vuelve aquí y escríbelas abajo — siguen valiendo 15 minutos, así que cambiar de app no es problema.",
+      "submit": "Vincular este dispositivo",
+      "notFound": "No hay nada esperando bajo estas palabras. Revisa cada palabra y el orden — y revisa que la otra pantalla todavía las muestre. Los códigos caducan a los 15 minutos y cada código funciona exactamente una vez.",
+      "noNode": "Este dispositivo no puede contactar un nodo comunitario, así que vincular con palabras no está disponible aquí. Usa la opción de QR de abajo.",
+      "scanInstead": "¿Sin nodo comunitario, o el otro dispositivo no puede conectarse? Escanea un QR"
+    },
     "capture": {
       "directions": {
         "title": "¿Necesitas un QR? Genera uno desde tu otro dispositivo.",
@@ -2168,7 +2187,7 @@
       "title": "La app ya está en tu pantalla de inicio",
       "intro": "Una pregunta antes de empezar:",
       "bringTitle": "Ya uso Understoria en el navegador de este teléfono",
-      "bringBody": "La app instalada empieza con su propio almacenamiento vacío, así que no ve tu sesión del navegador. Trae tu identidad — toma un minuto y nada sale de tu teléfono.",
+      "bringBody": "La app instalada empieza con su propio almacenamiento vacío, así que no ve tu sesión del navegador. Trae tu identidad — escribe 6 palabras, toma un minuto.",
       "newTitle": "Soy nueva aquí — empezar de cero",
       "newBody": "Haz el recorrido corto y luego crea tu identidad."
     },

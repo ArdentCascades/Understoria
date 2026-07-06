@@ -9,6 +9,31 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Device linking, Signal-style: type six words, done.** Adding a
+  device no longer involves QR codes, cameras, or copy-paste. The
+  device with your identity shows six words; the new device asks
+  for six words; typing them (with autocomplete) moves everything
+  across. Under the hood the community node acts as a one-shot
+  encrypted mailbox: the source parks the same passphrase-wrapped
+  envelope the QR flow always used (now with a 15-minute window
+  instead of 5), filed under a channel id derived from the words at
+  full PBKDF2 cost, and the new device claims it exactly once —
+  the row is deleted atomically with the read, so a hijacked code
+  makes your own import visibly fail instead of silently forking
+  your identity. The node sees ciphertext only and the words never
+  cross any wire; the mailbox never federates, is capped, and is
+  pruned on every write. Honest tradeoffs, documented in the
+  threat model: the six words alone are a bearer credential for
+  their 15 minutes, and the node operator holds a brute-force
+  target (~66 bits at 600k PBKDF2 iterations — the same class of
+  exposure the QR already conceded to anyone who photographs it).
+  The QR flow remains one tap away as the offline path and the
+  nothing-on-the-node option. This also un-traps the installed-app
+  journey: the words survive app-switching (they live at the node,
+  not in a fragile browser tab), so the same-phone flow is now
+  read words in browser → type words in app.
+
 ### Fixed
 - **Same-phone pairing no longer depends on the JS clipboard API —
   the exact API that is broken on the platform it was built for.**

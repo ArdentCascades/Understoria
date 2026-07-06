@@ -29,6 +29,12 @@ import {
   unwrapTransfer,
   type TransferPayload,
 } from "@/lib/devicePairing";
+import {
+  deriveLinkChannelId,
+  fetchLinkEnvelope,
+  normalizeLinkCode,
+  resolveLinkApiBase,
+} from "@/lib/deviceLink";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { PairDevicePassphraseEntry } from "@/components/PairDevicePassphraseEntry";
 import { PairDeviceBootstrapReminder } from "@/components/PairDeviceBootstrapReminder";
@@ -36,6 +42,7 @@ import { DevicePairingFingerprintConfirm } from "@/components/DevicePairingFinge
 import { recordPairing } from "@/db/pairing";
 
 type Stage =
+  | "link-entry"
   | "capture"
   | "passphrase"
   | "fingerprint-confirm"
@@ -80,10 +87,15 @@ export default function PairDevicePage() {
   const [searchParams] = useSearchParams();
   const samePhone = searchParams.get("samePhone") === "1";
 
-  const [stage, setStage] = useState<Stage>("capture");
+  // Word-linking is the default entry (design doc §6.6) — the node
+  // relays the envelope, so the member types only the 6 words. The
+  // QR/capture path stays one tap away for offline communities.
+  const [stage, setStage] = useState<Stage>("link-entry");
   const [encoded, setEncoded] = useState<string | null>(null);
   const [payload, setPayload] = useState<TransferPayload | null>(null);
   const [unwrapError, setUnwrapError] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [linkBusy, setLinkBusy] = useState(false);
   const [sessionPassphrase, setSessionPassphrase] = useState("");
   const [sessionConfirm, setSessionConfirm] = useState("");
   const [sessionError, setSessionError] = useState<string | null>(null);
@@ -120,6 +132,56 @@ export default function PairDevicePage() {
     setEncoded(value);
     setStage("passphrase");
   }, []);
+
+  // Link path: the 6 words locate the node's mailbox AND decrypt the
+  // envelope. One derivation finds the channel, one unwraps —
+  // channel match implies key match, so a found-but-undecryptable
+  // envelope is a server fault, not a typo. The mailbox row is
+  // ONE-SHOT: a successful fetch consumes it, so failures after that
+  // point send the member back to the source device to start over.
+  const handleSubmitLinkCode = useCallback(
+    async (code: string) => {
+      setLinkBusy(true);
+      setLinkError(null);
+      try {
+        const apiBase = await resolveLinkApiBase();
+        if (!apiBase) {
+          setLinkError(t("pairDevice.link.noNode"));
+          return;
+        }
+        const normalized = normalizeLinkCode(code);
+        const channelId = await deriveLinkChannelId(normalized);
+        const res = await fetchLinkEnvelope(apiBase, channelId);
+        if (res.kind === "not_found") {
+          setLinkError(t("pairDevice.link.notFound"));
+          return;
+        }
+        if (res.kind === "error") {
+          setLinkError(t("pairDevice.errors.generic"));
+          return;
+        }
+        const env = decodeEnvelope(res.envelope);
+        if (!env) {
+          setLinkError(t("pairDevice.errors.generic"));
+          return;
+        }
+        const result = await unwrapTransfer(env, normalized);
+        if (!result.ok) {
+          setLinkError(
+            result.reason === "expired"
+              ? t("pairDevice.link.notFound")
+              : t("pairDevice.errors.generic"),
+          );
+          return;
+        }
+        setPayload(result.payload);
+        setStage("fingerprint-confirm");
+      } finally {
+        setLinkBusy(false);
+      }
+    },
+    [t],
+  );
 
   const handleSubmitPassphrase = useCallback(
     async (passphrase: string) => {
@@ -187,9 +249,12 @@ export default function PairDevicePage() {
     setEncoded(null);
     setPayload(null);
     setUnwrapError(null);
+    setLinkError(null);
     setSessionPassphrase("");
     setSessionConfirm("");
-    setStage("capture");
+    // Back to the default entry — for the link path the mailbox row
+    // was consumed, so the source device must start over anyway.
+    setStage("link-entry");
   }, []);
 
   // The session-passphrase step optionally sets the device's own
@@ -265,11 +330,65 @@ export default function PairDevicePage() {
         </p>
       </header>
 
+      {stage === "link-entry" && (
+        <section className="card flex flex-col gap-4">
+          {/* Where-do-the-words-come-from directions, phrased for the
+              journey: the same-phone member flips to their browser;
+              the two-device member glances at the other screen. */}
+          <section
+            aria-labelledby="pairDevice-link-directions-heading"
+            className="rounded-xl border border-canopy-200 bg-canopy-50 p-4 dark:border-canopy-800 dark:bg-canopy-950/40"
+          >
+            <h2
+              id="pairDevice-link-directions-heading"
+              className="mb-2 text-sm font-semibold text-canopy-900 dark:text-canopy-100"
+            >
+              {t("pairDevice.link.directionsTitle")}
+            </h2>
+            <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+              <li>
+                {samePhone
+                  ? t("pairDevice.link.samePhoneStep1")
+                  : t("pairDevice.link.step1")}
+              </li>
+              <li>
+                {samePhone
+                  ? t("pairDevice.link.samePhoneStep2")
+                  : t("pairDevice.link.step2")}
+              </li>
+            </ol>
+          </section>
+          <PairDevicePassphraseEntry
+            onSubmit={(code) => {
+              void handleSubmitLinkCode(code);
+            }}
+            onCancel={handleCancelToWelcome}
+            unwrapError={linkError}
+            busy={linkBusy}
+            submitLabel={t("pairDevice.link.submit")}
+          />
+          <button
+            type="button"
+            className="self-start text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+            onClick={() => {
+              setLinkError(null);
+              setStage("capture");
+            }}
+          >
+            {t("pairDevice.link.scanInstead")}
+          </button>
+        </section>
+      )}
+
       {stage === "capture" && (
         <section className="card">
           <PairDeviceCapture
             onCaptured={handleCaptured}
-            onCancel={handleCancelToWelcome}
+            onCancel={() => {
+              // Back from the QR path returns to word entry, not all
+              // the way out — the member chose QR from there.
+              setStage("link-entry");
+            }}
             samePhone={samePhone}
           />
         </section>

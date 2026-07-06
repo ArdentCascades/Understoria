@@ -21,6 +21,14 @@ interface PairDevicePassphraseEntryProps {
    *  rendered passphrase. Shows an inline message and lets the
    *  member edit. */
   unwrapError?: string | null;
+  /** True while the parent's submit handler is in flight (the link
+   *  path does a KDF + network round-trip). Disables the submit
+   *  button so the one-shot mailbox row can't be raced by a
+   *  double-tap. */
+  busy?: boolean;
+  /** Submit button label override. Defaults to the QR path's
+   *  "Unwrap"; the link path passes its own. */
+  submitLabel?: string;
 }
 
 /**
@@ -38,6 +46,8 @@ export function PairDevicePassphraseEntry({
   onSubmit,
   onCancel,
   unwrapError,
+  busy = false,
+  submitLabel,
 }: PairDevicePassphraseEntryProps) {
   const { t } = useTranslation();
   const datalistId = useId();
@@ -81,7 +91,7 @@ export function PairDevicePassphraseEntry({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!allFilled) return;
+    if (!allFilled || busy) return;
     onSubmit(words.join(" "));
   }
 
@@ -137,8 +147,15 @@ export function PairDevicePassphraseEntry({
         <button type="button" className="btn-secondary" onClick={onCancel}>
           {t("common.back")}
         </button>
-        <button type="submit" className="btn-primary" disabled={!allFilled}>
-          {t("pairDevice.passphrase.unwrap")}
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={!allFilled || busy}
+          aria-busy={busy}
+        >
+          {busy
+            ? t("common.working")
+            : (submitLabel ?? t("pairDevice.passphrase.unwrap"))}
         </button>
       </div>
     </form>

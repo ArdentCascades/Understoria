@@ -26,11 +26,19 @@ import {
 } from "@/lib/devicePairing";
 import { DevicePairingComparisonCard } from "@/components/DevicePairingComparisonCard";
 import { DevicePairingDisplay } from "@/components/DevicePairingDisplay";
+import { DeviceLinkCodeDisplay } from "@/components/DeviceLinkCodeDisplay";
+import {
+  deriveLinkChannelId,
+  LINK_EXPIRY_MS,
+  publishLinkEnvelope,
+  resolveLinkApiBase,
+} from "@/lib/deviceLink";
 import { recordPairing } from "@/db/pairing";
 
 type Stage =
   | "comparison"
   | "gate"
+  | "link-display"
   | "display"
   | "label-source"
   | "expired"
@@ -55,7 +63,14 @@ type Stage =
  *     doc §6.3 — the envelope is too large to type, and clipboard
  *     routing reintroduces persistence).
  *
- * The destination side ships in a follow-up PR.
+ * The destination side lives in PairDevice.tsx.
+ *
+ * Two transports (design doc §6.6): the node-relayed LINK path
+ * (default when a community node is reachable — the member carries
+ * only the 6 words to the new device; the wrapped envelope waits at
+ * the node) and the QR path (offline / no-node fallback, and the
+ * split-channel option for members who don't want ciphertext on the
+ * node at all).
  */
 export default function AddDevicePage() {
   const { currentMember, lockState } = useApp();
@@ -70,6 +85,15 @@ export default function AddDevicePage() {
   const [passphrase, setPassphrase] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Which transport produced the current display/expired stage —
+  // drives the right copy on the expired screen.
+  const [method, setMethod] = useState<"link" | "qr">("qr");
+  // Set when the link path was attempted and failed (node down,
+  // mailbox full) — shown as an honest banner on the QR gate.
+  const [fallbackNotice, setFallbackNotice] = useState(false);
+  // Busy flag for the comparison Continue button — the link probe +
+  // PBKDF2 + upload take a couple of seconds.
+  const [preparing, setPreparing] = useState(false);
   // Free-text label captured at the post-pair "want to label this?"
   // prompt. Stays empty when the member skips. Not sensitive — the
   // inventory it feeds is local-only.
@@ -88,14 +112,17 @@ export default function AddDevicePage() {
     navigate("/profile");
   }, [reset, navigate]);
 
-  const handleShowQR = useCallback(async () => {
-    if (!currentMember) return;
-    if (lockState === "locked") {
-      setErrorMessage(t("addDevice.errors.locked"));
-      setStage("error");
-      return;
-    }
-    try {
+  // Shared wrap step for both transports: generate a fresh 6-word
+  // code, bundle identity + profile + block state, and seal it under
+  // the code. Per `docs/blocking.md` §14.1 the block bundle rides the
+  // local-key-wrapped pairing envelope (NEVER a peer-node wire as
+  // plaintext — on the link path the node stores only this
+  // ciphertext). Read scoped to this blocker's pubkey so a
+  // shared-device cluster doesn't leak one member's blocks into
+  // another member's transfer.
+  const buildWrappedTransfer = useCallback(
+    async (expiryMs: number) => {
+      if (!currentMember) throw new Error("no current member");
       const secretKeyB64 = await getSecretKey(currentMember.publicKey);
       const secretKey = b64decode(secretKeyB64);
       const publicKey = b64decode(currentMember.publicKey);
@@ -109,11 +136,6 @@ export default function AddDevicePage() {
       };
 
       const generated = generateTransferPassphrase(wordlist, 6);
-      // Per `docs/blocking.md` §14.1: block state propagates to a
-      // newly-paired device through the local-key-wrapped pairing
-      // envelope (NEVER over a peer-node wire). Read scoped to this
-      // blocker's pubkey so a shared-device cluster doesn't leak
-      // one member's blocks into another member's transfer.
       const blockBundle = await assembleBlocksForTransfer(
         currentMember.publicKey,
       );
@@ -122,13 +144,76 @@ export default function AddDevicePage() {
         publicKey,
         profile,
         passphrase: generated,
+        expiryMs,
         blocks: blockBundle.blocks,
         previouslyBlocked: blockBundle.previouslyBlocked,
       });
+      return { encoded: encodeEnvelope(env), code: generated };
+    },
+    [currentMember],
+  );
 
-      setEncoded(encodeEnvelope(env));
-      setPassphrase(generated);
+  // Continue from the comparison card. Tries the link transport
+  // first: reachable node → park the envelope there, show only the
+  // words. No node (or upload failed) → the QR gate, which is both
+  // the offline path and the "nothing on the node, ever" path.
+  const handleContinue = useCallback(async () => {
+    if (!currentMember) return;
+    if (lockState === "locked") {
+      setErrorMessage(t("addDevice.errors.locked"));
+      setStage("error");
+      return;
+    }
+    setPreparing(true);
+    try {
+      const apiBase = await resolveLinkApiBase();
+      if (!apiBase) {
+        setStage("gate");
+        return;
+      }
+      const { encoded: encodedEnv, code } =
+        await buildWrappedTransfer(LINK_EXPIRY_MS);
+      const channelId = await deriveLinkChannelId(code);
+      const published = await publishLinkEnvelope(
+        apiBase,
+        channelId,
+        encodedEnv,
+      );
+      if (published.kind !== "ok") {
+        setFallbackNotice(true);
+        setStage("gate");
+        return;
+      }
+      // The envelope is parked at the node — the words are all this
+      // screen needs to hold. `encoded` stays null on purpose.
+      setPassphrase(code);
+      setExpiresAt(published.expiresAt);
+      setMethod("link");
+      setStage("link-display");
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : t("addDevice.errors.generic"),
+      );
+      setStage("error");
+    } finally {
+      setPreparing(false);
+    }
+  }, [currentMember, lockState, t, buildWrappedTransfer]);
+
+  const handleShowQR = useCallback(async () => {
+    if (!currentMember) return;
+    if (lockState === "locked") {
+      setErrorMessage(t("addDevice.errors.locked"));
+      setStage("error");
+      return;
+    }
+    try {
+      const { encoded: encodedEnv, code } =
+        await buildWrappedTransfer(DEFAULT_EXPIRY_MS);
+      setEncoded(encodedEnv);
+      setPassphrase(code);
       setExpiresAt(Date.now() + DEFAULT_EXPIRY_MS);
+      setMethod("qr");
       setStage("display");
     } catch (err) {
       setErrorMessage(
@@ -136,7 +221,7 @@ export default function AddDevicePage() {
       );
       setStage("error");
     }
-  }, [currentMember, lockState, t]);
+  }, [currentMember, lockState, t, buildWrappedTransfer]);
 
   const handleExpired = useCallback(() => {
     reset();
@@ -145,6 +230,7 @@ export default function AddDevicePage() {
 
   const handleStartOver = useCallback(() => {
     reset();
+    setFallbackNotice(false);
     setStage("comparison");
   }, [reset]);
 
@@ -219,11 +305,54 @@ export default function AddDevicePage() {
             <button
               type="button"
               className="btn-primary"
-              onClick={() => setStage("gate")}
+              disabled={preparing}
+              aria-busy={preparing}
+              onClick={() => {
+                void handleContinue();
+              }}
             >
-              {t("addDevice.comparison.continue")}
+              {preparing
+                ? t("common.working")
+                : t("addDevice.comparison.continue")}
             </button>
           </div>
+        </section>
+      )}
+
+      {stage === "link-display" && passphrase && expiresAt && (
+        <section className="card flex flex-col gap-6">
+          <DeviceLinkCodeDisplay
+            code={passphrase}
+            publicKey={currentMember.publicKey}
+            expiresAt={expiresAt}
+            onExpired={handleExpired}
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleCancel}
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleDoneShowingQR}
+            >
+              {t("addDevice.display.done")}
+            </button>
+          </div>
+          <button
+            type="button"
+            className="self-center text-sm text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+            onClick={() => {
+              reset();
+              setStage("gate");
+            }}
+          >
+            {t("addDevice.link.qrInstead")}
+          </button>
         </section>
       )}
 
@@ -232,6 +361,14 @@ export default function AddDevicePage() {
           className="card flex flex-col gap-4"
           aria-labelledby="addDevice-gate-heading"
         >
+          {fallbackNotice && (
+            <p
+              role="status"
+              className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+            >
+              {t("addDevice.link.fallbackNotice")}
+            </p>
+          )}
           <h2
             id="addDevice-gate-heading"
             className="text-lg font-semibold text-amber-900 dark:text-amber-200"
@@ -367,7 +504,9 @@ export default function AddDevicePage() {
             {t("addDevice.expired.title")}
           </h2>
           <p className="text-sm text-moss-700 dark:text-moss-200">
-            {t("addDevice.expired.body")}
+            {method === "link"
+              ? t("addDevice.expired.bodyLink")
+              : t("addDevice.expired.body")}
           </p>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button

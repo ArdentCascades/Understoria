@@ -343,6 +343,53 @@ The "I'm done" button is therefore a member assertion, not a system
 confirmation. The screen auto-dismisses at 5 minutes regardless,
 which is the actual security property.
 
+### 6.6 Node-relayed linking (the default transport)
+
+**Revision.** The QR + split-channel design above optimizes for a
+threat (cross-room camera capture of the envelope) at a UX cost that
+field use showed to be unacceptable: same-phone pairing can't scan
+at all, clipboard transport is broken on iOS, and the full flow is
+ten steps across two apps against a five-minute clock. The revised
+default is Signal-class device linking through the community node:
+
+1. The source device generates the usual 6-word code and
+   `wrapForTransfer` envelope (same KDF, same secretbox, same
+   payload — but a **15-minute** expiry).
+2. It derives an opaque **channel id** from the code —
+   `hex(SHA-512(PBKDF2(code, "understoria-device-link-v1", 600k))[0..32])`
+   — and POSTs `{channelId, envelope}` to `POST /api/device-link`.
+3. The screen shows ONLY the six words. No QR, no envelope, no
+   clipboard: the words are the one thing that travels by human.
+4. The destination types the words. It derives the same channel id,
+   claims the envelope with `GET /api/device-link/:channelId` —
+   **one-shot: the row is deleted atomically with the read** — and
+   unwraps with the same words. Fingerprint confirm and the import
+   path are unchanged.
+
+What the node sees: an opaque channel id and passphrase-wrapped
+ciphertext, for at most 15 minutes, gone on first claim. It cannot
+decrypt (the words never cross the wire), and it cannot cheaply
+brute the channel id back to a code — testing one candidate code
+costs the same PBKDF2-600k as an envelope-key guess, and the code
+space is ~66 bits. Rows never federate; the mailbox has a row
+ceiling and is pruned on every write.
+
+The honest tradeoff, stated plainly: **in link mode the six words
+alone are a bearer credential while the row lives.** They locate
+AND decrypt. Whoever enters them first gets the identity — and
+because the row is one-shot, a hijacked code makes the member's own
+import visibly fail (a signal, not a silent fork). The display
+screen says this in member language. The QR flow remains, one tap
+away, as the offline path and the option for members who want the
+split-channel property or nothing on the node at all.
+
+Direction of trust vs. Signal: Signal authenticates the relay
+exchange with a QR (a camera channel); we authenticate with the
+code itself doing double duty, which is what makes the no-camera,
+no-clipboard, type-6-words UX possible. Both accept "the relay
+stores ciphertext" as the price of linking that ordinary people
+complete.
+
 ## 7. UX — destination device (the new device)
 
 ### 7.1 Entry point
@@ -369,8 +416,19 @@ the screen exists to prevent.
 
 ### 7.2 Capture
 
-The "I have another device" screen offers two capture modes,
-detected at runtime:
+**Default: word entry (§6.6).** The destination opens on six word
+inputs with BIP39 autocomplete. Directions above them are journey-
+aware (`?samePhone=1` says "flip to your browser"; the two-device
+copy says "glance at the other screen"). Submitting derives the
+channel id, claims the envelope from the node, and unwraps — one
+typed thing, no camera, no clipboard. "Nothing waiting under these
+words" covers typo, expiry, and already-claimed in one honest
+message. A device that can't reach a node (the fresh device probes
+`${origin}/api/health`, since the canonical deploy serves the PWA
+from the node) is told so and pointed at the QR path below.
+
+The QR capture screen remains behind a "scan a QR instead" link,
+with two modes detected at runtime:
 
 - **Camera scan** via `BarcodeDetector` API (Chrome / Edge, Safari
   18+, Firefox 137+). Permission is requested at scan time, not at

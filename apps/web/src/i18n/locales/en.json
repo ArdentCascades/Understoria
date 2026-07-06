@@ -59,9 +59,17 @@
       "fingerprintLabel": "Confirm on the other device",
       "fingerprintAriaLabel": "Identity fingerprint to confirm on the other device"
     },
+    "link": {
+      "intro": "On your new device, open Understoria and choose the option about already having your identity. Then type these 6 words there, in order:",
+      "warning": "These words are the whole key for the next 15 minutes — whoever types them first gets your identity. Don't say them around others and never send them in a chat.",
+      "afterImport": "When the new device says it's in, tap Done. The code dies on its own when the timer ends, and it only works once.",
+      "qrInstead": "New device offline, or prefer nothing stored on the node? Show a QR instead",
+      "fallbackNotice": "Couldn't reach your community node just now — using the QR method instead."
+    },
     "expired": {
       "title": "Time's up.",
       "body": "Five minutes passed. The QR is gone and so is the passphrase. If you still want to pair the other device, start over — a fresh passphrase will be generated.",
+      "bodyLink": "Fifteen minutes passed, so the words stopped working and the encrypted transfer was deleted from the node. If you still want to link the other device, start over — you'll get fresh words.",
       "startOver": "Start over",
       "close": "Close"
     },
@@ -85,8 +93,19 @@
   },
   "pairDevice": {
     "title": "Pair this device",
-    "subtitle": "Scan the QR from your other device, then type the 6 words it's showing.",
-    "subtitleSamePhone": "Copy the pairing code from this phone's browser, then type the 6 words it showed.",
+    "subtitle": "Bring your identity over from the device that has it.",
+    "subtitleSamePhone": "Bring your identity over from this phone's browser.",
+    "link": {
+      "directionsTitle": "Get the 6 words from the device that has your identity.",
+      "step1": "On that device, open Profile, then \"Add another device,\" and Continue.",
+      "step2": "It shows 6 words. Type them below, in order — they're valid for 15 minutes.",
+      "samePhoneStep1": "In this phone's browser, open Understoria and go to Profile → \"Add another device,\" then Continue.",
+      "samePhoneStep2": "It shows 6 words. Flip back here and type them below — they stay valid for 15 minutes, so switching apps is fine.",
+      "submit": "Link this device",
+      "notFound": "Nothing waiting under these words. Check each word and the order — and check the other screen is still showing them. Codes expire after 15 minutes and each code works exactly once.",
+      "noNode": "This device can't reach a community node, so word-linking isn't available here. Use the QR option below instead.",
+      "scanInstead": "No community node, or the other device can't connect? Scan a QR instead"
+    },
     "capture": {
       "directions": {
         "title": "Need a QR? Get one from your other device.",
@@ -2168,7 +2187,7 @@
       "title": "The app is on your home screen",
       "intro": "One question before we start:",
       "bringTitle": "I already use Understoria in this phone's browser",
-      "bringBody": "The installed app starts with its own empty storage, so it can't see your browser sign-in. Bring your identity over — it takes about a minute and nothing leaves your phone.",
+      "bringBody": "The installed app starts with its own empty storage, so it can't see your browser sign-in. Bring your identity over — type 6 words, takes about a minute.",
       "newTitle": "I'm new — set me up fresh",
       "newBody": "Take the short tour, then create your identity."
     },

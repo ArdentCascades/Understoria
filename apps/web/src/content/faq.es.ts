@@ -196,14 +196,16 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "new-device",
         question: "¿Cómo paso a un dispositivo nuevo?",
         answer: [
-          "Usa la vinculación de dispositivos. En el dispositivo que ya " +
-            "tiene tu identidad, ve a Perfil → Vincular otro dispositivo. " +
-            "Te muestra un código QR y una frase de seis palabras. En el " +
-            "dispositivo nuevo, elige 'Ya tengo otro dispositivo' en la " +
-            "pantalla de bienvenida, escanea el código (o pégalo), y " +
-            "escribe las seis palabras en orden. Tu identidad y tu perfil " +
-            "se mueven directamente, de dispositivo a dispositivo — nada " +
-            "pasa por ningún servidor.",
+          "En el dispositivo que ya tiene tu identidad, ve a Perfil → " +
+            "Vincular otro dispositivo. Te muestra seis palabras. En el " +
+            "dispositivo nuevo, elige la opción de vinculación en la " +
+            "pantalla de bienvenida y escribe esas seis palabras, en " +
+            "orden — esa es toda la transferencia. Las palabras valen " +
+            "15 minutos y funcionan exactamente una vez; tu nodo " +
+            "comunitario transmite el paquete cifrado pero nunca puede " +
+            "leerlo. (¿Sin nodo, o sin conexión? Hay una opción de QR a " +
+            "un toque que va de dispositivo a dispositivo sin guardar " +
+            "nada en ninguna parte.)",
           "Dos cosas no viajan: tu historial de mensajes (los mensajes " +
             "están cifrados a las claves propias de cada dispositivo, así " +
             "que se quedan donde fueron recibidos) y los ajustes por " +

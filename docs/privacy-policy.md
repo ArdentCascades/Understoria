@@ -97,6 +97,7 @@ types are:
 | Invite someone to co-organize a project | `CoOrganizerInvitation`, `CoOrganizerInvitationResponse`, `CoOrganizerInvitationRevocation` | Inviter and invitee public keys, project id, decision (accept / decline) or revocation, timestamps |
 | Create a community event | `Event` | Title, description, category, location (free text — no GPS pin), start time, optional end time, optional capacity, organizer public key, signature |
 | Cancel a community event you organized | `EventCancellation` | Event id, optional reason text, cancellation time, organizer public key, signature |
+| Link a new device (word code) | Device-link mailbox row | **Ciphertext only, and unlike everything above it does NOT federate.** An opaque channel id plus your identity bundle encrypted under the 6-word code (which never crosses any wire). Held at most 15 minutes, deleted the moment the new device claims it. The node cannot read it; see the threat model for the brute-force bound. The QR pairing option stores nothing on the node at all |
 
 **Public keys are not human identities by themselves.** A peer node
 sees the keys but does not learn your display name unless you've

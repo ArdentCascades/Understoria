@@ -451,21 +451,37 @@ We are not trying to protect against:
   plaintext and enforced on the destination after a successful
   unwrap. A captured QR is useless after the window even with
   the passphrase.
-  (e) **No server-side state.** The community node sees
-  nothing — no envelope, no acknowledgment, no peer-discovery
-  channel. Pairing succeeds or fails entirely within the two
-  devices' memories.
+  (e) **No server-side state — REVISED for the link transport**
+  (`device-pairing.md` §6.6): the now-default word-linking path
+  parks the passphrase-wrapped envelope on the community node as a
+  one-shot mailbox row under an opaque channel id, for at most 15
+  minutes, deleted on first claim. The node holds ciphertext only:
+  the code never crosses the wire, testing a candidate code against
+  a DB snapshot costs a full PBKDF2-600k per guess against ~66 bits,
+  and rows never federate. New residuals, named: (1) the node
+  operator (or a DB thief) holds a brute-force target for the
+  transfer window — same offline-attack class the QR already
+  conceded to anyone who photographs it, with a far smaller exposed
+  population; (2) in link mode the six words alone are a bearer
+  credential while the row lives — they locate AND decrypt — so the
+  display copy warns exactly that, and the one-shot delete turns a
+  hijacked code into a visible failure on the member's own device
+  rather than a silent fork. The QR path retains the original
+  no-server-state property and remains one tap away.
   (f) **Component-state-only on the source.** Envelope and
   passphrase live in React state only. No localStorage,
   sessionStorage, or IndexedDB write. Cancel / route-change /
   auto-dismiss drops the state.
   Rejected alternatives, each with the reason:
-  - **Server-stored wrapped envelope** (passkey-PRF style)
-    relocates identity bytes onto the community node and shifts
-    a portion of trust onto whoever holds the passkey keychain.
-    Tracked as future work in `device-pairing.md` §4, pending
-    pilot signal on whether QR transfer is too inconvenient in
-    practice.
+  - **Server-stored wrapped envelope** — ADOPTED, in bounded form
+    (the §6.6 link transport above). The pilot signal arrived: QR
+    transfer WAS too inconvenient in practice (same-phone pairing
+    can't scan its own screen; iOS clipboard transport is
+    unreliable). The bounds that make it acceptable: ciphertext
+    only, one-shot, 15-minute TTL, non-federating, channel id as
+    expensive to reverse as the envelope key. The passkey-PRF
+    variant (durable server storage keyed by a platform
+    authenticator) remains future work.
   - **Real-time ack channel** (long-poll, WebRTC, BroadcastChannel)
     would put pairing state on the server or a third party. The
     "I'm done" button is a member assertion, not a system
