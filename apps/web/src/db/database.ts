@@ -406,6 +406,14 @@ export class UnderstoriaDB extends Dexie {
   /** Signed invite revocations — same R0 posture as
    *  `redemptionReceipts`; keyed by token. */
   inviteRevocationRecords!: Table<InviteRevocation, string>;
+  /** Guardian shards this device holds for OTHER members
+   *  (docs/identity-recovery.md Phase K2) — see the v30 migration
+   *  comment for the posture. Row shape lives in
+   *  `lib/guardianShards.ts` (GuardianShardRow). */
+  guardianShards!: Table<
+    import("@/lib/guardianShards").GuardianShardRow,
+    string
+  >;
 
   constructor(name = "understoria") {
     super(name);
@@ -936,6 +944,16 @@ export class UnderstoriaDB extends Dexie {
       // wrapper row that would break re-POST-verbatim.
       redemptionReceipts: "invite.token",
       inviteRevocationRecords: "token",
+    });
+    // v30: guardian shards (docs/identity-recovery.md Phase K2) —
+    // Shamir shares of OTHER members' secret keys this device agreed
+    // to hold, ciphertext at rest (boxed to this member's key). Keyed
+    // by ownerKey: one active shard per guarded member; accepting a
+    // newer set replaces the older row. Never federates, never in the
+    // export or the pairing snapshot (a relational whom-do-I-guard
+    // surface + a per-device duty); cleared by soft purge.
+    this.version(30).stores({
+      guardianShards: "ownerKey",
     });
   }
 }

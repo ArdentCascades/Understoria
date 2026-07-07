@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Guardian shards: your community can bring you back**
+  (`docs/identity-recovery.md` Phase K2). Settings → Guardians splits
+  your account's key among 2–7 trusted members with Shamir secret
+  sharing (any k of them — you pick the threshold — can recover it;
+  fewer than k learn literally nothing). Each guardian accepts their
+  piece by scanning a QR from your screen, holds it encrypted, and
+  sees a permanent line for the duty. If you lose everything, the
+  restore page's "Recover with guardians" mints a one-time request
+  code; each guardian — after deliberate "is this really them?"
+  friction — scans it and answers with a release code sealed to that
+  one request, and at threshold your account walks back in. Every
+  hand-off is device-to-device (QR or paste): no server, no mailbox,
+  no operator anywhere in the path. The honest edges are in the UI:
+  any k guardians together could act as you (choose people who would
+  not collude), and choosing new guardians does not cancel an old
+  set, because the key itself never changes. Shamir implementation is
+  first-party and readable (`lib/sss.ts`), with the missing integrity
+  supplied by verifying the reconstructed key against your known
+  public key.
 - **A lost phone no longer means a lost self: the recovery kit**
   (`docs/identity-recovery.md` Phase K1). Settings → Recovery kit
   exports your account's key wrapped under a recovery passphrase you

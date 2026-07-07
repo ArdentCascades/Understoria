@@ -252,6 +252,7 @@ export async function softPurge(): Promise<PurgeResult> {
       db.invites,
       db.redemptionReceipts,
       db.inviteRevocationRecords,
+      db.guardianShards,
       db.votes,
       db.pairingLog,
     ],
@@ -274,6 +275,12 @@ export async function softPurge(): Promise<PurgeResult> {
       // the member's safety outranks the community's redundancy.
       await db.redemptionReceipts.clear();
       await db.inviteRevocationRecords.clear();
+      // Guardian shards: below-threshold shares are information-
+      // theoretically mute about the KEY, but each row names whom
+      // this member guards — the same relational class as blocks.
+      // The guarded member's redundancy drops by one; the re-shard
+      // nudge (K2 follow-up) is the recovery path.
+      await db.guardianShards.clear();
       await db.votes.clear();
       await db.pairingLog.clear();
     },
@@ -290,6 +297,7 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("invites");
   tables.push("redemptionReceipts");
   tables.push("inviteRevocationRecords");
+  tables.push("guardianShards");
   tables.push("votes");
   tables.push("pairingLog");
 
