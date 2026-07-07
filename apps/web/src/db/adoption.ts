@@ -29,9 +29,16 @@ import type { Proposal, ProjectAdoptionPayload } from "@/types";
 // cancel for the returning primary, and demotion-not-removal so they
 // keep working authority and a path back.
 //
-// LOCAL governance act: projects never federate (`organizerKey` lives
-// only on the local Project row), so adoption writes no wire records —
-// same consistency domain as proposals and votes.
+// LOCAL governance act: adoption writes no wire records — same
+// consistency domain as proposals and votes. Now that project state
+// federates (docs/project-federation.md), the honest limit: the
+// community node's stored ProjectState still names the absent
+// organizer, and an organizerKey change is accepted only from THEIR
+// signature — an adopter's takeover never propagates through the node.
+// An adopter who was already a co-organizer can still federate
+// day-to-day updates; one who wasn't federates nothing until the
+// returning primary signs a real handoff. Recorded in
+// docs/project-federation.md §4.
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

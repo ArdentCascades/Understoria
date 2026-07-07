@@ -37,8 +37,10 @@ import {
   createPeerPullStore,
   createPostStore,
   createInviteRevocationStore,
+  createProjectStateStore,
   createRedemptionStore,
   createTaskCommentStore,
+  createTaskStateStore,
   createVouchStore,
   openDatabase,
 } from "./db.js";
@@ -61,6 +63,7 @@ import { registerEventRoutes } from "./routes/events.js";
 import { registerEventCancellationRoutes } from "./routes/eventCancellations.js";
 import { registerDeviceLinkRoutes } from "./routes/deviceLink.js";
 import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
+import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard } from "./insertCaps.js";
 
@@ -182,6 +185,8 @@ export async function buildServer({
   const awaitingTransitionStore = createAwaitingTransitionStore(db);
   const deviceLinkStore = createDeviceLinkStore(db);
   const linkRequestStore = createLinkRequestStore(db);
+  const projectStateStore = createProjectStateStore(db);
+  const taskStateStore = createTaskStateStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -233,6 +238,13 @@ export async function buildServer({
   await registerEventCancellationRoutes(app, {
     store: eventCancellationStore,
     eventStore,
+  });
+  // Project & task state — the first MUTABLE (last-writer-wins)
+  // federation surface; authority rules in routes/projectStates.ts
+  // and docs/project-federation.md §4.
+  await registerProjectStateRoutes(app, {
+    projectStore: projectStateStore,
+    taskStore: taskStateStore,
   });
   // Device-link mailbox — NOT a federation surface: rows are opaque
   // ciphertext, one-shot, TTL-bounded, never pulled by peers. The

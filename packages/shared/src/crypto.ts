@@ -47,6 +47,8 @@ import type {
   SignedVouch,
   TaskComment,
   VouchPayload,
+  ProjectState,
+  TaskState,
 } from "./types.js";
 
 /**
@@ -921,4 +923,71 @@ export function verifyAwaitingTransition(rec: AwaitingTransition): boolean {
   }
   const payload = canonicalAwaitingTransitionPayload(rec);
   return verify(payload, rec.signature, rec.signedBy);
+}
+
+// --- Project & participation federation (docs/project-federation.md) --
+
+/**
+ * Deterministic JSON with recursively sorted object keys. The
+ * canonical form for SIGNED STATE records (ProjectState, TaskState),
+ * which serialize the FULL row: an explicit field list — the style
+ * the append-only kinds use — would break signature verification
+ * every time the row type gains a field, because older and newer
+ * devices would disagree about which fields exist. Sorting whatever
+ * keys ARE present keeps signer and verifier in agreement across
+ * schema evolution, at the cost that unknown fields ride along
+ * verbatim (they are covered by the signature, which is what we
+ * want).
+ */
+export function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(",")}]`;
+  }
+  if (typeof value === "object" && value !== null) {
+    const entries = Object.entries(value as Record<string, unknown>)
+      // undefined-valued keys are dropped, matching JSON.stringify.
+      .filter(([, v]) => v !== undefined)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`);
+    return `{${entries.join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
+}
+
+/** Canonical payload of a signed state record: the whole record with
+ *  the signature itself removed, in stable key order. `signerKey` and
+ *  `updatedAt` remain INSIDE the signed bytes — the authority checks
+ *  and the LWW clock are covered by the signature. */
+export function canonicalStatePayload(
+  rec: Record<string, unknown>,
+): string {
+  const { signature: _signature, ...rest } = rec;
+  return stableStringify(rest);
+}
+
+export function signStateRecord<T extends object>(
+  rec: Omit<T, "signature">,
+  secretKeyB64: string,
+): string {
+  return sign(stableStringify(rec), secretKeyB64);
+}
+
+export function verifyProjectState(rec: ProjectState): boolean {
+  if (!rec.signature || !rec.signerKey) return false;
+  if (typeof rec.updatedAt !== "number" || rec.updatedAt <= 0) return false;
+  return verify(
+    canonicalStatePayload(rec as unknown as Record<string, unknown>),
+    rec.signature,
+    rec.signerKey,
+  );
+}
+
+export function verifyTaskState(rec: TaskState): boolean {
+  if (!rec.signature || !rec.signerKey) return false;
+  if (typeof rec.updatedAt !== "number" || rec.updatedAt <= 0) return false;
+  return verify(
+    canonicalStatePayload(rec as unknown as Record<string, unknown>),
+    rec.signature,
+    rec.signerKey,
+  );
 }

@@ -71,10 +71,17 @@ always-available cancel are the mitigation.
 
 ## Federation — traced end-to-end
 
-Projects do not federate: the server has no projects table and
-`OutboxRow.kind` has no project member. `organizerKey` lives only on the
-local Project row, in the same consistency domain as proposals and votes.
-**Adoption is therefore a local governance act — no new wire records.**
+*(Written when projects were device-local; project STATE now federates
+— see `docs/project-federation.md`.)* Adoption itself remains a local
+governance act — no new wire records, same consistency domain as
+proposals and votes. The honest post-federation limit: the community
+node's stored `ProjectState` still names the absent organizer, and an
+`organizerKey` change is accepted only from THEIR signature, so an
+adopter's takeover never propagates through the node. An adopter who
+was already a co-organizer keeps federating day-to-day updates; one
+who wasn't federates nothing until the returning primary signs a real
+handoff. Deliberate: the alternative (a quorum can reassign authority
+on the node) is the takeover surface the federation design refuses.
 
 Co-organizer invitation verification after the flip:
 `inviterKey === Project.organizerKey` is enforced at **issue time only**;

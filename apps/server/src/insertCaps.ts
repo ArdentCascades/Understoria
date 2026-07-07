@@ -129,6 +129,19 @@ const SURFACES: Record<string, Surface> = {
     keyField: "signedBy",
     keyColumn: "signed_by",
   },
+  // LWW state records: the ceilings bound row COUNT, and LWW updates
+  // replace in place, so an honest project's lifetime of edits costs
+  // one row per project/task.
+  "/project-states": {
+    table: "project_states",
+    keyField: "signerKey",
+    keyColumn: "signer_key",
+  },
+  "/task-states": {
+    table: "task_states",
+    keyField: "signerKey",
+    keyColumn: "signer_key",
+  },
   // The auto-confirm batch inserts into exchanges; the requests carry
   // per-item keys, so only the table ceiling applies here. (An
   // attacker spending their own keys against the per-key exchange cap

@@ -6,6 +6,14 @@
 > The rest of this document is preserved as the design record; the
 > original planning-time status note follows.
 >
+> **Historical-boundary note (July 2026):** several analyses below
+> lean on "projects/tasks never federate," which was true at writing
+> and load-bearing for the verdicts then. Project & task STATE now
+> federates as signed LWW records (`docs/project-federation.md`).
+> The shipped verdicts themselves stand (the event⇄project link and
+> adoption remain local; sentinel rows remain rejected), but read
+> any "projects don't federate" clause here as dated.
+>
 > **Status at writing: PROPOSED.** Nothing in this document is committed work. Each
 > section is an implementation plan for one improvement to the
 > organizer / co-organizer / helper experience on projects, produced by

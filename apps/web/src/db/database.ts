@@ -124,7 +124,14 @@ export interface OutboxRow {
     // pushed to POST /awaiting-transitions when an exchange enters
     // awaiting_confirmation. The node's received_at stamp for it is
     // the age anchor the /auto-confirm window is enforced from.
-    | "awaiting_transition";
+    | "awaiting_transition"
+    // docs/project-federation.md: signed last-writer-wins state
+    // records pushed to POST /project-states / /task-states. Unlike
+    // every append-only kind above, a re-enqueue with a newer payload
+    // is the NORMAL case — the in-place pending-row replacement in
+    // enqueueOutbox is what keeps only the latest version queued.
+    | "project_state"
+    | "task_state";
   // Intentionally NOT a member of this union: "event_rsvp". EventRsvpRow
   // is local-only by design (docs/community-events.md §4 + §7); RSVPs
   // never enter the outbox. The union rejects "event_rsvp" at the
@@ -138,11 +145,12 @@ export interface OutboxRow {
   //
   // Intentionally NOT a member of this union: "event_project_link".
   // EventProjectLinkRow ties a federated event to a local-only project
-  // as a "work day" (docs/community-events.md "Project work days" +
-  // plan 10). Projects never federate, so a project pointer must never
-  // cross the wire — the link is local-only by construction, never
-  // enqueued, never pulled. eventProjectLinks.test.ts asserts the
-  // rejection with `// @ts-expect-error`.
+  // link as a "work day" (docs/community-events.md "Project work days"
+  // + plan 10). The link row predates project federation and remains
+  // local-only by construction — never enqueued, never pulled; peers
+  // that need the association can each create their own link.
+  // eventProjectLinks.test.ts asserts the rejection with
+  // `// @ts-expect-error`.
   //
   // Intentionally NOT members of this union: "event_shift" and
   // "shift_signup". EventShiftRow and ShiftSignupRow are the local-only
@@ -358,9 +366,9 @@ export class UnderstoriaDB extends Dexie {
   /**
    * Local-only event⇄project work-day link — see
    * `docs/community-events.md` ("Project work days") + plan 10. Ties a
-   * federated event to a local-only project. Never synced, never
-   * exported, never federated (projects don't federate, so a project
-   * pointer must never cross the wire). Read and written only by
+   * federated event to a project. Never synced, never exported, never
+   * federated (the link predates project federation and stays local;
+   * peers create their own). Read and written only by
    * `db/eventProjectLinks.ts`. The `OutboxRow.kind` union above rejects
    * `"event_project_link"` at the type level; there is no
    * `enqueueEventProjectLink` helper in `lib/outbox.ts`. Same

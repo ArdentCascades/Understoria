@@ -32,8 +32,10 @@ import {
   submitAwaitingTransitionToNode,
   submitInviteRevocationToNode,
   submitPostToNode,
+  submitProjectStateToNode,
   submitRedemptionReceiptToNode,
   submitTaskCommentToNode,
+  submitTaskStateToNode,
   submitVouchToNode,
   type SubmitResult,
 } from "@/lib/nodeSubmit";
@@ -46,7 +48,9 @@ import type {
   Event,
   EventCancellation,
   InviteRevocation,
+  ProjectState,
   RedemptionReceipt,
+  TaskState,
 } from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
 
@@ -293,6 +297,26 @@ export async function enqueueAwaitingTransition(
   return enqueueOutbox("awaiting_transition", record.postId, record);
 }
 
+/**
+ * Insert an outbox row for a signed project / task state record
+ * (docs/project-federation.md §5). Unlike the append-only kinds, a
+ * re-enqueue with a NEWER version of the same id is the normal case —
+ * the pending-row in-place replacement below keeps only the latest
+ * version queued, which is exactly the LWW semantics the server
+ * applies anyway.
+ */
+export async function enqueueProjectStateOutbox(
+  record: ProjectState,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("project_state", record.id, record);
+}
+
+export async function enqueueTaskStateOutbox(
+  record: TaskState,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("task_state", record.id, record);
+}
+
 async function enqueueOutbox(
   kind: OutboxRow["kind"],
   recordId: string,
@@ -536,6 +560,18 @@ export async function flushOutboxOnce(
         cfg,
         { fetchImpl: options.fetchImpl },
       );
+    } else if (row.kind === "project_state") {
+      result = await submitProjectStateToNode(
+        payload as unknown as ProjectState,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "task_state") {
+      result = await submitTaskStateToNode(
+        payload as unknown as TaskState,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else {
       result = await submitPostToNode(payload as Post, cfg, {
         fetchImpl: options.fetchImpl,
@@ -553,6 +589,15 @@ export async function flushOutboxOnce(
     // transactional compare-then-write leaves a superseded row
     // pending (enqueueOutbox already pulled its nextAttemptAt to now),
     // so the new payload ships on the next flush.
+    // Kind-aware poison override: a task state's 409 means "your
+    // project record hasn't landed yet" (docs/project-federation.md
+    // §4) — the project row is in this same outbox, so the retry
+    // schedule resolves the ordering. Every other 409 (redemption /
+    // revocation token races) stays permanent.
+    const poison =
+      isPoisonResult(result) &&
+      !(row.kind === "task_state" && result.status === 409);
+
     const applied = await db.transaction("rw", db.outbox, async () => {
       const current = await db.outbox.get(row.id);
       if (!current || current.payload !== row.payload) return false;
@@ -562,7 +607,7 @@ export async function flushOutboxOnce(
           lastAttemptAt: now,
           lastError: undefined,
         });
-      } else if (isPoisonResult(result)) {
+      } else if (poison) {
         await db.outbox.update(row.id, {
           status: "poisoned",
           attempts: row.attempts + 1,
@@ -583,7 +628,7 @@ export async function flushOutboxOnce(
 
     if (!applied) continue; // superseded mid-flight; new payload pending
     if (result.ok) delivered += 1;
-    else if (isPoisonResult(result)) poisoned += 1;
+    else if (poison) poisoned += 1;
     else retried += 1;
   }
 

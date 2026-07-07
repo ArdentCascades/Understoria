@@ -780,9 +780,11 @@ describe("materializeAcceptedCoOrganizer", () => {
   });
 
   it("quietly no-ops when the invitation or its project is missing", async () => {
+    // null = "no role granted" — the signal callers use to decide
+    // whether to republish the project's federated state record.
     await expect(
       materializeAcceptedCoOrganizer("no-such-invitation"),
-    ).resolves.toBeUndefined();
+    ).resolves.toBeNull();
   });
 
   // The guard tests below write rows directly. Signatures are

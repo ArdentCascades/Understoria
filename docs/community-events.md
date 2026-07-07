@@ -614,9 +614,11 @@ stated as negative space:
   never `packages/shared`), the same posture as `EventRSVP` and
   `BlockRow`. **No route, no federation cursor, no pull helper.** No
   new bytes cross any wire: a `projectId` on `EventPayload` would be a
-  breaking signature change AND a dead pointer on every peer, because
-  projects never federate. So the link lives only on the node that
-  created it; peers receive a plain community event.
+  breaking signature change (and was a dead pointer on every peer
+  when this shipped — projects were device-local; they federate now
+  via `docs/project-federation.md`, but the link row deliberately
+  stays local and peers create their own). So the link lives only on
+  the node that created it; peers receive a plain community event.
 - **Who may link:** organizer or co-organizer, re-validated in the
   data layer (`scheduleProjectWorkDay`) against the project's
   `isOrganizer` authority — a hand-crafted `/events/new?projectId=…`

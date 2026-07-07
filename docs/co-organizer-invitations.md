@@ -367,14 +367,18 @@ effectiveCoOrganizerKeys(project) =
 > the demotee never produced; a step-down "revocation" misattributes
 > the actor), bend the revocation record's documented
 > pre-acceptance-only semantics, and buy zero consistency, because
-> they can't federate and projects don't federate either — every
-> surface that asks "is X a co-organizer of P" runs on a device that
-> hosts P's row. The rows-derived helper
-> (`effectiveCoOrganizerKeysFromRows`) was deleted; the async
-> `effectiveCoOrganizerKeys` survives as the §4 audit/verification
-> lens. What's genuinely deferred is remote, *signed* provenance for
-> the two row-less transitions: a real step-down / handoff record
-> type, worth doing if and when projects themselves federate.
+> sentinels can't federate — every surface that asks "is X a
+> co-organizer of P" runs on a device that hosts P's row. The
+> rows-derived helper (`effectiveCoOrganizerKeysFromRows`) was
+> deleted; the async `effectiveCoOrganizerKeys` survives as the §4
+> audit/verification lens. What's genuinely deferred is remote,
+> *signed* provenance for the two row-less transitions: a real
+> step-down / handoff record type. (Projects themselves now DO
+> federate — `docs/project-federation.md` — and the `ProjectState`
+> record carries the LIVE `coOrganizerKeys` array signed by the
+> organizer, so step-down and handoff results propagate; what still
+> doesn't exist is a standalone signed artifact for each
+> transition.)
 >
 > A **third** row-less transition joins these (plan 11,
 > `docs/project-adoption.md`): `adopted_by_community` flips

@@ -309,46 +309,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [ready]);
 
-  // Federation sync — pull cross-node posts from the community
-  // node on startup. Runs once; subsequent syncs happen on
-  // manual refresh or next app load. Silent failure — if the
-  // node is unreachable the Board just shows local posts.
+  // Federation sync — pull cross-node records from the community node
+  // on startup AND on a steady interval, so long-lived tabs and
+  // installed apps converge without a reload (project & task state
+  // especially — docs/project-federation.md §5). Silent failure — if
+  // the node is unreachable the Board just shows local records.
   useEffect(() => {
     if (!ready) return;
-    void import("@/lib/federationSync").then(
-      ({
-        pullFederatedPosts,
-        pullFederatedClaims,
-        pullFederatedTaskComments,
-        pullFederatedExchanges,
-        pullFederatedCoOrgInvitations,
-        pullFederatedCoOrgResponses,
-        pullFederatedCoOrgRevocations,
-        pullFederatedEvents,
-        pullFederatedEventCancellations,
-        pullFederatedRedemptions,
-        pullFederatedInviteRevocations,
-        pullFederatedVouches,
-      }) => {
-        void pullFederatedPosts();
-        void pullFederatedClaims();
-        void pullFederatedTaskComments();
-        void pullFederatedExchanges();
-        void pullFederatedCoOrgInvitations();
-        void pullFederatedCoOrgResponses();
-        void pullFederatedCoOrgRevocations();
-        void pullFederatedEvents();
-        void pullFederatedEventCancellations();
-        // Phase 1 of docs/invite-redemption.md: redemption receipts
-        // (invite-row flip + roster materialization, §6) and the §9
-        // companion vouch pull (trust-status convergence).
-        void pullFederatedRedemptions();
-        // docs/invite-revocation.md: converge revoked-then-redeemed
-        // invites to one honest state across every device.
-        void pullFederatedInviteRevocations();
-        void pullFederatedVouches();
-      },
-    );
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const FEDERATION_REPULL_MS = 3 * 60 * 1000;
+    const runPulls = () =>
+      import("@/lib/federationSync").then(
+        ({
+          pullFederatedPosts,
+          pullFederatedClaims,
+          pullFederatedTaskComments,
+          pullFederatedExchanges,
+          pullFederatedCoOrgInvitations,
+          pullFederatedCoOrgResponses,
+          pullFederatedCoOrgRevocations,
+          pullFederatedEvents,
+          pullFederatedEventCancellations,
+          pullFederatedRedemptions,
+          pullFederatedInviteRevocations,
+          pullFederatedVouches,
+          pullFederatedProjectStates,
+          pullFederatedTaskStates,
+        }) => {
+          void pullFederatedPosts();
+          void pullFederatedClaims();
+          void pullFederatedTaskComments();
+          void pullFederatedExchanges();
+          void pullFederatedCoOrgInvitations();
+          void pullFederatedCoOrgResponses();
+          void pullFederatedCoOrgRevocations();
+          void pullFederatedEvents();
+          void pullFederatedEventCancellations();
+          // Phase 1 of docs/invite-redemption.md: redemption receipts
+          // (invite-row flip + roster materialization, §6) and the §9
+          // companion vouch pull (trust-status convergence).
+          void pullFederatedRedemptions();
+          // docs/invite-revocation.md: converge revoked-then-redeemed
+          // invites to one honest state across every device.
+          void pullFederatedInviteRevocations();
+          void pullFederatedVouches();
+          // docs/project-federation.md: project + task LWW state.
+          // Projects first — a task's authority derives from its
+          // project, so the task pull skips rows whose project
+          // hasn't landed yet and retries next cycle.
+          void pullFederatedProjectStates().then(() => {
+            void pullFederatedTaskStates();
+          });
+        },
+      );
+    void runPulls();
+    timer = setInterval(() => void runPulls(), FEDERATION_REPULL_MS);
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [ready]);
 
   // Auto-confirm sweep — for `awaiting_confirmation` records older

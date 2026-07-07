@@ -1205,6 +1205,13 @@ We are not trying to protect against:
   visible. The day project / task federation lands is the day
   this entry is superseded by a new entry that enumerates the
   wire fields.
+  **SUPERSEDED:** that day came. Project & task federation
+  Phase 1 shipped (`docs/project-federation.md`); the owed
+  entry — wire fields, adversary mapping, mitigations,
+  residuals — is "Federated `ProjectState` / `TaskState`
+  records" near the end of this section. `orderIndex` and
+  `dependencies` now DO cross the wire as fields of the
+  full-row `TaskState` record.
 
 - **Federated `RedemptionReceipt` records.**
   *Shipped — Phase 1 of `docs/invite-redemption.md` (§14 PRs 1a–1d,
@@ -1400,6 +1407,68 @@ We are not trying to protect against:
   static hosting, dev servers) fail the health probe and produce no
   suggestion; failure is silent because an unconfigured node is a
   normal state, not an error.
+
+- **Federated `ProjectState` / `TaskState` records (project &
+  participation federation Phase 1).**
+  *Shipped — `docs/project-federation.md`; supersedes the
+  "`ProjectTask.orderIndex` and `dependencies` remain local" entry
+  above, which reserved exactly this obligation.* Projects and their
+  tasks now cross the wire as signed **last-writer-wins state
+  records** — the node's first MUTABLE record kinds: `POST/GET
+  /project-states` and `/task-states`, outbox kinds `project_state` /
+  `task_state`, pulls in `federationSync.ts`, and a 3-minute re-pull
+  of the whole federation fan-out.
+  **New wire fields.** The FULL `Project` row (title, description,
+  category, status, target/contributed hours, deadline, location
+  zone, tags, organizer + co-organizer public keys, template id) and
+  the FULL `ProjectTask` row (title, description, hours estimated
+  and actual, urgency, status, `assignedTo` claimer key, claim and
+  check-in timestamps, dependencies, orderIndex) plus `updatedAt`,
+  `signerKey`, `signature` on each. Canonical form is
+  `stableStringify(record minus signature)` — every field is signed,
+  including ones a given app version doesn't know, so records pass
+  through servers and clients verbatim.
+  **Adversary mapping (§3).** A node-watching adversary (operator,
+  subpoena, MITM on a plain-HTTP pilot) now sees who organizes what,
+  who claims which task, and when — the same class of signal the
+  existing `Post` / `Exchange` / `TaskComment` surfaces already
+  leak (a task COMMENT already named the project, task, and author;
+  the comment "done!" federated while the status change didn't).
+  Claim timestamps (`claimedAt`, `checkInAcknowledgedAt`) extend the
+  "public task check-in chip reveals claim duration" entry's
+  reasoning onto the wire: claim-duration is now node-visible, not
+  just peer-visible. Accepted for the same reason as the chip —
+  it is precisely the coordination signal multi-member projects
+  exist to share. E2E encryption was considered and rejected for
+  community-audience data (§2 of the design doc): "encrypted to
+  whom?" has no good answer for a whole community with changing
+  membership, and the node's community IS the intended audience.
+  **Mitigations.** (a) Server-side authority rules checked against
+  the STORED version so a hostile write can't grant itself authority:
+  genesis must be self-organized; updates require the stored
+  organizer / a stored co-organizer; `organizerKey` changes only by
+  the stored organizer's signature (handoff). (b) The same rules are
+  recomputed client-side on pull against the LOCAL stored version —
+  a compromised node serving fabricated rows can't reassign
+  authority on member devices. (c) LWW accepts only strictly-newer
+  `updatedAt`, bounded at ingestion to now+24h, and the pull cursor
+  applies the standard plausibility bound (cursor-poisoning
+  defense). (d) Insert caps cover both tables (row-count ceilings;
+  LWW replaces in place, so an honest project's lifetime of edits
+  costs one row per project/task). (e) 409 for task-before-project
+  keeps ordering server-enforced; the outbox retries.
+  **Residuals, stated plainly.** (1) A task's claimer can vandalize
+  non-claim fields of the task they hold — the server does not diff
+  fields; the comment trail and the organizer's next LWW write
+  repair it. (2) LWW on wall clocks: same-millisecond edits can drop
+  one edit silently; the next edit repairs it. (3) A co-organizer's
+  writes are honored only after the organizer's device republishes a
+  version naming them (it does so automatically on ingesting the
+  signed acceptance — but an offline organizer device delays this).
+  (4) Project ADOPTION stays local: the node's stored authority
+  still names the absent organizer, deliberately — the alternative
+  is a quorum-takeover surface. (5) Members with a locked device
+  publish on their next unlocked mutation, not immediately.
 
 ## 8. Guidance for reviewers
 
