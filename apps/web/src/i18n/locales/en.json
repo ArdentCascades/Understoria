@@ -1688,6 +1688,21 @@
       "emptyTitle": "A new understoria",
       "empty": "No exchanges yet. Once the first one happens, you'll see the mix of care, labor, and support flowing through the community."
     },
+    "resilience": {
+      "title": "Community resilience",
+      "nodeTitle": "A community server",
+      "tier": {
+        "seedling": "Seedling",
+        "taking_root": "Taking root",
+        "sturdy": "Sturdy",
+        "deep_rooted": "Deep-rooted"
+      },
+      "bodySeedling": "Right now this community lives on this device alone. Connecting to a community server — or starting one — lets everyone's copies stay in step.",
+      "bodyOne": "One server carries this community — and {{count}} member holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
+      "bodyOther": "One server carries this community — and every one of its {{count}} members holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
+      "nodeQuiet": "The server hasn't answered lately — your copy is safe, and syncing resumes when it's back.",
+      "cta": "Grow another root"
+    },
     "federation": {
       "title": "Across federation",
       "summaryOne": "{{count}} exchange · {{hours}}h flowing through {{peers}} peer community",

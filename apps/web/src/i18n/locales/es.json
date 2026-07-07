@@ -1688,6 +1688,21 @@
       "emptyTitle": "Una nueva understoria",
       "empty": "Aún no hay intercambios. Cuando ocurra el primero, verás la mezcla de cuidados, trabajo y apoyo fluyendo por la comunidad."
     },
+    "resilience": {
+      "title": "Resiliencia comunitaria",
+      "nodeTitle": "Un servidor comunitario",
+      "tier": {
+        "seedling": "Semilla",
+        "taking_root": "Echando raíces",
+        "sturdy": "Firme",
+        "deep_rooted": "De raíces profundas"
+      },
+      "bodySeedling": "Ahora mismo esta comunidad vive solo en este dispositivo. Conectarse a un servidor comunitario — o crear uno — mantiene las copias de todas las personas al día.",
+      "bodyOne": "Un servidor sostiene esta comunidad — y {{count}} integrante guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyOther": "Un servidor sostiene esta comunidad — y cada una de sus {{count}} integrantes guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "nodeQuiet": "El servidor no ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando vuelva.",
+      "cta": "Hacer crecer otra raíz"
+    },
     "federation": {
       "title": "En la federación",
       "summaryOne": "{{count}} intercambio · {{hours}}h circulando por {{peers}} comunidad aliada",
