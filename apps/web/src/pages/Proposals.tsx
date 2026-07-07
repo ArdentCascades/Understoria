@@ -12,6 +12,9 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
+import { CosignRemoval } from "@/components/CosignRemoval";
+import { RemovalCeremony } from "@/components/RemovalCeremony";
+import { deriveRemovedKeys } from "@/lib/memberRemoval";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -122,6 +125,12 @@ export default function ProposalsPage() {
     () => db.memberReinstatements.toArray(),
     [],
     [],
+  );
+  const [cosigning, setCosigning] = useState(false);
+  const [reinstating, setReinstating] = useState<string | null>(null);
+  const removedNow = useMemo(
+    () => deriveRemovedKeys(memberRemovals, memberReinstatements),
+    [memberRemovals, memberReinstatements],
   );
   const nameByKey = useMemo(() => {
     const map = new Map<string, string>();
@@ -266,6 +275,25 @@ export default function ProposalsPage() {
         </ul>
       )}
 
+      {/* M2: any member can co-sign a proposed removal /
+          reinstatement here — the proposer shows their draft QR and
+          this captures it. */}
+      {currentMember && (
+        <section className="mt-6 card">
+          {!cosigning ? (
+            <button
+              type="button"
+              className="btn-secondary text-xs"
+              onClick={() => setCosigning(true)}
+            >
+              {t("removals.cosignButton")}
+            </button>
+          ) : (
+            <CosignRemoval onDone={() => setCosigning(false)} />
+          )}
+        </section>
+      )}
+
       {(memberRemovals.length > 0 || memberReinstatements.length > 0) && (
         <section className="mt-6" aria-labelledby="removals-title">
           <h2
@@ -317,6 +345,28 @@ export default function ProposalsPage() {
                         .join(", "),
                     })}
                   </p>
+                  {/* M3: the door can reopen — start a reinstatement
+                      ceremony for a currently-removed member. */}
+                  {r.removal && removedNow.has(r.key) && currentMember && (
+                    reinstating === r.key ? (
+                      <div className="mt-2">
+                        <RemovalCeremony
+                          recordKind="reinstatement"
+                          subjectKey={r.key}
+                          subjectName={nameByKey.get(r.key) ?? shortKey(r.key)}
+                          onCancel={() => setReinstating(null)}
+                        />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn-ghost mt-2 text-xs"
+                        onClick={() => setReinstating(r.key)}
+                      >
+                        {t("removals.reinstateButton")}
+                      </button>
+                    )
+                  )}
                 </li>
               ))}
           </ul>

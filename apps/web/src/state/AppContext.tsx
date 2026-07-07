@@ -162,6 +162,10 @@ export interface AppContextValue {
    * underlying `BlockRow.hideGovernance` flag.
    */
   governanceHiddenKeys: ReadonlySet<string>;
+  /** True when the CURRENT member stands removed by community
+   *  decision (docs/member-removal.md) — the Dashboard says so
+   *  plainly instead of showing an eternal failing sync. */
+  selfRemoved: boolean;
   lockState: LockState;
   unlock: (
     passphrase: string,
@@ -646,6 +650,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (currentMemberKey) derived.delete(currentMemberKey);
     return derived;
   }, [memberRemovalRows, memberReinstatementRows, currentMemberKey]);
+  // The removed member's own device keeps working (their data is
+  // theirs); this flag lets the Dashboard say what happened plainly
+  // instead of showing an eternal failing sync (M2).
+  const selfRemoved = useMemo(() => {
+    if (!currentMemberKey) return false;
+    return deriveRemovedKeys(
+      memberRemovalRows ?? [],
+      memberReinstatementRows ?? [],
+    ).has(currentMemberKey);
+  }, [memberRemovalRows, memberReinstatementRows, currentMemberKey]);
   const hiddenAuthorKeys = useMemo<ReadonlySet<string>>(() => {
     if (removedKeys.size === 0) return blockedKeys;
     const union = new Set(blockedKeys);
@@ -746,6 +760,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       eventProjectLinks: eventProjectLinks ?? [],
       blockedKeys,
       governanceHiddenKeys,
+      selfRemoved,
       lockState,
       unlock,
       lock,
@@ -786,6 +801,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       eventProjectLinks,
       blockedKeys,
       governanceHiddenKeys,
+      selfRemoved,
       lockState,
       unlock,
       lock,
