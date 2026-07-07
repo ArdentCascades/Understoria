@@ -57,6 +57,13 @@ export const EXPORT_EXCLUDED_TABLES = [
   "blocks",
   "previouslyBlocked",
   "invites",
+  // `redemptionReceipts` + `inviteRevocationRecords` — the signed
+  // membership artifacts (re-seed Phase R0). The tokens inside are
+  // consumed/dead, so no live credential leaks, but the rows ARE the
+  // who-invited-whom graph — the same relational surface that keeps
+  // `invites` out of a shareable file. Re-pullable from any node.
+  "redemptionReceipts",
+  "inviteRevocationRecords",
   "pairingLog",
   "eventRsvps",
   "eventProjectLinks",

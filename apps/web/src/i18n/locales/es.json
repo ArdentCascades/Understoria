@@ -1865,6 +1865,10 @@
     "data": {
       "title": "Datos y privacidad",
       "intro": "Todo lo que ves se guarda localmente en este dispositivo. Sin servidor. Sin analíticas. Sin cuenta que crear.",
+      "storageUsage": "Tu copia de esta comunidad: {{size}}",
+      "storageProtected": "protegida contra la limpieza del navegador",
+      "storageUnprotected": "el navegador podría borrarla si le falta espacio — instalar la aplicación suele protegerla",
+      "storageUnknown": "protección contra limpieza desconocida en este navegador",
       "export": "Exportar mis datos"
     },
     "communityAccount": {

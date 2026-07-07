@@ -9,6 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BackLink } from "@/components/BackLink";
 import { LanguageSection } from "@/components/LanguageSection";
@@ -17,6 +18,11 @@ import { NodeSection } from "@/components/NodeSection";
 import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { exportData } from "@/lib/exportData";
+import {
+  formatBytes,
+  readStorageStatus,
+  type StorageStatus,
+} from "@/lib/storageBudget";
 
 // Device-local preferences and admin. Extracted from Profile.tsx so
 // Profile can focus on community participation (who you are + what
@@ -31,6 +37,19 @@ import { exportData } from "@/lib/exportData";
 // reachable in a stress moment, not buried under a settings tap.
 export default function SettingsPage() {
   const { t } = useTranslation();
+  // Storage budget Phase 0 (docs/storage-budget.md): make the size
+  // and eviction-protection state of this device's community copy
+  // visible — a full device should fail legibly, not opaquely.
+  const [storage, setStorage] = useState<StorageStatus | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void readStorageStatus().then((st) => {
+      if (!cancelled) setStorage(st);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4">
@@ -68,6 +87,19 @@ export default function SettingsPage() {
           <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
             {t("profile.data.intro")}
           </p>
+          {storage && storage.usage !== null && (
+            <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
+              {t("profile.data.storageUsage", {
+                size: formatBytes(storage.usage),
+              })}
+              {" · "}
+              {storage.persisted === true
+                ? t("profile.data.storageProtected")
+                : storage.persisted === false
+                  ? t("profile.data.storageUnprotected")
+                  : t("profile.data.storageUnknown")}
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
             <button
               className="btn-secondary"

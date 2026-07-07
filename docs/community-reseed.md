@@ -1,7 +1,8 @@
 # Community re-seed — restore a community onto a fresh node from any member's device
 
-Status: **designed, not built.** This document is the implementation
-plan. Companion docs: `docs/community-resilience.md` (mirror nodes +
+Status: **Phase R0 shipped** (the artifact-persistence groundwork —
+see §1b/§4; devices now capture what a future re-seed needs while a
+node still serves it). **Phase R1 designed below, not built.** Companion docs: `docs/community-resilience.md` (mirror nodes +
 failover — the FIRST line of defense this feature backstops),
 `docs/add-a-node.md` (the member-facing node guide),
 `docs/operator-powers.md`, `docs/invite-redemption.md` (the receipt
@@ -78,7 +79,7 @@ into unsigned bookkeeping rows**, dropping the signatures:
 artifacts. New Dexie tables:
 
 ```
-redemptionReceipts: "token"          // full RedemptionReceipt JSON
+redemptionReceipts: "invite.token"   // full RedemptionReceipt JSON
 inviteRevocationRecords: "token"     // full InviteRevocation JSON
 ```
 
@@ -115,11 +116,10 @@ acceptable loss.
   `autoConfirmed` row **iff** `verifyExchangeLabel` resolves it
   against this static resolver — the same shared verifier peer pull
   and mirror pull already use, fail-closed when unset. The old
-  node's system PUBKEY is recoverable even after the node is lost:
-  it is printed in every member's app… no, it is not surfaced today
-  — so Phase R0 also persists the last-seen `/config.systemKey`
-  (with nodeId) in `nodeConfig`, and the re-seed UI shows it for the
-  operator to copy. Without it, auto-confirmed exchanges are skipped
+  node's system PUBKEY was not surfaced anywhere client-side —
+  so Phase R0 also captures the last-seen `/config.systemKey` (with
+  nodeId) into settings (`communityNodeLastSeenSystemKey`), and the
+  R1 re-seed UI will show it for the operator to copy. Without it, auto-confirmed exchanges are skipped
   and counted in the summary ("N exchanges could not be restored —
   see docs"), never silently dropped.
 - **Awaiting-transitions.** POST-only by design; the auto-confirm
@@ -197,8 +197,13 @@ Small, mostly-existing surface:
 ## 4. Order of shipping
 
 1. **R0 — persist the artifacts** (Dexie tables + write-throughs +
-   snapshot transfer + last-seen system-key capture). Ship ASAP;
-   it is small and it is the part that must exist BEFORE disaster.
+   snapshot transfer + last-seen system-key capture). **Shipped** —
+   `redemptionReceipts` / `inviteRevocationRecords` tables (schema
+   v29) written through from own redeem/revoke and both federated
+   pulls, carried by the device-pairing snapshot, cleared by soft
+   purge, excluded from the shareable export; the primary's
+   `/config.systemKey` is captured to settings on each Board-visit
+   config fetch.
 2. **R1-server** — `RESEED_GRACE_UNTIL`, `TRUSTED_SYSTEM_KEYS`,
    operator runbook ("Recovering from total node loss": stand up
    node, set founder keys + envs, hand members the URL, watch the

@@ -69,6 +69,7 @@ import {
   unlockSession,
   type LockState,
 } from "@/db/secrets";
+import { ensurePersistentStorage } from "@/lib/storageBudget";
 import {
   applyTheme,
   cacheResolvedTheme,
@@ -214,6 +215,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Storage budget Phase 0 (docs/storage-budget.md): ask the browser
+    // for the durable-storage grant so disk pressure can't silently
+    // evict the community's local copy. Idempotent, silent, and the
+    // app is unchanged when the browser declines — the Settings meter
+    // reports which state we're in.
+    void ensurePersistentStorage();
     (async () => {
       const node = await ensureNodeId();
       const initialLock = await currentLockState();

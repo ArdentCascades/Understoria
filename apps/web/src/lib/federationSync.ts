@@ -1173,6 +1173,13 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
       }
     };
 
+    // Re-seed Phase R0 (docs/community-reseed.md §1b): persist the
+    // verified SIGNED artifact regardless of how the derived invite
+    // row merges below — this is the row a device can re-upload to a
+    // fresh node, and it only exists to capture while a node still
+    // serves it. Idempotent by token; receipts are immutable.
+    await db.redemptionReceipts.put(receipt);
+
     const existing = await db.invites.get(receipt.invite.token);
     let changed = false;
 
@@ -1348,6 +1355,10 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
         maxReceivedAt = receivedAt;
       }
     };
+
+    // Re-seed Phase R0: persist the signed artifact (same rationale
+    // as the redemptions pull above).
+    await db.inviteRevocationRecords.put(revocation);
 
     const existing = await db.invites.get(revocation.token);
     let changed = false;

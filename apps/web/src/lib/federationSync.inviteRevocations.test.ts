@@ -195,6 +195,22 @@ describe("pullFederatedInviteRevocations", () => {
     );
   });
 
+  it("persists the verified SIGNED revocation artifact (re-seed R0)", async () => {
+    const inviter = generateKeyPair();
+    const { invite } = makeSignedInvite({ inviter });
+    const revocation = makeRevocation({
+      inviter,
+      token: invite.token,
+      revokedAt: 5_000,
+    });
+    stubFeeds({ inviteRevocations: [{ ...revocation, receivedAt: 900 }] });
+    await pullFederatedInviteRevocations();
+    // Verbatim, signature included (docs/community-reseed.md §1b).
+    expect(await db.inviteRevocationRecords.get(invite.token)).toEqual(
+      revocation,
+    );
+  });
+
   it("ignores a revocation whose inviterKey does not match the local invite (authority binding §3.1)", async () => {
     const realInviter = generateKeyPair();
     const { invite, receipt } = (() => {

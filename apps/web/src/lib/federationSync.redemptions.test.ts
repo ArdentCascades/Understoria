@@ -154,6 +154,16 @@ describe("pullFederatedRedemptions", () => {
     ).toBe("1000");
   });
 
+  it("persists the verified SIGNED receipt artifact (re-seed R0)", async () => {
+    const { receipt } = makeReceipt({ displayName: "Marisol" });
+    stubRedemptions([{ ...receipt, receivedAt: 1000 }]);
+    await pullFederatedRedemptions();
+    // Verbatim, signatures included — the row a device can re-upload
+    // to a fresh node (docs/community-reseed.md §1b).
+    const stored = await db.redemptionReceipts.get(receipt.invite.token);
+    expect(stored).toEqual(receipt);
+  });
+
   it("flips the inviter's local 'open' row to redeemed (the incident's stuck row)", async () => {
     const { receipt } = makeReceipt();
     await db.invites.put({

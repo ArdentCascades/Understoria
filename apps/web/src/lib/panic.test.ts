@@ -155,7 +155,16 @@ describe("hardPurge", () => {
       const kp = t.schema.primKey.keyPath;
       const row: Record<string, unknown> = {};
       if (typeof kp === "string") {
-        row[kp] = `seed_${t.name}`;
+        // Dotted keypaths (e.g. redemptionReceipts' "invite.token")
+        // need the nested shape, not a flat "a.b" property.
+        const parts = kp.split(".");
+        let target = row;
+        for (const part of parts.slice(0, -1)) {
+          const next: Record<string, unknown> = {};
+          target[part] = next;
+          target = next;
+        }
+        target[parts[parts.length - 1]] = `seed_${t.name}`;
       } else if (Array.isArray(kp)) {
         for (const part of kp) row[part] = `seed_${t.name}_${part}`;
       }

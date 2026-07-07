@@ -45,6 +45,8 @@ async function reset() {
     db.settings.clear(),
     db.secretKeys.clear(),
     db.invites.clear(),
+    db.redemptionReceipts.clear(),
+    db.inviteRevocationRecords.clear(),
     db.vouches.clear(),
     db.outbox.clear(),
     db.projects.clear(),
@@ -122,6 +124,34 @@ describe("redeemInvite", () => {
     expect(invite.redeemedBy).toBe(result.value.member.publicKey);
   });
 
+  it("persists the SIGNED receipt artifact beside the derived row (re-seed R0)", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+
+    const result = await redeemInvite(encoded, "Newcomer", NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // docs/community-reseed.md §1b: outbox rows are pruned after
+    // delivery, so this table is the only durable, re-uploadable
+    // copy of the artifact the membership closure derives from.
+    const [receipt] = await db.redemptionReceipts.toArray();
+    expect(receipt).toBeDefined();
+    expect(receipt.redeemedBy).toBe(result.value.member.publicKey);
+    expect(receipt.invite.inviterKey).toBe(inviter.publicKey);
+    expect(receipt.signature.length).toBeGreaterThan(0);
+    expect(receipt.invite.signature.length).toBeGreaterThan(0);
+  });
+
   it("rejects a second redemption of the same token", async () => {
     const inviter = await createMember({ displayName: "Rosa" }, NODE);
     const { shareUrl } = await issueInvite(
@@ -193,6 +223,13 @@ describe("redeemInvite", () => {
     const result = await redeemInvite(encoded, "Newcomer", NODE);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toBe("revoked");
+
+    // Re-seed R0: the signed revocation persists as a re-uploadable
+    // artifact beside the flipped row.
+    const record = await db.inviteRevocationRecords.get(row.token);
+    expect(record).toBeDefined();
+    expect(record?.inviterKey).toBe(inviter.publicKey);
+    expect(record?.signature.length).toBeGreaterThan(0);
   });
 
   it("refuses self-redemption (inviter holds the secret locally)", async () => {
