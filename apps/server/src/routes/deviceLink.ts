@@ -45,16 +45,18 @@ import type { DeviceLinkStore } from "../db.js";
  *  clients lie. */
 export const DEVICE_LINK_TTL_MS = 15 * 60_000;
 
-/** Envelope size cap. A real envelope (identity + profile + block
- *  bundle) is ~1-4 KB of base64; 32 KB leaves room for large block
- *  lists while keeping the mailbox useless as free blob storage. */
-const MAX_ENVELOPE_CHARS = 32 * 1024;
+/** Envelope size cap. The envelope now carries the community
+ *  snapshot (lib/communitySnapshot.ts caps it at 320K chars of JSON
+ *  before sealing + base64); 480 KB covers that with sealing and
+ *  encoding overhead while keeping the mailbox useless as general
+ *  blob storage. */
+const MAX_ENVELOPE_CHARS = 480 * 1024;
 
 /** Table row ceiling — a mailbox outlives its row for at most 15
- *  minutes, so even a small community node never has more than a
- *  handful of live rows; 512 concurrent transfers is beyond any
- *  realistic burst and still caps disk at ~16 MB worst case. */
-const MAX_LIVE_ROWS = 512;
+ *  minutes; 64 concurrent transfers is beyond any realistic burst
+ *  for a community node and caps worst-case disk at ~30 MB now that
+ *  envelopes can be snapshot-sized. */
+const MAX_LIVE_ROWS = 64;
 
 const CHANNEL_ID_RE = /^[0-9a-f]{64}$/;
 
@@ -86,7 +88,9 @@ export async function registerDeviceLinkRoutes(
   app: FastifyInstance,
   { store, now = () => Date.now() }: Deps,
 ): Promise<void> {
-  app.post("/device-link", async (req, reply) => {
+  // Per-route body override: the global 64 KB cap fits every signed
+  // federation record but not a snapshot-bearing pairing envelope.
+  app.post("/device-link", { bodyLimit: 640 * 1024 }, async (req, reply) => {
     const body = req.body as
       | { channelId?: unknown; envelope?: unknown }
       | null

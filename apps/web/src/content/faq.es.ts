@@ -209,10 +209,11 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "Dos cosas no viajan: tu historial de mensajes (los mensajes " +
             "están cifrados a las claves propias de cada dispositivo, así " +
             "que se quedan donde fueron recibidos) y los ajustes por " +
-            "dispositivo como el tema y el tamaño de texto. Todo lo que " +
-            "vive en el registro compartido de la comunidad — " +
-            "publicaciones, intercambios, avales — aparece en el " +
-            "dispositivo nuevo por la sincronización normal.",
+            "dispositivo como el tema y el tamaño de texto. Todo lo " +
+            "demás — publicaciones, proyectos, eventos, miembros, " +
+            "intercambios — viaja con la vinculación misma, así que el " +
+            "dispositivo nuevo se ve como el anterior de inmediato y " +
+            "sigue sincronizando después.",
         ],
       },
       {

@@ -205,9 +205,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
           "Two things don't come along: your message history (messages " +
             "are encrypted to each device's own keys, so they stay " +
             "where they were received) and per-device settings like " +
-            "theme and text size. Everything that lives on the shared " +
-            "community record — posts, exchanges, vouches — shows up " +
-            "on the new device through the normal sync.",
+            "theme and text size. Everything else — posts, projects, " +
+            "events, members, exchanges — comes across with the link " +
+            "itself, so the new device looks like the old one right " +
+            "away and keeps syncing afterward.",
         ],
       },
       {

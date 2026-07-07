@@ -149,6 +149,22 @@ plaintext (JSON, parsed after unwrap) = {
                                      // every pull is gated on the
                                      // setting. Optional on the wire
                                      // (older sources omit it).
+  snapshot?: { <table>: rows[] },    // shared-state slice of the
+                                     // source's local database
+                                     // (lib/communitySnapshot.ts —
+                                     // exactly what's in/out and why).
+                                     // Exists because several record
+                                     // kinds NEVER federate (projects,
+                                     // tasks, proposals, votes, RSVPs)
+                                     // and posts only reach the node
+                                     // when each device mirrored them —
+                                     // sync alone lands a linked device
+                                     // in a near-empty community.
+                                     // RELAYED transports only (never
+                                     // the QR — too large to render);
+                                     // applied on fresh devices only;
+                                     // capped at ~320 KB serialized,
+                                     // degrading to identity-only.
 }
 ```
 
