@@ -61,6 +61,17 @@ include breaking changes.
   read words in browser → type words in app.
 
 ### Fixed
+- **Community stats now transfer with a link.** Every device mints
+  its own random community id on first launch, and the dashboard's
+  headline numbers (hours exchanged, active members, streaks,
+  milestones) only count records filed under *this device's* id — so
+  a linked device, despite holding all the transferred exchanges,
+  showed them as "federated from another community" and zeroed its
+  own stats. A fresh linked device now adopts the source device's
+  community id (same member, same community, same id), and finishing
+  the link does a clean app start so everything — stats, sync,
+  outbox — comes up on the adopted identity.
+
 - **Linking now carries the community itself, not just your
   identity.** Field testing showed the previous fix (carrying the
   sync connection) wasn't enough, because several kinds of records

@@ -85,7 +85,7 @@ type Stage =
  * node at all).
  */
 export default function AddDevicePage() {
-  const { currentMember, lockState } = useApp();
+  const { currentMember, lockState, nodeId } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -227,6 +227,10 @@ export default function AddDevicePage() {
           previouslyBlocked: blockBundle.previouslyBlocked,
           ...(communityNode !== undefined ? { communityNode } : {}),
           ...(snapshot !== null ? { snapshot } : {}),
+          // Community id: the linked device adopts this so
+          // transferred records count as OUR community's, not
+          // "federated from elsewhere" (dashboard stats split on it).
+          ...(nodeId ? { nodeId } : {}),
         });
         const sealed = sealGrant(payload, requestPubkey);
         const published = await publishLinkEnvelope(
@@ -249,7 +253,7 @@ export default function AddDevicePage() {
         setGranting(null);
       }
     },
-    [currentMember, lockState, t],
+    [currentMember, lockState, nodeId, t],
   );
 
   const handleCancel = useCallback(() => {
@@ -307,10 +311,11 @@ export default function AddDevicePage() {
             }
           : {}),
         ...(snapshot !== null ? { snapshot } : {}),
+        ...(nodeId ? { nodeId } : {}),
       });
       return { encoded: encodeEnvelope(env), code: generated };
     },
-    [currentMember],
+    [currentMember, nodeId],
   );
 
   // Continue from the comparison card. Tries the link transport

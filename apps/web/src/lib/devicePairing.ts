@@ -135,6 +135,14 @@ export interface TransferPayload {
    *  Applied on fresh devices only; federation sync remains the
    *  ongoing top-up. Optional on the wire. */
   snapshot?: Record<string, Record<string, unknown>[]>;
+  /** The source device's community id (`settings.nodeId`). Every
+   *  device mints a random one on first run, and stats/record
+   *  attribution split on it — so a linked device that keeps its own
+   *  freshly-minted id files every transferred record under "another
+   *  community" and shows zeroed headline stats. A fresh destination
+   *  adopts this id: same member, same community, same id. Optional
+   *  on the wire. */
+  nodeId?: string;
 }
 
 export type UnwrapResult =
@@ -227,6 +235,7 @@ export function buildTransferPayload(opts: {
   previouslyBlocked?: PreviouslyBlockedRow[];
   communityNode?: { url: string; enabled: boolean };
   snapshot?: Record<string, Record<string, unknown>[]>;
+  nodeId?: string;
 }): TransferPayload {
   const now = opts.now ?? Date.now();
   const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;
@@ -245,6 +254,7 @@ export function buildTransferPayload(opts: {
       ? { communityNode: opts.communityNode }
       : {}),
     ...(opts.snapshot !== undefined ? { snapshot: opts.snapshot } : {}),
+    ...(opts.nodeId !== undefined ? { nodeId: opts.nodeId } : {}),
   };
 }
 
@@ -268,6 +278,10 @@ export async function wrapForTransfer(opts: {
   /** Optional: the source's community-node connection (see
    *  TransferPayload.communityNode). */
   communityNode?: { url: string; enabled: boolean };
+  /** Optional: shared-state snapshot (relayed transports only). */
+  snapshot?: Record<string, Record<string, unknown>[]>;
+  /** Optional: the source's community id (see TransferPayload.nodeId). */
+  nodeId?: string;
 }): Promise<TransferEnvelope> {
   const now = opts.now ?? Date.now();
   const expiryMs = opts.expiryMs ?? DEFAULT_EXPIRY_MS;

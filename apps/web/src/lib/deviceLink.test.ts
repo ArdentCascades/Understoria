@@ -320,3 +320,13 @@ describe("community connection rides the transfer", () => {
     if (opened.ok) expect(opened.payload.communityNode).toBeUndefined();
   });
 });
+
+describe("community id rides the transfer", () => {
+  it("sealGrant/openGrant preserve the source nodeId verbatim", () => {
+    const kp = generateLinkKeypair();
+    const payload = { ...samplePayload(), nodeId: "node_abc12345" };
+    const opened = openGrant(sealGrant(payload, b64encode(kp.publicKey)), kp);
+    expect(opened.ok).toBe(true);
+    if (opened.ok) expect(opened.payload.nodeId).toBe("node_abc12345");
+  });
+});
