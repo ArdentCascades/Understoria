@@ -247,9 +247,11 @@ We are not trying to protect against:
   makes closing an intentional governance act — the member
   choosing to close is performing a visible community function,
   analogous to a meeting facilitator calling a consensus vote
-  done. The `closedBy` field does not exist (no identity is
-  recorded), so the exposure is limited to timing. Risk is low
-  but worth noting for federation threat modeling.
+  done. Since proposal federation G1, the closure record carries
+  `closerKey` and a signature — closing is an ATTRIBUTED public
+  act inside the community, deliberately (the same open-ballot
+  posture as votes; see the proposal-federation entry in §7). The
+  exposure is identity + timing, inside the community only.
 
 - **Federated task comments expose plain-text bodies.** Task
   comments (PRs #72–#73) federate the same way posts do — a
@@ -283,11 +285,12 @@ We are not trying to protect against:
   body, authorKey, and createdAt at flag time. The snapshot is
   intentional — community accountability outlasts the author's
   choice to soft-delete their own comment (otherwise an author
-  could nullify a flag by deleting). Today this exposure is
-  local-only: proposals don't federate. When proposals federation
-  ships (tracked, no PR yet), the snapshot will federate too,
-  and the exposure shape will match the federated-bodies entry
-  above. Mitigation in place: flagging requires the flagger to
+  could nullify a flag by deleting). Since proposal federation
+  G1/G2, flag proposals sign at creation (post-commit, the
+  flagger's own row) and federate — the snapshot now travels with
+  them, and the exposure shape matches the federated-bodies entry
+  above: the snapshotted body survives on every device and node
+  that pulled the proposal, beyond the author's soft-delete. Mitigation in place: flagging requires the flagger to
   type a (optional) reason via `window.prompt`, which is a
   speed-bump against accidental flagging. No anonymous flagging
   — the `proposerKey` on the proposal row is the flagger's
@@ -1799,7 +1802,7 @@ We are not trying to protect against:
   remove anyone — quorum only (`operator-powers.md`).
 
 - **Proposal federation (open ballots).**
-  *Shipped (G1) — `docs/proposal-federation.md`.* Proposals, votes,
+  *Shipped (G1 + G2) — `docs/proposal-federation.md`.* Proposals, votes,
   and closures became signed federated records. The trade named
   before the schema: **votes are now public, attributed records
   inside the community** — the same posture as removal signatures,
@@ -1818,7 +1821,19 @@ We are not trying to protect against:
   config-dependent eligibility half re-checked on devices. Soft
   purge still clears the local votes table; the community's copy
   persists on nodes — the standard federated-record honesty, now
-  true of votes too.
+  true of votes too. G2 adds the effect surface: a pulled passed
+  `config_change` closure MOVES LOCAL CONFIG on every device —
+  the first mechanism by which a remote record changes local
+  behavior rather than local data. Bounds: the closure must
+  verify, its closer must be a member, first-writer-wins makes
+  the applied config total across the community, invalid payloads
+  soft-degrade (record stands, knobs don't move), and a passed
+  closure whose merged ballot shows standing blocks renders as
+  CONTESTED on every device rather than being silently honored.
+  A hostile node hiding votes before closing remains the residual
+  risk named in the plan's §6 — mirrors and re-seed bound how
+  long the omission survives, and the contested flag names it
+  when the merged set disagrees.
 
 - **Storage windowing (coverage-claim downgrade).**
   *Shipped — `docs/storage-budget.md` Phase 1.* A member may free up

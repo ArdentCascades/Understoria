@@ -2317,6 +2317,7 @@
     "emptyTitleFiltered": "Nothing matches",
     "emptyOpen": "No open proposals right now.",
     "emptyFiltered": "No proposals match this filter.",
+    "contested": "Recorded as passed, but a standing block exists in the community-wide votes — this outcome is contested. Talk it through; the record stays.",
     "localOnly": "Recorded on this device only — it was created before community decisions synced between devices, so other members can't see it.",
     "footer": "Voting and automatic close are still to come. For now the community reaches decisions on whatever channel it uses, and any member can record the outcome here so the historical record reflects reality.",
     "proposerLabel": "Proposed by",

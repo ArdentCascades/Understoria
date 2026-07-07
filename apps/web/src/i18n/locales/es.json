@@ -2317,6 +2317,7 @@
     "emptyTitleFiltered": "Nada coincide",
     "emptyOpen": "No hay propuestas abiertas ahora mismo.",
     "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
+    "contested": "Registrada como aprobada, pero existe un bloqueo vigente en los votos de toda la comunidad — este resultado está en disputa. Hablenlo; el registro permanece.",
     "localOnly": "Registrado solo en este dispositivo — se creó antes de que las decisiones comunitarias se sincronizaran entre dispositivos, así que otros miembros no pueden verlo.",
     "footer": "La votación y el cierre automático aún están por venir. Por ahora la comunidad toma decisiones en su canal habitual, y cualquier integrante puede registrar el resultado aquí para que el registro histórico refleje la realidad.",
     "proposerLabel": "Propuesta por",

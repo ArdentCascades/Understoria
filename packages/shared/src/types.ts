@@ -809,9 +809,14 @@ export interface DisputePayload {
  * let execution detect "stewardship has changed since this was filed."
  * See `docs/project-adoption.md`.
  *
- * Adoption is a LOCAL governance act — projects never federate, so
- * `organizerKey` lives only on the local Project row, in the same
- * consistency domain as proposals and votes. No new wire records.
+ * Adoption federates through records that already exist: the proposal
+ * and its closure carry the deliberation (proposal federation G1/G2),
+ * and the signed `ProjectState` LWW record carries the organizer
+ * handoff itself. The closure deliberately has NO pull-side adoption
+ * effect — re-running `executeAdoptionProposal` on pulling devices
+ * would race the authoritative ProjectState record. No new wire
+ * records. (An earlier note here said "projects never federate"; that
+ * predates project federation Phase 1.)
  */
 export interface ProjectAdoptionPayload {
   projectId: string;

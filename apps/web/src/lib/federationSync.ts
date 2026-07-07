@@ -53,6 +53,7 @@ import {
   verifyVote,
 } from "@understoria/shared/crypto";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
+import { applyClosureEffects } from "@/db/proposals";
 import { publishProjectState } from "@/db/projects";
 import { createMember } from "@/db/seed";
 import { verifyTaskComment } from "@/lib/crypto";
@@ -2445,9 +2446,11 @@ export async function pullFederatedProposalClosures(): Promise<FederationSyncRes
       advanceCursor();
       continue;
     }
-    // The community's answer stamps the local row. Effect application
-    // (dispute post restoration, config convergence) is Phase G2 —
-    // named in docs/proposal-federation.md §5.
+    // The community's answer stamps the local row, then its EFFECTS
+    // apply (Phase G2, docs/proposal-federation.md §5): dispute posts
+    // restore/settle, and a passed config_change converges this
+    // device's community knobs — the same idempotent path the
+    // closing device ran.
     await db.transaction("rw", [db.proposalClosures, db.proposals], async () => {
       await db.proposalClosures.put(record);
       await db.proposals.update(record.proposalId, {
@@ -2456,6 +2459,10 @@ export async function pullFederatedProposalClosures(): Promise<FederationSyncRes
         closedReason: record.reason,
       });
     });
+    await applyClosureEffects(
+      { ...proposal, status: record.outcome },
+      record.outcome,
+    ).catch(() => {});
     inserted += 1;
     advanceCursor();
   }
