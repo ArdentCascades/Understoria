@@ -16,6 +16,7 @@ import { LanguageSection } from "@/components/LanguageSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
 import { NodeSection } from "@/components/NodeSection";
 import { ReseedSection } from "@/components/ReseedSection";
+import { RecoveryKitCard } from "@/components/RecoveryKitCard";
 import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { exportData } from "@/lib/exportData";
@@ -82,6 +83,8 @@ export default function SettingsPage() {
         <ReseedSection />
 
         <SecuritySection />
+
+        <RecoveryKitCard />
 
         <section className="card mb-4">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">

@@ -346,7 +346,7 @@
     "body": "Tu cuenta vive en este dispositivo — eso es lo que la mantiene privada. Si tienes un segundo dispositivo, vincúlalo: tu teléfono y una computadora pueden tener la misma cuenta, así perder uno no te deja afuera. Toma solo un minuto, y se hace con ambos dispositivos enfrente.",
     "cta": "Agregar otro dispositivo",
     "dismiss": "Quizás después",
-    "learnMore": "No hay contraseña que restablecer ni empresa que pueda recuperar tu cuenta — ese es el precio de que nadie pueda bloquearte ni entregarte. Un segundo dispositivo vinculado es la manera de conservar el acceso si pierdes uno. (Guardar tu exportación de datos o poner una frase de paso protegen cosas distintas; ninguna recupera tu cuenta en un dispositivo nuevo.)",
+    "learnMore": "No hay contraseña que restablecer ni empresa que pueda recuperar tu cuenta — ese es el precio de que nadie pueda bloquearte ni entregarte. Un segundo dispositivo vinculado es la manera de conservar el acceso si pierdes uno. (Guardar tu exportación de datos o poner una frase de paso protegen cosas distintas; ninguna recupera tu cuenta en un dispositivo nuevo.) Un kit de recuperación (Ajustes → Kit de recuperación) es el respaldo en papel para cuando solo tienes un dispositivo.",
     "why": "¿Por qué?"
   },
   "install": {
@@ -1452,6 +1452,45 @@
     "confirm": "Sí, conectar con {{origin}}",
     "decline": "Ahora no"
   },
+  "recoveryKit": {
+    "title": "Kit de recuperación",
+    "intro": "Un archivo pequeño (o una página impresa) que puede devolver tu cuenta en un dispositivo nuevo si este se pierde y no tienes otro emparejado. Contiene tu clave secreta, protegida con una frase que eliges ahora mismo.",
+    "create": "Crear un kit de recuperación…",
+    "passphraseIntro": "Elige una frase de recuperación. Es independiente de cualquier frase que uses a diario — y nadie puede restablecerla: un kit sin su frase es solo papel. Quien tenga AMBOS, el kit y esta frase, puede actuar como tú.",
+    "passphraseLabel": "Frase de recuperación",
+    "passphraseRepeatLabel": "Repítela",
+    "confirmCreate": "Crear kit",
+    "created": "Tu kit está listo. Guarda el archivo fuera de este dispositivo, o imprímelo — un cajón en casa es mejor que una carpeta en este teléfono.",
+    "download": "Descargar archivo",
+    "print": "Imprimir",
+    "done": "Listo",
+    "storageHint": "Guárdalo como una llave de repuesto: fuera de la vista, lejos de este dispositivo, y donde lo encuentres en una mala semana. Crea un kit nuevo si cambias de comunidad.",
+    "errorMismatch": "Las frases no coinciden.",
+    "errorLocked": "Este dispositivo está bloqueado — desbloquéalo primero para que el kit incluya tu clave.",
+    "errorNoIdentity": "No hay ninguna identidad en este dispositivo que respaldar.",
+    "printTitle": "Kit de recuperación de Understoria",
+    "printIntro": "Esta página puede restaurar la cuenta de Understoria de {{name}} en un dispositivo nuevo: abre la aplicación, elige \"Tengo un kit de recuperación\", escanea este código con cualquier lector QR y pega el texto, luego escribe la frase de recuperación. Guarda esta página en un lugar seguro — junto con la frase, ES la cuenta.",
+    "printKeyLabel": "Clave pública (tuya, se puede compartir):",
+    "printNodeLabel": "Servidor comunitario:",
+    "printFooter": "Ninguna empresa guarda una copia de esto. Esa es la idea — y significa que esta página y su frase son el único camino de vuelta sin otro dispositivo emparejado."
+  },
+  "recover": {
+    "title": "Restaurar desde un kit de recuperación",
+    "intro": "Si creaste un kit de recuperación en tu dispositivo anterior, trae tu cuenta — saldo, avales, roles, membresía — a este. La historia compartida de tu comunidad se sincroniza después desde su servidor.",
+    "uploadTitle": "Abrir el archivo del kit",
+    "uploadBody": "El archivo understoria-recovery-kit-….json que descargaste al crear el kit.",
+    "pasteLink": "¿Kit impreso? Escanea el QR con cualquier aplicación y pega el texto aquí →",
+    "pasteUse": "Usar el kit pegado",
+    "kitFound": "Se encontró un kit de {{name}}. Escribe su frase de recuperación para restaurar.",
+    "passphraseLabel": "Frase de recuperación",
+    "restore": "Restaurar mi cuenta",
+    "restoring": "Restaurando…",
+    "errorNotAKit": "Eso no parece un kit de recuperación de Understoria.",
+    "errorVersion": "Este kit se creó con una versión más nueva de la aplicación — actualiza e inténtalo de nuevo.",
+    "errorPassphrase": "Esa frase no abre este kit.",
+    "errorLocked": "Este dispositivo está bloqueado — desbloquéalo antes de restaurar.",
+    "errorCorrupted": "Este kit está dañado — la clave interior no corresponde a su titular. Prueba con el archivo descargado en lugar de una copia retecleada."
+  },
   "reseed": {
     "title": "Restaurar esta comunidad en un nodo",
     "intro": "Si algún día se pierden todos los servidores comunitarios, este dispositivo aún guarda la historia compartida — cada publicación, intercambio, evento, proyecto y registro de membresía, firmado criptográficamente. Apúntalo a un nodo nuevo y súbelo todo de vuelta. Varias personas pueden hacerlo a la vez; las copias simplemente se combinan.",
@@ -2300,6 +2339,7 @@
     "start": "Abrir el tablero",
     "nextSteps": "Después: mira qué necesitan tus vecinas, o publica una oferta tuya.",
     "pairDeviceLink": "¿Ya tienes tu identidad en otro dispositivo? Vincula este →",
+    "recoveryKitLink": "¿Perdiste tu dispositivo pero tienes un kit de recuperación? Restaura aquí →",
     "installedArrival": {
       "title": "La app ya está en tu pantalla de inicio",
       "intro": "Una pregunta antes de empezar:",

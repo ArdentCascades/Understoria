@@ -336,6 +336,13 @@ export default function WelcomePage() {
             >
               {t("welcome.pairDeviceLink")}
             </button>
+            <button
+              type="button"
+              onClick={() => navigate("/recover")}
+              className="text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            >
+              {t("welcome.recoveryKitLink")}
+            </button>
           </div>
         </>
       ) : (

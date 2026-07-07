@@ -346,7 +346,7 @@
     "body": "Your account lives on this device — that's what keeps it private. If you have a second device, pair it: your phone and a laptop can hold the same account, so losing one doesn't lock you out. It only takes a minute, and you do it with both devices in front of you.",
     "cta": "Add another device",
     "dismiss": "Maybe later",
-    "learnMore": "There's no password to reset and no company that can restore your account — that's the trade for having no one able to lock you out or hand you over. A second paired device is the way to keep access if a device is ever lost. (Saving your data export or setting a passphrase protects different things; neither one brings your account back on a new device.)",
+    "learnMore": "There's no password to reset and no company that can restore your account — that's the trade for having no one able to lock you out or hand you over. A second paired device is the best way to keep access if a device is ever lost; a recovery kit (Settings → Recovery kit) is the paper backup for when you only have one device. (Saving your data export or setting a passphrase protects different things; neither one brings your account back on a new device.)",
     "why": "Why?"
   },
   "install": {
@@ -1452,6 +1452,45 @@
     "confirm": "Yes, connect to {{origin}}",
     "decline": "Not now"
   },
+  "recoveryKit": {
+    "title": "Recovery kit",
+    "intro": "A small file (or printed page) that can bring your account back on a brand-new device if this one is ever lost and you have no paired spare. It holds your secret key, locked under a passphrase you choose right now.",
+    "create": "Create a recovery kit…",
+    "passphraseIntro": "Choose a recovery passphrase. It is separate from any passphrase you use day to day — and there is nobody who can reset it: a kit without its passphrase is just paper. Whoever holds BOTH the kit and this passphrase can act as you.",
+    "passphraseLabel": "Recovery passphrase",
+    "passphraseRepeatLabel": "Repeat it",
+    "confirmCreate": "Create kit",
+    "created": "Your kit is ready. Save the file somewhere that isn't this device, or print it — a drawer at home beats a folder on this phone.",
+    "download": "Download file",
+    "print": "Print",
+    "done": "Done",
+    "storageHint": "Store it like a spare house key: out of sight, away from this device, and where you'll find it in a bad week. Make a new kit if you change communities.",
+    "errorMismatch": "The passphrases don't match.",
+    "errorLocked": "This device is locked — unlock it first so the kit can include your key.",
+    "errorNoIdentity": "No identity on this device to back up.",
+    "printTitle": "Understoria recovery kit",
+    "printIntro": "This page can restore {{name}}'s Understoria account on a new device: open the app, choose \"I have a recovery kit\", scan this code with any QR scanner and paste the text, then enter the recovery passphrase. Keep this page somewhere safe — with the passphrase, it IS the account.",
+    "printKeyLabel": "Public key (yours, shareable):",
+    "printNodeLabel": "Community server:",
+    "printFooter": "No company holds a copy of this. That is the point — and it means this page and its passphrase are the only way back without another paired device."
+  },
+  "recover": {
+    "title": "Restore from a recovery kit",
+    "intro": "If you made a recovery kit on your old device, it brings your account — balance, vouches, roles, membership — onto this one. Your community's shared history syncs back from its server afterwards.",
+    "uploadTitle": "Open the kit file",
+    "uploadBody": "The understoria-recovery-kit-….json file you downloaded when you made the kit.",
+    "pasteLink": "Printed kit? Scan the QR with any scanner app and paste the text here →",
+    "pasteUse": "Use pasted kit",
+    "kitFound": "Found a kit for {{name}}. Enter its recovery passphrase to restore.",
+    "passphraseLabel": "Recovery passphrase",
+    "restore": "Restore my account",
+    "restoring": "Restoring…",
+    "errorNotAKit": "That doesn't look like an Understoria recovery kit.",
+    "errorVersion": "This kit was made by a newer version of the app — update and try again.",
+    "errorPassphrase": "That passphrase doesn't open this kit.",
+    "errorLocked": "This device is locked — unlock it before restoring.",
+    "errorCorrupted": "This kit is damaged — the key inside doesn't match its owner. Try the downloaded file instead of a retyped copy."
+  },
   "reseed": {
     "title": "Restore this community onto a node",
     "intro": "If every community server is ever lost, this device still holds the shared history — every post, exchange, event, project, and membership record, cryptographically signed. Point it at a fresh node and upload it all back. Several members can do this at once; copies simply combine.",
@@ -2300,6 +2339,7 @@
     "start": "Open the board",
     "nextSteps": "Next: browse what neighbors need, or post an offer of your own.",
     "pairDeviceLink": "Already have your identity on another device? Pair this one →",
+    "recoveryKitLink": "Lost your device but have a recovery kit? Restore here →",
     "installedArrival": {
       "title": "The app is on your home screen",
       "intro": "One question before we start:",

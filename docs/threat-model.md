@@ -1711,6 +1711,27 @@ We are not trying to protect against:
   its skip counts are surfaced (never silent). Multiple members
   restoring concurrently union by idempotency.
 
+- **Identity recovery kit (K1).**
+  *Shipped — `docs/identity-recovery.md` §1.* A member can export
+  their secret key wrapped under an independent RECOVERY passphrase
+  (the same PBKDF2-HMAC-SHA256 600k + secretbox construction as
+  session protection — no new primitives, no new dependency; the QR
+  path reuses the existing `qrcode` package) into a downloadable
+  file or printed page, and restore it on a fresh device from the
+  Welcome flow. At-rest analysis mirrors the passphrase §7 entry:
+  kit theft alone yields a KDF-bounded brute-force target; kit +
+  passphrase IS the identity (the creation copy says so bluntly);
+  a forgotten kit passphrase makes the kit permanently inert (no
+  custodial reset exists, by design — the operator and the node
+  appear NOWHERE in this path). Restore refuses a locked device
+  (never writes a plaintext key beside wrapped ones), verifies the
+  decrypted key against the kit's named public key (a tampered kit
+  fails closed rather than installing a mismatched key), and treats
+  the kit's node coordinates as suggestions that never clobber a
+  configured device. What restore cannot recover is stated in the
+  UI: E2E message history and unsynced drafts (device-only by
+  design). Guardian shards (K2) remain designed-not-built.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:
