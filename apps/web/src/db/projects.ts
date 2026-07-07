@@ -18,17 +18,21 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import Dexie from "dexie";
 import { db } from "./database";
 import { uuid } from "@/lib/id";
 import {
   canonicalAwaitingTransitionPayload,
   canonicalExchangePayload,
   sign,
+  signStateRecord,
 } from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
 import {
   enqueueAwaitingTransition,
   enqueueExchangeOutbox,
+  enqueueProjectStateOutbox,
+  enqueueTaskStateOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
 import { diffAchievements } from "@/lib/achievements";
@@ -44,6 +48,7 @@ import type {
   ProjectTask,
   Urgency,
 } from "@/types";
+import type { ProjectState, TaskState } from "@understoria/shared/types";
 
 /**
  * Agent 10 — Community Projects & Momentum (Phase 2).
@@ -73,6 +78,96 @@ import type {
  *   - 48-hour auto-confirm when organizer is the completer — still deferred
  *   - Task dependencies enforcement (currently a UI hint only) — still deferred
  */
+
+// -- Federation publish (docs/project-federation.md §5) ----------------------
+
+/**
+ * Sign the CURRENT local version of a project as a ProjectState record,
+ * persist the stamped version locally (so `updatedAt` participates in
+ * the pull-side LWW merge), and enqueue it for the community node.
+ *
+ * Every project mutator calls this AFTER its write transaction commits.
+ * Soft-degrade by design: on a locked device (or for an actor key this
+ * device doesn't hold) the local write has already landed and the
+ * publish is skipped silently — the next unlocked mutation republishes
+ * the whole row, which is safe because these are full-state LWW
+ * records, not deltas.
+ */
+export async function publishProjectState(
+  projectId: string,
+  actorKey: string,
+): Promise<void> {
+  // Nested composition (createProjectWithTasks, cloneProject) invokes
+  // mutators inside an ambient transaction whose table scope excludes
+  // the outbox; the OUTERMOST mutator publishes after commit instead.
+  if (Dexie.currentTransaction) return;
+  try {
+    const row = (await db.projects.get(projectId)) as
+      | (Project & Partial<ProjectState>)
+      | undefined;
+    if (!row) return;
+    const secret = await getSecretKey(actorKey);
+    const { signature: _prev, ...rest } = row;
+    const unsigned = {
+      ...rest,
+      updatedAt: Date.now(),
+      signerKey: actorKey,
+    } as Omit<ProjectState, "signature">;
+    const record: ProjectState = {
+      ...unsigned,
+      signature: signStateRecord<ProjectState>(unsigned, secret),
+    };
+    await db.transaction(
+      "rw",
+      [db.projects, db.outbox, db.settings],
+      async () => {
+        await db.projects.put(record);
+        await enqueueProjectStateOutbox(record);
+      },
+    );
+    // Kick the worker so a connected node converges promptly — the
+    // same unawaited pattern confirmProjectTaskCompletion uses.
+    void flushOutboxNow().catch(() => {});
+  } catch {
+    // Locked device / missing key — see the soft-degrade note above.
+  }
+}
+
+/** Task-row counterpart of `publishProjectState`; same contract. */
+export async function publishTaskState(
+  taskId: string,
+  actorKey: string,
+): Promise<void> {
+  if (Dexie.currentTransaction) return;
+  try {
+    const row = (await db.projectTasks.get(taskId)) as
+      | (ProjectTask & Partial<TaskState>)
+      | undefined;
+    if (!row) return;
+    const secret = await getSecretKey(actorKey);
+    const { signature: _prev, ...rest } = row;
+    const unsigned = {
+      ...rest,
+      updatedAt: Date.now(),
+      signerKey: actorKey,
+    } as Omit<TaskState, "signature">;
+    const record: TaskState = {
+      ...unsigned,
+      signature: signStateRecord<TaskState>(unsigned, secret),
+    };
+    await db.transaction(
+      "rw",
+      [db.projectTasks, db.outbox, db.settings],
+      async () => {
+        await db.projectTasks.put(record);
+        await enqueueTaskStateOutbox(record);
+      },
+    );
+    void flushOutboxNow().catch(() => {});
+  } catch {
+    // Locked device / missing key — soft-degrade, next mutation republishes.
+  }
+}
 
 // -- Project lifecycle ------------------------------------------------------
 
@@ -117,6 +212,7 @@ export async function createProject(
     await db.projects.put(project);
     await logActivity(project.id, "project_created", organizerKey, {}, nodeId);
   });
+  await publishProjectState(project.id, organizerKey);
   return project;
 }
 
@@ -170,7 +266,7 @@ export async function createProjectWithTasks(
       }
     }
   });
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
@@ -195,6 +291,15 @@ export async function createProjectWithTasks(
       return { project, tasks: created };
     },
   );
+  // The nested createProject / addProjectTask calls skipped their own
+  // publishes inside the ambient transaction; publish here, after the
+  // whole batch has committed (project first — the node rejects tasks
+  // whose project it hasn't seen).
+  await publishProjectState(result.project.id, organizerKey);
+  for (const t of result.tasks) {
+    await publishTaskState(t.id, organizerKey);
+  }
+  return result;
 }
 
 export async function launchProject(
@@ -209,7 +314,7 @@ export async function pauseProject(
   organizerKey: string,
   note: string,
 ): Promise<Project> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectActivity],
     async () => {
@@ -237,13 +342,15 @@ export async function pauseProject(
       return updated;
     },
   );
+  await publishProjectState(projectId, organizerKey);
+  return result;
 }
 
 export async function resumeProject(
   projectId: string,
   organizerKey: string,
 ): Promise<Project> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectActivity],
     async () => {
@@ -267,13 +374,15 @@ export async function resumeProject(
       return updated;
     },
   );
+  await publishProjectState(projectId, organizerKey);
+  return result;
 }
 
 export async function completeProject(
   projectId: string,
   organizerKey: string,
 ): Promise<Project> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity, db.achievements, db.exchanges],
     async () => {
@@ -330,13 +439,15 @@ export async function completeProject(
       return updated;
     },
   );
+  await publishProjectState(projectId, organizerKey);
+  return result;
 }
 
 export async function archiveProject(
   projectId: string,
   organizerKey: string,
 ): Promise<Project> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectActivity],
     async () => {
@@ -358,13 +469,15 @@ export async function archiveProject(
       return updated;
     },
   );
+  await publishProjectState(projectId, organizerKey);
+  return result;
 }
 
 export async function unarchiveProject(
   projectId: string,
   organizerKey: string,
 ): Promise<Project> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectActivity],
     async () => {
@@ -386,6 +499,8 @@ export async function unarchiveProject(
       return updated;
     },
   );
+  await publishProjectState(projectId, organizerKey);
+  return result;
 }
 
 async function updateProjectStatus(
@@ -394,7 +509,7 @@ async function updateProjectStatus(
   from: Project["status"],
   to: Project["status"],
 ): Promise<Project> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectActivity],
     async () => {
@@ -409,6 +524,8 @@ async function updateProjectStatus(
       return updated;
     },
   );
+  await publishProjectState(projectId, organizerKey);
+  return result;
 }
 
 /**
@@ -489,7 +606,7 @@ export async function removeCoOrganizer(
   callerKey: string,
   coOrgKey: string,
 ): Promise<Project> {
-  return db.transaction("rw", [db.projects, db.projectActivity], async () => {
+  const result = await db.transaction("rw", [db.projects, db.projectActivity], async () => {
     const p = await db.projects.get(projectId);
     if (!p) throw new Error("Project not found.");
     // Two valid callers: the primary organizer (managing the roster) OR
@@ -524,6 +641,11 @@ export async function removeCoOrganizer(
     }
     return updated;
   });
+  // A stepping-down co-organizer is still in the STORED version's
+  // authority list on the node, so their self-removal signature is
+  // accepted; the primary's removals are organizer-signed anyway.
+  await publishProjectState(projectId, callerKey);
+  return result;
 }
 
 // -- Task lifecycle ---------------------------------------------------------
@@ -546,7 +668,7 @@ export async function addProjectTask(
   organizerKey: string,
   input: AddTaskInput,
 ): Promise<ProjectTask> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
@@ -589,13 +711,15 @@ export async function addProjectTask(
       return task;
     },
   );
+  await publishTaskState(result.id, organizerKey);
+  return result;
 }
 
 export async function claimProjectTask(
   taskId: string,
   memberKey: string,
 ): Promise<ProjectTask> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
@@ -634,13 +758,17 @@ export async function claimProjectTask(
       return updated;
     },
   );
+  // Signed by the claimer — the "claiming an OPEN task" authority
+  // case on the node (docs/project-federation.md §4).
+  await publishTaskState(taskId, memberKey);
+  return result;
 }
 
 export async function unclaimProjectTask(
   taskId: string,
   memberKey: string,
 ): Promise<ProjectTask> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
@@ -691,6 +819,8 @@ export async function unclaimProjectTask(
       return updated;
     },
   );
+  await publishTaskState(taskId, memberKey);
+  return result;
 }
 
 /**
@@ -704,7 +834,7 @@ export async function acknowledgeTaskCheckIn(
   taskId: string,
   memberKey: string,
 ): Promise<ProjectTask> {
-  return db.transaction("rw", [db.projectTasks], async () => {
+  const result = await db.transaction("rw", [db.projectTasks], async () => {
     const task = await db.projectTasks.get(taskId);
     if (!task) throw new Error("Task not found.");
     if (task.assignedTo !== memberKey)
@@ -721,6 +851,10 @@ export async function acknowledgeTaskCheckIn(
     await db.projectTasks.put(updated);
     return updated;
   });
+  // Republish so a peer's later LWW write can't silently reset the
+  // ack clock (the whole row is the record; there are no deltas).
+  await publishTaskState(taskId, memberKey);
+  return result;
 }
 
 export async function markProjectTaskComplete(
@@ -749,7 +883,7 @@ export async function markProjectTaskComplete(
   } catch {
     completerSecret = null;
   }
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity, db.outbox, db.settings],
     async () => {
@@ -781,7 +915,8 @@ export async function markProjectTaskComplete(
       // Signed awaiting-transition artifact (auto-confirm-key.md §5).
       // This is what finally makes the auto-confirm window enforceable
       // for the PROJECT-TASK path — the one /auto-confirm can't bind
-      // to a signed post (projects don't federate): the node stamps
+      // to a signed post (tasks are LWW state records, not signed
+      // posts — docs/project-federation.md §3): the node stamps
       // received_at at ingestion and measures the window from its own
       // clock. Signed by the completer (the helper side of the
       // eventual exchange); helped side is the project's primary
@@ -807,6 +942,8 @@ export async function markProjectTaskComplete(
       return updated;
     },
   );
+  await publishTaskState(taskId, memberKey);
+  return result;
 }
 
 export interface ConfirmTaskResult {
@@ -815,6 +952,9 @@ export interface ConfirmTaskResult {
   exchange: Exchange;
   /** Auto-milestones (25/50/75/100%) that fired in this confirmation. */
   milestonesReached: number[];
+  /** The fresh open copy minted when a recurring task is confirmed —
+   *  present so the caller can publish its state record too. */
+  respawnedTask?: ProjectTask;
 }
 
 /**
@@ -894,6 +1034,14 @@ export async function confirmProjectTaskCompletion(
     acknowledgment,
   });
 
+  // Publish the confirmed task, the project (contributedHours moved),
+  // and any recurring respawn — all organizer-signed.
+  await publishTaskState(taskId, organizerKey);
+  await publishProjectState(project.id, organizerKey);
+  if (result.respawnedTask) {
+    await publishTaskState(result.respawnedTask.id, organizerKey);
+  }
+
   // Kick the outbox worker so a connected node sees this exchange right
   // away. Same pattern confirmExchange uses.
   void flushOutboxNow().catch((err) => {
@@ -961,7 +1109,7 @@ export async function _systemAutoConfirmTask(
       "system auto-confirm: exchange is missing autoConfirmed / autoConfirmedBy",
     );
   }
-  return _writeTaskConfirmation({
+  const result = await _writeTaskConfirmation({
     task,
     project,
     exchange,
@@ -972,6 +1120,16 @@ export async function _systemAutoConfirmTask(
     now: exchange.autoConfirmedAt ?? Date.now(),
     acknowledgment,
   });
+  // Publish signed by the completer — in the §1 motivating case the
+  // organizer IS the completer, so the signer passes the node's
+  // organizer authority check for both records. (The system identity
+  // has no member secret on this device; it can't sign state records.)
+  await publishTaskState(taskId, exchange.helperKey);
+  await publishProjectState(project.id, exchange.helperKey);
+  if (result.respawnedTask) {
+    await publishTaskState(result.respawnedTask.id, exchange.helperKey);
+  }
+  return result;
 }
 
 /**
@@ -1120,6 +1278,7 @@ async function _writeTaskConfirmation(
       // This runs on BOTH confirm paths (member confirm and the
       // system-key auto-confirm sweep) because both funnel through
       // this writer.
+      let respawnedTask: ProjectTask | undefined;
       if (freshTask.recurringCadence && freshProject.status === "active") {
         const openTwin = await db.projectTasks
           .where("[projectId+status]")
@@ -1146,6 +1305,7 @@ async function _writeTaskConfirmation(
             checkInAcknowledgedAt: null,
           };
           await db.projectTasks.put(respawned);
+          respawnedTask = respawned;
           await logActivity(
             freshProject.id,
             "task_added",
@@ -1269,6 +1429,7 @@ async function _writeTaskConfirmation(
         project: updatedProject,
         exchange: exchangeToStore,
         milestonesReached: milestones,
+        respawnedTask,
       };
     },
   );
@@ -1320,7 +1481,7 @@ export async function handoffOrganizer(
   callerKey: string,
   newPrimaryKey: string,
 ): Promise<Project> {
-  return db.transaction("rw", [db.projects, db.projectActivity], async () => {
+  const result = await db.transaction("rw", [db.projects, db.projectActivity], async () => {
     const p = await db.projects.get(projectId);
     if (!p) throw new Error("Project not found.");
     if (p.organizerKey !== callerKey)
@@ -1344,6 +1505,11 @@ export async function handoffOrganizer(
     }, p.nodeId);
     return updated;
   });
+  // The handoff MUST be signed by the outgoing organizer — the node
+  // accepts an organizerKey change only from the stored organizer
+  // (docs/project-federation.md §4).
+  await publishProjectState(projectId, callerKey);
+  return result;
 }
 
 // -- Announcements ----------------------------------------------------------
@@ -1421,7 +1587,7 @@ export async function editProjectTask(
     dependencies?: string[];
   },
 ): Promise<ProjectTask> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
@@ -1458,6 +1624,8 @@ export async function editProjectTask(
       return updated;
     },
   );
+  await publishTaskState(taskId, organizerKey);
+  return result;
 }
 
 // -- Bulk task quick-add ----------------------------------------------------
@@ -1472,7 +1640,7 @@ export async function bulkAddTasks(
   if (titles.length === 0) throw new Error("No tasks to add.");
   if (titles.length > 50) throw new Error("Maximum 50 tasks at a time.");
 
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
@@ -1517,6 +1685,10 @@ export async function bulkAddTasks(
       return tasks;
     },
   );
+  for (const t of result) {
+    await publishTaskState(t.id, organizerKey);
+  }
+  return result;
 }
 
 export function canClaimTask(
@@ -1552,7 +1724,7 @@ export async function setTaskDependencies(
   organizerKey: string,
   dependencyIds: string[],
 ): Promise<ProjectTask> {
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.projects, db.projectTasks],
     async () => {
@@ -1576,6 +1748,8 @@ export async function setTaskDependencies(
       return updated;
     },
   );
+  await publishTaskState(taskId, organizerKey);
+  return result;
 }
 
 /**
@@ -1727,6 +1901,11 @@ export async function reorderProjectTask(input: {
       await db.projectTasks.put({ ...task, orderIndex: newOrderIndex });
     },
   );
+  // Publish only the MOVED task. A precision renumber rewrites every
+  // sibling's orderIndex locally without republishing them — ordering
+  // is cosmetic, renumbering is rare, and each sibling republishes on
+  // its next real mutation.
+  await publishTaskState(taskId, organizerKey);
 }
 
 /**
@@ -1839,5 +2018,9 @@ export async function cloneProject(
       }
     },
   );
+  await publishProjectState(project.id, organizerKey);
+  for (const t of await listTasksForProject(project.id)) {
+    await publishTaskState(t.id, organizerKey);
+  }
   return project;
 }

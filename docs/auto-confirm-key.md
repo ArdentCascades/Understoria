@@ -334,9 +334,10 @@ not skip it on a re-read.
 >   until it is flipped an attacker can simply omit the artifact. The
 >   binding gates (below) hold either way.
 > - **Project-task auto-confirms are covered by the artifact too.**
->   Projects are local-only and don't federate (`threat-model.md` §7),
->   so `bindToPost` still can't check hours/parties against a signed
->   post for a `project:<id>/task:<id>` request — that path keeps the
+>   Tasks federate as mutable LWW state records, not signed posts
+>   (`docs/project-federation.md` §3), so `bindToPost` still can't
+>   check hours/parties against a signed post for a
+>   `project:<id>/task:<id>` request — that path keeps the
 >   generous hours cap as its bound. But the artifact is keyed on the
 >   LABEL, so the waiting window is now enforceable for tasks exactly
 >   as for posts (and in enforced mode a task confirmation with no

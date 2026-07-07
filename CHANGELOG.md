@@ -10,6 +10,37 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Projects and tasks now sync — between your devices AND between
+  members.** Until now the whole project subsystem was device-local:
+  a helper claiming a task on their phone was invisible to the
+  organizer, task status changed on one of your devices never
+  reached the other, and only the one-time link snapshot moved any
+  of it. Projects and their tasks now travel through the community
+  node as signed, last-writer-wins state records (`ProjectState` /
+  `TaskState` — the node's first MUTABLE record kinds): every
+  create, claim, completion, confirmation, edit, pause, handoff, and
+  co-organizer change publishes the row, and every device pulls the
+  newest authorized version — on launch and now also every 3 minutes
+  while the app is open (the periodic re-pull covers ALL federated
+  kinds, so posts and comments converge in long-lived tabs too).
+  Authority is server-enforced against the STORED record and
+  re-checked on every device: a project's first version must be
+  signed by its own organizer, updates must come from the stored
+  organizer or co-organizers, handoff only from the stored
+  organizer, and any member may claim an OPEN task / work a task
+  they hold — a hostile write cannot grant itself authority in the
+  same write. Honest trade, named in the privacy policy §4 and
+  threat model §7: project and task rows are now visible to the
+  community node (signed plaintext, the same posture as posts and
+  events — that visibility IS the feature), a task's claimer could
+  vandalize fields of the task they hold until the organizer's next
+  edit repairs it, and project ADOPTION deliberately stays local
+  (the node never lets anyone but the stored organizer reassign a
+  project). Full design, alternatives considered (E2E encryption:
+  rejected for community-audience data, right for Phase 3's
+  own-device mirror), and known limitations in
+  `docs/project-federation.md`.
+
 - **Tap-to-link: adding a device is now two taps and zero typing.**
   The new device shows two emoji and waits; on the device that has
   your identity, Profile → Add another device sees the ask appear by

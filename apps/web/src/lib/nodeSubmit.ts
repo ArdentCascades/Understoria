@@ -32,7 +32,9 @@ import type {
   Event,
   EventCancellation,
   InviteRevocation,
+  ProjectState,
   RedemptionReceipt,
+  TaskState,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 
@@ -263,6 +265,31 @@ export async function submitInviteRevocationToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/invite-revocations", revocation, config, deps);
+}
+
+/**
+ * Push a signed project / task state record (docs/project-federation.md
+ * §5). Same best-effort semantics as every other submitter. The server
+ * answers 200 `{stored:false}` for a stale version (fine — some device
+ * published a newer one) and 403 for an unauthorized signer; both are
+ * terminal for that outbox row. A task's 409 `unknown_project` is the
+ * one RETRYABLE 4xx: the project record is still in flight, and the
+ * outbox flush special-cases it (see `flushOutboxOnce`).
+ */
+export async function submitProjectStateToNode(
+  record: ProjectState,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/project-states", record, config, deps);
+}
+
+export async function submitTaskStateToNode(
+  record: TaskState,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/task-states", record, config, deps);
 }
 
 // NOTE: there is intentionally no `submitEventRsvpToNode`. RSVPs are

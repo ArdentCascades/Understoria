@@ -616,7 +616,6 @@ export interface ProjectTask {
    *  reconciliation"). When set, CONFIRMING this task mints a fresh
    *  open copy in the same project — the rota slot re-opens once the
    *  round is done. Absent/null = one-shot (every pre-existing row).
-   *  Local-only like every other task field: tasks never federate.
    *  Values match `RecurringCadence` in the template content. */
   recurringCadence?: "session" | "month" | "event" | "cycle" | null;
   /** When the current claim happened. Stamped by
@@ -1166,3 +1165,31 @@ export interface AwaitingTransition extends AwaitingTransitionPayload {
    *  `canonicalAwaitingTransitionPayload(payload)`. */
   signature: string;
 }
+
+// --- Project & participation federation (docs/project-federation.md) --
+
+/**
+ * A signed last-writer-wins snapshot of a Project row. Unlike every
+ * other federated kind these records MUTATE: the newest `updatedAt`
+ * wins, subject to the authority rules in
+ * docs/project-federation.md §4 (only the stored version's organizer
+ * or co-organizers may replace it).
+ */
+export type ProjectState = Project & {
+  /** ms epoch of the mutation this snapshot captures. The LWW clock. */
+  updatedAt: number;
+  /** Public key of the member whose action produced this version.
+   *  The signature verifies against this key; the SERVER checks it
+   *  against the stored version's organizer/co-organizer set. */
+  signerKey: string;
+  signature: string;
+};
+
+/** Signed LWW snapshot of a ProjectTask row. Authority: organizer /
+ *  co-organizers of the task's project, or the task's claimer for
+ *  claim-cycle transitions (docs/project-federation.md §4). */
+export type TaskState = ProjectTask & {
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+};

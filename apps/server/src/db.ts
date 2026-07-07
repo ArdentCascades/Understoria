@@ -31,9 +31,11 @@ import type {
   FlagReason,
   Post,
   InviteRevocation,
+  ProjectState,
   RedemptionReceipt,
   SignedVouch,
   TaskComment,
+  TaskState,
 } from "@understoria/shared/types";
 
 /**
@@ -910,6 +912,43 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '17')",
+    ).run();
+  }
+
+  // Schema v18 — project & participation federation Phase 1
+  // (docs/project-federation.md). Signed last-writer-wins state
+  // records: unlike every append-only kind above, these REPLACE by id
+  // when a newer `updated_at` arrives and the authority rules pass.
+  // `organizer_key` on project_states is the authority anchor,
+  // established at first write and thereafter changeable only by a
+  // version the stored organizer signed.
+  if (current < 18) {
+    db.exec(`
+      CREATE TABLE project_states (
+        id TEXT PRIMARY KEY,
+        organizer_key TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX project_states_updated_idx ON project_states (updated_at);
+      CREATE INDEX project_states_signer_idx ON project_states (signer_key);
+      CREATE TABLE task_states (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX task_states_updated_idx ON task_states (updated_at);
+      CREATE INDEX task_states_project_idx ON task_states (project_id);
+      CREATE INDEX task_states_signer_idx ON task_states (signer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '18')",
     ).run();
   }
 }
@@ -2382,4 +2421,155 @@ export function createLinkRequestStore(db: DatabaseType): LinkRequestStore {
       return (countStmt.get() as { n: number }).n;
     },
   };
+}
+
+// --- Project & participation federation (docs/project-federation.md) --
+//
+// Unlike every append-only store above, these two hold MUTABLE state:
+// the route REPLACES a row when a strictly-newer signed version passes
+// the authority rules. The store itself is deliberately dumb — get /
+// upsert / list — so all authority logic lives (and is tested) in one
+// place, the route handler.
+
+export interface ProjectStateStore {
+  get(id: string): ProjectState | null;
+  /** INSERT OR REPLACE by id. The route decides whether to call this
+   *  (LWW + authority checks) — the store never compares versions. */
+  upsert(record: ProjectState): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): ProjectState[];
+  count(): number;
+}
+
+export function createProjectStateStore(db: DatabaseType): ProjectStateStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO project_states (
+      id, organizer_key, signer_key, updated_at, node_id,
+      payload, signature
+    ) VALUES (
+      @id, @organizerKey, @signerKey, @updatedAt, @nodeId,
+      @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare("SELECT * FROM project_states WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM project_states");
+
+  return {
+    get(id) {
+      const r = getStmt.get(id) as ProjectStateRowSqlite | undefined;
+      return r ? rowToProjectState(r) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        id: record.id,
+        organizerKey: record.organizerKey,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        nodeId: record.nodeId,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md). Cursor is
+      // `updated_at`: an updated row re-enters every puller's window,
+      // which is exactly the LWW propagation we want.
+      return pagedRows<ProjectStateRowSqlite>(
+        db,
+        "project_states",
+        "updated_at",
+        "id",
+        opts,
+      ).map(rowToProjectState);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+interface ProjectStateRowSqlite {
+  id: string;
+  organizer_key: string;
+  signer_key: string;
+  updated_at: number;
+  node_id: string;
+  payload: string;
+  signature: string;
+}
+
+function rowToProjectState(r: ProjectStateRowSqlite): ProjectState {
+  return JSON.parse(r.payload) as ProjectState;
+}
+
+export interface TaskStateStore {
+  get(id: string): TaskState | null;
+  /** INSERT OR REPLACE by id — same contract as ProjectStateStore. */
+  upsert(record: TaskState): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): TaskState[];
+  count(): number;
+}
+
+export function createTaskStateStore(db: DatabaseType): TaskStateStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO task_states (
+      id, project_id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @id, @projectId, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare("SELECT * FROM task_states WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM task_states");
+
+  return {
+    get(id) {
+      const r = getStmt.get(id) as TaskStateRowSqlite | undefined;
+      return r ? rowToTaskState(r) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        id: record.id,
+        projectId: record.projectId,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md).
+      return pagedRows<TaskStateRowSqlite>(
+        db,
+        "task_states",
+        "updated_at",
+        "id",
+        opts,
+      ).map(rowToTaskState);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+interface TaskStateRowSqlite {
+  id: string;
+  project_id: string;
+  signer_key: string;
+  updated_at: number;
+  payload: string;
+  signature: string;
+}
+
+function rowToTaskState(r: TaskStateRowSqlite): TaskState {
+  return JSON.parse(r.payload) as TaskState;
 }

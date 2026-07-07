@@ -30,8 +30,10 @@ import {
   type Exchange,
   type FlagReason,
   type Post,
+  type ProjectState,
   type SignedVouch,
   type TaskComment,
+  type TaskState,
 } from "@understoria/shared/types";
 import type { PostRecord } from "./db.js";
 
@@ -939,4 +941,119 @@ export function parseAwaitingTransition(
       signature: r.signature as string,
     },
   };
+}
+
+// --- Project & task state records (docs/project-federation.md) --------
+//
+// Unlike the reconstruct-known-fields parsers above, these two PASS THE
+// BODY THROUGH VERBATIM after checking the fields the server relies on.
+// The signature covers `stableStringify(record minus signature)` — every
+// field, including ones this server version doesn't know about — so
+// rebuilding the object from a field list would strip newer fields and
+// break re-verification on every pulling client. Size is bounded by the
+// global 64 KB body limit; row growth is bounded by the insert caps and
+// by LWW replacing rows in place.
+
+export type ParseProjectStateResult =
+  | { ok: true; value: ProjectState }
+  | { ok: false; error: string };
+
+export type ParseTaskStateResult =
+  | { ok: true; value: TaskState }
+  | { ok: false; error: string };
+
+const PROJECT_STATE_STRING_FIELDS = [
+  "id",
+  "organizerKey",
+  "signerKey",
+  "nodeId",
+  "signature",
+] as const;
+
+const STATE_TITLE_MAX = 300;
+const STATE_DESCRIPTION_MAX = 5000;
+const MAX_CO_ORGANIZERS = 20;
+
+function checkStateCommon(
+  r: Record<string, unknown>,
+): string | null {
+  if (
+    typeof r.updatedAt !== "number" ||
+    !Number.isInteger(r.updatedAt) ||
+    r.updatedAt <= 0
+  ) {
+    return "updatedAt must be a positive integer (ms epoch)";
+  }
+  if (r.updatedAt > Date.now() + 24 * 60 * 60 * 1000) {
+    return "updatedAt is too far in the future";
+  }
+  if (typeof r.title !== "string" || r.title.length === 0) {
+    return "title must be a non-empty string";
+  }
+  if (r.title.length > STATE_TITLE_MAX) {
+    return `title exceeds ${STATE_TITLE_MAX} characters`;
+  }
+  if (typeof r.description !== "string") {
+    return "description must be a string";
+  }
+  if (r.description.length > STATE_DESCRIPTION_MAX) {
+    return `description exceeds ${STATE_DESCRIPTION_MAX} characters`;
+  }
+  return null;
+}
+
+export function parseProjectState(input: unknown): ParseProjectStateResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of PROJECT_STATE_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    !Array.isArray(r.coOrganizerKeys) ||
+    r.coOrganizerKeys.length > MAX_CO_ORGANIZERS ||
+    r.coOrganizerKeys.some((k) => typeof k !== "string" || k.length === 0)
+  ) {
+    return {
+      ok: false,
+      error: `coOrganizerKeys must be an array of up to ${MAX_CO_ORGANIZERS} non-empty strings`,
+    };
+  }
+  const common = checkStateCommon(r);
+  if (common) return { ok: false, error: common };
+  return { ok: true, value: r as unknown as ProjectState };
+}
+
+const TASK_STATE_STRING_FIELDS = [
+  "id",
+  "projectId",
+  "signerKey",
+  "signature",
+] as const;
+
+export function parseTaskState(input: unknown): ParseTaskStateResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of TASK_STATE_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    r.assignedTo !== null &&
+    (typeof r.assignedTo !== "string" || r.assignedTo.length === 0)
+  ) {
+    return {
+      ok: false,
+      error: "assignedTo must be null or a non-empty string",
+    };
+  }
+  const common = checkStateCommon(r);
+  if (common) return { ok: false, error: common };
+  return { ok: true, value: r as unknown as TaskState };
 }

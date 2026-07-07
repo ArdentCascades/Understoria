@@ -28,6 +28,7 @@ import {
 } from "@/lib/crypto";
 import { b64decode, b64encode } from "@understoria/shared/bytes";
 import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
+import { publishProjectState } from "./projects";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -337,6 +338,7 @@ export async function respondToCoOrganizerInvitation(
     );
   }
 
+  let granted: { projectId: string; organizerKey: string } | null = null;
   await db.transaction(
     "rw",
     [
@@ -359,10 +361,18 @@ export async function respondToCoOrganizerInvitation(
       // lands in both the audit trail and the live authority list,
       // or in neither.
       if (input.decision === "accept") {
-        await materializeAcceptedCoOrganizer(input.invitationId, now);
+        granted = await materializeAcceptedCoOrganizer(input.invitationId, now);
       }
     },
   );
+  if (granted !== null) {
+    // Republish the project's federated state with the new authority
+    // list. On the invitee's own device this silently no-ops (the
+    // organizer's key doesn't live here); the organizer's device
+    // republishes when it ingests this response via federation.
+    const g = granted as { projectId: string; organizerKey: string };
+    await publishProjectState(g.projectId, g.organizerKey);
+  }
 
   return response;
 }
@@ -398,8 +408,8 @@ export async function respondToCoOrganizerInvitation(
 export async function materializeAcceptedCoOrganizer(
   invitationId: string,
   now: number = Date.now(),
-): Promise<void> {
-  await db.transaction(
+): Promise<{ projectId: string; organizerKey: string } | null> {
+  return db.transaction(
     "rw",
     [
       db.projects,
@@ -409,17 +419,17 @@ export async function materializeAcceptedCoOrganizer(
     ],
     async () => {
       const invitation = await db.coorgInvitations.get(invitationId);
-      if (!invitation) return;
+      if (!invitation) return null;
       const response = await db.coorgInvitationResponses
         .where("invitationId")
         .equals(invitationId)
         .first();
-      if (!response || response.decision !== "accept") return;
+      if (!response || response.decision !== "accept") return null;
       const revoked = await db.coorgInvitationRevocations
         .where("invitationId")
         .equals(invitationId)
         .first();
-      if (revoked) return;
+      if (revoked) return null;
       // The local accept path guarantees the responder IS the
       // invitee, but federation ingest only verifies a response's
       // self-signature — it cannot cross-check against an invitation
@@ -427,21 +437,31 @@ export async function materializeAcceptedCoOrganizer(
       // both rows are in hand, so the cross-check lands here: a
       // response signed by anyone other than the named invitee never
       // materializes a role.
-      if (response.inviteeKey !== invitation.inviteeKey) return;
+      if (response.inviteeKey !== invitation.inviteeKey) return null;
       const acceptedInTime = response.decidedAt <= invitation.expiresAt;
       const stillUnexpired = now < invitation.expiresAt;
-      if (!acceptedInTime && !stillUnexpired) return;
+      if (!acceptedInTime && !stillUnexpired) return null;
       const project = await db.projects.get(invitation.projectId);
-      if (!project) return;
+      if (!project) return null;
       // The primary organizer's authority doesn't ride the array;
       // issueCoOrganizerInvitation rejects self-invites, but a
       // federated row could still claim one.
-      if (invitation.inviteeKey === project.organizerKey) return;
-      if (project.coOrganizerKeys.includes(invitation.inviteeKey)) return;
+      if (invitation.inviteeKey === project.organizerKey) return null;
+      if (project.coOrganizerKeys.includes(invitation.inviteeKey)) return null;
       await db.projects.put({
         ...project,
         coOrganizerKeys: [...project.coOrganizerKeys, invitation.inviteeKey],
       });
+      // Signal the grant so callers can republish the project's
+      // federated ProjectState (docs/project-federation.md §4): the
+      // node honors a co-organizer's writes only once a stored version
+      // NAMES them, and only the organizer's device holds the key that
+      // can sign that version. The publish itself happens outside this
+      // transaction (the outbox is not in scope here).
+      return {
+        projectId: project.id,
+        organizerKey: project.organizerKey,
+      };
     },
   );
 }

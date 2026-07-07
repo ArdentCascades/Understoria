@@ -9,16 +9,26 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
+import type {
+  Exchange,
+  Post,
+  Project,
+  ProjectTask,
+  SignedVouch,
+  TaskComment,
+} from "@/types";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  ProjectState,
+  TaskState,
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
+import { publishProjectState } from "@/db/projects";
 import { createMember } from "@/db/seed";
 import { verifyTaskComment } from "@/lib/crypto";
 import { encodeInviteToken } from "@/lib/invite";
@@ -33,7 +43,9 @@ import {
   verifyExchange,
   verifyInviteRevocation,
   verifyPost,
+  verifyProjectState,
   verifyRedemptionReceipt,
+  verifyTaskState,
   verifyVouch,
 } from "@understoria/shared/crypto";
 
@@ -589,7 +601,13 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
     // Federation can deliver the accept response before its
     // invitation; now that the invitation is here, complete any
     // materialization the response-side hook had to skip.
-    await materializeAcceptedCoOrganizer(record.id);
+    const granted = await materializeAcceptedCoOrganizer(record.id);
+    if (granted) {
+      // Only the organizer's device can actually sign this (elsewhere
+      // it silently no-ops) — that device is the one whose ingest of
+      // the acceptance must push the new authority list to the node.
+      await publishProjectState(granted.projectId, granted.organizerKey);
+    }
     inserted += 1;
     advanceCursor();
   }
@@ -685,7 +703,12 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
     // same materialization the local accept path performs. No-ops
     // for declines and for invitations not (yet) on this node.
     if (record.decision === "accept") {
-      await materializeAcceptedCoOrganizer(record.invitationId);
+      const granted = await materializeAcceptedCoOrganizer(
+        record.invitationId,
+      );
+      if (granted) {
+        await publishProjectState(granted.projectId, granted.organizerKey);
+      }
     }
     inserted += 1;
     advanceCursor();
@@ -1487,3 +1510,223 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
 
 // NOTE: there is intentionally no `pullFederatedEventRsvps`. RSVPs
 // never federate — see `docs/community-events.md` §7.2.
+
+// --- Project & task state pulls (docs/project-federation.md §5) --------
+
+const PROJECT_STATE_CURSOR_KEY = "federationLastProjectStatePull";
+const TASK_STATE_CURSOR_KEY = "federationLastTaskStatePull";
+
+/**
+ * Pull signed ProjectState records and merge them last-writer-wins
+ * into the local projects table. The node enforces the §4 authority
+ * rules at ingestion, but the response body is UNTRUSTED (compromised
+ * node / plain-HTTP MITM), so the same rules are recomputed here
+ * against the LOCAL stored version before a row is applied:
+ *
+ *   - unknown id: genesis must be self-organized
+ *     (`signerKey === organizerKey`);
+ *   - known id: the signer must be the local version's organizer or
+ *     one of its co-organizers, an organizer change must be signed by
+ *     the local organizer, and the incoming `updatedAt` must be
+ *     strictly newer than the local one (our own unpushed edit wins
+ *     here and wins-or-loses on the server by the same clock).
+ *
+ * Refused rows never advance the cursor (same poisoned-cursor defense
+ * as every other pull); stale rows do (they're the normal "we already
+ * have newer" case).
+ */
+export async function pullFederatedProjectStates(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(PROJECT_STATE_CURSOR_KEY);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/project-states?${params.toString()}`;
+  let body: { projectStates?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { projectStates?: unknown[] };
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(body.projectStates)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.projectStates) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.organizerKey !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.title !== "string" ||
+      r.title.length === 0 ||
+      !Array.isArray(r.coOrganizerKeys) ||
+      r.coOrganizerKeys.some((k) => typeof k !== "string") ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    // Passed through VERBATIM, not rebuilt from a field list — the
+    // signature covers every field of the record (stableStringify of
+    // the whole row), so dropping unknown fields would break both
+    // this verification and any future re-verification.
+    const record = r as unknown as ProjectState;
+    if (!verifyProjectState(record)) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = record.updatedAt;
+      }
+    };
+
+    const local = (await db.projects.get(record.id)) as
+      | (Project & Partial<ProjectState>)
+      | undefined;
+    if (local) {
+      if (record.updatedAt <= (local.updatedAt ?? 0)) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
+      const authorized =
+        record.signerKey === local.organizerKey ||
+        (local.coOrganizerKeys ?? []).includes(record.signerKey);
+      const handoffOk =
+        record.organizerKey === local.organizerKey ||
+        record.signerKey === local.organizerKey;
+      if (!authorized || !handoffOk) {
+        skipped += 1;
+        continue;
+      }
+    } else if (record.signerKey !== record.organizerKey) {
+      skipped += 1;
+      continue;
+    }
+
+    await db.projects.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(PROJECT_STATE_CURSOR_KEY, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+/**
+ * Pull signed TaskState records — the task-row counterpart of
+ * `pullFederatedProjectStates`, with the §4 claimer rules recomputed
+ * against the LOCAL project + task rows. A task whose project this
+ * device doesn't have yet is skipped WITHOUT advancing the cursor:
+ * the project-states pull runs first in the fan-out, so the next
+ * cycle picks it up (the client mirror of the server's 409).
+ */
+export async function pullFederatedTaskStates(): Promise<FederationSyncResult | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+
+  const since = await getSetting(TASK_STATE_CURSOR_KEY);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/task-states?${params.toString()}`;
+  let body: { taskStates?: unknown[] };
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    body = (await res.json()) as { taskStates?: unknown[] };
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(body.taskStates)) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: number | null = since ? Number(since) : null;
+
+  for (const raw of body.taskStates) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.projectId !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.title !== "string" ||
+      r.title.length === 0 ||
+      (r.assignedTo !== null && typeof r.assignedTo !== "string") ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as TaskState;
+    if (!verifyTaskState(record)) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = record.updatedAt;
+      }
+    };
+
+    const project = (await db.projects.get(record.projectId)) as
+      | (Project & Partial<ProjectState>)
+      | undefined;
+    if (!project) {
+      // Project not here yet — retry next cycle, don't advance.
+      skipped += 1;
+      continue;
+    }
+    const isOrg =
+      record.signerKey === project.organizerKey ||
+      (project.coOrganizerKeys ?? []).includes(record.signerKey);
+
+    const local = (await db.projectTasks.get(record.id)) as
+      | (ProjectTask & Partial<TaskState>)
+      | undefined;
+    if (local) {
+      if (record.updatedAt <= (local.updatedAt ?? 0)) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
+      const claimOk =
+        local.assignedTo === record.signerKey ||
+        (local.assignedTo == null && record.assignedTo === record.signerKey);
+      if (!isOrg && !claimOk) {
+        skipped += 1;
+        continue;
+      }
+    } else if (!isOrg && record.assignedTo !== record.signerKey) {
+      skipped += 1;
+      continue;
+    }
+
+    await db.projectTasks.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(TASK_STATE_CURSOR_KEY, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
