@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { getSetting } from "@/db/database";
 import { listNodeEndpoints, nodeSuccessKey } from "@/lib/nodeEndpoints";
+import { getWindowHorizonMs, YEAR_MS } from "@/lib/storageWindow";
 import {
   computeResilience,
   isRecentSuccess,
@@ -42,9 +43,16 @@ export function ResilienceCard() {
   const { members } = useApp();
   const [snapshot, setSnapshot] = useState<ResilienceSnapshot | null>(null);
   const [leaves, setLeaves] = useState<NodeFreshness[]>([]);
+  // Storage windowing (docs/storage-budget.md Phase 1): the replica
+  // claim becomes conditional on a windowed device — never say more
+  // than THIS device's copy delivers.
+  const [windowYears, setWindowYears] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    void getWindowHorizonMs().then((ms) => {
+      if (!cancelled) setWindowYears(ms === null ? null : Math.round(ms / YEAR_MS));
+    });
     void (async () => {
       const { primary, endpoints } = await listNodeEndpoints();
       const freshness: NodeFreshness[] = [];
@@ -141,6 +149,11 @@ export function ResilienceCard() {
       {failoverLive && (
         <p className="mt-1 text-sm text-moss-700 dark:text-moss-200">
           {t("dashboard.resilience.bodyFailover")}
+        </p>
+      )}
+      {windowYears !== null && (
+        <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+          {t("dashboard.resilience.windowedNote", { years: windowYears })}
         </p>
       )}
       {snapshot.nodeQuiet && (

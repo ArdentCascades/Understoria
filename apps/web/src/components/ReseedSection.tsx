@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getSetting, SETTING_KEYS } from "@/db/database";
 import { LAST_SEEN_SYSTEM_KEY } from "@/lib/nodeEndpoints";
+import { getWindowHorizonMs, YEAR_MS } from "@/lib/storageWindow";
 import {
   runReseed,
   type ReseedKindResult,
@@ -51,9 +52,16 @@ export function ReseedSection() {
     complete: boolean;
   } | null>(null);
   const [systemKeyNote, setSystemKeyNote] = useState<string | null>(null);
+  // Storage windowing (docs/storage-budget.md Phase 1): a windowed
+  // device restores only what it holds — say so, and point at the
+  // collective guarantee (other devices union their copies in).
+  const [windowYears, setWindowYears] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    void getWindowHorizonMs().then((ms) => {
+      if (!cancelled) setWindowYears(ms === null ? null : Math.round(ms / YEAR_MS));
+    });
     void (async () => {
       const [url, keyRecord] = await Promise.all([
         getSetting(SETTING_KEYS.communityNodeUrl),
@@ -123,6 +131,12 @@ export function ReseedSection() {
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
         {t("reseed.intro")}
       </p>
+
+      {windowYears !== null && (
+        <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
+          {t("reseed.windowedNote", { years: windowYears })}
+        </p>
+      )}
 
       <label className="mb-3 flex flex-col gap-1">
         <span className="text-sm font-medium">{t("reseed.targetLabel")}</span>

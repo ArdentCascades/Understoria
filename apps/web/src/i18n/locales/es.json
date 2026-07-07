@@ -1564,7 +1564,8 @@
     "doneComplete": "Restauración terminada.",
     "doneInterrupted": "Restauración en pausa — ejecútala de nuevo para continuar donde se detuvo.",
     "totals": "{{restored}} restaurados · {{present}} ya estaban · {{skipped}} omitidos",
-    "skippedHint": "Los registros omitidos son los que este nodo rechazó — normalmente intercambios autoconfirmados (quien opera puede habilitarlos con TRUSTED_SYSTEM_KEYS) o recibos fuera de una ventana de restauración abierta (RESEED_GRACE_UNTIL). Ver docs/community-reseed.md."
+    "skippedHint": "Los registros omitidos son los que este nodo rechazó — normalmente intercambios autoconfirmados (quien opera puede habilitarlos con TRUSTED_SYSTEM_KEYS) o recibos fuera de una ventana de restauración abierta (RESEED_GRACE_UNTIL). Ver docs/community-reseed.md.",
+    "windowedNote": "Este dispositivo liberó espacio y guarda el último {{years}} año(s) más todo lo activo y lo tuyo — restaurará lo que tiene, y los dispositivos de otros miembros completan el resto."
   },
   "mirrorSuggest": {
     "label": "Añadir un servidor de respaldo para esta comunidad",
@@ -1819,11 +1820,12 @@
         "deep_rooted": "De raíces profundas"
       },
       "bodySeedling": "Ahora mismo esta comunidad vive solo en este dispositivo. Conectarse a un servidor comunitario — o crear uno — mantiene las copias de todas las personas al día.",
-      "bodyOne": "Un servidor sostiene esta comunidad — y {{count}} integrante guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "bodyOther": "Un servidor sostiene esta comunidad — y cada una de sus {{count}} integrantes guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "bodyMultiOne": "{{nodes}} servidores sostienen esta comunidad — y {{count}} integrante guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "bodyMultiOther": "{{nodes}} servidores sostienen esta comunidad — y cada una de sus {{count}} integrantes guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyOne": "Un servidor sostiene esta comunidad — y {{count}} integrante también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyOther": "Un servidor sostiene esta comunidad — y cada una de sus {{count}} integrantes también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyMultiOne": "{{nodes}} servidores sostienen esta comunidad — y {{count}} integrante también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyMultiOther": "{{nodes}} servidores sostienen esta comunidad — y cada una de sus {{count}} integrantes también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
       "bodyFailover": "Si un servidor desaparece, tus aplicaciones cambian a los demás por su cuenta. No se pierde nada.",
+      "windowedNote": "Este dispositivo guarda el último {{years}} año(s) más todo lo activo y lo tuyo — los servidores guardan la historia completa.",
       "nodeQuiet": "Ningún servidor ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando alguno vuelva.",
       "leaf": {
         "fresh": "sincronizado hoy",
@@ -1983,7 +1985,20 @@
       "storageProtected": "protegida contra la limpieza del navegador",
       "storageUnprotected": "el navegador podría borrarla si le falta espacio — instalar la aplicación suele protegerla",
       "storageUnknown": "protección contra limpieza desconocida en este navegador",
-      "export": "Exportar mis datos"
+      "export": "Exportar mis datos",
+      "window": {
+        "full": "Este dispositivo guarda la historia completa de la comunidad.",
+        "windowed": "Este dispositivo guarda el último {{years}} año(s) más todo lo activo y todo lo tuyo. La historia completa permanece en los servidores de tu comunidad.",
+        "freeUp": "Liberar espacio en este dispositivo…",
+        "chooseHorizon": "¿Cuánta historia debe guardar este dispositivo?",
+        "keepYears": "Guardar {{years}} año(s)",
+        "preview": "Esto elimina {{total}} registros antiguos solo de este dispositivo: {{posts}} publicaciones resueltas, {{events}} eventos pasados, {{projects}} proyectos cerrados, y sus detalles.",
+        "previewNote": "Nada de lo que escribiste, nada que siga abierto, y ninguno de los registros del libro de horas, del padrón o de la membresía se toca. Cada registro eliminado permanece en los servidores de tu comunidad y en los dispositivos de otros miembros — puedes recuperarlo todo más adelante.",
+        "confirm": "Liberar el espacio",
+        "done": "Listo — {{total}} registros eliminados de este dispositivo.",
+        "undo": "Guardar de nuevo la historia completa",
+        "undoDone": "Este dispositivo volverá a descargar la historia completa en segundo plano. Los registros de actividad de proyectos cerrados hace mucho no vuelven — solo existían en los dispositivos."
+      }
     },
     "communityAccount": {
       "title": "Comunidad y cuenta"

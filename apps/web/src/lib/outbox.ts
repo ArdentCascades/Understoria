@@ -763,6 +763,12 @@ async function tick(): Promise<void> {
   try {
     await flushOutboxOnce({ fetchImpl: worker.fetchImpl });
     await pruneDeliveredOutbox();
+    // Storage windowing: on a windowed device, re-compact at most
+    // daily so records that age past the horizon keep compacting.
+    // Everywhere else it's a no-op (one settings read). Dynamic
+    // import keeps the worker's module graph free of a static cycle.
+    const { maybeCompactWindow } = await import("@/lib/storageWindow");
+    await maybeCompactWindow();
   } catch (err) {
     if (typeof console !== "undefined" && console.warn) {
       console.warn("[understoria] outbox flush crashed", err);

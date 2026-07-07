@@ -1,7 +1,8 @@
 # Storage budget — when a phone can't hold the whole community
 
-Status: **Phase 0 shipped** (persistent-storage protection + the
-storage meter). **Phases 1–2 planned below in buildable detail, not
+Status: **Phases 0–1 shipped** (persistent-storage protection + the
+storage meter; local windowing with a pinned working set — Settings →
+Data → "Free up space on this device"). **Phase 2 planned below, not
 built. Phase 3 named and deferred.** Last reconciled against the
 codebase 2026-07 (post mirror-failover, re-seed R1, recovery kit K1,
 guardian shards K2). Companion docs: `docs/community-reseed.md`
@@ -107,12 +108,21 @@ that exists at Dexie v30, and a drift-guard test keeps it that way.
   legibly instead of opaquely. No wire bytes; the estimate never
   leaves the device.
 
-## Phase 1 — local windowing with a pinned working set
+## Phase 1 — local windowing with a pinned working set (SHIPPED)
 
 Member-initiated from the storage meter ("Free up space on this
 device…"); never automatic. The member picks a horizon (1 or 2
 years); the app deletes, locally only, old *settled* records while
-pinning everything that carries meaning forward.
+pinning everything that carries meaning forward. As built:
+`lib/storageWindow.ts` (classification + walker + merge guard),
+`StorageWindowSection` in Settings' Data card, guard threaded
+through every windowable pull in `lib/federationSync.ts`, daily
+re-compaction piggybacked on the outbox worker tick. Two as-built
+corrections to the spec below: co-organizer invitations hang off
+PROJECTS (not events) and window with their project; and the two
+local-only child tables (`projectActivity`, `eventProjectLinks`)
+window only as children of a windowed parent — they cannot be
+re-downloaded by the undo path, and the undo copy says so.
 
 ### 1a. Table classification (complete, at Dexie v30)
 
@@ -155,8 +165,8 @@ settled AND not pinned by a rule below):**
   settled means the project is closed/completed and last touched
   before the horizon; children window with their project.
 - `coorgInvitations`, `coorgInvitationResponses` — window with the
-  event they belong to. `coorgInvitationRevocations` are PINNED
-  (an authority-removal statement must outlive its event; tiny).
+  project they belong to. `coorgInvitationRevocations` are PINNED
+  (an authority-removal statement must outlive its project; tiny).
 
 **Pin rules that override the horizon, applied per record:**
 

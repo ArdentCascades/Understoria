@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A phone that can't hold the whole community can now keep just
+  what matters** (`docs/storage-budget.md` Phase 1). Settings → Data
+  gains "Free up space on this device": pick how much history to
+  keep (1 or 2 years), see exactly what would be removed, confirm —
+  and old settled records (expired posts, past events, closed
+  projects, with their details) are deleted from that device only.
+  Everything that carries meaning forward is pinned and never
+  removed: everything you wrote or worked on, everything still open,
+  the community roster, membership records, and the entire exchange
+  ledger and vouch graph — the numbers never change meaning. The
+  choice is honest end to end: the storage meter, the resilience
+  card, and the community-restore flow all state that device's real
+  coverage; switching servers can't silently re-download the archive
+  (freed space stays freed); and "Carry the full history again"
+  brings everything back from the community's servers. Never
+  automatic — the app never silently drops community data.
 - **Guardian shards: your community can bring you back**
   (`docs/identity-recovery.md` Phase K2). Settings → Guardians splits
   your account's key among 2–7 trusted members with Shamir secret
