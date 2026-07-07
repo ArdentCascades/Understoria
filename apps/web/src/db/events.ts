@@ -25,10 +25,15 @@ import {
 import { enqueueEvent, enqueueEventCancellation } from "@/lib/outbox";
 import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
+import {
+  publishEventRsvpState,
+  publishShiftSignupState,
+} from "./participationPublish";
 import type {
   Event,
   EventCancellation,
   EventRsvpRow,
+  ShiftSignupRow,
 } from "@/types";
 
 /**
@@ -40,9 +45,11 @@ import type {
  *   - `cancelEvent` — organizer signs a cancellation; idempotent.
  *     Only the original organizer can cancel (single-signer authority
  *     per §4.3 + §11).
- *   - `rsvpToEvent` — local-only upsert. Does NOT enqueue anything.
- *     The whole RSVP roster lives on the node where members tap
- *     "going" / "maybe" / "not going" and never federates (§4 + §7).
+ *   - `rsvpToEvent` — local upsert, then federates as a single-owner
+ *     LWW `EventRsvpState` record (participation Phase 2,
+ *     docs/project-federation.md §6 — a deliberate reversal of the
+ *     original local-only stance so organizers can actually see
+ *     attendance from other members' phones).
  *
  * Read helpers:
  *   - `getEvent` / `listEvents` — calendar + detail-page surfaces
@@ -285,11 +292,12 @@ export interface RsvpToEventInput {
  * existing row in place (keeping its `id`, updating `status` and
  * `respondedAt`).
  *
- * RSVPs are local-only — see `docs/community-events.md` §4 + §7.
- * This function MUST NOT call any outbox helper. There is no
- * `enqueueEventRsvp` to call, and adding one would be a wire-format
- * violation. The negative test in `events.test.ts` asserts the outbox
- * length is unchanged across RSVP writes.
+ * Federates since participation Phase 2 (docs/project-federation.md
+ * §6): after the local transaction commits, the RSVP publishes as a
+ * single-owner LWW `EventRsvpState` record, and any signups cleared
+ * by a "not going" publish withdrawal tombstones. (The original
+ * local-only stance and its negative tests were deliberately retired
+ * — threat-model §7 "Federated participation records".)
  */
 export async function rsvpToEvent(
   input: RsvpToEventInput,
@@ -299,7 +307,7 @@ export async function rsvpToEvent(
   // (below) are atomic — no render window may show a shift signup
   // without a live RSVP (docs/shift-signups.md §6.1). The scope is a
   // superset of what signUpForShift composes in, so Dexie nests it.
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [
       db.events,
@@ -363,17 +371,33 @@ export async function rsvpToEvent(
       // roster: going not_going clears their shift signups for this
       // event, atomically with the RSVP write
       // (docs/shift-signups.md §6.1). Removing a single SIGNUP does
-      // NOT downgrade the RSVP — that asymmetry is deliberate.
+      // NOT downgrade the RSVP — that asymmetry is deliberate. The
+      // cleared rows are captured so their withdrawal TOMBSTONES can
+      // publish after this transaction commits — the clear must reach
+      // every other device's roster too.
+      let clearedSignups: ShiftSignupRow[] = [];
       if (input.status === "not_going") {
+        clearedSignups = await db.shiftSignups
+          .where("[eventId+memberKey]")
+          .equals([input.eventId, input.memberKey])
+          .toArray();
         await db.shiftSignups
           .where("[eventId+memberKey]")
           .equals([input.eventId, input.memberKey])
           .delete();
       }
 
-      return row;
+      return { row, clearedSignups };
     },
   );
+  // Federate the RSVP and any signup tombstones. Both no-op inside
+  // signUpForShift's ambient transaction — that mutator publishes
+  // once after its own commit.
+  await publishEventRsvpState(input.eventId, input.memberKey);
+  for (const cleared of result.clearedSignups) {
+    await publishShiftSignupState(cleared, input.memberKey, now);
+  }
+  return result.row;
 }
 
 /**

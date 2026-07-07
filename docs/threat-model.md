@@ -697,6 +697,14 @@ We are not trying to protect against:
   because a per-deployment switch would be a foot-gun the moment a
   community misconfigures it. Mirrors the `Post.claimedBy` pattern:
   signed records federate; local rosters do not.
+  **(a) SUPERSEDED IN PART** by participation federation Phase 2
+  (docs/project-federation.md §6): RSVPs now DO travel through the
+  member's own community node — the reversal, its bounds (community
+  node only, never the cross-node peer wire), and its adversary
+  re-mapping are in the "Federated participation records" entry near
+  the end of this section. Mitigations (b)–(d) below, the venue
+  residual, and the permanent exchange-label boundary all survive
+  unchanged.
   (b) **Attendee roster is tiered, with an informed-consent surface
   on the RSVP control.** Non-RSVP'd members on the same node see a
   count only, not names. Peer-node viewers see neither names nor
@@ -761,20 +769,17 @@ We are not trying to protect against:
   a project↔event correlation is the organizer's own editable
   free-text title, decided in front of the §3 signing card; no
   `projectId` correlator is ever published.
-  Shift signups (`docs/shift-signups.md`) likewise do NOT widen this
-  surface: shift definitions and signups are local-only Dexie rows in
-  the `EventRSVP` posture — the `"event_shift"` and `"shift_signup"`
-  discriminators are rejected at the `OutboxRow.kind` type level,
-  there is no route, no cursor, no pull helper, and an event with
-  twelve shifts federates byte-for-byte identical to one with none.
-  This matters doubly here: shift structure is an operational
-  schedule (who is expected where, in which time slot) — a sharper
-  version of the location+time signal this entry already carries —
-  and a signup is per-slot attendance INTENT, strictly finer-grained
-  than the RSVP rows already kept off the wire. The only
-  member-chosen channel by which shift structure can reach the wire
-  is the organizer's own free-text description, decided in front of
-  the §3 signing card.
+  Shift signups (`docs/shift-signups.md`) originally did NOT widen
+  this surface: shift definitions and signups shipped as local-only
+  Dexie rows in the `EventRSVP` posture, with the `"event_shift"` and
+  `"shift_signup"` discriminators rejected at the `OutboxRow.kind`
+  type level. **That too is SUPERSEDED IN PART** by the same Phase 2
+  entry: shift structure and signups now reach the member's own
+  community node (never the peer wire), because a slot roster only
+  one device can see cannot coordinate anything. The reasoning this
+  paragraph recorded — shift structure is an operational schedule,
+  a signup is per-slot attendance intent — is precisely what the
+  Phase 2 entry weighs and accepts, with its bounds.
   One permanent boundary, recorded here so it stays visible to
   contributors reading the threat model rather than the design note:
   **no `Exchange.postId` label may ever encode an event id, shift
@@ -1469,6 +1474,69 @@ We are not trying to protect against:
   still names the absent organizer, deliberately — the alternative
   is a quorum-takeover surface. (5) Members with a locked device
   publish on their next unlocked mutation, not immediately.
+
+- **Federated participation records (`EventRsvpState` /
+  `EventShiftState` / `ShiftSignupState` — Phase 2).**
+  *Shipped — docs/project-federation.md §6; supersedes IN PART the
+  "Federated `Event` records" entry's mitigation (a) and its shift
+  paragraph above, both of which now carry pointers here.* This is
+  the most values-heavy reversal in the federation workstream and it
+  is recorded as such: the original events design called RSVP
+  locality its load-bearing decision, and the shifts design shipped
+  with type-level locks against exactly these three outbox kinds.
+  **Why it was reversed anyway:** field use showed the stance's real
+  effect was that an organizer literally could not see attendance
+  from anyone else's phone — the roster the feature exists to build
+  only ever existed on each member's own device. "Who's coming" is
+  the coordination signal an event announcement solicits; a
+  per-device answer is no answer. The same argument that carried
+  task claims in Phase 1 carries here.
+  **What now crosses which wire, precisely.** Three signed LWW state
+  records reach the member's OWN community node: the RSVP (event id,
+  member key, going/maybe/not_going, timestamps), the shift
+  definition (label, window, soft capacity, organizer key), and the
+  signup (shift id, member key, timestamps). RSVPs and signups are
+  SINGLE-OWNER (signature must be the named member's own; enforced
+  server-side and on every pulling device) and keyed by their
+  natural key so devices can't double-count a roster. Withdrawals
+  and shift deletions travel as tombstones so removal converges too
+  — "I'm not coming" removes the member's name from every device's
+  roster, not just their own. **NOT on the cross-node peer wire:**
+  none of the three kinds joins `peerPull`; an adversary harvesting
+  peer federation still sees only that the event exists and who
+  organized it. The perimeter that moved is the community node
+  itself (and anyone who can query it — the GET feeds are
+  unauthenticated, same as posts and events).
+  **Adversary re-mapping (§3).** The node-watching rows (operator,
+  subpoena, MITM on plain-HTTP pilots) gain the within-community
+  attendance graph: who intends to be where, when, in which slot —
+  the sharper location+time signal the superseded paragraphs named.
+  Weighed against: this is exactly what every attending member's
+  screen already shows (§6 visibility tiers still gate RENDERING —
+  non-RSVP'd members still see counts, not names), the event's
+  time/place was already on the wire signed by the organizer, and
+  the free-text-venue guidance for high-risk events (rotate venue
+  strings / "address sent on confirmation") applies with the same
+  force and is now doubly load-bearing.
+  **What survives unchanged, permanently:** (1) the never-compare
+  rule — a signup is INTENT, not attendance; nothing may ever
+  reconcile rosters against exchanges or presence
+  (docs/shift-signups.md §9, community-events.md §11.6); (2) the
+  exchange-label boundary — no `Exchange.postId` may ever encode an
+  event or shift id (exchanges DO cross the peer wire; that label
+  would rebuild the cross-node attendance graph through a side
+  door); (3) no per-member attendance aggregation surface; (4) no
+  notifications.
+  **Residuals, stated plainly.** (1) A member's RSVP history for an
+  event is visible to their community node operator for as long as
+  the node retains rows — mitigated only by the operator-trust
+  model every other record kind already lives under. (2) Tombstoned
+  rows persist on the node as tombstones (the removal is what
+  federates; the row's existence remains attested). (3) A shift
+  deletion arriving on a device where signups exist locally clears
+  that roster without per-member consent ceremony — organizer
+  authority, same as the local deleteShift guard's intent. (4)
+  Locked devices publish late, same as Phase 1.
 
 ## 8. Guidance for reviewers
 

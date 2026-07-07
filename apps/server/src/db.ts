@@ -29,10 +29,13 @@ import type {
   EventCancellation,
   Exchange,
   FlagReason,
+  EventRsvpState,
+  EventShiftState,
   Post,
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  ShiftSignupState,
   SignedVouch,
   TaskComment,
   TaskState,
@@ -949,6 +952,59 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '18')",
+    ).run();
+  }
+
+  // Schema v19 — participation federation Phase 2
+  // (docs/project-federation.md §6). Same signed-LWW-state posture as
+  // v18. RSVPs and shift signups are keyed by their NATURAL key —
+  // (event_id, member_key) / (shift_id, member_key) — not by row uuid,
+  // so two devices of one member can never double-count a roster:
+  // whichever version is newest simply replaces the pair's row.
+  // Shifts keep `id` as primary key (stable, organizer-minted) and
+  // carry a tombstone in the payload (`deletedAt`) rather than being
+  // DELETEd, so a removal keeps winning LWW against stale live copies.
+  if (current < 19) {
+    db.exec(`
+      CREATE TABLE event_rsvps (
+        event_id TEXT NOT NULL,
+        member_key TEXT NOT NULL,
+        id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        PRIMARY KEY (event_id, member_key)
+      );
+      CREATE INDEX event_rsvps_updated_idx ON event_rsvps (updated_at);
+      CREATE INDEX event_rsvps_signer_idx ON event_rsvps (signer_key);
+      CREATE TABLE event_shifts (
+        id TEXT PRIMARY KEY,
+        event_id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX event_shifts_updated_idx ON event_shifts (updated_at);
+      CREATE INDEX event_shifts_event_idx ON event_shifts (event_id);
+      CREATE INDEX event_shifts_signer_idx ON event_shifts (signer_key);
+      CREATE TABLE shift_signups (
+        shift_id TEXT NOT NULL,
+        member_key TEXT NOT NULL,
+        id TEXT NOT NULL,
+        event_id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        PRIMARY KEY (shift_id, member_key)
+      );
+      CREATE INDEX shift_signups_updated_idx ON shift_signups (updated_at);
+      CREATE INDEX shift_signups_signer_idx ON shift_signups (signer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '19')",
     ).run();
   }
 }
@@ -2572,4 +2628,201 @@ interface TaskStateRowSqlite {
 
 function rowToTaskState(r: TaskStateRowSqlite): TaskState {
   return JSON.parse(r.payload) as TaskState;
+}
+
+// --- Participation federation Phase 2 (docs/project-federation.md §6) -
+
+export interface EventRsvpStateStore {
+  /** Lookup by the NATURAL key — the identity of an RSVP. */
+  get(eventId: string, memberKey: string): EventRsvpState | null;
+  /** INSERT OR REPLACE by (eventId, memberKey). The route decides
+   *  whether to call this — the store never compares versions. */
+  upsert(record: EventRsvpState): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): EventRsvpState[];
+  count(): number;
+}
+
+export function createEventRsvpStateStore(
+  db: DatabaseType,
+): EventRsvpStateStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO event_rsvps (
+      event_id, member_key, id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @eventId, @memberKey, @id, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM event_rsvps WHERE event_id = ? AND member_key = ?",
+  );
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM event_rsvps");
+
+  return {
+    get(eventId, memberKey) {
+      const r = getStmt.get(eventId, memberKey) as
+        | StateRowSqlite
+        | undefined;
+      return r ? (JSON.parse(r.payload) as EventRsvpState) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        eventId: record.eventId,
+        memberKey: record.memberKey,
+        id: record.id,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging — ordering + cursor rationale on
+      // pagedRows (docs/composite-federation-cursors.md). `id` is the
+      // tie-break column only; identity is the natural key.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "event_rsvps",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as EventRsvpState);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface EventShiftStateStore {
+  get(id: string): EventShiftState | null;
+  upsert(record: EventShiftState): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): EventShiftState[];
+  count(): number;
+}
+
+export function createEventShiftStateStore(
+  db: DatabaseType,
+): EventShiftStateStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO event_shifts (
+      id, event_id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @id, @eventId, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare("SELECT * FROM event_shifts WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM event_shifts");
+
+  return {
+    get(id) {
+      const r = getStmt.get(id) as StateRowSqlite | undefined;
+      return r ? (JSON.parse(r.payload) as EventShiftState) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        id: record.id,
+        eventId: record.eventId,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging — see pagedRows. Tombstoned shifts
+      // stay in the feed (deletedAt in the payload): the removal must
+      // reach every puller, exactly like a task-comment tombstone.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "event_shifts",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as EventShiftState);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface ShiftSignupStateStore {
+  get(shiftId: string, memberKey: string): ShiftSignupState | null;
+  upsert(record: ShiftSignupState): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): ShiftSignupState[];
+  count(): number;
+}
+
+export function createShiftSignupStateStore(
+  db: DatabaseType,
+): ShiftSignupStateStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO shift_signups (
+      shift_id, member_key, id, event_id, signer_key, updated_at,
+      payload, signature
+    ) VALUES (
+      @shiftId, @memberKey, @id, @eventId, @signerKey, @updatedAt,
+      @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM shift_signups WHERE shift_id = ? AND member_key = ?",
+  );
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM shift_signups");
+
+  return {
+    get(shiftId, memberKey) {
+      const r = getStmt.get(shiftId, memberKey) as
+        | StateRowSqlite
+        | undefined;
+      return r ? (JSON.parse(r.payload) as ShiftSignupState) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        shiftId: record.shiftId,
+        memberKey: record.memberKey,
+        id: record.id,
+        eventId: record.eventId,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging — see pagedRows. Withdrawal tombstones
+      // stay in the feed for the same reason as shift tombstones.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "shift_signups",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as ShiftSignupState);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+/** Shared row shape for the Phase 2 payload-JSON state tables — only
+ *  the columns every reader touches; the payload is the truth. */
+interface StateRowSqlite {
+  id: string;
+  updated_at: number;
+  payload: string;
+  signature: string;
 }

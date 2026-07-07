@@ -10,6 +10,29 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Event RSVPs and shift rosters now sync too — "who's coming" is
+  finally a real roster.** Until now an RSVP or a shift signup lived
+  only on the device that tapped it, so an organizer literally could
+  not see attendance from anyone else's phone. RSVPs, shift
+  definitions, and shift signups now travel through the community
+  node as signed, last-writer-wins records (participation federation
+  Phase 2, `docs/project-federation.md` §6): tap "going" on your
+  phone and the organizer's browser shows it within minutes; sign up
+  for the setup crew and your name lands on every device's roster;
+  step back and a deletion marker takes it off everywhere — not just
+  where you tapped. Only YOU can sign your own RSVP or signup (the
+  server and every device check it), your two devices can never
+  double-count you (rosters key on member + event/shift, not row
+  ids), and shifts are signed by the event's organizer alone. Two
+  boundaries survive this deliberate reversal of the original
+  local-only design, named in the threat model and privacy policy:
+  participation records stay on your OWN community's node and are
+  never relayed to peer communities (the cross-federation attendance
+  graph the events design refused remains refused), and a signup is
+  intent, never attendance — nothing ever reconciles rosters against
+  exchanges. The project ACTIVITY feed (history timeline) is the one
+  piece still device-local; it follows separately.
+
 - **Projects and tasks now sync — between your devices AND between
   members.** Until now the whole project subsystem was device-local:
   a helper claiming a task on their phone was invisible to the

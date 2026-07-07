@@ -335,6 +335,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           pullFederatedVouches,
           pullFederatedProjectStates,
           pullFederatedTaskStates,
+          pullFederatedEventShifts,
+          pullFederatedEventRsvps,
+          pullFederatedShiftSignups,
         }) => {
           void pullFederatedPosts();
           void pullFederatedClaims();
@@ -343,7 +346,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
           void pullFederatedCoOrgInvitations();
           void pullFederatedCoOrgResponses();
           void pullFederatedCoOrgRevocations();
-          void pullFederatedEvents();
+          // Participation state rides behind the events pull: a
+          // shift's authority is checked against its LOCAL event, a
+          // live signup needs its shift — so events → shifts+RSVPs →
+          // signups (docs/project-federation.md §6).
+          void pullFederatedEvents().then(() => {
+            void pullFederatedEventRsvps();
+            void pullFederatedEventShifts().then(() => {
+              void pullFederatedShiftSignups();
+            });
+          });
           void pullFederatedEventCancellations();
           // Phase 1 of docs/invite-redemption.md: redemption receipts
           // (invite-row flip + roster materialization, §6) and the §9

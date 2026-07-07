@@ -131,12 +131,17 @@ export interface OutboxRow {
     // is the NORMAL case — the in-place pending-row replacement in
     // enqueueOutbox is what keeps only the latest version queued.
     | "project_state"
-    | "task_state";
-  // Intentionally NOT a member of this union: "event_rsvp". EventRsvpRow
-  // is local-only by design (docs/community-events.md §4 + §7); RSVPs
-  // never enter the outbox. The union rejects "event_rsvp" at the
-  // type level — events.test.ts asserts this with `// @ts-expect-error`.
-  //
+    | "task_state"
+    // Participation federation Phase 2 (docs/project-federation.md
+    // §6): RSVPs, shift definitions, and shift signups as signed LWW
+    // state records. These three names were LOAD-BEARING ABSENCES in
+    // this union for a year — the local-only stance was deliberately
+    // reversed after field use showed an organizer could not see
+    // attendance from anyone else's phone. The reversal's adversary
+    // analysis: threat-model §7 "Federated participation records".
+    | "event_rsvp"
+    | "event_shift"
+    | "shift_signup";
   // Intentionally NOT a member of this union: "block". BlockRow and
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never
@@ -151,16 +156,6 @@ export interface OutboxRow {
   // that need the association can each create their own link.
   // eventProjectLinks.test.ts asserts the rejection with
   // `// @ts-expect-error`.
-  //
-  // Intentionally NOT members of this union: "event_shift" and
-  // "shift_signup". EventShiftRow and ShiftSignupRow are the local-only
-  // shift-signup layer (docs/shift-signups.md §4 + §7): shift structure
-  // is a finer-grained time-and-place signal than the signed Event and
-  // a signup is a member-attendance intent — both are exactly the
-  // surveillance shapes the events design keeps off the wire. Never
-  // enqueued, never pulled; no enqueueEventShift / enqueueShiftSignup
-  // exists in lib/outbox.ts. eventShifts.test.ts asserts both
-  // rejections with `// @ts-expect-error`.
   /** JSON-stringified signed payload. While the row is `pending` a
    *  re-enqueue of the same record with NEW mutable state (e.g. a
    *  task-comment tombstone) replaces this in place; once delivered
@@ -352,7 +347,7 @@ export class UnderstoriaDB extends Dexie {
    * Cleared by soft-purge. Read and written only by `db/blocks.ts` on
    * the blocker's own device. The `OutboxRow.kind` union above rejects
    * `"block"` at the type level; there is no `enqueueBlock` helper in
-   * `lib/outbox.ts`. Same federation posture as `eventRsvps`.
+   * `lib/outbox.ts`.
    */
   blocks!: Table<BlockRow, string>;
   /**
@@ -372,26 +367,26 @@ export class UnderstoriaDB extends Dexie {
    * `db/eventProjectLinks.ts`. The `OutboxRow.kind` union above rejects
    * `"event_project_link"` at the type level; there is no
    * `enqueueEventProjectLink` helper in `lib/outbox.ts`. Same
-   * federation posture as `eventRsvps` and `blocks`.
+   * federation posture as `blocks`.
    */
   eventProjectLinks!: Table<EventProjectLinkRow, string>;
   /**
-   * Local-only shift definitions — see `docs/shift-signups.md` §4.1.
-   * Time-boxed, optionally-capped slots on a community event. Never
-   * synced, never exported, never federated; cleared by soft-purge.
-   * Read and written only by `db/eventShifts.ts`. The `OutboxRow.kind`
-   * union above rejects `"event_shift"` at the type level; there is no
-   * `enqueueEventShift` helper in `lib/outbox.ts`. Same federation
-   * posture as `eventRsvps`, `blocks`, and `eventProjectLinks`.
+   * Shift definitions — see `docs/shift-signups.md` §4.1. Time-boxed,
+   * optionally-capped slots on a community event. FEDERATE since
+   * participation Phase 2 (docs/project-federation.md §6) as
+   * organizer-signed LWW `EventShiftState` records — rows written by
+   * the publish path carry `updatedAt`/`signerKey`/`signature`
+   * alongside the base shape. Deletions publish a TOMBSTONE and then
+   * remove the local row; cleared by soft-purge.
    */
   eventShifts!: Table<EventShiftRow, string>;
   /**
-   * Local-only shift signups — see `docs/shift-signups.md` §4.2.
-   * A member's declared INTENT to fill a shift; NOT an attendance
-   * record, and nothing may ever reconcile this table against
-   * exchanges (docs/community-events.md §11.6, permanent). Same
-   * federation posture as `eventShifts`; the union rejects
-   * `"shift_signup"`, and there is no `enqueueShiftSignup`.
+   * Shift signups — see `docs/shift-signups.md` §4.2. A member's
+   * declared INTENT to fill a shift; NOT an attendance record, and
+   * nothing may ever reconcile this table against exchanges
+   * (docs/community-events.md §11.6 — that rule is PERMANENT and
+   * survives federation). Federates since Phase 2 as single-owner
+   * LWW `ShiftSignupState` records; withdrawal publishes a tombstone.
    */
   shiftSignups!: Table<ShiftSignupRow, string>;
 
@@ -769,16 +764,15 @@ export class UnderstoriaDB extends Dexie {
     // `"event_cancellation"` respectively; see the `OutboxRow.kind`
     // union above.
     //
-    // `eventRsvps` is LOCAL-ONLY BY DESIGN. RSVP rows MUST NEVER be
-    // enqueued into the outbox — see `docs/community-events.md` §4
-    // (data model: "EventRSVP … never enters the outbox") and §7
-    // (federation: "`EventRSVP`. Absolutely not. The discriminator
-    // `\"EventRSVP\"` MUST NOT appear in `OutboxRow.kind`. There is
-    // no `POST /event-rsvps` route. There is no `GET /event-rsvps?since=`
-    // cursor. There is no PWA-side `pullFederatedEventRSVPs`.").
-    // Accordingly: PR C does NOT add an `enqueueEventRsvp` helper to
-    // `lib/outbox.ts`. The absence is load-bearing — see
-    // `events.test.ts` for the negative tests that lock this in.
+    // `eventRsvps` shipped LOCAL-ONLY BY DESIGN (the original
+    // docs/community-events.md §4 + §7 stance, locked by negative
+    // tests). Participation federation Phase 2
+    // (docs/project-federation.md §6) deliberately REVERSED that
+    // stance — an organizer could not see attendance from anyone
+    // else's phone — so RSVP rows now federate as single-owner LWW
+    // `EventRsvpState` records ("event_rsvp" in OutboxRow.kind). The
+    // historical comment is kept in this form so the migration's
+    // original intent stays legible.
     this.version(22).stores({
       events:
         "id, createdBy, startsAt, createdAt, nodeId, [nodeId+id]",
@@ -894,9 +888,11 @@ export class UnderstoriaDB extends Dexie {
       eventProjectLinks:
         "id, eventId, projectId, createdAt, [projectId+eventId]",
     });
-    // v28: local-only shift signups (docs/shift-signups.md). Two pure
-    // new tables, no backfill. Both are the EventRsvpRow posture —
-    // never federated, never exported, cleared by soft-purge. The
+    // v28: shift signups (docs/shift-signups.md). Two pure new
+    // tables, no backfill. Shipped local-only in the EventRsvpRow
+    // posture; both now federate since participation Phase 2
+    // (docs/project-federation.md §6) — see the table doc comments
+    // above. Still cleared by soft-purge. The
     // `[shiftId+memberKey]` compound index backs the signup dedupe
     // (signing up twice is a no-op) and the `[eventId+memberKey]`
     // compound backs the RSVP-downgrade clear (a member going

@@ -26,8 +26,11 @@ import type { Config } from "./config.js";
 import {
   createAwaitingTransitionStore,
   createDeviceLinkStore,
+  createEventRsvpStateStore,
+  createEventShiftStateStore,
   createLinkRequestStore,
   createClaimStore,
+  createShiftSignupStateStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
@@ -64,6 +67,7 @@ import { registerEventCancellationRoutes } from "./routes/eventCancellations.js"
 import { registerDeviceLinkRoutes } from "./routes/deviceLink.js";
 import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
 import { registerProjectStateRoutes } from "./routes/projectStates.js";
+import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard } from "./insertCaps.js";
 
@@ -187,6 +191,9 @@ export async function buildServer({
   const linkRequestStore = createLinkRequestStore(db);
   const projectStateStore = createProjectStateStore(db);
   const taskStateStore = createTaskStateStore(db);
+  const eventRsvpStateStore = createEventRsvpStateStore(db);
+  const eventShiftStateStore = createEventShiftStateStore(db);
+  const shiftSignupStateStore = createShiftSignupStateStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -245,6 +252,15 @@ export async function buildServer({
   await registerProjectStateRoutes(app, {
     projectStore: projectStateStore,
     taskStore: taskStateStore,
+  });
+  // Participation state (Phase 2) — RSVPs / shifts / signups as
+  // signed LWW records; authority rules in
+  // routes/participationStates.ts and docs/project-federation.md §6.
+  await registerParticipationStateRoutes(app, {
+    rsvpStore: eventRsvpStateStore,
+    shiftStore: eventShiftStateStore,
+    signupStore: shiftSignupStateStore,
+    eventStore,
   });
   // Device-link mailbox — NOT a federation surface: rows are opaque
   // ciphertext, one-shot, TTL-bounded, never pulled by peers. The

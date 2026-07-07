@@ -27,10 +27,13 @@ import {
   type CoOrganizerInvitationRevocation,
   type Event,
   type EventCancellation,
+  type EventRsvpState,
+  type EventShiftState,
   type Exchange,
   type FlagReason,
   type Post,
   type ProjectState,
+  type ShiftSignupState,
   type SignedVouch,
   type TaskComment,
   type TaskState,
@@ -1056,4 +1059,150 @@ export function parseTaskState(input: unknown): ParseTaskStateResult {
   const common = checkStateCommon(r);
   if (common) return { ok: false, error: common };
   return { ok: true, value: r as unknown as TaskState };
+}
+
+// --- Phase 2 participation state records (docs/project-federation.md
+// §6). Same pass-the-body-through-verbatim posture as the project /
+// task parsers above: the signature covers every field via
+// stableStringify, so rebuilding from a field list would break
+// re-verification on every pulling client.
+
+export type ParseEventRsvpStateResult =
+  | { ok: true; value: EventRsvpState }
+  | { ok: false; error: string };
+
+export type ParseEventShiftStateResult =
+  | { ok: true; value: EventShiftState }
+  | { ok: false; error: string };
+
+export type ParseShiftSignupStateResult =
+  | { ok: true; value: ShiftSignupState }
+  | { ok: false; error: string };
+
+const RSVP_STATUSES = new Set(["going", "maybe", "not_going"]);
+const SHIFT_LABEL_MAX = 100;
+
+function checkLwwClock(r: Record<string, unknown>): string | null {
+  if (
+    typeof r.updatedAt !== "number" ||
+    !Number.isInteger(r.updatedAt) ||
+    r.updatedAt <= 0
+  ) {
+    return "updatedAt must be a positive integer (ms epoch)";
+  }
+  if (r.updatedAt > Date.now() + 24 * 60 * 60 * 1000) {
+    return "updatedAt is too far in the future";
+  }
+  return null;
+}
+
+function checkTombstone(r: Record<string, unknown>): string | null {
+  if (r.deletedAt !== null) {
+    if (
+      typeof r.deletedAt !== "number" ||
+      !Number.isInteger(r.deletedAt) ||
+      r.deletedAt <= 0
+    ) {
+      return "deletedAt must be null or a positive integer (ms epoch)";
+    }
+  }
+  return null;
+}
+
+export function parseEventRsvpState(
+  input: unknown,
+): ParseEventRsvpStateResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["id", "eventId", "memberKey", "signerKey", "signature"]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.status !== "string" || !RSVP_STATUSES.has(r.status)) {
+    return {
+      ok: false,
+      error: "status must be 'going', 'maybe', or 'not_going'",
+    };
+  }
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as EventRsvpState };
+}
+
+export function parseEventShiftState(
+  input: unknown,
+): ParseEventShiftStateResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["id", "eventId", "createdBy", "signerKey", "signature"]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    typeof r.label !== "string" ||
+    r.label.length === 0 ||
+    r.label.length > SHIFT_LABEL_MAX
+  ) {
+    return {
+      ok: false,
+      error: `label must be 1..${SHIFT_LABEL_MAX} characters`,
+    };
+  }
+  if (
+    typeof r.startsAt !== "number" ||
+    typeof r.endsAt !== "number" ||
+    !Number.isFinite(r.startsAt) ||
+    !Number.isFinite(r.endsAt) ||
+    r.endsAt <= r.startsAt
+  ) {
+    return { ok: false, error: "shift end time must be after its start" };
+  }
+  if (
+    r.capacity !== null &&
+    (typeof r.capacity !== "number" ||
+      !Number.isInteger(r.capacity) ||
+      r.capacity <= 0)
+  ) {
+    return {
+      ok: false,
+      error: "capacity must be null or a positive integer",
+    };
+  }
+  const tombstone = checkTombstone(r);
+  if (tombstone) return { ok: false, error: tombstone };
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as EventShiftState };
+}
+
+export function parseShiftSignupState(
+  input: unknown,
+): ParseShiftSignupStateResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of [
+    "id",
+    "shiftId",
+    "eventId",
+    "memberKey",
+    "signerKey",
+    "signature",
+  ]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  const tombstone = checkTombstone(r);
+  if (tombstone) return { ok: false, error: tombstone };
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as ShiftSignupState };
 }

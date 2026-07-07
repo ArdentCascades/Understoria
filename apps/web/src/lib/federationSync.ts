@@ -10,10 +10,13 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type {
+  EventRsvpRow,
+  EventShiftRow,
   Exchange,
   Post,
   Project,
   ProjectTask,
+  ShiftSignupRow,
   SignedVouch,
   TaskComment,
 } from "@/types";
@@ -23,7 +26,10 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  EventRsvpState,
+  EventShiftState,
   ProjectState,
+  ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
@@ -45,6 +51,7 @@ import {
   verifyPost,
   verifyProjectState,
   verifyRedemptionReceipt,
+  verifyStateRecord,
   verifyTaskState,
   verifyVouch,
 } from "@understoria/shared/crypto";
@@ -1727,6 +1734,273 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
 
   if (maxUpdatedAt !== null) {
     await setSetting(TASK_STATE_CURSOR_KEY, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+// --- Participation pulls: RSVPs / shifts / signups (Phase 2) ----------
+//
+// docs/project-federation.md §6. Same verify-then-LWW discipline as
+// the project/task pulls above, with the authority rules recomputed
+// against LOCAL rows (the response body is untrusted):
+//   - a shift must be signed by the LOCAL event's organizer;
+//   - an RSVP / signup must be signed by the member it names;
+//   - tombstones (deletedAt) delete the local row instead of upserting.
+// Rows whose referent isn't here yet (event for shifts/RSVPs, shift
+// for live signups) are skipped WITHOUT advancing the cursor — the
+// referent's own pull runs earlier in the fan-out, so the next cycle
+// picks them up.
+
+const EVENT_SHIFT_CURSOR_KEY = "federationLastEventShiftPull";
+const EVENT_RSVP_CURSOR_KEY = "federationLastEventRsvpPull";
+const SHIFT_SIGNUP_CURSOR_KEY = "federationLastShiftSignupPull";
+
+async function fetchStateFeed<T>(
+  path: string,
+  bodyKey: string,
+  cursorKey: string,
+): Promise<{ rows: T[]; since: string | null } | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!baseUrl) return null;
+  const since = await getSetting(cursorKey);
+  const params = new URLSearchParams({ limit: "200" });
+  if (since) params.set("since", since);
+  const url = `${baseUrl.replace(/\/+$/, "")}${path}?${params.toString()}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const body = (await res.json()) as Record<string, unknown>;
+    const rows = body[bodyKey];
+    if (!Array.isArray(rows)) return null;
+    return { rows: rows as T[], since: since ?? null };
+  } catch {
+    return null;
+  }
+}
+
+export async function pullFederatedEventShifts(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/event-shifts",
+    "eventShifts",
+    EVENT_SHIFT_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.eventId !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.label !== "string" ||
+      (r.deletedAt !== null && typeof r.deletedAt !== "number") ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as EventShiftState;
+    if (!verifyStateRecord(record)) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = record.updatedAt;
+      }
+    };
+
+    // Authority derives from the LOCAL event row — the one signed
+    // artifact we already verified when it arrived.
+    const event = await db.events.get(record.eventId);
+    if (!event) {
+      skipped += 1; // event not here yet — retry next cycle
+      continue;
+    }
+    if (record.signerKey !== event.createdBy) {
+      skipped += 1; // refused — never advance past a hostile row
+      continue;
+    }
+
+    const local = (await db.eventShifts.get(record.id)) as
+      | (EventShiftRow & Partial<EventShiftState>)
+      | undefined;
+    if (local && record.updatedAt <= (local.updatedAt ?? 0)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    if (record.deletedAt !== null) {
+      // Tombstone: the shift is gone everywhere; its roster goes with
+      // it (same cascade deleteShift enforces locally via its
+      // no-signups guard — a federated deletion may arrive where
+      // signups exist, and a roster for a dead shift means nothing).
+      await db.eventShifts.delete(record.id);
+      await db.shiftSignups.where("shiftId").equals(record.id).delete();
+    } else {
+      await db.eventShifts.put(record as unknown as EventShiftRow);
+    }
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(EVENT_SHIFT_CURSOR_KEY, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+export async function pullFederatedEventRsvps(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/event-rsvps",
+    "eventRsvps",
+    EVENT_RSVP_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.eventId !== "string" ||
+      typeof r.memberKey !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      (r.status !== "going" && r.status !== "maybe" && r.status !== "not_going") ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as EventRsvpState;
+    if (!verifyStateRecord(record) || record.signerKey !== record.memberKey) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = record.updatedAt;
+      }
+    };
+
+    if (!(await db.events.get(record.eventId))) {
+      skipped += 1; // event not here yet — retry next cycle
+      continue;
+    }
+
+    // Merge on the NATURAL key: two devices may have minted different
+    // row uuids for one member's RSVP; keeping both would double-count
+    // the roster, so the older row is removed when the ids differ.
+    const local = (await db.eventRsvps
+      .where("[eventId+memberKey]")
+      .equals([record.eventId, record.memberKey])
+      .first()) as (EventRsvpRow & Partial<EventRsvpState>) | undefined;
+    if (local) {
+      if (record.updatedAt <= (local.updatedAt ?? 0)) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
+      if (local.id !== record.id) {
+        await db.eventRsvps.delete(local.id);
+      }
+    }
+    await db.eventRsvps.put(record as unknown as EventRsvpRow);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(EVENT_RSVP_CURSOR_KEY, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+export async function pullFederatedShiftSignups(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/shift-signups",
+    "shiftSignups",
+    SHIFT_SIGNUP_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.shiftId !== "string" ||
+      typeof r.eventId !== "string" ||
+      typeof r.memberKey !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      (r.deletedAt !== null && typeof r.deletedAt !== "number") ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as ShiftSignupState;
+    if (!verifyStateRecord(record) || record.signerKey !== record.memberKey) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = record.updatedAt;
+      }
+    };
+
+    const local = (await db.shiftSignups
+      .where("[shiftId+memberKey]")
+      .equals([record.shiftId, record.memberKey])
+      .first()) as (ShiftSignupRow & Partial<ShiftSignupState>) | undefined;
+    if (local && record.updatedAt <= (local.updatedAt ?? 0)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    if (record.deletedAt !== null) {
+      // Withdrawal tombstone — processable whether or not the shift
+      // is (still) here.
+      if (local) await db.shiftSignups.delete(local.id);
+      inserted += 1;
+      advanceCursor();
+      continue;
+    }
+
+    // A LIVE signup needs its shift, or the roster entry would be a
+    // dead pointer — shift pull runs earlier in the fan-out.
+    if (!(await db.eventShifts.get(record.shiftId))) {
+      skipped += 1;
+      continue;
+    }
+    if (local && local.id !== record.id) {
+      await db.shiftSignups.delete(local.id);
+    }
+    await db.shiftSignups.put(record as unknown as ShiftSignupRow);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(SHIFT_SIGNUP_CURSOR_KEY, String(maxUpdatedAt));
   }
   return { inserted, skipped };
 }

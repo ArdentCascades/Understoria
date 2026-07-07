@@ -486,33 +486,12 @@ describe("GET /event-cancellations", () => {
   });
 });
 
-// LOAD-BEARING NEGATIVE TESTS — RSVPs are local-only by design
-// (community-events.md §4 + §7). There is no /event-rsvps route on
-// this server, and Fastify's default behavior for an unregistered
-// route is to return 404. These tests lock that constraint so a
-// future contributor doesn't quietly add an RSVP route without
-// auditing the surveillance-graph rationale in §11.1 of the design
-// doc.
-describe("RSVPs never federate — /event-rsvps is not a route", () => {
-  it("POST /event-rsvps returns 404", async () => {
-    const res = await app.inject({
-      method: "POST",
-      url: "/event-rsvps",
-      payload: { anything: "this shouldn't be a route" },
-    });
-    expect(res.statusCode).toBe(404);
-  });
-
-  it("GET /event-rsvps returns 404", async () => {
-    const res = await app.inject({ method: "GET", url: "/event-rsvps" });
-    expect(res.statusCode).toBe(404);
-  });
-
-  it("GET /event-rsvps?since=0 returns 404 (no cursor pull)", async () => {
-    const res = await app.inject({
-      method: "GET",
-      url: "/event-rsvps?since=0&limit=10",
-    });
-    expect(res.statusCode).toBe(404);
-  });
-});
+// The former LOAD-BEARING NEGATIVE TESTS here ("RSVPs never federate —
+// /event-rsvps is not a route") were retired by participation
+// federation Phase 2 (docs/project-federation.md §6): the local-only
+// stance they guarded was deliberately reversed after field use showed
+// an organizer literally could not see attendance from anyone else's
+// phone. The route now exists; its authority + LWW behavior is covered
+// in routes/participationStates.test.ts, and the reversal's adversary
+// analysis lives in threat-model §7 ("Federated participation
+// records").
