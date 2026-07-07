@@ -26,6 +26,7 @@ import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { removalQuorum } from "@/lib/memberRemoval";
 import {
   collectCosignFragment,
+  linkableProposals,
   mintCeremonyDraft,
   submitCeremonyRecord,
   type CeremonyDraft,
@@ -91,9 +92,14 @@ export function RemovalCeremony({
   const [capturing, setCapturing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [linkables, setLinkables] = useState<{ id: string; title: string }[]>(
+    [],
+  );
+  const [linkedProposalId, setLinkedProposalId] = useState("");
 
   useEffect(() => {
     void removalQuorum().then(setQuorum);
+    void linkableProposals().then(setLinkables);
   }, []);
 
   async function handleMint() {
@@ -104,6 +110,7 @@ export function RemovalCeremony({
         recordKind,
         subjectKey,
         reason.trim() || null,
+        linkedProposalId || null,
       );
       if (!result.ok) {
         setError(t(`removals.error.${result.error}`));
@@ -165,6 +172,23 @@ export function RemovalCeremony({
             placeholder={t("removals.reasonPlaceholder")}
           />
         </label>
+        {linkables.length > 0 && (
+          <label className="flex flex-col gap-1 text-sm">
+            {t("removals.linkLabel")}
+            <select
+              className="input"
+              value={linkedProposalId}
+              onChange={(e) => setLinkedProposalId(e.target.value)}
+            >
+              <option value="">{t("removals.linkNone")}</option>
+              {linkables.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <div className="flex flex-wrap justify-end gap-2">
           <button type="button" className="btn-ghost text-xs" onClick={onCancel}>
             {t("common.cancel")}

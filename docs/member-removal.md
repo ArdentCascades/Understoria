@@ -17,10 +17,17 @@ deltas from §4: signature fragments travel DEVICE-TO-DEVICE
 (QR / paste — the proposer shows the draft, each co-signer's
 device answers with a fragment, the proposer assembles at quorum),
 the same delivery posture guardian shards established, because
-direct messages have no transport in this codebase; and v1 keeps
-`proposalId: null` — deliberation stays where the community talks,
-and the proposal-category integration waits for proposals to
-federate. The assembled record is deliberately NOT written locally
+direct messages have no transport in this codebase; and
+`proposalId` now carries a real shared proposal id when the
+proposer links the deliberation (proposal federation G1/G2 shipped
+after this doc's v1, resolving the named dependency): the ceremony
+intro offers the device's SIGNED proposals as linkable, every
+co-signer's screen shows the linked deliberation before signing —
+honestly noting when the proposal isn't on that device — and the
+link is inside the canonical payload, so the quorum signatures
+bind it. The link is provenance, not authority: a removal with
+`proposalId: null` remains fully valid, because nothing forces
+deliberation through the app. The assembled record is deliberately NOT written locally
 on submit: the node's closure check is the authority
 (last_founder / quorum_not_met can still refuse), and the record
 flows back through the normal pull once accepted — one source of
@@ -181,7 +188,11 @@ Phase 1 keeps the flow simple and human:
 2. Deliberation happens where the community talks. The named
    dependency resolved: proposals federate since
    `docs/proposal-federation.md` G1, so the deliberation thread is
-   now genuinely shared (the SIGNATURES remain what bind).
+   now genuinely shared (the SIGNATURES remain what bind) — and
+   the ceremony now LINKS it: the proposer can pick a signed
+   proposal at the intro step, `proposalId` rides the canonical
+   payload, and co-signers see the linked deliberation before
+   signing.
 3. Co-signing: the proposer's device produces the unsigned payload;
    each co-signer opens it (deep link / QR at a meeting — same
    in-person ceremony posture as tap-to-link) and their device
