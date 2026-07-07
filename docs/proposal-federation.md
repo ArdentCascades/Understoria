@@ -176,9 +176,13 @@ displays as contested rather than silently honored.
   the proposer's own unsigned rows), and pulled closures restore
   the disputed post's status through the same idempotent path the
   closing device runs.
-- **Removal linkage (open):** the removal ceremony's `proposalId`
-  starts carrying real ids once its UI grows a proposal picker —
-  the data dependency (shared deliberation) is now resolved.
+- **Removal linkage (shipped):** the removal ceremony's intro step
+  offers the device's SIGNED proposals as a linkable deliberation;
+  `proposalId` rides the canonical payload (so the quorum
+  signatures bind it) and co-signers see the linked proposal —
+  with an honest "not on this device" note when they don't hold
+  the row. Provenance, not authority: `proposalId: null` removals
+  remain fully valid.
 
 ## 6. Abuse analysis
 

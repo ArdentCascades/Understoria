@@ -157,6 +157,109 @@ describe("the co-signing ceremony, device by device", () => {
     });
   });
 
+  it("a linked deliberation proposal rides the draft, signed, to the assembled record", async () => {
+    const proposer = generateKeyPair();
+    const cosigner = generateKeyPair();
+    const target = generateKeyPair();
+
+    // Proposer's device holds a SIGNED (shared) proposal and a
+    // legacy local-only one — only the signed row is linkable.
+    await beMember(proposer, "Rosa");
+    await db.proposals.bulkPut([
+      {
+        id: "prop_shared",
+        nodeId: "node_t",
+        kind: "proposal",
+        category: "config_change",
+        reversibilityTier: "hard",
+        title: "Should Mallory remain a member?",
+        description: "",
+        payload: "{}",
+        proposerKey: proposer.publicKey,
+        status: "passed",
+        createdAt: Date.now(),
+        closedAt: null,
+        closedReason: null,
+        impactReflection: null,
+        disputePostId: null,
+        signerKey: proposer.publicKey,
+        signature: "sig",
+      },
+      {
+        id: "prop_local",
+        nodeId: "node_t",
+        kind: "proposal",
+        category: "config_change",
+        reversibilityTier: "easy",
+        title: "local-only legacy row",
+        description: "",
+        payload: "{}",
+        proposerKey: proposer.publicKey,
+        status: "open",
+        createdAt: Date.now() - 1000,
+        closedAt: null,
+        closedReason: null,
+        impactReflection: null,
+        disputePostId: null,
+      },
+    ]);
+    const { linkableProposals } = await import("./removalCeremony");
+    expect(await linkableProposals()).toEqual([
+      { id: "prop_shared", title: "Should Mallory remain a member?" },
+    ]);
+
+    const minted = await mintCeremonyDraft(
+      "removal",
+      target.publicKey,
+      "deliberated in the linked proposal",
+      "prop_shared",
+    );
+    if (!minted.ok) throw new Error("mint failed");
+    expect(minted.draft.payload.proposalId).toBe("prop_shared");
+
+    // Co-signer's device (which does NOT hold the proposal row)
+    // still sees the linkage in the parsed draft and can sign — the
+    // canonical payload covers proposalId, so the fragment binds it.
+    await wipe();
+    await beMember(cosigner, "Gus");
+    const parsed = parseCeremonyDraft(minted.draft.draftText);
+    if (!parsed.ok) throw new Error("parse failed");
+    expect(parsed.draft.proposalId).toBe("prop_shared");
+    const frag = await coSignDraft(parsed.draft);
+    if (!frag.ok) throw new Error("cosign failed");
+
+    await wipe();
+    await beMember(proposer, "Rosa");
+    const collected = collectCosignFragment(frag.fragmentText, minted.draft);
+    expect(collected.ok).toBe(true);
+    if (!collected.ok) return;
+    const submitted = await submitCeremonyRecord(
+      {
+        ...minted.draft,
+        signatures: [...minted.draft.signatures, collected.entry],
+      },
+      2,
+    );
+    expect(submitted).toEqual({ ok: true });
+    const queued = await db.outbox
+      .filter((r) => r.kind === "member_removal")
+      .toArray();
+    const record = JSON.parse(queued[0].payload) as MemberRemoval;
+    expect(record.proposalId).toBe("prop_shared");
+    expect(removalStructurallyValid(record, 2)).toBe(true);
+
+    // A draft whose JSON omitted proposalId entirely normalizes to
+    // null, so its fragments still canonicalize identically.
+    const stripped = JSON.parse(minted.draft.draftText) as {
+      payload: Record<string, unknown>;
+    };
+    delete stripped.payload.proposalId;
+    const reParsed = parseCeremonyDraft(JSON.stringify(stripped));
+    if (!reParsed.ok) throw new Error("parse failed");
+    expect(reParsed.draft.proposalId).toBeNull();
+    expect(reParsed.draft.payload.proposalId).toBeNull();
+  });
+
   it("a reinstatement ceremony round-trips the same way", async () => {
     const proposer = generateKeyPair();
     const cosigner = generateKeyPair();

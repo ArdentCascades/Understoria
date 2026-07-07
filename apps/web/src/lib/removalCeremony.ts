@@ -53,10 +53,13 @@ import { uuid } from "@/lib/id";
  * assembled record exists; a photographed draft or fragment leaks
  * only what the final record makes public anyway.
  *
- * v1 keeps `proposalId: null`: deliberation happens where the
- * community talks (proposals remain per-device local today), and the
- * SIGNATURES are what bind — the named dependency from the plan, not
- * a blocker.
+ * `proposalId` may carry a real proposal id since proposal
+ * federation shipped: when the community deliberated the removal in
+ * a shared proposal, the proposer can link it and every co-signer's
+ * device shows the linked deliberation before signing. The link is
+ * PROVENANCE, not authority — the SIGNATURES are what bind, exactly
+ * as in v1, and a removal with `proposalId: null` remains fully
+ * valid (nothing forces deliberation through the app).
  */
 
 export type CeremonyKind = "removal" | "reinstatement";
@@ -94,11 +97,14 @@ export type MintResult =
   | { ok: false; error: "no_identity" | "locked" | "self_subject" | "bad_reason" };
 
 /** Proposer side: build the payload, sign it, produce the draft QR
- *  text. The proposer's signature is the first of the quorum. */
+ *  text. The proposer's signature is the first of the quorum.
+ *  `proposalId` optionally links the shared proposal the community
+ *  deliberated — provenance the co-signers see, not authority. */
 export async function mintCeremonyDraft(
   recordKind: CeremonyKind,
   subjectKey: string,
   reason: string | null,
+  proposalId: string | null = null,
 ): Promise<MintResult> {
   const me = await getSetting(SETTING_KEYS.currentMember);
   if (!me) return { ok: false, error: "no_identity" };
@@ -119,7 +125,7 @@ export async function mintCeremonyDraft(
     reason: trimmed.length > 0 ? trimmed : null,
     decidedAt: Date.now(),
     nodeId,
-    proposalId: null,
+    proposalId,
   };
   const payload: CeremonyPayload =
     recordKind === "removal"
@@ -142,6 +148,8 @@ export interface ParsedDraft {
   payload: CeremonyPayload;
   subjectKey: string;
   reason: string | null;
+  /** The linked deliberation proposal, when the proposer named one. */
+  proposalId: string | null;
 }
 
 export type ParseDraftResult =
@@ -171,6 +179,13 @@ export function parseCeremonyDraft(text: string): ParseDraftResult {
     if (typeof subjectKey !== "string" || subjectKey.length === 0) {
       return { ok: false, error: "not_a_draft" };
     }
+    // A draft missing the field entirely would canonicalize
+    // differently than the proposer's copy and every fragment would
+    // fail collection — normalize here so the payload the co-signer
+    // signs is byte-identical to what the proposer signed.
+    if (typeof raw.payload.proposalId !== "string") {
+      raw.payload.proposalId = null;
+    }
     return {
       ok: true,
       draft: {
@@ -178,6 +193,7 @@ export function parseCeremonyDraft(text: string): ParseDraftResult {
         payload: raw.payload,
         subjectKey,
         reason: typeof raw.payload.reason === "string" ? raw.payload.reason : null,
+        proposalId: raw.payload.proposalId,
       },
     };
   } catch {
@@ -316,4 +332,28 @@ export async function submitCeremonyRecord(
 export async function memberDisplayName(key: string): Promise<string | null> {
   const row = await db.members.get(key);
   return row?.displayName ?? null;
+}
+
+/** Proposals the ceremony can link as its deliberation: SIGNED rows
+ *  only (a local-only legacy row means nothing to the devices that
+ *  will read the removal record), newest first. */
+export async function linkableProposals(
+  limit = 20,
+): Promise<{ id: string; title: string }[]> {
+  const rows = await db.proposals
+    .orderBy("createdAt")
+    .reverse()
+    .filter((p) => typeof p.signature === "string" && p.signature.length > 0)
+    .limit(limit)
+    .toArray();
+  return rows.map((p) => ({ id: p.id, title: p.title }));
+}
+
+/** Title of a linked proposal, or null when this device doesn't hold
+ *  the row — the co-sign UI says so honestly instead of guessing. */
+export async function linkedProposalTitle(
+  proposalId: string,
+): Promise<string | null> {
+  const row = await db.proposals.get(proposalId);
+  return row?.title ?? null;
 }

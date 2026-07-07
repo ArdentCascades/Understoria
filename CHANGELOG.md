@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A removal can now name the deliberation it grew from.** When
+  the community talked a removal through in a shared proposal, the
+  member starting the ceremony can link that proposal — and every
+  co-signer sees the linked deliberation on their own screen before
+  signing (with an honest note when the proposal isn't on their
+  device yet). The link travels inside the signed record, so the
+  quorum's signatures vouch for it. It is provenance, not a
+  requirement: removals without a linked proposal remain exactly as
+  valid, because nothing forces deliberation through the app. A new
+  end-to-end drill exercises the whole loop against the real node —
+  propose, vote from a second device, close as passed, submit the
+  linked removal, and watch the removed member's writes refused.
+
 - **Community decisions now take effect everywhere** (`docs/
   proposal-federation.md` G2, completing the plan). When a
   config-change proposal passes, its settings apply on every

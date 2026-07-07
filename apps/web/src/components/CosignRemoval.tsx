@@ -25,6 +25,7 @@ import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { shortKey } from "@/lib/format";
 import {
   coSignDraft,
+  linkedProposalTitle,
   memberDisplayName,
   parseCeremonyDraft,
   type ParsedDraft,
@@ -40,6 +41,7 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
   const [capturing, setCapturing] = useState(true);
   const [draft, setDraft] = useState<ParsedDraft | null>(null);
   const [subjectName, setSubjectName] = useState<string | null>(null);
+  const [linkedTitle, setLinkedTitle] = useState<string | null>(null);
   const [fragmentText, setFragmentText] = useState<string | null>(null);
   const [fragmentQr, setFragmentQr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,9 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
     setError(null);
     setDraft(parsed.draft);
     setSubjectName(await memberDisplayName(parsed.draft.subjectKey));
+    if (parsed.draft.proposalId) {
+      setLinkedTitle(await linkedProposalTitle(parsed.draft.proposalId));
+    }
   }
 
   async function handleSign() {
@@ -114,6 +119,13 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
         {draft.reason && (
           <p className="text-sm text-moss-700 dark:text-moss-200">
             {t("removals.cosignReason", { reason: draft.reason })}
+          </p>
+        )}
+        {draft.proposalId && (
+          <p className="text-sm text-moss-700 dark:text-moss-200">
+            {linkedTitle
+              ? t("removals.linkedProposal", { title: linkedTitle })
+              : t("removals.linkedProposalMissing")}
           </p>
         )}
         <div className="flex flex-wrap justify-end gap-2">
