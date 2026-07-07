@@ -23,6 +23,12 @@ of leaving them implied.
   event stays its organizer's; your RSVP stays yours. The rules are
   checked by every member's app against signed records — not by the
   server's say-so.
+- **Remove anyone from the community.** Member removal exists
+  (`docs/member-removal.md`) and the operator appears NOWHERE in it:
+  a removal takes a quorum of members co-signing one public record,
+  and every device verifies the signatures itself. An operator who
+  fabricated one would need the quorum's secret keys — which never
+  leave those members' devices.
 
 ## What the operator CAN do (like any member)
 

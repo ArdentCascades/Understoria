@@ -35,6 +35,8 @@ import type {
   Exchange,
   FlagReason,
   EventRsvpState,
+  MemberRemoval,
+  MemberReinstatement,
   SeedVaultPledge,
   EventShiftState,
   Post,
@@ -1068,6 +1070,41 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '21')",
+    ).run();
+  }
+
+  if (current < 22) {
+    // Member removal / reinstatement (docs/member-removal.md M1):
+    // quorum-signed governance records. Payload-JSON shape like the
+    // state tables; append-only (records compose by decidedAt, never
+    // update). subject-key + decided_at indexes serve the membership
+    // resolver's standing computation and the feed cursor.
+    db.exec(`
+      CREATE TABLE member_removals (
+        id TEXT PRIMARY KEY,
+        removed_key TEXT NOT NULL,
+        decided_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        payload TEXT NOT NULL
+      );
+      CREATE INDEX member_removals_decided_idx
+        ON member_removals (decided_at);
+      CREATE INDEX member_removals_key_idx
+        ON member_removals (removed_key);
+      CREATE TABLE member_reinstatements (
+        id TEXT PRIMARY KEY,
+        reinstated_key TEXT NOT NULL,
+        decided_at INTEGER NOT NULL,
+        node_id TEXT NOT NULL,
+        payload TEXT NOT NULL
+      );
+      CREATE INDEX member_reinstatements_decided_idx
+        ON member_reinstatements (decided_at);
+      CREATE INDEX member_reinstatements_key_idx
+        ON member_reinstatements (reinstated_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '22')",
     ).run();
   }
 }
@@ -2938,6 +2975,110 @@ export function createSeedVaultPledgeStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as SeedVaultPledge);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface MemberRemovalStore {
+  get(id: string): MemberRemoval | null;
+  insert(record: MemberRemoval): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): MemberRemoval[];
+  count(): number;
+}
+
+export interface MemberReinstatementStore {
+  get(id: string): MemberReinstatement | null;
+  insert(record: MemberReinstatement): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): MemberReinstatement[];
+  count(): number;
+}
+
+export function createMemberRemovalStore(
+  db: DatabaseType,
+): MemberRemovalStore {
+  const insertStmt = db.prepare(`
+    INSERT OR REPLACE INTO member_removals (
+      id, removed_key, decided_at, node_id, payload
+    ) VALUES (@id, @removedKey, @decidedAt, @nodeId, @payload)
+  `);
+  const getStmt = db.prepare("SELECT * FROM member_removals WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM member_removals");
+  return {
+    get(id) {
+      const r = getStmt.get(id) as { payload: string } | undefined;
+      return r ? (JSON.parse(r.payload) as MemberRemoval) : null;
+    },
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        removedKey: record.removedKey,
+        decidedAt: record.decidedAt,
+        nodeId: record.nodeId,
+        payload: JSON.stringify(record),
+      });
+    },
+    list(opts = {}) {
+      return pagedRows<{ payload: string }>(
+        db,
+        "member_removals",
+        "decided_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as MemberRemoval);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export function createMemberReinstatementStore(
+  db: DatabaseType,
+): MemberReinstatementStore {
+  const insertStmt = db.prepare(`
+    INSERT OR REPLACE INTO member_reinstatements (
+      id, reinstated_key, decided_at, node_id, payload
+    ) VALUES (@id, @reinstatedKey, @decidedAt, @nodeId, @payload)
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM member_reinstatements WHERE id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM member_reinstatements",
+  );
+  return {
+    get(id) {
+      const r = getStmt.get(id) as { payload: string } | undefined;
+      return r ? (JSON.parse(r.payload) as MemberReinstatement) : null;
+    },
+    insert(record) {
+      insertStmt.run({
+        id: record.id,
+        reinstatedKey: record.reinstatedKey,
+        decidedAt: record.decidedAt,
+        nodeId: record.nodeId,
+        payload: JSON.stringify(record),
+      });
+    },
+    list(opts = {}) {
+      return pagedRows<{ payload: string }>(
+        db,
+        "member_reinstatements",
+        "decided_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as MemberReinstatement);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

@@ -37,6 +37,15 @@ import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { authorizedFetch } from "@/lib/authorizedRead";
 import { cursorKeySuffix, getActiveNodeUrl } from "@/lib/nodeEndpoints";
 import { windowAdmits } from "@/lib/storageWindow";
+import {
+  removalQuorum,
+  removalStructurallyValid,
+  reinstatementStructurallyValid,
+} from "@/lib/memberRemoval";
+import {
+  parseMemberRemoval,
+  parseMemberReinstatement,
+} from "@understoria/shared/crypto";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
 import { publishProjectState } from "@/db/projects";
 import { createMember } from "@/db/seed";
@@ -2170,6 +2179,108 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
 
   if (maxUpdatedAt !== null) {
     await setSetting(feed.cursorKey, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+const MEMBER_REMOVAL_CURSOR_KEY = "federationLastMemberRemovalPull";
+const MEMBER_REINSTATEMENT_CURSOR_KEY = "federationLastMemberReinstatementPull";
+
+/**
+ * Pull quorum removal / reinstatement records (docs/member-removal.md
+ * M1). The device re-verifies structure + quorum (see
+ * lib/memberRemoval.ts for why the closure half is the node's job)
+ * and stores the record; standing is derived at render time, so
+ * applying IS storing. Hostile rows (bad signatures, under quorum)
+ * are skipped WITHOUT advancing the cursor, matching every other
+ * pull's refused-row semantics.
+ */
+export async function pullFederatedMemberRemovals(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/member-removals",
+    "memberRemovals",
+    MEMBER_REMOVAL_CURSOR_KEY,
+  );
+  if (!feed) return null;
+  const quorum = await removalQuorum();
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxDecidedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const raw of feed.rows) {
+    const parsed = parseMemberRemoval(raw);
+    if (!parsed.ok || !plausibleCursorStamp(parsed.value.decidedAt)) {
+      skipped += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!removalStructurallyValid(record, quorum)) {
+      skipped += 1;
+      continue;
+    }
+    const advanceCursor = () => {
+      if (maxDecidedAt === null || record.decidedAt > maxDecidedAt) {
+        maxDecidedAt = record.decidedAt;
+      }
+    };
+    if (await db.memberRemovals.get(record.id)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.memberRemovals.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxDecidedAt !== null) {
+    await setSetting(feed.cursorKey, String(maxDecidedAt));
+  }
+  return { inserted, skipped };
+}
+
+export async function pullFederatedMemberReinstatements(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/member-reinstatements",
+    "memberReinstatements",
+    MEMBER_REINSTATEMENT_CURSOR_KEY,
+  );
+  if (!feed) return null;
+  const quorum = await removalQuorum();
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxDecidedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const raw of feed.rows) {
+    const parsed = parseMemberReinstatement(raw);
+    if (!parsed.ok || !plausibleCursorStamp(parsed.value.decidedAt)) {
+      skipped += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!reinstatementStructurallyValid(record, quorum)) {
+      skipped += 1;
+      continue;
+    }
+    const advanceCursor = () => {
+      if (maxDecidedAt === null || record.decidedAt > maxDecidedAt) {
+        maxDecidedAt = record.decidedAt;
+      }
+    };
+    if (await db.memberReinstatements.get(record.id)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.memberReinstatements.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxDecidedAt !== null) {
+    await setSetting(feed.cursorKey, String(maxDecidedAt));
   }
   return { inserted, skipped };
 }

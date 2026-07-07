@@ -33,6 +33,8 @@ import {
   createClaimStore,
   createShiftSignupStateStore,
   createSeedVaultPledgeStore,
+  createMemberRemovalStore,
+  createMemberReinstatementStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
@@ -71,11 +73,13 @@ import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
 import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
+import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
-import { registerInsertCapGuard } from "./insertCaps.js";
+import { registerInsertCapGuard, SURFACES } from "./insertCaps.js";
 import {
   createMembershipResolver,
   registerReadAuthGuard,
+  registerRemovedAuthorGuard,
 } from "./readAuth.js";
 import { MIRROR_INTERNAL_HEADER } from "./mirrorPull.js";
 
@@ -231,6 +235,8 @@ export async function buildServer({
   const eventShiftStateStore = createEventShiftStateStore(db);
   const shiftSignupStateStore = createShiftSignupStateStore(db);
   const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
+  const memberRemovalStore = createMemberRemovalStore(db);
+  const memberReinstatementStore = createMemberReinstatementStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -249,10 +255,23 @@ export async function buildServer({
   // one onRequest hook gating every federation GET when READ_AUTH=on.
   // Registered before the routes; deny-by-default so future feed
   // routes are covered automatically.
+  const membershipResolver = createMembershipResolver(db, config.founderKeys);
   registerReadAuthGuard(app, {
     readAuth: config.readAuth,
-    resolver: createMembershipResolver(db, config.founderKeys),
+    resolver: membershipResolver,
     peerTokens: Object.values(config.peerReadTokens),
+  });
+
+  // Member removal, the write half (docs/member-removal.md §3):
+  // refuse POSTs authored by a currently-removed member. Registered
+  // unconditionally — removal decisions bind even where READ_AUTH is
+  // off. Mirror-internal requests are exempt: pre-removal history
+  // must keep replicating.
+  registerRemovedAuthorGuard(app, {
+    resolver: membershipResolver,
+    surfaces: SURFACES,
+    internalHeader: MIRROR_INTERNAL_HEADER,
+    internalToken: internalBypassToken,
   });
 
   // Disk-fill backstop — one preHandler covering every federation
@@ -343,6 +362,15 @@ export async function buildServer({
   // Seed-vault pledges (docs/storage-budget.md Phase 2) — a member's
   // public archive-role claim, single-owner LWW like an RSVP.
   await registerSeedVaultPledgeRoutes(app, { store: seedVaultPledgeStore });
+  // Member removal / reinstatement (docs/member-removal.md M1): the
+  // quorum-signed governance records and their feeds.
+  await registerMemberRemovalRoutes(app, {
+    removalStore: memberRemovalStore,
+    reinstatementStore: memberReinstatementStore,
+    resolver: membershipResolver,
+    removalQuorum: config.removalQuorum,
+    founderKeys: config.founderKeys,
+  });
   // Device-link mailbox — NOT a federation surface: rows are opaque
   // ciphertext, one-shot, TTL-bounded, never pulled by peers. The
   // route carries its own row ceiling + prune (routes/deviceLink.ts),

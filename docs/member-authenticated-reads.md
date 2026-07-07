@@ -53,16 +53,28 @@ beyond what the records already imply:
   member for the receipt to add its redeemer — a pair of made-up
   keys vouching for each other reaches nothing).
 
-The resolver caches the closure and rebuilds when the redemptions
-table grows, so a fresh member is recognized on their first read
-after their receipt lands (the receipt is pushed by the outbox even
-before node config is confirmed — the one enqueue that doesn't
-require a configured URL — precisely so proof-of-joining precedes
-everything else).
+The resolver caches the closure and rebuilds when the redemptions,
+removals, or reinstatements tables grow, so a fresh member is
+recognized on their first read after their receipt lands (the
+receipt is pushed by the outbox even before node config is confirmed
+— the one enqueue that doesn't require a configured URL — precisely
+so proof-of-joining precedes everything else).
 
-Known bound, stated plainly: membership is append-only. The app has
-no member-expulsion record kind, so read access, once earned, is not
-revocable by this mechanism. Blocking remains a per-member relief
+The former "membership is append-only" bound is CLOSED
+(`docs/member-removal.md` M1). The closure definition gained a
+subtraction and a chain rule:
+
+    member = ( founders
+             ∪ closure over receipts whose inviter was NOT removed
+               at redeemedAt )
+             ∖ keys currently removed by quorum record
+
+A quorum-signed `MemberRemoval` ends read standing and write access
+(403 `author_removed` on POSTs); `MemberReinstatement` reopens both;
+standing at time T is the latest record with `decidedAt ≤ T` (ties
+reinstate). Removal is non-retroactive and never cascades: a removed
+member's pre-removal invitees remain members; their unredeemed
+invites die with the removal. Blocking remains a per-member relief
 surface, not a community membership verdict.
 
 ### The wire protocol
@@ -156,8 +168,9 @@ engineers; linked from the operator guide and privacy policy.
 
 - No community-key encryption of stored records (rejected above;
   revisit only if hosting is ever delegated to a non-member).
-- No member expulsion / read revocation (no such record kind exists
-  app-wide; design plan: `docs/member-removal.md`).
+- ~~No member expulsion / read revocation~~ — shipped since
+  (`docs/member-removal.md` M1); the closure section above carries
+  the amended definition.
 - No authentication on POSTs beyond the signatures records already
   carry — writes were never the gap; insert caps bound abuse.
 - No per-record read ACLs. The community reads as one audience;

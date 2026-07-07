@@ -292,6 +292,7 @@ Two things to know:
 | `MIRROR_PULL_INTERVAL_MS` | `60000` (1 min) | How often the mirror replication worker runs a pull cycle |
 | `RESEED_GRACE_UNTIL` | unset | Re-seed recovery window end (RFC3339 or epoch ms; `docs/community-reseed.md` §3). Until then, `POST /redemptions` accepts historical receipts past the delivery-grace bound and preserves their wire `receivedAt`. Boot refuses windows ending >30 days out; the server logs loudly while one is open. Set it during recovery, unset it after |
 | `TRUSTED_SYSTEM_KEYS` | unset | JSON array `[{"nodeId":"node_lost","current":"<pubkey>","history":[…]}]` naming LOST nodes whose auto-confirmed exchanges this node should accept on re-upload. Members' apps capture the value to copy (Settings → restore card). Fail-closed when unset |
+| `REMOVAL_QUORUM` | `3` | Co-signatures required on a member removal / reinstatement record (`docs/member-removal.md` §2). Published on `GET /config` so member devices verify against the community's real rule. MUST match across a mirror set, like `NODE_FOUNDER_KEYS` — set it thoughtfully relative to community size |
 
 The rate limiter uses a non-reversible bucket id (FNV-1a hash of the
 IP, modulo 1024) so client IPs never reach memory or logs even

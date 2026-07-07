@@ -10,6 +10,27 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Member removal — the one thing membership couldn't do**
+  (`docs/member-removal.md` Phase M1). Communities can now remove a
+  member, and it works the way the values doc demands: no single
+  person wields it — not the operator, not an organizer — only a
+  quorum of members (`REMOVAL_QUORUM`, default 3, published on the
+  node's `/config`) co-signing one public record that permanently
+  names who decided, when, and why. A removal ends the member's read
+  access and closes their pen (the server answers their writes with
+  403), while their history stands untouched — exchanges balance
+  other members' ledgers, and pretending the past away would be a
+  lie. It is not retroactive and never cascades: people they invited
+  before the removal remain members; their unredeemed invites die
+  with it. Reinstatement is a first-class record with the same
+  quorum, and the door-reopening rule wins ties. The records render
+  openly on the Decisions page — secret expulsions are how
+  communities rot — and a removed member's content gets the same
+  quiet hiding as a personal block, with its own honest wording. The
+  last non-removed founder can never be removed (the membership
+  chain keeps its root). What ships in M1 is the record and the
+  gates end-to-end; the guided in-app co-signing ceremony is the
+  next phase.
 - **Seed vaults: volunteer devices that promise to keep everything**
   (`docs/storage-budget.md` Phase 2 — the visible counterpart to
   freeing up space). Settings → Data gains "Keep the complete archive

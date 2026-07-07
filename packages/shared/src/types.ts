@@ -1277,6 +1277,65 @@ export interface ShiftSignupState {
   signature: string;
 }
 
+/**
+ * Member removal — the community's quorum decision to close a
+ * member's write access and read standing (docs/member-removal.md).
+ * The FIRST multi-signed record kind: every co-signer signs the SAME
+ * canonical payload (everything except `signatures`), so signatures
+ * are independently collectible and order-free.
+ *
+ * Validity (identical rule on server and pulling clients, enforced
+ * authoritatively by each node's membership closure at ingestion):
+ * at least REMOVAL_QUORUM entries where the signature verifies, the
+ * signer is a member (ignoring this record), signer !== removedKey,
+ * and signers are distinct. Removal is NOT retroactive and never
+ * cascades: a receipt extends the closure iff its inviter was not
+ * removed at `redeemedAt` — pre-removal invitees remain members.
+ *
+ * FIELD ORDER IS THE WIRE CONTRACT — do NOT alphabetize or reorder.
+ */
+export interface MemberRemovalPayload {
+  /** uuid of the record. */
+  id: string;
+  /** The member being removed. */
+  removedKey: string;
+  /** Written for the community, not a case file. ≤ 500 chars,
+   *  plain text. Null = no public reason given. */
+  reason: string | null;
+  /** ms epoch of the community's decision. Standing at time T is
+   *  decided by the latest removal/reinstatement with
+   *  decidedAt ≤ T. */
+  decidedAt: number;
+  /** Originating community node (attribution; the cross-community
+   *  replay defense is the CLOSURE check — foreign signers are not
+   *  members here — not this field). */
+  nodeId: string;
+  /** Link to the deliberation proposal, when one exists. */
+  proposalId: string | null;
+}
+
+export interface MemberRemoval extends MemberRemovalPayload {
+  /** ≥ REMOVAL_QUORUM co-signatures, each over
+   *  `canonicalMemberRemovalPayload(payload)`. */
+  signatures: { signerKey: string; signature: string }[];
+}
+
+/** Reinstatement — the door reopening. Same shape, same quorum, same
+ *  canonical-payload discipline; composes with removals by time. */
+export interface MemberReinstatementPayload {
+  id: string;
+  /** The member being reinstated. */
+  reinstatedKey: string;
+  reason: string | null;
+  decidedAt: number;
+  nodeId: string;
+  proposalId: string | null;
+}
+
+export interface MemberReinstatement extends MemberReinstatementPayload {
+  signatures: { signerKey: string; signature: string }[];
+}
+
 /** A member's public, revocable pledge to keep the COMPLETE community
  *  archive on a device of theirs (docs/storage-budget.md Phase 2 —
  *  the visible counterpart to storage windowing). Single-owner LWW on

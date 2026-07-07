@@ -70,8 +70,10 @@ interface Surface {
 }
 
 /** POST path → the table it inserts into + the attributable signer.
- *  Static, compile-time map — never derived from user input. */
-const SURFACES: Record<string, Surface> = {
+ *  Static, compile-time map — never derived from user input.
+ *  Exported for the removed-author write gate (readAuth.ts), which
+ *  reuses the same path→keyField attribution. */
+export const SURFACES: Record<string, Surface> = {
   "/exchanges": {
     table: "exchanges",
     keyField: "helperKey",
@@ -161,6 +163,21 @@ const SURFACES: Record<string, Surface> = {
     table: "seed_vault_pledges",
     keyField: "signerKey",
     keyColumn: "signer_key",
+  },
+  // Member removal / reinstatement (docs/member-removal.md): multi-
+  // signed records — no single attributable body key, so only the
+  // table ceiling applies (the route's quorum-of-members check is
+  // the real spam bound: each record costs REMOVAL_QUORUM member
+  // signatures).
+  "/member-removals": {
+    table: "member_removals",
+    keyField: null,
+    keyColumn: null,
+  },
+  "/member-reinstatements": {
+    table: "member_reinstatements",
+    keyField: null,
+    keyColumn: null,
   },
   // The auto-confirm batch inserts into exchanges; the requests carry
   // per-item keys, so only the table ceiling applies here. (An

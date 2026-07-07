@@ -50,6 +50,10 @@ import type {
   ProjectState,
   TaskState,
   SeedVaultPledge,
+  MemberRemoval,
+  MemberRemovalPayload,
+  MemberReinstatement,
+  MemberReinstatementPayload,
 } from "./types.js";
 
 /**
@@ -1003,6 +1007,151 @@ export function verifyTaskState(rec: TaskState): boolean {
 
 export function verifySeedVaultPledge(rec: SeedVaultPledge): boolean {
   return verifyStateRecord(rec);
+}
+
+// --- Member removal / reinstatement (docs/member-removal.md) ---------
+
+/** Default quorum when a node hasn't configured REMOVAL_QUORUM and a
+ *  client hasn't yet captured `/config.removalQuorum`. */
+export const DEFAULT_REMOVAL_QUORUM = 3;
+
+/** Length cap for the community-facing reason text. */
+export const REMOVAL_REASON_MAX_LENGTH = 500;
+
+/**
+ * Canonical bytes every co-signer signs — everything EXCEPT
+ * `signatures`, fixed field order (the wire contract; do NOT
+ * alphabetize). Identical bytes for every signer, so signatures are
+ * independently collectible and order-free.
+ */
+export function canonicalMemberRemovalPayload(
+  p: MemberRemovalPayload,
+): string {
+  return JSON.stringify({
+    id: p.id,
+    removedKey: p.removedKey,
+    reason: p.reason,
+    decidedAt: p.decidedAt,
+    nodeId: p.nodeId,
+    proposalId: p.proposalId,
+  });
+}
+
+export function canonicalMemberReinstatementPayload(
+  p: MemberReinstatementPayload,
+): string {
+  return JSON.stringify({
+    id: p.id,
+    reinstatedKey: p.reinstatedKey,
+    reason: p.reason,
+    decidedAt: p.decidedAt,
+    nodeId: p.nodeId,
+    proposalId: p.proposalId,
+  });
+}
+
+/**
+ * The STRUCTURAL half of the validity rule, shared verbatim by the
+ * server route and every pulling client: which signature entries
+ * verify over the canonical payload, name distinct signers, and do
+ * not name the removed/reinstated member signing for themselves.
+ * Returns the distinct valid signer keys.
+ *
+ * The MEMBERSHIP half — "each signer is in the closure ignoring this
+ * record" — deliberately lives with the caller: only a node can
+ * derive the founder-rooted closure (founder keys are not public),
+ * so nodes enforce it at ingestion and mirrors re-enforce it through
+ * their own closure; clients verify structure + quorum and trust
+ * their node's closure check, the same posture as auto-confirm
+ * label verification (docs/member-removal.md §2).
+ */
+export function validRemovalSigners(
+  canonicalPayload: string,
+  subjectKey: string,
+  signatures: readonly { signerKey: string; signature: string }[],
+): Set<string> {
+  const valid = new Set<string>();
+  for (const entry of signatures) {
+    if (!entry || typeof entry !== "object") continue;
+    if (
+      typeof entry.signerKey !== "string" ||
+      entry.signerKey.length === 0 ||
+      typeof entry.signature !== "string" ||
+      entry.signature.length === 0
+    )
+      continue;
+    if (entry.signerKey === subjectKey) continue; // never self-signed
+    if (valid.has(entry.signerKey)) continue; // distinct signers only
+    if (verify(canonicalPayload, entry.signature, entry.signerKey)) {
+      valid.add(entry.signerKey);
+    }
+  }
+  return valid;
+}
+
+export type ParseMemberRemovalResult =
+  | { ok: true; value: MemberRemoval }
+  | { ok: false; error: string };
+
+/** Shape-level validation shared by the server route and the PWA
+ *  pull (same rationale as `parseInviteRevocation`). Checks shape
+ *  only — signatures and quorum are the caller's job. */
+export function parseMemberRemoval(input: unknown): ParseMemberRemovalResult {
+  const base = parseRemovalShape(input, "removedKey");
+  if (!base.ok) return base;
+  return { ok: true, value: base.value as unknown as MemberRemoval };
+}
+
+export type ParseMemberReinstatementResult =
+  | { ok: true; value: MemberReinstatement }
+  | { ok: false; error: string };
+
+export function parseMemberReinstatement(
+  input: unknown,
+): ParseMemberReinstatementResult {
+  const base = parseRemovalShape(input, "reinstatedKey");
+  if (!base.ok) return base;
+  return { ok: true, value: base.value as unknown as MemberReinstatement };
+}
+
+function parseRemovalShape(
+  input: unknown,
+  subjectField: "removedKey" | "reinstatedKey",
+): { ok: true; value: Record<string, unknown> } | { ok: false; error: string } {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["id", subjectField, "nodeId"] as const) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (
+    r.reason !== null &&
+    (typeof r.reason !== "string" ||
+      r.reason.length === 0 ||
+      r.reason.length > REMOVAL_REASON_MAX_LENGTH)
+  ) {
+    return {
+      ok: false,
+      error: `reason must be null or a string of at most ${REMOVAL_REASON_MAX_LENGTH} chars`,
+    };
+  }
+  if (
+    typeof r.decidedAt !== "number" ||
+    !Number.isInteger(r.decidedAt) ||
+    r.decidedAt <= 0
+  ) {
+    return { ok: false, error: "decidedAt must be a positive integer (ms epoch)" };
+  }
+  if (r.proposalId !== null && typeof r.proposalId !== "string") {
+    return { ok: false, error: "proposalId must be null or a string" };
+  }
+  if (!Array.isArray(r.signatures) || r.signatures.length === 0) {
+    return { ok: false, error: "signatures must be a non-empty array" };
+  }
+  return { ok: true, value: r };
 }
 
 // --- Member-authenticated reads (docs/member-authenticated-reads.md) --

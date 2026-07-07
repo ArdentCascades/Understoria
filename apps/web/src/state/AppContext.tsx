@@ -29,6 +29,7 @@ import {
   type ReactNode,
 } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { deriveRemovedKeys } from "@/lib/memberRemoval";
 import {
   db,
   getSetting,
@@ -346,6 +347,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           pullFederatedEventRsvps,
           pullFederatedShiftSignups,
           pullFederatedSeedVaultPledges,
+          pullFederatedMemberRemovals,
+          pullFederatedMemberReinstatements,
         }) => {
           void pullFederatedPosts();
           void pullFederatedClaims();
@@ -382,6 +385,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           });
           // docs/storage-budget.md Phase 2: archive-role pledges.
           void pullFederatedSeedVaultPledges();
+          // docs/member-removal.md M1: quorum governance records.
+          void pullFederatedMemberRemovals();
+          void pullFederatedMemberReinstatements();
         },
       );
     void runPulls();
@@ -477,6 +483,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const members = useLiveQuery(() => db.members.toArray(), [], [] as Member[]);
+  // docs/member-removal.md M1: quorum governance records — standing
+  // is derived, never stored on the member row.
+  const memberRemovalRows = useLiveQuery(
+    () => db.memberRemovals.toArray(),
+    [],
+    [],
+  );
+  const memberReinstatementRows = useLiveQuery(
+    () => db.memberReinstatements.toArray(),
+    [],
+    [],
+  );
   const posts = useLiveQuery(
     () => db.posts.orderBy("createdAt").reverse().toArray(),
     [],
@@ -611,6 +629,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return s;
   }, [blockRowsForCurrent]);
 
+  // Members removed by community decision (docs/member-removal.md
+  // §3): their content gets the same hide treatment as a personal
+  // block, derived centrally for the same leakproof reason — but as
+  // a SEPARATE set, because the copy differs ("removed by community
+  // decision", never the personal-block wording) and because the
+  // current member's own standing must not hide their own data from
+  // themselves. Governance rows (proposals/votes) stay visible, as
+  // with blocks — and the removal records themselves render on the
+  // Decisions surface.
+  const removedKeys = useMemo<ReadonlySet<string>>(() => {
+    const derived = deriveRemovedKeys(
+      memberRemovalRows ?? [],
+      memberReinstatementRows ?? [],
+    );
+    if (currentMemberKey) derived.delete(currentMemberKey);
+    return derived;
+  }, [memberRemovalRows, memberReinstatementRows, currentMemberKey]);
+  const hiddenAuthorKeys = useMemo<ReadonlySet<string>>(() => {
+    if (removedKeys.size === 0) return blockedKeys;
+    const union = new Set(blockedKeys);
+    for (const k of removedKeys) union.add(k);
+    return union;
+  }, [blockedKeys, removedKeys]);
+
   // PR F: pre-filter the exposed arrays so every Board / Calendar /
   // Profile consumer downstream automatically respects the §6
   // hide-from-blocker rule. The current member's OWN content is
@@ -630,11 +672,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // live closer to their writes and use point-lookup
   // `isMutuallyBlocked`.
   const filteredPosts = useMemo(() => {
-    if (blockedKeys.size === 0) return posts ?? [];
-    return (posts ?? []).filter((p) => !blockedKeys.has(p.postedBy));
-  }, [posts, blockedKeys]);
+    if (hiddenAuthorKeys.size === 0) return posts ?? [];
+    return (posts ?? []).filter((p) => !hiddenAuthorKeys.has(p.postedBy));
+  }, [posts, hiddenAuthorKeys]);
   const filteredProjects = useMemo(() => {
-    if (blockedKeys.size === 0 || !currentMemberKey) return projects ?? [];
+    if (hiddenAuthorKeys.size === 0 || !currentMemberKey) return projects ?? [];
     // Co-organizer standing trumps block visibility — if the current
     // member is a co-organizer of a project organized by someone
     // they've now blocked, they should NOT lose access to the
@@ -649,23 +691,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // (and a stepped-down one correctly loses standing). See
     // `docs/co-organizer-invitations.md` §5.
     return (projects ?? []).filter((p) => {
-      if (!blockedKeys.has(p.organizerKey)) return true;
+      if (!hiddenAuthorKeys.has(p.organizerKey)) return true;
       return p.coOrganizerKeys.includes(currentMemberKey);
     });
-  }, [projects, blockedKeys, currentMemberKey]);
+  }, [projects, hiddenAuthorKeys, currentMemberKey]);
   const filteredEvents = useMemo(() => {
-    if (blockedKeys.size === 0) return events ?? [];
-    return (events ?? []).filter((e) => !blockedKeys.has(e.createdBy));
-  }, [events, blockedKeys]);
+    if (hiddenAuthorKeys.size === 0) return events ?? [];
+    return (events ?? []).filter((e) => !hiddenAuthorKeys.has(e.createdBy));
+  }, [events, hiddenAuthorKeys]);
   // Vouches: hide vouches AUTHORED by a blocked member from the
   // current blocker's view. The signed vouch row stays in Dexie
   // (immutable; existing signed records aren't retroactively
   // unsigned by a later block — see settled decision 6 / "block
   // engages prospectively only"); rendering filter only.
   const filteredVouches = useMemo(() => {
-    if (blockedKeys.size === 0) return vouches ?? [];
-    return (vouches ?? []).filter((v) => !blockedKeys.has(v.voucherKey));
-  }, [vouches, blockedKeys]);
+    if (hiddenAuthorKeys.size === 0) return vouches ?? [];
+    return (vouches ?? []).filter((v) => !hiddenAuthorKeys.has(v.voucherKey));
+  }, [vouches, hiddenAuthorKeys]);
 
   const setCurrentMember = useCallback(async (publicKey: string) => {
     await setSetting(SETTING_KEYS.currentMember, publicKey);

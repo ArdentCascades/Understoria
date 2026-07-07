@@ -119,6 +119,16 @@ export const RESEED_KINDS: readonly ReseedKindSpec[] = [
   { path: "/event-rsvps", table: "eventRsvps", toWire: signedOrNull },
   // docs/storage-budget.md Phase 2: archive-role pledges (no parent).
   { path: "/seed-vault-pledges", table: "seedVaultPledges", toWire: signedOrNull },
+  // docs/member-removal.md M1: governance records — after receipts
+  // (their validity reads the closure the receipts rebuild). These
+  // rows carry a signatures[] array rather than a single signature;
+  // they re-verify wholesale on the receiving node.
+  { path: "/member-removals", table: "memberRemovals", toWire: (row) => row },
+  {
+    path: "/member-reinstatements",
+    table: "memberReinstatements",
+    toWire: (row) => row,
+  },
   { path: "/shift-signups", table: "shiftSignups", toWire: signedOrNull },
   { path: "/posts", table: "posts", toWire: postToWire },
   { path: "/exchanges", table: "exchanges" },

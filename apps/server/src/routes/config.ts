@@ -76,6 +76,13 @@ export interface PublicConfigResponse {
    * exactly as reachable as this node itself.
    */
   mirrors?: string[];
+  /** Co-signature quorum for member removal / reinstatement records
+   *  (docs/member-removal.md). Always present: member devices verify
+   *  pulled records against this instead of hard-coding a number,
+   *  and an open /config keeps the rule auditable by everyone.
+   *  (Optional only for the builder's `{}` literal — the route sets
+   *  it unconditionally.) */
+  removalQuorum?: number;
 }
 
 export async function registerConfigRoutes(
@@ -98,6 +105,7 @@ export async function registerConfigRoutes(
     if (config.mirrorAnnounceUrls.length > 0) {
       response.mirrors = [...config.mirrorAnnounceUrls];
     }
+    response.removalQuorum = config.removalQuorum;
     return response;
   });
 }
