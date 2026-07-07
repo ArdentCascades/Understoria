@@ -1550,6 +1550,13 @@
       "device_locked": "This device is locked — unlock it before restoring."
     }
   },
+  "removals": {
+    "title": "Removals and reinstatements",
+    "intro": "The heaviest decisions a community can make, recorded in the open: who was removed or welcomed back, when, why, and exactly who signed. No single person — not even the server's operator — can create one of these; each needs a quorum of members co-signing.",
+    "removedLine": "{{name}} was removed by community decision {{when}}.",
+    "reinstatedLine": "{{name}} was reinstated by community decision {{when}}.",
+    "signedBy": "Signed by {{names}}."
+  },
   "reseed": {
     "title": "Restore this community onto a node",
     "intro": "If every community server is ever lost, this device still holds the shared history — every post, exchange, event, project, and membership record, cryptographically signed. Point it at a fresh node and upload it all back. Several members can do this at once; copies simply combine.",

@@ -279,6 +279,27 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     id: (r) => str(r.token),
     conflict409: "skip",
   },
+  // Member removal / reinstatement (docs/member-removal.md M1) —
+  // AFTER redemptions: validity reads the closure, and the closure
+  // reads receipts, so each cycle lands receipts first. A record the
+  // origin accepted that still lacks its signers' receipts here
+  // answers 409 quorum_not_met, which HALTS this kind until the next
+  // cycle (the referent-409 posture, never a skip — governance
+  // records must not be silently dropped).
+  {
+    path: "/member-removals",
+    bodyKey: "memberRemovals",
+    ts: (r) => num(r.decidedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
+  {
+    path: "/member-reinstatements",
+    bodyKey: "memberReinstatements",
+    ts: (r) => num(r.decidedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
 ];
 
 export type MirrorFetcher = (

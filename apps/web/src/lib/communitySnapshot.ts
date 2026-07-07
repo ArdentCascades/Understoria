@@ -70,6 +70,10 @@ export const SNAPSHOT_TABLES = [
   // docs/storage-budget.md Phase 2: public archive-role claims — the
   // linked device should see the community's coverage immediately.
   "seedVaultPledges",
+  // docs/member-removal.md M1: quorum governance records — a linked
+  // device must know who stands removed from its first render.
+  "memberRemovals",
+  "memberReinstatements",
 ] as const;
 
 export type SnapshotTable = (typeof SNAPSHOT_TABLES)[number];

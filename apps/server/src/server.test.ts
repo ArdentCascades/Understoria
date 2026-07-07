@@ -342,7 +342,9 @@ describe("GET /config", () => {
   it("returns an empty object when no operator info is configured", async () => {
     const res = await app.inject({ method: "GET", url: "/config" });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({});
+    // removalQuorum is ALWAYS published (docs/member-removal.md §2 —
+    // member devices verify pulled records against it).
+    expect(res.json()).toEqual({ removalQuorum: 3 });
   });
 });
 
@@ -631,6 +633,7 @@ describe("GET /config with operator info", () => {
     const res = await withOperator.inject({ method: "GET", url: "/config" });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({
+      removalQuorum: 3,
       operator: {
         name: "Marcus",
         fundingNote: "Hosting donated since 2026-01",

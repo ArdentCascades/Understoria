@@ -58,6 +58,11 @@ const MIRRORS_DISMISSED_KEY = "communityNodeMirrorsDismissed";
  *  capturedAt}` — re-seed Phase R0's disaster bookkeeping (see
  *  `pendingMirrorSuggestions`). Exported for the future re-seed UI. */
 export const LAST_SEEN_SYSTEM_KEY = "communityNodeLastSeenSystemKey";
+/** The community's removal quorum as last published by GET /config
+ *  (docs/member-removal.md §2) — member devices verify pulled
+ *  removal/reinstatement records against this instead of
+ *  hard-coding a number. */
+export const LAST_SEEN_REMOVAL_QUORUM = "communityRemovalQuorum";
 
 /** How long one active-node resolution is trusted before re-probing.
  *  Short enough that a mid-session outage fails over within a couple
@@ -321,8 +326,23 @@ export async function pendingMirrorSuggestions(
       mirrors?: unknown;
       systemKey?: { current?: unknown; history?: unknown };
       nodeId?: unknown;
+      removalQuorum?: unknown;
     } | null;
     if (!body || typeof body !== "object") return [];
+    // Member removal (docs/member-removal.md §2): capture the node's
+    // published quorum so pulled removal records verify against the
+    // community's real rule.
+    if (
+      typeof body.removalQuorum === "number" &&
+      Number.isInteger(body.removalQuorum) &&
+      body.removalQuorum > 0
+    ) {
+      try {
+        await setSetting(LAST_SEEN_REMOVAL_QUORUM, String(body.removalQuorum));
+      } catch {
+        // Capture is best-effort bookkeeping.
+      }
+    }
     // Re-seed Phase R0 (docs/community-reseed.md §1c): capture the
     // node's published auto-confirm key while the node is alive. If
     // the node is ever lost, this is the value the operator of a

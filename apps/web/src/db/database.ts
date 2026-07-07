@@ -42,6 +42,8 @@ import type {
   ProjectActivity,
   ProjectTask,
   Proposal,
+  MemberRemoval,
+  MemberReinstatement,
   RedemptionReceipt,
   SeedVaultPledge,
   ShiftSignupRow,
@@ -424,6 +426,13 @@ export class UnderstoriaDB extends Dexie {
    *  federates, re-seeds, rides the pairing snapshot, exports; never
    *  windowed (it is itself the coverage signal). */
   seedVaultPledges!: Table<SeedVaultPledge, string>;
+  /** Quorum removal / reinstatement records (docs/member-removal.md
+   *  M1): public, multi-signed governance decisions. Shared
+   *  community state — federates, re-seeds, rides the pairing
+   *  snapshot, exports; never windowed (standing derivation needs
+   *  the full history). */
+  memberRemovals!: Table<MemberRemoval, string>;
+  memberReinstatements!: Table<MemberReinstatement, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -973,6 +982,14 @@ export class UnderstoriaDB extends Dexie {
     // table is tiny by construction (≤ one row per member).
     this.version(31).stores({
       seedVaultPledges: "memberKey, updatedAt",
+    });
+
+    // v32 — member removal / reinstatement (docs/member-removal.md
+    // M1). Append-only quorum records; a key's standing at time T is
+    // the latest record with decidedAt ≤ T (ties → reinstatement).
+    this.version(32).stores({
+      memberRemovals: "id, removedKey, decidedAt",
+      memberReinstatements: "id, reinstatedKey, decidedAt",
     });
   }
 }

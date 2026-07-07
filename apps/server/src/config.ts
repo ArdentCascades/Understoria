@@ -128,6 +128,12 @@ export interface Config {
    * matching the design note's pilot recommendation.
    */
   autoConfirmMinHours: number;
+  /** Co-signature quorum for member removal / reinstatement records
+   *  (docs/member-removal.md §2). Fixed and operator-visible so the
+   *  rule is auditable by everyone and evaluates identically on
+   *  every honest node — MUST match across a mirror set, like
+   *  NODE_FOUNDER_KEYS. Published on GET /config as removalQuorum. */
+  removalQuorum: number;
   /**
    * When true, `POST /auto-confirm` REFUSES to sign a request whose
    * `postId` has no stored awaiting-transition artifact
@@ -299,6 +305,7 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       env.AUTO_CONFIRM_MIN_HOURS,
       168,
     ),
+    removalQuorum: asInt("REMOVAL_QUORUM", env.REMOVAL_QUORUM, 3),
     autoConfirmRequireTransition: asBool(
       env.AUTO_CONFIRM_REQUIRE_TRANSITION,
       false,

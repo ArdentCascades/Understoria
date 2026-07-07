@@ -10,6 +10,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo, useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/db/database";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -107,6 +109,20 @@ export default function ProposalsPage() {
     return governanceFilteredProposals.filter((p) => p.status === filter);
   }, [governanceFilteredProposals, filter]);
 
+  // docs/member-removal.md M1: the community's removal /
+  // reinstatement records render here — public inside the community,
+  // permanently attributed. Secret expulsions are how communities
+  // rot; this list is the opposite.
+  const memberRemovals = useLiveQuery(
+    () => db.memberRemovals.toArray(),
+    [],
+    [],
+  );
+  const memberReinstatements = useLiveQuery(
+    () => db.memberReinstatements.toArray(),
+    [],
+    [],
+  );
   const nameByKey = useMemo(() => {
     const map = new Map<string, string>();
     for (const m of members) map.set(m.publicKey, m.displayName);
@@ -248,6 +264,63 @@ export default function ProposalsPage() {
             );
           })}
         </ul>
+      )}
+
+      {(memberRemovals.length > 0 || memberReinstatements.length > 0) && (
+        <section className="mt-6" aria-labelledby="removals-title">
+          <h2
+            id="removals-title"
+            className="mb-1 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+          >
+            {t("removals.title")}
+          </h2>
+          <p className="mb-2 text-xs text-moss-600 dark:text-moss-300">
+            {t("removals.intro")}
+          </p>
+          <ul className="flex flex-col gap-2">
+            {[
+              ...memberRemovals.map((r) => ({
+                id: r.id,
+                key: r.removedKey,
+                reason: r.reason,
+                decidedAt: r.decidedAt,
+                signatures: r.signatures,
+                removal: true,
+              })),
+              ...memberReinstatements.map((r) => ({
+                id: r.id,
+                key: r.reinstatedKey,
+                reason: r.reason,
+                decidedAt: r.decidedAt,
+                signatures: r.signatures,
+                removal: false,
+              })),
+            ]
+              .sort((a, b) => b.decidedAt - a.decidedAt)
+              .map((r) => (
+                <li key={r.id} className="card">
+                  <p className="text-sm font-medium">
+                    {t(r.removal ? "removals.removedLine" : "removals.reinstatedLine", {
+                      name: nameByKey.get(r.key) ?? shortKey(r.key),
+                      when: formatRelativeTime(r.decidedAt),
+                    })}
+                  </p>
+                  {r.reason && (
+                    <p className="mt-1 text-sm text-moss-700 dark:text-moss-200">
+                      {r.reason}
+                    </p>
+                  )}
+                  <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+                    {t("removals.signedBy", {
+                      names: r.signatures
+                        .map((sig) => nameByKey.get(sig.signerKey) ?? shortKey(sig.signerKey))
+                        .join(", "),
+                    })}
+                  </p>
+                </li>
+              ))}
+          </ul>
+        </section>
       )}
 
       <p className="mt-6 text-sm text-moss-600 dark:text-moss-300">

@@ -1550,6 +1550,13 @@
       "device_locked": "Este dispositivo está bloqueado — desbloquéalo antes de restaurar."
     }
   },
+  "removals": {
+    "title": "Expulsiones y readmisiones",
+    "intro": "Las decisiones más graves que una comunidad puede tomar, registradas a la vista: quién fue expulsado o readmitido, cuándo, por qué y exactamente quiénes firmaron. Ninguna persona sola — ni siquiera quien opera el servidor — puede crear uno de estos registros; cada uno necesita un quórum de integrantes cofirmando.",
+    "removedLine": "{{name}} fue expulsado/a por decisión comunitaria {{when}}.",
+    "reinstatedLine": "{{name}} fue readmitido/a por decisión comunitaria {{when}}.",
+    "signedBy": "Firmado por {{names}}."
+  },
   "reseed": {
     "title": "Restaurar esta comunidad en un nodo",
     "intro": "Si algún día se pierden todos los servidores comunitarios, este dispositivo aún guarda la historia compartida — cada publicación, intercambio, evento, proyecto y registro de membresía, firmado criptográficamente. Apúntalo a un nodo nuevo y súbelo todo de vuelta. Varias personas pueden hacerlo a la vez; las copias simplemente se combinan.",

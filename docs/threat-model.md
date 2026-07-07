@@ -1582,10 +1582,10 @@ We are not trying to protect against:
   Staged rollout: apps sign reads unconditionally (harmless when
   off); the operator flips `READ_AUTH=on` once members are on a
   signing build. Boot refuses `on` with no founder keys.
-  **Residuals, stated plainly:** membership is append-only — there
-  is no expulsion record kind anywhere in the app, so read access,
-  once earned through the chain, is not revocable here (design
-  plan: `docs/member-removal.md`). A passphrase-locked session
+  **Residuals, stated plainly:** ~~membership is append-only~~ —
+  CLOSED by member removal M1 (`docs/member-removal.md`; its own §7
+  entry below carries the replacement trust assumption). A
+  passphrase-locked session
   cannot sign reads and silently stops pulling until unlocked
   (named in the operator runbook). POSTs remain ungated — writes
   always carried their own signatures, and insert caps bound abuse.
@@ -1764,6 +1764,39 @@ We are not trying to protect against:
   UI: re-sharding does not revoke an old set — the key never
   rotates, so k old shards still reconstruct; a member who
   distrusts a former guardian should mint a fresh identity.
+
+- **Member removal (the append-only residual, closed).**
+  *Shipped — `docs/member-removal.md` M1.* `MemberRemoval` is the
+  app's first MULTI-signed record: ≥ `REMOVAL_QUORUM` (default 3,
+  operator-visible on `/config`, must match across a mirror set)
+  distinct member signatures over one canonical payload, never the
+  subject's own. It subtracts from the membership closure (read
+  standing ends) and closes the pen (POSTs by a removed author
+  answer 403 `author_removed` — history stands, replication of
+  pre-removal records is exempt via the mirror-internal token).
+  Chain rule, non-retroactive: receipts extend the closure iff the
+  inviter was not removed at `redeemedAt` — pre-removal invitees
+  stay, unredeemed invites die; removal never cascades.
+  `MemberReinstatement` (same shape, same quorum) reopens the door;
+  ties resolve to reinstatement. **The trust assumption that
+  replaced the residual:** any K members CAN remove anyone — that
+  is the community governing itself; the mitigations are structural
+  (the record is public and permanently attributed on the Decisions
+  surface; reinstatement needs only the same quorum; a captured
+  community's remedy is the exit, which re-seed makes concrete) and
+  the last non-removed founder cannot be removed (the closure keeps
+  a root). Client trust posture, stated: devices re-verify
+  signatures/distinctness/quorum against the published
+  `removalQuorum` but cannot recompute the founder-rooted closure
+  (founder keys are deliberately not public) — the signers-are-
+  members half is each node's job at ingestion, re-checked by every
+  mirror as replication re-POSTs through its local routes; the
+  same posture as auto-confirm label verification. Gate coverage
+  honesty: the write gate checks the signing author each surface
+  validates (an exchange naming a removed counterparty still lands
+  — the ledger records what happened). Reason text is length-capped
+  plain text, never rendered as markup. The operator STILL cannot
+  remove anyone — quorum only (`operator-powers.md`).
 
 - **Storage windowing (coverage-claim downgrade).**
   *Shipped — `docs/storage-budget.md` Phase 1.* A member may free up

@@ -1,10 +1,21 @@
 # Member removal — governance for the one thing membership can't yet do
 
-Status: **designed, not built.** This document is the implementation
-plan for the residual named in `docs/threat-model.md` §7 and
-`docs/member-authenticated-reads.md`: *"membership is append-only —
-there is no expulsion record kind anywhere in the app, so read
-access, once earned through the chain, is not revocable."*
+Status: **M1 shipped** (the record + the gates: shared
+`MemberRemoval`/`MemberReinstatement` + canonical payloads +
+structural verifier; server tables/routes/mirror kinds, closure
+subtraction with the non-retroactive chain rule, `REMOVAL_QUORUM`
+env + `/config.removalQuorum`, the `author_removed` write gate, the
+last-founder guard; client pull/derived standing/central content
+hiding/Decisions display; snapshot + re-seed + windowing postures).
+**M2 (the co-signing ceremony UI) and M3 (reinstatement UI) not
+built** — records can be assembled and submitted by any tool that
+can sign, and reinstatement is fully honored end-to-end; what's
+missing is the in-app flow. One as-built note: standing is DERIVED
+from the record tables everywhere (server resolver and client), not
+stamped onto member rows — one rule, no state to drift. This
+document was the implementation plan for the residual named in
+`docs/threat-model.md` §7: *"membership is append-only… not
+revocable"* — that residual is now closed.
 
 Companion docs: `docs/member-authenticated-reads.md` (the membership
 closure this modifies), `docs/blocking.md` (the existing PERSONAL

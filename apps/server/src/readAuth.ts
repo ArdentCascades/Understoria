@@ -34,11 +34,11 @@ import {
  * register — it derives "who is a member" from artifacts the node
  * already stores and verifies:
  *
- *   member set = NODE_FOUNDER_KEYS
- *              ∪ transitive closure over verified redemption receipts
- *                (inviter must already be a member for the receipt to
- *                 admit its redeemer — two invented keys attesting
- *                 each other reach nothing)
+ *   member set = ( NODE_FOUNDER_KEYS
+ *                ∪ transitive closure over verified redemption
+ *                  receipts whose inviter was not removed at
+ *                  redeemedAt )
+ *                ∖ keys currently removed by quorum record
  *
  * Reads carry `x-understoria-key` / `-ts` / `-sig` headers signing
  * `canonicalReadAuthMessage(path+query, ts)`; the timestamp must be
@@ -46,9 +46,11 @@ import {
  * nonce scheme buys nothing further). Peer nodes authenticate with a
  * shared bearer token from PEER_READ_TOKENS instead.
  *
- * Known bound, stated plainly: membership is append-only — the app
- * has no expulsion record kind, so read access, once earned, is not
- * revocable here. Threat-model §7 records this.
+ * The former "membership is append-only" bound is CLOSED
+ * (docs/member-removal.md M1): quorum-signed MemberRemoval records
+ * subtract from the closure, with a non-retroactive chain rule, and
+ * MemberReinstatement records reopen the door. Threat-model §7
+ * records the quorum trust assumption that replaced the residual.
  */
 
 /** Clock skew + capture window for a signed read. */
@@ -68,71 +70,219 @@ const OPEN_PATH_PREFIXES = ["/health", "/config", "/device-link", "/link-request
 
 export interface MembershipResolver {
   isMember(publicKey: string): boolean;
+  /** Standing check for the write gate: currently removed by a
+   *  quorum record (docs/member-removal.md). A key can be removed
+   *  without ever having been reachable (defensive: such a record
+   *  should not exist, but the answer is still honest). */
+  isRemoved(publicKey: string): boolean;
   /** Test/inspection hook: the current member count (forces a build). */
   memberCount(): number;
 }
 
+/** One standing event: `removal` true = removed, false = reinstated. */
+interface StandingEvent {
+  decidedAt: number;
+  removal: boolean;
+}
+
 /**
- * Membership from founder roots + the redemption-receipt chain. The
- * closure is cached and rebuilt only when the redemptions table has
- * grown since the last build, so a brand-new member is recognized on
- * their first read after their receipt lands — the receipt is the one
- * record the outbox pushes even before a node URL is confirmed,
- * precisely so proof-of-joining precedes everything else.
+ * Was `key` removed as of time `t`? The latest event with
+ * `decidedAt ≤ t` decides; at an exact timestamp tie a reinstatement
+ * wins (the door reopening is the benign default — documented and
+ * tested, identical everywhere this rule runs).
+ */
+function removedAt(
+  standing: Map<string, StandingEvent[]>,
+  key: string,
+  t: number,
+): boolean {
+  const events = standing.get(key);
+  if (!events) return false;
+  let latest: StandingEvent | null = null;
+  for (const e of events) {
+    if (e.decidedAt > t) continue;
+    if (
+      latest === null ||
+      e.decidedAt > latest.decidedAt ||
+      (e.decidedAt === latest.decidedAt && latest.removal && !e.removal)
+    ) {
+      latest = e;
+    }
+  }
+  return latest !== null && latest.removal;
+}
+
+/**
+ * Membership from founder roots + the redemption-receipt chain,
+ * minus quorum removals (docs/member-removal.md §3):
+ *
+ *   member = reachable through the closure
+ *            AND not currently removed
+ *
+ * Removal-aware chain rule, non-retroactive by design: a receipt
+ * extends the closure iff its inviter was NOT removed at
+ * `redeemedAt` — a removed member's PRE-removal invitees remain
+ * members (their joining was legitimate; removal never cascades),
+ * while their unredeemed invites die with the removal. Reachability
+ * therefore keeps removed keys as CONDUITS for their historical
+ * edges; only the final membership test subtracts them.
+ *
+ * The closure is cached and rebuilt when the redemptions, removals,
+ * or reinstatements tables grow (all three are append-only, so row
+ * counts are a complete change signal). The current-standing check
+ * is evaluated live against the cached standing map so a record
+ * whose decidedAt has just passed takes effect without waiting for
+ * an unrelated write.
  */
 export function createMembershipResolver(
   db: DatabaseType,
   founderKeys: readonly string[],
 ): MembershipResolver {
   const edgesStmt = db.prepare(
-    "SELECT inviter_key, redeemed_by FROM redemptions",
+    "SELECT inviter_key, redeemed_by, redeemed_at FROM redemptions",
   );
-  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM redemptions");
+  const countStmt = db.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM redemptions) AS receipts,
+      (SELECT COUNT(*) FROM member_removals) AS removals,
+      (SELECT COUNT(*) FROM member_reinstatements) AS reinstatements
+  `);
+  const standingStmt = db.prepare(`
+    SELECT removed_key AS key, decided_at, 1 AS removal
+      FROM member_removals
+    UNION ALL
+    SELECT reinstated_key AS key, decided_at, 0 AS removal
+      FROM member_reinstatements
+  `);
 
-  let cache: Set<string> | null = null;
-  let cachedAtCount = -1;
+  let reachableCache: Set<string> | null = null;
+  let standingCache: Map<string, StandingEvent[]> | null = null;
+  let cachedAtCounts = "";
 
-  function build(): Set<string> {
-    const members = new Set<string>(founderKeys);
+  function build(): void {
+    const standing = new Map<string, StandingEvent[]>();
+    const standingRows = standingStmt.all() as {
+      key: string;
+      decided_at: number;
+      removal: number;
+    }[];
+    for (const row of standingRows) {
+      const list = standing.get(row.key) ?? [];
+      list.push({ decidedAt: row.decided_at, removal: row.removal === 1 });
+      standing.set(row.key, list);
+    }
+
+    const reachable = new Set<string>(founderKeys);
     const rows = edgesStmt.all() as {
       inviter_key: string;
       redeemed_by: string;
+      redeemed_at: number;
     }[];
     // BFS over invite edges. Receipts were signature-verified at
     // ingestion (route + verifyRedemptionReceipt), so each row is a
     // cryptographic attestation "inviter admitted redeemer"; rooting
     // at the founders is what makes it a membership proof rather
-    // than a self-serve list.
+    // than a self-serve list. The removal chain rule filters each
+    // edge by the inviter's standing AT REDEMPTION TIME.
     let grew = true;
     while (grew) {
       grew = false;
       for (const row of rows) {
-        if (members.has(row.inviter_key) && !members.has(row.redeemed_by)) {
-          members.add(row.redeemed_by);
+        if (
+          reachable.has(row.inviter_key) &&
+          !reachable.has(row.redeemed_by) &&
+          !removedAt(standing, row.inviter_key, row.redeemed_at)
+        ) {
+          reachable.add(row.redeemed_by);
           grew = true;
         }
       }
     }
-    return members;
+    reachableCache = reachable;
+    standingCache = standing;
   }
 
-  function current(): Set<string> {
-    const n = (countStmt.get() as { n: number }).n;
-    if (cache === null || n !== cachedAtCount) {
-      cache = build();
-      cachedAtCount = n;
+  function current(): { reachable: Set<string>; standing: Map<string, StandingEvent[]> } {
+    const counts = countStmt.get() as {
+      receipts: number;
+      removals: number;
+      reinstatements: number;
+    };
+    const stamp = `${counts.receipts}:${counts.removals}:${counts.reinstatements}`;
+    if (reachableCache === null || standingCache === null || stamp !== cachedAtCounts) {
+      build();
+      cachedAtCounts = stamp;
     }
-    return cache;
+    return { reachable: reachableCache!, standing: standingCache! };
   }
 
   return {
     isMember(publicKey) {
-      return current().has(publicKey);
+      const { reachable, standing } = current();
+      return reachable.has(publicKey) && !removedAt(standing, publicKey, Date.now());
+    },
+    isRemoved(publicKey) {
+      const { standing } = current();
+      return removedAt(standing, publicKey, Date.now());
     },
     memberCount() {
-      return current().size;
+      const { reachable, standing } = current();
+      let n = 0;
+      const now = Date.now();
+      for (const key of reachable) {
+        if (!removedAt(standing, key, now)) n += 1;
+      }
+      return n;
     },
   };
+}
+
+/**
+ * The write half of removal (docs/member-removal.md §3): POSTs whose
+ * attributable author key is currently removed are refused 403
+ * `author_removed`. The removed member's history stands; their pen
+ * is out. Registered UNCONDITIONALLY (independent of READ_AUTH — a
+ * community that hasn't turned on read gating still gets its removal
+ * decisions enforced on writes).
+ *
+ * Reuses the insert-cap SURFACES attribution (path → body keyField).
+ * Two deliberate exemptions:
+ *   - requests carrying the mirror worker's per-boot internal token:
+ *     mirror replication re-POSTs HISTORICAL records through these
+ *     routes, and a removed member's pre-removal history must keep
+ *     replicating — history is history;
+ *   - multi-signed surfaces (keyField null — /member-removals itself,
+ *     /member-reinstatements, /auto-confirm): their authority rules
+ *     live in-route.
+ * Gate coverage note (threat-model §7): the gate checks the SIGNING
+ * author each surface validates (e.g. /exchanges gates helperKey; a
+ * record naming a removed counterparty still lands — the ledger
+ * records what happened, it does not police who may be helped).
+ */
+export function registerRemovedAuthorGuard(
+  app: FastifyInstance,
+  deps: {
+    resolver: MembershipResolver;
+    surfaces: Record<string, { keyField: string | null }>;
+    internalHeader: string;
+    internalToken: string;
+  },
+): void {
+  app.addHook("preHandler", async (req, reply) => {
+    if (req.method !== "POST") return;
+    if (req.headers[deps.internalHeader] === deps.internalToken) return;
+    const surface = deps.surfaces[req.url.split("?")[0]];
+    if (!surface || !surface.keyField) return;
+    const body = req.body as Record<string, unknown> | null;
+    const key =
+      body && typeof body[surface.keyField] === "string"
+        ? (body[surface.keyField] as string)
+        : null;
+    if (key && deps.resolver.isRemoved(key)) {
+      reply.code(403);
+      return reply.send({ error: "author_removed" });
+    }
+  });
 }
 
 export interface ReadAuthDeps {
