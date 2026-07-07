@@ -18,8 +18,11 @@ import { authoritativeCancelledEventIds } from "./eventCancellation";
 //
 // Ethos: this is a DISCOVERY surface, not a leaderboard. It carries no
 // attendance count and no ranking beyond chronological — just "what's
-// soon." The only per-member signal is the VIEWER'S OWN "going" status
-// (RSVPs are local-only and never federate), shown to them alone. The
+// soon." The only per-member signal is the VIEWER'S OWN "going" status,
+// shown to them alone (RSVPs federate as signed participation states
+// since project federation Phase 2, but this surface still reads only
+// the viewer's row — the no-leaderboard ethos is a display decision,
+// not a data constraint). The
 // caller hides the section entirely when this returns empty, so an
 // eventless community never sees an "add an event" nudge
 // (solidarity-not-shame).

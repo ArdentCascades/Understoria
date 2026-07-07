@@ -45,15 +45,15 @@ import type {
   VoteChoice,
 } from "@/types";
 
-// Agent 13 task 1 — Decisions surface (proposals only for v1; the
-// dispute table will fold in here once the resolution lifecycle
-// design has settled per docs/roadmap.md).
-//
-// View-only browsing + a simple "record outcome" affordance. No
-// voting yet; the community still reaches decisions out-of-band
-// (their usual call / thread / doc) and any member can record the
-// outcome here so the proposal closes and the historical record
-// reflects reality.
+// The Decisions surface. Proposals, votes, and closures are signed
+// federated records since docs/proposal-federation.md G1/G2: ballots
+// are open (attributed, re-castable — the newest version tallies),
+// any member may record the community's outcome, and a passed
+// closure whose merged ballot shows standing blocks renders as
+// contested rather than being silently honored. Legacy rows made
+// before federation stay on the device that recorded them, marked
+// with a local-only note. Removal/reinstatement records and the
+// co-sign ceremony entry points live here too.
 
 const STATUS_FILTERS: Array<ProposalStatus | "all"> = [
   "open",
