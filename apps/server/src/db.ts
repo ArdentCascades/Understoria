@@ -35,6 +35,7 @@ import type {
   Exchange,
   FlagReason,
   EventRsvpState,
+  SeedVaultPledge,
   EventShiftState,
   Post,
   InviteRevocation,
@@ -1041,6 +1042,32 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '20')",
+    ).run();
+  }
+
+  if (current < 21) {
+    // Seed-vault pledges (docs/storage-budget.md Phase 2): a member's
+    // public, revocable claim to hold the complete community archive.
+    // Same payload-JSON state-table shape as the Phase 2 participation
+    // records; natural key is the member alone (one pledge per member,
+    // retraction is active:false, not a delete).
+    db.exec(`
+      CREATE TABLE seed_vault_pledges (
+        member_key TEXT NOT NULL,
+        id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        PRIMARY KEY (member_key)
+      );
+      CREATE INDEX seed_vault_pledges_updated_idx
+        ON seed_vault_pledges (updated_at);
+      CREATE INDEX seed_vault_pledges_signer_idx
+        ON seed_vault_pledges (signer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '21')",
     ).run();
   }
 }
@@ -2847,6 +2874,70 @@ export function createShiftSignupStateStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as ShiftSignupState);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface SeedVaultPledgeStore {
+  /** Lookup by the natural key — one pledge per member. */
+  get(memberKey: string): SeedVaultPledge | null;
+  /** INSERT OR REPLACE by memberKey. The route decides whether to
+   *  call this — the store never compares versions. */
+  upsert(record: SeedVaultPledge): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): SeedVaultPledge[];
+  count(): number;
+}
+
+export function createSeedVaultPledgeStore(
+  db: DatabaseType,
+): SeedVaultPledgeStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO seed_vault_pledges (
+      member_key, id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @memberKey, @id, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM seed_vault_pledges WHERE member_key = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM seed_vault_pledges",
+  );
+
+  return {
+    get(memberKey) {
+      const r = getStmt.get(memberKey) as StateRowSqlite | undefined;
+      return r ? (JSON.parse(r.payload) as SeedVaultPledge) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        memberKey: record.memberKey,
+        id: record.id,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging — see pagedRows. Retractions
+      // (active:false) stay in the feed so they keep winning LWW on
+      // every puller.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "seed_vault_pledges",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as SeedVaultPledge);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

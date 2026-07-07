@@ -43,6 +43,7 @@ import type {
   ProjectTask,
   Proposal,
   RedemptionReceipt,
+  SeedVaultPledge,
   ShiftSignupRow,
   TaskComment,
   Vote,
@@ -143,7 +144,10 @@ export interface OutboxRow {
     // analysis: threat-model §7 "Federated participation records".
     | "event_rsvp"
     | "event_shift"
-    | "shift_signup";
+    | "shift_signup"
+    // Seed-vault pledge (docs/storage-budget.md Phase 2): a member's
+    // public archive-role claim, single-owner LWW like an RSVP.
+    | "seed_vault_pledge";
   // Intentionally NOT a member of this union: "block". BlockRow and
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never
@@ -414,6 +418,12 @@ export class UnderstoriaDB extends Dexie {
     import("@/lib/guardianShards").GuardianShardRow,
     string
   >;
+  /** Seed-vault pledges (docs/storage-budget.md Phase 2): public,
+   *  revocable, member-granular archive-role claims — signed LWW
+   *  records keyed by the pledging member. Shared community state:
+   *  federates, re-seeds, rides the pairing snapshot, exports; never
+   *  windowed (it is itself the coverage signal). */
+  seedVaultPledges!: Table<SeedVaultPledge, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -954,6 +964,15 @@ export class UnderstoriaDB extends Dexie {
     // surface + a per-device duty); cleared by soft purge.
     this.version(30).stores({
       guardianShards: "ownerKey",
+    });
+
+    // v31 — seed-vault pledges (docs/storage-budget.md Phase 2).
+    // Keyed by memberKey (one pledge per member; the row id is only
+    // the LWW version marker). `active` is not indexable (booleans
+    // are not valid IndexedDB keys); readers filter in memory — the
+    // table is tiny by construction (≤ one row per member).
+    this.version(31).stores({
+      seedVaultPledges: "memberKey, updatedAt",
     });
   }
 }

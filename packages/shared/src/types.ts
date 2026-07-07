@@ -1276,3 +1276,24 @@ export interface ShiftSignupState {
   signerKey: string;
   signature: string;
 }
+
+/** A member's public, revocable pledge to keep the COMPLETE community
+ *  archive on a device of theirs (docs/storage-budget.md Phase 2 —
+ *  the visible counterpart to storage windowing). Single-owner LWW on
+ *  the same machinery as RSVPs: `signerKey === memberKey`, keyed by
+ *  `memberKey`, strictly-newer `updatedAt` replaces. Deliberately
+ *  MEMBER-granular, never device-granular — the pledge names a person
+ *  holding a role; no device census exists and none should.
+ *  Retraction is `active: false` (no tombstone: the retraction must
+ *  keep winning LWW over stale active copies). */
+export interface SeedVaultPledge {
+  /** UUID of the row version — identity is `memberKey`. */
+  id: string;
+  /** The pledging member. The single legitimate signer. */
+  memberKey: string;
+  active: boolean;
+  /** LWW clock. */
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}

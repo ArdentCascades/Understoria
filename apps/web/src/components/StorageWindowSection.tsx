@@ -30,6 +30,7 @@ import {
   YEAR_MS,
   type WindowPreview,
 } from "@/lib/storageWindow";
+import { getMySeedVaultPledge, setSeedVaultPledge } from "@/lib/seedVault";
 
 // Storage windowing (docs/storage-budget.md Phase 1) — lives inside
 // Settings' Data card, next to the meter it exists to answer. Member-
@@ -42,10 +43,37 @@ export function StorageWindowSection() {
   const [preview, setPreview] = useState<WindowPreview | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  // Seed-vault role (docs/storage-budget.md Phase 2) — the visible
+  // opposite of windowing; the two are mutually exclusive.
+  const [vaultActive, setVaultActive] = useState(false);
 
   useEffect(() => {
     void getWindowHorizonMs().then(setHorizonMs);
+    void getMySeedVaultPledge().then((p) => setVaultActive(p?.active === true));
   }, []);
+
+  async function handleVault(active: boolean) {
+    setBusy(true);
+    setNote(null);
+    try {
+      const result = await setSeedVaultPledge(active);
+      if (!result.ok) {
+        setNote(t(`profile.data.vault.error.${result.error}`));
+        return;
+      }
+      setVaultActive(active);
+      if (active) {
+        setHorizonMs(null);
+        setChoosing(false);
+        setPreview(null);
+        setNote(t("profile.data.vault.enabled"));
+      } else {
+        setNote(t("profile.data.vault.disabled"));
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const years = (ms: number) => Math.round(ms / YEAR_MS);
 
@@ -87,12 +115,14 @@ export function StorageWindowSection() {
   return (
     <div className="mt-3 border-t border-moss-200 pt-3 dark:border-moss-800">
       <p className="mb-2 text-xs text-moss-600 dark:text-moss-300">
-        {horizonMs === null
-          ? t("profile.data.window.full")
-          : t("profile.data.window.windowed", { years: years(horizonMs) })}
+        {vaultActive
+          ? t("profile.data.vault.active")
+          : horizonMs === null
+            ? t("profile.data.window.full")
+            : t("profile.data.window.windowed", { years: years(horizonMs) })}
       </p>
 
-      {!choosing && horizonMs === null && (
+      {!choosing && horizonMs === null && !vaultActive && (
         <button
           type="button"
           className="btn-secondary text-xs"
@@ -171,6 +201,24 @@ export function StorageWindowSection() {
         >
           {t("profile.data.window.undo")}
         </button>
+      )}
+
+      {!choosing && (
+        <div className="mt-3">
+          <p className="mb-2 text-xs text-moss-600 dark:text-moss-300">
+            {t("profile.data.vault.body")}
+          </p>
+          <button
+            type="button"
+            className="btn-secondary text-xs"
+            disabled={busy}
+            onClick={() => void handleVault(!vaultActive)}
+          >
+            {vaultActive
+              ? t("profile.data.vault.disable")
+              : t("profile.data.vault.enable")}
+          </button>
+        </div>
       )}
 
       {note && (

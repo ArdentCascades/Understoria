@@ -345,6 +345,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           pullFederatedEventShifts,
           pullFederatedEventRsvps,
           pullFederatedShiftSignups,
+          pullFederatedSeedVaultPledges,
         }) => {
           void pullFederatedPosts();
           void pullFederatedClaims();
@@ -379,6 +380,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           void pullFederatedProjectStates().then(() => {
             void pullFederatedTaskStates();
           });
+          // docs/storage-budget.md Phase 2: archive-role pledges.
+          void pullFederatedSeedVaultPledges();
         },
       );
     void runPulls();

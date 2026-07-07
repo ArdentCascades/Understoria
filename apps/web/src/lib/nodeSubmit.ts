@@ -36,6 +36,7 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  SeedVaultPledge,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -327,6 +328,16 @@ export async function submitEventRsvpToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/event-rsvps", record, config, deps);
+}
+
+/** Seed-vault pledge (docs/storage-budget.md Phase 2) — no referent,
+ *  so there is no retryable-409 case: the node stores or LWW-noops. */
+export async function submitSeedVaultPledgeToNode(
+  record: SeedVaultPledge,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/seed-vault-pledges", record, config, deps);
 }
 
 export async function submitEventShiftToNode(

@@ -29,6 +29,7 @@ import type {
   EventRsvpState,
   EventShiftState,
   ProjectState,
+  SeedVaultPledge,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -2163,6 +2164,68 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
       await db.shiftSignups.delete(local.id);
     }
     await db.shiftSignups.put(record as unknown as ShiftSignupRow);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(feed.cursorKey, String(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+const SEED_VAULT_PLEDGE_CURSOR_KEY = "federationLastSeedVaultPledgePull";
+
+/**
+ * Pull seed-vault pledges (docs/storage-budget.md Phase 2) — public,
+ * member-granular archive-role claims. Single-owner LWW exactly like
+ * RSVPs, natural key = memberKey, no parent record, and deliberately
+ * NO windowing guard: the pledge table is itself the coverage signal
+ * and is pinned on every device.
+ */
+export async function pullFederatedSeedVaultPledges(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/seed-vault-pledges",
+    "seedVaultPledges",
+    SEED_VAULT_PLEDGE_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.memberKey !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.active !== "boolean" ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as SeedVaultPledge;
+    if (!verifyStateRecord(record) || record.signerKey !== record.memberKey) {
+      skipped += 1; // refused — never advance past a hostile row
+      continue;
+    }
+
+    const advanceCursor = () => {
+      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = record.updatedAt;
+      }
+    };
+
+    const local = await db.seedVaultPledges.get(record.memberKey);
+    if (local && record.updatedAt <= local.updatedAt) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.seedVaultPledges.put(record);
     inserted += 1;
     advanceCursor();
   }

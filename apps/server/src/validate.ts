@@ -34,6 +34,7 @@ import {
   type Post,
   type ProjectState,
   type ShiftSignupState,
+  type SeedVaultPledge,
   type SignedVouch,
   type TaskComment,
   type TaskState,
@@ -1079,6 +1080,10 @@ export type ParseShiftSignupStateResult =
   | { ok: true; value: ShiftSignupState }
   | { ok: false; error: string };
 
+export type ParseSeedVaultPledgeResult =
+  | { ok: true; value: SeedVaultPledge }
+  | { ok: false; error: string };
+
 const RSVP_STATUSES = new Set(["going", "maybe", "not_going"]);
 const SHIFT_LABEL_MAX = 100;
 
@@ -1130,6 +1135,26 @@ export function parseEventRsvpState(
   const clock = checkLwwClock(r);
   if (clock) return { ok: false, error: clock };
   return { ok: true, value: r as unknown as EventRsvpState };
+}
+
+export function parseSeedVaultPledge(
+  input: unknown,
+): ParseSeedVaultPledgeResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["id", "memberKey", "signerKey", "signature"]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.active !== "boolean") {
+    return { ok: false, error: "active must be a boolean" };
+  }
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as SeedVaultPledge };
 }
 
 export function parseEventShiftState(

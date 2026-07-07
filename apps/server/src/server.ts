@@ -32,6 +32,7 @@ import {
   createLinkRequestStore,
   createClaimStore,
   createShiftSignupStateStore,
+  createSeedVaultPledgeStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
@@ -69,6 +70,7 @@ import { registerDeviceLinkRoutes } from "./routes/deviceLink.js";
 import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
 import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
+import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard } from "./insertCaps.js";
 import {
@@ -228,6 +230,7 @@ export async function buildServer({
   const eventRsvpStateStore = createEventRsvpStateStore(db);
   const eventShiftStateStore = createEventShiftStateStore(db);
   const shiftSignupStateStore = createShiftSignupStateStore(db);
+  const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -337,6 +340,9 @@ export async function buildServer({
     signupStore: shiftSignupStateStore,
     eventStore,
   });
+  // Seed-vault pledges (docs/storage-budget.md Phase 2) — a member's
+  // public archive-role claim, single-owner LWW like an RSVP.
+  await registerSeedVaultPledgeRoutes(app, { store: seedVaultPledgeStore });
   // Device-link mailbox — NOT a federation surface: rows are opaque
   // ciphertext, one-shot, TTL-bounded, never pulled by peers. The
   // route carries its own row ceiling + prune (routes/deviceLink.ts),

@@ -339,8 +339,12 @@ and any member can upload it back (`docs/community-reseed.md`):
    the captured value on the restore card (Settings).
 4. Ask members to open Settings → "Restore this community onto a
    node" and run it. One member restores everything their device
-   holds; several at once is fine (copies union). Consider a
-   temporarily raised `RATE_LIMIT_MAX` for a large community.
+   holds; several at once is fine (copies union). **Start with the
+   seed vaults** — members whose pledge shows on the resilience
+   card hold the complete archive by promise, while devices that
+   freed up space hold a window plus their pinned set
+   (`docs/storage-budget.md`). Consider a temporarily raised
+   `RATE_LIMIT_MAX` for a large community.
 5. Once the counts settle: flip `READ_AUTH=on` (membership derives
    from the restored receipts), UNSET `RESEED_GRACE_UNTIL`, restart.
    Registering a new `NODE_SYSTEM_SECRET_KEY` for future

@@ -69,6 +69,19 @@ more is "Deep-rooted."
    node makes you an operator, with the powers and limits that page
    names for your community. That transparency is part of the deal.
 
+## Not ready to run a node? Be a seed vault
+
+There is a zero-ops version of this whole page: open Settings →
+Data on a device with room to spare (an old laptop, the tablet in a
+drawer) and choose **"Keep the complete archive on this device."**
+No port forwarding, no TLS, no operator powers — just storage and
+solidarity. A seed vault never frees up space, keeps syncing like
+any device, and counts on the resilience card ("2 servers · 3 seed
+vaults") so the community can SEE how many complete copies exist.
+If every server is ever lost, seed vaults are the best devices to
+restore from (`community-reseed.md`). The pledge is public and
+revocable; withdrawing it deletes nothing.
+
 ## Governance, not just hardware
 
 A second node is also a social act: your community now has two

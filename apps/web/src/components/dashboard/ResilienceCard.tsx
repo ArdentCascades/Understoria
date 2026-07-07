@@ -16,6 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { getSetting } from "@/db/database";
 import { listNodeEndpoints, nodeSuccessKey } from "@/lib/nodeEndpoints";
 import { getWindowHorizonMs, YEAR_MS } from "@/lib/storageWindow";
+import { countActiveSeedVaults } from "@/lib/seedVault";
 import {
   computeResilience,
   isRecentSuccess,
@@ -47,11 +48,17 @@ export function ResilienceCard() {
   // claim becomes conditional on a windowed device — never say more
   // than THIS device's copy delivers.
   const [windowYears, setWindowYears] = useState<number | null>(null);
+  // Seed vaults (docs/storage-budget.md Phase 2): members who pledge
+  // the complete archive — counted like nodes, not like members.
+  const [seedVaults, setSeedVaults] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     void getWindowHorizonMs().then((ms) => {
       if (!cancelled) setWindowYears(ms === null ? null : Math.round(ms / YEAR_MS));
+    });
+    void countActiveSeedVaults().then((n) => {
+      if (!cancelled) setSeedVaults(n);
     });
     void (async () => {
       const { primary, endpoints } = await listNodeEndpoints();
@@ -125,6 +132,17 @@ export function ResilienceCard() {
           {tierLabel}
         </span>
       </div>
+
+      {seedVaults > 0 && (
+        <p className="mb-1 text-xs text-moss-600 dark:text-moss-300">
+          {t(
+            seedVaults === 1
+              ? "dashboard.resilience.seedVaultsOne"
+              : "dashboard.resilience.seedVaultsOther",
+            { count: seedVaults },
+          )}
+        </p>
+      )}
 
       <p className="text-sm text-moss-700 dark:text-moss-200">
         {snapshot.tier === "seedling"

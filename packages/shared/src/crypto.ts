@@ -49,6 +49,7 @@ import type {
   VouchPayload,
   ProjectState,
   TaskState,
+  SeedVaultPledge,
 } from "./types.js";
 
 /**
@@ -997,6 +998,10 @@ export function verifyProjectState(rec: ProjectState): boolean {
 }
 
 export function verifyTaskState(rec: TaskState): boolean {
+  return verifyStateRecord(rec);
+}
+
+export function verifySeedVaultPledge(rec: SeedVaultPledge): boolean {
   return verifyStateRecord(rec);
 }
 

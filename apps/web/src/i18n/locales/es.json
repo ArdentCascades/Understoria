@@ -1826,6 +1826,8 @@
       "bodyMultiOther": "{{nodes}} servidores sostienen esta comunidad — y cada una de sus {{count}} integrantes también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
       "bodyFailover": "Si un servidor desaparece, tus aplicaciones cambian a los demás por su cuenta. No se pierde nada.",
       "windowedNote": "Este dispositivo guarda el último {{years}} año(s) más todo lo activo y lo tuyo — los servidores guardan la historia completa.",
+      "seedVaultsOne": "{{count}} integrante guarda el archivo completo en un dispositivo propio — una bóveda de semillas.",
+      "seedVaultsOther": "{{count}} integrantes guardan el archivo completo en dispositivos propios — bóvedas de semillas.",
       "nodeQuiet": "Ningún servidor ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando alguno vuelva.",
       "leaf": {
         "fresh": "sincronizado hoy",
@@ -1998,6 +2000,18 @@
         "done": "Listo — {{total}} registros eliminados de este dispositivo.",
         "undo": "Guardar de nuevo la historia completa",
         "undoDone": "Este dispositivo volverá a descargar la historia completa en segundo plano. Los registros de actividad de proyectos cerrados hace mucho no vuelven — solo existían en los dispositivos."
+      },
+      "vault": {
+        "body": "¿Tienes espacio de sobra — un portátil viejo, una tableta en un cajón? Comprométete a guardar el archivo completo en este dispositivo. Es la forma sin mantenimiento de hacer la comunidad más difícil de borrar: sin servidor, sin abrir puertos, solo almacenamiento y solidaridad. Tu compromiso es público para que la comunidad vea cuántas copias completas existen; puedes dejarlo cuando quieras.",
+        "enable": "Guardar el archivo completo en este dispositivo",
+        "disable": "Retirar el compromiso del archivo",
+        "active": "Este dispositivo es una bóveda de semillas — guarda el archivo completo de la comunidad.",
+        "enabled": "Comprometido. Este dispositivo ahora lo guarda todo (cualquier espacio liberado se está descargando de nuevo).",
+        "disabled": "Compromiso retirado. No se borró nada — este dispositivo simplemente ya no promete guardarlo todo.",
+        "error": {
+          "no_identity": "No hay identidad en este dispositivo.",
+          "locked": "Este dispositivo está bloqueado — desbloquéalo primero."
+        }
       }
     },
     "communityAccount": {
