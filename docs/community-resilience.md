@@ -222,6 +222,11 @@ it.
 
 ## Out of scope, named
 
+- **Total loss — every node gone at once.** Mirrors make that far
+  less likely, and members' devices still hold everything; the plan
+  for uploading it all back onto a fresh node from any member's
+  phone is `docs/community-reseed.md` (designed, not built).
+
 - **Automatic node gossip / DHT-style discovery.** Mirrors are
   operator-configured and member-consented. This community's threat
   model prefers legible infrastructure over self-organizing meshes.
