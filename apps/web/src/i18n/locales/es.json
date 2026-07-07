@@ -1394,7 +1394,7 @@
     "submitting": "Desbloqueando…",
     "wrongPassphrase": "Esa frase no coincidió. Inténtalo de nuevo.",
     "nothingToUnlock": "No hay claves envueltas en este dispositivo — no hay nada que desbloquear. (Si estás viendo esto, recarga la página.)",
-    "noRecoveryNote": "Las frases olvidadas no se pueden recuperar — por diseño. Si has perdido la tuya, el único camino es Perfil → Emergencia → Borrado duro y empezar de cero con una identidad nueva."
+    "noRecoveryNote": "Las frases de acceso olvidadas no se pueden restablecer aquí — nadie tiene una llave maestra. Pero esto no tiene por qué significar empezar de cero: otro dispositivo vinculado aún guarda tu identidad, y si creaste un kit de recuperación o elegiste guardianes (Ajustes → Kit de recuperación / Guardianes), puedes borrar esta app (Perfil → Emergencia → Purga total) y restaurar desde ellos al empezar de nuevo. Sin ninguno de esos, una identidad nueva es el último recurso."
   },
   "invite": {
     "reading": "Leyendo invitación…",
@@ -2262,6 +2262,7 @@
       "intro": "Dos opciones de pánico para cuando un dispositivo está en riesgo. Ninguna contacta a un servidor; ambas ocurren completamente en este dispositivo.",
       "softBullet": "Borrado suave — vacía cada campo de texto identificable (nombres, descripciones, zonas, habilidades) manteniendo el registro firmado de intercambios y tu par de claves. Útil si un dispositivo va a estar brevemente en manos hostiles.",
       "hardBullet": "Borrado duro — vacía cada tabla incluyendo las claves privadas, rota a una identidad de nodo nueva. Irrecuperable. La página se recargará después.",
+      "federatedNote": "Nota de honestidad: ambas opciones actúan solo en ESTE DISPOSITIVO. Todo lo que ya se sincronizó con tu comunidad — publicaciones, intercambios, avales, votos y otros registros firmados — persiste en el nodo comunitario y en los dispositivos de otros miembros. Un voto público que ya no puedas respaldar se puede volver a emitir: la versión más reciente es la que cuenta.",
       "softButton": "Borrado suave (anonimizar)",
       "hardButton": "Borrado duro (eliminar todo)",
       "softTitle": "¿Ejecutar borrado suave?",
@@ -2323,7 +2324,7 @@
     "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
     "contested": "Registrada como aprobada, pero existe un bloqueo vigente en los votos de toda la comunidad — este resultado está en disputa. Hablenlo; el registro permanece.",
     "localOnly": "Registrado solo en este dispositivo — se creó antes de que las decisiones comunitarias se sincronizaran entre dispositivos, así que otros miembros no pueden verlo.",
-    "footer": "La votación y el cierre automático aún están por venir. Por ahora la comunidad toma decisiones en su canal habitual, y cualquier integrante puede registrar el resultado aquí para que el registro histórico refleje la realidad.",
+    "footer": "Las votaciones aquí son abiertas: tu voto lleva tu nombre, es visible dentro de la comunidad y se sincroniza con el dispositivo de cada miembro. Puedes cambiarlo mientras la propuesta esté abierta — la versión más reciente es la que cuenta. Cuando la comunidad llega a su decisión, cualquier miembro puede registrar el resultado, y surte efecto en todas partes.",
     "proposerLabel": "Propuesta por",
     "backfillProposer": "(historica, persona que reporto desconocida)",
     "proposedLabel": "Iniciada",

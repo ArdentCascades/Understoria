@@ -956,6 +956,9 @@ function EmergencySection() {
           <li>{t("profile.emergency.softBullet")}</li>
           <li>{t("profile.emergency.hardBullet")}</li>
         </ul>
+        <p className="mb-4 text-xs text-moss-600 dark:text-moss-300">
+          {t("profile.emergency.federatedNote")}
+        </p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"

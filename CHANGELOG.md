@@ -65,6 +65,21 @@ include breaking changes.
   answer now points at the recovery paths that exist.
 
 ### Changed
+- **Honesty pass on three surfaces that had fallen behind the
+  code.** The Emergency (panic) section now says plainly that both
+  purges act on this device only — records that already synced
+  (posts, exchanges, vouches, votes) persist on the community node
+  and other members' devices, and a public vote you can no longer
+  stand behind can be re-cast instead. This was the honesty line
+  the proposal-federation plan owed the panic copy when votes
+  became shared records. The lock screen's "passphrases cannot be
+  recovered — by design" note now names the recovery paths that
+  exist (a linked device, the recovery kit, guardians) before the
+  fresh-start last resort, matching the Help answer. And the
+  Decisions page footer no longer claims "voting is still to come"
+  — it explains open, re-castable, community-wide ballots and that
+  recorded outcomes take effect everywhere.
+
 - New design plan `docs/proposal-federation.md`: making proposals
   and votes signed, federated records so the Decisions page tells
   one truth on every device (today votes are invisible to everyone

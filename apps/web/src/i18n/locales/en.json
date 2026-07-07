@@ -1394,7 +1394,7 @@
     "submitting": "Unlocking…",
     "wrongPassphrase": "That passphrase didn't match. Try again.",
     "nothingToUnlock": "No wrapped keys on this device — nothing to unlock. (If you're seeing this, reload the page.)",
-    "noRecoveryNote": "Forgotten passphrases cannot be recovered — by design. If you've lost yours, the only path is Profile → Emergency → Hard purge and starting over with a fresh identity."
+    "noRecoveryNote": "Forgotten passphrases can't be reset here — nobody holds a master key. But this doesn't have to mean starting over: another linked device still holds your identity, and if you made a recovery kit or chose guardians (Settings → Recovery kit / Guardians), you can wipe this app (Profile → Emergency → Hard purge) and restore from them on the fresh start. With none of those, a fresh identity is the last resort."
   },
   "invite": {
     "reading": "Reading invite…",
@@ -2262,6 +2262,7 @@
       "intro": "Two panic options for when a device is at risk. Neither contacts a server; both happen entirely on this device.",
       "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger and your keypair. Useful if a device will briefly be handled by a hostile party.",
       "hardBullet": "Hard purge — wipes every table including private keys, rotates to a fresh node identity. Unrecoverable. The page will reload afterward.",
+      "federatedNote": "Honesty note: both options act on THIS DEVICE only. Anything that already synced with your community — posts, exchanges, vouches, votes, and other signed records — persists on the community node and on other members' devices. A public vote you can no longer stand behind can be re-cast instead: the newest version is what counts.",
       "softButton": "Soft purge (anonymize)",
       "hardButton": "Hard purge (delete everything)",
       "softTitle": "Run soft purge?",
@@ -2323,7 +2324,7 @@
     "emptyFiltered": "No proposals match this filter.",
     "contested": "Recorded as passed, but a standing block exists in the community-wide votes — this outcome is contested. Talk it through; the record stays.",
     "localOnly": "Recorded on this device only — it was created before community decisions synced between devices, so other members can't see it.",
-    "footer": "Voting and automatic close are still to come. For now the community reaches decisions on whatever channel it uses, and any member can record the outcome here so the historical record reflects reality.",
+    "footer": "Ballots here are open: your vote is attributed, visible inside the community, and syncs to every member's device. You can change it while the proposal is open — the newest version is what counts. When the community reaches its decision, any member can record the outcome, and it takes effect everywhere.",
     "proposerLabel": "Proposed by",
     "backfillProposer": "(historical, flagger unknown)",
     "proposedLabel": "Started",
