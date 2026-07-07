@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The Decisions page now tells one truth** (`docs/
+  proposal-federation.md` G1). Proposals, votes, and closures are
+  signed records that sync between every member's device — until
+  now, votes were invisible to everyone but their caster and every
+  tally was one device's math. Votes are open ballots, attributed
+  and public inside the community (the same posture as removal
+  signatures: a block is a conversation, not an anonymous veto), and
+  re-castable — your newest position is what counts. Closing a
+  proposal is first-come, community-wide, and guarded: a closure
+  can't claim "passed" over a standing block. Governance is also the
+  first place where the server checks membership on writes — an
+  invented key can't vote. Older proposals and votes made before
+  this change stay on the device that recorded them, marked
+  honestly, because nobody's signature is ever minted for them
+  retroactively.
+
 - **Help now answers the two hardest questions honestly.** "What
   happens if I lose my phone?" walks the real recovery order — a
   linked device, the recovery kit, your guardians, and only then a
@@ -27,7 +43,7 @@ include breaking changes.
   but their caster, and a passed config change only updates the
   device that clicked). Names the open-ballot values decision,
   preserves the blocking invariants, and phases the work (G1
-  records, G2 convergent effects). Designed, not built.
+  records, G2 convergent effects). G1 shipped above; G2 pending.
 - **The removal ceremony, in the app** (`docs/member-removal.md`
   Phases M2+M3, completing M1's record and gates). Proposing a
   removal starts on the member's profile — beneath the block action,

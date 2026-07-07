@@ -54,6 +54,9 @@ import type {
   MemberRemovalPayload,
   MemberReinstatement,
   MemberReinstatementPayload,
+  Proposal,
+  ProposalClosure,
+  Vote,
 } from "./types.js";
 
 /**
@@ -1007,6 +1010,259 @@ export function verifyTaskState(rec: TaskState): boolean {
 
 export function verifySeedVaultPledge(rec: SeedVaultPledge): boolean {
   return verifyStateRecord(rec);
+}
+
+// --- Proposal federation G1 (docs/proposal-federation.md) ------------
+
+/**
+ * Canonical bytes the PROPOSER signs — the immutable core only.
+ * Fixed field order (the wire contract; do NOT alphabetize). The
+ * lifecycle trio (status/closedAt/closedReason) is deliberately
+ * absent: it is derived from ProposalClosure records.
+ */
+export function canonicalProposalPayload(p: {
+  id: string;
+  nodeId: string;
+  kind: string;
+  category: string;
+  reversibilityTier: string;
+  title: string;
+  description: string;
+  payload: string;
+  proposerKey: string;
+  createdAt: number;
+  impactReflection: string | null;
+  disputePostId: string | null;
+}): string {
+  return JSON.stringify({
+    id: p.id,
+    nodeId: p.nodeId,
+    kind: p.kind,
+    category: p.category,
+    reversibilityTier: p.reversibilityTier,
+    title: p.title,
+    description: p.description,
+    payload: p.payload,
+    proposerKey: p.proposerKey,
+    createdAt: p.createdAt,
+    impactReflection: p.impactReflection,
+    disputePostId: p.disputePostId,
+  });
+}
+
+/** Verify a signed proposal: signature over the canonical core by
+ *  `signerKey`, which must equal `proposerKey`. Legacy rows (no
+ *  signature) fail — they are local-only by design. */
+export function verifyProposal(rec: Proposal): boolean {
+  if (!rec.signature || !rec.signerKey) return false;
+  if (rec.signerKey !== rec.proposerKey) return false;
+  return verify(canonicalProposalPayload(rec), rec.signature, rec.signerKey);
+}
+
+/** Canonical bytes the VOTER signs. Fixed field order. */
+export function canonicalVotePayload(v: {
+  id: string;
+  proposalId: string;
+  voterKey: string;
+  choice: string;
+  reason: string | null;
+  createdAt: number;
+  nodeId: string;
+}): string {
+  return JSON.stringify({
+    id: v.id,
+    proposalId: v.proposalId,
+    voterKey: v.voterKey,
+    choice: v.choice,
+    reason: v.reason,
+    createdAt: v.createdAt,
+    nodeId: v.nodeId,
+  });
+}
+
+export function verifyVote(rec: Vote): boolean {
+  if (!rec.signature || !rec.signerKey) return false;
+  if (rec.signerKey !== rec.voterKey) return false;
+  return verify(canonicalVotePayload(rec), rec.signature, rec.signerKey);
+}
+
+/** Canonical bytes the CLOSER signs — everything except `signature`.
+ *  Fixed field order. */
+export function canonicalProposalClosurePayload(c: {
+  id: string;
+  proposalId: string;
+  outcome: string;
+  reason: string | null;
+  closedAt: number;
+  closerKey: string;
+  nodeId: string;
+}): string {
+  return JSON.stringify({
+    id: c.id,
+    proposalId: c.proposalId,
+    outcome: c.outcome,
+    reason: c.reason,
+    closedAt: c.closedAt,
+    closerKey: c.closerKey,
+    nodeId: c.nodeId,
+  });
+}
+
+export function verifyProposalClosure(rec: ProposalClosure): boolean {
+  if (!rec.signature || !rec.signerKey) return false;
+  if (rec.signerKey !== rec.closerKey) return false;
+  return verify(
+    canonicalProposalClosurePayload(rec),
+    rec.signature,
+    rec.signerKey,
+  );
+}
+
+const PROPOSAL_KINDS = new Set(["proposal", "dispute"]);
+const PROPOSAL_CATEGORIES = new Set([
+  "config_change",
+  "dispute",
+  "project_adoption",
+]);
+const REVERSIBILITY_TIERS = new Set(["easy", "moderate", "hard"]);
+const VOTE_CHOICES = new Set(["affirm", "block", "abstain"]);
+const CLOSURE_OUTCOMES = new Set(["passed", "rejected", "withdrawn"]);
+
+export type ParseSignedProposalResult =
+  | { ok: true; value: Proposal }
+  | { ok: false; error: string };
+
+/** Shape check shared by the server route and the PWA pull — a
+ *  SIGNED wire proposal (legacy unsigned rows never cross the wire). */
+export function parseSignedProposal(
+  input: unknown,
+): ParseSignedProposalResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of [
+    "id",
+    "nodeId",
+    "title",
+    "proposerKey",
+    "signerKey",
+    "signature",
+  ] as const) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  for (const f of ["description", "payload"] as const) {
+    if (typeof r[f] !== "string") {
+      return { ok: false, error: `${f} must be a string` };
+    }
+  }
+  if (typeof r.kind !== "string" || !PROPOSAL_KINDS.has(r.kind)) {
+    return { ok: false, error: "kind must be 'proposal' or 'dispute'" };
+  }
+  if (typeof r.category !== "string" || !PROPOSAL_CATEGORIES.has(r.category)) {
+    return { ok: false, error: "unknown category" };
+  }
+  if (
+    typeof r.reversibilityTier !== "string" ||
+    !REVERSIBILITY_TIERS.has(r.reversibilityTier)
+  ) {
+    return { ok: false, error: "unknown reversibilityTier" };
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return { ok: false, error: "createdAt must be a positive integer" };
+  }
+  if (r.impactReflection !== null && typeof r.impactReflection !== "string") {
+    return { ok: false, error: "impactReflection must be null or a string" };
+  }
+  if (r.disputePostId !== null && typeof r.disputePostId !== "string") {
+    return { ok: false, error: "disputePostId must be null or a string" };
+  }
+  return { ok: true, value: r as unknown as Proposal };
+}
+
+export type ParseSignedVoteResult =
+  | { ok: true; value: Vote }
+  | { ok: false; error: string };
+
+export function parseSignedVote(input: unknown): ParseSignedVoteResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of [
+    "id",
+    "proposalId",
+    "voterKey",
+    "nodeId",
+    "signerKey",
+    "signature",
+  ] as const) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.choice !== "string" || !VOTE_CHOICES.has(r.choice)) {
+    return { ok: false, error: "choice must be affirm, block, or abstain" };
+  }
+  if (r.reason !== null && typeof r.reason !== "string") {
+    return { ok: false, error: "reason must be null or a string" };
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return { ok: false, error: "createdAt must be a positive integer" };
+  }
+  if (r.id !== `${r.proposalId as string}|${r.voterKey as string}`) {
+    return { ok: false, error: "id must be `${proposalId}|${voterKey}`" };
+  }
+  return { ok: true, value: r as unknown as Vote };
+}
+
+export type ParseProposalClosureResult =
+  | { ok: true; value: ProposalClosure }
+  | { ok: false; error: string };
+
+export function parseProposalClosure(
+  input: unknown,
+): ParseProposalClosureResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of [
+    "id",
+    "proposalId",
+    "closerKey",
+    "nodeId",
+    "signerKey",
+    "signature",
+  ] as const) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.outcome !== "string" || !CLOSURE_OUTCOMES.has(r.outcome)) {
+    return { ok: false, error: "outcome must be passed, rejected, or withdrawn" };
+  }
+  if (r.reason !== null && typeof r.reason !== "string") {
+    return { ok: false, error: "reason must be null or a string" };
+  }
+  if (
+    typeof r.closedAt !== "number" ||
+    !Number.isInteger(r.closedAt) ||
+    r.closedAt <= 0
+  ) {
+    return { ok: false, error: "closedAt must be a positive integer" };
+  }
+  return { ok: true, value: r as unknown as ProposalClosure };
 }
 
 // --- Member removal / reinstatement (docs/member-removal.md) ---------

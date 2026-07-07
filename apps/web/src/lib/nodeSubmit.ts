@@ -22,8 +22,10 @@ import type {
   AwaitingTransition,
   Exchange,
   Post,
+  Proposal,
   SignedVouch,
   TaskComment,
+  Vote,
 } from "@/types";
 import type {
   CoOrganizerInvitation,
@@ -38,6 +40,7 @@ import type {
   RedemptionReceipt,
   MemberRemoval,
   MemberReinstatement,
+  ProposalClosure,
   SeedVaultPledge,
   ShiftSignupState,
   TaskState,
@@ -359,6 +362,33 @@ export async function submitMemberReinstatementToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/member-reinstatements", record, config, deps);
+}
+
+/** Proposal federation G1 (docs/proposal-federation.md). Votes and
+ *  closures 409 on an unknown proposal — the retryable referent case
+ *  the outbox flush special-cases. */
+export async function submitProposalToNode(
+  record: Proposal,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/proposals", record, config, deps);
+}
+
+export async function submitVoteToNode(
+  record: Vote,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/votes", record, config, deps);
+}
+
+export async function submitProposalClosureToNode(
+  record: ProposalClosure,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/proposal-closures", record, config, deps);
 }
 
 export async function submitEventShiftToNode(

@@ -1798,6 +1798,28 @@ We are not trying to protect against:
   plain text, never rendered as markup. The operator STILL cannot
   remove anyone — quorum only (`operator-powers.md`).
 
+- **Proposal federation (open ballots).**
+  *Shipped (G1) — `docs/proposal-federation.md`.* Proposals, votes,
+  and closures became signed federated records. The trade named
+  before the schema: **votes are now public, attributed records
+  inside the community** — the same posture as removal signatures,
+  and the only posture under which no-silent-disenfranchisement
+  (`docs/blocking.md` §11.10) is checkable. Nothing new leaves the
+  community: the read gate covers the new feeds by deny-by-default,
+  legacy unsigned rows never cross the wire (no migration mints
+  signatures a member never made), and a re-castable vote means the
+  newest version is what tallies. Governance writes are the app's
+  first MEMBER-GATED write surfaces (membership resolver at POST):
+  an invented key may post an offer; it may not vote. Closures are
+  first-writer-wins per proposal — the community's answer is total
+  and convergent — with a parameter-free standing-block guard at
+  ingestion (mirror replication exempt, so an origin-accepted
+  decision replicates rather than diverging the set) and the
+  config-dependent eligibility half re-checked on devices. Soft
+  purge still clears the local votes table; the community's copy
+  persists on nodes — the standard federated-record honesty, now
+  true of votes too.
+
 - **Storage windowing (coverage-claim downgrade).**
   *Shipped — `docs/storage-budget.md` Phase 1.* A member may free up
   space on a constrained device: old SETTLED records (settled posts,

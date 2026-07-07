@@ -1,9 +1,22 @@
 # Proposal federation — making the Decisions page tell one truth
 
-Status: **designed, not built.** This is the plan for the last
+Status: **G1 SHIPPED** (the three record kinds end-to-end: signed
+proposals/votes/closures, server tables + member-gated routes +
+mirror + re-seed kinds, client signing at the mutators + pulls +
+derived lifecycle + the local-only note on legacy rows). **G2 —
+convergent effects — not built.** As-built deltas from §2/§6: the
+server-side eligibility guard enforces the PARAMETER-FREE half only
+(no standing blocks; min-affirms and the deliberation window are
+config-dependent and live client-side, where an ineligible closure
+renders as contested — G2 wires that display); dispute and comment-
+dispute proposal CREATION does not sign yet (those rows are built
+inside the dispute transactions; they join the wire in G2), so
+today's federated proposals are the ProposalNew path. Votes arriving
+after a closure are stored (timestamps order them); the closure math
+counts what it sees at close time. This was the plan for the last
 structural gap the governance work left open: proposals and votes
-are per-device local, so the Decisions surface can show a different
-reality on every member's phone. Named as the standing dependency in
+were per-device local, so the Decisions surface could show a
+different reality on every member's phone. Named as the standing dependency in
 `docs/member-removal.md` §4 ("deliberation happens where the
 community talks… knowing proposals are per-device local") and
 reserved in the types since v1 (`types.ts`: "Votes are unsigned for

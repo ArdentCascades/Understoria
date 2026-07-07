@@ -35,6 +35,9 @@ import {
   createSeedVaultPledgeStore,
   createMemberRemovalStore,
   createMemberReinstatementStore,
+  createProposalStore,
+  createVoteStore,
+  createProposalClosureStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
   createCoOrganizerInvitationStore,
@@ -74,6 +77,7 @@ import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
 import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
+import { registerGovernanceRoutes } from "./routes/proposals.governance.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard, SURFACES } from "./insertCaps.js";
 import {
@@ -237,6 +241,9 @@ export async function buildServer({
   const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
   const memberRemovalStore = createMemberRemovalStore(db);
   const memberReinstatementStore = createMemberReinstatementStore(db);
+  const proposalStore = createProposalStore(db);
+  const voteStore = createVoteStore(db);
+  const proposalClosureStore = createProposalClosureStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -370,6 +377,16 @@ export async function buildServer({
     resolver: membershipResolver,
     removalQuorum: config.removalQuorum,
     founderKeys: config.founderKeys,
+  });
+  // Proposal federation G1 (docs/proposal-federation.md): signed
+  // proposals / votes / closures — the member-gated write surfaces.
+  await registerGovernanceRoutes(app, {
+    proposalStore,
+    voteStore,
+    closureStore: proposalClosureStore,
+    resolver: membershipResolver,
+    internalHeader: MIRROR_INTERNAL_HEADER,
+    internalToken: internalBypassToken,
   });
   // Device-link mailbox — NOT a federation surface: rows are opaque
   // ciphertext, one-shot, TTL-bounded, never pulled by peers. The

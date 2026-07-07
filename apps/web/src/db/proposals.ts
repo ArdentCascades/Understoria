@@ -10,6 +10,18 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { uuid } from "@/lib/id";
+import {
+  canonicalProposalClosurePayload,
+  canonicalProposalPayload,
+  sign,
+} from "@understoria/shared/crypto";
+import type { ProposalClosure } from "@understoria/shared/types";
+import { getSecretKey } from "@/db/secrets";
+import {
+  enqueueProposalOutbox,
+  enqueueProposalClosureOutbox,
+  flushOutboxNow,
+} from "@/lib/outbox";
 import type {
   DisputePayload,
   CommentDisputePayload,
@@ -21,7 +33,7 @@ import type {
   ReversibilityTier,
   TaskComment,
 } from "@/types";
-import { db } from "./database";
+import { db, getSetting, SETTING_KEYS } from "./database";
 
 // Agent 13 task 1 — Proposals MVP. CRUD helpers + status queries.
 // Voting + automatic close are deferred to a follow-up PR; for
@@ -73,7 +85,24 @@ export async function createProposal(
     impactReflection: reflection,
     disputePostId: null,
   };
-  await db.proposals.put(proposal);
+  // Proposal federation G1: sign the immutable core so the proposal
+  // can cross the wire. Soft-degrade on a locked device / missing
+  // key: the row stays LOCAL-ONLY (the legacy posture) rather than
+  // failing creation — the same trade participation publishing makes.
+  try {
+    const secret = await getSecretKey(input.proposerKey);
+    proposal.signerKey = input.proposerKey;
+    proposal.signature = sign(canonicalProposalPayload(proposal), secret);
+  } catch {
+    /* unsigned = recorded on this device only */
+  }
+  await db.transaction("rw", [db.proposals, db.outbox, db.settings], async () => {
+    await db.proposals.put(proposal);
+    if (proposal.signature) {
+      await enqueueProposalOutbox(proposal);
+    }
+  });
+  if (proposal.signature) void flushOutboxNow().catch(() => {});
   return proposal;
 }
 
@@ -302,6 +331,54 @@ export async function getProposal(id: string): Promise<Proposal | null> {
  * is the next slice; for now this is the honest path.
  */
 export async function closeProposal(
+  proposalId: string,
+  outcome: "passed" | "rejected" | "withdrawn",
+  reason: string,
+): Promise<Proposal> {
+  const closed = await closeProposalLocally(proposalId, outcome, reason);
+  // Proposal federation G1: the terminal state federates as a signed
+  // FIRST-WRITER-WINS closure record (docs/proposal-federation.md
+  // §2). Soft-degrade when this device can't sign — the local close
+  // stands (legacy posture) and the node's copy stays open until a
+  // signing member records the outcome.
+  try {
+    const me = await getSetting(SETTING_KEYS.currentMember);
+    if (me) {
+      const secret = await getSecretKey(me);
+      const core = {
+        id: uuid(),
+        proposalId,
+        outcome,
+        reason: reason.trim() || null,
+        closedAt: closed.closedAt ?? Date.now(),
+        closerKey: me,
+        nodeId: closed.nodeId,
+      };
+      const record: ProposalClosure = {
+        ...core,
+        signerKey: me,
+        signature: sign(canonicalProposalClosurePayload(core), secret),
+      };
+      await db.transaction(
+        "rw",
+        [db.proposalClosures, db.outbox, db.settings],
+        async () => {
+          const existing = await db.proposalClosures.get(proposalId);
+          if (!existing) {
+            await db.proposalClosures.put(record);
+            await enqueueProposalClosureOutbox(record);
+          }
+        },
+      );
+      void flushOutboxNow().catch(() => {});
+    }
+  } catch {
+    /* local close stands; no wire record from this device */
+  }
+  return closed;
+}
+
+async function closeProposalLocally(
   proposalId: string,
   outcome: "passed" | "rejected" | "withdrawn",
   reason: string,

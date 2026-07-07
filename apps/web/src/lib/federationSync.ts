@@ -45,6 +45,12 @@ import {
 import {
   parseMemberRemoval,
   parseMemberReinstatement,
+  parseProposalClosure,
+  parseSignedProposal,
+  parseSignedVote,
+  verifyProposal,
+  verifyProposalClosure,
+  verifyVote,
 } from "@understoria/shared/crypto";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
 import { publishProjectState } from "@/db/projects";
@@ -2281,6 +2287,181 @@ export async function pullFederatedMemberReinstatements(): Promise<FederationSyn
 
   if (maxDecidedAt !== null) {
     await setSetting(feed.cursorKey, String(maxDecidedAt));
+  }
+  return { inserted, skipped };
+}
+
+const PROPOSAL_CURSOR_KEY = "federationLastProposalPull";
+const VOTE_CURSOR_KEY = "federationLastVotePull";
+const PROPOSAL_CLOSURE_CURSOR_KEY = "federationLastProposalClosurePull";
+
+/**
+ * Proposal federation G1 (docs/proposal-federation.md §4): signed
+ * proposals, votes, and closures. Wire proposals carry only the
+ * immutable core; the lifecycle trio is derived here — a pulled
+ * proposal lands "open" unless a closure is already stored locally,
+ * and a pulled closure stamps the local row. Members' devices trust
+ * the node's membership gate at ingestion (same posture as removal
+ * records) and re-verify every signature themselves.
+ */
+export async function pullFederatedProposals(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/proposals",
+    "proposals",
+    PROPOSAL_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const raw of feed.rows) {
+    const parsed = parseSignedProposal(raw);
+    if (!parsed.ok || !plausibleCursorStamp(parsed.value.createdAt)) {
+      skipped += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyProposal(record)) {
+      skipped += 1; // refused — never advance past a hostile row
+      continue;
+    }
+    const advanceCursor = () => {
+      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
+        maxCreatedAt = record.createdAt;
+      }
+    };
+    if (await db.proposals.get(record.id)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    const closure = await db.proposalClosures.get(record.id);
+    await db.proposals.put({
+      ...record,
+      status: closure ? closure.outcome : "open",
+      closedAt: closure ? closure.closedAt : null,
+      closedReason: closure ? closure.reason : null,
+    });
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(feed.cursorKey, String(maxCreatedAt));
+  }
+  return { inserted, skipped };
+}
+
+export async function pullFederatedVotes(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/votes",
+    "votes",
+    VOTE_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const raw of feed.rows) {
+    const parsed = parseSignedVote(raw);
+    if (!parsed.ok || !plausibleCursorStamp(parsed.value.createdAt)) {
+      skipped += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyVote(record)) {
+      skipped += 1;
+      continue;
+    }
+    const advanceCursor = () => {
+      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
+        maxCreatedAt = record.createdAt;
+      }
+    };
+    // Proposal not here yet — the proposals pull runs first in the
+    // fan-out; retry next cycle without advancing.
+    if (!(await db.proposals.get(record.proposalId))) {
+      skipped += 1;
+      continue;
+    }
+    // Single-owner LWW on the natural key (the deterministic id IS
+    // the natural key, so a plain get suffices).
+    const local = await db.votes.get(record.id);
+    if (local && record.createdAt <= local.createdAt) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.votes.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(feed.cursorKey, String(maxCreatedAt));
+  }
+  return { inserted, skipped };
+}
+
+export async function pullFederatedProposalClosures(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/proposal-closures",
+    "proposalClosures",
+    PROPOSAL_CLOSURE_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxClosedAt: number | null = feed.since ? Number(feed.since) : null;
+
+  for (const raw of feed.rows) {
+    const parsed = parseProposalClosure(raw);
+    if (!parsed.ok || !plausibleCursorStamp(parsed.value.closedAt)) {
+      skipped += 1;
+      continue;
+    }
+    const record = parsed.value;
+    if (!verifyProposalClosure(record)) {
+      skipped += 1;
+      continue;
+    }
+    const advanceCursor = () => {
+      if (maxClosedAt === null || record.closedAt > maxClosedAt) {
+        maxClosedAt = record.closedAt;
+      }
+    };
+    const proposal = await db.proposals.get(record.proposalId);
+    if (!proposal) {
+      skipped += 1; // proposal not here yet — retry next cycle
+      continue;
+    }
+    if (await db.proposalClosures.get(record.proposalId)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    // The community's answer stamps the local row. Effect application
+    // (dispute post restoration, config convergence) is Phase G2 —
+    // named in docs/proposal-federation.md §5.
+    await db.transaction("rw", [db.proposalClosures, db.proposals], async () => {
+      await db.proposalClosures.put(record);
+      await db.proposals.update(record.proposalId, {
+        status: record.outcome,
+        closedAt: record.closedAt,
+        closedReason: record.reason,
+      });
+    });
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxClosedAt !== null) {
+    await setSetting(feed.cursorKey, String(maxClosedAt));
   }
   return { inserted, skipped };
 }

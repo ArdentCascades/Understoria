@@ -44,6 +44,7 @@ import type {
   Proposal,
   MemberRemoval,
   MemberReinstatement,
+  ProposalClosure,
   RedemptionReceipt,
   SeedVaultPledge,
   ShiftSignupRow,
@@ -153,7 +154,11 @@ export interface OutboxRow {
     // Assembled quorum governance records (docs/member-removal.md
     // M2) — queued by the proposer's device after the ceremony.
     | "member_removal"
-    | "member_reinstatement";
+    | "member_reinstatement"
+    // Proposal federation G1 (docs/proposal-federation.md).
+    | "proposal"
+    | "vote"
+    | "proposal_closure";
   // Intentionally NOT a member of this union: "block". BlockRow and
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never
@@ -437,6 +442,10 @@ export class UnderstoriaDB extends Dexie {
    *  the full history). */
   memberRemovals!: Table<MemberRemoval, string>;
   memberReinstatements!: Table<MemberReinstatement, string>;
+  /** Proposal closures (docs/proposal-federation.md §2): the signed,
+   *  first-writer-wins terminal state of a proposal — keyed by
+   *  proposalId (one closure per proposal, everywhere). */
+  proposalClosures!: Table<ProposalClosure, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -994,6 +1003,11 @@ export class UnderstoriaDB extends Dexie {
     this.version(32).stores({
       memberRemovals: "id, removedKey, decidedAt",
       memberReinstatements: "id, reinstatedKey, decidedAt",
+    });
+
+    // v33 — proposal closures (docs/proposal-federation.md G1).
+    this.version(33).stores({
+      proposalClosures: "proposalId, closedAt",
     });
   }
 }

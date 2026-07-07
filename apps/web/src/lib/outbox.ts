@@ -34,6 +34,9 @@ import {
   submitSeedVaultPledgeToNode,
   submitMemberRemovalToNode,
   submitMemberReinstatementToNode,
+  submitProposalToNode,
+  submitVoteToNode,
+  submitProposalClosureToNode,
   submitShiftSignupToNode,
   submitAwaitingTransitionToNode,
   submitInviteRevocationToNode,
@@ -60,11 +63,12 @@ import type {
   RedemptionReceipt,
   MemberRemoval,
   MemberReinstatement,
+  ProposalClosure,
   SeedVaultPledge,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
-import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
+import type { Exchange, Post, Proposal, SignedVouch, TaskComment, Vote } from "@/types";
 
 /**
  * Durable outbox + retry worker for community-node mirroring.
@@ -281,6 +285,24 @@ export async function enqueueMemberReinstatementOutbox(
   record: MemberReinstatement,
 ): Promise<OutboxRow | null> {
   return enqueueOutbox("member_reinstatement", record.id, record);
+}
+
+export async function enqueueProposalOutbox(
+  record: Proposal,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("proposal", record.id, record);
+}
+
+export async function enqueueVoteOutbox(record: Vote): Promise<OutboxRow | null> {
+  // Natural key: one live queued version per (proposal, voter) — a
+  // re-cast replaces a still-pending older choice in place.
+  return enqueueOutbox("vote", `vote_${record.id}`, record);
+}
+
+export async function enqueueProposalClosureOutbox(
+  record: ProposalClosure,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("proposal_closure", `close_${record.proposalId}`, record);
 }
 
 export async function enqueueSeedVaultPledgeOutbox(
@@ -661,6 +683,22 @@ export async function flushOutboxOnce(
         cfg,
         { fetchImpl: options.fetchImpl },
       );
+    } else if (row.kind === "proposal") {
+      result = await submitProposalToNode(
+        payload as unknown as Proposal,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "vote") {
+      result = await submitVoteToNode(payload as unknown as Vote, cfg, {
+        fetchImpl: options.fetchImpl,
+      });
+    } else if (row.kind === "proposal_closure") {
+      result = await submitProposalClosureToNode(
+        payload as unknown as ProposalClosure,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else if (row.kind === "event_shift") {
       result = await submitEventShiftToNode(
         payload as unknown as EventShiftState,
@@ -706,6 +744,12 @@ export async function flushOutboxOnce(
       // yet — retryable by design (docs/member-removal.md M1).
       "member_removal",
       "member_reinstatement",
+      // 409 unknown_proposal: the proposal's own submission may still
+      // be in flight ahead of this row — retry until it lands. (A
+      // 409 standing_block closure also retries; if another closure
+      // wins meanwhile the retry answers 200 and settles.)
+      "vote",
+      "proposal_closure",
     ]);
     const poison =
       isPoisonResult(result) &&

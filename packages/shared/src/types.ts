@@ -757,6 +757,13 @@ export interface Proposal {
    * without duplicating the post lifecycle.
    */
   disputePostId: string | null;
+  /** Must equal `proposerKey` on signed rows (proposal federation
+   *  G1). Absent on legacy rows, which stay local-only. */
+  signerKey?: string;
+  /** Over `canonicalProposalPayload` — the IMMUTABLE core only; the
+   *  lifecycle trio (`status`/`closedAt`/`closedReason`) is derived
+   *  from `ProposalClosure` records and never signed here. */
+  signature?: string;
 }
 
 export interface ImpactReflection {
@@ -836,9 +843,12 @@ export interface ProjectAdoptionPayload {
  * a reason), or abstain (intentional non-position). Silence is also
  * valid in lazy consensus, but only the explicit choices are stored.
  *
- * Votes are unsigned for v1 because they stay local to the node. When
- * Agent 15 (federation governance) lands and votes need to cross
- * peer boundaries, we'll add a signature field alongside.
+ * SIGNED since proposal federation G1 (docs/proposal-federation.md):
+ * `signerKey`/`signature` bind the vote to its voter so votes can
+ * cross node boundaries. The fields are optional because LEGACY rows
+ * cast before G1 exist on devices unsigned — those stay local-only
+ * forever (no migration mints signatures a member never made) and
+ * render with a "recorded on this device only" note.
  *
  * Latest vote per (voter, proposal) wins. The `votes` table indexes
  * on the composite key so replacing a vote is a simple `put` with
@@ -859,6 +869,35 @@ export interface Vote {
   reason: string | null;
   createdAt: number;
   nodeId: string;
+  /** Must equal `voterKey` on signed rows. Absent on legacy rows. */
+  signerKey?: string;
+  /** Over `canonicalVotePayload`. Absent on legacy rows. */
+  signature?: string;
+}
+
+/**
+ * A proposal's terminal state as a federated record
+ * (docs/proposal-federation.md §2). Any member may close (unchanged
+ * from the local rule); the server keys closures by `proposalId` and
+ * refuses a second — FIRST-WRITER-WINS, so the community's answer is
+ * total and convergent. A closure claiming `passed` is additionally
+ * guarded against standing blocks (the parameter-free half of
+ * `autoCloseEligibility`; the config-dependent half is re-checked on
+ * every device, which displays an ineligible closure as contested).
+ */
+export interface ProposalClosure {
+  /** uuid of the record; identity is `proposalId`. */
+  id: string;
+  proposalId: string;
+  outcome: "passed" | "rejected" | "withdrawn";
+  reason: string | null;
+  closedAt: number;
+  /** The member who recorded the outcome. The single legitimate
+   *  signer. */
+  closerKey: string;
+  nodeId: string;
+  signerKey: string;
+  signature: string;
 }
 
 // ---------------------------------------------------------------------------

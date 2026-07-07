@@ -129,6 +129,15 @@ export const RESEED_KINDS: readonly ReseedKindSpec[] = [
     table: "memberReinstatements",
     toWire: (row) => row,
   },
+  // docs/proposal-federation.md G1 — proposals before votes before
+  // closures; unsigned legacy rows never cross the wire.
+  { path: "/proposals", table: "proposals", toWire: signedOrNull },
+  { path: "/votes", table: "votes", toWire: signedOrNull },
+  {
+    path: "/proposal-closures",
+    table: "proposalClosures",
+    toWire: (row) => row,
+  },
   { path: "/shift-signups", table: "shiftSignups", toWire: signedOrNull },
   { path: "/posts", table: "posts", toWire: postToWire },
   { path: "/exchanges", table: "exchanges" },
