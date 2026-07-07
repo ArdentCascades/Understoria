@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A lost phone no longer means a lost self: the recovery kit**
+  (`docs/identity-recovery.md` Phase K1). Settings → Recovery kit
+  exports your account's key wrapped under a recovery passphrase you
+  choose — as a small file, or a printable page with a QR code. On a
+  new device, "Lost your device but have a recovery kit?" on the
+  welcome screen restores your account (balance, vouches, roles,
+  membership), adopts your community's server addresses, and syncs
+  the shared history back. The honest edges are in the UI where they
+  belong: whoever holds the kit AND its passphrase is you; nobody can
+  reset a forgotten kit passphrase (no company holds a copy — that is
+  the point); and a paired second device remains the best protection,
+  with the kit as the paper backup for one-device members.
 - **A community can now be fully restored after losing every server**
   (`docs/community-reseed.md` Phase R1, completing the groundwork
   below). Settings gains "Restore this community onto a node": point

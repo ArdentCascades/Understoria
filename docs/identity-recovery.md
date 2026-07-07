@@ -1,7 +1,8 @@
 # Identity recovery — a lost phone should not mean a lost self
 
-Status: **designed, not built.** This document is the implementation
-plan. Companion docs: `docs/device-pairing.md` / tap-to-link (the
+Status: **Phase K1 shipped** (the recovery kit — export in
+Settings, printable QR, and the Welcome "I have a recovery kit"
+restore path). **Phase K2 designed below, not built; K3 deferred.** Companion docs: `docs/device-pairing.md` / tap-to-link (the
 existing and still-best mitigation: a second linked device),
 `docs/threat-model.md` (passphrase protection §7),
 `docs/member-removal.md` (whose quorum machinery Phase 3 would
@@ -31,7 +32,18 @@ material), **no weakening of the live key** (recovery paths must be
 strictly offline/consensual artifacts), and **honesty in the UI**
 about what each layer does and does not protect.
 
-## 1. Phase K1 — the Recovery Kit (self-custody, ship first)
+## 1. Phase K1 — the Recovery Kit (self-custody) — SHIPPED
+
+Implemented as specified below: `lib/recoveryKit.ts` (build / strict
+parse / restore, reusing `lib/passphrase.ts` byte-for-byte, with the
+decrypted key verified against the named public key so a corrupted
+kit fails closed), `RecoveryKitCard` in Settings (independent kit
+passphrase, download + printable QR page), `/recover` linked from
+the Welcome tour beside the pairing path (file upload or
+paste-from-any-QR-scanner), restore mirroring the device-pairing
+import guards (locked-device refusal, fresh-device-only adoption of
+the kit's community coordinates), and the keep-access nudge naming
+the kit as the paper backup. Original design, for the record:
 
 A file (and printable page) a member creates in
 Profile → Security → "Create a recovery kit":
