@@ -102,6 +102,16 @@ include breaking changes.
   mirror operator holds every `operator-powers.md` power).
 
 ### Fixed
+- **Image builds died with exit code 134 on the recommended 1 GB
+  VPS.** Node sizes its default heap cap from the machine's total
+  RAM, so on a 1 GB host it aborted the web bundle's tsc + vite
+  compile at ~512 MB without ever using swap. Both Dockerfiles now
+  raise the build-stage heap ceiling (`NODE_OPTIONS=
+  --max-old-space-size=1536`, build stage only — runtime images are
+  untouched), the Linode runbook documents the required swapfile
+  (§1) and the exit-134 symptom (§11), and `scripts/setup.sh` warns
+  up front when a small host has no swap instead of letting the
+  build fail halfway through.
 - **Cross-origin member-authenticated reads were impossible**: the
   node's CORS allow-list omitted the `x-understoria-*` read-signature
   headers, so any browser fetch carrying them to a node on a

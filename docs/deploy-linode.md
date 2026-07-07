@@ -35,6 +35,26 @@ for a community of a few hundred members. SQLite + Node holds steady
 under 200 MB RSS for that size; the limiting factor is disk for the
 DB and any local backups.
 
+**Swap (required on a 1 GB box).** RUNNING the node is light;
+BUILDING the images on the box (first launch and every redeploy) is
+not — the web bundle's TypeScript + Vite compile needs more memory
+than 1 GB provides. Add a swapfile once, right after provisioning:
+
+```bash
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab   # survive reboots
+```
+
+Symptom if you skip this: `docker compose build` fails at
+`RUN npm --workspace @understoria/web run build` with
+**exit code 134** (Node aborting at its heap limit). The build is
+the only thing that ever needs the swap; steady-state serving does
+not touch it. On 2 GB+ instances swap is still good hygiene but the
+build fits without it.
+
 **Image.** Debian 12 (or any recent Linux with Docker support).
 
 **Networking.**
@@ -393,6 +413,15 @@ git checkout <new-tag>
 # This is SAFE — no data is destroyed.
 docker compose up -d --build
 ```
+
+> **Build dies with exit code 134?** That's Node hitting its heap
+> limit during the web compile — the box has no (or too little)
+> swap. Check with `swapon --show`; if it prints nothing, do the
+> swapfile step from §1, then re-run. On a 1 GB instance it also
+> helps to build the two images one at a time instead of letting
+> `up --build` run both in parallel:
+> `docker compose build understoria && docker compose build web`,
+> then `docker compose up -d`.
 
 The auto-confirm secret key SURVIVES rebuilds — it lives in `.env`,
 which `git pull` doesn't touch.

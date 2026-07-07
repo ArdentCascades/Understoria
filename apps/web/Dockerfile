@@ -22,6 +22,16 @@ RUN npm ci --workspaces --include-workspace-root --no-audit --no-fund
 # Copy the web source and build. `tsc --noEmit` runs first via the
 # package's `build` script and gates on type errors.
 COPY apps/web apps/web
+
+# Raise V8's self-imposed heap cap for the compile. Node sizes its
+# default old-space limit from the machine's TOTAL RAM, so on the
+# 1 GB VPS the runbook recommends it caps itself near ~512 MB and
+# aborts (exit code 134, "Reached heap limit") before ever touching
+# swap — tsc + vite need more than that. This is a ceiling, not a
+# reservation: hosts with less physical RAM than the cap need swap
+# to back it (see docs/deploy-linode.md §1). Build-stage only — the
+# runtime stage below is busybox and runs no Node at all.
+ENV NODE_OPTIONS=--max-old-space-size=1536
 RUN npm --workspace @understoria/web run build
 
 # ---------------------------------------------------------------------
