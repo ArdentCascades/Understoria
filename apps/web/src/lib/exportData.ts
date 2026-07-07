@@ -64,6 +64,9 @@ export const EXPORT_EXCLUDED_TABLES = [
   // `invites` out of a shareable file. Re-pullable from any node.
   "redemptionReceipts",
   "inviteRevocationRecords",
+  // `guardianShards` — pieces of OTHER members' identities plus the
+  // whom-do-I-guard relation; a shareable file must carry neither.
+  "guardianShards",
   "pairingLog",
   "eventRsvps",
   "eventProjectLinks",

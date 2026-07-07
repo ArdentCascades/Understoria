@@ -136,6 +136,35 @@ export async function buildRecoveryKit(
   };
 }
 
+/**
+ * Does this 64-byte Ed25519 secret genuinely generate `publicKey`?
+ * SUBTLE and load-bearing: `nacl.sign.keyPair.fromSecretKey` merely
+ * COPIES the embedded public half out of bytes 32..64 — a corrupted
+ * SEED (bytes 0..32) sails through that check while producing a key
+ * that can no longer sign as its public half. Re-derive from the
+ * seed instead, and require the embedded half to agree too. Shared
+ * by the kit restore and guardian-shard recovery (`lib/
+ * guardianShards.ts`) — it IS the integrity check Shamir lacks.
+ */
+export function secretMatchesPublicKey(
+  secretB64: string,
+  publicKey: string,
+): boolean {
+  try {
+    const secret = b64decode(secretB64);
+    if (secret.length !== nacl.sign.secretKeyLength) return false;
+    const fromSeed = nacl.sign.keyPair.fromSeed(
+      secret.slice(0, nacl.sign.seedLength),
+    );
+    return (
+      b64encode(fromSeed.publicKey) === publicKey &&
+      b64encode(secret.slice(nacl.sign.seedLength)) === publicKey
+    );
+  } catch {
+    return false;
+  }
+}
+
 export type ParseKitResult =
   | { ok: true; kit: RecoveryKit }
   | { ok: false; error: "not_a_kit" | "unsupported_version" };
@@ -223,15 +252,37 @@ export async function restoreFromRecoveryKit(
   // The decrypted key must actually BE the named identity — a
   // corrupted or hand-edited kit fails here rather than minting a
   // key that can't sign as its public half.
-  try {
-    const derived = nacl.sign.keyPair.fromSecretKey(b64decode(secretB64));
-    if (b64encode(derived.publicKey) !== kit.publicKey) {
-      return { ok: false, error: "corrupted_kit" };
-    }
-  } catch {
+  if (!secretMatchesPublicKey(secretB64, kit.publicKey)) {
     return { ok: false, error: "corrupted_kit" };
   }
 
+  const core = await restoreIdentityCore({
+    publicKey: kit.publicKey,
+    displayName: kit.displayName,
+    secretB64,
+    nodeId: kit.nodeId,
+    communityNodeUrl: kit.communityNodeUrl,
+    mirrors: kit.mirrors,
+  });
+  if (!core.ok) return core;
+  return { ok: true, publicKey: kit.publicKey };
+}
+
+/**
+ * The shared write path behind every "an identity walks back in"
+ * flow — the recovery kit above and guardian-shard recovery
+ * (`lib/guardianShards.ts`). Caller has already authenticated the
+ * secret (kit passphrase / reconstructed shares) AND verified it
+ * derives the named public key.
+ */
+export async function restoreIdentityCore(identity: {
+  publicKey: string;
+  displayName: string;
+  secretB64: string;
+  nodeId: string | null;
+  communityNodeUrl: string | null;
+  mirrors: readonly string[];
+}): Promise<{ ok: true } | { ok: false; error: "device_locked" }> {
   // Same guard as the pairing import: a protected-and-locked device
   // has no live master key to wrap under, and we never write a
   // plaintext key beside wrapped ones.
@@ -240,31 +291,38 @@ export async function restoreFromRecoveryKit(
   }
 
   const memberCountBefore = await db.members.count();
-  const existing = await db.members.get(kit.publicKey);
+  const existing = await db.members.get(identity.publicKey);
+  // Resolve the fallback OUTSIDE the transaction — `settings` is not
+  // in its table scope, and Dexie refuses cross-scope reads.
+  const memberNodeId =
+    identity.nodeId ?? (await getSetting(SETTING_KEYS.nodeId)) ?? "node_local";
   await db.transaction("rw", [db.members, db.secretKeys], async () => {
     if (!existing) {
       await createMember(
-        { publicKey: kit.publicKey, displayName: kit.displayName },
-        kit.nodeId ?? (await getSetting(SETTING_KEYS.nodeId)) ?? "node_local",
+        { publicKey: identity.publicKey, displayName: identity.displayName },
+        memberNodeId,
       );
     }
-    await persistSecretKey(kit.publicKey, secretB64);
+    await persistSecretKey(identity.publicKey, identity.secretB64);
   });
-  await setSetting(SETTING_KEYS.currentMember, kit.publicKey);
+  await setSetting(SETTING_KEYS.currentMember, identity.publicKey);
   await markOnboarded();
 
-  // Adopt the kit's community id on a FRESH device only (same rule as
-  // the pairing import — a device with its own community keeps it).
-  if (kit.nodeId && memberCountBefore === 0) {
-    await setSetting(SETTING_KEYS.nodeId, kit.nodeId);
+  // Adopt the community id on a FRESH device only (same rule as the
+  // pairing import — a device with its own community keeps it).
+  if (identity.nodeId && memberCountBefore === 0) {
+    await setSetting(SETTING_KEYS.nodeId, identity.nodeId);
   }
   // Node coordinates are SUGGESTIONS: adopt only where nothing is
   // configured; a stale kit must never clobber a live config.
-  if (kit.communityNodeUrl) {
+  if (identity.communityNodeUrl) {
     const current = await readSubmitConfig();
     if (current.url.trim() === "") {
-      await writeSubmitConfig({ url: kit.communityNodeUrl, enabled: true });
-      for (const mirror of kit.mirrors) {
+      await writeSubmitConfig({
+        url: identity.communityNodeUrl,
+        enabled: true,
+      });
+      for (const mirror of identity.mirrors) {
         try {
           await acceptMirror(mirror);
         } catch {
@@ -274,8 +332,8 @@ export async function restoreFromRecoveryKit(
     }
   }
 
-  // First sync — the community pours back in (the kit carries the
-  // self; the network carries the history).
+  // First sync — the community pours back in (the restore carries
+  // the self; the network carries the history).
   void import("@/lib/federationSync").then((sync) => {
     void sync.pullFederatedPosts();
     void sync.pullFederatedClaims();
@@ -296,7 +354,7 @@ export async function restoreFromRecoveryKit(
     void sync.pullFederatedShiftSignups();
   });
 
-  return { ok: true, publicKey: kit.publicKey };
+  return { ok: true };
 }
 
 /** Filename for the downloaded kit — dated so a drawer of kits sorts. */

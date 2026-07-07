@@ -28,6 +28,7 @@ import {
   restoreFromRecoveryKit,
   type RecoveryKit,
 } from "@/lib/recoveryKit";
+import { GuardianRecoveryFlow } from "@/components/GuardianRecoveryFlow";
 
 // "I have a recovery kit" — docs/identity-recovery.md Phase K1's
 // restore leg, linked from the Welcome tour beside the pairing path.
@@ -40,6 +41,7 @@ export default function RecoverIdentityPage() {
   const navigate = useNavigate();
   const { setCurrentMember, refreshOnboarded } = useApp();
   const [kit, setKit] = useState<RecoveryKit | null>(null);
+  const [guardianMode, setGuardianMode] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasted, setPasted] = useState("");
   const [passphrase, setPassphrase] = useState("");
@@ -99,7 +101,18 @@ export default function RecoverIdentityPage() {
         {t("recover.intro")}
       </p>
 
-      {!kit && (
+      {guardianMode && (
+        <GuardianRecoveryFlow
+          onRecovered={async (publicKey) => {
+            await setCurrentMember(publicKey);
+            await refreshOnboarded();
+            navigate("/");
+          }}
+          onCancel={() => setGuardianMode(false)}
+        />
+      )}
+
+      {!kit && !guardianMode && (
         <div className="flex flex-col gap-3">
           <label className="card flex cursor-pointer flex-col gap-1 border-canopy-300 hover:border-canopy-500 dark:border-canopy-700">
             <span className="font-semibold text-canopy-900 dark:text-canopy-100">
@@ -115,6 +128,18 @@ export default function RecoverIdentityPage() {
               onChange={(e) => void handleFile(e)}
             />
           </label>
+          <button
+            type="button"
+            className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+            onClick={() => setGuardianMode(true)}
+          >
+            <span className="font-semibold text-canopy-900 dark:text-canopy-100">
+              {t("recover.guardiansTitle")}
+            </span>
+            <span className="text-sm text-moss-600 dark:text-moss-300">
+              {t("recover.guardiansBody")}
+            </span>
+          </button>
           {!pasteOpen ? (
             <button
               type="button"
@@ -144,7 +169,7 @@ export default function RecoverIdentityPage() {
         </div>
       )}
 
-      {kit && (
+      {kit && !guardianMode && (
         <form onSubmit={(e) => void handleRestore(e)} className="flex flex-col gap-3">
           <p className="rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
             {t("recover.kitFound", { name: kit.displayName })}

@@ -1730,7 +1730,40 @@ We are not trying to protect against:
   the kit's node coordinates as suggestions that never clobber a
   configured device. What restore cannot recover is stated in the
   UI: E2E message history and unsynced drafts (device-only by
-  design). Guardian shards (K2) remain designed-not-built.
+  design).
+
+- **Guardian shards (K2).**
+  *Shipped — `docs/identity-recovery.md` §2.* Shamir k-of-n
+  (GF(256), k ≥ 2, n ≤ 7) over the member's secret key, split
+  across chosen guardian members. SSS is implemented in-repo
+  (~150 readable lines, `lib/sss.ts`) rather than as a dependency
+  — deliberately, per §8.3: first-party auditable code over an npm
+  tree. Security properties, honestly: below k shares the scheme
+  is information-theoretically blind (fresh random coefficients
+  per byte); at k, ANY k guardians together CAN reconstruct the
+  identity — the collusion bound is exactly the threshold the
+  member picked, and the picker copy says so. Shamir carries no
+  integrity, so reconstruction is anchored by re-deriving the
+  public key from the recovered seed and requiring it to match the
+  owner (a naive `fromSecretKey` check would pass a tampered seed
+  — the embedded public-key half is copied, not derived). The live
+  attack is social engineering of guardians (impersonating the
+  member to collect releases); the mitigation is human and the UI
+  builds it in: deliberate friction copy before release, in-person
+  bias, and releases sealed to the ONE requesting session's
+  temporary key so a photographed release QR is inert anywhere
+  else. Every hand-off is device-to-device (QR/paste) — the node,
+  operator, and message channel appear NOWHERE; there is no new
+  network surface, no mailbox, no metadata. New relational surface
+  per §8 question 6: a guardian's device knows whom they guard
+  (`guardianShards` rows, ciphertext-at-rest sealed to the
+  guardian's key) — soft purge clears the table (the panicking
+  member's safety outranks the guarded member's redundancy) and
+  data export excludes it (it is another person's key material in
+  trust, not the exporter's data). Known limitation, stated in the
+  UI: re-sharding does not revoke an old set — the key never
+  rotates, so k old shards still reconstruct; a member who
+  distrusts a former guardian should mint a fresh identity.
 
 ## 8. Guidance for reviewers
 

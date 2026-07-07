@@ -1,8 +1,10 @@
 # Identity recovery — a lost phone should not mean a lost self
 
-Status: **Phase K1 shipped** (the recovery kit — export in
-Settings, printable QR, and the Welcome "I have a recovery kit"
-restore path). **Phase K2 designed below, not built; K3 deferred.** Companion docs: `docs/device-pairing.md` / tap-to-link (the
+Status: **Phases K1 and K2 shipped** (K1: the recovery kit —
+export in Settings, printable QR, and the Welcome "I have a
+recovery kit" restore path. K2: guardian shards — Settings →
+Guardians for setup/duties, "Recover with guardians" on the
+restore page). **K3 deferred.** Companion docs: `docs/device-pairing.md` / tap-to-link (the
 existing and still-best mitigation: a second linked device),
 `docs/threat-model.md` (passphrase protection §7),
 `docs/member-removal.md` (whose quorum machinery Phase 3 would
@@ -104,48 +106,68 @@ it like a spare house key), passphrase forgotten (kit is inert —
 stated at creation, twice), kit + passphrase both lost (you are
 where you are today). Threat-model §7 entry required.
 
-## 2. Phase K2 — Guardian shards (social recovery)
+## 2. Phase K2 — Guardian shards (social recovery) — SHIPPED
 
 For members who can't safely keep a kit (no printer, shared
-housing, seizure risk) — spread the trust across people instead:
+housing, seizure risk) — spread the trust across people instead.
+As built (`lib/sss.ts`, `lib/guardianShards.ts`,
+`GuardianShardsCard`, `GuardianRecoveryFlow`):
 
-- **Secret sharing:** Shamir k-of-n over the 32-byte secret key,
-  GF(256), k=3/n=5 default (member-tunable within sane bounds,
-  k ≥ 2, n ≤ 7). Implemented in-repo (~150 lines + published test
-  vectors) rather than as a dependency — the dependency-audit bar
-  (`threat-model.md` §8.3) is easier to clear for readable
-  first-party code than for an npm tree.
-- **Distribution rides the shipped E2E channel:** each shard is
-  encrypted to a chosen guardian member's X25519 key (ed2curve —
-  exactly the `db/messages.ts` construction) and delivered as a
-  special message kind. The guardian's app stores it in a
-  `guardianShards` table and shows a quiet permanent line in
-  Profile: "You hold a recovery shard for Rosa (1 of 5, 3 needed)."
-  Guardians consent before storing (accept/decline card — the
-  informed-consent house style).
+- **Secret sharing:** Shamir k-of-n over the 64-byte Ed25519
+  secret key, GF(256), member-picked k and n within k ≥ 2, n ≤ 7.
+  Implemented in-repo (~150 readable lines, per-byte fresh random
+  coefficients, tested against subset/tamper/threshold cases)
+  rather than as a dependency — the dependency-audit bar
+  (`threat-model.md` §8.3) is easier to clear for first-party code
+  than for an npm tree. Shamir provides NO integrity; the
+  reconstruction is verified by re-deriving the public key from
+  the reconstructed seed and requiring it to equal the owner's
+  known key (`secretMatchesPublicKey` — the same anchor the
+  recovery kit uses).
+- **Delivery delta from the original design:** the plan above
+  assumed shards could ride the E2E message channel. In the
+  shipped codebase direct messages have NO transport — they are
+  written locally only (no outbox kind, no federation pull, no
+  node route). So every hand-off in K2 is **device-to-device**:
+  QR scan or copy/paste via the same capture component device
+  pairing uses. This is strictly LESS metadata than the mailbox
+  design — the node appears nowhere in any leg of the ceremony,
+  not even as a ciphertext relay.
+- **Distribution:** each shard is sealed to the chosen guardian's
+  X25519 key (ed2curve — the shared `crypto.ts` box construction)
+  and shown to that guardian as a QR, one guardian at a time. The
+  guardian accepts it in Settings → Guardians (decrypt-to-verify,
+  then the row is stored still-encrypted in a `guardianShards`
+  table keyed by owner); their card permanently lists "Rosa —
+  piece 1 of 5, any 3 recover". Accepting is the consent; a
+  guardian can drop the duty at any time.
 - **Recovery ceremony:** the member's NEW device mints a temporary
-  keypair and displays it as QR + code words. The member contacts
-  guardians out of band ("it's really me, I lost my phone"). Each
-  guardian, in person or over a trusted call, opens "Release
-  Rosa's shard", is shown deliberate friction copy (verify it's
-  really her, really her asking, ideally face to face), then their
-  app re-encrypts the shard to the temporary key and hands it over
-  via QR (in person) or the node's existing device-link mailbox
-  (opaque ciphertext, TTL'd, exactly its design). k shards →
-  reconstruct → real identity restored → temp key discarded →
-  guardians notified their shards are stale; the member re-shards.
+  keypair and shows a request QR. The member contacts guardians
+  out of band. Each guardian opens "Help recover", is shown
+  deliberate friction copy (verify it's really her, face to face
+  or on a call YOU place), scans the request, and their app
+  re-encrypts their share to the temporary key and shows a release
+  QR. The new device captures releases one by one (progress:
+  "2 of 3 pieces"), reconstructs at threshold, verifies the key,
+  and restores through the same core path as the recovery kit.
+  The temp key lives only in that page's memory.
 - **Threats, honestly:** k colluding guardians CAN steal the
   identity — choosing guardians is choosing who you trust with
   your self; the picker copy says exactly that. Social engineering
   of guardians is the live attack (hence the friction + in-person
-  bias). Guardian device loss silently erodes redundancy — the
-  member's app periodically (and privately) checks shard-holder
-  liveness via the message channel and nudges re-sharding below
-  n-1. A guardian who is REMOVED from the community
-  (`member-removal.md`) keeps their device data — the member is
-  nudged to re-shard, rotating the removed guardian out.
-- The node learns only what the mailbox already leaks: that two
-  devices exchanged ciphertext. No shard metadata surface.
+  bias). Re-sharding does NOT revoke the old set: the key itself
+  never rotates, so k old shards still reconstruct it — the UI
+  says so and points a worried member at making a fresh account. A
+  guardian who is REMOVED from the community keeps their device
+  data — same honesty applies. Shard-holder liveness nudges from
+  the original sketch are NOT built (there is no channel to check
+  over); redundancy erosion is a member-visible fact in each
+  guardian's duties list instead.
+- On the guardian's device the share exists ONLY as ciphertext
+  sealed owner→guardian; a guardian's stolen/imaged device without
+  its unlocked key material yields nothing. `guardianShards` rows
+  are relational (whom I guard), so soft purge clears them and
+  data export excludes them.
 
 ## 3. Phase K3 — community re-binding (design sketch only, deferred)
 
@@ -174,10 +196,12 @@ visibly open and the reasons for waiting are on record.
 1. **K1** — small-to-medium PR: kit export/import, Welcome path,
    nudge update, en/es, tests (wrap round-trip, wrong passphrase,
    stale URL handling), threat-model §7.
-2. **K2** — two PRs: (a) SSS + shard message kind + guardian
-   storage/consent; (b) the recovery ceremony (temp key, release
-   flow, mailbox leg, re-shard nudges). E2E: full lose-the-phone
-   drill with three guardian contexts.
+2. **K2** — SHIPPED (one PR: SSS + ceremony module + guardian
+   card + recovery flow; the mailbox leg dissolved into
+   device-to-device QR since messages have no transport). The
+   ceremony is covered by multi-device unit drills (three guardian
+   contexts simulated by wiping and re-seeding the test database
+   between roles).
 3. **K3** — not scheduled.
 
 ## 5. Threat-model / docs obligations (owed at implementation)
