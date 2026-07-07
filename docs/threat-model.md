@@ -1765,6 +1765,28 @@ We are not trying to protect against:
   rotates, so k old shards still reconstruct; a member who
   distrusts a former guardian should mint a fresh identity.
 
+- **Storage windowing (coverage-claim downgrade).**
+  *Shipped — `docs/storage-budget.md` Phase 1.* A member may free up
+  space on a constrained device: old SETTLED records (settled posts,
+  past events, closed projects — with their subtrees) older than a
+  member-chosen horizon are deleted locally, while a pinned working
+  set never windows (the roster, membership receipts, the exchange
+  ledger and vouch graph, governance history, everything the member
+  authored, everything still live). No new data or network surface —
+  windowing is strictly a LOCAL delete plus a merge-time refusal to
+  re-insert (cursors alone cannot enforce it: mirror failover and
+  node moves legitimately re-pull from zero). What §7 owes is the
+  CLAIM downgrade: "every member's device is a complete seed"
+  becomes conditional the moment any device can window, so the
+  resilience card and the re-seed flow now state THIS device's
+  coverage instead of asserting completeness, and the re-seed
+  guarantee is collective (devices union; seed vaults — Phase 2 —
+  make the full-archive role visible again). Deliberately NOT added:
+  any cross-device census of who windows what — the honest copy is
+  device-local. Two local-only tables (project activity, event↔
+  project links) window with their parents and cannot be re-fetched
+  by the undo path; the undo copy says so.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

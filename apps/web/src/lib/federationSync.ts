@@ -35,6 +35,7 @@ import type {
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { authorizedFetch } from "@/lib/authorizedRead";
 import { cursorKeySuffix, getActiveNodeUrl } from "@/lib/nodeEndpoints";
+import { windowAdmits } from "@/lib/storageWindow";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
 import { publishProjectState } from "@/db/projects";
 import { createMember } from "@/db/seed";
@@ -219,6 +220,19 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
     // the cursor (matching peerPull's rejected-row semantics).
     if (!verifyPost(post)) {
       skipped += 1;
+      continue;
+    }
+    // Storage windowing (docs/storage-budget.md Phase 1): a windowed
+    // device refuses to re-insert what its compaction walker would
+    // immediately delete — mirror failover and node moves re-pull
+    // from cursor zero and would otherwise resurrect the archive.
+    // Refusal ADVANCES the cursor: the row is settled-old, not
+    // deferred. No-op on unwindowed devices.
+    if (!(await windowAdmits("post", { ageAt: post.createdAt, post }))) {
+      skipped += 1;
+      if (maxCreatedAt === null || post.createdAt > maxCreatedAt) {
+        maxCreatedAt = post.createdAt;
+      }
       continue;
     }
     await db.posts.put(post);
@@ -408,6 +422,21 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
         maxCreatedAt = effectiveCursorAt;
       }
     };
+
+    // Windowing guard: a comment whose project is locally absent AND
+    // whose own stamp is past the horizon is part of a windowed
+    // subtree — refuse and advance. (Fresh comment, absent project =
+    // parent may still arrive; admitted, matching today's behavior.)
+    if (
+      !(await windowAdmits("project_child", {
+        ageAt: effectiveCursorAt,
+        parentPresent: !!(await db.projects.get(comment.projectId)),
+      }))
+    ) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
 
     const existing = await db.taskComments.get(comment.id);
     if (!existing) {
@@ -622,6 +651,18 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
       continue;
     }
 
+    // Windowing guard: invitations window with their project.
+    if (
+      !(await windowAdmits("coorg", {
+        ageAt: record.createdAt,
+        parentPresent: !!(await db.projects.get(record.projectId)),
+      }))
+    ) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
     const existing = await db.coorgInvitations.get(record.id);
     if (existing) {
       skipped += 1;
@@ -719,6 +760,18 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
     if (!verifyCoOrganizerInvitationResponse(record)) {
       // Never advance past a refused row — see pullFederatedExchanges.
       skipped += 1;
+      continue;
+    }
+
+    // Windowing guard: responses window with their invitation.
+    if (
+      !(await windowAdmits("coorg", {
+        ageAt: record.decidedAt,
+        parentPresent: !!(await db.coorgInvitations.get(record.invitationId)),
+      }))
+    ) {
+      skipped += 1;
+      advanceCursor();
       continue;
     }
 
@@ -947,6 +1000,17 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
       continue;
     }
 
+    // Windowing guard: an ended-before-the-horizon event this member
+    // never touched stays out (my participation and recent
+    // cancellations pin — the guard checks local rows for both).
+    if (
+      !(await windowAdmits("event", { ageAt: record.createdAt, event: record }))
+    ) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
     await db.events.put(record);
     inserted += 1;
     advanceCursor();
@@ -1054,6 +1118,18 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
     // render-time guard (lib/eventCancellation.ts) keeps that row inert
     // until an event proves authority — so a forgery can never act.
     const localEvent = await db.events.get(record.eventId);
+    // Windowing guard: a cancellation is admitted while its tombstone
+    // is still converging (recent) or while its event is here.
+    if (
+      !(await windowAdmits("event_cancellation", {
+        ageAt: record.cancelledAt,
+        parentPresent: !!localEvent,
+      }))
+    ) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
     if (localEvent && localEvent.createdBy !== record.createdBy) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn(
@@ -1627,6 +1703,19 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
       }
     };
 
+    // Windowing guard: a settled project past the horizon that this
+    // member never organized or worked on stays out.
+    if (
+      !(await windowAdmits("project", {
+        ageAt: record.updatedAt,
+        project: record as unknown as Project,
+      }))
+    ) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
     const local = (await db.projects.get(record.id)) as
       | (Project & Partial<ProjectState>)
       | undefined;
@@ -1725,6 +1814,19 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
       | (Project & Partial<ProjectState>)
       | undefined;
     if (!project) {
+      // Windowing: when the parent project was REFUSED by the guard
+      // (settled-old subtree), it is never coming — advance past its
+      // tasks instead of retrying forever.
+      if (
+        !(await windowAdmits("project_child", {
+          ageAt: record.updatedAt,
+          parentPresent: false,
+        }))
+      ) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
       // Project not here yet — retry next cycle, don't advance.
       skipped += 1;
       continue;
@@ -1851,6 +1953,18 @@ export async function pullFederatedEventShifts(): Promise<FederationSyncResult |
     // artifact we already verified when it arrived.
     const event = await db.events.get(record.eventId);
     if (!event) {
+      // Windowing: shifts of a windowed-out event never resolve —
+      // advance past them instead of retrying forever.
+      if (
+        !(await windowAdmits("event_child", {
+          ageAt: record.updatedAt,
+          parentPresent: false,
+        }))
+      ) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
       skipped += 1; // event not here yet — retry next cycle
       continue;
     }
@@ -1926,6 +2040,18 @@ export async function pullFederatedEventRsvps(): Promise<FederationSyncResult | 
     };
 
     if (!(await db.events.get(record.eventId))) {
+      // Windowing: RSVPs of a windowed-out event never resolve —
+      // advance past them instead of retrying forever.
+      if (
+        !(await windowAdmits("event_child", {
+          ageAt: record.updatedAt,
+          parentPresent: false,
+        }))
+      ) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
       skipped += 1; // event not here yet — retry next cycle
       continue;
     }
@@ -2018,6 +2144,18 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
     // A LIVE signup needs its shift, or the roster entry would be a
     // dead pointer — shift pull runs earlier in the fan-out.
     if (!(await db.eventShifts.get(record.shiftId))) {
+      // Windowing: signups of a windowed-out shift never resolve —
+      // advance past them instead of retrying forever.
+      if (
+        !(await windowAdmits("event_child", {
+          ageAt: record.updatedAt,
+          parentPresent: false,
+        }))
+      ) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
       skipped += 1;
       continue;
     }

@@ -20,6 +20,7 @@ import { RecoveryKitCard } from "@/components/RecoveryKitCard";
 import { GuardianShardsCard } from "@/components/GuardianShardsCard";
 import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
+import { StorageWindowSection } from "@/components/StorageWindowSection";
 import { exportData } from "@/lib/exportData";
 import {
   formatBytes,
@@ -118,6 +119,7 @@ export default function SettingsPage() {
               {t("profile.data.export")}
             </button>
           </div>
+          <StorageWindowSection />
         </section>
       </div>
     </div>

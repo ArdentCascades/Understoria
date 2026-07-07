@@ -1564,7 +1564,8 @@
     "doneComplete": "Restore finished.",
     "doneInterrupted": "Restore paused — run it again to continue from where it stopped.",
     "totals": "{{restored}} restored · {{present}} already there · {{skipped}} skipped",
-    "skippedHint": "Skipped records are ones this node declined — usually auto-confirmed exchanges (the operator can enable them with TRUSTED_SYSTEM_KEYS) or receipts outside an open re-seed window (RESEED_GRACE_UNTIL). See docs/community-reseed.md."
+    "skippedHint": "Skipped records are ones this node declined — usually auto-confirmed exchanges (the operator can enable them with TRUSTED_SYSTEM_KEYS) or receipts outside an open re-seed window (RESEED_GRACE_UNTIL). See docs/community-reseed.md.",
+    "windowedNote": "This device freed up space and keeps the last {{years}} year(s) plus everything active and yours — it will restore what it holds, and other members' devices fill in the rest."
   },
   "mirrorSuggest": {
     "label": "Add a backup server for this community",
@@ -1819,11 +1820,12 @@
         "deep_rooted": "Deep-rooted"
       },
       "bodySeedling": "Right now this community lives on this device alone. Connecting to a community server — or starting one — lets everyone's copies stay in step.",
-      "bodyOne": "One server carries this community — and {{count}} member holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
-      "bodyOther": "One server carries this community — and every one of its {{count}} members holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
-      "bodyMultiOne": "{{nodes}} servers carry this community — and {{count}} member holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
-      "bodyMultiOther": "{{nodes}} servers carry this community — and every one of its {{count}} members holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
+      "bodyOne": "One server carries this community — and {{count}} member carries it on their own device too. Nothing here can be taken away by taking a machine.",
+      "bodyOther": "One server carries this community — and every one of its {{count}} members carries it on their own device too. Nothing here can be taken away by taking a machine.",
+      "bodyMultiOne": "{{nodes}} servers carry this community — and {{count}} member carries it on their own device too. Nothing here can be taken away by taking a machine.",
+      "bodyMultiOther": "{{nodes}} servers carry this community — and every one of its {{count}} members carries it on their own device too. Nothing here can be taken away by taking a machine.",
       "bodyFailover": "If one server disappears, your apps switch to the others on their own. Nothing is lost.",
+      "windowedNote": "This device keeps the last {{years}} year(s) plus everything active and yours — the servers keep the full history.",
       "nodeQuiet": "No server has answered lately — your copy is safe, and syncing resumes when one is back.",
       "leaf": {
         "fresh": "synced today",
@@ -1983,7 +1985,20 @@
       "storageProtected": "protected from browser cleanup",
       "storageUnprotected": "the browser may clear it under disk pressure — installing the app usually protects it",
       "storageUnknown": "cleanup protection unknown on this browser",
-      "export": "Export my data"
+      "export": "Export my data",
+      "window": {
+        "full": "This device carries the community's full history.",
+        "windowed": "This device keeps the last {{years}} year(s) plus everything active and everything yours. The full history stays on your community's servers.",
+        "freeUp": "Free up space on this device…",
+        "chooseHorizon": "How much history should this device keep?",
+        "keepYears": "Keep {{years}} year(s)",
+        "preview": "This removes {{total}} old records from this device only: {{posts}} settled posts, {{events}} past events, {{projects}} closed projects, and their details.",
+        "previewNote": "Nothing you wrote, nothing still open, and none of the community's ledger, roster, or membership records are touched. Every removed record stays on your community's servers and on other members' devices — you can bring everything back later.",
+        "confirm": "Free up the space",
+        "done": "Done — {{total}} records removed from this device.",
+        "undo": "Carry the full history again",
+        "undoDone": "This device will re-download the full history in the background. Activity logs of long-closed projects don't come back — they only ever lived on devices."
+      }
     },
     "communityAccount": {
       "title": "Community & account"
