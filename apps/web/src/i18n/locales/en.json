@@ -1865,6 +1865,10 @@
     "data": {
       "title": "Data & privacy",
       "intro": "Everything you see is stored locally on this device. No server. No analytics. No account to sign up for.",
+      "storageUsage": "Your copy of this community: {{size}}",
+      "storageProtected": "protected from browser cleanup",
+      "storageUnprotected": "the browser may clear it under disk pressure — installing the app usually protects it",
+      "storageUnknown": "cleanup protection unknown on this browser",
       "export": "Export my data"
     },
     "communityAccount": {

@@ -1656,6 +1656,32 @@ We are not trying to protect against:
   with LWW records resolving by version exactly as they do between
   devices.
 
+- **Re-seed Phase R0 (artifact persistence).**
+  *Shipped — `docs/community-reseed.md` §1b; the full re-seed
+  capability (R1) owes its own entry when it lands.* Devices now
+  persist the SIGNED redemption receipts and invite revocations they
+  verify (new Dexie tables), instead of dropping the signatures
+  after materializing bookkeeping rows. No new exposure: every
+  device already held the derived who-invited-whom rows and display
+  names; the artifact adds only the signatures binding what was
+  already stored — and it is exactly what a fresh node's membership
+  closure would need re-uploaded after total node loss. Handling
+  matches the `invites` table's posture everywhere it matters: soft
+  purge clears both tables whole (the payloads are signed, so
+  scrubbing names would destroy them; in a panic the member's safety
+  outranks the community's redundancy — the next pull refills from
+  any live node), and both are excluded from the shareable export
+  (same relational-graph rationale that excludes `invites`). The
+  device also captures the node's published auto-confirm system key
+  (`/config.systemKey`) into settings — disaster bookkeeping for
+  R1's `TRUSTED_SYSTEM_KEYS`, public data by definition.
+  Companion Phase 0 of `docs/storage-budget.md` shipped alongside:
+  the app requests the browser's durable-storage grant (an eviction
+  under disk pressure could otherwise silently delete the
+  community's local copy) and Settings shows the copy's size and
+  protection state. The estimate never leaves the device; no new
+  wire bytes anywhere in either change.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

@@ -150,10 +150,13 @@ export async function revokeInvite(
   // told anyone" — the exact per-device-divergence bug this closes.
   await db.transaction(
     "rw",
-    [db.invites, db.outbox, db.settings],
+    [db.invites, db.outbox, db.settings, db.inviteRevocationRecords],
     async () => {
       await db.invites.put({ ...row, status: "revoked", revokedAt });
       await enqueueInviteRevocationOutbox(revocation);
+      // Re-seed Phase R0: the signed revocation persists beside the
+      // flipped row (docs/community-reseed.md §1b).
+      await db.inviteRevocationRecords.put(revocation);
     },
   );
   void flushOutboxNow().catch(() => {
@@ -352,7 +355,7 @@ export async function redeemInvite(
   // await to trigger Dexie's premature commit).
   const member = await db.transaction(
     "rw",
-    [db.invites, db.outbox, db.members, db.secretKeys],
+    [db.invites, db.outbox, db.members, db.secretKeys, db.redemptionReceipts],
     async () => {
       let m: Member;
       if (mintKp) {
@@ -400,6 +403,11 @@ export async function redeemInvite(
       });
       if (receipt) {
         await enqueueRedemptionReceiptOutbox(receipt);
+        // Re-seed Phase R0 (docs/community-reseed.md §1b): keep the
+        // SIGNED artifact, not just the derived invite row — outbox
+        // rows are pruned after delivery, and this receipt is what a
+        // fresh node's membership closure would need re-uploaded.
+        await db.redemptionReceipts.put(receipt);
       }
       return m;
     },

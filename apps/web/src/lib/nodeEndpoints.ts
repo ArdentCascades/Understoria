@@ -54,6 +54,11 @@ const MIRRORS_KEY = "communityNodeMirrors";
  *  answered"; the consent card never re-asks for these. */
 const MIRRORS_DISMISSED_KEY = "communityNodeMirrorsDismissed";
 
+/** Last-seen `/config` system key, JSON `{nodeId, current, history,
+ *  capturedAt}` — re-seed Phase R0's disaster bookkeeping (see
+ *  `pendingMirrorSuggestions`). Exported for the future re-seed UI. */
+export const LAST_SEEN_SYSTEM_KEY = "communityNodeLastSeenSystemKey";
+
 /** How long one active-node resolution is trusted before re-probing.
  *  Short enough that a mid-session outage fails over within a couple
  *  of sync ticks; long enough that one sync cycle's 16 pulls share a
@@ -312,8 +317,41 @@ export async function pendingMirrorSuggestions(
       mode: "cors",
     });
     if (!res.ok) return [];
-    const body = (await res.json()) as { mirrors?: unknown } | null;
-    if (!body || !Array.isArray(body.mirrors)) return [];
+    const body = (await res.json()) as {
+      mirrors?: unknown;
+      systemKey?: { current?: unknown; history?: unknown };
+      nodeId?: unknown;
+    } | null;
+    if (!body || typeof body !== "object") return [];
+    // Re-seed Phase R0 (docs/community-reseed.md §1c): capture the
+    // node's published auto-confirm key while the node is alive. If
+    // the node is ever lost, this is the value the operator of a
+    // replacement copies into TRUSTED_SYSTEM_KEYS so the community's
+    // auto-confirmed exchanges re-verify — it is recoverable from any
+    // member's device precisely because it was captured here.
+    if (
+      typeof body.nodeId === "string" &&
+      body.systemKey &&
+      typeof body.systemKey === "object" &&
+      typeof body.systemKey.current === "string"
+    ) {
+      try {
+        await setSetting(
+          LAST_SEEN_SYSTEM_KEY,
+          JSON.stringify({
+            nodeId: body.nodeId,
+            current: body.systemKey.current,
+            history: Array.isArray(body.systemKey.history)
+              ? body.systemKey.history
+              : [],
+            capturedAt: new Date().toISOString(),
+          }),
+        );
+      } catch {
+        // Capture is best-effort bookkeeping.
+      }
+    }
+    if (!Array.isArray(body.mirrors)) return [];
     announced = body.mirrors
       .filter((u): u is string => typeof u === "string")
       .map(normalizeNodeUrl)

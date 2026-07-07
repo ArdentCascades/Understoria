@@ -250,6 +250,8 @@ export async function softPurge(): Promise<PurgeResult> {
       db.shiftSignups,
       db.outbox,
       db.invites,
+      db.redemptionReceipts,
+      db.inviteRevocationRecords,
       db.votes,
       db.pairingLog,
     ],
@@ -264,6 +266,14 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.shiftSignups.clear();
       await db.outbox.clear();
       await db.invites.clear();
+      // The signed membership artifacts (re-seed Phase R0) are the
+      // who-invited-whom graph with display names inside the signed
+      // payloads — unscrubbable without destroying the signatures, so
+      // they clear whole. Costs this device its re-seed capability
+      // until the next pull refills them from a node: in a panic,
+      // the member's safety outranks the community's redundancy.
+      await db.redemptionReceipts.clear();
+      await db.inviteRevocationRecords.clear();
       await db.votes.clear();
       await db.pairingLog.clear();
     },
@@ -278,6 +288,8 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("shiftSignups");
   tables.push("outbox");
   tables.push("invites");
+  tables.push("redemptionReceipts");
+  tables.push("inviteRevocationRecords");
   tables.push("votes");
   tables.push("pairingLog");
 

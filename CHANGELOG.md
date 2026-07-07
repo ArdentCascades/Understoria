@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Your device's copy of the community is now protected and
+  measured** (`docs/storage-budget.md` Phase 0). The app asks the
+  browser for the durable-storage grant at launch, so disk pressure
+  can no longer silently evict the community's local copy, and
+  Settings → Data shows the copy's size and whether it's protected.
+  Nothing leaves the device.
+- **Groundwork for restoring a community after total node loss**
+  (`docs/community-reseed.md` Phase R0). Devices now keep the SIGNED
+  redemption receipts and invite revocations they verify — the
+  artifacts a fresh node's membership derives from — instead of
+  dropping the signatures after bookkeeping. They ride the
+  device-pairing transfer, clear on panic purge, and stay out of the
+  shareable export. **Update soon after this releases:** these
+  artifacts can only be captured while a community node is still
+  reachable, which is the whole point of shipping this before it's
+  ever needed. The app also records the node's published auto-confirm
+  key as disaster bookkeeping for the future restore flow.
 - **Mirror nodes + automatic failover — "one server disappears,
   nobody notices, nothing is lost" is now literally true**
   (`docs/community-resilience.md` Phase B, verified end-to-end by a

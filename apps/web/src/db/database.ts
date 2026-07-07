@@ -33,6 +33,7 @@ import type {
   EventRsvpRow,
   EventShiftRow,
   Exchange,
+  InviteRevocation,
   Member,
   NodeConfig,
   Post,
@@ -41,6 +42,7 @@ import type {
   ProjectActivity,
   ProjectTask,
   Proposal,
+  RedemptionReceipt,
   ShiftSignupRow,
   TaskComment,
   Vote,
@@ -389,6 +391,21 @@ export class UnderstoriaDB extends Dexie {
    * LWW `ShiftSignupState` records; withdrawal publishes a tombstone.
    */
   shiftSignups!: Table<ShiftSignupRow, string>;
+  /**
+   * Verified redemption receipts, stored WITH their signatures —
+   * re-seed Phase R0 (docs/community-reseed.md §1b). The `invites` /
+   * `members` rows derived from these are the app's working state;
+   * THESE rows are the re-uploadable artifacts a fresh node's
+   * membership closure derives from. Keyed by the embedded invite
+   * token. Cleared by soft purge (who-invited-whom graph — same
+   * personal-relief class as `invites`), excluded from the shareable
+   * export for the same reason, carried by the device-pairing
+   * snapshot.
+   */
+  redemptionReceipts!: Table<RedemptionReceipt, string>;
+  /** Signed invite revocations — same R0 posture as
+   *  `redemptionReceipts`; keyed by token. */
+  inviteRevocationRecords!: Table<InviteRevocation, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -901,6 +918,24 @@ export class UnderstoriaDB extends Dexie {
       eventShifts: "id, eventId, startsAt, createdAt",
       shiftSignups:
         "id, shiftId, eventId, memberKey, [shiftId+memberKey], [eventId+memberKey]",
+    });
+    // v29: re-seed Phase R0 (docs/community-reseed.md §1b) — persist
+    // the SIGNED membership artifacts. The pulls verified these and
+    // then materialized them into unsigned `invites`/`members`
+    // bookkeeping rows, dropping the signatures — which meant no
+    // device could ever re-upload the receipt chain a fresh node's
+    // membership closure derives from. Two pure new tables keyed by
+    // invite token (receipts and revocations are immutable and
+    // first-writer-wins by token everywhere else too). No backfill
+    // possible from local data: existing devices refill from any
+    // live node's feeds on the next periodic pull — which is exactly
+    // why R0 ships long before it is ever needed.
+    this.version(29).stores({
+      // Receipts nest the token inside the embedded signed invite;
+      // Dexie dotted keypaths make it the primary key without a
+      // wrapper row that would break re-POST-verbatim.
+      redemptionReceipts: "invite.token",
+      inviteRevocationRecords: "token",
     });
   }
 }

@@ -62,6 +62,11 @@ export const SNAPSHOT_TABLES = [
   "coorgInvitations",
   "coorgInvitationResponses",
   "coorgInvitationRevocations",
+  // Re-seed Phase R0 (docs/community-reseed.md §1b): the signed
+  // membership artifacts ride the transfer so a linked device is
+  // just as capable of re-seeding a fresh node as the source.
+  "redemptionReceipts",
+  "inviteRevocationRecords",
 ] as const;
 
 export type SnapshotTable = (typeof SNAPSHOT_TABLES)[number];
