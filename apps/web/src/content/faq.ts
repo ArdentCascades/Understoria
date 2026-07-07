@@ -151,15 +151,50 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "lost-passphrase",
         question: "What happens if I lose my passphrase?",
         answer: [
-          "There is no recovery, by design. The trade is: no central " +
-            "authority can read your data, and so no central authority " +
-            "can rescue it either.",
-          "If this worries you, the safest path is to pick a passphrase " +
-            "you can remember and to write it down somewhere offline. " +
-            "If you do lose access, the only remaining option is Profile " +
-            "→ Emergency → Hard purge, which wipes the device and lets " +
-            "you start over with a fresh identity. You won't get your " +
-            "old credit history back.",
+          "Nobody can reset it for you, by design. The trade is: no " +
+            "central authority can read your data, and so no central " +
+            "authority can rescue it either.",
+          "But a forgotten passphrase no longer has to mean a lost " +
+            "self. If you have a second linked device, it still holds " +
+            "your identity. If you made a recovery kit (Settings → " +
+            "Recovery kit), it restores your account under its own, " +
+            "separate passphrase. If you chose guardians, enough of " +
+            "them together can bring you back with no passphrase at " +
+            "all. See 'What happens if I lose my phone?' below for the " +
+            "full order to try.",
+          "Only if none of those exist is the answer Profile → " +
+            "Emergency → Hard purge: wipe the device and start over " +
+            "with a fresh identity, without your old credit history.",
+        ],
+      },
+      {
+        id: "lost-phone",
+        question: "What happens if I lose my phone?",
+        answer: [
+          "Your account can come back — here is the honest order to " +
+            "try, best first.",
+          "1. A second linked device. If you added one (Settings → " +
+            "Add device), your identity already lives there; just " +
+            "keep using it, and link a replacement phone from it.",
+          "2. A recovery kit. If you made one (Settings → Recovery " +
+            "kit), open the app on any new device, choose 'Lost your " +
+            "device but have a recovery kit?', and enter the kit's " +
+            "passphrase. Balance, vouches, roles, and membership all " +
+            "return; the community history syncs back from its server.",
+          "3. Your guardians. If you split your key among guardians " +
+            "(Settings → Guardians), meet enough of them: the new " +
+            "device shows a request code, each guardian answers with " +
+            "a release code, and at the threshold your account walks " +
+            "back in — no kit, no passphrase.",
+          "4. A new invite. If none of the above exist, ask someone " +
+            "to invite you again. You'll be a fresh member: your old " +
+            "history stays visible to the community under your old " +
+            "name, but the new key starts from zero. This is exactly " +
+            "why the app nudges everyone toward a second device, a " +
+            "kit, or guardians BEFORE the bad week.",
+          "What never comes back on a new device: direct messages " +
+            "and unsent drafts — they only ever lived on the lost " +
+            "phone, by design.",
         ],
       },
       {
@@ -328,6 +363,36 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
           "And if what you need is simply distance from someone, " +
             "blocking is always available too — see 'What if someone " +
             "is bothering me?' under Messages.",
+        ],
+      },
+      {
+        id: "member-removal",
+        question: "How does removing someone from the community work?",
+        answer: [
+          "Removal is the heaviest thing this community can do, and " +
+            "the app treats it that way. It is a last resort: a " +
+            "personal block already stops someone's content from " +
+            "reaching you, a dispute can contest a specific exchange, " +
+            "and a conversation fixes more than either.",
+          "No single person can remove anyone — not an organizer, and " +
+            "not whoever runs the server. It takes several members " +
+            "(the number is set by your community and shown to " +
+            "everyone) each signing their own name to one public " +
+            "record. Proposing starts on the member's profile; " +
+            "co-signing happens in person, from the Decisions page.",
+          "A removal is public inside the community — who was " +
+            "removed, when, why, and exactly who signed, all visible " +
+            "on the Decisions page. Secret expulsions are how " +
+            "communities rot.",
+          "It is not erasure. The removed member's past exchanges " +
+            "remain — they balance other members' ledgers — and " +
+            "everything on their own device stays theirs. What ends " +
+            "is their access: reading stops, and new writing is " +
+            "refused. People they invited before the removal remain " +
+            "members; their unused invites die with it.",
+          "And the door can reopen: reinstatement takes the same " +
+            "number of signatures, started from the removal record " +
+            "itself on the Decisions page.",
         ],
       },
       {

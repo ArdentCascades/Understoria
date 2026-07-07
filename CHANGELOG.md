@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Help now answers the two hardest questions honestly.** "What
+  happens if I lose my phone?" walks the real recovery order — a
+  linked device, the recovery kit, your guardians, and only then a
+  fresh invite — and says plainly what never comes back. "How does
+  removing someone from the community work?" adapts the removal
+  values into member-facing words: last resort, never one person's
+  call, public inside the community, not erasure, and a door that
+  reopens. The stale "there is no recovery, by design" passphrase
+  answer now points at the recovery paths that exist.
+
+### Changed
+- New design plan `docs/proposal-federation.md`: making proposals
+  and votes signed, federated records so the Decisions page tells
+  one truth on every device (today votes are invisible to everyone
+  but their caster, and a passed config change only updates the
+  device that clicked). Names the open-ballot values decision,
+  preserves the blocking invariants, and phases the work (G1
+  records, G2 convergent effects). Designed, not built.
 - **The removal ceremony, in the app** (`docs/member-removal.md`
   Phases M2+M3, completing M1's record and gates). Proposing a
   removal starts on the member's profile — beneath the block action,
