@@ -149,6 +149,13 @@ plaintext (JSON, parsed after unwrap) = {
                                      // every pull is gated on the
                                      // setting. Optional on the wire
                                      // (older sources omit it).
+  nodeId?: string,                   // the source's community id.
+                                     // Devices mint a random one on
+                                     // first run and stats/attribution
+                                     // split on it; a fresh destination
+                                     // adopts the source's so
+                                     // transferred records count as
+                                     // its own community's.
   snapshot?: { <table>: rows[] },    // shared-state slice of the
                                      // source's local database
                                      // (lib/communitySnapshot.ts —

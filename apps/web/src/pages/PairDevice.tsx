@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { db } from "@/db/database";
+import { db, SETTING_KEYS, setSetting } from "@/db/database";
 import { createMember } from "@/db/seed";
 import { markOnboarded } from "@/db/onboarding";
 import {
@@ -162,9 +162,14 @@ export default function PairDevicePage() {
         setSavingLabel(false);
       }
       setStage("success-redirect");
-      navigate("/");
+      // FULL page load, not SPA navigation: the import adopted the
+      // source's community id and node connection, and AppContext
+      // captured the pre-import values at boot — a clean boot brings
+      // the dashboard splits, sync loop, and outbox worker up on the
+      // adopted state.
+      window.location.assign("/");
     },
-    [navigate],
+    [],
   );
 
   const handleCancelToWelcome = useCallback(() => {
@@ -1010,6 +1015,19 @@ export default function PairDevicePage() {
 async function adoptCommunityNodeAndSync(
   payload: TransferPayload,
 ): Promise<void> {
+  // Adopt the source's community id on a FRESH device (same guard as
+  // the snapshot: exactly the one member row the import just wrote).
+  // Every device mints a random nodeId on first run, and dashboard
+  // stats + record attribution split on it — keeping our own fresh
+  // id would file every transferred exchange under "another
+  // community" and zero the headline stats.
+  if (typeof payload.nodeId === "string" && payload.nodeId !== "") {
+    const memberCount = await db.members.count();
+    if (memberCount <= 1) {
+      await setSetting(SETTING_KEYS.nodeId, payload.nodeId);
+    }
+  }
+
   // Hydrate the community itself FIRST: projects, tasks, proposals,
   // and RSVPs never federate, so the snapshot in the payload is the
   // only way they reach this device (lib/communitySnapshot.ts). The
