@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { Database as DatabaseType } from "better-sqlite3";
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { FastifyInstance } from "fastify";
 import {
   canonicalEventPayload,

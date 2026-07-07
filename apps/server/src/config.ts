@@ -145,6 +145,46 @@ export interface Config {
    */
   tableRowCeiling: number;
   perKeyRowCeiling: number;
+  /**
+   * Member-authenticated reads (docs/member-authenticated-reads.md).
+   * `"off"` (default) leaves the GET feeds open exactly as before —
+   * the staged-rollout posture: members' apps sign reads
+   * unconditionally, so an operator flips this only after everyone is
+   * on an app version that sends the headers. `"on"` requires every
+   * federation GET to carry a valid member signature (or a configured
+   * peer token). Enabling without any `NODE_FOUNDER_KEYS` fails the
+   * boot loudly: an "on" node nobody can read is a misconfiguration,
+   * not a security posture.
+   */
+  readAuth: "off" | "on";
+  /**
+   * Trust roots for the membership resolver: base64 Ed25519 public
+   * keys of members who joined WITHOUT an invite (the founding
+   * member(s)). Everyone else proves membership transitively through
+   * verified redemption receipts. Comma-separated via
+   * `NODE_FOUNDER_KEYS`.
+   */
+  founderKeys: readonly string[];
+  /**
+   * Shared read tokens for peer nodes (`PEER_READ_TOKENS`, JSON map of
+   * peer base URL → token). Outgoing peer pulls to a mapped URL send
+   * `authorization: Bearer <token>`; inbound reads presenting any
+   * mapped token are accepted as peer reads when `readAuth` is on.
+   * Peers aren't members; peering pairs exchange tokens out of band,
+   * the same channel that already carries `PEER_NODE_URLS`.
+   */
+  peerReadTokens: Readonly<Record<string, string>>;
+  /**
+   * Encryption-at-rest key for the SQLite database
+   * (`DATABASE_KEY`). When set, `openDatabase` applies `PRAGMA key`
+   * (SQLCipher scheme via better-sqlite3-multiple-ciphers) before
+   * migrations — the file on disk is then unreadable without it.
+   * Null keeps plaintext (the pre-existing behavior; upgrades don't
+   * break). Protects the powered-off disk / stolen backup, NOT a
+   * live-compromised host (the key lives in this process's env).
+   * One-time migration of an existing plaintext DB: operator-guide §5.
+   */
+  databaseKey: string | null;
 }
 
 function asInt(name: string, raw: string | undefined, fallback: number): number {
@@ -213,7 +253,80 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       env.PER_KEY_ROW_CEILING,
       10_000,
     ),
+    readAuth: parseReadAuth(env.READ_AUTH, env.NODE_FOUNDER_KEYS),
+    founderKeys: parseFounderKeys(env.NODE_FOUNDER_KEYS),
+    peerReadTokens: parsePeerReadTokens(env.PEER_READ_TOKENS),
+    databaseKey: nonEmpty(env.DATABASE_KEY),
   };
+}
+
+function parseReadAuth(
+  raw: string | undefined,
+  founderRaw: string | undefined,
+): "off" | "on" {
+  const mode = (raw ?? "off").toLowerCase();
+  if (mode !== "off" && mode !== "on") {
+    throw new Error(
+      `READ_AUTH must be "off" or "on", got ${JSON.stringify(raw)}`,
+    );
+  }
+  if (mode === "on" && parseFounderKeys(founderRaw).length === 0) {
+    // Loud, not lenient: enforcement with an empty member universe
+    // means NOBODY can read the node — always a misconfiguration.
+    throw new Error(
+      "READ_AUTH=on requires at least one NODE_FOUNDER_KEYS entry " +
+        "(the membership resolver's trust root — " +
+        "docs/member-authenticated-reads.md §1)",
+    );
+  }
+  return mode;
+}
+
+function parseFounderKeys(raw: string | undefined): readonly string[] {
+  if (raw === undefined || raw.trim() === "") return [];
+  const keys = raw
+    .split(",")
+    .map((k) => k.trim())
+    .filter((k) => k !== "");
+  for (const key of keys) {
+    // Ed25519 pubkeys are 32 bytes → 44 base64 chars. A loose sanity
+    // bound only; the verifier is the real gate.
+    if (key.length < 40 || key.length > 60) {
+      throw new Error(
+        `NODE_FOUNDER_KEYS entry ${JSON.stringify(key.slice(0, 12))}… does not look like a base64 Ed25519 public key`,
+      );
+    }
+  }
+  return keys;
+}
+
+function parsePeerReadTokens(
+  raw: string | undefined,
+): Readonly<Record<string, string>> {
+  if (raw === undefined || raw.trim() === "") return {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("PEER_READ_TOKENS is not valid JSON");
+  }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error(
+      'PEER_READ_TOKENS must be a JSON object of {"<peer url>": "<token>"}',
+    );
+  }
+  const out: Record<string, string> = {};
+  for (const [url, token] of Object.entries(parsed)) {
+    if (typeof token !== "string" || token.length < 16) {
+      // Short bearer tokens are guessable; refuse them at boot rather
+      // than let a weak one quietly hold the read door open.
+      throw new Error(
+        `PEER_READ_TOKENS entry for ${JSON.stringify(url)} must be a string of at least 16 characters`,
+      );
+    }
+    out[url.replace(/\/+$/, "")] = token;
+  }
+  return out;
 }
 
 function asNonNegativeInt(

@@ -999,3 +999,20 @@ export function verifyProjectState(rec: ProjectState): boolean {
 export function verifyTaskState(rec: TaskState): boolean {
   return verifyStateRecord(rec);
 }
+
+// --- Member-authenticated reads (docs/member-authenticated-reads.md) --
+
+/**
+ * Canonical bytes a member signs to authorize one read. Path INCLUDES
+ * the query string, so a captured signature can't be replayed against
+ * a different cursor window; the timestamp bounds how long captured
+ * headers stay usable (reads are idempotent, so a nonce scheme buys
+ * nothing further). Shared so the PWA signer and the node verifier
+ * can never drift.
+ */
+export function canonicalReadAuthMessage(
+  pathWithQuery: string,
+  timestampMs: number,
+): string {
+  return `read|${pathWithQuery}|${timestampMs}`;
+}

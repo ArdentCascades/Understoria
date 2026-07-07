@@ -31,7 +31,7 @@ import type {
   SignedVouch,
   TaskComment,
 } from "@understoria/shared/types";
-import type { Database as DatabaseType } from "better-sqlite3";
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import {
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,

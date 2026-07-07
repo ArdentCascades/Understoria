@@ -282,10 +282,66 @@ Two things to know:
 | `NODE_SYSTEM_SECRET_KEY` | unset | Base64 Ed25519 secret for the §4 auto-confirm system key. Unset = auto-confirm signing off (the server warns loudly if a window is configured with no key). Generate via `scripts/generate-system-key.mjs`; rotation procedure in `system-key-rotation.md` |
 | `NODE_SYSTEM_KEY_HISTORY` | unset | JSON array of retired system public keys (`[{"publicKey":"…","retiredAt":…}]`). Append-only across rotations — peers verify old auto-confirmed records against it. The server refuses to boot on a malformed entry |
 | `AUTO_CONFIRM_MIN_HOURS` | `0` | Server-side floor under the community's `autoConfirmHours` setting. `0` = no auto-confirm via this node regardless of community config; also the safe way to disable auto-confirm without unpublishing key history |
+| `DATABASE_KEY` | unset | Encryption-at-rest key for the SQLite file (SQLCipher scheme). Set it and the database on disk is unreadable without it — a stolen backup or seized disk yields nothing. Unset keeps plaintext (upgrades don't break). **Keep a copy of the key somewhere that is NOT next to the database backups** — a backup without its key is a brick, which is the point. Migrating an existing plaintext DB: see the runbook below |
+| `READ_AUTH` | `off` | Member-authenticated reads (`docs/member-authenticated-reads.md`). `off` = feeds open as before. `on` = every federation GET must carry a member's read signature (or a peer token). Members' apps sign reads automatically; flip to `on` only after everyone runs a signing build — see the rollout runbook below |
+| `NODE_FOUNDER_KEYS` | unset | Comma-separated base64 public keys of the founding member(s) — the trust roots the invite chain grows from. Required when `READ_AUTH=on` (boot refuses otherwise). Each member's public key is on their Profile page |
+| `PEER_READ_TOKENS` | unset | JSON map `{"https://peer.example": "<shared token ≥16 chars>"}`. Outgoing pulls to a mapped peer send the token; inbound reads presenting any mapped token are accepted as peer reads. Exchange tokens with the other operator the same way you exchange `PEER_NODE_URLS`. Only needed when either side enforces `READ_AUTH=on` |
 
 The rate limiter uses a non-reversible bucket id (FNV-1a hash of the
 IP, modulo 1024) so client IPs never reach memory or logs even
 transiently. There are no IP fields in any log line by default.
+
+### Runbook: turning on member-authenticated reads
+
+Until you flip this, anyone who learns your node's URL can READ the
+community's records (they can't forge anything — but reading was
+never invite-gated). To close that:
+
+1. Confirm every member runs an app version that signs reads (any
+   build from this feature onward — the app signs unconditionally,
+   so there's nothing for members to configure).
+2. Collect the founding member(s)' public keys (Profile page) and
+   set `NODE_FOUNDER_KEYS=<key1>,<key2>`. Everyone who joined via an
+   invite is recognized automatically through their redemption
+   receipt chain — you only name the members who never redeemed an
+   invite.
+3. If you peer with other communities, exchange tokens and set
+   `PEER_READ_TOKENS` on both sides FIRST — an enforcement-on node
+   with no tokens simply stops serving its peers.
+4. Set `READ_AUTH=on` and restart. Watch for members reporting
+   "app stopped syncing": the usual causes are a member who joined
+   before invite receipts existed (add their key to
+   `NODE_FOUNDER_KEYS`), or a passphrase-locked device (reads sign
+   only while unlocked; syncing resumes at unlock).
+
+### Runbook: encrypting an existing database at rest
+
+A NEW deployment just sets `DATABASE_KEY` before first boot. To
+convert an existing plaintext database:
+
+```bash
+# 1. Stop the node. 2. Then, with the sqlite3-mc-capable CLI or a
+#    one-off node script:
+node -e "
+const D = require('better-sqlite3-multiple-ciphers');
+const db = new D('understoria.db');
+db.exec(\"ATTACH DATABASE 'understoria.enc.db' AS enc KEY 'YOUR-NEW-KEY'\");
+db.exec(\"SELECT sqlcipher_export('enc')\");
+db.exec(\"DETACH DATABASE enc\");
+db.close();
+"
+# 3. Move understoria.db somewhere safe (it is the PLAINTEXT copy —
+#    shred it once the encrypted one is verified), rename
+#    understoria.enc.db into place, set DATABASE_KEY, start, verify,
+#    then destroy the plaintext copy.
+```
+
+Escrow the key separately from the backups (a printed copy in the
+community's records works). Losing the key = losing the node's copy
+of the data — recoverable only because every member's device holds
+the community dataset (a fresh node can be repopulated by members'
+outboxes re-pushing, but history convergence is manual work you
+don't want).
 
 ### Federation pull (optional)
 
@@ -372,6 +428,9 @@ storing on third-party infrastructure.
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
 | Open-invite server storage | Intentionally absent | Invites never cross any wire (the old `POST/GET /invites` surface was removed); only signed redemption receipts and revocations federate |
 | Device-link relay | Shipped (`POST/GET /device-link`, `POST/GET /link-request`) | Ephemeral device-linking surfaces: a one-shot encrypted mailbox (ciphertext only, 15-minute TTL) plus tap-to-link rendezvous rows (one throwaway public key each, 10-minute TTL, bucketed by a salted address fold). Neither federates; both are capped and pruned on every write — nothing to operate or back up. **Tap-to-link needs `TRUST_PROXY` set as documented in §4**: without it every client shares the proxy's address, so all members land in ONE rendezvous bucket and see each other's link requests (harmless but confusing — approval still requires the member's own tap) |
+| Member-gated reads | Shipped, staged (`READ_AUTH` — see the §6 runbook) | Default off for rollout. Until flipped, anyone with the URL can READ the feeds (writing always required valid signatures). Flip it once every member runs a current app build |
+| Encryption at rest | Shipped (`DATABASE_KEY` — see the §6 runbook) | Optional but recommended; escrow the key separately from backups |
+| Member removal / read revocation | Not built | Membership (and therefore read access) is append-only — there is no expulsion record kind anywhere in the app yet. Blocking is per-member relief, not removal. A governance workstream owns this; see `docs/operator-powers.md` |
 | Automated dependency scanning | Manual | Run `npm audit` weekly; subscribe to advisories |
 
 Each of these is tracked in the [Threat Model](threat-model.md) §7.

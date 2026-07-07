@@ -81,9 +81,24 @@ We are not trying to protect against:
 
 - **No email / phone on signup.** Identity is an Ed25519 public key
   held on the device. No central username directory. (Agent 2)
-- **Client-side encrypted storage** via SQLCipher on nodes; IndexedDB
-  data is paired with plans to move private-key material behind a
-  passphrase-derived wrapper. (Agent 2)
+- **Encrypted storage on nodes: IMPLEMENTED.** For most of the
+  project's life this bullet claimed SQLCipher aspirationally while
+  the server ran plain SQLite. It is now real: the node's driver is
+  better-sqlite3-multiple-ciphers, and setting `DATABASE_KEY` keys
+  the database (SQLCipher scheme) so the file at rest — the seized
+  disk, the stolen backup, the retired SD card — is unreadable
+  without it. Protects the powered-off artifact, not a live-rooted
+  host (the key is in the process env). Rollout + plaintext-DB
+  migration: operator guide; design:
+  `docs/member-authenticated-reads.md` §2. IndexedDB private-key
+  material sits behind the shipped passphrase wrapper. (Agent 2)
+- **Member-authenticated reads: IMPLEMENTED (staged).** Joining was
+  always invite-gated; READING was not — any holder of the node URL
+  could pull every feed. With `READ_AUTH=on`, federation GETs
+  require a signed member read (membership proven by the
+  founder-rooted redemption-receipt chain, no separate register) or
+  a configured peer token. Full entry in §7; design:
+  `docs/member-authenticated-reads.md`. (This review)
 - **Signed exchange transactions.** Every exchange is signed by both
   parties; any node can verify independently. No central ledger. (Agent 2)
 - **Minimal server logging.** No IP addresses, no member identifiers,
@@ -1505,8 +1520,9 @@ We are not trying to protect against:
   none of the three kinds joins `peerPull`; an adversary harvesting
   peer federation still sees only that the event exists and who
   organized it. The perimeter that moved is the community node
-  itself (and anyone who can query it — the GET feeds are
-  unauthenticated, same as posts and events).
+  itself (and, until member-authenticated reads are enforced —
+  `READ_AUTH`, see the entry below — anyone who can query it; with
+  enforcement on, readers must prove membership).
   **Adversary re-mapping (§3).** The node-watching rows (operator,
   subpoena, MITM on plain-HTTP pilots) gain the within-community
   attendance graph: who intends to be where, when, in which slot —
@@ -1537,6 +1553,59 @@ We are not trying to protect against:
   that roster without per-member consent ceremony — organizer
   authority, same as the local deleteShift guard's intent. (4)
   Locked devices publish late, same as Phase 1.
+
+- **Member-authenticated reads + at-rest encryption (the
+  reader-power review).**
+  *Shipped — `docs/member-authenticated-reads.md`; companion
+  member-facing doc `docs/operator-powers.md`.* Two gaps and one
+  false claim, closed together:
+  **(1) The open-read gap.** Every federation GET feed answered any
+  caller. Joining is invite-gated; reading was not — an abusive
+  ex-member's new keypair, an employer, or a scraper with the node
+  URL held the same view members earn by invitation. Now, with
+  `READ_AUTH=on`, GETs require headers signing
+  `read|<path+query>|<ts>` (±10-minute skew bound — reads are
+  idempotent, so replay of a captured header within the window
+  yields only a response the key holder could fetch anyway, and the
+  path binding stops cross-feed reuse). **Membership is derived, not
+  registered:** the set is the transitive closure from the
+  operator-configured `NODE_FOUNDER_KEYS` over verified
+  redemption receipts — artifacts the node already stores — so no
+  new member-directory surface is created for a subpoena to find;
+  the receipts already implied it. Two invented keys attesting each
+  other never reach the closure. Peer nodes authenticate with
+  pair-exchanged bearer tokens (`PEER_READ_TOKENS`).
+  Exemptions, each self-limiting: `/health`, `/config` (needed
+  before membership is provable), and the device-link/tap-to-link
+  surfaces (a brand-new device has no identity; they authenticate
+  by unguessable ids and ciphertext with TTLs+caps).
+  Staged rollout: apps sign reads unconditionally (harmless when
+  off); the operator flips `READ_AUTH=on` once members are on a
+  signing build. Boot refuses `on` with no founder keys.
+  **Residuals, stated plainly:** membership is append-only — there
+  is no expulsion record kind anywhere in the app, so read access,
+  once earned through the chain, is not revocable here (a future
+  governance workstream owns removal). A passphrase-locked session
+  cannot sign reads and silently stops pulling until unlocked
+  (named in the operator runbook). POSTs remain ungated — writes
+  always carried their own signatures, and insert caps bound abuse.
+  **(2) At-rest encryption made real.** §6's SQLCipher bullet was
+  aspirational; the driver now supports it and `DATABASE_KEY` keys
+  the file. Scope honesty: protects the powered-off disk / backup /
+  retired media (§3 seizure row), not a live-rooted host — the key
+  lives in the process environment.
+  **(3) The operator-power frame.** The same review weighed
+  encrypting all community records under a shared community key and
+  set it aside: every member (operator included) holds such a key,
+  so it removes no insider's view; in a local-first app every
+  member's device already replicates the full dataset, so "nobody
+  can see everything" is not achievable cryptographically. The
+  honest levers — read gating, at-rest encryption, the shipped
+  no-aggregation UI boundaries, and social structure — are now all
+  either implemented or documented (`docs/operator-powers.md`
+  enumerates the operator's residual powers: metadata visibility,
+  record withholding, service denial, founder-key configuration —
+  each with its remedy).
 
 ## 8. Guidance for reviewers
 

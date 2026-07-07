@@ -56,6 +56,23 @@ async function main(): Promise<void> {
     eventStore: createEventStore(database),
     eventCancellationStore: createEventCancellationStore(database),
     pullStore: createPeerPullStore(database),
+    // When a peer enforces member-authenticated reads, our pulls
+    // present the shared token agreed for that peering pair
+    // (PEER_READ_TOKENS — docs/member-authenticated-reads.md §1).
+    // Peers without a mapped token get the plain fetch, exactly as
+    // before.
+    fetcher: (url) => {
+      const base = Object.keys(config.peerReadTokens).find((peer) =>
+        url.startsWith(peer),
+      );
+      return base
+        ? fetch(url, {
+            headers: {
+              authorization: `Bearer ${config.peerReadTokens[base]}`,
+            },
+          })
+        : fetch(url);
+    },
     onError: (peerUrl, err) =>
       app.log.warn({ peerUrl, err }, "peer pull failed"),
     onPull: (result) =>
