@@ -1584,8 +1584,8 @@ We are not trying to protect against:
   signing build. Boot refuses `on` with no founder keys.
   **Residuals, stated plainly:** membership is append-only — there
   is no expulsion record kind anywhere in the app, so read access,
-  once earned through the chain, is not revocable here (a future
-  governance workstream owns removal). A passphrase-locked session
+  once earned through the chain, is not revocable here (design
+  plan: `docs/member-removal.md`). A passphrase-locked session
   cannot sign reads and silently stops pulling until unlocked
   (named in the operator runbook). POSTs remain ungated — writes
   always carried their own signatures, and insert caps bound abuse.

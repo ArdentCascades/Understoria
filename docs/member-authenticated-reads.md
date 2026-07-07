@@ -157,7 +157,7 @@ engineers; linked from the operator guide and privacy policy.
 - No community-key encryption of stored records (rejected above;
   revisit only if hosting is ever delegated to a non-member).
 - No member expulsion / read revocation (no such record kind exists
-  app-wide; a future governance workstream owns that).
+  app-wide; design plan: `docs/member-removal.md`).
 - No authentication on POSTs beyond the signatures records already
   carry — writes were never the gap; insert caps bound abuse.
 - No per-record read ACLs. The community reads as one audience;
