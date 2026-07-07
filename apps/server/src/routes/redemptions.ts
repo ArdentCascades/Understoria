@@ -22,6 +22,20 @@ interface Deps {
   /** Injectable clock for deterministic grace-window tests. */
   now?: () => number;
   /**
+   * Re-seed window end (`Config.reseedGraceUntil`,
+   * docs/community-reseed.md §3). While `now() < reseedGraceUntil`,
+   * the delivery-grace bound is skipped and a plausible wire
+   * `receivedAt` is preserved for EVERY caller — members' devices
+   * re-uploading historical receipts to a node recovering from
+   * total loss can't carry the mirror worker's internal token. The
+   * trade-off (a back-dated play of a stolen, expired,
+   * still-unredeemed invite becomes possible inside the window) is
+   * why config refuses windows longer than 30 days and the server
+   * logs loudly while one is open. Verification and
+   * first-writer-wins are untouched, as always.
+   */
+  reseedGraceUntil?: number | null;
+  /**
    * `BuiltServer.internalBypassToken`. A POST carrying it in
    * `x-understoria-internal` is the mirror-pull worker replicating a
    * receipt ANOTHER node already accepted (docs/community-resilience.md
@@ -98,12 +112,14 @@ export const REDEMPTION_DELIVERY_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
  */
 export async function registerRedemptionRoutes(
   app: FastifyInstance,
-  { store, now = () => Date.now(), internalToken }: Deps,
+  { store, now = () => Date.now(), internalToken, reseedGraceUntil = null }: Deps,
 ): Promise<void> {
   app.post("/redemptions", async (req, reply) => {
     const isMirrorApply =
       internalToken !== undefined &&
       req.headers[MIRROR_INTERNAL_HEADER] === internalToken;
+    const reseedWindowOpen =
+      reseedGraceUntil !== null && now() < reseedGraceUntil;
     const parsed = parseRedemption(req.body);
     if (!parsed.ok) {
       reply.code(400);
@@ -137,8 +153,9 @@ export async function registerRedemptionRoutes(
     // bound and keeps the origin node's arrival stamp when the wire
     // row carries a plausible one.
     const wireReceivedAt = (req.body as Record<string, unknown>)?.receivedAt;
+    const preserveWireStamp = isMirrorApply || reseedWindowOpen;
     const receivedAt =
-      isMirrorApply &&
+      preserveWireStamp &&
       typeof wireReceivedAt === "number" &&
       Number.isInteger(wireReceivedAt) &&
       wireReceivedAt > 0 &&
@@ -146,7 +163,7 @@ export async function registerRedemptionRoutes(
         ? wireReceivedAt
         : now();
     if (
-      !isMirrorApply &&
+      !preserveWireStamp &&
       receivedAt > receipt.invite.expiresAt + REDEMPTION_DELIVERY_GRACE_MS
     ) {
       reply.code(409);

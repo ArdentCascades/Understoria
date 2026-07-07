@@ -24,6 +24,12 @@
  * and a Raspberry-Pi-class single-community pilot.
  */
 
+export interface TrustedSystemKey {
+  nodeId: string;
+  current: string;
+  history: { pubkey: string; retiredAt: number }[];
+}
+
 export interface Config {
   /** Bind address. `0.0.0.0` in containers; `127.0.0.1` for local dev. */
   host: string;
@@ -205,6 +211,30 @@ export interface Config {
    *  or failover serves visibly stale data. */
   mirrorPullIntervalMs: number;
   /**
+   * Re-seed window end (`RESEED_GRACE_UNTIL`, RFC3339 or epoch ms) —
+   * docs/community-reseed.md §3. Until this moment, `POST
+   * /redemptions` skips its delivery-grace bound and preserves a
+   * plausible wire `receivedAt`, so members' devices can re-upload
+   * HISTORICAL receipts to a node recovering from total loss. Boot
+   * refuses a window ending more than 30 days out (the trade-off it
+   * opens — a back-dated play of a stolen expired invite — must stay
+   * time-boxed), and the server logs loudly while it is open. Null =
+   * closed (the default, and the permanent state outside recovery).
+   */
+  reseedGraceUntil: number | null;
+  /**
+   * Operator-declared auto-confirm trust (`TRUSTED_SYSTEM_KEYS`) —
+   * docs/community-reseed.md §1c. JSON array of
+   * `{"nodeId": "...", "current": "<pubkey>", "history": [...]}`
+   * naming LOST nodes whose system-signed exchanges this node should
+   * accept on re-upload. `POST /exchanges` verifies re-seeded
+   * `autoConfirmed` rows against exactly these keys (shared §4
+   * verifier, fail-closed when unset — the pre-existing categorical
+   * refusal stands). Copy the values from a member device's captured
+   * `/config.systemKey` record, never from memory.
+   */
+  trustedSystemKeys: readonly TrustedSystemKey[];
+  /**
    * Encryption-at-rest key for the SQLite database
    * (`DATABASE_KEY`). When set, `openDatabase` applies `PRAGMA key`
    * (SQLCipher scheme via better-sqlite3-multiple-ciphers) before
@@ -301,7 +331,106 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       env.MIRROR_PULL_INTERVAL_MS,
       60_000,
     ),
+    reseedGraceUntil: parseReseedGraceUntil(env.RESEED_GRACE_UNTIL),
+    trustedSystemKeys: parseTrustedSystemKeys(env.TRUSTED_SYSTEM_KEYS),
   };
+}
+
+/** 30 days — the hard ceiling on how far out a re-seed window may
+ *  end. The window trades a bounded replay risk for recoverability
+ *  (docs/community-reseed.md §3); an unbounded window would be the
+ *  risk without the bound. */
+const RESEED_WINDOW_MAX_MS = 30 * 24 * 60 * 60 * 1000;
+
+function parseReseedGraceUntil(raw: string | undefined): number | null {
+  if (raw === undefined || raw.trim() === "") return null;
+  const trimmed = raw.trim();
+  const asNumber = Number(trimmed);
+  const ts = Number.isFinite(asNumber) && asNumber > 0
+    ? asNumber
+    : Date.parse(trimmed);
+  if (!Number.isFinite(ts) || ts <= 0) {
+    throw new Error(
+      "RESEED_GRACE_UNTIL must be an RFC3339 timestamp or epoch ms",
+    );
+  }
+  if (ts > Date.now() + RESEED_WINDOW_MAX_MS) {
+    // Loud, not lenient: a "temporary" window that outlives the
+    // recovery is exactly the misconfiguration this bound exists for.
+    throw new Error(
+      "RESEED_GRACE_UNTIL must end within 30 days — the re-seed window is a time-boxed recovery measure, not a setting to leave on",
+    );
+  }
+  // A PAST value is valid and inert: the window has closed, and the
+  // operator can unset the env at leisure.
+  return ts;
+}
+
+function parseTrustedSystemKeys(
+  raw: string | undefined,
+): TrustedSystemKey[] {
+  if (raw === undefined || raw.trim() === "") return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("TRUSTED_SYSTEM_KEYS is not valid JSON");
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error("TRUSTED_SYSTEM_KEYS must be a JSON array");
+  }
+  const seen = new Set<string>();
+  return parsed.map((entry, i) => {
+    if (
+      entry === null ||
+      typeof entry !== "object" ||
+      typeof (entry as { nodeId?: unknown }).nodeId !== "string" ||
+      (entry as { nodeId: string }).nodeId.trim() === "" ||
+      typeof (entry as { current?: unknown }).current !== "string" ||
+      (entry as { current: string }).current.trim() === ""
+    ) {
+      throw new Error(
+        `TRUSTED_SYSTEM_KEYS entry ${i} must be {"nodeId": "...", "current": "<base64 pubkey>", "history": [...]}`,
+      );
+    }
+    const nodeId = (entry as { nodeId: string }).nodeId;
+    if (seen.has(nodeId)) {
+      // Two declarations for one nodeId is the same ambiguity the
+      // peer-pull resolver fails closed on — refuse to boot rather
+      // than pick one.
+      throw new Error(
+        `TRUSTED_SYSTEM_KEYS declares nodeId "${nodeId}" twice`,
+      );
+    }
+    seen.add(nodeId);
+    const rawHistory = (entry as { history?: unknown }).history;
+    const history = Array.isArray(rawHistory)
+      ? rawHistory.map((h, j) => {
+          if (
+            h === null ||
+            typeof h !== "object" ||
+            typeof (h as { pubkey?: unknown }).pubkey !== "string" ||
+            (h as { pubkey: string }).pubkey.trim() === "" ||
+            typeof (h as { retiredAt?: unknown }).retiredAt !== "number" ||
+            !Number.isInteger((h as { retiredAt: number }).retiredAt) ||
+            (h as { retiredAt: number }).retiredAt <= 0
+          ) {
+            throw new Error(
+              `TRUSTED_SYSTEM_KEYS entry ${i} history[${j}] must be {"pubkey": "<base64>", "retiredAt": <epoch ms>}`,
+            );
+          }
+          return {
+            pubkey: (h as { pubkey: string }).pubkey,
+            retiredAt: (h as { retiredAt: number }).retiredAt,
+          };
+        })
+      : [];
+    return {
+      nodeId,
+      current: (entry as { current: string }).current,
+      history: history.sort((a, b) => a.retiredAt - b.retiredAt),
+    };
+  });
 }
 
 function parseReadAuth(

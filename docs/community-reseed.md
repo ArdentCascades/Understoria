@@ -1,8 +1,15 @@
 # Community re-seed — restore a community onto a fresh node from any member's device
 
-Status: **Phase R0 shipped** (the artifact-persistence groundwork —
-see §1b/§4; devices now capture what a future re-seed needs while a
-node still serves it). **Phase R1 designed below, not built.** Companion docs: `docs/community-resilience.md` (mirror nodes +
+Status: **Phases R0 and R1 shipped.** Devices persist the signed
+membership artifacts (§1b), and Settings carries the member-facing
+"Restore this community onto a node" flow backed by the walker in
+`apps/web/src/lib/reseed.ts` and the server recovery envs
+(`RESEED_GRACE_UNTIL`, `TRUSTED_SYSTEM_KEYS`). Verified end-to-end
+by the §4 drill: node and database destroyed, fresh node stood up,
+full history restored from one member's device through the UI —
+including an auto-confirmed exchange and the membership receipt —
+idempotent on a second run. Operator runbook: operator-guide §6
+("Recovering from total node loss"). Companion docs: `docs/community-resilience.md` (mirror nodes +
 failover — the FIRST line of defense this feature backstops),
 `docs/add-a-node.md` (the member-facing node guide),
 `docs/operator-powers.md`, `docs/invite-redemption.md` (the receipt

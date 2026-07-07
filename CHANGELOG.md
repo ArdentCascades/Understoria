@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A community can now be fully restored after losing every server**
+  (`docs/community-reseed.md` Phase R1, completing the groundwork
+  below). Settings gains "Restore this community onto a node": point
+  any member's device at a fresh node and it uploads the entire
+  shared history — posts, exchanges (including auto-confirmed ones),
+  events, rosters, projects, and the membership receipts read
+  authentication derives from — through the node's ordinary,
+  signature-verified write routes. Resumable if interrupted, paced to
+  be gentle on small hardware, honest about anything skipped, and
+  safe to run from several devices at once (copies union). Two
+  operator recovery envs, both inert by default and deliberately
+  bounded: `RESEED_GRACE_UNTIL` (a ≤30-day window during which
+  historical membership receipts are accepted; the server logs loudly
+  while it is open) and `TRUSTED_SYSTEM_KEYS` (an explicit declaration
+  of the lost node's auto-confirm key — the app shows the captured
+  value to copy). Verified by an end-to-end drill: node and database
+  destroyed, fresh node stood up, everything restored from one
+  member's phone. Runbook: operator-guide §6.
 - **Your device's copy of the community is now protected and
   measured** (`docs/storage-budget.md` Phase 0). The app asks the
   browser for the durable-storage grant at launch, so disk pressure

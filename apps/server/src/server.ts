@@ -263,8 +263,32 @@ export async function buildServer({
     },
   });
 
+  // Re-seed recovery surface (docs/community-reseed.md §3): a
+  // time-boxed grace window for historical receipts, and an
+  // operator-declared resolver so a LOST node's auto-confirmed
+  // exchanges re-verify. Both inert by default; the open window logs
+  // loudly because it is a recovery measure, not a setting.
+  if (config.reseedGraceUntil !== null && config.reseedGraceUntil > Date.now()) {
+    app.log.warn(
+      `RESEED_GRACE_UNTIL is set: historical redemption receipts are accepted until ${new Date(config.reseedGraceUntil).toISOString()}. Unset it once the community has re-seeded.`,
+    );
+  }
+  const resolveTrustedSystemKey =
+    config.trustedSystemKeys.length > 0
+      ? (nodeId: string, signedAt: number): string | null => {
+          const entry = config.trustedSystemKeys.find(
+            (k) => k.nodeId === nodeId,
+          );
+          if (!entry) return null;
+          for (const h of entry.history) {
+            if (h.retiredAt > signedAt) return h.pubkey;
+          }
+          return entry.current;
+        }
+      : undefined;
+
   await registerHealthRoutes(app);
-  await registerExchangeRoutes(app, { store });
+  await registerExchangeRoutes(app, { store, resolveTrustedSystemKey });
   await registerVouchRoutes(app, { store: vouchStore });
   await registerPostRoutes(app, { store: postStore });
   // NOTE: no invite routes. `POST/GET /invites` was removed in the
@@ -275,6 +299,7 @@ export async function buildServer({
   await registerRedemptionRoutes(app, {
     store: redemptionStore,
     internalToken: internalBypassToken,
+    reseedGraceUntil: config.reseedGraceUntil,
   });
   await registerInviteRevocationRoutes(app, {
     store: inviteRevocationStore,
