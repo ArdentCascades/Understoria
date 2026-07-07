@@ -178,10 +178,10 @@ Phase 1 keeps the flow simple and human:
    and a hard-tier impact reflection, reusing the proposal
    machinery (`category: "member_removal"`, `reversibilityTier:
    "hard"`).
-2. Deliberation happens where the community talks (the proposal
-   thread today, knowing proposals are per-device local; genuinely
-   shared deliberation arrives when proposals federate — named
-   dependency, not blocker: the SIGNATURES are what bind).
+2. Deliberation happens where the community talks. The named
+   dependency resolved: proposals federate since
+   `docs/proposal-federation.md` G1, so the deliberation thread is
+   now genuinely shared (the SIGNATURES remain what bind).
 3. Co-signing: the proposer's device produces the unsigned payload;
    each co-signer opens it (deep link / QR at a meeting — same
    in-person ceremony posture as tap-to-link) and their device

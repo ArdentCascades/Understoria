@@ -1206,3 +1206,15 @@ sees the rationale, not just the conclusion.
   may prefer the opt-in copy be more prominent so they can
   flip the toggle without a UI re-read. PR E i18n review should
   test both shapes with pilot members. Not blocked.
+
+## Amendment: federated votes (proposal federation G1)
+
+Votes are signed, federated records since
+`docs/proposal-federation.md` G1. The §3.2 and §6 rules survive
+unchanged in KIND but their scope grew: the `hideGovernance` display
+filter now hides a blocked member's proposals/votes ACROSS the
+community's merged record set (still display-only, still per-viewer),
+and the no-silent-disenfranchisement invariant (§11.10) is now
+enforceable in the strong sense — decision math (block guards,
+auto-close eligibility) runs on the community-wide vote set on every
+node and every device, never on any viewer's filtered slice.

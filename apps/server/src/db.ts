@@ -37,6 +37,9 @@ import type {
   EventRsvpState,
   MemberRemoval,
   MemberReinstatement,
+  Proposal,
+  ProposalClosure,
+  Vote,
   SeedVaultPledge,
   EventShiftState,
   Post,
@@ -1105,6 +1108,46 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '22')",
+    ).run();
+  }
+
+  if (current < 23) {
+    // Proposal federation G1 (docs/proposal-federation.md): signed
+    // proposals (immutable core), votes (single-owner LWW on the
+    // natural key), and closures (first-writer-wins per proposal).
+    db.exec(`
+      CREATE TABLE proposals (
+        id TEXT PRIMARY KEY,
+        proposer_key TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        payload TEXT NOT NULL
+      );
+      CREATE INDEX proposals_created_idx ON proposals (created_at);
+      CREATE INDEX proposals_proposer_idx ON proposals (proposer_key);
+      CREATE TABLE votes (
+        proposal_id TEXT NOT NULL,
+        voter_key TEXT NOT NULL,
+        id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        PRIMARY KEY (proposal_id, voter_key)
+      );
+      CREATE INDEX votes_created_idx ON votes (created_at);
+      CREATE INDEX votes_voter_idx ON votes (voter_key);
+      CREATE TABLE proposal_closures (
+        proposal_id TEXT PRIMARY KEY,
+        id TEXT NOT NULL,
+        closer_key TEXT NOT NULL,
+        closed_at INTEGER NOT NULL,
+        payload TEXT NOT NULL
+      );
+      CREATE INDEX proposal_closures_closed_idx
+        ON proposal_closures (closed_at);
+      CREATE INDEX proposal_closures_closer_idx
+        ON proposal_closures (closer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '23')",
     ).run();
   }
 }
@@ -3079,6 +3122,164 @@ export function createMemberReinstatementStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as MemberReinstatement);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface ProposalStore {
+  get(id: string): Proposal | null;
+  insert(record: Proposal): void;
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): Proposal[];
+  count(): number;
+}
+
+export function createProposalStore(db: DatabaseType): ProposalStore {
+  const insertStmt = db.prepare(`
+    INSERT OR REPLACE INTO proposals (id, proposer_key, created_at, payload)
+    VALUES (@id, @proposerKey, @createdAt, @payload)
+  `);
+  const getStmt = db.prepare("SELECT * FROM proposals WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM proposals");
+  return {
+    get(id) {
+      const r = getStmt.get(id) as { payload: string } | undefined;
+      return r ? (JSON.parse(r.payload) as Proposal) : null;
+    },
+    insert(record) {
+      // The stored wire form is the IMMUTABLE core — lifecycle fields
+      // live in proposal_closures, so strip any the sender included.
+      const { status: _s, closedAt: _c, closedReason: _r, ...core } =
+        record as Proposal & Record<string, unknown>;
+      insertStmt.run({
+        id: record.id,
+        proposerKey: record.proposerKey,
+        createdAt: record.createdAt,
+        payload: JSON.stringify(core),
+      });
+    },
+    list(opts = {}) {
+      return pagedRows<{ payload: string }>(
+        db,
+        "proposals",
+        "created_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as Proposal);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface VoteStore {
+  get(proposalId: string, voterKey: string): Vote | null;
+  upsert(record: Vote): void;
+  list(opts?: { since?: number; sinceId?: string; limit?: number }): Vote[];
+  /** Every stored vote for one proposal (latest per voter by table
+   *  construction) — the closure block-guard's input. */
+  listForProposal(proposalId: string): Vote[];
+  count(): number;
+}
+
+export function createVoteStore(db: DatabaseType): VoteStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO votes (proposal_id, voter_key, id, created_at, payload)
+    VALUES (@proposalId, @voterKey, @id, @createdAt, @payload)
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM votes WHERE proposal_id = ? AND voter_key = ?",
+  );
+  const forProposalStmt = db.prepare(
+    "SELECT payload FROM votes WHERE proposal_id = ?",
+  );
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM votes");
+  return {
+    get(proposalId, voterKey) {
+      const r = getStmt.get(proposalId, voterKey) as
+        | { payload: string }
+        | undefined;
+      return r ? (JSON.parse(r.payload) as Vote) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        proposalId: record.proposalId,
+        voterKey: record.voterKey,
+        id: record.id,
+        createdAt: record.createdAt,
+        payload: JSON.stringify(record),
+      });
+    },
+    list(opts = {}) {
+      return pagedRows<{ payload: string }>(
+        db,
+        "votes",
+        "created_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as Vote);
+    },
+    listForProposal(proposalId) {
+      return (forProposalStmt.all(proposalId) as { payload: string }[]).map(
+        (r) => JSON.parse(r.payload) as Vote,
+      );
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export interface ProposalClosureStore {
+  getByProposal(proposalId: string): ProposalClosure | null;
+  insert(record: ProposalClosure): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): ProposalClosure[];
+  count(): number;
+}
+
+export function createProposalClosureStore(
+  db: DatabaseType,
+): ProposalClosureStore {
+  const insertStmt = db.prepare(`
+    INSERT OR REPLACE INTO proposal_closures (
+      proposal_id, id, closer_key, closed_at, payload
+    ) VALUES (@proposalId, @id, @closerKey, @closedAt, @payload)
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM proposal_closures WHERE proposal_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM proposal_closures",
+  );
+  return {
+    getByProposal(proposalId) {
+      const r = getStmt.get(proposalId) as { payload: string } | undefined;
+      return r ? (JSON.parse(r.payload) as ProposalClosure) : null;
+    },
+    insert(record) {
+      insertStmt.run({
+        proposalId: record.proposalId,
+        id: record.id,
+        closerKey: record.closerKey,
+        closedAt: record.closedAt,
+        payload: JSON.stringify(record),
+      });
+    },
+    list(opts = {}) {
+      return pagedRows<{ payload: string }>(
+        db,
+        "proposal_closures",
+        "closed_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as ProposalClosure);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

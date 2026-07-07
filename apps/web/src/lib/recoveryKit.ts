@@ -355,6 +355,9 @@ export async function restoreIdentityCore(identity: {
     void sync.pullFederatedSeedVaultPledges();
     void sync.pullFederatedMemberRemovals();
     void sync.pullFederatedMemberReinstatements();
+    void sync.pullFederatedProposals();
+    void sync.pullFederatedVotes();
+    void sync.pullFederatedProposalClosures();
   });
 
   return { ok: true };

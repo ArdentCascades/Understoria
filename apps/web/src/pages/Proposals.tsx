@@ -495,6 +495,11 @@ function ProposalCard({
         <ReversibilityChip tier={proposal.reversibilityTier} />
         <CategoryChip category={proposal.category} />
       </div>
+      {!proposal.signature && (
+        <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
+          {t("proposals.localOnly")}
+        </p>
+      )}
       <h2 className="text-lg font-semibold leading-snug">{proposal.title}</h2>
       {proposal.description && (
         <p className="mt-1 text-sm text-moss-700 dark:text-moss-200">

@@ -10,6 +10,9 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { voteId } from "@/lib/votes";
+import { canonicalVotePayload, sign } from "@understoria/shared/crypto";
+import { getSecretKey } from "@/db/secrets";
+import { enqueueVoteOutbox, flushOutboxNow } from "@/lib/outbox";
 import type { Vote, VoteChoice } from "@/types";
 import { db } from "./database";
 
@@ -42,14 +45,33 @@ export async function castVote(input: CastVoteInput): Promise<Vote> {
   // proposal in the same transaction and refuse if it is no longer
   // open, so a stale second tab can't amend a sealed decision with a
   // vote dated after `closedAt`.
-  return db.transaction("rw", [db.votes, db.proposals], async () => {
-    const proposal = await db.proposals.get(input.proposalId);
-    if (proposal && proposal.status !== "open") {
-      throw new Error("This proposal is closed — voting has ended.");
-    }
-    await db.votes.put(row);
-    return row;
-  });
+  // Proposal federation G1: sign so the vote can cross the wire —
+  // open ballots, same posture as removal signatures. Soft-degrade
+  // to a local-only row when this device can't sign.
+  try {
+    const secret = await getSecretKey(input.voterKey);
+    row.signerKey = input.voterKey;
+    row.signature = sign(canonicalVotePayload(row), secret);
+  } catch {
+    /* unsigned = recorded on this device only */
+  }
+  const stored = await db.transaction(
+    "rw",
+    [db.votes, db.proposals, db.outbox, db.settings],
+    async () => {
+      const proposal = await db.proposals.get(input.proposalId);
+      if (proposal && proposal.status !== "open") {
+        throw new Error("This proposal is closed — voting has ended.");
+      }
+      await db.votes.put(row);
+      if (row.signature) {
+        await enqueueVoteOutbox(row);
+      }
+      return row;
+    },
+  );
+  if (stored.signature) void flushOutboxNow().catch(() => {});
+  return stored;
 }
 
 export async function listVotesFor(proposalId: string): Promise<Vote[]> {

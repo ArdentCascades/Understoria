@@ -214,6 +214,9 @@ describe("runReseed", () => {
       "seedVaultPledges",
       "memberRemovals",
       "memberReinstatements",
+      "proposals",
+      "votes",
+      "proposalClosures",
     ]) {
       expect(tables.has(expected), expected).toBe(true);
     }

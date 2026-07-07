@@ -353,6 +353,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           pullFederatedSeedVaultPledges,
           pullFederatedMemberRemovals,
           pullFederatedMemberReinstatements,
+          pullFederatedProposals,
+          pullFederatedVotes,
+          pullFederatedProposalClosures,
         }) => {
           void pullFederatedPosts();
           void pullFederatedClaims();
@@ -392,6 +395,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           // docs/member-removal.md M1: quorum governance records.
           void pullFederatedMemberRemovals();
           void pullFederatedMemberReinstatements();
+          // docs/proposal-federation.md G1: proposals before votes
+          // before closures (referent order).
+          void pullFederatedProposals().then(() => {
+            void pullFederatedVotes();
+            void pullFederatedProposalClosures();
+          });
         },
       );
     void runPulls();

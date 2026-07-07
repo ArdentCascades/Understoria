@@ -74,6 +74,9 @@ export const SNAPSHOT_TABLES = [
   // device must know who stands removed from its first render.
   "memberRemovals",
   "memberReinstatements",
+  // docs/proposal-federation.md G1: the community's decisions ride
+  // the transfer with the proposals/votes already listed above.
+  "proposalClosures",
 ] as const;
 
 export type SnapshotTable = (typeof SNAPSHOT_TABLES)[number];

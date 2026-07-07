@@ -179,6 +179,18 @@ export const SURFACES: Record<string, Surface> = {
     keyField: null,
     keyColumn: null,
   },
+  // Proposal federation G1: member-gated governance writes.
+  "/proposals": {
+    table: "proposals",
+    keyField: "signerKey",
+    keyColumn: "proposer_key",
+  },
+  "/votes": { table: "votes", keyField: "signerKey", keyColumn: "voter_key" },
+  "/proposal-closures": {
+    table: "proposal_closures",
+    keyField: "signerKey",
+    keyColumn: "closer_key",
+  },
   // The auto-confirm batch inserts into exchanges; the requests carry
   // per-item keys, so only the table ceiling applies here. (An
   // attacker spending their own keys against the per-key exchange cap

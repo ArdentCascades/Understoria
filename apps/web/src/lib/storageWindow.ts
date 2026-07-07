@@ -69,9 +69,9 @@ export const WINDOW_LOCAL_TABLES = [
  * Shared state kept in full on every device forever. The roster and
  * membership layer are load-bearing for verification/read-auth/
  * re-seed; exchanges and vouches ARE the ledger and the trust graph
- * (windowing them would change what the numbers mean); proposals and
- * votes are governance history with no federation transport (gone is
- * gone); a co-organizer revocation must outlive its project.
+ * (windowing them would change what the numbers mean); proposals,
+ * votes, and closures are the community's governance history; a
+ * co-organizer revocation must outlive its project.
  */
 export const WINDOW_PINNED_TABLES = [
   "members",
@@ -88,6 +88,7 @@ export const WINDOW_PINNED_TABLES = [
   "memberReinstatements",
   "proposals",
   "votes",
+  "proposalClosures",
   "coorgInvitationRevocations",
 ] as const;
 

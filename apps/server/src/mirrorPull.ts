@@ -300,6 +300,30 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     id: (r) => str(r.id),
     conflict409: "halt",
   },
+  // Proposal federation G1 — proposals before votes before closures
+  // (votes and closures 409 on an unknown proposal; the halt posture
+  // retries next cycle once the referent lands).
+  {
+    path: "/proposals",
+    bodyKey: "proposals",
+    ts: (r) => num(r.createdAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
+  {
+    path: "/votes",
+    bodyKey: "votes",
+    ts: (r) => num(r.createdAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
+  {
+    path: "/proposal-closures",
+    bodyKey: "proposalClosures",
+    ts: (r) => num(r.closedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
 ];
 
 export type MirrorFetcher = (
