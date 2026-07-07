@@ -181,15 +181,52 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "lost-passphrase",
         question: "¿Qué pasa si pierdo mi contraseña?",
         answer: [
-          "No hay recuperación, por diseño. El trato es: ninguna " +
-            "autoridad central puede leer tus datos, y por eso ninguna " +
-            "autoridad central puede rescatarlos tampoco.",
-          "Si te preocupa, el camino más seguro es elegir una contraseña " +
-            "que puedas recordar y anotarla en algún lugar fuera de línea. " +
-            "Si pierdes el acceso, la única opción que queda es Perfil → " +
-            "Emergencia → Borrado duro, que vacía el dispositivo y te " +
-            "deja empezar de cero con una identidad nueva. No vas a " +
-            "recuperar tu historial de créditos anterior.",
+          "Nadie puede restablecerla por ti, por diseño. El trato es: " +
+            "ninguna autoridad central puede leer tus datos, y por eso " +
+            "ninguna autoridad central puede rescatarlos tampoco.",
+          "Pero una contraseña olvidada ya no tiene por qué significar " +
+            "una identidad perdida. Si tienes un segundo dispositivo " +
+            "vinculado, tu identidad sigue ahí. Si creaste un kit de " +
+            "recuperación (Ajustes → Kit de recuperación), restaura tu " +
+            "cuenta con su propia frase, separada. Si elegiste " +
+            "guardianes, un grupo suficiente de ellos puede devolverte " +
+            "tu cuenta sin contraseña alguna. Mira '¿Qué pasa si pierdo " +
+            "mi teléfono?' abajo para el orden completo.",
+          "Solo si nada de eso existe la respuesta es Perfil → " +
+            "Emergencia → Borrado duro: vaciar el dispositivo y empezar " +
+            "de cero con una identidad nueva, sin tu historial anterior.",
+        ],
+      },
+      {
+        id: "lost-phone",
+        question: "¿Qué pasa si pierdo mi teléfono?",
+        answer: [
+          "Tu cuenta puede volver — este es el orden honesto a " +
+            "intentar, de mejor a peor.",
+          "1. Un segundo dispositivo vinculado. Si añadiste uno " +
+            "(Ajustes → Añadir dispositivo), tu identidad ya vive ahí; " +
+            "sigue usándolo y vincula el teléfono de reemplazo desde él.",
+          "2. Un kit de recuperación. Si creaste uno (Ajustes → Kit de " +
+            "recuperación), abre la aplicación en cualquier dispositivo " +
+            "nuevo, elige '¿Perdiste tu dispositivo pero tienes un kit " +
+            "de recuperación?' y escribe la frase del kit. El saldo, " +
+            "los avales, los roles y la membresía vuelven; la historia " +
+            "de la comunidad se sincroniza desde su servidor.",
+          "3. Tus guardianes. Si repartiste tu clave entre guardianes " +
+            "(Ajustes → Guardianes), reúnete con suficientes: el " +
+            "dispositivo nuevo muestra un código de solicitud, cada " +
+            "guardián responde con un código de liberación, y al " +
+            "llegar al umbral tu cuenta vuelve — sin kit y sin " +
+            "contraseña.",
+          "4. Una invitación nueva. Si nada de lo anterior existe, " +
+            "pide que te inviten de nuevo. Serás un miembro nuevo: tu " +
+            "historia anterior sigue visible para la comunidad bajo tu " +
+            "nombre anterior, pero la clave nueva empieza de cero. " +
+            "Exactamente por eso la aplicación insiste en un segundo " +
+            "dispositivo, un kit o guardianes ANTES de la mala semana.",
+          "Lo que nunca vuelve en un dispositivo nuevo: los mensajes " +
+            "directos y los borradores sin enviar — solo vivían en el " +
+            "teléfono perdido, por diseño.",
         ],
       },
       {
@@ -339,6 +376,39 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "Y si lo que necesitas es simplemente distancia, bloquear " +
             "siempre está disponible — ve '¿Qué hago si alguien me está " +
             "molestando?' en Mensajes.",
+        ],
+      },
+      {
+        id: "member-removal",
+        question: "¿Cómo funciona expulsar a alguien de la comunidad?",
+        answer: [
+          "La expulsión es lo más grave que esta comunidad puede " +
+            "hacer, y la aplicación la trata así. Es el último " +
+            "recurso: un bloqueo personal ya impide que el contenido " +
+            "de alguien te llegue, una disputa puede impugnar un " +
+            "intercambio concreto, y una conversación arregla más que " +
+            "cualquiera de las dos.",
+          "Ninguna persona sola puede expulsar a nadie — ni quien " +
+            "organiza, ni quien opera el servidor. Hacen falta varias " +
+            "personas (el número lo fija tu comunidad y es visible " +
+            "para todas) firmando cada una con su nombre un registro " +
+            "público. Proponer empieza en el perfil del miembro; " +
+            "cofirmar ocurre en persona, desde la página de Decisiones.",
+          "Una expulsión es pública dentro de la comunidad — quién " +
+            "fue expulsado, cuándo, por qué y exactamente quiénes " +
+            "firmaron, todo visible en la página de Decisiones. Las " +
+            "expulsiones secretas son la manera en que las comunidades " +
+            "se pudren.",
+          "No es un borrado. Los intercambios pasados de la persona " +
+            "expulsada permanecen — equilibran los libros de otros " +
+            "miembros — y todo lo que hay en su propio dispositivo " +
+            "sigue siendo suyo. Lo que termina es su acceso: la " +
+            "lectura se detiene y la escritura nueva se rechaza. Las " +
+            "personas que invitó antes de la expulsión siguen siendo " +
+            "miembros; sus invitaciones sin usar mueren con ella.",
+          "Y la puerta puede reabrirse: la readmisión requiere el " +
+            "mismo número de firmas, iniciada desde el propio registro " +
+            "de expulsión en la página de Decisiones.",
         ],
       },
       {
