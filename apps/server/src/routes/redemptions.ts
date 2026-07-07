@@ -15,11 +15,31 @@ import {
   verifyRedemptionReceipt,
 } from "@understoria/shared/crypto";
 import type { RedemptionStore } from "../db.js";
+import { MIRROR_INTERNAL_HEADER } from "../mirrorPull.js";
 
 interface Deps {
   store: RedemptionStore;
   /** Injectable clock for deterministic grace-window tests. */
   now?: () => number;
+  /**
+   * `BuiltServer.internalBypassToken`. A POST carrying it in
+   * `x-understoria-internal` is the mirror-pull worker replicating a
+   * receipt ANOTHER node already accepted (docs/community-resilience.md
+   * §B.1). Two things relax for that caller and nothing else:
+   *   - The delivery-grace check is skipped — it bounds how stale a
+   *     NEW play can arrive; a receipt the community accepted long ago
+   *     must still replicate to a brand-new mirror, or the mirror's
+   *     membership closure (docs/member-authenticated-reads.md) would
+   *     be missing members forever.
+   *   - The wire row's `receivedAt` is preserved (when plausible)
+   *     instead of re-stamped — `receivedAt` IS this feed's cursor, so
+   *     keeping the origin stamp gives the receipt one identity across
+   *     the whole mirror set instead of shuffling per node.
+   * Signature verification and first-writer-wins are NOT relaxed. The
+   * token never leaves the process, so no external caller can claim
+   * this path.
+   */
+  internalToken?: string;
 }
 
 /**
@@ -78,9 +98,12 @@ export const REDEMPTION_DELIVERY_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
  */
 export async function registerRedemptionRoutes(
   app: FastifyInstance,
-  { store, now = () => Date.now() }: Deps,
+  { store, now = () => Date.now(), internalToken }: Deps,
 ): Promise<void> {
   app.post("/redemptions", async (req, reply) => {
+    const isMirrorApply =
+      internalToken !== undefined &&
+      req.headers[MIRROR_INTERNAL_HEADER] === internalToken;
     const parsed = parseRedemption(req.body);
     if (!parsed.ok) {
       reply.code(400);
@@ -110,9 +133,22 @@ export async function registerRedemptionRoutes(
 
     // Delivery grace: bound on ARRIVAL time (server clock), not on
     // the client-claimed redeemedAt — §11's cap on how stale a
-    // back-dated play can be.
-    const receivedAt = now();
-    if (receivedAt > receipt.invite.expiresAt + REDEMPTION_DELIVERY_GRACE_MS) {
+    // back-dated play can be. Mirror replication (see Deps) skips the
+    // bound and keeps the origin node's arrival stamp when the wire
+    // row carries a plausible one.
+    const wireReceivedAt = (req.body as Record<string, unknown>)?.receivedAt;
+    const receivedAt =
+      isMirrorApply &&
+      typeof wireReceivedAt === "number" &&
+      Number.isInteger(wireReceivedAt) &&
+      wireReceivedAt > 0 &&
+      wireReceivedAt <= now() + 24 * 60 * 60 * 1000
+        ? wireReceivedAt
+        : now();
+    if (
+      !isMirrorApply &&
+      receivedAt > receipt.invite.expiresAt + REDEMPTION_DELIVERY_GRACE_MS
+    ) {
       reply.code(409);
       return { error: "delivery_grace_expired" };
     }

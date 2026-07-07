@@ -23,6 +23,7 @@ import type { BoardNudgeStatus } from "@/lib/boardNudge";
 const status: Record<
   | "notJoined"
   | "nodeSuggest"
+  | "mirrorSuggest"
   | "first"
   | "profile"
   | "keepAccess"
@@ -32,6 +33,7 @@ const status: Record<
 > = {
   notJoined: hidden(),
   nodeSuggest: hidden(),
+  mirrorSuggest: hidden(),
   first: hidden(),
   profile: hidden(),
   keepAccess: hidden(),
@@ -49,6 +51,9 @@ vi.mock("@/components/useNotJoinedNudge", () => ({
 }));
 vi.mock("@/components/useNodeOriginSuggestNudge", () => ({
   useNodeOriginSuggestNudge: () => status.nodeSuggest,
+}));
+vi.mock("@/components/useMirrorSuggestNudge", () => ({
+  useMirrorSuggestNudge: () => status.mirrorSuggest,
 }));
 vi.mock("@/components/useFirstActionNudge", () => ({
   useFirstActionNudge: () => status.first,
@@ -81,6 +86,7 @@ function visibleWith(node: BoardNudgeStatus["node"]): BoardNudgeStatus {
 beforeEach(() => {
   status.notJoined = hidden();
   status.nodeSuggest = hidden();
+  status.mirrorSuggest = hidden();
   status.first = hidden();
   status.profile = hidden();
   status.keepAccess = hidden();

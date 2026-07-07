@@ -1452,6 +1452,13 @@
     "confirm": "Sí, conectar con {{origin}}",
     "decline": "Ahora no"
   },
+  "mirrorSuggest": {
+    "label": "Añadir un servidor de respaldo para esta comunidad",
+    "title": "¿Añadir un servidor de respaldo para esta comunidad?",
+    "body": "El servidor de tu comunidad anunció un segundo servidor que funciona junto a él: {{origin}}. Si lo añades, tu aplicación cambiará a él por su cuenta cuando el servidor habitual no responda, y lo que compartes también se sincronizará allí. Quien administra el respaldo puede ver los mismos datos comunitarios que quien opera tu servidor habitual. No se usa nada hasta que confirmes.",
+    "confirm": "Añadir servidor de respaldo",
+    "decline": "Ahora no"
+  },
   "format": {
     "justNow": "ahora mismo",
     "minutesAgo": "hace {{count}} min",
@@ -1700,7 +1707,15 @@
       "bodySeedling": "Ahora mismo esta comunidad vive solo en este dispositivo. Conectarse a un servidor comunitario — o crear uno — mantiene las copias de todas las personas al día.",
       "bodyOne": "Un servidor sostiene esta comunidad — y {{count}} integrante guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
       "bodyOther": "Un servidor sostiene esta comunidad — y cada una de sus {{count}} integrantes guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "nodeQuiet": "El servidor no ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando vuelva.",
+      "bodyMultiOne": "{{nodes}} servidores sostienen esta comunidad — y {{count}} integrante guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyMultiOther": "{{nodes}} servidores sostienen esta comunidad — y cada una de sus {{count}} integrantes guarda una copia completa en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyFailover": "Si un servidor desaparece, tus aplicaciones cambian a los demás por su cuenta. No se pierde nada.",
+      "nodeQuiet": "Ningún servidor ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando alguno vuelva.",
+      "leaf": {
+        "fresh": "sincronizado hoy",
+        "lagging": "quedándose atrás",
+        "quiet": "no ha respondido últimamente"
+      },
       "cta": "Hacer crecer otra raíz"
     },
     "federation": {

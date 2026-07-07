@@ -81,3 +81,20 @@ describe("isRecentSuccess", () => {
     expect(isRecentSuccess("not-a-date", now)).toBe(false);
   });
 });
+
+describe("nodeFreshness", () => {
+  const now = 1_700_000_000_000;
+  const iso = (msAgo: number) => new Date(now - msAgo).toISOString();
+  it("maps ages onto fresh / lagging / quiet", async () => {
+    const { nodeFreshness, NODE_LAGGING_WINDOW_MS } = await import(
+      "./resilience"
+    );
+    expect(nodeFreshness(iso(60_000), now)).toBe("fresh");
+    expect(nodeFreshness(iso(NODE_REACHABLE_WINDOW_MS + 1), now)).toBe(
+      "lagging",
+    );
+    expect(nodeFreshness(iso(NODE_LAGGING_WINDOW_MS + 1), now)).toBe("quiet");
+    expect(nodeFreshness(undefined, now)).toBe("quiet");
+    expect(nodeFreshness("garbage", now)).toBe("quiet");
+  });
+});

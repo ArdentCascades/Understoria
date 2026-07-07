@@ -12,6 +12,7 @@
 import type { ReactNode } from "react";
 import { useNotJoinedNudge } from "@/components/useNotJoinedNudge";
 import { useNodeOriginSuggestNudge } from "@/components/useNodeOriginSuggestNudge";
+import { useMirrorSuggestNudge } from "@/components/useMirrorSuggestNudge";
 import { useFirstActionNudge } from "@/components/useFirstActionNudge";
 import { useProfileNudge } from "@/components/useProfileNudge";
 import { useKeepAccessNudge } from "@/components/useKeepAccessNudge";
@@ -47,7 +48,7 @@ import { useInstallCardNudge } from "@/components/useInstallCardNudge";
 // flash this orchestrator exists to prevent. The fallback keeps its
 // own eligibility/dismiss logic; only turn-taking is decided here.
 export function BoardNudges({ fallback }: { fallback?: ReactNode } = {}) {
-  // Rules of Hooks: all seven hooks are called unconditionally, in a
+  // Rules of Hooks: all eight hooks are called unconditionally, in a
   // fixed order, every render. Priority is the array order (index 0 =
   // highest). Do NOT make any of these calls conditional.
   //
@@ -63,11 +64,15 @@ export function BoardNudges({ fallback }: { fallback?: ReactNode } = {}) {
   const statuses = [
     useNotJoinedNudge(), // 1 highest
     useNodeOriginSuggestNudge(), // 2
-    useFirstActionNudge(), // 3
-    useProfileNudge(), // 4
-    useKeepAccessNudge(), // 5
-    useVouchDiscoveryNudge(), // 6
-    useInstallCardNudge(), // 7 lowest
+    // The announced-mirror consent card sits right below the node
+    // suggestion: same informed-consent family, but it improves an
+    // already-connected device rather than enabling sync at all.
+    useMirrorSuggestNudge(), // 3
+    useFirstActionNudge(), // 4
+    useProfileNudge(), // 5
+    useKeepAccessNudge(), // 6
+    useVouchDiscoveryNudge(), // 7
+    useInstallCardNudge(), // 8 lowest
   ];
 
   for (const s of statuses) {

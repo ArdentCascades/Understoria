@@ -23,13 +23,12 @@ twice over:
    to disrupt the community. Distributing the infrastructure
    distributes the target until there isn't one.
 
-**What a second node gives you today, honestly:** a warm standby (a
-complete replacement server, ready if the first is lost) and the
-distributed-target effect above. Automatic switchover — where members'
-apps quietly move to the second node with nobody lifting a finger —
-is the designed next step (`community-resilience.md` Phase B) and the
-Dashboard card will start counting higher when it lands. This guide
-doesn't promise it before it exists.
+**What a second node gives you today:** automatic failover. Set up
+as a MIRROR (below), the two servers replicate every record
+continuously, and members' apps switch between them on their own —
+nobody lifts a finger, nothing is lost. The Dashboard resilience
+card counts it honestly: two reachable nodes is "Sturdy," three or
+more is "Deep-rooted."
 
 ## What you need
 
@@ -57,18 +56,18 @@ doesn't promise it before it exists.
    exactly as closed to strangers as the first.
 4. **Publish it** at an address members could reach
    (operator-guide §4).
-5. **Read [`operator-powers.md`](./operator-powers.md).** Running a
+5. **Pair the nodes as mirrors** — on each node, point
+   `MIRROR_NODE_URLS` at the other (plus `MIRROR_READ_TOKENS` if the
+   community runs `READ_AUTH=on`), and add your node's address to the
+   existing node's `MIRROR_ANNOUNCE_URLS` so members' apps offer it
+   on a consent card. The operator guide's mirror runbook (§6) has
+   the exact lines. From then on the two servers replicate every
+   record continuously, and members' apps fail over on their own —
+   if either machine is ever lost, the community doesn't even pause,
+   and a replacement node re-fills from the survivor.
+6. **Read [`operator-powers.md`](./operator-powers.md).** Running a
    node makes you an operator, with the powers and limits that page
    names for your community. That transparency is part of the deal.
-
-Until Phase B lands, the second node runs as a warm standby: back up
-the primary's (encrypted) database file onto it on whatever cadence
-your community likes, or simply keep it installed and ready — if the
-primary is ever lost, you set your node's address in members' apps
-(one settings field) and the community re-converges, with members'
-devices re-pushing anything a stale backup missed. When Phase B
-ships, the two nodes will replicate continuously and members' apps
-will fail over on their own.
 
 ## Governance, not just hardware
 

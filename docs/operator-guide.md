@@ -286,6 +286,10 @@ Two things to know:
 | `READ_AUTH` | `off` | Member-authenticated reads (`docs/member-authenticated-reads.md`). `off` = feeds open as before. `on` = every federation GET must carry a member's read signature (or a peer token). Members' apps sign reads automatically; flip to `on` only after everyone runs a signing build — see the rollout runbook below |
 | `NODE_FOUNDER_KEYS` | unset | Comma-separated base64 public keys of the founding member(s) — the trust roots the invite chain grows from. Required when `READ_AUTH=on` (boot refuses otherwise). Each member's public key is on their Profile page |
 | `PEER_READ_TOKENS` | unset | JSON map `{"https://peer.example": "<shared token ≥16 chars>"}`. Outgoing pulls to a mapped peer send the token; inbound reads presenting any mapped token are accepted as peer reads. Exchange tokens with the other operator the same way you exchange `PEER_NODE_URLS`. Only needed when either side enforces `READ_AUTH=on` |
+| `MIRROR_NODE_URLS` | unset | Comma-separated base URLs of MIRROR nodes — other nodes of THIS SAME community (`docs/community-resilience.md` §B). Unlike peers, mirrors replicate EVERY durable kind, including project/RSVP/shift state and redemption receipts. Each mirror pulls from the others; set it on every node in the set (full mesh) |
+| `MIRROR_READ_TOKENS` | unset | JSON map `{"https://mirror.example": "<shared token ≥16 chars>"}` — bearer tokens the mirror worker sends when pulling from a `READ_AUTH=on` mirror. Same shape and hygiene as `PEER_READ_TOKENS` |
+| `MIRROR_ANNOUNCE_URLS` | unset | Comma-separated mirror URLs published in `GET /config.mirrors`. Members' apps offer each announced mirror on a consent card and, once accepted, fail over to it automatically. Announce only addresses meant to be exactly as reachable as this node — the config surface is public |
+| `MIRROR_PULL_INTERVAL_MS` | `60000` (1 min) | How often the mirror replication worker runs a pull cycle |
 
 The rate limiter uses a non-reversible bucket id (FNV-1a hash of the
 IP, modulo 1024) so client IPs never reach memory or logs even
@@ -313,6 +317,39 @@ never invite-gated). To close that:
    before invite receipts existed (add their key to
    `NODE_FOUNDER_KEYS`), or a passphrase-locked device (reads sign
    only while unlocked; syncing resumes at unlock).
+
+### Runbook: pairing two nodes as mirrors
+
+Mirrors make "one server disappears, nobody notices, nothing is
+lost" literally true (`docs/community-resilience.md` §B). Checklist
+for adding a second node run by another member:
+
+1. The new node matches the community's trust settings: same
+   `NODE_FOUNDER_KEYS`, same `READ_AUTH` state, its own
+   `DATABASE_KEY`. **A mirror running `READ_AUTH=off` serves the
+   whole replicated dataset to anyone with its URL** — the gate must
+   match on every node.
+2. On EACH node, set `MIRROR_NODE_URLS` to the other node(s). If
+   `READ_AUTH=on`, also exchange `MIRROR_READ_TOKENS` (≥16 chars,
+   out of band). With three or more nodes, list ALL the others on
+   each node — the exchange verifier resolves auto-confirm keys
+   across the whole set.
+3. On the node members already use, add the new node's address to
+   `MIRROR_ANNOUNCE_URLS`. Members' apps will show a consent card
+   naming it; once a member accepts, their app fails over to it
+   automatically whenever the primary is unreachable. Announcing is
+   an invitation — nothing is used without the member's yes.
+4. Restart both. Watch the logs for `mirror pull` lines; a brand-new
+   mirror catches up from zero in pages (historical redemption
+   receipts included — the membership closure derives identically on
+   both nodes).
+5. `NODE_SYSTEM_SECRET_KEY` stays on ONE node only (the auto-confirm
+   signer). If that node is ever lost, register a new system key on
+   a surviving mirror per `system-key-rotation.md`.
+
+The new operator should read `docs/operator-powers.md` — a mirror
+operator holds every power that page names, and the member-facing
+consent card says as much.
 
 ### Runbook: encrypting an existing database at rest
 

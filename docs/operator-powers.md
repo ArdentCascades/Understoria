@@ -80,10 +80,17 @@ Named plainly, with the honest remedies:
 
 Structure beats vigilance:
 
-- **Two operators are better than one.** A pair (or a rotation)
-  means no single person is "the one with the server," and vacations
-  don't take the community down. The role should rotate the way any
-  stewardship role does.
+- **Two operators are better than one — and now it's a mechanism,
+  not just advice.** A second member can run a MIRROR node
+  (`docs/community-resilience.md` Phase B): the two servers
+  replicate every record continuously, and members' apps switch
+  between them on their own when one is unreachable. No single
+  person is "the one with the server," vacations don't take the
+  community down, and there is no longer one household to pressure.
+  Honesty note: a mirror's operator IS an operator — everything on
+  this page applies to them too, and the app's consent card says so
+  before a member's device adopts a mirror. The role should rotate
+  the way any stewardship role does.
 - **Operator transparency is built in.** `GET /config` publishes the
   operator's self-declared name, funding note, and contact — set at
   deploy, visible to every member in the app.

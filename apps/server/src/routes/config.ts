@@ -64,6 +64,18 @@ export interface PublicConfigResponse {
    *  for, binding `autoConfirmedBy: "system:<nodeId>"` claims to the
    *  published pubkey. */
   nodeId?: string;
+  /**
+   * Mirror nodes of THIS community (`MIRROR_ANNOUNCE_URLS`) — the
+   * addresses member apps may fail over to when this node is
+   * unreachable. Announcing is an invitation, not a command: the PWA
+   * shows a consent card naming each newly announced mirror and only
+   * adopts it after the member accepts (`docs/community-resilience.md`
+   * §B.2). Omitted when the operator announces none. Config is an
+   * open pre-membership surface, so mirrors listed here are public —
+   * operators should only announce addresses that are meant to be
+   * exactly as reachable as this node itself.
+   */
+  mirrors?: string[];
 }
 
 export async function registerConfigRoutes(
@@ -82,6 +94,9 @@ export async function registerConfigRoutes(
         history: config.systemKeyHistory,
       };
       response.nodeId = config.nodeId;
+    }
+    if (config.mirrorAnnounceUrls.length > 0) {
+      response.mirrors = [...config.mirrorAnnounceUrls];
     }
     return response;
   });

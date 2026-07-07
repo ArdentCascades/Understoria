@@ -15,10 +15,21 @@ import {
   verifyInviteRevocation,
 } from "@understoria/shared/crypto";
 import type { InviteRevocationStore } from "../db.js";
+import { MIRROR_INTERNAL_HEADER } from "../mirrorPull.js";
 
 interface Deps {
   store: InviteRevocationStore;
   now?: () => number;
+  /**
+   * `BuiltServer.internalBypassToken` — marks the mirror-pull worker's
+   * self-injected replication POSTs (docs/community-resilience.md
+   * §B.1). Only effect here: the wire row's `receivedAt` is preserved
+   * (when plausible) instead of re-stamped, because `receivedAt` is
+   * this feed's cursor and the revocation should keep one identity
+   * across the whole mirror set. Verification and first-writer-wins
+   * are untouched. See routes/redemptions.ts for the fuller story.
+   */
+  internalToken?: string;
 }
 
 /**
@@ -49,9 +60,12 @@ interface Deps {
  */
 export async function registerInviteRevocationRoutes(
   app: FastifyInstance,
-  { store, now = () => Date.now() }: Deps,
+  { store, now = () => Date.now(), internalToken }: Deps,
 ): Promise<void> {
   app.post("/invite-revocations", async (req, reply) => {
+    const isMirrorApply =
+      internalToken !== undefined &&
+      req.headers[MIRROR_INTERNAL_HEADER] === internalToken;
     const parsed = parseInviteRevocation(req.body);
     if (!parsed.ok) {
       reply.code(400);
@@ -74,7 +88,16 @@ export async function registerInviteRevocationRoutes(
       return { error: "token_already_revoked" };
     }
 
-    store.insert(revocation, now());
+    const wireReceivedAt = (req.body as Record<string, unknown>)?.receivedAt;
+    const receivedAt =
+      isMirrorApply &&
+      typeof wireReceivedAt === "number" &&
+      Number.isInteger(wireReceivedAt) &&
+      wireReceivedAt > 0 &&
+      wireReceivedAt <= now() + 24 * 60 * 60 * 1000
+        ? wireReceivedAt
+        : now();
+    store.insert(revocation, receivedAt);
     reply.code(201);
     return { stored: true, token: revocation.token };
   });

@@ -29,13 +29,13 @@
  * node removes "pressure one host" as an attack entirely.
  *
  * The one hard rule (design doc §0): never say more than the code
- * delivers. Phase A can only ever produce the first two tiers —
- * `sturdy` and `deep_rooted` require the Phase B mirror machinery
- * (real failover), and claiming them for a single-node community
- * would be exactly the over-promise the design rejected. Wording
- * tiers, not a numeric score: `no-leaderboards` applies to
- * infrastructure too, and a small community with one lovingly-run
- * node is healthy, not failing.
+ * delivers. With Phase B shipped (mirror replication + automatic
+ * failover, `lib/nodeEndpoints.ts`), `sturdy` and `deep_rooted` are
+ * now earnable for real: they count nodes with a successful signed
+ * exchange in the reachability window, and the failover they imply
+ * actually happens. Wording tiers, not a numeric score:
+ * `no-leaderboards` applies to infrastructure too, and a small
+ * community with one lovingly-run node is healthy, not failing.
  */
 
 export type ResilienceTier =
@@ -105,4 +105,28 @@ export function isRecentSuccess(
   if (!lastSuccessIso) return false;
   const ts = Date.parse(lastSuccessIso);
   return Number.isFinite(ts) && now - ts <= NODE_REACHABLE_WINDOW_MS;
+}
+
+/**
+ * Per-node freshness for the Phase B trunk row's quiet leaf:
+ * `fresh` = synced within the reachable window (green),
+ * `lagging` = seen within a week but not today (amber),
+ * `quiet` = longer than that, or never (grey).
+ * Same calm register as `nodeQuiet` — information, not alarm.
+ */
+export type NodeFreshness = "fresh" | "lagging" | "quiet";
+
+export const NODE_LAGGING_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function nodeFreshness(
+  lastSuccessIso: string | undefined | null,
+  now: number = Date.now(),
+): NodeFreshness {
+  if (!lastSuccessIso) return "quiet";
+  const ts = Date.parse(lastSuccessIso);
+  if (!Number.isFinite(ts)) return "quiet";
+  const age = now - ts;
+  if (age <= NODE_REACHABLE_WINDOW_MS) return "fresh";
+  if (age <= NODE_LAGGING_WINDOW_MS) return "lagging";
+  return "quiet";
 }

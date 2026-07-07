@@ -1018,6 +1018,31 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '19')",
     ).run();
   }
+
+  // Schema v20 — mirror replication (docs/community-resilience.md
+  // §B.1). One row per (mirror, kind): the composite `(last_ts,
+  // last_id)` high-water mark of the mirror-pull worker's exclusive
+  // pair cursor. Cursors are PER MIRROR — mirrors lag each other, so
+  // carrying node A's high-water mark to node B would silently skip
+  // every record B has that A hasn't seen yet. Separate from
+  // `peer_pull_state` on purpose: that table is one denormalized row
+  // per PEER (a neighboring community, few kinds, observability
+  // columns); this one is a plain cursor ledger over EVERY durable
+  // kind of the same community.
+  if (current < 20) {
+    db.exec(`
+      CREATE TABLE mirror_pull_state (
+        mirror_url TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        last_ts INTEGER NOT NULL,
+        last_id TEXT NOT NULL,
+        PRIMARY KEY (mirror_url, kind)
+      );
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '20')",
+    ).run();
+  }
 }
 
 /**
@@ -2836,4 +2861,35 @@ interface StateRowSqlite {
   updated_at: number;
   payload: string;
   signature: string;
+}
+
+// ---------------------------------------------------------------------------
+// Mirror-pull cursor store (schema v20, docs/community-resilience.md §B.1)
+
+export interface MirrorPullStore {
+  /** The worker's `(last_ts, last_id)` high-water mark for one
+   *  (mirror, kind) — null before the first successful page. */
+  get(mirrorUrl: string, kind: string): { lastTs: number; lastId: string } | null;
+  set(mirrorUrl: string, kind: string, lastTs: number, lastId: string): void;
+}
+
+export function createMirrorPullStore(db: DatabaseType): MirrorPullStore {
+  const getStmt = db.prepare(
+    "SELECT last_ts, last_id FROM mirror_pull_state WHERE mirror_url = ? AND kind = ?",
+  );
+  const setStmt = db.prepare(`
+    INSERT OR REPLACE INTO mirror_pull_state (mirror_url, kind, last_ts, last_id)
+    VALUES (?, ?, ?, ?)
+  `);
+  return {
+    get(mirrorUrl, kind) {
+      const r = getStmt.get(mirrorUrl, kind) as
+        | { last_ts: number; last_id: string }
+        | undefined;
+      return r ? { lastTs: r.last_ts, lastId: r.last_id } : null;
+    },
+    set(mirrorUrl, kind, lastTs, lastId) {
+      setStmt.run(mirrorUrl, kind, lastTs, lastId);
+    },
+  };
 }

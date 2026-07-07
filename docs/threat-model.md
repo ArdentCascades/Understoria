@@ -1607,6 +1607,55 @@ We are not trying to protect against:
   record withholding, service denial, founder-key configuration —
   each with its remedy).
 
+- **Mirror nodes + client failover (community resilience Phase B).**
+  *Shipped — `docs/community-resilience.md` §B.* Same-community
+  replica nodes (`MIRROR_NODE_URLS`) replicate **every durable
+  kind** — including the five signed-LWW participation/project state
+  kinds that deliberately never cross the *peer* wire, and the
+  redemption receipts the membership closure derives from. The
+  participation-privacy boundary from Phase 2 ("never to other
+  communities") is not crossed: the data moves between the same
+  community's own servers. What a reviewer should check:
+  **(1) Each mirror operator is an operator.** A mirror widens the
+  COUNT of hosts holding the community's records by one, and its
+  operator holds every power `docs/operator-powers.md` names. The
+  member-facing consent card says so before a mirror is adopted
+  (auto-suggest via `GET /config.mirrors`, never auto-enable), and
+  `add-a-node.md` step 5 already required reading that page.
+  **(2) The read gate must match.** A mirror running `READ_AUTH=off`
+  serves the whole replicated dataset to anyone with its URL, no
+  matter how tightly the primary is gated — mirrors must run the
+  same `READ_AUTH` + `NODE_FOUNDER_KEYS` as the primary (the
+  membership closure derives identically from the replicated
+  receipts). `MIRROR_READ_TOKENS` get the same hygiene as
+  `PEER_READ_TOKENS`: ≥16 chars, exchanged out of band, rotated on
+  suspicion.
+  **(3) Replication reuses the write gate.** The mirror worker
+  applies pulled records by re-POSTing them through the node's OWN
+  routes (`app.inject`), so every mirrored record passes the same
+  parse/signature/authority/LWW checks as a member submission —
+  no second ingestion path to audit. The per-boot internal token
+  that marks those self-POSTs only (a) exempts them from rate
+  limiting and (b) lets `/redemptions` skip its delivery-grace bound
+  and preserve the origin `receivedAt` (a receipt the community
+  accepted long ago must still replicate to a new mirror or its
+  membership closure would be missing members); it never leaves the
+  process and relaxes nothing else.
+  **(4) One small widening, named:** the CORS allow-list now includes
+  the three `x-understoria-*` read-signature headers — required for
+  the FIRST cross-origin surface that carries them (a mirror URL);
+  the canonical same-origin `/api` deploy never preflighted. This
+  permits browsers to SEND the headers cross-origin; the read gate
+  itself is unchanged.
+  **Residuals:** auto-confirm authority stays with exactly ONE node
+  (`NODE_SYSTEM_SECRET_KEY` is never shared; mirrors verify via the
+  published key, and a lost primary means registering a new system
+  key per the existing rotation runbook). Failover is convergence,
+  not high-availability: records pushed to different nodes during a
+  partition reunite through mirror replication and idempotent pulls,
+  with LWW records resolving by version exactly as they do between
+  devices.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

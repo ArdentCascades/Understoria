@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { randomBytes } from "node:crypto";
 import Fastify, { type FastifyInstance } from "fastify";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
@@ -74,6 +75,7 @@ import {
   createMembershipResolver,
   registerReadAuthGuard,
 } from "./readAuth.js";
+import { MIRROR_INTERNAL_HEADER } from "./mirrorPull.js";
 
 export interface BuildOptions {
   config: Config;
@@ -87,6 +89,20 @@ export interface BuildOptions {
 export interface BuiltServer {
   app: FastifyInstance;
   database: DatabaseType;
+  /**
+   * Per-boot random token that exempts a request from rate limiting
+   * when sent as the `x-understoria-internal` header. It exists for
+   * exactly one caller: the mirror-pull worker, which applies records
+   * from a mirror node by `app.inject()`-ing POSTs against THIS
+   * process (so every mirrored record passes the same
+   * validation/authority/LWW code as a real submission) and would
+   * otherwise burn the loopback bucket's rate budget on a catch-up
+   * batch. The token never leaves the process, is never logged, and
+   * changes on every boot — an external caller cannot learn or reuse
+   * it. Nothing else is bypassed: read-auth, insert caps, and body
+   * validation all still apply.
+   */
+  internalBypassToken: string;
 }
 
 /**
@@ -143,6 +159,7 @@ export async function buildServer({
     crossOriginEmbedderPolicy: false,
   });
 
+  const internalBypassToken = randomBytes(32).toString("base64url");
   await app.register(rateLimit, {
     max: config.rateLimitMax,
     timeWindow: "1 minute",
@@ -151,6 +168,12 @@ export async function buildServer({
     // it with a non-reversible bucket id derived from the IP only at
     // throttle time.
     keyGenerator: (req) => hashIpToBucket(req.ip),
+    // The mirror-pull worker's self-injected POSTs carry the per-boot
+    // token (see BuiltServer.internalBypassToken) — a mirror catch-up
+    // batch must not consume the loopback bucket that real local
+    // clients share.
+    allowList: (req) =>
+      req.headers[MIRROR_INTERNAL_HEADER] === internalBypassToken,
   });
 
   // Permissive CORS for the configured PWA origin.
@@ -164,9 +187,16 @@ export async function buildServer({
         "Access-Control-Allow-Methods",
         "GET, POST, OPTIONS",
       );
+      // The x-understoria-* trio is the member-authenticated-reads
+      // signature (docs/member-authenticated-reads.md §1). It was
+      // absent here for a long time without symptoms because the
+      // canonical deploy is SAME-origin (the PWA and the node share
+      // one host, /api prefix) — no preflight. A mirror node is the
+      // first cross-origin fetch that carries these headers, and the
+      // preflight fails without them listed.
       reply.header(
         "Access-Control-Allow-Headers",
-        "Content-Type",
+        "Content-Type, x-understoria-key, x-understoria-ts, x-understoria-sig",
       );
       if (req.method === "OPTIONS") {
         reply.code(204).send();
@@ -242,8 +272,14 @@ export async function buildServer({
   // rows (a live-credential feed, `docs/invite-redemption.md` §10.1).
   // Redemption receipts (below) are the only invite-adjacent wire
   // surface: open invites never cross any wire.
-  await registerRedemptionRoutes(app, { store: redemptionStore });
-  await registerInviteRevocationRoutes(app, { store: inviteRevocationStore });
+  await registerRedemptionRoutes(app, {
+    store: redemptionStore,
+    internalToken: internalBypassToken,
+  });
+  await registerInviteRevocationRoutes(app, {
+    store: inviteRevocationStore,
+    internalToken: internalBypassToken,
+  });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });
   await registerCoOrganizerInvitationRoutes(app, {
@@ -302,7 +338,7 @@ export async function buildServer({
     configuredPeers: config.peerNodeUrls,
   });
 
-  return { app, database: db };
+  return { app, database: db, internalBypassToken };
 }
 
 /**

@@ -175,6 +175,36 @@ export interface Config {
    */
   peerReadTokens: Readonly<Record<string, string>>;
   /**
+   * MIRROR nodes — other nodes OF THIS SAME COMMUNITY
+   * (docs/community-resilience.md §B). A different relationship than
+   * `peerNodeUrls` (neighboring communities): the mirror worker
+   * replicates EVERY durable kind from these URLs, including the LWW
+   * participation/project state that deliberately never crosses the
+   * peer wire — legal because the data moves between the community's
+   * own servers. Comma-separated base URLs via `MIRROR_NODE_URLS`.
+   */
+  mirrorNodeUrls: readonly string[];
+  /**
+   * Read tokens for pulling from mirrors that enforce READ_AUTH —
+   * same JSON url→token shape as `peerReadTokens`, set via
+   * `MIRROR_READ_TOKENS`. A mirror pair typically shares one token
+   * both ways.
+   */
+  mirrorReadTokens: Readonly<Record<string, string>>;
+  /**
+   * Mirror URLs this node ANNOUNCES in `GET /config.mirrors` so
+   * members' apps can discover them (behind a consent card —
+   * auto-suggest, never auto-enable). Usually the same list as
+   * `mirrorNodeUrls` plus/minus this node's own address; kept
+   * separate because announcement is a member-facing promise while
+   * pulling is an operator plumbing detail. `MIRROR_ANNOUNCE_URLS`.
+   */
+  mirrorAnnounceUrls: readonly string[];
+  /** How often the mirror worker pulls each mirror, in ms.
+   *  Default 60s — mirrors should lag each other by minutes at most,
+   *  or failover serves visibly stale data. */
+  mirrorPullIntervalMs: number;
+  /**
    * Encryption-at-rest key for the SQLite database
    * (`DATABASE_KEY`). When set, `openDatabase` applies `PRAGMA key`
    * (SQLCipher scheme via better-sqlite3-multiple-ciphers) before
@@ -257,6 +287,20 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     founderKeys: parseFounderKeys(env.NODE_FOUNDER_KEYS),
     peerReadTokens: parsePeerReadTokens(env.PEER_READ_TOKENS),
     databaseKey: nonEmpty(env.DATABASE_KEY),
+    mirrorNodeUrls: parseUrlList("MIRROR_NODE_URLS", env.MIRROR_NODE_URLS),
+    mirrorReadTokens: parseTokenMap(
+      "MIRROR_READ_TOKENS",
+      env.MIRROR_READ_TOKENS,
+    ),
+    mirrorAnnounceUrls: parseUrlList(
+      "MIRROR_ANNOUNCE_URLS",
+      env.MIRROR_ANNOUNCE_URLS,
+    ),
+    mirrorPullIntervalMs: asInt(
+      "MIRROR_PULL_INTERVAL_MS",
+      env.MIRROR_PULL_INTERVAL_MS,
+      60_000,
+    ),
   };
 }
 
@@ -303,30 +347,9 @@ function parseFounderKeys(raw: string | undefined): readonly string[] {
 function parsePeerReadTokens(
   raw: string | undefined,
 ): Readonly<Record<string, string>> {
-  if (raw === undefined || raw.trim() === "") return {};
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new Error("PEER_READ_TOKENS is not valid JSON");
-  }
-  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error(
-      'PEER_READ_TOKENS must be a JSON object of {"<peer url>": "<token>"}',
-    );
-  }
-  const out: Record<string, string> = {};
-  for (const [url, token] of Object.entries(parsed)) {
-    if (typeof token !== "string" || token.length < 16) {
-      // Short bearer tokens are guessable; refuse them at boot rather
-      // than let a weak one quietly hold the read door open.
-      throw new Error(
-        `PEER_READ_TOKENS entry for ${JSON.stringify(url)} must be a string of at least 16 characters`,
-      );
-    }
-    out[url.replace(/\/+$/, "")] = token;
-  }
-  return out;
+  // Short bearer tokens are guessable; parseTokenMap refuses them at
+  // boot rather than let a weak one quietly hold the read door open.
+  return parseTokenMap("PEER_READ_TOKENS", raw);
 }
 
 function asNonNegativeInt(
@@ -350,6 +373,13 @@ function nonEmpty(raw: string | undefined): string | null {
 }
 
 function parsePeerUrls(raw: string | undefined): readonly string[] {
+  return parseUrlList("PEER_NODE_URLS", raw);
+}
+
+function parseUrlList(
+  name: string,
+  raw: string | undefined,
+): readonly string[] {
   if (raw === undefined || raw.trim() === "") return [];
   const urls: string[] = [];
   for (const candidate of raw.split(",")) {
@@ -360,17 +390,45 @@ function parsePeerUrls(raw: string | undefined): readonly string[] {
       parsed = new URL(trimmed);
     } catch {
       throw new Error(
-        `PEER_NODE_URLS entry ${JSON.stringify(trimmed)} is not a valid URL`,
+        `${name} entry ${JSON.stringify(trimmed)} is not a valid URL`,
       );
     }
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       throw new Error(
-        `PEER_NODE_URLS entry ${JSON.stringify(trimmed)} must be http(s)`,
+        `${name} entry ${JSON.stringify(trimmed)} must be http(s)`,
       );
     }
     urls.push(trimmed);
   }
   return urls;
+}
+
+function parseTokenMap(
+  name: string,
+  raw: string | undefined,
+): Readonly<Record<string, string>> {
+  if (raw === undefined || raw.trim() === "") return {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`${name} is not valid JSON`);
+  }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error(
+      `${name} must be a JSON object of {"<url>": "<token>"}`,
+    );
+  }
+  const out: Record<string, string> = {};
+  for (const [url, token] of Object.entries(parsed)) {
+    if (typeof token !== "string" || token.length < 16) {
+      throw new Error(
+        `${name} entry for ${JSON.stringify(url)} must be a string of at least 16 characters`,
+      );
+    }
+    out[url.replace(/\/+$/, "")] = token;
+  }
+  return out;
 }
 
 function parseSystemKeyHistory(

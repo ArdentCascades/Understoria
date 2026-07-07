@@ -1452,6 +1452,13 @@
     "confirm": "Yes, connect to {{origin}}",
     "decline": "Not now"
   },
+  "mirrorSuggest": {
+    "label": "Add a backup server for this community",
+    "title": "Add a backup server for this community?",
+    "body": "Your community's server announced a second server it runs alongside it: {{origin}}. If you add it, your app switches to it on its own whenever the usual server can't be reached, and what you share syncs there too. Whoever runs the backup can see the same community data as your usual server's operator. Nothing is used until you confirm.",
+    "confirm": "Add backup server",
+    "decline": "Not now"
+  },
   "format": {
     "justNow": "just now",
     "minutesAgo": "{{count}}m ago",
@@ -1700,7 +1707,15 @@
       "bodySeedling": "Right now this community lives on this device alone. Connecting to a community server — or starting one — lets everyone's copies stay in step.",
       "bodyOne": "One server carries this community — and {{count}} member holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
       "bodyOther": "One server carries this community — and every one of its {{count}} members holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
-      "nodeQuiet": "The server hasn't answered lately — your copy is safe, and syncing resumes when it's back.",
+      "bodyMultiOne": "{{nodes}} servers carry this community — and {{count}} member holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
+      "bodyMultiOther": "{{nodes}} servers carry this community — and every one of its {{count}} members holds a complete copy on their own device. Nothing here can be taken away by taking a machine.",
+      "bodyFailover": "If one server disappears, your apps switch to the others on their own. Nothing is lost.",
+      "nodeQuiet": "No server has answered lately — your copy is safe, and syncing resumes when one is back.",
+      "leaf": {
+        "fresh": "synced today",
+        "lagging": "lagging behind",
+        "quiet": "hasn't answered lately"
+      },
       "cta": "Grow another root"
     },
     "federation": {
