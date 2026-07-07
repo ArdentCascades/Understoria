@@ -2027,3 +2027,149 @@ describe("pullEventCancellationsFromPeer", () => {
     expect(result2.insertedCount).toBe(1);
   });
 });
+
+describe("composite pair cursors (phase 2) — the worker moves through a tie", () => {
+  const PEER = "https://peer.example";
+
+  function buildWorker(fetcher: Fetcher) {
+    const pullStore = createPeerPullStore(db);
+    const vouchStore = createVouchStore(db);
+    const worker = startPeerPullWorker({
+      peerUrls: [PEER],
+      intervalMs: 60_000,
+      store: createExchangeStore(db),
+      vouchStore,
+      postStore: createPostStore(db),
+      taskCommentStore: createTaskCommentStore(db),
+      coorgInvitationStore: createCoOrganizerInvitationStore(db),
+      coorgInvitationResponseStore:
+        createCoOrganizerInvitationResponseStore(db),
+      coorgInvitationRevocationStore:
+        createCoOrganizerInvitationRevocationStore(db),
+      eventStore: createEventStore(db),
+      eventCancellationStore: createEventCancellationStore(db),
+      pullStore,
+      fetcher,
+    });
+    return { worker, pullStore, vouchStore };
+  }
+
+  /** Everything except /vouches answers empty (and /config answers
+   *  "no system key") via the exchangeOnly wrapper. */
+  function withVouchFeed(
+    serve: (since: string | null, sinceId: string | null) => unknown[],
+    servedUrls: string[] = [],
+  ): Fetcher {
+    const others = exchangeOnly(() =>
+      jsonResponse({ count: 0, exchanges: [] }),
+    );
+    return (url) => {
+      if (!/\/vouches\b/.test(url)) return others(url);
+      servedUrls.push(url);
+      const u = new URL(url);
+      const rows = serve(
+        u.searchParams.get("since"),
+        u.searchParams.get("sinceId"),
+      );
+      return jsonResponse({ count: rows.length, vouches: rows });
+    };
+  }
+
+  it("a single-millisecond tie larger than the server page converges, pair persisted", async () => {
+    // The §1 wedge scenario: 120 rows sharing one millisecond, served
+    // by a peer whose own page cap is 50. Under a bare-timestamp
+    // cursor the same lowest-id page re-serves forever; under the
+    // pair the cursor records WHERE INSIDE the millisecond it stopped.
+    const TIE_TS = 7_777;
+    const PAGE = 50;
+    const vouches = Array.from({ length: 120 }, (_, i) =>
+      makeSignedVouch({
+        id: `v_${String(i).padStart(3, "0")}`,
+        createdAt: TIE_TS,
+      }),
+    ).sort((a, b) => (a.id < b.id ? -1 : 1));
+    const servedUrls: string[] = [];
+    const fetcher = withVouchFeed((since, sinceId) => {
+      let rows = vouches;
+      if (since !== null && sinceId !== null) {
+        // The server's exclusive pair predicate (pagedRows).
+        const s = Number(since);
+        rows = rows.filter(
+          (r) => r.createdAt > s || (r.createdAt === s && r.id > sinceId),
+        );
+      } else if (since !== null) {
+        const s = Number(since);
+        rows = rows.filter((r) => r.createdAt >= s);
+      }
+      return rows.slice(0, PAGE);
+    }, servedUrls);
+    const { worker, pullStore, vouchStore } = buildWorker(fetcher);
+
+    // Pull 1: the first page of the tie; the persisted pair points at
+    // the exact row we stopped on.
+    await worker.pullAllOnce();
+    let state = pullStore.get(PEER)!;
+    expect(state.lastVouchCreatedAt).toBe(TIE_TS);
+    expect(state.lastVouchCreatedId).toBe("v_049");
+    expect(vouchStore.has("v_049")).toBe(true);
+    expect(vouchStore.has("v_050")).toBe(false);
+
+    // Pulls 2–3 move THROUGH the tie to convergence.
+    await worker.pullAllOnce();
+    await worker.pullAllOnce();
+    state = pullStore.get(PEER)!;
+    expect(state.lastVouchCreatedId).toBe("v_119");
+    for (const v of vouches) expect(vouchStore.has(v.id)).toBe(true);
+
+    // A further pull is an empty no-op that leaves the pair in place.
+    const results = await worker.pullAllOnce();
+    expect(results.find((r) => r.kind === "vouch")?.insertedCount).toBe(0);
+    expect(pullStore.get(PEER)!.lastVouchCreatedId).toBe("v_119");
+
+    // Wire shape: the first request carried no cursor; the second
+    // carried the pair.
+    expect(servedUrls[0]).not.toContain("since");
+    expect(servedUrls[1]).toContain(`since=${TIE_TS}`);
+    expect(servedUrls[1]).toContain("sinceId=v_049");
+    worker.stop();
+  });
+
+  it("a legacy timestamp-only cursor sends since alone, then upgrades to the pair", async () => {
+    const servedUrls: string[] = [];
+    const late = makeSignedVouch({ id: "v_new", createdAt: 600 });
+    const fetcher = withVouchFeed(
+      (since) => (since === null || Number(since) <= 600 ? [late] : []),
+      servedUrls,
+    );
+    const { worker, pullStore, vouchStore } = buildWorker(fetcher);
+    // Seed the legacy position: a timestamp with NO id half (exactly
+    // what a pre-phase-2 database holds after the migration).
+    pullStore.recordSuccess({
+      peerUrl: PEER,
+      kind: "vouch",
+      at: 1,
+      latestSeenAt: 500,
+      latestSeenId: null,
+      pulledCount: 0,
+    });
+
+    await worker.pullAllOnce();
+    // The request carried `since` alone — the inclusive legacy pull —
+    // and the successful pull wrote the pair form.
+    expect(servedUrls[0]).toContain("since=500");
+    expect(servedUrls[0]).not.toContain("sinceId");
+    let state = pullStore.get(PEER)!;
+    expect(state.lastVouchCreatedAt).toBe(600);
+    expect(state.lastVouchCreatedId).toBe("v_new");
+    expect(vouchStore.has("v_new")).toBe(true);
+
+    // An empty follow-up pull must not clobber either half — the pair
+    // moves together or not at all.
+    await worker.pullAllOnce();
+    expect(servedUrls[1]).toContain("sinceId=v_new");
+    state = pullStore.get(PEER)!;
+    expect(state.lastVouchCreatedAt).toBe(600);
+    expect(state.lastVouchCreatedId).toBe("v_new");
+    worker.stop();
+  });
+});

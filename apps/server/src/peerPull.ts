@@ -50,7 +50,10 @@ import type {
  * Federation pull loop — Agent 3 task 2.
  *
  * Each configured peer URL is polled on an interval. For every poll we
- * GET /exchanges?since=<last_completed_at>, verify every row's
+ * GET /exchanges?since=<ts>&sinceId=<id> (the exclusive composite
+ * pair cursor from docs/composite-federation-cursors.md; a NULL
+ * stored id falls back to the legacy inclusive since-only pull),
+ * verify every row's
  * signatures with the same `verifyExchange` the POST endpoint uses
  * (a peer claiming to be honest cannot inject anything unsigned), and
  * INSERT the new ones into the local store. The dedup check is by id —
@@ -78,9 +81,32 @@ export interface PullResult {
   duplicateCount: number;
   /** Records that arrived but failed signature verification. */
   rejectedCount: number;
-  /** max(cursorField) across the inserted rows; null if none new.
-   *  Cursor is `completedAt` for exchanges, `createdAt` for vouches. */
+  /** Timestamp half of the max (cursorField, id) pair across the
+   *  CONSUMED rows (inserted or verified duplicates); null if none.
+   *  Cursor field is `completedAt` for exchanges, `createdAt` for
+   *  vouches — see the per-kind pull functions. */
   latestCompletedAt: number | null;
+  /** Id half of the pair — composite cursors phase 2. Together with
+   *  `latestCompletedAt` this pins the exact position of the last
+   *  consumed row, so the next pull's exclusive pair cursor can move
+   *  through a timestamp tie of any size. */
+  latestId: string | null;
+}
+
+/** The (timestamp, id) position of the last consumed row. */
+type CursorPair = { ts: number; id: string };
+
+/** Fold one consumed row into the running max pair — feed order is
+ *  `ts ASC, id ASC`, so the pair comparison mirrors the server's. */
+function advancePair(
+  latest: CursorPair | null,
+  ts: number,
+  id: string,
+): CursorPair {
+  if (latest === null || ts > latest.ts || (ts === latest.ts && id > latest.id)) {
+    return { ts, id };
+  }
+  return latest;
 }
 
 export type Fetcher = (url: string) => Promise<{
@@ -96,6 +122,9 @@ export type Fetcher = (url: string) => Promise<{
 export async function pullFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: ExchangeStore;
   /** Cap the response size so a misbehaving peer can't OOM us. The
@@ -115,16 +144,17 @@ export async function pullFromPeer(opts: {
   resolveSystemPubkey?: (nodeId: string, signedAt: number) => string | null;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
   const resolveSystemPubkey = opts.resolveSystemPubkey ?? (() => null);
 
-  const url = buildUrl(peerUrl, "exchanges", since, maxRows);
+  const url = buildUrl(peerUrl, "exchanges", since, sinceId, maxRows);
   const rows = await fetchAndExtract(fetcher, url, peerUrl, "exchanges");
 
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCompletedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseExchange(raw);
@@ -147,24 +177,14 @@ export async function pullFromPeer(opts: {
     }
     if (store.has(exchange.id)) {
       duplicateCount += 1;
-      // Even a duplicate's completedAt advances our high-water mark —
-      // we know we've successfully processed that point in time.
-      if (
-        latestCompletedAt === null ||
-        exchange.completedAt > latestCompletedAt
-      ) {
-        latestCompletedAt = exchange.completedAt;
-      }
+      // Even a duplicate's position advances our high-water mark —
+      // we know we've successfully processed that point in the feed.
+      latest = advancePair(latest, exchange.completedAt, exchange.id);
       continue;
     }
     store.insert(exchange);
     insertedCount += 1;
-    if (
-      latestCompletedAt === null ||
-      exchange.completedAt > latestCompletedAt
-    ) {
-      latestCompletedAt = exchange.completedAt;
-    }
+    latest = advancePair(latest, exchange.completedAt, exchange.id);
   }
 
   return {
@@ -173,7 +193,8 @@ export async function pullFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -184,20 +205,24 @@ export async function pullFromPeer(opts: {
 export async function pullVouchesFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: VouchStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "vouches", since, maxRows);
+  const url = buildUrl(peerUrl, "vouches", since, sinceId, maxRows);
   const rows = await fetchAndExtract(fetcher, url, peerUrl, "vouches");
 
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCreatedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseVouch(raw);
@@ -212,16 +237,12 @@ export async function pullVouchesFromPeer(opts: {
     }
     if (store.has(vouch.id)) {
       duplicateCount += 1;
-      if (latestCreatedAt === null || vouch.createdAt > latestCreatedAt) {
-        latestCreatedAt = vouch.createdAt;
-      }
+      latest = advancePair(latest, vouch.createdAt, vouch.id);
       continue;
     }
     store.insert(vouch);
     insertedCount += 1;
-    if (latestCreatedAt === null || vouch.createdAt > latestCreatedAt) {
-      latestCreatedAt = vouch.createdAt;
-    }
+    latest = advancePair(latest, vouch.createdAt, vouch.id);
   }
 
   return {
@@ -230,7 +251,8 @@ export async function pullVouchesFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestCreatedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -240,20 +262,24 @@ export async function pullVouchesFromPeer(opts: {
 export async function pullPostsFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: PostStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "posts", since, maxRows);
+  const url = buildUrl(peerUrl, "posts", since, sinceId, maxRows);
   const rows = await fetchAndExtract(fetcher, url, peerUrl, "posts");
 
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCreatedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parsePost(raw);
@@ -275,16 +301,12 @@ export async function pullPostsFromPeer(opts: {
     }
     if (store.has(record.id)) {
       duplicateCount += 1;
-      if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
-        latestCreatedAt = record.createdAt;
-      }
+      latest = advancePair(latest, record.createdAt, record.id);
       continue;
     }
     store.insert(record);
     insertedCount += 1;
-    if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
-      latestCreatedAt = record.createdAt;
-    }
+    latest = advancePair(latest, record.createdAt, record.id);
   }
 
   return {
@@ -293,7 +315,8 @@ export async function pullPostsFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestCreatedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -319,20 +342,24 @@ export async function pullPostsFromPeer(opts: {
 export async function pullTaskCommentsFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: TaskCommentStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "task-comments", since, maxRows);
+  const url = buildUrl(peerUrl, "task-comments", since, sinceId, maxRows);
   const rows = await fetchAndExtract(fetcher, url, peerUrl, "taskComments");
 
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCreatedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseTaskComment(raw);
@@ -354,11 +381,8 @@ export async function pullTaskCommentsFromPeer(opts: {
       comment.createdAt,
       comment.deletedAt ?? 0,
     );
-    const advanceCursor = () => {
-      if (latestCreatedAt === null || effectiveCursorAt > latestCreatedAt) {
-        latestCreatedAt = effectiveCursorAt;
-      }
-    };
+    // (Inlined at each consume site rather than a closure so the
+    // narrowed type of `latest` survives to the return below.)
     if (store.has(comment.id)) {
       // Already have the row. If the incoming carries a tombstone we
       // didn't have, apply it; otherwise count as duplicate.
@@ -367,17 +391,17 @@ export async function pullTaskCommentsFromPeer(opts: {
         if (local === null || local === undefined) {
           store.upsertTombstone(comment.id, comment.deletedAt);
           insertedCount += 1;
-          advanceCursor();
+          latest = advancePair(latest, effectiveCursorAt, comment.id);
           continue;
         }
       }
       duplicateCount += 1;
-      advanceCursor();
+      latest = advancePair(latest, effectiveCursorAt, comment.id);
       continue;
     }
     store.insert(comment);
     insertedCount += 1;
-    advanceCursor();
+    latest = advancePair(latest, effectiveCursorAt, comment.id);
   }
 
   return {
@@ -386,7 +410,8 @@ export async function pullTaskCommentsFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestCreatedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -394,14 +419,18 @@ export async function pullTaskCommentsFromPeer(opts: {
 export async function pullCoOrganizerInvitationsFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: CoOrganizerInvitationStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "coorg-invitations", since, maxRows);
+  const url = buildUrl(peerUrl, "coorg-invitations", since, sinceId, maxRows);
   const rows = await fetchAndExtract(
     fetcher,
     url,
@@ -412,7 +441,7 @@ export async function pullCoOrganizerInvitationsFromPeer(opts: {
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCreatedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseCoOrganizerInvitation(raw);
@@ -427,16 +456,12 @@ export async function pullCoOrganizerInvitationsFromPeer(opts: {
     }
     if (store.has(record.id)) {
       duplicateCount += 1;
-      if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
-        latestCreatedAt = record.createdAt;
-      }
+      latest = advancePair(latest, record.createdAt, record.id);
       continue;
     }
     store.insert(record);
     insertedCount += 1;
-    if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
-      latestCreatedAt = record.createdAt;
-    }
+    latest = advancePair(latest, record.createdAt, record.id);
   }
 
   return {
@@ -445,7 +470,8 @@ export async function pullCoOrganizerInvitationsFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestCreatedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -453,14 +479,18 @@ export async function pullCoOrganizerInvitationsFromPeer(opts: {
 export async function pullCoOrganizerInvitationResponsesFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: CoOrganizerInvitationResponseStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "coorg-invitation-responses", since, maxRows);
+  const url = buildUrl(peerUrl, "coorg-invitation-responses", since, sinceId, maxRows);
   const rows = await fetchAndExtract(
     fetcher,
     url,
@@ -471,7 +501,7 @@ export async function pullCoOrganizerInvitationResponsesFromPeer(opts: {
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestDecidedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseCoOrganizerInvitationResponse(raw);
@@ -486,16 +516,12 @@ export async function pullCoOrganizerInvitationResponsesFromPeer(opts: {
     }
     if (store.has(record.id)) {
       duplicateCount += 1;
-      if (latestDecidedAt === null || record.decidedAt > latestDecidedAt) {
-        latestDecidedAt = record.decidedAt;
-      }
+      latest = advancePair(latest, record.decidedAt, record.id);
       continue;
     }
     store.insert(record);
     insertedCount += 1;
-    if (latestDecidedAt === null || record.decidedAt > latestDecidedAt) {
-      latestDecidedAt = record.decidedAt;
-    }
+    latest = advancePair(latest, record.decidedAt, record.id);
   }
 
   return {
@@ -504,7 +530,8 @@ export async function pullCoOrganizerInvitationResponsesFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestDecidedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -512,17 +539,22 @@ export async function pullCoOrganizerInvitationResponsesFromPeer(opts: {
 export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: CoOrganizerInvitationRevocationStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
   const url = buildUrl(
     peerUrl,
     "coorg-invitation-revocations",
     since,
+    sinceId,
     maxRows,
   );
   const rows = await fetchAndExtract(
@@ -535,7 +567,7 @@ export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestRevokedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseCoOrganizerInvitationRevocation(raw);
@@ -550,16 +582,12 @@ export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
     }
     if (store.has(record.id)) {
       duplicateCount += 1;
-      if (latestRevokedAt === null || record.revokedAt > latestRevokedAt) {
-        latestRevokedAt = record.revokedAt;
-      }
+      latest = advancePair(latest, record.revokedAt, record.id);
       continue;
     }
     store.insert(record);
     insertedCount += 1;
-    if (latestRevokedAt === null || record.revokedAt > latestRevokedAt) {
-      latestRevokedAt = record.revokedAt;
-    }
+    latest = advancePair(latest, record.revokedAt, record.id);
   }
 
   return {
@@ -568,7 +596,8 @@ export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestRevokedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -577,20 +606,24 @@ export async function pullCoOrganizerInvitationRevocationsFromPeer(opts: {
 export async function pullEventsFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: EventStore;
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "events", since, maxRows);
+  const url = buildUrl(peerUrl, "events", since, sinceId, maxRows);
   const rows = await fetchAndExtract(fetcher, url, peerUrl, "events");
 
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCreatedAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseEvent(raw);
@@ -605,16 +638,12 @@ export async function pullEventsFromPeer(opts: {
     }
     if (store.has(record.id)) {
       duplicateCount += 1;
-      if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
-        latestCreatedAt = record.createdAt;
-      }
+      latest = advancePair(latest, record.createdAt, record.id);
       continue;
     }
     store.insert(record);
     insertedCount += 1;
-    if (latestCreatedAt === null || record.createdAt > latestCreatedAt) {
-      latestCreatedAt = record.createdAt;
-    }
+    latest = advancePair(latest, record.createdAt, record.id);
   }
 
   return {
@@ -623,7 +652,8 @@ export async function pullEventsFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestCreatedAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -636,6 +666,9 @@ export async function pullEventsFromPeer(opts: {
 export async function pullEventCancellationsFromPeer(opts: {
   peerUrl: string;
   since: number | null;
+  /** Id half of the exclusive pair cursor; null/absent = legacy
+   *  inclusive `since`-only pull (composite cursors phase 2). */
+  sinceId?: string | null;
   fetcher: Fetcher;
   store: EventCancellationStore;
   /** Consulted for the organizer-authority check — a cancellation may
@@ -644,9 +677,10 @@ export async function pullEventCancellationsFromPeer(opts: {
   maxRows?: number;
 }): Promise<PullResult> {
   const { peerUrl, since, fetcher, store, eventStore } = opts;
+  const sinceId = opts.sinceId ?? null;
   const maxRows = opts.maxRows ?? 500;
 
-  const url = buildUrl(peerUrl, "event-cancellations", since, maxRows);
+  const url = buildUrl(peerUrl, "event-cancellations", since, sinceId, maxRows);
   const rows = await fetchAndExtract(
     fetcher,
     url,
@@ -657,7 +691,7 @@ export async function pullEventCancellationsFromPeer(opts: {
   let insertedCount = 0;
   let duplicateCount = 0;
   let rejectedCount = 0;
-  let latestCancelledAt: number | null = null;
+  let latest: CursorPair | null = null;
 
   for (const raw of rows) {
     const parsed = parseEventCancellation(raw);
@@ -683,9 +717,7 @@ export async function pullEventCancellationsFromPeer(opts: {
     }
     if (store.has(record.id)) {
       duplicateCount += 1;
-      if (latestCancelledAt === null || record.cancelledAt > latestCancelledAt) {
-        latestCancelledAt = record.cancelledAt;
-      }
+      latest = advancePair(latest, record.cancelledAt, record.id);
       continue;
     }
     // First-write-wins by eventId. A second cancellation arriving for
@@ -694,16 +726,12 @@ export async function pullEventCancellationsFromPeer(opts: {
     const existingForEvent = store.getByEventId(record.eventId);
     if (existingForEvent !== null) {
       duplicateCount += 1;
-      if (latestCancelledAt === null || record.cancelledAt > latestCancelledAt) {
-        latestCancelledAt = record.cancelledAt;
-      }
+      latest = advancePair(latest, record.cancelledAt, record.id);
       continue;
     }
     store.insert(record);
     insertedCount += 1;
-    if (latestCancelledAt === null || record.cancelledAt > latestCancelledAt) {
-      latestCancelledAt = record.cancelledAt;
-    }
+    latest = advancePair(latest, record.cancelledAt, record.id);
   }
 
   return {
@@ -712,7 +740,8 @@ export async function pullEventCancellationsFromPeer(opts: {
     insertedCount,
     duplicateCount,
     rejectedCount,
-    latestCompletedAt: latestCancelledAt,
+    latestCompletedAt: latest?.ts ?? null,
+    latestId: latest?.id ?? null,
   };
 }
 
@@ -729,12 +758,19 @@ function buildUrl(
     | "events"
     | "event-cancellations",
   since: number | null,
+  sinceId: string | null,
   limit: number,
 ): string {
   const base = peerUrl.replace(/\/+$/, "");
   const params = new URLSearchParams();
   if (since !== null && Number.isFinite(since)) {
     params.set("since", String(since));
+    // The pair component only means anything next to its timestamp —
+    // the server ignores sinceId without since, and a stored id
+    // without a stored ts never happens (recordSuccess pairs them).
+    if (sinceId !== null && sinceId.length > 0) {
+      params.set("sinceId", sinceId);
+    }
   }
   params.set("limit", String(limit));
   return `${base}/${path}?${params.toString()}`;
@@ -822,29 +858,56 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     onPull,
   } = opts;
 
-  function sinceFor(
+  function cursorFor(
     kind: PullRecordKind,
     state: ReturnType<PeerPullStore["get"]>,
-  ): number | null {
+  ): { since: number | null; sinceId: string | null } {
     switch (kind) {
       case "exchange":
-        return state?.lastCompletedAt ?? null;
+        return {
+          since: state?.lastCompletedAt ?? null,
+          sinceId: state?.lastCompletedId ?? null,
+        };
       case "vouch":
-        return state?.lastVouchCreatedAt ?? null;
+        return {
+          since: state?.lastVouchCreatedAt ?? null,
+          sinceId: state?.lastVouchCreatedId ?? null,
+        };
       case "post":
-        return state?.lastPostCreatedAt ?? null;
+        return {
+          since: state?.lastPostCreatedAt ?? null,
+          sinceId: state?.lastPostCreatedId ?? null,
+        };
       case "task_comment":
-        return state?.lastTaskCommentCreatedAt ?? null;
+        return {
+          since: state?.lastTaskCommentCreatedAt ?? null,
+          sinceId: state?.lastTaskCommentCreatedId ?? null,
+        };
       case "coorg_invitation":
-        return state?.lastCoOrgInvitationCreatedAt ?? null;
+        return {
+          since: state?.lastCoOrgInvitationCreatedAt ?? null,
+          sinceId: state?.lastCoOrgInvitationCreatedId ?? null,
+        };
       case "coorg_invitation_response":
-        return state?.lastCoOrgInvitationResponseDecidedAt ?? null;
+        return {
+          since: state?.lastCoOrgInvitationResponseDecidedAt ?? null,
+          sinceId: state?.lastCoOrgInvitationResponseDecidedId ?? null,
+        };
       case "coorg_invitation_revocation":
-        return state?.lastCoOrgInvitationRevocationRevokedAt ?? null;
+        return {
+          since: state?.lastCoOrgInvitationRevocationRevokedAt ?? null,
+          sinceId: state?.lastCoOrgInvitationRevocationRevokedId ?? null,
+        };
       case "event":
-        return state?.lastEventCreatedAt ?? null;
+        return {
+          since: state?.lastEventCreatedAt ?? null,
+          sinceId: state?.lastEventCreatedId ?? null,
+        };
       case "event_cancellation":
-        return state?.lastEventCancellationCreatedAt ?? null;
+        return {
+          since: state?.lastEventCancellationCreatedAt ?? null,
+          sinceId: state?.lastEventCancellationCreatedId ?? null,
+        };
     }
   }
 
@@ -1021,6 +1084,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     kind: PullRecordKind,
     peerUrl: string,
     since: number | null,
+    sinceId: string | null,
   ): Promise<PullResult> {
     switch (kind) {
       case "exchange":
@@ -1038,6 +1102,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store,
           resolveSystemPubkey,
@@ -1046,6 +1111,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullVouchesFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: vouchStore,
         });
@@ -1053,6 +1119,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullPostsFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: postStore,
         });
@@ -1060,6 +1127,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullTaskCommentsFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: taskCommentStore,
         });
@@ -1067,6 +1135,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullCoOrganizerInvitationsFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: coorgInvitationStore,
         });
@@ -1074,6 +1143,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullCoOrganizerInvitationResponsesFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: coorgInvitationResponseStore,
         });
@@ -1081,6 +1151,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullCoOrganizerInvitationRevocationsFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: coorgInvitationRevocationStore,
         });
@@ -1088,6 +1159,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullEventsFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: eventStore,
         });
@@ -1095,6 +1167,7 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
         return pullEventCancellationsFromPeer({
           peerUrl,
           since,
+          sinceId,
           fetcher,
           store: eventCancellationStore,
           eventStore,
@@ -1107,14 +1180,15 @@ export function startPeerPullWorker(opts: PullWorkerOptions): PullWorker {
     kind: PullRecordKind,
   ): Promise<PullResult | null> {
     const state = pullStore.get(peerUrl);
-    const since = sinceFor(kind, state);
+    const { since, sinceId } = cursorFor(kind, state);
     try {
-      const result = await runPull(kind, peerUrl, since);
+      const result = await runPull(kind, peerUrl, since, sinceId);
       pullStore.recordSuccess({
         peerUrl,
         kind,
         at: Date.now(),
         latestSeenAt: result.latestCompletedAt,
+        latestSeenId: result.latestId,
         pulledCount: result.insertedCount,
       });
       onPull?.(result);

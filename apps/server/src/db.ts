@@ -340,6 +340,21 @@ export interface PeerPullStateRow {
   lastCoOrgInvitationRevocationRevokedAt: number | null;
   lastEventCreatedAt: number | null;
   lastEventCancellationCreatedAt: number | null;
+  /** Id half of each (timestamp, id) pair cursor — composite cursors
+   *  phase 2. NULL = legacy timestamp-only position: send `since`
+   *  alone (inclusive re-serve, dedup no-ops), write the pair after
+   *  the next successful pull. Always updated ATOMICALLY with its
+   *  timestamp column — a pair whose halves disagree would skip or
+   *  re-serve rows. */
+  lastCompletedId: string | null;
+  lastVouchCreatedId: string | null;
+  lastPostCreatedId: string | null;
+  lastTaskCommentCreatedId: string | null;
+  lastCoOrgInvitationCreatedId: string | null;
+  lastCoOrgInvitationResponseDecidedId: string | null;
+  lastCoOrgInvitationRevocationRevokedId: string | null;
+  lastEventCreatedId: string | null;
+  lastEventCancellationCreatedId: string | null;
   lastError: string | null;
   lastPulledCount: number;
 }
@@ -369,6 +384,10 @@ export interface PeerPullStore {
     kind: PullRecordKind;
     at: number;
     latestSeenAt: number | null;
+    /** Id of the last-consumed row at `latestSeenAt` — the pair
+     *  half. Persisted only together with a non-null `latestSeenAt`
+     *  so the stored pair can never disagree. */
+    latestSeenId: string | null;
     pulledCount: number;
   }): void;
   recordFailure(opts: { peerUrl: string; at: number; error: string }): void;
@@ -1150,6 +1169,35 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '23')",
     ).run();
   }
+
+  if (current < 24) {
+    // Composite cursors phase 2 (docs/composite-federation-cursors.md
+    // §4.2): peer_pull_state gains one nullable id column per
+    // existing timestamp cursor, so node↔node pullers can persist the
+    // (timestamp, id) pair and send the exclusive pair cursor. NULL
+    // means "legacy position" — the puller sends `since` alone (one
+    // inclusive re-serve page, dedup no-ops) and writes the pair form
+    // on its next successful pull. No data migration needed.
+    db.exec(`
+      ALTER TABLE peer_pull_state ADD COLUMN last_completed_id TEXT;
+      ALTER TABLE peer_pull_state ADD COLUMN last_vouch_created_id TEXT;
+      ALTER TABLE peer_pull_state ADD COLUMN last_post_created_id TEXT;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_task_comment_created_id TEXT;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_coorg_invitation_created_id TEXT;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_coorg_invitation_response_decided_id TEXT;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_coorg_invitation_revocation_revoked_id TEXT;
+      ALTER TABLE peer_pull_state ADD COLUMN last_event_created_id TEXT;
+      ALTER TABLE peer_pull_state
+        ADD COLUMN last_event_cancellation_created_id TEXT;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '24')",
+    ).run();
+  }
 }
 
 /**
@@ -1544,129 +1592,81 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
   // peer recovers; operators can read `last_success_at` vs.
   // `last_pulled_at` to tell whether the most recent attempt
   // succeeded. Per-kind error columns are a future refinement.
-  const successExchangeStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at, last_completed_at,
-      last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_completed_at = COALESCE(@latestSeenAt, last_completed_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successVouchStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at, last_vouch_created_at,
-      last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_vouch_created_at = COALESCE(@latestSeenAt, last_vouch_created_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successPostStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at, last_post_created_at,
-      last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_post_created_at = COALESCE(@latestSeenAt, last_post_created_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successTaskCommentStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at,
-      last_task_comment_created_at, last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_task_comment_created_at =
-        COALESCE(@latestSeenAt, last_task_comment_created_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successCoOrgInvitationStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at,
-      last_coorg_invitation_created_at, last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_coorg_invitation_created_at =
-        COALESCE(@latestSeenAt, last_coorg_invitation_created_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successCoOrgInvitationResponseStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at,
-      last_coorg_invitation_response_decided_at, last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_coorg_invitation_response_decided_at =
-        COALESCE(@latestSeenAt, last_coorg_invitation_response_decided_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successCoOrgInvitationRevocationStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at,
-      last_coorg_invitation_revocation_revoked_at, last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, @latestSeenAt, @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_coorg_invitation_revocation_revoked_at =
-        COALESCE(@latestSeenAt, last_coorg_invitation_revocation_revoked_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successEventStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at,
-      last_event_created_at, last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, COALESCE(@latestSeenAt, 0), @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_event_created_at =
-        COALESCE(@latestSeenAt, last_event_created_at),
-      last_pulled_count = @pulledCount
-  `);
-  const successEventCancellationStmt = db.prepare(`
-    INSERT INTO peer_pull_state (
-      peer_url, last_pulled_at, last_success_at,
-      last_event_cancellation_created_at, last_pulled_count
-    ) VALUES (
-      @peerUrl, @at, @at, COALESCE(@latestSeenAt, 0), @pulledCount
-    )
-    ON CONFLICT(peer_url) DO UPDATE SET
-      last_pulled_at = @at,
-      last_success_at = @at,
-      last_event_cancellation_created_at =
-        COALESCE(@latestSeenAt, last_event_cancellation_created_at),
-      last_pulled_count = @pulledCount
-  `);
+  // One parameterized success statement per kind, generated from the
+  // cursor-column map. Each updates its (timestamp, id) pair cursor
+  // ATOMICALLY: when the pull consumed nothing (@latestSeenAt NULL)
+  // both halves keep their existing values; when it consumed rows,
+  // both halves take the new position together. A pair whose halves
+  // disagreed would skip or re-serve rows at the boundary.
+  //
+  // Note: success deliberately does NOT clear `last_error`. The pulls
+  // for the same peer run in parallel each tick, and clearing
+  // `last_error` on success would race with a concurrent failure
+  // update, hiding the failure. The accepted trade is that
+  // `last_error` may hold a stale message after a peer recovers;
+  // operators can read `last_success_at` vs. `last_pulled_at` to tell
+  // whether the most recent attempt succeeded. Per-kind error columns
+  // are a future refinement.
+  const KIND_CURSOR_COLUMNS: Record<
+    PullRecordKind,
+    { ts: string; id: string; notNull?: boolean }
+  > = {
+    exchange: { ts: "last_completed_at", id: "last_completed_id" },
+    vouch: { ts: "last_vouch_created_at", id: "last_vouch_created_id" },
+    post: { ts: "last_post_created_at", id: "last_post_created_id" },
+    task_comment: {
+      ts: "last_task_comment_created_at",
+      id: "last_task_comment_created_id",
+    },
+    coorg_invitation: {
+      ts: "last_coorg_invitation_created_at",
+      id: "last_coorg_invitation_created_id",
+    },
+    coorg_invitation_response: {
+      ts: "last_coorg_invitation_response_decided_at",
+      id: "last_coorg_invitation_response_decided_id",
+    },
+    coorg_invitation_revocation: {
+      ts: "last_coorg_invitation_revocation_revoked_at",
+      id: "last_coorg_invitation_revocation_revoked_id",
+    },
+    // The event columns are NOT NULL DEFAULT 0 (v10), so first insert
+    // coalesces the timestamp to 0 instead of NULL.
+    event: {
+      ts: "last_event_created_at",
+      id: "last_event_created_id",
+      notNull: true,
+    },
+    event_cancellation: {
+      ts: "last_event_cancellation_created_at",
+      id: "last_event_cancellation_created_id",
+      notNull: true,
+    },
+  };
+  const successStmts = Object.fromEntries(
+    Object.entries(KIND_CURSOR_COLUMNS).map(([kind, col]) => [
+      kind,
+      db.prepare(`
+        INSERT INTO peer_pull_state (
+          peer_url, last_pulled_at, last_success_at,
+          ${col.ts}, ${col.id}, last_pulled_count
+        ) VALUES (
+          @peerUrl, @at, @at,
+          ${col.notNull ? "COALESCE(@latestSeenAt, 0)" : "@latestSeenAt"},
+          @latestSeenId, @pulledCount
+        )
+        ON CONFLICT(peer_url) DO UPDATE SET
+          last_pulled_at = @at,
+          last_success_at = @at,
+          ${col.ts} = COALESCE(@latestSeenAt, ${col.ts}),
+          ${col.id} = CASE
+            WHEN @latestSeenAt IS NOT NULL THEN @latestSeenId
+            ELSE ${col.id}
+          END,
+          last_pulled_count = @pulledCount
+      `),
+    ]),
+  ) as Record<PullRecordKind, ReturnType<DatabaseType["prepare"]>>;
   const failureStmt = db.prepare(`
     INSERT INTO peer_pull_state (
       peer_url, last_pulled_at, last_error, last_pulled_count
@@ -1686,26 +1686,16 @@ export function createPeerPullStore(db: DatabaseType): PeerPullStore {
       const rows = listStmt.all() as PeerPullStateRowSqlite[];
       return rows.map(toState);
     },
-    recordSuccess({ peerUrl, kind, at, latestSeenAt, pulledCount }) {
-      const stmt =
-        kind === "exchange"
-          ? successExchangeStmt
-          : kind === "vouch"
-            ? successVouchStmt
-            : kind === "post"
-              ? successPostStmt
-              : kind === "task_comment"
-                ? successTaskCommentStmt
-                : kind === "coorg_invitation"
-                  ? successCoOrgInvitationStmt
-                  : kind === "coorg_invitation_response"
-                    ? successCoOrgInvitationResponseStmt
-                    : kind === "coorg_invitation_revocation"
-                      ? successCoOrgInvitationRevocationStmt
-                      : kind === "event"
-                        ? successEventStmt
-                        : successEventCancellationStmt;
-      stmt.run({ peerUrl, at, latestSeenAt, pulledCount });
+    recordSuccess({ peerUrl, kind, at, latestSeenAt, latestSeenId, pulledCount }) {
+      successStmts[kind].run({
+        peerUrl,
+        at,
+        latestSeenAt,
+        // Never persist an id without its timestamp — the halves move
+        // together or not at all.
+        latestSeenId: latestSeenAt === null ? null : latestSeenId,
+        pulledCount,
+      });
     },
     recordFailure({ peerUrl, at, error }) {
       failureStmt.run({ peerUrl, at, error });
@@ -1726,6 +1716,15 @@ interface PeerPullStateRowSqlite {
   last_coorg_invitation_revocation_revoked_at: number | null;
   last_event_created_at: number | null;
   last_event_cancellation_created_at: number | null;
+  last_completed_id: string | null;
+  last_vouch_created_id: string | null;
+  last_post_created_id: string | null;
+  last_task_comment_created_id: string | null;
+  last_coorg_invitation_created_id: string | null;
+  last_coorg_invitation_response_decided_id: string | null;
+  last_coorg_invitation_revocation_revoked_id: string | null;
+  last_event_created_id: string | null;
+  last_event_cancellation_created_id: string | null;
   last_error: string | null;
   last_pulled_count: number;
 }
@@ -1746,6 +1745,17 @@ function toState(r: PeerPullStateRowSqlite): PeerPullStateRow {
       r.last_coorg_invitation_revocation_revoked_at,
     lastEventCreatedAt: r.last_event_created_at,
     lastEventCancellationCreatedAt: r.last_event_cancellation_created_at,
+    lastCompletedId: r.last_completed_id,
+    lastVouchCreatedId: r.last_vouch_created_id,
+    lastPostCreatedId: r.last_post_created_id,
+    lastTaskCommentCreatedId: r.last_task_comment_created_id,
+    lastCoOrgInvitationCreatedId: r.last_coorg_invitation_created_id,
+    lastCoOrgInvitationResponseDecidedId:
+      r.last_coorg_invitation_response_decided_id,
+    lastCoOrgInvitationRevocationRevokedId:
+      r.last_coorg_invitation_revocation_revoked_id,
+    lastEventCreatedId: r.last_event_created_id,
+    lastEventCancellationCreatedId: r.last_event_cancellation_created_id,
     lastError: r.last_error,
     lastPulledCount: r.last_pulled_count,
   };

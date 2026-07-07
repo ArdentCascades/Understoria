@@ -65,6 +65,18 @@ include breaking changes.
   answer now points at the recovery paths that exist.
 
 ### Changed
+- **Node-to-node sync can no longer stall inside a crowded
+  millisecond** (`docs/composite-federation-cursors.md` phase 2).
+  When many records share one timestamp — the shape a bulk restore
+  or import produces — a peer node's pull cursor used to record only
+  *which millisecond* it reached, so a tie larger than one page
+  re-served the same rows forever. Peer pull cursors now record the
+  exact row they stopped on (a timestamp + id pair, moved
+  atomically), and existing databases upgrade in place: the first
+  pull after this change behaves exactly as before, then writes the
+  new form. Mirror pulls have used pair cursors since they shipped;
+  the in-app (device) pulls are the remaining phase 3.
+
 - **Honesty pass on three surfaces that had fallen behind the
   code.** The Emergency (panic) section now says plainly that both
   purges act on this device only — records that already synced
