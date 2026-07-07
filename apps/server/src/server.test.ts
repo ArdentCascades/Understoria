@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import Database from "better-sqlite3";
+import Database from "better-sqlite3-multiple-ciphers";
 import {
   canonicalCoOrganizerInvitationPayload,
   canonicalCoOrganizerInvitationResponsePayload,
@@ -43,7 +43,7 @@ import type { PostRecord } from "./db.js";
 import { buildServer } from "./server.js";
 import { readConfigFromEnv } from "./config.js";
 import { createExchangeStore, openDatabase } from "./db.js";
-import type { Database as DatabaseType } from "better-sqlite3";
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { FastifyInstance } from "fastify";
 
 let app: FastifyInstance;

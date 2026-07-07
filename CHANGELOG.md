@@ -10,6 +10,37 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Reading the community now requires being IN the community — and
+  the server's disk can be sealed.** Three pieces from the
+  reader-power review (`docs/member-authenticated-reads.md`,
+  member-facing summary in `docs/operator-powers.md`):
+  **(1) Member-authenticated reads.** Joining has always been
+  invite-gated, but reading was not — anyone who learned your
+  node's address could browse every record. Now the app signs every
+  sync request with your key, and once the operator flips
+  `READ_AUTH=on`, the server answers only readers who can prove
+  membership — derived from the invite chain itself (founding keys
+  plus verified invite-redemption receipts), with no new member
+  register created anywhere. Peer communities keep pulling via
+  operator-exchanged tokens. Honest bounds, in the threat model:
+  membership is append-only (no expulsion mechanism exists yet
+  anywhere in the app), and a passphrase-locked device pauses
+  syncing until unlocked.
+  **(2) Encryption at rest, made real.** The threat model had long
+  claimed SQLCipher storage the server didn't actually have. The
+  node's database driver now supports it: set `DATABASE_KEY` and
+  the file on disk — including every backup copy — is unreadable
+  without the key. Protects the seized disk and the stolen backup;
+  a live-compromised host still sees data in use, said plainly.
+  **(3) Operator powers, written down.** `docs/operator-powers.md`
+  tells members exactly what a node operator can do (read shared
+  records like any member; see traffic metadata; withhold service)
+  and cannot do (forge records, read direct messages, reassign
+  authority) — with the structural remedies: operator pairs or
+  rotation, built-in operator transparency, and the fact that every
+  member's device holds the full community data, so leaving a bad
+  operator costs an afternoon, not the community's history.
+
 - **Event RSVPs and shift rosters now sync too — "who's coming" is
   finally a real roster.** Until now an RSVP or a shift signup lived
   only on the device that tapped it, so an organizer literally could

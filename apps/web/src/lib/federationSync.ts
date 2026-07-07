@@ -33,6 +33,7 @@ import type {
   TaskState,
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
+import { authorizedFetch } from "@/lib/authorizedRead";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
 import { publishProjectState } from "@/db/projects";
 import { createMember } from "@/db/seed";
@@ -118,7 +119,7 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
   const url = `${baseUrl.replace(/\/+$/, "")}/posts?${params.toString()}`;
   let body: { posts?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { posts?: unknown[] };
   } catch {
@@ -226,7 +227,7 @@ export async function pullFederatedClaims(): Promise<number> {
   const url = `${baseUrl.replace(/\/+$/, "")}/claims?${params.toString()}`;
   let body: { claims?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return 0;
     body = (await res.json()) as { claims?: unknown[] };
   } catch {
@@ -309,7 +310,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
   const url = `${baseUrl.replace(/\/+$/, "")}/task-comments?${params.toString()}`;
   let body: { taskComments?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { taskComments?: unknown[] };
   } catch {
@@ -442,7 +443,7 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
   const url = `${baseUrl.replace(/\/+$/, "")}/exchanges?${params.toString()}`;
   let body: { exchanges?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { exchanges?: unknown[] };
   } catch {
@@ -546,7 +547,7 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
   const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitations?${params.toString()}`;
   let body: { coorgInvitations?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { coorgInvitations?: unknown[] };
   } catch {
@@ -649,7 +650,7 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
   const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitation-responses?${params.toString()}`;
   let body: { coorgInvitationResponses?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { coorgInvitationResponses?: unknown[] };
   } catch {
@@ -750,7 +751,7 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
   const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitation-revocations?${params.toString()}`;
   let body: { coorgInvitationRevocations?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { coorgInvitationRevocations?: unknown[] };
   } catch {
@@ -848,7 +849,7 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
   const url = `${baseUrl.replace(/\/+$/, "")}/events?${params.toString()}`;
   let body: { events?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { events?: unknown[] };
   } catch {
@@ -963,7 +964,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
   const url = `${baseUrl.replace(/\/+$/, "")}/event-cancellations?${params.toString()}`;
   let body: { eventCancellations?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { eventCancellations?: unknown[] };
   } catch {
@@ -1112,7 +1113,7 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
   const url = `${baseUrl.replace(/\/+$/, "")}/redemptions?${params.toString()}`;
   let body: { redemptions?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { redemptions?: unknown[] };
   } catch {
@@ -1297,7 +1298,7 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
 
   let body: { inviteRevocations?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { inviteRevocations?: unknown[] };
   } catch {
@@ -1441,7 +1442,7 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
   const url = `${baseUrl.replace(/\/+$/, "")}/vouches?${params.toString()}`;
   let body: { vouches?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { vouches?: unknown[] };
   } catch {
@@ -1555,7 +1556,7 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
   const url = `${baseUrl.replace(/\/+$/, "")}/project-states?${params.toString()}`;
   let body: { projectStates?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { projectStates?: unknown[] };
   } catch {
@@ -1655,7 +1656,7 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
   const url = `${baseUrl.replace(/\/+$/, "")}/task-states?${params.toString()}`;
   let body: { taskStates?: unknown[] };
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     body = (await res.json()) as { taskStates?: unknown[] };
   } catch {
@@ -1769,7 +1770,7 @@ async function fetchStateFeed<T>(
   if (since) params.set("since", since);
   const url = `${baseUrl.replace(/\/+$/, "")}${path}?${params.toString()}`;
   try {
-    const res = await fetch(url);
+    const res = await authorizedFetch(url, baseUrl);
     if (!res.ok) return null;
     const body = (await res.json()) as Record<string, unknown>;
     const rows = body[bodyKey];

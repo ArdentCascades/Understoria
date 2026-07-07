@@ -18,8 +18,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import Database from "better-sqlite3";
-import type { Database as DatabaseType } from "better-sqlite3";
+// better-sqlite3-multiple-ciphers is the API-compatible fork bundling
+// SQLite3MultipleCiphers — same driver, plus `PRAGMA key` support so
+// the database file can be encrypted at rest (SQLCipher scheme). With
+// no key configured it behaves byte-for-byte like plain better-sqlite3.
+// See docs/member-authenticated-reads.md §2.
+import Database from "better-sqlite3-multiple-ciphers";
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type {
   AwaitingTransition,
   CoOrganizerInvitation,
@@ -363,8 +368,14 @@ export interface PeerPullStore {
   recordFailure(opts: { peerUrl: string; at: number; error: string }): void;
 }
 
-export function openDatabase(path: string): DatabaseType {
+export function openDatabase(path: string, key?: string | null): DatabaseType {
   const db = new Database(path);
+  if (key) {
+    // MUST run before any other statement touches pages — an
+    // unkeyed read of an encrypted file throws SQLITE_NOTADB.
+    // Single-quote SQL escaping; the key never appears in logs.
+    db.pragma(`key = '${key.replace(/'/g, "''")}'`);
+  }
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   migrate(db);

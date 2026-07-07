@@ -201,6 +201,18 @@ Beyond the signed records you push, the node sees:
   pulled, or confirmed. This is the unavoidable consequence of any
   client-server protocol.
 
+**Who can read the node's records.** Your community's members. When
+the operator enables member-authenticated reads (`READ_AUTH` —
+supported by every current app version), every read must carry a
+member's cryptographic signature, proven through the invite chain —
+an outsider who merely knows the server's address gets nothing.
+Until it's enabled, reading is open to anyone with the URL (writing
+was never open: records must be validly signed). The node's database
+file itself can be encrypted at rest (`DATABASE_KEY`), so a stolen
+disk or backup is unreadable. What the operator can and cannot do is
+spelled out plainly in
+[`docs/operator-powers.md`](./operator-powers.md).
+
 The node does **not**:
 
 - Run analytics (no Google Analytics, no Plausible, no anything).

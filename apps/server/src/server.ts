@@ -21,7 +21,7 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
-import type { Database as DatabaseType } from "better-sqlite3";
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { Config } from "./config.js";
 import {
   createAwaitingTransitionStore,
@@ -70,6 +70,10 @@ import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard } from "./insertCaps.js";
+import {
+  createMembershipResolver,
+  registerReadAuthGuard,
+} from "./readAuth.js";
 
 export interface BuildOptions {
   config: Config;
@@ -170,7 +174,7 @@ export async function buildServer({
     }
   });
 
-  const db = database ?? openDatabase(config.databasePath);
+  const db = database ?? openDatabase(config.databasePath, config.databaseKey);
   const store = createExchangeStore(db);
   const vouchStore = createVouchStore(db);
   const postStore = createPostStore(db);
@@ -207,6 +211,16 @@ export async function buildServer({
       "auto-confirm window is configured (AUTO_CONFIRM_MIN_HOURS > 0) but no NODE_SYSTEM_SECRET_KEY is set; /auto-confirm will refuse to sign.",
     );
   }
+
+  // Member-authenticated reads (docs/member-authenticated-reads.md):
+  // one onRequest hook gating every federation GET when READ_AUTH=on.
+  // Registered before the routes; deny-by-default so future feed
+  // routes are covered automatically.
+  registerReadAuthGuard(app, {
+    readAuth: config.readAuth,
+    resolver: createMembershipResolver(db, config.founderKeys),
+    peerTokens: Object.values(config.peerReadTokens),
+  });
 
   // Disk-fill backstop — one preHandler covering every federation
   // POST (insertCaps.ts). Registered before the routes so the check

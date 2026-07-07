@@ -20,7 +20,7 @@
  * that is the back-compat contract old pullers rely on.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { Database as DatabaseType } from "better-sqlite3";
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import {
   createClaimStore,
   createCoOrganizerInvitationResponseStore,
