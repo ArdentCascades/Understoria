@@ -1452,6 +1452,22 @@
     "confirm": "Sí, conectar con {{origin}}",
     "decline": "Ahora no"
   },
+  "reseed": {
+    "title": "Restaurar esta comunidad en un nodo",
+    "intro": "Si algún día se pierden todos los servidores comunitarios, este dispositivo aún guarda la historia compartida — cada publicación, intercambio, evento, proyecto y registro de membresía, firmado criptográficamente. Apúntalo a un nodo nuevo y súbelo todo de vuelta. Varias personas pueden hacerlo a la vez; las copias simplemente se combinan.",
+    "targetLabel": "Nodo donde restaurar",
+    "systemKeyNote": "Para quien opere el nodo nuevo — la clave de autoconfirmación del nodo perdido (TRUSTED_SYSTEM_KEYS):",
+    "start": "Restaurar la historia comunitaria…",
+    "confirmTitle": "¿Subir la historia compartida de esta comunidad?",
+    "confirmBody": "Todo lo que este dispositivo guarda de los registros compartidos de la comunidad se subirá a {{url}} — los mismos datos que guarda cualquier nodo de esta comunidad. Continúa solo si esa dirección es el servidor de reemplazo de tu comunidad. Puede tardar unos minutos y se reanuda si se interrumpe.",
+    "confirm": "Sí, restaurar",
+    "progress": "Restaurando {{kind}} — {{done}} de {{total}}",
+    "starting": "Comenzando…",
+    "doneComplete": "Restauración terminada.",
+    "doneInterrupted": "Restauración en pausa — ejecútala de nuevo para continuar donde se detuvo.",
+    "totals": "{{restored}} restaurados · {{present}} ya estaban · {{skipped}} omitidos",
+    "skippedHint": "Los registros omitidos son los que este nodo rechazó — normalmente intercambios autoconfirmados (quien opera puede habilitarlos con TRUSTED_SYSTEM_KEYS) o recibos fuera de una ventana de restauración abierta (RESEED_GRACE_UNTIL). Ver docs/community-reseed.md."
+  },
   "mirrorSuggest": {
     "label": "Añadir un servidor de respaldo para esta comunidad",
     "title": "¿Añadir un servidor de respaldo para esta comunidad?",

@@ -290,6 +290,8 @@ Two things to know:
 | `MIRROR_READ_TOKENS` | unset | JSON map `{"https://mirror.example": "<shared token ≥16 chars>"}` — bearer tokens the mirror worker sends when pulling from a `READ_AUTH=on` mirror. Same shape and hygiene as `PEER_READ_TOKENS` |
 | `MIRROR_ANNOUNCE_URLS` | unset | Comma-separated mirror URLs published in `GET /config.mirrors`. Members' apps offer each announced mirror on a consent card and, once accepted, fail over to it automatically. Announce only addresses meant to be exactly as reachable as this node — the config surface is public |
 | `MIRROR_PULL_INTERVAL_MS` | `60000` (1 min) | How often the mirror replication worker runs a pull cycle |
+| `RESEED_GRACE_UNTIL` | unset | Re-seed recovery window end (RFC3339 or epoch ms; `docs/community-reseed.md` §3). Until then, `POST /redemptions` accepts historical receipts past the delivery-grace bound and preserves their wire `receivedAt`. Boot refuses windows ending >30 days out; the server logs loudly while one is open. Set it during recovery, unset it after |
+| `TRUSTED_SYSTEM_KEYS` | unset | JSON array `[{"nodeId":"node_lost","current":"<pubkey>","history":[…]}]` naming LOST nodes whose auto-confirmed exchanges this node should accept on re-upload. Members' apps capture the value to copy (Settings → restore card). Fail-closed when unset |
 
 The rate limiter uses a non-reversible bucket id (FNV-1a hash of the
 IP, modulo 1024) so client IPs never reach memory or logs even
@@ -317,6 +319,36 @@ never invite-gated). To close that:
    before invite receipts existed (add their key to
    `NODE_FOUNDER_KEYS`), or a passphrase-locked device (reads sign
    only while unlocked; syncing resumes at unlock).
+
+### Runbook: recovering from total node loss (re-seed)
+
+When EVERY node of a community is gone — machine seized, disk dead,
+no mirror — members' devices still hold the entire shared history,
+and any member can upload it back (`docs/community-reseed.md`):
+
+1. Stand up a fresh node (install per §3; new `DATABASE_KEY`). Use
+   the old address if you control it — members' apps then need no
+   reconfiguration — otherwise share the new URL.
+2. Set the SAME `NODE_FOUNDER_KEYS` as the lost node, and
+   `READ_AUTH=off` for the moment (writes are what recovery needs;
+   flip reads back on in step 5).
+3. Set `RESEED_GRACE_UNTIL` to a few days out — historical
+   membership receipts arrive years "late" and must not be refused.
+   Set `TRUSTED_SYSTEM_KEYS` to the lost node's auto-confirm key so
+   its auto-confirmed exchanges re-verify; any member's app shows
+   the captured value on the restore card (Settings).
+4. Ask members to open Settings → "Restore this community onto a
+   node" and run it. One member restores everything their device
+   holds; several at once is fine (copies union). Consider a
+   temporarily raised `RATE_LIMIT_MAX` for a large community.
+5. Once the counts settle: flip `READ_AUTH=on` (membership derives
+   from the restored receipts), UNSET `RESEED_GRACE_UNTIL`, restart.
+   Registering a new `NODE_SYSTEM_SECRET_KEY` for future
+   auto-confirms follows `system-key-rotation.md`.
+
+What does not come back, honestly: open claims (short-lived
+coordination state) and pending auto-confirm timers (they restart on
+re-delivery). Everything signed comes back.
 
 ### Runbook: pairing two nodes as mirrors
 

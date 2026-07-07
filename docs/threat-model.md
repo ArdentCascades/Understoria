@@ -1682,6 +1682,35 @@ We are not trying to protect against:
   protection state. The estimate never leaves the device; no new
   wire bytes anywhere in either change.
 
+- **Community re-seed Phase R1 (the restore flow).**
+  *Shipped — `docs/community-reseed.md` §2–§4; extends the R0 entry
+  above.* Any member can now upload the community's entire
+  replicated history from their device to a fresh node through the
+  node's ORDINARY write routes — the design's core property is that
+  no new ingestion surface exists to audit: routes authenticate
+  signatures, not submitters, and everything is idempotent. Two
+  operator-declared, deliberately-bounded relaxations exist for
+  recovery and nothing else:
+  **(1) `RESEED_GRACE_UNTIL`** — while open, `/redemptions` skips
+  its delivery-grace bound (historical receipts necessarily arrive
+  years "late") and preserves plausible wire `receivedAt` stamps.
+  The window re-opens the §11 back-dated-play risk for stolen,
+  expired, still-unredeemed invites — bounded by: config refuses
+  windows longer than 30 days, boot logs loudly while open, invite
+  revocations re-seed too, and the play remains signed and
+  attributable. Verification and first-writer-wins never relax.
+  **(2) `TRUSTED_SYSTEM_KEYS`** — an explicit operator trust
+  statement that a LOST node's system key is authentic, letting its
+  auto-confirmed exchanges re-verify through the shared §4 gate
+  (fail-closed when unset; refuses duplicate nodeId declarations).
+  A WRONG key here would launder forged auto-confirms — the runbook
+  says to copy it from a member device's captured `/config` record
+  (R0), never from memory.
+  The walker itself is client-side, member-initiated, paced under
+  the node's existing rate limits and insert caps, resumable, and
+  its skip counts are surfaced (never silent). Multiple members
+  restoring concurrently union by idempotency.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

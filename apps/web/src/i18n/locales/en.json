@@ -1452,6 +1452,22 @@
     "confirm": "Yes, connect to {{origin}}",
     "decline": "Not now"
   },
+  "reseed": {
+    "title": "Restore this community onto a node",
+    "intro": "If every community server is ever lost, this device still holds the shared history — every post, exchange, event, project, and membership record, cryptographically signed. Point it at a fresh node and upload it all back. Several members can do this at once; copies simply combine.",
+    "targetLabel": "Node to restore onto",
+    "systemKeyNote": "For the new node's operator — the lost node's auto-confirm key (TRUSTED_SYSTEM_KEYS):",
+    "start": "Restore community history…",
+    "confirmTitle": "Upload this community's shared history?",
+    "confirmBody": "Everything this device holds of the community's shared records will be uploaded to {{url}} — the same data any node of this community holds. Only continue if that address is your community's replacement server. This can take a few minutes and resumes if interrupted.",
+    "confirm": "Yes, restore",
+    "progress": "Restoring {{kind}} — {{done}} of {{total}}",
+    "starting": "Starting…",
+    "doneComplete": "Restore finished.",
+    "doneInterrupted": "Restore paused — run it again to continue from where it stopped.",
+    "totals": "{{restored}} restored · {{present}} already there · {{skipped}} skipped",
+    "skippedHint": "Skipped records are ones this node declined — usually auto-confirmed exchanges (the operator can enable them with TRUSTED_SYSTEM_KEYS) or receipts outside an open re-seed window (RESEED_GRACE_UNTIL). See docs/community-reseed.md."
+  },
   "mirrorSuggest": {
     "label": "Add a backup server for this community",
     "title": "Add a backup server for this community?",

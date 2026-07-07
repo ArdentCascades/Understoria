@@ -15,6 +15,7 @@ import { BackLink } from "@/components/BackLink";
 import { LanguageSection } from "@/components/LanguageSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
 import { NodeSection } from "@/components/NodeSection";
+import { ReseedSection } from "@/components/ReseedSection";
 import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { exportData } from "@/lib/exportData";
@@ -77,6 +78,8 @@ export default function SettingsPage() {
         <BlockedContactsPanel />
 
         <NodeSection />
+
+        <ReseedSection />
 
         <SecuritySection />
 

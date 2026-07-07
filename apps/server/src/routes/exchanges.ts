@@ -19,12 +19,27 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { FastifyInstance } from "fastify";
-import { verifyExchange } from "@understoria/shared/crypto";
+import {
+  verifyExchange,
+  verifyExchangeLabel,
+} from "@understoria/shared/crypto";
 import type { ExchangeStore } from "../db.js";
 import { parseExchange } from "../validate.js";
 
 interface Deps {
   store: ExchangeStore;
+  /**
+   * Operator-declared resolver for LOST nodes' system keys
+   * (`Config.trustedSystemKeys`, docs/community-reseed.md §1c). When
+   * present, an `autoConfirmed` row is accepted iff the shared §4
+   * verifier resolves its confirming node against these keys — the
+   * re-seed path for exchanges the lost node auto-confirmed. Absent
+   * (the default), the categorical refusal below stands unchanged.
+   */
+  resolveTrustedSystemKey?: (
+    nodeId: string,
+    signedAt: number,
+  ) => string | null;
 }
 
 /**
@@ -45,7 +60,7 @@ interface Deps {
  */
 export async function registerExchangeRoutes(
   app: FastifyInstance,
-  { store }: Deps,
+  { store, resolveTrustedSystemKey }: Deps,
 ): Promise<void> {
   app.post("/exchanges", async (req, reply) => {
     const parsed = parseExchange(req.body);
@@ -62,7 +77,27 @@ export async function registerExchangeRoutes(
     // without a resolver) and let a client forge an auto-confirm
     // flag with a garbage helped-side signature. See
     // `docs/auto-confirm-key.md` §4.
+    //
+    // ONE deliberate exception (docs/community-reseed.md §1c): when
+    // the operator has declared TRUSTED_SYSTEM_KEYS for lost nodes,
+    // a re-seeded auto-confirmed row is accepted iff it verifies
+    // §4-strictly against those keys — the same shared
+    // `verifyExchangeLabel` gate peer pull and mirror pull use.
+    // Fail-closed: no resolver, or an unresolvable/invalid row, is
+    // still a 422.
     if (exchange.autoConfirmed) {
+      if (
+        resolveTrustedSystemKey !== undefined &&
+        verifyExchangeLabel(exchange, resolveTrustedSystemKey) !== "invalid"
+      ) {
+        if (store.has(exchange.id)) {
+          reply.code(200);
+          return { stored: false, id: exchange.id };
+        }
+        store.insert(exchange);
+        reply.code(201);
+        return { stored: true, id: exchange.id };
+      }
       reply.code(422);
       return { error: "auto_confirm_via_dedicated_endpoint" };
     }
