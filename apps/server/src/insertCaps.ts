@@ -142,6 +142,21 @@ const SURFACES: Record<string, Surface> = {
     keyField: "signerKey",
     keyColumn: "signer_key",
   },
+  "/event-rsvps": {
+    table: "event_rsvps",
+    keyField: "signerKey",
+    keyColumn: "signer_key",
+  },
+  "/event-shifts": {
+    table: "event_shifts",
+    keyField: "signerKey",
+    keyColumn: "signer_key",
+  },
+  "/shift-signups": {
+    table: "shift_signups",
+    keyField: "signerKey",
+    keyColumn: "signer_key",
+  },
   // The auto-confirm batch inserts into exchanges; the requests carry
   // per-item keys, so only the table ceiling applies here. (An
   // attacker spending their own keys against the per-key exchange cap

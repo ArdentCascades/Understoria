@@ -90,41 +90,28 @@ async function makeEvent(
 }
 
 // --------------------------------------------------------------------------
-// Type-level negative tests — these are compile-time assertions, not
-// runtime ones. They lock in the load-bearing absences in the design.
+// The former type-level NEGATIVE tests here (rejecting "event_rsvp"
+// from OutboxRow.kind, asserting no enqueue/pull helpers exist) were
+// deliberately retired by participation federation Phase 2
+// (docs/project-federation.md §6): the local-only stance they locked
+// was reversed after field use showed an organizer could not see
+// attendance from anyone else's phone. The same surfaces are now
+// asserted POSITIVELY, and the reversal's adversary analysis lives in
+// threat-model §7 ("Federated participation records").
 // --------------------------------------------------------------------------
 
-describe("OutboxRow.kind type-level negatives", () => {
-  it('rejects "event_rsvp" as an OutboxRow kind at the type level', async () => {
-    // The Dexie `OutboxRow.kind` union does not include "event_rsvp"
-    // — RSVPs are local-only by design (docs/community-events.md
-    // §4 + §7). Attempting to construct a row with that kind would
-    // be a wire-format violation, so the type system catches it
-    // before the value ever lives.
+describe("OutboxRow.kind participation federation (Phase 2)", () => {
+  it('accepts "event_rsvp" as an OutboxRow kind', () => {
     type OutboxKind = import("./database").OutboxRow["kind"];
-    // @ts-expect-error — "event_rsvp" must not be assignable to the union.
-    const _bad: OutboxKind = "event_rsvp";
-    void _bad;
-    // The accepted ones, asserted positively for symmetry.
-    const ok: OutboxKind[] = ["event", "event_cancellation"];
-    expect(ok).toEqual(["event", "event_cancellation"]);
+    const ok: OutboxKind[] = ["event", "event_cancellation", "event_rsvp"];
+    expect(ok).toContain("event_rsvp");
   });
 
-  it("has no `enqueueEventRsvp` helper exported from lib/outbox", async () => {
+  it("exports the RSVP enqueue + pull helpers", async () => {
     const outbox = await import("@/lib/outbox");
-    expect(
-      (outbox as unknown as Record<string, unknown>).enqueueEventRsvp,
-    ).toBeUndefined();
-  });
-
-  it("has no `pullFederatedEventRsvps` helper exported from lib/federationSync", async () => {
+    expect(typeof outbox.enqueueEventRsvpOutbox).toBe("function");
     const fed = await import("@/lib/federationSync");
-    // @ts-expect-error — the function does not exist as an export, and
-    // the absence is load-bearing. Locking the negative at the type level
-    // so a future refactor that adds a federation-pull RSVP route fails
-    // here first.
-    const fn = fed.pullFederatedEventRsvps;
-    expect(fn).toBeUndefined();
+    expect(typeof fed.pullFederatedEventRsvps).toBe("function");
   });
 });
 

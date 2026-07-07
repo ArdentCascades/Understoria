@@ -13,16 +13,25 @@ import { db } from "./database";
 import { uuid } from "@/lib/id";
 import { rsvpToEvent } from "./events";
 import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
+import {
+  publishEventRsvpState,
+  publishEventShiftState,
+  publishShiftSignupState,
+} from "./participationPublish";
 import type { EventShiftRow, ShiftSignupRow } from "@/types";
 
 /**
- * Shift signups — the LOCAL-ONLY slot structure on a community event.
+ * Shift signups — the slot structure on a community event.
  * See `docs/shift-signups.md` for the full design; the load-bearing
  * decisions, restated where the code lives:
  *
- *   - Shifts and signups NEVER federate (§4 + §7). No enqueue helper,
- *     no pull helper, no route; the `OutboxRow.kind` union rejects
- *     both discriminators. `eventShifts.test.ts` locks the negatives.
+ *   - Shifts and signups FEDERATE since participation Phase 2
+ *     (docs/project-federation.md §6) — a deliberate reversal of the
+ *     original local-only stance, made because a roster only one
+ *     device can see isn't a roster. Shifts are organizer-signed LWW
+ *     records; signups are single-owner; deletions and withdrawals
+ *     travel as tombstones. The reversal's adversary analysis:
+ *     threat-model §7 "Federated participation records".
  *   - A signup is INTENT, never attendance (§3, §9). Nothing in this
  *     module — or anywhere — may reconcile the signup roster against
  *     exchanges; that comparison is the permanently-rejected
@@ -77,6 +86,15 @@ export interface AddShiftInput {
  */
 export async function addShift(input: AddShiftInput): Promise<EventShiftRow> {
   const now = input.now ?? Date.now();
+  const created = await addShiftLocal(input, now);
+  await publishEventShiftState(created, input.byKey);
+  return created;
+}
+
+async function addShiftLocal(
+  input: AddShiftInput,
+  now: number,
+): Promise<EventShiftRow> {
   const label = input.label.trim();
   if (label.length === 0 || label.length > SHIFT_LABEL_MAX) {
     throw new ShiftError(
@@ -167,7 +185,7 @@ export async function deleteShift(
   shiftId: string,
   byKey: string,
 ): Promise<void> {
-  await db.transaction(
+  const removed = await db.transaction(
     "rw",
     [db.eventShifts, db.shiftSignups],
     async () => {
@@ -192,8 +210,12 @@ export async function deleteShift(
         );
       }
       await db.eventShifts.delete(shiftId);
+      // Captured pre-delete so the tombstone below can sign the full
+      // row content (the local row is gone once we commit).
+      return shift;
     },
   );
+  await publishEventShiftState(removed, byKey, Date.now());
 }
 
 /**
@@ -218,7 +240,7 @@ export async function setShiftCapacity(
       "Capacity must be empty or a positive whole number.",
     );
   }
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [db.eventShifts, db.shiftSignups],
     async () => {
@@ -249,6 +271,8 @@ export async function setShiftCapacity(
       return updated;
     },
   );
+  await publishEventShiftState(result, byKey);
+  return result;
 }
 
 // -- Sign up ----------------------------------------------------------------
@@ -275,7 +299,7 @@ export async function signUpForShift(
   input: SignUpForShiftInput,
 ): Promise<ShiftSignupRow> {
   const now = input.now ?? Date.now();
-  return db.transaction(
+  const result = await db.transaction(
     "rw",
     [
       db.eventShifts,
@@ -315,7 +339,7 @@ export async function signUpForShift(
         .where("[shiftId+memberKey]")
         .equals([input.shiftId, input.memberKey])
         .first();
-      if (existing) return existing;
+      if (existing) return { row: existing, eventId: shift.eventId };
 
       const row: ShiftSignupRow = {
         id: uuid(),
@@ -325,9 +349,15 @@ export async function signUpForShift(
         signedUpAt: now,
       };
       await db.shiftSignups.put(row);
-      return row;
+      return { row, eventId: shift.eventId };
     },
   );
+  // Federate the whole action: the implied "going" RSVP (published
+  // here because rsvpToEvent's own publish no-ops inside the ambient
+  // transaction above) and the signup itself.
+  await publishEventRsvpState(result.eventId, input.memberKey);
+  await publishShiftSignupState(result.row, input.memberKey);
+  return result.row;
 }
 
 /**
@@ -340,10 +370,19 @@ export async function removeSignup(
   shiftId: string,
   memberKey: string,
 ): Promise<void> {
+  const existing = (await db.shiftSignups
+    .where("[shiftId+memberKey]")
+    .equals([shiftId, memberKey])
+    .first()) as ShiftSignupRow | undefined;
   await db.shiftSignups
     .where("[shiftId+memberKey]")
     .equals([shiftId, memberKey])
     .delete();
+  if (existing) {
+    // Withdrawal tombstone — the roster removal must reach every
+    // other device, not just this one.
+    await publishShiftSignupState(existing, memberKey, Date.now());
+  }
 }
 
 // -- Read -------------------------------------------------------------------

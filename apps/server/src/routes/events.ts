@@ -34,10 +34,11 @@ interface Deps {
  *     ASC (cursor pagination — the worker advances on max(createdAt)),
  *     capped at `limit` (default 200, hard ceiling 1000).
  *
- * NB: RSVPs are local-only by design (docs/community-events.md §4 +
- * §7). There is no `/event-rsvps` route on this server. Negative
- * tests in `events.test.ts` lock that constraint so a future
- * contributor can't quietly add one.
+ * NB: RSVPs federate since participation Phase 2
+ * (docs/project-federation.md §6) — the `/event-rsvps` route lives in
+ * `participationStates.ts` as a single-owner LWW state record, a
+ * deliberate reversal of the original local-only stance (recorded in
+ * threat-model §7).
  */
 export async function registerEventRoutes(
   app: FastifyInstance,

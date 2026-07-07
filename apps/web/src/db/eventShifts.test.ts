@@ -93,32 +93,31 @@ function shiftInput(
   };
 }
 
-describe("shift rows are local-only (negative-space locks)", () => {
-  it('rejects "event_shift" and "shift_signup" as OutboxRow kinds', () => {
+// The negative-space locks that used to open this block (rejecting the
+// outbox kinds, asserting no enqueue/pull helpers) were deliberately
+// retired by participation federation Phase 2
+// (docs/project-federation.md §6) — a roster only one device can see
+// isn't a roster. The surfaces are asserted POSITIVELY below; what
+// SURVIVES federation unchanged is the never-compare rule (§9) and the
+// base row types staying unsigned (state metadata rides separately as
+// the signed wire record).
+describe("shift federation surfaces (Phase 2) + surviving locks", () => {
+  it('accepts "event_shift" and "shift_signup" as OutboxRow kinds', () => {
     type OutboxKind = import("./database").OutboxRow["kind"];
-    // @ts-expect-error — the discriminator must not be assignable to the union.
-    const _badShift: OutboxKind = "event_shift";
-    // @ts-expect-error — the discriminator must not be assignable to the union.
-    const _badSignup: OutboxKind = "shift_signup";
-    void _badShift;
-    void _badSignup;
+    const ok: OutboxKind[] = ["event_shift", "shift_signup"];
+    expect(ok).toHaveLength(2);
   });
 
-  it("has no enqueue helpers exported from lib/outbox", async () => {
+  it("exports the enqueue and pull helpers", async () => {
     const outbox = await import("@/lib/outbox");
-    const mod = outbox as unknown as Record<string, unknown>;
-    expect(mod.enqueueEventShift).toBeUndefined();
-    expect(mod.enqueueShiftSignup).toBeUndefined();
-  });
-
-  it("has no pull helpers exported from lib/federationSync", async () => {
+    expect(typeof outbox.enqueueEventShiftOutbox).toBe("function");
+    expect(typeof outbox.enqueueShiftSignupOutbox).toBe("function");
     const fed = await import("@/lib/federationSync");
-    const mod = fed as unknown as Record<string, unknown>;
-    expect(mod.pullFederatedEventShifts).toBeUndefined();
-    expect(mod.pullFederatedShiftSignups).toBeUndefined();
+    expect(typeof fed.pullFederatedEventShifts).toBe("function");
+    expect(typeof fed.pullFederatedShiftSignups).toBe("function");
   });
 
-  it("shift and signup rows carry no signature and no nodeId", () => {
+  it("base row TYPES stay unsigned and node-stamp-free (wire metadata rides the EventShiftState/ShiftSignupState records instead)", () => {
     const shift: EventShiftRow = {
       id: "s1",
       eventId: "e1",
@@ -136,13 +135,14 @@ describe("shift rows are local-only (negative-space locks)", () => {
       memberKey: "k",
       signedUpAt: 0,
     };
-    // @ts-expect-error — local-only rows are never signed.
+    // @ts-expect-error — the BASE row type declares no signature; the
+    // signed wire shape is EventShiftState in @understoria/shared.
     void shift.signature;
-    // @ts-expect-error — local-only rows carry no origin-node stamp.
+    // @ts-expect-error — no origin-node stamp on the row type.
     void shift.nodeId;
-    // @ts-expect-error — local-only rows are never signed.
+    // @ts-expect-error — same: the signed wire shape is ShiftSignupState.
     void signup.signature;
-    // @ts-expect-error — local-only rows carry no origin-node stamp.
+    // @ts-expect-error — no origin-node stamp on the row type.
     void signup.nodeId;
     expect(shift.id).toBe("s1");
     expect(signup.id).toBe("g1");

@@ -1,5 +1,18 @@
 # Understoria — Shift signups (design note)
 
+> **Federation update (July 2026):** participation federation
+> Phase 2 (`docs/project-federation.md` §6) deliberately reversed
+> this note's zero-wire-bytes posture: shifts and signups now sync
+> through the member's own **community node** as signed LWW state
+> records (organizer-signed shifts, single-owner signups, tombstoned
+> deletions/withdrawals) — because a roster only one device can see
+> cannot coordinate anything. They still never cross the cross-node
+> peer wire, and the §9 never-compare rule and the §9.2
+> exchange-label boundary survive in full. The reversal supersedes
+> `community-events.md` §11.1 as §7.3 below demands, and its
+> adversary analysis is threat-model §7 "Federated participation
+> records". §7's original text is kept as the design record.
+
 > **Status:** **phase 1 shipped.** The §14 rulings were settled by
 > operator adoption of every recommended default; implementation
 > landed as PRs B, C, E, F per §13 (D loudly skipped, as designed),
@@ -362,6 +375,11 @@ raising the cap, which they control).
 
 ## §7 Federation — zero new wire bytes
 
+*(SUPERSEDED IN PART by participation Phase 2 — see the banner at
+the top of this note. §§7.1–7.3 below are the original record;
+§7.2's cost analysis and §7.3's peer-wire rejection still bind the
+CROSS-NODE surface, which Phase 2 left untouched.)*
+
 ### §7.1 The recommended shape: everything local
 
 **There is NO wire change in this design.** Stated in the
@@ -412,6 +430,9 @@ already rejected, made strictly worse by per-shift time
 granularity ("key X will be at location Y specifically from 9 to
 12"). This note does not re-litigate it; it cites it. Any future
 proposal must supersede §11.1 there, not argue with this section.
+*(That is exactly what happened: Phase 2 superseded §11.1 there,
+for the community-node scope only — the peer-wire rejection this
+paragraph describes remains in force.)*
 
 ### §7.4 What degrades cross-node, named honestly
 

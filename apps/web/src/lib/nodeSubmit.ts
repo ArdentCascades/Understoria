@@ -31,9 +31,12 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  EventRsvpState,
+  EventShiftState,
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
@@ -292,8 +295,38 @@ export async function submitTaskStateToNode(
   return postSignedRecord("/task-states", record, config, deps);
 }
 
-// NOTE: there is intentionally no `submitEventRsvpToNode`. RSVPs are
-// local-only by design — see `docs/community-events.md` §4 + §7.
+/**
+ * Push the Phase 2 participation state records
+ * (docs/project-federation.md §6). Same best-effort semantics as the
+ * project/task submitters; a 409 (event / shift not on the node yet)
+ * is the retryable-4xx case the outbox flush special-cases. The
+ * former note here — "there is intentionally no submitEventRsvpToNode;
+ * RSVPs are local-only by design" — was retired by Phase 2's
+ * deliberate stance reversal (threat-model §7).
+ */
+export async function submitEventRsvpToNode(
+  record: EventRsvpState,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/event-rsvps", record, config, deps);
+}
+
+export async function submitEventShiftToNode(
+  record: EventShiftState,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/event-shifts", record, config, deps);
+}
+
+export async function submitShiftSignupToNode(
+  record: ShiftSignupState,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/shift-signups", record, config, deps);
+}
 
 async function postSignedRecord(
   path: string,

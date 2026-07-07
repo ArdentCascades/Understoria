@@ -972,7 +972,17 @@ export function signStateRecord<T extends object>(
   return sign(stableStringify(rec), secretKeyB64);
 }
 
-export function verifyProjectState(rec: ProjectState): boolean {
+/** Generic verifier for any signed LWW state record: the signature
+ *  must verify against `signerKey` over the canonical whole-record
+ *  payload, and the LWW clock must be a positive number. AUTHORITY
+ *  (who may sign which record) is deliberately not here — it depends
+ *  on the STORED version and is checked by the server routes and the
+ *  client pulls against their own stores. */
+export function verifyStateRecord(rec: {
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}): boolean {
   if (!rec.signature || !rec.signerKey) return false;
   if (typeof rec.updatedAt !== "number" || rec.updatedAt <= 0) return false;
   return verify(
@@ -982,12 +992,10 @@ export function verifyProjectState(rec: ProjectState): boolean {
   );
 }
 
+export function verifyProjectState(rec: ProjectState): boolean {
+  return verifyStateRecord(rec);
+}
+
 export function verifyTaskState(rec: TaskState): boolean {
-  if (!rec.signature || !rec.signerKey) return false;
-  if (typeof rec.updatedAt !== "number" || rec.updatedAt <= 0) return false;
-  return verify(
-    canonicalStatePayload(rec as unknown as Record<string, unknown>),
-    rec.signature,
-    rec.signerKey,
-  );
+  return verifyStateRecord(rec);
 }

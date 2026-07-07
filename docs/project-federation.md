@@ -1,7 +1,8 @@
 # Project & Participation Federation
 
-Status: **Phase 1 shipped** (project + task state). Phases 2–3 designed,
-not yet built.
+Status: **Phases 1–2 shipped** (Phase 1: project + task state;
+Phase 2: RSVPs, shifts, shift signups). Phase 2b (projectActivity)
+and Phase 3 designed, not yet built.
 
 ## 1. The gap this closes
 
@@ -135,13 +136,38 @@ worth the machinery. Recorded in threat model §7.
 
 ## 6. Phases
 
-- **Phase 1 (this doc's shipped scope):** ProjectState + TaskState,
-  periodic re-pull, docs/threat-model/privacy-policy updates.
-- **Phase 2:** EventRsvp + ShiftSignup as single-owner LWW records
-  (each row has exactly one legitimate signer — the member it names —
-  so the authority rule is one line). Mechanically identical to
-  Phase 1; separated only to keep review size sane. `projectActivity`
-  rides here too (append-only, author-signed, like comments).
+- **Phase 1 (shipped):** ProjectState + TaskState, periodic re-pull,
+  docs/threat-model/privacy-policy updates.
+- **Phase 2 (shipped):** EventRsvpState + EventShiftState +
+  ShiftSignupState. Implementation notes beyond the one-line plan
+  above, discovered in the build:
+    - **Shift definitions had to federate too** — a signup without
+      its shift is a dead roster pointer on every other device, so
+      the scope grew from "RSVP + signup" to all three kinds. Shift
+      authority is the simplest in the family: the stored EVENT's
+      `createdBy`, immutable and organizer-signed.
+    - **Natural-key LWW.** RSVPs key by (eventId, memberKey) and
+      signups by (shiftId, memberKey) on the server — not by row
+      uuid — so a member's two devices minting different uuids for
+      the same logical answer can never double-count a roster.
+    - **Tombstones.** Shift deletion and signup withdrawal publish
+      the captured row with `deletedAt` set; pullers delete the
+      local row, and the tombstone keeps winning LWW so a stale
+      live copy can't resurrect it. "I'm not coming" also
+      tombstones the member's signups for that event (the §6.1
+      clear, federated).
+    - **Community-node scope only** — none of the three kinds joins
+      the cross-node `peerPull` loop; the peer-wire
+      attendance-graph rejection in `community-events.md` §11.1 /
+      `shift-signups.md` §7.3 remains in force. This was the most
+      values-laden reversal in the workstream and is recorded as
+      such in threat-model §7 "Federated participation records".
+    - **`projectActivity` was split out to Phase 2b:** it signs at
+      ~20 in-transaction call sites and feeds the adoption/attention
+      logic — a mechanically different change that would have
+      doubled this PR.
+- **Phase 2b:** projectActivity as append-only author-signed
+  records (like comments), so the history timeline converges too.
 - **Phase 3:** encrypted own-device mirror for whatever stays
   device-local (drafts? governance if it stays local-only): periodic
   snapshot sealed to the member's own key through the device-link

@@ -367,6 +367,7 @@ storing on third-party infrastructure.
 |---------|--------|---------------------|
 | Federation between nodes | Shipped (§6 pull loop: exchanges, vouches, posts, claims, task comments, events, invitations) | Configure `PEER_NODE_URLS`; proposals/disputes remain local-only by design |
 | Project & task state (community-node sync) | Shipped (`POST/GET /project-states`, `/task-states` — `docs/project-federation.md`) | Signed last-writer-wins state records; the node's first MUTABLE tables (a newer authorized version REPLACES the stored row, so they don't grow with edit volume — insert caps bound row count). Nothing to operate; back up with the same database. NOT in the cross-node `peerPull` loop yet — single-community scope |
+| Event participation (RSVPs, shifts, signups) | Shipped (`POST/GET /event-rsvps`, `/event-shifts`, `/shift-signups` — `docs/project-federation.md` §6) | Same mutable LWW posture; RSVPs/signups keyed by natural key (one row per member per event/shift), deletions stored as tombstones. Deliberately NOT in `peerPull`: attendance data never leaves your community's node |
 | Direct messaging | Shipped in the PWA (end-to-end encrypted; the node never sees plaintext) | — |
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
 | Open-invite server storage | Intentionally absent | Invites never cross any wire (the old `POST/GET /invites` surface was removed); only signed redemption receipts and revocations federate |

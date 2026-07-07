@@ -99,6 +99,9 @@ types are:
 | Cancel a community event you organized | `EventCancellation` | Event id, optional reason text, cancellation time, organizer public key, signature |
 | Create or update a project | `ProjectState` | The full project row: title, description, category, status, target / contributed hours, deadline, location zone, tags, organizer and co-organizer public keys, timestamps, signer public key, signature. **Mutable:** each edit replaces the previous version on the node (last-writer-wins) |
 | Add, claim, work, or edit a project task | `TaskState` | The full task row: title, description, category, hours (estimated and actual), urgency, status, who has claimed it (public key), dependencies, order, timestamps, signer public key, signature. Same last-writer-wins replacement |
+| RSVP to a community event | `EventRsvpState` | Your public key, the event id, going / maybe / not going, timestamps, signature. Mutable (changing your answer replaces the old one); signed only by you — nobody can RSVP on your behalf. Stays on YOUR community node; never relayed to peer communities |
+| Add a shift to an event you organize | `EventShiftState` | Shift label, time window, soft capacity, your public key, timestamps, signature. Removing a shift stores a deletion marker. Community-node only, like RSVPs |
+| Sign up for (or leave) a shift | `ShiftSignupState` | Your public key, the shift and event ids, timestamps, signature. Withdrawal stores a deletion marker so your name comes off every device's roster, not just your own. Signed only by you; community-node only. **Intent, not attendance** — nothing ever compares signups against exchanges |
 | Link a new device (tap-to-link) | Link request + device-link mailbox row | **Neither federates and the node can read neither.** The new device stores one throwaway public key for up to 10 minutes, filed under a salted, deliberately lossy fold of its network address (4096 buckets shared by many households — never the address itself, which is not stored or logged). Your approval stores your identity bundle sealed to that key — ciphertext the node cannot open — for at most 15 minutes, deleted the instant the new device collects it |
 | Link a new device (word-code fallback) | Device-link mailbox row | Same mailbox, encrypted under the 6-word code instead (which never crosses any wire). The QR pairing option stores nothing on the node at all |
 
@@ -106,16 +109,22 @@ types are:
 sees the keys but does not learn your display name unless you've
 shared it with someone there separately.
 
-**Projects and their tasks now live on the community node.** Until
-project federation shipped (`docs/project-federation.md`), projects
-were device-local; now the full project and task rows are visible to
-the node and to every member who syncs from it — that is the point
-(a helper claiming a task on their phone becomes visible to the
-organizer). Unlike every other record above, these two are
-**mutable**: a newer signed version from an authorized member
-replaces the stored one. What did NOT change: proposals, votes,
-disputes, RSVPs, shift signups, drafts, and the event⇄project
-work-day link all remain local-only.
+**Projects, tasks, and event participation now live on the
+community node.** Until federation Phases 1–2 shipped
+(`docs/project-federation.md`), projects were device-local and
+RSVPs / shift signups deliberately never left the device that
+tapped them; now these rows are visible to the node and to every
+member who syncs from it — that is the point (a helper claiming a
+task, or a member RSVPing "going", becomes visible to the
+organizer). Unlike the other records above, these are **mutable**:
+a newer signed version from an authorized member replaces the
+stored one, and withdrawals travel as deletion markers. Two bounds
+worth naming plainly: participation records stay on YOUR community
+node and are never relayed to peer communities, and a shift signup
+is a statement of intent that is never reconciled against
+exchanges or treated as attendance. What did NOT change: proposals,
+votes, disputes, direct messages, blocks, drafts, and the
+event⇄project work-day link all remain local-only.
 
 **Once a signed record reaches the node, it federates.** The
 community node's job is to relay records to peer nodes that pull

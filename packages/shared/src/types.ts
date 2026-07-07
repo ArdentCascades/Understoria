@@ -1193,3 +1193,86 @@ export type TaskState = ProjectTask & {
   signerKey: string;
   signature: string;
 };
+
+// --- Phase 2: event participation (docs/project-federation.md §6) -----
+//
+// RSVPs and shift signups were LOCAL-ONLY by design for their first
+// year (docs/community-events.md §4 old text; docs/shift-signups.md).
+// Phase 2 deliberately reverses that: "who's coming" is exactly the
+// coordination signal events exist to share, and keeping it per-device
+// meant an organizer literally could not see attendance from anyone
+// else's phone. The reversal is documented in threat-model §7 and the
+// privacy policy §4. What did NOT change: the never-compare rule —
+// signups are intent, not attendance, and nothing may ever reconcile
+// them against exchanges or presence (docs/shift-signups.md §9).
+//
+// All three are signed last-writer-wins state records on the Phase 1
+// machinery (stableStringify canonical form, strictly-newer replace).
+// The RSVP and signup kinds are SINGLE-OWNER: the only legitimate
+// signer is the member the row names, and the server keys them by
+// their natural key — (eventId, memberKey) / (shiftId, memberKey) —
+// so two devices of one member can never double-count a roster.
+
+/** A member's own RSVP to a community event. Single-owner: the server
+ *  and every puller require `signerKey === memberKey`. Upserted by
+ *  (eventId, memberKey); `status` covers withdrawal ("not_going"), so
+ *  there is no tombstone field. */
+export interface EventRsvpState {
+  /** UUID of the row version — NOT the identity key; the natural key
+   *  (eventId, memberKey) is. Two devices may mint different ids for
+   *  the same logical RSVP and the natural key collapses them. */
+  id: string;
+  eventId: string;
+  /** The RSVP'ing member. The single legitimate signer. */
+  memberKey: string;
+  status: "going" | "maybe" | "not_going";
+  /** ms epoch of the member's most recent answer. */
+  respondedAt: number;
+  /** LWW clock. */
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}
+
+/** A shift definition on a community event. Authority: the STORED
+ *  event's `createdBy` (the event organizer) — checked against the
+ *  events table on the node and against the local event row on pull.
+ *  Deletion federates as a tombstone (`deletedAt` set): pullers drop
+ *  the local row, and the record keeps winning LWW so the shift can't
+ *  resurrect from a stale copy. */
+export interface EventShiftState {
+  id: string;
+  eventId: string;
+  label: string;
+  startsAt: number;
+  endsAt: number;
+  /** Soft cap — a planning aid, never enforced as a bouncer. */
+  capacity: number | null;
+  createdBy: string;
+  createdAt: number;
+  /** ms epoch when the organizer removed the shift; null = live. */
+  deletedAt: number | null;
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}
+
+/** A member's signup for a shift. Single-owner (`signerKey ===
+ *  memberKey`), natural key (shiftId, memberKey). Withdrawal
+ *  federates as a tombstone. INTENT, not attendance — see the
+ *  never-compare rule (docs/shift-signups.md §9), which survives
+ *  federation unchanged. */
+export interface ShiftSignupState {
+  /** UUID of the row version; identity is (shiftId, memberKey). */
+  id: string;
+  shiftId: string;
+  /** Denormalized event id (roster per event; downgrade clearing). */
+  eventId: string;
+  memberKey: string;
+  signedUpAt: number;
+  /** ms epoch when the member withdrew; null = live. */
+  deletedAt: number | null;
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}

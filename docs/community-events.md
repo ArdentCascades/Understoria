@@ -118,8 +118,10 @@ absence of those features.
 ## §4 Data model
 
 Three record types. Two are federated and signed (`Event`,
-`EventCancellation`). One is local to the node where the RSVP
-happened (`EventRSVP`) and **never enters the outbox**.
+`EventCancellation`). The third (`EventRSVP`) shipped local to the
+node where the RSVP happened and never entered the outbox; since
+participation Phase 2 it syncs through the member's own community
+node (see §4.2 / §7.2) while staying off the peer wire.
 
 ### §4.1 `Event` — federated, signed
 
@@ -195,13 +197,17 @@ Field-by-field rationale:
   their own nodes; the organizer's node displays this as "X RSVPs
   here, ? on peer nodes."
 
-### §4.2 `EventRSVP` — LOCAL DEXIE ONLY, NEVER FEDERATED
+### §4.2 `EventRSVP` — local Dexie row; community-node sync since Phase 2
 
-This is the load-bearing decision in this design. **`EventRSVP`
-never enters the outbox.** The discriminator string `"EventRSVP"`
-MUST NOT appear in any `OutboxRow.kind`, in any federation route,
-in any peer-pull cursor. The Dexie row is the only place this
-exists.
+*(Heading at writing: "LOCAL DEXIE ONLY, NEVER FEDERATED" — the
+load-bearing decision of this design, SUPERSEDED IN PART by
+participation federation Phase 2; see §7.2 and §11.1 for exactly
+what changed and what didn't.)* As shipped: **`EventRSVP` never
+entered the outbox** — no `OutboxRow.kind` discriminator, no
+federation route, no peer-pull cursor; the Dexie row was the only
+place it existed. Since Phase 2 the row syncs through the member's
+own community node as a signed single-owner `EventRsvpState` record;
+it still never crosses the cross-node peer wire.
 
 ```ts
 // LOCAL ONLY — Dexie table `eventRsvps`. Not signed. Not federated.
@@ -398,10 +404,13 @@ Citing `privacy-precondition` here:
 > "No email, no phone number, minimal logging. Your identity is a
 > cryptographic key on your device."
 
-The RSVP roster is local-only because that's what
-`privacy-precondition` requires of any new data surface. Federating
-the roster — even encrypted, even partial — re-introduces the
-exposure model the principle was written to prevent.
+The RSVP roster shipped local-only because that's what
+`privacy-precondition` was read to require of any new data surface.
+*(Phase 2 revisited this reading: the roster now syncs within the
+member's own community — the audience the RSVP addresses — while
+staying off the cross-node peer wire. The principle's exposure model
+was about the open federation, and that boundary held. See §7.2 +
+§11.1.)*
 
 ## §7 Federation
 
@@ -418,18 +427,23 @@ exposure model the principle was written to prevent.
 
 ### §7.2 What does NOT federate
 
-`EventRSVP`. Absolutely not. The discriminator `"EventRSVP"` MUST
-NOT appear in `OutboxRow.kind`. There is no `POST /event-rsvps`
-route. There is no `GET /event-rsvps?since=` cursor. There is no
-PWA-side `pullFederatedEventRSVPs`. The Dexie table `eventRsvps` is
-read locally and written locally and that's the entire story.
+*(SUPERSEDED IN PART — participation Phase 2,
+docs/project-federation.md §6.)* As originally shipped: `EventRSVP`,
+absolutely not — no outbox kind, no route, no cursor, no pull; the
+Dexie table was read and written locally and that was the entire
+story.
 
-A peer node viewing an event the organizer published has **zero
-knowledge** of who RSVP'd. This is the federated-attendance-graph
-surveillance vector that the threat-model §7 addendum names. It is
-why this decision is settled at the architecture layer rather than
-left as a per-deployment policy: a per-deployment switch would be a
-foot-gun the moment a community misconfigures it.
+Since Phase 2: RSVPs (and shift definitions / signups) sync as
+signed LWW state records through the member's own **community
+node**, via `"event_rsvp"` / `"event_shift"` / `"shift_signup"`
+outbox kinds, the `POST/GET /event-rsvps` (+shifts/signups) routes,
+and `pullFederatedEventRsvps` & co. What remains true, and remains
+settled at the architecture layer: **none of these kinds joins the
+cross-node `peerPull` loop.** A PEER node viewing a federated event
+still has zero knowledge of who RSVP'd — the attendance graph stays
+inside the community whose members are on it. The reversal's full
+adversary analysis: threat-model §7 "Federated participation
+records"; the ruling it supersedes: §11.1 below.
 
 ### §7.3 Peer-node count rendering
 
@@ -646,7 +660,10 @@ naming why the reasoning here no longer holds.
 
 ### §11.1 Federated RSVPs
 
-**Rejected.** Federating the RSVP roster would create a
+**Rejected at writing; SUPERSEDED IN PART by participation
+federation Phase 2 (docs/project-federation.md §6 + threat-model §7
+"Federated participation records").** The original ruling, kept for
+the record: federating the RSVP roster would create a
 federated-attendance-graph surveillance surface. Quoting the
 threat-model §7 addendum (this PR): "an organizing employer or
 union-busting firm pulling the public peer wire would see `key X is
@@ -655,9 +672,15 @@ timestamp, across the entire federation. That's the
 federation-grade version of the attendance-list surveillance
 problem labor organizers have spent a century avoiding."
 
-The local-only roster (§4.2) closes this vector at the architecture
-layer. The trade-off is that an organizer doesn't see peer-node
-RSVPs — see §7.3 for how the UI handles that honestly.
+What Phase 2 changed, precisely: RSVPs now sync as single-owner
+signed LWW records through the member's OWN community node — because
+the local-only trade's real cost turned out to be that an organizer
+could not see attendance from anyone else's phone, which defeated
+the roster entirely. What Phase 2 did NOT change: **none of the
+participation kinds joins the cross-node peer wire** (`peerPull`
+carries none of them), so the quoted across-the-entire-federation
+harvest remains closed; the §6 visibility tiers still gate what
+renders; and §11.2/§11.6 below stand in full.
 
 ### §11.2 Public attendee roster visible to non-attendees
 

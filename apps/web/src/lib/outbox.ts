@@ -27,8 +27,11 @@ import {
   submitCoOrganizerInvitationRevocationToNode,
   submitCoOrganizerInvitationToNode,
   submitEventCancellationToNode,
+  submitEventRsvpToNode,
+  submitEventShiftToNode,
   submitEventToNode,
   submitExchangeToNode,
+  submitShiftSignupToNode,
   submitAwaitingTransitionToNode,
   submitInviteRevocationToNode,
   submitPostToNode,
@@ -47,9 +50,12 @@ import type {
   CoOrganizerInvitationRevocation,
   Event,
   EventCancellation,
+  EventRsvpState,
+  EventShiftState,
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
 import type { Exchange, Post, SignedVouch, TaskComment } from "@/types";
@@ -239,8 +245,41 @@ export async function enqueueEventCancellation(
   return enqueueOutbox("event_cancellation", cancellation.id, cancellation);
 }
 
-// NOTE: EventRsvpRow has no outbox enqueue helper — RSVPs are
-// local-only by design (docs/community-events.md §4).
+/**
+ * Participation federation Phase 2 (docs/project-federation.md §6):
+ * enqueue a signed RSVP / shift / signup state record. Same LWW
+ * re-enqueue semantics as the project/task kinds — a newer version of
+ * the same natural key replaces a still-pending row in place. The
+ * former note here ("EventRsvpRow has no outbox enqueue helper —
+ * RSVPs are local-only by design") was retired by Phase 2's stance
+ * reversal; the dedup keys are the NATURAL keys so both of a member's
+ * devices queue at most one live version per RSVP / signup.
+ */
+export async function enqueueEventRsvpOutbox(
+  record: EventRsvpState,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox(
+    "event_rsvp",
+    `rsvp_${record.eventId}_${record.memberKey}`,
+    record,
+  );
+}
+
+export async function enqueueEventShiftOutbox(
+  record: EventShiftState,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("event_shift", record.id, record);
+}
+
+export async function enqueueShiftSignupOutbox(
+  record: ShiftSignupState,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox(
+    "shift_signup",
+    `signup_${record.shiftId}_${record.memberKey}`,
+    record,
+  );
+}
 
 /**
  * Insert an outbox row for a signed redemption receipt — Phase 1 of
@@ -572,6 +611,24 @@ export async function flushOutboxOnce(
         cfg,
         { fetchImpl: options.fetchImpl },
       );
+    } else if (row.kind === "event_rsvp") {
+      result = await submitEventRsvpToNode(
+        payload as unknown as EventRsvpState,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "event_shift") {
+      result = await submitEventShiftToNode(
+        payload as unknown as EventShiftState,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "shift_signup") {
+      result = await submitShiftSignupToNode(
+        payload as unknown as ShiftSignupState,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else {
       result = await submitPostToNode(payload as Post, cfg, {
         fetchImpl: options.fetchImpl,
@@ -589,14 +646,22 @@ export async function flushOutboxOnce(
     // transactional compare-then-write leaves a superseded row
     // pending (enqueueOutbox already pulled its nextAttemptAt to now),
     // so the new payload ships on the next flush.
-    // Kind-aware poison override: a task state's 409 means "your
-    // project record hasn't landed yet" (docs/project-federation.md
-    // §4) — the project row is in this same outbox, so the retry
-    // schedule resolves the ordering. Every other 409 (redemption /
-    // revocation token races) stays permanent.
+    // Kind-aware poison override: for the LWW state kinds a 409 means
+    // "your referent hasn't landed yet" — task before project
+    // (docs/project-federation.md §4), RSVP/shift before the event,
+    // signup before the shift (§6). The referent is in this same
+    // outbox or arrives via federation, so the retry schedule
+    // resolves the ordering. Every other 409 (redemption / revocation
+    // token races) stays permanent.
+    const RETRYABLE_409_KINDS: ReadonlySet<OutboxRow["kind"]> = new Set([
+      "task_state",
+      "event_rsvp",
+      "event_shift",
+      "shift_signup",
+    ]);
     const poison =
       isPoisonResult(result) &&
-      !(row.kind === "task_state" && result.status === 409);
+      !(RETRYABLE_409_KINDS.has(row.kind) && result.status === 409);
 
     const applied = await db.transaction("rw", db.outbox, async () => {
       const current = await db.outbox.get(row.id);
