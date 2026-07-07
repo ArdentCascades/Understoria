@@ -10,6 +10,38 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Mirror nodes + automatic failover — "one server disappears,
+  nobody notices, nothing is lost" is now literally true**
+  (`docs/community-resilience.md` Phase B, verified end-to-end by a
+  kill-the-primary test with two real node processes). A community
+  can now run several nodes of ITSELF: mirrors (`MIRROR_NODE_URLS`)
+  replicate **every durable record kind** between them — including
+  the project/task/RSVP/shift LWW state and the redemption receipts
+  membership derives from — by re-POSTing each pulled record through
+  the receiving node's own routes, so mirrored records pass exactly
+  the same signature/authority/LWW checks as member submissions.
+  Members' apps discover announced mirrors via `GET /config.mirrors`
+  and adopt each one only through a consent card (auto-suggest,
+  never auto-enable; the card names that a mirror's operator is an
+  operator); once accepted, pulls and pushes switch to a mirror on
+  their own whenever the usual server is unreachable, with per-node
+  pull cursors so no record is ever skipped. The Dashboard
+  resilience card goes live past its Phase A ceiling: per-node
+  freshness leaves, and tiers that climb honestly — two reachable
+  nodes is "Sturdy," three or more "Deep-rooted." New operator
+  surface: `MIRROR_NODE_URLS`, `MIRROR_READ_TOKENS`,
+  `MIRROR_ANNOUNCE_URLS`, `MIRROR_PULL_INTERVAL_MS`, and a pairing
+  runbook in the operator guide; threat-model §7 names the
+  obligations (a mirror must run the same `READ_AUTH` gate, and each
+  mirror operator holds every `operator-powers.md` power).
+
+### Fixed
+- **Cross-origin member-authenticated reads were impossible**: the
+  node's CORS allow-list omitted the `x-understoria-*` read-signature
+  headers, so any browser fetch carrying them to a node on a
+  different origin failed preflight. Invisible until now because the
+  canonical deploy is same-origin (`/api`) — mirrors are the first
+  cross-origin surface that sends them.
 - **The Dashboard now shows your community's resilience — and how to
   grow it.** A new "Community resilience" card makes visible what
   separates this architecture from corporate centralized services:
@@ -26,7 +58,8 @@ include breaking changes.
   `docs/community-resilience.md`: the card cannot claim automatic
   failover before it exists — mirror nodes and failover are fully
   designed there as Phase B, and the card's tiers only climb when
-  that machinery makes them true.
+  that machinery makes them true (Phase B ships in this same
+  release — see the mirror-nodes entry above).
 
 - **Reading the community now requires being IN the community — and
   the server's disk can be sealed.** Three pieces from the

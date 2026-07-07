@@ -34,6 +34,7 @@ import type {
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { authorizedFetch } from "@/lib/authorizedRead";
+import { cursorKeySuffix, getActiveNodeUrl } from "@/lib/nodeEndpoints";
 import { materializeAcceptedCoOrganizer } from "@/db/coorgInvitations";
 import { publishProjectState } from "@/db/projects";
 import { createMember } from "@/db/seed";
@@ -65,6 +66,34 @@ const EXCHANGE_CURSOR_KEY = SETTING_KEYS.federationLastExchangePull;
 export interface FederationSyncResult {
   inserted: number;
   skipped: number;
+}
+
+/**
+ * Where this sync cycle pulls from, and how its cursor keys are
+ * scoped. With mirror failover (docs/community-resilience.md §B.2)
+ * the active node may be an accepted mirror rather than the member's
+ * primary; cursors are PER NODE (`ctx.key`) because mirrors lag each
+ * other — carrying the primary's high-water mark to a mirror would
+ * silently skip every record the primary hadn't served yet. The
+ * primary keeps the legacy unsuffixed keys, so existing devices carry
+ * their cursors forward untouched; a newly adopted mirror starts from
+ * zero and dedups (every pull is idempotent by id / natural key).
+ */
+interface PullContext {
+  baseUrl: string;
+  /** Scope a cursor settings key to the active node. */
+  key: (base: string) => string;
+}
+
+async function resolvePullContext(): Promise<PullContext | null> {
+  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
+  if (enabled !== "1") return null;
+  const primary = await getSetting(SETTING_KEYS.communityNodeUrl);
+  if (!primary?.trim()) return null;
+  const active = await getActiveNodeUrl();
+  if (!active) return null;
+  const suffix = cursorKeySuffix(active.url, primary);
+  return { baseUrl: active.url, key: (base) => `${base}${suffix}` };
 }
 
 /**
@@ -107,12 +136,11 @@ function plausibleCursorStamp(v: unknown): v is number {
  * configured. Returns null if sync is not applicable.
  */
 export async function pullFederatedPosts(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(POST_CURSOR_KEY);
+  const since = await getSetting(ctx.key(POST_CURSOR_KEY));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -201,7 +229,7 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(POST_CURSOR_KEY, String(maxCreatedAt));
+    await setSetting(ctx.key(POST_CURSOR_KEY), String(maxCreatedAt));
   }
 
   return { inserted, skipped };
@@ -215,12 +243,11 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
  * item for the poster.
  */
 export async function pullFederatedClaims(): Promise<number> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return 0;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return 0;
+  const ctx = await resolvePullContext();
+  if (!ctx) return 0;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(CLAIM_CURSOR_KEY);
+  const since = await getSetting(ctx.key(CLAIM_CURSOR_KEY));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -276,7 +303,7 @@ export async function pullFederatedClaims(): Promise<number> {
   }
 
   if (maxClaimedAt !== null) {
-    await setSetting(CLAIM_CURSOR_KEY, String(maxClaimedAt));
+    await setSetting(ctx.key(CLAIM_CURSOR_KEY), String(maxClaimedAt));
   }
 
   return applied;
@@ -298,12 +325,11 @@ export async function pullFederatedClaims(): Promise<number> {
  * with `deletedAt = null` against a tombstoned local row is ignored.
  */
 export async function pullFederatedTaskComments(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(TASK_COMMENT_CURSOR_KEY);
+  const since = await getSetting(ctx.key(TASK_COMMENT_CURSOR_KEY));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -405,7 +431,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(TASK_COMMENT_CURSOR_KEY, String(maxCreatedAt));
+    await setSetting(ctx.key(TASK_COMMENT_CURSOR_KEY), String(maxCreatedAt));
   }
 
   return { inserted, skipped };
@@ -431,12 +457,11 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
  * Idempotent: dedup on `id`. Cursor advances on `completedAt`.
  */
 export async function pullFederatedExchanges(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(EXCHANGE_CURSOR_KEY);
+  const since = await getSetting(ctx.key(EXCHANGE_CURSOR_KEY));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -521,7 +546,7 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
   }
 
   if (maxCompletedAt !== null) {
-    await setSetting(EXCHANGE_CURSOR_KEY, String(maxCompletedAt));
+    await setSetting(ctx.key(EXCHANGE_CURSOR_KEY), String(maxCompletedAt));
   }
 
   return { inserted, skipped };
@@ -535,12 +560,11 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
  * See `docs/co-organizer-invitations.md` §8.
  */
 export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(SETTING_KEYS.federationLastCoOrgInvitationPull);
+  const since = await getSetting(ctx.key(SETTING_KEYS.federationLastCoOrgInvitationPull));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -622,7 +646,7 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
 
   if (maxCreatedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastCoOrgInvitationPull,
+      ctx.key(SETTING_KEYS.federationLastCoOrgInvitationPull),
       String(maxCreatedAt),
     );
   }
@@ -636,13 +660,12 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
  * `pullFederatedCoOrgInvitations`.
  */
 export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
   const since = await getSetting(
-    SETTING_KEYS.federationLastCoOrgInvitationResponsePull,
+    ctx.key(SETTING_KEYS.federationLastCoOrgInvitationResponsePull),
   );
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
@@ -724,7 +747,7 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
 
   if (maxDecidedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastCoOrgInvitationResponsePull,
+      ctx.key(SETTING_KEYS.federationLastCoOrgInvitationResponsePull),
       String(maxDecidedAt),
     );
   }
@@ -737,13 +760,12 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
  * `revokedAt`. Same merge / dedupe rules as the other coorg pulls.
  */
 export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
   const since = await getSetting(
-    SETTING_KEYS.federationLastCoOrgInvitationRevocationPull,
+    ctx.key(SETTING_KEYS.federationLastCoOrgInvitationRevocationPull),
   );
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
@@ -812,7 +834,7 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
 
   if (maxRevokedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastCoOrgInvitationRevocationPull,
+      ctx.key(SETTING_KEYS.federationLastCoOrgInvitationRevocationPull),
       String(maxRevokedAt),
     );
   }
@@ -837,13 +859,12 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
  * `null` (no body) on a 404 and the cursor stays where it is.
  */
 export async function pullFederatedEvents(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
   const since =
-    (await getSetting(SETTING_KEYS.federationLastEventPull)) ?? "0";
+    (await getSetting(ctx.key(SETTING_KEYS.federationLastEventPull))) ?? "0";
   const params = new URLSearchParams({ limit: "200", since });
 
   const url = `${baseUrl.replace(/\/+$/, "")}/events?${params.toString()}`;
@@ -933,7 +954,7 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
 
   if (maxCreatedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastEventPull,
+      ctx.key(SETTING_KEYS.federationLastEventPull),
       String(maxCreatedAt),
     );
   }
@@ -952,13 +973,12 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
  * the application layer when a UI surface renders cancellation state.
  */
 export async function pullFederatedEventCancellations(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
   const since =
-    (await getSetting(SETTING_KEYS.federationLastEventCancellationPull)) ?? "0";
+    (await getSetting(ctx.key(SETTING_KEYS.federationLastEventCancellationPull))) ?? "0";
   const params = new URLSearchParams({ limit: "200", since });
 
   const url = `${baseUrl.replace(/\/+$/, "")}/event-cancellations?${params.toString()}`;
@@ -1053,7 +1073,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
 
   if (maxCancelledAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastEventCancellationPull,
+      ctx.key(SETTING_KEYS.federationLastEventCancellationPull),
       String(maxCancelledAt),
     );
   }
@@ -1101,13 +1121,12 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
  * computes identical starting balances from the same constants.
  */
 export async function pullFederatedRedemptions(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
   const since =
-    (await getSetting(SETTING_KEYS.federationLastRedemptionPull)) ?? "0";
+    (await getSetting(ctx.key(SETTING_KEYS.federationLastRedemptionPull))) ?? "0";
   const params = new URLSearchParams({ limit: "200", since });
 
   const url = `${baseUrl.replace(/\/+$/, "")}/redemptions?${params.toString()}`;
@@ -1258,7 +1277,7 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
 
   if (maxReceivedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastRedemptionPull,
+      ctx.key(SETTING_KEYS.federationLastRedemptionPull),
       String(maxReceivedAt),
     );
   }
@@ -1286,13 +1305,12 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
  * `redeemed_despite_revocation`.
  */
 export async function pullFederatedInviteRevocations(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
   const since =
-    (await getSetting(SETTING_KEYS.federationLastInviteRevocationPull)) ?? "0";
+    (await getSetting(ctx.key(SETTING_KEYS.federationLastInviteRevocationPull))) ?? "0";
   const params = new URLSearchParams({ limit: "200", since });
   const url = `${baseUrl.replace(/\/+$/, "")}/invite-revocations?${params.toString()}`;
 
@@ -1407,7 +1425,7 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
 
   if (maxReceivedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastInviteRevocationPull,
+      ctx.key(SETTING_KEYS.federationLastInviteRevocationPull),
       String(maxReceivedAt),
     );
   }
@@ -1430,12 +1448,11 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
  * signatures skipped without advancing the cursor.
  */
 export async function pullFederatedVouches(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(SETTING_KEYS.federationLastVouchPull);
+  const since = await getSetting(ctx.key(SETTING_KEYS.federationLastVouchPull));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -1508,7 +1525,7 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
 
   if (maxCreatedAt !== null) {
     await setSetting(
-      SETTING_KEYS.federationLastVouchPull,
+      ctx.key(SETTING_KEYS.federationLastVouchPull),
       String(maxCreatedAt),
     );
   }
@@ -1544,12 +1561,11 @@ const TASK_STATE_CURSOR_KEY = "federationLastTaskStatePull";
  * have newer" case).
  */
 export async function pullFederatedProjectStates(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(PROJECT_STATE_CURSOR_KEY);
+  const since = await getSetting(ctx.key(PROJECT_STATE_CURSOR_KEY));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -1630,7 +1646,7 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(PROJECT_STATE_CURSOR_KEY, String(maxUpdatedAt));
+    await setSetting(ctx.key(PROJECT_STATE_CURSOR_KEY), String(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -1644,12 +1660,11 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
  * cycle picks it up (the client mirror of the server's 409).
  */
 export async function pullFederatedTaskStates(): Promise<FederationSyncResult | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(TASK_STATE_CURSOR_KEY);
+  const since = await getSetting(ctx.key(TASK_STATE_CURSOR_KEY));
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
 
@@ -1734,7 +1749,7 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(TASK_STATE_CURSOR_KEY, String(maxUpdatedAt));
+    await setSetting(ctx.key(TASK_STATE_CURSOR_KEY), String(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -1760,12 +1775,15 @@ async function fetchStateFeed<T>(
   path: string,
   bodyKey: string,
   cursorKey: string,
-): Promise<{ rows: T[]; since: string | null } | null> {
-  const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
-  if (enabled !== "1") return null;
-  const baseUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
-  if (!baseUrl) return null;
-  const since = await getSetting(cursorKey);
+): Promise<{ rows: T[]; since: string | null; cursorKey: string } | null> {
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
+  // Callers persist their high-water mark under the SCOPED key handed
+  // back here — writing the unscoped key while reading the scoped one
+  // would wedge the cursor whenever a mirror is the active node.
+  const scopedKey = ctx.key(cursorKey);
+  const since = await getSetting(scopedKey);
   const params = new URLSearchParams({ limit: "200" });
   if (since) params.set("since", since);
   const url = `${baseUrl.replace(/\/+$/, "")}${path}?${params.toString()}`;
@@ -1775,7 +1793,7 @@ async function fetchStateFeed<T>(
     const body = (await res.json()) as Record<string, unknown>;
     const rows = body[bodyKey];
     if (!Array.isArray(rows)) return null;
-    return { rows: rows as T[], since: since ?? null };
+    return { rows: rows as T[], since: since ?? null, cursorKey: scopedKey };
   } catch {
     return null;
   }
@@ -1854,7 +1872,7 @@ export async function pullFederatedEventShifts(): Promise<FederationSyncResult |
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(EVENT_SHIFT_CURSOR_KEY, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, String(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -1924,7 +1942,7 @@ export async function pullFederatedEventRsvps(): Promise<FederationSyncResult | 
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(EVENT_RSVP_CURSOR_KEY, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, String(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -2001,7 +2019,7 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(SHIFT_SIGNUP_CURSOR_KEY, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, String(maxUpdatedAt));
   }
   return { inserted, skipped };
 }

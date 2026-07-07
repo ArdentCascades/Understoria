@@ -1,13 +1,14 @@
 # Community resilience — the score, the card, and mirror nodes
 
 Status: **Phase A shipped** (the honest resilience card + the
-add-a-node path). **Phase B designed in full below, not yet built**
-(mirror nodes + automatic failover — the machinery that lets the
-score rise). Companion docs: `docs/add-a-node.md` (the member-facing
-guide the card's call-to-action opens onto),
-`docs/operator-powers.md` (why distributing nodes also distributes
-the pressure target), `docs/member-authenticated-reads.md` (the read
-gate mirrors must speak).
+add-a-node path). **Phase B shipped** (mirror nodes + automatic
+failover — the machinery that lets the score rise; kill-the-primary
+verified end-to-end with two real node processes). Companion docs:
+`docs/add-a-node.md` (the member-facing guide the card's
+call-to-action opens onto), `docs/operator-powers.md` (why
+distributing nodes also distributes the pressure target),
+`docs/member-authenticated-reads.md` (the read gate mirrors must
+speak), operator-guide §6 (the mirror-pairing runbook).
 
 ## 0. What this is for
 
@@ -101,11 +102,12 @@ device already has:
 - `docs/add-a-node.md` — the member-facing node guide.
 - i18n `dashboard.resilience.*` in en + es.
 
-## Phase B — mirror nodes + failover (designed, not built)
+## Phase B — mirror nodes + failover (shipped)
 
 The machinery that makes "one node goes down, nobody notices,
 nothing is lost" literally true, and lets the card climb past
-`taking_root` without lying.
+`taking_root` without lying. Shipped as designed, with the
+implementation deltas noted inline below.
 
 ### B.1 Mirror replication (server)
 
@@ -116,19 +118,27 @@ community), and it deliberately replicates MORE:
 - New env: `MIRROR_NODE_URLS` (comma-separated), `MIRROR_READ_TOKENS`
   (JSON url→token, same shape as `PEER_READ_TOKENS` — mirrors of a
   read-gated community authenticate as peers do).
-- A mirror-pull worker structured like `peerPull.ts` but covering
+- A mirror-pull worker (`apps/server/src/mirrorPull.ts`) covering
   **every durable kind**, including what peer federation excludes:
   the five LWW state kinds (`/project-states`, `/task-states`,
   `/event-rsvps`, `/event-shifts`, `/shift-signups`), plus
-  `/redemptions`, `/invite-revocations`, `/awaiting-transitions`.
-  The LWW kinds replicate with the same authority-checked upsert the
-  routes already implement (mirrors are the same community, so the
-  privacy boundary from participation Phase 2 — "never to other
-  communities" — is not crossed; the data moves between the
-  community's own servers).
+  `/redemptions` and `/invite-revocations`.
+  The worker applies each pulled record by re-POSTing it through the
+  node's OWN routes (`app.inject`), so every mirrored record passes
+  exactly the same parse/signature/authority/LWW/idempotency code as
+  a member submission — no second ingestion path (mirrors are the
+  same community, so the privacy boundary from participation Phase 2
+  — "never to other communities" — is not crossed; the data moves
+  between the community's own servers). Cursors are per
+  (mirror, kind) in the `mirror_pull_state` table — per-mirror is
+  load-bearing, since mirrors lag each other.
   Excluded, correctly: the device-link mailbox and tap-to-link
   rendezvous (ephemeral, self-limiting, meaningful only on the node
-  the two devices both talk to).
+  the two devices both talk to), and — an implementation delta from
+  the first draft of this design — `/awaiting-transitions`, which is
+  POST-only by design: the auto-confirm clock anchors to ONE node's
+  arrival stamp, and replicating it would manufacture divergent
+  anchors.
 - Mirrors must agree on `NODE_FOUNDER_KEYS` (same community, same
   trust roots) and each derive the same membership closure from the
   replicated redemption receipts. `NODE_SYSTEM_SECRET_KEY` is NOT
@@ -145,19 +155,25 @@ community), and it deliberately replicates MORE:
 
 ### B.2 Failover (web)
 
-- Settings gain `communityNodeUrls` (ordered list; the existing
-  single `communityNodeUrl` becomes its first entry via a Dexie
-  migration — no member re-configures anything).
-- The app refreshes the list from `/config.mirrors` on each launch
-  (adopt-new, never silently drop the member's explicit primary; a
-  consent card names newly announced mirrors before they're used,
-  same informed-consent discipline as the node-URL suggestion).
-- **Pulls:** cursor keys become per-node
-  (`federationLast<Kind>Pull::<urlHash>`) — this is load-bearing:
-  mirrors lag each other, so carrying a high-water mark from node A
-  to node B would silently skip records forever. First pull against
-  a newly adopted mirror starts from zero and dedupes (every pull
-  is already idempotent by id / natural key).
+- The member's explicit primary stays in `communityNodeUrl`,
+  untouched; accepted mirrors live in a new `communityNodeMirrors`
+  setting (implementation delta: no Dexie migration needed — the
+  primary key never changes shape, so existing devices carry every
+  cursor forward byte-identically). `lib/nodeEndpoints.ts` owns the
+  ordered endpoint list, active-node resolution (a cheap `/health`
+  probe walk, cached ~30 s), and per-node telemetry.
+- The Board refreshes the announced list from `/config.mirrors` on
+  each visit (adopt-new, never silently drop the member's explicit
+  primary; a consent card names each newly announced mirror before
+  it is ever used — same informed-consent discipline as the node-URL
+  suggestion; declining persists and never re-nags).
+- **Pulls:** cursor keys are per-node — the primary keeps the legacy
+  unsuffixed keys, each mirror gets `federationLast<Kind>Pull::<urlHash>`.
+  This is load-bearing: mirrors lag each other, so carrying a
+  high-water mark from node A to node B would silently skip records
+  forever. First pull against a newly adopted mirror starts from
+  zero and dedupes (every pull is already idempotent by id / natural
+  key).
 - **Pushes:** the outbox stays single-delivery per record but the
   flush walks the node list: try primary, on network failure or 5xx
   try the next, remember which node accepted. Replication between
@@ -167,18 +183,18 @@ community), and it deliberately replicates MORE:
   node URL; extend the telemetry keys per-node. "Reachable" for the
   card = a successful signed read in the last 24h.
 
-### B.3 The score goes live
+### B.3 The score goes live (shipped)
 
-`computeResilience` gains real inputs: `nodesConfigured`,
-`nodesReachable24h`, per-node freshness (newest record timestamp
-seen from each). The card's trunk row shows each node with a quiet
-freshness leaf (green = synced today, amber = lagging, grey =
-unreachable), and the tier climbs: 2 reachable → `sturdy`,
-3+ → `deep_rooted`. Copy for the takedown story becomes concrete:
-"If one server disappears, your apps switch to the others on their
-own. Nothing is lost."
+`computeResilience` now receives real inputs: `nodesConfigured` =
+the endpoint list, `nodesReachable` = nodes with a successful signed
+read/write in the last 24 h (per-node telemetry keys). The card's
+trunk row shows each node with a quiet freshness leaf (green =
+synced today, amber = lagging, grey = quiet), and the tier climbs:
+2 reachable → `sturdy`, 3+ → `deep_rooted`. Copy for the takedown
+story is concrete: "If one server disappears, your apps switch to
+the others on their own. Nothing is lost."
 
-### B.4 Threat-model / docs obligations (owed at Phase B time)
+### B.4 Threat-model / docs obligations (all delivered with Phase B)
 
 - §7 entry: mirrors widen the *count of hosts* holding the
   community's records (each mirror operator = one more

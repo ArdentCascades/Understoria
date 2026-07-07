@@ -13,44 +13,54 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { getSetting, SETTING_KEYS } from "@/db/database";
+import { getSetting } from "@/db/database";
+import { listNodeEndpoints, nodeSuccessKey } from "@/lib/nodeEndpoints";
 import {
   computeResilience,
   isRecentSuccess,
+  nodeFreshness,
+  type NodeFreshness,
   type ResilienceSnapshot,
 } from "@/lib/resilience";
 
-// "Community resilience" — docs/community-resilience.md Phase A.
+// "Community resilience" — docs/community-resilience.md Phase A + B.
 // Makes the structural difference from corporate centralization
 // visible: the trunk row shows how many servers carry this community
-// (Phase A: at most one, honestly), the replica line names the fact
-// that every member's device already holds a complete signed copy,
-// and the dashed empty trunk IS the call to action — it links to the
-// add-a-node Help entry. Wording tiers, never a numeric score
-// (no-leaderboards applies to infrastructure too); no red styling at
-// tier one — a small community with one lovingly-run node is healthy,
-// not failing. Renders entirely from local settings + tables: zero
-// new wire bytes.
+// (the primary plus every consented mirror, each with a quiet
+// freshness leaf), the replica line names the fact that every
+// member's device already holds a complete signed copy, and the
+// dashed empty trunk IS the call to action — it links to the
+// add-a-node Help entry. With two or more nodes answering, the tier
+// climbs (sturdy / deep_rooted) and the copy makes the takedown story
+// concrete: if one server disappears, apps switch to the others on
+// their own. Wording tiers, never a numeric score (no-leaderboards
+// applies to infrastructure too); no red styling anywhere — a small
+// community with one lovingly-run node is healthy, not failing.
+// Renders entirely from local settings + tables: zero new wire bytes.
 export function ResilienceCard() {
   const { t } = useTranslation();
   const { members } = useApp();
   const [snapshot, setSnapshot] = useState<ResilienceSnapshot | null>(null);
+  const [leaves, setLeaves] = useState<NodeFreshness[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [enabled, url, lastSuccess] = await Promise.all([
-        getSetting(SETTING_KEYS.communityNodeEnabled),
-        getSetting(SETTING_KEYS.communityNodeUrl),
-        getSetting(SETTING_KEYS.communityNodeLastSuccess),
-      ]);
-      const configured = enabled === "1" && !!url?.trim() ? 1 : 0;
-      const reachable =
-        configured === 1 && isRecentSuccess(lastSuccess) ? 1 : 0;
+      const { primary, endpoints } = await listNodeEndpoints();
+      const freshness: NodeFreshness[] = [];
+      let reachable = 0;
+      for (const url of endpoints) {
+        const lastSuccess = await getSetting(
+          nodeSuccessKey(url, primary ?? url),
+        );
+        freshness.push(nodeFreshness(lastSuccess));
+        if (isRecentSuccess(lastSuccess)) reachable += 1;
+      }
       if (!cancelled) {
+        setLeaves(freshness);
         setSnapshot(
           computeResilience({
-            nodesConfigured: configured,
+            nodesConfigured: endpoints.length,
             nodesReachable: reachable,
             memberCount: members.length,
           }),
@@ -65,7 +75,12 @@ export function ResilienceCard() {
   if (!snapshot) return null;
 
   const tierLabel = t(`dashboard.resilience.tier.${snapshot.tier}`);
-  const filledTrunks = snapshot.nodesConfigured;
+  const failoverLive = snapshot.tier === "sturdy" || snapshot.tier === "deep_rooted";
+  const LEAF_CLASS: Record<NodeFreshness, string> = {
+    fresh: "bg-canopy-500",
+    lagging: "bg-amber-400",
+    quiet: "bg-moss-300 dark:bg-moss-600",
+  };
 
   return (
     <section className="card mb-4" aria-labelledby="resilience-title">
@@ -76,15 +91,19 @@ export function ResilienceCard() {
         {t("dashboard.resilience.title")}
       </h2>
 
-      {/* Trunk row: one tree per node; the dashed slot is the CTA. */}
+      {/* Trunk row: one tree per node (with its freshness leaf); the
+          dashed slot is the CTA. */}
       <div className="mb-2 flex items-center gap-2" aria-hidden="true">
-        {Array.from({ length: filledTrunks }, (_, i) => (
+        {leaves.map((freshness, i) => (
           <span
             key={`node-${i}`}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-canopy-50 text-xl dark:bg-canopy-950/40"
-            title={t("dashboard.resilience.nodeTitle")}
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-canopy-50 text-xl dark:bg-canopy-950/40"
+            title={`${t("dashboard.resilience.nodeTitle")} — ${t(`dashboard.resilience.leaf.${freshness}`)}`}
           >
             🌳
+            <span
+              className={`absolute right-1 top-1 h-2 w-2 rounded-full ${LEAF_CLASS[freshness]}`}
+            />
           </span>
         ))}
         <Link
@@ -102,13 +121,28 @@ export function ResilienceCard() {
       <p className="text-sm text-moss-700 dark:text-moss-200">
         {snapshot.tier === "seedling"
           ? t("dashboard.resilience.bodySeedling")
-          : t(
-              snapshot.memberCount === 1
-                ? "dashboard.resilience.bodyOne"
-                : "dashboard.resilience.bodyOther",
-              { count: snapshot.memberCount },
-            )}
+          : snapshot.nodesConfigured > 1
+            ? t(
+                snapshot.memberCount === 1
+                  ? "dashboard.resilience.bodyMultiOne"
+                  : "dashboard.resilience.bodyMultiOther",
+                {
+                  count: snapshot.memberCount,
+                  nodes: snapshot.nodesConfigured,
+                },
+              )
+            : t(
+                snapshot.memberCount === 1
+                  ? "dashboard.resilience.bodyOne"
+                  : "dashboard.resilience.bodyOther",
+                { count: snapshot.memberCount },
+              )}
       </p>
+      {failoverLive && (
+        <p className="mt-1 text-sm text-moss-700 dark:text-moss-200">
+          {t("dashboard.resilience.bodyFailover")}
+        </p>
+      )}
       {snapshot.nodeQuiet && (
         <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
           {t("dashboard.resilience.nodeQuiet")}

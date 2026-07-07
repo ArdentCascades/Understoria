@@ -40,6 +40,11 @@ import type {
   TaskState,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
+import {
+  normalizeNodeUrl,
+  readAcceptedMirrors,
+  recordNodeSuccess,
+} from "@/lib/nodeEndpoints";
 
 /**
  * Best-effort mirroring of a finalized exchange to the community node.
@@ -64,6 +69,16 @@ import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
 export interface SubmitConfig {
   url: string;
   enabled: boolean;
+  /**
+   * Accepted mirror URLs to try when the primary is unreachable
+   * (docs/community-resilience.md §B.2). Populated by
+   * `readSubmitConfig` from the member's consented mirror list; the
+   * outbox stays single-delivery per record — whichever node accepts
+   * it fans it out server-side via mirror replication. Optional so
+   * existing call sites and tests that build a bare `{url, enabled}`
+   * keep working unchanged.
+   */
+  fallbackUrls?: readonly string[];
 }
 
 export interface SubmitResult {
@@ -76,13 +91,15 @@ export interface SubmitResult {
 }
 
 export async function readSubmitConfig(): Promise<SubmitConfig> {
-  const [url, enabledRaw] = await Promise.all([
+  const [url, enabledRaw, mirrors] = await Promise.all([
     getSetting(SETTING_KEYS.communityNodeUrl),
     getSetting(SETTING_KEYS.communityNodeEnabled),
+    readAcceptedMirrors(),
   ]);
   return {
     url: url ?? "",
     enabled: enabledRaw === "1",
+    fallbackUrls: mirrors,
   };
 }
 
@@ -343,39 +360,63 @@ async function postSignedRecord(
     return { ok: false, error: "fetch_not_available" };
   }
 
-  const endpoint = joinUrl(config.url.trim(), path);
-  let res: Response;
-  try {
-    res = await fetchImpl(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(record),
-      // Browsers default credentials to "same-origin" — we want explicit
-      // omit since the node is cross-origin and signatures are the
-      // authentication.
-      credentials: "omit",
-      mode: "cors",
-    });
-  } catch (err) {
-    const error = (err as Error).message ?? "network_error";
-    await recordOutcome({ ok: false, error });
-    return { ok: false, error };
+  // Failover walk (docs/community-resilience.md §B.2): the member's
+  // primary first, then each accepted mirror. Only a NETWORK failure
+  // or a 5xx moves to the next node — a 4xx is the record being
+  // refused, and every mirror runs the identical validation, so a
+  // second opinion can't change the verdict (and the outbox's
+  // poison/retry semantics key off that first honest status). The
+  // record is delivered to at most ONE node; mirror replication fans
+  // it out server-side.
+  const bases: string[] = [];
+  for (const raw of [config.url, ...(config.fallbackUrls ?? [])]) {
+    const normalized = normalizeNodeUrl(raw);
+    if (normalized && !bases.includes(normalized)) bases.push(normalized);
   }
 
-  if (res.ok) {
-    await recordOutcome({ ok: true, status: res.status });
-    return { ok: true, status: res.status };
+  let last: SubmitResult = { ok: false, error: "disabled" };
+  for (const base of bases) {
+    const endpoint = joinUrl(base, path);
+    let res: Response;
+    try {
+      res = await fetchImpl(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record),
+        // Browsers default credentials to "same-origin" — we want explicit
+        // omit since the node is cross-origin and signatures are the
+        // authentication.
+        credentials: "omit",
+        mode: "cors",
+      });
+    } catch (err) {
+      last = { ok: false, error: (err as Error).message ?? "network_error" };
+      continue; // unreachable — try the next node
+    }
+
+    if (res.ok) {
+      await recordOutcome({ ok: true, status: res.status });
+      void recordNodeSuccess(base);
+      return { ok: true, status: res.status };
+    }
+    // 4xx/5xx — try to read the error body for diagnostics, fall back to status.
+    let body = "";
+    try {
+      body = (await res.text()).slice(0, 200);
+    } catch {
+      /* ignore */
+    }
+    const error = body || `http_${res.status}`;
+    const result: SubmitResult = { ok: false, status: res.status, error };
+    if (res.status < 500) {
+      await recordOutcome(result);
+      return result;
+    }
+    last = result; // server-side failure — try the next node
   }
-  // 4xx/5xx — try to read the error body for diagnostics, fall back to status.
-  let body = "";
-  try {
-    body = (await res.text()).slice(0, 200);
-  } catch {
-    /* ignore */
-  }
-  const error = body || `http_${res.status}`;
-  await recordOutcome({ ok: false, status: res.status, error });
-  return { ok: false, status: res.status, error };
+
+  await recordOutcome(last);
+  return last;
 }
 
 /**

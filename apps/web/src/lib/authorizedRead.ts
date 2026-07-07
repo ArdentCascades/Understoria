@@ -21,6 +21,7 @@
 import { getSetting, SETTING_KEYS } from "@/db/database";
 import { getSecretKey } from "@/db/secrets";
 import { canonicalReadAuthMessage, sign } from "@/lib/crypto";
+import { recordNodeSuccess } from "@/lib/nodeEndpoints";
 
 /**
  * Member-authenticated reads, client half
@@ -48,7 +49,13 @@ export async function authorizedFetch(
   baseUrl: string,
 ): Promise<Response> {
   const headers = await readAuthHeaders(url, baseUrl);
-  return headers ? fetch(url, { headers }) : fetch(url);
+  const res = headers ? await fetch(url, { headers }) : await fetch(url);
+  // Per-node reachability telemetry for failover + the resilience card
+  // ("reachable" = a successful read in the last 24h, community-
+  // resilience.md §B.2). Debounced and best-effort inside
+  // recordNodeSuccess; never blocks or fails the pull.
+  if (res.ok) void recordNodeSuccess(baseUrl);
+  return res;
 }
 
 async function readAuthHeaders(

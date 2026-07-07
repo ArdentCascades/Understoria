@@ -27,16 +27,19 @@ import {
   createEventCancellationStore,
   createEventStore,
   createExchangeStore,
+  createMirrorPullStore,
   createPeerPullStore,
   createPostStore,
   createTaskCommentStore,
   createVouchStore,
 } from "./db.js";
 import { startPeerPullWorker } from "./peerPull.js";
+import { startMirrorPullWorker } from "./mirrorPull.js";
+import { createSystemSignerFromSecret } from "./systemSigner.js";
 
 async function main(): Promise<void> {
   const config = readConfigFromEnv();
-  const { app, database } = await buildServer({ config });
+  const { app, database, internalBypassToken } = await buildServer({ config });
 
   // Start the federation pull worker after the server is built so it
   // shares the same database. Without configured peers this is a
@@ -88,10 +91,49 @@ async function main(): Promise<void> {
       ),
   });
 
+  // Mirror replication (docs/community-resilience.md §B.1): pull every
+  // durable kind from each same-community mirror and apply it through
+  // this node's own routes. Without configured mirrors this is a no-op.
+  // The own-key entry lets rows this node auto-confirmed itself verify
+  // when they come back around through a mirror.
+  const ownSigner = createSystemSignerFromSecret(config.systemSecretKey);
+  const mirrorWorker = startMirrorPullWorker({
+    app,
+    internalToken: internalBypassToken,
+    mirrorUrls: config.mirrorNodeUrls,
+    readTokens: config.mirrorReadTokens,
+    intervalMs: config.mirrorPullIntervalMs,
+    cursorStore: createMirrorPullStore(database),
+    exchangeStore: createExchangeStore(database),
+    ownSystemKey: ownSigner
+      ? {
+          nodeId: config.nodeId,
+          current: ownSigner.publicKey,
+          history: [...config.systemKeyHistory],
+        }
+      : null,
+    onResult: (result) => {
+      if (result.applied > 0 || result.refused > 0 || result.halted) {
+        app.log.info(
+          {
+            mirrorUrl: result.mirrorUrl,
+            kind: result.kind,
+            applied: result.applied,
+            refused: result.refused,
+            halted: result.halted,
+            haltReason: result.haltReason,
+          },
+          "mirror pull",
+        );
+      }
+    },
+  });
+
   const stop = async (signal: string) => {
     app.log.info(`received ${signal}, closing`);
     try {
       worker.stop();
+      mirrorWorker.stop();
       await app.close();
     } catch (err) {
       app.log.error({ err }, "error during close");

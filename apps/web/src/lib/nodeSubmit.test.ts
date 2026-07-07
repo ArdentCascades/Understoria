@@ -57,15 +57,18 @@ describe("readSubmitConfig / writeSubmitConfig", () => {
   it("round-trips url and enabled flag through settings", async () => {
     await writeSubmitConfig({ url: "https://node.example/api", enabled: true });
     const cfg = await readSubmitConfig();
+    // fallbackUrls is the Phase B mirror list — empty until the member
+    // accepts an announced mirror.
     expect(cfg).toEqual({
       url: "https://node.example/api",
       enabled: true,
+      fallbackUrls: [],
     });
   });
 
   it("returns empty / disabled defaults on a fresh node", async () => {
     const cfg = await readSubmitConfig();
-    expect(cfg).toEqual({ url: "", enabled: false });
+    expect(cfg).toEqual({ url: "", enabled: false, fallbackUrls: [] });
   });
 });
 
@@ -231,5 +234,75 @@ describe("submitExchangeToNode (network)", () => {
     const status = await readSubmitStatus();
     expect(status.lastSuccess).toBe("2026-01-01T00:00:00.000Z");
     expect(status.lastError).toContain("network gone");
+  });
+});
+
+describe("postSignedRecord failover walk (docs/community-resilience.md §B.2)", () => {
+  const PRIMARY = "https://primary.example/api";
+  const MIRROR = "https://mirror.example/api";
+  const CONFIG = { url: PRIMARY, enabled: true, fallbackUrls: [MIRROR] };
+
+  it("delivers to the mirror when the primary is unreachable — record lands on exactly one node", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).startsWith(PRIMARY)) throw new Error("connrefused");
+      return new Response('{"stored":true}', { status: 201 });
+    });
+    const r = await submitExchangeToNode(fakeExchange(), CONFIG, {
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(r).toEqual({ ok: true, status: 201 });
+    const urls = (fetchImpl.mock.calls as unknown as Array<[RequestInfo]>).map(
+      (c) => String(c[0]),
+    );
+    expect(urls).toEqual([
+      `${PRIMARY}/exchanges`,
+      `${MIRROR}/exchanges`,
+    ]);
+  });
+
+  it("walks past a 5xx but returns a 4xx immediately — every mirror runs the same validation, so a second opinion can't change a refusal (and outbox poison semantics need the honest status)", async () => {
+    const fiveHundredThenOk = vi.fn(async (input: RequestInfo | URL) =>
+      String(input).startsWith(PRIMARY)
+        ? new Response("boom", { status: 503 })
+        : new Response('{"stored":true}', { status: 201 }),
+    );
+    const walked = await submitExchangeToNode(fakeExchange(), CONFIG, {
+      fetchImpl: fiveHundredThenOk as unknown as typeof fetch,
+    });
+    expect(walked.ok).toBe(true);
+    expect(fiveHundredThenOk).toHaveBeenCalledTimes(2);
+
+    const fourTwoTwo = vi.fn(async () =>
+      new Response('{"error":"bad_signature"}', { status: 422 }),
+    );
+    const refused = await submitExchangeToNode(fakeExchange(), CONFIG, {
+      fetchImpl: fourTwoTwo as unknown as typeof fetch,
+    });
+    expect(refused.ok).toBe(false);
+    expect(refused.status).toBe(422);
+    expect(fourTwoTwo).toHaveBeenCalledOnce(); // never tried the mirror
+  });
+
+  it("reports the last failure when every node is down (outbox retries as before)", async () => {
+    const fetchImpl = vi.fn(async () => {
+      throw new Error("all_down");
+    });
+    const r = await submitExchangeToNode(fakeExchange(), CONFIG, {
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(r).toEqual({ ok: false, error: "all_down" });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("dedups a mirror that equals the primary (trailing-slash variant)", async () => {
+    const fetchImpl = vi.fn(async () => {
+      throw new Error("down");
+    });
+    await submitExchangeToNode(
+      fakeExchange(),
+      { url: PRIMARY, enabled: true, fallbackUrls: [`${PRIMARY}/`] },
+      { fetchImpl: fetchImpl as unknown as typeof fetch },
+    );
+    expect(fetchImpl).toHaveBeenCalledOnce();
   });
 });
