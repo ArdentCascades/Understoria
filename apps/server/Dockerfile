@@ -31,7 +31,12 @@ RUN npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
 # Copy the server source and build it. Server's tsc resolves
 # @understoria/shared types from the dist produced above.
+# NODE_OPTIONS: same reasoning as apps/web/Dockerfile — on a 1 GB
+# host V8 caps its own heap near ~512 MB and aborts rather than use
+# swap; raise the ceiling for the compile. Build-stage only (the
+# runtime stage is a fresh FROM and never sees this env).
 COPY apps/server apps/server
+ENV NODE_OPTIONS=--max-old-space-size=1536
 RUN npm --workspace @understoria/server run build
 
 # Drop dev dependencies so the runtime stage doesn't carry vitest,

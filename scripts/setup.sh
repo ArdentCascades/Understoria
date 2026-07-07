@@ -143,6 +143,26 @@ else
   info "timedatectl not present — can't verify clock sync. Make sure NTP is configured."
 fi
 
+# ─── Memory / swap check ─────────────────────────────────────────────
+#
+# Building the web image (tsc + vite) needs more memory than a 1 GB
+# VPS has. Without swap the build aborts with exit code 134 partway
+# through `docker compose build` — a confusing place to discover a
+# provisioning gap. Warn up front instead (deploy-linode.md §1 has
+# the swapfile recipe).
+mem_kb=$(awk '/^MemTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
+swap_kb=$(awk '/^SwapTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
+if [ "$mem_kb" -gt 0 ] && [ "$mem_kb" -lt 1572864 ] && [ "$swap_kb" -lt 1048576 ]; then
+  warn "This host has less than 1.5 GB RAM and little or no swap."
+  warn "The web image build will likely die with exit code 134 (out of memory)."
+  warn "Fix (once): add a 2 GB swapfile — see docs/deploy-linode.md §1:"
+  warn "  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
+  warn "  echo '/swapfile none swap sw 0 0' >> /etc/fstab"
+  confirm "Continue without swap anyway?" || exit 1
+else
+  ok "Memory + swap look sufficient for the image builds."
+fi
+
 # ─── .env handling ───────────────────────────────────────────────────
 
 if [ -f .env ]; then
