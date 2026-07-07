@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Seed vaults: volunteer devices that promise to keep everything**
+  (`docs/storage-budget.md` Phase 2 — the visible counterpart to
+  freeing up space). Settings → Data gains "Keep the complete archive
+  on this device": a member with room to spare (an old laptop, a
+  tablet in a drawer) publicly pledges the full community archive —
+  the zero-ops version of running a server, with no ports, no TLS,
+  and no operator powers. The pledge is a signed record only its own
+  member can make, revocable any time, and deliberately names a
+  person, never hardware — the community learns how many complete
+  copies exist, not what anyone owns. The resilience card counts
+  active vaults beside the servers, the operator runbook says to
+  restore from vaults first after total node loss, and pledging on a
+  device that had freed up space automatically re-downloads the full
+  history first (a vault that windows would be lying).
 - **A phone that can't hold the whole community can now keep just
   what matters** (`docs/storage-budget.md` Phase 1). Settings → Data
   gains "Free up space on this device": pick how much history to

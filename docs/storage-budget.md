@@ -1,9 +1,9 @@
 # Storage budget — when a phone can't hold the whole community
 
-Status: **Phases 0–1 shipped** (persistent-storage protection + the
-storage meter; local windowing with a pinned working set — Settings →
-Data → "Free up space on this device"). **Phase 2 planned below, not
-built. Phase 3 named and deferred.** Last reconciled against the
+Status: **Phases 0–2 shipped** (persistent-storage protection + the
+storage meter; local windowing with a pinned working set; the
+seed-vault role — both under Settings → Data). **Phase 3 named and
+deferred.** Last reconciled against the
 codebase 2026-07 (post mirror-failover, re-seed R1, recovery kit K1,
 guardian shards K2). Companion docs: `docs/community-reseed.md`
 (whose collective-restore property is what makes partial copies
@@ -228,12 +228,17 @@ settled-old on a ZERO cursor (the mirror-switch resurrection
 scenario, explicitly); undo resets cursors; preview counts match
 apply deletes.
 
-## Phase 2 — the seed-vault role (distribution by consent)
+## Phase 2 — the seed-vault role (distribution by consent) — SHIPPED
 
 Instead of secretly sharding across everyone, let members opt in to
-being archives. **Build order note: land this in the same release
-train as Phase 1** — windowing without visible vault coverage
-degrades the community's collective re-seed guarantee silently.
+being archives. Landed immediately after Phase 1, as planned —
+windowing without visible vault coverage would degrade the
+community's collective re-seed guarantee silently. As built:
+`SeedVaultPledge` in `packages/shared`, server store/route/migration
+(schema v21) + mirror-pull + insert caps, client
+`lib/seedVault.ts` + pull + outbox kind + re-seed kind + snapshot
+table, the toggle in Settings → Data, and the count on the
+resilience card.
 
 - **The role**: Settings → Data, "Keep the complete archive on this
   device." A seed-vault device never windows (the two settings are

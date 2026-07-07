@@ -1787,6 +1787,34 @@ We are not trying to protect against:
   project links) window with their parents and cannot be re-fetched
   by the undo path; the undo copy says so.
 
+- **Seed-vault pledges (a new public role claim).**
+  *Shipped — `docs/storage-budget.md` Phase 2.* `SeedVaultPledge` is
+  a signed, single-owner LWW record announcing that a MEMBER keeps
+  the complete community archive on a device of theirs. What §7 owes
+  is scrutiny of the new public surface: the pledge is deliberately
+  **member-granular, never device-granular** — it names a person
+  holding a role and says nothing about hardware, addresses, or how
+  many devices they own (no device census exists and none should).
+  It is public by design (the community must be able to COUNT its
+  full copies for the resilience card and know whom to restore from
+  after total node loss), revocable at any time (retraction is
+  `active:false` and must keep winning LWW — a stale active copy
+  cannot resurrect the role), and forgery-proof in the usual way
+  (the only legitimate signer is the member the pledge names;
+  server, mirror pull, and client pull all enforce it). Social
+  consideration, named: the resilience card nudges the COMMUNITY
+  when coverage is thin — it never names a member who "should"
+  pledge, and declining to pledge while quietly keeping everything
+  is always fine (the pledge is for visibility, not surveillance).
+  Adversary who pledges falsely (claims the archive, holds
+  nothing): they gain nothing — the pledge grants no authority, no
+  read power, no operator role; the harm is an overstated coverage
+  count, the same lie a node operator could already tell, and
+  re-seed unions many devices so one hollow vault degrades nothing
+  that another copy covers. Storage posture matches vouches (public
+  signed claims): exported, snapshot-carried, never windowed,
+  untouched by soft purge.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

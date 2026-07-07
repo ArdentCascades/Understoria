@@ -183,6 +183,13 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     conflict409: "halt",
   },
   {
+    path: "/seed-vault-pledges",
+    bodyKey: "seedVaultPledges",
+    ts: (r) => num(r.updatedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
+  {
     path: "/shift-signups",
     bodyKey: "shiftSignups",
     ts: (r) => num(r.updatedAt),

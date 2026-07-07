@@ -117,6 +117,8 @@ export const RESEED_KINDS: readonly ReseedKindSpec[] = [
   { path: "/task-states", table: "projectTasks", toWire: signedOrNull },
   { path: "/event-shifts", table: "eventShifts", toWire: signedOrNull },
   { path: "/event-rsvps", table: "eventRsvps", toWire: signedOrNull },
+  // docs/storage-budget.md Phase 2: archive-role pledges (no parent).
+  { path: "/seed-vault-pledges", table: "seedVaultPledges", toWire: signedOrNull },
   { path: "/shift-signups", table: "shiftSignups", toWire: signedOrNull },
   { path: "/posts", table: "posts", toWire: postToWire },
   { path: "/exchanges", table: "exchanges" },

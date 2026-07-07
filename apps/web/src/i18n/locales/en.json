@@ -1826,6 +1826,8 @@
       "bodyMultiOther": "{{nodes}} servers carry this community — and every one of its {{count}} members carries it on their own device too. Nothing here can be taken away by taking a machine.",
       "bodyFailover": "If one server disappears, your apps switch to the others on their own. Nothing is lost.",
       "windowedNote": "This device keeps the last {{years}} year(s) plus everything active and yours — the servers keep the full history.",
+      "seedVaultsOne": "{{count}} member keeps the complete archive on a device of their own — a seed vault.",
+      "seedVaultsOther": "{{count}} members keep the complete archive on devices of their own — seed vaults.",
       "nodeQuiet": "No server has answered lately — your copy is safe, and syncing resumes when one is back.",
       "leaf": {
         "fresh": "synced today",
@@ -1998,6 +2000,18 @@
         "done": "Done — {{total}} records removed from this device.",
         "undo": "Carry the full history again",
         "undoDone": "This device will re-download the full history in the background. Activity logs of long-closed projects don't come back — they only ever lived on devices."
+      },
+      "vault": {
+        "body": "Got room to spare — an old laptop, a tablet in a drawer? Pledge to keep the complete archive on this device. It's the zero-ops way to make the community harder to erase: no server, no port forwarding, just storage and solidarity. Your pledge is public so the community can see how many full copies exist; you can stop any time.",
+        "enable": "Keep the complete archive on this device",
+        "disable": "Stop pledging the archive",
+        "active": "This device is a seed vault — it keeps the community's complete archive.",
+        "enabled": "Pledged. This device now keeps everything (any freed-up space is being re-downloaded).",
+        "disabled": "Pledge withdrawn. Nothing was deleted — this device just no longer promises to keep everything.",
+        "error": {
+          "no_identity": "No identity on this device.",
+          "locked": "This device is locked — unlock it first."
+        }
       }
     },
     "communityAccount": {

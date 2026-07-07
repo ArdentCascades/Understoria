@@ -79,6 +79,9 @@ export const WINDOW_PINNED_TABLES = [
   "inviteRevocationRecords",
   "exchanges",
   "vouches",
+  // The archive-role claims themselves (docs/storage-budget.md Phase
+  // 2) — tiny, and the coverage signal windowing is honest about.
+  "seedVaultPledges",
   "proposals",
   "votes",
   "coorgInvitationRevocations",
