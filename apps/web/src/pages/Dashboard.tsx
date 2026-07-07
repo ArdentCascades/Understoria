@@ -47,6 +47,7 @@ export default function DashboardPage() {
     nodeConfig,
     nodeId,
     proposals,
+    selfRemoved,
   } = useApp();
   const { t } = useTranslation();
   // Split BEFORE feeding the stats helpers so the headline + flow
@@ -114,6 +115,18 @@ export default function DashboardPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
+      {/* docs/member-removal.md M2: if THIS member stands removed,
+          say it plainly — their data is theirs and keeps working
+          locally; syncing will fail until reinstatement. Never an
+          eternal unexplained spinner. */}
+      {selfRemoved && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+        >
+          {t("removals.selfBanner")}
+        </div>
+      )}
       <header className="mb-4">
         <div className="flex items-center gap-2 text-canopy-700 dark:text-canopy-300">
           <Sprig size={20} />

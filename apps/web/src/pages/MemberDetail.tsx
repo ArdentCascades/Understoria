@@ -47,6 +47,7 @@ import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { isBlocked } from "@/db/blocks";
+import { RemovalCeremony } from "@/components/RemovalCeremony";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
 import { humanizeError } from "@/lib/humanizeError";
@@ -65,6 +66,7 @@ export default function MemberDetailPage() {
   const [vouchedJustNow, setVouchedJustNow] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
   const [unblockOpen, setUnblockOpen] = useState(false);
+  const [removalOpen, setRemovalOpen] = useState(false);
 
   // Reactive blocked-state lookup. Re-runs when either side's
   // pubkey changes OR when the underlying `blocks` table mutates
@@ -321,6 +323,31 @@ export default function MemberDetailPage() {
               ? t("block.action.unblockButton")
               : t("block.action.button")}
           </button>
+        </section>
+      )}
+
+      {/* Member removal (docs/member-removal.md §4): the heaviest
+          tool sits BENEATH the block action — graduated-tools
+          ordering — and opens with an interstitial naming the
+          lighter tools before anything can be signed. */}
+      {!isSelf && currentMember && publicKey && (
+        <section className="card mb-4">
+          {!removalOpen ? (
+            <button
+              type="button"
+              className="btn-ghost text-xs text-moss-600 dark:text-moss-300"
+              onClick={() => setRemovalOpen(true)}
+            >
+              {t("removals.proposeButton")}
+            </button>
+          ) : (
+            <RemovalCeremony
+              recordKind="removal"
+              subjectKey={publicKey}
+              subjectName={member.displayName}
+              onCancel={() => setRemovalOpen(false)}
+            />
+          )}
         </section>
       )}
 

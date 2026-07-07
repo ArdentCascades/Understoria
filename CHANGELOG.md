@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The removal ceremony, in the app** (`docs/member-removal.md`
+  Phases M2+M3, completing M1's record and gates). Proposing a
+  removal starts on the member's profile — beneath the block action,
+  behind an interstitial that names the lighter tools first (a
+  personal block, a dispute, a conversation) — and produces a draft
+  the proposer shows to each agreeing member in person; every
+  co-signer's device shows exactly who and why before signing, and
+  answers with a code the proposer captures. Nothing exists until
+  enough have signed — stopping midway means nothing happened. The
+  Decisions page gains "Co-sign a removal or reinstatement" and, on
+  every currently-removed member's record, "Start a reinstatement"
+  with the same ceremony. A removed member's own device now says
+  what happened in plain words — their data is still theirs and
+  keeps working locally; syncing resumes on reinstatement — instead
+  of failing silently. All hand-offs are device-to-device (QR or
+  paste); the server sees nothing until the finished record is
+  submitted, and it remains the authority that accepts or refuses
+  it.
 - **Member removal — the one thing membership couldn't do**
   (`docs/member-removal.md` Phase M1). Communities can now remove a
   member, and it works the way the values doc demands: no single

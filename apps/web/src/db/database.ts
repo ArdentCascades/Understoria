@@ -149,7 +149,11 @@ export interface OutboxRow {
     | "shift_signup"
     // Seed-vault pledge (docs/storage-budget.md Phase 2): a member's
     // public archive-role claim, single-owner LWW like an RSVP.
-    | "seed_vault_pledge";
+    | "seed_vault_pledge"
+    // Assembled quorum governance records (docs/member-removal.md
+    // M2) — queued by the proposer's device after the ceremony.
+    | "member_removal"
+    | "member_reinstatement";
   // Intentionally NOT a member of this union: "block". BlockRow and
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never

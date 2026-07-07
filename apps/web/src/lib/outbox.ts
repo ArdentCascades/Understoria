@@ -32,6 +32,8 @@ import {
   submitEventToNode,
   submitExchangeToNode,
   submitSeedVaultPledgeToNode,
+  submitMemberRemovalToNode,
+  submitMemberReinstatementToNode,
   submitShiftSignupToNode,
   submitAwaitingTransitionToNode,
   submitInviteRevocationToNode,
@@ -56,6 +58,8 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  MemberRemoval,
+  MemberReinstatement,
   SeedVaultPledge,
   ShiftSignupState,
   TaskState,
@@ -265,6 +269,18 @@ export async function enqueueEventRsvpOutbox(
     `rsvp_${record.eventId}_${record.memberKey}`,
     record,
   );
+}
+
+export async function enqueueMemberRemovalOutbox(
+  record: MemberRemoval,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("member_removal", record.id, record);
+}
+
+export async function enqueueMemberReinstatementOutbox(
+  record: MemberReinstatement,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("member_reinstatement", record.id, record);
 }
 
 export async function enqueueSeedVaultPledgeOutbox(
@@ -633,6 +649,18 @@ export async function flushOutboxOnce(
         cfg,
         { fetchImpl: options.fetchImpl },
       );
+    } else if (row.kind === "member_removal") {
+      result = await submitMemberRemovalToNode(
+        payload as unknown as MemberRemoval,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "member_reinstatement") {
+      result = await submitMemberReinstatementToNode(
+        payload as unknown as MemberReinstatement,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else if (row.kind === "event_shift") {
       result = await submitEventShiftToNode(
         payload as unknown as EventShiftState,
@@ -674,6 +702,10 @@ export async function flushOutboxOnce(
       "event_rsvp",
       "event_shift",
       "shift_signup",
+      // 409 quorum_not_met: the node hasn't seen a signer's receipt
+      // yet — retryable by design (docs/member-removal.md M1).
+      "member_removal",
+      "member_reinstatement",
     ]);
     const poison =
       isPoisonResult(result) &&

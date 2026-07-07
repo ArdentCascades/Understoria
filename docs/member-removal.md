@@ -7,12 +7,27 @@ subtraction with the non-retroactive chain rule, `REMOVAL_QUORUM`
 env + `/config.removalQuorum`, the `author_removed` write gate, the
 last-founder guard; client pull/derived standing/central content
 hiding/Decisions display; snapshot + re-seed + windowing postures).
-**M2 (the co-signing ceremony UI) and M3 (reinstatement UI) not
-built** — records can be assembled and submitted by any tool that
-can sign, and reinstatement is fully honored end-to-end; what's
-missing is the in-app flow. One as-built note: standing is DERIVED
-from the record tables everywhere (server resolver and client), not
-stamped onto member rows — one rule, no state to drift. This
+**M2 and M3 shipped** (the in-app ceremony: "Propose removal" on
+the member's profile beneath the block action, opening with the
+graduated-tools interstitial; co-signing from the Decisions page;
+"Start a reinstatement" on any currently-removed entry; the
+removed member's own device shows a plain-words banner naming the
+reinstatement path instead of an eternal failing sync). As-built
+deltas from §4: signature fragments travel DEVICE-TO-DEVICE
+(QR / paste — the proposer shows the draft, each co-signer's
+device answers with a fragment, the proposer assembles at quorum),
+the same delivery posture guardian shards established, because
+direct messages have no transport in this codebase; and v1 keeps
+`proposalId: null` — deliberation stays where the community talks,
+and the proposal-category integration waits for proposals to
+federate. The assembled record is deliberately NOT written locally
+on submit: the node's closure check is the authority
+(last_founder / quorum_not_met can still refuse), and the record
+flows back through the normal pull once accepted — one source of
+truth, nothing optimistic to roll back. Other as-built note:
+standing is DERIVED from the record tables everywhere (server
+resolver and client), not stamped onto member rows — one rule, no
+state to drift. This
 document was the implementation plan for the residual named in
 `docs/threat-model.md` §7: *"membership is append-only… not
 revocable"* — that residual is now closed.

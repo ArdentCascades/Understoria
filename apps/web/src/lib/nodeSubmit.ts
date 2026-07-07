@@ -36,6 +36,8 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  MemberRemoval,
+  MemberReinstatement,
   SeedVaultPledge,
   ShiftSignupState,
   TaskState,
@@ -338,6 +340,25 @@ export async function submitSeedVaultPledgeToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/seed-vault-pledges", record, config, deps);
+}
+
+/** Member removal / reinstatement (docs/member-removal.md M2): the
+ *  assembled quorum record. 409 quorum_not_met is the retryable
+ *  case the outbox flush special-cases. */
+export async function submitMemberRemovalToNode(
+  record: MemberRemoval,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/member-removals", record, config, deps);
+}
+
+export async function submitMemberReinstatementToNode(
+  record: MemberReinstatement,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/member-reinstatements", record, config, deps);
 }
 
 export async function submitEventShiftToNode(
