@@ -20,7 +20,9 @@
  */
 import { db } from "./database";
 import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
-import { buildDisputeProposal } from "./proposals";
+import { buildDisputeProposal,
+  signProposalIfUnsigned,
+} from "./proposals";
 import { diffAchievements } from "@/lib/achievements";
 import { computeZoneReachForHelper } from "@/lib/flow";
 import { getNodeConfig } from "./nodeConfig";
@@ -638,6 +640,17 @@ export async function disputeExchange(
         }),
       );
     }
+    return updated;
+  }).then(async (updated) => {
+    // Phase G2 (docs/proposal-federation.md): sign the dispute
+    // proposal post-commit so it federates — signing can't run
+    // inside the transaction above (secretKeys/outbox are out of
+    // scope). Soft no-op when this device can't sign.
+    const proposal = await db.proposals
+      .where("disputePostId")
+      .equals(updated.id)
+      .first();
+    if (proposal) await signProposalIfUnsigned(proposal.id);
     return updated;
   });
 }

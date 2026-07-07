@@ -15,7 +15,8 @@ import {
   canonicalProposalPayload,
   sign,
 } from "@understoria/shared/crypto";
-import type { ProposalClosure } from "@understoria/shared/types";
+import type { NodeConfig, ProposalClosure } from "@understoria/shared/types";
+import { putNodeConfig } from "./nodeConfig";
 import { getSecretKey } from "@/db/secrets";
 import {
   enqueueProposalOutbox,
@@ -33,6 +34,7 @@ import type {
   ReversibilityTier,
   TaskComment,
 } from "@/types";
+import Dexie from "dexie";
 import { db, getSetting, SETTING_KEYS } from "./database";
 
 // Agent 13 task 1 — Proposals MVP. CRUD helpers + status queries.
@@ -336,6 +338,12 @@ export async function closeProposal(
   reason: string,
 ): Promise<Proposal> {
   const closed = await closeProposalLocally(proposalId, outcome, reason);
+  // Phase G2: config convergence — the closing device applies the
+  // passed payload immediately; every other device applies it when
+  // the closure record arrives (applyClosureEffects via the pull).
+  if (closed.category === "config_change" && outcome === "passed") {
+    await applyClosureEffects(closed, outcome).catch(() => {});
+  }
   // Proposal federation G1: the terminal state federates as a signed
   // FIRST-WRITER-WINS closure record (docs/proposal-federation.md
   // §2). Soft-degrade when this device can't sign — the local close
@@ -428,24 +436,99 @@ async function closeProposalLocally(
     //     credit principle), so a post that had already COMPLETED stays
     //     completed (the dispute record is the accountability signal);
     //     a pre-completion post is cancelled so credit never flows.
-    if (proposal.kind === "dispute" && proposal.disputePostId) {
-      const post = await db.posts.get(proposal.disputePostId);
-      if (post && post.status === "disputed") {
-        const prior = post.preDisputeStatus ?? "claimed";
-        const nextStatus =
-          outcome === "passed"
-            ? prior === "completed"
-              ? "completed"
-              : "cancelled"
-            : prior;
-        await db.posts.put({
-          ...post,
-          status: nextStatus,
-          preDisputeStatus: null,
-        });
-      }
-    }
+    await applyDisputeOutcome(proposal, outcome);
 
     return updated;
   });
+}
+
+/**
+ * Post-commit signer for proposals minted INSIDE another write
+ * transaction (dispute + comment-dispute rows — `getSecretKey` and
+ * the outbox are out of those transactions' scope, the K2 lesson).
+ * No-op unless this device holds the proposer's key and the row is
+ * still unsigned; Phase G2 of docs/proposal-federation.md.
+ */
+export async function signProposalIfUnsigned(proposalId: string): Promise<void> {
+  if (Dexie.currentTransaction) return;
+  try {
+    const row = await db.proposals.get(proposalId);
+    if (!row || row.signature) return;
+    const me = await getSetting(SETTING_KEYS.currentMember);
+    if (!me || row.proposerKey !== me) return;
+    const secret = await getSecretKey(me);
+    const signerKey = me;
+    const signature = sign(canonicalProposalPayload(row), secret);
+    await db.transaction("rw", [db.proposals, db.outbox, db.settings], async () => {
+      const fresh = await db.proposals.get(proposalId);
+      if (!fresh || fresh.signature) return;
+      const signed = { ...fresh, signerKey, signature };
+      await db.proposals.put(signed);
+      await enqueueProposalOutbox(signed);
+    });
+    void flushOutboxNow().catch(() => {});
+  } catch {
+    /* locked device / missing key — the row stays local-only */
+  }
+}
+
+/** The dispute half of a closure's effects — idempotent: a post no
+ *  longer in "disputed" is left alone, so the closing device and
+ *  every pulling device converge through this one path. */
+async function applyDisputeOutcome(
+  proposal: Proposal,
+  outcome: "passed" | "rejected" | "withdrawn",
+): Promise<void> {
+  if (proposal.kind !== "dispute" || !proposal.disputePostId) return;
+  const post = await db.posts.get(proposal.disputePostId);
+  if (!post || post.status !== "disputed") return;
+  const prior = post.preDisputeStatus ?? "claimed";
+  const nextStatus =
+    outcome === "passed"
+      ? prior === "completed"
+        ? "completed"
+        : "cancelled"
+      : prior;
+  await db.posts.put({
+    ...post,
+    status: nextStatus,
+    preDisputeStatus: null,
+  });
+}
+
+/**
+ * Apply a proposal closure's EFFECTS on this device — Phase G2 of
+ * docs/proposal-federation.md §5, called by the closure pull after
+ * the lifecycle stamp (and equivalent to what the closing device ran
+ * locally). Idempotent by construction:
+ *
+ *  - dispute outcomes restore/settle the flagged post only while it
+ *    is still "disputed";
+ *  - a passed `config_change` applies its full-NodeConfig payload
+ *    through `putNodeConfig` (validation included — the caller this
+ *    function's doc comment always promised). This is the first
+ *    mechanism by which a community's knobs actually CONVERGE:
+ *    closure order is total (first-writer-wins per proposal), so
+ *    every device lands on the same config.
+ *  - `project_adoption` needs NO pull-side effect: the organizer
+ *    handoff federates as ProjectState LWW records from the
+ *    executing device; re-running it here would race that authority
+ *    transfer.
+ *
+ * Failures degrade softly (an invalid config payload is skipped —
+ * the closure still stands as a record; the community can re-propose).
+ */
+export async function applyClosureEffects(
+  proposal: Proposal,
+  outcome: "passed" | "rejected" | "withdrawn",
+): Promise<void> {
+  await applyDisputeOutcome(proposal, outcome);
+  if (proposal.category === "config_change" && outcome === "passed") {
+    try {
+      const parsed = JSON.parse(proposal.payload) as NodeConfig;
+      await putNodeConfig(proposal.nodeId, parsed);
+    } catch {
+      /* invalid or legacy payload — the record stands, the knobs don't move */
+    }
+  }
 }

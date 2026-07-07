@@ -257,6 +257,14 @@ export default function ProposalsPage() {
               votes: decisionVotesByProposal.get(p.id) ?? [],
               config: nodeConfig,
             });
+            // Phase G2 (docs/proposal-federation.md §2): a closure
+            // that slipped past a node whose vote set lacked a block
+            // displays as CONTESTED here — computed on the merged,
+            // unfiltered set, never the viewer's slice.
+            const contested =
+              p.status === "passed" &&
+              tallyVotes(decisionVotesByProposal.get(p.id) ?? []).blocks
+                .length > 0;
             return (
               <li key={p.id}>
                 <ProposalCard
@@ -268,6 +276,7 @@ export default function ProposalsPage() {
                   nodeId={nodeId}
                   nameByKey={nameByKey}
                   eligibility={eligibility}
+                  contested={contested}
                 />
               </li>
             );
@@ -389,6 +398,7 @@ function ProposalCard({
   nodeId,
   nameByKey,
   eligibility,
+  contested,
 }: {
   proposal: Proposal;
   proposerName: string | null;
@@ -397,6 +407,7 @@ function ProposalCard({
   currentMemberKey: string | null;
   nodeId: string;
   nameByKey: Map<string, string>;
+  contested: boolean;
   eligibility: AutoCloseEligibility;
 }) {
   const { t } = useTranslation();
@@ -498,6 +509,11 @@ function ProposalCard({
       {!proposal.signature && (
         <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
           {t("proposals.localOnly")}
+        </p>
+      )}
+      {contested && (
+        <p className="mb-1 rounded-lg border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          {t("proposals.contested")}
         </p>
       )}
       <h2 className="text-lg font-semibold leading-snug">{proposal.title}</h2>

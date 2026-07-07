@@ -26,7 +26,10 @@ import {
   enqueueTaskCommentOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
-import { ensureCommentDisputeProposal } from "./proposals";
+import {
+  ensureCommentDisputeProposal,
+  signProposalIfUnsigned,
+} from "./proposals";
 import type { Proposal, TaskComment } from "@/types";
 
 export const MAX_COMMENT_LENGTH = 2000;
@@ -209,10 +212,14 @@ export async function flagTaskComment(
   if (comment.authorKey === flaggerKey) {
     throw new Error("You can't flag your own comment.");
   }
-  return ensureCommentDisputeProposal({
+  const proposal = await ensureCommentDisputeProposal({
     comment,
     flaggerKey,
     reason: reason.trim() || null,
     nodeId,
   });
+  // Phase G2: sign post-commit so the dispute federates (soft no-op
+  // when this device can't sign).
+  await signProposalIfUnsigned(proposal.id);
+  return proposal;
 }

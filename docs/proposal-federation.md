@@ -1,19 +1,29 @@
 # Proposal federation — making the Decisions page tell one truth
 
-Status: **G1 SHIPPED** (the three record kinds end-to-end: signed
-proposals/votes/closures, server tables + member-gated routes +
-mirror + re-seed kinds, client signing at the mutators + pulls +
-derived lifecycle + the local-only note on legacy rows). **G2 —
-convergent effects — not built.** As-built deltas from §2/§6: the
+Status: **G1 + G2 SHIPPED.** G1: the three record kinds end-to-end
+(signed proposals/votes/closures, server tables + member-gated
+routes + mirror + re-seed kinds, client signing at the mutators +
+pulls + derived lifecycle + the local-only note on legacy rows).
+G2: convergent effects — `applyClosureEffects` runs the SAME
+idempotent path on the closing device and every pulling device
+(dispute post-status restoration guarded on `status === "disputed"`;
+passed `config_change` closures apply their payload via
+`putNodeConfig`, soft-degrading on invalid JSON so a bad record
+stands without moving knobs); dispute and comment-dispute proposal
+creation now signs via `signProposalIfUnsigned` (post-commit, after
+the dispute transaction — never inside it — and only the proposer's
+own unsigned rows, so legacy rows stay local); a passed closure
+whose merged vote set shows standing blocks renders a **contested**
+banner on the Decisions page. As-built deltas from §2/§5/§6: the
 server-side eligibility guard enforces the PARAMETER-FREE half only
-(no standing blocks; min-affirms and the deliberation window are
-config-dependent and live client-side, where an ineligible closure
-renders as contested — G2 wires that display); dispute and comment-
-dispute proposal CREATION does not sign yet (those rows are built
-inside the dispute transactions; they join the wire in G2), so
-today's federated proposals are the ProposalNew path. Votes arriving
-after a closure are stored (timestamps order them); the closure math
-counts what it sees at close time. This was the plan for the last
+(no standing blocks at POST; min-affirms and the deliberation window
+are config-dependent and live client-side, where the contested
+display names disagreement rather than suppressing the record);
+`project_adoption` closures deliberately have NO pull-side effect —
+the signed ProjectState LWW record already federates the organizer
+handoff, and re-running `executeAdoptionProposal` on pull would race
+it. Votes arriving after a closure are stored (timestamps order
+them); the closure math counts what it sees at close time. This was the plan for the last
 structural gap the governance work left open: proposals and votes
 were per-device local, so the Decisions surface could show a
 different reality on every member's phone. Named as the standing dependency in
@@ -144,23 +154,31 @@ displays as contested rather than silently honored.
   computing over the UNFILTERED (now community-wide) vote set —
   which finally makes §11.10 mean what it says.
 
-## 5. Phase G2 — convergent effects
+## 5. Phase G2 — convergent effects (shipped)
 
-- **Config convergence:** a valid passed `config_change` closure
-  applies its payload to the local `nodeConfig` on EVERY device via
-  the pull path — the first mechanism by which a community's knobs
-  actually converge. (The payload remains a full NodeConfig
-  snapshot; conflicting concurrent proposals resolve by
-  closure-order, which is total.)
-- **Adoption across devices:** `project_adoption` closures
-  materialize the organizer handoff everywhere (the ProjectState
-  LWW records already federate the authority list; the closure is
-  what triggers the local `executeAdoptionProposal` effects). The
-  stale "projects never federate" comment on the payload type gets
-  corrected — it predates project federation Phase 1.
-- **Removal linkage:** the removal ceremony's `proposalId` starts
-  carrying real ids once deliberation is shared (M2's named
-  dependency resolves).
+- **Config convergence (shipped):** a valid passed `config_change`
+  closure applies its payload to the local `nodeConfig` on EVERY
+  device via the pull path — the first mechanism by which a
+  community's knobs actually converge. (The payload remains a full
+  NodeConfig snapshot; conflicting concurrent proposals resolve by
+  closure-order, which is total. Invalid payloads soft-degrade: the
+  closure record stands, the knobs don't move.)
+- **Adoption across devices (shipped as a non-effect, by design):**
+  the ProjectState LWW records already federate the organizer
+  handoff, so `project_adoption` closures carry the DECISION but
+  trigger no pull-side `executeAdoptionProposal` — re-running it on
+  pulling devices would race the authoritative state record. The
+  stale "projects never federate" comment on the payload type is
+  corrected — it predated project federation Phase 1.
+- **Dispute deliberation joins the wire (shipped):** dispute and
+  comment-dispute proposals sign post-commit via
+  `signProposalIfUnsigned` (outside the dispute transaction, only
+  the proposer's own unsigned rows), and pulled closures restore
+  the disputed post's status through the same idempotent path the
+  closing device runs.
+- **Removal linkage (open):** the removal ceremony's `proposalId`
+  starts carrying real ids once its UI grows a proposal picker —
+  the data dependency (shared deliberation) is now resolved.
 
 ## 6. Abuse analysis
 

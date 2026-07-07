@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Community decisions now take effect everywhere** (`docs/
+  proposal-federation.md` G2, completing the plan). When a
+  config-change proposal passes, its settings apply on every
+  member's device as the closure syncs in — not just the device
+  that clicked close; communities converge their knobs by record,
+  not rumor. Dispute outcomes restore the disputed exchange's
+  status the same way, through one idempotent path shared by the
+  closing device and every pulling device. Disputes themselves now
+  join the shared record: flagging an exchange or a comment signs
+  the resulting proposal so the whole community can deliberate it
+  (older unsigned rows stay on their device, unchanged). And when a
+  passed decision's community-wide ballot shows standing blocks the
+  closer couldn't see, the Decisions page names it — a visible
+  "contested" banner instead of silent acceptance.
+
 - **The Decisions page now tells one truth** (`docs/
   proposal-federation.md` G1). Proposals, votes, and closures are
   signed records that sync between every member's device — until
@@ -43,7 +58,7 @@ include breaking changes.
   but their caster, and a passed config change only updates the
   device that clicked). Names the open-ballot values decision,
   preserves the blocking invariants, and phases the work (G1
-  records, G2 convergent effects). G1 shipped above; G2 pending.
+  records, G2 convergent effects). Both phases shipped above.
 - **The removal ceremony, in the app** (`docs/member-removal.md`
   Phases M2+M3, completing M1's record and gates). Proposing a
   removal starts on the member's profile — beneath the block action,
