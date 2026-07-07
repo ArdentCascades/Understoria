@@ -252,6 +252,37 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
     title: "Comunidad e invitaciones",
     entries: [
       {
+        id: "add-a-node",
+        question:
+          "¿Qué protege a esta comunidad si alguien se lleva nuestro servidor?",
+        answer: [
+          "Dos cosas, y son el corazón de por qué Understoria está " +
+            "construida de otra manera que los servicios corporativos. " +
+            "Primero: el dispositivo de cada integrante ya guarda una " +
+            "copia completa y firmada de la comunidad — el tablón, el " +
+            "registro, los proyectos, todo. Confiscar el servidor no " +
+            "se lleva nada que no esté ya en los teléfonos de todo el " +
+            "mundo, y un servidor nuevo se puede rellenar desde esas " +
+            "copias.",
+          "Segundo: el servidor no tiene que ser una sola máquina, ni " +
+            "la máquina de una sola persona. Cualquier integrante " +
+            "puede correr un nodo comunitario — un portátil viejo en " +
+            "un armario es de verdad suficiente. Cada nodo adicional " +
+            "significa que no existe una sola persona a la que un " +
+            "grupo antisindical o contrario a la ayuda mutua pueda " +
+            "presionar para romper la comunidad. La tarjeta de " +
+            "resiliencia del Panel muestra cuántas raíces ha echado " +
+            "tu comunidad.",
+          "¿Lista para añadir uno? El paso a paso vive en la " +
+            "documentación del proyecto — docs/add-a-node.md en el " +
+            "repositorio de Understoria explica cómo reutilizar una " +
+            "computadora vieja, y la guía de operación cubre los " +
+            "detalles. Es una tarde de trabajo, y quien corre el " +
+            "servidor actual puede ayudarte a intercambiar los dos " +
+            "ajustes que enlazan los nodos.",
+        ],
+      },
+      {
         id: "invite-someone",
         question: "¿Cómo invito a alguien?",
         answer: [

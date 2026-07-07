@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The Dashboard now shows your community's resilience — and how to
+  grow it.** A new "Community resilience" card makes visible what
+  separates this architecture from corporate centralized services:
+  every member's device carries a complete signed copy of the
+  community, so seizing a server takes nothing — and every
+  additional member-run node removes "pressure one person" as a way
+  to attack the community at all. The card shows the community's
+  servers as a trunk row (honestly: one, today), names the
+  members-carrying-copies fact, uses calm wording tiers instead of a
+  numeric score (no leaderboards, not even for infrastructure), and
+  its dashed empty trunk is the call to action — it opens a new Help
+  entry and `docs/add-a-node.md`, a member-facing guide to running a
+  node on a repurposed old computer. Deliberately honest per
+  `docs/community-resilience.md`: the card cannot claim automatic
+  failover before it exists — mirror nodes and failover are fully
+  designed there as Phase B, and the card's tiers only climb when
+  that machinery makes them true.
+
 - **Reading the community now requires being IN the community — and
   the server's disk can be sealed.** Three pieces from the
   reader-power review (`docs/member-authenticated-reads.md`,

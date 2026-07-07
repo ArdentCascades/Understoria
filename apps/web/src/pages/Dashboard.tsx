@@ -33,6 +33,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { LeafDivider, Sprig } from "@/components/visual";
 import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
+import { ResilienceCard } from "@/components/dashboard/ResilienceCard";
 import { UpcomingGatherings } from "@/components/dashboard/UpcomingGatherings";
 import { WhereHandsAreWelcome } from "@/components/dashboard/WhereHandsAreWelcome";
 import type { AchievementType, Category, Milestone } from "@/types";
@@ -189,6 +190,11 @@ export default function DashboardPage() {
           </p>
         </section>
       )}
+
+      {/* Community resilience (docs/community-resilience.md Phase A):
+          clustered with the federation rollup — the other "community
+          as a whole" infrastructure surface. */}
+      <ResilienceCard />
 
       {/* Governance doorway, kept beside the federation rollup so the
           "community as a whole" surfaces cluster. One quiet line —

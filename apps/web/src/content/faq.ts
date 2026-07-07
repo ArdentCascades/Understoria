@@ -246,6 +246,35 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
     title: "Community and invites",
     entries: [
       {
+        id: "add-a-node",
+        question:
+          "What keeps this community safe if someone takes our server away?",
+        answer: [
+          "Two things, and they're the heart of how Understoria is " +
+            "built differently from corporate services. First: every " +
+            "member's device already carries a complete, signed copy " +
+            "of the community — the board, the ledger, the projects, " +
+            "all of it. Seizing the server takes nothing that isn't " +
+            "already on everyone's phones, and a replacement server " +
+            "can be filled back up from those copies.",
+          "Second: the server doesn't have to be one machine, or one " +
+            "person's machine. Any member can run a community node — " +
+            "an old laptop in a closet with the lid shut is genuinely " +
+            "enough. Every extra node means there is no single person " +
+            "whom an anti-union or anti-mutual-aid group could " +
+            "pressure to break the community apart. The resilience " +
+            "card on the Dashboard shows how many roots your " +
+            "community has grown.",
+          "Ready to add one? The step-by-step lives in the project's " +
+            "docs — docs/add-a-node.md in the Understoria repository " +
+            "walks through repurposing an old computer, and the " +
+            "operator guide covers the details. It's an afternoon of " +
+            "work, and the member who ran your current server can " +
+            "help you exchange the two settings that link the nodes " +
+            "together.",
+        ],
+      },
+      {
         id: "invite-someone",
         question: "How do I invite someone?",
         answer: [
