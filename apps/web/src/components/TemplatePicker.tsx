@@ -141,7 +141,7 @@ export function TemplatePicker({
           onChange={(e) => setQuery(e.target.value)}
         />
         <select
-          className="input"
+          className="input sm:w-auto"
           value={category}
           onChange={(e) =>
             setCategory(e.target.value as ProjectCategory | "")
@@ -158,7 +158,7 @@ export function TemplatePicker({
           ))}
         </select>
         <select
-          className="input"
+          className="input sm:w-auto"
           value={setupBucket}
           onChange={(e) =>
             setSetupBucket(e.target.value as SetupBucket | "")
