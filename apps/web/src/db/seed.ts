@@ -320,7 +320,3 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   return you;
 }
 
-export async function listDemoMembers(): Promise<Member[]> {
-  const all = await db.members.orderBy("createdAt").toArray();
-  return all;
-}

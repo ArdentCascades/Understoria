@@ -45,7 +45,9 @@ the operator of the lost node may be the person who is gone.
 
 ## 1. What a device holds vs. what a node needs
 
-Audit of the Dexie schema (v28) against the node's durable kinds.
+Audit of the Dexie schema (v28 at audit time; the re-seed kinds
+list in `lib/reseed.ts` has grown with the schema since — its drift
+test enforces coverage) against the node's durable kinds.
 Three classes:
 
 ### 1a. Stored signed — re-POST verbatim

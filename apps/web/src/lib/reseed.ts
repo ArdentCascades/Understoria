@@ -103,7 +103,14 @@ function signedOrNull(
     : null;
 }
 
-export const RESEED_KINDS: readonly ReseedKindSpec[] = [
+export // Deliberately ABSENT: `claims`. There is no client-side claims
+// table — a pulled claim folds its effect into the posts row
+// (status/claimedBy) and the record itself is discarded — so a
+// device has nothing to re-upload. Re-seeding restores posts with
+// lifecycle stripped; claim state re-converges from surviving
+// nodes' mirrors (claims ARE in MIRROR_KINDS) or is re-asserted by
+// the claimants.
+const RESEED_KINDS: readonly ReseedKindSpec[] = [
   // Membership first — receipts are what READ_AUTH derives from.
   { path: "/redemptions", table: "redemptionReceipts", conflict409: "skip" },
   {

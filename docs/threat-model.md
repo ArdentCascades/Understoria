@@ -1181,17 +1181,19 @@ We are not trying to protect against:
   for switching to soft block (alignment with
   `solidarity-not-shame` and with the existing type doc-comment
   at `packages/shared/src/types.ts:455-457`) is in §3.1 there.
-  **What does NOT change on the wire.** Tasks remain local.
-  The whole project / task subsystem is local-only today:
-  `apps/server/src/server.ts` registers no project or task
-  routes, and `apps/web/src/lib/federationSync.ts` exports no
-  project or task pull. `Project` and `ProjectTask` rows carry
-  no `signature` field. Adding `orderIndex` and rewriting the
-  `dependencies` semantics changes none of this. No outbox
-  enqueue. No peer-pull cursor. No server endpoint. No new
-  discriminator string in `OutboxRow.kind`. The federation
-  layer has zero knowledge of project tasks before this PR and
-  zero knowledge of project tasks after this PR.
+  **What does NOT change on the wire.** *(SUPERSEDED on this
+  point by project federation Phase 1 — the wire claims below
+  described the codebase at writing time and are kept for the
+  historical record. Projects and tasks NOW sync within the
+  community as signed `ProjectState`/`TaskState` LWW records:
+  `apps/server/src/routes/projectStates.ts`,
+  `pullFederatedProjectStates`/`pullFederatedTaskStates`, and the
+  §7 project-federation entry. Cross-node `peerPull` still carries
+  neither.)* At the time of this PR, tasks remained local: no
+  project or task routes, no pull, no `signature` field on
+  `Project`/`ProjectTask` rows, no outbox enqueue, no peer-pull
+  cursor. Adding `orderIndex` and rewriting the `dependencies`
+  semantics changed none of that.
   **Why this matters for §7.** This file's existing precedent
   at line 572 names the discipline explicitly: *"A future PR
   may promote `recurringCadence` to a first-class field on

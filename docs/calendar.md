@@ -219,8 +219,10 @@ The two threats this avoids:
   in [`docs/community-events.md`](./community-events.md); the
   threat-model entry is "Federated `Event` records widen the
   public wire surface" in §7 of `docs/threat-model.md`; the
-  privacy-policy §4 / §6 amendment lists the new record types and
-  confirms `EventRSVP` is local-only. Phase 1 ships `Event` +
+  privacy-policy §4 / §6 amendment lists the new record types.
+  (`EventRSVP` was local-only at this writing; it federates within
+  the community as signed participation state since
+  `docs/project-federation.md` §6 — still never to peer nodes.) Phase 1 ships `Event` +
   `EventCancellation` as federated signed records, with the RSVP
   roster scoped to the node where the RSVP happened (the
   `Post.claimedBy` pattern applied to attendance). Phase 2

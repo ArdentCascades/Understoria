@@ -35,6 +35,7 @@ import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { myOrganizedProjects } from "@/lib/myProjects";
 import { hasOpenTasks, projectNeedsMoreHands } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
+import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
 import type {
@@ -373,7 +374,7 @@ export default function BoardPage() {
       <BoardNudges
         fallback={
           <ContextualHint
-            settingKey="boardHintDismissed"
+            settingKey={SETTING_KEYS.boardHintDismissed}
             ariaLabel={t("hints.board.label")}
             message={t("hints.board.message")}
             learnMoreTo="/help#post-something"

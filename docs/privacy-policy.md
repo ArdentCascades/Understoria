@@ -149,21 +149,22 @@ invitation + signed acceptance" for the values reasoning.
 enumerated in the table above; the location field is **free text,
 not a GPS coordinate or structured address**, so the organizer
 decides what level of specificity to publish on a public wire.
-**Your RSVP to an event stays on the node where you RSVP'd.** It
-is NOT a signed record, NOT pushed to the community node's outbox,
-and NOT federated to peer nodes. The organizer of the event and
-other members on this node who have also RSVP'd "going" or "maybe"
-see your name on the local attendee list; non-attendees on this
-node see the count only; peer-node viewers see neither names nor
-counts. See [`docs/community-events.md`](./community-events.md)
-and the threat-model §7 entry "Federated `Event` records widen the
-public wire surface" for the values reasoning and the rejected
-alternatives (federated RSVPs, public attendee roster, iCal
-export — all out of scope or deferred with conditions).
+**Your RSVP to an event stays inside your community.** Since
+participation Phase 2 (`docs/project-federation.md` §6) an RSVP is
+a signed `EventRsvpState` record that syncs between your devices
+and other members' devices **through your own community's node**,
+as the §4 table above describes. What has NOT changed is the outer
+boundary: RSVPs are deliberately excluded from the cross-node
+`peerPull` loop, so **peer communities never receive them** — a
+peer node viewing an event you organized sees neither attendee
+names nor counts. Members of your community see your name on the
+attendee list once you RSVP "going" or "maybe". See
+[`docs/community-events.md`](./community-events.md) and the
+threat-model §7 participation entry for the values reasoning.
 
 **Member blocks** are NOT in the table above and never will be.
-A `Block` row sits alongside `EventRSVP` as a deliberately
-local-only personal-relief surface: the row records that you have
+A `Block` row is a deliberately local-only personal-relief
+surface: the row records that you have
 chosen to block a specific other member, your governance-visibility
 choice for that block, and any private note to yourself. It is
 NOT a signed record, NOT pushed to the community node's outbox,
@@ -235,12 +236,12 @@ node propagate to those peers. Specifically:
   X helped key Y" — not "Alice helped Bob" — unless someone on
   their node has separately associated those keys with names.
 - Peers do **not** receive your direct messages, your profile, or
-  any data that stayed on your device. In plain language: peers
-  do **not** receive your `EventRSVP` rows. RSVPs are local-only
-  state — they live in your PWA's Dexie database, never enter the
-  outbox, and have no federation route. A peer node viewing an
-  event you organized has zero knowledge of who RSVP'd on the
-  node where the RSVP happened.
+  any data that stayed on your device or your community's node. In
+  plain language: peers do **not** receive your RSVPs. They sync
+  within your community as signed state records, but they are
+  deliberately excluded from the cross-node pull loop — attendance
+  data never leaves your community's node. A peer node viewing an
+  event you organized has zero knowledge of who RSVP'd.
 
 The current peer list is:
 

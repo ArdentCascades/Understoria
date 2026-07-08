@@ -58,7 +58,7 @@ import {
   shortKey,
 } from "@/lib/format";
 import { updateMemberProfile } from "@/db/actions";
-import type { InviteRow } from "@/db/database";
+import { SETTING_KEYS, type InviteRow } from "@/db/database";
 import { issueInvite } from "@/db/invites";
 import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
@@ -426,7 +426,7 @@ function ProfileBody({ member }: { member: Member }) {
             autoConfirmHours={nodeConfig.autoConfirmHours}
           />
           <ContextualHint
-            settingKey="balanceHintDismissed"
+            settingKey={SETTING_KEYS.balanceHintDismissed}
             ariaLabel={t("hints.balance.label")}
             message={t("hints.balance.message")}
             learnMoreTo="/help#what-is-balance"
@@ -526,7 +526,7 @@ function ProfileBody({ member }: { member: Member }) {
                 several cards away from the Generate button it talks
                 about. */}
             <ContextualHint
-              settingKey="inviteHintDismissed"
+              settingKey={SETTING_KEYS.inviteHintDismissed}
               ariaLabel={t("hints.invite.label")}
               message={t("hints.invite.message")}
               learnMoreTo="/help#invite-someone"

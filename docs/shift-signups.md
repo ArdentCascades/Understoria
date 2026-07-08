@@ -84,12 +84,13 @@ Vocabulary, settled here because every later section depends on
 it:
 
 - A **shift** is a time-boxed, optionally-capped slot *belonging
-  to an event*: "Setup crew, 9:00–12:00, 4 spots." It is a local
-  Dexie row on the organizer's node. It is not signed, and it
-  never federates.
-- A **signup** is a member's declared intent to fill a shift. It
-  is a local Dexie row with exactly the posture of `EventRSVP`:
-  not signed, never federated, never exported.
+  to an event*: "Setup crew, 9:00–12:00, 4 spots." *(Local-only at
+  this writing; signed community-node state since participation
+  Phase 2 — see the header note. Never to peer nodes.)*
+- A **signup** is a member's declared intent to fill a shift, with
+  exactly the posture of `EventRSVP` *(which likewise federates
+  within the community since Phase 2)*: never exported, never to
+  peer nodes.
 - The **event stays the signed artifact.** The organizer's
   signature on the `Event` — with the §3 comparison card from
   `community-events.md` unchanged — remains the single deliberate,
@@ -352,7 +353,7 @@ Identical to `community-events.md` §6.1, applied per-shift:
 | Tier | Sees | Does not see |
 |---|---|---|
 | **Non-RSVP'd member, same node** | Shift labels, times, spot counts ("2 spots open") | Names on any shift roster |
-| **Peer-node viewer** | Nothing — shifts don't federate (§7); their event page is the plain event | That shifts exist at all |
+| **Peer-node viewer** | Nothing — shifts stay off the cross-node wire (§7; community-node sync since Phase 2 doesn't change this); their event page is the plain event | That shifts exist at all |
 | **Organizer; member RSVP'd going/maybe** | Full per-shift rosters (names) on this node | Anything from peer nodes (doesn't exist here) |
 
 A member who removes a signup disappears from the roster
