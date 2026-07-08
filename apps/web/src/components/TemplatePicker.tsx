@@ -59,8 +59,12 @@ interface TemplatePickerProps {
  * The filter row (search + category + setup-time) narrows the gallery
  * in-place. State is session-only — defaults are empty filters, so the
  * gallery looks unchanged until a member starts narrowing. The
- * "Start from scratch" card always renders as the last item regardless
- * of filter state, so members always have an escape hatch.
+ * "Start from scratch" affordance renders FIRST — a compact row above
+ * the filters — so it is reachable with zero scrolling no matter how
+ * large the gallery grows (pilot report: with the card at the tail,
+ * every added template pushed the blank option further away). It is
+ * deliberately lighter-weight than the template cards so the gallery
+ * keeps its show-what's-possible role.
  */
 export function TemplatePicker({
   selectedId,
@@ -121,6 +125,12 @@ export function TemplatePicker({
       <p className="text-sm text-moss-600 dark:text-moss-300 mb-3">
         {t("projects.templates.intro")}
       </p>
+      <div className="mb-3">
+        <ScratchCard
+          isSelected={selectedId === null}
+          onSelect={() => onSelect(null)}
+        />
+      </div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <input
           type="search"
@@ -194,12 +204,6 @@ export function TemplatePicker({
             </li>
           ))
         )}
-        <li>
-          <ScratchCard
-            isSelected={selectedId === null}
-            onSelect={() => onSelect(null)}
-          />
-        </li>
       </ul>
     </section>
   );
@@ -305,7 +309,7 @@ function ScratchCard({ isSelected, onSelect }: ScratchCardProps) {
       type="button"
       onClick={onSelect}
       aria-pressed={isSelected}
-      className={`w-full h-full text-left p-4 flex flex-col gap-2 rounded-lg border-2 border-dashed transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
+      className={`w-full text-left p-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-lg border-2 border-dashed transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
         isSelected
           ? "border-canopy-500 bg-canopy-50/40 dark:border-canopy-400 dark:bg-canopy-950/30"
           : "border-bark-300 dark:border-bark-700 hover:border-canopy-300 dark:hover:border-canopy-700"
