@@ -151,7 +151,7 @@ describe("pullFederatedRedemptions", () => {
 
     expect(
       await getSetting(SETTING_KEYS.federationLastRedemptionPull),
-    ).toBe("1000");
+    ).toBe(`1000:${receipt.invite.token}`);
   });
 
   it("persists the verified SIGNED receipt artifact (re-seed R0)", async () => {
@@ -314,7 +314,7 @@ describe("pullFederatedRedemptions", () => {
     // can't strand the rejected row forever.
     expect(
       await getSetting(SETTING_KEYS.federationLastRedemptionPull),
-    ).toBe("100");
+    ).toBe(`100:${good.invite.token}`);
   });
 
   it("keeps the local row when a pulled receipt conflicts with a locally-redeemed one", async () => {
@@ -399,7 +399,7 @@ describe("pullFederatedVouches", () => {
       voucheeKey: v1.voucheeKey,
     });
     expect(await getSetting(SETTING_KEYS.federationLastVouchPull)).toBe(
-      "200",
+      `200:${v2.id}`,
     );
   });
 
@@ -413,7 +413,7 @@ describe("pullFederatedVouches", () => {
     expect(await db.vouches.get(bad.id)).toBeUndefined();
     // Bad rows never advance the cursor past themselves.
     expect(await getSetting(SETTING_KEYS.federationLastVouchPull)).toBe(
-      "100",
+      `100:${good.id}`,
     );
   });
 

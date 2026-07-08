@@ -154,7 +154,7 @@ describe("pullFederatedProjectStates", () => {
     expect(await db.projects.get("proj_1")).toMatchObject({
       title: "Community fridge",
     });
-    expect(await getSetting(PROJECT_CURSOR)).toBe("5000");
+    expect(await getSetting(PROJECT_CURSOR)).toBe("5000:proj_1");
   });
 
   it("refuses a genesis whose signer is not its organizer (cursor pinned)", async () => {
@@ -192,7 +192,7 @@ describe("pullFederatedProjectStates", () => {
       skipped: 1,
     });
     expect((await db.projects.get("proj_3"))!.status).toBe("active");
-    expect(await getSetting(PROJECT_CURSOR)).toBe("3000");
+    expect(await getSetting(PROJECT_CURSOR)).toBe("3000:proj_3");
 
     // Newer remote (t=6000) wins.
     vi.unstubAllGlobals();
@@ -266,7 +266,7 @@ describe("pullFederatedTaskStates", () => {
     expect(await db.projectTasks.get("task_1")).toMatchObject({
       title: "Wipe shelves",
     });
-    expect(await getSetting(TASK_CURSOR)).toBe("5000");
+    expect(await getSetting(TASK_CURSOR)).toBe("5000:task_1");
   });
 
   it("accepts a helper's claim of an open task, refuses a steal", async () => {

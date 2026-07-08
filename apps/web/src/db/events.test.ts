@@ -585,15 +585,13 @@ describe("pullFederatedEvents", () => {
     });
     expect(await db.events.get("peer_bad")).toBeUndefined();
 
-    // Cursor advanced to the verified row's createdAt — not past the
-    // rejected row.
+    // Cursor advanced to the verified row's (createdAt, id) pair — not
+    // past the rejected row.
     expect(
-      Number(
-        await db.settings
-          .get(SETTING_KEYS.federationLastEventPull)
-          .then((r) => r?.value ?? "0"),
-      ),
-    ).toBe(5_000);
+      await db.settings
+        .get(SETTING_KEYS.federationLastEventPull)
+        .then((r) => r?.value),
+    ).toBe("5000:peer_good");
 
     // Idempotent: second pull skips the already-stored row.
     const second = await pullFederatedEvents();
@@ -694,6 +692,6 @@ describe("pullFederatedEventCancellations", () => {
       await db.settings
         .get(SETTING_KEYS.federationLastEventCancellationPull)
         .then((r) => r?.value),
-    ).toBe("12345");
+    ).toBe("12345:peer_cancel_1");
   });
 });

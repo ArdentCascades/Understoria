@@ -140,6 +140,56 @@ function plausibleCursorStamp(v: unknown): v is number {
   );
 }
 
+/** A pull cursor position: the (timestamp, id) pair of the last row
+ *  this device consumed (docs/composite-federation-cursors.md §2,
+ *  phase 3). `id: null` = a legacy bare-timestamp position. */
+interface CursorPos {
+  ts: number;
+  id: string | null;
+}
+
+/** Parse a persisted cursor setting. Phase 3 writes "<ms>:<id>";
+ *  a value without a colon is a legacy bare timestamp — send `since`
+ *  alone (one inclusive re-serve page; id-dedup no-ops) and the next
+ *  successful write upgrades it to the pair form. */
+export function parseCursor(raw: string | null | undefined): CursorPos | null {
+  if (!raw) return null;
+  const i = raw.indexOf(":");
+  if (i === -1) {
+    const ts = Number(raw);
+    return Number.isFinite(ts) ? { ts, id: null } : null;
+  }
+  const ts = Number(raw.slice(0, i));
+  const id = raw.slice(i + 1);
+  return Number.isFinite(ts) && id.length > 0 ? { ts, id } : null;
+}
+
+/** Set the wire params for a cursor. The pair component only means
+ *  anything next to its timestamp; a server that predates phase 1
+ *  simply ignores `sinceId` and degrades to the inclusive pull. */
+function setCursorParams(params: URLSearchParams, cur: CursorPos | null): void {
+  if (!cur) return;
+  params.set("since", String(cur.ts));
+  if (cur.id !== null) params.set("sinceId", cur.id);
+}
+
+/** Fold one CONSUMED row into the running max pair — feed order is
+ *  `ts ASC, id ASC`, so this mirrors the server's pair comparison.
+ *  (Refused rows never come through here; windowing refusals and
+ *  verified duplicates do — same advance semantics as before.) */
+function advancePair(cur: CursorPos | null, ts: number, id: string): CursorPos {
+  if (cur === null || ts > cur.ts || (ts === cur.ts && (cur.id === null || id > cur.id))) {
+    return { ts, id };
+  }
+  return cur;
+}
+
+/** Serialize for persistence. A pair whose id half is still null
+ *  (nothing consumed since a legacy value was read) stays legacy. */
+function formatCursor(cur: CursorPos): string {
+  return cur.id === null ? String(cur.ts) : `${cur.ts}:${cur.id}`;
+}
+
 /**
  * Pull posts from the configured community node that originated from
  * peer nodes. Inserts them into the local posts table with lifecycle
@@ -158,9 +208,9 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(POST_CURSOR_KEY));
+  const cursor = parseCursor(await getSetting(ctx.key(POST_CURSOR_KEY)));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/posts?${params.toString()}`;
   let body: { posts?: unknown[] };
@@ -176,7 +226,7 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = since ? Number(since) : null;
+  let maxCreatedAt: CursorPos | null = cursor;
 
   for (const raw of body.posts) {
     const r = raw as Record<string, unknown>;
@@ -208,9 +258,7 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
     const existing = await db.posts.get(r.id);
     if (existing) {
       skipped += 1;
-      if (maxCreatedAt === null || r.createdAt > maxCreatedAt) {
-        maxCreatedAt = r.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, r.createdAt, r.id);
       continue;
     }
     const post: Post = {
@@ -247,20 +295,16 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
     // deferred. No-op on unwindowed devices.
     if (!(await windowAdmits("post", { ageAt: post.createdAt, post }))) {
       skipped += 1;
-      if (maxCreatedAt === null || post.createdAt > maxCreatedAt) {
-        maxCreatedAt = post.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, post.createdAt, post.id);
       continue;
     }
     await db.posts.put(post);
     inserted += 1;
-    if (maxCreatedAt === null || post.createdAt > maxCreatedAt) {
-      maxCreatedAt = post.createdAt;
-    }
+    maxCreatedAt = advancePair(maxCreatedAt, post.createdAt, post.id);
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(ctx.key(POST_CURSOR_KEY), String(maxCreatedAt));
+    await setSetting(ctx.key(POST_CURSOR_KEY), formatCursor(maxCreatedAt));
   }
 
   return { inserted, skipped };
@@ -278,9 +322,9 @@ export async function pullFederatedClaims(): Promise<number> {
   if (!ctx) return 0;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(CLAIM_CURSOR_KEY));
+  const cursor = parseCursor(await getSetting(ctx.key(CLAIM_CURSOR_KEY)));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/claims?${params.toString()}`;
   let body: { claims?: unknown[] };
@@ -295,7 +339,7 @@ export async function pullFederatedClaims(): Promise<number> {
   if (!Array.isArray(body.claims)) return 0;
 
   let applied = 0;
-  let maxClaimedAt: number | null = since ? Number(since) : null;
+  let maxClaimedAt: CursorPos | null = cursor;
 
   for (const raw of body.claims) {
     const r = raw as Record<string, unknown>;
@@ -317,9 +361,7 @@ export async function pullFederatedClaims(): Promise<number> {
     // cursor never moved and newer claims were never fetched — a
     // permanent stall. The claim record is immutable, so re-observing
     // a row we've already processed is a harmless no-op.
-    if (maxClaimedAt === null || r.claimedAt > maxClaimedAt) {
-      maxClaimedAt = r.claimedAt;
-    }
+    maxClaimedAt = advancePair(maxClaimedAt, r.claimedAt, r.postId);
 
     const post = await db.posts.get(r.postId as string);
     if (!post) continue;
@@ -334,7 +376,7 @@ export async function pullFederatedClaims(): Promise<number> {
   }
 
   if (maxClaimedAt !== null) {
-    await setSetting(ctx.key(CLAIM_CURSOR_KEY), String(maxClaimedAt));
+    await setSetting(ctx.key(CLAIM_CURSOR_KEY), formatCursor(maxClaimedAt));
   }
 
   return applied;
@@ -360,9 +402,9 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(TASK_COMMENT_CURSOR_KEY));
+  const cursor = parseCursor(await getSetting(ctx.key(TASK_COMMENT_CURSOR_KEY)));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/task-comments?${params.toString()}`;
   let body: { taskComments?: unknown[] };
@@ -378,7 +420,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = since ? Number(since) : null;
+  let maxCreatedAt: CursorPos | null = cursor;
 
   for (const raw of body.taskComments) {
     const r = raw as Record<string, unknown>;
@@ -435,9 +477,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
       comment.deletedAt ?? 0,
     );
     const advanceCursor = () => {
-      if (maxCreatedAt === null || effectiveCursorAt > maxCreatedAt) {
-        maxCreatedAt = effectiveCursorAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, effectiveCursorAt, comment.id);
     };
 
     // Windowing guard: a comment whose project is locally absent AND
@@ -477,7 +517,7 @@ export async function pullFederatedTaskComments(): Promise<FederationSyncResult 
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(ctx.key(TASK_COMMENT_CURSOR_KEY), String(maxCreatedAt));
+    await setSetting(ctx.key(TASK_COMMENT_CURSOR_KEY), formatCursor(maxCreatedAt));
   }
 
   return { inserted, skipped };
@@ -507,9 +547,9 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(EXCHANGE_CURSOR_KEY));
+  const cursor = parseCursor(await getSetting(ctx.key(EXCHANGE_CURSOR_KEY)));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/exchanges?${params.toString()}`;
   let body: { exchanges?: unknown[] };
@@ -525,7 +565,7 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
 
   let inserted = 0;
   let skipped = 0;
-  let maxCompletedAt: number | null = since ? Number(since) : null;
+  let maxCompletedAt: CursorPos | null = cursor;
 
   for (const raw of body.exchanges) {
     const r = raw as Record<string, unknown>;
@@ -565,9 +605,11 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
     };
 
     const advanceCursor = () => {
-      if (maxCompletedAt === null || exchange.completedAt > maxCompletedAt) {
-        maxCompletedAt = exchange.completedAt;
-      }
+      maxCompletedAt = advancePair(
+        maxCompletedAt,
+        exchange.completedAt,
+        exchange.id,
+      );
     };
 
     if (!verifyExchange(exchange)) {
@@ -592,7 +634,7 @@ export async function pullFederatedExchanges(): Promise<FederationSyncResult | n
   }
 
   if (maxCompletedAt !== null) {
-    await setSetting(ctx.key(EXCHANGE_CURSOR_KEY), String(maxCompletedAt));
+    await setSetting(ctx.key(EXCHANGE_CURSOR_KEY), formatCursor(maxCompletedAt));
   }
 
   return { inserted, skipped };
@@ -610,9 +652,11 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(SETTING_KEYS.federationLastCoOrgInvitationPull));
+  const cursor = parseCursor(
+    await getSetting(ctx.key(SETTING_KEYS.federationLastCoOrgInvitationPull)),
+  );
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitations?${params.toString()}`;
   let body: { coorgInvitations?: unknown[] };
@@ -628,7 +672,7 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = since ? Number(since) : null;
+  let maxCreatedAt: CursorPos | null = cursor;
 
   for (const raw of body.coorgInvitations) {
     const r = raw as Record<string, unknown>;
@@ -657,9 +701,7 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
     };
 
     const advanceCursor = () => {
-      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
-        maxCreatedAt = record.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, record.createdAt, record.id);
     };
 
     if (!verifyCoOrganizerInvitation(record)) {
@@ -705,7 +747,7 @@ export async function pullFederatedCoOrgInvitations(): Promise<FederationSyncRes
   if (maxCreatedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastCoOrgInvitationPull),
-      String(maxCreatedAt),
+      formatCursor(maxCreatedAt),
     );
   }
 
@@ -722,11 +764,13 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(
-    ctx.key(SETTING_KEYS.federationLastCoOrgInvitationResponsePull),
+  const cursor = parseCursor(
+    await getSetting(
+      ctx.key(SETTING_KEYS.federationLastCoOrgInvitationResponsePull),
+    ),
   );
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitation-responses?${params.toString()}`;
   let body: { coorgInvitationResponses?: unknown[] };
@@ -742,7 +786,7 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
 
   let inserted = 0;
   let skipped = 0;
-  let maxDecidedAt: number | null = since ? Number(since) : null;
+  let maxDecidedAt: CursorPos | null = cursor;
 
   for (const raw of body.coorgInvitationResponses) {
     const r = raw as Record<string, unknown>;
@@ -769,9 +813,7 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
     };
 
     const advanceCursor = () => {
-      if (maxDecidedAt === null || record.decidedAt > maxDecidedAt) {
-        maxDecidedAt = record.decidedAt;
-      }
+      maxDecidedAt = advancePair(maxDecidedAt, record.decidedAt, record.id);
     };
 
     if (!verifyCoOrganizerInvitationResponse(record)) {
@@ -818,7 +860,7 @@ export async function pullFederatedCoOrgResponses(): Promise<FederationSyncResul
   if (maxDecidedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastCoOrgInvitationResponsePull),
-      String(maxDecidedAt),
+      formatCursor(maxDecidedAt),
     );
   }
 
@@ -834,11 +876,13 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(
-    ctx.key(SETTING_KEYS.federationLastCoOrgInvitationRevocationPull),
+  const cursor = parseCursor(
+    await getSetting(
+      ctx.key(SETTING_KEYS.federationLastCoOrgInvitationRevocationPull),
+    ),
   );
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/coorg-invitation-revocations?${params.toString()}`;
   let body: { coorgInvitationRevocations?: unknown[] };
@@ -854,7 +898,7 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
 
   let inserted = 0;
   let skipped = 0;
-  let maxRevokedAt: number | null = since ? Number(since) : null;
+  let maxRevokedAt: CursorPos | null = cursor;
 
   for (const raw of body.coorgInvitationRevocations) {
     const r = raw as Record<string, unknown>;
@@ -879,9 +923,7 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
     };
 
     const advanceCursor = () => {
-      if (maxRevokedAt === null || record.revokedAt > maxRevokedAt) {
-        maxRevokedAt = record.revokedAt;
-      }
+      maxRevokedAt = advancePair(maxRevokedAt, record.revokedAt, record.id);
     };
 
     if (!verifyCoOrganizerInvitationRevocation(record)) {
@@ -905,7 +947,7 @@ export async function pullFederatedCoOrgRevocations(): Promise<FederationSyncRes
   if (maxRevokedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastCoOrgInvitationRevocationPull),
-      String(maxRevokedAt),
+      formatCursor(maxRevokedAt),
     );
   }
 
@@ -933,9 +975,11 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since =
-    (await getSetting(ctx.key(SETTING_KEYS.federationLastEventPull))) ?? "0";
-  const params = new URLSearchParams({ limit: "200", since });
+  const cursor = parseCursor(
+    await getSetting(ctx.key(SETTING_KEYS.federationLastEventPull)),
+  );
+  const params = new URLSearchParams({ limit: "200" });
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/events?${params.toString()}`;
   let body: { events?: unknown[] };
@@ -951,7 +995,7 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = Number(since);
+  let maxCreatedAt: CursorPos | null = cursor;
 
   for (const raw of body.events) {
     const r = raw as Record<string, unknown>;
@@ -1005,9 +1049,7 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
     }
 
     const advanceCursor = () => {
-      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
-        maxCreatedAt = record.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, record.createdAt, record.id);
     };
 
     const existing = await db.events.get(record.id);
@@ -1036,7 +1078,7 @@ export async function pullFederatedEvents(): Promise<FederationSyncResult | null
   if (maxCreatedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastEventPull),
-      String(maxCreatedAt),
+      formatCursor(maxCreatedAt),
     );
   }
 
@@ -1058,9 +1100,11 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since =
-    (await getSetting(ctx.key(SETTING_KEYS.federationLastEventCancellationPull))) ?? "0";
-  const params = new URLSearchParams({ limit: "200", since });
+  const cursor = parseCursor(
+    await getSetting(ctx.key(SETTING_KEYS.federationLastEventCancellationPull)),
+  );
+  const params = new URLSearchParams({ limit: "200" });
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/event-cancellations?${params.toString()}`;
   let body: { eventCancellations?: unknown[] };
@@ -1076,7 +1120,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
 
   let inserted = 0;
   let skipped = 0;
-  let maxCancelledAt: number | null = Number(since);
+  let maxCancelledAt: CursorPos | null = cursor;
 
   for (const raw of body.eventCancellations) {
     const r = raw as Record<string, unknown>;
@@ -1116,9 +1160,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
     }
 
     const advanceCursor = () => {
-      if (maxCancelledAt === null || record.cancelledAt > maxCancelledAt) {
-        maxCancelledAt = record.cancelledAt;
-      }
+      maxCancelledAt = advancePair(maxCancelledAt, record.cancelledAt, record.id);
     };
 
     const existing = await db.eventCancellations.get(record.id);
@@ -1167,7 +1209,7 @@ export async function pullFederatedEventCancellations(): Promise<FederationSyncR
   if (maxCancelledAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastEventCancellationPull),
-      String(maxCancelledAt),
+      formatCursor(maxCancelledAt),
     );
   }
 
@@ -1218,9 +1260,11 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since =
-    (await getSetting(ctx.key(SETTING_KEYS.federationLastRedemptionPull))) ?? "0";
-  const params = new URLSearchParams({ limit: "200", since });
+  const cursor = parseCursor(
+    await getSetting(ctx.key(SETTING_KEYS.federationLastRedemptionPull)),
+  );
+  const params = new URLSearchParams({ limit: "200" });
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/redemptions?${params.toString()}`;
   let body: { redemptions?: unknown[] };
@@ -1236,7 +1280,7 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
 
   let inserted = 0;
   let skipped = 0;
-  let maxReceivedAt: number | null = Number(since);
+  let maxReceivedAt: CursorPos | null = cursor;
 
   for (const raw of body.redemptions) {
     const r = raw as Record<string, unknown>;
@@ -1261,9 +1305,11 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
     }
 
     const advanceCursor = () => {
-      if (maxReceivedAt === null || receivedAt > maxReceivedAt) {
-        maxReceivedAt = receivedAt;
-      }
+      maxReceivedAt = advancePair(
+        maxReceivedAt,
+        receivedAt,
+        receipt.invite.token,
+      );
     };
 
     // Re-seed Phase R0 (docs/community-reseed.md §1b): persist the
@@ -1378,7 +1424,7 @@ export async function pullFederatedRedemptions(): Promise<FederationSyncResult |
   if (maxReceivedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastRedemptionPull),
-      String(maxReceivedAt),
+      formatCursor(maxReceivedAt),
     );
   }
 
@@ -1409,9 +1455,11 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since =
-    (await getSetting(ctx.key(SETTING_KEYS.federationLastInviteRevocationPull))) ?? "0";
-  const params = new URLSearchParams({ limit: "200", since });
+  const cursor = parseCursor(
+    await getSetting(ctx.key(SETTING_KEYS.federationLastInviteRevocationPull)),
+  );
+  const params = new URLSearchParams({ limit: "200" });
+  setCursorParams(params, cursor);
   const url = `${baseUrl.replace(/\/+$/, "")}/invite-revocations?${params.toString()}`;
 
   let body: { inviteRevocations?: unknown[] };
@@ -1426,7 +1474,7 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
 
   let inserted = 0;
   let skipped = 0;
-  let maxReceivedAt: number | null = Number(since);
+  let maxReceivedAt: CursorPos | null = cursor;
 
   for (const raw of body.inviteRevocations) {
     const r = raw as Record<string, unknown>;
@@ -1444,9 +1492,7 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
     }
 
     const advanceCursor = () => {
-      if (maxReceivedAt === null || receivedAt > maxReceivedAt) {
-        maxReceivedAt = receivedAt;
-      }
+      maxReceivedAt = advancePair(maxReceivedAt, receivedAt, revocation.token);
     };
 
     // Re-seed Phase R0: persist the signed artifact (same rationale
@@ -1530,7 +1576,7 @@ export async function pullFederatedInviteRevocations(): Promise<FederationSyncRe
   if (maxReceivedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastInviteRevocationPull),
-      String(maxReceivedAt),
+      formatCursor(maxReceivedAt),
     );
   }
 
@@ -1556,9 +1602,11 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(SETTING_KEYS.federationLastVouchPull));
+  const cursor = parseCursor(
+    await getSetting(ctx.key(SETTING_KEYS.federationLastVouchPull)),
+  );
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/vouches?${params.toString()}`;
   let body: { vouches?: unknown[] };
@@ -1574,7 +1622,7 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = since ? Number(since) : null;
+  let maxCreatedAt: CursorPos | null = cursor;
 
   for (const raw of body.vouches) {
     const r = raw as Record<string, unknown>;
@@ -1610,9 +1658,7 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
     }
 
     const advanceCursor = () => {
-      if (maxCreatedAt === null || vouch.createdAt > maxCreatedAt) {
-        maxCreatedAt = vouch.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, vouch.createdAt, vouch.id);
     };
 
     const existing = await db.vouches.get(vouch.id);
@@ -1630,7 +1676,7 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
   if (maxCreatedAt !== null) {
     await setSetting(
       ctx.key(SETTING_KEYS.federationLastVouchPull),
-      String(maxCreatedAt),
+      formatCursor(maxCreatedAt),
     );
   }
 
@@ -1669,9 +1715,9 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(PROJECT_STATE_CURSOR_KEY));
+  const cursor = parseCursor(await getSetting(ctx.key(PROJECT_STATE_CURSOR_KEY)));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/project-states?${params.toString()}`;
   let body: { projectStates?: unknown[] };
@@ -1686,7 +1732,7 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
 
   let inserted = 0;
   let skipped = 0;
-  let maxUpdatedAt: number | null = since ? Number(since) : null;
+  let maxUpdatedAt: CursorPos | null = cursor;
 
   for (const raw of body.projectStates) {
     const r = raw as Record<string, unknown>;
@@ -1715,9 +1761,7 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
     }
 
     const advanceCursor = () => {
-      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = record.updatedAt;
-      }
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
     };
 
     // Windowing guard: a settled project past the horizon that this
@@ -1763,7 +1807,7 @@ export async function pullFederatedProjectStates(): Promise<FederationSyncResult
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(ctx.key(PROJECT_STATE_CURSOR_KEY), String(maxUpdatedAt));
+    await setSetting(ctx.key(PROJECT_STATE_CURSOR_KEY), formatCursor(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -1781,9 +1825,9 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
 
-  const since = await getSetting(ctx.key(TASK_STATE_CURSOR_KEY));
+  const cursor = parseCursor(await getSetting(ctx.key(TASK_STATE_CURSOR_KEY)));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
 
   const url = `${baseUrl.replace(/\/+$/, "")}/task-states?${params.toString()}`;
   let body: { taskStates?: unknown[] };
@@ -1798,7 +1842,7 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
 
   let inserted = 0;
   let skipped = 0;
-  let maxUpdatedAt: number | null = since ? Number(since) : null;
+  let maxUpdatedAt: CursorPos | null = cursor;
 
   for (const raw of body.taskStates) {
     const r = raw as Record<string, unknown>;
@@ -1822,9 +1866,7 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
     }
 
     const advanceCursor = () => {
-      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = record.updatedAt;
-      }
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
     };
 
     const project = (await db.projects.get(record.projectId)) as
@@ -1879,7 +1921,7 @@ export async function pullFederatedTaskStates(): Promise<FederationSyncResult | 
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(ctx.key(TASK_STATE_CURSOR_KEY), String(maxUpdatedAt));
+    await setSetting(ctx.key(TASK_STATE_CURSOR_KEY), formatCursor(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -1905,7 +1947,7 @@ async function fetchStateFeed<T>(
   path: string,
   bodyKey: string,
   cursorKey: string,
-): Promise<{ rows: T[]; since: string | null; cursorKey: string } | null> {
+): Promise<{ rows: T[]; cursor: CursorPos | null; cursorKey: string } | null> {
   const ctx = await resolvePullContext();
   if (!ctx) return null;
   const baseUrl = ctx.baseUrl;
@@ -1913,9 +1955,9 @@ async function fetchStateFeed<T>(
   // back here — writing the unscoped key while reading the scoped one
   // would wedge the cursor whenever a mirror is the active node.
   const scopedKey = ctx.key(cursorKey);
-  const since = await getSetting(scopedKey);
+  const cursor = parseCursor(await getSetting(scopedKey));
   const params = new URLSearchParams({ limit: "200" });
-  if (since) params.set("since", since);
+  setCursorParams(params, cursor);
   const url = `${baseUrl.replace(/\/+$/, "")}${path}?${params.toString()}`;
   try {
     const res = await authorizedFetch(url, baseUrl);
@@ -1923,7 +1965,7 @@ async function fetchStateFeed<T>(
     const body = (await res.json()) as Record<string, unknown>;
     const rows = body[bodyKey];
     if (!Array.isArray(rows)) return null;
-    return { rows: rows as T[], since: since ?? null, cursorKey: scopedKey };
+    return { rows: rows as T[], cursor, cursorKey: scopedKey };
   } catch {
     return null;
   }
@@ -1939,7 +1981,7 @@ export async function pullFederatedEventShifts(): Promise<FederationSyncResult |
 
   let inserted = 0;
   let skipped = 0;
-  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
 
   for (const r of feed.rows) {
     if (
@@ -1961,9 +2003,7 @@ export async function pullFederatedEventShifts(): Promise<FederationSyncResult |
     }
 
     const advanceCursor = () => {
-      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = record.updatedAt;
-      }
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
     };
 
     // Authority derives from the LOCAL event row — the one signed
@@ -2014,7 +2054,7 @@ export async function pullFederatedEventShifts(): Promise<FederationSyncResult |
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -2029,7 +2069,7 @@ export async function pullFederatedEventRsvps(): Promise<FederationSyncResult | 
 
   let inserted = 0;
   let skipped = 0;
-  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
 
   for (const r of feed.rows) {
     if (
@@ -2051,9 +2091,7 @@ export async function pullFederatedEventRsvps(): Promise<FederationSyncResult | 
     }
 
     const advanceCursor = () => {
-      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = record.updatedAt;
-      }
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
     };
 
     if (!(await db.events.get(record.eventId))) {
@@ -2096,7 +2134,7 @@ export async function pullFederatedEventRsvps(): Promise<FederationSyncResult | 
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -2111,7 +2149,7 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
 
   let inserted = 0;
   let skipped = 0;
-  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
 
   for (const r of feed.rows) {
     if (
@@ -2134,9 +2172,7 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
     }
 
     const advanceCursor = () => {
-      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = record.updatedAt;
-      }
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
     };
 
     const local = (await db.shiftSignups
@@ -2185,7 +2221,7 @@ export async function pullFederatedShiftSignups(): Promise<FederationSyncResult 
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
@@ -2213,7 +2249,7 @@ export async function pullFederatedMemberRemovals(): Promise<FederationSyncResul
 
   let inserted = 0;
   let skipped = 0;
-  let maxDecidedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxDecidedAt: CursorPos | null = feed.cursor;
 
   for (const raw of feed.rows) {
     const parsed = parseMemberRemoval(raw);
@@ -2227,9 +2263,7 @@ export async function pullFederatedMemberRemovals(): Promise<FederationSyncResul
       continue;
     }
     const advanceCursor = () => {
-      if (maxDecidedAt === null || record.decidedAt > maxDecidedAt) {
-        maxDecidedAt = record.decidedAt;
-      }
+      maxDecidedAt = advancePair(maxDecidedAt, record.decidedAt, record.id);
     };
     if (await db.memberRemovals.get(record.id)) {
       skipped += 1;
@@ -2242,7 +2276,7 @@ export async function pullFederatedMemberRemovals(): Promise<FederationSyncResul
   }
 
   if (maxDecidedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxDecidedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxDecidedAt));
   }
   return { inserted, skipped };
 }
@@ -2258,7 +2292,7 @@ export async function pullFederatedMemberReinstatements(): Promise<FederationSyn
 
   let inserted = 0;
   let skipped = 0;
-  let maxDecidedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxDecidedAt: CursorPos | null = feed.cursor;
 
   for (const raw of feed.rows) {
     const parsed = parseMemberReinstatement(raw);
@@ -2272,9 +2306,7 @@ export async function pullFederatedMemberReinstatements(): Promise<FederationSyn
       continue;
     }
     const advanceCursor = () => {
-      if (maxDecidedAt === null || record.decidedAt > maxDecidedAt) {
-        maxDecidedAt = record.decidedAt;
-      }
+      maxDecidedAt = advancePair(maxDecidedAt, record.decidedAt, record.id);
     };
     if (await db.memberReinstatements.get(record.id)) {
       skipped += 1;
@@ -2287,7 +2319,7 @@ export async function pullFederatedMemberReinstatements(): Promise<FederationSyn
   }
 
   if (maxDecidedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxDecidedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxDecidedAt));
   }
   return { inserted, skipped };
 }
@@ -2315,7 +2347,7 @@ export async function pullFederatedProposals(): Promise<FederationSyncResult | n
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxCreatedAt: CursorPos | null = feed.cursor;
 
   for (const raw of feed.rows) {
     const parsed = parseSignedProposal(raw);
@@ -2329,9 +2361,7 @@ export async function pullFederatedProposals(): Promise<FederationSyncResult | n
       continue;
     }
     const advanceCursor = () => {
-      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
-        maxCreatedAt = record.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, record.createdAt, record.id);
     };
     if (await db.proposals.get(record.id)) {
       skipped += 1;
@@ -2350,7 +2380,7 @@ export async function pullFederatedProposals(): Promise<FederationSyncResult | n
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxCreatedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxCreatedAt));
   }
   return { inserted, skipped };
 }
@@ -2365,7 +2395,7 @@ export async function pullFederatedVotes(): Promise<FederationSyncResult | null>
 
   let inserted = 0;
   let skipped = 0;
-  let maxCreatedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxCreatedAt: CursorPos | null = feed.cursor;
 
   for (const raw of feed.rows) {
     const parsed = parseSignedVote(raw);
@@ -2379,9 +2409,7 @@ export async function pullFederatedVotes(): Promise<FederationSyncResult | null>
       continue;
     }
     const advanceCursor = () => {
-      if (maxCreatedAt === null || record.createdAt > maxCreatedAt) {
-        maxCreatedAt = record.createdAt;
-      }
+      maxCreatedAt = advancePair(maxCreatedAt, record.createdAt, record.id);
     };
     // Proposal not here yet — the proposals pull runs first in the
     // fan-out; retry next cycle without advancing.
@@ -2403,7 +2431,7 @@ export async function pullFederatedVotes(): Promise<FederationSyncResult | null>
   }
 
   if (maxCreatedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxCreatedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxCreatedAt));
   }
   return { inserted, skipped };
 }
@@ -2418,7 +2446,7 @@ export async function pullFederatedProposalClosures(): Promise<FederationSyncRes
 
   let inserted = 0;
   let skipped = 0;
-  let maxClosedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxClosedAt: CursorPos | null = feed.cursor;
 
   for (const raw of feed.rows) {
     const parsed = parseProposalClosure(raw);
@@ -2432,9 +2460,10 @@ export async function pullFederatedProposalClosures(): Promise<FederationSyncRes
       continue;
     }
     const advanceCursor = () => {
-      if (maxClosedAt === null || record.closedAt > maxClosedAt) {
-        maxClosedAt = record.closedAt;
-      }
+      // Pair id is the closure record's own uuid — the server's
+      // `proposal_closures` tiebreak column — NOT the proposalId the
+      // local table is keyed by.
+      maxClosedAt = advancePair(maxClosedAt, record.closedAt, record.id);
     };
     const proposal = await db.proposals.get(record.proposalId);
     if (!proposal) {
@@ -2468,7 +2497,7 @@ export async function pullFederatedProposalClosures(): Promise<FederationSyncRes
   }
 
   if (maxClosedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxClosedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxClosedAt));
   }
   return { inserted, skipped };
 }
@@ -2492,7 +2521,7 @@ export async function pullFederatedSeedVaultPledges(): Promise<FederationSyncRes
 
   let inserted = 0;
   let skipped = 0;
-  let maxUpdatedAt: number | null = feed.since ? Number(feed.since) : null;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
 
   for (const r of feed.rows) {
     if (
@@ -2513,9 +2542,7 @@ export async function pullFederatedSeedVaultPledges(): Promise<FederationSyncRes
     }
 
     const advanceCursor = () => {
-      if (maxUpdatedAt === null || record.updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = record.updatedAt;
-      }
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
     };
 
     const local = await db.seedVaultPledges.get(record.memberKey);
@@ -2530,7 +2557,7 @@ export async function pullFederatedSeedVaultPledges(): Promise<FederationSyncRes
   }
 
   if (maxUpdatedAt !== null) {
-    await setSetting(feed.cursorKey, String(maxUpdatedAt));
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
   }
   return { inserted, skipped };
 }
