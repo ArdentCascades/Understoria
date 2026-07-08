@@ -9,13 +9,15 @@ include breaking changes.
 
 ## [Unreleased]
 
-### Fixed
-- **"gathering" no longer bursts out of its dashboard tile.** The
-  new side rail narrowed the stats row without giving the tiles
-  room to adapt; five-across now waits for genuinely wide screens,
-  and long words wrap inside their tile instead of overflowing.
-
 ### Changed
+- **"Start a project" shows the form only once you've picked a
+  starting point.** The blank form used to sit beside the templates
+  before you'd chosen anything; now the template gallery gets the
+  whole page while you browse, and the form appears when you pick a
+  template, choose "Start from scratch", or continue a draft.
+  Reconsidering brings the full gallery back without losing
+  anything you typed.
+
 - **Wide monitors get more content, and the dashboard rows fill
   evenly.** The app's content width now stretches to 1600px on big
   screens (it stopped at 1440), and dashboard cards sharing a row
@@ -47,6 +49,12 @@ include breaking changes.
   they now sit in sensible pairs — total hours beside community
   resilience, milestones beside where help is flowing. Phones are
   unchanged.
+
+### Fixed
+- **"gathering" no longer bursts out of its dashboard tile.** The
+  new side rail narrowed the stats row without giving the tiles
+  room to adapt; five-across now waits for genuinely wide screens,
+  and long words wrap inside their tile instead of overflowing.
 
 ### Added
 - **Press `/` to search the board.** A desktop keyboard habit: from
