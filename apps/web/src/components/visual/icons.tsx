@@ -91,6 +91,22 @@ export function IconShare(props: IconProps) {
   );
 }
 
+// Browser install icon — a monitor with a downward arrow, the shape
+// Chromium draws at the right end of the address bar. Shown next to
+// the desktop install hint so members know what they're looking for
+// (pilot report: "worth showing them what the icon looks like").
+// Same 1.5px stroke / fill-none style as the rest of the set.
+export function IconInstall(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+      <path d="M12 7v6" />
+      <path d="M9.5 10.5 12 13l2.5-2.5" />
+      <path d="M9 20h6" />
+    </Icon>
+  );
+}
+
 // Gear — entry point for the device-settings sub-page. Drawn with
 // six teeth around a center hub; matches the 1.5px stroke / fill-none
 // style of the rest of the icon set.

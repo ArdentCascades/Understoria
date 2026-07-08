@@ -11,7 +11,7 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IconShare } from "@/components/visual";
+import { IconInstall, IconShare } from "@/components/visual";
 import { useInstallGuide } from "@/lib/useInstallGuide";
 import {
   SELECTABLE_DEVICES,
@@ -199,11 +199,33 @@ function DeviceSteps({
                 data-decorative=""
               />
             </li>
+          ) : device === "desktop" && i === 0 ? (
+            // The desktop steps describe the address-bar install icon —
+            // show the shape being described, mirroring the iOS Share
+            // treatment (pilot report: "worth showing them what the
+            // icon looks like").
+            <li key={key} className="flex flex-wrap items-center gap-1">
+              <span>{t(key)}</span>
+              <IconInstall
+                size={18}
+                className="text-canopy-700 dark:text-canopy-300"
+                data-decorative=""
+              />
+            </li>
           ) : (
             <li key={key}>{t(key)}</li>
           ),
         )}
       </ol>
+      {device === "desktop" && (
+        // The steps above are the Chrome/Edge family's. Firefox has no
+        // desktop web-app install and Safari's lives in a menu — say
+        // so instead of leaving members of those browsers hunting for
+        // an icon that isn't there (pilot report).
+        <p className="mt-2 text-xs text-canopy-800 dark:text-canopy-200">
+          {t("install.desktop.otherBrowsersNote")}
+        </p>
+      )}
     </div>
   );
 }

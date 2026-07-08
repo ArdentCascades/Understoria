@@ -217,11 +217,44 @@ describe("useInstallCardNudge", () => {
     expect(link?.className).toContain("touch-target");
   });
 
+  it("card manual desktop firefox → the honest no-install copy, no icon hunt", async () => {
+    // The pilot report: a Firefox member was told to find an install
+    // icon Firefox doesn't have. The firefox branch says the truth
+    // and names the browsers that DO install.
+    mockEnv.current = {
+      kind: "manual",
+      device: "desktop",
+      desktopBrowser: "firefox",
+    };
+    render();
+    await flushAsync();
+    expect(container.textContent).toContain("Firefox on computers can't install web apps");
+    expect(container.textContent).toContain("Chrome or Edge");
+    // No icon glyph on this branch — there is no icon to picture.
+    expect(container.querySelector("svg")).toBeNull();
+    // Desktop phrasing in the title, not "home screen".
+    expect(container.textContent).toContain("Install Understoria as an app");
+  });
+
+  it("card manual desktop chromium → the address-bar hint WITH the icon pictured", async () => {
+    mockEnv.current = {
+      kind: "manual",
+      device: "desktop",
+      desktopBrowser: "chromium-like",
+    };
+    render();
+    await flushAsync();
+    expect(container.textContent).toContain("install icon");
+    // The IconInstall glyph renders next to the hint so the member
+    // knows the shape they're looking for.
+    expect(container.querySelector("svg")).not.toBeNull();
+  });
+
   it("card dismiss → writes the sentinel and stays hidden on re-render", async () => {
     mockEnv.current = { kind: "ios-safari" };
     render();
     await flushAsync();
-    expect(container.textContent).toContain("Keep Understoria one tap away");
+    expect(container.textContent).toContain("Add Understoria to your home screen");
 
     const dismiss = Array.from(container.querySelectorAll("button")).find(
       (b) => b.textContent?.includes("Not now"),

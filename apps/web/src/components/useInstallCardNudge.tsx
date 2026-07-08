@@ -11,7 +11,7 @@
  */
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { IconShare } from "@/components/visual";
+import { IconInstall, IconShare } from "@/components/visual";
 import { OneTapInstall } from "@/components/InstallGuide";
 import { useInstallGuide, type UseInstallGuide } from "@/lib/useInstallGuide";
 import type { InstallEnvironment } from "@/lib/installGuide";
@@ -53,6 +53,16 @@ function InstallGuideCard({ guide }: { guide: UseInstallGuide }) {
   // never nags.
   if (state === null || state.kind === "installed") return null;
 
+  // Pilot report: the old one-size title ("Keep Understoria one tap
+  // away") said neither what the card does nor how it varies by
+  // device — the title now names the concrete action, and a one-line
+  // "why" says what the member gets. "Home screen" phrasing for
+  // mobile states; "install as an app" for desktop (where there is
+  // no home screen) and for the one-tap prompt (Chromium's own verb).
+  const desktopPhrasing =
+    state.kind === "promptable" ||
+    (state.kind === "manual" && state.device === "desktop");
+
   return (
     <div
       role="region"
@@ -62,7 +72,12 @@ function InstallGuideCard({ guide }: { guide: UseInstallGuide }) {
                  dark:border-canopy-900 dark:bg-canopy-950/40"
     >
       <p className="font-medium text-canopy-900 dark:text-canopy-100">
-        {t("install.card.title")}
+        {desktopPhrasing
+          ? t("install.card.titleDesktop")
+          : t("install.card.titleMobile")}
+      </p>
+      <p className="text-xs text-canopy-800 dark:text-canopy-200">
+        {t("install.card.why")}
       </p>
       <CardBody state={state} onPrompt={promptInstall} />
       <div className="flex justify-end">
@@ -150,11 +165,40 @@ function CardHint({ state }: { state: InstallEnvironment }) {
         </p>
       );
     case "manual":
+      if (state.device === "android") {
+        return (
+          <p className="text-canopy-900 dark:text-canopy-100">
+            {t("install.card.androidHint")}
+          </p>
+        );
+      }
+      // Desktop forks by browser (pilot report: a Firefox member was
+      // told to find an install icon Firefox doesn't have). Firefox
+      // gets the honest no-install line; Safari gets Add to Dock;
+      // the chromium-like family keeps the icon hint WITH a picture
+      // of the icon, mirroring the iOS Share-glyph treatment.
+      if (state.desktopBrowser === "firefox") {
+        return (
+          <p className="text-canopy-900 dark:text-canopy-100">
+            {t("install.card.firefoxDesktopHint")}
+          </p>
+        );
+      }
+      if (state.desktopBrowser === "safari") {
+        return (
+          <p className="text-canopy-900 dark:text-canopy-100">
+            {t("install.card.safariDesktopHint")}
+          </p>
+        );
+      }
       return (
-        <p className="text-canopy-900 dark:text-canopy-100">
-          {state.device === "android"
-            ? t("install.card.androidHint")
-            : t("install.card.desktopHint")}
+        <p className="flex flex-wrap items-center gap-1 text-canopy-900 dark:text-canopy-100">
+          <IconInstall
+            size={18}
+            className="text-canopy-700 dark:text-canopy-300"
+            data-decorative=""
+          />
+          <span>{t("install.card.desktopHint")}</span>
         </p>
       );
     // `promptable` is handled by CardBody; `installed` never reaches a

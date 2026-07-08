@@ -42,7 +42,30 @@ export type InstallEnvironment =
   | { kind: "ios-safari" }
   | { kind: "ios-other" } // iOS on a non-Safari browser — only Safari can install on iOS
   | { kind: "in-app-browser" }
-  | { kind: "manual"; device: DeviceId }; // android/desktop generic steps
+  // android/desktop generic steps. `desktopBrowser` is set on the
+  // desktop bucket only, because desktop install support genuinely
+  // FORKS by browser (pilot report: a Firefox user was told to find
+  // an install icon that Firefox does not have):
+  //   chromium-like — the address-bar install icon exists
+  //   safari        — File → Add to Dock (macOS Sonoma+), no icon
+  //   firefox       — no desktop web-app install at all; the honest
+  //                   copy says so instead of sending them hunting
+  | { kind: "manual"; device: DeviceId; desktopBrowser?: DesktopBrowser };
+
+/** Desktop browser families whose install affordances differ. Only
+ *  consulted for the desktop manual bucket — mobile copy is generic. */
+export type DesktopBrowser = "chromium-like" | "safari" | "firefox";
+
+/** Classify a DESKTOP user agent by install affordance. Firefox first
+ *  (its UA also contains no Chrome token); Safari via the existing
+ *  wrapped-engine-aware predicate plus a Chromium exclusion (Chrome's
+ *  UA contains "Safari"); everything else is treated as
+ *  chromium-like, the address-bar-icon family. */
+export function detectDesktopBrowser(ua: string): DesktopBrowser {
+  if (/Firefox\//.test(ua)) return "firefox";
+  if (isSafari(ua) && !/Chrome|Chromium|Edg\//.test(ua)) return "safari";
+  return "chromium-like";
+}
 
 // --- Pure predicates -------------------------------------------------
 // Every predicate takes its inputs as parameters so it is unit-testable
@@ -152,7 +175,13 @@ export function detectInstallEnvironment(input: {
   // 6. Everything else gets generic manual steps for its device bucket.
   //    iOS was handled above, so detectDevice resolves to android or
   //    desktop here; the panel's device toggle covers a misdetection.
-  return { kind: "manual", device: detectDevice(ua, platform, maxTouchPoints) };
+  //    Desktop additionally carries the browser family, because the
+  //    install affordance forks by browser there (see the type).
+  const device = detectDevice(ua, platform, maxTouchPoints);
+  if (device === "desktop") {
+    return { kind: "manual", device, desktopBrowser: detectDesktopBrowser(ua) };
+  }
+  return { kind: "manual", device };
 }
 
 /**
