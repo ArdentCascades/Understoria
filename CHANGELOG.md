@@ -9,6 +9,15 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **The community board wastes far less desktop space.** The right
+  column was silently reserved for the "needs your attention" card
+  even when there was nothing needing attention — which is most
+  visits — leaving a permanent dead zone on the right. It now
+  collapses when empty, and the board's cards spread into the room.
+  The floating post/project buttons also move to the bottom-right
+  corner on desktop instead of hovering over the cards mid-screen.
+
 ### Added
 - **A design proposal for passkey restore is on the table** —
   docs/passkey-restore.md. The idea: your synced passkey could
