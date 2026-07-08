@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
@@ -398,6 +398,13 @@ export default function CalendarPage() {
 
   return (
     <div className="px-4 pb-36 pt-stack-md">
+      {/* At lg+ the page is a row: the calendar column flexes and the
+          nested event panel (Outlet) docks on the right when open -
+          the calendar stays mounted, so month and filter state
+          survive opening events. Below lg the Outlet renders as a
+          full-screen takeover and this wrapper is a plain block. */}
+      <div className="lg:flex lg:items-start lg:gap-6">
+      <div className="min-w-0 lg:flex-1">
       <header className="mb-stack-md">
         <h1 className="page-title">{t("calendar.title")}</h1>
         <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
@@ -587,6 +594,9 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+      </div>
+      <Outlet />
+      </div>
     </div>
   );
 }

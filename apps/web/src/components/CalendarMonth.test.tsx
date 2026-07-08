@@ -137,13 +137,13 @@ describe("CalendarMonth paging", () => {
       startsAt: Date.UTC(2026, 8, 10, 18, 0, 0),
     });
     render(<MonthHarness events={[far]} />);
-    expect(container.querySelector('a[href="/events/far"]')).toBeNull();
+    expect(container.querySelector('a[href="/calendar/event/far"]')).toBeNull();
     const next = navButton(/next month/i);
     act(() => next.click());
     act(() => next.click());
     act(() => next.click());
     expect(container.textContent).toContain("September 2026");
-    expect(container.querySelector('a[href="/events/far"]')).not.toBeNull();
+    expect(container.querySelector('a[href="/calendar/event/far"]')).not.toBeNull();
   });
 
   it("does not mark any cell as today on a month that doesn't contain it", () => {

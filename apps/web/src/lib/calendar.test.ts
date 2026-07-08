@@ -691,7 +691,7 @@ describe("buildCalendar — event", () => {
       kind: "event",
       eventId: "ev_1",
       title: "Saturday skillshare",
-      path: "/events/ev_1",
+      path: "/calendar/event/ev_1",
       organizerKey: "organizer",
       // buildCalendar copies the event's free-text category onto the
       // entry for the chip's colour/emoji (Task 4).
@@ -794,7 +794,7 @@ describe("buildCalendar — event", () => {
     if (entry.kind !== "event") throw new Error("expected event entry");
     expect(entry.title).toBe("Potluck");
     expect(entry.location).toBe("community room");
-    expect(entry.path).toBe("/events/ev_full");
+    expect(entry.path).toBe("/calendar/event/ev_full");
     expect(entry.organizerKey).toBe("alice_key");
     expect(entry.startsAt).toBe(startsAt);
   });
@@ -1216,7 +1216,7 @@ describe("entryIsPast — events", () => {
       endsAt,
       location: "anywhere",
       organizerKey: "org",
-      path: "/events/ev",
+      path: "/calendar/event/ev",
       // Single-day fixture: dayCount 1 routes entryIsPast through the
       // (endsAt ?? startsAt) < startOfTodayMs branch — the same path the
       // pre-multi-day rule took.
@@ -1288,7 +1288,7 @@ describe("entryIsPast — events", () => {
       endsAt: date + 2 * DAY,
       location: "anywhere",
       organizerKey: "org",
-      path: "/events/ev",
+      path: "/calendar/event/ev",
       isMultiDay: dayCount > 1,
       dayIndex,
       dayCount,

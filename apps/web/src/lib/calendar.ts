@@ -338,7 +338,13 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
         endsAt: ev.endsAt,
         location: ev.location,
         organizerKey: ev.createdBy,
-        path: `/events/${ev.id}`,
+        // Calendar-originated event links open IN the calendar - the
+        // nested route renders the event as a docked side panel at
+        // desktop widths (full-screen below lg) while the calendar
+        // stays mounted, so month/filter state survives the visit.
+        // `/events/:id` remains the canonical standalone page for
+        // shares, ICS files, and deep links from elsewhere.
+        path: `/calendar/event/${ev.id}`,
         isMultiDay,
         dayIndex: i,
         dayCount,

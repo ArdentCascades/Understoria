@@ -439,6 +439,11 @@
     "primaryNav": "Navegación principal"
   },
   "calendar": {
+    "panel": {
+      "ariaLabel": "Detalles del evento",
+      "closeShort": "Cerrar",
+      "close": "Cerrar panel del evento"
+    },
     "title": "Calendario de la comunidad",
     "tagline": "Lo que la comunidad está haciendo en conjunto — fechas límite de proyectos, publicaciones por vencer y el ritmo de los intercambios que ya ocurrieron.",
     "views": {

@@ -346,7 +346,7 @@ describe("CalendarPage", () => {
     function linkHrefs() {
       return Array.from(
         container.querySelectorAll<HTMLAnchorElement>(
-          'a[href^="/project/"], a[href^="/post/"], a[href^="/events/"]',
+          'a[href^="/project/"], a[href^="/post/"], a[href^="/calendar/event/"], a[href^="/calendar/event/"]',
         ),
       ).map((a) => a.getAttribute("href"));
     }
@@ -354,7 +354,7 @@ describe("CalendarPage", () => {
     let hrefs = linkHrefs();
     // Before toggling, both the project deadline and the event appear.
     expect(hrefs).toContain("/project/p1");
-    expect(hrefs).toContain("/events/ev_a");
+    expect(hrefs).toContain("/calendar/event/ev_a");
 
     const chip = Array.from(
       container.querySelectorAll<HTMLButtonElement>("button"),
@@ -365,7 +365,7 @@ describe("CalendarPage", () => {
     });
 
     hrefs = linkHrefs();
-    expect(hrefs).toContain("/events/ev_a");
+    expect(hrefs).toContain("/calendar/event/ev_a");
     expect(hrefs).not.toContain("/project/p1");
     vi.useRealTimers();
   });
@@ -394,13 +394,13 @@ describe("CalendarPage", () => {
 
     function eventHrefs() {
       return Array.from(
-        container.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'),
+        container.querySelectorAll<HTMLAnchorElement>('a[href^="/calendar/event/"]'),
       ).map((a) => a.getAttribute("href"));
     }
 
     // No project filter: both events render.
-    expect(eventHrefs()).toContain("/events/linked");
-    expect(eventHrefs()).toContain("/events/unlinked");
+    expect(eventHrefs()).toContain("/calendar/event/linked");
+    expect(eventHrefs()).toContain("/calendar/event/unlinked");
 
     // Select the project. The project <select> is the one with a "p1"
     // option (the other select holds categories).
@@ -416,8 +416,8 @@ describe("CalendarPage", () => {
     // Now only the linked work day survives among events; the unlinked
     // event is filtered out, and the project's own deadline still shows.
     const hrefs = eventHrefs();
-    expect(hrefs).toContain("/events/linked");
-    expect(hrefs).not.toContain("/events/unlinked");
+    expect(hrefs).toContain("/calendar/event/linked");
+    expect(hrefs).not.toContain("/calendar/event/unlinked");
     expect(
       Array.from(
         container.querySelectorAll<HTMLAnchorElement>('a[href="/project/p1"]'),
@@ -484,8 +484,8 @@ describe("CalendarPage", () => {
     render(<CalendarPage />);
     // The event the viewer is going to carries the going-specific
     // aria-label; the other event keeps the plain one.
-    const goingChip = container.querySelector('a[href="/events/going"]');
-    const otherChip = container.querySelector('a[href="/events/other"]');
+    const goingChip = container.querySelector('a[href="/calendar/event/going"]');
+    const otherChip = container.querySelector('a[href="/calendar/event/other"]');
     expect(goingChip?.getAttribute("aria-label")).toBe("Event you're going to");
     expect(otherChip?.getAttribute("aria-label")).toBe("Event");
     vi.useRealTimers();
@@ -586,19 +586,19 @@ describe("CalendarPage", () => {
 
     function eventHrefs() {
       return Array.from(
-        container.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'),
+        container.querySelectorAll<HTMLAnchorElement>('a[href^="/calendar/event/"]'),
       ).map((a) => a.getAttribute("href"));
     }
     // Before toggling Mine, every event shows (community-wide).
-    expect(eventHrefs()).toContain("/events/theirs");
+    expect(eventHrefs()).toContain("/calendar/event/theirs");
 
     act(() => mineChip().click());
 
     const hrefs = eventHrefs();
-    expect(hrefs).toContain("/events/mine-org");
-    expect(hrefs).toContain("/events/mine-going");
-    expect(hrefs).toContain("/events/mine-maybe");
-    expect(hrefs).not.toContain("/events/theirs");
+    expect(hrefs).toContain("/calendar/event/mine-org");
+    expect(hrefs).toContain("/calendar/event/mine-going");
+    expect(hrefs).toContain("/calendar/event/mine-maybe");
+    expect(hrefs).not.toContain("/calendar/event/theirs");
     vi.useRealTimers();
   });
 
@@ -618,7 +618,7 @@ describe("CalendarPage", () => {
 
     function eventHrefs() {
       return Array.from(
-        container.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'),
+        container.querySelectorAll<HTMLAnchorElement>('a[href^="/calendar/event/"]'),
       ).map((a) => a.getAttribute("href"));
     }
 
@@ -634,12 +634,12 @@ describe("CalendarPage", () => {
     });
 
     const hrefs = eventHrefs();
-    expect(hrefs).toContain("/events/soc");
-    expect(hrefs).not.toContain("/events/work");
+    expect(hrefs).toContain("/calendar/event/soc");
+    expect(hrefs).not.toContain("/calendar/event/work");
     vi.useRealTimers();
   });
 
-  it("renders the FAB linking to /events/new with the i18n aria-label", () => {
+  it("renders the FAB linking to /calendar/event/new with the i18n aria-label", () => {
     render(<CalendarPage />);
     const fab = container.querySelector<HTMLAnchorElement>(
       'a[href="/events/new"]',
@@ -671,7 +671,7 @@ describe("CalendarPage", () => {
     clickAgenda();
     // The event's link appears in BOTH day sections.
     const sections = Array.from(container.querySelectorAll("section")).filter(
-      (s) => s.querySelector('a[href="/events/fest"]') !== null,
+      (s) => s.querySelector('a[href="/calendar/event/fest"]') !== null,
     );
     expect(sections.length).toBe(2);
     vi.useRealTimers();
@@ -693,7 +693,7 @@ describe("CalendarPage", () => {
     // the "day 2 of 2" cue only on the title attribute — assert here on
     // the final-day "Ends" copy and that the start time is absent.
     const sections = Array.from(container.querySelectorAll("section")).filter(
-      (s) => s.querySelector('a[href="/events/fest"]') !== null,
+      (s) => s.querySelector('a[href="/calendar/event/fest"]') !== null,
     );
     expect(sections.length).toBe(2);
     const finalText = sections[1].textContent ?? "";
@@ -717,7 +717,7 @@ describe("CalendarPage", () => {
     render(<CalendarPage />);
     clickAgenda();
     const sections = Array.from(container.querySelectorAll("section")).filter(
-      (s) => s.querySelector('a[href="/events/build"]') !== null,
+      (s) => s.querySelector('a[href="/calendar/event/build"]') !== null,
     );
     expect(sections.length).toBe(3);
     const middleText = sections[1].textContent ?? "";
@@ -754,7 +754,7 @@ describe("CalendarPage", () => {
     // Collect this event's chips; at least one is a continuation day
     // (dayIndex > 0) and carries a "day N of 3" aria-label.
     const chips = Array.from(
-      container.querySelectorAll<HTMLAnchorElement>('a[href="/events/build"]'),
+      container.querySelectorAll<HTMLAnchorElement>('a[href="/calendar/event/build"]'),
     );
     const labels = chips.map((c) => c.getAttribute("aria-label") ?? "");
     expect(labels.some((l) => /day 2 of 3/i.test(l))).toBe(true);
@@ -782,7 +782,7 @@ describe("CalendarPage", () => {
     render(<CalendarPage />);
     clickAgenda();
     const chips = Array.from(
-      container.querySelectorAll<HTMLAnchorElement>('a[href="/events/fest"]'),
+      container.querySelectorAll<HTMLAnchorElement>('a[href="/calendar/event/fest"]'),
     );
     expect(chips.length).toBe(2);
     // Both day entries carry a "going" aria-label (the going-specific
@@ -802,7 +802,7 @@ describe("CalendarPage", () => {
     ];
     render(<CalendarPage />);
     clickAgenda();
-    const chips = container.querySelectorAll('a[href="/events/one"]');
+    const chips = container.querySelectorAll('a[href="/calendar/event/one"]');
     expect(chips.length).toBe(1);
     vi.useRealTimers();
   });
@@ -852,12 +852,12 @@ describe("CalendarPage", () => {
 
     // RSVP'd-going event: accent + weight + the existing ✓ stays; the
     // going aria-label (not colour) carries it for screen readers.
-    const goingChip = container.querySelector('a[href="/events/going"]');
+    const goingChip = container.querySelector('a[href="/calendar/event/going"]');
     expect(goingChip?.className ?? "").toContain("border-canopy");
     expect(goingChip?.innerHTML ?? "").toContain("font-semibold");
     expect(goingChip?.textContent ?? "").toContain("✓");
     // Ambient event: none of it.
-    const ambientChip = container.querySelector('a[href="/events/ambient"]');
+    const ambientChip = container.querySelector('a[href="/calendar/event/ambient"]');
     expect(ambientChip?.className ?? "").not.toContain("border-canopy");
     expect(ambientChip?.innerHTML ?? "").not.toContain("font-semibold");
     vi.useRealTimers();
@@ -1011,7 +1011,7 @@ describe("CalendarPage month paging", () => {
     // Default jsdom innerWidth (1024) selects the month view.
     render(<CalendarPage />);
     expect(container.textContent).toContain("June 2026");
-    expect(container.querySelector('a[href="/events/far"]')).toBeNull();
+    expect(container.querySelector('a[href="/calendar/event/far"]')).toBeNull();
 
     const nextMonth = () =>
       Array.from(container.querySelectorAll<HTMLButtonElement>("button")).find(
@@ -1021,7 +1021,7 @@ describe("CalendarPage month paging", () => {
     act(() => nextMonth()!.click());
     act(() => nextMonth()!.click());
     expect(container.textContent).toContain("September 2026");
-    expect(container.querySelector('a[href="/events/far"]')).not.toBeNull();
+    expect(container.querySelector('a[href="/calendar/event/far"]')).not.toBeNull();
 
     // The quiet Today jump resets to the current month.
     const today = Array.from(
@@ -1030,7 +1030,7 @@ describe("CalendarPage month paging", () => {
     expect(today).toBeDefined();
     act(() => today!.click());
     expect(container.textContent).toContain("June 2026");
-    expect(container.querySelector('a[href="/events/far"]')).toBeNull();
+    expect(container.querySelector('a[href="/calendar/event/far"]')).toBeNull();
     vi.useRealTimers();
   });
 });
