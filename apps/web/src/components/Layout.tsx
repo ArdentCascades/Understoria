@@ -82,7 +82,7 @@ export function Layout() {
         tabIndex={-1}
       >
         <div
-          className={`mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px] ${mainPad}`}
+          className={`mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1600px] ${mainPad}`}
         >
           {!ready ? (
             <Splash />

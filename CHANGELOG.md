@@ -9,7 +9,19 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **"gathering" no longer bursts out of its dashboard tile.** The
+  new side rail narrowed the stats row without giving the tiles
+  room to adapt; five-across now waits for genuinely wide screens,
+  and long words wrap inside their tile instead of overflowing.
+
 ### Changed
+- **Wide monitors get more content, and the dashboard rows fill
+  evenly.** The app's content width now stretches to 1600px on big
+  screens (it stopped at 1440), and dashboard cards sharing a row
+  stretch to the same height instead of leaving ragged gaps — the
+  total-hours card centers itself beside its taller neighbors.
+
 - **The dashboard takes its desktop shape: a main column and a
   side rail.** The two act-now cards — "Coming up" and "Where hands
   are welcome" — now sit in a rail on the right that stays put as
