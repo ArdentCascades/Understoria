@@ -31,7 +31,8 @@ import {
 // (the primary plus every consented mirror, each with a quiet
 // freshness leaf), the replica line names the fact that every
 // member's device already holds a complete signed copy, and the
-// dashed empty trunk IS the call to action — it links to the
+// dashed empty trunk IS the call to action — it opens the guided
+// "Grow another root" wizard (/grow-root), which replaced the static
 // add-a-node Help entry. With two or more nodes answering, the tier
 // climbs (sturdy / deep_rooted) and the copy makes the takedown story
 // concrete: if one server disappears, apps switch to the others on
@@ -122,7 +123,7 @@ export function ResilienceCard() {
           </span>
         ))}
         <Link
-          to="/help#add-a-node"
+          to="/grow-root"
           className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-dashed border-moss-300 text-lg text-moss-600 hover:border-canopy-500 hover:text-canopy-600 dark:border-moss-700 dark:text-moss-300 dark:hover:border-canopy-400"
           title={t("dashboard.resilience.cta")}
         >
@@ -181,7 +182,7 @@ export function ResilienceCard() {
       )}
 
       <Link
-        to="/help#add-a-node"
+        to="/grow-root"
         className="mt-2 inline-block text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
       >
         {t("dashboard.resilience.cta")} →

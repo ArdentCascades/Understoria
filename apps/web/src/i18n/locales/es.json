@@ -1630,6 +1630,98 @@
     "confirm": "Añadir servidor de respaldo",
     "decline": "Ahora no"
   },
+  "growRoot": {
+    "title": "Hacer crecer otra raíz",
+    "intro": "Las comunidades de Understoria se fortalecen como los árboles: echando más raíces. Elige la forma en que puedes ayudar.",
+    "continue": "Continuar",
+    "copied": "Copiado.",
+    "gate": {
+      "title": "Esta guía se abre con confianza",
+      "body": "Administrar un servidor para la comunidad conlleva responsabilidades reales: quien lo hace se convierte en operador, con poderes y límites que toda la comunidad puede leer. Por eso esta guía paso a paso se abre para personas de confianza: quienes cuentan con el aval de al menos {{count}} personas, el mismo umbral de confianza que usa el resto de la aplicación.",
+      "progress": "Llevas {{have}} de {{need}} avales. No es una nota: crece solo, a medida que intercambias ayuda con tus vecinos.",
+      "seedVaultLead": "Algo que puedes hacer ahora mismo: comprometerte a guardar una copia completa del archivo de la comunidad está abierto a todo el mundo, sin necesidad de servidor.",
+      "seedVaultLink": "Guardar el archivo completo en este dispositivo",
+      "guideLink": "Leer la guía completa también está abierto a todo el mundo"
+    },
+    "paths": {
+      "run": {
+        "title": "Puedo mantener un ordenador encendido",
+        "body": "Un portátil viejo en un armario es suficiente, de verdad. Esta guía genera la configuración por ti y comprueba el resultado contigo."
+      },
+      "ask": {
+        "title": "Quiero pedírselo a alguien",
+        "body": "Redacta una nota breve para esa amistad que tiene un ordenador de sobra: tú pones la invitación, la aplicación pone los pasos."
+      },
+      "help": {
+        "title": "No puedo administrar un servidor, pero puedo ayudar",
+        "body": "Hay una forma sin complicaciones de fortalecer las raíces de tu comunidad desde el dispositivo que ya tienes en la mano."
+      }
+    },
+    "ask": {
+      "title": "Pídele a alguien que haga crecer una raíz",
+      "body": "Aquí tienes una nota lista para enviar. Tu canal de siempre es el adecuado: no contiene nada secreto.",
+      "message": "¡Hola! Nuestra comunidad se coordina en {{origin}} — una hora de ayuda vale una hora de ayuda. Ahora mismo todo funciona en un único servidor, y buscamos a una persona más que administre un segundo, para que ninguna máquina (ni ninguna persona) sea un punto de presión. Un portátil viejo que se quede encendido es suficiente, de verdad, y la aplicación te guía en cada paso: {{guide}}. ¿Te animas? Es cosa de una tarde, y yo te ayudo."
+    },
+    "helper": {
+      "title": "Ayudar sin administrar un servidor",
+      "body": "El dispositivo de cada integrante ya lleva una copia firmada de la comunidad, pero los teléfonos recortan registros antiguos cuando falta espacio. Comprometerte como bóveda de semillas significa que uno de tus dispositivos guarda el archivo completo: sin abrir puertos, sin poderes de operador, solo almacenamiento y solidaridad. Si algún día se perdieran todos los servidores, las bóvedas de semillas son los dispositivos desde los que la comunidad se restaura.",
+      "link": "Abrir los ajustes de datos para comprometerte"
+    },
+    "needs": {
+      "title": "Qué necesitas",
+      "intro": "Tres cosas, ninguna exótica:",
+      "computer": "Un ordenador que pueda quedarse encendido: un portátil viejo (con la tapa cerrada, en un armario), un mini-PC o una placa tipo Raspberry Pi.",
+      "internet": "Conexión a internet en casa, y poder abrir un puerto en tu router o usar un servicio de túnel.",
+      "afternoon": "Una tarde, más una conversación con quien administra el servidor actual de tu comunidad.",
+      "ack": "He leído lo que significa administrar un nodo: quien opera uno tiene los poderes y límites que nombra docs/operator-powers.md, y mi comunidad puede ver que los tengo.",
+      "ackLink": "Léelo en la página de Ayuda"
+    },
+    "settings": {
+      "title": "La configuración de tu comunidad",
+      "loading": "Pidiendo sus datos al servidor de tu comunidad…",
+      "noNode": "Este dispositivo aún no está conectado a un servidor comunitario, así que la guía no puede leer los datos de tu comunidad. Conecta uno primero en Ajustes.",
+      "noNodeLink": "Abrir Ajustes",
+      "intro": "Este es el archivo de configuración del servidor nuevo, generado para tu comunidad. Cópialo entero: las líneas que aún necesitan una mano humana se señalan abajo.",
+      "readAuth": "Nuestra comunidad exige lecturas firmadas (READ_AUTH activado)",
+      "readAuthHint": "Pregunta a quien opera tu servidor actual si no estás seguro. La puerta de lectura debe coincidir en todos los servidores: un espejo con ella desactivada serviría el conjunto de datos replicado a cualquiera que tenga su dirección.",
+      "envLabel": "Configuración para el servidor nuevo",
+      "placeholdersLead": "Antes de arrancar el servidor, tres líneas necesitan una mano humana:",
+      "placeholderDbKey": "DATABASE_KEY — ejecuta en el ordenador nuevo el comando del comentario y pega el resultado.",
+      "placeholderFounders": "NODE_FOUNDER_KEYS — cópialo de tu operador actual, carácter por carácter.",
+      "placeholderQuorum": "REMOVAL_QUORUM — ponle el mismo número que usa el servidor actual."
+    },
+    "handover": {
+      "title": "Entrégale esto a tu operador actual",
+      "body": "El servidor actual necesita unas pocas líneas para emparejarse con el nuevo y anunciarlo a las aplicaciones de la comunidad. Muestra el código QR en persona, o pega el texto.",
+      "urlLabel": "La dirección pública del servidor nuevo",
+      "urlHint": "Pregunta a quien va a operar el servidor nuevo dónde vivirá: un dominio o una dirección de túnel, como https://node2.example.",
+      "label": "Configuración para el servidor actual",
+      "qrAlt": "Código QR con el bloque de configuración para el operador actual",
+      "tokenNote": "El mismo token aparece en ambos bloques a propósito: es la forma en que los dos servidores se reconocerán. Viaja solo mediante este botón de copiar o el código QR, nunca por la red."
+    },
+    "verify": {
+      "title": "Comprueba tu nueva raíz",
+      "intro": "Cuando el servidor nuevo esté en marcha y ambos archivos de configuración en su sitio, pon aquí su dirección y mirémoslo juntos.",
+      "urlLabel": "La dirección del servidor nuevo",
+      "run": "Ejecutar las comprobaciones",
+      "running": "Comprobando…",
+      "rerun": "Ejecutar las comprobaciones otra vez",
+      "check": {
+        "reachable": "El servidor nuevo responde",
+        "config": "Publica su página de configuración",
+        "distinctNodeId": "Tiene un nombre propio",
+        "announced": "Tu servidor actual lo anuncia a la comunidad"
+      },
+      "status": {
+        "ok": "superada",
+        "fail": "todavía no",
+        "unknown": "no se pudo determinar"
+      },
+      "notYet": "Aún no está todo en verde — completamente normal en el primer intento. Ajusta lo que nombra la fila, reinicia el servidor y ejecuta las comprobaciones otra vez; reintentar no rompe nada.",
+      "allGreen": "La aplicación de cada integrante ofrecerá ahora la nueva raíz en una tarjeta de consentimiento — incluida la tuya. Tu comunidad acaba de volverse más difícil de tumbar.",
+      "dashboardLink": "Volver al Panel"
+    }
+  },
   "format": {
     "justNow": "ahora mismo",
     "minutesAgo": "hace {{count}} min",
