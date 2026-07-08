@@ -52,6 +52,10 @@ export function CanopyMilestones({
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("dashboard.milestones.title")}
       </h2>
+      {/* Stacked on phones; three columns from md up — each row is a
+          label, a handful of leaves, and a one-line caption, so the
+          stack left the card mostly air at desktop widths. */}
+      <div className="md:grid md:grid-cols-3 md:gap-4">
       <CanopyRow
         rowLabel={t("dashboard.milestones.hours")}
         leaves={hoursRow}
@@ -67,6 +71,7 @@ export function CanopyMilestones({
         leaves={membersRow}
         newlyReachedLabels={newlyReachedLabels}
       />
+      </div>
     </section>
   );
 }
@@ -89,7 +94,7 @@ function CanopyRow({
   // would turn a milestone into a target (no-leaderboards).
   const next = leaves.find((l) => !l.reached) ?? null;
   return (
-    <div className="mb-stack-sm last:mb-0">
+    <div className="mb-stack-sm last:mb-0 md:mb-0">
       <div className="mb-1 text-xs text-moss-600 dark:text-moss-300">
         {rowLabel}
       </div>
