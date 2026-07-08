@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **A plan — and a runbook — for when the internet itself goes
+  down** (`docs/offline-resilience.md`, prompted by the Hurricane
+  Helene question). Most of the answer already exists: every
+  member's phone keeps a complete working copy, writes queue, and
+  everything heals when connectivity returns. The new "storm hub"
+  runbook closes the coordination gap: a go-bag mirror node with a
+  WiFi access point and local DNS that answers the community's own
+  domain, so members' installed apps simply work at the shelter —
+  no reconfiguration, no new software, drilled in good times. An
+  in-person QR exchange path (confirm help phone-to-phone with no
+  network at all) is designed next; radio mesh is honestly named a
+  non-goal for now.
+
 ### Fixed
 - **"Start from scratch" moved to the top of the Start-a-project
   page** (pilot report). It used to render as the last card in the

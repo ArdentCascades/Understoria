@@ -509,6 +509,11 @@ storing on third-party infrastructure.
 
 Each of these is tracked in the [Threat Model](threat-model.md) §7.
 
+**Storm-ready?** `docs/offline-resilience.md` §4 is the runbook for
+a go-bag hub node that keeps the community functioning through a
+regional internet outage — a mirror + WiFi AP + local DNS, built
+and drilled in good times.
+
 ## 9. Security posture checklist
 
 Run through this once a month, at least. More often during pilot.
