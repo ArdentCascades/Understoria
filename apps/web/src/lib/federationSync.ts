@@ -2470,28 +2470,53 @@ export async function pullFederatedProposalClosures(): Promise<FederationSyncRes
       skipped += 1; // proposal not here yet — retry next cycle
       continue;
     }
-    if (await db.proposalClosures.get(record.proposalId)) {
+    const local = await db.proposalClosures.get(record.proposalId);
+    if (local && local.id === record.id) {
       skipped += 1;
       advanceCursor();
       continue;
     }
-    // The community's answer stamps the local row, then its EFFECTS
-    // apply (Phase G2, docs/proposal-federation.md §5): dispute posts
-    // restore/settle, and a passed config_change converges this
-    // device's community knobs — the same idempotent path the
-    // closing device ran.
-    await db.transaction("rw", [db.proposalClosures, db.proposals], async () => {
-      await db.proposalClosures.put(record);
-      await db.proposals.update(record.proposalId, {
-        status: record.outcome,
-        closedAt: record.closedAt,
-        closedReason: record.reason,
-      });
-    });
-    await applyClosureEffects(
-      { ...proposal, status: record.outcome },
-      record.outcome,
-    ).catch(() => {});
+    // Either no local closure yet, or the local closure has a
+    // DIFFERENT id: this device closed the proposal too, lost the
+    // server's first-writer-wins race (its POST settled with
+    // stored:false), and until now would have skipped the winner
+    // forever — permanent divergence. The pulled record is the
+    // community's arbitrated answer: adopt it — replace the local
+    // closure, re-stamp the lifecycle, re-run the effects. Residual,
+    // named honestly: if the outcomes differed on a DISPUTE, the
+    // post may already have left "disputed" under the loser's
+    // outcome and the idempotent effects won't force it back; the
+    // proposal, closure record, and config knobs still converge,
+    // which is what the community reads.
+    //
+    // The lifecycle stamp and the EFFECTS (Phase G2,
+    // docs/proposal-federation.md §5 — dispute posts restore/settle,
+    // a passed config_change converges this device's knobs) commit
+    // in ONE transaction: a transient failure rolls everything back
+    // and the row retries next cycle instead of stamping without
+    // its effects. Deterministic bad payloads still soft-degrade
+    // inside applyClosureEffects and do not throw.
+    try {
+      await db.transaction(
+        "rw",
+        [db.proposalClosures, db.proposals, db.posts, db.nodeConfig],
+        async () => {
+          await db.proposalClosures.put(record);
+          await db.proposals.update(record.proposalId, {
+            status: record.outcome,
+            closedAt: record.closedAt,
+            closedReason: record.reason,
+          });
+          await applyClosureEffects(
+            { ...proposal, status: record.outcome },
+            record.outcome,
+          );
+        },
+      );
+    } catch {
+      skipped += 1; // transient — cursor stays put, retry next cycle
+      continue;
+    }
     inserted += 1;
     advanceCursor();
   }

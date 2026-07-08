@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **A device that lost the race to record a decision's outcome now
+  adopts the community's answer instead of diverging forever.** When
+  two members recorded different outcomes for the same proposal at
+  nearly the same time, the node correctly kept the first — but the
+  second member's device already held its own outcome locally and
+  skipped the community's answer on every sync, permanently showing
+  the wrong result (and, for settings changes, the wrong community
+  settings). Found by the full-repo sweep. The device now recognizes
+  the arbitrated answer, replaces its own record, re-stamps the
+  proposal, and re-applies the effects; the outcome stamp and its
+  effects also now commit together, so a transient failure retries
+  instead of half-applying.
+
 - **The shipped `docker-compose.yml` never forwarded most documented
   operator settings to the server** — including `NODE_FOUNDER_KEYS`,
   which meant a stock deployment refused EVERY governance write
