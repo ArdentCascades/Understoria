@@ -93,6 +93,14 @@ export default function ProjectNewPage() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null,
   );
+  // Has the member picked a starting point at all? `selectedTemplateId`
+  // can't carry this: null means BOTH "undecided" and "from scratch".
+  // Until a choice is made (a template card, the scratch card, or
+  // restoring a draft) the form doesn't exist yet - the page is the
+  // full-width template gallery, which is also what gives the
+  // templates room on desktop (pilot report: the empty form used to
+  // sit beside the picker before anyone asked for it).
+  const [hasChosen, setHasChosen] = useState(false);
   // Mobile-only disclosure for the TemplatePicker. The picker has to
   // appear in DOM order before the form (so the reading flow is
   // "pick a starting point, then fill in"), but on a narrow viewport
@@ -208,6 +216,7 @@ export default function ProjectNewPage() {
       setStagedTasks([]);
     }
     setPendingDraft(null);
+    setHasChosen(true);
     // Mirror handleSelectTemplate's collapse — the member has made a
     // decision (continue their draft) and the form is the next thing
     // they care about. Without this, on mobile the template picker
@@ -223,6 +232,7 @@ export default function ProjectNewPage() {
 
   function handleSelectTemplate(templateId: string | null) {
     setSelectedTemplateId(templateId);
+    setHasChosen(true);
     // Collapse on selection — whether they picked a template or
     // explicitly chose "start from scratch", they've made a decision
     // and the form is the next thing they care about.
@@ -254,6 +264,10 @@ export default function ProjectNewPage() {
     setSelectedTemplateId(null);
     setStagedTasks([]);
     setPickerExpanded(true);
+    // Back to browsing: the full-width gallery returns and the form
+    // waits again. Typed field values are deliberately kept - choosing
+    // again brings them right back (scratch never clears fields).
+    setHasChosen(false);
   }
 
   if (!currentMember) return null;
@@ -338,10 +352,20 @@ export default function ProjectNewPage() {
           push the form off-screen. Below lg the grid collapses; DOM
           order template-picker → selected-banner → form is preserved
           for mobile. */}
-      <div className="lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <div
+        className={
+          hasChosen
+            ? "lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start lg:gap-6"
+            : undefined
+        }
+      >
         <aside
           aria-label={t("projects.templates.asideAriaLabel")}
-          className="mb-4 lg:mb-0 lg:col-start-1 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
+          className={
+            hasChosen
+              ? "mb-4 lg:mb-0 lg:col-start-1 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
+              : "mb-4"
+          }
         >
           {/* Mobile-only collapsed summary. Hidden on lg+ because the
               sticky rail stays open at that breakpoint regardless. */}
@@ -381,12 +405,19 @@ export default function ProjectNewPage() {
             <TemplatePicker
               selectedId={selectedTemplateId}
               onSelect={handleSelectTemplate}
-              layout="rail"
+              layout={hasChosen ? "rail" : "default"}
               activeProjectsByTemplate={activeProjectsByTemplate}
             />
           </div>
         </aside>
 
+        {/* The form appears only after a decision (a template, the
+            scratch card, or a restored draft): an empty form nobody
+            asked for was half the desktop page, and its absence is
+            what gives the gallery the width above. Page-level field
+            state survives the unmount, so reconsidering loses
+            nothing. */}
+        {hasChosen && (
         <div className="lg:col-start-2 lg:row-start-1 lg:min-w-0 lg:max-w-2xl">
           {selectedTemplateId &&
             (() => {
@@ -769,6 +800,7 @@ export default function ProjectNewPage() {
             </div>
           </form>
         </div>
+        )}
       </div>
     </div>
   );
