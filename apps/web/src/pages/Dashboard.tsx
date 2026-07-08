@@ -177,8 +177,8 @@ export default function DashboardPage() {
           this wrapper is display:block) is untouched; conditional
           cards simply pack tighter. items-start keeps a short card
           from being stretched to its row-mate's height. */}
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
-      <section className="card relative mb-4 overflow-hidden text-center">
+      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4">
+      <section className="card relative mb-4 overflow-hidden text-center lg:flex lg:flex-col lg:justify-center">
         <div
           aria-hidden="true"
           data-decorative="true"
@@ -255,7 +255,10 @@ export default function DashboardPage() {
         <LeafDivider variant="short" />
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+      {/* 5 columns only from xl: the #382 rail narrows the main column
+          at lg, where five tiles squeezed "gathering" out of its box
+          (pilot report). */}
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
           label={t("dashboard.stats.activeWeek")}
           value={stats.activeMembersThisWeek}
@@ -319,7 +322,7 @@ export default function DashboardPage() {
           breakdown. The divider between them is a mobile-stack
           separator — side by side it would render as a stray leaf in
           a grid cell, so it hides at lg. */}
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
+      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4">
       <CanopyMilestones
         totalHours={stats.totalHoursExchanged}
         totalExchanges={stats.totalExchanges}
@@ -381,7 +384,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Third desktop pair: the two "flow of help" visualizations. */}
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
+      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4">
       <div className="relative">
         <BreadthBar entries={flow.breadth} members={members} />
         <div className="-mt-3 mb-4 flex justify-end">
@@ -456,7 +459,7 @@ function StatCard({
       <div className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {label}
       </div>
-      <div className="mt-1 text-3xl font-bold">{value}</div>
+      <div className="mt-1 break-words text-3xl font-bold leading-tight">{value}</div>
       <div className="text-xs text-moss-600 dark:text-moss-300">{sublabel}</div>
       {linkTo && linkLabel && (
         <Link

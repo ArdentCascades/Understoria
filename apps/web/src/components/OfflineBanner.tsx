@@ -106,7 +106,7 @@ export function OfflineBanner() {
                      bg-bark-100/95 px-4 py-2 text-sm text-bark-800 shadow-sm
                      backdrop-blur supports-[backdrop-filter]:bg-bark-100/80
                      dark:border-bark-700 dark:bg-bark-800/95 dark:text-bark-100
-                     lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]"
+                     lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1600px]"
         >
           <p>{t("offline.banner")}</p>
           {pendingCount > 0 && (
