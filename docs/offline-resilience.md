@@ -159,9 +159,22 @@ implementation PR; the invariants are the ones above.
   legible infrastructure someone chose to run (the
   `community-resilience.md` posture); phones silently meshing with
   whatever answers on the local network is the opposite of that.
-- **Bluetooth background sync.** Platform-restricted for web apps,
-  battery-hostile, and the QR path covers the person-to-person
-  case with informed consent built into the gesture.
+- **Bluetooth, directly.** Named with its reasons, because the
+  question recurs: the Web Bluetooth API is CENTRAL-ROLE ONLY (a
+  browser can connect to a peripheral but can never advertise as
+  one, so two phones running the PWA structurally cannot pair),
+  it does not exist on iOS at all (WebKit rejected the API), and
+  it offers no background operation. Where Bluetooth genuinely
+  enters: (a) the §3 snapshot-gossip files travel over AirDrop /
+  Quick Share, which use Bluetooth + WiFi-Direct under the hood —
+  members ride the OS transport on every platform without the app
+  shipping radio code; (b) the storm hub could act as a BLE
+  peripheral for Chromium-Android members, but at a few KB/s for
+  a fraction of devices it is dominated by the hub's WiFi and not
+  worth building; (c) true phone-to-phone Bluetooth mesh becomes
+  possible only with NATIVE apps — which is exactly open community
+  proposal #96, so that door is gated on a decision already on the
+  community's table, not forgotten.
 
 ## 7. Threat-model / docs obligations
 
