@@ -20,6 +20,7 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useStepFocus } from "@/lib/useStepFocus";
 import QRCode from "qrcode";
 import { useApp } from "@/state/AppContext";
 import { validatePassphrase } from "@/lib/passphrase";
@@ -46,6 +47,9 @@ export function RecoveryKitCard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [kit, setKit] = useState<RecoveryKit | null>(null);
+  // Opening the form / minting the kit unmounts the pressed button —
+  // refocus the card so keyboard and SR users keep their place.
+  const stepRef = useStepFocus<HTMLElement>(kit ? "kit" : open ? "form" : "closed");
 
   if (!currentMember) return null;
   const locked = lockState === "locked";
@@ -118,7 +122,7 @@ export function RecoveryKitCard() {
     </style></head><body>
       <h1>${esc(t("recoveryKit.printTitle"))}</h1>
       <p>${esc(t("recoveryKit.printIntro", { name: kit.displayName }))}</p>
-      <img src="${dataUrl}" alt="QR" />
+      <img src="${dataUrl}" alt="${esc(t("recoveryKit.printQrAlt"))}" />
       <p><strong>${esc(t("recoveryKit.printKeyLabel"))}</strong><br/><code>${esc(kit.publicKey)}</code></p>
       ${kit.communityNodeUrl ? `<p><strong>${esc(t("recoveryKit.printNodeLabel"))}</strong><br/><code>${esc(kit.communityNodeUrl)}</code></p>` : ""}
       <p>${esc(t("recoveryKit.printFooter"))}</p>
@@ -129,7 +133,12 @@ export function RecoveryKitCard() {
   }
 
   return (
-    <section className="card mb-4" aria-labelledby="recovery-kit-title">
+    <section
+      ref={stepRef}
+      tabIndex={-1}
+      className="card mb-4 outline-none"
+      aria-labelledby="recovery-kit-title"
+    >
       <h2
         id="recovery-kit-title"
         className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"

@@ -185,6 +185,30 @@ formal audit; the formal audit is one of the items in §6.
   previously-focused element on close. Esc dismisses (handler
   already existed). The backdrop is now visual-only — the
   dismiss paths are Esc and the Cancel button.
+- **Inline wizard step focus (`useStepFocus`)** — the ceremony
+  and recovery flows (RemovalCeremony, CosignRemoval,
+  GuardianShardsCard's offer stepper, GuardianRecoveryFlow,
+  RecoveryKitCard) are inline multi-step flows whose step
+  transitions unmount the button the user just pressed, dropping
+  focus to `<body>`. `src/lib/useStepFocus.ts` refocuses the new
+  step's container (`tabIndex={-1}`) on every step CHANGE — never
+  on first render, since an inline section appearing on a page
+  must not yank the reading position the way a dialog may. Same
+  batch: the guardian offer stepper's "show to {name}, step n of
+  N" line is `role="status"` so each advance announces; the
+  guardian duties render as a real `<ul>`; StorageWindowSection's
+  horizon choices carry `aria-pressed` in a labeled group and its
+  failure notes announce via `role="alert"` (statuses stay
+  polite); PairDeviceCapture's camera-permission transitions are
+  `role="status"`; RecoverIdentity's paste box gained its label;
+  the printed recovery kit's QR has a descriptive alt.
+- **`text-moss-500` / `dark:text-moss-400` source scan** — the
+  body-text contrast sweep (§6) regressed twice because the guard
+  only asserted the ratio math. `palette-contrast.test.ts` now
+  also walks `src/` and fails on any component using either
+  banned text class (decorative `aria-hidden` glyphs use other
+  shades). Eight regressed call sites were re-swept to
+  `text-moss-600` / `dark:text-moss-300` in the same change.
 - **`BottomNav` keyboard navigation** — Tab moves into the nav
   as a unit; once inside, ArrowRight / ArrowLeft / Home / End
   move focus between items without re-traversing the document.

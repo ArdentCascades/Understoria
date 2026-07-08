@@ -123,7 +123,7 @@ export function ResilienceCard() {
         ))}
         <Link
           to="/help#add-a-node"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-dashed border-moss-300 text-lg text-moss-500 hover:border-canopy-500 hover:text-canopy-600 dark:border-moss-700 dark:text-moss-400 dark:hover:border-canopy-400"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-dashed border-moss-300 text-lg text-moss-600 hover:border-canopy-500 hover:text-canopy-600 dark:border-moss-700 dark:text-moss-300 dark:hover:border-canopy-400"
           title={t("dashboard.resilience.cta")}
         >
           +

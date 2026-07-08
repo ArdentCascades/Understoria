@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { shortKey } from "@/lib/format";
+import { useStepFocus } from "@/lib/useStepFocus";
 import {
   coSignDraft,
   linkedProposalTitle,
@@ -46,6 +47,16 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
   const [fragmentQr, setFragmentQr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // The flow's phase, derived from the state machine below — the
+  // step-focus discipline needs one value that changes per screen.
+  const phase = capturing
+    ? "capture"
+    : fragmentText !== null
+      ? "fragment"
+      : draft
+        ? "confirm"
+        : "fallback";
+  const stepRef = useStepFocus(phase);
 
   useEffect(() => {
     if (!fragmentText) return;
@@ -95,7 +106,7 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
 
   if (capturing) {
     return (
-      <div className="flex flex-col gap-2">
+      <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-2 outline-none">
         <p className="text-sm text-moss-700 dark:text-moss-200">
           {t("removals.cosignCaptureHint")}
         </p>
@@ -107,7 +118,7 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
   if (draft && fragmentText === null) {
     const name = subjectName ?? shortKey(draft.subjectKey);
     return (
-      <div className="flex flex-col gap-3">
+      <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-3 outline-none">
         <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
           {t(
             draft.recordKind === "removal"
@@ -152,7 +163,7 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
 
   if (fragmentText !== null) {
     return (
-      <div className="flex flex-col gap-3">
+      <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-3 outline-none">
         <p className="text-sm font-medium">{t("removals.cosignShowBack")}</p>
         <div className="flex flex-col items-center gap-2">
           {fragmentQr && (
@@ -178,7 +189,7 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-2 outline-none">
       {error && (
         <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
           {error}

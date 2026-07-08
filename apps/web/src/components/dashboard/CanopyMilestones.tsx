@@ -116,7 +116,7 @@ function CanopyRow({
         })}
       </ul>
       {next && (
-        <div className="mt-1 text-xs text-moss-500 dark:text-moss-400">
+        <div className="mt-1 text-xs text-moss-600 dark:text-moss-300">
           {t("dashboard.milestones.next", { label: next.milestone.label })}
         </div>
       )}

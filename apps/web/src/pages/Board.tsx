@@ -855,7 +855,7 @@ function MobileFiltersToggle({
           : t("board.filters.toggle")}
       </span>
       {/* Sighted-only state cue; aria-expanded carries the meaning. */}
-      <span aria-hidden="true" className="text-moss-500 dark:text-moss-300">
+      <span aria-hidden="true" className="text-moss-600 dark:text-moss-300">
         {open ? "▾" : "▸"}
       </span>
     </button>

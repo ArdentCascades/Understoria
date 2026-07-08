@@ -65,6 +65,21 @@ include breaking changes.
   answer now points at the recovery paths that exist.
 
 ### Changed
+- **The removal, recovery, and storage flows now keep their promises
+  to keyboard and screen-reader members** (roadmap 22.N+). Moving
+  between steps of the removal ceremony, co-signing, guardian
+  setup, and recovery-kit flows no longer drops focus when the
+  pressed button disappears — focus lands on the new step, and the
+  guardian stepper announces each "show to {name}" advance. The
+  storage section's horizon choices expose which one is selected
+  (not just a color change), its failures announce assertively, the
+  camera-permission states in device capture are announced, the
+  recovery-kit paste box gained its label, and the printed kit's QR
+  says what it is. Also re-swept eight low-contrast text call sites
+  that had crept back in after the body-text contrast survey closed
+  — and this time a test walks the source so the banned shades
+  can't return quietly.
+
 - **Device sync can no longer stall inside a crowded millisecond
   either** (`docs/composite-federation-cursors.md` phase 3,
   completing the design — every puller in the system now moves

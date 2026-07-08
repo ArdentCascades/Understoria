@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 export function MarkdownHint() {
   const { t } = useTranslation();
   return (
-    <p className="mt-1 text-xs text-moss-500 dark:text-moss-400">
+    <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
       {t("common.markdownHint")}
     </p>
   );

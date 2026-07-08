@@ -1109,7 +1109,7 @@ function WorkDaysSection({
         </ul>
       )}
       {/* Honest federation footnote — the link is this node's view only. */}
-      <p className="mt-2 text-xs text-moss-500 dark:text-moss-400">
+      <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
         {t("projects.workDays.localLinkHint")}
       </p>
     </section>
@@ -2964,7 +2964,7 @@ function CoOrganizerCapabilityCard() {
           <li>{t("projects.coorg.capabilities.announce")}</li>
           <li>{t("projects.coorg.capabilities.stepDown")}</li>
         </ul>
-        <p className="mt-3 text-xs text-moss-600 dark:text-moss-400">
+        <p className="mt-3 text-xs text-moss-600 dark:text-moss-300">
           {t("projects.coorg.notIncluded")}
         </p>
       </details>

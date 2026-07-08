@@ -507,7 +507,7 @@ function ProposalCard({
         <CategoryChip category={proposal.category} />
       </div>
       {!proposal.signature && (
-        <p className="mb-1 text-xs text-moss-500 dark:text-moss-400">
+        <p className="mb-1 text-xs text-moss-600 dark:text-moss-300">
           {t("proposals.localOnly")}
         </p>
       )}
