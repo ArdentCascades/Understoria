@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Help can now be confirmed entirely in person** — no internet,
+  no server, not even the storm hub. When an exchange is ready to
+  confirm, the post page offers "Confirm in person": the helper's
+  phone shows a code, the member who received the help scans it,
+  reviews the hours and category — and checks the key fingerprint
+  shown on both screens, so you always know exactly whose name
+  you're crediting — then signs, and a receipt code carries the
+  finished exchange back. Both phones hold the completed record on
+  the spot; each shares it with the community's server whenever it
+  next sees the internet, and the server keeps a single copy —
+  exactly as if you'd confirmed online. This closes the loop the
+  offline-resilience plan named: two neighbors in a shelter can
+  now record real help for each other with nothing but their
+  phones. (For now the flow starts from an existing claimed post —
+  the normal case; recording spontaneous never-posted help remains
+  an open community proposal.)
+
 - **A plan — and a runbook — for when the internet itself goes
   down** (`docs/offline-resilience.md`, prompted by the Hurricane
   Helene question). Most of the answer already exists: every
@@ -18,10 +35,10 @@ include breaking changes.
   runbook closes the coordination gap: a go-bag mirror node with a
   WiFi access point and local DNS that answers the community's own
   domain, so members' installed apps simply work at the shelter —
-  no reconfiguration, no new software, drilled in good times. An
+  no reconfiguration, no new software, drilled in good times. The
   in-person QR exchange path (confirm help phone-to-phone with no
-  network at all) is designed next; radio mesh is honestly named a
-  non-goal for now.
+  network at all) shipped with this release — see above; radio
+  mesh is honestly named a non-goal for now.
 
 ### Fixed
 - **"Start from scratch" moved to the top of the Start-a-project
