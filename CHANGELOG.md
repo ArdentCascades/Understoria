@@ -10,6 +10,12 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The dashboard's cards got denser on wide screens.** "Where hands
+  are welcome" and "Coming up" flow their entries into two columns,
+  and the three collective-milestone rows sit side by side instead
+  of stacked — the community's whole at-a-glance view now fits one
+  desktop screen. Phones are unchanged.
+
 - **On desktop, calendar events open beside the calendar.** Clicking
   an event used to swap the whole page; now a panel slides in on the
   right while the calendar stays put — your month and filters
