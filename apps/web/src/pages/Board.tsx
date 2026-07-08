@@ -430,13 +430,23 @@ export default function BoardPage() {
           adding a "trending categories" / "active now" / unread-count
           panel by accretion would violate the no-notifications and
           no-leaderboards principles. AttentionSection itself remains
-          curated, renders null when empty, and adds no badge count. */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_280px] lg:items-start lg:gap-6">
+          curated, renders null when empty, and adds no badge count.
+
+          The col-3 track is `auto`, NOT a fixed 280px: AttentionSection
+          renders null when nothing needs attention (its common state),
+          and a fixed track kept 280px + gap of permanently dead space
+          on the right of every such visit — the desktop-waste pilot
+          report. The rail wrapper carries the width instead
+          (lg:w-[280px]) and hides itself when empty (lg:empty:hidden),
+          so the reading column absorbs the space whenever there is no
+          attention card, and the layout is byte-identical to before
+          whenever there is one. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_auto] lg:items-start lg:gap-6">
         {/* Right rail. Single grid cell in col 3, sticky. With the
             outer grid on one row track + lg:items-start, its height is
             its own concern — a tall attention card no longer drags the
             middle column's rhythm. */}
-        <div className="lg:col-start-3 lg:row-start-1 lg:self-start lg:sticky lg:top-4">
+        <div className="lg:col-start-3 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden">
           <AttentionSection />
         </div>
 
@@ -772,9 +782,14 @@ export default function BoardPage() {
 
       {/* Hidden while the on-screen keyboard is up — the fixed anchor
           would float detached mid-screen (see useVirtualKeyboard.ts),
-          and it sat directly over the Board search box's typing area. */}
+          and it sat directly over the Board search box's typing area.
+          Centered on mobile (thumb reach over the bottom nav); pinned
+          bottom-RIGHT at lg+ — centered on desktop it floated on top
+          of the middle column's cards (the desktop-waste pilot
+          report's screenshot), while the right edge is the one region
+          the reading column never occupies. */}
       {!keyboardOpen && (
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 lg:justify-end lg:px-8">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (
             <button

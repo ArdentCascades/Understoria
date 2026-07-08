@@ -329,3 +329,31 @@ describe("Board reading order (WCAG 2.4.3)", () => {
     expect(orderClassed.length).toBe(0);
   });
 });
+
+describe("Board desktop rail collapse (screen-real-estate pilot report)", () => {
+  // jsdom does no layout, so these lock the CLASS contract the
+  // collapse depends on: the outer grid must not reserve a fixed
+  // col-3 track (auto sizes to the rail wrapper), and the rail
+  // wrapper must carry its own width and hide itself when
+  // AttentionSection renders nothing — otherwise 280px + gap of
+  // permanently dead space returns to the right edge of every
+  // no-attention visit.
+  it("uses an auto col-3 track, and the rail wrapper self-sizes and hides when empty", () => {
+    render(<BoardPage />, "/");
+    const gridEl = container.querySelector(
+      '[class*="lg:grid-cols-"]',
+    ) as HTMLElement;
+    expect(gridEl).toBeTruthy();
+    const gridClass = gridEl.className;
+    expect(gridClass).toContain("lg:grid-cols-[240px_minmax(0,1fr)_auto]");
+    expect(gridClass).not.toContain("280px]");
+
+    const marker = container.querySelector(
+      '[data-testid="attention-section"]',
+    ) as HTMLElement;
+    expect(marker).toBeTruthy();
+    const rail = marker.parentElement as HTMLElement;
+    expect(rail.className).toContain("lg:w-[280px]");
+    expect(rail.className).toContain("lg:empty:hidden");
+  });
+});
