@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -32,6 +32,7 @@ import { BoardNudges } from "@/components/BoardNudges";
 import { matchesQuery } from "@/lib/messageSearch";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
+import { useSlashFocus } from "@/lib/useSlashFocus";
 import { myOrganizedProjects } from "@/lib/myProjects";
 import { hasOpenTasks, projectNeedsMoreHands } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
@@ -84,6 +85,10 @@ export default function BoardPage() {
   // last keystroke). Debouncing keeps the list from re-filtering on
   // every keystroke mid-word; the input itself stays responsive.
   const [query, setQuery] = useState("");
+  // `/` focuses the search from anywhere on the page (desktop
+  // keyboard habit); a no-op while typing in any field.
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  useSlashFocus(searchRef);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
   // Hide claimed posts by default — the Board is action-oriented
@@ -525,6 +530,7 @@ export default function BoardPage() {
               )}
             </span>
             <input
+              ref={searchRef}
               type="search"
               className="input"
               value={query}
