@@ -248,6 +248,13 @@ function ProfileBody({ member }: { member: Member }) {
     );
   }, [setSearchParams]);
 
+  // The full-key disclosure below the header. Closed by default —
+  // the 44-char key is noise on every ordinary visit — but one tap
+  // away, because it's the value operator runbooks actually need
+  // (NODE_FOUNDER_KEYS bootstrap, mirror trust settings) and no
+  // other surface in the app shows it untruncated.
+  const [fullKeyOpen, setFullKeyOpen] = useState(false);
+
   const trust = trustStatusWithInvites(currentMember.publicKey, {
     vouches,
     invites,
@@ -401,6 +408,16 @@ function ProfileBody({ member }: { member: Member }) {
               <p className="text-xs text-moss-600 dark:text-moss-300">
                 {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
               </p>
+              <button
+                type="button"
+                className="text-xs text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                aria-expanded={fullKeyOpen}
+                onClick={() => setFullKeyOpen((v) => !v)}
+              >
+                {fullKeyOpen
+                  ? t("profile.fullKey.hide")
+                  : t("profile.fullKey.show")}
+              </button>
             </div>
             <div className="flex items-center gap-2">
               <TrustChip status={trust} count={trustCount} />
@@ -416,6 +433,10 @@ function ProfileBody({ member }: { member: Member }) {
               </Link>
             </div>
           </header>
+
+          {fullKeyOpen && (
+            <FullKeyPanel publicKey={currentMember.publicKey} />
+          )}
 
           <BalanceCard
             balance={balance}
@@ -1565,5 +1586,57 @@ function InvitesSummaryLine({ invites }: { invites: InviteRow[] }) {
         {t("profile.invites.summary.manageAll")}
       </Link>
     </p>
+  );
+}
+
+// The untruncated public key, on demand. This is the value the
+// operator runbooks ask members to hand over (NODE_FOUNDER_KEYS
+// bootstrap in .env.example, the mirror trust settings in
+// operator-guide §6) and no other surface shows it whole. The key is
+// PUBLIC — displaying it leaks nothing — and the visible <code> is
+// deliberately selectable so the panel keeps working where
+// navigator.clipboard is unavailable or denied (the same lesson as
+// the copy-free pairing path: never make the clipboard API the only
+// road).
+function FullKeyPanel({ publicKey }: { publicKey: string }) {
+  const { t } = useTranslation();
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(publicKey);
+      setCopyStatus(t("common.copied"));
+      setTimeout(() => setCopyStatus(null), 3000);
+    } catch {
+      setCopyStatus(t("common.copyFailed"));
+    }
+  }
+
+  return (
+    <section className="card mb-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        {t("profile.fullKey.title")}
+      </h2>
+      <code className="mt-2 block select-all break-all rounded bg-moss-50 px-2 py-1 font-mono text-xs dark:bg-moss-900">
+        {publicKey}
+      </code>
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        <button
+          type="button"
+          className="btn-secondary text-xs"
+          onClick={handleCopy}
+        >
+          {t("common.copy")}
+        </button>
+        {copyStatus && (
+          <span role="status" className="text-canopy-800 dark:text-canopy-200">
+            {copyStatus}
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+        {t("profile.fullKey.hint")}
+      </p>
+    </section>
   );
 }

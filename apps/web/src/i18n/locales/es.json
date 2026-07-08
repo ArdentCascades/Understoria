@@ -2087,6 +2087,12 @@
   "profile": {
     "title": "Tu perfil",
     "identity": "Identidad: {{key}}",
+    "fullKey": {
+      "show": "Mostrar clave completa",
+      "hide": "Ocultar clave completa",
+      "title": "Tu clave pública completa",
+      "hint": "Esta clave es pública — es seguro compartirla, imprimirla o pegarla donde sea. Así te reconocen los servidores y otros miembros. Si administras el servidor de tu comunidad, este valor exacto es el que va en NODE_FOUNDER_KEYS en su archivo .env."
+    },
     "sidebarAriaLabel": "Resumen del perfil",
     "addDevice": {
       "title": "Vincular otro dispositivo",

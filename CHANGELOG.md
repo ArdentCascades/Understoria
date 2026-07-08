@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Your Profile can now show your full public key.** The identity
+  line always showed a shortened key, and nowhere in the app could
+  you see or copy the whole thing — even though the server setup
+  guide asks the founding member to paste exactly that value into
+  the community server's settings. "Show full key" under the
+  identity line now reveals it, selectable and with a Copy button,
+  along with a plain note that the key is public and safe to share.
+
+- **Inviting someone new works during an outage too — and the
+  outage Help answer now says so.** Invite codes are signed on
+  your device and verify with no network, so a member in a shelter
+  can hand one out as a QR, a link on paper, or a photo, and the
+  new person finishes joining at the storm hub (which serves the
+  whole app, install included) or the moment any connection
+  returns. Nothing new was built — this already held — but the
+  outage answer in Help now explains it, and the storm-hub runbook
+  gains a drill step: bring a phone that has never seen the app
+  and walk it all the way to membership at the hub.
+
 - **The offline banner now points at the outage playbook.** When
   the app notices it's offline it has always said, calmly, that
   everything still works from your device and counted the changes
