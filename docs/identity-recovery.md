@@ -191,6 +191,19 @@ Decision: **do not build K3 until K1+K2 have shipped and a real
 community asks for more.** The sketch lives here so the door is
 visibly open and the reasons for waiting are on record.
 
+## 3b. Passkey restore (design proposal — community decision)
+
+A candidate rung between the kit and the shards: the member's
+synced platform passkey (shipped for UNLOCK in
+`lib/passkeyUnlock.ts`) opens a node-held, PRF-encrypted copy of
+the identity — a brand-new phone recovers with two biometric taps
+and zero preparation beyond having enrolled the passkey. It is the
+only rung that would place anything in a server's care (ciphertext
+the node can never open, but a real posture change) and it makes
+the member's platform account a recovery root. Full design,
+trade-offs, and the community decision points:
+`docs/passkey-restore.md`. Not built until decided.
+
 ## 4. Order of shipping + sizing
 
 1. **K1** — small-to-medium PR: kit export/import, Welcome path,

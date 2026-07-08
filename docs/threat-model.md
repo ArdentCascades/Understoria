@@ -154,7 +154,11 @@ We are not trying to protect against:
   lock a member out of their own identity. The credential's user
   handle is random, deliberately NOT the member's public key, so the
   platform credential store learns nothing linking the passkey to
-  the federated identity.
+  the federated identity. Phase 2 — passkey-based identity RESTORE
+  via a node-held encrypted vault — is a design proposal only
+  (`docs/passkey-restore.md`), not built: it would change what the
+  node stores and make the member's platform account a recovery
+  root, so it awaits a community decision.
 - **E2E direct messaging: IMPLEMENTED.** Messages between members on
   the same node are encrypted with NaCl box (X25519 + XSalsa20-Poly1305).
   X25519 encryption keys are derived from Ed25519 identity keys via

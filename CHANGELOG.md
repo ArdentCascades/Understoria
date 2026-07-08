@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A design proposal for passkey restore is on the table** —
+  docs/passkey-restore.md. The idea: your synced passkey could
+  bring your identity back on a brand-new phone with two taps and
+  zero preparation, by keeping an encrypted copy (that the server
+  can never open) on the community's node. Because it changes what
+  the node stores and makes your Apple/Google account part of
+  recovery, nothing is built — the doc lays out the mechanism, the
+  honest trade-offs, and the four questions for the community to
+  decide.
+
 - **Unlock with a passkey.** If your device is protected with a
   passphrase, you can now also add a passkey (Settings → Security)
   and unlock with your fingerprint, face, or device PIN — one tap on
