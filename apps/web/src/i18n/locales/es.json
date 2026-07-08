@@ -1436,6 +1436,9 @@
     "submitting": "Desbloqueando…",
     "wrongPassphrase": "Esa frase no coincidió. Inténtalo de nuevo.",
     "nothingToUnlock": "No hay claves envueltas en este dispositivo — no hay nada que desbloquear. (Si estás viendo esto, recarga la página.)",
+    "passkeyButton": "Desbloquear con llave de acceso",
+    "passkeyFailed": "La llave de acceso no pudo desbloquear este dispositivo. Tu frase de abajo siempre funciona.",
+    "or": "o",
     "noRecoveryNote": "Las frases de acceso olvidadas no se pueden restablecer aquí — nadie tiene una llave maestra. Pero esto no tiene por qué significar empezar de cero: otro dispositivo vinculado aún guarda tu identidad, y si creaste un kit de recuperación o elegiste guardianes (Ajustes → Kit de recuperación / Guardianes), puedes borrar esta app (Perfil → Emergencia → Purga total) y restaurar desde ellos al empezar de nuevo. Sin ninguno de esos, una identidad nueva es el último recurso."
   },
   "invite": {
@@ -2397,7 +2400,22 @@
       "successChange": "Frase cambiada. Usa la nueva la próxima vez que desbloquees.",
       "successDisable": "Protección con frase desactivada. Las claves secretas vuelven a guardarse en texto plano en este dispositivo.",
       "errorMismatch": "Las dos frases no coincidieron.",
-      "errorMismatchNew": "Las dos nuevas frases no coincidieron."
+      "errorMismatchNew": "Las dos nuevas frases no coincidieron.",
+      "passkey": {
+        "title": "Llave de acceso",
+        "intro": "Desbloquea este dispositivo con tu huella, tu cara o el PIN del dispositivo en vez de escribir la frase. Tu frase sigue activa como el respaldo que siempre funciona.",
+        "enableFirst": "Activa primero la protección con frase — una llave de acceso es una forma extra de desbloquear, nunca la única.",
+        "add": "Añadir una llave de acceso",
+        "adding": "Añadiendo…",
+        "remove": "Quitar llave de acceso",
+        "addedOn": "Una llave de acceso desbloquea este dispositivo (añadida {{date}}). Tu frase también sigue funcionando.",
+        "promptNote": "Tu dispositivo puede pedirte confirmar dos veces — una para crear la llave y otra para prepararla para desbloquear. Es normal.",
+        "needUnlock": "Desbloquea este dispositivo primero para cambiar los ajustes de la llave de acceso.",
+        "prfUnsupported": "Este dispositivo creó una llave de acceso pero no puede usarse para desbloquear aquí (su autenticador no tiene la función PRF necesaria). No se cambió nada — puedes borrar la llave sin uso desde el gestor de contraseñas de tu dispositivo.",
+        "failed": "No se pudo configurar la llave de acceso. No se cambió nada — tu frase sigue funcionando.",
+        "successAdd": "Llave de acceso añadida. La próxima vez que este dispositivo se bloquee, un toque lo desbloquea — y tu frase siempre funciona también.",
+        "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo."
+      }
     },
     "emergency": {
       "title": "Emergencia",

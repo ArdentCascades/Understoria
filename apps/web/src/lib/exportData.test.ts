@@ -6,7 +6,7 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import { EXPORT_EXCLUDED_TABLES, buildExportBundle } from "./exportData";
-import { db } from "@/db/database";
+import { db, SETTING_KEYS } from "@/db/database";
 import { blockMember, unblockMember } from "@/db/blocks";
 
 async function reset() {
@@ -130,5 +130,21 @@ describe("buildExportBundle excludes local-only privacy tables", () => {
         expect(Object.keys(bundle.data)).toContain(name);
       }
     });
+  });
+});
+
+describe("row-level exclusion inside settings", () => {
+  it("drops the device-key-wrappers record but keeps other settings", async () => {
+    await db.settings.put({ key: SETTING_KEYS.nodeId, value: "node_x" });
+    await db.settings.put({
+      key: SETTING_KEYS.deviceKeyWrappers,
+      value: JSON.stringify({ v: 1, passphrase: { fake: true } }),
+    });
+    const bundle = await buildExportBundle();
+    const rows = bundle.data.settings as { key: string }[];
+    expect(rows.some((r) => r.key === SETTING_KEYS.nodeId)).toBe(true);
+    expect(
+      rows.some((r) => r.key === SETTING_KEYS.deviceKeyWrappers),
+    ).toBe(false);
   });
 });

@@ -130,6 +130,31 @@ We are not trying to protect against:
   passphrases are unrecoverable by design — this is documented in the
   UI and on the lock screen. Argon2id remains a viable future
   migration; the blob format carries a `kdf` field for that.
+- **Passkey unlock: IMPLEMENTED (an additional method, never the only
+  one).** A member can enroll a platform passkey (Settings →
+  Security) whose WebAuthn `prf` extension output — 32 high-entropy
+  bytes released only after the platform's user verification
+  (biometric / device PIN) — is HKDF-SHA256-derived into a key that
+  wraps the device master key. Enrollment migrates the device to an
+  envelope layout: secret-key rows wrapped by a random device master
+  key, the master key wrapped once per unlock method (passphrase
+  PBKDF2, passkey PRF), so changing one method never touches the
+  other. What this changes and doesn't: the Ed25519 identity and all
+  record signing are untouched (WebAuthn cannot sign canonical
+  payloads); nothing new reaches any server — the wrappers record is
+  device-local and excluded from export, and the ceremony is fully
+  offline (no relying-party round-trip, so unlock works at a storm
+  hub or with no network at all). Trade named honestly: the
+  biometric replaces the knowledge factor, so anyone enrolled in the
+  device's OS biometrics/PIN can unlock — the same exposure class as
+  a shoulder-surfed passphrase, delegated to the platform.
+  Invariants enforced in code: enrollment requires passphrase
+  protection already on, and disabling the passphrase refuses while
+  a passkey is enrolled — a lost or platform-reset passkey can never
+  lock a member out of their own identity. The credential's user
+  handle is random, deliberately NOT the member's public key, so the
+  platform credential store learns nothing linking the passkey to
+  the federated identity.
 - **E2E direct messaging: IMPLEMENTED.** Messages between members on
   the same node are encrypted with NaCl box (X25519 + XSalsa20-Poly1305).
   X25519 encryption keys are derived from Ed25519 identity keys via

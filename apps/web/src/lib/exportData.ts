@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { db } from "@/db/database";
+import { db, SETTING_KEYS } from "@/db/database";
 
 /**
  * Tables that are deliberately excluded from the data export bundle.
@@ -96,6 +96,17 @@ export async function buildExportBundle(): Promise<{
   tables.forEach((t, i) => {
     data[t.name] = arrays[i];
   });
+  // Row-level exclusion inside `settings`: the device-key-wrappers
+  // record is key-wrapping material (the device master key under the
+  // passphrase / passkey KEKs). `secretKeys` stays out of exports for
+  // exactly this reason — its wrapping envelope must not travel in a
+  // shareable file either, where a weak passphrase would be offline
+  // brute-forceable.
+  if (Array.isArray(data.settings)) {
+    data.settings = (data.settings as { key: string }[]).filter(
+      (row) => row.key !== SETTING_KEYS.deviceKeyWrappers,
+    );
+  }
   return {
     exportedAt: new Date().toISOString(),
     // Bumped from 1: the bundle now spans the member's full local
