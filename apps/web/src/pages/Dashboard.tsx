@@ -143,6 +143,18 @@ export default function DashboardPage() {
         <MilestoneCelebration key={m.label} milestone={m} />
       ))}
 
+      {/* Structural rail (the third round of the desktop real-estate
+          reports): at lg+ the page becomes main-column + sticky right
+          rail, the shape desktop dashboards are read in. The RAIL is
+          the two act-now doorway cards — Coming up and Where hands
+          are welcome — which are already first in DOM order, so both
+          wrappers use the Board's `contents`-on-mobile pattern and
+          the curated mobile stack is byte-identical. The rail column
+          is `auto` + self-sized + empty:hidden (the #377 collapse):
+          on a calm week both cards render null and the main column
+          takes the full width instead of framing a dead rail. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
+      <div className="contents lg:col-start-2 lg:row-start-1 lg:block lg:w-[320px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden">
       {/* Quiet "what's coming up" glance — leads the page only when there
           are upcoming events; renders nothing otherwise. */}
       <UpcomingGatherings />
@@ -152,6 +164,9 @@ export default function DashboardPage() {
           open invitations are open-ended and can wait a scroll-line.
           Same self-hiding contract — a calm week gets a calm page. */}
       <WhereHandsAreWelcome />
+      </div>
+
+      <div className="contents min-w-0 lg:col-start-1 lg:row-start-1 lg:block">
 
       {/* Desktop pairing (the stretched-cards half of the desktop
           pilot reports): at lg+ the "community as a whole" cards —
@@ -409,6 +424,8 @@ export default function DashboardPage() {
           </section>
         </>
       )}
+      </div>
+      </div>
     </div>
   );
 }

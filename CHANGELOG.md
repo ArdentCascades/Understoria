@@ -10,6 +10,13 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The dashboard takes its desktop shape: a main column and a
+  side rail.** The two act-now cards — "Coming up" and "Where hands
+  are welcome" — now sit in a rail on the right that stays put as
+  you scroll, while the community's numbers and patterns compose
+  the main column. On a calm week with nothing in the rail, the
+  main column takes the whole width. Phones read exactly as before.
+
 - **The dashboard's cards got denser on wide screens.** "Where hands
   are welcome" and "Coming up" flow their entries into two columns,
   and the three collective-milestone rows sit side by side instead

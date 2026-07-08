@@ -83,10 +83,11 @@ export function WhereHandsAreWelcome() {
       <p className="mb-2 text-xs text-moss-600 dark:text-moss-300">
         {t("dashboard.handsWelcome.intro")}
       </p>
-      {/* One column on phones; two at lg+ — each row is a one-line
-          link, and a full-width single column left a huge dead middle
-          in the card (the dashboard real-estate pilot report). */}
-      <ul className="flex flex-col gap-0.5 lg:grid lg:grid-cols-2 lg:gap-x-8">
+      {/* Single column at every width: this card now lives in the
+          desktop dashboard's 320px rail, where one line per entry is
+          the honest fit (the brief two-column interlude assumed a
+          half-page card). */}
+      <ul className="flex flex-col gap-0.5">
         {items.map((item) => (
           <li key={item.key}>
             <Link
