@@ -245,6 +245,11 @@ it.
   its §4 drill; seed vaults in `docs/storage-budget.md` Phase 2
   keep at least some devices complete enough to do it).
 
+- **A regional internet outage** (the node up but unreachable, or
+  everyone offline together): `docs/offline-resilience.md` — what
+  already survives on every phone, the storm-hub runbook, and the
+  in-person QR exchange path.
+
 - **Automatic node gossip / DHT-style discovery.** Mirrors are
   operator-configured and member-consented. This community's threat
   model prefers legible infrastructure over self-organizing meshes.
