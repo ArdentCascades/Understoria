@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Your Profile can now show your full public key.** The identity
+  line always showed a shortened key, and nowhere in the app could
+  you see or copy the whole thing — even though the server setup
+  guide asks the founding member to paste exactly that value into
+  the community server's settings. "Show full key" under the
+  identity line now reveals it, selectable and with a Copy button,
+  along with a plain note that the key is public and safe to share.
+
 - **Inviting someone new works during an outage too — and the
   outage Help answer now says so.** Invite codes are signed on
   your device and verify with no network, so a member in a shelter

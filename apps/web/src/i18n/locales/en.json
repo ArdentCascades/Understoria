@@ -2087,6 +2087,12 @@
   "profile": {
     "title": "Your profile",
     "identity": "Identity: {{key}}",
+    "fullKey": {
+      "show": "Show full key",
+      "hide": "Hide full key",
+      "title": "Your full public key",
+      "hint": "This key is public — it's safe to share, print, or paste anywhere. It's how servers and other members recognize you. If you operate your community's server, this exact value is what goes in NODE_FOUNDER_KEYS in its .env file."
+    },
     "sidebarAriaLabel": "Profile summary",
     "addDevice": {
       "title": "Add another device",
