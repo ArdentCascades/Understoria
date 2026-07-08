@@ -127,6 +127,8 @@ export default {
       animation: {
         "milestone-pop": "milestone-pop 600ms cubic-bezier(0.2, 0.8, 0.2, 1)",
         "fade-in": "fade-in 200ms ease-out",
+        // The calendar's docked event panel entering from the right.
+        "slide-in": "slide-in 200ms ease-out",
       },
       keyframes: {
         "milestone-pop": {
@@ -137,6 +139,10 @@ export default {
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(4px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in": {
+          "0%": { opacity: "0", transform: "translateX(24px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
         },
       },
     },

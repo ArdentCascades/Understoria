@@ -439,6 +439,11 @@
     "primaryNav": "Primary navigation"
   },
   "calendar": {
+    "panel": {
+      "ariaLabel": "Event details",
+      "closeShort": "Close",
+      "close": "Close event panel"
+    },
     "title": "Community calendar",
     "tagline": "What the community is doing together — project deadlines, posts about to expire, and the rhythm of exchanges that already happened.",
     "views": {

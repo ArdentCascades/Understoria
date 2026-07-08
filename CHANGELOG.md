@@ -10,6 +10,13 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **On desktop, calendar events open beside the calendar.** Clicking
+  an event used to swap the whole page; now a panel slides in on the
+  right while the calendar stays put — your month and filters
+  untouched, and clicking another event just swaps the panel. It has
+  its own address you can share or bookmark, Escape or Close puts it
+  away, and on phones it still opens full-screen exactly as before.
+
 - **The dashboard uses desktop width too.** Its cards used to stack
   in one column, each stretched across the whole screen; on desktop
   they now sit in sensible pairs — total hours beside community

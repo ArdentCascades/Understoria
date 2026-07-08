@@ -22,6 +22,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import BoardPage from "@/pages/Board";
 import CalendarPage from "@/pages/Calendar";
+import { CalendarEventPanel } from "@/components/CalendarEventPanel";
 import DashboardPage from "@/pages/Dashboard";
 import ProfilePage from "@/pages/Profile";
 import SettingsPage from "@/pages/Settings";
@@ -103,7 +104,15 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<BoardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/calendar" element={<CalendarPage />}>
+            {/* The docked event panel - calendar stays mounted while
+                the event renders beside it (full-screen below lg).
+                /events/:eventId below remains the canonical page. */}
+            <Route
+              path="event/:eventId"
+              element={<CalendarEventPanel />}
+            />
+          </Route>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/invites" element={<InvitesPage />} />
