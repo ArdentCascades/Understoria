@@ -283,33 +283,6 @@ export async function ensureCommentDisputeProposal(input: {
   return proposal;
 }
 
-/**
- * Returns the set of comment ids with an open dispute proposal.
- * Used by the UI to render "Flagged" chips on flagged comments and
- * hide the Flag button (one flag per comment is sufficient — the
- * dispute surface aggregates community attention).
- */
-export async function listFlaggedCommentIds(): Promise<Set<string>> {
-  const openDisputes = await db.proposals
-    .where("[kind+status]")
-    .equals(["dispute", "open"])
-    .toArray();
-  const ids = new Set<string>();
-  for (const p of openDisputes) {
-    try {
-      const parsed = JSON.parse(p.payload) as { subjectType?: string; commentId?: string };
-      if (
-        parsed.subjectType === "task_comment" &&
-        typeof parsed.commentId === "string"
-      ) {
-        ids.add(parsed.commentId);
-      }
-    } catch {
-      // Skip.
-    }
-  }
-  return ids;
-}
 
 /** Returns proposals newest-first. Status filter is optional — by
  *  default returns every proposal regardless of status. */

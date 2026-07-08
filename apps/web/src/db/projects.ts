@@ -1546,14 +1546,6 @@ export async function listAnnouncements(
 
 // -- Reads ------------------------------------------------------------------
 
-export async function listProjects(opts: {
-  status?: Project["status"];
-} = {}): Promise<Project[]> {
-  if (opts.status) {
-    return db.projects.where("status").equals(opts.status).toArray();
-  }
-  return db.projects.toArray();
-}
 
 export async function listTasksForProject(
   projectId: string,

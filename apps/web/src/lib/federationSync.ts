@@ -1683,8 +1683,10 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
   return { inserted, skipped };
 }
 
-// NOTE: there is intentionally no `pullFederatedEventRsvps`. RSVPs
-// never federate — see `docs/community-events.md` §7.2.
+// (An earlier note here said RSVPs never federate — that predated
+// participation Phase 2; `pullFederatedEventRsvps` lives below with
+// the other participation-state pulls. They still never cross to
+// PEER nodes — community-node sync only.)
 
 // --- Project & task state pulls (docs/project-federation.md §5) --------
 

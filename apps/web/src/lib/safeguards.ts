@@ -43,10 +43,6 @@ import { DEFAULT_NODE_CONFIG } from "@/types";
 const RECIPROCAL_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-// Re-exported for callers that compared against a constant directly
-// (mostly tests). New code should read from NodeConfig.
-export const DEFAULT_DAILY_HELPER_LIMIT = DEFAULT_NODE_CONFIG.dailyHelperLimit;
-
 export class DailyLimitExceededError extends Error {
   readonly code = "DAILY_LIMIT_EXCEEDED";
   constructor(readonly limit: number) {

@@ -92,7 +92,11 @@ Also new since first writing: local-only tables have grown
 (`guardianShards` — other members' encrypted key shards;
 `redemptionReceipts` / `inviteRevocationRecords` — the membership
 layer). The Phase 1 classification below accounts for every table
-that exists at Dexie v30, and a drift-guard test keeps it that way.
+in the live Dexie schema (v30 at writing; the drift-guard test in
+`storageWindow.test.ts` FAILS on any table added without a
+classification, which is how the v31–v33 tables — seed-vault
+pledges, member removals/reinstatements, proposal closures — were
+classified as they shipped).
 
 ## Phase 0 — protect and measure (SHIPPED)
 
@@ -124,7 +128,7 @@ local-only child tables (`projectActivity`, `eventProjectLinks`)
 window only as children of a windowed parent — they cannot be
 re-downloaded by the undo path, and the undo copy says so.
 
-### 1a. Table classification (complete, at Dexie v30)
+### 1a. Table classification (complete; enforced by drift-guard as the schema grows)
 
 Every table falls in exactly one class; a drift-guard test
 enumerates `db.tables` against this classification so a future
@@ -147,9 +151,11 @@ them entirely):** `settings`, `secretKeys`, `outbox`, `drafts`,
   graph; windowing them would change what the numbers MEAN. Also
   among the smallest rows. (If a community's ledger alone outgrows
   phones, that community has reached Phase 3 territory.)
-- `proposals`, `votes` — governance history; local-only records
-  (no federation transport today) so a windowed copy could never be
-  re-fetched, and they are small.
+- `proposals`, `votes` — governance history. (When this was
+  classified they were local-only with no federation transport;
+  they federate since `docs/proposal-federation.md` G1, but the
+  pin stands on the original second ground — governance history is
+  the community's memory and is small.)
 
 **Windowable (dropped locally when older than the horizon AND
 settled AND not pinned by a rule below):**

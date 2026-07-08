@@ -443,11 +443,21 @@ concrete check that catches it before it ships.
   RSVPs, v23 = settings-key migration, v24 = blocking tables,
   v25 = `ProjectTask.orderIndex` backfill, v26 = claimer-stated
   `actualHours`, v27 = local-only event⇄project work-day links,
-  v28 = local-only shift signups (`eventShifts` / `shiftSignups`).
-  Server is at v15: v9 = co-organizer invitation federation,
-  v10 = community events, v11 = invite redemption, v12 = auto-confirm
+  v28 = shift signups (`eventShifts` / `shiftSignups`; the v22 RSVPs
+  and v28 signups were local-only at creation and federate as signed
+  participation state since project federation Phase 2), and the
+  schema has since grown through v33 (v29–v30 = re-seed / recovery
+  support, v31 = seed-vault pledges, v32 = member removals +
+  reinstatements, v33 = proposal closures). Server is at v24:
+  highlights v9 = co-organizer invitation federation, v10 =
+  community events, v11 = invite redemption, v12 = auto-confirm
   provenance markers, v13 = invite revocation, v14 = awaiting
-  transitions, v15 = insert-cap per-key index.
+  transitions, v15 = insert-cap per-key index, v16–v20 = project +
+  participation state and reader hardening, v21 = seed-vault
+  pledges, v22 = member removals, v23 = proposals / votes /
+  closures, v24 = composite pair-cursor columns. (This inventory is
+  a snapshot; `apps/web/src/db/database.ts` and
+  `apps/server/src/db.ts` are the source of truth.)
   Next free PWA version: **29**. Next free server version: **16**.
 
   Settings that don't warrant a Dexie migration live in the existing

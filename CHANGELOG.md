@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **The documentation caught up with the code across nine documents**
+  (full-repo sweep, part 3). The operator guide no longer claims
+  member removal is "not built" or that proposals stay local-only
+  (both shipped); its env table now shows the real
+  `AUTO_CONFIRM_MIN_HOURS` default (168, not 0) and a key-history
+  example that actually boots (`pubkey`, not `publicKey`). The
+  privacy policy no longer contradicts itself about RSVPs — they
+  sync within your community as signed records and are still never
+  shared with peer communities, which is now stated consistently in
+  all three places it appears. A superseded threat-model passage,
+  the roadmap's frozen schema inventory, and stale local-only
+  wording in the storage, calendar, shift-signup, and re-seed docs
+  all carry honest supersession notes or current facts. One
+  actively wrong code comment (claiming the RSVP pull doesn't
+  exist, 400 lines above that very function) is corrected, five
+  dead exports and one unused dependency are removed, and the
+  deliberate absence of `claims` from the re-seed kinds is now
+  explained where the list lives.
+
 - **A device that lost the race to record a decision's outcome now
   adopts the community's answer instead of diverging forever.** When
   two members recorded different outcomes for the same proposal at
