@@ -362,6 +362,25 @@ If the auto-confirm sweep is enabled, you can wait 7 days — or
 temporarily lower `AUTO_CONFIRM_MIN_HOURS` in `.env` to (say) `1`
 and `docker compose up -d` to re-test the system-signed code path.
 
+### Enable governance (one-time, after the founder onboards)
+
+The member-gated write surfaces — proposals, votes, closures, member
+removals — check membership against the invite chain, and the chain
+needs a root. Until `NODE_FOUNDER_KEYS` is set, NO key counts as a
+member and every governance write is refused with `403 not_a_member`
+(the server also warns about this at boot).
+
+1. Have the founding member create their identity in the app
+   (onboarding above).
+2. Copy their public key from their Profile page.
+3. On the Linode: add `NODE_FOUNDER_KEYS=<that key>` to `.env`
+   (comma-separate if there are several founders), then
+   `docker compose up -d` to apply.
+
+Everyone who joins via an invite from a founder (or from anyone
+downstream of one) proves membership transitively through their
+redemption receipt — no further operator action per member.
+
 ## 10. Set up backups
 
 The Linode disk is a single point of failure. The bundled script
@@ -413,6 +432,14 @@ git checkout <new-tag>
 # This is SAFE — no data is destroyed.
 docker compose up -d --build
 ```
+
+> **Members get "not a member" errors when voting or proposing?**
+> `NODE_FOUNDER_KEYS` is unset (or didn't reach the container — it
+> must be in `.env`, and your compose file must be current enough to
+> forward it; versions before July 2026 didn't). See §9 "Enable
+> governance". `docker compose exec understoria node -e
+> "console.log(process.env.NODE_FOUNDER_KEYS)"` shows what the
+> server actually received.
 
 > **Build dies with exit code 134?** That's Node hitting its heap
 > limit during the web compile — the box has no (or too little)

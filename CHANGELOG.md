@@ -9,6 +9,25 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The shipped `docker-compose.yml` never forwarded most documented
+  operator settings to the server** — including `NODE_FOUNDER_KEYS`,
+  which meant a stock deployment refused EVERY governance write
+  (proposals, votes, closures, member removals) with "not a member,"
+  and `DATABASE_KEY`, which meant an operator following the
+  at-rest-encryption runbook got a plaintext database without any
+  error. All fifteen missing knobs now pass through (membership &
+  governance, member-authenticated reads, at-rest key, peer/mirror
+  tokens and URLs, row ceilings, proxy trust, re-seed recovery
+  window, and the auto-confirm artifact flip), `.env.example`
+  documents each one, the deploy runbook gains a one-time "enable
+  governance" step plus a troubleshooting entry, and the server now
+  warns loudly at boot when it has no founder keys instead of
+  letting members discover it as mysterious vote failures.
+  **Existing deployments: `git pull`, add
+  `NODE_FOUNDER_KEYS=<founding member's public key>` to `.env`,
+  then `docker compose up -d`.**
+
 ### Added
 - **A removal can now name the deliberation it grew from.** When
   the community talked a removal through in a shared proposal, the

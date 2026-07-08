@@ -262,6 +262,19 @@ export async function buildServer({
   // one onRequest hook gating every federation GET when READ_AUTH=on.
   // Registered before the routes; deny-by-default so future feed
   // routes are covered automatically.
+  //
+  // With no founder keys the resolver has no trust roots, so NO key
+  // counts as a member and every member-gated write (proposals,
+  // votes, closures, member removals) is refused with 403. That is a
+  // deliberately safe default, but it is almost always a
+  // misconfiguration (the shipped docker-compose once failed to
+  // forward NODE_FOUNDER_KEYS at all) — say so loudly instead of
+  // letting members discover it as mysterious vote failures.
+  if (config.founderKeys.length === 0) {
+    app.log.warn(
+      "NODE_FOUNDER_KEYS is unset: the membership resolver has no trust roots, so every member-gated write (proposals, votes, closures, member removals) will be refused with 403 not_a_member. Set the founding member(s)' public keys to enable governance.",
+    );
+  }
   const membershipResolver = createMembershipResolver(db, config.founderKeys);
   registerReadAuthGuard(app, {
     readAuth: config.readAuth,
