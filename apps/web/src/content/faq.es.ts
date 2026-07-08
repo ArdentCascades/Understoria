@@ -289,6 +289,34 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
     title: "Comunidad e invitaciones",
     entries: [
       {
+        id: "internet-outage",
+        question:
+          "¿Qué podemos hacer si se corta el internet — como durante un huracán?",
+        answer: [
+          "Más de lo que crees, porque la app entera se construyó " +
+            "exactamente para esto. Tu dispositivo ya lleva todo: el " +
+            "tablón, el registro, la lista de miembros, tu identidad. " +
+            "Puedes seguir leyendo, publicando y confirmando — cada " +
+            "cambio se guarda en cola y se envía solo en cuanto vuelvas " +
+            "a conectarte. Nada se pierde mientras no hay internet.",
+          "Si alguien cerca necesita ayuda AHORA: ayúdale, y luego " +
+            "confírmenlo juntos en persona. En la página de la " +
+            "publicación, elige \"Confirmar en persona\" — un teléfono " +
+            "muestra un código, el otro lo escanea y firma. Ambos " +
+            "teléfonos guardan el registro y lo llevan a casa cuando " +
+            "vuelva el internet.",
+          "Si tu comunidad tiene un nodo de tormenta — un pequeño " +
+            "servidor de respaldo que alguien mantiene listo para " +
+            "cortes — únete a su WiFi cuando no haya internet y la app " +
+            "simplemente vuelve a funcionar para todos en el refugio: " +
+            "las publicaciones fluyen, la ayuda se confirma, sin " +
+            "configurar nada. Pregunta a quien administra el servidor " +
+            "de tu comunidad si existe un nodo de tormenta; si no, " +
+            "docs/offline-resilience.md es la receta para construirlo " +
+            "en tiempos buenos.",
+        ],
+      },
+      {
         id: "add-a-node",
         question:
           "¿Qué protege a esta comunidad si alguien se lleva nuestro servidor?",

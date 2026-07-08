@@ -1887,6 +1887,32 @@ We are not trying to protect against:
   signed claims): exported, snapshot-carried, never windowed,
   untouched by soft purge.
 
+- **In-person exchange over QR (no new leak; fingerprint gate).**
+  *Shipped — `docs/offline-resilience.md` §5,
+  `apps/web/src/lib/inPersonExchange.ts`.* Two members with no
+  network confirm a completed exchange phone-to-phone: the helper
+  shows a helper-signed offer QR, the helped member reviews and
+  co-signs, and a receipt QR carries the finished double-signed
+  record back. What §7 is owed, paid: **nothing new leaks** — the
+  offer and receipt QRs carry exactly the fields the final
+  federated exchange record already publishes (post id, the two
+  member keys, hours, category, timestamp, node id, signatures), so
+  a photographed QR reveals only what the public ledger will say;
+  and **the capture surface refuses impostors** — an offer is
+  rejected unless it matches a post the scanner already holds,
+  names that post's exact parties, and addresses the scanner as
+  the helped counterparty, with the helper's 64-bit key fingerprint
+  displayed on BOTH screens (the `lib/keyFingerprint.ts` check
+  device pairing uses) so the human confirms WHO they are crediting
+  before signing. Same delivery posture as guardian shards: nothing
+  is enforceable until both signatures exist. Replay is inert — the
+  exchange id is minted once at offer time, both devices enqueue
+  the same record, and the node (idempotent on id) keeps one copy;
+  re-scanning either QR is a local no-op. Deliberately NOT built:
+  post-less "spontaneous help" records (the un-ratified
+  direct-exchange-label proposal) — every in-person record hangs
+  off a claimed post both parties already hold.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

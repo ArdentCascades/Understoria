@@ -261,6 +261,7 @@
   },
   "offline": {
     "banner": "Estás sin conexión. Todo aquí sigue funcionando desde tu dispositivo.",
+    "guideLink": "Qué puedes hacer durante un corte",
     "pendingCount_one": "{{count}} cambio se enviará cuando vuelvas a conectarte.",
     "pendingCount_other": "{{count}} cambios se enviarán cuando vuelvas a conectarte.",
     "backOnline": "De nuevo en línea. Enviando los cambios pendientes…"
@@ -1388,6 +1389,42 @@
       "disputedLink": "Ver Perfil → Disputas"
     },
     "newRolesEarned": "Nuevos roles comunitarios"
+  },
+  "inPerson": {
+    "entry": "Confirmar en persona — sin necesidad de internet",
+    "title": "Confirmar en persona",
+    "offerHint": "¿Están juntos? Muéstrale este código a {{name}}. Su teléfono revisa los detalles, firma, y su pantalla responde con un código de recibo — captúralo abajo y ambos habrán terminado.",
+    "hoursLine": "{{hours}} de {{category}}",
+    "offerQrAlt": "Código de oferta de intercambio en persona — muéstralo a la persona que ayudaste",
+    "fingerprintLabel": "Huella de la llave",
+    "offerFingerprintHint": "El otro teléfono muestra esta misma huella en su pantalla de revisión — léanlas en voz alta juntos antes de firmar.",
+    "captureReceipt": "Ya firmó — captura su recibo",
+    "captureReceiptHint": "Apunta tu cámara al código de recibo en la pantalla de {{name}}.",
+    "captureOfferHint": "Apunta tu cámara al código de oferta en la pantalla de quien te ayudó.",
+    "reviewBody": "Estás a punto de firmar que \"{{title}}\" está completo. Firmar acredita {{hours}} de {{category}} de ti hacia {{name}} — el mismo crédito que confirmar en línea, registrado en el libro compartido de la comunidad.",
+    "reviewFingerprintHint": "Compara esta huella con la que aparece en la pantalla de {{name}}. Si no coinciden, no firmes — puede que estés escaneando el teléfono equivocado.",
+    "sign": "Firmar — acreditar {{hours}}",
+    "receiptHint": "Un último paso: muéstrale este recibo a {{name}} para que su teléfono también guarde el intercambio terminado.",
+    "receiptQrAlt": "Código de recibo de intercambio en persona — muéstralo a quien te ayudó",
+    "done": "Listo — el intercambio está completo en ambos teléfonos, aquí mismo, sin red alguna. Cada teléfono lo compartirá con el servidor de la comunidad la próxima vez que vea internet, y el servidor guarda una sola copia.",
+    "copyText": "Copiar como texto",
+    "close": "Cerrar",
+    "error": {
+      "no_identity": "No hay identidad en este dispositivo.",
+      "locked": "Este dispositivo está bloqueado — desbloquéalo primero.",
+      "post_missing": "Este teléfono no tiene esa publicación — sincroniza con la comunidad primero, o verifica que ambos estén viendo el mismo intercambio.",
+      "already_completed": "Este intercambio ya está completo.",
+      "not_confirmable": "Esta publicación no está lista para confirmar — primero alguien tiene que reclamarla.",
+      "not_helper": "Solo quien dio la ayuda puede iniciar la confirmación en persona.",
+      "bad_hours": "Esas horas no tienen sentido para un intercambio.",
+      "not_an_offer": "Ese código no es una oferta de intercambio en persona.",
+      "not_a_receipt": "Ese código no es un recibo de intercambio en persona.",
+      "post_mismatch": "Esa oferta no coincide con la copia de la publicación en este teléfono — las personas o la categoría difieren. No la firmes.",
+      "wrong_member": "Esta oferta no está dirigida a ti — solo quien recibió la ayuda puede firmarla.",
+      "different_record": "Ese recibo pertenece a un intercambio distinto de la oferta que hizo este teléfono.",
+      "bad_signature": "Una firma en ese código no se verifica. No lo aceptes.",
+      "daily_limit": "Esto superaría el límite diario de la comunidad para una misma persona ayudante — espera un día y confirma entonces."
+    }
   },
   "lockScreen": {
     "title": "Este dispositivo está bloqueado",

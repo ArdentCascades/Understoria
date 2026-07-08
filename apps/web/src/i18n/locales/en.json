@@ -261,6 +261,7 @@
   },
   "offline": {
     "banner": "You're offline. Everything here still works from your device.",
+    "guideLink": "What you can still do in an outage",
     "pendingCount_one": "{{count}} change will send when you reconnect.",
     "pendingCount_other": "{{count}} changes will send when you reconnect.",
     "backOnline": "Back online. Sending queued changes…"
@@ -1388,6 +1389,42 @@
       "disputedLink": "See Profile → Disputes"
     },
     "newRolesEarned": "New community roles"
+  },
+  "inPerson": {
+    "entry": "Confirm in person — no internet needed",
+    "title": "Confirm in person",
+    "offerHint": "Standing together? Show this code to {{name}}. Their phone checks the details, they sign, and their screen answers with a receipt code — capture it below and you're both done.",
+    "hoursLine": "{{hours}} of {{category}}",
+    "offerQrAlt": "In-person exchange offer code — show to the member you helped",
+    "fingerprintLabel": "Key fingerprint",
+    "offerFingerprintHint": "The other phone shows this same fingerprint on its review screen — read them aloud together before they sign.",
+    "captureReceipt": "They've signed — capture their receipt",
+    "captureReceiptHint": "Point your camera at the receipt code on {{name}}'s screen.",
+    "captureOfferHint": "Point your camera at the offer code on your helper's screen.",
+    "reviewBody": "You're about to sign that \"{{title}}\" is complete. Signing credits {{hours}} of {{category}} from you to {{name}} — the same credit as confirming online, recorded in the community's shared ledger.",
+    "reviewFingerprintHint": "Check this fingerprint against the one on {{name}}'s screen. If they don't match, don't sign — you may be scanning the wrong phone.",
+    "sign": "Sign — credit {{hours}}",
+    "receiptHint": "One last step: show this receipt to {{name}} so their phone holds the finished exchange too.",
+    "receiptQrAlt": "In-person exchange receipt code — show to your helper",
+    "done": "Done — the exchange is complete on both phones, right here, with no network at all. Each phone will share it with the community's server whenever it next sees the internet, and the server keeps a single copy.",
+    "copyText": "Copy as text",
+    "close": "Close",
+    "error": {
+      "no_identity": "No identity on this device.",
+      "locked": "This device is locked — unlock it first.",
+      "post_missing": "This phone doesn't hold that post — sync with the community first, or check you're both looking at the same exchange.",
+      "already_completed": "This exchange is already complete.",
+      "not_confirmable": "This post isn't ready to confirm — it needs to be claimed first.",
+      "not_helper": "Only the member who gave the help can start the in-person confirmation.",
+      "bad_hours": "Those hours don't make sense for an exchange.",
+      "not_an_offer": "That code isn't an in-person exchange offer.",
+      "not_a_receipt": "That code isn't an in-person exchange receipt.",
+      "post_mismatch": "That offer doesn't match this phone's copy of the post — the people or category differ. Don't sign it.",
+      "wrong_member": "This offer isn't addressed to you — only the member who received the help can sign it.",
+      "different_record": "That receipt belongs to a different exchange than the offer this phone made.",
+      "bad_signature": "A signature on that code doesn't verify. Don't accept it.",
+      "daily_limit": "This would pass the community's daily limit for one helper — wait a day and confirm then."
+    }
   },
   "lockScreen": {
     "title": "This device is locked",

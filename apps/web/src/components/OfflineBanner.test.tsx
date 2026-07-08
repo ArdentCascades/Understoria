@@ -20,6 +20,7 @@
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // `useLiveQuery` is the banner's only read path into Dexie (the
@@ -80,10 +81,13 @@ function render() {
   act(() => {
     root = createRoot(container);
     root.render(
-      <ToastProvider>
-        <OfflineBanner />
-        <ToastContainer />
-      </ToastProvider>,
+      // MemoryRouter: the banner's outage-guide link needs a router.
+      <MemoryRouter>
+        <ToastProvider>
+          <OfflineBanner />
+          <ToastContainer />
+        </ToastProvider>
+      </MemoryRouter>,
     );
   });
 }

@@ -281,6 +281,31 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
     title: "Community and invites",
     entries: [
       {
+        id: "internet-outage",
+        question:
+          "What can we still do when the internet goes out — like during a hurricane?",
+        answer: [
+          "More than you might think, because the whole app was built " +
+            "for exactly this. Your device already carries everything: " +
+            "the board, the ledger, the member list, your identity. You " +
+            "can keep reading, posting, and confirming — every change " +
+            "queues safely and sends itself the moment you reconnect. " +
+            "Nothing is lost while the internet is down.",
+          "If someone near you needs help NOW: help them, then confirm " +
+            "it together in person. On the post's page, choose " +
+            "\"Confirm in person\" — one phone shows a code, the other " +
+            "scans it and signs. Both phones keep the record and carry " +
+            "it home when the internet returns.",
+          "If your community runs a storm hub — a small backup server " +
+            "someone keeps ready for outages — join its WiFi when the " +
+            "internet is down and the app simply works again for " +
+            "everyone at the shelter: posts flow, help gets confirmed, " +
+            "no setup needed. Ask whoever runs your community's server " +
+            "whether a storm hub exists; if not, docs/offline-resilience.md " +
+            "is the recipe for building one in good times.",
+        ],
+      },
+      {
         id: "add-a-node",
         question:
           "What keeps this community safe if someone takes our server away?",

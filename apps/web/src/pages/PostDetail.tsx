@@ -38,6 +38,7 @@ import { Markdown } from "@/components/Markdown";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { InPersonExchange } from "@/components/InPersonExchange";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { IconMessages, LeafDivider } from "@/components/visual";
@@ -391,6 +392,7 @@ export default function PostDetailPage() {
         isClaimer={isClaimer}
         isParty={isParty}
         alreadyConfirmed={alreadyConfirmed}
+        meKey={me?.publicKey ?? null}
         helperName={helperName}
         helpedName={helpedName}
         viewerRole={
@@ -509,6 +511,7 @@ interface ActionPanelProps {
   isClaimer: boolean;
   isParty: boolean;
   alreadyConfirmed: boolean;
+  meKey: string | null;
   helperName: string | undefined;
   helpedName: string | undefined;
   viewerRole: ViewerRole;
@@ -524,6 +527,7 @@ function ActionPanel({
   isClaimer,
   isParty,
   alreadyConfirmed,
+  meKey,
   helperName,
   helpedName,
   viewerRole,
@@ -533,6 +537,10 @@ function ActionPanel({
   onOpenDialog,
 }: ActionPanelProps) {
   const { t } = useTranslation();
+  // The in-person QR ceremony (docs/offline-resilience.md §5) opens
+  // inline where the normal confirm affordance lives. Declared before
+  // any early return — hook-count discipline.
+  const [inPersonOpen, setInPersonOpen] = useState(false);
   if (post.status === "open") {
     if (isPoster) {
       return (
@@ -624,6 +632,35 @@ function ActionPanel({
             {t("postDetail.actionsConfirmComplete")}
           </button>
         )}
+        {/* In-person confirmation (docs/offline-resilience.md §5):
+            both parties standing together confirm phone-to-phone with
+            no network. Shown to a party whenever the exchange is in a
+            confirmable state — even one who already confirmed the
+            normal way, because the ceremony completes BOTH signatures
+            in one sitting. Hidden mid-ceremony behind its own inline
+            flow. */}
+        {meKey &&
+          (inPersonOpen ? (
+            <div className="rounded-xl border border-moss-200 p-3 dark:border-moss-700">
+              <h3 className="mb-2 text-sm font-semibold">
+                {t("inPerson.title")}
+              </h3>
+              <InPersonExchange
+                post={post}
+                meKey={meKey}
+                otherPartyName={otherPartyName}
+                onClose={() => setInPersonOpen(false)}
+              />
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn-ghost self-start text-xs"
+              onClick={() => setInPersonOpen(true)}
+            >
+              {t("inPerson.entry")}
+            </button>
+          ))}
         <div className="flex flex-wrap gap-2">
           <button
             className="btn-secondary"

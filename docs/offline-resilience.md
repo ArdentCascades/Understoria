@@ -1,8 +1,9 @@
 # Offline resilience — when the internet itself goes down
 
 Status: **design accepted; §4 storm-hub runbook SHIPPED (ops
-pattern, no app changes); §5 in-person exchange — next code
-feature; §6 named non-goals.** Prompted by the operator's question:
+pattern, no app changes); §5 in-person exchange SHIPPED
+(`lib/inPersonExchange.ts` + the "Confirm in person" flow on the
+post page); §6 named non-goals.** Prompted by the operator's question:
 "Let's say the internet goes down, such as in the case of Hurricane
 Helene — how could Understoria continue to function?" This is the
 scenario the resilience work has been building toward
@@ -56,7 +57,7 @@ where the mutual aid needs to flow.
    their installed apps simply work. SHIPPED as a runbook.
 2. **In-person exchange over QR** (§5) — two members with no hub
    at all confirm an exchange phone-to-phone. Small feature, all
-   shipped patterns. NEXT.
+   shipped patterns. SHIPPED.
 3. **Snapshot gossip** — a "share recent updates as a file"
    export/import (AirDrop/Bluetooth/SD card), merging by the
    normal rules, so the board spreads hand-to-hand. Medium;
@@ -131,7 +132,7 @@ replication.
   validation; the runbook box should keep a battery-backed RTC or
   sync its clock at each drill.
 
-## 5. In-person exchange over QR (next)
+## 5. In-person exchange over QR (SHIPPED)
 
 Two members meet with no hub at all. The helper's device renders
 the canonical exchange payload, helper-signed, as a QR; the helped
@@ -144,9 +145,37 @@ Same delivery posture as guardian shards: nothing is enforceable
 until both signatures exist, and a photographed QR leaks only what
 the final public record says anyway. The same shape can later carry
 a post or a vouch — a paper bulletin board of QR codes in a shelter
-lobby is a workable coordination surface. Design details (payload
-kinds, replay/duplicate handling, UI entry points) belong to the
-implementation PR; the invariants are the ones above.
+lobby is a workable coordination surface.
+
+**As built** (`apps/web/src/lib/inPersonExchange.ts` + the
+`InPersonExchange` component, entered via "Confirm in person" on
+the post page wherever the normal confirm button lives):
+
+- **Two payload kinds**, mirroring the removal ceremony's
+  draft/fragment pair: `understoria-exchange-offer` (helper-signed
+  canonical payload + the exchange id, minted once at offer time)
+  and `understoria-exchange-receipt` (the COMPLETE double-signed
+  record). The same `canonicalExchangePayload` bytes the online
+  `confirmExchange` path signs, so records from the two paths are
+  indistinguishable downstream.
+- **Replay/duplicate handling:** because the id is minted at offer
+  time and rides the whole trip, both devices enqueue the same
+  record and the node's idempotent-on-id `POST /exchanges` keeps
+  one copy. Re-accepting an offer re-issues the stored receipt;
+  re-scanning a receipt is a local no-op. Nothing doubles.
+- **The fingerprint gate (§7):** the offer screen shows the
+  helper's key fingerprint beside the QR and the review screen
+  shows the fingerprint of the key that actually signed what was
+  scanned — the same eyeball check device pairing uses. The review
+  copy states plainly that signing credits hours.
+- **Post-attached only (v1 scope):** the flow hangs off an
+  existing claimed post BOTH members already hold — the normal
+  case. Both devices refuse offers about posts they don't hold,
+  offers naming parties other than that post's parties, and
+  scanners who aren't the helped counterparty. Post-less
+  "spontaneous help" is deliberately NOT here — that is the
+  un-ratified direct-exchange-label proposal, and it stays a
+  proposal.
 
 ## 6. Non-goals, named
 
@@ -180,9 +209,10 @@ implementation PR; the invariants are the ones above.
 
 The storm hub adds no new record kinds and no new wire surface —
 it is a mirror with a local answering machine. What §7 of
-`docs/threat-model.md` is owed when §5 ships: the in-person
-exchange QR carries the same fields the exchange record already
-publishes (nothing new leaks), and the capture surface must refuse
-payloads whose signer is not the member standing in front of you
-claims to be (fingerprint display, as device pairing does).
+`docs/threat-model.md` was owed when §5 shipped is now paid (see
+its in-person-exchange entry): the in-person exchange QR carries
+exactly the fields the exchange record already publishes (nothing
+new leaks), and the capture surface refuses payloads whose signer
+is not a party to the post the scanner holds, with the fingerprint
+display for the human check, as device pairing does.
 `docs/operator-guide.md` gains a pointer to the §4 runbook.
