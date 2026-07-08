@@ -65,6 +65,18 @@ include breaking changes.
   answer now points at the recovery paths that exist.
 
 ### Changed
+- **Device sync can no longer stall inside a crowded millisecond
+  either** (`docs/composite-federation-cursors.md` phase 3,
+  completing the design — every puller in the system now moves
+  through timestamp ties of any size). The app's own pull loops —
+  all twenty-three of them, posts to proposals — now remember the
+  exact row they stopped on rather than just the millisecond, the
+  same fix the node-to-node pulls got below. Existing devices
+  upgrade in place: a stored old-style position behaves exactly as
+  before for one pull, then carries the precise form from the next
+  record onward. Nothing changes about what is or isn't accepted —
+  rejected records still never advance the position.
+
 - **Node-to-node sync can no longer stall inside a crowded
   millisecond** (`docs/composite-federation-cursors.md` phase 2).
   When many records share one timestamp — the shape a bulk restore

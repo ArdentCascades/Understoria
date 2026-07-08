@@ -191,7 +191,7 @@ describe("pullFederatedInviteRevocations", () => {
     expect(row?.status).toBe("revoked");
     expect(row?.revokedAt).toBe(5_000);
     expect(await getSetting(SETTING_KEYS.federationLastInviteRevocationPull)).toBe(
-      "900",
+      `900:${invite.token}`,
     );
   });
 
@@ -240,10 +240,12 @@ describe("pullFederatedInviteRevocations", () => {
     // transient — an attacker's placeholder landing first makes the
     // REAL inviter's revocation mismatch until the receipt corrects
     // the row — so the dropped row stays below the high-water mark
-    // and is re-evaluated on every pull.
-    expect(await getSetting(SETTING_KEYS.federationLastInviteRevocationPull)).toBe(
-      "0",
-    );
+    // and is re-evaluated on every pull. No row consumed → nothing
+    // persisted (pre-pair the absent-cursor default "0" was written
+    // back verbatim; either way the next pull starts from zero).
+    expect(
+      await getSetting(SETTING_KEYS.federationLastInviteRevocationPull),
+    ).toBeUndefined();
   });
 
   it("recovers the genuine revocation once the receipt corrects an attacker's placeholder (mismatch is transient)", async () => {
@@ -280,7 +282,7 @@ describe("pullFederatedInviteRevocations", () => {
     );
     expect(
       await getSetting(SETTING_KEYS.federationLastInviteRevocationPull),
-    ).toBe("100");
+    ).toBe(`100:${invite.token}`);
 
     // The receipt arrives: the placeholder was NOT authoritative
     // (attacker key ≠ embedded inviter key), so the row corrects to
@@ -308,7 +310,7 @@ describe("pullFederatedInviteRevocations", () => {
     expect(final?.revokedAt).toBe(7_777);
     expect(
       await getSetting(SETTING_KEYS.federationLastInviteRevocationPull),
-    ).toBe("105");
+    ).toBe(`105:${invite.token}`);
   });
 
   it("skips a revocation whose signature does not verify without advancing the cursor", async () => {
@@ -342,7 +344,7 @@ describe("pullFederatedInviteRevocations", () => {
     expect(result).toEqual({ inserted: 1, skipped: 1 });
     // Cursor stops at the last GOOD row.
     expect(await getSetting(SETTING_KEYS.federationLastInviteRevocationPull)).toBe(
-      "100",
+      `100:${invite.token}`,
     );
   });
 });

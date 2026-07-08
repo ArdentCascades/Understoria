@@ -1,28 +1,31 @@
 # Understoria — Composite `(timestamp, id)` Federation Cursors (design note)
 
-> **Status:** **phases 1 and 2 shipped.** Phase 1 (server-side):
-> every federation store's `list()` routes through the shared
-> `pagedRows` helper in `apps/server/src/db.ts` that accepts the
-> optional `sinceId` pair component, and every federation GET route
-> parses it. The legacy `since`-only inclusive cursor is preserved
-> byte-for-byte (it is the absent-parameter path, not a fork), locked
-> in place by `db.cursors.test.ts` — the §4 wedge regression suite,
-> run against all 12 stores (250 rows sharing one millisecond, page
-> cap 50, full convergence under the pair cursor). Phase 2
-> (node↔node): `peer_pull_state` carries one nullable id column per
-> timestamp cursor (schema v24), the nine `peerPull.ts` pull
-> functions track the max `(timestamp, id)` pair across consumed
-> rows and send it as the exclusive pair cursor, and `recordSuccess`
-> persists both halves ATOMICALLY (a NULL stored id — the state
-> every pre-phase-2 database wakes up with — sends `since` alone,
-> one inclusive re-serve page, then upgrades to the pair). The
-> mirror puller (`mirrorPull.ts`) was born after phase 1 and has
-> used the pair from its first version. Worker-level wedge +
-> legacy-upgrade tests in `peerPull.test.ts`. **Phase 3 (PWA
-> pullers persisting `"<ms>:<id>"`) remains specced below and
-> unshipped** — until it lands, the PWA's ~19 pull loops still
-> track bare timestamps and the wedge remains for them — still
-> unreachable through normal one-at-a-time writes. Originally
+> **Status:** **ALL THREE PHASES SHIPPED — this design is fully
+> implemented.** Phase 1 (server): every federation store's `list()`
+> routes through the shared `pagedRows` helper accepting the optional
+> exclusive `sinceId` pair component; every federation GET route
+> parses it; the legacy `since`-only inclusive cursor is preserved
+> byte-for-byte as the absent-parameter path, locked by
+> `db.cursors.test.ts`. Phase 2 (node↔node): `peer_pull_state`
+> carries one nullable id column per timestamp cursor (schema v24);
+> the nine `peerPull.ts` pull functions track and send the max
+> `(timestamp, id)` pair across consumed rows, both halves persisted
+> atomically; `mirrorPull.ts` used the pair from birth; worker-level
+> wedge + legacy-upgrade tests in `peerPull.test.ts`. Phase 3 (PWA):
+> all 23 pull loops in `apps/web/src/lib/federationSync.ts` persist
+> `federationLast<Kind>Pull` as `"<ms>:<id>"` and send the pair
+> (`parseCursor` / `advancePair` / `formatCursor`; the shared
+> `fetchStateFeed` covers the state-record feeds). The §2 legacy
+> parse rule is live: a bare-timestamp value sends `since` alone —
+> one inclusive re-serve page, id-dedup no-ops — and upgrades to the
+> pair form on the next consumed row. Reject-rows still never
+> advance the pair; windowing refusals and verified duplicates still
+> do. Per-kind tiebreak ids match the server's `pagedRows` columns
+> (`token` for redemptions/invite revocations, `postId` for claims,
+> the row id everywhere else — including proposal closures, whose
+> tiebreak is the closure's own uuid, not `proposalId`). Wedge
+> convergence + legacy upgrade + parse-rule tests in
+> `federationSync.cursors.test.ts`. Originally
 > filed at the round-3 review.
 
 ---

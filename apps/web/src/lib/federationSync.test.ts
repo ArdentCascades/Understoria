@@ -95,7 +95,7 @@ describe("pullFederatedExchanges", () => {
       nodeId: "peer_node",
     });
     expect(await getSetting(SETTING_KEYS.federationLastExchangePull)).toBe(
-      "1000",
+      "1000:peer_1",
     );
   });
 
@@ -144,7 +144,7 @@ describe("pullFederatedExchanges", () => {
     expect(result).toEqual({ inserted: 1, skipped: 1 });
     // Cursor reflects the GOOD row only — the rejected row left no mark.
     expect(await getSetting(SETTING_KEYS.federationLastExchangePull)).toBe(
-      "1000",
+      "1000:good_1",
     );
   });
 
@@ -174,7 +174,7 @@ describe("pullFederatedExchanges", () => {
     expect(result).toEqual({ inserted: 1, skipped: 1 });
     expect(await db.exchanges.get("fab_1")).toBeUndefined();
     expect(await getSetting(SETTING_KEYS.federationLastExchangePull)).toBe(
-      "1234",
+      "1234:good_2",
     );
   });
 
@@ -462,10 +462,11 @@ describe("pullFederatedClaims — cursor advances on every row", () => {
 
     const spy = stubClaims([stale, [fresh]]);
 
-    // Pull 1: 3 non-applicable claims. Cursor MUST advance to 1002.
+    // Pull 1: 3 non-applicable claims. Cursor MUST advance to 1002
+    // (paired with the row's postId — the claims feed's tiebreak).
     const first = await pullFederatedClaims();
     expect(first).toBe(0); // nothing applied
-    expect(await getSetting("federationLastClaimPull")).toBe("1002");
+    expect(await getSetting("federationLastClaimPull")).toBe("1002:absent_2");
 
     // Pull 2 uses since=1002 and reaches the fresh claim.
     const second = await pullFederatedClaims();
@@ -504,7 +505,7 @@ describe("pullFederatedCoOrgInvitations", () => {
     });
     expect(
       await getSetting(SETTING_KEYS.federationLastCoOrgInvitationPull),
-    ).toBe("1500");
+    ).toBe("1500:ci_1");
   });
 
   it("skips rows whose signature does not verify", async () => {
@@ -549,7 +550,7 @@ describe("pullFederatedCoOrgInvitations", () => {
     expect(await db.coorgInvitations.get("ci_future")).toBeUndefined();
     expect(
       await getSetting(SETTING_KEYS.federationLastCoOrgInvitationPull),
-    ).toBe("400");
+    ).toBe("400:ci_good");
   });
 
   it("dedupes on id across repeated pulls", async () => {
@@ -605,7 +606,7 @@ describe("pullFederatedCoOrgResponses", () => {
       await getSetting(
         SETTING_KEYS.federationLastCoOrgInvitationResponsePull,
       ),
-    ).toBe("1200");
+    ).toBe("1200:cr_1");
   });
 
   it("skips rows whose signature does not verify", async () => {
@@ -645,7 +646,7 @@ describe("pullFederatedCoOrgRevocations", () => {
       await getSetting(
         SETTING_KEYS.federationLastCoOrgInvitationRevocationPull,
       ),
-    ).toBe("3300");
+    ).toBe("3300:cv_1");
   });
 
   it("skips rows whose signature does not verify", async () => {
