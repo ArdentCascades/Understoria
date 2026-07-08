@@ -213,7 +213,7 @@ function renderBlock(block: MdBlock, key: number): ReactNode {
           className="overflow-x-auto rounded bg-moss-100 p-2 text-xs dark:bg-moss-900"
         >
           {block.lang ? (
-            <span className="mb-1 block text-[0.7rem] text-moss-500 dark:text-moss-400">
+            <span className="mb-1 block text-[0.7rem] text-moss-600 dark:text-moss-300">
               {block.lang}
             </span>
           ) : null}

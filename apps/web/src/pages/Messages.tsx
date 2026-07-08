@@ -342,7 +342,7 @@ function SearchResults({
                     )}
                   </div>
                   {isNameOnlyMatch ? (
-                    <p className="mt-1 text-sm italic text-moss-600 dark:text-moss-400">
+                    <p className="mt-1 text-sm italic text-moss-600 dark:text-moss-300">
                       {t("messages.search.matchedName")}
                     </p>
                   ) : (

@@ -43,6 +43,9 @@ export function StorageWindowSection() {
   const [preview, setPreview] = useState<WindowPreview | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  // Whether the current note is an ERROR (role="alert", assertive)
+  // rather than a progress/status line (role="status", polite).
+  const [noteIsError, setNoteIsError] = useState(false);
   // Seed-vault role (docs/storage-budget.md Phase 2) — the visible
   // opposite of windowing; the two are mutually exclusive.
   const [vaultActive, setVaultActive] = useState(false);
@@ -55,9 +58,11 @@ export function StorageWindowSection() {
   async function handleVault(active: boolean) {
     setBusy(true);
     setNote(null);
+    setNoteIsError(false);
     try {
       const result = await setSeedVaultPledge(active);
       if (!result.ok) {
+        setNoteIsError(true);
         setNote(t(`profile.data.vault.error.${result.error}`));
         return;
       }
@@ -141,12 +146,17 @@ export function StorageWindowSection() {
           <p className="text-xs font-medium">
             {t("profile.data.window.chooseHorizon")}
           </p>
-          <div className="flex gap-2">
+          <div
+            className="flex gap-2"
+            role="group"
+            aria-label={t("profile.data.window.chooseHorizon")}
+          >
             {WINDOW_HORIZON_CHOICES.map((ms) => (
               <button
                 key={ms}
                 type="button"
                 disabled={busy}
+                aria-pressed={chosen === ms}
                 className={
                   chosen === ms ? "btn-primary text-xs" : "btn-secondary text-xs"
                 }
@@ -222,7 +232,14 @@ export function StorageWindowSection() {
       )}
 
       {note && (
-        <p role="status" className="mt-2 text-xs text-canopy-800 dark:text-canopy-200">
+        <p
+          role={noteIsError ? "alert" : "status"}
+          className={
+            noteIsError
+              ? "mt-2 text-xs text-rose-700 dark:text-rose-300"
+              : "mt-2 text-xs text-canopy-800 dark:text-canopy-200"
+          }
+        >
           {note}
         </p>
       )}

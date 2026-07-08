@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
+import { useStepFocus } from "@/lib/useStepFocus";
 import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
@@ -49,6 +50,10 @@ export function GuardianRecoveryFlow({
   const [capturing, setCapturing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // When the capture form mounts/unmounts, the pressed button
+  // disappears — refocus the flow container so a keyboard or SR user
+  // keeps their place (the role="status" progress line reads next).
+  const stepRef = useStepFocus(capturing);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +99,7 @@ export function GuardianRecoveryFlow({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-3 outline-none">
       <p className="text-sm text-moss-700 dark:text-moss-200">
         {t("recover.guardiansIntro")}
       </p>

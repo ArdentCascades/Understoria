@@ -24,6 +24,7 @@ import QRCode from "qrcode";
 import { REMOVAL_REASON_MAX_LENGTH } from "@understoria/shared/crypto";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
 import { removalQuorum } from "@/lib/memberRemoval";
+import { useStepFocus } from "@/lib/useStepFocus";
 import {
   collectCosignFragment,
   linkableProposals,
@@ -96,6 +97,7 @@ export function RemovalCeremony({
     [],
   );
   const [linkedProposalId, setLinkedProposalId] = useState("");
+  const stepRef = useStepFocus(step);
 
   useEffect(() => {
     void removalQuorum().then(setQuorum);
@@ -153,7 +155,7 @@ export function RemovalCeremony({
 
   if (step === "intro") {
     return (
-      <div className="flex flex-col gap-3">
+      <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-3 outline-none">
         <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
           {t(
             recordKind === "removal"
@@ -215,7 +217,7 @@ export function RemovalCeremony({
     const have = draft.signatures.length;
     const enough = have >= quorum;
     return (
-      <div className="flex flex-col gap-3">
+      <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-3 outline-none">
         <p className="text-sm text-moss-700 dark:text-moss-200">
           {t("removals.draftHint", { name: subjectName })}
         </p>
@@ -265,7 +267,7 @@ export function RemovalCeremony({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={stepRef} tabIndex={-1} className="flex flex-col gap-3 outline-none">
       <p role="status" className="text-sm text-moss-700 dark:text-moss-200">
         {t("removals.submitted")}
       </p>

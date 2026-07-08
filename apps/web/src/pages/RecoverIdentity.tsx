@@ -150,12 +150,15 @@ export default function RecoverIdentityPage() {
             </button>
           ) : (
             <div className="flex flex-col gap-2">
-              <textarea
-                className="input min-h-28 font-mono text-xs"
-                placeholder='{"kind":"understoria-recovery-kit", …}'
-                value={pasted}
-                onChange={(e) => setPasted(e.target.value)}
-              />
+              <label className="flex flex-col gap-1 text-sm">
+                {t("recover.pasteLabel")}
+                <textarea
+                  className="input min-h-28 font-mono text-xs"
+                  placeholder='{"kind":"understoria-recovery-kit", …}'
+                  value={pasted}
+                  onChange={(e) => setPasted(e.target.value)}
+                />
+              </label>
               <button
                 type="button"
                 className="btn-secondary self-end text-xs"

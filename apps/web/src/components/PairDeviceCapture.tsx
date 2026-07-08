@@ -381,14 +381,17 @@ export function PairDeviceCapture({
       )}
 
       {cameraState === null && (
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p role="status" className="text-sm text-moss-600 dark:text-moss-300">
           {t("pairDevice.capture.requestingCamera")}
         </p>
       )}
 
       {cameraState === false && (
         <div className="flex flex-col gap-3 rounded-xl bg-moss-50 p-4 dark:bg-moss-900/40">
-          <p className="text-sm font-medium text-moss-900 dark:text-moss-100">
+          <p
+            role="status"
+            className="text-sm font-medium text-moss-900 dark:text-moss-100"
+          >
             {t("pairDevice.capture.cameraUnavailable")}
           </p>
           <p className="text-sm text-moss-600 dark:text-moss-300">

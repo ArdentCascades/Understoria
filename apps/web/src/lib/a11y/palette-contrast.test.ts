@@ -290,3 +290,35 @@ describe("palette contrast — moss-500 stays out of light-mode text", () => {
     expect(contrastRatio(fg, parseHex(LIGHT_BG_PAGE))).toBeLessThan(AA_NORMAL);
   });
 });
+
+// The math above says WHY the tokens were swept; this scan says the
+// sweep HOLDS. It regressed twice without it (localOnly note,
+// MarkdownHint & co.) — the ratio test alone can't see call sites.
+// `text-moss-500` fails AA on both light surfaces (4.09 / 3.79) and
+// `dark:text-moss-400` fails on dark cards (4.28 on moss-900), so
+// neither may appear as a TEXT class. Decorative `aria-hidden`
+// glyphs use other shades and are exempt by not matching these
+// exact class names.
+describe("palette contrast — the swept text classes stay out of the source", () => {
+  it("no component uses text-moss-500 or dark:text-moss-400", async () => {
+    const { readdirSync, readFileSync, statSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const offenders: string[] = [];
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        const p = join(dir, name);
+        if (statSync(p).isDirectory()) {
+          walk(p);
+          continue;
+        }
+        if (!/\.(tsx|ts)$/.test(name) || /\.test\./.test(name)) continue;
+        const src = readFileSync(p, "utf8");
+        if (/(?<!dark:)\btext-moss-500\b/.test(src) || /dark:text-moss-400\b/.test(src)) {
+          offenders.push(p);
+        }
+      }
+    };
+    walk(join(__dirname, "..", ".."));
+    expect(offenders).toEqual([]);
+  });
+});

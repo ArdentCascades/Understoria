@@ -24,6 +24,7 @@ import QRCode from "qrcode";
 import { useApp } from "@/state/AppContext";
 import { getSetting } from "@/db/database";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
+import { useStepFocus } from "@/lib/useStepFocus";
 import {
   acceptGuardianShard,
   createGuardianOffers,
@@ -99,6 +100,10 @@ export function GuardianShardsCard() {
     { guardianName: string; text: string }[] | null
   >(null);
   const [offerIndex, setOfferIndex] = useState(0);
+  // Focus follows the offer stepper: entering the stepper and each
+  // "next guardian" advance land focus on the step container, so the
+  // announced showTo line reads in order.
+  const offerStepRef = useStepFocus(offers === null ? null : offerIndex);
   // Guardian-side flow state
   const [accepting, setAccepting] = useState(false);
   const [acceptNote, setAcceptNote] = useState<string | null>(null);
@@ -301,8 +306,12 @@ export function GuardianShardsCard() {
       )}
 
       {offers !== null && (
-        <div className="mb-4 flex flex-col gap-2">
-          <p className="text-sm font-medium">
+        <div
+          ref={offerStepRef}
+          tabIndex={-1}
+          className="mb-4 flex flex-col gap-2 outline-none"
+        >
+          <p role="status" className="text-sm font-medium">
             {t("guardians.showTo", {
               name: offers[offerIndex].guardianName,
               step: offerIndex + 1,
@@ -346,8 +355,9 @@ export function GuardianShardsCard() {
             {t("guardians.noDuties")}
           </p>
         )}
+        <ul>
         {duties.map((d) => (
-          <div
+          <li
             key={d.ownerKey}
             className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm"
           >
@@ -381,8 +391,9 @@ export function GuardianShardsCard() {
                 {t("guardians.dropDuty")}
               </button>
             </span>
-          </div>
+          </li>
         ))}
+        </ul>
         {acceptNote && (
           <p role="status" className="mb-2 text-xs text-canopy-800 dark:text-canopy-200">
             {acceptNote}
