@@ -10,6 +10,12 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The template filters share one row on desktop.** The search box
+  and the two dropdowns on "Start a project" each spanned the full
+  page width, stacked; the dropdowns now take only the room their
+  labels need, freeing a whole extra row of templates above the
+  fold.
+
 - **"Start a project" shows the form only once you've picked a
   starting point.** The blank form used to sit beside the templates
   before you'd chosen anything; now the template gallery gets the
