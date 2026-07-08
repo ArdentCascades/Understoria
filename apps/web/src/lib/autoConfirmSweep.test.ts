@@ -67,9 +67,22 @@ async function awaitingTask(
   return task;
 }
 
+/** The spy's /auto-confirm calls ONLY. `createProject` fires an
+ *  un-awaited `flushOutboxNow()` whose fetch may resolve before or
+ *  after the stub is installed depending on event-loop scheduling —
+ *  counting raw calls made these tests flaky. The sweep's own POST is
+ *  the one under test. */
+function autoConfirmCalls(
+  fetchSpy: ReturnType<typeof vi.fn>,
+): Array<[string, { body: string }]> {
+  return fetchSpy.mock.calls.filter(([url]) =>
+    String(url).includes("/auto-confirm"),
+  ) as Array<[string, { body: string }]>;
+}
+
 /** Pulls the POSTed `requests[].payload.hours` out of the fetch body. */
 function postedHours(fetchSpy: ReturnType<typeof vi.fn>): number {
-  const body = JSON.parse(fetchSpy.mock.calls[0][1].body as string);
+  const body = JSON.parse(autoConfirmCalls(fetchSpy)[0][1].body);
   return body.requests[0].payload.hours;
 }
 
@@ -100,7 +113,7 @@ describe("runAutoConfirmSweep — task credit hours", () => {
 
     await runAutoConfirmSweep(NODE);
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(autoConfirmCalls(fetchSpy)).toHaveLength(1);
     expect(postedHours(fetchSpy)).toBe(6);
   });
 
@@ -125,7 +138,7 @@ describe("runAutoConfirmSweep — task credit hours", () => {
 
     await runAutoConfirmSweep(NODE);
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(autoConfirmCalls(fetchSpy)).toHaveLength(1);
     expect(postedHours(fetchSpy)).toBe(2);
   });
 });
@@ -178,7 +191,7 @@ describe("runAutoConfirmSweep — post waiting window starts at awaitingSince", 
 
     await runAutoConfirmSweep(NODE);
 
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(autoConfirmCalls(fetchSpy)).toHaveLength(0);
   });
 
   it("sweeps once the window has elapsed from awaitingSince, and sends that timestamp", async () => {
@@ -193,8 +206,8 @@ describe("runAutoConfirmSweep — post waiting window starts at awaitingSince", 
 
     await runAutoConfirmSweep(NODE);
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(fetchSpy.mock.calls[0][1].body as string);
+    expect(autoConfirmCalls(fetchSpy)).toHaveLength(1);
+    const body = JSON.parse(autoConfirmCalls(fetchSpy)[0][1].body);
     expect(body.requests[0].awaitingSince).toBe(awaitingSince);
   });
 
@@ -207,8 +220,8 @@ describe("runAutoConfirmSweep — post waiting window starts at awaitingSince", 
 
     await runAutoConfirmSweep(NODE);
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(fetchSpy.mock.calls[0][1].body as string);
+    expect(autoConfirmCalls(fetchSpy)).toHaveLength(1);
+    const body = JSON.parse(autoConfirmCalls(fetchSpy)[0][1].body);
     expect(body.requests[0].awaitingSince).toBe(createdAt);
   });
 });

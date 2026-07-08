@@ -1,18 +1,28 @@
 # Understoria — Composite `(timestamp, id)` Federation Cursors (design note)
 
-> **Status:** **phase 1 shipped** (server-side). Every federation
-> store's `list()` now routes through a shared `pagedRows` helper in
-> `apps/server/src/db.ts` that accepts the optional `sinceId` pair
-> component, and every federation GET route parses it. The legacy
-> `since`-only inclusive cursor is preserved byte-for-byte (it is the
-> absent-parameter path, not a fork), locked in place by
-> `db.cursors.test.ts` — the §4 wedge regression suite, run against
-> all 12 stores (250 rows sharing one millisecond, page cap 50,
-> full convergence under the pair cursor). Phases 2 (peerPull +
-> `peer_pull_state` id columns) and 3 (PWA pullers persisting
-> `"<ms>:<id>"`) remain specced below and unshipped; until they land,
-> pullers still track bare timestamps and the wedge remains for them —
-> still unreachable through normal one-at-a-time writes. Originally
+> **Status:** **phases 1 and 2 shipped.** Phase 1 (server-side):
+> every federation store's `list()` routes through the shared
+> `pagedRows` helper in `apps/server/src/db.ts` that accepts the
+> optional `sinceId` pair component, and every federation GET route
+> parses it. The legacy `since`-only inclusive cursor is preserved
+> byte-for-byte (it is the absent-parameter path, not a fork), locked
+> in place by `db.cursors.test.ts` — the §4 wedge regression suite,
+> run against all 12 stores (250 rows sharing one millisecond, page
+> cap 50, full convergence under the pair cursor). Phase 2
+> (node↔node): `peer_pull_state` carries one nullable id column per
+> timestamp cursor (schema v24), the nine `peerPull.ts` pull
+> functions track the max `(timestamp, id)` pair across consumed
+> rows and send it as the exclusive pair cursor, and `recordSuccess`
+> persists both halves ATOMICALLY (a NULL stored id — the state
+> every pre-phase-2 database wakes up with — sends `since` alone,
+> one inclusive re-serve page, then upgrades to the pair). The
+> mirror puller (`mirrorPull.ts`) was born after phase 1 and has
+> used the pair from its first version. Worker-level wedge +
+> legacy-upgrade tests in `peerPull.test.ts`. **Phase 3 (PWA
+> pullers persisting `"<ms>:<id>"`) remains specced below and
+> unshipped** — until it lands, the PWA's ~19 pull loops still
+> track bare timestamps and the wedge remains for them — still
+> unreachable through normal one-at-a-time writes. Originally
 > filed at the round-3 review.
 
 ---
