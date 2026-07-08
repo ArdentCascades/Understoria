@@ -80,6 +80,58 @@ services:
       PEER_NODE_URLS: "${PEER_NODE_URLS:-}"
       # How often the pull worker hits each peer (ms). Default 5 min.
       PEER_PULL_INTERVAL_MS: "${PEER_PULL_INTERVAL_MS:-300000}"
+      # ---- Membership & governance ------------------------------------
+      # Trust roots for the membership resolver: comma-separated base64
+      # public keys of the founding member(s). REQUIRED for the
+      # member-gated write surfaces (proposals, votes, closures, member
+      # removals) — with no founder keys, NO key counts as a member and
+      # every governance write is refused with 403 not_a_member. Each
+      # member's public key is on their Profile page. See
+      # docs/operator-guide.md.
+      NODE_FOUNDER_KEYS: "${NODE_FOUNDER_KEYS:-}"
+      # Co-signatures required on a member removal / reinstatement.
+      # MUST match across a mirror set. docs/member-removal.md §2.
+      REMOVAL_QUORUM: "${REMOVAL_QUORUM:-3}"
+      # ---- Reads & at-rest protection ---------------------------------
+      # Member-authenticated reads ("off" | "on"). Flip to "on" only
+      # after every member runs a signing build — rollout runbook in
+      # docs/operator-guide.md. "on" requires NODE_FOUNDER_KEYS (boot
+      # refuses otherwise).
+      READ_AUTH: "${READ_AUTH:-off}"
+      # Encryption-at-rest key for the SQLite file. Unset keeps
+      # plaintext. Keep a copy of the key AWAY from the backups — a
+      # backup without its key is a brick, which is the point.
+      DATABASE_KEY: "${DATABASE_KEY:-}"
+      # JSON map {"https://peer.example":"<token>"} for reads against
+      # READ_AUTH=on peers (and inbound peer reads).
+      PEER_READ_TOKENS: "${PEER_READ_TOKENS:-}"
+      # Honor X-Forwarded-For from the reverse proxy for rate limiting.
+      # Any value fastify's trustProxy accepts; empty = off.
+      TRUST_PROXY: "${TRUST_PROXY:-}"
+      # ---- Mirrors (docs/community-resilience.md) ----------------------
+      # Origin nodes this node mirrors (comma-separated URLs).
+      MIRROR_NODE_URLS: "${MIRROR_NODE_URLS:-}"
+      # Mirror URLs this node publishes on GET /config for failover.
+      MIRROR_ANNOUNCE_URLS: "${MIRROR_ANNOUNCE_URLS:-}"
+      MIRROR_PULL_INTERVAL_MS: "${MIRROR_PULL_INTERVAL_MS:-}"
+      # JSON map {"https://mirror.example":"<token>"} for pulling from
+      # READ_AUTH=on mirrors.
+      MIRROR_READ_TOKENS: "${MIRROR_READ_TOKENS:-}"
+      # ---- Disk-fill backstops (docs/operator-guide.md) ----------------
+      TABLE_ROW_CEILING: "${TABLE_ROW_CEILING:-}"
+      PER_KEY_ROW_CEILING: "${PER_KEY_ROW_CEILING:-}"
+      # ---- Recovery & rollout flips ------------------------------------
+      # Re-seed acceptance window (RFC3339 or epoch ms) — set only
+      # while restoring a community onto this fresh node, then unset.
+      # docs/community-reseed.md.
+      RESEED_GRACE_UNTIL: "${RESEED_GRACE_UNTIL:-}"
+      # JSON array of {"nodeId","pubkey"} system keys trusted during a
+      # re-seed. Set alongside RESEED_GRACE_UNTIL, then unset.
+      TRUSTED_SYSTEM_KEYS: "${TRUSTED_SYSTEM_KEYS:-}"
+      # Refuse auto-confirm requests without a signed awaiting-
+      # transition artifact ("1" to enable). Flip only after every
+      # member runs an artifact-pushing build. docs/auto-confirm-key.md §5.
+      AUTO_CONFIRM_REQUIRE_TRANSITION: "${AUTO_CONFIRM_REQUIRE_TRANSITION:-}"
     volumes:
       - understoria-data:/data
     cap_drop:
