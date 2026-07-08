@@ -303,6 +303,15 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "no setup needed. Ask whoever runs your community's server " +
             "whether a storm hub exists; if not, docs/offline-resilience.md " +
             "is the recipe for building one in good times.",
+          "You can even invite someone new. Your invite code works " +
+            "without any internet — it's signed by you and stays good " +
+            "for two weeks — so show them the QR code or hand them the " +
+            "link on paper and let them keep a photo of it. At a storm " +
+            "hub they can install the app and join on the spot; " +
+            "otherwise they finish joining the moment they get any " +
+            "connection at all. The one thing that can't happen with " +
+            "no network anywhere is downloading the app itself — the " +
+            "invite waits patiently until they can.",
         ],
       },
       {

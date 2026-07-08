@@ -314,6 +314,15 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "de tu comunidad si existe un nodo de tormenta; si no, " +
             "docs/offline-resilience.md es la receta para construirlo " +
             "en tiempos buenos.",
+          "Incluso puedes invitar a alguien nuevo. Tu código de " +
+            "invitación funciona sin internet — lo firmas tú y vale " +
+            "por dos semanas — así que muéstrale el código QR o dale " +
+            "el enlace en papel y que guarde una foto. En un nodo de " +
+            "tormenta puede instalar la app y unirse en el momento; " +
+            "si no, termina de unirse en cuanto consiga cualquier " +
+            "conexión. Lo único que no puede pasar sin ninguna red es " +
+            "descargar la app en sí — la invitación espera paciente " +
+            "hasta que pueda.",
         ],
       },
       {

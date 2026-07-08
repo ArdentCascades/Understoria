@@ -3,7 +3,8 @@
 Status: **design accepted; §4 storm-hub runbook SHIPPED (ops
 pattern, no app changes); §5 in-person exchange SHIPPED
 (`lib/inPersonExchange.ts` + the "Confirm in person" flow on the
-post page); §6 named non-goals.** Prompted by the operator's question:
+post page); §5b invite-during-outage assessment (already holds,
+nothing to build); §6 named non-goals.** Prompted by the operator's question:
 "Let's say the internet goes down, such as in the case of Hurricane
 Helene — how could Understoria continue to function?" This is the
 scenario the resilience work has been building toward
@@ -107,6 +108,15 @@ three properties that are each ordinary on their own:
    off the router's WAN, join the hub WiFi with two phones, post
    from one, see it on the other. Verify the two honest caveats
    below while you're at it.
+6. **Drill a brand-new member too:** bring a phone that has never
+   seen the app, join it to the hub WiFi, open the community's
+   address, install the app, and scan a member's invite QR. This
+   works because the hub serves the whole deployment — Caddy hands
+   out the app itself, not just the API — the invite QR carries the
+   community's real domain (which the hub's DNS answers), invites
+   verify by signature with no network, and redemption is entirely
+   local (the receipt queues and rides the normal replication
+   through the hub). New members can join at the shelter.
 
 **When the storm comes:** power the hub (wall, car inverter, or a
 battery bank — the node is deliberately lightweight), members join
@@ -177,6 +187,42 @@ the post page wherever the normal confirm button lives):
   un-ratified direct-exchange-label proposal, and it stays a
   proposal.
 
+## 5b. Inviting someone new during an outage
+
+The question that follows §5 naturally: two people meet in the
+field, one is a member, the other wants in. What holds today, with
+no changes:
+
+- **The invite itself is outage-proof.** An invite is a small,
+  self-contained, inviter-SIGNED blob (`lib/invite.ts`) — minting
+  one, rendering it as a QR, and verifying it all happen with zero
+  network. It stays valid for 14 days, and it survives as a photo,
+  a screenshot, or ink on paper. A member standing in a shelter can
+  hand out invites freely; nothing about creating or carrying one
+  needs the internet.
+- **Redemption is already local-first.** `redeemInvite` mints the
+  identity, consumes the token, and queues the signed redemption
+  receipt entirely on-device — nothing crosses any wire at
+  redemption time. Single-use is enforced by first-writer-wins on
+  the token when receipts federate, so an invite redeemed offline
+  converges exactly like one redeemed online.
+- **At a storm hub, the whole journey works — including getting
+  the app.** The hub serves the full deployment (the app shell via
+  Caddy, not just the API), and the invite QR carries the
+  community's real domain, which the hub's DNS answers. A
+  brand-new phone joins the hub WiFi, opens the address, installs,
+  scans, and joins — §4 drill step 6 verifies exactly this.
+- **With no hub at all, the invite waits — honestly.** The one
+  thing that cannot happen phone-to-phone is delivering the APP
+  itself: a PWA's shell must be served from its HTTPS origin, and
+  browsers offer no way to hand an installed web app to another
+  phone (§6). So the field flow is: give them the invite NOW (they
+  photograph the QR or take the paper), and they finish joining
+  the moment they touch any connectivity — the hub's WiFi, a
+  neighborhood with service, or the outage's end. The invite's
+  14-day window comfortably covers a Helene-scale outage's early
+  weeks; a fresh one is one tap away after that.
+
 ## 6. Non-goals, named
 
 - **LoRa / packet-radio mesh.** A real idea for tiny signed
@@ -188,6 +234,13 @@ the post page wherever the normal confirm button lives):
   legible infrastructure someone chose to run (the
   `community-resilience.md` posture); phones silently meshing with
   whatever answers on the local network is the opposite of that.
+- **Phone-to-phone delivery of the app itself.** A PWA's shell is
+  served from its HTTPS origin by construction; no browser offers a
+  way to hand the installed app to another phone the way a native
+  APK can travel over AirDrop / Quick Share. The storm hub closes
+  this for gathered communities (it serves the app, §4 / §5b); a
+  truly serverless hand-off is native-app territory — open
+  community proposal #96 again, the same door as Bluetooth mesh.
 - **Bluetooth, directly.** Named with its reasons, because the
   question recurs: the Web Bluetooth API is CENTRAL-ROLE ONLY (a
   browser can connect to a peripheral but can never advertise as
