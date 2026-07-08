@@ -57,8 +57,14 @@ export function Layout() {
   // consults no viewport metrics at all — and with the document
   // unscrollable, iOS has no document scroll state to corrupt in the
   // first place.
+  // lg:flex-row-reverse: at desktop widths the same two flex children
+  // (main, then BottomNav in DOM order) lay out as a row with the nav
+  // on the LEFT — the "stretched phone app" pilot report. row-REVERSE
+  // keeps the DOM order (and therefore tab order and the mobile
+  // layout) byte-identical; only the visual axis changes. The nav
+  // renders its vertical variant at lg (see BottomNav.tsx).
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
+    <div className="flex h-dvh flex-col overflow-hidden lg:flex-row-reverse">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
       <main

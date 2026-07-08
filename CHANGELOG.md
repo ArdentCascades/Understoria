@@ -10,6 +10,13 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **On desktop, navigation moves to a left side rail.** The
+  phone-style bottom bar made wide screens feel like a stretched
+  phone app; at desktop widths the same five destinations now sit
+  in a slim rail on the left edge, the way desktop apps do. Floating
+  buttons drop into the freed bottom corner, and the offline banner
+  follows. Phones and tablets are completely unchanged.
+
 - **The community board wastes far less desktop space.** The right
   column was silently reserved for the "needs your attention" card
   even when there was nothing needing attention — which is most

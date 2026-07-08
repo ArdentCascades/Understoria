@@ -66,6 +66,8 @@ function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
   if (
     key !== "ArrowRight" &&
     key !== "ArrowLeft" &&
+    key !== "ArrowUp" &&
+    key !== "ArrowDown" &&
     key !== "Home" &&
     key !== "End"
   ) {
@@ -78,9 +80,14 @@ function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
   const idx = links.indexOf(e.currentTarget);
   e.preventDefault();
   let next: HTMLAnchorElement;
+  // Both axes always work: Right/Down advance, Left/Up go back. The
+  // bar is horizontal on mobile and a vertical rail at lg+, and
+  // honoring both pairs everywhere beats trying to detect the
+  // rendered orientation from inside a key handler.
   if (key === "Home") next = links[0];
   else if (key === "End") next = links[links.length - 1];
-  else if (key === "ArrowRight") next = links[(idx + 1) % links.length];
+  else if (key === "ArrowRight" || key === "ArrowDown")
+    next = links[(idx + 1) % links.length];
   else next = links[(idx - 1 + links.length) % links.length];
   next.focus();
 }
@@ -100,6 +107,13 @@ export function BottomNav() {
   // keyboard over the shell's bottom edge anyway, and <main> gains
   // the freed row of space for the form being typed into.
   if (keyboardOpen) return null;
+  // At lg+ the shell lays out as a row (Layout.tsx lg:flex-row-reverse)
+  // and this same component becomes a slim vertical rail on the LEFT
+  // edge: border moves from top to right, the item row becomes a
+  // column, and the width is a fixed 5rem so five icon+label cells
+  // read as a rail rather than five stretched tabs — the "stretched
+  // phone app" half of the desktop-waste pilot report. Same DOM, same
+  // five NavLinks, same labels at every width.
   return (
     <nav
       aria-label={t("nav.primaryNav")}
@@ -107,18 +121,18 @@ export function BottomNav() {
                  border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
-                 lg:pb-0"
+                 lg:w-20 lg:border-r lg:border-t-0 lg:pb-0"
     >
-      <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-[1440px]">
+      <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:mx-0 lg:h-full lg:max-w-none lg:flex-col lg:justify-start lg:gap-1 lg:pt-4">
         {ITEMS.map((item) => (
-          <li key={item.to} className="flex-1">
+          <li key={item.to} className="flex-1 lg:flex-none">
             <NavLink
               to={item.to}
               end={item.to === "/"}
               onKeyDown={handleArrowNav}
               className={({ isActive }) =>
                 [
-                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[0.6875rem] font-medium leading-tight transition-colors sm:text-xs sm:leading-normal",
+                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[0.6875rem] font-medium leading-tight transition-colors sm:text-xs sm:leading-normal lg:py-3",
                   isActive
                     ? "text-canopy-700 dark:text-canopy-300"
                     : "text-moss-600 dark:text-moss-300 hover:text-canopy-700 dark:hover:text-canopy-300",

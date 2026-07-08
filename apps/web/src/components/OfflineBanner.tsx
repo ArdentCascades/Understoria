@@ -37,10 +37,11 @@ import { useToast } from "@/state/ToastContext";
 //
 // Placement: a slim fixed strip hovering just above the BottomNav,
 // using the same `5rem + safe-area` bottom clearance that <main>
-// already reserves for the nav (and `4rem` on lg, where the nav is
-// sticky with no safe-area padding). Layout adds matching bottom
-// padding to <main> while the banner is visible, so no content is
-// ever hidden behind it.
+// already reserves for the nav. At lg+ the nav is a LEFT rail
+// (Layout lg:flex-row-reverse), so the strip sits at `5rem` to
+// clear the corner-pinned FAB pills instead. Layout adds matching
+// bottom padding to <main> while the banner is visible, so no
+// content is ever hidden behind it.
 //
 // Tone: bark (warm neutral), deliberately NOT alarm-red. Offline is
 // a normal condition for this community, not an error — the copy and
@@ -96,7 +97,7 @@ export function OfflineBanner() {
       // must stay in the a11y tree so offline transitions announce
       // exactly once regardless of keyboard state.
       className={`pointer-events-none fixed inset-x-0 z-20 px-4
-                 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-16
+                 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-20
                  ${keyboardOpen ? "opacity-0" : ""}`}
     >
       {!online && (
