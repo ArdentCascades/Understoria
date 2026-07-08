@@ -1,5 +1,9 @@
 # Add a node — grow another root
 
+> **In the app:** Dashboard → Community resilience → **+** walks you
+> through this interactively (for trusted members); this page remains
+> the full reference.
+
 This is the guide behind the Dashboard resilience card's "Grow
 another root" button. It is written for a community member who has
 never run a server. If you want the full operator reference, it's

@@ -3,7 +3,23 @@
 Status: **Phase A shipped** (the honest resilience card + the
 add-a-node path). **Phase B shipped** (mirror nodes + automatic
 failover — the machinery that lets the score rise; kill-the-primary
-verified end-to-end with two real node processes). Companion docs:
+verified end-to-end with two real node processes).
+
+As-built addition: the card's dashed **+** (and its bottom CTA) now
+open an in-app guided flow, `/grow-root` ("Grow another root"),
+instead of the static Help entry. It offers a path chooser (run a
+server / recruit someone with a composed ask / pledge a seed vault),
+generates the mirror-pairing env pair from the operator-guide §6
+runbook (the shared read token minted on-device and handed over only
+by copy/QR), and verifies the new root live (`/health`, `/config`,
+distinct node id, announced in the origin's `mirrors[]`). The wizard
+is gated to trusted members (≥ `MINIMUM_VOUCHES_FOR_TRUST` = 2
+vouches — a mirror operator gains the operator-powers read surface,
+so recruitment asks the community's existing trust bar). Honest note:
+that gate is UI friction, not a security boundary — the docs stay
+public, and the real controls remain `NODE_FOUNDER_KEYS` /
+`READ_AUTH` / the current operator's consent. The seed-vault path and
+the written guide stay open to everyone. Companion docs:
 `docs/add-a-node.md` (the member-facing guide the card's
 call-to-action opens onto), `docs/operator-powers.md` (why
 distributing nodes also distributes the pressure target),

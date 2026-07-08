@@ -1630,6 +1630,98 @@
     "confirm": "Add backup server",
     "decline": "Not now"
   },
+  "growRoot": {
+    "title": "Grow another root",
+    "intro": "Understoria communities get stronger the way trees do — by growing more roots. Pick the way you can help.",
+    "continue": "Continue",
+    "copied": "Copied.",
+    "gate": {
+      "title": "This guide opens with trust",
+      "body": "Running a server for the community comes with real responsibilities — whoever runs one becomes an operator, with powers and limits the whole community can read about. So this guided path opens for trusted members: people vouched for by at least {{count}} others, the same trust bar the app uses everywhere else.",
+      "progress": "You have {{have}} of {{need}} vouches so far. That's not a grade — it simply grows as you exchange help with neighbors.",
+      "seedVaultLead": "Something you can do right now: pledging a complete copy of the community's archive is open to everyone, no server required.",
+      "seedVaultLink": "Keep the complete archive on this device",
+      "guideLink": "Reading the full guide is open to everyone too"
+    },
+    "paths": {
+      "run": {
+        "title": "I can run a computer that stays on",
+        "body": "An old laptop in a closet is genuinely enough. This guide generates the settings for you and checks the result with you."
+      },
+      "ask": {
+        "title": "I want to ask someone",
+        "body": "Compose a short note for the friend with the spare computer — you bring the invitation, the app brings the steps."
+      },
+      "help": {
+        "title": "I can't run a server, but I can help",
+        "body": "There's a zero-ops way to strengthen your community's roots from the device already in your hand."
+      }
+    },
+    "ask": {
+      "title": "Ask someone to grow a root",
+      "body": "Here's a note ready to send. Your usual channel is the right one — there's nothing secret in it.",
+      "message": "Hi! Our community coordinates on {{origin}} — one hour of help equals one hour of help. Right now everything runs on a single server, and we're looking for one more person to run a second one, so no single machine (and no single person) can be a pressure point. An old laptop that stays on is genuinely enough, and the app walks you through every step: {{guide}}. Would you be up for it? It's about an afternoon, and I'll help."
+    },
+    "helper": {
+      "title": "Help without running a server",
+      "body": "Every member's device already carries a signed copy of the community, but phones trim old records when space runs low. Pledging a seed vault means one of your devices keeps the complete archive — no port forwarding, no operator powers, just storage and solidarity. If every server were ever lost, seed vaults are the devices the community restores from.",
+      "link": "Open the data settings to pledge"
+    },
+    "needs": {
+      "title": "What you need",
+      "intro": "Three things, none of them exotic:",
+      "computer": "A computer that can stay on — an old laptop (lid shut, in a closet), a mini-PC, or a Raspberry-Pi-class board.",
+      "internet": "A home internet connection, and the ability to forward a port on your router or use a tunneling service.",
+      "afternoon": "An afternoon, plus a conversation with whoever runs your community's current server.",
+      "ack": "I've read what running a node means: an operator holds the powers and limits named in docs/operator-powers.md, and holding them is visible to my community.",
+      "ackLink": "Read about it on the Help page"
+    },
+    "settings": {
+      "title": "Your community's settings",
+      "loading": "Asking your community's server for its details…",
+      "noNode": "This device isn't connected to a community server yet, so the guide can't read your community's details. Connect one in Settings first.",
+      "noNodeLink": "Open Settings",
+      "intro": "This is the settings file for the new server, generated for your community. Copy it whole — the lines that still need a human are called out below.",
+      "readAuth": "Our community requires signed reads (READ_AUTH is on)",
+      "readAuthHint": "Ask your current operator if you're not sure. The read gate must match on every server — a mirror with it off would serve the whole replicated dataset to anyone with its address.",
+      "envLabel": "Settings for the new server",
+      "placeholdersLead": "Before the server starts, three lines need a human:",
+      "placeholderDbKey": "DATABASE_KEY — run the command in the comment on the new computer and paste the result.",
+      "placeholderFounders": "NODE_FOUNDER_KEYS — copy it from your current operator, character for character.",
+      "placeholderQuorum": "REMOVAL_QUORUM — set it to the same number the current server uses."
+    },
+    "handover": {
+      "title": "Hand this to your current operator",
+      "body": "The current server needs a few lines to pair with the new one and announce it to members' apps. Show the QR code in person, or paste the text.",
+      "urlLabel": "The new server's public address",
+      "urlHint": "Ask the new operator where the server will live — a domain or tunnel address like https://node2.example.",
+      "label": "Settings for the current server",
+      "qrAlt": "QR code carrying the settings block for the current operator",
+      "tokenNote": "The same token appears in both blocks on purpose — it's how the two servers will recognize each other. It travels only by this copy button or QR code, never over the network."
+    },
+    "verify": {
+      "title": "Check your new root",
+      "intro": "Once the new server is running and both settings files are in place, put its address here and let's look at it together.",
+      "urlLabel": "The new server's address",
+      "run": "Run the checks",
+      "running": "Checking…",
+      "rerun": "Run the checks again",
+      "check": {
+        "reachable": "The new server answers",
+        "config": "It publishes its settings page",
+        "distinctNodeId": "It has a name of its own",
+        "announced": "Your current server announces it to members"
+      },
+      "status": {
+        "ok": "passed",
+        "fail": "not yet",
+        "unknown": "couldn't tell"
+      },
+      "notYet": "Not all green yet — completely normal on a first try. Adjust what the row names, restart the server, and run the checks again; retrying breaks nothing.",
+      "allGreen": "Every member's app will now offer the new root on a consent card — including yours. Your community just became harder to take down.",
+      "dashboardLink": "Back to the Dashboard"
+    }
+  },
   "format": {
     "justNow": "just now",
     "minutesAgo": "{{count}}m ago",

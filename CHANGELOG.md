@@ -85,6 +85,23 @@ include breaking changes.
   then `docker compose up -d`.**
 
 ### Added
+- **Adding a second server is now a guided, in-app experience.** The
+  **+** on the Dashboard's Community-resilience card used to open a
+  page of documentation; it now opens "Grow another root," a wizard
+  with three honestly-sized paths. If you can keep a computer on, it
+  walks you through the whole thing: a what-you-need checklist, the
+  ready-to-paste settings for the new server AND the three lines your
+  current operator adds (generated for your community, with the
+  shared secret between the two servers handled only by copy button
+  or QR code — it never crosses the network), and a final "run the
+  checks" screen that turns green as your new root comes alive. If
+  you can't run a server, you can compose a ready-to-send note asking
+  the friend with the spare laptop, or pledge your own device as a
+  seed vault — that path stays open to everyone. The wizard itself
+  opens for trusted members (at least two vouches, the same trust bar
+  the app uses everywhere else), because running a server makes you
+  an operator; the written guide remains public for all.
+
 - **A removal can now name the deliberation it grew from.** When
   the community talked a removal through in a shared proposal, the
   member starting the ceremony can link that proposal — and every

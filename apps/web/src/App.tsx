@@ -32,6 +32,7 @@ import InviteAcceptPage from "@/pages/InviteAccept";
 import AddDevicePage from "@/pages/AddDevice";
 import PairDevicePage from "@/pages/PairDevice";
 import RecoverIdentityPage from "@/pages/RecoverIdentity";
+import GrowRootPage from "@/pages/GrowRoot";
 import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import TaskDetailPage from "@/pages/TaskDetail";
@@ -135,6 +136,7 @@ export default function App() {
           <Route path="/invite" element={<InviteAcceptPage />} />
           <Route path="/pair-device" element={<PairDevicePage />} />
           <Route path="/recover" element={<RecoverIdentityPage />} />
+          <Route path="/grow-root" element={<GrowRootPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
