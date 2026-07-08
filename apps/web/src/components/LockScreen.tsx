@@ -18,19 +18,44 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { shortKey } from "@/lib/format";
 import { humanizeError } from "@/lib/humanizeError";
 import { Sprig } from "@/components/visual";
+import { passkeyEnrollment, unlockSessionWithKek } from "@/db/secrets";
+import {
+  assertPasskeyKek,
+  supportsPasskeys,
+  type PasskeyEnrollmentMeta,
+} from "@/lib/passkeyUnlock";
+import { b64decode } from "@/lib/bytes";
 
 export function LockScreen() {
-  const { currentMember, unlock } = useApp();
+  const { currentMember, unlock, refreshLockState } = useApp();
   const { t } = useTranslation();
   const [passphrase, setPassphrase] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // The passkey enrollment on this device, if any. `null` while
+  // loading AND when absent — the button appears only once metadata
+  // exists, so an un-enrolled device sees the passphrase form alone,
+  // exactly as before.
+  const [enrollment, setEnrollment] = useState<PasskeyEnrollmentMeta | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!supportsPasskeys()) return;
+    void passkeyEnrollment().then((meta) => {
+      if (!cancelled) setEnrollment(meta);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,6 +70,36 @@ export function LockScreen() {
       } else {
         setPassphrase("");
       }
+    } catch (err) {
+      setError(humanizeError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handlePasskey() {
+    if (!enrollment) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      const asserted = await assertPasskeyKek({
+        credentialId: enrollment.credentialId,
+        prfSalt: b64decode(enrollment.prfSalt),
+      });
+      if (!asserted.ok) {
+        // A dismissed platform prompt is a decision, not a failure —
+        // stay quiet and leave the passphrase form ready.
+        if (asserted.error !== "cancelled") {
+          setError(t("lockScreen.passkeyFailed"));
+        }
+        return;
+      }
+      const result = await unlockSessionWithKek(asserted.kek);
+      if (result !== "unlocked") {
+        setError(t("lockScreen.passkeyFailed"));
+        return;
+      }
+      await refreshLockState();
     } catch (err) {
       setError(humanizeError(err));
     } finally {
@@ -87,6 +142,26 @@ export function LockScreen() {
             t("lockScreen.introNone")
           )}
         </p>
+        {enrollment && (
+          <>
+            <button
+              type="button"
+              className="btn-primary w-full"
+              onClick={handlePasskey}
+              disabled={submitting}
+            >
+              {t("lockScreen.passkeyButton")}
+            </button>
+            <div
+              className="my-4 flex items-center gap-3 text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300"
+              aria-hidden="true"
+            >
+              <span className="h-px flex-1 bg-moss-200 dark:bg-moss-700" />
+              {t("lockScreen.or")}
+              <span className="h-px flex-1 bg-moss-200 dark:bg-moss-700" />
+            </div>
+          </>
+        )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">
@@ -97,8 +172,10 @@ export function LockScreen() {
               // The entire lock-screen surface is "enter your
               // passphrase" — autofocus is the right default here
               // since there is nothing else to do on this view.
+              // With a passkey enrolled the button above is the
+              // primary path, so the field no longer grabs focus.
               // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus
+              autoFocus={!enrollment}
               className="input"
               autoComplete="current-password"
               value={passphrase}

@@ -62,6 +62,59 @@ export interface WrappedBlob {
   ciphertext: string; // base64
 }
 
+/**
+ * A blob wrapped DIRECTLY by a caller-held 32-byte key — no KDF,
+ * because the key never came from a passphrase. This is the shape the
+ * device-master-key envelope uses (db/secrets.ts): secret-key rows
+ * are wrapped by a random device master key, and the master key
+ * itself is wrapped once per unlock method (passphrase PBKDF2 blob,
+ * passkey PRF-derived key). Same secretbox construction as v1.
+ */
+export interface DirectWrappedBlob {
+  v: 2;
+  nonce: string; // base64 (24 bytes)
+  ciphertext: string; // base64
+}
+
+export function isDirectBlob(
+  blob: WrappedBlob | DirectWrappedBlob,
+): blob is DirectWrappedBlob {
+  return blob.v === 2;
+}
+
+/** Wrap a base64 plaintext under a caller-held 32-byte key. */
+export function wrapDirect(
+  plaintextB64: string,
+  key: Uint8Array,
+): DirectWrappedBlob {
+  const nonce = randomBytes(nacl.secretbox.nonceLength);
+  const box = nacl.secretbox(b64decode(plaintextB64), nonce, key);
+  return {
+    v: 2,
+    nonce: b64encode(nonce),
+    ciphertext: b64encode(box),
+  };
+}
+
+/**
+ * Unwrap a direct blob. Returns the plaintext base64, or `null` on
+ * authentication failure / corruption (same contract as `unwrap`).
+ */
+export function unwrapDirect(
+  blob: DirectWrappedBlob,
+  key: Uint8Array,
+): string | null {
+  try {
+    const nonce = b64decode(blob.nonce);
+    const ct = b64decode(blob.ciphertext);
+    const plaintext = nacl.secretbox.open(ct, nonce, key);
+    if (!plaintext) return null;
+    return b64encode(plaintext);
+  } catch {
+    return null;
+  }
+}
+
 export const DEFAULT_ITERATIONS = 600_000;
 const SALT_LENGTH = 16;
 const MIN_PASSPHRASE_LENGTH = 8;

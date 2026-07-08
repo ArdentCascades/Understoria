@@ -9,14 +9,22 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
   changePassphrase,
   disablePassphrase,
   enablePassphrase,
+  enrollPasskeyWrapper,
+  passkeyEnrollment,
+  removePasskeyWrapper,
 } from "@/db/secrets";
+import {
+  enrollPasskey,
+  supportsPasskeys,
+  type PasskeyEnrollmentMeta,
+} from "@/lib/passkeyUnlock";
 import { humanizeError } from "@/lib/humanizeError";
 
 // Passphrase-protection controls. Extracted from Profile.tsx when
@@ -24,7 +32,7 @@ import { humanizeError } from "@/lib/humanizeError";
 // alongside the other device-local preferences (Language, Appearance,
 // Community Node, Data export).
 export function SecuritySection() {
-  const { lockState, lock, refreshLockState } = useApp();
+  const { lockState, lock, refreshLockState, currentMember } = useApp();
   const { t } = useTranslation();
   const [mode, setMode] = useState<"idle" | "enable" | "change" | "disable">(
     "idle",
@@ -35,6 +43,70 @@ export function SecuritySection() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  // Passkey state. `passkeySupported` is a plain capability check;
+  // `enrollment` is this device's stored enrollment metadata (never
+  // the wrapped key material).
+  const passkeySupported = supportsPasskeys();
+  const [enrollment, setEnrollment] = useState<PasskeyEnrollmentMeta | null>(
+    null,
+  );
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+  const [passkeyError, setPasskeyError] = useState<string | null>(null);
+
+  const reloadEnrollment = useCallback(async () => {
+    setEnrollment(await passkeyEnrollment());
+  }, []);
+
+  useEffect(() => {
+    void reloadEnrollment();
+  }, [reloadEnrollment]);
+
+  async function handleAddPasskey() {
+    setPasskeyError(null);
+    setSuccess(null);
+    setPasskeyBusy(true);
+    try {
+      const result = await enrollPasskey({
+        displayName: currentMember?.displayName ?? "Understoria member",
+      });
+      if (!result.ok) {
+        if (result.error === "cancelled") return; // their call, no scolding
+        setPasskeyError(
+          result.error === "prf_unsupported"
+            ? t("profile.security.passkey.prfUnsupported")
+            : t("profile.security.passkey.failed"),
+        );
+        return;
+      }
+      await enrollPasskeyWrapper(result.kek, {
+        credentialId: result.credentialId,
+        prfSalt: result.prfSalt,
+        createdAt: Date.now(),
+      });
+      await reloadEnrollment();
+      await refreshLockState();
+      setSuccess(t("profile.security.passkey.successAdd"));
+    } catch (err) {
+      setPasskeyError(humanizeError(err));
+    } finally {
+      setPasskeyBusy(false);
+    }
+  }
+
+  async function handleRemovePasskey() {
+    setPasskeyError(null);
+    setSuccess(null);
+    setPasskeyBusy(true);
+    try {
+      await removePasskeyWrapper();
+      await reloadEnrollment();
+      setSuccess(t("profile.security.passkey.successRemove"));
+    } catch (err) {
+      setPasskeyError(humanizeError(err));
+    } finally {
+      setPasskeyBusy(false);
+    }
+  }
 
   function reset() {
     setMode("idle");
@@ -143,6 +215,76 @@ export function SecuritySection() {
           </>
         )}
       </div>
+
+      {/* Passkey block. Visible when the browser can do WebAuthn (or
+          an enrollment already exists — never hide a Remove button
+          behind a capability check). The passphrase-first invariant
+          is stated, not implied: without protection on, this is a
+          one-line teaser; with it, the add/remove controls. */}
+      {(passkeySupported || enrollment) && (
+        <div className="mt-4 border-t border-moss-100 pt-4 dark:border-moss-800">
+          <h3 className="text-sm font-semibold">
+            {t("profile.security.passkey.title")}
+          </h3>
+          {!protectionOn ? (
+            <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+              {t("profile.security.passkey.enableFirst")}
+            </p>
+          ) : enrollment ? (
+            <>
+              <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+                {t("profile.security.passkey.addedOn", {
+                  date: new Date(enrollment.createdAt).toLocaleDateString(),
+                })}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleRemovePasskey}
+                  disabled={passkeyBusy || lockState === "locked"}
+                >
+                  {t("profile.security.passkey.remove")}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+                {t("profile.security.passkey.intro")}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleAddPasskey}
+                  disabled={passkeyBusy || lockState === "locked"}
+                >
+                  {passkeyBusy
+                    ? t("profile.security.passkey.adding")
+                    : t("profile.security.passkey.add")}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+                {t("profile.security.passkey.promptNote")}
+              </p>
+            </>
+          )}
+          {protectionOn && lockState === "locked" && (
+            <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+              {t("profile.security.passkey.needUnlock")}
+            </p>
+          )}
+          {passkeyError && (
+            <p
+              role="alert"
+              className="mt-2 text-sm text-rose-700 dark:text-rose-300"
+            >
+              {passkeyError}
+            </p>
+          )}
+        </div>
+      )}
 
       {mode !== "idle" && (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">

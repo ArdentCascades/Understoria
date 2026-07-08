@@ -1436,6 +1436,9 @@
     "submitting": "Unlocking…",
     "wrongPassphrase": "That passphrase didn't match. Try again.",
     "nothingToUnlock": "No wrapped keys on this device — nothing to unlock. (If you're seeing this, reload the page.)",
+    "passkeyButton": "Unlock with passkey",
+    "passkeyFailed": "The passkey couldn't unlock this device. Your passphrase below always works.",
+    "or": "or",
     "noRecoveryNote": "Forgotten passphrases can't be reset here — nobody holds a master key. But this doesn't have to mean starting over: another linked device still holds your identity, and if you made a recovery kit or chose guardians (Settings → Recovery kit / Guardians), you can wipe this app (Profile → Emergency → Hard purge) and restore from them on the fresh start. With none of those, a fresh identity is the last resort."
   },
   "invite": {
@@ -2397,7 +2400,22 @@
       "successChange": "Passphrase changed. Use the new one next time you unlock.",
       "successDisable": "Passphrase protection disabled. Secret keys are stored in plaintext on this device again.",
       "errorMismatch": "The two passphrases didn't match.",
-      "errorMismatchNew": "The two new passphrases didn't match."
+      "errorMismatchNew": "The two new passphrases didn't match.",
+      "passkey": {
+        "title": "Passkey",
+        "intro": "Unlock this device with your fingerprint, face, or device PIN instead of typing the passphrase. Your passphrase stays on as the fallback that always works.",
+        "enableFirst": "Turn on passphrase protection first — a passkey is an extra way to unlock, never the only one.",
+        "add": "Add a passkey",
+        "adding": "Adding…",
+        "remove": "Remove passkey",
+        "addedOn": "A passkey unlocks this device (added {{date}}). Your passphrase also still works.",
+        "promptNote": "Your device may ask you to confirm twice — once to create the passkey and once to prepare it for unlocking. That's normal.",
+        "needUnlock": "Unlock this device first to change passkey settings.",
+        "prfUnsupported": "This device created a passkey but it can't power unlocking here (its authenticator lacks the required PRF feature). Nothing was changed — you can delete the unused passkey from your device's password manager.",
+        "failed": "The passkey couldn't be set up. Nothing was changed — your passphrase still works.",
+        "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
+        "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
+      }
     },
     "emergency": {
       "title": "Emergency",

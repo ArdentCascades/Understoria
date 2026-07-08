@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Unlock with a passkey.** If your device is protected with a
+  passphrase, you can now also add a passkey (Settings → Security)
+  and unlock with your fingerprint, face, or device PIN — one tap on
+  the lock screen instead of typing. The passphrase stays on as the
+  fallback that always works, and the app won't let a passkey become
+  the only way in. Everything happens on your device: nothing new is
+  stored on any server, and passkey unlock works even with no
+  internet at all. Your identity and how your records are signed are
+  completely unchanged.
+
 - **Your Profile can now show your full public key.** The identity
   line always showed a shortened key, and nowhere in the app could
   you see or copy the whole thing — even though the server setup

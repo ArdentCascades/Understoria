@@ -82,7 +82,13 @@ export interface AppSetting {
 export interface SecretKeyRow {
   publicKey: string;
   secretKey?: string;
-  wrapped?: import("@/lib/passphrase").WrappedBlob;
+  /** v1: wrapped directly under the passphrase-derived key.
+   *  v2 (DirectWrappedBlob): wrapped under the device master key —
+   *  the envelope devices migrate to when a passkey is enrolled
+   *  (db/secrets.ts). */
+  wrapped?:
+    | import("@/lib/passphrase").WrappedBlob
+    | import("@/lib/passphrase").DirectWrappedBlob;
 }
 
 /**
@@ -1144,6 +1150,14 @@ export const SETTING_KEYS = {
    *  federated. Paging / offset state is deliberately NOT stored here:
    *  the calendar always opens anchored on today. */
   calendarFilters: "calendarFilters",
+  /** JSON `DeviceKeyWrappers` record (db/secrets.ts): the device
+   *  master key wrapped once per unlock method (passphrase PBKDF2
+   *  blob, passkey PRF-derived key) plus the passkey's non-secret
+   *  enrollment metadata. Present only on devices that enrolled a
+   *  passkey — passphrase-only devices keep the original per-row
+   *  wrapping and never write this key. Device-local; never
+   *  federated or exported. */
+  deviceKeyWrappers: "deviceKeyWrappers",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
