@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **"Start from scratch" moved to the top of the Start-a-project
+  page** (pilot report). It used to render as the last card in the
+  template gallery, so every template we add pushed the blank
+  option further out of reach — members who already knew what they
+  wanted had to scroll the whole gallery to say so. It's now a
+  compact row right above the search box: reachable without
+  scrolling no matter how many templates the gallery grows, while
+  the template cards keep their job of showing what's possible.
+
 - **The "add to home screen" card stopped assuming everyone uses
   Chrome** (pilot report). The old card said "Keep Understoria one
   tap away" — which explained nothing — and on computers told every
