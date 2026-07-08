@@ -153,6 +153,16 @@ export default function DashboardPage() {
           Same self-hiding contract — a calm week gets a calm page. */}
       <WhereHandsAreWelcome />
 
+      {/* Desktop pairing (the stretched-cards half of the desktop
+          pilot reports): at lg+ the "community as a whole" cards —
+          total hours, federation rollup, resilience, the proposals
+          doorway — flow into two columns instead of each spanning
+          ~1400px of card for a paragraph of content. Plain grid
+          auto-placement, so DOM order (and the mobile stack, where
+          this wrapper is display:block) is untouched; conditional
+          cards simply pack tighter. items-start keeps a short card
+          from being stretched to its row-mate's height. */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
       <section className="card relative mb-4 overflow-hidden text-center">
         <div
           aria-hidden="true"
@@ -224,6 +234,7 @@ export default function DashboardPage() {
           </Link>
         </section>
       )}
+      </div>
 
       <div className="my-2">
         <LeafDivider variant="short" />
@@ -289,6 +300,11 @@ export default function DashboardPage() {
         <LeafDivider variant="short" />
       </div>
 
+      {/* Second desktop pair: milestones beside the category
+          breakdown. The divider between them is a mobile-stack
+          separator — side by side it would render as a stray leaf in
+          a grid cell, so it hides at lg. */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
       <CanopyMilestones
         totalHours={stats.totalHoursExchanged}
         totalExchanges={stats.totalExchanges}
@@ -297,7 +313,7 @@ export default function DashboardPage() {
         nodeConfig={nodeConfig}
       />
 
-      <div className="my-2">
+      <div className="my-2 lg:hidden">
         <LeafDivider variant="short" />
       </div>
 
@@ -343,11 +359,14 @@ export default function DashboardPage() {
           </ul>
         )}
       </section>
+      </div>
 
       <div className="my-2">
         <LeafDivider variant="short" />
       </div>
 
+      {/* Third desktop pair: the two "flow of help" visualizations. */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
       <div className="relative">
         <BreadthBar entries={flow.breadth} members={members} />
         <div className="-mt-3 mb-4 flex justify-end">
@@ -359,6 +378,7 @@ export default function DashboardPage() {
         reciprocalPairs={flow.reciprocalPairs}
         totalPairs={flow.totalPairs}
       />
+      </div>
 
       {achievementsThisMonth.size > 0 && (
         <>

@@ -10,6 +10,17 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The dashboard uses desktop width too.** Its cards used to stack
+  in one column, each stretched across the whole screen; on desktop
+  they now sit in sensible pairs — total hours beside community
+  resilience, milestones beside where help is flowing. Phones are
+  unchanged.
+
+### Added
+- **Press `/` to search the board.** A desktop keyboard habit: from
+  anywhere on the community board, `/` jumps to the search box. It
+  never fires while you're already typing somewhere.
+
 - **On desktop, navigation moves to a left side rail.** The
   phone-style bottom bar made wide screens feel like a stretched
   phone app; at desktop widths the same five destinations now sit
