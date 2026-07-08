@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **The "add to home screen" card stopped assuming everyone uses
+  Chrome** (pilot report). The old card said "Keep Understoria one
+  tap away" — which explained nothing — and on computers told every
+  browser's user to find an install icon that only Chrome and Edge
+  have. The card's title now names the actual action for your
+  device ("Add Understoria to your home screen" / "Install
+  Understoria as an app") with one line on what you get. On
+  computers it now knows your browser: Firefox users get the honest
+  answer (Firefox can't install web apps on computers — Understoria
+  still works fully in a tab, or use Chrome/Edge to install),
+  Safari users get File → "Add to Dock", and Chrome/Edge users see
+  a picture of the install icon next to the hint so they know what
+  they're looking for. The full guide on the Help page carries the
+  same picture and the same honesty about other browsers.
+
 - **The documentation caught up with the code across nine documents**
   (full-repo sweep, part 3). The operator guide no longer claims
   member removal is "not built" or that proposals stay local-only

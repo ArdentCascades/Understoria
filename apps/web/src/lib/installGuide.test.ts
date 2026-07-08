@@ -12,6 +12,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   clearDeferredPrompt,
+  detectDesktopBrowser,
   detectDevice,
   detectInstallEnvironment,
   getDeferredPrompt,
@@ -44,6 +45,10 @@ const UA = {
     "Mozilla/5.0 (Android 14; Mobile; rv:126.0) Gecko/126.0 Firefox/126.0",
   chromeDesktop:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  firefoxDesktop:
+    "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0",
+  safariDesktop:
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
   edgeDesktop:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.2478.80",
   facebook:
@@ -128,14 +133,19 @@ describe("detectInstallEnvironment", () => {
       expect: { kind: "manual", device: "android" },
     },
     {
-      name: "Chrome desktop → manual desktop",
+      name: "Chrome desktop → manual desktop, chromium-like",
       in: input({ ua: UA.chromeDesktop }),
-      expect: { kind: "manual", device: "desktop" },
+      expect: { kind: "manual", device: "desktop", desktopBrowser: "chromium-like" },
     },
     {
-      name: "Edge desktop → manual desktop",
+      name: "Edge desktop → manual desktop, chromium-like",
       in: input({ ua: UA.edgeDesktop }),
-      expect: { kind: "manual", device: "desktop" },
+      expect: { kind: "manual", device: "desktop", desktopBrowser: "chromium-like" },
+    },
+    {
+      name: "Firefox desktop → manual desktop, firefox (no install icon exists — the honest-copy branch)",
+      in: input({ ua: UA.firefoxDesktop }),
+      expect: { kind: "manual", device: "desktop", desktopBrowser: "firefox" },
     },
     {
       name: "Facebook in-app (FBAN) → in-app-browser",
@@ -158,9 +168,9 @@ describe("detectInstallEnvironment", () => {
       expect: { kind: "in-app-browser" },
     },
     {
-      name: "unrecognized UA → manual desktop (the catch-all device)",
+      name: "unrecognized UA → manual desktop (the catch-all device + family)",
       in: input({ ua: "SomeRandomCrawler/1.0" }),
-      expect: { kind: "manual", device: "desktop" },
+      expect: { kind: "manual", device: "desktop", desktopBrowser: "chromium-like" },
     },
   ];
 
@@ -270,5 +280,20 @@ describe("beforeinstallprompt capture", () => {
 
     window.dispatchEvent(new Event("appinstalled"));
     expect(getDeferredPrompt()).toBeNull();
+  });
+});
+
+describe("detectDesktopBrowser", () => {
+  it("Firefox desktop → firefox (Mozilla removed desktop web-app install)", () => {
+    expect(detectDesktopBrowser(UA.firefoxDesktop)).toBe("firefox");
+  });
+  it("Safari on macOS → safari (File → Add to Dock, no address-bar icon)", () => {
+    expect(detectDesktopBrowser(UA.safariDesktop)).toBe("safari");
+  });
+  it("Chrome desktop → chromium-like (the address-bar icon family)", () => {
+    expect(detectDesktopBrowser(UA.chromeDesktop)).toBe("chromium-like");
+  });
+  it("Edge desktop → chromium-like (its UA carries Edg/ and Chrome)", () => {
+    expect(detectDesktopBrowser(UA.edgeDesktop)).toBe("chromium-like");
   });
 });

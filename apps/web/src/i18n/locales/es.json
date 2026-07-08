@@ -352,11 +352,15 @@
   "install": {
     "card": {
       "label": "Añade Understoria a tu teléfono",
-      "title": "Ten Understoria a un toque",
+      "titleMobile": "Añade Understoria a tu pantalla de inicio",
+      "titleDesktop": "Instala Understoria como aplicación",
+      "why": "Se abre a pantalla completa, funciona sin conexión y no necesita tienda de aplicaciones.",
       "dismiss": "Ahora no",
       "iosHint": "Toca Compartir y luego «Añadir a pantalla de inicio».",
       "androidHint": "Abre el menú de tu navegador y luego «Añadir a pantalla de inicio».",
-      "desktopHint": "Haz clic en el icono de instalar en tu barra de direcciones.",
+      "desktopHint": "Haz clic en el icono de instalar que se muestra aquí, en el extremo derecho de la barra de direcciones (Chrome y Edge lo muestran; Firefox no ofrece instalación en computadoras).",
+      "firefoxDesktopHint": "Firefox en computadoras no puede instalar aplicaciones web — Understoria funciona plenamente en esta pestaña. Para instalarla como aplicación, abre esta dirección en Chrome o Edge.",
+      "safariDesktopHint": "En Safari: menú Archivo → \"Añadir al Dock\" (macOS Sonoma o posterior).",
       "moreHelp": "Más ayuda"
     },
     "panel": {
@@ -389,7 +393,8 @@
       "intro": "Instala Understoria en tu computadora:",
       "step1": "Busca el icono de instalar al final de la barra de direcciones (Chrome o Edge).",
       "step2": "Haz clic en él y luego en «Instalar».",
-      "step3": "Understoria se abre en su propia ventana, junto a tus otras apps."
+      "step3": "Understoria se abre en su propia ventana, junto a tus otras apps.",
+      "otherBrowsersNote": "¿Usas Firefox? No puede instalar aplicaciones web en computadoras — Understoria funciona plenamente en una pestaña, o abre esta dirección en Chrome o Edge para instalarla. En Safari, usa Archivo → \"Añadir al Dock\" (macOS Sonoma o posterior)."
     },
     "inAppBrowser": {
       "title": "Abre esto primero en tu navegador",

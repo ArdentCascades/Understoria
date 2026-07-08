@@ -352,11 +352,15 @@
   "install": {
     "card": {
       "label": "Add Understoria to your phone",
-      "title": "Keep Understoria one tap away",
+      "titleMobile": "Add Understoria to your home screen",
+      "titleDesktop": "Install Understoria as an app",
+      "why": "It opens full screen, works offline, and needs no app store.",
       "dismiss": "Not now",
       "iosHint": "Tap Share, then \"Add to Home Screen\".",
       "androidHint": "Open your browser's menu, then \"Add to Home screen\".",
-      "desktopHint": "Click the install icon in your address bar.",
+      "desktopHint": "Click the install icon shown here, at the right end of the address bar (Chrome and Edge show it; Firefox doesn't offer installs on computers).",
+      "firefoxDesktopHint": "Firefox on computers can't install web apps — Understoria still works fully in this tab. To install it as an app, open this address in Chrome or Edge.",
+      "safariDesktopHint": "In Safari: File menu → \"Add to Dock\" (macOS Sonoma or newer).",
       "moreHelp": "More help"
     },
     "panel": {
@@ -389,7 +393,8 @@
       "intro": "Install Understoria on your computer:",
       "step1": "Look for the install icon at the right end of the address bar (Chrome or Edge).",
       "step2": "Click it, then click \"Install\".",
-      "step3": "Understoria opens in its own window, with your other apps."
+      "step3": "Understoria opens in its own window, with your other apps.",
+      "otherBrowsersNote": "Using Firefox? It can't install web apps on computers — Understoria still works fully in a tab, or open this address in Chrome or Edge to install it. In Safari, use File → \"Add to Dock\" (macOS Sonoma or newer)."
     },
     "inAppBrowser": {
       "title": "Open this in your browser first",
