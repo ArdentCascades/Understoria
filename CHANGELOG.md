@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The offline banner now points at the outage playbook.** When
+  the app notices it's offline it has always said, calmly, that
+  everything still works from your device and counted the changes
+  waiting to send. It now adds one link — "What you can still do in
+  an outage" — leading to a new Help answer that covers the three
+  moves that matter in a storm: keep using the app (nothing is
+  lost), confirm help in person with the QR flow, and join the
+  community's storm-hub WiFi if one exists. Findable in fair
+  weather too, under Help.
+
 - **Help can now be confirmed entirely in person** — no internet,
   no server, not even the storm hub. When an exchange is ready to
   confirm, the post page offers "Confirm in person": the helper's

@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
@@ -112,6 +113,19 @@ export function OfflineBanner() {
               {t("offline.pendingCount", { count: pendingCount })}
             </p>
           )}
+          {/* The one actionable line: the outage playbook (in-person
+              confirm, storm hub) lives on Help where it's findable in
+              fair weather too. The banner wrapper is
+              pointer-events-none by design; the link re-enables its
+              own hit area. */}
+          <Link
+            to="/help#internet-outage"
+            className="touch-target pointer-events-auto mt-0.5 inline-flex
+                       items-center text-sm font-medium text-bark-700
+                       underline-offset-2 hover:underline dark:text-bark-200"
+          >
+            {t("offline.guideLink")} →
+          </Link>
         </div>
       )}
     </div>
