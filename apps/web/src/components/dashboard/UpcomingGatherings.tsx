@@ -45,7 +45,7 @@ export function UpcomingGatherings() {
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("dashboard.gatherings.title")}
       </h2>
-      <ul className="flex flex-col gap-0.5 lg:grid lg:grid-cols-2 lg:gap-x-8">
+      <ul className="flex flex-col gap-0.5">
         {gatherings.map(({ event, viewerGoing }) => {
           const meta = eventCategoryMeta(event.category);
           return (
