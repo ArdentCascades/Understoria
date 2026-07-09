@@ -1,6 +1,6 @@
 # Desktop power tools — plans
 
-Status: **plans only — nothing here is built.** The desktop layout
+Status: **plan 1 P1 shipped; the rest are plans.** The desktop layout
 work (nav rail, board/dashboard rails, calendar event panel, the
 1600px cap) made room; the operator asked what could fill it for
 the members who do coordination work at a keyboard. Five plans, in
@@ -17,7 +17,14 @@ scoreboard. Every surface below reads the member's OWN data and
 responsibilities from Dexie — nothing new is stored on any server,
 and phones are untouched unless a plan says otherwise.
 
-## 1. Command palette (Ctrl+K / Cmd+K)
+## 1. Command palette (Ctrl+K / Cmd+K) — P1 SHIPPED
+
+As built: `lib/commandPalette.ts` (pure index + scorer) +
+`components/CommandPalette.tsx` mounted in Layout. One deliberate
+delta from the plan below: results render as a flat ranked list
+with a kind chip per row rather than grouped sections — fewer moving
+parts, same scannability at 12 results. P2 (action verbs) remains
+open.
 
 **What:** one keystroke opens a search over everything the device
 already holds — posts, projects, events, members, proposals, Help

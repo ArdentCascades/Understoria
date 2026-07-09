@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Press Ctrl+K (or Cmd+K) to search everything.** The command
+  palette searches everything already on your device — posts,
+  projects, events, members, proposals, Help answers — and jumps
+  anywhere in the app. Results are instant and private: the search
+  runs entirely on your device, works offline, and nothing about
+  what you searched is stored anywhere.
+
+### Added
 - **Plans for five desktop power tools are on the table** —
   docs/desktop-power-tools.md: a command palette (Ctrl+K over
   everything already on your device), an organizer's desk

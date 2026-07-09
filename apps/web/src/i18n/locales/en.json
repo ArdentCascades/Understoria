@@ -2760,5 +2760,30 @@
       "cannotBlockSelf": "You can't block yourself.",
       "noteTooLong": "Note must be 500 characters or fewer."
     }
+  },
+  "palette": {
+    "ariaLabel": "Command palette",
+    "placeholder": "Search everything, or jump somewhere…",
+    "resultsAriaLabel": "Search results",
+    "noResults": "Nothing matched. Everything searched lives on this device.",
+    "hint": "↑↓ to move · Enter to open · Esc to close",
+    "close": "Close palette",
+    "routes": {
+      "help": "Help",
+      "settings": "Settings",
+      "proposals": "Proposals",
+      "newPost": "Post a need or offer",
+      "newProject": "Start a project",
+      "newEvent": "Create an event"
+    },
+    "kind": {
+      "postNeed": "Need",
+      "postOffer": "Offer",
+      "project": "Project",
+      "event": "Event",
+      "member": "Member",
+      "proposal": "Proposal",
+      "help": "Help"
+    }
   }
 }
