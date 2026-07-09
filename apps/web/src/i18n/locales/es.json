@@ -2845,6 +2845,26 @@
       "pause": "Pausar",
       "play": "Reproducir",
       "exit": "Salir de la pantalla de reunión"
+    },
+    "customize": {
+      "summary": "Personalizar la pantalla",
+      "titleLabel": "Título de la pantalla",
+      "titlePlaceholder": "p. ej. Café de Reparación — Sábado",
+      "dwellLabel": "Segundos por diapositiva",
+      "dwellUnit": "{{n}}s",
+      "categoriesLabel": "Mostrar",
+      "cat": {
+        "events": "Eventos",
+        "tasks": "Tareas",
+        "needs": "Necesidades",
+        "offers": "Ofertas"
+      },
+      "itemsLabel": "Fijar u ocultar elementos específicos",
+      "itemsEmpty": "Nada que mostrar aún — agrega un evento, proyecto o publicación.",
+      "pin": "Fijar",
+      "pinned": "Fijado",
+      "hide": "Ocultar",
+      "hidden": "Oculto"
     }
   },
   "desk": {

@@ -228,12 +228,20 @@ and deserves its own design pass — it is the single biggest dependency
 in this document and should be weighed on its own merits, not smuggled in
 under a kiosk.
 
-### 7.2 Organizer curation
+### 7.2 Organizer curation — **shipped**
 
-The pin / hide / reorder panel, category toggles, per-screen dwell time,
-and a screen title — layered on top of the Phase-1 auto-selection so the
+The pin / hide panel, category toggles, per-screen dwell time, and a
+screen title — layered on top of the Phase-1 auto-selection so the
 default still "just works" and the organizer only intervenes to
-disagree. Independent of §7.1; can land before or after it.
+disagree. This is the whole Phase-2 slice that touches **no** privacy
+surface: it's device-local config (never federated) over already-public
+content, so it landed independently of §7.1. Lives in the `/present`
+lobby's "Customize the screen" panel, backed by
+`apps/web/src/lib/useGatheringConfig.ts` (the `gatheringScreenConfig`
+setting) and the `filter` argument to `buildGatheringSlides`. **Hide**
+also serves as the interim "please don't feature my post" control — a
+member asks, the organizer hides it in one tap, no federation required —
+until the self-serve opt-out (§7.3) exists.
 
 ### 7.3 People slide + self-serve opt-out (needs §7.1)
 

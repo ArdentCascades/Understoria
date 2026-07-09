@@ -2845,6 +2845,26 @@
       "pause": "Pause",
       "play": "Play",
       "exit": "Exit the gathering screen"
+    },
+    "customize": {
+      "summary": "Customize the screen",
+      "titleLabel": "Screen title",
+      "titlePlaceholder": "e.g. Repair Café — Saturday",
+      "dwellLabel": "Seconds per slide",
+      "dwellUnit": "{{n}}s",
+      "categoriesLabel": "Show",
+      "cat": {
+        "events": "Events",
+        "tasks": "Tasks",
+        "needs": "Needs",
+        "offers": "Offers"
+      },
+      "itemsLabel": "Pin or hide specific items",
+      "itemsEmpty": "Nothing to show yet — add an event, project, or post.",
+      "pin": "Pin",
+      "pinned": "Pinned",
+      "hide": "Hide",
+      "hidden": "Hidden"
     }
   },
   "desk": {

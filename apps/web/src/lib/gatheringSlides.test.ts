@@ -262,6 +262,51 @@ describe("buildGatheringSlides", () => {
   });
 });
 
+describe("buildGatheringSlides — organizer curation (filter)", () => {
+  it("suppresses a category toggled off", () => {
+    const slides = buildGatheringSlides(
+      baseInput({
+        events: [event({ id: "e" })],
+        posts: [post({ id: "n", type: "NEED" })],
+        filter: { categories: { events: false } },
+      }),
+    );
+    expect(slides.some((s) => s.kind === "event")).toBe(false);
+    expect(slides.some((s) => s.kind === "need")).toBe(true);
+  });
+
+  it("hides a specific item by id", () => {
+    const slides = buildGatheringSlides(
+      baseInput({
+        posts: [
+          post({ id: "keep", type: "NEED", title: "Keep" }),
+          post({ id: "drop", type: "NEED", title: "Drop" }),
+        ],
+        filter: { hiddenIds: ["drop"] },
+      }),
+    );
+    const needs = slides.filter((s) => s.kind === "need");
+    expect(needs.map((s) => (s.kind === "need" ? s.id : ""))).toEqual(["keep"]);
+  });
+
+  it("hoists pinned items to the front in pin order", () => {
+    const slides = buildGatheringSlides(
+      baseInput({
+        events: [event({ id: "e" })],
+        posts: [
+          post({ id: "n", type: "NEED" }),
+          post({ id: "o", type: "OFFER" }),
+        ],
+        // Pin the offer first, then the need — they should lead, in that
+        // order, ahead of the (unpinned) event.
+        filter: { pinnedIds: ["o", "n"] },
+      }),
+    );
+    const actionable = slides.filter((s) => s.kind !== "welcome");
+    expect(actionable.map((s) => s.kind)).toEqual(["offer", "need", "event"]);
+  });
+});
+
 describe("absoluteUrl", () => {
   it("joins origin and path, tolerating a trailing slash", () => {
     expect(absoluteUrl("https://x.test", "/a")).toBe("https://x.test/a");

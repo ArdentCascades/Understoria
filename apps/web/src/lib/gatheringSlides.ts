@@ -85,6 +85,44 @@ export interface GatheringSlidesInput {
   anonymousName: string;
   /** Per-category caps so one busy category can't swamp the rotation. */
   caps?: { events?: number; tasks?: number; needs?: number; offers?: number };
+  /** Optional organizer curation (docs/gathering-screen.md §7.2) — all
+   *  device-local, all operating on already-public content, so it carries
+   *  no privacy weight. */
+  filter?: GatheringSlideFilter;
+}
+
+export interface GatheringSlideFilter {
+  /** Coarse category on/off. A category defaults to ON; only `false`
+   *  suppresses it. */
+  categories?: {
+    events?: boolean;
+    tasks?: boolean;
+    needs?: boolean;
+    offers?: boolean;
+  };
+  /** Slide ids hoisted to the front, in this order (if still live). */
+  pinnedIds?: readonly string[];
+  /** Slide ids never shown. */
+  hiddenIds?: readonly string[];
+}
+
+/** The display label for a slide (the item's own title), for the
+ *  curation list. Welcome has no label. */
+export function slideLabel(slide: GatheringSlide): string {
+  switch (slide.kind) {
+    case "welcome":
+      return "";
+    case "task":
+      return slide.taskTitle;
+    default:
+      return slide.title;
+  }
+}
+
+/** The curation key for a slide (its underlying item id). Welcome has
+ *  none. */
+export function slideId(slide: GatheringSlide): string {
+  return slide.kind === "welcome" ? "" : slide.id;
 }
 
 /** Join an origin and an absolute path into one URL, tolerating a
@@ -123,7 +161,13 @@ export function buildGatheringSlides(
     input.members.find((m) => m.publicKey === key)?.displayName ||
     input.anonymousName;
 
-  const eventSlides: GatheringSlide[] = selectUpcomingGatherings({
+  // A category defaults ON; only an explicit `false` suppresses it.
+  const on = (k: keyof NonNullable<GatheringSlideFilter["categories"]>) =>
+    input.filter?.categories?.[k] !== false;
+
+  const eventSlides: GatheringSlide[] = !on("events")
+    ? []
+    : selectUpcomingGatherings({
     events: input.events,
     eventCancellations: input.eventCancellations,
     eventRsvps: input.eventRsvps,
@@ -149,50 +193,74 @@ export function buildGatheringSlides(
     input.projects.filter((p) => p.status === "active").map((p) => p.id),
   );
   const projectTitle = new Map(input.projects.map((p) => [p.id, p.title]));
-  const taskSlides: GatheringSlide[] = input.projectTasks
-    .filter((t) => t.status === "open" && activeProjectIds.has(t.projectId))
-    .slice(0, caps.tasks)
-    .map((t) => ({
-      kind: "task",
-      id: t.id,
-      taskTitle: t.title,
-      projectTitle: projectTitle.get(t.projectId) ?? "",
-      href: absoluteUrl(input.origin, `/project/${t.projectId}/task/${t.id}`),
-    }));
+  const taskSlides: GatheringSlide[] = !on("tasks")
+    ? []
+    : input.projectTasks
+        .filter((t) => t.status === "open" && activeProjectIds.has(t.projectId))
+        .slice(0, caps.tasks)
+        .map((t) => ({
+          kind: "task",
+          id: t.id,
+          taskTitle: t.title,
+          projectTitle: projectTitle.get(t.projectId) ?? "",
+          href: absoluteUrl(
+            input.origin,
+            `/project/${t.projectId}/task/${t.id}`,
+          ),
+        }));
 
-  const needSlides: GatheringSlide[] = input.posts
-    .filter((p) => p.type === "NEED" && p.status === "open")
-    .slice(0, caps.needs)
-    .map((p) => ({
-      kind: "need",
-      id: p.id,
-      title: p.title,
-      authorKey: p.postedBy,
-      authorName: nameOf(p.postedBy),
-      href: absoluteUrl(input.origin, messageAuthorPath(p.postedBy, p.id)),
-    }));
+  const needSlides: GatheringSlide[] = !on("needs")
+    ? []
+    : input.posts
+        .filter((p) => p.type === "NEED" && p.status === "open")
+        .slice(0, caps.needs)
+        .map((p) => ({
+          kind: "need",
+          id: p.id,
+          title: p.title,
+          authorKey: p.postedBy,
+          authorName: nameOf(p.postedBy),
+          href: absoluteUrl(input.origin, messageAuthorPath(p.postedBy, p.id)),
+        }));
 
-  const offerSlides: GatheringSlide[] = input.posts
-    .filter((p) => p.type === "OFFER" && p.status === "open")
-    .slice(0, caps.offers)
-    .map((p) => ({
-      kind: "offer",
-      id: p.id,
-      title: p.title,
-      authorKey: p.postedBy,
-      authorName: nameOf(p.postedBy),
-      href: absoluteUrl(input.origin, messageAuthorPath(p.postedBy, p.id)),
-    }));
+  const offerSlides: GatheringSlide[] = !on("offers")
+    ? []
+    : input.posts
+        .filter((p) => p.type === "OFFER" && p.status === "open")
+        .slice(0, caps.offers)
+        .map((p) => ({
+          kind: "offer",
+          id: p.id,
+          title: p.title,
+          authorKey: p.postedBy,
+          authorName: nameOf(p.postedBy),
+          href: absoluteUrl(input.origin, messageAuthorPath(p.postedBy, p.id)),
+        }));
+
+  // Hide, then pin. `hiddenIds` removes an item entirely (the interim
+  // "please don't feature my post" control); `pinnedIds` hoists survivors
+  // to the front in the organizer's chosen order.
+  const hidden = new Set(input.filter?.hiddenIds ?? []);
+  const pinnedRank = new Map(
+    (input.filter?.pinnedIds ?? []).map((id, i) => [id, i] as const),
+  );
+  const idOf = (s: GatheringSlide) => (s.kind === "welcome" ? "" : s.id);
 
   const actionable = roundRobin([
     eventSlides,
     taskSlides,
     needSlides,
     offerSlides,
-  ]);
+  ]).filter((s) => !hidden.has(idOf(s)));
+
+  const pinned = actionable
+    .filter((s) => pinnedRank.has(idOf(s)))
+    .sort((a, b) => pinnedRank.get(idOf(a))! - pinnedRank.get(idOf(b))!);
+  const rest = actionable.filter((s) => !pinnedRank.has(idOf(s)));
+
   // The welcome slide always leads; it's the calm interstitial that names
   // the community and stands alone when nothing else qualifies.
-  return [{ kind: "welcome" }, ...actionable];
+  return [{ kind: "welcome" }, ...pinned, ...rest];
 }
 
 /** True when the rotation has something to act on beyond the welcome
