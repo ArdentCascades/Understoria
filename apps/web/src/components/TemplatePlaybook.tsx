@@ -100,23 +100,19 @@ export function TemplatePlaybook({
     </div>
   );
 
-  if (variant === "compact") {
-    return (
-      <details className="rounded-xl bg-canopy-50 p-3 dark:bg-canopy-950/30">
-        <summary className="cursor-pointer text-sm font-semibold text-canopy-800 dark:text-canopy-200">
-          {t("projects.templates.playbook.compactSummary")}
-        </summary>
-        {body}
-      </details>
-    );
-  }
-
+  // Both variants are collapsed-by-default disclosures — this is
+  // reference material, not the main event, so it never pushes the tasks
+  // (project page) or the task's own actions below the fold.
+  const summaryText =
+    variant === "compact"
+      ? t("projects.templates.playbook.compactSummary")
+      : t("projects.templates.playbook.title", { name: tpl.name });
   return (
-    <section className="card border-canopy-200 bg-canopy-50/60 dark:border-canopy-800 dark:bg-canopy-950/30">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-canopy-800 dark:text-canopy-200">
-        {t("projects.templates.playbook.title", { name: tpl.name })}
-      </h2>
+    <details className="rounded-xl border border-canopy-200 bg-canopy-50/60 p-3 dark:border-canopy-800 dark:bg-canopy-950/30">
+      <summary className="cursor-pointer text-sm font-semibold text-canopy-800 dark:text-canopy-200">
+        {summaryText}
+      </summary>
       {body}
-    </section>
+    </details>
   );
 }
