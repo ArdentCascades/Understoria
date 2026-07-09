@@ -323,6 +323,11 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "conexión. Lo único que no puede pasar sin ninguna red es " +
             "descargar la app en sí — la invitación espera paciente " +
             "hasta que pueda.",
+          "Los buenos tiempos son el momento de ponerlo en papel: la " +
+            "página de Infraestructura comunitaria puede imprimir un " +
+            "kit de cortes — un cartel de pared y tarjetas de bolsillo " +
+            "con los pasos para unirse al centro — para que las " +
+            "instrucciones sobrevivan también a las baterías muertas.",
         ],
       },
       {

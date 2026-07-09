@@ -312,6 +312,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "connection at all. The one thing that can't happen with " +
             "no network anywhere is downloading the app itself — the " +
             "invite waits patiently until they can.",
+          "Good times are when to put this on paper: the Community " +
+            "infrastructure page can print an outage kit — a wall " +
+            "poster and wallet cards with the join-the-hub steps — so " +
+            "the instructions survive dead batteries too.",
         ],
       },
       {

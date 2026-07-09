@@ -30,6 +30,7 @@ import PrintEventFlyerPage from "@/pages/PrintEventFlyer";
 import PrintShiftRosterPage from "@/pages/PrintShiftRoster";
 import PrintCalendarPage from "@/pages/PrintCalendar";
 import PrintGuidePage from "@/pages/PrintGuide";
+import PrintOfflineKitPage from "@/pages/PrintOfflineKit";
 import { CalendarEventPanel } from "@/components/CalendarEventPanel";
 import { BoardPostPanel } from "@/components/BoardPostPanel";
 import DashboardPage from "@/pages/Dashboard";
@@ -148,6 +149,7 @@ export default function App() {
           />
           <Route path="/print/calendar" element={<PrintCalendarPage />} />
           <Route path="/print/guide" element={<PrintGuidePage />} />
+          <Route path="/print/offline-kit" element={<PrintOfflineKitPage />} />
           <Route path="/invites" element={<InvitesPage />} />
           <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />

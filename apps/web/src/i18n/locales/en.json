@@ -2944,6 +2944,37 @@
     "tabs": {
       "cut": "tear one off, scan it later",
       "qrAria": "Tear-off QR tab"
+    },
+    "kit": {
+      "link": "Print the outage kit (wall poster + wallet cards)",
+      "setup": {
+        "title": "Before you print: the hub's WiFi",
+        "body": "Typed here by you, never read from your device. Leave it empty if the community doesn't have a storm hub yet — the kit prints with \"ask for the community WiFi\" instead.",
+        "ssid": "Hub WiFi name (SSID)",
+        "ssidPlaceholder": "e.g. Riverside-Hub",
+        "password": "Hub WiFi password (prints on the poster)",
+        "passwordPlaceholder": "leave empty for an open network"
+      },
+      "poster": {
+        "headline": "Internet down? Our community still works.",
+        "step1": "1. Join the hub WiFi",
+        "wifiQrAria": "QR code that joins the hub WiFi",
+        "passwordLine": "Password: {{password}}",
+        "askForWifi": "Ask a member or the shelter desk for the community WiFi.",
+        "step2": "2. Open {{host}} — the same address as always",
+        "addressQrAria": "QR code for the community's address",
+        "sameAddress": "No new app, no setup. On the hub WiFi, the ordinary address just works.",
+        "step3": "3. You're on the community island",
+        "step3Body": "Post needs, offer help, confirm exchanges, welcome new neighbors. Everything syncs back to the wider network when the internet returns.",
+        "sharesWifi": "This poster shares the hub WiFi with everyone who can see it — post it where that's the point."
+      },
+      "cards": {
+        "title": "Wallet cards",
+        "cut": "cut along the dashed lines — one for your wallet, one for a neighbor",
+        "body": "If the internet is down: find the community WiFi, join it, and open this same address. The app keeps working.",
+        "wifiLine": "Hub WiFi: {{ssid}}",
+        "askForWifi": "Hub WiFi: ask a member"
+      }
     }
   }
 }

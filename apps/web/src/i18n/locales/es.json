@@ -2944,6 +2944,37 @@
     "tabs": {
       "cut": "arranca una pestaña y escanéala después",
       "qrAria": "Pestaña QR para arrancar"
+    },
+    "kit": {
+      "link": "Imprimir el kit de cortes (cartel de pared + tarjetas de bolsillo)",
+      "setup": {
+        "title": "Antes de imprimir: el WiFi del centro",
+        "body": "Lo escribes tú aquí; nunca se lee de tu dispositivo. Déjalo vacío si la comunidad aún no tiene centro de tormenta — el kit se imprime con \"pregunta por el WiFi comunitario\".",
+        "ssid": "Nombre del WiFi del centro (SSID)",
+        "ssidPlaceholder": "p. ej. Centro-Ribera",
+        "password": "Contraseña del WiFi (se imprime en el cartel)",
+        "passwordPlaceholder": "déjalo vacío si la red es abierta"
+      },
+      "poster": {
+        "headline": "¿Sin internet? Nuestra comunidad sigue funcionando.",
+        "step1": "1. Únete al WiFi del centro",
+        "wifiQrAria": "Código QR que conecta al WiFi del centro",
+        "passwordLine": "Contraseña: {{password}}",
+        "askForWifi": "Pregunta a un miembro o en la mesa del refugio por el WiFi comunitario.",
+        "step2": "2. Abre {{host}} — la misma dirección de siempre",
+        "addressQrAria": "Código QR de la dirección de la comunidad",
+        "sameAddress": "Sin app nueva, sin configuración. En el WiFi del centro, la dirección de siempre simplemente funciona.",
+        "step3": "3. Estás en la isla comunitaria",
+        "step3Body": "Publica necesidades, ofrece ayuda, confirma intercambios, da la bienvenida. Todo se sincroniza con la red cuando vuelve el internet.",
+        "sharesWifi": "Este cartel comparte el WiFi del centro con cualquiera que lo vea — pégalo donde eso sea justamente el punto."
+      },
+      "cards": {
+        "title": "Tarjetas de bolsillo",
+        "cut": "recorta por las líneas discontinuas — una para tu cartera, otra para una vecina",
+        "body": "Si el internet se corta: busca el WiFi comunitario, únete, y abre esta misma dirección. La app sigue funcionando.",
+        "wifiLine": "WiFi del centro: {{ssid}}",
+        "askForWifi": "WiFi del centro: pregunta a un miembro"
+      }
     }
   }
 }

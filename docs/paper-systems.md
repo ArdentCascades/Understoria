@@ -1,6 +1,7 @@
 # Paper systems — plans
 
-Status: **P1-P6 shipped; P7-P8 gated on community conversations.**
+Status: **every buildable plan (P1-P6 + the P4 offline kit) is
+shipped; P7-P8 remain gated on community conversations.**
 Print surfaces (desktop-power-tools plan 5)
 shipped the plumbing — chrome-free printing on every page, the
 `/print/...` route shape, the QR-per-thing pattern, and the dated
@@ -123,7 +124,14 @@ excluded), day grouping order, cap line, footer.
 
 **Size:** small-medium.
 
-## P4. Offline kit: wallet card + storm-hub wall poster
+## P4. Offline kit: wallet card + storm-hub wall poster — SHIPPED
+
+As built: as planned (pages/PrintOfflineKit.tsx over
+lib/offlineKit.ts, whose `wifiQrValue` carries the WIFI:-format
+escaping — an unescaped `;` in a password would silently truncate
+the payload). Entry points: the Infrastructure drills section and a
+new paragraph in the internet-outage FAQ answer (both locales). The
+threat-model §7 print entry gained the printed-credential analysis.
 
 **What:** the offline-resilience runbook, physicalized — for the
 moment when screens are dead and the runbook can't be read in the
