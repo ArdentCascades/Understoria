@@ -2032,7 +2032,8 @@
         "lagging": "lagging behind",
         "quiet": "hasn't answered lately"
       },
-      "cta": "Grow another root"
+      "cta": "Grow another root",
+      "infraLink": "Community infrastructure"
     },
     "federation": {
       "title": "Across federation",
@@ -2780,7 +2781,8 @@
       "newPost": "Post a need or offer",
       "newProject": "Start a project",
       "newEvent": "Create an event",
-      "desk": "Your desk"
+      "desk": "Your desk",
+      "infrastructure": "Community infrastructure"
     },
     "kind": {
       "postNeed": "Need",
@@ -2818,5 +2820,71 @@
     },
     "doorway_one": "{{count}} thing is waiting at your desk",
     "doorway_other": "{{count}} things are waiting at your desk"
+  },
+  "infra": {
+    "title": "Community infrastructure",
+    "tagline": "How this community stays up. Every member can read this page — there is no operator-only view.",
+    "servers": {
+      "title": "Servers carrying this community",
+      "checking": "Checking…",
+      "none": "No server is connected yet. Right now this device IS the community — everything lives here and on other members' phones.",
+      "primary": "Primary",
+      "mirror": "Mirror",
+      "answered": "Answered",
+      "noAnswer": "Didn't answer from here",
+      "nodeId": "Publishes node id {{nodeId}}",
+      "nodeIdMismatch": "This server publishes a different node id than the community id on this device ({{expected}}). Worth asking your operator about — it can mean a changed address or a replaced server.",
+      "offline": "You're offline, so servers can't be asked right now. \"Didn't answer\" means exactly that — asked from this device, no answer — never \"down\".",
+      "recheck": "Check again"
+    },
+    "device": {
+      "title": "What this device carries",
+      "members": "Members whose records are on this phone",
+      "lastSync": "Last successful sync",
+      "never": "Not yet",
+      "freshness": {
+        "fresh": "Within the last day",
+        "lagging": "Within the last week",
+        "quiet": "Longer ago"
+      },
+      "outboxPending": "Records waiting to be sent",
+      "outboxPoisoned": "Records the server refused",
+      "outboxClear": "Nothing is waiting to be sent — everything you've signed has reached the community."
+    },
+    "governance": {
+      "title": "Governance",
+      "openProposals": "Proposals open right now",
+      "quorum": "Removal quorum (community rule)",
+      "quorumUnknown": "Not published yet",
+      "view": "See proposals"
+    },
+    "drills": {
+      "title": "Disaster drills",
+      "intro": "Practice the two recoveries before you need them. These checklists live only on this device — the linked runbooks in the repository stay the source of truth.",
+      "lastDrilled": "Last drilled {{date}}.",
+      "notYet": "Not drilled yet.",
+      "markToday": "We ran it today",
+      "reset": "Clear checks",
+      "stormHub": {
+        "title": "Storm-hub drill",
+        "body": "Proves the go-bag server can carry the community through an internet outage.",
+        "step1": "Cut the internet: unplug the router's uplink (WAN).",
+        "step2": "Join the hub's WiFi with two members' phones.",
+        "step3": "Post from one phone and watch it appear on the other.",
+        "step4": "Bring a phone that has never seen the app: open the community's address on the hub WiFi, install, and join with an invite QR.",
+        "step5": "Check the caveats: the hub's certificate was renewed within the last 90 days, phones accept the hub's DNS, and the hub's clock is right.",
+        "step6": "Reconnect the internet and confirm the hub syncs back to the other servers."
+      },
+      "reseed": {
+        "title": "Re-seed drill",
+        "body": "Proves the community can be restored onto a brand-new server from one member's device, even if every server were lost.",
+        "step1": "Stand up a fresh, empty server with the community's exact founder keys (operator-guide §6, \"Recovering from total node loss\").",
+        "step2": "Set its recovery settings: RESEED_GRACE_UNTIL, and TRUSTED_SYSTEM_KEYS from the key record this app captured.",
+        "step3": "From one member's device: Settings → \"Restore this community onto a node\", pointed at the new address.",
+        "step4": "Watch the restore finish, then pull from a second member's device and check the history is all there.",
+        "step5": "Turn the read gate back on (READ_AUTH=on) and confirm members still get in with their receipts alone.",
+        "step6": "Remove the recovery settings from the server."
+      }
+    }
   }
 }

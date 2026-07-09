@@ -1,6 +1,6 @@
 # Desktop power tools — plans
 
-Status: **plans 1 (P1), 2, and 3 shipped; plans 4-5 remain plans.** The desktop layout
+Status: **plans 1 (P1) through 4 shipped; plan 5 remains a plan.** The desktop layout
 work (nav rail, board/dashboard rails, calendar event panel, the
 1600px cap) made room; the operator asked what could fill it for
 the members who do coordination work at a keyboard. Five plans, in
@@ -180,7 +180,22 @@ board state survives open/close.
 **Size:** 1–2 PRs (extract DockedPanel + calendar refactor, then
 board wiring). No server changes.
 
-## 4. Operator console → "Community infrastructure" page
+## 4. Operator console → "Community infrastructure" page — SHIPPED
+
+As built: `/infrastructure` (pages/Infrastructure.tsx) over
+`lib/infraStatus.ts`, linked from the ResilienceCard (alongside the
+grow-root CTA, replacing nothing) and the palette. Deltas from the
+plan below: the probe simplified from probeNewRoot's full check list
+to per-endpoint `/health` + published-`/config.nodeId`, with the
+mismatch flag only on the PRIMARY (mirrors run distinct NODE_IDs by
+design) and the tri-state honesty kept as "couldn't ask ≠ wrong /
+down" plus an explicit you're-offline note; the outbox and
+governance reads live in the page (a live query and two settings
+reads didn't earn a lib). Drill checklists shipped as planned —
+`SETTING_KEYS.drillChecklists`, device-local, with a "We ran it
+today" stamp that clears the checks for the next run. P2 (mirror
+`lastSyncAt` freshness on /config) remains unbuilt and gets its own
+decision if wanted.
 
 **What:** the runbooks turned into a page you can see is green:
 node + mirror health, federation peers, outbox state, governance

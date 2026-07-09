@@ -23,6 +23,7 @@ import { Layout } from "@/components/Layout";
 import BoardPage from "@/pages/Board";
 import CalendarPage from "@/pages/Calendar";
 import OrganizerDeskPage from "@/pages/OrganizerDesk";
+import InfrastructurePage from "@/pages/Infrastructure";
 import { CalendarEventPanel } from "@/components/CalendarEventPanel";
 import { BoardPostPanel } from "@/components/BoardPostPanel";
 import DashboardPage from "@/pages/Dashboard";
@@ -125,6 +126,7 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/desk" element={<OrganizerDeskPage />} />
+          <Route path="/infrastructure" element={<InfrastructurePage />} />
           <Route path="/invites" element={<InvitesPage />} />
           <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />

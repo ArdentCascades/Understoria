@@ -1158,6 +1158,12 @@ export const SETTING_KEYS = {
    *  wrapping and never write this key. Device-local; never
    *  federated or exported. */
   deviceKeyWrappers: "deviceKeyWrappers",
+  /** JSON `DrillChecklists` record (lib/infraStatus.ts): the
+   *  Community-infrastructure page's device-local drill tracking —
+   *  checked step indexes + a member-set "last drilled" date per
+   *  drill. The runbooks stay the source of truth; this is only the
+   *  tracker. Never federated (settings never are). */
+  drillChecklists: "drillChecklists",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {
