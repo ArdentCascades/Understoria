@@ -1950,6 +1950,11 @@
       "search": "Sin resultados para \"{{query}}\".",
       "filtered": "Nada coincide con estos filtros.",
       "clearFilters": "Quitar filtros"
+    },
+    "panel": {
+      "ariaLabel": "Detalles de la publicación",
+      "closeShort": "Cerrar",
+      "close": "Cerrar panel de la publicación"
     }
   },
   "dashboard": {

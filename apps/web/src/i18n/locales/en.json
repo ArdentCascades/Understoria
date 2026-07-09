@@ -1950,6 +1950,11 @@
       "search": "No results for \"{{query}}\".",
       "filtered": "Nothing matches these filters.",
       "clearFilters": "Clear filters"
+    },
+    "panel": {
+      "ariaLabel": "Post details",
+      "closeShort": "Close",
+      "close": "Close post panel"
     }
   },
   "dashboard": {

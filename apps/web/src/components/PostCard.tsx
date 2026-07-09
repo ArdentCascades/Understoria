@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { AvailabilityChip, Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
@@ -53,6 +53,13 @@ export function PostCard({
   searchQuery?: string;
 }) {
   const { t } = useTranslation();
+  // Carry the current query string into the post URL. PostCard only
+  // renders on the Board, whose ?tab= lives in the URL — the post
+  // route nests under the Board (the docked panel), so preserving
+  // the search keeps the board behind the panel on the tab the
+  // member was browsing, and closing the panel restores it exactly.
+  // PostDetail ignores query params, so this is inert otherwise.
+  const { search } = useLocation();
   // No "needs help" / "offers" type label in the meta row: PostCard
   // renders only inside the Board's NEED / OFFER tabs, where the
   // active tab already declares the type — repeating it on every
@@ -61,7 +68,7 @@ export function PostCard({
   // the label behind a `showTypeLabel` prop defaulting to false.
   return (
     <Link
-      to={`/post/${post.id}`}
+      to={{ pathname: `/post/${post.id}`, search }}
       className="card block animate-fade-in transition-shadow hover:shadow-md
                  focus-visible:ring-2 focus-visible:ring-canopy-600/50"
     >

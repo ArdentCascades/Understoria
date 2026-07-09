@@ -24,12 +24,12 @@ import BoardPage from "@/pages/Board";
 import CalendarPage from "@/pages/Calendar";
 import OrganizerDeskPage from "@/pages/OrganizerDesk";
 import { CalendarEventPanel } from "@/components/CalendarEventPanel";
+import { BoardPostPanel } from "@/components/BoardPostPanel";
 import DashboardPage from "@/pages/Dashboard";
 import ProfilePage from "@/pages/Profile";
 import SettingsPage from "@/pages/Settings";
 import InvitesPage from "@/pages/Invites";
 import PostFormPage from "@/pages/PostForm";
-import PostDetailPage from "@/pages/PostDetail";
 import InviteAcceptPage from "@/pages/InviteAccept";
 import AddDevicePage from "@/pages/AddDevice";
 import PairDevicePage from "@/pages/PairDevice";
@@ -103,7 +103,15 @@ export default function App() {
           }
         />
         <Route element={<Layout />}>
-          <Route index element={<BoardPage />} />
+          <Route path="/" element={<BoardPage />}>
+            {/* The docked post panel - the board stays mounted while
+                the post renders beside it (full-screen below lg).
+                This nests the CANONICAL post URL: /post/:id keeps
+                working everywhere (links, shares, QR) and simply
+                gains the board behind it. /post/new stays a separate
+                static route below and outranks the :id param. */}
+            <Route path="post/:id" element={<BoardPostPanel />} />
+          </Route>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/calendar" element={<CalendarPage />}>
             {/* The docked event panel - calendar stays mounted while
@@ -120,7 +128,6 @@ export default function App() {
           <Route path="/invites" element={<InvitesPage />} />
           <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />
-          <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route

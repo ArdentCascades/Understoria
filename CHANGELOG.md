@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **On desktop, posts open beside the board.** Click a post on a
+  larger screen and it docks in a panel next to the card grid — the
+  board keeps your tab, filters, search, and scroll position, and
+  clicking the next card just swaps the panel. Claim, confirm, and
+  message from right there. Post links and shared URLs are unchanged,
+  and on phones a post still opens the way it always has.
+
+### Added
 - **Your desk: everything waiting on you, in one place.** A new page
   (find it with Ctrl+K, or through the dashboard when something
   needs you) gathers, across everything you organize: task
