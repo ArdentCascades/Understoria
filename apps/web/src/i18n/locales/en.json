@@ -2790,7 +2790,8 @@
       "newProject": "Start a project",
       "newEvent": "Create an event",
       "desk": "Your desk",
-      "infrastructure": "Community infrastructure"
+      "infrastructure": "Community infrastructure",
+      "present": "Gathering screen"
     },
     "kind": {
       "postNeed": "Need",
@@ -2802,11 +2803,59 @@
       "help": "Help"
     }
   },
+  "present": {
+    "anonymous": "a neighbor",
+    "postedBy": "Posted by {{name}}",
+    "lobby": {
+      "title": "Gathering screen",
+      "body": "A full-screen slideshow of your community's events, tasks, and requests — each with a QR code people in the room can scan to jump in. Best on a TV or a laptop propped where everyone can see it.",
+      "start": "Start the screen",
+      "back": "Go back"
+    },
+    "welcome": {
+      "eyebrow": "Welcome",
+      "title": "Grow power from below",
+      "hint": "Scan any code with your phone to jump in.",
+      "empty": "Nothing scheduled right now — check the board."
+    },
+    "event": {
+      "eyebrow": "Coming up",
+      "cta": "Scan to RSVP",
+      "qrAria": "QR code to RSVP to {{title}}"
+    },
+    "task": {
+      "eyebrow": "Help wanted",
+      "in": "in {{project}}",
+      "cta": "Scan to claim",
+      "qrAria": "QR code to claim the task {{title}}"
+    },
+    "need": {
+      "eyebrow": "Someone needs a hand",
+      "cta": "Scan to offer help",
+      "qrAria": "QR code to message {{name}} and offer help"
+    },
+    "offer": {
+      "eyebrow": "Offer available",
+      "cta": "Scan to ask",
+      "qrAria": "QR code to message {{name}} about their offer"
+    },
+    "controls": {
+      "prev": "Previous slide",
+      "next": "Next slide",
+      "pause": "Pause",
+      "play": "Play",
+      "exit": "Exit the gathering screen"
+    }
+  },
   "desk": {
     "title": "Your desk",
     "tagline": "Everything waiting on you, and everything short of hands, across what you organize.",
     "emptyTitle": "Nothing is waiting on you",
     "empty": "Your projects, posts, and gatherings are all caught up. Rest is part of the work.",
+    "present": {
+      "title": "Gathering screen",
+      "body": "Put your events, tasks, and requests on a shared screen with QR codes people can scan in the room."
+    },
     "confirmations": {
       "title": "Confirmations waiting on you",
       "count_one": "{{count}} to confirm",

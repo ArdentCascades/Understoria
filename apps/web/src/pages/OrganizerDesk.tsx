@@ -171,6 +171,28 @@ export default function OrganizerDeskPage() {
         </p>
       </header>
 
+      {/* Always-available tool (not a to-do): the gathering screen for a
+          shared display at an in-person gathering. */}
+      <Link
+        to="/present"
+        className="card mb-4 flex items-center gap-3 hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
+        <span aria-hidden="true" className="text-2xl">
+          {"\u{1F4FA}"}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">
+            {t("desk.present.title")}
+          </span>
+          <span className="block text-xs text-moss-600 dark:text-moss-300">
+            {t("desk.present.body")}
+          </span>
+        </span>
+        <span aria-hidden="true" className="text-moss-400">
+          {"›"}
+        </span>
+      </Link>
+
       {empty ? (
         <EmptyState
           illustration="raising"

@@ -59,6 +59,7 @@ import DisputesPage from "@/pages/Disputes";
 import ProposalsPage from "@/pages/Proposals";
 import ProposalNewPage from "@/pages/ProposalNew";
 import WelcomePage from "@/pages/Welcome";
+import PresentPage from "@/pages/Present";
 import NotFoundPage from "@/pages/NotFound";
 import { useApp } from "@/state/AppContext";
 
@@ -110,6 +111,13 @@ export default function App() {
             </StandaloneScroll>
           }
         />
+        {/* The gathering screen (docs/gathering-screen.md) renders
+            OUTSIDE the Layout app shell — no BottomNav, no command
+            palette — so a fullscreen kiosk on a wall is just the
+            slideshow. Still inside OnboardingGate: it's a member's
+            device, not a pre-onboarding surface. It manages its own
+            full-height layout, so no StandaloneScroll wrapper. */}
+        <Route path="/present" element={<PresentPage />} />
         <Route element={<Layout />}>
           <Route path="/" element={<BoardPage />}>
             {/* The docked post panel - the board stays mounted while

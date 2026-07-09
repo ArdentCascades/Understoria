@@ -2790,7 +2790,8 @@
       "newProject": "Iniciar un proyecto",
       "newEvent": "Crear un evento",
       "desk": "Tu escritorio",
-      "infrastructure": "Infraestructura comunitaria"
+      "infrastructure": "Infraestructura comunitaria",
+      "present": "Pantalla de reunión"
     },
     "kind": {
       "postNeed": "Necesidad",
@@ -2802,11 +2803,59 @@
       "help": "Ayuda"
     }
   },
+  "present": {
+    "anonymous": "un vecino",
+    "postedBy": "Publicado por {{name}}",
+    "lobby": {
+      "title": "Pantalla de reunión",
+      "body": "Una presentación a pantalla completa de los eventos, tareas y solicitudes de tu comunidad — cada una con un código QR que la gente en la sala puede escanear para sumarse. Ideal en un televisor o una laptop a la vista de todos.",
+      "start": "Iniciar la pantalla",
+      "back": "Volver"
+    },
+    "welcome": {
+      "eyebrow": "Bienvenida",
+      "title": "Construir poder desde abajo",
+      "hint": "Escanea cualquier código con tu teléfono para sumarte.",
+      "empty": "Nada programado por ahora — revisa el tablón."
+    },
+    "event": {
+      "eyebrow": "Próximamente",
+      "cta": "Escanea para confirmar",
+      "qrAria": "Código QR para confirmar asistencia a {{title}}"
+    },
+    "task": {
+      "eyebrow": "Se buscan manos",
+      "in": "en {{project}}",
+      "cta": "Escanea para tomarla",
+      "qrAria": "Código QR para tomar la tarea {{title}}"
+    },
+    "need": {
+      "eyebrow": "Alguien necesita una mano",
+      "cta": "Escanea para ofrecer ayuda",
+      "qrAria": "Código QR para escribir a {{name}} y ofrecer ayuda"
+    },
+    "offer": {
+      "eyebrow": "Oferta disponible",
+      "cta": "Escanea para pedir",
+      "qrAria": "Código QR para escribir a {{name}} sobre su oferta"
+    },
+    "controls": {
+      "prev": "Diapositiva anterior",
+      "next": "Diapositiva siguiente",
+      "pause": "Pausar",
+      "play": "Reproducir",
+      "exit": "Salir de la pantalla de reunión"
+    }
+  },
   "desk": {
     "title": "Tu escritorio",
     "tagline": "Todo lo que te espera, y todo lo que necesita manos, en lo que organizas.",
     "emptyTitle": "Nada te espera",
     "empty": "Tus proyectos, publicaciones y reuniones están al día. Descansar es parte del trabajo.",
+    "present": {
+      "title": "Pantalla de reunión",
+      "body": "Muestra tus eventos, tareas y solicitudes en una pantalla compartida con códigos QR que la gente puede escanear en la sala."
+    },
     "confirmations": {
       "title": "Confirmaciones que te esperan",
       "count_one": "{{count}} por confirmar",

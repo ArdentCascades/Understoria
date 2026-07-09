@@ -1,7 +1,10 @@
 # The community gathering screen (kiosk mode)
 
-> Status: **plan**. Phase 1 is specified for build; later phases are
-> scoped and dependency-ordered. This document is the design of record.
+> Status: **Phase 1 shipped**; later phases are scoped and
+> dependency-ordered below. This document is the design of record.
+> Phase 1 lives in `apps/web/src/pages/Present.tsx` (route `/present`),
+> `apps/web/src/lib/gatheringSlides.ts` (the pure slide selector),
+> `useSlideshow.ts`, and `useWakeLock.ts`.
 
 ## 1. What it is
 

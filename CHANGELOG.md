@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A gathering screen for the room you're in.** New fullscreen kiosk
+  (`/present`, from Your Desk or Ctrl/Cmd+K) that rotates your
+  community's live, actionable items on a shared screen or TV — every
+  slide a big QR code people can scan with their phones. Upcoming events
+  ("Scan to RSVP"), open tasks on active projects ("Scan to claim"), and
+  open needs/offers ("Scan to offer help" — the code opens a message to
+  the person who posted, with the post attached). It keeps the screen
+  awake, auto-advances (tap to pause, arrows to step), and re-checks live
+  data each cycle so a claimed task or a past event drops out — no dead
+  QR codes. Phase 1 shows only already-public content; see
+  `docs/gathering-screen.md` for the people-directory and
+  recruit-newcomers slides that follow once member profiles federate.
 - **Settings is now one click away on the desktop side rail.** On
   wider screens the left navigation rail had room to spare below its
   five items, so Settings joins it — pinned to the bottom, the way
