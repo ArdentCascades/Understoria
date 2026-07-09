@@ -162,6 +162,7 @@ function setLiveQueries(evt: Event | null | undefined) {
     null, // getEventCancellation
     null, // getMemberRsvp
     [], // listRsvpsForEvent
+    [], // listShiftsForEvent (print roster menu gate)
     null, // getLinkForEvent
   ];
   liveCursor = 0;
@@ -249,7 +250,7 @@ describe("EventDetailPage — header overflow menu", () => {
     expect(trigger.getAttribute("aria-label")).toBe("Event actions");
   });
 
-  it("opening the menu shows Copy link and Add to calendar (the only two items)", () => {
+  it("opening the menu shows Copy link, Add to calendar, and Print flyer (the only three items)", () => {
     render();
     openMenu();
     expect(menuItemByText("Copy link")).toBeDefined();
@@ -261,7 +262,11 @@ describe("EventDetailPage — header overflow menu", () => {
     expect(
       items.some((b) => (b.textContent ?? "").startsWith("Add to calendar")),
     ).toBe(true);
-    expect(items).toHaveLength(2);
+    // Paper systems P1. The sign-in-sheet item is NOT here: this
+    // event has no shifts (the live sequence's shifts slot is []),
+    // and the roster item only appears once shifts exist.
+    expect(menuItemByText("Print flyer")).toBeDefined();
+    expect(items).toHaveLength(3);
   });
 
   it("selecting Copy link writes the canonical /events/<id> URL and toasts the confirmation", async () => {

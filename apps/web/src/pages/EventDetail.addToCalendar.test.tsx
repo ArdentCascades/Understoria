@@ -146,7 +146,7 @@ interface MockState {
 let mockState: MockState;
 
 function setLiveQueries(evt: Event, cxl: EventCancellation | null) {
-  liveSequence = [evt, cxl, null, [], null];
+  liveSequence = [evt, cxl, null, [], [], null];
   liveCursor = 0;
 }
 

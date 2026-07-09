@@ -122,7 +122,7 @@ interface MockState {
 let mockState: MockState;
 
 function setLiveQueries(evt: Event | null | undefined) {
-  liveSequence = [evt, null, null, [], null];
+  liveSequence = [evt, null, null, [], [], null];
   liveCursor = 0;
 }
 

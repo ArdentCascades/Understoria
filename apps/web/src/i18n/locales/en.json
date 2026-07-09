@@ -605,7 +605,9 @@
       "attendeeFallbackKey": "(member {{shortKey}})",
       "goingRosterHeading": "Going",
       "maybeRosterHeading": "Maybe",
-      "rosterHiddenHint": "RSVP \"Going\" or \"Maybe\" to see who else is coming. Everyone else sees the count only."
+      "rosterHiddenHint": "RSVP \"Going\" or \"Maybe\" to see who else is coming. Everyone else sees the count only.",
+      "printFlyer": "Print flyer",
+      "printRoster": "Print sign-in sheet"
     },
     "rsvp": {
       "heading": "RSVP to this event",
@@ -2907,6 +2909,24 @@
       "filtered": "showing: {{filters}}",
       "empty": "Nothing matches this view right now.",
       "qrAria": "QR code for the post \"{{title}}\""
+    },
+    "flyer": {
+      "rsvp": "Scan to see details and RSVP — or open {{host}} and find it on the calendar.",
+      "qrAria": "QR code for this gathering",
+      "cancelled": "This gathering was cancelled — a flyer would misdirect people, so there's nothing to print.",
+      "ended": "This gathering has already happened, so there's nothing to put on a wall.",
+      "notFound": "This gathering isn't on this device.",
+      "rosterLink": "Print sign-in sheet"
+    },
+    "roster": {
+      "subtitle": "Sign-in sheet · {{date}}",
+      "instructions": "Write your name on a line — or scan the code to sign up by phone. Names on paper get typed into the app by the organizer afterward.",
+      "qrAria": "QR code to sign up by phone",
+      "slots": "{{signedUp}} of {{capacity}} signed up in the app",
+      "slotsUncapped": "{{signedUp}} signed up in the app · no cap",
+      "full": "Full in the app — check with the organizer before adding names.",
+      "andMore": "…and more are welcome.",
+      "noShifts": "This gathering has no shifts yet — print the flyer instead."
     }
   }
 }

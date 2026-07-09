@@ -605,7 +605,9 @@
       "attendeeFallbackKey": "(miembro {{shortKey}})",
       "goingRosterHeading": "Vienen",
       "maybeRosterHeading": "Tal vez",
-      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. El resto ve sólo el conteo."
+      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. El resto ve sólo el conteo.",
+      "printFlyer": "Imprimir cartel",
+      "printRoster": "Imprimir hoja de registro"
     },
     "rsvp": {
       "heading": "Confirmar asistencia",
@@ -2907,6 +2909,24 @@
       "filtered": "mostrando: {{filters}}",
       "empty": "Nada coincide con esta vista ahora mismo.",
       "qrAria": "Código QR de la publicación \"{{title}}\""
+    },
+    "flyer": {
+      "rsvp": "Escanea para ver los detalles y confirmar — o abre {{host}} y búscalo en el calendario.",
+      "qrAria": "Código QR de este encuentro",
+      "cancelled": "Este encuentro se canceló — un cartel confundiría a la gente, así que no hay nada que imprimir.",
+      "ended": "Este encuentro ya pasó, así que no hay nada que poner en una pared.",
+      "notFound": "Este encuentro no está en este dispositivo.",
+      "rosterLink": "Imprimir hoja de registro"
+    },
+    "roster": {
+      "subtitle": "Hoja de registro · {{date}}",
+      "instructions": "Escribe tu nombre en una línea — o escanea el código para apuntarte con el teléfono. Los nombres en papel los pasa la organizadora a la app después.",
+      "qrAria": "Código QR para apuntarte con el teléfono",
+      "slots": "{{signedUp}} de {{capacity}} apuntadas en la app",
+      "slotsUncapped": "{{signedUp}} apuntadas en la app · sin cupo",
+      "full": "Lleno en la app — consulta con quien organiza antes de añadir nombres.",
+      "andMore": "…y caben más manos.",
+      "noShifts": "Este encuentro aún no tiene turnos — imprime el cartel."
     }
   }
 }

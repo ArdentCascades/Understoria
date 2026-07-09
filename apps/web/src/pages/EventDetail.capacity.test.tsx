@@ -152,7 +152,7 @@ function setLiveQueries(
   rsvps: EventRsvpRow[],
   myRsvp: EventRsvpRow | null = null,
 ) {
-  liveSequence = [evt, null, myRsvp, rsvps, null];
+  liveSequence = [evt, null, myRsvp, rsvps, [], null];
   liveCursor = 0;
 }
 
