@@ -9,6 +9,16 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Plans for five desktop power tools are on the table** —
+  docs/desktop-power-tools.md: a command palette (Ctrl+K over
+  everything already on your device), an organizer's desk
+  ("everything waiting on you, across everything you organize"),
+  the board post panel, a community-infrastructure page that turns
+  the drill runbooks into something you can see is green, and
+  print surfaces for the shelter-lobby QR bulletin the offline
+  plan imagined. Plans only — each will land as its own change.
+
 ### Changed
 - **The template filters share one row on desktop.** The search box
   and the two dropdowns on "Start a project" each spanned the full
