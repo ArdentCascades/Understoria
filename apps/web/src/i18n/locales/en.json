@@ -2927,6 +2927,23 @@
       "full": "Full in the app — check with the organizer before adding names.",
       "andMore": "…and more are welcome.",
       "noShifts": "This gathering has no shifts yet — print the flyer instead."
+    },
+    "calendar": {
+      "title": "Coming up in our community",
+      "link": "Print upcoming events",
+      "empty": "Nothing on the calendar in the next six weeks.",
+      "more": "…plus {{count}} more in the app — this sheet only holds so much.",
+      "qrAria": "QR code for \"{{title}}\""
+    },
+    "guide": {
+      "title": "How our timebank works",
+      "link": "Print a one-page guide for tabling",
+      "tagline": "A neighbors' time-trading network — one page of the questions everyone asks first.",
+      "cta": "Want in? Ask the person at this table for an invite — joining takes one scan and costs nothing."
+    },
+    "tabs": {
+      "cut": "tear one off, scan it later",
+      "qrAria": "Tear-off QR tab"
     }
   }
 }

@@ -594,6 +594,14 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+      {/* Paper systems P3: the fridge-calendar sheet. Quiet register,
+          like the board's print link. */}
+      <Link
+        to="/print/calendar"
+        className="mt-4 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:text-left"
+      >
+        {t("print.calendar.link")}
+      </Link>
       </div>
       <Outlet />
       </div>

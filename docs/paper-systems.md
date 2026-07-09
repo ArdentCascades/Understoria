@@ -1,6 +1,6 @@
 # Paper systems — plans
 
-Status: **P1 and P2 shipped; P3-P6 are plans; P7-P8 gated.**
+Status: **P1-P6 shipped; P7-P8 gated on community conversations.**
 Print surfaces (desktop-power-tools plan 5)
 shipped the plumbing — chrome-free printing on every page, the
 `/print/...` route shape, the QR-per-thing pattern, and the dated
@@ -99,7 +99,11 @@ default), per-shift rows, refusal states, footer.
 
 **Size:** small-medium.
 
-## P3. Fridge calendar
+## P3. Fridge calendar — SHIPPED
+
+As built: as planned (pages/PrintCalendar.tsx), linked from the
+Calendar page. Day groups render with weekday+date headers; the
+30-row cap prints "+N more in the app" when it bites.
 
 **What:** a month-at-a-glance sheet of upcoming gatherings for the
 community fridge / lobby corkboard: date-grouped rows — when,
@@ -161,7 +165,11 @@ footer + credential caveat, cut-line layout classes.
 **Size:** medium (the WiFi-QR escaping and the 2-up card layout are
 the substance).
 
-## P5. Field guide (tabling one-pager)
+## P5. Field guide (tabling one-pager) — SHIPPED
+
+As built: as planned (pages/PrintGuide.tsx over lib/printGuide.ts),
+linked from the Help page header. The drift guard resolves the
+curated ids against BOTH locales in tests.
 
 **What:** the what-is-this zine for farmers-market tabling: a
 single sheet built from the FAQ's canonical entries — what this is,
@@ -182,7 +190,11 @@ a renamed FAQ id must fail the build, not print a hole), footer.
 
 **Size:** small.
 
-## P6. Tear-off tabs
+## P6. Tear-off tabs — SHIPPED
+
+As built: as planned (TearOffStrip in PrintChrome.tsx) — six
+invite tabs on the poster, one per post (capped at 8) on the board
+sheet, dashed cut borders + the scissors line.
 
 **What:** the real bulletin-board mechanic, deferred out of plan 5:
 a strip of small tear-off QR tabs along the bottom edge of the

@@ -24,7 +24,11 @@ import { useTranslation } from "react-i18next";
 import { decodeAndVerifyInvite } from "@/lib/invite";
 import { formatAbsoluteDate } from "@/lib/format";
 import { InviteQRCode } from "@/components/InviteQRCode";
-import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
+import {
+  PrintFooter,
+  PrintToolbar,
+  TearOffStrip,
+} from "@/components/PrintChrome";
 
 // The invite poster (docs/desktop-power-tools.md plan 5;
 // docs/offline-resilience.md §5's "paper bulletin board of QR codes
@@ -106,6 +110,16 @@ export default function PrintInvitePage() {
             date: formatAbsoluteDate(parsed.invite.expiresAt),
           })}
         </p>
+
+        {/* Tear-off tabs (P6): six copies of the same invite for
+            passers-by in a hurry. */}
+        <TearOffStrip
+          tabs={Array.from({ length: 6 }, () => ({
+            value: inviteUrl,
+            label: window.location.host,
+          }))}
+          qrAriaLabel={t("print.invite.qrAria")}
+        />
 
         <PrintFooter />
       </div>

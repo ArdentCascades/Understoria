@@ -21,6 +21,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatAbsoluteDate } from "@/lib/format";
+import { InviteQRCode } from "@/components/InviteQRCode";
 
 // Shared frame bits for the /print/... pages (desktop-power-tools
 // plan 5). The pages render as normal on-screen routes; @media print
@@ -65,5 +66,48 @@ export function PrintFooter() {
     <p className="mt-8 text-xs text-moss-600 dark:text-moss-300 print:text-black">
       {t("print.footer", { date: formatAbsoluteDate(Date.now()) })}
     </p>
+  );
+}
+
+/**
+ * Tear-off tabs (paper-systems P6) — the real bulletin-board
+ * mechanic: a strip of small QR tabs along the bottom edge, dashed
+ * cut borders between them, so someone hurrying past takes one home
+ * and scans it later. Rendered on screen too (what prints is what
+ * you see), just compact.
+ */
+export function TearOffStrip({
+  tabs,
+  qrAriaLabel,
+}: {
+  tabs: { value: string; label: string }[];
+  qrAriaLabel: string;
+}) {
+  const { t } = useTranslation();
+  if (tabs.length === 0) return null;
+  return (
+    <div className="mt-8">
+      <p
+        aria-hidden="true"
+        className="border-t border-dashed border-moss-400 pt-1 text-left text-xs text-moss-600 dark:text-moss-300 print:border-black/50 print:text-black"
+      >
+        {"✂ "}
+        {t("print.tabs.cut")}
+      </p>
+      <ul className="flex flex-wrap items-stretch">
+        {tabs.map((tab, i) => (
+          <li
+            key={`${tab.value}-${i}`}
+            className="flex w-24 flex-col items-center gap-1 border-r border-dashed border-moss-400 p-2 first:border-l dark:border-moss-600 print:border-black/50"
+            style={{ breakInside: "avoid" }}
+          >
+            <InviteQRCode value={tab.value} size={72} ariaLabel={qrAriaLabel} />
+            <span className="w-full truncate text-center text-[10px] leading-tight text-moss-700 dark:text-moss-200 print:text-black">
+              {tab.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
