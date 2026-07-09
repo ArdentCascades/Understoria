@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Your desk: everything waiting on you, in one place.** A new page
+  (find it with Ctrl+K, or through the dashboard when something
+  needs you) gathers, across everything you organize: task
+  confirmations waiting on you, exchanges awaiting your signature,
+  shifts still short of hands, and projects with open tasks. Every
+  row jumps to where the action already happens — and it shows only
+  YOUR responsibilities, never anyone else's activity. An empty
+  desk says so warmly: rest is part of the work.
+
+### Added
 - **Press Ctrl+K (or Cmd+K) to search everything.** The command
   palette searches everything already on your device — posts,
   projects, events, members, proposals, Help answers — and jumps

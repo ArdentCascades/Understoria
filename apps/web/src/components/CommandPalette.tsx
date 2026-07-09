@@ -129,6 +129,12 @@ export function CommandPalette() {
         },
         {
           kind: "route",
+          id: "route:/desk",
+          title: t("palette.routes.desk"),
+          to: "/desk",
+        },
+        {
+          kind: "route",
           id: "route:/post/new",
           title: t("palette.routes.newPost"),
           to: "/post/new",

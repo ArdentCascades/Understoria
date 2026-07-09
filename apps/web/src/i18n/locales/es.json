@@ -2774,7 +2774,8 @@
       "proposals": "Propuestas",
       "newPost": "Publicar necesidad u oferta",
       "newProject": "Iniciar un proyecto",
-      "newEvent": "Crear un evento"
+      "newEvent": "Crear un evento",
+      "desk": "Tu escritorio"
     },
     "kind": {
       "postNeed": "Necesidad",
@@ -2785,5 +2786,32 @@
       "proposal": "Propuesta",
       "help": "Ayuda"
     }
+  },
+  "desk": {
+    "title": "Tu escritorio",
+    "tagline": "Todo lo que te espera, y todo lo que necesita manos, en lo que organizas.",
+    "emptyTitle": "Nada te espera",
+    "empty": "Tus proyectos, publicaciones y reuniones están al día. Descansar es parte del trabajo.",
+    "confirmations": {
+      "title": "Confirmaciones que te esperan",
+      "count_one": "{{count}} por confirmar",
+      "count_other": "{{count}} por confirmar"
+    },
+    "posts": {
+      "title": "Intercambios esperando tu firma",
+      "confirm": "Confirmar",
+      "someone": "Un miembro"
+    },
+    "shifts": {
+      "title": "Turnos faltos de manos",
+      "count": "{{signedUp}} de {{capacity}} apuntados"
+    },
+    "openTasks": {
+      "title": "Proyectos con tareas abiertas",
+      "count_one": "{{count}} tarea abierta",
+      "count_other": "{{count}} tareas abiertas"
+    },
+    "doorway_one": "{{count}} cosa espera en tu escritorio",
+    "doorway_other": "{{count}} cosas esperan en tu escritorio"
   }
 }

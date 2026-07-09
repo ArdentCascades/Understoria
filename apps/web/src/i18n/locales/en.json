@@ -2774,7 +2774,8 @@
       "proposals": "Proposals",
       "newPost": "Post a need or offer",
       "newProject": "Start a project",
-      "newEvent": "Create an event"
+      "newEvent": "Create an event",
+      "desk": "Your desk"
     },
     "kind": {
       "postNeed": "Need",
@@ -2785,5 +2786,32 @@
       "proposal": "Proposal",
       "help": "Help"
     }
+  },
+  "desk": {
+    "title": "Your desk",
+    "tagline": "Everything waiting on you, and everything short of hands, across what you organize.",
+    "emptyTitle": "Nothing is waiting on you",
+    "empty": "Your projects, posts, and gatherings are all caught up. Rest is part of the work.",
+    "confirmations": {
+      "title": "Confirmations waiting on you",
+      "count_one": "{{count}} to confirm",
+      "count_other": "{{count}} to confirm"
+    },
+    "posts": {
+      "title": "Exchanges awaiting your signature",
+      "confirm": "Confirm",
+      "someone": "A member"
+    },
+    "shifts": {
+      "title": "Shifts short of hands",
+      "count": "{{signedUp}} of {{capacity}} signed up"
+    },
+    "openTasks": {
+      "title": "Projects with open tasks",
+      "count_one": "{{count}} open task",
+      "count_other": "{{count}} open tasks"
+    },
+    "doorway_one": "{{count}} thing is waiting at your desk",
+    "doorway_other": "{{count}} things are waiting at your desk"
   }
 }

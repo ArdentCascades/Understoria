@@ -22,6 +22,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import BoardPage from "@/pages/Board";
 import CalendarPage from "@/pages/Calendar";
+import OrganizerDeskPage from "@/pages/OrganizerDesk";
 import { CalendarEventPanel } from "@/components/CalendarEventPanel";
 import DashboardPage from "@/pages/Dashboard";
 import ProfilePage from "@/pages/Profile";
@@ -115,6 +116,7 @@ export default function App() {
           </Route>
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/desk" element={<OrganizerDeskPage />} />
           <Route path="/invites" element={<InvitesPage />} />
           <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />
