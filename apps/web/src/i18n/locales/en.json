@@ -1115,7 +1115,12 @@
       "acceptedPointer": "You're a co-organizer now. See \"What you can do\" on the project page."
     },
     "manage": {
-      "title": "Manage project"
+      "title": "Manage project",
+      "pauseItem": "Pause project",
+      "cloneItem": "Clone project",
+      "coorgItem": "Manage co-organizers",
+      "handoffItem": "Hand off project",
+      "stepDownItem": "Step down as co-organizer"
     },
     "handoff": {
       "title": "Pass the torch",

@@ -25,8 +25,8 @@
 //   3. The announcement compose form is collapsed behind a "Write an
 //      update" disclosure while existing announcement cards stay
 //      visible; the Updates section renders after the task list.
-//   4. Pause + Clone live inside the "Manage project" <details>; the
-//      standalone organizer-controls card is gone.
+//   4. Pause + Clone are header-kebab items that each open a focused
+//      dialog; no standalone organizer-controls card, no disclosure.
 //
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -434,66 +434,63 @@ describe("ProjectDetail — announcement compose disclosure", () => {
   });
 });
 
-describe("ProjectDetail — Pause/Clone inside the Manage disclosure", () => {
+describe("ProjectDetail — Pause/Clone are header-kebab items", () => {
   beforeEach(() => {
     mockState.currentMember = member(organizerKey, "Org");
   });
 
-  function manageDetails(): HTMLDetailsElement {
-    const details = Array.from(container.querySelectorAll("details")).find(
-      (d) =>
-        (d.querySelector("summary")?.textContent ?? "").trim() ===
-        "Manage project",
+  function openKebab() {
+    const trigger = container.querySelector<HTMLButtonElement>(
+      'button[aria-haspopup="menu"]',
     );
-    if (!details) throw new Error("Manage project details not found");
-    return details;
+    if (!trigger) throw new Error("project header kebab not found");
+    act(() => {
+      trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
   }
 
-  it("hosts Pause and Clone inside the Manage project details — no standalone card", async () => {
+  function menuItem(label: string): HTMLButtonElement | undefined {
+    return Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]'),
+    ).find((b) => (b.textContent ?? "").trim() === label);
+  }
+
+  it("offers Pause project and Clone project in the kebab — no disclosure, no standalone card", async () => {
     render();
     await flush();
 
-    const details = manageDetails();
-    const buttons = Array.from(container.querySelectorAll("button"));
-    const pauseButtons = buttons.filter(
-      (b) => (b.textContent ?? "").trim() === "Pause",
-    );
-    const cloneButtons = buttons.filter(
-      (b) => (b.textContent ?? "").trim() === "Clone project",
-    );
-    expect(pauseButtons.length).toBe(1);
-    expect(cloneButtons.length).toBe(1);
-    // Every Pause/Clone affordance lives inside the disclosure — the
-    // standalone organizer-controls card is gone.
-    expect(pauseButtons[0]!.closest("details")).toBe(details);
-    expect(cloneButtons[0]!.closest("details")).toBe(details);
-
-    // The forms still work from inside the disclosure: Pause reveals
-    // its note input.
-    clickButton("Pause");
+    // The former "Manage project" disclosure is gone entirely.
     expect(
-      details.querySelector('input[placeholder*="optional"], input'),
-    ).not.toBeNull();
+      Array.from(container.querySelectorAll("details")).some(
+        (d) =>
+          (d.querySelector("summary")?.textContent ?? "").trim() ===
+          "Manage project",
+      ),
+    ).toBe(false);
+    // Nothing renders inline until the kebab is opened.
+    expect(menuItem("Pause project")).toBeUndefined();
+
+    openKebab();
+    expect(menuItem("Pause project")).not.toBeUndefined();
+    expect(menuItem("Clone project")).not.toBeUndefined();
+
+    // Selecting Pause opens a focused dialog with the note input.
+    clickButton("Pause project");
+    const dialog = container.querySelector('[role="dialog"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog!.querySelector("input")).not.toBeNull();
   });
 
-  it("still offers Clone (via the disclosure) on a completed project", async () => {
+  it("offers Clone but not Pause on a completed project", async () => {
     mockState.projects = [
       project({ status: "completed", completedAt: 1000 }),
     ];
     render();
     await flush();
 
-    const details = manageDetails();
-    const clone = Array.from(container.querySelectorAll("button")).find(
-      (b) => (b.textContent ?? "").trim() === "Clone project",
-    );
-    expect(clone).not.toBeUndefined();
-    expect(clone!.closest("details")).toBe(details);
-    // Pause is not offered on a completed project.
-    expect(
-      Array.from(container.querySelectorAll("button")).some(
-        (b) => (b.textContent ?? "").trim() === "Pause",
-      ),
-    ).toBe(false);
+    openKebab();
+    expect(menuItem("Clone project")).not.toBeUndefined();
+    // Pause is only for active projects.
+    expect(menuItem("Pause project")).toBeUndefined();
   });
 });

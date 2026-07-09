@@ -74,6 +74,7 @@ import {
 import { taskCheckInState } from "@/lib/taskCheckInState";
 import { capitalize } from "@/lib/taskPresentation";
 import { useProjectTaskContext } from "@/lib/useProjectTaskContext";
+import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 import { workingAlongsideKeys } from "@/lib/projectRoster";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { computeProjectClosure, type ProjectClosure } from "@/lib/projectClosure";
@@ -155,6 +156,12 @@ export default function ProjectDetailPage() {
   // drag-and-drop and Move up/down buttons stay in TaskList; only the
   // dialog + its launcher moved up here.
   const [reorderDialogOpen, setReorderDialogOpen] = useState(false);
+  // Which management dialog (former "Manage project" disclosure
+  // section) is open. Each is a kebab-menu item now — the
+  // Reorder-tasks precedent: menu item → focused dialog.
+  const [manageDialog, setManageDialog] = useState<
+    null | "pause" | "clone" | "coorg" | "handoff" | "stepdown"
+  >(null);
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedQuery(query), 250);
@@ -463,6 +470,44 @@ export default function ProjectDetailPage() {
       onSelect: () => {
         void run(() => unarchiveProject(project.id, actorKey));
       },
+    });
+  }
+  // The form-based management flows (formerly the "Manage project"
+  // disclosure). Same gates their sections used; each item opens a
+  // focused dialog hosting the existing section component unchanged.
+  if (isOrg && project.status === "active") {
+    projectMenuItems.push({
+      key: "pause",
+      label: t("projects.manage.pauseItem"),
+      onSelect: () => setManageDialog("pause"),
+    });
+  }
+  if (showLifecycleControls) {
+    projectMenuItems.push({
+      key: "clone",
+      label: t("projects.manage.cloneItem"),
+      onSelect: () => setManageDialog("clone"),
+    });
+  }
+  if (showCoOrgManagement) {
+    projectMenuItems.push({
+      key: "coorg",
+      label: t("projects.manage.coorgItem"),
+      onSelect: () => setManageDialog("coorg"),
+    });
+  }
+  if (showHandoff) {
+    projectMenuItems.push({
+      key: "handoff",
+      label: t("projects.manage.handoffItem"),
+      onSelect: () => setManageDialog("handoff"),
+    });
+  }
+  if (showStepDown) {
+    projectMenuItems.push({
+      key: "stepdown",
+      label: t("projects.manage.stepDownItem"),
+      onSelect: () => setManageDialog("stepdown"),
     });
   }
 
@@ -873,61 +918,83 @@ export default function ProjectDetailPage() {
 
           {isOrg && !isPrimaryOrganizer && <CoOrganizerCapabilityCard />}
 
-          {/* Low-frequency governance + lifecycle verbs (pause/clone,
-              invite/handoff/step-down) collapsed behind one "Manage
-              project" disclosure so the high-volume reading column isn't
-              buried under them. Rendered only when at least one inner
-              section would show. Pause + Clone (with their note/title
-              forms) moved in here from a former standalone card; the
-              one-click verbs (Mark complete / Resume / Archive) live in
-              the header overflow menu instead. */}
-          {(showLifecycleControls ||
-            showCoOrgManagement ||
-            showHandoff ||
-            showStepDown) && (
-            <details className="card mb-4">
-              <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-600 marker:hidden hover:underline dark:text-moss-300">
-                {t("projects.manage.title")}
-              </summary>
-              <div className="mt-3 flex flex-col gap-4">
-                {showLifecycleControls && (
-                  <OrganizerControls
-          project={project}
-          actorKey={actorKey}
-          onRun={run}
-        />
-                )}
-                {showCoOrgManagement && (
-                  <CoOrganizerSection
-                    project={project}
-                    members={members}
-                    currentKey={currentMember!.publicKey}
-                    memberMap={memberMap}
-                    nodeId={nodeId}
-                    lockState={lockState}
-                    invitations={coorgInvitations}
-                    responses={coorgInvitationResponses}
-                    revocations={coorgInvitationRevocations}
-                    onRun={run}
-                  />
-                )}
-                {showHandoff && (
-                  <HandoffSection
-                    project={project}
-                    currentKey={currentMember!.publicKey}
-                    memberMap={memberMap}
-                    onRun={run}
-                  />
-                )}
-                {showStepDown && (
-                  <CoOrganizerStepDownSection
-                    project={project}
-                    currentKey={currentMember!.publicKey}
-                    onRun={run}
-                  />
-                )}
-              </div>
-            </details>
+          {/* The former "Manage project" disclosure is gone: its
+              form-based flows (pause/clone, co-organizer management,
+              handoff, step-down) are kebab-menu items now, each
+              opening one of these focused dialogs — the same pattern
+              as Reorder tasks. The section components are unchanged;
+              only the frame moved. A dialog whose gate flips mid-use
+              (pause succeeds → status is no longer active) unmounts
+              itself, exactly like the old inline forms disappeared. */}
+          {manageDialog === "pause" && isOrg && project.status === "active" && (
+            <ManageDialog
+              title={t("projects.manage.pauseItem")}
+              onClose={() => setManageDialog(null)}
+            >
+              <OrganizerControls
+                project={project}
+                actorKey={actorKey}
+                onRun={run}
+                form="pause"
+              />
+            </ManageDialog>
+          )}
+          {manageDialog === "clone" && showLifecycleControls && (
+            <ManageDialog
+              title={t("projects.manage.cloneItem")}
+              onClose={() => setManageDialog(null)}
+            >
+              <OrganizerControls
+                project={project}
+                actorKey={actorKey}
+                onRun={run}
+                form="clone"
+              />
+            </ManageDialog>
+          )}
+          {manageDialog === "coorg" && showCoOrgManagement && (
+            <ManageDialog
+              ariaLabel={t("projects.coOrganizers.title")}
+              onClose={() => setManageDialog(null)}
+            >
+              <CoOrganizerSection
+                project={project}
+                members={members}
+                currentKey={currentMember!.publicKey}
+                memberMap={memberMap}
+                nodeId={nodeId}
+                lockState={lockState}
+                invitations={coorgInvitations}
+                responses={coorgInvitationResponses}
+                revocations={coorgInvitationRevocations}
+                onRun={run}
+              />
+            </ManageDialog>
+          )}
+          {manageDialog === "handoff" && showHandoff && (
+            <ManageDialog
+              ariaLabel={t("projects.handoff.title")}
+              onClose={() => setManageDialog(null)}
+            >
+              <HandoffSection
+                project={project}
+                currentKey={currentMember!.publicKey}
+                memberMap={memberMap}
+                onRun={run}
+              />
+            </ManageDialog>
+          )}
+          {manageDialog === "stepdown" && showStepDown && (
+            <ManageDialog
+              ariaLabel={t("projects.manage.stepDownItem")}
+              onClose={() => setManageDialog(null)}
+            >
+              <CoOrganizerStepDownSection
+                project={project}
+                currentKey={currentMember!.publicKey}
+                onRun={run}
+              />
+            </ManageDialog>
           )}
 
           {/* Mobile copy of the rail's secondary meta (RailSecondary):
@@ -1430,22 +1497,78 @@ function WorkingAlongsideCard({
 // step-down rather than in an always-visible card. The one-click verbs
 // (Mark complete / Resume / Archive / Unarchive) live in the header
 // overflow menu.
+// Modal frame for the management flows launched from the header
+// kebab (pause / clone / co-organizers / handoff / step-down) — the
+// ReorderTasksDialog shell: backdrop click, Escape, focus trap,
+// scrollable card. Sections with their own headings pass `ariaLabel`;
+// the two bare forms (pause, clone) get a visible `title`.
+function ManageDialog({
+  title,
+  ariaLabel,
+  onClose,
+  children,
+}: {
+  title?: string;
+  ariaLabel?: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(cardRef, true);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    // Backdrop click closes — mouse-only path; the keyboard
+    // dismissal is Esc (wired above). Same suppression rationale as
+    // ReorderTasksDialog's backdrop.
+    /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel ?? title}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-moss-950/40 p-4 sm:items-center"
+    >
+      <div
+        ref={cardRef}
+        className="card flex max-h-[85vh] w-full max-w-md flex-col gap-3 overflow-y-auto animate-fade-in"
+      >
+        {title && <h2 className="text-lg font-semibold">{title}</h2>}
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function OrganizerControls({
   project,
   actorKey,
   onRun,
+  form,
 }: {
   project: Project;
   actorKey: string;
   onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
+  /** Which form this instance IS. The former toggle buttons became
+   *  kebab-menu items ("Pause project" / "Clone project"), each
+   *  opening a dialog that mounts this component with the matching
+   *  form already open — the Reorder-tasks precedent. */
+  form: "pause" | "clone";
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentMember, nodeId, lockState, members } = useApp();
   const { showToast } = useToast();
   const [pauseNote, setPauseNote] = useState("");
-  const [showPauseForm, setShowPauseForm] = useState(false);
-  const [showCloneForm, setShowCloneForm] = useState(false);
   const [cloneTitle, setCloneTitle] = useState("");
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
@@ -1471,14 +1594,9 @@ function OrganizerControls({
   }, [project.organizerKey, project.coOrganizerKeys, currentMember]);
   // Pre-checked by default (continuity of a working crew); each box is
   // individually uncheckable so the send stays a deliberate act.
-  const [checkedKeys, setCheckedKeys] = useState<Set<string>>(new Set());
-  function toggleCloneForm() {
-    setShowCloneForm((open) => {
-      const next = !open;
-      if (next) setCheckedKeys(new Set(cloneCandidates));
-      return next;
-    });
-  }
+  const [checkedKeys, setCheckedKeys] = useState<Set<string>>(
+    () => (form === "clone" ? new Set(cloneCandidates) : new Set()),
+  );
 
   // Draft / planning projects render their organizer CTA through the
   // PlanningBanner above (see `planningBanner.title` / `.bodyOrganizer`
@@ -1494,19 +1612,7 @@ function OrganizerControls({
 
   return (
     <section className="flex flex-col gap-3">
-      {project.status === "active" && (
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="btn-secondary"
-            disabled={pending}
-            onClick={() => setShowPauseForm((v) => !v)}
-          >
-            {t("projects.detail.pause")}
-          </button>
-        </div>
-      )}
-      {project.status === "active" && showPauseForm && (
+      {form === "pause" && project.status === "active" && (
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -1514,7 +1620,6 @@ function OrganizerControls({
               pauseProject(project.id, actorKey, pauseNote),
             );
             if (ok) {
-              setShowPauseForm(false);
               setPauseNote("");
             }
           }}
@@ -1537,19 +1642,7 @@ function OrganizerControls({
           </button>
         </form>
       )}
-      {(project.status === "active" || project.status === "paused" || project.status === "completed") && (
-        <>
-          <button
-            type="button"
-            className="btn-secondary"
-            disabled={pending}
-            onClick={toggleCloneForm}
-          >
-            {t("projects.clone.button")}
-          </button>
-        </>
-      )}
-      {showCloneForm && currentMember && (
+      {form === "clone" && currentMember && (
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -1604,7 +1697,6 @@ function OrganizerControls({
                 showToast(t("projects.clone.reinvite.partialToast"));
               }
             }
-            setShowCloneForm(false);
             setCloneTitle("");
             navigate(`/project/${clone.id}`);
           }}

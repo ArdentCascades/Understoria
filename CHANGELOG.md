@@ -9,6 +9,16 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **The project page's "Manage project" section moved into the ⋮
+  menu.** Pause, Clone, Manage co-organizers, Hand off, and Step
+  down used to sit in a disclosure that pushed the tasks and updates
+  down the page. They're now items in the same three-dot menu that
+  already held Copy link and the lifecycle verbs; each opens a
+  focused dialog. Same actions, same permissions — just out of the
+  way until you reach for them.
+
+
 ### Fixed
 - **The board breathes again while a post is open on desktop.**
   Opening a post used to squeeze the board between the docked panel
