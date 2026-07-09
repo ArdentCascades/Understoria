@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Print an invite poster or a board sheet for the bulletin
+  board.** From the invite share sheet, "Print poster" makes a
+  clean page — the QR, what this network is in plain words, and the
+  invitation's expiry date — ready for a shelter lobby or community
+  center. From the board, "Print this view" turns your current
+  filters into a sheet with a scannable QR per post. Every printout
+  says right on it when it was printed and that paper doesn't sync
+  or purge — recycle stale sheets. And printing any OTHER page now
+  works properly too: the app's navigation and buttons stay off the
+  paper.
+
+### Added
 - **See your community's infrastructure — all of it, no operator
   badge required.** A new page shows which servers carry the
   community and whether they answered just now, what this device

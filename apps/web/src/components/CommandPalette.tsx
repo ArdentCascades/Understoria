@@ -214,7 +214,7 @@ export function CommandPalette() {
       role="dialog"
       aria-modal="true"
       aria-label={t("palette.ariaLabel")}
-      className="fixed inset-0 z-50 flex items-start justify-center bg-moss-950/40 p-4 pt-[12vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-moss-950/40 p-4 pt-[12vh] print:hidden"
     >
       {/* Click-away backdrop as a real button (a11y-clean, and the
           dialog's Escape is already on the input). */}

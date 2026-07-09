@@ -19,9 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 import { InviteQRCode } from "@/components/InviteQRCode";
+import { extractInviteToken } from "@/lib/invite";
 import { canShareUrl, shareUrl, type ShareResult } from "@/lib/share";
 
 // Modal sheet for sharing a freshly-generated invite.
@@ -375,6 +377,21 @@ function RevealedView({
         >
           {status}
         </p>
+      )}
+
+      {/* Print surfaces (desktop-power-tools plan 5): the poster
+          page for the shelter-lobby bulletin board. Post-gate only
+          — printing is the most deliberate physical reveal there
+          is, and the poster page's footer says so ("paper doesn't
+          sync or purge"). The invite token travels in the fragment,
+          exactly like the share link itself. */}
+      {extractInviteToken(url) && (
+        <Link
+          to={`/print/invite#${extractInviteToken(url)}`}
+          className="mt-3 inline-block text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("profile.invites.shareSheet.printPoster")} →
+        </Link>
       )}
 
       <div className="mt-5 flex flex-wrap justify-end gap-2">

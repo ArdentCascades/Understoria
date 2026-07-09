@@ -1942,6 +1942,22 @@ We are not trying to protect against:
   direct-exchange-label proposal) — every in-person record hangs
   off a claimed post both parties already hold.
 
+- **Print surfaces (paper doesn't purge).**
+  *Shipped — `docs/desktop-power-tools.md` plan 5.* The invite
+  poster and the board sheet put member data on PAPER: an offline
+  copy outside every purge, revocation, and expiry path the app
+  enforces — a shelter-lobby sheet keeps naming needs and zones
+  after the posts close, and a poster's invite QR outlives a
+  revocation (redemption still fails at the node, but the paper
+  keeps advertising). Mitigations are honesty and lifecycle, not
+  code: every printout carries a dated "paper doesn't sync or
+  purge — recycle stale sheets" footer, the poster prints the
+  expiry date on its face and refuses to render an already-expired
+  or unverifiable invite, and printing is always an explicit member
+  act behind the same reveal gate the on-screen QR has. Same
+  posture as the recovery kit's print path: the member is told
+  what the paper is before it exists.
+
 ## 8. Guidance for reviewers
 
 When reviewing a pull request, ask:

@@ -1955,7 +1955,8 @@
       "ariaLabel": "Detalles de la publicación",
       "closeShort": "Cerrar",
       "close": "Cerrar panel de la publicación"
-    }
+    },
+    "printView": "Imprimir esta vista"
   },
   "dashboard": {
     "title": "Panel comunitario",
@@ -2386,7 +2387,8 @@
           "notAvailable": "Tu navegador no puede compartir ni copiar sin mostrar el enlace. Toca «Mostrar la invitación» y cópialo a mano.",
           "statusCopied": "Enlace copiado al portapapeles. Pégalo en Signal, Mensajes, o donde quieras enviarlo — el enlace no está en pantalla.",
           "statusFailed": "Tu navegador bloqueó la opción de compartir y el portapapeles. Toca «Mostrar la invitación» para copiarlo a mano."
-        }
+        },
+        "printPoster": "Imprimir cartel"
       }
     },
     "security": {
@@ -2885,6 +2887,26 @@
         "step5": "Vuelve a activar la puerta de lectura (READ_AUTH=on) y confirma que los miembros siguen entrando solo con sus recibos.",
         "step6": "Quita los ajustes de recuperación del servidor."
       }
+    }
+  },
+  "print": {
+    "printButton": "Imprimir",
+    "footer": "Impreso desde Understoria el {{date}} — el papel no se sincroniza ni se purga. Cuando esta hoja quede vieja, recíclala e imprime una nueva.",
+    "invite": {
+      "headline": "Estás invitada a nuestra red de apoyo mutuo",
+      "what": "Vecinas y vecinos intercambiando tiempo y habilidades — una hora de ayuda dada es una hora que puedes pedir. Funciona en nuestro propio servidor comunitario, no en el de una corporación. Escanea el código con la cámara de tu teléfono para unirte.",
+      "qrAria": "Código QR de invitación — escanéalo para unirte a esta comunidad",
+      "urlLead": "O escribe esta dirección:",
+      "expires": "Esta invitación vale hasta el {{date}}.",
+      "expired": "Esta invitación ya caducó — el cartel fallaría en la puerta. Emite una invitación nueva e imprime esa.",
+      "invalid": "Esto no parece un enlace de invitación válido, así que no hay nada seguro que imprimir."
+    },
+    "board": {
+      "titleNeeds": "Tablón comunitario — cosas que la gente necesita",
+      "titleOffers": "Tablón comunitario — ayuda que se ofrece",
+      "filtered": "mostrando: {{filters}}",
+      "empty": "Nada coincide con esta vista ahora mismo.",
+      "qrAria": "Código QR de la publicación \"{{title}}\""
     }
   }
 }

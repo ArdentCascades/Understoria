@@ -1955,7 +1955,8 @@
       "ariaLabel": "Post details",
       "closeShort": "Close",
       "close": "Close post panel"
-    }
+    },
+    "printView": "Print this view"
   },
   "dashboard": {
     "title": "Community dashboard",
@@ -2386,7 +2387,8 @@
           "notAvailable": "Your browser can't share or copy without showing the link. Tap \"Show the invite\" and copy it by hand instead.",
           "statusCopied": "Link copied to your clipboard. Paste it into Signal, Messages, or wherever you want to send it — the link is not on screen.",
           "statusFailed": "Your browser blocked the share and the clipboard. Tap \"Show the invite\" to copy it by hand."
-        }
+        },
+        "printPoster": "Print poster"
       }
     },
     "security": {
@@ -2885,6 +2887,26 @@
         "step5": "Turn the read gate back on (READ_AUTH=on) and confirm members still get in with their receipts alone.",
         "step6": "Remove the recovery settings from the server."
       }
+    }
+  },
+  "print": {
+    "printButton": "Print",
+    "footer": "Printed from Understoria on {{date}} — paper doesn't sync or purge. When this sheet goes stale, recycle it and print a fresh one.",
+    "invite": {
+      "headline": "You're invited to our mutual-aid network",
+      "what": "Neighbors trading time and skills — an hour of help given is an hour you can ask for. It runs on our own community server, not a corporation's. Scan the code with your phone's camera to join.",
+      "qrAria": "Invitation QR code — scan to join this community",
+      "urlLead": "Or type this address:",
+      "expires": "This invitation is good until {{date}}.",
+      "expired": "This invitation has expired — posters would fail at the door. Issue a fresh invite and print that one.",
+      "invalid": "This doesn't look like a valid invitation link, so there's nothing safe to print."
+    },
+    "board": {
+      "titleNeeds": "Community board — things people need",
+      "titleOffers": "Community board — help on offer",
+      "filtered": "showing: {{filters}}",
+      "empty": "Nothing matches this view right now.",
+      "qrAria": "QR code for the post \"{{title}}\""
     }
   }
 }

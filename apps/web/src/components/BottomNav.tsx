@@ -117,7 +117,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label={t("nav.primaryNav")}
-      className="z-30 shrink-0 border-t
+      className="z-30 shrink-0 border-t print:hidden
                  border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95

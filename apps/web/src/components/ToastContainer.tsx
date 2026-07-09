@@ -55,7 +55,7 @@ export function ToastContainer() {
   if (isError || toast.action) {
     return (
       <div
-        className={`pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 flex justify-center px-4 ${wrapperVisibility}`}
+        className={`pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 flex justify-center px-4 print:hidden ${wrapperVisibility}`}
         role={isError ? "alert" : "status"}
         aria-live={isError ? "assertive" : "polite"}
       >
@@ -90,7 +90,7 @@ export function ToastContainer() {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 flex justify-center px-4 ${wrapperVisibility}`}
+      className={`pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 flex justify-center px-4 print:hidden ${wrapperVisibility}`}
       aria-live="polite"
       role="status"
     >
