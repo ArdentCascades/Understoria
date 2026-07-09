@@ -110,7 +110,11 @@ describe("PrintBoardPage", () => {
     expect(container.textContent).not.toContain("Post need");
     expect(container.textContent).not.toContain("Post claimed");
     expect(container.textContent).not.toContain("Post cancelled");
-    expect(qrValues()).toEqual([`${window.location.origin}/post/keep`]);
+    // One row QR + one tear-off tab (P6), both canonical.
+    expect(qrValues()).toEqual([
+      `${window.location.origin}/post/keep`,
+      `${window.location.origin}/post/keep`,
+    ]);
     expect(container.textContent).toContain("paper doesn't sync or purge");
   });
 
@@ -120,7 +124,10 @@ describe("PrintBoardPage", () => {
       makePost({ id: "claimed-post", claimedBy: "helper" }),
     ];
     renderAt("?tab=offers&claimed=1");
+    // Two rows, then their two tear-off tabs.
     expect(qrValues()).toEqual([
+      `${window.location.origin}/post/open-post`,
+      `${window.location.origin}/post/claimed-post`,
       `${window.location.origin}/post/open-post`,
       `${window.location.origin}/post/claimed-post`,
     ]);

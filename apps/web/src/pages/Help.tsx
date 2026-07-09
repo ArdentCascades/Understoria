@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FAQ_SECTIONS } from "@/content/faq";
 import { FAQ_SECTIONS_ES } from "@/content/faq.es";
@@ -64,6 +64,14 @@ export default function HelpPage() {
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("help.subtitle")}
         </p>
+        {/* Paper systems P5: the tabling one-pager, projected from
+            these same FAQ entries. */}
+        <Link
+          to="/print/guide"
+          className="mt-1 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("print.guide.link")}
+        </Link>
       </header>
 
       <div className="space-y-6">

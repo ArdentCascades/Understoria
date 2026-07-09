@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **More paper for the corkboard: a calendar sheet, a tabling
+  guide, and tear-off tabs.** The calendar page can now print the
+  next six weeks of gatherings as a fridge sheet (a code per event;
+  it says honestly when one page couldn't hold everything). The
+  Help page can print a one-page "how our timebank works" guide for
+  markets and fairs, ending with "ask the person at this table for
+  an invite." And the invite poster and board sheet now grow
+  tear-off QR tabs along the bottom — take one home, scan it later.
+
+### Added
 - **Print a flyer or a sign-in sheet for any gathering.** From an
   event's menu, "Print flyer" makes a door-ready page — what, when,
   where, and a code that opens the event. Once a gathering has

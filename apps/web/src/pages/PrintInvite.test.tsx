@@ -90,6 +90,12 @@ describe("PrintInvitePage", () => {
     );
     expect(container.textContent).toContain("paper doesn't sync or purge");
     expect(container.textContent).toContain("This invitation is good until");
+    // Tear-off strip (P6): six tabs, every one the same invite.
+    const all = [...container.querySelectorAll('[data-testid="qr"]')];
+    expect(all.length).toBe(7); // the poster QR + 6 tabs
+    expect(
+      new Set(all.map((el) => el.getAttribute("data-value"))).size,
+    ).toBe(1);
   });
 
   it("refuses to render a poster for an expired invite", () => {

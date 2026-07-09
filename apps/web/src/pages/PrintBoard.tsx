@@ -25,7 +25,11 @@ import { useApp } from "@/state/AppContext";
 import { filterBoardPosts } from "@/lib/boardFilter";
 import { formatHours } from "@/lib/format";
 import { InviteQRCode } from "@/components/InviteQRCode";
-import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
+import {
+  PrintFooter,
+  PrintToolbar,
+  TearOffStrip,
+} from "@/components/PrintChrome";
 import type { Category, Urgency } from "@/types";
 
 // The printable board sheet (docs/desktop-power-tools.md plan 5;
@@ -127,6 +131,16 @@ export default function PrintBoardPage() {
           ))}
         </ul>
       )}
+
+      {/* Tear-off tabs (P6): one per post so someone hurrying past
+          takes a need home. Capped — a strip only works as a strip. */}
+      <TearOffStrip
+        tabs={visible.slice(0, 8).map((p) => ({
+          value: `${window.location.origin}/post/${p.id}`,
+          label: p.title,
+        }))}
+        qrAriaLabel={t("print.tabs.qrAria")}
+      />
 
       <PrintFooter />
     </div>

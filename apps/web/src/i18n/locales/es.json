@@ -2927,6 +2927,23 @@
       "full": "Lleno en la app — consulta con quien organiza antes de añadir nombres.",
       "andMore": "…y caben más manos.",
       "noShifts": "Este encuentro aún no tiene turnos — imprime el cartel."
+    },
+    "calendar": {
+      "title": "Próximamente en nuestra comunidad",
+      "link": "Imprimir próximos encuentros",
+      "empty": "Nada en el calendario en las próximas seis semanas.",
+      "more": "…y {{count}} más en la app — en esta hoja no cabe todo.",
+      "qrAria": "Código QR de \"{{title}}\""
+    },
+    "guide": {
+      "title": "Cómo funciona nuestro banco de tiempo",
+      "link": "Imprimir una guía de una página para mesas informativas",
+      "tagline": "Una red vecinal de intercambio de tiempo — una página con las preguntas que todo el mundo hace primero.",
+      "cta": "¿Quieres entrar? Pide una invitación a la persona de esta mesa — unirse toma un escaneo y no cuesta nada."
+    },
+    "tabs": {
+      "cut": "arranca una pestaña y escanéala después",
+      "qrAria": "Pestaña QR para arrancar"
     }
   }
 }
