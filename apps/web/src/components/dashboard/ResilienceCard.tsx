@@ -181,12 +181,24 @@ export function ResilienceCard() {
         </p>
       )}
 
-      <Link
-        to="/grow-root"
-        className="mt-2 inline-block text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-      >
-        {t("dashboard.resilience.cta")} →
-      </Link>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <Link
+          to="/grow-root"
+          className="inline-block text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("dashboard.resilience.cta")} →
+        </Link>
+        {/* The detail affordance (desktop-power-tools plan 4): the
+            full infrastructure picture — every server's health, this
+            device's outbox, governance posture, drill checklists.
+            Every member can read it; that IS the posture. */}
+        <Link
+          to="/infrastructure"
+          className="inline-block text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("dashboard.resilience.infraLink")} →
+        </Link>
+      </div>
     </section>
   );
 }

@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **See your community's infrastructure — all of it, no operator
+  badge required.** A new page shows which servers carry the
+  community and whether they answered just now, what this device
+  holds and still has queued to send, the open-proposals count and
+  the community's removal quorum, plus trackable checklists for the
+  two disaster drills (the storm hub and the re-seed). Everything on
+  it was already yours to see; now it's in one place. Drill
+  check-marks stay on your device only.
+
+### Added
 - **On desktop, posts open beside the board.** Click a post on a
   larger screen and it docks in a panel next to the card grid — the
   board keeps your tab, filters, search, and scroll position, and

@@ -2032,7 +2032,8 @@
         "lagging": "quedándose atrás",
         "quiet": "no ha respondido últimamente"
       },
-      "cta": "Hacer crecer otra raíz"
+      "cta": "Hacer crecer otra raíz",
+      "infraLink": "Infraestructura comunitaria"
     },
     "federation": {
       "title": "En la federación",
@@ -2780,7 +2781,8 @@
       "newPost": "Publicar necesidad u oferta",
       "newProject": "Iniciar un proyecto",
       "newEvent": "Crear un evento",
-      "desk": "Tu escritorio"
+      "desk": "Tu escritorio",
+      "infrastructure": "Infraestructura comunitaria"
     },
     "kind": {
       "postNeed": "Necesidad",
@@ -2818,5 +2820,71 @@
     },
     "doorway_one": "{{count}} cosa espera en tu escritorio",
     "doorway_other": "{{count}} cosas esperan en tu escritorio"
+  },
+  "infra": {
+    "title": "Infraestructura comunitaria",
+    "tagline": "Cómo se mantiene en pie esta comunidad. Cualquier miembro puede leer esta página — no hay una vista solo para operadores.",
+    "servers": {
+      "title": "Servidores que sostienen esta comunidad",
+      "checking": "Comprobando…",
+      "none": "Todavía no hay un servidor conectado. Ahora mismo este dispositivo ES la comunidad — todo vive aquí y en los teléfonos de otros miembros.",
+      "primary": "Principal",
+      "mirror": "Espejo",
+      "answered": "Respondió",
+      "noAnswer": "No respondió desde aquí",
+      "nodeId": "Publica el id de nodo {{nodeId}}",
+      "nodeIdMismatch": "Este servidor publica un id de nodo distinto del id comunitario en este dispositivo ({{expected}}). Vale la pena preguntar a tu operadora — puede significar una dirección cambiada o un servidor reemplazado.",
+      "offline": "Estás sin conexión, así que ahora no se puede preguntar a los servidores. \"No respondió\" significa exactamente eso — se preguntó desde este dispositivo y no hubo respuesta — nunca \"caído\".",
+      "recheck": "Comprobar de nuevo"
+    },
+    "device": {
+      "title": "Lo que lleva este dispositivo",
+      "members": "Miembros cuyos registros están en este teléfono",
+      "lastSync": "Última sincronización exitosa",
+      "never": "Todavía no",
+      "freshness": {
+        "fresh": "En el último día",
+        "lagging": "En la última semana",
+        "quiet": "Hace más tiempo"
+      },
+      "outboxPending": "Registros esperando enviarse",
+      "outboxPoisoned": "Registros que el servidor rechazó",
+      "outboxClear": "No hay nada esperando enviarse — todo lo que has firmado ya llegó a la comunidad."
+    },
+    "governance": {
+      "title": "Gobernanza",
+      "openProposals": "Propuestas abiertas ahora mismo",
+      "quorum": "Quórum de retiro (regla comunitaria)",
+      "quorumUnknown": "Aún no publicado",
+      "view": "Ver propuestas"
+    },
+    "drills": {
+      "title": "Simulacros de desastre",
+      "intro": "Practica las dos recuperaciones antes de necesitarlas. Estas listas viven solo en este dispositivo — los manuales enlazados en el repositorio siguen siendo la fuente de verdad.",
+      "lastDrilled": "Último simulacro: {{date}}.",
+      "notYet": "Aún sin simulacro.",
+      "markToday": "Lo hicimos hoy",
+      "reset": "Limpiar marcas",
+      "stormHub": {
+        "title": "Simulacro del centro de tormenta",
+        "body": "Comprueba que el servidor de la mochila puede sostener a la comunidad durante un corte de internet.",
+        "step1": "Corta el internet: desconecta el enlace (WAN) del router.",
+        "step2": "Conecta dos teléfonos de miembros al WiFi del centro.",
+        "step3": "Publica desde un teléfono y mira cómo aparece en el otro.",
+        "step4": "Trae un teléfono que nunca haya visto la app: abre la dirección de la comunidad en el WiFi del centro, instala, y únete con un QR de invitación.",
+        "step5": "Revisa las salvedades: el certificado del centro se renovó en los últimos 90 días, los teléfonos aceptan el DNS del centro, y el reloj del centro está bien.",
+        "step6": "Reconecta el internet y confirma que el centro se sincroniza de vuelta con los otros servidores."
+      },
+      "reseed": {
+        "title": "Simulacro de resiembra",
+        "body": "Comprueba que la comunidad puede restaurarse en un servidor completamente nuevo desde el dispositivo de un miembro, incluso si se perdieran todos los servidores.",
+        "step1": "Levanta un servidor nuevo y vacío con las claves fundadoras exactas de la comunidad (operator-guide §6, \"Recovering from total node loss\").",
+        "step2": "Configura sus ajustes de recuperación: RESEED_GRACE_UNTIL, y TRUSTED_SYSTEM_KEYS desde el registro de clave que esta app capturó.",
+        "step3": "Desde el dispositivo de un miembro: Ajustes → \"Restaurar esta comunidad en un nodo\", apuntando a la nueva dirección.",
+        "step4": "Espera a que termine la restauración, luego sincroniza desde el dispositivo de un segundo miembro y revisa que toda la historia esté ahí.",
+        "step5": "Vuelve a activar la puerta de lectura (READ_AUTH=on) y confirma que los miembros siguen entrando solo con sus recibos.",
+        "step6": "Quita los ajustes de recuperación del servidor."
+      }
+    }
   }
 }
