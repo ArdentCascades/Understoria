@@ -20,6 +20,19 @@ include breaking changes.
 
 
 ### Changed
+- **Task reordering now lives entirely in the "Reorder tasks"
+  dialog.** The main task list used to carry two reorder handles on
+  every row — the title doubled as a drag handle, and each row had a
+  pair of Move up / Move down arrows. Both were frustration sources:
+  reading or selecting a title could kick off an accidental drag, and
+  the arrows cluttered every row for what is a rare, organizer-only
+  action. Reordering now happens only in the focused dialog opened
+  from the project's ⋮ menu, which is a strict superset of what the
+  list offered — drag (pointer *and* keyboard) plus discrete Move up /
+  Move down buttons on every dialog row, at the same 44×44 touch
+  target and with the same screen-reader announcements. Nothing is
+  lost for keyboard or screen-reader users; the list is just clean to
+  read and act on again.
 - **The project page's "Manage project" section moved into the ⋮
   menu.** Pause, Clone, Manage co-organizers, Hand off, and Step
   down used to sit in a disclosure that pushed the tasks and updates

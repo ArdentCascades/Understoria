@@ -12,7 +12,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useSortable } from "@dnd-kit/sortable";
 import { claimProjectTask } from "@/db/projects";
 import { stripMarkdown } from "@/lib/markdown";
 import { formatHours } from "@/lib/format";
@@ -23,48 +22,6 @@ import { usePendingAction } from "@/lib/usePendingAction";
 import { useTaskCommentCount } from "@/lib/useTaskCommentCount";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
 import type { Project, ProjectTask } from "@/types";
-
-// Move up / Move down reorder icons. Co-located here because only the
-// project-list card renders them — the per-task page drops the
-// move-buttons row entirely (`docs/task-ordering-and-dependencies.md`
-// §3.2 — the canonical, keyboard-first reorder path).
-function ArrowUpIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 13V3" />
-      <path d="M3.5 7.5 8 3l4.5 4.5" />
-    </svg>
-  );
-}
-
-function ArrowDownIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 3v10" />
-      <path d="M3.5 8.5 8 13l4.5-4.5" />
-    </svg>
-  );
-}
 
 // "Follows: <upstream titles>" badge. Visible to everyone, not just
 // organizers. Three render modes:
@@ -161,8 +118,6 @@ export function TaskCard({
   allTasks,
   searchQuery,
   taskCheckInDays,
-  sortableHandle,
-  moveButtons,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -182,20 +137,6 @@ export function TaskCard({
    *  sees why this row matched. The one-line description preview stays
    *  plain — the title is enough for finding tasks at a glance. */
   searchQuery?: string;
-  /** When non-null, the row participates in drag-reorder. The title
-   *  receives the spread `{...attributes} {...listeners}` to act as
-   *  the drag handle (design doc §3 — "only show task titles"). */
-  sortableHandle?: {
-    attributes: ReturnType<typeof useSortable>["attributes"];
-    listeners: ReturnType<typeof useSortable>["listeners"];
-  } | null;
-  /** When non-null, the row renders Move up / Move down buttons.
-   *  This is the keyboard-canonical path (design doc §9.2). */
-  moveButtons?: {
-    isFirst: boolean;
-    isLast: boolean;
-    onMove: (direction: "up" | "down") => void;
-  } | null;
 }) {
   const { t } = useTranslation();
   const [followsExpanded, setFollowsExpanded] = useState(false);
@@ -271,50 +212,12 @@ export function TaskCard({
             t={t}
           />
         )}
-        {moveButtons && (
-          <div className="ml-auto flex items-center gap-1">
-            <button
-              type="button"
-              aria-label={t("projects.task.moveUp", { title: task.title })}
-              aria-disabled={moveButtons.isFirst}
-              disabled={moveButtons.isFirst}
-              onClick={() => {
-                if (!moveButtons.isFirst) moveButtons.onMove("up");
-              }}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
-            >
-              <ArrowUpIcon />
-            </button>
-            <button
-              type="button"
-              aria-label={t("projects.task.moveDown", { title: task.title })}
-              aria-disabled={moveButtons.isLast}
-              disabled={moveButtons.isLast}
-              onClick={() => {
-                if (!moveButtons.isLast) moveButtons.onMove("down");
-              }}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
-            >
-              <ArrowDownIcon />
-            </button>
-          </div>
-        )}
       </div>
-      <h3
-        className={`text-base font-semibold leading-snug ${sortableHandle ? "cursor-grab touch-none select-none active:cursor-grabbing" : ""}`}
-        {...(sortableHandle?.attributes ?? {})}
-        {...(sortableHandle?.listeners ?? {})}
-      >
+      <h3 className="text-base font-semibold leading-snug">
         {searchQuery && searchQuery.trim() !== "" ? (
           <HighlightedText text={task.title} query={searchQuery} />
         ) : (
           task.title
-        )}
-        {sortableHandle && (
-          <span className="sr-only">
-            {" "}
-            {t("projects.task.dragHint")}
-          </span>
         )}
       </h3>
       {/* One-line preview only — NO whitespace-pre-wrap, so a multi-line

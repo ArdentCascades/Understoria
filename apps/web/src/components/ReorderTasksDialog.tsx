@@ -34,12 +34,15 @@ import { useToast } from "@/state/ToastContext";
 import { reorderProjectTask } from "@/db/projects";
 import type { ProjectTask } from "@/types";
 
-// Focused-reorder modal. Same @dnd-kit setup as the inline TaskList
-// (PR E / #214), but scoped to a single column of title-only rows so
-// drag-reorder feels uncluttered. Each drop fires reorderProjectTask
-// immediately — this is a focused view, not a staged transaction.
-// The inline Move up / Move down buttons stay; this dialog is the
-// optimized-for-drag sibling.
+// Focused-reorder modal. The SINGLE home for task reordering: the main
+// task list is a plain read/act surface with no inline reorder handles
+// (accidental title-drags and per-row arrow clutter were a frustration
+// trap — see `docs/task-ordering-and-dependencies.md` §3.2). So this
+// dialog must be a strict superset of every reorder path: a single
+// column of title-only rows offering pointer drag, keyboard drag, AND
+// discrete Move up / Move down buttons on every row. Each drop or move
+// fires reorderProjectTask immediately — this is a focused view, not a
+// staged transaction.
 export interface ReorderTasksDialogProps {
   open: boolean;
   tasks: readonly ProjectTask[];
@@ -121,6 +124,40 @@ export function ReorderTasksDialog({
           beforeId,
           afterId,
         });
+      } catch {
+        showToast(t("projects.task.reorderError"), { tone: "error" });
+      }
+    },
+    [tasks, organizerKey, showToast, t],
+  );
+
+  // Discrete Move up / Move down. The keyboard-canonical, pointer-simple
+  // path that the main list used to carry — now it lives here so the
+  // dialog is a strict superset of every reorder gesture. Computes the
+  // new neighbor pair the same way handleDragEnd does and persists
+  // through the one reorderProjectTask helper.
+  const moveTask = useCallback(
+    async (taskId: string, direction: "up" | "down") => {
+      const idx = tasks.findIndex((task) => task.id === taskId);
+      if (idx < 0) return;
+      const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= tasks.length) return;
+      const reordered = [...tasks];
+      const [moved] = reordered.splice(idx, 1);
+      reordered.splice(targetIdx, 0, moved);
+      const beforeId = targetIdx > 0 ? reordered[targetIdx - 1].id : null;
+      const afterId =
+        targetIdx < reordered.length - 1 ? reordered[targetIdx + 1].id : null;
+      if (beforeId === null && afterId === null) return;
+      try {
+        await reorderProjectTask({ taskId, organizerKey, beforeId, afterId });
+        setLiveMessage(
+          t("projects.task.dragEnd", {
+            title: moved.title,
+            position: targetIdx + 1,
+            total: tasks.length,
+          }),
+        );
       } catch {
         showToast(t("projects.task.reorderError"), { tone: "error" });
       }
@@ -221,6 +258,7 @@ export function ReorderTasksDialog({
                   taskIds={taskIds}
                   activeDragId={activeDragId}
                   firstTaskRef={firstTaskRef}
+                  onMove={moveTask}
                 />
               </SortableContext>
               <DragOverlay>
@@ -272,11 +310,13 @@ function ReorderTaskList({
   taskIds,
   activeDragId,
   firstTaskRef,
+  onMove,
 }: {
   tasks: readonly ProjectTask[];
   taskIds: readonly string[];
   activeDragId: string | null;
   firstTaskRef: React.RefObject<HTMLLIElement | null>;
+  onMove: (taskId: string, direction: "up" | "down") => void;
 }) {
   const isRowDragging = useCallback(
     (id: string) => id === activeDragId,
@@ -291,6 +331,9 @@ function ReorderTaskList({
           task={task}
           flipRef={register(task.id)}
           rowRef={idx === 0 ? firstTaskRef : undefined}
+          isFirst={idx === 0}
+          isLast={idx === tasks.length - 1}
+          onMove={onMove}
         />
       ))}
     </ul>
@@ -301,11 +344,18 @@ function ReorderTaskRow({
   task,
   flipRef,
   rowRef,
+  isFirst,
+  isLast,
+  onMove,
 }: {
   task: ProjectTask;
   flipRef: (node: HTMLElement | null) => void;
   rowRef?: React.RefObject<HTMLLIElement | null>;
+  isFirst: boolean;
+  isLast: boolean;
+  onMove: (taskId: string, direction: "up" | "down") => void;
 }) {
+  const { t } = useTranslation();
   const sortableHook = useSortable({ id: task.id });
   const style = {
     transform: CSS.Transform.toString(sortableHook.transform),
@@ -325,13 +375,83 @@ function ReorderTaskRow({
       ref={setRef}
       style={style}
       data-dragging={sortableHook.isDragging ? "true" : undefined}
-      {...sortableHook.attributes}
-      {...sortableHook.listeners}
-      className="flex min-h-[44px] cursor-grab touch-none select-none items-center gap-2 rounded-lg border border-moss-200 bg-moss-50 px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 active:cursor-grabbing dark:border-moss-700 dark:bg-moss-900"
+      className="flex min-h-[44px] items-center gap-1 rounded-lg border border-moss-200 bg-moss-50 px-2 py-1 text-sm dark:border-moss-700 dark:bg-moss-900"
     >
-      <DragHandleIcon />
-      <span className="flex-1 font-medium">{task.title}</span>
+      {/* Drag handle carries the sortable attributes/listeners so a
+          pointer or keyboard drag begins on THIS control — the Move
+          buttons beside it stay plain clickable buttons (they'd
+          otherwise swallow their own clicks into a drag). */}
+      <span
+        {...sortableHook.attributes}
+        {...sortableHook.listeners}
+        className="flex min-h-[44px] flex-1 cursor-grab touch-none select-none items-center gap-2 rounded-lg px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 active:cursor-grabbing"
+      >
+        <DragHandleIcon />
+        <span className="flex-1 font-medium">{task.title}</span>
+      </span>
+      <button
+        type="button"
+        aria-label={t("projects.task.moveUp", { title: task.title })}
+        aria-disabled={isFirst}
+        disabled={isFirst}
+        onClick={() => {
+          if (!isFirst) onMove(task.id, "up");
+        }}
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
+      >
+        <ArrowUpIcon />
+      </button>
+      <button
+        type="button"
+        aria-label={t("projects.task.moveDown", { title: task.title })}
+        aria-disabled={isLast}
+        disabled={isLast}
+        onClick={() => {
+          if (!isLast) onMove(task.id, "down");
+        }}
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-moss-600 hover:bg-moss-100 hover:text-moss-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-canopy-600 disabled:cursor-not-allowed disabled:opacity-30 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
+      >
+        <ArrowDownIcon />
+      </button>
     </li>
+  );
+}
+
+function ArrowUpIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 13V3" />
+      <path d="M3.5 7.5 8 3l4.5 4.5" />
+    </svg>
+  );
+}
+
+function ArrowDownIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 3v10" />
+      <path d="M3.5 8.5 8 13l4.5-4.5" />
+    </svg>
   );
 }
 

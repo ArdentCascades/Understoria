@@ -238,116 +238,19 @@ async function flush() {
   });
 }
 
-function moveButton(title: string, direction: "up" | "down"): HTMLButtonElement {
-  const label = direction === "up" ? `Move ${title} up` : `Move ${title} down`;
-  const btn = container.querySelector(
-    `[aria-label="${label}"]`,
-  ) as HTMLButtonElement | null;
-  if (!btn) throw new Error(`Move button not found: ${label}`);
-  return btn;
-}
-
 function clickButton(btn: HTMLButtonElement) {
   act(() => {
     btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
 }
 
-describe("ProjectDetail — reorder UI (Move buttons)", () => {
-  it("Move up on the first task is disabled", () => {
-    mockState.projectTasks = [
-      task("t1", { title: "First", orderIndex: 1000 }),
-      task("t2", { title: "Second", orderIndex: 2000 }),
-    ];
-    render();
-    const btn = moveButton("First", "up");
-    expect(btn.getAttribute("aria-disabled")).toBe("true");
-    expect(btn.disabled).toBe(true);
-  });
-
-  it("Move down on the last task is disabled", () => {
-    mockState.projectTasks = [
-      task("t1", { title: "First", orderIndex: 1000 }),
-      task("t2", { title: "Second", orderIndex: 2000 }),
-    ];
-    render();
-    const btn = moveButton("Second", "down");
-    expect(btn.getAttribute("aria-disabled")).toBe("true");
-    expect(btn.disabled).toBe(true);
-  });
-
-  it("Move down on the first task calls reorderProjectTask with the right neighbors", async () => {
-    mockState.projectTasks = [
-      task("t1", { title: "First", orderIndex: 1000 }),
-      task("t2", { title: "Second", orderIndex: 2000 }),
-      task("t3", { title: "Third", orderIndex: 3000 }),
-    ];
-    render();
-    clickButton(moveButton("First", "down"));
-    await flush();
-    expect(reorderMock).toHaveBeenCalledTimes(1);
-    // After moving t1 down by one, new neighbors are: before=t2, after=t3.
-    expect(reorderMock.mock.calls[0][0]).toMatchObject({
-      taskId: "t1",
-      organizerKey,
-      beforeId: "t2",
-      afterId: "t3",
-    });
-  });
-
-  it("Three clicks on Move down compute neighbors against the then-current position", async () => {
-    // Simulate a four-task project where each click moves the row
-    // down by one position. The test mock returns void (and the
-    // store doesn't actually re-sort), so each click reads the
-    // SAME starting position — we only verify the helper is called
-    // three times with the FIRST-position neighbors each time. This
-    // locks the contract: each click is independently computed from
-    // the (then-current) rendered order, not cached.
-    mockState.projectTasks = [
-      task("t1", { title: "Alpha", orderIndex: 1000 }),
-      task("t2", { title: "Beta", orderIndex: 2000 }),
-      task("t3", { title: "Gamma", orderIndex: 3000 }),
-      task("t4", { title: "Delta", orderIndex: 4000 }),
-    ];
-    render();
-    const btn = moveButton("Alpha", "down");
-    clickButton(btn);
-    clickButton(btn);
-    clickButton(btn);
-    await flush();
-    expect(reorderMock).toHaveBeenCalledTimes(3);
-    for (const call of reorderMock.mock.calls) {
-      expect((call[0] as { taskId: string }).taskId).toBe("t1");
-    }
-  });
-
-  it("Successful reorder emits a live-region announcement", async () => {
-    mockState.projectTasks = [
-      task("t1", { title: "First", orderIndex: 1000 }),
-      task("t2", { title: "Second", orderIndex: 2000 }),
-    ];
-    render();
-    clickButton(moveButton("First", "down"));
-    await flush();
-    const live = container.querySelector(
-      "[data-testid=\"reorder-live-region\"]",
-    );
-    expect(live).not.toBeNull();
-    expect((live?.textContent ?? "")).toContain("First moved to position 2");
-  });
-
-  it("Failed reorder surfaces an error toast", async () => {
-    reorderMock.mockRejectedValueOnce(new Error("nope"));
-    mockState.projectTasks = [
-      task("t1", { title: "First", orderIndex: 1000 }),
-      task("t2", { title: "Second", orderIndex: 2000 }),
-    ];
-    render();
-    clickButton(moveButton("First", "down"));
-    await flush();
-    expect(showToastMock).toHaveBeenCalled();
-  });
-});
+// The Move-button reorder path (neighbor computation, disabled ends,
+// live region, error toast) and the reduced-motion FLIP bail now live
+// on the dialog and are covered by
+// `apps/web/src/components/ReorderTasksDialog.test.tsx`. The main task
+// list is a plain read/act surface with no inline reorder affordances,
+// so there is nothing to assert here beyond the kebab → dialog wiring
+// below.
 
 describe("ProjectDetail — Reorder tasks dialog", () => {
   // The reorder DIALOG is now launched from the project header overflow
@@ -564,41 +467,6 @@ describe("ProjectDetail — header overflow menu", () => {
       if (originalShare !== undefined) {
         (navigator as { share?: unknown }).share = originalShare;
       }
-    }
-  });
-});
-
-describe("ProjectDetail — FLIP animation", () => {
-  it("bails on prefers-reduced-motion (no transform applied to rows)", async () => {
-    // Mock matchMedia so useReducedMotion returns true.
-    const originalMatchMedia = window.matchMedia;
-    window.matchMedia = ((query: string) => ({
-      matches: query.includes("prefers-reduced-motion"),
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    })) as unknown as typeof window.matchMedia;
-
-    try {
-      mockState.projectTasks = [
-        task("t1", { title: "First", orderIndex: 1000 }),
-        task("t2", { title: "Second", orderIndex: 2000 }),
-      ];
-      render();
-      await flush();
-      // Inspect the li elements that host the FLIP ref — under
-      // reduced-motion the hook should never write to style.transform.
-      const items = container.querySelectorAll('[id^="task-"]');
-      expect(items.length).toBeGreaterThan(0);
-      for (const el of Array.from(items)) {
-        expect((el as HTMLElement).style.transform).toBe("");
-      }
-    } finally {
-      window.matchMedia = originalMatchMedia;
     }
   });
 });

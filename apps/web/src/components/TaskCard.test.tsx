@@ -102,8 +102,6 @@ function renderCard(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
     needsMoreHands: false,
     allTasks: [] as ProjectTask[],
     taskCheckInDays: 7,
-    sortableHandle: null,
-    moveButtons: null,
     ...props,
   };
   act(() => {
