@@ -332,15 +332,16 @@ Open a project to see:
 
 ### Every task has its own page
 
-Tap **"Open task"** on any task card (the link also shows the
-comment count) to open the task's own page. That's where the full
-description, all the actions, and the **comment thread** live — the
-place to ask a clarifying question, coordinate timing, or leave a
-note for whoever picks the task up next. The task card back on the
-project list stays slim on purpose: a one-line preview and the
-Claim button, so a busy discussion never buries the rest of the
-project. A "← Back to {project}" link at the top of the task page
-takes you back to the list.
+**Tap anywhere on a task card** to open the task's own page. That's
+where the full description, all the actions, and the **comment
+thread** live — the place to ask a clarifying question, coordinate
+timing, or leave a note for whoever picks the task up next. When a
+task has a discussion going, its card shows a small 💬 comment count
+so you can tell a busy task from a quiet one before opening it. The
+card back on the project list stays slim on purpose: a one-line
+preview and the Claim button, so a busy discussion never buries the
+rest of the project. A "← Back to {project}" link at the top of the
+task page takes you back to the list.
 
 ### Joining a project
 
@@ -400,13 +401,14 @@ the project surface as much as it does on the board.
 
 ### Reordering — the organiser's tool, your context
 
-Organisers can drag tasks to change their order, or use the
-**Reorder** modal (handy for accessibility and for big task
-lists). The order isn't a priority queue you're obliged to
-follow; it's the project's reading order so a contributor
-arriving fresh sees the work the way the organiser thinks about
-it. The order you see on the page is what the organiser most
-recently set.
+Organisers reorder tasks from the **Reorder tasks** dialog (in the
+project's ⋮ menu) — by dragging or with per-row Move up / Move down
+buttons. The task list itself stays clean to read and act on; there
+are no reorder handles on the rows. The order isn't a priority queue
+you're obliged to follow; it's the project's reading order so a
+contributor arriving fresh sees the work the way the organiser
+thinks about it. The order you see on the page is what the organiser
+most recently set.
 
 If you finish three confirmed project tasks, the **Crew Member**
 role shows up on your profile. If you organize a project that draws contributors,
@@ -627,6 +629,27 @@ without copying it from the address bar.
 The full design and the values reasoning live in
 [`community-events.md`](./community-events.md).
 
+## 9b. The gathering screen
+
+When your community is together in a room — a repair café, a
+skillshare, a mutual-aid distribution — you can put a **gathering
+screen** on a TV or a propped-up laptop so people can act from their
+phones. Open it from **Your desk** or the command palette (Ctrl/Cmd+K),
+tap **Start the screen**, and it fills the display with a rotating
+slideshow: upcoming events ("Scan to RSVP"), tasks that need hands
+("Scan to claim"), and open needs and offers ("Scan to offer help" —
+the code opens a message to whoever posted it). Every slide carries a
+big QR code, the screen stays awake, and it re-checks live data as it
+goes so a claimed task or a past event drops out on its own.
+
+Before you start, the **Customize the screen** panel lets you give it a
+title, set how long each slide holds, turn whole categories on or off,
+and **pin** items to lead or **hide** ones you'd rather not show. (If
+someone asks not to have their post up on the wall, Hide is the quick
+way to honor that.) The screen only ever shows things already public on
+the board — it's an amplifier for the room, not a new kind of sharing.
+Full design in [`gathering-screen.md`](./gathering-screen.md).
+
 ## 10. The Dashboard
 
 Tap **Dashboard** at the bottom of the screen. This is the
@@ -772,7 +795,10 @@ Tap **Profile** to see:
   in a stress moment without an extra tap.
 
 The Profile page also has a **gear icon in the top right** that opens
-**Settings** — device-local preferences that only affect this device:
+**Settings** — device-local preferences that only affect this device.
+(On a wide screen there's also a **Settings** entry pinned to the
+bottom of the left navigation rail; on a phone, use the gear or
+Ctrl/Cmd+K.) Settings holds:
 
 - **Language** — switch between English and Spanish.
 - **Appearance** — comfort settings. Pick a theme (Match system /

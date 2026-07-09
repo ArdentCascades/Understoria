@@ -135,7 +135,7 @@ The net rule: **the wall never shows anything the community board
 doesn't already show, and the one slide that would (the people
 directory) waits for the opt-out to be real.**
 
-## 6. Phase 1 — the screen itself (build now)
+## 6. Phase 1 — the screen itself (shipped)
 
 ### 6.1 Route & shell
 
@@ -273,14 +273,16 @@ needs its own threat-model treatment before build.
 
 ## 9. Open decision for the operator
 
-The **member-profile federation (§7.1)** work is the gate on the two
-most exciting slides (people directory, real opt-out). It is a genuine
-investment with threat-model implications. The recommended path:
+Phase 1 (the screen itself) and §7.2 (organizer curation) are **shipped** —
+full value for the in-room-members case, no new plumbing, and no privacy
+promise the transport can't keep. What remains is one genuine decision:
 
-1. **Ship Phase 1 now** — full value for the in-room-members case, no new
-   plumbing, no privacy promise the transport can't keep.
-2. Then decide whether member-profile federation (§7.1) is worth building
-   for the people slide + community-wide opt-out, or whether organizer
-   curation (§7.2) alone is enough for the near term.
-3. Treat the multi-use gathering invite (§7.4) as a separate, later
-   security-reviewed effort when recruiting passers-by becomes a priority.
+1. **Whether to build member-profile federation (§7.1)** — the gate on
+   the two most exciting slides (people directory, real self-serve
+   opt-out). It's a real investment with threat-model implications; the
+   interim organizer-mediated Hide (§7.2) covers the "don't feature me"
+   case in the meantime.
+2. **Whether to build the multi-use gathering invite (§7.4)** — a
+   separate, later security-reviewed effort, worth it when recruiting
+   passers-by (not just coordinating existing members) becomes a
+   priority.
