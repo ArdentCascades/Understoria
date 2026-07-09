@@ -346,27 +346,33 @@ export function TaskDetailBody({
 
   return (
     <div className="card flex flex-col gap-2">
-      {/* Header control directly under the page's status/hours chips:
-          Copy link (always), plus Edit / Add-fresh-copy when the gate
-          allows. A right-aligned kebab keeps these out of the inline
-          action row without hiding the primary lifecycle buttons. */}
-      <div className="mb-2 flex justify-end">
-        <OverflowMenu
-          label={t("projects.task.menuLabel")}
-          items={menuItems}
-        />
+      {/* The kebab (Copy link always, plus Edit / Add-fresh-copy when
+          the gate allows) shares the top line with the task's lead
+          text instead of owning a full row above it — same right-aligned
+          control, no wasted vertical band. `items-start` pins it to the
+          first line even when the description wraps; if there's no lead
+          text the row collapses to just the kebab. */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {showClaimerNote && (
+            <p className="text-xs italic text-moss-600 dark:text-moss-300">
+              {t("projects.task.waitingOnClaimerNote")}
+            </p>
+          )}
+          {task.description && (
+            <Markdown
+              text={task.description}
+              className="text-sm text-moss-600 dark:text-moss-300"
+            />
+          )}
+        </div>
+        <div className="shrink-0">
+          <OverflowMenu
+            label={t("projects.task.menuLabel")}
+            items={menuItems}
+          />
+        </div>
       </div>
-      {showClaimerNote && (
-        <p className="text-xs italic text-moss-600 dark:text-moss-300">
-          {t("projects.task.waitingOnClaimerNote")}
-        </p>
-      )}
-      {task.description && (
-        <Markdown
-          text={task.description}
-          className="text-sm text-moss-600 dark:text-moss-300"
-        />
-      )}
       {task.recurringCadence && (
         <p className="text-xs text-moss-600 dark:text-moss-300">
           <span aria-hidden="true" className="mr-1">
