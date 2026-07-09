@@ -16,6 +16,13 @@ coverage/
 *.tsbuildinfo
 .vite/
 
+# The npm-workspaces root package-lock.json is the ONLY lockfile.
+# A stray nested one is never consulted by installs or the Docker
+# builds, but Dependabot still scans it — a stale copy once raised
+# phantom vulnerability alerts for long-since-patched versions.
+apps/*/package-lock.json
+packages/*/package-lock.json
+
 # Claude Code local scratch — worktrees for isolated parallel agents,
 # session metadata. Never federated, never published.
 .claude/
