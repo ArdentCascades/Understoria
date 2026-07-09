@@ -13,23 +13,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
-import {
-  DndContext,
-  DragOverlay,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import {
@@ -46,7 +29,6 @@ import {
   pauseProject,
   postAnnouncement,
   removeCoOrganizer,
-  reorderProjectTask,
   resumeProject,
   unarchiveProject,
 } from "@/db/projects";
@@ -88,7 +70,6 @@ import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
-import { useFlipAnimation } from "@/lib/a11y/useFlipAnimation";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { IconMessages, Sprig } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
@@ -1771,50 +1752,16 @@ function OrganizerControls({
   );
 }
 
-// --- Reorder UI -----------------------------------------------------------
+// --- Task list ------------------------------------------------------------
 //
-// The task list ships two reorder affordances per docs/task-ordering-and-
-// dependencies.md §3.2:
-//
-//   1. Drag-and-drop (sugar) — the task title is the drag handle.
-//   2. Always-visible Move up / Move down icon buttons (canonical) —
-//      keyboard-first, screen-reader-first, touch-target-44.
-//
-// Both paths resolve to a neighbor pair before calling
-// `reorderProjectTask({ taskId, organizerKey, beforeId, afterId })`,
-// which lives in db/projects.ts and itself enforces organizer / co-org
-// authority via `requireOrganizer`.
-//
-// Non-organizer / non-co-org viewers see the static list — no drag
-// handles, no buttons, no @dnd-kit overhead.
-// Single shared aria-live region for reorder announcements. The
-// @dnd-kit accessibility hooks fire for drag; we mirror the same
-// announcements for the button path so a keyboard / screen-reader
-// member hears identical feedback regardless of how they moved.
-function useLiveRegion(): {
-  message: string;
-  announce: (msg: string) => void;
-} {
-  const [message, setMessage] = useState("");
-  const counter = useRef(0);
-  const announce = useCallback((msg: string) => {
-    counter.current += 1;
-    // Append an invisible suffix on repeat messages so a re-announce
-    // of the same text still fires the screen-reader update.
-    const tag = counter.current % 2 === 0 ? "" : "​";
-    setMessage(`${msg}${tag}`);
-  }, []);
-  return { message, announce };
-}
-
-// "Follows: <upstream titles>" badge. Visible to everyone, not just
-// organizers. Three render modes:
-//   • 1 dep: "Follows: <title>"
-//   • 2-3 deps: comma-joined "Follows: A, B, C"
-//   • 4+ deps (collapsed): "Follows: <first> +N more" + tap to expand
-//   • 4+ deps (expanded): inline popover with all titles, each
-//     clickable to scroll to that upstream task row.
-// Completed deps drop out at the caller — we only see unmet ones.
+// The project task list. A plain read/act surface: click a task to
+// open it, claim/confirm inline. Reordering is NOT here — it lives
+// in the focused "Reorder tasks" dialog (header kebab), so the list
+// carries no drag handles and no per-row Move buttons. That removes
+// the accidental-drag trap (the title used to be a drag handle) and
+// the clutter of two arrow buttons on every row for a rare organizer
+// action. The dialog is the single reorder surface; see
+// docs/task-ordering-and-dependencies.md §3.2.
 function TaskList({
   tasks,
   visibleTasks,
@@ -1840,323 +1787,36 @@ function TaskList({
    *  the ring. */
   highlightTaskId?: string | null;
 }) {
-  const { t } = useTranslation();
-  const { showToast } = useToast();
-  const { message, announce } = useLiveRegion();
-  const [activeDragId, setActiveDragId] = useState<string | null>(null);
-
-  // FLIP animation for inline reorders. Skipped while @dnd-kit is
-  // mid-drag on a row (it already applies its own transform) and
-  // skipped entirely under prefers-reduced-motion (handled inside
-  // the hook).
-  const isRowDragging = useCallback(
-    (id: string) => id === activeDragId,
-    [activeDragId],
-  );
-  const visibleTaskIds = useMemo(
-    () => visibleTasks.map((task) => task.id),
-    [visibleTasks],
-  );
-  const { register: registerFlipRow } = useFlipAnimation(visibleTaskIds, {
-    isRowDragging,
-  });
-
-  // Per design §9: pointer + keyboard sensors. KeyboardSensor with
-  // `sortableKeyboardCoordinates` so arrow keys move the sortable
-  // item one slot per press.
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      // 5px activation distance avoids accidental drags on tap.
-      activationConstraint: { distance: 5 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  const taskIds = useMemo(() => visibleTasks.map((t) => t.id), [visibleTasks]);
-
-  // For the button path: locate the neighbors of `taskId` in the
-  // FULL tasks list (not the filtered visible list), and call the
-  // action with them.
-  const moveTask = useCallback(
-    async (taskId: string, direction: "up" | "down") => {
-      if (!currentKey) return;
-      const fullList = tasks;
-      const idx = fullList.findIndex((t) => t.id === taskId);
-      if (idx < 0) return;
-      // Disabled-at-the-ends check, also enforced visually.
-      if (direction === "up" && idx === 0) return;
-      if (direction === "down" && idx === fullList.length - 1) return;
-      // Compute the neighbor pair at the destination position. The
-      // neighbors are read from the CURRENT list (the task we're
-      // moving is removed in the action layer's transaction; here we
-      // just point at the two rows that flank the destination slot).
-      // Move up to idx-1: the new neighbors are the task that was at
-      // idx-2 (now still at idx-2) and the task that was at idx-1
-      // (which will end up at idx after the move). Move down to
-      // idx+1: the new neighbors are the task that was at idx+1
-      // (which steps up into idx) and the task that was at idx+2.
-      const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-      const beforeIdx = direction === "up" ? idx - 2 : idx + 1;
-      const afterIdx = direction === "up" ? idx - 1 : idx + 2;
-      const beforeId = beforeIdx >= 0 ? fullList[beforeIdx].id : null;
-      const afterId =
-        afterIdx <= fullList.length - 1 ? fullList[afterIdx].id : null;
-      const task = fullList[idx];
-      const result = await onRun(() =>
-        reorderProjectTask({
-          taskId,
-          organizerKey: currentKey,
-          beforeId,
-          afterId,
-        }),
-      );
-      if (result !== null) {
-        announce(
-          t("projects.task.dragEnd", {
-            title: task.title,
-            position: targetIdx + 1,
-            total: fullList.length,
-          }),
-        );
-      } else {
-        showToast(t("projects.task.reorderError"), { tone: "error" });
-      }
-    },
-    [tasks, currentKey, onRun, announce, t, showToast],
-  );
-
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    setActiveDragId(String(event.active.id));
-  }, []);
-
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      setActiveDragId(null);
-      const { active, over } = event;
-      if (!over || !currentKey || active.id === over.id) return;
-      const fromIdx = tasks.findIndex((t) => t.id === active.id);
-      const toIdx = tasks.findIndex((t) => t.id === over.id);
-      if (fromIdx < 0 || toIdx < 0) return;
-      // Compute the destination neighbors as if the dragged task is
-      // now in `toIdx` (with itself removed from `fromIdx`).
-      const reordered = [...tasks];
-      const [moved] = reordered.splice(fromIdx, 1);
-      reordered.splice(toIdx, 0, moved);
-      const beforeId = toIdx > 0 ? reordered[toIdx - 1].id : null;
-      const afterId =
-        toIdx < reordered.length - 1 ? reordered[toIdx + 1].id : null;
-      if (beforeId === null && afterId === null) return;
-      const result = await onRun(() =>
-        reorderProjectTask({
-          taskId: String(active.id),
-          organizerKey: currentKey,
-          beforeId,
-          afterId,
-        }),
-      );
-      if (result === null) {
-        showToast(t("projects.task.reorderError"), { tone: "error" });
-      }
-      // Drag-end announcement is also dispatched by
-      // accessibility.announcements below; that handles the SR text.
-    },
-    [tasks, currentKey, onRun, showToast, t],
-  );
-
-  function renderRow(task: ProjectTask, idx: number) {
-    const checkInState = taskCheckInState(task, nodeConfig, tasks);
-    return (
-      <SortableTaskRow
-        key={task.id}
-        task={task}
-        sortable={isOrg}
-        isFirst={idx === 0}
-        isLast={idx === visibleTasks.length - 1}
-        onMove={moveTask}
-        isOrganizer={isOrg}
-        acceptingClaims={project.status === "active"}
-        projectStatus={project.status}
-        currentKey={currentKey}
-        onRun={onRun}
-        needsMoreHands={checkInState === "needs_more_hands"}
-        allTasks={tasks}
-        searchQuery={searchQuery}
-        taskCheckInDays={nodeConfig.taskCheckInDays}
-      />
-    );
-  }
-
-  // Non-organizer viewers get the static list — no drag, no buttons,
-  // no @dnd-kit overhead, and (deliberately) no FLIP either. Their
-  // view doesn't reorder.
-  if (!isOrg) {
-    return (
-      <>
-        <ul className="flex flex-col gap-2">
-          {visibleTasks.map((task, idx) => (
-            <li
-              key={task.id}
-              id={`task-${task.id}`}
-              tabIndex={-1}
-              className={
-                task.id === highlightTaskId
-                  ? "rounded-lg ring-2 ring-canopy-500 motion-safe:transition-shadow"
-                  : undefined
-              }
-            >
-              {renderRow(task, idx)}
-            </li>
-          ))}
-        </ul>
-        <div
-          aria-live="polite"
-          aria-atomic="true"
-          className="sr-only"
-          data-testid="reorder-live-region"
+  return (
+    <ul className="flex flex-col gap-2">
+      {visibleTasks.map((task) => (
+        <li
+          key={task.id}
+          id={`task-${task.id}`}
+          tabIndex={-1}
+          className={
+            task.id === highlightTaskId
+              ? "rounded-lg ring-2 ring-canopy-500 motion-safe:transition-shadow"
+              : undefined
+          }
         >
-          {message}
-        </div>
-      </>
-    );
-  }
-
-  const activeTask = activeDragId
-    ? tasks.find((t) => t.id === activeDragId)
-    : null;
-
-  return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragCancel={() => {
-        if (activeTask) {
-          announce(
-            t("projects.task.dragCancel", { title: activeTask.title }),
-          );
-        }
-        setActiveDragId(null);
-      }}
-      accessibility={{
-        announcements: {
-          onDragStart: ({ active }) => {
-            const t2 = tasks.find((x) => x.id === active.id);
-            return t2
-              ? t("projects.task.dragStart", { title: t2.title })
-              : "";
-          },
-          onDragOver: () => "",
-          onDragEnd: ({ active, over }) => {
-            const t2 = tasks.find((x) => x.id === active.id);
-            if (!t2 || !over) return "";
-            const overIdx = tasks.findIndex((x) => x.id === over.id);
-            return t("projects.task.dragEnd", {
-              title: t2.title,
-              position: overIdx + 1,
-              total: tasks.length,
-            });
-          },
-          onDragCancel: ({ active }) => {
-            const t2 = tasks.find((x) => x.id === active.id);
-            return t2
-              ? t("projects.task.dragCancel", { title: t2.title })
-              : "";
-          },
-        },
-      }}
-    >
-      <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-        <ul className="flex flex-col gap-2">
-          {visibleTasks.map((task, idx) => (
-            <li
-              key={task.id}
-              id={`task-${task.id}`}
-              ref={registerFlipRow(task.id)}
-              tabIndex={-1}
-              className={
-                task.id === highlightTaskId
-                  ? "rounded-lg ring-2 ring-canopy-500 motion-safe:transition-shadow"
-                  : undefined
-              }
-            >
-              {renderRow(task, idx)}
-            </li>
-          ))}
-        </ul>
-      </SortableContext>
-      <DragOverlay>
-        {activeTask ? (
-          <div className="card opacity-90 shadow-lg">
-            <h3 className="text-base font-semibold leading-snug">
-              {activeTask.title}
-            </h3>
-          </div>
-        ) : null}
-      </DragOverlay>
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-        data-testid="reorder-live-region"
-      >
-        {message}
-      </div>
-    </DndContext>
-  );
-}
-
-function SortableTaskRow({
-  task,
-  sortable,
-  isFirst,
-  isLast,
-  onMove,
-  ...rest
-}: {
-  task: ProjectTask;
-  sortable: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-  onMove: (taskId: string, direction: "up" | "down") => void;
-  isOrganizer: boolean;
-  acceptingClaims: boolean;
-  projectStatus: Project["status"];
-  currentKey: string | undefined;
-  onRun: <T>(action: () => Promise<T>) => Promise<T | null>;
-  needsMoreHands: boolean;
-  allTasks: readonly ProjectTask[];
-  searchQuery?: string;
-  taskCheckInDays: number;
-}) {
-  const sortableHook = useSortable({ id: task.id, disabled: !sortable });
-  const style = sortable
-    ? {
-        transform: CSS.Transform.toString(sortableHook.transform),
-        transition: sortableHook.transition,
-      }
-    : undefined;
-  return (
-    <div ref={sortable ? sortableHook.setNodeRef : undefined} style={style}>
-      <TaskCard
-        task={task}
-        {...rest}
-        sortableHandle={
-          sortable
-            ? {
-                attributes: sortableHook.attributes,
-                listeners: sortableHook.listeners,
-              }
-            : null
-        }
-        moveButtons={
-          sortable
-            ? { isFirst, isLast, onMove: (dir) => onMove(task.id, dir) }
-            : null
-        }
-      />
-    </div>
+          <TaskCard
+            task={task}
+            isOrganizer={isOrg}
+            acceptingClaims={project.status === "active"}
+            projectStatus={project.status}
+            currentKey={currentKey}
+            onRun={onRun}
+            needsMoreHands={
+              taskCheckInState(task, nodeConfig, tasks) === "needs_more_hands"
+            }
+            allTasks={tasks}
+            searchQuery={searchQuery}
+            taskCheckInDays={nodeConfig.taskCheckInDays}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 

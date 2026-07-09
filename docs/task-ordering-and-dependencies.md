@@ -167,22 +167,48 @@ within a project. Higher values render lower in the list (or
 the inverse, whatever the implementation picks — the field
 itself is monotonic; the rendering direction is a UI choice).
 
-The reorder surface on the ProjectDetail page:
+The reorder surface is a **focused "Reorder tasks" dialog**,
+reached from the header kebab on the ProjectDetail page
+(`ReorderTasksDialog.tsx`). The main task list itself is a plain
+read/act surface: it carries **no** inline reorder affordances —
+no drag-on-title handle, no per-row Move buttons. That was a
+deliberate consolidation (see the note below): the title used to
+double as a drag handle, so any attempt to select or read a title
+risked kicking off an accidental reorder, and a pair of arrow
+buttons on every row was persistent clutter for what is a rare,
+organizer-only action.
 
-- Drag-and-drop with `@dnd-kit/core` + `@dnd-kit/sortable`.
-- **Always-visible Move up / Move down icon buttons on every
-  task row.** This is the keyboard-canonical path; the drag is
-  sugar. The buttons are not hidden on touch or desktop; they
-  appear on every device, every breakpoint, every row.
-- Both paths persist through the same new action helper:
+The dialog is a strict **superset** of every reorder gesture, so
+nothing is lost by moving reordering off the list:
+
+- Drag-and-drop with `@dnd-kit/core` + `@dnd-kit/sortable`,
+  working for both pointer and keyboard (PointerSensor +
+  KeyboardSensor with `sortableKeyboardCoordinates`). A dedicated
+  drag handle on each row carries the sortable listeners.
+- **Move up / Move down icon buttons on every dialog row.** This
+  is the keyboard-canonical, screen-reader-first path
+  (touch-target-44); the drag is sugar. The buttons sit beside
+  the drag handle, not on it, so a button click never turns into
+  a drag.
+- Both paths persist through the same action helper:
   `reorderProjectTask({ taskId, organizerKey, beforeId, afterId })`.
   The button path computes the neighbor pair from the current
-  rendered order before calling; the drag path passes the
-  neighbors directly. The action signature is settled — see
-  §5.1 for the resolution rules.
+  order before calling; the drag path passes the neighbors
+  directly. The action signature is settled — see §5.1 for the
+  resolution rules.
 
-The authority for both surfaces is organizer + co-organizers
-(see §8 for the rationale).
+The authority for the dialog is organizer + co-organizers (see
+§8 for the rationale); non-organizers never see the kebab entry.
+
+> **Consolidation note (post-pilot).** Earlier revisions shipped
+> two reorder affordances *inline on the list* — the title as a
+> drag handle plus always-visible Move buttons per row. Operator
+> feedback flagged both as frustration sources (accidental drags
+> from title interaction; arrow clutter on every row). The
+> reorder machinery now lives solely in the dialog, which
+> preserves the full keyboard/drag/button matrix while leaving the
+> list clean. The `reorderProjectTask` neighbor-pair contract
+> (§5.1) is unchanged.
 
 ### §3.3 The chip and attention-suppression extension
 
@@ -724,12 +750,22 @@ Rejected alternatives:
 This is the load-bearing accessibility decision in this
 section. Stating it as the contract:
 
-> Every task row, on every device, at every breakpoint,
+> Every reorder row, on every device, at every breakpoint,
 > renders a Move up button and a Move down button. The buttons
 > are not hidden on touch. The buttons are not hidden on
 > desktop. The buttons are not collapsed into a "…" menu.
 > They are visible, focusable, and operable from every device
 > a member might use.
+
+> **Where the reorder rows live (post-pilot amendment).** These
+> rows are now the rows *inside the "Reorder tasks" dialog*, not
+> the main task list — see the §3.2 consolidation note. The
+> accessibility contract is unchanged: every dialog row still
+> carries both Move buttons, at 44 × 44, on every device. The
+> only change is that reordering is entered deliberately (via the
+> header kebab) rather than being always-live on the list, which
+> removed the accidental-drag and per-row-clutter traps operators
+> reported.
 
 The buttons are not a fallback. They are the canonical path.
 A member who has never figured out the drag gesture — keyboard

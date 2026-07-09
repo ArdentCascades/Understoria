@@ -417,7 +417,23 @@ describe("ProjectDetail — co-organizer capability card", () => {
 });
 
 describe("ProjectDetail — reorder authority (co-organizer)", () => {
-  it("co-organizer can reorder tasks via Move buttons", async () => {
+  // Reordering lives in the header-kebab "Reorder tasks" dialog now
+  // (the main task list carries no inline reorder handles). Open it the
+  // same way co-organizer management is opened, then drive the Move
+  // buttons inside the dialog. The key assertion here is authority: a
+  // co-organizer's move persists with THEIR key as organizerKey.
+  function launchReorderDialog() {
+    const trigger = container.querySelector<HTMLButtonElement>(
+      'button[aria-haspopup="menu"]',
+    );
+    if (!trigger) throw new Error("project header kebab not found");
+    act(() => {
+      trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    clickButton("Reorder tasks");
+  }
+
+  it("co-organizer can reorder tasks via the dialog's Move buttons", async () => {
     const p = project();
     p.coOrganizerKeys = [inviteeKey];
     mockState.projects = [p];
@@ -428,8 +444,10 @@ describe("ProjectDetail — reorder authority (co-organizer)", () => {
     // Current member is the co-organizer (not the primary).
     mockState.currentMember = member(inviteeKey, "Bob Invitee");
     render();
+    launchReorderDialog();
+    await flush();
 
-    const moveDown = container.querySelector(
+    const moveDown = document.querySelector(
       "[aria-label=\"Move First down\"]",
     ) as HTMLButtonElement | null;
     expect(moveDown).not.toBeNull();
@@ -447,7 +465,7 @@ describe("ProjectDetail — reorder authority (co-organizer)", () => {
     });
   });
 
-  it("non-organizer non-co-organizer non-claimant sees no Move buttons", () => {
+  it("a regular member gets no Reorder tasks entry in the header kebab", () => {
     const otherKey = "other-key";
     mockState.members = [
       member(organizerKey, "Organizer"),
@@ -460,9 +478,24 @@ describe("ProjectDetail — reorder authority (co-organizer)", () => {
     ];
     render();
 
-    const moveUps = container.querySelectorAll(
-      "[aria-label^=\"Move \"]",
+    // No inline reorder affordances anywhere on the list...
+    expect(container.querySelectorAll("[aria-label^=\"Move \"]").length).toBe(
+      0,
     );
-    expect(moveUps.length).toBe(0);
+    // ...and the kebab (if present) carries no Reorder tasks item.
+    const trigger = container.querySelector<HTMLButtonElement>(
+      'button[aria-haspopup="menu"]',
+    );
+    if (trigger) {
+      act(() => {
+        trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      const reorderItem = Array.from(
+        container.querySelectorAll<HTMLButtonElement>(
+          'button[role="menuitem"]',
+        ),
+      ).find((b) => (b.textContent ?? "").trim() === "Reorder tasks");
+      expect(reorderItem).toBeUndefined();
+    }
   });
 });
