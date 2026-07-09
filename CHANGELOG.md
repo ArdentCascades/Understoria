@@ -9,6 +9,16 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Settings is now one click away on the desktop side rail.** On
+  wider screens the left navigation rail had room to spare below its
+  five items, so Settings joins it — pinned to the bottom, the way
+  desktop apps put account and preferences at the base of a left
+  rail. On phones nothing changes: the bottom tab bar stays its five
+  items, and Settings is still reached from the Profile gear (or
+  Ctrl/Cmd+K).
+
+
 ### Changed
 - **The project page's "Manage project" section moved into the ⋮
   menu.** Pause, Clone, Manage co-organizers, Hand off, and Step
