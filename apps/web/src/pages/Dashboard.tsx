@@ -459,7 +459,16 @@ function StatCard({
       <div className="text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {label}
       </div>
-      <div className="mt-1 break-words text-3xl font-bold leading-tight">{value}</div>
+      {/* Word values ("gathering") get a size that fits a tile
+          before break-words has to split them mid-word; numbers keep
+          the big figure. */}
+      <div
+        className={`mt-1 break-words font-bold leading-tight ${
+          typeof value === "string" ? "text-2xl" : "text-3xl"
+        }`}
+      >
+        {value}
+      </div>
       <div className="text-xs text-moss-600 dark:text-moss-300">{sublabel}</div>
       {linkTo && linkLabel && (
         <Link

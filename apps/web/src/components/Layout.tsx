@@ -21,6 +21,7 @@
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "./BottomNav";
+import { CommandPalette } from "./CommandPalette";
 import { LockScreen } from "./LockScreen";
 import { OfflineBanner } from "./OfflineBanner";
 import { ScrollToTop } from "./ScrollToTop";
@@ -96,6 +97,7 @@ export function Layout() {
       {!locked && <OfflineBanner />}
       {!locked && <BottomNav />}
       {!locked && <ToastContainer />}
+      {!locked && <CommandPalette />}
       {/* Rendered even while locked: the notice is about the software
           itself, and a stale build on the lock screen is still stale. */}
       <UpdatePrompt />

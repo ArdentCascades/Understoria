@@ -2760,5 +2760,30 @@
       "cannotBlockSelf": "No puedes bloquearte a ti mismo.",
       "noteTooLong": "La nota debe tener 500 caracteres o menos."
     }
+  },
+  "palette": {
+    "ariaLabel": "Paleta de comandos",
+    "placeholder": "Busca en todo, o salta a algún lugar…",
+    "resultsAriaLabel": "Resultados de búsqueda",
+    "noResults": "Nada coincidió. Todo lo buscado vive en este dispositivo.",
+    "hint": "↑↓ para moverte · Enter para abrir · Esc para cerrar",
+    "close": "Cerrar paleta",
+    "routes": {
+      "help": "Ayuda",
+      "settings": "Ajustes",
+      "proposals": "Propuestas",
+      "newPost": "Publicar necesidad u oferta",
+      "newProject": "Iniciar un proyecto",
+      "newEvent": "Crear un evento"
+    },
+    "kind": {
+      "postNeed": "Necesidad",
+      "postOffer": "Oferta",
+      "project": "Proyecto",
+      "event": "Evento",
+      "member": "Miembro",
+      "proposal": "Propuesta",
+      "help": "Ayuda"
+    }
   }
 }
