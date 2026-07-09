@@ -69,6 +69,7 @@ import { MarkdownHint } from "@/components/MarkdownHint";
 import { EmptyState } from "@/components/EmptyState";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
+import { TemplatePlaybook } from "@/components/TemplatePlaybook";
 import { ReorderTasksDialog } from "@/components/ReorderTasksDialog";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { IconMessages, Sprig } from "@/components/visual";
@@ -692,6 +693,14 @@ export default function ProjectDetailPage() {
               {t("projects.adoptionBanner")}
             </Link>
           )}
+
+          {/* The template "playbook" — how this kind of project actually
+              works — re-derived from the stored templateId (dropped at
+              instantiation otherwise). Reads as reference; absent for
+              from-scratch projects or unknown templates. */}
+          <div className="mb-4">
+            <TemplatePlaybook templateId={project.templateId} variant="full" />
+          </div>
 
           {/* Tasks are the first main-column content after the error /
               adoption banners — the work itself outranks its context
