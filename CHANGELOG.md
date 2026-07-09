@@ -20,6 +20,12 @@ include breaking changes.
 
 
 ### Changed
+- **The task page's ⋮ menu sits in line with the description.** On a
+  task's own page the three-dot menu used to occupy its own row above
+  the text, leaving an empty band across the card. It now shares the
+  top line with the task's lead text, so the card is shorter and the
+  wasted vertical space is gone — same actions, same right-aligned
+  control.
 - **Task reordering now lives entirely in the "Reorder tasks"
   dialog.** The main task list used to carry two reorder handles on
   every row — the title doubled as a drag handle, and each row had a
