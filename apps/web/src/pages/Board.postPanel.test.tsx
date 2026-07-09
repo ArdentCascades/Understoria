@@ -203,4 +203,30 @@ describe("Board docked post panel", () => {
         .parentElement!.className,
     ).not.toContain("lg:hidden");
   });
+
+  it("cedes the filter rail's grid track while the panel is open", () => {
+    // At exactly 1024px the panel + the 240px rail left ~290px for
+    // the reading column — colliding tab pills, one-word-wide cards
+    // (the pilot screenshots). While open: two grid tracks, no
+    // desktop filter-rail copy. On close: the rail and its track
+    // come straight back.
+    renderAt("/post/p1?tab=offers");
+    const grid = () =>
+      container.querySelector('[class*="grid grid-cols-1 gap-4"]')!;
+    const desktopRail = () =>
+      container.querySelector('[class*="lg:sticky"][class*="lg:col-start-1"]');
+    expect(grid().className).toContain("lg:grid-cols-[minmax(0,1fr)_auto]");
+    expect(desktopRail()).toBeNull();
+
+    const close = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Close post panel"]',
+    )!;
+    act(() => {
+      close.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(grid().className).toContain(
+      "lg:grid-cols-[240px_minmax(0,1fr)_auto]",
+    );
+    expect(desktopRail()).not.toBeNull();
+  });
 });

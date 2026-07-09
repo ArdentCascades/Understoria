@@ -9,6 +9,15 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The board breathes again while a post is open on desktop.**
+  Opening a post used to squeeze the board between the docked panel
+  and the filter column — tab labels collided and cards wrapped one
+  word per line. Now the filter column steps aside with the rest of
+  the rails while a post is open (everything returns the moment you
+  close it), and card grids match the room they actually have.
+
+
 ### Added
 - **Print the outage kit: a shelter wall poster and wallet cards.**
   From the Community infrastructure page, print the storm-hub

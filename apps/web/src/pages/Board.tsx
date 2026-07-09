@@ -467,8 +467,22 @@ export default function BoardPage() {
           (lg:w-[280px]) and hides itself when empty (lg:empty:hidden),
           so the reading column absorbs the space whenever there is no
           attention card, and the layout is byte-identical to before
-          whenever there is one. */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_auto] lg:items-start lg:gap-6">
+          whenever there is one.
+
+          While the docked post panel is open, BOTH rails cede: the
+          grid collapses to [reading-column, auto] and the filter
+          rail hides with the attention rail. At exactly 1024px the
+          panel + the 240px filter rail left ~290px for the tablist
+          and cards — colliding tab pills, one-word-wide project
+          cards (the pilot screenshots). The panel is triage mode:
+          filters return the moment it closes. */}
+      <div
+        className={`grid grid-cols-1 gap-4 lg:items-start lg:gap-6 ${
+          postPanelOpen
+            ? "lg:grid-cols-[minmax(0,1fr)_auto]"
+            : "lg:grid-cols-[240px_minmax(0,1fr)_auto]"
+        }`}
+      >
         {/* Right rail. Single grid cell in col 3, sticky. With the
             outer grid on one row track + lg:items-start, its height is
             its own concern — a tall attention card no longer drags the
@@ -495,7 +509,11 @@ export default function BoardPage() {
             `lg:hidden`) so DOM order matches visual order natively —
             no `order-*` utilities required. The desktop-visible filter
             rail lives as an outer-grid child in col-1 below. */}
-        <div className="contents min-w-0 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
+        <div
+          className={`contents min-w-0 lg:row-start-1 lg:flex lg:flex-col lg:gap-3 ${
+            postPanelOpen ? "lg:col-start-1" : "lg:col-start-2"
+          }`}
+        >
         {/* Mobile sticky header group: tablist + search stick TOGETHER
             at top-0 so a member can flip NEED↔OFFER or search from
             anywhere in a long scroll — previously only the search
@@ -750,6 +768,7 @@ export default function BoardPage() {
               searchQuery={debouncedQuery}
               filtersActive={projectFiltersActive}
               onClearFilters={resetProjectFilters}
+              panelOpen={postPanelOpen}
             />
           </div>
         )}
@@ -763,8 +782,11 @@ export default function BoardPage() {
             so DOM order matches visual order without `order-*`
             utilities. The filter rail's height is its own concern —
             single-row grid + lg:items-start means it never couples
-            into the middle column's vertical rhythm. */}
-        {tab !== "PROJECTS" && (
+            into the middle column's vertical rhythm.
+
+            Stays hidden while the docked post panel is open — the
+            panel takes the rail's track (see the outer grid). */}
+        {tab !== "PROJECTS" && !postPanelOpen && (
           <div className="hidden lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4 lg:block">
             <PostFilterRail
               categoryFilter={categoryFilter}
@@ -783,6 +805,7 @@ export default function BoardPage() {
 
         {tab === "PROJECTS" && (
           <>
+            {!postPanelOpen && (
             <div className="hidden lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4 lg:block">
               <ProjectFilterRail
                 projectCategoryFilter={projectCategoryFilter}
@@ -795,6 +818,7 @@ export default function BoardPage() {
                 setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
               />
             </div>
+            )}
 
             {/* Archive link sits below everything at every breakpoint
                 (a rarely-needed jump-off, not a primary control). At
@@ -973,6 +997,7 @@ function ProjectList({
   searchQuery,
   filtersActive,
   onClearFilters,
+  panelOpen,
 }: {
   /** Projects to render. Already filtered by the parent — this
    *  component does NOT re-apply category / status / open-task
@@ -991,6 +1016,9 @@ function ProjectList({
    *  Clear-filters button on the filter-empty state so a member
    *  who narrowed too far has a one-tap escape. */
   onClearFilters: () => void;
+  /** True while the docked post panel is open — the reading column
+   *  is narrower, so the card grid dials its columns back. */
+  panelOpen: boolean;
 }) {
   const { t } = useTranslation();
   const tasksByProject = useMemo(() => {
@@ -1042,7 +1070,14 @@ function ProjectList({
   }
 
   return (
-    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <ul
+      className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${
+        // Panel open: the viewport-based md: breakpoint doesn't know
+        // the reading column shrank, so dial the columns back to
+        // what the remaining width actually fits.
+        panelOpen ? "lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3" : "xl:grid-cols-3"
+      }`}
+    >
       {projects.map((p) => {
         const counts = tasksByProject.get(p.id) ?? { total: 0, open: 0 };
         return (
