@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Every template task now carries its own tip.** Open a task on a
+  template-started project and a one-or-two-sentence **"Tip for this
+  task"** appears under the description — the gotcha, threshold, or
+  do-X-before-Y a seasoned organizer would lean over and mention, not a
+  restatement of the description. All ~340 tips are authored for every
+  task of all 54 project templates, in English and Spanish, and the tip
+  follows your language setting regardless of which language the project
+  was created in. Rename a task (or add your own) and the tip simply
+  bows out; tips are looked up from the app's content, so nothing new is
+  stored on tasks or federated. Coverage in both languages is CI-pinned.
 - **Task pages now help you actually do the task.** Three additions,
   focused on claimers — especially on projects started from a template:
   - **The template playbook is back.** Templates ship real how-to

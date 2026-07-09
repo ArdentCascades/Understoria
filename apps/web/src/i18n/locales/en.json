@@ -918,7 +918,8 @@
         "backToProject": "Back to {{title}}",
         "followsLabel": "Follows:",
         "skillsLabel": "Skills that help:",
-        "skillsFit": "This fits the skills on your profile."
+        "skillsFit": "This fits the skills on your profile.",
+        "tipsLabel": "Tip for this task:"
       },
       "claimSummary": "About {{hours}} hours · we'll check in with you privately after {{days}} days.",
       "claimSummaryNoHours": "We'll check in with you privately after {{days}} days.",
