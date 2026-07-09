@@ -843,10 +843,15 @@
       "stagedSum_one": "{{count}} task · about {{hours}}h of setup",
       "stagedSum_other": "{{count}} tasks · about {{hours}}h of setup",
       "context": {
+        "whatYoullNeed": "What you'll need:",
         "firstSteps": "First steps:",
         "pitfalls": "What trips people up:",
         "pairsWith": "Pairs well with:",
         "learnMore": "Learn more:"
+      },
+      "playbook": {
+        "title": "How this works — from the {{name}} playbook",
+        "compactSummary": "Before you start — from the project playbook"
       }
     },
     "detail": {
@@ -910,7 +915,10 @@
       "commentCountChip_other": "{{count}} comments",
       "detail": {
         "notFound": "This task couldn't be found — it may have been removed.",
-        "backToProject": "Back to {{title}}"
+        "backToProject": "Back to {{title}}",
+        "followsLabel": "Follows:",
+        "skillsLabel": "Skills that help:",
+        "skillsFit": "This fits the skills on your profile."
       },
       "claimSummary": "About {{hours}} hours · we'll check in with you privately after {{days}} days.",
       "claimSummaryNoHours": "We'll check in with you privately after {{days}} days.",

@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Task pages now help you actually do the task.** Three additions,
+  focused on claimers — especially on projects started from a template:
+  - **The template playbook is back.** Templates ship real how-to
+    guidance (what you'll need, first steps, what trips people up,
+    learn-more links) that used to be shown once to the organizer at the
+    create-project screen and then dropped. It's now re-derived from the
+    project's template and shown where it helps: a "How this works" card
+    on the project page, and a collapsed "Before you start" note on each
+    task's own page.
+  - **Skills that help — and a "fits your profile" cue.** A task's
+    suggested skills now appear on its page, and any that overlap the
+    skills on your profile are highlighted with a positive "this fits
+    you" note. It only ever surfaces a match, never what's missing —
+    suggested skills are help, not a gate.
+  - **"Follows" on the task's own page.** If a task is sequenced behind
+    others, the page now shows what it follows (with links), so someone
+    who opens a task directly sees what needs to happen first.
 - **Customize the gathering screen.** The `/present` lobby gained a
   "Customize the screen" panel: give the screen a title (shown on the
   welcome slide), set how long each slide holds, toggle whole categories

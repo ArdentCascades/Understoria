@@ -38,7 +38,7 @@ import { HistoryTimeline } from "@/pages/ProjectDetail";
 export default function TaskDetailPage() {
   const { id, taskId } = useParams<{ id: string; taskId: string }>();
   const ctx = useProjectTaskContext(id);
-  const { blockedKeys } = useApp();
+  const { blockedKeys, currentMember } = useApp();
   const { t } = useTranslation();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -176,6 +176,8 @@ export default function TaskDetailPage() {
         flaggedCommentIds={ctx.flaggedCommentIds}
         taskCheckInDays={ctx.nodeConfig.taskCheckInDays}
         autoConfirmHours={ctx.autoConfirmHours}
+        templateId={project.templateId}
+        viewerSkills={currentMember?.skills ?? []}
       />
       {/* Completed/archived projects keep their history reachable from
           the task page too. */}

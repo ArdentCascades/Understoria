@@ -9,7 +9,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/state/ToastContext";
 import {
@@ -29,7 +30,9 @@ import { TaskComments } from "@/components/TaskComments";
 import { Markdown } from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
+import { TemplatePlaybook } from "@/components/TemplatePlaybook";
 import { shareUrl } from "@/lib/share";
+import { matchTaskSkills } from "@/lib/taskSkillMatch";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
 
@@ -60,6 +63,8 @@ export function TaskDetailBody({
   flaggedCommentIds,
   taskCheckInDays,
   autoConfirmHours,
+  templateId,
+  viewerSkills,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -72,6 +77,13 @@ export function TaskDetailBody({
   needsMoreHands: boolean;
   allTasks: readonly ProjectTask[];
   flaggedCommentIds: ReadonlySet<string>;
+  /** The project's template id (if any). Re-derives the template
+   *  "playbook" (first steps / pitfalls / learn-more) for the claimer;
+   *  null when the project wasn't started from a template. */
+  templateId: string | null;
+  /** The viewer's own profile skills, for the positive "fits your
+   *  skills" cue on this task's suggested skills. */
+  viewerSkills: readonly string[];
   /** Node-configured private check-in window. Drives the claim-time
    *  commitment summary in the (deep-link) Claim block — mirrored from
    *  the card so a member who lands on an open task's page can claim
@@ -89,6 +101,25 @@ export function TaskDetailBody({
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
+
+  // Unmet (non-completed) upstream tasks. The list card carries a
+  // "Follows" badge, but the task's OWN page deliberately dropped it —
+  // so a member who deep-links straight to this task never saw what has
+  // to happen first. Surface it here, linking to each upstream task.
+  const unmetDeps = useMemo(
+    () =>
+      task.dependencies
+        .map((id) => allTasks.find((tk) => tk.id === id))
+        .filter((d): d is ProjectTask => !!d && d.status !== "completed")
+        .map((d) => ({ id: d.id, title: d.title })),
+    [task.dependencies, allTasks],
+  );
+
+  // Positive-only skill fit (never surfaces what's missing).
+  const skillMatch = useMemo(
+    () => matchTaskSkills(task.requiredSkills, viewerSkills),
+    [task.requiredSkills, viewerSkills],
+  );
 
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [acknowledgmentText, setAcknowledgmentText] = useState("");
@@ -373,6 +404,59 @@ export function TaskDetailBody({
           />
         </div>
       </div>
+      {unmetDeps.length > 0 && (
+        <p className="text-sm text-moss-600 dark:text-moss-300">
+          <span aria-hidden="true">{"→"}</span>{" "}
+          <span className="font-medium">
+            {t("projects.task.detail.followsLabel")}
+          </span>{" "}
+          {unmetDeps.map((d, i) => (
+            <Fragment key={d.id}>
+              {i > 0 && ", "}
+              <Link
+                to={`/project/${task.projectId}/task/${d.id}`}
+                className="underline decoration-moss-300 underline-offset-2 hover:text-canopy-700 dark:hover:text-canopy-300"
+              >
+                {d.title}
+              </Link>
+            </Fragment>
+          ))}
+        </p>
+      )}
+      {task.requiredSkills.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-sm font-medium text-moss-700 dark:text-moss-200">
+              {t("projects.task.detail.skillsLabel")}
+            </span>
+            {task.requiredSkills.map((s) => {
+              const fits = skillMatch.matched.includes(s);
+              return (
+                <span
+                  key={s}
+                  className={`chip ${
+                    fits
+                      ? "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100"
+                      : "bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200"
+                  }`}
+                >
+                  {fits && (
+                    <span aria-hidden="true" className="mr-1">
+                      {"✓"}
+                    </span>
+                  )}
+                  {s}
+                </span>
+              );
+            })}
+          </div>
+          {skillMatch.hasMatch && (
+            <p className="text-xs text-canopy-700 dark:text-canopy-300">
+              {t("projects.task.detail.skillsFit")}
+            </p>
+          )}
+        </div>
+      )}
       {task.recurringCadence && (
         <p className="text-xs text-moss-600 dark:text-moss-300">
           <span aria-hidden="true" className="mr-1">
@@ -385,6 +469,7 @@ export function TaskDetailBody({
           {t("projects.task.recurring.detailHint")}
         </p>
       )}
+      <TemplatePlaybook templateId={templateId} variant="compact" />
       {task.assignedTo &&
         (task.status === "awaiting_confirmation" ? (
           <p className="text-xs text-moss-600 dark:text-moss-300">
