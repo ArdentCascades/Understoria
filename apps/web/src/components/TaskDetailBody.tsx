@@ -30,7 +30,6 @@ import { TaskComments } from "@/components/TaskComments";
 import { Markdown } from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
-import { TemplatePlaybook } from "@/components/TemplatePlaybook";
 import { shareUrl } from "@/lib/share";
 import { matchTaskSkills } from "@/lib/taskSkillMatch";
 import { usePendingAction } from "@/lib/usePendingAction";
@@ -63,7 +62,6 @@ export function TaskDetailBody({
   flaggedCommentIds,
   taskCheckInDays,
   autoConfirmHours,
-  templateId,
   viewerSkills,
 }: {
   task: ProjectTask;
@@ -77,10 +75,6 @@ export function TaskDetailBody({
   needsMoreHands: boolean;
   allTasks: readonly ProjectTask[];
   flaggedCommentIds: ReadonlySet<string>;
-  /** The project's template id (if any). Re-derives the template
-   *  "playbook" (first steps / pitfalls / learn-more) for the claimer;
-   *  null when the project wasn't started from a template. */
-  templateId: string | null;
   /** The viewer's own profile skills, for the positive "fits your
    *  skills" cue on this task's suggested skills. */
   viewerSkills: readonly string[];
@@ -469,7 +463,6 @@ export function TaskDetailBody({
           {t("projects.task.recurring.detailHint")}
         </p>
       )}
-      <TemplatePlaybook templateId={templateId} variant="compact" />
       {task.assignedTo &&
         (task.status === "awaiting_confirmation" ? (
           <p className="text-xs text-moss-600 dark:text-moss-300">

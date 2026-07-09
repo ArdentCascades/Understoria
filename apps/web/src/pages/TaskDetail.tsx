@@ -176,7 +176,6 @@ export default function TaskDetailPage() {
         flaggedCommentIds={ctx.flaggedCommentIds}
         taskCheckInDays={ctx.nodeConfig.taskCheckInDays}
         autoConfirmHours={ctx.autoConfirmHours}
-        templateId={project.templateId}
         viewerSkills={currentMember?.skills ?? []}
       />
       {/* Completed/archived projects keep their history reachable from

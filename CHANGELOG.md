@@ -16,9 +16,10 @@ include breaking changes.
     guidance (what you'll need, first steps, what trips people up,
     learn-more links) that used to be shown once to the organizer at the
     create-project screen and then dropped. It's now re-derived from the
-    project's template and shown where it helps: a "How this works" card
-    on the project page, and a collapsed "Before you start" note on each
-    task's own page.
+    project's template as a collapsed **"How this works"** disclosure at
+    the top of the project page — reference you can open when you want it,
+    without pushing the tasks below the fold. (It's project-level context,
+    so it stays on the project page, not on individual task pages.)
   - **Skills that help — and a "fits your profile" cue.** A task's
     suggested skills now appear on its page, and any that overlap the
     skills on your profile are highlighted with a positive "this fits
