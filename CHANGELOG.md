@@ -20,6 +20,16 @@ include breaking changes.
 
 
 ### Changed
+- **Tap a task to open it — the whole card is now the link.** The
+  project task list dropped the per-card "Open task ›" footer row: the
+  entire card is a link to the task's page, so a tap anywhere on it
+  opens the task. That reclaims a row per card, so more tasks fit on
+  screen. The Claim button and the "Follows" why-tooltip still work
+  independently (they sit above the card's tap layer), and the comment
+  count that used to ride the footer — the "busy vs quiet" cue — moves
+  to a small 💬 chip in the card's header row. Keyboard and
+  screen-reader users get a proper link (the task title), not a
+  click-only `<div>`.
 - **The task page's ⋮ menu sits in line with the description.** On a
   task's own page the three-dot menu used to occupy its own row above
   the text, leaving an empty band across the card. It now shares the

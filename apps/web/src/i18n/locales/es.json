@@ -906,9 +906,8 @@
     "task": {
       "addTaskButton": "+ Añadir tarea",
       "claim": "Tomar esta tarea",
-      "openDetail": "Abrir tarea ›",
-      "openDetailWithCount_one": "Abrir tarea · {{count}} comentario ›",
-      "openDetailWithCount_other": "Abrir tarea · {{count}} comentarios ›",
+      "commentCountChip_one": "{{count}} comentario",
+      "commentCountChip_other": "{{count}} comentarios",
       "detail": {
         "notFound": "No se encontró esta tarea — es posible que se haya eliminado.",
         "backToProject": "Volver a {{title}}"

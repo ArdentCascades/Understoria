@@ -11,10 +11,11 @@
  */
 /**
  * The slim project-list task card. Covers the affordances that are
- * card-specific (and thus NOT on the per-task page body): the enriched
- * "Open task · N comments" footer link (driven by the live comment
- * count, blocked-author filtered), the one-line clamped description
- * preview, and the one-tap Claim.
+ * card-specific (and thus NOT on the per-task page body): the whole card
+ * being a link to the task page (stretched over the title), the
+ * comment-count chip (driven by the live comment count, blocked-author
+ * filtered), the one-line clamped description preview, and the one-tap
+ * Claim.
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -114,41 +115,58 @@ function renderCard(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
   });
 }
 
-function footerLink(): HTMLAnchorElement | null {
+function cardLink(): HTMLAnchorElement | null {
   return container.querySelector<HTMLAnchorElement>(
     'a[href="/project/proj-1/task/t1"]',
   );
 }
 
-describe("TaskCard — enriched 'Open task' affordance", () => {
-  it("shows the comment count when the thread has comments", () => {
+function commentChip(): HTMLElement | null {
+  return Array.from(container.querySelectorAll<HTMLElement>("[aria-label]")).find(
+    (el) => /\bcomments?\b/.test(el.getAttribute("aria-label") ?? ""),
+  ) ?? null;
+}
+
+describe("TaskCard — whole-card link + comment-count chip", () => {
+  it("makes the whole card a link to the task via the title's stretched link", () => {
+    liveComments = [];
+    renderCard({ allTasks: [task()] });
+    const link = cardLink();
+    expect(link).not.toBeNull();
+    // The link IS the title (its accessible name), and it stretches over
+    // the card via an ::after overlay (after:absolute after:inset-0).
+    expect((link!.textContent ?? "").trim()).toBe("Install hinges");
+    expect(link!.className).toContain("after:absolute");
+    expect(link!.className).toContain("after:inset-0");
+  });
+
+  it("shows the comment count as a chip when the thread has comments", () => {
     liveComments = [
       { id: "c1", authorKey: "a" },
       { id: "c2", authorKey: "b" },
       { id: "c3", authorKey: "c" },
     ];
     renderCard({ allTasks: [task()] });
-    const link = footerLink();
-    expect(link).not.toBeNull();
-    // Plural form names the live count.
-    expect((link!.textContent ?? "").trim()).toBe("Open task · 3 comments ›");
+    const chip = commentChip();
+    expect(chip).not.toBeNull();
+    // Plural aria-label names the live count; the visible glyph is 💬 N.
+    expect(chip!.getAttribute("aria-label")).toBe("3 comments");
+    expect((chip!.textContent ?? "")).toContain("3");
   });
 
-  it("uses the singular form for exactly one comment", () => {
+  it("uses the singular aria-label for exactly one comment", () => {
     liveComments = [{ id: "c1", authorKey: "a" }];
     renderCard({ allTasks: [task()] });
-    expect((footerLink()!.textContent ?? "").trim()).toBe(
-      "Open task · 1 comment ›",
-    );
+    expect(commentChip()!.getAttribute("aria-label")).toBe("1 comment");
   });
 
-  it("falls back to the plain 'Open task' affordance with zero comments", () => {
+  it("renders no comment chip with zero comments", () => {
     liveComments = [];
     renderCard({ allTasks: [task()] });
-    expect((footerLink()!.textContent ?? "").trim()).toBe("Open task ›");
+    expect(commentChip()).toBeNull();
   });
 
-  it("matches the thread header by filtering blocked authors out of the count", () => {
+  it("filters blocked authors out of the comment count", () => {
     // Two comments, one by a blocked author — the visible count is 1,
     // exactly what TaskComments' header would show.
     liveComments = [
@@ -157,19 +175,18 @@ describe("TaskCard — enriched 'Open task' affordance", () => {
     ];
     mockApp = { blockedKeys: new Set<string>(["blocked-author"]) };
     renderCard({ allTasks: [task()] });
-    expect((footerLink()!.textContent ?? "").trim()).toBe(
-      "Open task · 1 comment ›",
-    );
+    expect(commentChip()!.getAttribute("aria-label")).toBe("1 comment");
   });
 
-  it("renders the footer as a Link, never a button", () => {
+  it("exposes the open affordance as a Link, never a button", () => {
     liveComments = [{ id: "c1", authorKey: "a" }];
     renderCard({ allTasks: [task()] });
-    // The "Open task" affordance must be an anchor — the project-page
-    // suites scan/click buttons by text and must not pick it up.
+    // The card open path is the title anchor — the project-page suites
+    // scan/click buttons by text and must not pick up an open control.
+    expect(cardLink()).not.toBeNull();
     const openButtons = Array.from(
       container.querySelectorAll("button"),
-    ).filter((b) => (b.textContent ?? "").includes("Open task"));
+    ).filter((b) => (b.textContent ?? "").toLowerCase().includes("open task"));
     expect(openButtons).toHaveLength(0);
   });
 });
