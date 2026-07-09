@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Plans for going further with paper are on the table** —
+  docs/paper-systems.md: event flyers, a work-day sign-in sheet
+  for the clipboard, a fridge calendar, a wallet card + shelter
+  wall poster for internet outages, a tabling one-pager, tear-off
+  tabs, a paper intake form for neighbors without phones, and a
+  design sketch for signed paper hour-vouchers. Plans only — each
+  will land as its own change, and the last two wait for a
+  community conversation.
+
+### Added
 - **Print an invite poster or a board sheet for the bulletin
   board.** From the invite share sheet, "Print poster" makes a
   clean page — the QR, what this network is in plain words, and the
