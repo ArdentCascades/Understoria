@@ -1,6 +1,6 @@
 # Desktop power tools — plans
 
-Status: **plan 1 P1 shipped; the rest are plans.** The desktop layout
+Status: **plans 1 (P1) and 2 shipped; the rest are plans.** The desktop layout
 work (nav rail, board/dashboard rails, calendar event panel, the
 1600px cap) made room; the operator asked what could fill it for
 the members who do coordination work at a keyboard. Five plans, in
@@ -70,7 +70,16 @@ Later features register entries here ("Open organizer's desk").
 
 **Size:** ~1 PR, lib-heavy. No server changes.
 
-## 2. Organizer's desk
+## 2. Organizer's desk — SHIPPED
+
+As built: `/desk` (pages/OrganizerDesk.tsx) with the doorway card in
+the dashboard rail and a palette route. Two deltas from the plan:
+the confirm-queue and open-tasks sections reuse
+`myOrganizedProjects` outright (its per-project `awaitingYouCount` /
+`openTaskCount` already carried every careful predicate — only the
+shift-gap selector was genuinely new, in `lib/organizerDesk.ts`),
+and rows link per-project rather than per-task (the project page is
+where confirmation happens anyway).
 
 **What:** one page answering "what's waiting on ME, and what's
 short of hands, across everything I organize?" — today that's a

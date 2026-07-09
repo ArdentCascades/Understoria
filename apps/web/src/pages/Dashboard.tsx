@@ -36,6 +36,7 @@ import { CanopyMilestones } from "@/components/dashboard/CanopyMilestones";
 import { ResilienceCard } from "@/components/dashboard/ResilienceCard";
 import { UpcomingGatherings } from "@/components/dashboard/UpcomingGatherings";
 import { WhereHandsAreWelcome } from "@/components/dashboard/WhereHandsAreWelcome";
+import { DeskDoorway } from "@/components/dashboard/DeskDoorway";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -164,6 +165,11 @@ export default function DashboardPage() {
           open invitations are open-ended and can wait a scroll-line.
           Same self-hiding contract — a calm week gets a calm page. */}
       <WhereHandsAreWelcome />
+
+      {/* The organizer's-desk doorway: one line, only when something
+          is actionable at the viewer's own desk (plan 2's doorways
+          contract). */}
+      <DeskDoorway />
       </div>
 
       <div className="contents min-w-0 lg:col-start-1 lg:row-start-1 lg:block">
