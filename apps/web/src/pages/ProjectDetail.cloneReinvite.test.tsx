@@ -220,6 +220,19 @@ function clickButton(label: string) {
   });
 }
 
+// Clone moved from an inline disclosure toggle to a header kebab
+// item that opens a focused dialog. Open the kebab, then the item.
+function openClone() {
+  const trigger = container.querySelector<HTMLButtonElement>(
+    'button[aria-haspopup="menu"]',
+  );
+  if (!trigger) throw new Error("project header kebab not found");
+  act(() => {
+    trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  clickButton("Clone project");
+}
+
 function checkbox(name: string): HTMLInputElement {
   const el = container.querySelector(
     `input[aria-label="Invite ${name} to co-organize the new project"]`,
@@ -231,7 +244,7 @@ function checkbox(name: string): HTMLInputElement {
 describe("ProjectDetail — clone re-invitations", () => {
   it("pre-checks every source co-organizer (self absent) and invites only the still-checked ones", async () => {
     render();
-    clickButton("Clone project");
+    openClone();
     // The checklist appears with both co-organizers, pre-checked; the
     // cloner (primary) is not a candidate to invite themselves.
     expect(container.textContent).toContain("Invite co-organizers again?");
@@ -267,7 +280,7 @@ describe("ProjectDetail — clone re-invitations", () => {
   it("stops before cloning when the session is locked and boxes are checked", async () => {
     mockState.lockState = "locked";
     render();
-    clickButton("Clone project");
+    openClone();
     clickButton("Create clone");
     await flush();
     expect(cloneMock).not.toHaveBeenCalled();
@@ -278,14 +291,14 @@ describe("ProjectDetail — clone re-invitations", () => {
   it("renders the plain form (no checklist) when the source has no co-organizers", () => {
     mockState.projects = [project({ coOrganizerKeys: [] })];
     render();
-    clickButton("Clone project");
+    openClone();
     expect(container.textContent).not.toContain("Invite co-organizers again?");
   });
 
   it("lists the source primary with the neutral chip when a co-organizer clones", () => {
     mockState.currentMember = member(COORG_A, "Aya");
     render();
-    clickButton("Clone project");
+    openClone();
     // The source primary is a candidate now, tagged as having organized
     // the original; Aya (the cloner) is absent.
     expect(checkbox("Primary").checked).toBe(true);

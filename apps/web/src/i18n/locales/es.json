@@ -1115,7 +1115,12 @@
       "acceptedPointer": "Ahora eres co-organizador. Mira \"Lo que puedes hacer\" en la página del proyecto."
     },
     "manage": {
-      "title": "Administrar proyecto"
+      "title": "Administrar proyecto",
+      "pauseItem": "Pausar proyecto",
+      "cloneItem": "Clonar proyecto",
+      "coorgItem": "Gestionar coorganización",
+      "handoffItem": "Traspasar el proyecto",
+      "stepDownItem": "Dejar la coorganización"
     },
     "handoff": {
       "title": "Pasar la antorcha",

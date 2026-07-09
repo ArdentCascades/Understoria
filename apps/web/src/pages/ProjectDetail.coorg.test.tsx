@@ -258,6 +258,20 @@ function clickButton(label: string) {
   });
 }
 
+// Co-organizer management moved from the "Manage project" disclosure
+// into a header-kebab item that opens a focused dialog. Open the
+// kebab, then the item, so the CoOrganizerSection is on screen.
+function openCoorg() {
+  const trigger = container.querySelector<HTMLButtonElement>(
+    'button[aria-haspopup="menu"]',
+  );
+  if (!trigger) throw new Error("project header kebab not found");
+  act(() => {
+    trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  clickButton("Manage co-organizers");
+}
+
 async function flush() {
   await act(async () => {
     await Promise.resolve();
@@ -269,6 +283,7 @@ async function flush() {
 describe("ProjectDetail — co-organizer invitations (organizer)", () => {
   it("shows the invite affordance and sends an invitation", async () => {
     render();
+    openCoorg();
     const text = container.textContent ?? "";
     expect(text).toContain("Send invitation");
     // The federation-timing copy is present.
@@ -303,6 +318,7 @@ describe("ProjectDetail — co-organizer invitations (organizer)", () => {
   it("lists a pending invitation and revokes it after confirm", async () => {
     mockState.coorgInvitations = [pendingInvitation()];
     render();
+    openCoorg();
     const text = container.textContent ?? "";
     expect(text).toContain("Pending invitations");
     expect(text).toContain("Bob Invitee");
@@ -348,6 +364,7 @@ describe("ProjectDetail — co-organizer invitations (organizer)", () => {
       },
     ];
     render();
+    openCoorg();
     const text = container.textContent ?? "";
     expect(text).toContain("Past invitations");
     expect(text).toContain("declined");
