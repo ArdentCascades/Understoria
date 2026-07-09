@@ -1,6 +1,7 @@
 # Desktop power tools — plans
 
-Status: **plans 1 (P1) through 4 shipped; plan 5 remains a plan.** The desktop layout
+Status: **all five plans shipped** (palette P2 action verbs and the
+infrastructure page's mirror-freshness P2 remain open follow-ups). The desktop layout
 work (nav rail, board/dashboard rails, calendar event panel, the
 1600px cap) made room; the operator asked what could fill it for
 the members who do coordination work at a keyboard. Five plans, in
@@ -235,7 +236,23 @@ tri-states), checklist persistence round-trip.
 
 **Size:** 1–2 PRs. No server changes in P1.
 
-## 5. Print surfaces
+## 5. Print surfaces — SHIPPED
+
+As built: `/print/invite#<encoded>` (pages/PrintInvite.tsx) and
+`/print/board?tab=…` (pages/PrintBoard.tsx), plus the global
+`print:hidden` chrome and — a mechanism the plan missed — releasing
+the one-screen-tall clipped app shell for print (`print:h-auto` /
+`print:overflow-visible` on Layout's shell and `<main>`), without
+which every page printed as one clipped viewport. Deltas: the invite
+travels in the URL FRAGMENT (the exact token the share links use, so
+it never reaches a server and the poster page verifies-then-renders,
+refusing expired/forged invites); the board sheet re-derives the
+member's view from query params through a predicate extracted to
+`lib/boardFilter.ts` and now shared with the Board itself; there is
+no `communityName` in any config, so both sheets identify the
+community by its host. Entry points: "Print poster" in the share
+sheet's revealed view (post-gate), "Print this view" under the board
+list. A source-guard test locks the chrome classes.
 
 **What:** desktop is where printers live, and
 `docs/offline-resilience.md` §5 already imagines "a paper bulletin

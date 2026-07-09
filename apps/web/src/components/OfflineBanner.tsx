@@ -96,7 +96,7 @@ export function OfflineBanner() {
       // mid-screen (see useVirtualKeyboard.ts), but the live region
       // must stay in the a11y tree so offline transitions announce
       // exactly once regardless of keyboard state.
-      className={`pointer-events-none fixed inset-x-0 z-20 px-4
+      className={`pointer-events-none fixed inset-x-0 z-20 px-4 print:hidden
                  bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-20
                  ${keyboardOpen ? "opacity-0" : ""}`}
     >

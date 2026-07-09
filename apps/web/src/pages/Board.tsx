@@ -36,6 +36,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { ContextualHint } from "@/components/ContextualHint";
 import { BoardNudges } from "@/components/BoardNudges";
 import { matchesQuery } from "@/lib/messageSearch";
+import { filterBoardPosts } from "@/lib/boardFilter";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { useSlashFocus } from "@/lib/useSlashFocus";
@@ -196,24 +197,23 @@ export default function BoardPage() {
   // default view hides any post that already has a claimer; the
   // "Show N claimed" toggle adds them back in.
   //
-  // The query check reuses `matchesQuery` from lib/messageSearch.ts
-  // (case-insensitive, trimmed, empty-query short-circuits to false).
-  // When the debounced query is empty we skip the predicate entirely
-  // so unfiltered scrolling stays the cheapest path.
-  const matchingPosts = useMemo(() => {
-    const q = debouncedQuery.trim();
-    return posts.filter((p) => {
-      if (p.type !== tab) return false;
-      if (p.status === "cancelled") return false;
-      if (categoryFilter && p.category !== categoryFilter) return false;
-      if (urgencyFilter && p.urgency !== urgencyFilter) return false;
-      if (zoneFilter && p.locationZone !== zoneFilter) return false;
-      if (q !== "") {
-        if (!matchesQuery(`${p.title} ${p.description}`, q)) return false;
-      }
-      return true;
-    });
-  }, [posts, tab, categoryFilter, urgencyFilter, zoneFilter, debouncedQuery]);
+  // The predicate lives in lib/boardFilter.ts, SHARED with the
+  // printable board sheet (/print/board) so what prints is exactly
+  // what's on screen. Claimed-hiding stays here — the Board needs
+  // the claimed-in-scope count for its toggle label.
+  const matchingPosts = useMemo(
+    () =>
+      tab === "PROJECTS"
+        ? []
+        : filterBoardPosts(posts, {
+            type: tab,
+            category: categoryFilter,
+            urgency: urgencyFilter,
+            zone: zoneFilter,
+            query: debouncedQuery,
+          }),
+    [posts, tab, categoryFilter, urgencyFilter, zoneFilter, debouncedQuery],
+  );
 
   const claimedInScope = useMemo(
     () => matchingPosts.filter((p) => p.claimedBy !== null).length,
@@ -702,21 +702,41 @@ export default function BoardPage() {
                  xl (1280 cap → 680px middle → ~334px cards) resumes
                  2. The 1-col dip at lg is the honest tradeoff for
                  gaining both rails. */
-              <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
-                {visiblePosts.map((p) => (
-                  <li key={p.id}>
-                    <PostCard
-                      post={p}
-                      posterName={memberName.get(p.postedBy) ?? ""}
-                      isCurrentMember={p.postedBy === currentMember?.publicKey}
-                      posterTrust={trustByKey.get(p.postedBy)}
-                      isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
-                      posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
-                      searchQuery={debouncedQuery}
-                    />
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
+                  {visiblePosts.map((p) => (
+                    <li key={p.id}>
+                      <PostCard
+                        post={p}
+                        posterName={memberName.get(p.postedBy) ?? ""}
+                        isCurrentMember={p.postedBy === currentMember?.publicKey}
+                        posterTrust={trustByKey.get(p.postedBy)}
+                        isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
+                        posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
+                        searchQuery={debouncedQuery}
+                      />
+                    </li>
+                  ))}
+                </ul>
+                {/* Print surfaces (plan 5): the member's filters ARE
+                    the print selection — this link carries the
+                    current tab + filters to /print/board, which
+                    re-derives exactly this list. Quiet register,
+                    like the archive link. */}
+                <Link
+                  to={`/print/board?${boardPrintParams(
+                    tabToParam(tab),
+                    categoryFilter,
+                    urgencyFilter,
+                    zoneFilter,
+                    debouncedQuery,
+                    showClaimed,
+                  )}`}
+                  className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:text-left"
+                >
+                  {t("board.printView")}
+                </Link>
+              </>
             )}
           </div>
         )}
@@ -837,7 +857,7 @@ export default function BoardPage() {
           takeover that covers it anyway. Closing the panel brings
           the FAB straight back. */}
       {!keyboardOpen && !postPanelOpen && (
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 lg:bottom-6 lg:justify-end lg:px-8">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (
             <button
@@ -872,6 +892,26 @@ export default function BoardPage() {
       )}
     </div>
   );
+}
+
+/** Query string for /print/board — only filters that are actually
+ *  set travel, so the print URL reads as sparse as the selection. */
+function boardPrintParams(
+  tabParam: string,
+  category: string,
+  urgency: string,
+  zone: string,
+  query: string,
+  showClaimed: boolean,
+): string {
+  const params = new URLSearchParams();
+  params.set("tab", tabParam);
+  if (category) params.set("cat", category);
+  if (urgency) params.set("urg", urgency);
+  if (zone) params.set("zone", zone);
+  if (query.trim()) params.set("q", query.trim());
+  if (showClaimed) params.set("claimed", "1");
+  return params.toString();
 }
 
 /**

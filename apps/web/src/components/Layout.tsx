@@ -64,8 +64,14 @@ export function Layout() {
   // keeps the DOM order (and therefore tab order and the mobile
   // layout) byte-identical; only the visual axis changes. The nav
   // renders its vertical variant at lg (see BottomNav.tsx).
+  // print:h-auto/print:overflow-visible (shell and <main> both): the
+  // one-screen-tall clipped shell exists for iOS keyboard physics,
+  // but paper has no keyboard — without these overrides everything
+  // past the first viewport-height of any page is simply cut off in
+  // print. Together with the print:hidden on nav/banner/toasts/FABs
+  // this makes EVERY page print as its content, not its chrome.
   return (
-    <div className="flex h-dvh flex-col overflow-hidden lg:flex-row-reverse">
+    <div className="flex h-dvh flex-col overflow-hidden lg:flex-row-reverse print:block print:h-auto print:overflow-visible">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
       <main
@@ -79,7 +85,7 @@ export function Layout() {
         // the document they escape the shell's clipping and quietly
         // re-open a document scroll range (found the hard way via an
         // sr-only <legend> deep in the Profile page).
-        className="relative flex-1 overflow-y-auto overscroll-contain"
+        className="relative flex-1 overflow-y-auto overscroll-contain print:overflow-visible"
         tabIndex={-1}
       >
         <div
