@@ -180,9 +180,15 @@ export default function PresentPage() {
 
   // --- Lobby ---------------------------------------------------------
   if (!presenting) {
+    // `/present` is chromeless (outside Layout), and the document itself
+    // can't scroll — so the lobby must be its own fixed-height scroller.
+    // The inner `min-h-dvh` + `justify-center` centers the card when it
+    // fits and lets the outer scroll when the Customize panel makes it
+    // taller than the viewport (otherwise the top is unreachable).
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-br from-canopy-900 to-moss-950 p-6 text-center text-white">
-        <div className="w-full max-w-lg rounded-2xl bg-white/10 p-8 backdrop-blur">
+      <div className="h-dvh overflow-y-auto overscroll-contain bg-gradient-to-br from-canopy-900 to-moss-950 text-white">
+        <div className="flex min-h-dvh flex-col items-center justify-center p-6 text-center">
+          <div className="my-6 w-full max-w-lg rounded-2xl bg-white/10 p-8 backdrop-blur">
           <h1 className="font-serif text-4xl font-semibold">
             {t("present.lobby.title")}
           </h1>
@@ -210,6 +216,7 @@ export default function PresentPage() {
             onChange={updateConfig}
             t={t}
           />
+          </div>
         </div>
       </div>
     );
