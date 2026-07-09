@@ -30,8 +30,9 @@ import { HistoryTimeline } from "@/pages/ProjectDetail";
 // context, reconstructed from global state + route params via
 // `useProjectTaskContext` (no project-scoped fetch exists, so the
 // context is identical to the project page's). The slim `<TaskCard>` on
-// the project list shows the scan half (chips, one-line preview, Claim,
-// "Open task · N comments" link here). The chip row the body drops is
+// the project list shows the scan half (chips, comment-count chip,
+// one-line preview, Claim) and the whole card links here — a tap
+// anywhere on the card opens this page. The chip row the body drops is
 // rebuilt as a compact page header under the breadcrumb. The in-list
 // `#task-<id>` deep-links into the project list are untouched.
 export default function TaskDetailPage() {

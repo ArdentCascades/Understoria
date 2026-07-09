@@ -48,7 +48,7 @@ function FollowsBadge({
     const titles = unmetDeps.map((d) => d.title).join(", ");
     return (
       <span
-        className="inline-flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300"
+        className="relative z-[2] inline-flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300"
         title={t("projects.task.followsHint")}
       >
         <span aria-hidden="true">→</span>
@@ -60,7 +60,7 @@ function FollowsBadge({
   const first = unmetDeps[0];
   const rest = unmetDeps.length - 1;
   return (
-    <span className="inline-flex flex-wrap items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
+    <span className="relative z-[2] inline-flex flex-wrap items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
       <button
         type="button"
         onClick={onToggle}
@@ -86,7 +86,12 @@ function FollowsBadge({
                 onClick={() => {
                   const el = document.getElementById(`task-${dep.id}`);
                   el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  (el?.querySelector("h3") as HTMLElement | null)?.focus?.();
+                  // Land focus on the destination row's title link (the
+                  // whole card is a link now); fall back to the row's own
+                  // tabIndex=-1 <li> anchor.
+                  (
+                    (el?.querySelector("h3 a") as HTMLElement | null) ?? el
+                  )?.focus?.();
                 }}
               >
                 {dep.title}
@@ -100,13 +105,22 @@ function FollowsBadge({
 }
 
 // Slim project-list task card. The "scan" half of the per-task-page
-// split: chips, title (drag handle), a ONE-LINE description preview, the
-// one-tap Claim affordance, and an enriched "Open task · N comments"
-// footer link to the task's own page. The full description, edit form,
-// completion/confirm/release actions, claimer narrative, and the comment
-// thread live in `TaskDetailBody` on that page. The Claim block is the
-// single piece of JSX deliberately shared with the body (one tap from
-// the list, but a deep-linker can still claim without bouncing back).
+// split: chips, title, a ONE-LINE description preview, and the one-tap
+// Claim affordance. The full description, edit form, completion/confirm/
+// release actions, claimer narrative, and the comment thread live in
+// `TaskDetailBody` on that page.
+//
+// The WHOLE card is a link to the task's page — the title carries a
+// "stretched link" (`after:absolute after:inset-0`) so a tap or click
+// anywhere on the card opens the task, and there's no separate "Open
+// task" footer eating a row. The card is a real `<a>` (via the title),
+// so keyboard and screen-reader users get proper link semantics; the
+// interactive controls that must NOT trigger the open (Claim, the
+// Follows badge's buttons) sit at `relative z-[2]`, above the stretched
+// overlay. The comment count — the "busy vs quiet" signal that used to
+// ride the footer — moves to a chip in the header row. The Claim block
+// is deliberately shared with the body (one tap from the list, but a
+// deep-linker can still claim without bouncing back).
 export function TaskCard({
   task,
   isOrganizer,
@@ -156,7 +170,7 @@ export function TaskCard({
   const hasUnmetDeps = unmetDepTitles.length > 0;
 
   return (
-    <div className="card flex flex-col gap-2">
+    <div className="card relative flex flex-col gap-2 transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-canopy-500 dark:focus-within:ring-canopy-400">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={`chip ${statusChipClass(task.status)}`}
@@ -212,13 +226,40 @@ export function TaskCard({
             t={t}
           />
         )}
-      </div>
-      <h3 className="text-base font-semibold leading-snug">
-        {searchQuery && searchQuery.trim() !== "" ? (
-          <HighlightedText text={task.title} query={searchQuery} />
-        ) : (
-          task.title
+        {/* Comment-count signal — the "busy vs quiet" cue that used to
+            live on the removed "Open task · N comments" footer. A plain
+            non-interactive chip, so it sits under the stretched link and
+            a tap on it still opens the task. */}
+        {commentCount > 0 && (
+          <span
+            className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200"
+            aria-label={t("projects.task.commentCountChip", {
+              count: commentCount,
+            })}
+            title={t("projects.task.commentCountChip", { count: commentCount })}
+          >
+            <span aria-hidden="true" className="mr-1">
+              {"\u{1F4AC}"}
+            </span>
+            {commentCount}
+          </span>
         )}
+      </div>
+      {/* The title carries the stretched link: `after:absolute
+          after:inset-0` makes its ::after fill the card, so a tap
+          anywhere that isn't a raised control opens the task. focus:
+          outline-none because the card shows a focus-within ring. */}
+      <h3 className="text-base font-semibold leading-snug">
+        <Link
+          to={`/project/${task.projectId}/task/${task.id}`}
+          className="text-moss-900 after:absolute after:inset-0 after:z-[1] after:content-[''] hover:text-canopy-700 focus:outline-none dark:text-moss-50 dark:hover:text-canopy-300"
+        >
+          {searchQuery && searchQuery.trim() !== "" ? (
+            <HighlightedText text={task.title} query={searchQuery} />
+          ) : (
+            task.title
+          )}
+        </Link>
       </h3>
       {/* One-line preview only — NO whitespace-pre-wrap, so a multi-line
           description collapses to a single clamped line. The full,
@@ -234,7 +275,7 @@ export function TaskCard({
           <>
             <button
               type="button"
-              className="btn-primary"
+              className="btn-primary relative z-[2]"
               disabled={pending}
               aria-busy={pending}
               onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
@@ -275,19 +316,6 @@ export function TaskCard({
           </p>
         )}
       </div>
-      {/* Enriched footer link to the task's own page — a plain Link
-          (never a button, so the suites that scan/click buttons by text
-          don't see it). When the thread has comments, the count rides
-          along so a member can tell a busy task from a quiet one before
-          opening it; with zero, the plain "Open task ›" affordance. */}
-      <Link
-        to={`/project/${task.projectId}/task/${task.id}`}
-        className="self-start text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
-      >
-        {commentCount > 0
-          ? t("projects.task.openDetailWithCount", { count: commentCount })
-          : t("projects.task.openDetail")}
-      </Link>
     </div>
   );
 }
