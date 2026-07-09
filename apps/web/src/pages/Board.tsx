@@ -19,7 +19,13 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, type TrustStatus } from "@/lib/vouch";
@@ -121,6 +127,14 @@ export default function BoardPage() {
   const [onlyWithOpenTasks, setOnlyWithOpenTasks] = useState(false);
   const [onlyNeedsMoreHands, setOnlyNeedsMoreHands] = useState(false);
   const navigate = useNavigate();
+  // Whether the docked post panel (the nested /post/:id route) is
+  // open. /post/new can't false-positive here: it's a separate
+  // static route, so this component isn't even mounted there. While
+  // the panel is open, the AttentionSection rail hides at lg+ (the
+  // panel needs its width — at exactly 1024px both can't fit beside
+  // the reading column) and the FAB unmounts (its bottom-right perch
+  // is where the panel docks; below lg the panel covers it anyway).
+  const postPanelOpen = useMatch("/post/:id") !== null;
 
   // Debounce the visible→filtered transition. 250 ms matches the
   // Messages search debounce; small enough to feel live, long enough
@@ -361,6 +375,14 @@ export default function BoardPage() {
   // any tab.
   return (
     <div className="px-4 pb-36 pt-4">
+      {/* At lg+ the page is a row: the board column flexes and the
+          nested post panel (Outlet) docks on the right when open -
+          the board stays mounted, so tab, filters, search, and
+          scroll survive opening posts. Below lg the Outlet renders
+          as a full-screen takeover and this wrapper is a plain
+          block. Same shape as Calendar's event panel. */}
+      <div className="lg:flex lg:items-start lg:gap-6">
+      <div className="min-w-0 lg:flex-1">
       <header className="mb-4">
         <h1 className="page-title">{t("board.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
@@ -451,7 +473,16 @@ export default function BoardPage() {
             outer grid on one row track + lg:items-start, its height is
             its own concern — a tall attention card no longer drags the
             middle column's rhythm. */}
-        <div className="lg:col-start-3 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden">
+        <div
+          className={`lg:col-start-3 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden ${
+            // While the post panel is docked, cede the rail's width
+            // to it — at exactly 1024px the panel + both rails can't
+            // coexist beside a readable card column. The rail is
+            // back the moment the panel closes; below lg the panel
+            // is a full-screen takeover so nothing changes there.
+            postPanelOpen ? "lg:hidden" : ""
+          }`}
+        >
           <AttentionSection />
         </div>
 
@@ -785,6 +816,11 @@ export default function BoardPage() {
           </>
         )}
       </div>
+      </div>
+      {/* end board column */}
+      <Outlet />
+      </div>
+      {/* end lg row (board column + docked post panel) */}
 
       {/* Hidden while the on-screen keyboard is up — the fixed anchor
           would float detached mid-screen (see useVirtualKeyboard.ts),
@@ -793,8 +829,14 @@ export default function BoardPage() {
           bottom-RIGHT at lg+ — centered on desktop it floated on top
           of the middle column's cards (the desktop-waste pilot
           report's screenshot), while the right edge is the one region
-          the reading column never occupies. */}
-      {!keyboardOpen && (
+          the reading column never occupies.
+
+          Also unmounted while the docked post panel is open: at lg+
+          the panel occupies exactly the bottom-right region the FAB
+          floats over, and below lg the panel is a full-screen
+          takeover that covers it anyway. Closing the panel brings
+          the FAB straight back. */}
+      {!keyboardOpen && !postPanelOpen && (
       <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 lg:bottom-6 lg:justify-end lg:px-8">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (

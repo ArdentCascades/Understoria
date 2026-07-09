@@ -1,6 +1,6 @@
 # Desktop power tools — plans
 
-Status: **plans 1 (P1) and 2 shipped; the rest are plans.** The desktop layout
+Status: **plans 1 (P1), 2, and 3 shipped; plans 4-5 remain plans.** The desktop layout
 work (nav rail, board/dashboard rails, calendar event panel, the
 1600px cap) made room; the operator asked what could fill it for
 the members who do coordination work at a keyboard. Five plans, in
@@ -123,7 +123,23 @@ one page render test with the reading-order lock.
 **Size:** 1–2 PRs (selectors+page, then dashboard card). No server
 changes.
 
-## 3. Board post panel
+## 3. Board post panel — SHIPPED
+
+As built: option (a) below, as recommended. The frame was extracted
+into `components/DockedPanel.tsx` (focus-on-open/swap, document-level
+Escape guarded against form fields, dock-at-lg / full-screen-below)
+with `CalendarEventPanel` and the new `BoardPostPanel` as thin
+wrappers. `/post/:id` nests under the Board route — one canonical
+URL, every existing link and share URL untouched. Watch-out
+resolutions: PostDetail turned out to have no fixed-position
+affordances (the share menu is a plain dropdown), so nothing fought
+the scrolling aside; the FAB unmounts while the panel is open (the
+panel docks exactly where it floats); and the AttentionSection rail
+hides at lg+ while the panel is open — at exactly 1024px the panel
+and both rails can't coexist beside a readable card column. One
+addition the plan missed: `PostCard` now carries the current query
+string into the post URL, so the board's `?tab=` survives
+open→close and Offers-tab triage lands back on Offers.
 
 **What:** the calendar pattern applied to the board — click a post,
 it docks beside the card grid; claim/confirm from there; click the
