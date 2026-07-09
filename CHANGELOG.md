@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Print the outage kit: a shelter wall poster and wallet cards.**
+  From the Community infrastructure page, print the storm-hub
+  instructions as physical objects: a wall poster with three big
+  steps — join the hub WiFi (one scannable code phones understand
+  natively), open the community's usual address, and you're on the
+  community island — plus two cut-out wallet cards with the same
+  steps at pocket size. You type the hub's WiFi name and password
+  yourself before printing (the app never reads them from your
+  device), and the poster says on its face that it shares the WiFi
+  with everyone who can see it — that's its job.
+
+### Added
 - **More paper for the corkboard: a calendar sheet, a tabling
   guide, and tear-off tabs.** The calendar page can now print the
   next six weeks of gatherings as a fridge sheet (a code per event;

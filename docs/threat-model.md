@@ -1957,6 +1957,17 @@ We are not trying to protect against:
   act behind the same reveal gate the on-screen QR has. Same
   posture as the recovery kit's print path: the member is told
   what the paper is before it exists.
+  The offline kit (paper-systems P4) additionally prints a WiFi
+  CREDENTIAL: the storm-hub SSID and password, as text and as a
+  phone-native `WIFI:` QR. Deliberate — the wall poster's whole job
+  is to hand the shelter WiFi to everyone in the room during an
+  outage. Mitigations: the credential is TYPED by the member on
+  screen-only fields (never read from the OS or stored anywhere),
+  the poster carries a shares-with-everyone caveat on its face, and
+  the artifact makes sense only for a hub AP that is a deliberately
+  public utility in the scenario it exists for — a member who
+  prints their HOME WiFi onto a poster has been warned by the
+  caveat in the very ink they're posting.
 
 ## 8. Guidance for reviewers
 

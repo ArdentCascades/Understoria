@@ -328,6 +328,14 @@ export default function InfrastructurePage() {
         </h2>
         <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
           {t("infra.drills.intro")}
+          {" "}
+          {/* Paper systems P4: the drills' physical companion. */}
+          <Link
+            to="/print/offline-kit"
+            className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          >
+            {t("print.kit.link")}
+          </Link>
         </p>
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
           {DRILLS.map((drill) => (
