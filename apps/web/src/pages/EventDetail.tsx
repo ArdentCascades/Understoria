@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
@@ -23,6 +23,7 @@ import {
   listRsvpsForEvent,
 } from "@/db/events";
 import { getLinkForEvent } from "@/db/eventProjectLinks";
+import { listShiftsForEvent } from "@/db/eventShifts";
 import { getSecretKey } from "@/db/secrets";
 import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { humanizeError } from "@/lib/humanizeError";
@@ -62,6 +63,7 @@ export default function EventDetailPage() {
   // back to the calendar. Fixes the project → event → Back dead-end
   // that used to dump members onto /calendar and lose the project.
   const goBack = useHistoryAwareBack("/calendar");
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { currentMember, members, nodeId, lockState, projects, blockedKeys } =
     useApp();
@@ -100,6 +102,13 @@ export default function EventDetailPage() {
   );
   const rsvps = useLiveQuery(
     () => (eventId ? listRsvpsForEvent(eventId) : Promise.resolve([])),
+    [eventId],
+    [],
+  );
+  // Gates the "Print sign-in sheet" menu item (paper-systems P2) —
+  // a roster only makes sense once the gathering has shifts.
+  const shiftsForPrint = useLiveQuery(
+    () => (eventId ? listShiftsForEvent(eventId) : Promise.resolve([])),
     [eventId],
     [],
   );
@@ -270,6 +279,23 @@ export default function EventDetailPage() {
         handleAddToCalendar();
       },
     });
+    // Paper systems P1/P2: the flyer for the community-center door,
+    // and the clipboard sign-in sheet once shifts exist. Hidden on
+    // cancelled events like add-to-calendar — paper for a cancelled
+    // gathering misdirects (the print pages also refuse on their
+    // own, for stale links).
+    menuItems.push({
+      key: "print-flyer",
+      label: t("events.detail.printFlyer"),
+      onSelect: () => navigate(`/print/event/${event!.id}`),
+    });
+    if (shiftsForPrint.length > 0) {
+      menuItems.push({
+        key: "print-roster",
+        label: t("events.detail.printRoster"),
+        onSelect: () => navigate(`/print/event/${event!.id}/roster`),
+      });
+    }
   }
 
   return (

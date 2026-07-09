@@ -26,6 +26,8 @@ import OrganizerDeskPage from "@/pages/OrganizerDesk";
 import InfrastructurePage from "@/pages/Infrastructure";
 import PrintInvitePage from "@/pages/PrintInvite";
 import PrintBoardPage from "@/pages/PrintBoard";
+import PrintEventFlyerPage from "@/pages/PrintEventFlyer";
+import PrintShiftRosterPage from "@/pages/PrintShiftRoster";
 import { CalendarEventPanel } from "@/components/CalendarEventPanel";
 import { BoardPostPanel } from "@/components/BoardPostPanel";
 import DashboardPage from "@/pages/Dashboard";
@@ -134,6 +136,14 @@ export default function App() {
               chrome, so what prints is just the sheet. */}
           <Route path="/print/invite" element={<PrintInvitePage />} />
           <Route path="/print/board" element={<PrintBoardPage />} />
+          <Route
+            path="/print/event/:eventId"
+            element={<PrintEventFlyerPage />}
+          />
+          <Route
+            path="/print/event/:eventId/roster"
+            element={<PrintShiftRosterPage />}
+          />
           <Route path="/invites" element={<InvitesPage />} />
           <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />

@@ -1,6 +1,7 @@
 # Paper systems — plans
 
-Status: **plans.** Print surfaces (desktop-power-tools plan 5)
+Status: **P1 and P2 shipped; P3-P6 are plans; P7-P8 gated.**
+Print surfaces (desktop-power-tools plan 5)
 shipped the plumbing — chrome-free printing on every page, the
 `/print/...` route shape, the QR-per-thing pattern, and the dated
 "paper doesn't sync or purge" honesty footer. But so far paper only
@@ -33,7 +34,12 @@ Shared guardrails, up front:
 - **En/es parity** on every sheet — a bulletin board in a bilingual
   neighborhood should be printable twice.
 
-## P1. Event flyer
+## P1. Event flyer — SHIPPED
+
+As built: as planned (pages/PrintEventFlyer.tsx), plus a screen-only
+companion link to the P2 roster when the gathering has shifts. The
+overflow-menu entries hide on cancelled events (the add-to-calendar
+precedent) and the pages also refuse on their own for stale links.
 
 **What:** the invite poster's shape applied to a gathering: title,
 when (start–end), where, the plain-text description, a QR to the
@@ -54,7 +60,15 @@ cancelled/ended refusal, menu entry present.
 
 **Size:** small. The poster page minus the verification maths.
 
-## P2. Shift roster / sign-in sheet
+## P2. Shift roster / sign-in sheet — SHIPPED
+
+As built: as planned (pages/PrintShiftRoster.tsx). One delta: the
+entry point is an overflow-menu item on EventDetail (appearing once
+shifts exist) rather than a link inside the shifts card — the menu
+already carried the print register, and the shifts card stays
+focused on acting. The answer to the plan's open question: ANY
+event's sheet is printable, not just the viewer's own — printing is
+a helper act, and the data is already on every device.
 
 **What:** how volunteer days actually run — a clipboard, not a
 phone. For an event with shifts: each shift's label, time window,

@@ -10,6 +10,17 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Print a flyer or a sign-in sheet for any gathering.** From an
+  event's menu, "Print flyer" makes a door-ready page — what, when,
+  where, and a code that opens the event. Once a gathering has
+  shifts, "Print sign-in sheet" adds the clipboard version: each
+  shift with ruled lines for handwritten names (as many lines as
+  spots left) and a code for signing up by phone; the organizer
+  types the paper names into the app afterward. Neither will print
+  for a cancelled or already-finished gathering — paper that
+  misdirects is worse than no paper.
+
+### Added
 - **Plans for going further with paper are on the table** —
   docs/paper-systems.md: event flyers, a work-day sign-in sheet
   for the clipboard, a fridge calendar, a wallet card + shelter
