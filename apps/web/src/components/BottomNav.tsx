@@ -27,6 +27,7 @@ import {
   IconDashboard,
   IconMessages,
   IconProfile,
+  IconSettings,
   type IconProps,
 } from "@/components/visual";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
@@ -114,6 +115,22 @@ export function BottomNav() {
   // read as a rail rather than five stretched tabs — the "stretched
   // phone app" half of the desktop-waste pilot report. Same DOM, same
   // five NavLinks, same labels at every width.
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    [
+      "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[0.6875rem] font-medium leading-tight transition-colors sm:text-xs sm:leading-normal lg:py-3",
+      isActive
+        ? "text-canopy-700 dark:text-canopy-300"
+        : "text-moss-600 dark:text-moss-300 hover:text-canopy-700 dark:hover:text-canopy-300",
+    ].join(" ");
+
+  // At lg+ the nav is a flex COLUMN so the primary items sit at the
+  // top and a utility slot (Settings) can be pushed to the base with
+  // mt-auto — the Slack/Discord/VS Code left-rail pattern. On mobile
+  // the nav is a plain block holding the horizontal item row and the
+  // Settings link is `hidden`, so the bottom tab bar stays exactly
+  // five cells (the phone-width ceiling the five-item design was
+  // built around; Settings stays reachable there via the Profile
+  // gear + Ctrl-K).
   return (
     <nav
       aria-label={t("nav.primaryNav")}
@@ -121,23 +138,16 @@ export function BottomNav() {
                  border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
-                 lg:w-20 lg:border-r lg:border-t-0 lg:pb-0"
+                 lg:flex lg:w-20 lg:flex-col lg:border-r lg:border-t-0 lg:pb-0"
     >
-      <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:mx-0 lg:h-full lg:max-w-none lg:flex-col lg:justify-start lg:gap-1 lg:pt-4">
+      <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:mx-0 lg:max-w-none lg:flex-col lg:justify-start lg:gap-1 lg:pt-4">
         {ITEMS.map((item) => (
           <li key={item.to} className="flex-1 lg:flex-none">
             <NavLink
               to={item.to}
               end={item.to === "/"}
               onKeyDown={handleArrowNav}
-              className={({ isActive }) =>
-                [
-                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[0.6875rem] font-medium leading-tight transition-colors sm:text-xs sm:leading-normal lg:py-3",
-                  isActive
-                    ? "text-canopy-700 dark:text-canopy-300"
-                    : "text-moss-600 dark:text-moss-300 hover:text-canopy-700 dark:hover:text-canopy-300",
-                ].join(" ")
-              }
+              className={linkClass}
             >
               <item.Icon size={22} />
               <span className="text-center break-words">
@@ -147,6 +157,23 @@ export function BottomNav() {
           </li>
         ))}
       </ul>
+
+      {/* Desktop-only utility slot, pinned to the base of the rail.
+          A different tier from the primary five (own border-topped
+          section, outside the ul's arrow-key group — a plain Tab
+          stop), so it never joins the mobile tab bar or the primary
+          reading order. */}
+      <NavLink
+        to="/settings"
+        className={(state) =>
+          `hidden border-t border-moss-200 dark:border-moss-800 lg:mt-auto lg:flex ${linkClass(
+            state,
+          )}`
+        }
+      >
+        <IconSettings size={22} />
+        <span className="text-center break-words">{t("nav.settings")}</span>
+      </NavLink>
     </nav>
   );
 }

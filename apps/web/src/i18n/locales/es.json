@@ -436,7 +436,8 @@
     "dashboard": "Panel",
     "messages": "Mensajes",
     "profile": "Perfil",
-    "primaryNav": "Navegación principal"
+    "primaryNav": "Navegación principal",
+    "settings": "Ajustes"
   },
   "calendar": {
     "panel": {
