@@ -1164,6 +1164,12 @@ export const SETTING_KEYS = {
    *  drill. The runbooks stay the source of truth; this is only the
    *  tracker. Never federated (settings never are). */
   drillChecklists: "drillChecklists",
+  /** JSON `GatheringConfig` (lib/useGatheringConfig.ts): the gathering
+   *  screen's device-local curation — category on/off toggles, per-item
+   *  pin/hide, dwell seconds, and an optional screen title. Never
+   *  federated (settings never are) and carries no privacy weight: it
+   *  only rearranges already-public content on this one device. */
+  gatheringScreenConfig: "gatheringScreenConfig",
 } as const;
 
 export async function getSetting(key: string): Promise<string | undefined> {

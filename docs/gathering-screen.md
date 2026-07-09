@@ -135,7 +135,7 @@ The net rule: **the wall never shows anything the community board
 doesn't already show, and the one slide that would (the people
 directory) waits for the opt-out to be real.**
 
-## 6. Phase 1 — the screen itself (build now)
+## 6. Phase 1 — the screen itself (shipped)
 
 ### 6.1 Route & shell
 
@@ -228,12 +228,20 @@ and deserves its own design pass — it is the single biggest dependency
 in this document and should be weighed on its own merits, not smuggled in
 under a kiosk.
 
-### 7.2 Organizer curation
+### 7.2 Organizer curation — **shipped**
 
-The pin / hide / reorder panel, category toggles, per-screen dwell time,
-and a screen title — layered on top of the Phase-1 auto-selection so the
+The pin / hide panel, category toggles, per-screen dwell time, and a
+screen title — layered on top of the Phase-1 auto-selection so the
 default still "just works" and the organizer only intervenes to
-disagree. Independent of §7.1; can land before or after it.
+disagree. This is the whole Phase-2 slice that touches **no** privacy
+surface: it's device-local config (never federated) over already-public
+content, so it landed independently of §7.1. Lives in the `/present`
+lobby's "Customize the screen" panel, backed by
+`apps/web/src/lib/useGatheringConfig.ts` (the `gatheringScreenConfig`
+setting) and the `filter` argument to `buildGatheringSlides`. **Hide**
+also serves as the interim "please don't feature my post" control — a
+member asks, the organizer hides it in one tap, no federation required —
+until the self-serve opt-out (§7.3) exists.
 
 ### 7.3 People slide + self-serve opt-out (needs §7.1)
 
@@ -265,14 +273,16 @@ needs its own threat-model treatment before build.
 
 ## 9. Open decision for the operator
 
-The **member-profile federation (§7.1)** work is the gate on the two
-most exciting slides (people directory, real opt-out). It is a genuine
-investment with threat-model implications. The recommended path:
+Phase 1 (the screen itself) and §7.2 (organizer curation) are **shipped** —
+full value for the in-room-members case, no new plumbing, and no privacy
+promise the transport can't keep. What remains is one genuine decision:
 
-1. **Ship Phase 1 now** — full value for the in-room-members case, no new
-   plumbing, no privacy promise the transport can't keep.
-2. Then decide whether member-profile federation (§7.1) is worth building
-   for the people slide + community-wide opt-out, or whether organizer
-   curation (§7.2) alone is enough for the near term.
-3. Treat the multi-use gathering invite (§7.4) as a separate, later
-   security-reviewed effort when recruiting passers-by becomes a priority.
+1. **Whether to build member-profile federation (§7.1)** — the gate on
+   the two most exciting slides (people directory, real self-serve
+   opt-out). It's a real investment with threat-model implications; the
+   interim organizer-mediated Hide (§7.2) covers the "don't feature me"
+   case in the meantime.
+2. **Whether to build the multi-use gathering invite (§7.4)** — a
+   separate, later security-reviewed effort, worth it when recruiting
+   passers-by (not just coordinating existing members) becomes a
+   priority.

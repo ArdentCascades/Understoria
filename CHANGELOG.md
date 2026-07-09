@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Customize the gathering screen.** The `/present` lobby gained a
+  "Customize the screen" panel: give the screen a title (shown on the
+  welcome slide), set how long each slide holds, toggle whole categories
+  (events / tasks / needs / offers) on or off, and **pin** items to lead
+  the rotation or **hide** ones you'd rather not show. It's device-local
+  and only rearranges already-public content, so it carries no privacy
+  weight — and **Hide** doubles as an on-the-spot "please don't feature
+  my post" control until the self-serve version arrives. Defaults still
+  "just work" with no setup.
 - **A gathering screen for the room you're in.** New fullscreen kiosk
   (`/present`, from Your Desk or Ctrl/Cmd+K) that rotates your
   community's live, actionable items on a shared screen or TV — every

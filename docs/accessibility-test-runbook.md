@@ -511,17 +511,38 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### Reorder task modal (ProjectDetail)
 
 - **Entry:** ProjectDetail as an organiser or co-organiser, with
-  at least three tasks. Open the Reorder modal (PR #215).
-- **Steps:** confirm the modal opens with focus on its first
-  control; the task list inside is keyboard-reorderable (Move
-  up / Move down per row); a screen reader announces each
-  reorder via the existing live region the page uses for drag
-  reorders. Close the modal; focus should return to the
+  at least two tasks. Open the **Reorder tasks** dialog from the
+  project header's ⋮ menu (PR #215; consolidated to be the ONLY
+  reorder surface in PR #400 — the main task list carries no inline
+  reorder handles, so don't hunt for Move buttons on the list rows).
+- **Steps:** confirm the dialog opens with focus on its first
+  control; each row is keyboard-reorderable both by drag and by its
+  **Move up / Move down** buttons; a screen reader announces each
+  reorder via the dialog's own live region
+  (`data-testid="reorder-dialog-live-region"`, shared by the drag and
+  button paths). Close the dialog; focus should return to the
   affordance that opened it.
 - **Expected:** focus trapped inside while open; Escape closes;
   Move buttons disabled at the ends with `aria-disabled="true"`;
   every row has a 44×44 touch target; the screen-reader announce
-  reads "Moved <task title> up to position N of M" or analogous.
+  reads "<task title> moved to position N of M" or analogous.
+
+### Gathering screen (`/present`)
+
+- **Entry:** `/present` from Your desk or the palette (PRs #403 /
+  #404). A chromeless fullscreen kiosk; the lobby has a **Start the
+  screen** button and a **Customize the screen** disclosure.
+- **Steps:** in the lobby, confirm the customize `<details>` opens by
+  keyboard and every control (title input, dwell chips, category
+  toggles, per-item Pin/Hide) is focusable with a visible ring and
+  toggles report `aria-pressed`. Start the show; confirm keyboard
+  control works (Left/Right step, Space pauses, Escape exits), each QR
+  image has a descriptive `aria-label` naming the action, and the
+  fade-out controls are still keyboard-reachable.
+- **Expected:** the show honors `prefers-reduced-motion` (hard-cut,
+  no cross-fade); the QR stays black-on-white for scan reliability;
+  the screen requests a wake lock where supported (soft no-op
+  otherwise); Escape / the Exit control returns to the lobby.
 
 ### Conversation header kebab menu
 
@@ -648,8 +669,10 @@ onboard — are prioritized; the rest confirm the page is navigable.
 
 ### Per-task page + BackLink breadcrumb (TaskDetail)
 
-- **Entry:** from a project's task list, activate the
-  "Open task · N comments" link on a task card. Route
+- **Entry:** from a project's task list, activate a task card — the
+  whole card is a link (its title carries a stretched link that fills
+  the card; PR #402 removed the separate "Open task" footer), and a
+  💬 comment-count chip rides the card header. Route
   `/project/:id/task/:taskId` (PRs #273 / #274; breadcrumb
   extracted as the `BackLink` primitive in PR #291).
 - **Steps:** on arrival, focus moves per the global route-change

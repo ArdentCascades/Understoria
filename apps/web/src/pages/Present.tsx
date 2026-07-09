@@ -9,13 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -27,12 +21,18 @@ import { useWakeLock } from "@/lib/useWakeLock";
 import {
   buildGatheringSlides,
   hasActionableSlides,
+  slideId,
+  slideLabel,
   type GatheringSlide,
 } from "@/lib/gatheringSlides";
+import {
+  DWELL_CHOICES,
+  togglePinned,
+  toggleHidden,
+  useGatheringConfig,
+  type GatheringConfig,
+} from "@/lib/useGatheringConfig";
 
-// Dwell per slide (docs/gathering-screen.md §6.2). ~12s: long enough to
-// read and raise a phone, short enough to keep the wall alive.
-const DWELL_MS = 12_000;
 // Re-select slides on this cadence so a past event or a just-claimed task
 // ages out of the rotation even while nobody touches the screen. The live
 // Dexie data already re-renders on writes; this only advances wall-clock
@@ -61,6 +61,7 @@ export default function PresentPage() {
   const navigate = useNavigate();
   const reduced = useReducedMotion();
 
+  const { config, update: updateConfig } = useGatheringConfig();
   const [presenting, setPresenting] = useState(false);
   const [paused, setPaused] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -77,38 +78,39 @@ export default function PresentPage() {
     typeof window !== "undefined" ? window.location.origin : "";
   const anonymous = t("present.anonymous");
 
-  const slides = useMemo(
-    () =>
-      buildGatheringSlides({
-        origin,
-        events: app.events,
-        eventCancellations: app.eventCancellations,
-        eventRsvps: app.eventRsvps,
-        projects: app.projects,
-        projectTasks: app.projectTasks,
-        posts: app.posts,
-        members: app.members,
-        currentMemberKey: app.currentMember?.publicKey ?? null,
-        now,
-        anonymousName: anonymous,
-      }),
-    [
-      origin,
-      anonymous,
-      now,
-      app.events,
-      app.eventCancellations,
-      app.eventRsvps,
-      app.projects,
-      app.projectTasks,
-      app.posts,
-      app.members,
-      app.currentMember,
-    ],
+  // Config parses fresh each render, so a plain compute (buildGatheringSlides
+  // is a cheap pure pass over already-loaded state) is simpler and correct
+  // than memoizing against churning object identities.
+  const baseInput = {
+    origin,
+    events: app.events,
+    eventCancellations: app.eventCancellations,
+    eventRsvps: app.eventRsvps,
+    projects: app.projects,
+    projectTasks: app.projectTasks,
+    posts: app.posts,
+    members: app.members,
+    currentMemberKey: app.currentMember?.publicKey ?? null,
+    now,
+    anonymousName: anonymous,
+  };
+  const slides = buildGatheringSlides({
+    ...baseInput,
+    filter: {
+      categories: config.categories,
+      pinnedIds: config.pinnedIds,
+      hiddenIds: config.hiddenIds,
+    },
+  });
+  // The full menu (ignoring pins/hides/toggles) for the lobby's curation
+  // list, so an organizer can pin or hide any candidate.
+  const candidates = buildGatheringSlides(baseInput).filter(
+    (s) => s.kind !== "welcome",
   );
+  const welcomeTitle = config.title.trim() || t("present.welcome.title");
 
   const { index, next, prev } = useSlideshow(slides.length, {
-    dwellMs: DWELL_MS,
+    dwellMs: config.dwellSeconds * 1000,
     paused: paused || !presenting,
   });
   useWakeLock(presenting);
@@ -201,6 +203,13 @@ export default function PresentPage() {
           >
             {t("present.lobby.back")}
           </button>
+
+          <CustomizePanel
+            config={config}
+            candidates={candidates}
+            onChange={updateConfig}
+            t={t}
+          />
         </div>
       </div>
     );
@@ -223,6 +232,7 @@ export default function PresentPage() {
           slide={slide}
           qrSize={qrSize}
           showEmptyHint={showEmptyHint}
+          welcomeTitle={welcomeTitle}
           t={t}
         />
       </div>
@@ -296,6 +306,159 @@ function ControlButton({
   );
 }
 
+// Organizer curation (docs/gathering-screen.md §7.2) — device-local, over
+// already-public content, so no privacy weight. Lives in the lobby so it's
+// set before the show starts. `Hide` doubles as the interim "please don't
+// feature my post" control: no member-profile federation needed.
+function CustomizePanel({
+  config,
+  candidates,
+  onChange,
+  t,
+}: {
+  config: GatheringConfig;
+  candidates: GatheringSlide[];
+  onChange: (next: GatheringConfig) => void;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
+  const cats: Array<keyof GatheringConfig["categories"]> = [
+    "events",
+    "tasks",
+    "needs",
+    "offers",
+  ];
+  const chip = (active: boolean) =>
+    `rounded-full px-3 py-1 text-sm ${
+      active
+        ? "bg-white text-canopy-900"
+        : "bg-white/10 text-white hover:bg-white/20"
+    }`;
+  return (
+    <details className="mt-6 rounded-xl bg-white/5 p-4 text-left">
+      <summary className="cursor-pointer text-sm font-semibold text-white/90">
+        {t("present.customize.summary")}
+      </summary>
+
+      <div className="mt-4 flex flex-col gap-4">
+        <label className="flex flex-col gap-1 text-sm text-white/80">
+          {t("present.customize.titleLabel")}
+          <input
+            type="text"
+            value={config.title}
+            maxLength={80}
+            placeholder={t("present.customize.titlePlaceholder")}
+            onChange={(e) => onChange({ ...config, title: e.target.value })}
+            className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+          />
+        </label>
+
+        <div className="text-sm text-white/80">
+          <span className="mb-1 block">
+            {t("present.customize.dwellLabel")}
+          </span>
+          <div className="flex gap-2">
+            {DWELL_CHOICES.map((n) => (
+              <button
+                key={n}
+                type="button"
+                aria-pressed={config.dwellSeconds === n}
+                onClick={() => onChange({ ...config, dwellSeconds: n })}
+                className={chip(config.dwellSeconds === n)}
+              >
+                {t("present.customize.dwellUnit", { n })}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-sm text-white/80">
+          <span className="mb-1 block">
+            {t("present.customize.categoriesLabel")}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {cats.map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={config.categories[k]}
+                onClick={() =>
+                  onChange({
+                    ...config,
+                    categories: {
+                      ...config.categories,
+                      [k]: !config.categories[k],
+                    },
+                  })
+                }
+                className={chip(config.categories[k])}
+              >
+                {t(`present.customize.cat.${k}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-sm text-white/80">
+          <span className="mb-1 block">
+            {t("present.customize.itemsLabel")}
+          </span>
+          {candidates.length === 0 ? (
+            <p className="text-white/50">{t("present.customize.itemsEmpty")}</p>
+          ) : (
+            <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto pr-1">
+              {candidates.map((c) => {
+                const id = slideId(c);
+                const pinned = config.pinnedIds.includes(id);
+                const hidden = config.hiddenIds.includes(id);
+                return (
+                  <li
+                    key={id}
+                    className={`flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1 ${
+                      hidden ? "opacity-50" : ""
+                    }`}
+                  >
+                    <span className="min-w-0 flex-1 truncate">
+                      {slideLabel(c)}
+                    </span>
+                    <button
+                      type="button"
+                      aria-pressed={pinned}
+                      onClick={() => onChange(togglePinned(config, id))}
+                      className={`rounded px-2 py-0.5 text-xs ${
+                        pinned
+                          ? "bg-white text-canopy-900"
+                          : "bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      {pinned
+                        ? t("present.customize.pinned")
+                        : t("present.customize.pin")}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={hidden}
+                      onClick={() => onChange(toggleHidden(config, id))}
+                      className={`rounded px-2 py-0.5 text-xs ${
+                        hidden
+                          ? "bg-white text-canopy-900"
+                          : "bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      {hidden
+                        ? t("present.customize.hidden")
+                        : t("present.customize.hide")}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+    </details>
+  );
+}
+
 // A white card behind the QR keeps it black-on-white (best scan
 // reliability) even against the dark wall background.
 function QrCard({ value, size, ariaLabel }: { value: string; size: number; ariaLabel: string }) {
@@ -310,11 +473,13 @@ function SlideView({
   slide,
   qrSize,
   showEmptyHint,
+  welcomeTitle,
   t,
 }: {
   slide: GatheringSlide;
   qrSize: number;
   showEmptyHint: boolean;
+  welcomeTitle: string;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   if (slide.kind === "welcome") {
@@ -324,7 +489,7 @@ function SlideView({
           {t("present.welcome.eyebrow")}
         </p>
         <h1 className="mt-4 font-serif text-6xl font-bold leading-tight md:text-7xl">
-          {t("present.welcome.title")}
+          {welcomeTitle}
         </h1>
         <p className="mt-6 text-2xl text-white/80 md:text-3xl">
           {showEmptyHint ? t("present.welcome.empty") : t("present.welcome.hint")}
