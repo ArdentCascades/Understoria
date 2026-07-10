@@ -13,7 +13,9 @@
 // The nav is exactly the five primary items on every platform — the
 // old desktop-only pinned Settings slot moved into the global
 // me-menu (AppHeader), so the rail and the tab bar are now the same
-// five links everywhere. The second test locks that removal.
+// five links everywhere. The fifth slot is "My work" (the combined
+// tasks + projects surface); Profile moved into the me-menu as the
+// member's identity row. The later tests lock both removals.
 //
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -69,12 +71,17 @@ describe("BottomNav", () => {
       "/dashboard",
       "/calendar",
       "/messages",
-      "/profile",
+      "/my-work",
     ]);
   });
 
   it("carries NO Settings slot — Settings lives in the me-menu now", () => {
     render();
     expect(container.querySelector('a[href="/settings"]')).toBeNull();
+  });
+
+  it("carries NO Profile slot — Profile lives in the me-menu now", () => {
+    render();
+    expect(container.querySelector('a[href="/profile"]')).toBeNull();
   });
 });

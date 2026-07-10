@@ -117,6 +117,12 @@ export function CommandPalette() {
         },
         {
           kind: "route",
+          id: "route:/my-work",
+          title: t("nav.myWork"),
+          to: "/my-work",
+        },
+        {
+          kind: "route",
           id: "route:/profile",
           title: t("nav.profile"),
           to: "/profile",

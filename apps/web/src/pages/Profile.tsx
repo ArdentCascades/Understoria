@@ -313,8 +313,9 @@ function ProfileBody({ member }: { member: Member }) {
   // care, feeding the "Projects you organize" jump-off card below.
   // `projectCount` is the only field the card reads, and it depends on
   // projects / tasks / blockedKeys only (the co-organizer invitation
-  // rows affect `pendingInviteCount`, which lives on /my-projects), so
-  // we pass the lean slice here and let the page hydrate the rest.
+  // rows affect `pendingInviteCount`, which lives on the My work
+  // tab), so we pass the lean slice here and let the page hydrate
+  // the rest.
   const organizing = useMemo(
     () =>
       myOrganizedProjects({
@@ -500,8 +501,8 @@ function ProfileBody({ member }: { member: Member }) {
             {/* Cross-project commitments jump-off. Rendered only when the
                 member is actually carrying something — at zero the card
                 disappears rather than display an empty obligation. The
-                full inventory lives at /my-tasks; this card is the
-                Profile-side door to it. */}
+                full inventory lives on the My work tab; this card is the
+                Profile-side door to its tasks section. */}
             {carrying.taskCount > 0 && (
               <section className="card mb-4">
                 <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
@@ -514,7 +515,7 @@ function ProfileBody({ member }: { member: Member }) {
                   />
                 </p>
                 <Link
-                  to="/my-tasks"
+                  to="/my-work#tasks"
                   className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
                 >
                   {t("myTasks.seeAll")}
@@ -524,7 +525,8 @@ function ProfileBody({ member }: { member: Member }) {
             {/* Organizer-side jump-off, same posture as the carrying card:
                 shown only when the member actually stewards something, so an
                 empty list never reads as "you should be organizing more".
-                The full workbench lives at /my-projects. */}
+                The full workbench is the My work tab's projects
+                section. */}
             {organizing.projectCount > 0 && (
               <section className="card mb-4">
                 <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
@@ -534,7 +536,7 @@ function ProfileBody({ member }: { member: Member }) {
                   <MyProjectsSummary projectCount={organizing.projectCount} />
                 </p>
                 <Link
-                  to="/my-projects"
+                  to="/my-work#projects"
                   className="mt-2 inline-block text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
                 >
                   {t("myProjects.seeAll")}

@@ -435,6 +435,7 @@
     "calendar": "Calendario",
     "dashboard": "Panel",
     "messages": "Mensajes",
+    "myWork": "Mi trabajo",
     "profile": "Perfil",
     "primaryNav": "Navegación principal",
     "settings": "Ajustes"
@@ -1252,14 +1253,18 @@
       "presence": "Cerrada sin efecto: quien organiza ha vuelto a estar activo."
     }
   },
+  "myWork": {
+    "title": "Mi trabajo",
+    "subtitle": "Lo que has tomado y lo que organizas — todo en un solo lugar, de todos los proyectos.",
+    "emptyTitle": "Nada a tu cargo por ahora",
+    "empty": "Cuando tomes una tarea o inicies un proyecto, aparecerá aquí — tus compromisos y los proyectos que organizas, en un solo lugar."
+  },
   "myTasks": {
     "title": "Tareas que llevas",
-    "subtitle": "Cada tarea que has tomado, de todos los proyectos, en un solo lugar.",
     "summaryOne": "Llevas 1 tarea ahora mismo.",
     "summaryOneProject": "Llevas {{count}} tareas en un proyecto.",
     "summaryOther": "Llevas {{count}} tareas en {{projects}} proyectos.",
     "claimedAgo": "Tomada {{when}}",
-    "emptyTitle": "Nada pendiente por ahora",
     "empty": "Cuando tomes una tarea de un proyecto comunitario aparecerá aquí, para que veas tus compromisos sin abrir cada proyecto uno por uno.",
     "browseProjects": "Explorar proyectos",
     "seeAll": "Ver todas tus tareas",
@@ -1267,7 +1272,6 @@
   },
   "myProjects": {
     "title": "Proyectos que organizas",
-    "subtitle": "Cada proyecto a tu cuidado — como organizador o co-organizador — y lo que espera por ti, en un solo lugar.",
     "summaryOne": "1 proyecto está a tu cuidado ahora mismo.",
     "summaryOther": "{{count}} proyectos están a tu cuidado ahora mismo.",
     "awaiting_one": "1 tarea espera tu confirmación",
@@ -1278,7 +1282,6 @@
     "pendingInvites_one": "1 invitación de co-organizador esperando respuesta",
     "pendingInvites_other": "{{count}} invitaciones de co-organizador esperando respuesta",
     "coOrganizerChip": "Co-organizador",
-    "emptyTitle": "Ningún proyecto a tu cuidado ahora mismo",
     "empty": "Cuando inicias un proyecto, o aceptas una invitación de co-organizador, aparece aquí — para que veas todo lo que está a tu cuidado sin abrir cada uno.",
     "startProject": "Iniciar un proyecto",
     "seeAll": "Ver todos los proyectos que organizas",

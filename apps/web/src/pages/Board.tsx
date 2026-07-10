@@ -309,7 +309,7 @@ export default function BoardPage() {
 
   // Whether the member is carrying any task claims across projects —
   // gates the quiet "Tasks you're carrying" jump-off below the
-  // archive link. Uses the same helper as the /my-tasks page so the
+  // archive link. Uses the same helper as the My work tab so the
   // link only shows when the page would have something to show.
   const carryingCount = useMemo(
     () =>
@@ -322,7 +322,7 @@ export default function BoardPage() {
 
   // Whether the member organizes (or co-organizes) any project — gates
   // the quiet "Projects you organize" jump-off below the carrying link.
-  // Same helper as /my-projects so the link only shows when the page
+  // Same helper as the My work tab so the link only shows when the page
   // would have something to show; blockedKeys keeps the gate honest for
   // a completed project whose sole loose end is a blocked completer.
   const organizingCount = useMemo(
@@ -838,7 +838,7 @@ export default function BoardPage() {
                 (no-notifications; solidarity-not-shame). */}
             {carryingCount > 0 && (
               <Link
-                to="/my-tasks"
+                to="/my-work#tasks"
                 className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-3 lg:mt-2 lg:text-left"
               >
                 {t("myTasks.boardLink")}
@@ -851,7 +851,7 @@ export default function BoardPage() {
                 solidarity-not-shame). */}
             {organizingCount > 0 && (
               <Link
-                to="/my-projects"
+                to="/my-work#projects"
                 className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-4 lg:mt-2 lg:text-left"
               >
                 {t("myProjects.boardLink")}

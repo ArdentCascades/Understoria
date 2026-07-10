@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A "My work" tab.** The fifth tab (bottom bar and desktop rail)
+  is now your own work: every task you're carrying and every project
+  you organize, on one read-only page (`/my-work`) — the two views
+  that used to live behind Profile as separate pages. Tasks grouped
+  by project on top, the organizer workbench below (side-by-side on
+  a wide screen); the old `/my-tasks` and `/my-projects` addresses
+  redirect to the matching section, and the quiet links on the
+  board's Projects tab and on Profile land there too. Profile itself
+  moved to the me-menu (top right), where its row is your own name.
+  All actions stay on the project pages, and every number on the
+  page is your own work — no rankings, no badges. The navigation
+  model now has a reference doc (`docs/navigation-shell.md`).
+  (Second half of the navigation restructure.)
 - **A me-menu in the top-right corner, on every page.** A slim new
   header band carries the app's name and a menu button; the menu
   slides in from the right with the about-you destinations — your
@@ -21,7 +34,8 @@ include breaking changes.
   slot is gone — Settings lives in the same menu on both platforms.
   Focus-trapped, Escape closes, honors reduced-motion; the gathering
   screen and print pages stay chromeless. (First half of the
-  navigation restructure — next, the Profile tab becomes "My work.")
+  navigation restructure; the second — the "My work" tab — is the
+  entry above.)
 - **Every template task now carries its own tip.** Open a task on a
   template-started project and a one-or-two-sentence **"Tip for this
   task"** appears under the description — the gotcha, threshold, or
