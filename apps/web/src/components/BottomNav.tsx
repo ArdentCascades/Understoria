@@ -26,7 +26,7 @@ import {
   IconCalendar,
   IconDashboard,
   IconMessages,
-  IconProfile,
+  IconMyWork,
   type IconProps,
 } from "@/components/visual";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
@@ -38,7 +38,7 @@ interface NavItem {
     | "nav.calendar"
     | "nav.dashboard"
     | "nav.messages"
-    | "nav.profile";
+    | "nav.myWork";
   Icon: ComponentType<IconProps>;
 }
 
@@ -54,7 +54,11 @@ const ITEMS: NavItem[] = [
   { to: "/dashboard", labelKey: "nav.dashboard", Icon: IconDashboard },
   { to: "/calendar", labelKey: "nav.calendar", Icon: IconCalendar },
   { to: "/messages", labelKey: "nav.messages", Icon: IconMessages },
-  { to: "/profile", labelKey: "nav.profile", Icon: IconProfile },
+  // The fifth slot is "My work" (docs/navigation-shell.md): every tab
+  // is a daily-work surface. Profile — identity, history, the things
+  // you revisit rather than work in — lives in the me-menu (AppHeader,
+  // top right), where its row is the member's own name.
+  { to: "/my-work", labelKey: "nav.myWork", Icon: IconMyWork },
 ];
 
 // Keyboard navigation inside the bottom nav. Tab still moves into

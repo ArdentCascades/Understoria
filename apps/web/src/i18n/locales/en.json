@@ -435,6 +435,7 @@
     "calendar": "Calendar",
     "dashboard": "Dashboard",
     "messages": "Messages",
+    "myWork": "My work",
     "profile": "Profile",
     "primaryNav": "Primary navigation",
     "settings": "Settings"
@@ -1252,14 +1253,18 @@
       "presence": "Closed without effect — the organizer is active again."
     }
   },
+  "myWork": {
+    "title": "My work",
+    "subtitle": "What you've claimed and what you organize — all of it in one place, across every project.",
+    "emptyTitle": "Nothing in your care right now",
+    "empty": "When you claim a task or start a project, it shows up here — your commitments and the projects you organize, in one place."
+  },
   "myTasks": {
     "title": "Tasks you're carrying",
-    "subtitle": "Every task you've claimed, across all projects, in one place.",
     "summaryOne": "You're carrying 1 task right now.",
     "summaryOneProject": "You're carrying {{count}} tasks in one project.",
     "summaryOther": "You're carrying {{count}} tasks across {{projects}} projects.",
     "claimedAgo": "Claimed {{when}}",
-    "emptyTitle": "Nothing on your plate right now",
     "empty": "When you claim a task in a community project it shows up here, so you can see your commitments without opening each project one by one.",
     "browseProjects": "Browse projects",
     "seeAll": "See all your tasks",
@@ -1267,7 +1272,6 @@
   },
   "myProjects": {
     "title": "Projects you organize",
-    "subtitle": "Every project in your care — as organizer or co-organizer — and what's waiting on you, in one place.",
     "summaryOne": "1 project is in your care right now.",
     "summaryOther": "{{count}} projects are in your care right now.",
     "awaiting_one": "1 task waiting for your confirmation",
@@ -1278,7 +1282,6 @@
     "pendingInvites_one": "1 co-organizer invitation waiting on a reply",
     "pendingInvites_other": "{{count}} co-organizer invitations waiting on a reply",
     "coOrganizerChip": "Co-organizer",
-    "emptyTitle": "No projects in your care right now",
     "empty": "When you start a project, or accept a co-organizer invitation, it shows up here — so you can see everything in your care without opening each one.",
     "startProject": "Start a project",
     "seeAll": "See all projects you organize",

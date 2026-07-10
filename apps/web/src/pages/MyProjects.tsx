@@ -9,22 +9,24 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useApp } from "@/state/AppContext";
-import { myOrganizedProjects, type OrganizedProject } from "@/lib/myProjects";
+import type { MyOrganizedProjectsView, OrganizedProject } from "@/lib/myProjects";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
-import { EmptyState } from "@/components/EmptyState";
-import { WhyTooltip } from "@/components/WhyTooltip";
 import type { Exchange } from "@/types";
 
-// Organizer-side twin of /my-tasks — the projects in the member's care
-// and what's waiting on them, in one pull-only place. Read-only by
-// design: confirmation and every organizer action stay on the project
-// page, so there's exactly one surface that owns those actions and
-// their framing. See `lib/myProjects.ts` for the scope decisions.
+// Organizer-side twin of the carrying view — the projects in the
+// member's care and what's waiting on them, in one pull-only place.
+// Read-only by design: confirmation and every organizer action stay
+// on the project page, so there's exactly one surface that owns those
+// actions and their framing. See `lib/myProjects.ts` for the scope
+// decisions.
+//
+// Once a standalone page at /my-projects; now the organizer half of
+// the combined /my-work tab (MyWork.tsx), which owns the route, the
+// heading, and the empty states. This module keeps the rendering so
+// the section and the Profile summary card stay in one place.
 
 /**
  * Shared summary sentence so the Profile entry card and the page header
@@ -110,85 +112,33 @@ function ProjectCard({
   );
 }
 
-export default function MyProjectsPage() {
-  const {
-    currentMember,
-    projects,
-    projectTasks,
-    exchanges,
-    coorgInvitations,
-    coorgInvitationResponses,
-    coorgInvitationRevocations,
-    blockedKeys,
-  } = useApp();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  const view = useMemo(
-    () =>
-      currentMember
-        ? myOrganizedProjects({
-            memberKey: currentMember.publicKey,
-            projects,
-            projectTasks,
-            coorgInvitations,
-            coorgInvitationResponses,
-            coorgInvitationRevocations,
-            blockedKeys,
-          })
-        : { groups: [], projectCount: 0, awaitingYouTotal: 0 },
-    [
-      currentMember,
-      projects,
-      projectTasks,
-      coorgInvitations,
-      coorgInvitationResponses,
-      coorgInvitationRevocations,
-      blockedKeys,
-    ],
-  );
-
-  if (!currentMember) return null;
-
+/**
+ * The populated body of the organizing view: summary sentence + one
+ * card per project. The caller (MyWork) owns the section heading and
+ * decides what to render at zero projects, so this component assumes
+ * a non-empty view.
+ */
+export function MyProjectsSection({
+  view,
+  exchanges,
+}: {
+  view: MyOrganizedProjectsView;
+  exchanges: readonly Exchange[];
+}) {
   return (
-    <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
-        <button
-          type="button"
-          className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate(-1)}
-        >
-          {t("common.back")}
-        </button>
-        <h1 className="page-title mt-2">{t("myProjects.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
-          {t("myProjects.subtitle")}
-          <WhyTooltip principleId="no-notifications" />
-        </p>
-      </header>
-
-      {view.projectCount === 0 ? (
-        <EmptyState
-          title={t("myProjects.emptyTitle")}
-          message={t("myProjects.empty")}
-          action={{ label: t("myProjects.startProject"), to: "/project/new" }}
-        />
-      ) : (
-        <>
-          <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
-            <MyProjectsSummary projectCount={view.projectCount} />
-          </p>
-          <div className="flex flex-col gap-3">
-            {view.groups.map((group) => (
-              <ProjectCard
-                key={group.project.id}
-                group={group}
-                exchanges={exchanges}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+    <>
+      <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
+        <MyProjectsSummary projectCount={view.projectCount} />
+      </p>
+      <div className="flex flex-col gap-3">
+        {view.groups.map((group) => (
+          <ProjectCard
+            key={group.project.id}
+            group={group}
+            exchanges={exchanges}
+          />
+        ))}
+      </div>
+    </>
   );
 }

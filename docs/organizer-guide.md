@@ -462,10 +462,11 @@ once they've accepted).
   every peer, a work day is indistinguishable from any other
   event, and the location field is never pre-filled for you;
   how specific to be stays your call (see §7b).
-- **"Projects you organize" (`/my-projects`).** If you steward
-  several projects, this pull-only workbench gathers them with
-  what's quietly waiting on you — tasks awaiting your
-  confirmation, open slots, invitations you've issued. It's
+- **"Projects you organize" (the My work tab, `/my-work`).** If
+  you steward several projects, the **My work** tab's projects
+  section gathers them with what's quietly waiting on you — tasks
+  awaiting your confirmation, open slots, invitations you've
+  issued. (The old `/my-projects` address redirects there.) It's
   read-only on purpose: confirming and every other organiser
   action stays on the project page.
 - **Completion gets a communal moment.** When a project reaches

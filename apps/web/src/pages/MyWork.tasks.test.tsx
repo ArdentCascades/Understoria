@@ -23,9 +23,13 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// The tasks-you're-carrying half of the combined My work page, plus
+// the page-level shapes (section anchors, combined empty state). The
+// organizer half is covered in MyWork.projects.test.tsx.
+
 // Mock `useApp` BEFORE importing the page. The real provider needs a
-// hydrated Dexie connection; the page only consumes the three arrays
-// below plus `currentMember`.
+// hydrated Dexie connection; the page only consumes the arrays below
+// plus `currentMember`.
 vi.mock("@/state/AppContext", () => {
   return {
     useApp: () => mockState,
@@ -36,13 +40,18 @@ vi.mock("@/state/AppContext", () => {
 // Importing it once here brings the locale resources in so
 // `useTranslation()` returns real strings during render.
 import "@/i18n";
-import MyTasksPage from "./MyTasks";
+import MyWorkPage from "./MyWork";
 import type { Member, Project, ProjectTask } from "@/types";
 
 interface MockState {
   currentMember: Member | null;
   projects: Project[];
   projectTasks: ProjectTask[];
+  exchanges: never[];
+  coorgInvitations: never[];
+  coorgInvitationResponses: never[];
+  coorgInvitationRevocations: never[];
+  blockedKeys: Set<string>;
 }
 
 let mockState: MockState = blankState();
@@ -52,6 +61,11 @@ function blankState(): MockState {
     currentMember: null,
     projects: [],
     projectTasks: [],
+    exchanges: [],
+    coorgInvitations: [],
+    coorgInvitationResponses: [],
+    coorgInvitationRevocations: [],
+    blockedKeys: new Set<string>(),
   };
 }
 
@@ -146,16 +160,22 @@ function render(node: ReactNode) {
   });
 }
 
-describe("MyTasksPage", () => {
-  it("renders the empty state when the member is carrying nothing", () => {
+describe("MyWorkPage (carrying half)", () => {
+  it("renders ONE combined empty state when nothing is in the member's care", () => {
     mockState.currentMember = makeMember("me-key");
-    render(<MyTasksPage />);
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
-    expect(text).toContain("Nothing on your plate");
-    // The empty-state action points back at the Projects tab.
+    expect(text).toContain("Nothing in your care");
+    // Not two stacked section shells — the section anchors only render
+    // when at least one half has content.
+    expect(container.querySelector("#tasks")).toBeNull();
+    expect(container.querySelector("#projects")).toBeNull();
+    // Browsing projects is the primary door; starting one the quiet
+    // second link.
     expect(
       container.querySelector('a[href="/?tab=projects"]'),
     ).not.toBeNull();
+    expect(container.querySelector('a[href="/project/new"]')).not.toBeNull();
   });
 
   it("shows only the viewing member's active commitments, grouped by project", () => {
@@ -200,7 +220,7 @@ describe("MyTasksPage", () => {
         completedAt: 400,
       }),
     ];
-    render(<MyTasksPage />);
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
     expect(text).toContain("Community fridge");
     expect(text).toContain("Tool library");
@@ -220,6 +240,13 @@ describe("MyTasksPage", () => {
     expect(
       container.querySelector('a[href="/project/p2/task/t2"]'),
     ).not.toBeNull();
+    // Both section anchors exist (the /my-tasks and /my-projects
+    // redirects land on them), and the empty organizer half is a quiet
+    // sentence with the start-a-project door — not a second EmptyState.
+    expect(container.querySelector("#tasks")).not.toBeNull();
+    expect(container.querySelector("#projects")).not.toBeNull();
+    expect(text).toContain("When you start a project");
+    expect(container.querySelector('a[href="/project/new"]')).not.toBeNull();
   });
 
   it("labels submitted work as awaiting confirmation", () => {
@@ -235,7 +262,7 @@ describe("MyTasksPage", () => {
         completedBy: "me-key",
       }),
     ];
-    render(<MyTasksPage />);
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
     expect(text).toContain("Awaiting confirmation");
   });
@@ -254,7 +281,7 @@ describe("MyTasksPage", () => {
         claimedAt: 100,
       }),
     ];
-    render(<MyTasksPage />);
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
     expect(text).toContain("Paused");
   });

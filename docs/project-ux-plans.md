@@ -365,6 +365,14 @@ Modified/added near existing keys (en.json lines 615–626):
 ## 7. "Projects you organize" view
 **Tier:** medium — **Effort:** M
 
+> **Shipped, then superseded (July 2026):** this view and its
+> claimer-side twin shipped as standalone pages (`/my-projects`,
+> `/my-tasks`) and were later folded into the combined **My work**
+> tab at `/my-work` (see `docs/navigation-shell.md`). The old routes
+> redirect to the corresponding sections; the entry points described
+> below now land on those sections. The scope decisions in this plan
+> (read-only, self-only, no counts on entry cards) still hold.
+
 ### Why
 The claimer side just shipped (commit 636c5b7, `/my-tasks`): a member helping on several projects can see their commitments in one pull. The organizer side has the same fragmentation problem, worse: a member who organizes three projects must open each project page to learn whether anything is waiting on their signature, whether tasks are sitting open, and whether a co-organizer invitation they issued is still dangling. The most consequential of these — tasks in `awaiting_confirmation` — is tier-0 in the attention rail's own rationale (apps/web/src/lib/attention.ts:179-181: "your signature is the only thing standing between someone else and their credit"). The rail nudges per-item; nothing today gives an organizer the per-project inventory. This view is the organizer-side twin of `myClaimedTasks`, built from rows already on the device.
 

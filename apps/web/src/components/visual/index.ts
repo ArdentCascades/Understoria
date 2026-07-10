@@ -19,6 +19,7 @@ export {
   IconInvite,
   IconMenu,
   IconMessages,
+  IconMyWork,
   IconProfile,
   IconSearch,
   IconSettings,

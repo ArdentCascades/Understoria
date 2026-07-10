@@ -185,3 +185,18 @@ export function IconInfrastructure(props: IconProps) {
     </Icon>
   );
 }
+
+// A clipboard with a check and a line of writing — the member's own
+// work inventory (tasks carried + projects organized). A familiar
+// "work" shape rather than a botanical one so the tab stays legible
+// to a first-time user, like Messages and Profile.
+export function IconMyWork(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="5" y="4.5" width="14" height="16" rx="2.5" />
+      <rect x="9" y="2.5" width="6" height="3.5" rx="1.25" />
+      <path d="M8.5 12l2.2 2.2 4.8-5" />
+      <path d="M8.5 16.5h7" />
+    </Icon>
+  );
+}

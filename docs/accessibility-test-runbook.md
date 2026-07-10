@@ -245,9 +245,26 @@ onboard — are prioritized; the rest confirm the page is navigable.
   be used." with the reason announced when it's spent/invalid;
   "Continue to the board" is reachable and lands you in onboarding.
 
+### My work
+
+- **Entry:** bottom nav "My work". Route `/my-work` (the old
+  `/my-tasks` and `/my-projects` routes redirect to its sections).
+- **Steps:** read-all; jump by heading between the two `<h2>`
+  sections, "Tasks you're carrying" and "Projects you organize".
+  Arrow through a task row and activate it; confirm it lands on the
+  task's own page. With nothing claimed or organized, confirm the
+  single combined empty state ("Nothing in your care right now")
+  and its "Browse projects" action.
+- **Expected:** heading "My work"; each project group under Tasks
+  is a labelled region whose heading links to the project page;
+  status reads as text chips ("Claimed" / "Awaiting confirmation");
+  nothing on the page is an action — it's a read-only inventory,
+  and claims/confirmations happen on the project pages.
+
 ### Profile
 
-- **Entry:** bottom nav. Route `/profile`.
+- **Entry:** the "Menu" button (top right) → the row with your own
+  display name. Route `/profile`.
 - **Steps:** read-all; jump by heading through balance, the
   profile editor, invites, roles earned, and history. `Tab` to the
   gear in the header. Edit a field and save.

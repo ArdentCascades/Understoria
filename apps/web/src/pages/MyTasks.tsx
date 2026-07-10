@@ -18,14 +18,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useApp } from "@/state/AppContext";
-import { myClaimedTasks, type MyTaskGroup } from "@/lib/myTasks";
+import type { MyClaimedTasksView, MyTaskGroup } from "@/lib/myTasks";
 import { CategoryBadge } from "@/components/CategoryBadge";
-import { EmptyState } from "@/components/EmptyState";
-import { WhyTooltip } from "@/components/WhyTooltip";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import type { Project, ProjectTask } from "@/types";
 
@@ -38,6 +34,11 @@ import type { Project, ProjectTask } from "@/types";
 // page, so there is exactly one surface where those actions (and
 // their careful framing) live. See `lib/myTasks.ts` for the scope
 // decisions.
+//
+// Once a standalone page at /my-tasks; now the claimer half of the
+// combined /my-work tab (MyWork.tsx), which owns the route, the
+// heading, and the empty states. This module keeps the rendering so
+// the section and the Profile summary card stay in one place.
 
 /**
  * One sentence, three grammatical shapes — a single task implies a
@@ -156,59 +157,26 @@ function ProjectGroup({ group }: { group: MyTaskGroup }) {
   );
 }
 
-export default function MyTasksPage() {
-  const { currentMember, projects, projectTasks } = useApp();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  const view = useMemo(
-    () =>
-      currentMember
-        ? myClaimedTasks(currentMember.publicKey, projectTasks, projects)
-        : { groups: [], taskCount: 0, projectCount: 0 },
-    [currentMember, projectTasks, projects],
-  );
-
-  if (!currentMember) return null;
-
+/**
+ * The populated body of the carrying view: summary sentence + one
+ * card per project. The caller (MyWork) owns the section heading and
+ * decides what to render at zero tasks, so this component assumes a
+ * non-empty view.
+ */
+export function MyTasksSection({ view }: { view: MyClaimedTasksView }) {
   return (
-    <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
-        <button
-          type="button"
-          className="btn-ghost -ml-2 text-sm"
-          onClick={() => navigate(-1)}
-        >
-          {t("common.back")}
-        </button>
-        <h1 className="page-title mt-2">{t("myTasks.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
-          {t("myTasks.subtitle")}
-          <WhyTooltip principleId="no-notifications" />
-        </p>
-      </header>
-
-      {view.taskCount === 0 ? (
-        <EmptyState
-          title={t("myTasks.emptyTitle")}
-          message={t("myTasks.empty")}
-          action={{ label: t("myTasks.browseProjects"), to: "/?tab=projects" }}
+    <>
+      <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
+        <MyTasksSummary
+          taskCount={view.taskCount}
+          projectCount={view.projectCount}
         />
-      ) : (
-        <>
-          <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
-            <MyTasksSummary
-              taskCount={view.taskCount}
-              projectCount={view.projectCount}
-            />
-          </p>
-          <div className="flex flex-col gap-3">
-            {view.groups.map((group) => (
-              <ProjectGroup key={group.project.id} group={group} />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+      </p>
+      <div className="flex flex-col gap-3">
+        {view.groups.map((group) => (
+          <ProjectGroup key={group.project.id} group={group} />
+        ))}
+      </div>
+    </>
   );
 }

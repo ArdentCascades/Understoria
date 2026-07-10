@@ -95,6 +95,27 @@ Someone in the community sends you an **invite link**. It looks like
 That's it. You're a member. The app stores your identity locally on
 this device. There is no username or password.
 
+## 2a. Getting around
+
+Five tabs sit at the bottom of the screen (on a wide screen they
+become a rail along the left edge): **Board**, **Dashboard**,
+**Calendar**, **Messages**, and **My work** — every task you've
+claimed and every project you organize, gathered in one place
+(§9 and §12 say more about what lands there).
+
+Everything about *you* lives behind the **Menu** button in the top
+right corner of every page:
+
+- **Your own name** — your Profile page (§12).
+- **Settings** — language, appearance, security, data export.
+- **Invite someone** (§13).
+- **Help** — the in-app guide and FAQ.
+- **Search** — find posts, projects, events, people, and help
+  answers on your device. With a keyboard, **Ctrl+K** (⌘K on a
+  Mac) opens the same search from anywhere.
+- **Community infrastructure** — how the community's own servers
+  are doing.
+
 ## 3. Your starting credits
 
 Every new member starts with **5 hours** of time credits. This means
@@ -375,10 +396,11 @@ small projects), above the task list you'll find:
   carrying — the same affordance organisers use to find their
   own claims quickly.
 
-If you're helping on several projects at once, **Tasks you're
-carrying** (linked from your Profile and from the bottom of the
-Projects tab) gathers every claim of yours in one place, grouped
-by project.
+If you're helping on several projects at once, the **My work** tab
+(bottom of the screen) gathers every claim of yours in one place,
+grouped by project — with the projects you organize below it. The
+quiet **"Tasks you're carrying"** links at the bottom of the
+Projects tab and on your Profile land on the same view.
 
 ### Task dependencies — "Follows:" framing
 
@@ -760,7 +782,7 @@ A few things worth knowing:
 
 ## 12. Your Profile page
 
-Tap **Profile** to see:
+Open the **Menu** (top right) and tap **your own name** to see:
 
 - **Your balance** and a note about what it means. If you have
   exchanges that are awaiting confirmation (yours or the other
@@ -781,14 +803,14 @@ Tap **Profile** to see:
   task's page, and if an exchange of yours is in community review,
   the small amber chip on its row links to the conversation where
   the community is discussing it.
-- **Tasks you're carrying** and **Projects you organize** — links
-  to the two gather-it-in-one-place views: `/my-tasks` collects
-  every task you've claimed across all projects, and
-  `/my-projects` collects every project in your care (as organizer
-  or co-organizer) with what's quietly waiting on you — tasks
+- **Tasks you're carrying** and **Projects you organize** — short
+  summary cards that jump to the **My work** tab (`/my-work`),
+  where both views live together: every task you've claimed across
+  all projects, and every project in your care (as organizer or
+  co-organizer) with what's quietly waiting on you — tasks
   awaiting your confirmation, open slots, invitations you've
-  issued. Both are read-only by design; the actions stay on the
-  project pages.
+  issued. Both views are read-only by design; the actions stay on
+  the project pages.
 - **Invites you've issued** — once you've been in the community a
   while, you can generate invite links for people you want to bring
   in. (See §13.)

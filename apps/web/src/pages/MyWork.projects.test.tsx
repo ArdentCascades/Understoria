@@ -14,6 +14,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// The projects-you-organize half of the combined My work page; the
+// carrying half and page-level shapes live in MyWork.tasks.test.tsx.
+
 // Mock `useApp` BEFORE importing the page — the real provider needs a
 // hydrated Dexie connection; the page only reads the arrays below.
 vi.mock("@/state/AppContext", () => {
@@ -23,7 +26,7 @@ vi.mock("@/state/AppContext", () => {
 });
 
 import "@/i18n";
-import MyProjectsPage from "./MyProjects";
+import MyWorkPage from "./MyWork";
 import type {
   CoOrganizerInvitation,
   Exchange,
@@ -149,13 +152,29 @@ function render(node: ReactNode) {
   });
 }
 
-describe("MyProjectsPage", () => {
-  it("renders the empty state when the member organizes nothing", () => {
+describe("MyWorkPage (organizing half)", () => {
+  it("renders a quiet sentence (not a second EmptyState) when only the organizer half is empty", () => {
     mockState.currentMember = makeMember("me-key");
-    render(<MyProjectsPage />);
+    // A claim keeps the carrying half populated, so the page renders
+    // its sections rather than the combined empty state.
+    mockState.projects = [
+      makeProject({ id: "p1", title: "Someone else's project", organizerKey: "other-key" }),
+    ];
+    mockState.projectTasks = [
+      makeTask({
+        id: "t1",
+        projectId: "p1",
+        assignedTo: "me-key",
+        status: "claimed",
+        claimedAt: 100,
+      }),
+    ];
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
-    expect(text).toContain("No projects in your care");
-    // The empty-state action opens the new-project flow.
+    expect(text).toContain("When you start a project");
+    // The full-page empty title stays out of a half-populated page.
+    expect(text).not.toContain("Nothing in your care");
+    // The quiet line still carries the new-project door.
     expect(container.querySelector('a[href="/project/new"]')).not.toBeNull();
   });
 
@@ -181,7 +200,7 @@ describe("MyProjectsPage", () => {
         completedAt: 500,
       }),
     ];
-    render(<MyProjectsPage />);
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
     expect(text).toContain("Community fridge");
     expect(text).toContain("Tool library");
@@ -213,7 +232,7 @@ describe("MyProjectsPage", () => {
         completedAt: 500,
       }),
     ];
-    render(<MyProjectsPage />);
+    render(<MyWorkPage />);
     const text = container.textContent ?? "";
     expect(text).toContain("Last signature");
     expect(text).not.toContain("Wrapped up");

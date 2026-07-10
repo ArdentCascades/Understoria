@@ -47,8 +47,7 @@ import ProjectNewPage from "@/pages/ProjectNew";
 import ProjectDetailPage from "@/pages/ProjectDetail";
 import TaskDetailPage from "@/pages/TaskDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
-import MyTasksPage from "@/pages/MyTasks";
-import MyProjectsPage from "@/pages/MyProjects";
+import MyWorkPage from "@/pages/MyWork";
 import EventNewPage from "@/pages/EventNew";
 import EventDetailPage from "@/pages/EventDetail";
 import MessagesShell, { MessagesEmptyPane } from "@/pages/Messages";
@@ -168,8 +167,19 @@ export default function App() {
             element={<TaskDetailPage />}
           />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
-          <Route path="/my-tasks" element={<MyTasksPage />} />
-          <Route path="/my-projects" element={<MyProjectsPage />} />
+          <Route path="/my-work" element={<MyWorkPage />} />
+          {/* The two standalone pages folded into /my-work (the
+              "My work" tab); the routes live on as redirects so
+              bookmarks and older in-app links land on the right
+              section of the combined page. */}
+          <Route
+            path="/my-tasks"
+            element={<Navigate to="/my-work#tasks" replace />}
+          />
+          <Route
+            path="/my-projects"
+            element={<Navigate to="/my-work#projects" replace />}
+          />
           <Route path="/events/new" element={<EventNewPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
           {/* Phase 3.1: nested so at lg+ the conversation renders inside
