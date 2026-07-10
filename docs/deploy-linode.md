@@ -416,6 +416,12 @@ docker compose start understoria
 Verify the restored DB by checking `GET /api/health` and a couple of
 member-visible pages.
 
+If the deployment uses `DATABASE_KEY` (encryption at rest), the
+snapshots are encrypted with that same key — the restore above works
+unchanged **as long as the `.env` on the restored host carries the
+same `DATABASE_KEY`**. A snapshot without its key is a brick; keep
+the key escrowed away from the backups.
+
 ## 11. Redeploy on a new version
 
 This is the **safe, non-destructive** path. Member data persists

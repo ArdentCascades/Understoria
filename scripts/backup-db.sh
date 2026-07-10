@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 #
-# Understoria SQLite backup. Uses `sqlite3 .backup` (online backup
-# API) so it's safe to run while the server is writing — better than
-# `cp` of the .db file, which can produce a corrupt snapshot in the
-# middle of a transaction.
+# Understoria SQLite backup. Takes the snapshot through SQLite's own
+# machinery (`VACUUM INTO`, run with the server's bundled
+# better-sqlite3-multiple-ciphers driver) so it's safe to run while
+# the server is writing — better than `cp` of the .db file, which can
+# produce a corrupt snapshot in the middle of a transaction.
+#
+# Works for BOTH deployment shapes:
+#   - plaintext database: snapshot is a plain SQLite file.
+#   - DATABASE_KEY set (encryption at rest): the stock `sqlite3` CLI
+#     cannot even read the file, so the driver applies the key from
+#     the container's own environment and `VACUUM INTO` writes the
+#     snapshot ENCRYPTED WITH THE SAME KEY. Restoring needs that key —
+#     escrow it somewhere that is NOT next to these backups, or the
+#     snapshots are bricks (which is the point of a stolen copy, and
+#     the end of you if you lose the key too).
 #
 # Recommended cron (root crontab on the Linode):
 #
@@ -33,10 +44,23 @@ timestamp=$(date -u +"%Y%m%dT%H%M%SZ")
 mkdir -p "$BACKUP_DIR"
 snapshot="$BACKUP_DIR/understoria-${timestamp}.db"
 
-# Use the running container's sqlite3 to call `.backup`. We avoid
-# `docker cp` of the raw file because the SQLite file may have an
-# in-progress WAL checkpoint when we touch it.
-docker exec "${PROJECT}" sh -c "sqlite3 /data/understoria.db \".backup /tmp/snapshot.db\""
+# Run the snapshot inside the container with the server's own SQLite
+# driver (which understands the optional DATABASE_KEY encryption; the
+# key is read from the container's environment and never appears on a
+# command line or in this script's logs). `VACUUM INTO` takes a
+# consistent read snapshot, so a mid-transaction state is never
+# captured. We avoid `docker cp` of the raw file because the SQLite
+# file may have an in-progress WAL checkpoint when we touch it.
+docker exec -i "${PROJECT}" node - <<'JS'
+const Database = require("better-sqlite3-multiple-ciphers");
+const fs = require("fs");
+fs.rmSync("/tmp/snapshot.db", { force: true });
+const db = new Database("/data/understoria.db", { readonly: true });
+const key = process.env.DATABASE_KEY;
+if (key) db.pragma(`key = '${key.replace(/'/g, "''")}'`);
+db.exec("VACUUM INTO '/tmp/snapshot.db'");
+db.close();
+JS
 docker cp "${PROJECT}:/tmp/snapshot.db" "$snapshot"
 docker exec "${PROJECT}" rm -f /tmp/snapshot.db
 

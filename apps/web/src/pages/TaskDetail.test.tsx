@@ -362,6 +362,21 @@ describe("TaskDetailPage — per-task page", () => {
     expect(claimProjectTaskMock).toHaveBeenCalledWith("t2", viewerKey);
   });
 
+  it("still offers Claim when the task follows an unfinished upstream", () => {
+    // Dependencies are SOFT (task-ordering doc §3, operator-affirmed):
+    // a member may claim ahead of the upstream. The Follows line says
+    // what's pending; the affordance itself is never gated on it.
+    mockState.projectTasks = [
+      task("t1", { title: "First task" }),
+      task("t2", { title: "Second task", dependencies: ["t1"] }),
+    ];
+    render("/project/proj-1/task/t2");
+    expect(container.textContent ?? "").toContain("Follows:");
+    clickButtonByText("Claim this task");
+    expect(claimProjectTaskMock).toHaveBeenCalledTimes(1);
+    expect(claimProjectTaskMock).toHaveBeenCalledWith("t2", viewerKey);
+  });
+
   it("shows the project-not-found guard for an unknown project", () => {
     render("/project/nope/task/x");
     const text = container.textContent ?? "";

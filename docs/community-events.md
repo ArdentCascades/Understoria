@@ -454,9 +454,23 @@ records"; the ruling it supersedes: §11.1 below.
 
 ### §7.3 Peer-node count rendering
 
-The question: a peer-node viewer who opens an event published from
-node A sees no RSVP data (because A's RSVPs never federate). What
-does their UI show?
+> **SUPERSEDED (July 2026, operator-affirmed) — cross-node RSVP goes
+> through your own node; the suppression affordance below was never
+> built and won't be.** Participation federation Phase 2 changed the
+> premise this section argued from: the RSVP control now works on
+> **any** event copy, including one that federated in from a peer
+> node — the member's signed `EventRsvpState` syncs to **their own**
+> community node like every other RSVP. So a peer-node viewer isn't
+> "on the wrong node to RSVP" anymore; they RSVP right where they
+> are, and the count they see is *their community's* RSVPs for that
+> event. What §7 settled still holds: participation records never
+> join the cross-node `peerPull` loop, so each community's roster
+> stays on its own node — the organizer sees their community's
+> RSVPs, node B's members see node B's, and no cross-community
+> attendance graph exists anywhere. The "RSVPs: not visible from
+> this node / RSVP at <organizer-node>" rendering described below
+> was designed for the pre-Phase-2 world and is preserved only as
+> design history.
 
 **Decision: suppress the count entirely on peer-node views and show
 an affordance pointing at the organizer's node.** Rendered shape:
@@ -971,8 +985,11 @@ workstream.
   - Event detail page with the §6 tiered visibility rendering.
   - RSVP control with the §6.2 informed-consent expansion card.
   - Cancel-event surface with reason field (free text, optional).
-  - Cross-node event detail page with the §7.3 "RSVPs: not
-    visible from this node" affordance.
+  - ~~Cross-node event detail page with the §7.3 "RSVPs: not
+    visible from this node" affordance~~ — never built; superseded
+    by participation federation Phase 2 (see the §7.3 note): the
+    ordinary RSVP control works on peer-origin events through the
+    member's own node.
   - i18n keys in `en.json` and `es.json`.
 
 - **PR F — Calendar + attention.** *Shipped in PR #192.*

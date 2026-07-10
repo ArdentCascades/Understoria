@@ -271,7 +271,7 @@ export function TaskCard({
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && acceptingClaims && (
+        {task.status === "open" && currentKey && !isOrganizer && acceptingClaims && (
           <>
             <button
               type="button"

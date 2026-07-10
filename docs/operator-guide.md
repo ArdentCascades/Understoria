@@ -495,15 +495,22 @@ Tell them to export from Profile → Settings → Data & privacy periodically.
 
 If you're running the node: back up `/data/understoria.db` regularly.
 Every row is signed, so even a compromised backup can't be tampered
-with undetectably — but lost backups mean lost history. A simple
-nightly cron is sufficient:
+with undetectably — but lost backups mean lost history. Use the
+bundled `scripts/backup-db.sh` on a nightly cron (see the Linode
+guide §10 for the cron setup) — it snapshots through SQLite's own
+machinery, and it handles **both** deployment shapes: on a plaintext
+database the snapshot is a plain SQLite file, and on a `DATABASE_KEY`
+deployment it uses the server's own encryption-aware driver and the
+snapshot comes out **encrypted with the same key**. (The stock
+`sqlite3` CLI cannot read an encrypted database — a bare
+`.backup` one-liner fails with `SQLITE_NOTADB` there, which is why
+the script is the documented path.) Restoring an encrypted snapshot
+needs the same `DATABASE_KEY`; escrow the key somewhere that is NOT
+next to the backups.
 
-```sh
-docker exec understoria sqlite3 /data/understoria.db ".backup '/data/backup-$(date +%F).sqlite'"
-```
-
-…then move the resulting file off the host. Encrypt at rest before
-storing on third-party infrastructure.
+…then move the resulting file off the host. Encrypt plaintext
+snapshots before storing on third-party infrastructure (encrypted
+ones already are).
 
 ## 8. Things that are NOT yet built (and what to do about it)
 
