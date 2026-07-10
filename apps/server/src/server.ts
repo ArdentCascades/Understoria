@@ -142,12 +142,14 @@ export async function buildServer({
     // bodies are abuse.
     bodyLimit: 64 * 1024,
     // trustProxy is OFF by default so a spoofed X-Forwarded-For from a
-    // direct connection can't influence `req.ip`. Behind the documented
-    // Caddy reverse proxy (which terminates on the same host), set
-    // TRUST_PROXY=loopback so `req.ip` becomes the REAL client IP —
-    // otherwise every client shares the proxy's loopback address and
-    // collapses into ONE rate-limit bucket (Round-4 review). The IP is
-    // still only ever hashed to a bucket, never stored raw.
+    // direct connection can't influence `req.ip`. Under the bundled
+    // compose stack set TRUST_PROXY=true — Caddy arrives from a
+    // bridge-network IP, so `loopback` would silently no-op and every
+    // client would share the proxy's address in ONE rate-limit bucket
+    // (Round-4 review). For a bare-metal Caddy on the same host,
+    // `loopback` is the tighter setting; an explicit IP/CIDR list is
+    // also accepted. The IP is still only ever hashed to a bucket,
+    // never stored raw.
     trustProxy: config.trustProxy === "" ? false : config.trustProxy,
   });
 

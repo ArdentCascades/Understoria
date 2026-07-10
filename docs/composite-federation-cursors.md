@@ -56,11 +56,20 @@ must be designed before any such tooling ships.
 
 ### Affected surfaces (the full inventory)
 
-- **Server stores** (`apps/server/src/db.ts` `list()`): exchanges,
-  posts, vouches, task_comments, coorg_invitations,
-  coorg_invitation_responses, coorg_invitation_revocations, events,
-  event_cancellations, claims (timestamp cursors); redemptions and
-  invite_revocations (`received_at` cursors, token tiebreak).
+- **Server stores** (`apps/server/src/db.ts` `list()` — the
+  authoritative inventory is the set of `pagedRows` call sites,
+  23 as shipped): exchanges, posts, vouches, task_comments,
+  coorg_invitations, coorg_invitation_responses,
+  coorg_invitation_revocations, events, event_cancellations, claims
+  (timestamp cursors); redemptions and invite_revocations
+  (`received_at` cursors, token tiebreak); the LWW state feeds —
+  project_states, task_states, event_rsvps, event_shifts,
+  shift_signups, seed_vault_pledges (`updated_at` cursors); the
+  removal feeds — member_removals, member_reinstatements
+  (`decided_at` cursors); and the governance feeds — proposals,
+  votes, proposal_closures (`created_at` cursors). *(As originally
+  filed, this list named only the first twelve; the state, removal,
+  and governance feeds adopted `pagedRows` as they shipped.)*
 - **Node↔node pullers** (`apps/server/src/peerPull.ts`): one
   persisted high-water mark per record kind per peer in
   `peer_pull_state`.

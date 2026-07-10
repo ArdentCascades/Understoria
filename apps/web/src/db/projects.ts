@@ -75,7 +75,9 @@ import type { ProjectState, TaskState } from "@understoria/shared/types";
  *     Maker, Keystone) — shipped
  *   - Custom milestones beyond auto-25/50/75/100 — still deferred
  *   - Federation: cross-node task claims — still deferred
- *   - 48-hour auto-confirm when organizer is the completer — still deferred
+ *   - Auto-confirm when organizer is the completer — shipped via the
+ *     system-key sweep (`lib/autoConfirmSweep.ts`, configurable
+ *     `autoConfirmHours`, 168h default; see docs/auto-confirm-key.md)
  *   - Task dependencies enforcement (currently a UI hint only) — still deferred
  */
 

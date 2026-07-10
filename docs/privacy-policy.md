@@ -81,16 +81,17 @@ is gone. There is no server-side copy.
 ## 4. What leaves your device
 
 When you take certain actions, the PWA pushes a **signed, immutable
-record** to the community node. Each record is a small JSON object
-covered by an Ed25519 signature from your private key. The record
-types are:
+record** to the community node. Each record is a small JSON object,
+and every type below except `Claim` is covered by an Ed25519
+signature from your private key (the `Claim` row explains its
+deliberate exception). The record types are:
 
 | Action | Record | Visible fields |
 |---|---|---|
 | Post a NEED or OFFER | `Post` | Your public key, title, description, category, hours estimate, urgency, post time, your location zone |
 | Confirm an exchange | `Exchange` | Both members' public keys, hours, category, completion time, signatures |
 | Vouch for another member | `Vouch` | Your public key, their public key, timestamp |
-| Claim a post | `Claim` | Your public key, the post id, claim time |
+| Claim a post | `Claim` | Your public key, the post id, claim time. **Unsigned, by design** — a claim is a lightweight heads-up, not an authoritative record. No credit moves on a claim; the exchange it leads to (signed by both parties) is the source of truth |
 | Comment on a task | `TaskComment` | Your public key, project + task ids, the comment body |
 | Someone redeems your invite | `RedemptionReceipt` | Signed by the **new member** at redemption: the invite id, inviter and new-member public keys, redemption time. The open invite itself never leaves your device — there is deliberately no invite endpoint on the node |
 | Revoke an invite you issued | `InviteRevocation` | Your public key (as inviter), the invite id, revocation time, signature |
@@ -203,10 +204,12 @@ URLs, iCal subscription feeds — both out of scope).
 Beyond the signed records you push, the node sees:
 
 - **IP addresses** of incoming requests. The reverse proxy (Caddy)
-  logs these in its access log; the application server's request
-  log is off by default and does not include request paths or member
-  identifiers. Logs are retained for `[N days]` and are not shared
-  with third parties.
+  logs these in its access log. The application server's own log
+  never records them: at the default log level each request is
+  logged as its HTTP method alone — no IP, no path, no member
+  identifiers (request paths appear only if the operator turns on
+  `LOG_REQUEST_PATHS` during triage). Logs are retained for
+  `[N days]` and are not shared with third parties.
 - **Approximate timing** of your activity — when your client posted,
   pulled, or confirmed. This is the unavoidable consequence of any
   client-server protocol.
@@ -238,9 +241,12 @@ If `[OPERATOR_NAME]` has federated this node with peers (listed at
 `https://[DOMAIN]/api/peers`), then signed records pushed from this
 node propagate to those peers. Specifically:
 
-- Peer nodes can read every `Post`, `Exchange`, `Vouch`, `Claim`,
-  `TaskComment`, `Event`, and `EventCancellation` that your client
-  signed and pushed.
+- Peer nodes can read every `Post`, `Exchange`, `Vouch`,
+  `TaskComment`, `Event`, `EventCancellation`,
+  `CoOrganizerInvitation`, `CoOrganizerInvitationResponse`, and
+  `CoOrganizerInvitationRevocation` that your client signed and
+  pushed. `Claim` records do **not** cross to peers: claims
+  replicate only between mirrors of your own community's node.
 - Peers see public keys, not display names. They learn that "key
   X helped key Y" — not "Alice helped Bob" — unless someone on
   their node has separately associated those keys with names.

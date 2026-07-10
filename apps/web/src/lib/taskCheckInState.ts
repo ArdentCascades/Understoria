@@ -67,8 +67,25 @@ export function taskCheckInState(
   // spam.
   if (task.claimedAt === null) return "fresh";
 
+  // #409 made dependency-blocked tasks claimable early, so a claim can
+  // predate the moment the task became workable. Anchor the ladder at
+  // unblock, not claim: the guard above hides the whole window while a
+  // dep is incomplete, and anchoring at `claimedAt` would let the task
+  // surface straight into the public tier the instant its upstream
+  // completes — skipping the promised private check-in.
+  let effectiveClaimedAt = task.claimedAt;
+  for (const depId of task.dependencies) {
+    const dep = allTasks.find((t) => t.id === depId);
+    // canClaimTask above guarantees every dep is completed; a completed
+    // dep missing its `completedAt` stamp shouldn't happen, but guard
+    // by falling back to the claim time.
+    if (dep?.completedAt != null && dep.completedAt > effectiveClaimedAt) {
+      effectiveClaimedAt = dep.completedAt;
+    }
+  }
+
   const ackOrClaim = Math.max(
-    task.claimedAt,
+    effectiveClaimedAt,
     task.checkInAcknowledgedAt ?? 0,
   );
 
@@ -83,7 +100,7 @@ export function taskCheckInState(
   // failing keeps us in `check_in_due` (private nudge visible to
   // the claimer only).
   const claimFloorPassed =
-    now - task.claimedAt >= config.taskNeedsHelpDays * DAY_MS;
+    now - effectiveClaimedAt >= config.taskNeedsHelpDays * DAY_MS;
   const gracePassed =
     now - ackOrClaim >=
     (config.taskCheckInDays + config.taskCheckInGraceDays) * DAY_MS;

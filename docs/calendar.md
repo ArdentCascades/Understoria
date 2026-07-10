@@ -137,7 +137,8 @@ Filtering is scoped to surfaces members already know about:
 
 ## 7. Empty state
 
-Final copy (en; es parity ships in PR 3):
+Final copy (en; es parity ships in PR 3). The closing invitation
+was added when the create-event FAB shipped, pointing at it:
 
 ```
 The community's calendar is quiet this week.
@@ -145,7 +146,8 @@ The community's calendar is quiet this week.
 When someone creates a project with a deadline or posts a need
 that expires, it'll show up here. Activity from completed
 exchanges shows up too — the calendar reflects what the community
-is doing together, not a score to chase.
+is doing together, not a score to chase. Know of something the
+community should gather for? The + button below starts an event.
 ```
 
 Not "you have nothing scheduled." Not "you're behind." The

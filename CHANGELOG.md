@@ -108,6 +108,32 @@ include breaking changes.
 
 
 ### Fixed
+- **Second audit round: 68 adversarially-verified findings fixed —
+  including four real bugs in freshly shipped code.** A 77-agent
+  audit re-checked every doc against the source and reviewed the
+  newest code itself; every finding survived an independent
+  refutation pass before being fixed. The bugs: the rewritten backup
+  script snapshotted into the container's tmpfs `/tmp`, which
+  `docker cp` cannot read — nightly backups failed on the documented
+  stack (now snapshots under `/data`); `TRUST_PROXY=true`, the value
+  the docs recommend for the bundled stack, crashed the server at
+  boot (the string now coerces to a real boolean, with a boot test);
+  the gathering screen's control buttons leaked their taps into the
+  tap-anywhere-to-pause layer, so Pause did nothing and Next quietly
+  froze the rotation (controls now stop propagation on the right
+  event); and an early-claimed task that was waiting on an upstream
+  could skip its promised private check-in and jump straight to the
+  public "needs more hands" chip — the check-in clock now starts
+  when the task actually becomes workable. Also: the runtime image
+  drops the now-unused sqlite3 CLI, `.env.example`'s keygen
+  one-liner and `TRUSTED_SYSTEM_KEYS` shape are no longer traps,
+  stale "never federates" comments beside the participation
+  federation code tell the truth, ~35 doc corrections landed
+  (honest server-side receipt retention, READ_AUTH pointers, the
+  real device-pairing transfer list, log-retention reality,
+  pre-Phase-2 RSVP descriptions in five docs, and more), and two of
+  the 342 task tips were touched up (a units drift in one Spanish
+  tip; one tip that argued with its own task's sign wording).
 - **"Follows" tasks can be claimed before their upstream is done —
   as designed.** Dependencies were always meant to be soft ("any
   member can claim any open task at any time"), and the data layer

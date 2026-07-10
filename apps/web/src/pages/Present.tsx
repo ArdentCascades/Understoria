@@ -244,46 +244,35 @@ export default function PresentPage() {
         />
       </div>
 
-      {/* Controls — fade out on inactivity so the wall reads clean. */}
+      {/* Controls — fade out on inactivity so the wall reads clean.
+          The container's tap-anywhere pause toggle listens on
+          pointerdown, so the toolbar must stop THAT event (a click
+          handler's stopPropagation runs after pointerdown has already
+          bubbled) or every control press also toggles pause. Bumping
+          here keeps the controls visible through a touch interaction,
+          where no mousemove fires. */}
       <div
         className={`absolute inset-x-0 bottom-0 flex items-center justify-center gap-3 p-4 transition-opacity ${
           controlsVisible ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          bumpControls();
+        }}
       >
-        <ControlButton
-          label={t("present.controls.prev")}
-          onClick={(e) => {
-            e.stopPropagation();
-            prev();
-          }}
-        >
+        <ControlButton label={t("present.controls.prev")} onClick={prev}>
           ‹
         </ControlButton>
         <ControlButton
           label={paused ? t("present.controls.play") : t("present.controls.pause")}
-          onClick={(e) => {
-            e.stopPropagation();
-            setPaused((p) => !p);
-          }}
+          onClick={() => setPaused((p) => !p)}
         >
           {paused ? "▶" : "❚❚"}
         </ControlButton>
-        <ControlButton
-          label={t("present.controls.next")}
-          onClick={(e) => {
-            e.stopPropagation();
-            next();
-          }}
-        >
+        <ControlButton label={t("present.controls.next")} onClick={next}>
           ›
         </ControlButton>
-        <ControlButton
-          label={t("present.controls.exit")}
-          onClick={(e) => {
-            e.stopPropagation();
-            stop();
-          }}
-        >
+        <ControlButton label={t("present.controls.exit")} onClick={stop}>
           ✕
         </ControlButton>
       </div>
@@ -297,7 +286,7 @@ function ControlButton({
   children,
 }: {
   label: string;
-  onClick: (e: React.MouseEvent) => void;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
   return (

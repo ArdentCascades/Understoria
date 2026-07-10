@@ -49,11 +49,13 @@ RUN npm prune --workspaces --include-workspace-root --omit=dev
 FROM node:22-bookworm-slim AS runtime
 
 # tini provides clean signal forwarding so docker stop / SIGTERM
-# triggers the server's graceful shutdown path. sqlite3 is the CLI
-# binary (~3MB) needed by scripts/backup-db.sh's online `.backup`
-# call — the JS binding (better-sqlite3) is unrelated.
+# triggers the server's graceful shutdown path. No sqlite3 CLI:
+# scripts/backup-db.sh snapshots through the server's bundled
+# better-sqlite3-multiple-ciphers driver (the stock CLI couldn't
+# read a DATABASE_KEY-encrypted file anyway), and nothing else in
+# the image needs it.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends tini ca-certificates sqlite3 \
+    && apt-get install -y --no-install-recommends tini ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Non-root user with a writable data dir for the SQLite file.

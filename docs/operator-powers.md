@@ -18,9 +18,19 @@ of leaving them implied.
   — and today they never cross the node at all. They live only on
   the device that holds them; there is no relay, so there isn't even
   ciphertext for the operator to sit on.
-- **Read a device-link transfer.** When you add a device, your
-  identity crosses the node sealed to the new device's key; the node
-  holds ciphertext for minutes and hands it out exactly once.
+- **Read a device-link transfer — with one named exception.** When
+  you add a device, your identity crosses the node sealed to the new
+  device's key; the node holds ciphertext for minutes and hands it
+  out exactly once. The honest caveat: on the tap-to-link path, an
+  operator who is *actively* attacking during those minutes could
+  substitute the ephemeral key your device seals to, and capture the
+  transfer — a residual named in the threat model and
+  `docs/device-pairing.md` §6.7. The word-code and QR paths don't
+  have this hole: the QR never touches the server, and the word-code
+  path ends in a fingerprint-compare screen on both devices that
+  catches a swapped envelope. Linking by tap trusts your own
+  community's node for those minutes; if you don't extend that
+  trust, the other paths are one tap away.
 - **Quietly reassign authority.** A project stays its organizer's; an
   event stays its organizer's; your RSVP stays yours. The rules are
   checked by every member's app against signed records — not by the
@@ -46,10 +56,13 @@ of leaving them implied.
 The community's shared records — the board, events, project state,
 rosters — are readable by every member; that mutual visibility *is*
 the noticeboard. The operator, being a member, reads the same
-records. Since member-authenticated reads shipped
-(`docs/member-authenticated-reads.md`), *non-members* cannot: an
+records. With authenticated reads enabled
+(`READ_AUTH=on` — it ships off by default, and the operator turns it
+on; `docs/member-authenticated-reads.md`), *non-members* cannot: an
 outsider with the node's URL gets `401`, and membership is proven by
-the invite chain, not by an account the operator administers.
+the invite chain, not by an account the operator administers. On a
+node that hasn't enabled it, the feeds remain readable to anyone
+holding the URL.
 
 There is deliberately no dashboard, leaderboard, or per-member
 history surface for anyone — operator included. The app refuses to
@@ -76,8 +89,12 @@ Named plainly, with the honest remedies:
    (Settings → export) plus a fresh node makes the community
    portable.*
 3. **Turn the service off.** Hosting is a plug that can be pulled.
-   *Remedy: every device holds the full community data; standing up
-   a replacement node loses nothing but the URL.*
+   *Remedy: the community's devices collectively hold the data.
+   Since storage windowing, a single device may keep only a recent
+   window (`docs/storage-budget.md`) — but seed-vault pledges mark
+   the members keeping full copies, and re-seeding a replacement
+   node unions every device's records, so the community as a whole
+   loses nothing but the URL.*
 4. **Hold the membership roots.** With authenticated reads enabled,
    the operator configures the founding keys the invite chain grows
    from (`NODE_FOUNDER_KEYS`). Misconfiguring them locks members
@@ -111,10 +128,12 @@ Structure beats vigilance:
 - **Operator transparency is built in.** `GET /config` publishes the
   operator's self-declared name, funding note, and contact — set at
   deploy, visible to every member in the app.
-- **The exit is real.** Because every device carries the data and
-  every record is signed, the community can leave a bad operator
-  with an afternoon's work. That fact, known by everyone, is itself
-  the strongest check.
+- **The exit is real.** Because the community's devices together
+  carry the data — individual devices may hold only a window, and
+  seed-vault pledges name who keeps full copies — and every record
+  is signed, the community can leave a bad operator with an
+  afternoon's work: a re-seed unions everyone's copies onto the new
+  node. That fact, known by everyone, is itself the strongest check.
 
 ## Where the deeper analysis lives
 

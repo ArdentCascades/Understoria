@@ -281,7 +281,10 @@ If a change pushes us past any of those, call it out in the PR.
 Good entry points to start reading:
 
 1. `src/types/index.ts` — the shape of every domain object.
-2. `src/lib/timebank.ts` — the simplest core module (≈20 lines).
+2. `src/lib/timebank.ts` — the credit math, event-sourced from the
+   exchange log (~300 lines that read top to bottom). For a smaller
+   first bite, `src/lib/boardTab.ts` (~50 lines) shows the house
+   style in miniature.
 3. `src/db/actions.ts` — the post lifecycle, top to bottom.
 4. `src/pages/PostDetail.tsx` — how a page consumes context, actions,
    and components.

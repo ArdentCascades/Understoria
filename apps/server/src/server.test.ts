@@ -606,6 +606,63 @@ describe("GET /peers with configured peers", () => {
   });
 });
 
+describe("TRUST_PROXY parsing", () => {
+  it('coerces "true"/"false" to booleans (the raw string "true" would crash proxy-addr at boot)', () => {
+    expect(
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        TRUST_PROXY: "true",
+      } as NodeJS.ProcessEnv).trustProxy,
+    ).toBe(true);
+    expect(
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        TRUST_PROXY: " TRUE ",
+      } as NodeJS.ProcessEnv).trustProxy,
+    ).toBe(true);
+    expect(
+      readConfigFromEnv({
+        LOG_LEVEL: "fatal",
+        TRUST_PROXY: "false",
+      } as NodeJS.ProcessEnv).trustProxy,
+    ).toBe(false);
+  });
+
+  it("passes address values (loopback, IPs, CIDRs, lists) through as-is", () => {
+    for (const value of [
+      "loopback",
+      "127.0.0.1",
+      "10.0.0.0/8",
+      "loopback, 172.16.0.0/12",
+    ]) {
+      expect(
+        readConfigFromEnv({
+          LOG_LEVEL: "fatal",
+          TRUST_PROXY: value,
+        } as NodeJS.ProcessEnv).trustProxy,
+      ).toBe(value);
+    }
+  });
+
+  it("boots with TRUST_PROXY=true — the bundled compose-stack setting", async () => {
+    const trustDb = openDatabase(":memory:");
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      NODE_ID: "node_test",
+      TRUST_PROXY: "true",
+    } as NodeJS.ProcessEnv);
+    const built = await buildServer({ config, database: trustDb });
+    try {
+      await built.app.ready();
+      const res = await built.app.inject({ method: "GET", url: "/health" });
+      expect(res.statusCode).toBe(200);
+    } finally {
+      await built.app.close();
+      trustDb.close();
+    }
+  });
+});
+
 describe("GET /config with operator info", () => {
   let withOperator: FastifyInstance;
   let withOperatorDb: DatabaseType;

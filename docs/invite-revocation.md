@@ -223,8 +223,13 @@ is minted or destroyed, consistent with §6's "the receipt is not a
   so backdating buys nothing. (`revokedAt` is retained only for
   display: "revoked on …".)
 - **Unauthenticated `GET /invite-revocations`.** Same posture as every
-  sibling GET; read-side auth lands for all of them together with
-  `docs/federated-node-allowlist.md`.
+  sibling GET — and read-side auth has since landed for all of them
+  together as member-authenticated reads
+  (`docs/member-authenticated-reads.md`): with `READ_AUTH=on` (opt-in;
+  off by default) federation GETs are deny-by-default for non-members.
+  (This bullet originally pointed at
+  `docs/federated-node-allowlist.md`; that note is about mirror-push
+  trust, not read auth.)
 - **Purge.** The `invite_revocations` store gets the same soft/hard
   purge hooks as the redemptions store; the local `invites` table is
   already cleared by both purges (round-2 fix).

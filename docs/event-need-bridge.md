@@ -477,10 +477,14 @@ precisely the consent boundary this whole note defends.
   line, no link to the need — even when their node holds a
   federated copy of that need. The bridge context exists only on
   the home node.
-- A cross-node member who wants the context follows the same
-  path cross-node RSVPs already take (`community-events.md`
-  §7.3): open the organizer's node, where the event page shows
-  the bridge line and the RSVP control both.
+- RSVP'ing is no part of this degradation anymore: since
+  participation Phase 2, a cross-node member RSVPs to their own
+  community's copy of the event through their own node (see the
+  supersession note on `community-events.md` §7.3 — the
+  open-the-organizer's-node flow is dead). What still lives only
+  at home is the bridge *context*: the "answers a need" line
+  renders where the local-only link row exists, so a member who
+  wants that context views the event on the organizer's node.
 - If the author wants cross-node readers to understand what the
   gathering is for, the title and description are theirs to
   write — "Helping hands — moving day for a neighbor's need" —

@@ -23,18 +23,15 @@
 export * from "@understoria/shared/types";
 
 /**
- * Local-only RSVP shape — see `docs/community-events.md` §4 (data
- * model) + §7 (federation). EventRsvpRow lives in the web app's local
- * Dexie store and never federates. The shared package deliberately
- * omits an `EventRSVP` type so the federation layer has no knowledge
- * of this shape; it lives here, in the app-layer types module,
- * because that's the only layer that ever needs it.
- *
- * The `OutboxRow.kind` union in `db/database.ts` rejects
- * `"event_rsvp"` at the type level. `lib/outbox.ts` deliberately does
- * NOT expose an `enqueueEventRsvp` helper. Both absences are
- * load-bearing — see `events.test.ts` for the negative tests that
- * lock this in.
+ * RSVP row — see `docs/community-events.md` §4 (data model) + §7
+ * (federation). EventRsvpRow is the local Dexie materialization of a
+ * member's RSVP. Since participation federation Phase 2
+ * (docs/project-federation.md §6) it federates as a signed,
+ * single-owner LWW `EventRsvpState` record (defined in
+ * `packages/shared/src/types.ts`), published via
+ * `db/participationPublish.ts` and synced only through the member's
+ * OWN community node — participation kinds never join the cross-node
+ * peer pull, so peer communities never see who's coming.
  */
 export interface EventRsvpRow {
   /** UUID. */
@@ -123,7 +120,7 @@ export interface PreviouslyBlockedRow {
  * never cross the wire. A `projectId` on the event payload would be a
  * breaking wire change AND a dead pointer on every peer (projects don't
  * federate), so the link lives here instead. Same posture as
- * `EventRsvpRow` and `BlockRow`: never signed, never enqueued, never
+ * `BlockRow`: never signed, never enqueued, never
  * pulled, never exported. The linking node renders the work-day card and
  * the project-filtered calendar; peer nodes see a plain event.
  *
@@ -152,16 +149,14 @@ export interface EventProjectLinkRow {
 }
 
 /**
- * Local-only shift definition — see `docs/shift-signups.md` §4.1.
- * A time-boxed, optionally-capped slot belonging to a community event
- * ("Setup crew, 9–12, 4 spots"), on this node only. Never signed,
- * never enqueued, never pulled, never exported — peer nodes see a
- * plain event. Same posture as `EventRsvpRow`, `BlockRow`, and
- * `EventProjectLinkRow`; deliberately NO `signature` and NO `nodeId`,
- * both absences structural. The `OutboxRow.kind` union in
- * `db/database.ts` rejects `"event_shift"` at the type level;
- * `lib/outbox.ts` exposes no `enqueueEventShift`.
- * `eventShifts.test.ts` locks the negatives in.
+ * Shift definition — see `docs/shift-signups.md` §4.1. A time-boxed,
+ * optionally-capped slot belonging to a community event ("Setup crew,
+ * 9–12, 4 spots"). This row is the local Dexie materialization; since
+ * participation federation Phase 2 (docs/project-federation.md §6) it
+ * federates as a signed `EventShiftState` record (organizer-signed,
+ * deletion as a tombstone — `packages/shared/src/types.ts`), synced
+ * only through the community's own node. Participation kinds never
+ * join the cross-node peer pull; peer communities see a plain event.
  */
 export interface EventShiftRow {
   /** UUID for this shift. */
@@ -190,15 +185,17 @@ export interface EventShiftRow {
 }
 
 /**
- * Local-only shift signup — see `docs/shift-signups.md` §4.2.
- * A member's declared INTENT to fill a shift. Same posture as
- * `EventRsvpRow`: never signed, never enqueued, never pulled, never
- * exported; cleared by soft-purge. NOT an attendance record —
- * nothing may ever compare this table against exchanges or presence
+ * Shift signup row — see `docs/shift-signups.md` §4.2. A member's
+ * declared INTENT to fill a shift, materialized locally in Dexie.
+ * Same posture as `EventRsvpRow`: since participation federation
+ * Phase 2 it federates as a signed, single-owner `ShiftSignupState`
+ * record (withdrawal as a tombstone), synced only through the
+ * member's OWN community node; participation kinds never join the
+ * cross-node peer pull. NOT an attendance record — nothing may ever
+ * compare this table against exchanges or presence
  * (`docs/community-events.md` §11.6, permanent;
- * `docs/shift-signups.md` §9). The `OutboxRow.kind` union rejects
- * `"shift_signup"` at the type level; `lib/outbox.ts` exposes no
- * `enqueueShiftSignup`.
+ * `docs/shift-signups.md` §9 — the never-compare rule survives
+ * federation unchanged).
  */
 export interface ShiftSignupRow {
   /** UUID for this signup. */

@@ -136,9 +136,13 @@ acceptable loss.
   auto-confirm windows simply restart from re-delivery of new
   transitions. Zero data loss (the exchange history is what matters).
 - **Device-link / tap-to-link mailboxes.** Ephemeral, self-limiting.
-- **Proposals, votes, messages.** Never on any node (local-first
-  governance; E2E messages are device-to-device ciphertext). Out of
-  scope by architecture, not by omission.
+- **Messages.** Never on any node — E2E messages are
+  device-to-device ciphertext. Out of scope by architecture, not by
+  omission. (Proposals, votes, and closures used to sit on this
+  list; since proposal federation G1 they are signed records on the
+  node, in `MIRROR_KINDS`, and in the re-seed walker — `/proposals`
+  → `/votes` → `/proposal-closures`. Only legacy unsigned rows stay
+  local: skipped and counted, never silently dropped.)
 
 ## 2. Phase R1 — the walker (web)
 

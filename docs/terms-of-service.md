@@ -68,8 +68,10 @@ and the Code of Conduct say.
 
 Almost every action in Understoria produces a **signed,
 cryptographic record**: a post, an exchange confirmation, a vouch,
-a claim, a task comment. When your client signs and sends one of
-these, you assert:
+a task comment. (Claiming a post is the deliberate exception — a
+claim is an unsigned heads-up, no credit moves on it, and the
+exchange that follows is the signed record.) When your client signs
+and sends one of these, you assert:
 
 - The content is true to the best of your knowledge (the hours
   actually happened; the vouch reflects your actual judgment of

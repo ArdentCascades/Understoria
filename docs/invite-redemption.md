@@ -48,9 +48,10 @@ on it:
    `${origin}/invite#<base64url(signed JSON)>` — a `SignedInvite`
    blob signed by the inviter (`apps/web/src/db/invites.ts:63-85`,
    verification `apps/web/src/lib/invite.ts:128-157`). The server is
-   never involved. `apps/server/src/routes/invites.ts` has a
-   `POST /invites` route with **no web-side caller** (§10.1 studies
-   it; we replace rather than adopt it).
+   never involved. At the time of writing,
+   `apps/server/src/routes/invites.ts` had a `POST /invites` route
+   with **no web-side caller** (§10.1 studies it; we replaced rather
+   than adopted it — the file was removed when Phase 1 shipped, §8).
 2. **Redemption is purely local.** `redeemInvite`
    (`apps/web/src/db/invites.ts:145-205`) mints the invitee's
    keypair, a member row, and a redeemed-invite row — in HER Dexie
@@ -131,9 +132,10 @@ the device that authored it (plus every server it transited). Trust
 status therefore diverges per device today, for manual vouches and
 implicit invite-vouches alike. Phase 1 fixes both legs (§9).
 
-The invite leg is doubly dead: the `POST /invites` route
-(`apps/server/src/routes/invites.ts`) is a designed-but-never-wired
-intention — and §10.1 argues its shape is one we should *not* wire.
+The invite leg was doubly dead: the `POST /invites` route (then at
+`apps/server/src/routes/invites.ts`) was a designed-but-never-wired
+intention — §10.1 argues its shape is one we should *not* wire, and
+Phase 1 deleted the file outright (§8); the path no longer exists.
 
 ---
 
@@ -413,12 +415,17 @@ display name the member chose for the roster.
 late-arriving and fresh devices must be able to compute trust and
 materialize the roster — i.e., the life of the node (matching the
 vouches table). Bounded alternatives all break convergence for the
-next fresh device. Operator ruling 1 (§15) confirms this default and
-ties deletion to the existing purge tooling: when a member is
-hard-purged, receipts where they appear as `redeemed_by` are
-deleted; receipts where they appear as `inviter_key` are retained
-(they are the *other* member's proof of admission) unless that
-member is purged too. **No peer replication in Phase 1:** receipts
+next fresh device. Operator ruling 3 (§15) confirms this default.
+**As-built honesty on deletion:** no server-side deletion path
+exists — `RedemptionStore` has no delete, and the only shipped purge
+tooling is the device-local panic flow (`apps/web/src/lib/panic.ts`);
+the operator guide tracks server-side purge as *Pending*. Until that
+tooling ships, receipts are retained on the node for its lifetime,
+full stop. When it lands, the intended rule stands: receipts where a
+hard-purged member appears as `redeemed_by` are deleted; receipts
+where they appear as `inviter_key` are retained (they are the
+*other* member's proof of admission) unless that member is purged
+too. **No peer replication in Phase 1:** receipts
 are deliberately excluded from `peerPull.ts` — cross-node membership
 is out of scope, and keeping the roster off the inter-node wire
 narrows exposure to the community's own operator (§11).
@@ -471,10 +478,11 @@ qualitative trust status.
 
 ### §10.1 Adopt the existing `POST /invites`: register invites at creation, then a redemption receipt
 
-The unwired route's shape: `POST /invites` verifies and stores a
-full `SignedInvite`; `GET /invites?since=` returns full rows —
+The unwired route's shape (historical — the file was deleted when
+Phase 1 shipped, §8): `POST /invites` verified and stored a
+full `SignedInvite`; `GET /invites?since=` returned full rows —
 token and signature included — to any caller, "for federation"
-(`apps/server/src/routes/invites.ts:31-35`). Wiring it at invite
+(then `apps/server/src/routes/invites.ts:31-35`). Wiring it at invite
 creation, plus a separate redemption record, would give the server
 an open-invite registry and let it enforce single-use and even
 revocation centrally.
@@ -559,18 +567,27 @@ redeemedBy, displayName, redeemedAt, signature.
 - **Row 6 (infiltrator / bad-faith member):** any member-level
   actor can pull `GET /redemptions` and read the invite graph. This
   grants nothing beyond what row 6 already has: the manual-vouch
-  graph is already served unauthenticated by `GET /vouches` to any
-  caller, and a member sees the roster in-app by design. The §9
-  vouch pull likewise normalizes onto every device a graph that was
-  already one `curl` away. Named honestly rather than mitigated:
+  graph is served by `GET /vouches` to the same audience, and a
+  member sees the roster in-app by design. *(As written, both GETs
+  were unauthenticated — one `curl` away for anyone. Member-
+  authenticated reads have since shipped,
+  `docs/member-authenticated-reads.md`: with `READ_AUTH=on`, opt-in
+  and off by default, these GETs deny non-members. Row 6 holds a
+  member key, so nothing in this row's analysis changes.)* The §9
+  vouch pull likewise normalizes onto every device a graph the
+  membership could already reach. Named honestly rather than
+  mitigated:
   the trust graph is community-visible *by design of the
   web-of-trust*; what the threat model protects is its
   non-existence on wires the community doesn't control.
 - **Rows 1–2 (employer / union-busters):** an adversary who can
   reach the node URL can enumerate the roster. Unchanged mitigation
   posture: nodes for at-risk communities sit behind the deployment
-  guidance (TLS, no logging, allowlist work tracked in
-  `docs/federated-node-allowlist.md`); the PWA-only deployment mode
+  guidance (TLS, no logging, and — shipped since this note —
+  member-authenticated reads, `READ_AUTH=on`,
+  `docs/member-authenticated-reads.md`; the allowlist note
+  `docs/federated-node-allowlist.md` is about mirror-push trust, not
+  reads); the PWA-only deployment mode
   (no node at all) remains fully functional — this design degrades
   gracefully to today's local-only behavior.
 - **Row 7 (stalker):** displayName + joined-at is strictly less
@@ -725,9 +742,16 @@ two phases are ordered but not interleaved.
    binding receipts to `invite.nodeId` at admission time.
 3. **Roster departure.** Propagating "member left" is the tombstone
    twin of this design (soft-purge currently anonymizes locally
-   only). Needs its own note; the receipt table's purge hooks (§8)
-   are the anchor point.
+   only). Needs its own note; the pending server-side purge tooling
+   (§8 — no server deletion path exists yet) is the anchor point.
 4. **`GET /redemptions` is unauthenticated,** like every sibling
-   GET. Acceptable for the pilot posture (§11 row 6); the
-   federated-node-allowlist work (`docs/federated-node-allowlist.md`)
-   is where read-side auth would land for all of these at once.
+   GET. **Answered since:** read-side auth shipped for all of these
+   at once as member-authenticated reads
+   (`docs/member-authenticated-reads.md`) — with `READ_AUTH=on`
+   (opt-in; off by default) every federation GET is deny-by-default
+   and requires a signed member read or a configured peer token. The
+   pilot posture (§11 row 6) remains the default. This note
+   originally pointed at `docs/federated-node-allowlist.md` as where
+   read auth would land; that design turned out to be about
+   mirror-push trust (where a member's device may *send* records),
+   not read-side auth.

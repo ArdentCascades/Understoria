@@ -188,11 +188,14 @@ All from `useApp()`, all already block-filtered at the context:
   (lazy `qrcode` lib, `role="img"`), sized large (≈`min(40vh, 40vw)`) so
   it scans from across a room (rule of thumb: QR ≈ 1/10 of scan
   distance).
-- Targets are **absolute URLs** built from an origin helper: when online,
-  `window.location.origin`; when the community is running on a local
-  offline hub (reuse the storm-hub origin logic from the offline-kit
-  work), the hub address — so a scanned code resolves on the local island
-  during an internet outage, not to a dead public URL.
+- Targets are **absolute URLs** built from `window.location.origin` —
+  always, with no separate offline-hub detection. (The module comment on
+  `apps/web/src/lib/gatheringSlides.ts` records why the storm-hub logic
+  this bullet originally proposed reusing turned out unnecessary: the
+  kiosk device loaded the app from whichever origin serves the room —
+  public URL or local hub — and that same origin is exactly what phones
+  in the room should hit. A scanned code therefore resolves on the local
+  island during an internet outage, not to a dead public URL, for free.)
 - The **message-QR** for a need/offer targets
   `/messages/${encodeURIComponent(authorKey)}` — a scanner who is already
   a member lands in a compose-to-author thread. (A not-yet-member who
@@ -262,7 +265,8 @@ needs its own threat-model treatment before build.
 ## 8. Testing & verification
 
 - Unit: slide-selection selectors (correct items in/out, caps applied,
-  resolved/past items excluded), the offline-aware URL helper, and the
+  resolved/past items excluded), the absolute-URL builder (§6.4 — plain
+  `window.location.origin`, no offline-aware helper shipped), and the
   auto-advance/pause reducer (timers faked). No live Dexie needed —
   drive `useApp()` via the existing context mock pattern.
 - i18n: a new `present.*` namespace in **both** `en.json` and `es.json`

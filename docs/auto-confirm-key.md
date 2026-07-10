@@ -33,10 +33,13 @@ self-confirmation:
 > confirm.");`
 
 This is the right rule — a member cannot attest credit to themselves —
-but it has a corner case the existing code already flagged. The comment
-at `apps/web/src/db/projects.ts:62` reads:
-
-> `48-hour auto-confirm when organizer is the completer — still deferred`
+but it has a corner case the existing code already flagged. The Phase 3
+list in the file-header comment of `apps/web/src/db/projects.ts`
+carried the deferral for exactly this gap ("auto-confirm when organizer
+is the completer"); with this design shipped, that comment now records
+that organizer-completer auto-confirm lands via the node system-key
+sweep, at a 168-hour (7-day) default window rather than the 48 hours
+the old placeholder guessed at.
 
 When the project organizer is also the task completer and no co-organizer
 acts, credit cannot flow at all. Today the helper either chases the

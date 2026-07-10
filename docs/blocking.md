@@ -503,12 +503,14 @@ other member. Cited:
 
 **Events (RSVP) (c — both).** RSVP is a direct attendee signal to
 the organizer. Blocking gates RSVP in either direction. The
-blocker cannot RSVP to the blocked party's events (the affordance
-is disabled with the same generic "not available on this node"
-message that cross-node RSVP uses, per
-`community-events.md` §7.3); the blocked party cannot RSVP to the
-blocker's events (the local RSVP-write is silently rejected, per
-the EventRSVP local-only shape). Cited:
+blocker cannot RSVP to the blocked party's events — as built, the
+gate throws the shared generic copy `BLOCKED_ACTION_MESSAGE`,
+"This isn't available right now." (`apps/web/src/db/blocks.ts`;
+this draft originally borrowed the "not available on this node"
+wording from the cross-node RSVP affordance sketched in
+`community-events.md` §7.3, which was never built). The blocked
+party cannot RSVP to the blocker's events (the local RSVP-write is
+silently rejected, per the EventRSVP local-only shape). Cited:
 `privacy-precondition` (attendance is a direct-interaction
 disclosure across a block, which the block exists to prevent).
 

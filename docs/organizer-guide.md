@@ -296,16 +296,21 @@ A few things to be deliberate about when you create one:
   locator for high-risk events.
 
 - **Capacity is a planning aid for you.** If you set a cap and
-  your local-node RSVP count hits it, you'll see an attention
-  item — supplies, space, whatever the cap is for. Members on
-  peer nodes don't see the cap as a "sold out" signal; their
-  view shows "RSVPs not visible from this node" with an
-  affordance to RSVP on your node.
+  your community's "going" count reaches it, you'll see an
+  attention item — supplies, space, whatever the cap is for.
+  The cap is never enforced: the node won't bounce anyone for
+  being one-too-many, and members of peer communities don't see
+  a "sold out" signal — their copy of the event shows them the
+  ordinary RSVP control and *their own* community's count, not
+  yours.
 
-- **RSVPs are per-node.** A member on a peer node who wants to
-  RSVP has to open your node's PWA to do so. Their pubkey is
-  portable (they bring their own keypair); their local RSVP
-  state lives where they signed it.
+- **RSVPs stay with each community.** A member of a peer
+  community RSVPs to your event from their own app, through
+  their own community's node — they never open yours. Each RSVP
+  is a signed record that syncs only within the community whose
+  member signed it, so the roster and count you see are your
+  community's; theirs stay on their node, and no
+  cross-community attendance list exists anywhere.
 
 - **If something changes, cancel and re-create.** Phase 1 has no
   edit affordance — an edit would silently move the people who

@@ -14,7 +14,7 @@
  * Or, when the node_modules are inside the container:
  *
  *   docker compose run --rm -T --no-deps --entrypoint node understoria \
- *     /workspace/scripts/generate-system-key.mjs
+ *     /app/scripts/generate-system-key.mjs
  *
  * Output goes to stdout. The public key is printed alongside for
  * sanity-checking; only the secret line needs to land in `.env`.
