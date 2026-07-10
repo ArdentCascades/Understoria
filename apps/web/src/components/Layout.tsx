@@ -20,6 +20,7 @@
  */
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
 import { CommandPalette } from "./CommandPalette";
 import { LockScreen } from "./LockScreen";
@@ -58,23 +59,30 @@ export function Layout() {
   // consults no viewport metrics at all — and with the document
   // unscrollable, iOS has no document scroll state to corrupt in the
   // first place.
-  // lg:flex-row-reverse: at desktop widths the same two flex children
-  // (main, then BottomNav in DOM order) lay out as a row with the nav
-  // on the LEFT — the "stretched phone app" pilot report. row-REVERSE
-  // keeps the DOM order (and therefore tab order and the mobile
-  // layout) byte-identical; only the visual axis changes. The nav
-  // renders its vertical variant at lg (see BottomNav.tsx).
-  // print:h-auto/print:overflow-visible (shell and <main> both): the
+  // Shell structure: an outer COLUMN holds [AppHeader, body]; the
+  // body is the previous shell — [main, BottomNav] — as a column on
+  // mobile and a reversed row at lg (nav rail on the LEFT, the
+  // "stretched phone app" pilot report). row-REVERSE keeps the DOM
+  // order (and therefore tab order and the mobile layout)
+  // byte-identical; only the visual axis changes. The nav renders its
+  // vertical variant at lg (see BottomNav.tsx). The header sits
+  // OUTSIDE the row so it spans the full width above both rail and
+  // content; min-h-0 on the body is what lets the nested flex child
+  // (<main>) actually shrink and scroll instead of forcing the shell
+  // taller than the screen.
+  // print:h-auto/print:overflow-visible (shell, body, and <main>): the
   // one-screen-tall clipped shell exists for iOS keyboard physics,
   // but paper has no keyboard — without these overrides everything
   // past the first viewport-height of any page is simply cut off in
-  // print. Together with the print:hidden on nav/banner/toasts/FABs
-  // this makes EVERY page print as its content, not its chrome.
+  // print. Together with the print:hidden on header/nav/banner/toasts/
+  // FABs this makes EVERY page print as its content, not its chrome.
   return (
-    <div className="flex h-dvh flex-col overflow-hidden lg:flex-row-reverse print:block print:h-auto print:overflow-visible">
+    <div className="flex h-dvh flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
-      <main
+      {ready && !locked && <AppHeader />}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row-reverse print:block print:h-auto print:overflow-visible">
+        <main
         id="main"
         // overscroll-contain: reaching the top/bottom of the inner
         // scroller must not chain into a document rubber-band that
@@ -100,8 +108,9 @@ export function Layout() {
           )}
         </div>
       </main>
-      {!locked && <OfflineBanner />}
-      {!locked && <BottomNav />}
+        {!locked && <OfflineBanner />}
+        {!locked && <BottomNav />}
+      </div>
       {!locked && <ToastContainer />}
       {!locked && <CommandPalette />}
       {/* Rendered even while locked: the notice is about the software

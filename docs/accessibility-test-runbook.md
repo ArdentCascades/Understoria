@@ -117,6 +117,25 @@ copy. Core flows — claim a need, post an offer, message someone,
 vouch, create a project, vote on a proposal, redeem an invite,
 onboard — are prioritized; the rest confirm the page is navigable.
 
+### Global header + me-menu
+
+- **Entry:** any chromed page — the slim band at the very top with
+  "Understoria" on the left and the "Menu" button on the right.
+  (Absent on `/present`, the print pages, and the lock screen — by
+  design.)
+- **Steps:** `Tab` to the "Menu" button and activate it. Confirm the
+  drawer announces as a dialog named "Menu". `Tab` through the rows:
+  your own display name (the Profile row), "Settings", "Invite
+  someone", "Help", "Search", "Community infrastructure" — confirm
+  `Tab` wraps inside the drawer (focus never escapes to the page).
+  Press `Escape`.
+- **Expected:** the button reports expanded/collapsed; the drawer
+  traps focus while open; `Escape` closes it and focus returns to
+  the "Menu" button; activating "Search" opens the command palette
+  with focus in its input; activating any link closes the drawer and
+  navigates. With reduced motion enabled the drawer appears without
+  the slide.
+
 ### Welcome (onboarding)
 
 - **Entry:** first launch after redeeming an invite, before a
