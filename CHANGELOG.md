@@ -108,6 +108,26 @@ include breaking changes.
 
 
 ### Fixed
+- **"Follows" tasks can be claimed before their upstream is done —
+  as designed.** Dependencies were always meant to be soft ("any
+  member can claim any open task at any time"), and the data layer
+  honored that, but the task card and task page quietly hid the Claim
+  button while an upstream task was unfinished — a de-facto hard
+  block. The button now shows regardless; the Follows chip/line still
+  says what's pending, and a claimer of a not-yet-ready task keeps
+  the existing gentle "you'll be reminded when it's ready" note.
+- **Backups now work on encrypted deployments.** The backup script
+  used the stock `sqlite3` CLI, which can't read a `DATABASE_KEY`-
+  encrypted database — on an encrypted node the nightly cron produced
+  nothing. The script now snapshots through the server's own
+  encryption-aware SQLite driver (`VACUUM INTO`), works on both
+  plaintext and encrypted deployments, and an encrypted node's
+  snapshots come out encrypted with the same key (escrow the key away
+  from the backups — restoring needs it). The operator and Linode
+  guides say all this plainly now, and the cross-node RSVP section of
+  the events design doc gained its overdue superseded-note (members
+  RSVP to any event copy through their own node; rosters never cross
+  the community boundary).
 - **Documentation caught up with the code — 50 verified corrections
   across 28 files.** A six-agent docs↔code audit checked every factual
   claim in the manuals against the source and fixed what had drifted.

@@ -149,18 +149,6 @@ export function TaskDetailBody({
   const [editUrgency, setEditUrgency] = useState<Urgency>(task.urgency);
   const [editDeps, setEditDeps] = useState<string[]>(task.dependencies);
 
-  // Unmet (non-completed) deps gate the Claim affordance — claiming a
-  // task whose upstream isn't done would immediately read as blocked.
-  // The body doesn't render the Follows badge (that's the card's job);
-  // it only needs the boolean to know whether to offer Claim.
-  const hasUnmetDeps = useMemo(
-    () =>
-      task.dependencies.some((id) => {
-        const dep = allTasks.find((tk) => tk.id === id);
-        return !!dep && dep.status !== "completed";
-      }),
-    [task.dependencies, allTasks],
-  );
   // Claimer-side note: visible only to the claimant when the task is
   // structurally blocked. canClaimTask reads the full task list to
   // include not-yet-loaded dep titles that have completed.
@@ -515,7 +503,11 @@ export function TaskDetailBody({
           </p>
         ) : null)}
       <div className="flex flex-wrap items-center gap-2">
-        {task.status === "open" && currentKey && !isOrganizer && !hasUnmetDeps && acceptingClaims && (
+        {/* Dependencies never gate Claim — they're soft per
+            docs/task-ordering-and-dependencies.md §3 (operator-affirmed).
+            The Follows line above says what's still upstream, and after
+            claiming, the claimer note explains the wait. */}
+        {task.status === "open" && currentKey && !isOrganizer && acceptingClaims && (
           <>
             <button
               type="button"
