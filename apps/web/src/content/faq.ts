@@ -139,6 +139,24 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
     title: "Your identity and devices",
     entries: [
       {
+        id: "getting-around",
+        question: "Where did the Profile tab go? How do I get around?",
+        answer: [
+          "Five tabs sit at the bottom of the screen (a rail on the " +
+            "left on a wide screen): Board, Dashboard, Calendar, " +
+            "Messages, and My work — every task you've claimed and " +
+            "every project you organize, gathered in one place.",
+          "Everything about YOU moved behind the Menu button in the " +
+            "top right corner: your Profile (listed under your own " +
+            "name), Settings, Invite someone, this Help page, Search, " +
+            "and Community infrastructure.",
+          "Search finds posts, projects, events, people, and these " +
+            "help answers — all from what's already on your device. " +
+            "With a keyboard, Ctrl+K (⌘K on a Mac) opens it from " +
+            "anywhere.",
+        ],
+      },
+      {
         id: "change-name",
         question: "How do I change my display name or neighborhood?",
         answer: [
@@ -173,9 +191,9 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "Your account can come back — here is the honest order to " +
             "try, best first.",
-          "1. A second linked device. If you added one (Settings → " +
-            "Add device), your identity already lives there; just " +
-            "keep using it, and link a replacement phone from it.",
+          "1. A second linked device. If you added one (Profile → " +
+            "Add another device), your identity already lives there; " +
+            "just keep using it, and link a replacement phone from it.",
           "2. A recovery kit. If you made one (Settings → Recovery " +
             "kit), open the app on any new device, choose 'Lost your " +
             "device but have a recovery kit?', and enter the kit's " +
@@ -351,7 +369,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "invite-someone",
         question: "How do I invite someone?",
         answer: [
-          "Profile → Invites → Generate invite. You'll get a single-use " +
+          "The quickest way: open the Menu (top right) and choose " +
+            "Invite someone — it takes you straight to the invites " +
+            "card. The long way round is Profile → Invites.",
+          "Tap Generate invite and you'll get a single-use " +
             "link. Share it in person, by Signal, or in any channel " +
             "where you can confirm it actually reached the person you " +
             "meant. Don't post invite links publicly.",
@@ -417,10 +438,10 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "(the number is set by your community and shown to " +
             "everyone) each signing their own name to one public " +
             "record. Proposing starts on the member's profile; " +
-            "co-signing happens in person, from the Decisions page.",
+            "co-signing happens in person, from the Proposals page.",
           "A removal is public inside the community — who was " +
             "removed, when, why, and exactly who signed, all visible " +
-            "on the Decisions page. Secret expulsions are how " +
+            "on the Proposals page. Secret expulsions are how " +
             "communities rot.",
           "It is not erasure. The removed member's past exchanges " +
             "remain — they balance other members' ledgers — and " +
@@ -430,7 +451,7 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "members; their unused invites die with it.",
           "And the door can reopen: reinstatement takes the same " +
             "number of signatures, started from the removal record " +
-            "itself on the Decisions page.",
+            "itself on the Proposals page.",
         ],
       },
       {

@@ -141,6 +141,25 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
     title: "Tu identidad y tus dispositivos",
     entries: [
       {
+        id: "getting-around",
+        question: "¿Dónde quedó la pestaña Perfil? ¿Cómo me muevo por la app?",
+        answer: [
+          "Cinco pestañas viven en la parte de abajo de la pantalla " +
+            "(una barra a la izquierda en pantallas anchas): Tablero, " +
+            "Panel, Calendario, Mensajes y Mi trabajo — cada tarea que " +
+            "has tomado y cada proyecto que organizas, reunidos en un " +
+            "solo lugar.",
+          "Todo lo que trata de TI se movió detrás del botón Menú, en " +
+            "la esquina superior derecha: tu Perfil (aparece bajo tu " +
+            "propio nombre), Ajustes, Invitar a alguien, esta página de " +
+            "Ayuda, Buscar e Infraestructura comunitaria.",
+          "Buscar encuentra publicaciones, proyectos, eventos, " +
+            "personas y estas respuestas de ayuda — todo desde lo que " +
+            "ya está en tu dispositivo. Con teclado, Ctrl+K (⌘K en " +
+            "Mac) lo abre desde cualquier parte.",
+        ],
+      },
+      {
         id: "change-name",
         question: "¿Cómo cambio mi nombre visible o mi zona?",
         answer: [
@@ -204,8 +223,9 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "Tu cuenta puede volver — este es el orden honesto a " +
             "intentar, de mejor a peor.",
           "1. Un segundo dispositivo vinculado. Si añadiste uno " +
-            "(Ajustes → Añadir dispositivo), tu identidad ya vive ahí; " +
-            "sigue usándolo y vincula el teléfono de reemplazo desde él.",
+            "(Perfil → Añadir otro dispositivo), tu identidad ya vive " +
+            "ahí; sigue usándolo y vincula el teléfono de reemplazo " +
+            "desde él.",
           "2. Un kit de recuperación. Si creaste uno (Ajustes → Kit de " +
             "recuperación), abre la aplicación en cualquier dispositivo " +
             "nuevo, elige '¿Perdiste tu dispositivo pero tienes un kit " +
@@ -365,7 +385,10 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "invite-someone",
         question: "¿Cómo invito a alguien?",
         answer: [
-          "Perfil → Invitaciones → Generar invitación. Vas a recibir un " +
+          "El camino más rápido: abre el Menú (arriba a la derecha) y " +
+            "elige Invitar a alguien — te lleva directo a la tarjeta " +
+            "de invitaciones. El camino largo es Perfil → Invitaciones.",
+          "Toca Generar invitación y vas a recibir un " +
             "enlace de un solo uso. Compártelo en persona, por Signal o " +
             "por cualquier canal en el que puedas confirmar que llegó a " +
             "la persona que querías. No publiques enlaces de invitación " +
@@ -435,10 +458,10 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "personas (el número lo fija tu comunidad y es visible " +
             "para todas) firmando cada una con su nombre un registro " +
             "público. Proponer empieza en el perfil del miembro; " +
-            "cofirmar ocurre en persona, desde la página de Decisiones.",
+            "cofirmar ocurre en persona, desde la página de Propuestas.",
           "Una expulsión es pública dentro de la comunidad — quién " +
             "fue expulsado, cuándo, por qué y exactamente quiénes " +
-            "firmaron, todo visible en la página de Decisiones. Las " +
+            "firmaron, todo visible en la página de Propuestas. Las " +
             "expulsiones secretas son la manera en que las comunidades " +
             "se pudren.",
           "No es un borrado. Los intercambios pasados de la persona " +
@@ -450,7 +473,7 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "miembros; sus invitaciones sin usar mueren con ella.",
           "Y la puerta puede reabrirse: la readmisión requiere el " +
             "mismo número de firmas, iniciada desde el propio registro " +
-            "de expulsión en la página de Decisiones.",
+            "de expulsión en la página de Propuestas.",
         ],
       },
       {

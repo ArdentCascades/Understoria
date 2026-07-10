@@ -200,3 +200,16 @@ export function IconMyWork(props: IconProps) {
     </Icon>
   );
 }
+
+// Two arcs cycling around each other — hours given and received
+// flowing in a circle. The FAQ's balance section marker.
+export function IconBalance(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 9.5a6.5 6.5 0 0 1 11.2-2.6" />
+      <path d="M17.5 3.5v3.5H14" />
+      <path d="M18 14.5a6.5 6.5 0 0 1-11.2 2.6" />
+      <path d="M6.5 20.5V17H10" />
+    </Icon>
+  );
+}

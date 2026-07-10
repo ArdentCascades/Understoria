@@ -12,7 +12,13 @@
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// jsdom has no scrollIntoView; the page calls it for deep links and
+// section chips.
+beforeEach(() => {
+  Element.prototype.scrollIntoView = vi.fn();
+});
 
 // Pull in real i18n so the page's surrounding chrome (title,
 // footer) renders translated copy and `i18n.changeLanguage` is a
@@ -41,10 +47,10 @@ afterEach(async () => {
   await i18n.changeLanguage("en");
 });
 
-function render(node: ReactNode) {
+function render(node: ReactNode, wrap = true) {
   act(() => {
     root = createRoot(container);
-    root.render(<MemoryRouter>{node}</MemoryRouter>);
+    root.render(wrap ? <MemoryRouter>{node}</MemoryRouter> : node);
   });
 }
 
@@ -89,5 +95,114 @@ describe("HelpPage — locale-aware FAQ", () => {
     // must still land on the right Spanish entry.
     expect(container.querySelector("#confirm-exchange")).not.toBeNull();
     expect(container.querySelector("#someone-bothering-me")).not.toBeNull();
+  });
+});
+
+describe("HelpPage — accordion, filter, deep links", () => {
+  function questionButton(text: string) {
+    return [...container.querySelectorAll<HTMLButtonElement>("h3 button")].find(
+      (b) => (b.textContent ?? "").includes(text),
+    )!;
+  }
+
+  it("collapses answers by default and expands on tap", () => {
+    render(<HelpPage />);
+    // Answer prose is NOT in the DOM until its question is opened.
+    expect(container.textContent).not.toContain(
+      "The credit only moves once",
+    );
+    const btn = questionButton("How does confirming an exchange work?");
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+    act(() => {
+      btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(btn.getAttribute("aria-expanded")).toBe("true");
+    expect(container.textContent).toContain("The credit only moves once");
+    // Tapping again collapses.
+    act(() => {
+      btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(container.textContent).not.toContain(
+      "The credit only moves once",
+    );
+  });
+
+  it("auto-expands the entry a deep link points at", () => {
+    render(
+      <MemoryRouter initialEntries={["/help#confirm-exchange"]}>
+        <HelpPage />
+      </MemoryRouter>,
+      false,
+    );
+    expect(container.textContent).toContain("The credit only moves once");
+  });
+
+  it("filters questions, expands matches, and hides the rest", () => {
+    render(<HelpPage />);
+    const input = container.querySelector<HTMLInputElement>(
+      'input[type="search"]',
+    )!;
+    act(() => {
+      // React reads the value through the native setter.
+      const set = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!;
+      set.call(input, "passphrase");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    // The matching entry is present AND expanded.
+    expect(container.textContent).toContain(
+      "What happens if I lose my passphrase?",
+    );
+    expect(container.textContent).toContain("Nobody can reset it for you");
+    // A non-matching entry is gone entirely.
+    expect(container.textContent).not.toContain(
+      "How do I cancel a post I no longer need?",
+    );
+  });
+
+  it("shows a no-matches state for a hopeless filter", () => {
+    render(<HelpPage />);
+    const input = container.querySelector<HTMLInputElement>(
+      'input[type="search"]',
+    )!;
+    act(() => {
+      const set = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!;
+      set.call(input, "zzzzxq");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(container.textContent).toContain("No questions match");
+  });
+
+  it("Expand all opens every answer; Collapse all closes them", () => {
+    render(<HelpPage />);
+    const expand = [...container.querySelectorAll("button")].find(
+      (b) => b.textContent === "Expand all",
+    )!;
+    act(() => {
+      expand.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(container.textContent).toContain("The credit only moves once");
+    expect(container.textContent).toContain("Nobody can reset it for you");
+    const collapse = [...container.querySelectorAll("button")].find(
+      (b) => b.textContent === "Collapse all",
+    )!;
+    act(() => {
+      collapse.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(container.textContent).not.toContain(
+      "The credit only moves once",
+    );
+  });
+
+  it("renders a jump chip per section", () => {
+    render(<HelpPage />);
+    const nav = container.querySelector('nav[aria-label="Jump to a section"]')!;
+    expect(nav).not.toBeNull();
+    expect(nav.querySelectorAll("button").length).toBe(7);
   });
 });

@@ -2480,7 +2480,17 @@
   "help": {
     "title": "Preguntas frecuentes",
     "subtitle": "Respuestas rápidas a las cosas que aparecen al usar la app. ¿Buscas el panorama más amplio? Mira la guía de miembros o vuelve a ver la bienvenida desde tu perfil.",
-    "footer": "¿No encontraste tu pregunta? Casi todo lo que no está aquí es una conversación de comunidad, no una función de la app — habla con alguien de confianza."
+    "footer": "¿No encontraste tu pregunta? Casi todo lo que no está aquí es una conversación de comunidad, no una función de la app — habla con alguien de confianza.",
+    "filterLabel": "Filtrar preguntas",
+    "filterPlaceholder": "Escribe para filtrar preguntas…",
+    "filterMatches_one": "{{count}} pregunta coincide.",
+    "filterMatches_other": "{{count}} preguntas coinciden.",
+    "clearFilter": "Borrar filtro",
+    "noMatchesTitle": "Ninguna pregunta coincide",
+    "noMatches": "Prueba con otras palabras — o borra el filtro y navega por secciones.",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Plegar todo",
+    "sectionsNav": "Ir a una sección"
   },
   "disputes": {
     "title": "Disputas",
