@@ -10,6 +10,12 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **The Menu button no longer looks "still on" after closing the
+  drawer with the mouse.** The drawer's ✕ sits directly over the Menu
+  button, so a mouse-close left the cursor parked on it and its hover
+  tint read as a stuck selected state. Hover styling now stays quiet
+  until the pointer actually leaves the button once; deliberate
+  hovering (and the keyboard focus ring) behave exactly as before.
 - **Opening the menu on desktop no longer shoves the page sideways.**
   Two compounding bugs: the header's frosted-glass effect
   (`backdrop-filter`) silently made the header the positioning

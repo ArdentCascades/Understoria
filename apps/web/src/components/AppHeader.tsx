@@ -30,6 +30,15 @@ import { IconMenu } from "@/components/visual";
 export function AppHeader() {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  // The drawer's ✕ sits directly over this button, so a mouse-close
+  // leaves the cursor parked here and the hover tint reads as "the
+  // menu is still on". Mute hover styling when the drawer closes and
+  // re-arm it only when the pointer actually LEAVES once — not on
+  // enter/move, because Chromium re-fires those synthetically the
+  // moment the drawer unmounts under a motionless cursor. Keyboard
+  // users are untouched (focus-visible is separate).
+  const [hoverMuted, setHoverMuted] = useState(false);
+  const unmuteHover = useCallback(() => setHoverMuted(false), []);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   // Focus returns to the button explicitly: the drawer UNMOUNTS on
   // close, and by the time the focus trap's cleanup runs the panel is
@@ -37,6 +46,7 @@ export function AppHeader() {
   // restore-only-if-still-inside guard correctly declines.
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
+    setHoverMuted(true);
     buttonRef.current?.focus();
   }, []);
 
@@ -53,11 +63,16 @@ export function AppHeader() {
         <button
           ref={buttonRef}
           type="button"
-          className="touch-target flex items-center justify-center rounded-xl px-3 py-2 text-moss-600 hover:bg-moss-100 hover:text-moss-900 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-50"
+          className={`touch-target flex items-center justify-center rounded-xl px-3 py-2 text-moss-600 dark:text-moss-300 ${
+            hoverMuted
+              ? ""
+              : "hover:bg-moss-100 hover:text-moss-900 dark:hover:bg-moss-800 dark:hover:text-moss-50"
+          }`}
           aria-label={t("menu.open")}
           aria-expanded={menuOpen}
           aria-haspopup="dialog"
           onClick={() => setMenuOpen(true)}
+          onPointerLeave={unmuteHover}
         >
           <IconMenu size={22} />
         </button>
