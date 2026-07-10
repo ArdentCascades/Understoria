@@ -48,6 +48,11 @@ import { FAQ_SECTIONS_ES } from "@/content/faq.es";
 //   - Selection navigates and closes; query resets so the next open
 //     starts fresh (a launcher, not a saved search — nothing about
 //     what was searched persists anywhere).
+// The me-menu's Search row opens the palette without a keyboard —
+// dispatched as a window event so the two components stay uncoupled
+// (and the first palette doorway mobile users have ever had).
+export const OPEN_PALETTE_EVENT = "understoria:open-palette";
+
 export function CommandPalette() {
   const { posts, projects, events, members, proposals } = useApp();
   const { t, i18n } = useTranslation();
@@ -66,8 +71,15 @@ export function CommandPalette() {
         setOpen((v) => !v);
       }
     }
+    function onOpenEvent() {
+      setOpen(true);
+    }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    window.addEventListener(OPEN_PALETTE_EVENT, onOpenEvent);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener(OPEN_PALETTE_EVENT, onOpenEvent);
+    };
   }, []);
 
   useEffect(() => {

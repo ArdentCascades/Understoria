@@ -19,7 +19,12 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { IconSettings } from "@/components/visual";
@@ -1389,6 +1394,16 @@ function InvitesSection({
   const [issuing, setIssuing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  // The me-menu's "Invite someone" deep-links here as /profile#invites.
+  // The shell's ScrollToTop resets the main scroller on navigation, so
+  // the hash needs an explicit scroll once the section exists.
+  const location = useLocation();
+  const invitesRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (location.hash === "#invites") {
+      invitesRef.current?.scrollIntoView({ block: "start" });
+    }
+  }, [location.hash]);
   // Inline link starts redacted by default. Anyone in camera view —
   // including security cams, webcams, and onlookers on a wide
   // desktop monitor — can read the URL right off the screen. The
@@ -1438,7 +1453,7 @@ function InvitesSection({
   }
 
   return (
-    <section className="card mb-4">
+    <section id="invites" ref={invitesRef} className="card mb-4 scroll-mt-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
         {t("profile.invites.title")}
       </h2>

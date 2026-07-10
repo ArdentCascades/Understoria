@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A me-menu in the top-right corner, on every page.** A slim new
+  header band carries the app's name and a menu button; the menu
+  slides in from the right with the about-you destinations — your
+  Profile (shown as your own name), Settings, **Invite someone**,
+  Help, **Search**, and Community infrastructure. It's where tool
+  apps keep account things, and it gives phones two doorways they
+  never had: one-tap invites and the command palette (previously
+  desktop-only Ctrl+K). The desktop rail's special pinned Settings
+  slot is gone — Settings lives in the same menu on both platforms.
+  Focus-trapped, Escape closes, honors reduced-motion; the gathering
+  screen and print pages stay chromeless. (First half of the
+  navigation restructure — next, the Profile tab becomes "My work.")
 - **Every template task now carries its own tip.** Open a task on a
   template-started project and a one-or-two-sentence **"Tip for this
   task"** appears under the description — the gotcha, threshold, or

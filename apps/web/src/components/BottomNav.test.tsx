@@ -10,14 +10,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 //
-// The nav rail's tiering. Settings is a DESKTOP-ONLY utility slot
-// (paper over the "more room in the sidebar" question): it must
-//   1. never join the mobile tab bar — the primary row stays exactly
-//      the five items the phone-width ceiling was designed around;
-//   2. be `hidden lg:flex`, so it appears only on the desktop rail;
-//   3. sit OUTSIDE the primary <ul> (a plain Tab stop, not part of
-//      the five-item arrow-key menubar);
-//   4. link to /settings.
+// The nav is exactly the five primary items on every platform — the
+// old desktop-only pinned Settings slot moved into the global
+// me-menu (AppHeader), so the rail and the tab bar are now the same
+// five links everywhere. The second test locks that removal.
 //
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -77,15 +73,8 @@ describe("BottomNav", () => {
     ]);
   });
 
-  it("adds Settings as a desktop-only slot OUTSIDE the primary list", () => {
+  it("carries NO Settings slot — Settings lives in the me-menu now", () => {
     render();
-    const settings = container.querySelector('a[href="/settings"]')!;
-    expect(settings).not.toBeNull();
-    // Not inside the arrow-key <ul>.
-    expect(settings.closest("ul")).toBeNull();
-    // Desktop-only + pinned to the base.
-    expect(settings.className).toContain("hidden");
-    expect(settings.className).toContain("lg:flex");
-    expect(settings.className).toContain("lg:mt-auto");
+    expect(container.querySelector('a[href="/settings"]')).toBeNull();
   });
 });

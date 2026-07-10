@@ -439,6 +439,18 @@
     "primaryNav": "Navegación principal",
     "settings": "Ajustes"
   },
+  "menu": {
+    "open": "Menú",
+    "close": "Cerrar el menú",
+    "title": "Menú",
+    "profile": "Perfil",
+    "profileHint": "Tu perfil · {{key}}",
+    "settings": "Ajustes",
+    "invite": "Invita a alguien",
+    "help": "Ayuda",
+    "search": "Buscar",
+    "infrastructure": "Infraestructura comunitaria"
+  },
   "calendar": {
     "panel": {
       "ariaLabel": "Detalles del evento",

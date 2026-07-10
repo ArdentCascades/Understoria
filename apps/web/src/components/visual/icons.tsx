@@ -125,3 +125,63 @@ export function IconSettings(props: IconProps) {
     </Icon>
   );
 }
+
+// Three lines — the universal menu glyph. Deliberately NOT botanical:
+// the me-menu button has to read as "menu" to a first-time user with
+// zero context, the same reasoning as Messages/Profile above.
+export function IconMenu(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </Icon>
+  );
+}
+
+// Magnifier — universal search shape (the me-menu's palette entry).
+export function IconSearch(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M15.5 15.5L20 20" />
+    </Icon>
+  );
+}
+
+// Circled question mark — help.
+export function IconHelp(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.6 9.2a2.4 2.4 0 1 1 3.3 2.2c-.7.3-1.2.9-1.2 1.7v.4" />
+      <path d="M11.7 16.6h.01" />
+    </Icon>
+  );
+}
+
+// Bust with a plus — invite someone in.
+export function IconInvite(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="9" r="3.5" />
+      <path d="M3.5 20c0-3.3 2.8-5.5 6.5-5.5s6.5 2.2 6.5 5.5" />
+      <path d="M18.5 6.5v5" />
+      <path d="M16 9h5" />
+    </Icon>
+  );
+}
+
+// Two joined roots under a canopy line — shared infrastructure.
+export function IconInfrastructure(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 8h16" />
+      <path d="M8 8v4c0 2-1.5 3-3 3.5" />
+      <path d="M16 8v4c0 2 1.5 3 3 3.5" />
+      <path d="M12 8v9" />
+      <path d="M12 17c-1 1.5-2.5 2-4 2" />
+      <path d="M12 17c1 1.5 2.5 2 4 2" />
+    </Icon>
+  );
+}

@@ -27,7 +27,6 @@ import {
   IconDashboard,
   IconMessages,
   IconProfile,
-  IconSettings,
   type IconProps,
 } from "@/components/visual";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
@@ -123,14 +122,6 @@ export function BottomNav() {
         : "text-moss-600 dark:text-moss-300 hover:text-canopy-700 dark:hover:text-canopy-300",
     ].join(" ");
 
-  // At lg+ the nav is a flex COLUMN so the primary items sit at the
-  // top and a utility slot (Settings) can be pushed to the base with
-  // mt-auto — the Slack/Discord/VS Code left-rail pattern. On mobile
-  // the nav is a plain block holding the horizontal item row and the
-  // Settings link is `hidden`, so the bottom tab bar stays exactly
-  // five cells (the phone-width ceiling the five-item design was
-  // built around; Settings stays reachable there via the Profile
-  // gear + Ctrl-K).
   return (
     <nav
       aria-label={t("nav.primaryNav")}
@@ -157,23 +148,10 @@ export function BottomNav() {
           </li>
         ))}
       </ul>
-
-      {/* Desktop-only utility slot, pinned to the base of the rail.
-          A different tier from the primary five (own border-topped
-          section, outside the ul's arrow-key group — a plain Tab
-          stop), so it never joins the mobile tab bar or the primary
-          reading order. */}
-      <NavLink
-        to="/settings"
-        className={(state) =>
-          `hidden border-t border-moss-200 dark:border-moss-800 lg:mt-auto lg:flex ${linkClass(
-            state,
-          )}`
-        }
-      >
-        <IconSettings size={22} />
-        <span className="text-center break-words">{t("nav.settings")}</span>
-      </NavLink>
+      {/* The desktop rail's pinned Settings slot (PR #399) is gone:
+          Settings lives in the global me-menu (AppHeader, top-right)
+          on BOTH platforms now, so the rail and the tab bar are the
+          same five items everywhere. */}
     </nav>
   );
 }
