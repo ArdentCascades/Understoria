@@ -28,9 +28,13 @@ set -euo pipefail
 
 # ─── Configuration ───────────────────────────────────────────────────
 
-# Compose project name used by `docker compose`. Override with
-# UNDERSTORIA_COMPOSE_PROJECT=foo to match your `-p` flag.
-PROJECT="${UNDERSTORIA_COMPOSE_PROJECT:-understoria}"
+# CONTAINER name of the running server. docker-compose.yml pins
+# `container_name: understoria`, so this is fixed regardless of any
+# `-p` compose project flag. Override with UNDERSTORIA_CONTAINER=foo
+# if you changed container_name. (UNDERSTORIA_COMPOSE_PROJECT is
+# still honored for existing crontabs — despite its old label it was
+# always used as the container name.)
+CONTAINER="${UNDERSTORIA_CONTAINER:-${UNDERSTORIA_COMPOSE_PROJECT:-understoria}}"
 
 # Where snapshots land on the Linode disk.
 BACKUP_DIR="${UNDERSTORIA_BACKUP_DIR:-/opt/understoria/backups}"
@@ -51,20 +55,32 @@ snapshot="$BACKUP_DIR/understoria-${timestamp}.db"
 # consistent read snapshot, so a mid-transaction state is never
 # captured. We avoid `docker cp` of the raw file because the SQLite
 # file may have an in-progress WAL checkpoint when we touch it.
-docker exec -i "${PROJECT}" node - <<'JS'
+#
+# The temp snapshot goes under /data — the writable volume — NOT
+# /tmp: the container runs with a read-only rootfs and /tmp is a
+# small tmpfs mount, and `docker cp` cannot read out of a tmpfs
+# mount, so a /tmp snapshot fails on every run of the documented
+# stack. Must match the path inside the heredoc below.
+TMP_SNAPSHOT="/data/.snapshot-tmp.db"
+docker exec -i "${CONTAINER}" node - <<'JS'
 const Database = require("better-sqlite3-multiple-ciphers");
 const fs = require("fs");
-fs.rmSync("/tmp/snapshot.db", { force: true });
+// Clear any leftover from a previously failed run — VACUUM INTO
+// refuses to write over an existing file.
+fs.rmSync("/data/.snapshot-tmp.db", { force: true });
 const db = new Database("/data/understoria.db", { readonly: true });
 const key = process.env.DATABASE_KEY;
 if (key) db.pragma(`key = '${key.replace(/'/g, "''")}'`);
-db.exec("VACUUM INTO '/tmp/snapshot.db'");
+db.exec("VACUUM INTO '/data/.snapshot-tmp.db'");
 db.close();
 JS
-docker cp "${PROJECT}:/tmp/snapshot.db" "$snapshot"
-docker exec "${PROJECT}" rm -f /tmp/snapshot.db
+docker cp "${CONTAINER}:${TMP_SNAPSHOT}" "$snapshot"
+docker exec "${CONTAINER}" rm -f "${TMP_SNAPSHOT}"
 
-# Compress; SQLite + repeated blob fields compress well.
+# Compress. Plaintext snapshots (SQLite + repeated blob fields)
+# compress well; DATABASE_KEY snapshots are ciphertext and barely
+# shrink — the gzip is kept anyway so every snapshot has the same
+# .gz name and handling.
 gzip -9 "$snapshot"
 echo "[$(date -u +%FT%TZ)] snapshot: ${snapshot}.gz ($(du -h "${snapshot}.gz" | cut -f1))"
 

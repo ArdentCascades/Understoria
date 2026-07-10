@@ -850,8 +850,7 @@
         "learnMore": "Learn more:"
       },
       "playbook": {
-        "title": "How this works — from the {{name}} playbook",
-        "compactSummary": "Before you start — from the project playbook"
+        "title": "How this works — from the {{name}} playbook"
       }
     },
     "detail": {
@@ -2258,7 +2257,7 @@
       "title": "Community settings",
       "rowDescription": "Open to review or tune the community's thresholds.",
       "intro": "Thresholds the community can tune to fit its own context. Defaults work for most groups.",
-      "bootstrapNote": "These changes take effect immediately for everyone on this device. Once the in-app proposal system ships, edits here will route through a community vote instead.",
+      "bootstrapNote": "Direct edits here take effect immediately for everyone on this device; settings changes can also go through a community proposal and vote instead.",
       "proposeLink": "Or propose a change for the community to discuss →",
       "dailyLimit": {
         "label": "Daily helper limit",

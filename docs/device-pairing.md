@@ -623,13 +623,17 @@ On submit, the destination:
    back to capture — letting the member retype the passphrase
    doesn't help, because if the fingerprints diverge the envelope
    on the wire is the wrong envelope.
-8. Prompts the member to set a **session passphrase** for this
+8. Offers the member an **optional session passphrase** for this
    device. The transfer passphrase is single-use; the session
    passphrase is the member's own choice for unlocking the local
-   key on this device going forward.
-9. Re-wraps the imported secretKey under the new session
-   passphrase via the existing `lib/passphrase.ts` flow and writes
-   the member row + wrapped key to IndexedDB.
+   key on this device going forward. The step is skippable — an
+   empty submit imports with the key stored unprotected, the same
+   default as a fresh seed flow, and Settings → Security offers
+   locking later (consistent with §6.7's "no mandatory
+   lock-passphrase stage").
+9. If a session passphrase was set, re-wraps the imported
+   secretKey under it via the existing `lib/passphrase.ts` flow;
+   either way, writes the member row + key to IndexedDB.
 10. Calls `markOnboarded()` and sets `currentMember`.
 11. Navigates to the Board.
 
@@ -662,8 +666,31 @@ already knew.
 
 ## 8. What gets transferred — full list
 
-**Transferred:** identity (Ed25519 keypair), profile (displayName,
-skills, availability, availabilityChips, locationZone).
+*(This list matches the as-built `TransferPayload` in
+`apps/web/src/lib/devicePairing.ts`, i.e. the §5.1 envelope shape.
+The payload grew after the original draft, which listed only
+identity + profile; the fields below marked "optional on the wire"
+were added without a payload-version bump, and `docs/blocking.md`
+§14.1 cites this section for the block-bundle fields.)*
+
+**Transferred:**
+
+- Identity (Ed25519 keypair) and profile (displayName, skills,
+  availability, availabilityChips, locationZone).
+- The block list and block history (`blocks`,
+  `previouslyBlocked`) — `docs/blocking.md` §14.1. Optional on the
+  wire (older sources omit them).
+- The community-node connection (`communityNode: { url, enabled }`)
+  — the member's own prior consent traveling with their identity;
+  adopted only when the destination has no connection of its own,
+  then an immediate first sync runs. Optional on the wire.
+- The source's community id (`nodeId`), so transferred records and
+  stats count as the same community on the new device. Optional on
+  the wire.
+- The community snapshot — the shared-state slice of the source's
+  local database (`lib/communitySnapshot.ts` for exactly what's in
+  and out and why). Relayed transports only (never the QR — too
+  large); applied on fresh devices only. Optional on the wire.
 
 **Not transferred:**
 
@@ -671,13 +698,13 @@ skills, availability, availabilityChips, locationZone).
   re-encryption flow exists.
 - Drafts. Local-only on purpose.
 - Settings: theme, density, text size, dismissed nudges, hint
-  banners, mirror-consent state, community node URL setting.
+  banners, mirror-consent state.
 - Achievements (regenerate from federated records on first
   sync).
 - Federation cursors (regenerate on first sync).
 - The session passphrase or its wrapping. The destination
-  device's session passphrase is set by the member at pairing
-  time.
+  device's session passphrase — if the member sets one (§7.4) —
+  is its own.
 
 **Not in scope for v1** (may be added later, each requires its
 own threat-model entry):

@@ -273,11 +273,16 @@ After the help has actually happened, both of you confirm it:
 Once both of you have confirmed, the hours move between your balances
 and the exchange is recorded.
 
-Before you tap confirm, the app shows a small dialog that **names the
-debit out loud** — "Confirming credits Alex with 2 hours; the same
-amount comes from your balance" — so the side effect on your balance
-is never surprising. The confirm dialog is the same shape for project
-tasks (§9) as it is for board posts.
+Before you tap confirm, the app shows a small dialog so you know
+what you're agreeing to. On a board post it's a plain check-in —
+*"Confirm that the help actually happened. Credit moves once you've
+both confirmed."* — because both of you confirm, and the post
+itself already shows the hours. It's the project-task confirm (§9)
+that **names the debit out loud** — *"Confirming records a signed
+exchange: 2 hours move to Alex, and 2 hours move out of your
+balance"* — because there a single confirmation by the organizer
+moves the credit, and the side effect on your balance should never
+be surprising.
 
 If something went wrong — you didn't receive what was promised, or the
 other person didn't show — tap **Something's wrong — flag it**
@@ -397,10 +402,12 @@ the system when to *not bother you*, not when to *forbid you*.
 ### Stepping back from a task you've claimed
 
 Plans change. If you claimed a task and can't get to it, you can
-release it — the row gets a **Release this task** affordance with
-copy that says *"step back, no judgment."* The task returns to
-Open, the organizer sees an activity entry, and the community
-keeps moving. There's no penalty surface, no flag, no public
+release it — open the task's page and tap **Release claim**; a
+muted line beside the button carries the reassurance: *"Releasing
+helps the organizer find another helper — no judgment."* It's one
+tap, no confirmation dialog in the way. The task returns to Open,
+the organizer sees an activity entry, and the community keeps
+moving. There's no penalty surface, no flag, no public
 record of who stepped back. Solidarity-not-shame applies inside
 the project surface as much as it does on the board.
 
@@ -534,20 +541,26 @@ Open an event to see the details. The **RSVP** control expands a
 small card explaining what your RSVP means before you commit:
 
 - If you RSVP **Going** or **Maybe**, the organizer sees your name
-  on the attendee list, and other members on this node who also
-  RSVP'd see your name. Everyone else on this node sees only the
-  count, not names. Members on peer nodes see neither names nor
-  counts.
+  on the attendee list, and other members of your community who
+  also RSVP'd see your name. Everyone else in your community sees
+  only the count, not names. Members of peer communities never see
+  your RSVP at all — no name, no count.
 - If you RSVP **Not going** (or change to it later), you're
   removed from the visible roster — no delta is shown to anyone.
 - Either way you'll get a heads-up on your attention rail if the
   organizer cancels.
 
-Your RSVP **stays on this node**. It is not a signed record, it
-does not federate to peer nodes, and even on this device the
-organizer cannot see RSVPs you made from a different node. If you
-opened the PWA on another community's node, you'd have to RSVP
-there separately.
+Your RSVP is a **signed record that stays inside your community**.
+It syncs through your own community's node, so your other devices
+and the rest of your community stay in step — but it never crosses
+to a peer community's node, and no cross-community attendance list
+exists anywhere. That also means you RSVP from right where you
+are: if an event from a peer community shows up on your calendar,
+the ordinary RSVP control works on it, through your own node — you
+never need to open another community's copy of the app. (For a
+peer community's event, that community's organizer doesn't see
+your RSVP; it stays with your community, under the same
+visibility rules as any other RSVP.)
 
 ### Shifts — signing up for a slice of the day
 
@@ -784,14 +797,23 @@ Tap **Profile** to see:
   offline), open the study-group prompts and copy one to share
   in a meeting, or open the **install guide** (§1a) to put the app
   on your home screen.
-- **Community settings** — three safeguard thresholds the community
-  can tune to fit its own context: daily helper limit (a hard
-  per-day cap), short-exchange threshold (exchanges shorter than
-  this get flagged for community review, not blocked), and
+- **Community settings** — the knobs the community can tune to fit
+  its own context. The exchange safeguards: daily helper limit (a
+  hard per-day cap), short-exchange threshold (exchanges shorter
+  than this get flagged for community review, not blocked), and
   reciprocal-pattern threshold (after this many exchanges between
-  the same two members in 30 days, the next one gets flagged). A
-  yellow note explains these are bootstrap-mode — once in-app
-  governance ships, changes here will route through a proposal.
+  the same two members in 30 days, the next one gets flagged). The
+  gentler timers: task check-in days (when a claimer gets the
+  private "still on it?" nudge), "could use more hands" days (when
+  a quiet task gets its public chip), check-in grace days (how long
+  an acknowledged nudge keeps that chip away), and auto-confirm
+  hours (when the node closes out an exchange a partner never got
+  to). The governance pair: proposal deliberation period and
+  minimum affirm votes. Plus an invite-only onboarding toggle and
+  an editor for custom community milestones. A yellow note names
+  the two ways a change can land: edits made here apply
+  immediately, or you can send the same change through a community
+  proposal instead — the panel links straight to starting one.
 - **Add another device** — set up Understoria on a second device
   (a laptop as well as your phone, say) under one identity. (See §12a.)
 - **Paired devices** — a list of the devices you've added, so you can

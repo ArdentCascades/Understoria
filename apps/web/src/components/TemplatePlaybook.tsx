@@ -22,19 +22,17 @@ import { findFaqEntry } from "@/lib/templateContext";
 // is persisted except `Project.templateId`, so we RE-DERIVE the playbook
 // here from that id (no schema change, always current with the content).
 // It reads as reference — "the {template} playbook says…" — because the
-// organizer may have since diverged from the template.
-//
-//   • full    — a "How this works" card on the project page.
-//   • compact — a collapsed "Before you start" on a task's own page, so
-//               a member who deep-links to one task still gets the
-//               project's hard-won advice.
+// organizer may have since diverged from the template. Renders as a
+// "How this works" card on the project page (the compact task-page
+// variant left with its last call site, #406).
 
 export function TemplatePlaybook({
   templateId,
-  variant,
 }: {
   templateId: string | null;
-  variant: "full" | "compact";
+  /** Only "full" remains (#406 removed the compact variant). Accepted
+   *  and ignored so the project-page call site needn't churn. */
+  variant?: "full";
 }) {
   const { t, i18n } = useTranslation();
   if (!templateId) return null;
@@ -42,18 +40,17 @@ export function TemplatePlaybook({
   const tpl = getTemplate(templateId, locale);
   if (!tpl) return null;
 
-  const showLearnMore = variant === "full" && (tpl.learnMore?.length ?? 0) > 0;
-  const showWhatYoullNeed = variant === "full" && Boolean(tpl.whatYoullNeed);
+  const showLearnMore = (tpl.learnMore?.length ?? 0) > 0;
   const hasContent =
     Boolean(tpl.firstSteps) ||
     Boolean(tpl.commonPitfalls) ||
-    showWhatYoullNeed ||
+    Boolean(tpl.whatYoullNeed) ||
     showLearnMore;
   if (!hasContent) return null;
 
   const body = (
     <div className="mt-2 flex flex-col gap-2 text-sm text-moss-700 dark:text-moss-200">
-      {showWhatYoullNeed && (
+      {Boolean(tpl.whatYoullNeed) && (
         <p>
           <span className="font-semibold">
             {t("projects.templates.context.whatYoullNeed")}
@@ -100,17 +97,12 @@ export function TemplatePlaybook({
     </div>
   );
 
-  // Both variants are collapsed-by-default disclosures — this is
-  // reference material, not the main event, so it never pushes the tasks
-  // (project page) or the task's own actions below the fold.
-  const summaryText =
-    variant === "compact"
-      ? t("projects.templates.playbook.compactSummary")
-      : t("projects.templates.playbook.title", { name: tpl.name });
+  // Collapsed-by-default disclosure — this is reference material, not
+  // the main event, so it never pushes the tasks below the fold.
   return (
     <details className="rounded-xl border border-canopy-200 bg-canopy-50/60 p-3 dark:border-canopy-800 dark:bg-canopy-950/30">
       <summary className="cursor-pointer text-sm font-semibold text-canopy-800 dark:text-canopy-200">
-        {summaryText}
+        {t("projects.templates.playbook.title", { name: tpl.name })}
       </summary>
       {body}
     </details>

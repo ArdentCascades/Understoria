@@ -269,10 +269,49 @@ describe("taskCheckInState dependency suppression", () => {
     expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe("fresh");
   });
 
-  it("surfaces the chip normally when all deps are completed", () => {
+  it("surfaces the chip normally when all deps completed long ago", () => {
+    // Upstream done 18 days ago: the unblock anchor is well past both
+    // the claim floor (14) and check-in + grace (9), so the chip fires.
     const t = downstream();
     const up = upstream("completed", {
-      completedAt: NOW - 5 * DAY,
+      completedAt: NOW - 18 * DAY,
+      completedBy: "bob",
+    });
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe(
+      "needs_more_hands",
+    );
+  });
+
+  it("anchors the ladder at unblock: a just-unblocked early claim starts fresh", () => {
+    // Claimed 20 days ago, but structurally blocked until the upstream
+    // completed 2 days ago. The clock starts at unblock — no jumping
+    // straight to the public tier the moment the upstream lands.
+    const t = downstream();
+    const up = upstream("completed", {
+      completedAt: NOW - 2 * DAY,
+      completedBy: "bob",
+    });
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe("fresh");
+  });
+
+  it("an unblocked early claim walks the private tier before the public one", () => {
+    // Unblocked 8 days ago: past checkInDays (7) so the private nudge
+    // shows, but under the needs-help floor (14) counted from unblock,
+    // so no public chip yet.
+    const t = downstream();
+    const up = upstream("completed", {
+      completedAt: NOW - 8 * DAY,
+      completedBy: "bob",
+    });
+    expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe("check_in_due");
+  });
+
+  it("guards a completed dep with a null completedAt by anchoring at the claim", () => {
+    // Shouldn't happen (completed rows are stamped), but a missing
+    // stamp must not wedge the ladder — fall back to claimedAt.
+    const t = downstream();
+    const up = upstream("completed", {
+      completedAt: null,
       completedBy: "bob",
     });
     expect(taskCheckInState(t, CONFIG, [t, up], NOW)).toBe(

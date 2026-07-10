@@ -10,9 +10,14 @@
 > lean on "projects/tasks never federate," which was true at writing
 > and load-bearing for the verdicts then. Project & task STATE now
 > federates as signed LWW records (`docs/project-federation.md`).
-> The shipped verdicts themselves stand (the event⇄project link and
-> adoption remain local; sentinel rows remain rejected), but read
-> any "projects don't federate" clause here as dated.
+> The shipped verdicts themselves stand (the event⇄project link
+> remains local; sentinel rows remain rejected), and adoption has
+> since moved too: adoption proposals, votes, and closures now
+> federate through the community node (`docs/proposal-federation.md`
+> G1/G2 — the `project_adoption` closure deliberately has no
+> pull-side effect, since the ProjectState record already carries
+> the handoff). Read any "projects don't federate" or "adoption is
+> local" clause here as dated.
 >
 > **Status at writing: PROPOSED.** Nothing in this document is committed work. Each
 > section is an implementation plan for one improvement to the

@@ -102,7 +102,12 @@ We are not trying to protect against:
 - **Signed exchange transactions.** Every exchange is signed by both
   parties; any node can verify independently. No central ledger. (Agent 2)
 - **Minimal server logging.** No IP addresses, no member identifiers,
-  no request bodies. 7-day retention max. (Agent 4, task 4)
+  no request bodies. Retention is bounded by size, not time: the
+  shipped compose file caps each container at three rotating 10 MB
+  log files (~30 MB max), which a busy node cycles through in hours
+  but a quiet node can retain for well over a week; deployments
+  outside the provided compose file get no cap unless the operator
+  configures one. (Agent 4, task 4)
 - **Federation via opt-in peering.** A node can disconnect at any time
   and keep functioning. No mandatory third parties. (Agent 3)
 - **Compartmentalization.** Mutual aid data, organizing data, and admin
@@ -941,7 +946,7 @@ We are not trying to protect against:
   Profile → Emergency soft-purge wipes `blocks` and
   `previouslyBlocked` alongside the other anonymizable surfaces.
   Hard-purge wipes everything by definition.
-  (c) **Data-export excludes the tables.** The Profile →
+  (c) **Data-export excludes the tables.** The Settings-page
   Data export JSON snapshot excludes `blocks` and
   `previouslyBlocked` explicitly, alongside the existing
   private-key exclusion. A member exporting their data does not

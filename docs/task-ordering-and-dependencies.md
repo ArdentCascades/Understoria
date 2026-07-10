@@ -539,7 +539,11 @@ not at the affected party's behavior).
 The render of the badge for multi-dependency tasks (a task
 with three upstreams, two of them complete) is left as an open
 question for PR E review — list all? show first + count? See
-§13.
+§13. *(Resolved as-built — `FollowsBadge` in
+`apps/web/src/components/TaskCard.tsx`: one unmet upstream
+renders its title; 2–3 render as a comma-joined list; from 4,
+the badge collapses to "Follows: &lt;first&gt; +N more" and
+expands in place to a full list of jump-links.)*
 
 ### §6.4 The claimant acknowledgment line
 
@@ -818,11 +822,13 @@ faster on a desktop. It is not the primary affordance.
   `aria-disabled="true"`). Same for the bottommost task's
   Move down. No "wraparound" — a reorder that would move a
   task off the ends is just not offered.
-- During a drag (when the user has grabbed an item), the
-  Move buttons on other rows render disabled to avoid
-  conflicting state. Same for the keyboard path: while a
-  sortable item is "picked up" via the keyboard sensor, the
-  Move buttons elsewhere are not interactive.
+- *(As-built: the end-of-list disabling above is the only
+  disabled state the shipped `ReorderTasksDialog.tsx`
+  implements. The mid-grab behavior sketched at design time —
+  disabling other rows' Move buttons while an item is picked
+  up, on both the pointer and keyboard paths — was never
+  built; a grabbed item simply completes or cancels its own
+  move, and no conflicting-state issue has surfaced.)*
 
 ### §9.5 i18n keys
 
@@ -1174,6 +1180,13 @@ guardrail for future contributors.
   Recommend leaving this open for PR E review with the
   designer; pilot data may help pick. The information cost vs.
   visual cost trade-off doesn't have an obvious right answer.
+  **Resolved as-built:** the shipped `FollowsBadge`
+  (`apps/web/src/components/TaskCard.tsx`) blends the first
+  two shapes — comma-joined titles for up to 3 unmet
+  upstreams, then "&lt;first&gt; +N more" from 4, expandable
+  in place to a list of all unmet upstreams as jump-links
+  (which also answers the click-handling question below with
+  the recommended yes).
 
 - **Click handling on the "Follows" badge.** Should the
   badge be a link to the upstream task (scroll-to or

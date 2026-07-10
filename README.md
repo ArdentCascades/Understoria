@@ -148,7 +148,7 @@ and Docker deployment (see the operator guide above and
 - **Identity** — Ed25519 key pairs. No email, no phone number, no external identity provider. Your public key is your identity.
 - **Trust** — Web-of-trust vouching. New members need two vouches from existing members. Mirrors how real organizing works.
 - **Transactions** — Every exchange is signed by both parties. Verifiable by any node without a central authority.
-- **Data** — Encrypted at rest (SQLCipher). Minimal logging. No IP addresses stored. Panic button for emergency data purge.
+- **Data** — Encrypted at rest (SQLCipher). Minimal logging. The app server stores no IP addresses (rate limiting only ever hashes them); the one exception is the reverse proxy's rotating access log, which operators keep short-lived — see the privacy policy §5. Panic button for emergency data purge.
 - **Federation** — Nodes peer voluntarily. Shared needs/offers broadcast across the network. Cross-node exchanges recorded on both sides.
 - **Sync** — CRDT-based data model. Nodes operate independently when disconnected, reconcile when reconnected.
 
@@ -223,8 +223,8 @@ Sign off every commit with `git commit -s`.
 
 ## Community
 
-- **Discussions** — [GitHub Discussions](https://github.com/your-org/understoria/discussions) for questions, ideas, and conversation
-- **Issues** — [GitHub Issues](https://github.com/your-org/understoria/issues) for bugs and feature requests
+- **Discussions** — [GitHub Discussions](https://github.com/ardentcascades/understoria/discussions) for questions, ideas, and conversation
+- **Issues** — [GitHub Issues](https://github.com/ardentcascades/understoria/issues) for bugs and feature requests
 - **Matrix** — `#understoria:matrix.org` for real-time chat (encrypted by default)
 
 We make decisions through modified consensus. Major decisions go through a community proposal process. See [GOVERNANCE.md](GOVERNANCE.md) for details.
@@ -253,7 +253,7 @@ The phase view below is a public summary.
 - [x] End-to-end encrypted messaging
 - [x] Device pairing — same-identity transfer to a second device via local QR + one-time passphrase, with fingerprint verification and a paired-device inventory on Profile
 - [x] Community calendar — agenda / month / week view aggregating project deadlines, post expiries, and exchange density (5th bottom-nav tab)
-- [x] Community events — federated signed `Event` + `EventCancellation` records with local-only RSVP roster, comparison-card create flow, attention-rail integration, and an "Events only" calendar filter
+- [x] Community events — federated signed `Event` + `EventCancellation` records, RSVPs as signed records that sync through your own community's node (never relayed to peers), comparison-card create flow, attention-rail integration, and an "Events only" calendar filter
 - [x] Member blocking — local-only personal-relief surface with informed-consent comparison card, per-block governance-visibility toggle, paired-device transfer, and tap-to-reveal Settings panel
 - [x] Invite-only mode — `nodeConfig.inviteOnly` flag with first-member bootstrap exception for fresh deployments
 - [x] Task ordering + soft-block dependencies — drag / Move buttons / Reorder modal for organisers; `Follows:` framing + claimant ack line + chip suppression for structurally-blocked tasks; ordering and dependencies ride the signed `TaskState` records, so they sync between members' devices like the rest of the task row

@@ -203,7 +203,7 @@ controlled in the same PR as the surface it serves.
 | `content/faq.ts` | FAQ entries. |
 | `content/design-principles.ts` | Design-principles reading inside the app. |
 | `content/study-prompts.ts` | Study-prompt corpus. |
-| `content/projectTemplates.ts` | 10 starter community-project templates (community fridge, garden, lending library, care network, emergency prep, free store, skill share, bulk-buying co-op, repair café, rides). Ships with full Spanish parity — `getProjectTemplates(locale)` returns the locale-appropriate set. Picked via `TemplatePicker` at the top of `ProjectNew`. Recurring tasks are flat tasks with a localized cadence sentence appended to the description; no schema field. Templates are *starting points, not prescriptions* — every field is editable before the project is created. |
+| `content/projectTemplates.ts` | 54 starter community-project templates per locale — from community fridges, gardens, and lending libraries through to court support, harm-reduction supplies, and oral-history projects. Ships with full Spanish parity — `getProjectTemplates(locale)` returns the locale-appropriate set. Picked via `TemplatePicker` at the top of `ProjectNew`. Recurring tasks are flat tasks with a localized cadence sentence appended to the description; no schema field. Templates are *starting points, not prescriptions* — every field is editable before the project is created. |
 
 When you add a new content surface, prefer this pattern over
 stretching the i18n locales: long prose belongs near its component,

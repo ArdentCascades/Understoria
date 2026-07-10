@@ -32,7 +32,7 @@ DIST="$REPO_ROOT/apps/web/dist/index.html"
 
 if [ ! -f "$DIST" ]; then
   echo "ERROR: $DIST not found." >&2
-  echo "Build the PWA first:  (cd apps/web && pnpm build)  or  vite build" >&2
+  echo "Build the PWA first:  npm run build  (from the repo root)" >&2
   exit 1
 fi
 

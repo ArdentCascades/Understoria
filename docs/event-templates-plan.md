@@ -148,6 +148,17 @@ produces the content the rest consume.
   `category: "skilled_labor"`, `suggestedDurationMinutes: 240` (the §10
   "4-hour" suggestion), so a project-scheduled work day and a gallery-picked
   one are the same templated shape (Task 3 wires the project path to set it).
+
+  > **As-built drift (cosmetic; the spec above stands as written):** the
+  > shipped vocabulary in `apps/web/src/lib/categories.ts` kept all three
+  > categories and their emoji but landed different chip colours —
+  > `social` 🎉 is `bg-canopy-500` and `celebration` 🎂 is `bg-bark-500`
+  > (`learning` 📚 shipped as specced at `bg-moss-500`). Three template
+  > emoji also drifted in `apps/web/src/content/eventTemplates.ts`:
+  > skill-share ships 🎓 (not 🧑‍🏫), music-jam 🎵 (not 🎶), and work-day 🌱
+  > (not 🛠️). The 14-template set, its gallery order, the ids, and the
+  > `work-day` reservation (`skilled_labor`, 240 minutes) shipped as
+  > written.
 - Accessors `getEventTemplates(locale)` / `getEventTemplate(id, locale)`,
   shape-identical to `projectTemplates.ts:5710`.
 

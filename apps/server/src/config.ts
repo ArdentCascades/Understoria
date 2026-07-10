@@ -45,14 +45,18 @@ export interface Config {
   rateLimitMax: number;
   /**
    * Value passed to Fastify's `trustProxy` (Round-4 review). Empty
-   * string / undefined → `false` (direct exposure). Set `TRUST_PROXY`
-   * to `loopback` (or the proxy's address) when behind the documented
-   * Caddy reverse proxy, so `req.ip` resolves the REAL client IP from
-   * `X-Forwarded-For` instead of the proxy's loopback address — without
-   * which every client collapses into one rate-limit bucket. The IP is
-   * still only ever HASHED to a bucket, never stored raw.
+   * string / undefined → `false` (direct exposure). Under the bundled
+   * compose stack set `TRUST_PROXY=true` — Caddy reaches the server
+   * from a bridge-network IP, so an address filter like `loopback`
+   * would silently no-op and collapse every client into one
+   * rate-limit bucket. For a bare-metal Caddy on the same host,
+   * `loopback` is the tighter setting; an explicit IP/CIDR (or comma
+   * list) is also accepted. Trusting the proxy makes `req.ip` resolve
+   * the REAL client IP from `X-Forwarded-For` instead of the proxy's
+   * address. The IP is still only ever HASHED to a bucket, never
+   * stored raw.
    */
-  trustProxy: string;
+  trustProxy: boolean | string;
   /** Stable identifier for this node. Embedded in stored exchanges. */
   nodeId: string;
   /** Pino log level. `info` by default; flip to `debug` for triage only. */
@@ -74,8 +78,11 @@ export interface Config {
   operatorFundingNote: string | null;
   operatorContact: string | null;
   /**
-   * Federation peers this node pulls from. Comma-separated base URLs
-   * (no path, no trailing slash; the worker appends `/exchanges`).
+   * Federation peers this node pulls from. Comma-separated base URLs,
+   * no trailing slash; the worker appends `/exchanges` etc. A path
+   * prefix is preserved and EXPECTED under the bundled Caddy layout,
+   * where the API is served at `/api` — entries look like
+   * `https://peer.example/api`.
    * Read from PEER_NODE_URLS at startup; Agent 15 (federation
    * governance) will replace this with signed federation agreements.
    * Empty means "this node does not federate."
@@ -282,7 +289,7 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     databasePath: env.DATABASE_PATH ?? "./understoria.db",
     corsOrigin: env.CORS_ORIGIN ?? "*",
     rateLimitMax: asInt("RATE_LIMIT_MAX", env.RATE_LIMIT_MAX, 60),
-    trustProxy: env.TRUST_PROXY ?? "",
+    trustProxy: parseTrustProxy(env.TRUST_PROXY),
     nodeId: env.NODE_ID ?? "node_local",
     logLevel: logLevelRaw as Config["logLevel"],
     logRequestPaths: asBool(env.LOG_REQUEST_PATHS, false),
@@ -501,6 +508,20 @@ function asNonNegativeInt(
     );
   }
   return n;
+}
+
+/** `"true"`/`"false"` must reach Fastify as BOOLEANS: the raw string
+ *  `"true"` would be handed to proxy-addr as an IP and crash the boot
+ *  ("invalid IP address: true") — yet `true` is exactly what the
+ *  bundled compose stack needs. Every other value (`loopback`, IPs,
+ *  CIDRs, comma lists) passes through as-is; empty stays `""` and the
+ *  server maps it to `false`. */
+function parseTrustProxy(raw: string | undefined): boolean | string {
+  const trimmed = (raw ?? "").trim();
+  const lower = trimmed.toLowerCase();
+  if (lower === "true") return true;
+  if (lower === "false") return false;
+  return trimmed;
 }
 
 function nonEmpty(raw: string | undefined): string | null {

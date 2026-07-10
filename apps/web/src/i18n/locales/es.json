@@ -850,8 +850,7 @@
         "learnMore": "Aprende más:"
       },
       "playbook": {
-        "title": "Cómo funciona — según la guía de {{name}}",
-        "compactSummary": "Antes de empezar — según la guía del proyecto"
+        "title": "Cómo funciona — según la guía de {{name}}"
       }
     },
     "detail": {
@@ -2258,7 +2257,7 @@
       "title": "Configuración comunitaria",
       "rowDescription": "Abre para revisar o ajustar los umbrales de la comunidad.",
       "intro": "Umbrales que la comunidad puede ajustar a su propio contexto. Los valores predeterminados funcionan para la mayoría de los grupos.",
-      "bootstrapNote": "Estos cambios entran en efecto de inmediato para todas las personas en este dispositivo. Cuando llegue el sistema de propuestas en la aplicación, las ediciones aquí pasarán por una votación comunitaria.",
+      "bootstrapNote": "Las ediciones directas aquí entran en efecto de inmediato para todas las personas en este dispositivo; los cambios de configuración también pueden pasar por una propuesta y votación comunitaria.",
       "proposeLink": "O propón un cambio para que la comunidad lo discuta →",
       "dailyLimit": {
         "label": "Límite diario de ayudante",

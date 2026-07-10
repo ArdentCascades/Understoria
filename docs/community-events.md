@@ -516,6 +516,18 @@ no badge count, no email. The member sees them next time they open
 the app. The dismissal lifecycle is local-only — dismissals never
 federate.
 
+*(As-built delta — the dismissal lifecycles below were designed but
+never built. The shipped items (`apps/web/src/lib/attention.ts`)
+are pull-only exactly as specified, but none of the three is
+dismissable — the attention rail has no dismissal plumbing at all.
+Each item just ages out on its own time window: `event_today`
+disappears with the UTC day, `event_cancelled` rolls off 7 days
+after the cancellation, and `event_capacity_reached` shows while
+the going-count still meets the cap — recomputed on every open, so
+it drops out if RSVPs dip back under the cap, rather than the
+once-ever dedupe §8.3 describes. Read the per-item "Dismissal" and
+"Dedupe … ever" clauses as design history.)*
+
 ### §8.1 `event_today`
 
 - **Query.** For each `Event` where `effectiveEventState(event) =

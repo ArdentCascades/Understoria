@@ -408,8 +408,8 @@ export const TASK_TIPS: Record<
       "es": "Los libros infantiles son los que más salen y menos regresan, así que abastécelos de sobra; y recicla discretamente los donativos manchados o los libros de texto de los años noventa antes de ponerlos: con un estante de basura, la gente deja de abrir la puerta."
     },
     {
-      "en": "Word it as 'take one, leave one if you can' — if people think they owe a book back, they won't take the one they need, and the whole point was no barriers.",
-      "es": "Redáctalo como 'lleve uno, deje uno si puede': si la gente cree que debe devolver un libro, no se llevará el que necesita, y la idea era justamente que no hubiera barreras."
+      "en": "Whatever the sign says, make it read as an invitation, not an obligation — people will take books without leaving one back, and that's fine; if they feel they owe one, they won't take the one they need, and the whole point was no barriers.",
+      "es": "Diga lo que diga el letrero, que se lea como una invitación y no como una obligación: la gente tomará libros sin dejar otro, y está bien; si sienten que deben uno, no se llevarán el que necesitan, y la idea era justamente que no hubiera barreras."
     },
     {
       "en": "Line up a backup steward too, and tell both what to pull on sight: anything moldy, anything with a stranger's phone number written in it, and adult titles in a box kids reach into.",
@@ -747,7 +747,7 @@ export const TASK_TIPS: Record<
     },
     {
       "en": "Line up more crates and vehicle room than you'd guess — a single 'small' tree can yield hundreds of pounds, and produce left in a hot car by noon is compost by evening.",
-      "es": "Ten más cajas y espacio en los vehículos de lo que calculas: un solo árbol \"pequeño\" puede dar cientos de kilos, y la fruta dejada en un auto caliente al mediodía es abono para la tarde."
+      "es": "Ten más cajas y espacio en los vehículos de lo que calculas: un solo árbol \"pequeño\" puede dar más de cien kilos, y la fruta dejada en un auto caliente al mediodía es abono para la tarde."
     },
     {
       "en": "Track firm yeses, not maybes — a list of ten who might show is worthless against a grower's two-hour window; know the three who actually will.",

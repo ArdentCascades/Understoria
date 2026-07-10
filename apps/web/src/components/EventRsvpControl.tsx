@@ -34,10 +34,12 @@ export interface EventRsvpControlProps {
 /**
  * RSVP informed-consent surface. Names the visibility consequence of
  * a `going`/`maybe` RSVP BEFORE the row is written — same discipline
- * as the co-organizer invitation acceptance card. RSVPs themselves are
- * not federated (see `docs/community-events.md` §4 + §7), but the
- * local visibility consequence is real and the member deserves to
- * see it before tapping.
+ * as the co-organizer invitation acceptance card. The local Dexie row
+ * federates as the member's own signed `EventRsvpState` record via
+ * their community node (participation Phase 2,
+ * `docs/project-federation.md` §6; participation kinds never join the
+ * cross-node peer pull), so the roster is community-visible — all the
+ * more reason the member sees the consequence before tapping.
  *
  * States:
  *

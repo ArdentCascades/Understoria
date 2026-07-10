@@ -116,6 +116,21 @@ the design:
 
 ## §4 Data model
 
+*(SUPERSEDED IN PART by participation Phase 2 — see the banner at
+the top of this note. Every negative-space clause below is now
+false as stated: `"event_shift"` and `"shift_signup"` ARE
+`OutboxRow.kind` members, `enqueueEventShiftOutbox` /
+`enqueueShiftSignupOutbox` exist in `lib/outbox.ts`, the
+`POST/GET /event-shifts` and `/shift-signups` routes exist
+(`apps/server/src/routes/participationStates.ts`),
+`pullFederatedEventShifts` / `pullFederatedShiftSignups` live in
+`lib/federationSync.ts`, and the wire shapes are signed
+`packages/shared` types (`EventShiftState` / `ShiftSignupState`,
+carrying `signerKey` + `signature` and tombstoned deletion). What
+still binds: none of these kinds ever joins the cross-node
+`peerPull` loop — sync is through the member's own community node
+only. §§4.1–4.2 below are kept as the original design record.)*
+
 Two record types. Both are **local to the node where they were
 created** and **never enter the outbox**. Same posture as
 `EventRsvpRow`, `BlockRow`, `EventProjectLinkRow`, and the

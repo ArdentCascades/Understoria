@@ -38,7 +38,9 @@ import type {
 
 /**
  * Community-events data layer — see `docs/community-events.md` for the
- * full design. Two signed record types and one local-only RSVP row:
+ * full design. Two signed record types plus the RSVP row (a local
+ * Dexie materialization that federates as a signed state record since
+ * participation Phase 2):
  *
  *   - `createEvent` — organizer signs an event, persists locally,
  *     enqueues for federation. Mirrors `issueCoOrganizerInvitation`.
@@ -276,7 +278,7 @@ export async function getEventCancellation(
   return row ?? null;
 }
 
-// -- RSVP (LOCAL-ONLY) ------------------------------------------------------
+// -- RSVP (local row; federates to the member's own community node) ----------
 
 export interface RsvpToEventInput {
   eventId: string;
