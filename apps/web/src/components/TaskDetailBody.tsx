@@ -32,6 +32,7 @@ import { MarkdownHint } from "@/components/MarkdownHint";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
 import { matchTaskSkills } from "@/lib/taskSkillMatch";
+import { getTaskTips } from "@/content/taskTips";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
 
@@ -63,6 +64,7 @@ export function TaskDetailBody({
   taskCheckInDays,
   autoConfirmHours,
   viewerSkills,
+  templateId,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -78,6 +80,12 @@ export function TaskDetailBody({
   /** The viewer's own profile skills, for the positive "fits your
    *  skills" cue on this task's suggested skills. */
   viewerSkills: readonly string[];
+  /** The project's `templateId` (null for from-scratch projects).
+   *  Resolves this task's authored, TASK-specific tip — matched by
+   *  title against the template's task list (content/taskTips.ts).
+   *  Deliberately not the project-level playbook: that stays on the
+   *  project page. */
+  templateId: string | null;
   /** Node-configured private check-in window. Drives the claim-time
    *  commitment summary in the (deep-link) Claim block — mirrored from
    *  the card so a member who lands on an open task's page can claim
@@ -88,7 +96,7 @@ export function TaskDetailBody({
    *  line entirely. */
   autoConfirmHours: number;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { showToast } = useToast();
   const isAssignee = task.assignedTo === currentKey;
   const isCompleter = task.completedBy === currentKey;
@@ -113,6 +121,16 @@ export function TaskDetailBody({
   const skillMatch = useMemo(
     () => matchTaskSkills(task.requiredSkills, viewerSkills),
     [task.requiredSkills, viewerSkills],
+  );
+
+  // The task's own authored tip (content/taskTips.ts), re-derived from
+  // the template id + this task's (verbatim-from-template) title. Null
+  // for from-scratch projects, renamed tasks, or organizer-added tasks
+  // — the block simply doesn't render.
+  const locale = i18n.resolvedLanguage ?? "en";
+  const taskTip = useMemo(
+    () => getTaskTips(templateId, task.title, locale),
+    [templateId, task.title, locale],
   );
 
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -450,6 +468,19 @@ export function TaskDetailBody({
             </p>
           )}
         </div>
+      )}
+      {/* The one authored, TASK-specific pointer for this template task
+          — a gotcha or order-of-operations the description doesn't say.
+          1–2 sentences, always visible (unlike the project page's
+          collapsed playbook: this is about THIS task, so it earns its
+          lines). */}
+      {taskTip && (
+        <p className="rounded-md border border-canopy-100 bg-canopy-50/40 px-3 py-2 text-sm text-moss-700 dark:border-canopy-900 dark:bg-canopy-950/20 dark:text-moss-200">
+          <span className="font-semibold text-canopy-800 dark:text-canopy-200">
+            {t("projects.task.detail.tipsLabel")}
+          </span>{" "}
+          {taskTip}
+        </p>
       )}
       {task.recurringCadence && (
         <p className="text-xs text-moss-600 dark:text-moss-300">

@@ -918,7 +918,8 @@
         "backToProject": "Volver a {{title}}",
         "followsLabel": "Sigue a:",
         "skillsLabel": "Habilidades que ayudan:",
-        "skillsFit": "Esto coincide con las habilidades de tu perfil."
+        "skillsFit": "Esto coincide con las habilidades de tu perfil.",
+        "tipsLabel": "Consejo para esta tarea:"
       },
       "claimSummary": "Cerca de {{hours}} horas · nos pondremos en contacto contigo en privado después de {{days}} días.",
       "claimSummaryNoHours": "Nos pondremos en contacto contigo en privado después de {{days}} días.",

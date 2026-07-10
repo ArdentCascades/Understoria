@@ -177,6 +177,7 @@ export default function TaskDetailPage() {
         taskCheckInDays={ctx.nodeConfig.taskCheckInDays}
         autoConfirmHours={ctx.autoConfirmHours}
         viewerSkills={currentMember?.skills ?? []}
+        templateId={project.templateId}
       />
       {/* Completed/archived projects keep their history reachable from
           the task page too. */}

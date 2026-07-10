@@ -91,6 +91,7 @@ vi.mock("@/db/projects", () => ({
 
 import "@/i18n";
 import { addProjectTask } from "@/db/projects";
+import { TASK_TIPS } from "@/content/taskTips";
 import TaskDetailPage from "./TaskDetail";
 import type { Member, Project, ProjectTask } from "@/types";
 
@@ -880,5 +881,39 @@ describe("TaskDetailPage — claimer 'you'll be reminded' note", () => {
     expect(container.textContent ?? "").not.toContain(
       "You'll be reminded when it's ready.",
     );
+  });
+});
+
+describe("per-task tip", () => {
+  // A template project's task keeps the template task `name` as its
+  // title, which is how the authored tip (content/taskTips.ts) is
+  // recovered — no tip data is stored on the task itself.
+  const templateTaskTitle = "Find a host site with power and foot traffic";
+  const expectedTip = TASK_TIPS["community-fridge"][0].en;
+
+  it("renders the authored tip for a template task", () => {
+    mockState.projects = [project({ templateId: "community-fridge" })];
+    mockState.projectTasks = [task("t1", { title: templateTaskTitle })];
+    render("/project/proj-1/task/t1");
+    const text = container.textContent ?? "";
+    expect(text).toContain("Tip for this task:");
+    expect(text).toContain(expectedTip);
+  });
+
+  it("does NOT render for a renamed task or a from-scratch project", () => {
+    // Renamed: the title no longer matches any template task.
+    mockState.projects = [project({ templateId: "community-fridge" })];
+    mockState.projectTasks = [task("t1", { title: "Our own custom task" })];
+    render("/project/proj-1/task/t1");
+    expect(container.textContent ?? "").not.toContain("Tip for this task:");
+
+    // From scratch: no templateId at all (default fixture).
+    act(() => {
+      root.unmount();
+    });
+    mockState.projects = [project()];
+    mockState.projectTasks = [task("t1", { title: templateTaskTitle })];
+    render("/project/proj-1/task/t1");
+    expect(container.textContent ?? "").not.toContain("Tip for this task:");
   });
 });
