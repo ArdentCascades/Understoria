@@ -704,4 +704,4 @@ Code of Conduct enforcement: [COC_CONTACT]
 - Threat model adversaries these incidents map to:
   [`threat-model.md`](./threat-model.md) §3
 - Security disclosure process: [`../SECURITY.md`](../SECURITY.md)
-- Auto-confirm key rotation procedure: [`auto-confirm-key.md`](./auto-confirm-key.md) §6
+- Auto-confirm key rotation procedure: [`system-key-rotation.md`](./system-key-rotation.md) §3 (design background: [`auto-confirm-key.md`](./auto-confirm-key.md))

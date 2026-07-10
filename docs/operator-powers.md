@@ -14,8 +14,10 @@ of leaving them implied.
   a key that never leaves that member's device. The operator cannot
   create, alter, or re-attribute a record. Your app checks every
   signature itself and silently drops anything that doesn't verify.
-- **Read your direct messages.** Messages are end-to-end encrypted;
-  the node relays ciphertext it cannot open.
+- **Read your direct messages.** Messages are end-to-end encrypted
+  — and today they never cross the node at all. They live only on
+  the device that holds them; there is no relay, so there isn't even
+  ciphertext for the operator to sit on.
 - **Read a device-link transfer.** When you add a device, your
   identity crosses the node sealed to the new device's key; the node
   holds ciphertext for minutes and hands it out exactly once.
@@ -25,10 +27,19 @@ of leaving them implied.
   server's say-so.
 - **Remove anyone from the community.** Member removal exists
   (`docs/member-removal.md`) and the operator appears NOWHERE in it:
-  a removal takes a quorum of members co-signing one public record,
-  and every device verifies the signatures itself. An operator who
-  fabricated one would need the quorum's secret keys — which never
-  leave those members' devices.
+  a removal takes a quorum of members co-signing one public record.
+  Your device checks the record's structure itself — real
+  signatures, distinct signers, none of them the removed member,
+  enough to meet the quorum. Honesty about the one thing your
+  device *cannot* check: whether those signers are actually members.
+  Only the node can compute membership (the founding keys aren't
+  public), so a hostile operator could mint fresh keys and dress
+  them up as a quorum. What keeps that survivable rather than
+  silent: the removal record is public and permanently attributed —
+  every member can see it and its signer keys, and signers nobody
+  recognizes are the alarm; reinstatement needs only a genuine
+  quorum; and a community whose node lies to it can leave that node
+  (the exit below is real).
 
 ## What the operator CAN do (like any member)
 

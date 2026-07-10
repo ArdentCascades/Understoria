@@ -11,23 +11,26 @@
 ```
 understoria/
 ├── apps/
-│   └── web/                  # React PWA (only app so far)
-│       ├── src/
-│       │   ├── App.tsx
-│       │   ├── main.tsx
-│       │   ├── index.css
-│       │   ├── components/   # Shared UI (TrustChip, LockScreen, …)
-│       │   ├── pages/        # Route screens (Board, Profile, …)
-│       │   ├── state/        # React context / hooks
-│       │   ├── db/           # Dexie schema, actions, secrets, seed
-│       │   ├── lib/          # Pure modules: crypto, panic, invite…
-│       │   ├── types/        # Shared type definitions
-│       │   └── test/         # Vitest setup
-│       ├── public/           # Static assets served as-is
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── tailwind.config.js
-│       └── vite.config.ts
+│   ├── web/                  # React PWA
+│   │   ├── src/
+│   │   │   ├── App.tsx
+│   │   │   ├── main.tsx
+│   │   │   ├── index.css
+│   │   │   ├── components/   # Shared UI (TrustChip, LockScreen, …)
+│   │   │   ├── pages/        # Route screens (Board, Profile, …)
+│   │   │   ├── state/        # React context / hooks
+│   │   │   ├── db/           # Dexie schema, actions, secrets, seed
+│   │   │   ├── lib/          # Computation + orchestration modules
+│   │   │   ├── types/        # Re-export shim over packages/shared
+│   │   │   └── test/         # Vitest setup
+│   │   ├── public/           # Static assets served as-is
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── tailwind.config.js
+│   │   └── vite.config.ts
+│   └── server/               # Fastify community node (federation relay)
+├── packages/
+│   └── shared/               # Types + crypto shared by PWA and server
 ├── docs/                     # Member / operator / organizer / threat
 │                             #   model / opsec / political ed.
 ├── CODE_OF_CONDUCT.md
@@ -38,9 +41,11 @@ understoria/
 └── README.md
 ```
 
-The root `package.json` is a thin npm workspace pointing at
-`apps/web`. Root-level scripts (`npm run dev`, `npm test`) pass
-through.
+The root `package.json` is an npm workspace over `apps/*` and
+`packages/*` — currently `apps/web`, `apps/server`, and
+`packages/shared`. Root-level scripts (`npm run dev`, `npm test`,
+`npm run typecheck`) build the shared package first, then fan out
+across the workspaces.
 
 ## 2. Tech stack, at a glance
 
@@ -72,7 +77,7 @@ the history).
 
 ## 3. Module map
 
-### `lib/` — pure modules, no side effects
+### `lib/` — computation and orchestration
 
 | Module | Responsibility |
 |--------|---------------|
@@ -94,15 +99,31 @@ the history).
 | `density.ts` | Opt-in compact layout density preference. Apply / cache / preference guard, mirroring `textSize.ts` |
 | `templateUsage.ts` | `getActiveProjectsForTemplate` — pure filter that finds Planning- or Active-status projects sharing a given `templateId`. Used by the Start-a-project picker to route members toward existing community efforts |
 
-Invariant: **nothing in `lib/` imports from `db/`.** If you need DB
-access, stay in `db/` (or do the I/O in a page/component and pass
-pure data to `lib/`).
+The rule here is about **purity, not the import graph**. `lib/`
+holds two kinds of module:
+
+- **Pure computation** (everything in the table above — crypto,
+  timebank, achievements, formatting, filters). These stay DB-free,
+  take plain data in, return plain data out, and are tested without
+  a DOM or a database.
+- **Orchestration** — the modules that coordinate I/O across many
+  tables: federation sync (`federationSync.ts`), the outbox
+  (`outbox.ts`), purge (`panic.ts`), export (`exportData.ts`),
+  device pairing (`devicePairing.ts`), the attention and
+  auto-confirm sweeps (`attention.ts`, `autoConfirmSweep.ts`),
+  snapshots and authorized reads. These live in `lib/` and DO
+  import from `db/`.
+
+When you add code: keep new computation pure, and if it needs the
+database, either put the write path in a `db/` module or put the
+coordination in an orchestration module. Don't add DB reads to a
+module that is currently pure — split the pure core out instead.
 
 ### `db/` — persistence and transactions
 
 | Module | Responsibility |
 |--------|---------------|
-| `database.ts` | Dexie schema — 28 versions deep. Core stores (`members`, `posts`, `exchanges`, `invites`, `vouches`, `secretKeys`, `settings`, `achievements`) plus the later families: projects (`projects`, `projectTasks`, `projectActivity`), events (`events`, `eventRsvps`, `eventShifts`, `shiftSignups`, `eventProjectLinks`), governance (`proposals`, `votes`), messaging (`messages`), federation (`outbox`, `nodeConfig`), and safety (`blocks`, `previouslyBlocked`, `pairingLog`, `drafts`, `coorgInvitations` + responses/revocations). The schema comments in the file are the canonical ledger; `docs/roadmap.md` "Migration strategy" tracks version reservations |
+| `database.ts` | Dexie schema — 33 versions deep. Core stores (`members`, `posts`, `exchanges`, `invites`, `vouches`, `secretKeys`, `settings`, `achievements`) plus the later families: projects (`projects`, `projectTasks`, `projectActivity`), events (`events`, `eventRsvps`, `eventShifts`, `shiftSignups`, `eventProjectLinks`), governance (`proposals`, `votes`), messaging (`messages`), federation (`outbox`, `nodeConfig`), and safety (`blocks`, `previouslyBlocked`, `pairingLog`, `drafts`, `coorgInvitations` + responses/revocations). The schema comments in the file are the canonical ledger; `docs/roadmap.md` "Migration strategy" tracks version reservations |
 | `seed.ts` | First-launch demo community (dev builds only) |
 | `actions.ts` | Post lifecycle (`createPost`, `claimPost`, `confirmExchange`, …) |
 | `secrets.ts` | Session-aware `getSecretKey`, enable / change / disable passphrase |
@@ -155,9 +176,12 @@ new forms don't collide.
 
 ### Side effects at the edges
 
-Dexie lives only in `db/`. Network (when it arrives) will live in
-`net/`. React lives in `components/`, `pages/`, `state/`. Pure code
-is all of `lib/`, tested without a DOM.
+Every write path lives in a `db/` module — components and pages
+never call `db.table.put()` directly. Network lives in the `lib/`
+orchestration layer (`outbox.ts` pushes, `federationSync.ts` pulls).
+React lives in `components/`, `pages/`, `state/`. Pure computation
+stays DB-free and is tested without a DOM (see the `lib/` note in
+§3 for the pure-vs-orchestration split).
 
 ### Lock state is a first-class app state
 
@@ -169,8 +193,8 @@ present that to the user as a re-authentication prompt (the
 ## 5. Running the tests
 
 ```sh
-npm test            # one-shot
-npm run test:watch  # file-watching, develop-friendly
+npm test                                   # one-shot, all workspaces
+npm run test:watch --workspace apps/web    # file-watching, develop-friendly
 ```
 
 The suite runs under `vitest` with `jsdom` and `fake-indexeddb`.
@@ -208,10 +232,11 @@ Adding a test:
 
 ## 7. Federation readiness
 
-Federation is live (the server's peer pull loop syncs exchanges,
-vouches, posts, claims, task comments, and events between configured
-peers), and the same discipline that made that possible still
-applies to every new record type:
+Federation is live (the server's peer pull loop syncs nine record
+kinds between configured peers: exchanges, vouches, posts, task
+comments, co-organizer invitations + responses + revocations,
+events, and event cancellations), and the same discipline that made
+that possible still applies to every new record type:
 
 - Exchanges are signed and verifiable by `verifyExchange()` without
   DB access.

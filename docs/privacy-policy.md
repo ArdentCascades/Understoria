@@ -102,6 +102,11 @@ types are:
 | RSVP to a community event | `EventRsvpState` | Your public key, the event id, going / maybe / not going, timestamps, signature. Mutable (changing your answer replaces the old one); signed only by you — nobody can RSVP on your behalf. Stays on YOUR community node; never relayed to peer communities |
 | Add a shift to an event you organize | `EventShiftState` | Shift label, time window, soft capacity, your public key, timestamps, signature. Removing a shift stores a deletion marker. Community-node only, like RSVPs |
 | Sign up for (or leave) a shift | `ShiftSignupState` | Your public key, the shift and event ids, timestamps, signature. Withdrawal stores a deletion marker so your name comes off every device's roster, not just your own. Signed only by you; community-node only. **Intent, not attendance** — nothing ever compares signups against exchanges |
+| File a proposal — or flag an exchange or comment, which files a dispute-kind proposal | `Proposal` | Your public key (as proposer), the kind and category, title, description text, the category-specific payload (for a dispute: a snapshot of the flagged exchange — post title, category, hours, both members' public keys), reversibility tier, optional impact reflection, creation time, signature. Only the immutable core is signed; the open / passed / rejected state is derived from closures. Community-node only — proposals are not relayed to peer communities |
+| Vote on a proposal | `Vote` | Your public key, the proposal id, your choice (affirm / block / abstain), your optional reason text, timestamp, signature. Re-casting replaces your earlier vote. Community-node only |
+| Close a proposal | `ProposalClosure` | The proposal id, the outcome, optional reason text, closing time, your public key, signature. First closure wins — the node refuses a second. Community-node only |
+| Co-sign a member removal or reinstatement | `MemberRemoval` / `MemberReinstatement` | The removed (or reinstated) member's public key, the public reason text if one was given (≤ 500 chars), the decision time, a link to the deliberation proposal, and the public keys + signatures of every co-signer — a quorum decides this, never one person. Community-node only |
+| Pledge to keep the full community archive | `SeedVaultPledge` | Your public key, whether the pledge is active, timestamp, signature. Retracting flips it inactive; the record itself remains. Member-granular on purpose — it never names your devices. Community-node only |
 | Link a new device (tap-to-link) | Link request + device-link mailbox row | **Neither federates and the node can read neither.** The new device stores one throwaway public key for up to 10 minutes, filed under a salted, deliberately lossy fold of its network address (4096 buckets shared by many households — never the address itself, which is not stored or logged). Your approval stores your identity bundle sealed to that key — ciphertext the node cannot open — for at most 15 minutes, deleted the instant the new device collects it |
 | Link a new device (word-code fallback) | Device-link mailbox row | Same mailbox, encrypted under the 6-word code instead (which never crosses any wire). The QR pairing option stores nothing on the node at all |
 
@@ -122,9 +127,13 @@ stored one, and withdrawals travel as deletion markers. Two bounds
 worth naming plainly: participation records stay on YOUR community
 node and are never relayed to peer communities, and a shift signup
 is a statement of intent that is never reconciled against
-exchanges or treated as attendance. What did NOT change: proposals,
-votes, disputes, direct messages, blocks, drafts, and the
-event⇄project work-day link all remain local-only.
+exchanges or treated as attendance. What did NOT change: direct
+messages, blocks, drafts, and the event⇄project work-day link all
+remain local-only. Proposals, votes, and disputes used to be on
+that local-only list; since proposal federation shipped they travel
+to your community node as signed records — the table above and §8
+spell out exactly what they carry and where they stop (your own
+community's node; peer communities never receive them).
 
 **Once a signed record reaches the node, it federates.** The
 community node's job is to relay records to peer nodes that pull
@@ -264,9 +273,23 @@ history is gone — there is no backup.
 ## 8. Disputes, moderation, and governance records
 
 When you flag an exchange or a comment, you create a **Proposal**
-record visible to the community for deliberation. Proposals live
-locally on the node where they're filed; they do not federate at
-this time. The Code of Conduct's enforcement contact — `[COC_CONTACT]`
+record (a dispute-kind proposal) visible to the community for
+deliberation. Proposals, votes, and closures are signed records
+that go to your community node — the §4 table lists their fields —
+so every member of your community syncs the same deliberation.
+Three bounds worth naming plainly:
+
+- They stay on **your** community's node. The pull loop between
+  peer communities deliberately excludes proposals, votes, and
+  closures, so other communities never receive your governance
+  records.
+- Proposals and votes recorded **before** this shipped were never
+  signed, and they stay on the device that recorded them forever —
+  no signature is ever minted on a member's behalf.
+- If your device cannot sign at creation time (a locked session),
+  the proposal is recorded on this device only rather than failing.
+
+The Code of Conduct's enforcement contact — `[COC_CONTACT]`
 — sees flagged content; please read [`CODE_OF_CONDUCT.md`](
 ../CODE_OF_CONDUCT.md) before filing.
 

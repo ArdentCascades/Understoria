@@ -221,9 +221,11 @@ Phase 1 keeps the flow simple and human:
   record removing the last non-removed founder is refused — the
   closure must keep at least one root. Named edge, tested.
 - **Replay across communities:** `nodeId` is in the canonical
-  payload; a record signed for one community fails verification
-  elsewhere... it verifies but names another nodeId — clients and
-  server refuse records whose `nodeId` isn't the local community's.
+  payload, but nobody compares it against a local value — it is
+  attribution, not the defense. The defense is the closure: a record
+  signed for another community carries signers who are not members
+  HERE, so it dies on the ingestion quorum check (409
+  `quorum_not_met`).
 - **Griefing via reason text:** length-capped, plain text, no
   markdown render, same sanitation as post descriptions.
 

@@ -194,8 +194,11 @@ Field-by-field rationale:
   per node — see §4.2). When the cap is reached on the organizer's
   node, the organizer gets an `event_capacity_reached` attention
   item (see §8). Other nodes' members may RSVP past the cap from
-  their own nodes; the organizer's node displays this as "X RSVPs
-  here, ? on peer nodes."
+  their own nodes; the organizer's node shows only its own
+  aggregate — the capacity field renders the plain node-local fill,
+  "{{going}} of {{capacity}} going" (`events.detail.capacityFill`),
+  with no peer-node figure (those RSVPs aren't in this node's
+  database).
 
 ### §4.2 `EventRSVP` — local Dexie row; community-node sync since Phase 2
 
@@ -348,10 +351,10 @@ and isn't anymore" is the wrong shape).
 
 ### §6.2 The informed-consent surface
 
-The RSVP control surfaces this BEFORE submission. The first time a
-member taps "RSVP" on an event (and on every subsequent RSVP, with
-an option to dismiss the explanation per-event), a small card
-expands:
+The RSVP control surfaces this BEFORE submission. Whenever the
+chooser is showing — before a member's first RSVP on an event, and
+again whenever they tap "Change RSVP" — a small card sits above the
+buttons:
 
 ```
 RSVP to "<title>"
@@ -365,8 +368,11 @@ If you RSVP not going (or change to not_going later):
   - Your name is removed from the visible roster.
   - You'll still get a heads-up if the organizer cancels the event.
 
-  [ Going ]    [ Maybe ]    [ Not going ]    [ Cancel ]
+  [ Going ]    [ Maybe ]    [ Not going ]
 ```
+
+(A Cancel button joins the row only in the change flow, to back out
+of "Change RSVP" without touching the recorded answer.)
 
 Same discipline as the co-organizer-invitation acceptance card:
 the values commitment is that the visibility consequence is named
@@ -374,11 +380,12 @@ before the signature, not after. Even though an `EventRSVP` is not
 a signed federated record, the local visibility consequence is real
 and members deserve to know about it.
 
-The "(with an option to dismiss the explanation per-event)" is
-deliberate — a member who has read the disclosure on event #1 should
-not have it shoved in front of them on event #2 of the same series.
-A "Don't show this again for this event" checkbox dismisses for the
-remainder of *this* event only. The next event re-prompts.
+There is deliberately no "don't show this again" dismissal. The
+card lives with the chooser: once an RSVP is recorded, both fold
+away behind the current-answer summary, so it never nags a member
+who has already answered — and it reappears with the chooser on
+"Change RSVP", keeping the visibility consequence in view at
+exactly the moments a signature is being made or remade.
 
 ### §6.3 Why this tiered model rather than the alternatives
 

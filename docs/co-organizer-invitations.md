@@ -470,6 +470,12 @@ attention-prompt for the invitee, not a quick yes/no modal.
 
 ## §7 Organizer-side UX
 
+> **As built:** the roster, picker, and Pending / Past lists
+> described below live inside the **"Manage co-organizers"**
+> dialog, opened from the **⋮ menu** in the project header —
+> not as a section rendered directly on the project detail
+> page. The contents are as specified; only the surface moved.
+
 - **Project detail page.** The existing co-organizer roster section
   gains a "Pending invitations" subsection. Each outstanding
   invitation renders one row:

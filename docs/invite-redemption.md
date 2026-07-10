@@ -313,7 +313,7 @@ there are no cross-record dependencies):
 |---|---|
 | No row (every other member's device) | insert `InviteRow` with `status: "redeemed"`, `redeemedBy`, `redeemedAt`; upsert a member row for `redeemedBy` (`displayName`, `nodeId`, joined-at = `redeemedAt`) if none exists |
 | Row `status: "open"` (the inviter's device) | flip to `redeemed` + `redeemedBy`/`redeemedAt`; Invites page now shows it |
-| Row `status: "revoked"` (inviter revoked; revocation is local-only today) | keep `revoked`, additionally record redemption-observed so the inviter's Invites page can say "this invite was used after you revoked it" — a community conversation, not an automatic ejection (`community-authority`); see §16 |
+| Row `status: "revoked"` (inviter revoked) | **SUPERSEDED** (revocations now federate — §16 item 1, [`invite-revocation.md`](./invite-revocation.md)): an authoritative revocation (its `inviterKey` matches the receipt's embedded, inviter-signed invite) converges to `redeemed_despite_revocation`, keeping the redemption-observed fields so the inviter's Invites page can say "this invite was used after you revoked it" — a community conversation, not an automatic ejection (`community-authority`); a non-authoritative local `revoked` corrects to plain `redeemed` |
 | Row `status: "redeemed"`, same `redeemedBy` | no-op (idempotent) |
 | Row `status: "redeemed"`, different `redeemedBy` | should be unreachable (server enforces first-wins, §7); keep the local row, log |
 

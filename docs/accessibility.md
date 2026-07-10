@@ -114,13 +114,13 @@ formal audit; the formal audit is one of the items in §6.
 - **Dark mode** — every UI surface has a `dark:` variant, and the
   toggle that activates them shipped in PR #85. Three-state
   preference (`system` / `light` / `dark`, default `system`) on
-  Profile → Appearance; class-based mechanism with a no-FOUC
+  Settings → Appearance; class-based mechanism with a no-FOUC
   inline script in `index.html` so there's no flash of the wrong
   theme on first paint. Contrast for the chip / badge palette is
   programmatically verified (see the contrast bullet below); the
   broader body-text survey is still in §6.
 - **Text-size preference** — three-step comfort setting (Default
-  / Larger / Largest) under Profile → Appearance (PR #88). Sets
+  / Larger / Largest) under Settings → Appearance (PR #88). Sets
   the `<html>` font-size as a percentage so every rem-based size
   in the app scales together; the preference multiplies on top of
   the user's OS / browser default (Dynamic Type, browser zoom)
@@ -130,7 +130,7 @@ formal audit; the formal audit is one of the items in §6.
   taps stay comfortable relative to the upsized type — WCAG AAA
   SC 2.5.5 territory.
 - **Layout density preference** — opt-in two-step setting
-  (Comfortable / Compact) under Profile → Appearance, alongside
+  (Comfortable / Compact) under Settings → Appearance, alongside
   text size. Compact trims card padding from 1rem to 0.75rem;
   everything else — type size, line height, focus ring,
   touch-target floor — stays the same. Opt-in only; default is

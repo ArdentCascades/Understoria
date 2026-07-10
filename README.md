@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/understoria-logo.svg" alt="Understoria" width="120" />
+  <img src="apps/web/public/icons/icon.svg" alt="Understoria" width="120" />
 </p>
 
 <h1 align="center">Understoria</h1>
@@ -89,9 +89,9 @@ To also run the optional community node (Fastify + SQLite, port 8787):
 npm run dev:server
 ```
 
-Then in the PWA, **Profile → Community node** → paste
-`http://localhost:8787` and tick "Mirror finalized exchanges to this
-node." Finalized exchanges mirror to the node and the outbox status
+Then in the PWA, **Profile → Settings (gear icon) → Community
+node** → paste `http://localhost:8787` and tick "Mirror finalized
+exchanges to this node." Finalized exchanges mirror to the node and the outbox status
 chip shows delivery progress.
 
 `npm test` runs the full vitest suite across all workspaces.
@@ -256,14 +256,14 @@ The phase view below is a public summary.
 - [x] Community events — federated signed `Event` + `EventCancellation` records with local-only RSVP roster, comparison-card create flow, attention-rail integration, and an "Events only" calendar filter
 - [x] Member blocking — local-only personal-relief surface with informed-consent comparison card, per-block governance-visibility toggle, paired-device transfer, and tap-to-reveal Settings panel
 - [x] Invite-only mode — `nodeConfig.inviteOnly` flag with first-member bootstrap exception for fresh deployments
-- [x] Task ordering + soft-block dependencies — drag / Move buttons / Reorder modal for organisers; `Follows:` framing + claimant ack line + chip suppression for structurally-blocked tasks; local-only (no federation surface)
+- [x] Task ordering + soft-block dependencies — drag / Move buttons / Reorder modal for organisers; `Follows:` framing + claimant ack line + chip suppression for structurally-blocked tasks; ordering and dependencies ride the signed `TaskState` records, so they sync between members' devices like the rest of the task row
 
 ### Phase 3: Federation *(active)*
 - [x] Community node server with Docker deployment
 - [x] Signed-exchange verification on the server
 - [x] Spanish translation
 - [x] Federation protocol and cross-node exchanges (server endpoints, pull loop, PWA surfacing done; full lifecycle sync pending)
-- [x] Posts / vouches / invites endpoints on the server
+- [x] Posts / vouches / redemption-receipt endpoints on the server (the earlier invites endpoint was deliberately removed — open invites never cross any wire; redemption receipts replaced it)
 - [x] Per-task comment threads + federation (signed, tombstone-merge soft delete) + community flag-for-review via the existing disputes surface
 - [ ] Organizing module: campaigns, power mapping, meeting tools
 

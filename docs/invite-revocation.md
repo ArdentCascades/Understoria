@@ -1,11 +1,13 @@
 # Understoria — Invite Revocation Propagation (design note)
 
-> **Status:** **shipped.** Signed `InviteRevocation` records
+> **Status:** **Phase 1 shipped.** Signed `InviteRevocation` records
 > federate: `revokeInvite` signs and enqueues in one transaction,
 > `POST/GET /invite-revocations` live on the server, and
 > `pullFederatedInviteRevocations` merges on every client (revoked
-> beats open; redeemed-before-revocation stands — the §9 operator
-> ruling as ratified). Extends
+> beats open; redeemed-before-revocation stands). The §9 operator
+> ruling (vouch withdrawal — Phase 2, §10) is still a **draft
+> awaiting ratification**; until it is adopted the implicit vouch
+> counts as today. Extends
 > [`invite-redemption.md`](./invite-redemption.md) — read its §6
 > (the `RedemptionReceipt` and its merge rules) and §16.1 (this
 > note is the "future note if pilots hit the race" it anticipated).
@@ -138,16 +140,20 @@ there is no new transport shape to reason about.
   community-node URL is configured and delivers once one is — a fresh
   inviter's device must not lose the revocation.
 - **Server.** `POST /invite-revocations` — 201 on first store, 200
-  idempotent on replay, 400 malformed, 422 bad signature. A new
+  idempotent on replay, 400 malformed, 409 `token_already_revoked`
+  when a *different* `inviterKey` already revoked the token (poison
+  for the outbox — retrying never succeeds), 422 bad signature. A new
   `invite_revocations` store keyed by `token`, with a server-assigned
   `received_at` as the pull cursor (the same §7 deviation the
   redemptions store makes, for the same reason: a skewed client
   `revokedAt` must never strand a revocation below the cursor). GET
   `/invite-revocations?since=<receivedAt>` with the now-standard
   inclusive `>=` + `token` tiebreak.
-- **Pull.** `pullFederatedInviteRevocations()` in `federationSync.ts`,
-  and the server-side `pullInviteRevocationsFromPeer` sibling — both
-  verify with `verifyInviteRevocation` and apply §5's merge.
+- **Pull.** `pullFederatedInviteRevocations()` in `federationSync.ts`
+  verifies with `verifyInviteRevocation` and applies §5's merge. Like
+  `/redemptions`, the route is PWA↔node only — there is no
+  server-side peer-pull leg (same-community mirrors do replicate the
+  store, but that is mirror convergence, not a peer leg).
 
 ## §5 Merge rules (commutative, arrival-order-independent)
 

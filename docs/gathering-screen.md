@@ -176,7 +176,7 @@ directory) waits for the opt-out to be real.**
 All from `useApp()`, all already block-filtered at the context:
 
 - **Events:** `selectUpcomingGatherings({ events, eventCancellations, eventRsvps, currentMemberKey, now, limit })` (`apps/web/src/lib/upcomingEvents.ts`).
-- **Tasks needing hands:** projects where `status === "active" && projectNeedsMoreHands(projectId, projectTasks, nodeConfig, now)` (`apps/web/src/lib/projectFilter.ts`), then the specific open tasks whose `taskCheckInState(...)` is `needs_more_hands` — mirroring `components/dashboard/WhereHandsAreWelcome.tsx`.
+- **Tasks needing hands:** any open task (`status === "open"`) on any project whose `status === "active"`, first 4 per the per-category cap (`apps/web/src/lib/gatheringSlides.ts`). Planning/paused projects aren't claimable, so their tasks stay off the wall; a claimed task drops out on the next live re-query. Deliberately simpler than `WhereHandsAreWelcome.tsx` — neither `projectNeedsMoreHands` nor the `needs_more_hands` check-in state is used here.
 - **Needs / offers:** `posts.filter(p => p.type === "NEED" | "OFFER" && p.status === "open")`, newest first, capped.
 - A small per-category cap keeps the rotation from being swamped by one
   busy category; `log`-style honesty note in the plan comment when items

@@ -559,8 +559,9 @@ wonder if something is wrong.
 
 ### §6.5 Reorders are not in the activity feed
 
-Project activity rows are logged today for task creation,
-claim, completion, confirmation, and dependency changes.
+Project activity rows are logged today for task creation and
+edits (a dependency change made through the task editor rides
+the edit's entry), claim, completion, and confirmation.
 **Reorders do not get an activity entry.** They are routine
 organizing work, not audit-relevant; the chip-shame footprint
 of a `task_reordered` row on every drag would exceed the
@@ -574,6 +575,25 @@ of "who reordered what when," a future PR can revisit; the
 omission is named here, not buried.
 
 ## §7 Federation
+
+> **SUPERSEDED — project federation Phase 1 shipped.** This
+> section was accurate when written; it is kept as the
+> historical record of the local-only boundary and of the
+> obligation §7.4 names (which was honored). The current
+> posture: project and task state DO federate as signed,
+> full-row last-writer-wins records. `publishProjectState` /
+> `publishTaskState` (`apps/web/src/db/projects.ts`) sign the
+> whole row — **including `orderIndex` and `dependencies`** —
+> the server registers `routes/projectStates.ts`
+> (`apps/server/src/server.ts`), the PWA pulls via
+> `pullFederatedProjectStates` / `pullFederatedTaskStates`
+> (`apps/web/src/lib/federationSync.ts`), and the signed wire
+> types are `ProjectState` / `TaskState` in
+> `packages/shared/src/types.ts`. See
+> `docs/project-federation.md` and the "Federated
+> `ProjectState` / `TaskState` records" entry in
+> `docs/threat-model.md` §7. Read everything below as "was
+> true at design time," not "is true now."
 
 This section follows the loud "What does NOT federate"
 discipline from `docs/community-events.md` §7. The section is

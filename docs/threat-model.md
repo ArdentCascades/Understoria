@@ -108,8 +108,10 @@ We are not trying to protect against:
 - **Compartmentalization.** Mutual aid data, organizing data, and admin
   data are separate trust tiers — compromise of one does not trivially
   grant the others. (Agent 4, task 5)
-- **Panic button / data purge.** Admin-triggered wipe with soft
-  (anonymize) and hard (delete) modes. Dead-man's-switch variant. (Agent 4, task 3)
+- **Panic button / data purge.** Member-triggered local wipe with
+  soft (anonymize) and hard (delete) modes, in Profile → Emergency.
+  The dead-man's-switch variant is NOT built — still pending, with
+  node-level purge (§7). (Agent 4, task 3)
 - **Web of trust onboarding: IMPLEMENTED.** Signed single-use invite
   tokens (Ed25519), 14-day default expiry, revocable by the issuer
   pre-redemption. Redeeming a valid invite counts as the inviter's
@@ -126,7 +128,7 @@ We are not trying to protect against:
   600,000 iterations + NaCl secretbox / XSalsa20-Poly1305). The master
   key is held in session memory only; a tab close or explicit "Lock
   now" returns the device to a locked state. Enabling / changing /
-  disabling protection lives in Profile → Security. Forgotten
+  disabling protection lives in Settings → Security. Forgotten
   passphrases are unrecoverable by design — this is documented in the
   UI and on the lock screen. Argon2id remains a viable future
   migration; the blob format carries a `kdf` field for that.

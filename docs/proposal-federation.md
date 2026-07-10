@@ -124,7 +124,8 @@ displays as contested rather than silently honored.
 - Schema v23: `proposals` (id PK, payload-JSON), `votes`
   (PK `(proposal_id, voter_key)`, LWW on `created_at`),
   `proposal_closures` (PK `proposal_id`). Feed cursors: composite
-  `(createdAt, id)` / `(closedAt, proposalId)` via `pagedRows`.
+  `(createdAt, id)` / `(closedAt, id)` — the closure's own `id`
+  tiebreak, not `proposalId` — via `pagedRows`.
 - Routes `POST/GET /proposals`, `/votes`, `/proposal-closures`,
   registered AFTER the read-auth and removed-author guards like
   everything else; insert-cap SURFACES entries (`signerKey`).
@@ -138,8 +139,11 @@ displays as contested rather than silently honored.
 - `createProposal` / `castVote` / `closeProposal` sign and enqueue
   (outbox kinds `proposal`, `vote`, `proposal_closure`; vote dedup
   key = natural key so both of a member's devices queue one live
-  version; closure 409 non-retryable — someone else closed first,
-  the pull reconciles).
+  version; a lost closure race is not a 409 at all — the server
+  answers `200 {stored:false}` and the outbox settles; the closure
+  409s that exist (`unknown_proposal`, `standing_block`) are
+  RETRYABLE, since the referent may still be in flight and a retry
+  after someone else closes lands on the 200; the pull reconciles).
 - Three pulls with the house merge rules (insert-if-new + verify /
   LWW / apply-once). Applying a closure runs the SAME local effect
   path `closeProposal` runs today (dispute post-status restoration,

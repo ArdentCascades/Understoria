@@ -1218,3 +1218,18 @@ and the no-silent-disenfranchisement invariant (§11.10) is now
 enforceable in the strong sense — decision math (block guards,
 auto-close eligibility) runs on the community-wide vote set on every
 node and every device, never on any viewer's filtered slice.
+
+## Amendment: federated RSVPs (participation federation Phase 2)
+
+RSVPs are signed, federated records since participation federation
+Phase 2 (`community-events.md` §4.2, as amended): the RSVP syncs
+through the member's own community node as a single-owner
+`EventRsvpState` record, so the "EventRSVP local-only shape" that
+the §6.2 Events-RSVP row and §11.1's precedent paragraph cite is
+superseded as a *mechanism*. The block RULE survives unchanged: the
+bidirectional (c) gate is enforced where it always was — locally, at
+RSVP-write time, with the same generic §6.1 copy — so a blocked
+party's RSVP is rejected on-device before anything reaches the
+outbox. And §11.1's own conclusion stands untouched: blocks
+themselves remain local-only; what changed is that a *permitted*
+RSVP now reaches other devices, not that a blocked one does.

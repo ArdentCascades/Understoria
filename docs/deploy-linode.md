@@ -525,8 +525,8 @@ disputes; a launch posture also needs:
   who arrives at `/welcome` so you can set up your own account
   without needing an invite from yourself — that's the
   first-member bootstrap exception (PR #202). Once you're set
-  up, open **Settings → Community** and enable the invite-only
-  toggle (`nodeConfig.inviteOnly`). From that point on the
+  up, open **Profile → Community settings** and enable the
+  invite-only toggle (`nodeConfig.inviteOnly`). From that point on the
   `/welcome` profile-setup step is replaced with an invite-only
   landing — only members redeeming a signed single-use invite
   via `/invite#<token>` can onboard. This closes the

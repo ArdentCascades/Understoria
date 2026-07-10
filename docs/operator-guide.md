@@ -164,7 +164,7 @@ Operators are also members. On your first visit:
    identity. On an invite-only node the very first device gets a
    bootstrap exception, so you can self-onboard before any invites
    exist. No purge choreography needed.
-2. Set a passphrase under **Profile → Security**. As the operator,
+2. Set a passphrase under **Profile → Settings → Security**. As the operator,
    you'll be issuing the first invites — your key really matters.
    Write the passphrase on paper. Put the paper somewhere safe.
 3. **Profile → Invites → Generate invite link** for each founding
@@ -192,7 +192,8 @@ The Fastify node lives at `apps/server/`. It exposes:
   Returns `201` on insert, `200` on idempotent re-submission, `400`
   on malformed body, `422` on bad signatures.
 - `GET /exchanges?since=<ms>&limit=<n>` — lists stored exchanges
-  newest-first. Every row is signed and any peer can independently
+  oldest-first (ascending timestamp, so pulls page forward from a
+  cursor). Every row is signed and any peer can independently
   verify with the same code path.
 
 The exchange pair above is the original core; the same
@@ -200,7 +201,14 @@ accept-verified-and-serve pattern has since grown to posts, vouches,
 claims, task comments, community events (+ cancellations),
 co-organizer invitations, invite redemptions/revocations, and
 awaiting-transition records — each with its own route file under
-`apps/server/src/routes/` and each covered by the §6 peer pull.
+`apps/server/src/routes/`. Not every kind rides the §6 peer pull,
+though: the cross-node loop replicates exchanges, vouches, posts,
+task comments, co-organizer invitations (+ responses and
+revocations), and events (+ cancellations). Claims, redemption
+receipts, and invite revocations stay off the cross-node wire
+(they replicate only between mirrors of the same community; see
+`MIRROR_NODE_URLS`), and awaiting-transition records are POST-only
+by design — they have no feed at all.
 
 It does **not** yet:
 - Authenticate clients beyond the cryptographic signatures on each
@@ -238,7 +246,7 @@ node (`npm run dev:server`, port 8787) on the same machine for a
 test pilot:
 
 1. Open the PWA at <http://localhost:5173>.
-2. Go to **Profile → Community node**, paste
+2. Go to **Profile → Settings → Community node**, paste
    `http://localhost:8787` into the URL field, tick "Mirror
    finalized exchanges to this node", and Save.
 3. Use the dev member-switcher to walk through a full claim →
@@ -267,7 +275,7 @@ Two things to know:
 | `DATABASE_PATH` | `./understoria.db` (`/data/understoria.db` in Docker) | SQLite file |
 | `CORS_ORIGIN` | `*` | Set this to your PWA origin for production |
 | `RATE_LIMIT_MAX` | `60` | Per-client requests per minute (see `TRUST_PROXY`) |
-| `TRUST_PROXY` | *(unset)* | Set to `loopback` when behind the Caddy reverse proxy above. WITHOUT it, every request arrives from the proxy's loopback address and all clients share ONE rate-limit bucket — one abuser then throttles the whole community. With it, the real client IP (hashed to a bucket, never stored raw) drives per-client limiting. Leave unset only if the node is exposed directly with no proxy. |
+| `TRUST_PROXY` | *(unset)* | Set when behind a reverse proxy — the right value depends on where the proxy connects from. Bare-metal Caddy as above (`reverse_proxy 127.0.0.1:8787`): set `loopback`. The bundled Docker compose stack: set `true` — Caddy reaches the server from a compose-network address, not loopback, so `loopback` would silently do nothing there. WITHOUT it, every request arrives from the proxy's address and all clients share ONE rate-limit bucket — one abuser then throttles the whole community. With it, the real client IP (hashed to a bucket, never stored raw) drives per-client limiting. Leave unset only if the node is exposed directly with no proxy. |
 | `AUTO_CONFIRM_REQUIRE_TRANSITION` | *(unset)* | When set to `1`/`true`, `/auto-confirm` refuses any request whose post/task has no stored awaiting-transition artifact — the fully-enforced waiting window. Leave unset until every member runs a build that pushes artifacts (the server enforces the window from artifacts whenever they exist, regardless of this flag) |
 | `TABLE_ROW_CEILING` | `500000` | Disk-fill backstop: max rows per federated table. At the ceiling, POSTs answer 507 (honest clients' outboxes retry; nothing is deleted) until you raise the knob or prune. `0` disables |
 | `PER_KEY_ROW_CEILING` | `10000` | Max rows per signing key per table — a LIFETIME count (record timestamps are client-claimed, so a rolling window would be dodgeable by backdating). Far above any honest member's output; raise it for legitimately high-volume communities. `0` disables |
@@ -426,6 +434,12 @@ records from each peer over a small public surface:
 - `GET /vouches?since=<last>` — signed web-of-trust vouches
 - `GET /posts?since=<last>` — signed needs and offers (immutable
   subset only; the lifecycle fields stay local to each node)
+- `GET /task-comments?since=<last>` — signed task comments
+  (including tombstones, so soft-deletes converge)
+- `GET /coorg-invitations`, `GET /coorg-invitation-responses`,
+  `GET /coorg-invitation-revocations` — the co-organizer trio
+- `GET /events` and `GET /event-cancellations` — signed community
+  events and their cancellations
 
 Every record's signature is verified before insert. Pulled rows
 keep their original `nodeId` (for exchanges) — federation is
@@ -477,7 +491,7 @@ forwards them to the node.
 ## 7. Backups
 
 If you're running PWA-only: members' device exports are the backup.
-Tell them to export from Profile → Data & privacy periodically.
+Tell them to export from Profile → Settings → Data & privacy periodically.
 
 If you're running the node: back up `/data/understoria.db` regularly.
 Every row is signed, so even a compromised backup can't be tampered
@@ -495,13 +509,13 @@ storing on third-party infrastructure.
 
 | Feature | Status | Operator workaround |
 |---------|--------|---------------------|
-| Federation between nodes | Shipped (§6 pull loop: exchanges, vouches, posts, claims, task comments, events, invitations) | Configure `PEER_NODE_URLS`. Proposals, votes, and closures federate within the community (`docs/proposal-federation.md` — signed, member-gated records on this node); they deliberately stay out of the cross-node `peerPull` loop |
+| Federation between nodes | Shipped (§6 pull loop: exchanges, vouches, posts, task comments, co-organizer invitations + responses + revocations, events + cancellations; claims replicate only between mirrors of the same community) | Configure `PEER_NODE_URLS`. Proposals, votes, and closures federate within the community (`docs/proposal-federation.md` — signed, member-gated records on this node); they deliberately stay out of the cross-node `peerPull` loop |
 | Project & task state (community-node sync) | Shipped (`POST/GET /project-states`, `/task-states` — `docs/project-federation.md`) | Signed last-writer-wins state records; the node's first MUTABLE tables (a newer authorized version REPLACES the stored row, so they don't grow with edit volume — insert caps bound row count). Nothing to operate; back up with the same database. NOT in the cross-node `peerPull` loop yet — single-community scope |
 | Event participation (RSVPs, shifts, signups) | Shipped (`POST/GET /event-rsvps`, `/event-shifts`, `/shift-signups` — `docs/project-federation.md` §6) | Same mutable LWW posture; RSVPs/signups keyed by natural key (one row per member per event/shift), deletions stored as tombstones. Deliberately NOT in `peerPull`: attendance data never leaves your community's node |
 | Direct messaging | Shipped in the PWA (end-to-end encrypted; the node never sees plaintext) | — |
 | Server-side panic button / dead-man's-switch | Pending | Member-level soft/hard purge exists; `docker compose down -v` wipes the volume |
 | Open-invite server storage | Intentionally absent | Invites never cross any wire (the old `POST/GET /invites` surface was removed); only signed redemption receipts and revocations federate |
-| Device-link relay | Shipped (`POST/GET /device-link`, `POST/GET /link-request`) | Ephemeral device-linking surfaces: a one-shot encrypted mailbox (ciphertext only, 15-minute TTL) plus tap-to-link rendezvous rows (one throwaway public key each, 10-minute TTL, bucketed by a salted address fold). Neither federates; both are capped and pruned on every write — nothing to operate or back up. **Tap-to-link needs `TRUST_PROXY` set as documented in §4**: without it every client shares the proxy's address, so all members land in ONE rendezvous bucket and see each other's link requests (harmless but confusing — approval still requires the member's own tap) |
+| Device-link relay | Shipped (`POST/GET /device-link`, `POST/GET /link-request`) | Ephemeral device-linking surfaces: a one-shot encrypted mailbox (ciphertext only, 15-minute TTL) plus tap-to-link rendezvous rows (one throwaway public key each, 10-minute TTL, bucketed by a salted address fold). Neither federates; both are capped and pruned on every write — nothing to operate or back up. **Tap-to-link needs `TRUST_PROXY` set as documented in the §6 env table** (`loopback` bare-metal, `true` under compose): without it every client shares the proxy's address, so all members land in ONE rendezvous bucket and see each other's link requests (harmless but confusing — approval still requires the member's own tap) |
 | Member-gated reads | Shipped, staged (`READ_AUTH` — see the §6 runbook) | Default off for rollout. Until flipped, anyone with the URL can READ the feeds (writing always required valid signatures). Flip it once every member runs a current app build |
 | Encryption at rest | Shipped (`DATABASE_KEY` — see the §6 runbook) | Optional but recommended; escrow the key separately from backups |
 | Member removal / read revocation | Shipped (`docs/member-removal.md` M1–M3) | Quorum-signed `MemberRemoval` records (`REMOVAL_QUORUM` co-signatures, default 3) close a member's standing; reinstatement is the same ceremony in reverse. The removed-author gate refuses their new writes; history is never erased. Requires `NODE_FOUNDER_KEYS` (the trust roots the membership resolver grows from). Nothing to operate beyond setting the two env knobs |
@@ -568,8 +582,8 @@ One day you may hand the operator role to someone else, or shut the
 node down.
 
 1. Announce the change out-of-band, with at least two weeks' notice.
-2. Tell members to export their data (Profile → Data & privacy →
-   Export my data).
+2. Tell members to export their data (Profile → Settings → Data &
+   privacy → Export my data).
 3. On the chosen cutoff date, stop the web server. Members retain
    everything on their devices.
 4. If you're handing off, transfer the domain, the host credentials,
