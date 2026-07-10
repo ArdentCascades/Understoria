@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useRef, useState, type ComponentType } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -77,16 +78,25 @@ export function MeMenu({
   const itemClass =
     "touch-target flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-moss-700 hover:bg-canopy-50 hover:text-canopy-800 dark:text-moss-200 dark:hover:bg-canopy-950/40 dark:hover:text-canopy-200";
 
-  return (
-    <div
-      className="fixed inset-0 z-50 print:hidden"
-      onPointerDown={(e) => {
-        // Scrim tap closes; taps inside the panel stay inside.
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      {/* Scrim — same tone as ConfirmDialog's. */}
-      <div aria-hidden="true" className="absolute inset-0 bg-moss-950/40" />
+  // Portaled to <body>: the component mounts inside the AppHeader,
+  // whose backdrop-filter makes the header the CONTAINING BLOCK for
+  // fixed-position descendants — rendered in place, this "fullscreen"
+  // overlay is actually sized to the 44px header band (the scrim only
+  // dimmed and tap-closed the top strip, and the off-screen panel sat
+  // in the header's coordinate space). The portal restores true
+  // viewport geometry.
+  return createPortal(
+    <div className="fixed inset-0 z-50 print:hidden">
+      {/* Scrim — same tone as ConfirmDialog's. The close handler
+          lives on the scrim itself: it covers every pixel the panel
+          doesn't, so "tap outside the panel" and "tap the scrim" are
+          the same event (a container-level target check never fires —
+          the scrim is always the topmost target). */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-moss-950/40"
+        onPointerDown={onClose}
+      />
       <div
         ref={panelRef}
         role="dialog"
@@ -177,7 +187,8 @@ export function MeMenu({
           </ul>
         </nav>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

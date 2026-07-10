@@ -39,12 +39,18 @@ export function useFocusTrap(
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
     // Initial focus: first focusable child, else the container
-    // itself if it's been given tabindex.
+    // itself if it's been given tabindex. preventScroll, because the
+    // container may still be mid-entrance-transition (the MeMenu
+    // drawer is focused while translated past the viewport edge) —
+    // without it the browser scrolls an overflow-hidden ancestor
+    // sideways to "reveal" the target and shoves the whole app shell
+    // over. Every consumer is a fixed-position dialog; none needs a
+    // scroll to become visible.
     const initial = getFocusableElements(container);
     if (initial.length > 0) {
-      initial[0].focus();
+      initial[0].focus({ preventScroll: true });
     } else if (container.tabIndex >= 0) {
-      container.focus();
+      container.focus({ preventScroll: true });
     }
 
     function onKeyDown(e: KeyboardEvent) {

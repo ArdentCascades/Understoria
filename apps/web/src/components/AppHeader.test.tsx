@@ -19,6 +19,10 @@
 //   4. the Search row fires the palette's open event and closes;
 //   5. selecting a link closes the drawer.
 //
+// The drawer PORTALS to <body> (the header's backdrop-filter would
+// otherwise capture its fixed positioning), so dialog queries go
+// through `document`, not the render container.
+//
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
@@ -94,13 +98,13 @@ describe("AppHeader + MeMenu", () => {
     const btn = menuButton();
     expect(btn).not.toBeNull();
     expect(btn.getAttribute("aria-expanded")).toBe("false");
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it("opens the drawer with exactly the six me-tier destinations", () => {
     render();
     openMenu();
-    const dialog = container.querySelector('[role="dialog"]')!;
+    const dialog = document.querySelector('[role="dialog"]')!;
     expect(dialog).not.toBeNull();
     expect(menuButton().getAttribute("aria-expanded")).toBe("true");
     const hrefs = [...dialog.querySelectorAll("a")].map((a) =>
@@ -122,14 +126,30 @@ describe("AppHeader + MeMenu", () => {
   it("closes on Escape and returns focus to the menu button", () => {
     render();
     openMenu();
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     act(() => {
       document.dispatchEvent(
         new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
       );
     });
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
     expect(document.activeElement).toBe(menuButton());
+  });
+
+  it("closes on a scrim tap", () => {
+    render();
+    openMenu();
+    // The scrim is the aria-hidden sibling that carries the close
+    // handler — a pointerdown anywhere on it must close the drawer
+    // (regression: the handler once sat on the container with a
+    // target check the scrim could never satisfy).
+    const scrim = document.querySelector(
+      '.fixed.inset-0 > [aria-hidden="true"]',
+    )!;
+    act(() => {
+      scrim.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    });
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it("Search row dispatches the palette open event and closes the drawer", () => {
@@ -138,7 +158,7 @@ describe("AppHeader + MeMenu", () => {
     const listener = vi.fn();
     window.addEventListener(OPEN_PALETTE_EVENT, listener);
     const searchBtn = [
-      ...container.querySelectorAll<HTMLButtonElement>(
+      ...document.querySelectorAll<HTMLButtonElement>(
         '[role="dialog"] button',
       ),
     ].find((b) => (b.textContent ?? "").includes("Search"))!;
@@ -146,19 +166,19 @@ describe("AppHeader + MeMenu", () => {
       searchBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
     window.removeEventListener(OPEN_PALETTE_EVENT, listener);
   });
 
   it("selecting a link closes the drawer", () => {
     render();
     openMenu();
-    const settings = container.querySelector<HTMLAnchorElement>(
+    const settings = document.querySelector<HTMLAnchorElement>(
       '[role="dialog"] a[href="/settings"]',
     )!;
     act(() => {
       settings.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 });
