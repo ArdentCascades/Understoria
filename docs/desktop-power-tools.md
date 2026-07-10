@@ -1,7 +1,10 @@
 # Desktop power tools — plans
 
-Status: **all five plans shipped** (palette P2 action verbs and the
-infrastructure page's mirror-freshness P2 remain open follow-ups). The desktop layout
+Status: **all five plans shipped**. The palette's P2 action verbs
+have since shipped too — "New post", "New project", and "New event"
+ride the static route table (`components/CommandPalette.tsx`); only
+"lock now" is still absent — so the one remaining open follow-up is
+the infrastructure page's mirror-freshness P2. The desktop layout
 work (nav rail, board/dashboard rails, calendar event panel, the
 1600px cap) made room; the operator asked what could fill it for
 the members who do coordination work at a keyboard. Five plans, in
@@ -24,8 +27,10 @@ As built: `lib/commandPalette.ts` (pure index + scorer) +
 `components/CommandPalette.tsx` mounted in Layout. One deliberate
 delta from the plan below: results render as a flat ranked list
 with a kind chip per row rather than grouped sections — fewer moving
-parts, same scannability at 12 results. P2 (action verbs) remains
-open.
+parts, same scannability at 12 results. P2's action verbs have since
+shipped as palette entries — "New post" → `/post/new`, "New project"
+→ `/project/new`, "New event" → `/events/new` — with "lock now" the
+only verb still absent.
 
 **What:** one keystroke opens a search over everything the device
 already holds — posts, projects, events, members, proposals, Help
@@ -67,6 +72,9 @@ navigation.
 
 **Phases:** P1 search + navigate (one PR). P2 actions (new post /
 new project / lock now) as a static verb table — small follow-up.
+*(P2 since shipped in part: "New post", "New project", and "New
+event" live in `CommandPalette.tsx`'s static route table; "lock
+now" is the only planned verb still missing.)*
 Later features register entries here ("Open organizer's desk").
 
 **Size:** ~1 PR, lib-heavy. No server changes.

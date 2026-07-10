@@ -122,8 +122,11 @@ Filtering is scoped to surfaces members already know about:
 
 - **By category** — reuses `ALL_CATEGORIES` and `CATEGORY_META`
   from `lib/categories.ts`.
-- **By project** — focus on one project's deadlines. Reachable
-  from the project detail page as "View on calendar."
+- **By project** — focus on one project's deadlines. A select in
+  the calendar's own filter row (there is no "View on calendar"
+  link on the project detail page); the choice persists with the
+  other filters in the local settings store, so the calendar
+  reopens as you left it.
 - **"Mine"** toggle — projects I organize, posts I authored,
   exchanges I'm a party to. Defaults off. This is the only
   filter that produces a per-member view, and it's per-member
@@ -303,9 +306,11 @@ entry avoids overclaiming protection the design doesn't provide.
   filtering, UTC day boundaries, sort stability, edge cases. No UI,
   no nav entry.
 - **PR 3 (PR #175) — SHIPPED.** `Calendar.tsx` page + `CalendarAgenda`,
-  `CalendarMonth`, `CalendarWeek` components. Nav entry (5th tab,
-  labels collapse to icon-only below `sm` to preserve the 44×44 touch
-  floor at 320px per §8.1). Filter row (category / project / "Mine").
+  `CalendarMonth`, `CalendarWeek` components. Nav entry (5th tab;
+  labels are always visible at every width — PR #185 reversed the
+  original icon-only collapse below `sm` per operator feedback,
+  fitting the 320px / 44×44 touch floor of §8.1 with a smaller
+  rem-based label size instead). Filter row (category / project / "Mine").
   Empty state. i18n keys in en + es. `WhyTooltip` on the
   exchange-density indicator pointing at `no-leaderboards`.
 

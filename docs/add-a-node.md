@@ -50,7 +50,8 @@ more is "Deep-rooted."
 ## The short version of the steps
 
 1. **Install** — build from source per operator-guide §3 (Node.js +
-   two commands), or use the Docker compose file in `deploy/`.
+   two commands), or use the `docker-compose.yml` at the repo root
+   (the `deploy/` directory holds its Caddyfile).
 2. **Set the basics** — a `NODE_ID`, and set `DATABASE_KEY` from day
    one so the disk is encrypted at rest before any data touches it
    (operator-guide §6 env table).

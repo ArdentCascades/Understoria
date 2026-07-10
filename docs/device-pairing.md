@@ -347,13 +347,16 @@ After the member confirms "Show the QR":
   monospaced font, segmented visually for spoken delivery
   (`canvas | river | toolbox | yellow | march | empty`).
 - A short hex fingerprint of the member's public key
-  (`1A2B 3C4D` — first 4 bytes of the Ed25519 public key, hex,
-  one space) appears between the passphrase and the QR, labelled
-  "Confirm on the other device." The destination shows the same
-  string on its own confirm step (§7.4). The cryptographic
-  identity check is already enforced by the unwrap path's
-  `publickey_mismatch` reason; this string is human-visible
-  signal for mistaken-pairing and mid-flow QR swap.
+  (`1A2B 3C4D 5E6F 7A8B` — first 8 bytes of the Ed25519 public
+  key, hex, grouped in fours; widened from 4 bytes when review
+  found a 32-bit prefix grindable offline) appears between the
+  passphrase and the QR, labelled "Confirm on the other device."
+  The destination shows the same string on its own confirm step
+  (§7.4). This human check is load-bearing: the unwrap path's
+  `publickey_mismatch` reason only confirms the envelope's keys
+  form a consistent *pair* — an attacker's own valid keypair
+  passes it — so the fingerprint match is the defense against
+  mistaken pairing and a mid-flow QR swap.
 - The QR appears below the passphrase.
 - A live countdown ticks down from 5:00 (mm:ss).
 - Two actions: **"I'm done"** (member confirms the other device
@@ -614,8 +617,8 @@ On submit, the destination:
    minutes old. Ask the other device to start over."
 6. Sanity-checks `publicKey === derive(secretKey).publicKey` —
    guards against malformed input that survived secretbox.
-7. Renders the public-key fingerprint (same `XXXX XXXX` shape as
-   the source device, §6.4) and asks the member to confirm it
+7. Renders the public-key fingerprint (same `XXXX XXXX XXXX XXXX`
+   shape as the source device, §6.4) and asks the member to confirm it
    matches. "Yes" advances. "No" drops the payload and bounces
    back to capture — letting the member retype the passphrase
    doesn't help, because if the fingerprints diverge the envelope

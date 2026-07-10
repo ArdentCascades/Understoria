@@ -268,11 +268,15 @@ not skip it on a re-read.
   configured `autoConfirmHours`, or the sweep code itself, an
   operator can fire an auto-confirm sooner than the community
   expects. *Mitigation:* the auto-confirm timestamp
-  (`autoConfirmedAt`, included in the signed payload) is in the
-  signed record. A peer node or auditor can detect early-fire by
-  comparing it to the original `awaiting_confirmation` transition
-  time on the underlying post / task (which is also signed and
-  federated). Detection is post-hoc, not preventative.
+  (`autoConfirmedAt`) is stamped on the record — as a plain field,
+  NOT under the system-key signature, which covers only the
+  helper-signed canonical exchange payload (postId, parties, hours,
+  category, completedAt). What makes the window tamper-evident is
+  the signed awaiting-transition artifact (the Round-4 correction
+  below): a peer node or auditor can detect early-fire by comparing
+  `autoConfirmedAt` to the `awaiting_confirmation` transition time
+  on the underlying post / task (which is signed and federated).
+  Detection is post-hoc, not preventative.
 
 - **Refuse to run the sweep.** An operator can set
   `autoConfirmHours = 0`, or simply not deploy the sweep, leaving
@@ -396,8 +400,9 @@ Round-4 correction landing in a later round. The surface:
 - New `systemKey: { current, history }` block in
   `GET /config` response.
 - New `autoConfirmHours: number` field on `NodeConfig` in
-  `packages/shared/src/types.ts`, default 0 (community opts in
-  via Agent 13 proposal — see §7 open question).
+  `packages/shared/src/types.ts`, default 168 (on by default; a
+  community opts *out* by setting 0 via Agent 13 proposal — see
+  §7, where the opt-out argument won).
 - New `POST /auto-confirm` endpoint on the server that verifies
   the helper signature, signs the helped-side signature with the
   system key, and writes the record.
@@ -432,9 +437,13 @@ is **PWA-side on app start** (`autoConfirmSweep.ts`), with the
 server env floor `AUTO_CONFIRM_MIN_HOURS` bounding how low a
 community setting can take the window; the discriminator is the
 **explicit** `autoConfirmed` / `autoConfirmedBy` fields on
-`Exchange`; `autoConfirmedAt` ships as a field **inside the signed
-surface** (a later hardening round moved it under the system-key
-signature, per the recommendation); helper-requested opt-out of
+`Exchange`; `autoConfirmedAt` ships as a plain **top-level field,
+outside the signed surface** — the system key signs only the
+helper-signed canonical payload, and the "extended payload"
+recommendation below was overtaken by the Round-4 window anchor
+(the signed awaiting-transition artifact is what makes the window
+tamper-evident; `system-key-rotation.md` §6 is honest that the
+stamp itself stays self-declared); helper-requested opt-out of
 auto-confirm did not ship (default-no held).
 
 Items the design was guessing about, flagged so a pilot could tune

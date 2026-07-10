@@ -125,8 +125,11 @@ services:
       # while restoring a community onto this fresh node, then unset.
       # docs/community-reseed.md.
       RESEED_GRACE_UNTIL: "${RESEED_GRACE_UNTIL:-}"
-      # JSON array of {"nodeId","pubkey"} system keys trusted during a
-      # re-seed. Set alongside RESEED_GRACE_UNTIL, then unset.
+      # JSON array of {"nodeId","current","history"} entries — e.g.
+      # [{"nodeId":"node_old","current":"<pubkey>","history":[...]}] —
+      # naming lost nodes' system keys trusted during a re-seed (the
+      # server refuses to boot on any other shape). Set alongside
+      # RESEED_GRACE_UNTIL, then unset.
       TRUSTED_SYSTEM_KEYS: "${TRUSTED_SYSTEM_KEYS:-}"
       # Refuse auto-confirm requests without a signed awaiting-
       # transition artifact ("1" to enable). Flip only after every

@@ -57,8 +57,12 @@ baseline as of this writing:
   suite today. Component-level tests are welcome but not required
   unless the component has non-trivial logic.
 
-CI runs `npm run typecheck`, `npm test`, and `npm run build`. All
-three must pass.
+CI's main job runs `npm run typecheck`, a jsx-a11y lint of the web
+workspace (`npm run lint --workspace=@understoria/web`), `npm test`,
+`npm run build` (the PWA), and `npm run build:server` — all of them
+must pass. Two further jobs run alongside it: an informational
+`npm audit` (high-severity advisories are surfaced but don't block
+a PR) and the DCO sign-off check described in the next section.
 
 ## Sign-off and the DCO
 
@@ -255,13 +259,14 @@ When reviewing or contributing translations:
   React's `Trans` component on the React side. Keep the tags
   identical.
 
-### Ongoing migration
+### Keeping the locales in step
 
-The current build has migrated the high-traffic surface (board, nav,
-post cards, urgency / category badges, relative-time formatting,
-language switcher). Profile, Dashboard, PostDetail, PostForm, and
-InviteAccept are still English-only. Migrating those is incremental
-and welcome — each PR can take one page at a time.
+The migration is done: every page in the app — including Profile,
+Dashboard, PostDetail, PostForm, and InviteAccept — is translated,
+and an en/es parity test (`src/i18n/parity.test.ts`) fails the build
+if a key exists in one locale file but not the other. The ongoing
+work is additive: any new surface must ship with both locales from
+the start — there is no "add Spanish later" lane.
 
 ## What not to contribute
 

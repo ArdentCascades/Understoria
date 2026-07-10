@@ -180,11 +180,16 @@ downgrades a would-be forgery to a visible denial.
   convergence (a fresh peer pulls everything; established peers
   whose cursors already passed the rejected rows will pick them up
   when they next bootstrap or re-sync from zero).
-- **"I lost the old public key."** Check `/api/config` history on
-  any long-running peer (they cache last-known-good config), your
-  `.env` backups, or the announcement you sent at the previous
-  rotation. Without it, pre-rotation records cannot be re-verified —
-  which is why step 3 says append-only.
+- **"I lost the old public key."** Ask any member: their device
+  captures your published `systemKey` — current *and* history — on
+  every config fetch (`LAST_SEEN_SYSTEM_KEY` in
+  `apps/web/src/lib/nodeEndpoints.ts`, surfaced in Settings via the
+  re-seed section). Peers will not help here — a peer's
+  `/api/config` serves only its *own* key, and its last-known-good
+  copy of yours lives in process memory with no endpoint. Failing
+  that, check your `.env` backups or the announcement you sent at
+  the previous rotation. Without the key, pre-rotation records
+  cannot be re-verified — which is why step 3 says append-only.
 - **Disabling auto-confirm entirely** (empty
   `NODE_SYSTEM_SECRET_KEY`) hides `systemKey` — *and the history* —
   from `/api/config`. If your node ever system-signed records, keep

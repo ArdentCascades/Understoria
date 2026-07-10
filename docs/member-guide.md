@@ -21,10 +21,10 @@ The first time you open Understoria on a device, you'll see a short
 1. **"This is a timebank."** One hour of help equals one hour of help.
 2. **"You start with credit."** New members begin with 5 hours of
    seed balance.
-3. **"Your identity is a key, not an account."** No email, no password.
-4. **"The community is the authority."** Decisions are made together,
+3. **"You hold your own key."** No email, no password.
+4. **"The community decides."** Decisions are made together,
    not by admins.
-5. **"Some help takes more than one person."** Projects are collective
+5. **"Some help needs a group."** Projects are collective
    efforts — shared goals with their own task lists. Starter
    templates exist for common projects, and if a template you'd pick
    is already running in your community, the app surfaces it before
@@ -320,8 +320,13 @@ Open a project to see:
 - A **sparkline** under the progress bar showing the last 14 days of
   contributions. Useful for seeing whether the project is gathering
   steam or losing it.
-- A list of **tasks** — each one with an estimated number of hours,
-  an urgency, and who (if anyone) is currently working on it.
+- A list of **tasks** — each row is a slim card: a status chip, an
+  hours chip (the estimate while the task is open; the recorded
+  actual hours once it's in motion), plus chips where they apply —
+  recurring cadence, "needs more hands," a "Follows:" badge naming
+  unmet upstream tasks, and a comment count — then the title and a
+  one-line description preview. Who (if anyone) is currently working
+  on a task shows on the task's own page, not on the row.
 - A **"Working alongside"** card — a simple alphabetical list of
   the people currently carrying or completing the project's tasks,
   so the project feels like shared work and you can see who you'd
@@ -483,9 +488,10 @@ deliberate change: a role that touches your balance and your name is
 yours to agree to.
 
 **If you organize a project** and want help running it, open the
-project page and use **Invite a co-organizer** — pick a member and
-tap **Send**. They'll see your invitation the next time their app
-syncs. Pending invitations show on the project page, and you can
+**⋮ menu** in the project header and choose **Manage co-organizers**
+— pick a member and tap **Send invitation**. They'll see your
+invitation the next time their app syncs. Pending (and recent past)
+invitations are listed inside the same dialog, and you can
 **Revoke** any of them right up until the moment the person accepts.
 
 **If someone invites you**, an item appears on your home screen
@@ -659,7 +665,7 @@ community-level view, not your personal stats. Highlights:
   **solidarity streak** (consecutive days with at least one exchange
   in the community).
 - **Milestones** — community thresholds the group has crossed (first
-  10 hours, first 25, etc.).
+  10 hours, first 50, first 100, and so on).
 - **Where help is flowing** — a category breakdown showing the mix
   of care, labor, and support moving through the community.
 - **Breadth, not depth** — a glimpse of how widely help spreads;

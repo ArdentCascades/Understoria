@@ -99,11 +99,11 @@ page.
       rather than glides, and the conversation auto-scroll snaps to
       the latest message. *(These honor `useReducedMotion()` once
       the reduced-motion branches land.)*
-- [ ] **Text size.** Profile → Appearance → Larger, then Largest:
+- [ ] **Text size.** Settings → Appearance → Larger, then Largest:
       text scales everywhere with no clipping, overlap, or cut-off
       controls; touch targets stay comfortable (the floor bumps to
       52px at Largest).
-- [ ] **Dark mode.** Profile → Appearance → Dark: every surface
+- [ ] **Dark mode.** Settings → Appearance → Dark: every surface
       has a dark variant; nothing washes out below contrast.
 - [ ] **Touch targets.** Every tap surface is at least 44×44 CSS
       px (52×52 at Largest text).
@@ -134,7 +134,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### Board
 
 - **Entry:** bottom nav "Board", or after onboarding. Route
-  `/board`.
+  `/` (the board is the app's root route).
 - **Steps:** confirm the "Needs" / "Offers" tabs are a tab group —
   `Tab` to it, then `←` / `→` between tabs. `Tab` to the "Search
   posts" field. On the Projects tab, reach the two filter selects.
@@ -172,7 +172,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### PostForm — post an offer (core flow)
 
 - **Entry:** the "post" affordance from the Board, choosing Offer.
-  Route `/posts/new` (type Offer).
+  Route `/post/new` (type Offer).
 - **Steps:** confirm the Need / Offer toggle is a tab group
   (named "Post type"). `Tab` through title, description, estimated
   hours. Submit with a field empty to hear validation, then
@@ -200,7 +200,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### MemberDetail — vouch (core flow)
 
 - **Entry:** activate a member's name/avatar from a post, the
-  board, or a conversation header. Route `/members/:key`.
+  board, or a conversation header. Route `/member/:publicKey`.
 - **Steps:** read-all to hear the member's name and trust state
   (qualitative only — no vouch counts or voucher roster, per the
   no-comparable-stats ruling). `Tab` to the "Vouch for this member"
@@ -252,7 +252,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### ProjectNew — create a project (core flow)
 
 - **Entry:** the "start a project" affordance, or route
-  `/projects/new`.
+  `/project/new`.
 - **Steps:** read-all; `Tab` through title, description, tags
   ("garden, tool-library"). Note the templates aside is a labelled
   region. Submit empty to hear validation, then complete and
@@ -265,7 +265,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### ProjectDetail
 
 - **Entry:** activate a project card from the Board, or after
-  creating one. Route `/projects/:id`.
+  creating one. Route `/project/:id`.
 - **Steps:** read-all; jump by heading; reach the task list and
   its search field; exercise a task action (claim / acknowledge).
 - **Expected:** the project title is the `<h1>`; the sidebar is a
@@ -379,14 +379,17 @@ onboard — are prioritized; the rest confirm the page is navigable.
 - **Entry:** activate an event marker from the Calendar or follow
   a deep link. Route `/events/:id`.
 - **Steps:** read-all to hear the title, organizer, time,
-  location, category, capacity, and current RSVP count (or the
-  "not visible from this node" affordance on peer-node views).
-  `Tab` to the RSVP control; activating it expands the
-  informed-consent card. From inside the card pick Going,
-  Maybe, Not going, or Cancel. If the event is cancelled, the
-  cancellation banner announces ahead of the body content.
+  location, category, capacity, and current RSVP count.
+  `Tab` to the RSVP control; before your first RSVP the
+  informed-consent card is already showing above the choices
+  (after RSVPing, activate "Change RSVP" to bring it back). From
+  inside the card pick Going, Maybe, or Not going (Cancel appears
+  only when changing an existing RSVP). If the event is
+  cancelled, the cancellation banner announces ahead of the body
+  content.
 - **Expected:** the event title is the page `<h1>`; the
-  organizer pubkey reads as a link to their MemberDetail; the
+  organizer reads as plain text (their display name, or a
+  shortened pubkey — it is deliberately not a link); the
   RSVP card's visibility-tier explanation is read linearly
   before the four action buttons; switching to **Not going**
   removes the visible name without announcing a delta; on a
@@ -417,7 +420,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 ### MemberDetail — block confirmation (core flow)
 
 - **Entry:** open another member's profile (route
-  `/members/:key`) and reach the **Block contact** button.
+  `/member/:publicKey`) and reach the **Block contact** button.
 - **Steps:** activate Block contact; the comparison card opens
   with focus trapped inside. Read-all to hear "What this means"
   and "What this does NOT mean" rows; reach the **Also hide their
@@ -466,7 +469,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
 
 ### Dashboard title at Large / Largest text size
 
-- **Entry:** Profile → Appearance → Text size → Largest, then
+- **Entry:** Settings → Appearance → Text size → Largest, then
   navigate to Dashboard.
 - **Steps:** the page title "Community dashboard" should wrap
   cleanly at the larger sizes without clipping, scrolling

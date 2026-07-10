@@ -167,8 +167,8 @@ acceptable loss.
   raised `RATE_LIMIT_MAX` for big communities. The walker runs in
   the foreground with a progress bar; PWA background limits make
   anything else dishonest.
-- **UI:** Profile → Community node → "Restore this community onto a
-  node." Consent copy states exactly what will be uploaded (the
+- **UI:** Profile → Settings → Community node → "Restore this
+  community onto a node." Consent copy states exactly what will be uploaded (the
   community's shared history THIS device holds — and that this is
   the same data any node of this community holds), confirms the
   target URL, and shows per-kind progress + a final summary

@@ -97,7 +97,8 @@ Should return `{"status":"ok"}`.
 
 In the browser:
 
-1. Tap **Profile** in the bottom nav.
+1. Tap **Profile** in the bottom nav, then open **Settings** (the
+   gear in the header, or the Settings row).
 2. Scroll to **Community node**.
 3. Paste `http://localhost:8787` into the URL field.
 4. Tick **Mirror finalized exchanges to this node**.
@@ -129,7 +130,7 @@ The post moves to **Completed**, credits transfer (Rosa 5 → 3,
 Marcus 5 → 7), and an achievement banner appears.
 
 Now check the mirror:
-- The **Community node** section in Profile briefly shows
+- The **Community node** section in Settings briefly shows
   `1 pending in outbox`, then `Last success: <timestamp>`.
 - In a terminal:
   ```sh
@@ -139,7 +140,7 @@ Now check the mirror:
 
 ## 9. Things worth poking at
 
-- **Passphrase**: Profile → Security → Enable. Pick something
+- **Passphrase**: Profile → Settings → Security → Enable. Pick something
   memorable. Reload the tab — you'll get the lock screen. There's
   no recovery; if you forget it, your only path is Profile →
   Emergency → Hard purge and starting over.
@@ -150,7 +151,7 @@ Now check the mirror:
 - **Soft vs hard purge**: Profile → Emergency. Soft strips
   identifying text but keeps the signed exchange ledger; hard
   wipes everything and rotates to a fresh node identity.
-- **Language switch**: Profile → Language → Español. Most of the
+- **Language switch**: Profile → Settings → Language → Español. Most of the
   app switches immediately. (Spanish translation is bootstrap-
   quality and explicitly invites native-speaker review.)
 - **Outbox resilience**: stop the server (Ctrl-C in its terminal).
@@ -198,7 +199,7 @@ for clean SIGTERM handling.
 - **`Cannot find module @understoria/shared`** at PWA or server
   startup → the shared package didn't build. Run
   `npm run shared:build` and try again.
-- **PWA loads but Profile → Community node shows
+- **PWA loads but Settings → Community node shows
   `Last error: …`** → the node isn't reachable at the URL you
   configured. Confirm `curl http://localhost:8787/health` returns
   200; check firewall / port-binding.

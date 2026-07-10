@@ -62,8 +62,10 @@ compensates with structure rather than a signature:
 Eligibility is "no organizer activity in `adoptionQuietDays` (default
 60)." Measured **only** from `projectActivity` rows — `logActivity`
 stamps `actorKey` on creation, pause/resume, complete, archive, task
-adds, confirmations, announcements, handoffs, and invitations. It does
-**not** fire on task *edits*, reorders, or dependency changes, and never
+adds *and edits* (a dependency change made through the task editor
+rides the edit's entry), confirmations, announcements, handoffs, and
+invitations. It does
+**not** fire on reorders, and never
 on reads. So the proxy can under-count a silently-active primary. We
 accept that imprecision rather than add read-tracking (a
 no-read-receipts / no-activity-search posture); the notice item and the

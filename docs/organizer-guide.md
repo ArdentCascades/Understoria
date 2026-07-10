@@ -372,11 +372,13 @@ once they've accepted).
   claimed — useful when a project has dozens of tasks and you
   want to see what's on your own plate without leaving the
   organiser view.
-- **Reordering: drag, Move up / Move down buttons, or the
-  Reorder modal.** Drag works on a pointer device; Move
-  buttons keep keyboard and screen-reader parity; the Reorder
-  modal lays out the full task list in a focusable, accessible
-  list for projects with many tasks where drag is awkward. The
+- **Reordering: the "Reorder tasks" dialog.** All reordering
+  lives in one place — pick **Reorder tasks** from the **⋮ menu**
+  in the project header and a focused dialog lays out the full
+  task list as title-only rows. Inside it, drag works on a
+  pointer device (keyboard drag too), and every row also carries
+  discrete **Move up / Move down** buttons for keyboard and
+  screen-reader parity. The
   order is the project's reading order — the way you want
   contributors to encounter the work — not a priority queue
   that suppresses anyone's claim. See
@@ -406,11 +408,13 @@ once they've accepted).
   timestamp records *when you paused*, not the project's
   creation time. Reading the project page later, the paused
   banner reflects the actual pause moment.
-- **Co-organiser capabilities, at a glance.** A small capability
-  card on the project page enumerates what your co-organisers
-  can do (launch, pause, resume, complete, add / edit tasks,
-  set dependencies, reorder, confirm completions, post
-  announcements, step down). When you invite someone, the
+- **Co-organiser capabilities, at a glance.** Co-organisers see
+  a small capability card on the project page enumerating what
+  the role covers (launch, pause, resume, complete, add / edit
+  tasks, set dependencies, reorder, confirm completions, post
+  announcements, step down). As the primary organiser you don't
+  see the card yourself — it's addressed to the people holding
+  the role. When you invite someone, the
   acceptance pointer in the invitation card directs them to
   the same enumeration so the role is consented-to rather than
   assumed. The full list is in
@@ -419,12 +423,12 @@ once they've accepted).
 - **Where the controls live.** The project page leads with the
   work — summary, updates, work days, task list — and tucks the
   organiser machinery where it doesn't crowd contributors out.
-  The one-tap lifecycle verbs (Reorder tasks, Mark complete,
-  Resume, Archive) plus **Copy link** sit in the **⋮ menu** in
-  the project header. **Pause** (with its note) and **Clone**
-  live inside the **"Manage project"** disclosure near the
-  bottom, together with co-organiser management, handoff, and
-  step-down. **"+ Add task"** and the announcements' **"Write an
+  Everything sits in the **⋮ menu** in the project header: the
+  one-tap lifecycle verbs (Reorder tasks, Mark complete,
+  Resume, Archive) plus **Copy link**, and alongside them
+  **Pause** (with its note), **Clone**, co-organiser management,
+  handoff, and step-down — each of those opening a focused
+  dialog. **"+ Add task"** and the announcements' **"Write an
   update"** are small disclosures that expand into the forms.
   Nothing was removed — it's the same set of controls, arranged
   so a phone-sized screen reaches the task list first.
@@ -433,9 +437,10 @@ once they've accepted).
   took, and that — not your estimate — is what the confirm
   dialog names and the signed exchange records. A task estimated
   at 2 hours that took 6 credits 6.
-- **Recurring work: "Add a fresh copy."** A completed task row
-  offers a one-tap fresh copy — same title, description, hours,
-  and skills, staged open at the bottom of the list — so
+- **Recurring work: "Add a fresh copy."** On a completed task's
+  own page, the **⋮ menu** offers a one-tap fresh copy — same
+  title, description, hours, and skills, staged open at the
+  bottom of the list — so
   next cycle's version of the same job doesn't mean retyping it.
 - **Cloning re-invites your crew, it never copies it.** The
   clone form shows a pre-checked list of the source project's

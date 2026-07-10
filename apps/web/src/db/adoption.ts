@@ -60,8 +60,9 @@ export class AdoptionError extends Error {
  * The most recent organizer-authored activity timestamp on a project, or
  * `null` if the organizer has never logged any. A PROXY for presence:
  * `logActivity` stamps `actorKey` on creation, pause/resume, complete,
- * archive, task adds, confirmations, announcements, handoffs, and
- * invitations — but NOT on task edits, reorders, or dependency changes,
+ * archive, task adds and edits (dependency changes made through the
+ * task editor ride the edit's entry), confirmations, announcements,
+ * handoffs, and invitations — but NOT on reorders,
  * and never on reads (reads are deliberately untracked,
  * no-read-receipts). So this can under-count a silently-active primary;
  * the notice item and the always-available cancel are the mitigation.

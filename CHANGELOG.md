@@ -108,6 +108,29 @@ include breaking changes.
 
 
 ### Fixed
+- **Documentation caught up with the code — 50 verified corrections
+  across 28 files.** A six-agent docs↔code audit checked every factual
+  claim in the manuals against the source and fixed what had drifted.
+  The ones that mattered most: the **privacy policy** now tells the
+  truth that proposals, votes, and disputes travel to your community
+  node as signed records (they were listed as local-only from before
+  proposal federation shipped) and its record-type table gained the
+  missing removal/reinstatement/seed-vault rows; **operator-powers**
+  now states the real member-removal guarantee (your device verifies
+  the record's structure and quorum; whether signers are members is
+  the node's check — and what makes a fabricated quorum survivable);
+  the roadmap's schema-version ledger points at genuinely free
+  versions again (34/25, not 29/16); the a11y test runbook's entry
+  URLs no longer 404; the rotation runbook's lost-key recovery tip
+  points at a source that exists (member devices' cached key history,
+  not peers' `/config`); `docker-compose.yml`'s `TRUSTED_SYSTEM_KEYS`
+  comment shows the shape the server actually boots on; and a few
+  dozen stale UI paths ("Profile → …" sections that moved to
+  Settings, pre-kebab menus, retired reorder buttons) match the
+  screens again. Three items were deliberately left for a community
+  decision: whether "follows" tasks should be claimable early (the
+  design doc says yes, the UI hides Claim), an encrypted-database-
+  compatible backup path, and the cross-node RSVP affordance design.
 - **The board breathes again while a post is open on desktop.**
   Opening a post used to squeeze the board between the docked panel
   and the filter column — tab labels collided and cards wrapped one

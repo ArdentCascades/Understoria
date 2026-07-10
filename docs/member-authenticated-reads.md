@@ -57,8 +57,9 @@ The resolver caches the closure and rebuilds when the redemptions,
 removals, or reinstatements tables grow, so a fresh member is
 recognized on their first read after their receipt lands (the
 receipt is pushed by the outbox even before node config is confirmed
-— the one enqueue that doesn't require a configured URL — precisely
-so proof-of-joining precedes everything else).
+— one of the two enqueues that don't require a configured URL,
+invite revocations being the other — precisely so proof-of-joining
+precedes everything else).
 
 The former "membership is append-only" bound is CLOSED
 (`docs/member-removal.md` M1). The closure definition gained a
