@@ -11,6 +11,7 @@
  */
 export { Icon, type IconProps } from "./Icon";
 export {
+  IconBalance,
   IconBoard,
   IconCalendar,
   IconDashboard,

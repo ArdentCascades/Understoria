@@ -9,26 +9,6 @@ include breaking changes.
 
 ## [Unreleased]
 
-### Fixed
-- **The Menu button no longer looks "still on" after closing the
-  drawer with the mouse.** The drawer's ✕ sits directly over the Menu
-  button, so a mouse-close left the cursor parked on it and its hover
-  tint read as a stuck selected state. Hover styling now stays quiet
-  until the pointer actually leaves the button once; deliberate
-  hovering (and the keyboard focus ring) behave exactly as before.
-- **Opening the menu on desktop no longer shoves the page sideways.**
-  Two compounding bugs: the header's frosted-glass effect
-  (`backdrop-filter`) silently made the header the positioning
-  ancestor for the "fullscreen" menu overlay, so the overlay was
-  really a 50px-tall strip — and the menu's focus management, running
-  while the panel was still sliding in from off-screen, made the
-  browser scroll the whole app shell ~360px left to "reveal" it, then
-  drift back: the jerk. The drawer now renders at the document root
-  (true fullscreen scrim, which also means tapping anywhere outside
-  the panel closes it — before, only the top strip could, and the
-  page under an open menu was still clickable), and dialog focus
-  traps take initial focus without scrolling.
-
 ### Added
 - **A "My work" tab.** The fifth tab (bottom bar and desktop rail)
   is now your own work: every task you're carrying and every project
@@ -115,6 +95,21 @@ include breaking changes.
 
 
 ### Changed
+- **Common questions folds into a browsable, filterable page.** The
+  Help page's ~25 answers no longer render as one long wall of text:
+  answers now collapse behind their questions, topic chips (with the
+  app's line-art icons, plus a new give-and-receive glyph for
+  Balance) jump between sections, and a filter box narrows to
+  matching questions as you type — expanded, with the match
+  highlighted, all on-device. "Expand all" restores the everything-
+  visible page (that's also the mode for the browser's find-in-page).
+  Shared answer links and the palette's help results still land on —
+  and now auto-expand — the right entry. The answers themselves got
+  an accuracy pass: a new "Where did the Profile tab go?" entry
+  covers the menu and the My work tab, invites lead with the one-tap
+  menu path, and two stale references (the add-a-device location and
+  a "Decisions" page that is actually called Proposals) are
+  corrected in both languages.
 - **Tap a task to open it — the whole card is now the link.** The
   project task list dropped the per-card "Open task ›" footer row: the
   entire card is a link to the task's page, so a tap anywhere on it
@@ -154,6 +149,24 @@ include breaking changes.
 
 
 ### Fixed
+- **The Menu button no longer looks "still on" after closing the
+  drawer with the mouse.** The drawer's ✕ sits directly over the Menu
+  button, so a mouse-close left the cursor parked on it and its hover
+  tint read as a stuck selected state. Hover styling now stays quiet
+  until the pointer actually leaves the button once; deliberate
+  hovering (and the keyboard focus ring) behave exactly as before.
+- **Opening the menu on desktop no longer shoves the page sideways.**
+  Two compounding bugs: the header's frosted-glass effect
+  (`backdrop-filter`) silently made the header the positioning
+  ancestor for the "fullscreen" menu overlay, so the overlay was
+  really a 50px-tall strip — and the menu's focus management, running
+  while the panel was still sliding in from off-screen, made the
+  browser scroll the whole app shell ~360px left to "reveal" it, then
+  drift back: the jerk. The drawer now renders at the document root
+  (true fullscreen scrim, which also means tapping anywhere outside
+  the panel closes it — before, only the top strip could, and the
+  page under an open menu was still clickable), and dialog focus
+  traps take initial focus without scrolling.
 - **Second audit round: 68 adversarially-verified findings fixed —
   including four real bugs in freshly shipped code.** A 77-agent
   audit re-checked every doc against the source and reviewed the

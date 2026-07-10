@@ -354,13 +354,23 @@ onboard — are prioritized; the rest confirm the page is navigable.
 
 ### Help
 
-- **Entry:** the Help link, or a deep link like
+- **Entry:** Menu (top right) → "Help", or a deep link like
   `/help#confirm-exchange`. Route `/help`.
-- **Steps:** read-all; jump by heading through the FAQ sections;
-  open the page with a `#fragment` to test the scroll handler.
+- **Steps:** read-all; `Tab` to the "Filter questions" field and
+  type a word — confirm the match count announces (`role="status"`)
+  and matching questions appear expanded. Clear the filter, arrow
+  through the section jump chips and activate one. `Tab` to a
+  question button, activate it, read the answer, activate again to
+  collapse. Try "Expand all". Open the page with a `#fragment` to
+  test the deep-link handler.
 - **Expected:** heading "Common questions"; each FAQ section is a
-  named `<section>` with an `<h2>`; a fragment link scrolls the
-  matching section into view (instantly under reduced motion, §3).
+  named `<section>` with an `<h2>`; every question is a real
+  `<button>` inside an `<h3>` reporting expanded/collapsed
+  (`aria-expanded` + `aria-controls`); a fragment link expands its
+  entry and scrolls it into view (instantly under reduced motion,
+  §3); the filter is labelled and its result count is a polite
+  status; "Expand all" makes every answer readable for
+  find-in-page.
 
 ### NotFound
 

@@ -2480,7 +2480,17 @@
   "help": {
     "title": "Common questions",
     "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide or revisit the welcome from your profile.",
-    "footer": "Didn't find your question? Most of what isn't here is a community conversation, not an app feature — talk to a member you trust."
+    "footer": "Didn't find your question? Most of what isn't here is a community conversation, not an app feature — talk to a member you trust.",
+    "filterLabel": "Filter questions",
+    "filterPlaceholder": "Type to filter questions…",
+    "filterMatches_one": "{{count}} question matches.",
+    "filterMatches_other": "{{count}} questions match.",
+    "clearFilter": "Clear filter",
+    "noMatchesTitle": "No questions match",
+    "noMatches": "Try different words — or clear the filter and browse by section.",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "sectionsNav": "Jump to a section"
   },
   "disputes": {
     "title": "Disputes",
