@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Opening the menu on desktop no longer shoves the page sideways.**
+  Two compounding bugs: the header's frosted-glass effect
+  (`backdrop-filter`) silently made the header the positioning
+  ancestor for the "fullscreen" menu overlay, so the overlay was
+  really a 50px-tall strip — and the menu's focus management, running
+  while the panel was still sliding in from off-screen, made the
+  browser scroll the whole app shell ~360px left to "reveal" it, then
+  drift back: the jerk. The drawer now renders at the document root
+  (true fullscreen scrim, which also means tapping anywhere outside
+  the panel closes it — before, only the top strip could, and the
+  page under an open menu was still clickable), and dialog focus
+  traps take initial focus without scrolling.
+
 ### Added
 - **A "My work" tab.** The fifth tab (bottom bar and desktop rail)
   is now your own work: every task you're carrying and every project
