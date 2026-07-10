@@ -136,6 +136,37 @@ describe("AppHeader + MeMenu", () => {
     expect(document.activeElement).toBe(menuButton());
   });
 
+  it("mutes the button's hover styling on close until the pointer moves again", () => {
+    render();
+    expect(menuButton().className).toContain("hover:bg-moss-100");
+    openMenu();
+    // Close via the drawer's ✕ — it sits directly over the menu
+    // button, so the cursor is left parked there; the hover tint must
+    // not paint until the pointer actually does something.
+    const close = document.querySelector<HTMLButtonElement>(
+      '[role="dialog"] button[aria-label="Close menu"]',
+    )!;
+    act(() => {
+      close.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(menuButton().className).not.toContain("hover:bg-moss-100");
+    // Only actually leaving re-arms hover — enter/move re-fire
+    // synthetically under a parked cursor the moment the drawer
+    // unmounts, so they must not.
+    act(() => {
+      // React delegates onPointerLeave from bubbling pointerout
+      // events whose relatedTarget is outside the element.
+      menuButton().dispatchEvent(
+        new MouseEvent("pointerout", {
+          bubbles: true,
+          relatedTarget: document.body,
+        }),
+      );
+    });
+    expect(menuButton().className).toContain("hover:bg-moss-100");
+  });
+
   it("closes on a scrim tap", () => {
     render();
     openMenu();
