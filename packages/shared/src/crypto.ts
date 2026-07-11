@@ -255,6 +255,28 @@ export function verifyExchangeLabel(
 }
 
 /**
+ * The `direct:` exchange-label namespace — credit for help that has no
+ * post and no project task to hang an exchange on (a plain event's
+ * shift crew, spontaneous help). See `docs/direct-exchange-label.md`.
+ *
+ * Grammar is deliberately exact: `direct:` + a lowercase 36-character
+ * UUID (the `crypto.randomUUID()` shape), nothing else. The uuid is
+ * freshly random at record time with NO derivation from anything —
+ * not an event id, not a shift id, not a date, not a member key
+ * (§3's permanent boundary: `Exchange` federates, so a label derived
+ * from a gathering would publish the attendance graph
+ * `community-events.md` §11.1 rejected). Consumers use THIS predicate
+ * rather than ad-hoc `startsWith("direct:")` checks so a label that
+ * smuggles structure into the suffix (`direct:event-123`) is never
+ * accepted as a direct exchange by anyone.
+ */
+const DIRECT_EXCHANGE_LABEL = /^direct:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export function isDirectExchangeLabel(postId: string): boolean {
+  return DIRECT_EXCHANGE_LABEL.test(postId);
+}
+
+/**
  * Canonical, stable serialization of a vouch payload — the bytes the
  * voucher's secret key signs. Field order is fixed for cross-engine
  * stability, same reasoning as canonicalExchangePayload.

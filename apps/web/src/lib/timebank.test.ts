@@ -573,3 +573,47 @@ describe("timebank.projectConfirmationOutflow", () => {
     expect(out.perProject).toEqual([{ projectId: "proj-a", hours: 0.3 }]);
   });
 });
+
+// Consumer no-op locks for docs/direct-exchange-label.md §4: a
+// `direct:` exchange is byte-shape-identical to any other exchange,
+// so the ledger must treat it as ordinary credit while the
+// project-attribution lens must never see it. These tests pin both
+// halves so a future refactor can't accidentally special-case (or
+// mis-attribute) the namespace.
+describe("timebank × direct: labels", () => {
+  function directExchange(
+    id: string,
+    helper: string,
+    helped: string,
+    hours: number,
+  ): Exchange {
+    return {
+      ...exchange(id, helper, helped, hours, 0),
+      postId: `direct:${crypto.randomUUID()}`,
+    };
+  }
+
+  it("balanceFor counts a direct exchange exactly like any exchange", () => {
+    const a = member("a");
+    const b = member("b");
+    const exchanges = [directExchange("d1", "a", "b", 2)];
+    expect(balanceFor(a, exchanges)).toBe(7);
+    expect(balanceFor(b, exchanges)).toBe(3);
+  });
+
+  it("projectConfirmationOutflow never attributes a direct exchange", () => {
+    const out = projectConfirmationOutflow("org", [
+      directExchange("d1", "helper", "org", 4),
+    ]);
+    expect(out.totalHours).toBe(0);
+    expect(out.perProject).toEqual([]);
+  });
+
+  it("transactionHistory lists a direct exchange like any other", () => {
+    const history = transactionHistory("a", [
+      directExchange("d1", "a", "b", 1.5),
+    ]);
+    expect(history).toHaveLength(1);
+    expect(history[0].delta).toBe(1.5);
+  });
+});
