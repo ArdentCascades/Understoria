@@ -179,6 +179,13 @@ export interface OutboxRow {
   // that need the association can each create their own link.
   // eventProjectLinks.test.ts asserts the rejection with
   // `// @ts-expect-error`.
+  //
+  // Intentionally NOT a member of this union: "task_plan". TaskPlanRow
+  // is a member's PRIVATE executive-function scaffolding (their own
+  // step breakdown + planned day for a claimed task) — process data,
+  // never community record. It never enters the outbox, never exports,
+  // never rides the pairing snapshot, and is cleared by soft-purge.
+  // taskPlans.test.ts asserts the rejection with `// @ts-expect-error`.
   /** JSON-stringified signed payload. While the row is `pending` a
    *  re-enqueue of the same record with NEW mutable state (e.g. a
    *  task-comment tombstone) replaces this in place; once delivered
@@ -331,6 +338,42 @@ export interface CoOrganizerInvitationRevocationRow
  */
 export type EventRow = Event;
 
+/** One self-authored step inside a member's private task plan. */
+export interface TaskPlanStep {
+  /** UUID — stable identity for toggle/remove. */
+  id: string;
+  /** The member's own words, e.g. "find the ladder". */
+  text: string;
+  done: boolean;
+}
+
+/**
+ * A member's PRIVATE working plan for a task they've claimed: their
+ * own step breakdown plus an optional self-chosen "planned day"
+ * (implementation intention). Executive-function scaffolding — the
+ * member's process, not the community's record. LOCAL-ONLY, same
+ * personal-relief posture as `blocks`: never federates (no
+ * `OutboxRow.kind`, no enqueue helper), never exported, never rides
+ * the pairing snapshot, cleared whole by soft purge. Nothing here may
+ * ever feed a reminder, badge, or overdue marker (`no-notifications`,
+ * `solidarity-not-shame`).
+ *
+ * Keyed by taskId: one plan per task per device. `memberKey` guards
+ * rendering — a plan only renders for its author, and a write by a
+ * different member (the task changed hands) replaces the row whole.
+ */
+export interface TaskPlanRow {
+  taskId: string;
+  memberKey: string;
+  steps: TaskPlanStep[];
+  /** Local calendar date "YYYY-MM-DD" the member privately intends to
+   *  give this task some time, or null. A self-promise, not a
+   *  deadline: nothing turns red when it passes. */
+  plannedDay: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
 /**
  * Community-event cancellation row — see `docs/community-events.md`
  * §4.3. Wraps the federated `EventCancellation` record verbatim.
@@ -452,6 +495,15 @@ export class UnderstoriaDB extends Dexie {
    *  first-writer-wins terminal state of a proposal — keyed by
    *  proposalId (one closure per proposal, everywhere). */
   proposalClosures!: Table<ProposalClosure, string>;
+  /**
+   * Local-only private task plans — the member's own step breakdown
+   * and planned day for tasks they've claimed (see `TaskPlanRow`).
+   * Same never-synced/never-exported posture as `blocks`; read and
+   * written only by `db/taskPlans.ts`. The `OutboxRow.kind` union
+   * rejects `"task_plan"` at the type level; taskPlans.test.ts
+   * asserts the rejection with `// @ts-expect-error`.
+   */
+  taskPlans!: Table<TaskPlanRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -1014,6 +1066,17 @@ export class UnderstoriaDB extends Dexie {
     // v33 — proposal closures (docs/proposal-federation.md G1).
     this.version(33).stores({
       proposalClosures: "proposalId, closedAt",
+    });
+
+    // v34 — private task plans (ADHD-support round: self-decomposed
+    // steps + planned day on claimed tasks). Pure new table, no
+    // backfill. Keyed by taskId (one plan per task per device);
+    // `memberKey` indexed so "In my care" can pull the viewer's own
+    // plans in one query. LOCAL-ONLY — same posture as `blocks`: no
+    // outbox kind, excluded from export and the pairing snapshot,
+    // cleared whole by soft purge. See the TaskPlanRow doc comment.
+    this.version(34).stores({
+      taskPlans: "taskId, memberKey, updatedAt",
     });
   }
 }

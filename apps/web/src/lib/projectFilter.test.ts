@@ -19,7 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { describe, expect, it } from "vitest";
-import { hasOpenTasks, projectNeedsMoreHands } from "./projectFilter";
+import {
+  hasHourSizedTasks,
+  hasOpenTasks,
+  projectNeedsMoreHands,
+} from "./projectFilter";
 import type { ProjectTask, ProjectTaskStatus } from "@/types";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -88,6 +92,43 @@ function makeTask(
     checkInAcknowledgedAt: null,
   };
 }
+
+describe("projectFilter — hasHourSizedTasks", () => {
+  function sized(
+    id: string,
+    projectId: string,
+    hours: number,
+    status: ProjectTaskStatus = "open",
+  ): ProjectTask {
+    return { ...makeTask(id, projectId, status), estimatedHours: hours };
+  }
+
+  it("matches an open task at exactly one hour, and below", () => {
+    expect(hasHourSizedTasks("p1", [sized("t1", "p1", 1)])).toBe(true);
+    expect(hasHourSizedTasks("p1", [sized("t1", "p1", 0.5)])).toBe(true);
+  });
+
+  it("rejects bigger tasks, non-open tasks, and other projects' tasks", () => {
+    expect(hasHourSizedTasks("p1", [sized("t1", "p1", 1.5)])).toBe(false);
+    expect(hasHourSizedTasks("p1", [sized("t1", "p1", 1, "claimed")])).toBe(
+      false,
+    );
+    expect(hasHourSizedTasks("p1", [sized("t1", "p2", 1)])).toBe(false);
+  });
+
+  it("rejects unestimated (0-hour) tasks — unknown size is not hour-sized", () => {
+    expect(hasHourSizedTasks("p1", [sized("t1", "p1", 0)])).toBe(false);
+  });
+
+  it("needs only one qualifying task among many", () => {
+    const tasks = [
+      sized("t1", "p1", 4),
+      sized("t2", "p1", 1, "completed"),
+      sized("t3", "p1", 0.75),
+    ];
+    expect(hasHourSizedTasks("p1", tasks)).toBe(true);
+  });
+});
 
 describe("projectFilter — hasOpenTasks", () => {
   it("returns false when the project has no tasks at all", () => {

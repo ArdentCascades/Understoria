@@ -74,12 +74,37 @@ export default function MyWorkPage() {
   const shiftRows = useLiveQuery(() => db.eventShifts.toArray(), [], []);
   const signupRows = useLiveQuery(() => db.shiftSignups.toArray(), [], []);
 
+  // The viewer's own private planned days (db/taskPlans.ts) — Dexie-
+  // only, like the shifts. Tasks the member gave a day sort first in
+  // the carrying list and show a quiet "You planned …" line.
+  const memberKey = currentMember?.publicKey;
+  const planRows = useLiveQuery(
+    async () =>
+      memberKey
+        ? await db.taskPlans.where("memberKey").equals(memberKey).toArray()
+        : [],
+    [memberKey],
+    [] as import("@/db/database").TaskPlanRow[],
+  );
+  const plannedDays = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const row of planRows) {
+      if (row.plannedDay) map.set(row.taskId, row.plannedDay);
+    }
+    return map;
+  }, [planRows]);
+
   const carrying = useMemo(
     () =>
       currentMember
-        ? myClaimedTasks(currentMember.publicKey, projectTasks, projects)
+        ? myClaimedTasks(
+            currentMember.publicKey,
+            projectTasks,
+            projects,
+            plannedDays,
+          )
         : { groups: [], taskCount: 0, projectCount: 0 },
-    [currentMember, projectTasks, projects],
+    [currentMember, projectTasks, projects, plannedDays],
   );
 
   const organizing = useMemo(
@@ -215,7 +240,7 @@ export default function MyWorkPage() {
                 </Link>
               </p>
             ) : (
-              <MyTasksSection view={carrying} />
+              <MyTasksSection view={carrying} plannedDays={plannedDays} />
             )}
 
             {/* The other two commitment kinds a member can claim —

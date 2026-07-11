@@ -21,6 +21,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { MyClaimedTasksView, MyTaskGroup } from "@/lib/myTasks";
+import { localDayString } from "@/db/taskPlans";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import type { Project, ProjectTask } from "@/types";
@@ -75,9 +76,43 @@ const PROJECT_STATUS_KEY = {
   archived: "projects.statusArchived",
 } as const;
 
-function TaskRow({ task, project }: { task: ProjectTask; project: Project }) {
-  const { t } = useTranslation();
+function TaskRow({
+  task,
+  project,
+  plannedDay,
+}: {
+  task: ProjectTask;
+  project: Project;
+  /** The member's own private "YYYY-MM-DD" planned day for this task
+   *  (db/taskPlans.ts), if they set one. */
+  plannedDay?: string;
+}) {
+  const { t, i18n } = useTranslation();
   const awaiting = task.status === "awaiting_confirmation";
+
+  // Private planned-day line. Three shapes, all quiet: today, a
+  // future day, and a day gone by. The past shape stays in the same
+  // muted moss as everything else — a passed self-promise is a fact
+  // the member already knows, not a fault to flag in red
+  // (solidarity-not-shame). Changing the day lives on the task page,
+  // like every other action.
+  let plannedLine: string | null = null;
+  if (plannedDay) {
+    const todayStr = localDayString();
+    const [y, m, d] = plannedDay.split("-").map(Number);
+    const dayLabel = new Intl.DateTimeFormat(i18n.language, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }).format(new Date(y, m - 1, d));
+    plannedLine =
+      plannedDay === todayStr
+        ? t("myTasks.plannedToday")
+        : plannedDay < todayStr
+          ? t("myTasks.plannedPast", { day: dayLabel })
+          : t("myTasks.plannedFor", { day: dayLabel });
+  }
+
   return (
     <li className="py-2">
       <Link
@@ -110,6 +145,17 @@ function TaskRow({ task, project }: { task: ProjectTask; project: Project }) {
             not a deadline — no day counters, no overdue framing
             (solidarity-not-shame). The check-in nudges stay where
             they live today: the attention rail. */}
+        {plannedLine && (
+          <span
+            className={`mt-1 block text-xs ${
+              plannedDay && plannedDay < localDayString()
+                ? "text-moss-600 dark:text-moss-300"
+                : "font-medium text-canopy-700 dark:text-canopy-300"
+            }`}
+          >
+            {plannedLine}
+          </span>
+        )}
         {task.claimedAt !== null && (
           <span className="mt-1 block text-xs text-moss-600 dark:text-moss-300">
             {t("myTasks.claimedAgo", {
@@ -122,7 +168,13 @@ function TaskRow({ task, project }: { task: ProjectTask; project: Project }) {
   );
 }
 
-function ProjectGroup({ group }: { group: MyTaskGroup }) {
+function ProjectGroup({
+  group,
+  plannedDays,
+}: {
+  group: MyTaskGroup;
+  plannedDays?: ReadonlyMap<string, string>;
+}) {
   const { t } = useTranslation();
   const { project, tasks } = group;
   return (
@@ -150,7 +202,12 @@ function ProjectGroup({ group }: { group: MyTaskGroup }) {
       </div>
       <ul className="divide-y divide-moss-100 dark:divide-moss-800">
         {tasks.map((task) => (
-          <TaskRow key={task.id} task={task} project={project} />
+          <TaskRow
+            key={task.id}
+            task={task}
+            project={project}
+            plannedDay={plannedDays?.get(task.id)}
+          />
         ))}
       </ul>
     </section>
@@ -163,7 +220,16 @@ function ProjectGroup({ group }: { group: MyTaskGroup }) {
  * decides what to render at zero tasks, so this component assumes a
  * non-empty view.
  */
-export function MyTasksSection({ view }: { view: MyClaimedTasksView }) {
+export function MyTasksSection({
+  view,
+  plannedDays,
+}: {
+  view: MyClaimedTasksView;
+  /** taskId → the viewer's own private planned day (db/taskPlans.ts),
+   *  read by the caller via useLiveQuery. Optional so the Profile
+   *  summary path keeps working without the Dexie read. */
+  plannedDays?: ReadonlyMap<string, string>;
+}) {
   return (
     <>
       <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
@@ -174,7 +240,11 @@ export function MyTasksSection({ view }: { view: MyClaimedTasksView }) {
       </p>
       <div className="flex flex-col gap-3">
         {view.groups.map((group) => (
-          <ProjectGroup key={group.project.id} group={group} />
+          <ProjectGroup
+            key={group.project.id}
+            group={group}
+            plannedDays={plannedDays}
+          />
         ))}
       </div>
     </>

@@ -942,6 +942,27 @@
       "claimSummary": "Cerca de {{hours}} horas · nos pondremos en contacto contigo en privado después de {{days}} días.",
       "claimSummaryNoHours": "Nos pondremos en contacto contigo en privado después de {{days}} días.",
       "checkInAckToast": "Recibido — te escribiremos de nuevo en {{days}} días.",
+      "claimMoment": {
+        "yours": "Está a tu cuidado.",
+        "firstStep": "Un buen primer paso:",
+        "tipAbove": "El consejo de arriba es un buen primer paso.",
+        "planLink": "Abre la tarea para anotar tus propios primeros pasos — solo tú puedes verlos",
+        "jotHint": "Si te ayuda, anota abajo tus propios primeros pasos — solo tú puedes verlos."
+      },
+      "plan": {
+        "heading": "Tu plan privado",
+        "privacy": "Solo tú puedes ver esto. Vive en este dispositivo y nunca se comparte.",
+        "stepsHint": "Divide esto en tus propios primeros pasos — lo bastante pequeños para de verdad empezar.",
+        "addPlaceholder": "Añade un paso con tus palabras…",
+        "addButton": "Añadir",
+        "removeStep": "Quitar paso: {{step}}",
+        "progress": "{{done}} de {{total}} hechos",
+        "dayLabel": "Elige un día para dedicarle un rato (solo para ti)",
+        "dayToday": "Hoy",
+        "dayTomorrow": "Mañana",
+        "dayClear": "Quitar",
+        "dayPast": "Habías planeado el {{day}}. La vida pasa — elige otro día cuando estés lista o listo."
+      },
       "releaseReassurance": "Soltarla ayuda a que quien organiza encuentre a alguien más — sin juicios.",
       "notClaimablePlanning": "Este proyecto sigue en planificación — quien organiza aún no lo ha lanzado.",
       "notClaimablePaused": "Este proyecto está en pausa — no acepta nuevas tomas por ahora.",
@@ -1274,6 +1295,9 @@
     "summaryOneProject": "Llevas {{count}} tareas en un proyecto.",
     "summaryOther": "Llevas {{count}} tareas en {{projects}} proyectos.",
     "claimedAgo": "Tomada {{when}}",
+    "plannedToday": "Planeaste hoy para esto",
+    "plannedFor": "Planeaste el {{day}}",
+    "plannedPast": "Habías planeado el {{day}} — cuando puedas",
     "empty": "Cuando tomes una tarea de un proyecto comunitario aparecerá aquí, para que veas tus compromisos sin abrir cada proyecto uno por uno.",
     "browseProjects": "Explorar proyectos",
     "seeAll": "Ver todas tus tareas",
@@ -1968,6 +1992,9 @@
       },
       "needsMoreHands": {
         "toggle": "Le vendrían bien más manos"
+      },
+      "hourSized": {
+        "toggle": "Cabe en una hora, más o menos"
       },
       "emptyForFilters": "Nada coincide con tus filtros."
     },

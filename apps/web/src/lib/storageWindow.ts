@@ -63,6 +63,11 @@ export const WINDOW_LOCAL_TABLES = [
   "previouslyBlocked",
   "guardianShards",
   "nodeConfig",
+  // Private task plans (db/taskPlans.ts): a member's own step
+  // breakdowns + planned days. Tiny (one row per claimed task the
+  // member chose to plan), never re-downloadable, and active by
+  // definition — the walker has no business in them.
+  "taskPlans",
 ] as const;
 
 /**

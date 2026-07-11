@@ -237,6 +237,9 @@ export async function softPurge(): Promise<PurgeResult> {
   //     member's organizing pattern and a per-slot attendance-intent
   //     graph — the same personal-relief class as `eventRsvps`, only
   //     finer-grained (docs/shift-signups.md §4).
+  //   - `taskPlans`: the member's private step breakdowns and planned
+  //     days for claimed tasks — verbatim free text about their own
+  //     process and capacity; nothing structural worth keeping.
   await db.transaction(
     "rw",
     [
@@ -248,6 +251,7 @@ export async function softPurge(): Promise<PurgeResult> {
       db.eventProjectLinks,
       db.eventShifts,
       db.shiftSignups,
+      db.taskPlans,
       db.outbox,
       db.invites,
       db.redemptionReceipts,
@@ -265,6 +269,7 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.eventProjectLinks.clear();
       await db.eventShifts.clear();
       await db.shiftSignups.clear();
+      await db.taskPlans.clear();
       await db.outbox.clear();
       await db.invites.clear();
       // The signed membership artifacts (re-seed Phase R0) are the
@@ -293,6 +298,7 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("eventProjectLinks");
   tables.push("eventShifts");
   tables.push("shiftSignups");
+  tables.push("taskPlans");
   tables.push("outbox");
   tables.push("invites");
   tables.push("redemptionReceipts");

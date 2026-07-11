@@ -30,6 +30,7 @@ import { TaskComments } from "@/components/TaskComments";
 import { Markdown } from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
+import { TaskPrivateChecklist } from "@/components/TaskPrivateChecklist";
 import { shareUrl } from "@/lib/share";
 import { matchTaskSkills } from "@/lib/taskSkillMatch";
 import { getTaskTips } from "@/content/taskTips";
@@ -133,6 +134,10 @@ export function TaskDetailBody({
     [templateId, task.title, locale],
   );
 
+  // Set the moment THIS render's Claim succeeds — gates the claim-
+  // moment block so it appears only in the transition moment, not on
+  // every visit to an already-claimed task.
+  const [justClaimed, setJustClaimed] = useState(false);
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [acknowledgmentText, setAcknowledgmentText] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -514,7 +519,12 @@ export function TaskDetailBody({
               className="btn-primary"
               disabled={pending}
               aria-busy={pending}
-              onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
+              onClick={async () => {
+                const claimed = await dispatch(() =>
+                  claimProjectTask(task.id, currentKey),
+                );
+                if (claimed) setJustClaimed(true);
+              }}
             >
               {pending ? t("common.working") : t("projects.task.claim")}
             </button>
@@ -683,6 +693,39 @@ export function TaskDetailBody({
           </span>
         )}
       </div>
+      {/* Claim-moment block — the counterpart of the card's version.
+          The tip block above already carries the task's authored
+          pointer, so this one holds the moment ("it's yours") and
+          hands off to the private plan that just appeared below. */}
+      {justClaimed && task.status === "claimed" && isAssignee && (
+        <div
+          role="status"
+          className="rounded-md border border-canopy-100 bg-canopy-50/50 px-3 py-2 text-sm text-moss-700 dark:border-canopy-900 dark:bg-canopy-950/30 dark:text-moss-200"
+        >
+          <p className="font-semibold text-canopy-800 dark:text-canopy-200">
+            {t("projects.task.claimMoment.yours")}
+          </p>
+          {taskTip && (
+            <p className="mt-1">
+              {t("projects.task.claimMoment.tipAbove")}
+            </p>
+          )}
+          <p className="mt-1 text-xs">
+            {t("projects.task.claimMoment.jotHint")}
+          </p>
+        </div>
+      )}
+      {/* The claimer's private working plan — their own step breakdown
+          + planned day, local-only (db/taskPlans.ts). Assignee-only by
+          construction; stays through awaiting_confirmation so the
+          member can still see what they did while the organizer
+          confirms. */}
+      {currentKey &&
+        isAssignee &&
+        (task.status === "claimed" ||
+          task.status === "awaiting_confirmation") && (
+          <TaskPrivateChecklist taskId={task.id} memberKey={currentKey} />
+        )}
       {/* Claimer-side narrative (PR #226's voice — "credit moves when
           ..."). Visible only to the completer of an awaiting task;
           tells them the plain story while they wait. Mirrors

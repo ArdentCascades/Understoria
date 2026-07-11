@@ -21,6 +21,7 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { useTaskCommentCount } from "@/lib/useTaskCommentCount";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
+import { getTaskTips } from "@/content/taskTips";
 import type { Project, ProjectTask } from "@/types";
 
 // "Follows: <upstream titles>" badge. Visible to everyone, not just
@@ -132,6 +133,7 @@ export function TaskCard({
   allTasks,
   searchQuery,
   taskCheckInDays,
+  templateId,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -151,9 +153,18 @@ export function TaskCard({
    *  sees why this row matched. The one-line description preview stays
    *  plain — the title is enough for finding tasks at a glance. */
   searchQuery?: string;
+  /** The project's `templateId` (null for from-scratch projects) —
+   *  resolves the task's authored tip for the claim-moment block, so
+   *  the first concrete step lands exactly when momentum is highest
+   *  and the claimer hasn't left the list. */
+  templateId: string | null;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [followsExpanded, setFollowsExpanded] = useState(false);
+  // Set the moment THIS render's Claim succeeds — gates the claim-
+  // moment block so it appears only in the transition moment, not on
+  // every claimed row forever.
+  const [justClaimed, setJustClaimed] = useState(false);
   const { pending, run: runWithPending } = usePendingAction();
   const dispatch = <T,>(action: () => Promise<T>) =>
     runWithPending(() => onRun(action));
@@ -168,6 +179,15 @@ export function TaskCard({
       .map((dep) => ({ id: dep.id, title: dep.title }));
   }, [task.dependencies, allTasks]);
   const hasUnmetDeps = unmetDepTitles.length > 0;
+
+  // The task's authored tip (content/taskTips.ts) — the claim-moment
+  // block reuses it as "a good first step" so a new claimer leaves
+  // the moment with something concrete to do first.
+  const locale = i18n.resolvedLanguage ?? "en";
+  const claimMomentTip = useMemo(
+    () => getTaskTips(templateId, task.title, locale),
+    [templateId, task.title, locale],
+  );
 
   return (
     <div className="card relative flex flex-col gap-2 transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-canopy-500 dark:focus-within:ring-canopy-400">
@@ -278,7 +298,12 @@ export function TaskCard({
               className="btn-primary relative z-[2]"
               disabled={pending}
               aria-busy={pending}
-              onClick={() => dispatch(() => claimProjectTask(task.id, currentKey))}
+              onClick={async () => {
+                const claimed = await dispatch(() =>
+                  claimProjectTask(task.id, currentKey),
+                );
+                if (claimed) setJustClaimed(true);
+              }}
             >
               {pending ? t("common.working") : t("projects.task.claim")}
             </button>
@@ -315,6 +340,37 @@ export function TaskCard({
             {t("projects.task.claimableAfterLaunch")}
           </p>
         )}
+        {/* Claim-moment block: appears in place of the Claim button
+            the instant a claim lands, holding the moment's momentum —
+            what's the first concrete move? Persistent (not a toast:
+            4 seconds isn't enough to act on), and gone on the next
+            visit. role="status" so screen readers hear the claim
+            landed without an interrupting alert. */}
+        {justClaimed &&
+          task.status === "claimed" &&
+          task.assignedTo === currentKey && (
+            <div
+              role="status"
+              className="basis-full rounded-md border border-canopy-100 bg-canopy-50/50 px-3 py-2 text-sm text-moss-700 dark:border-canopy-900 dark:bg-canopy-950/30 dark:text-moss-200"
+            >
+              <p className="font-semibold text-canopy-800 dark:text-canopy-200">
+                {t("projects.task.claimMoment.yours")}
+              </p>
+              {claimMomentTip && (
+                <p className="mt-1">
+                  {t("projects.task.claimMoment.firstStep")} {claimMomentTip}
+                </p>
+              )}
+              <p className="mt-1 text-xs">
+                <Link
+                  to={`/project/${task.projectId}/task/${task.id}`}
+                  className="relative z-[2] text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                >
+                  {t("projects.task.claimMoment.planLink")}
+                </Link>
+              </p>
+            </div>
+          )}
       </div>
     </div>
   );

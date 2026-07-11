@@ -44,6 +44,8 @@ export interface ProjectFilterRailProps {
   setOnlyWithOpenTasks: (next: (prev: boolean) => boolean) => void;
   onlyNeedsMoreHands: boolean;
   setOnlyNeedsMoreHands: (next: (prev: boolean) => boolean) => void;
+  onlyHourSized: boolean;
+  setOnlyHourSized: (next: (prev: boolean) => boolean) => void;
 }
 
 export function ProjectFilterRail({
@@ -55,6 +57,8 @@ export function ProjectFilterRail({
   setOnlyWithOpenTasks,
   onlyNeedsMoreHands,
   setOnlyNeedsMoreHands,
+  onlyHourSized,
+  setOnlyHourSized,
 }: ProjectFilterRailProps) {
   const { t } = useTranslation();
   return (
@@ -145,6 +149,22 @@ export function ProjectFilterRail({
         }`}
       >
         {t("board.projectFilters.needsMoreHands.toggle")}
+      </button>
+      {/* Projects with at least one open task of an hour or less
+          (lib/projectFilter.ts hasHourSizedTasks) — a bounded,
+          finishable slice for a member with a little energy right
+          now. Filters the work, never profiles the member. */}
+      <button
+        type="button"
+        onClick={() => setOnlyHourSized((v) => !v)}
+        aria-pressed={onlyHourSized}
+        className={`rounded-full px-3 py-1 text-xs font-medium ${
+          onlyHourSized
+            ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
+            : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+        }`}
+      >
+        {t("board.projectFilters.hourSized.toggle")}
       </button>
     </div>
   );

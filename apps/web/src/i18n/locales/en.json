@@ -942,6 +942,27 @@
       "claimSummary": "About {{hours}} hours · we'll check in with you privately after {{days}} days.",
       "claimSummaryNoHours": "We'll check in with you privately after {{days}} days.",
       "checkInAckToast": "Got it — we'll check in again in {{days}} days.",
+      "claimMoment": {
+        "yours": "It's in your care.",
+        "firstStep": "A good first step:",
+        "tipAbove": "The tip above is a good first step.",
+        "planLink": "Open the task to jot your own first steps — only you can see them",
+        "jotHint": "If it helps, jot your own first steps below — only you can see them."
+      },
+      "plan": {
+        "heading": "Your private plan",
+        "privacy": "Only you can see this. It lives on this device and is never shared.",
+        "stepsHint": "Break this into your own first steps — small enough to actually start.",
+        "addPlaceholder": "Add a step in your own words…",
+        "addButton": "Add",
+        "removeStep": "Remove step: {{step}}",
+        "progress": "{{done}} of {{total}} done",
+        "dayLabel": "Pick a day to give this some time (just for you)",
+        "dayToday": "Today",
+        "dayTomorrow": "Tomorrow",
+        "dayClear": "Clear",
+        "dayPast": "You'd planned {{day}}. Life happens — pick a new day whenever you're ready."
+      },
       "releaseReassurance": "Releasing helps the organizer find another helper — no judgment.",
       "notClaimablePlanning": "This project is still planning — the organizer hasn't launched it yet.",
       "notClaimablePaused": "This project is paused — no new claims right now.",
@@ -1274,6 +1295,9 @@
     "summaryOneProject": "You're carrying {{count}} tasks in one project.",
     "summaryOther": "You're carrying {{count}} tasks across {{projects}} projects.",
     "claimedAgo": "Claimed {{when}}",
+    "plannedToday": "You planned today for this",
+    "plannedFor": "You planned {{day}}",
+    "plannedPast": "You'd planned {{day}} — whenever you're ready",
     "empty": "When you claim a task in a community project it shows up here, so you can see your commitments without opening each project one by one.",
     "browseProjects": "Browse projects",
     "seeAll": "See all your tasks",
@@ -1968,6 +1992,9 @@
       },
       "needsMoreHands": {
         "toggle": "Could use more hands"
+      },
+      "hourSized": {
+        "toggle": "Fits in about an hour"
       },
       "emptyForFilters": "Nothing matches your filters."
     },
