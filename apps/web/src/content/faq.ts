@@ -366,6 +366,22 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         ],
       },
       {
+        id: "start-a-community",
+        question: "Could I start a community like this for my neighborhood?",
+        answer: [
+          "Yes — and you don't need anyone's permission, a GitHub " +
+            "account, or an app store. Understoria is free software, " +
+            "and this community's own server offers its complete " +
+            "source code for download.",
+          "The whole path is written up inside the app: open the " +
+            "Menu (top right) → Community infrastructure → the card " +
+            "called 'The software itself' → 'Start a new community " +
+            "from this download'. It walks you from downloading and " +
+            "verifying the code to running your own server, in plain " +
+            "language.",
+        ],
+      },
+      {
         id: "invite-someone",
         question: "How do I invite someone?",
         answer: [

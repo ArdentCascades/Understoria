@@ -26,10 +26,14 @@ include breaking changes.
   another node or the public repository). `.dockerignore` now also
   excludes `backups/` and database files, so operator data can never
   ride along in an image build or the served tarball. The whole loop
-  has a plain-language walkthrough —
-  `docs/bootstrap-from-a-node.md`: download from your community's
-  node, verify, try it, deploy it, become a seed for the next
-  community.
+  has a plain-language walkthrough in TWO places: in the app itself
+  (Menu → Community infrastructure → The software itself → "Start a
+  new community from this download", also answered in the Help FAQ —
+  served by every node, in both languages, so nobody needs GitHub
+  even to read the instructions) and in the repo/tarball as
+  `docs/bootstrap-from-a-node.md`. The in-app guide points at the
+  deep runbooks that ride INSIDE the download's docs folder, closing
+  the loop completely.
 - **Deployment beyond Docker is now documented**
   (`docs/deploy-alternatives.md`). Three supported shapes join the
   Docker Compose reference runbook: rootless **Podman** (a
