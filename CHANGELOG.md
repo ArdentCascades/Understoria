@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The dev demo community now includes claimable work.** Rosa
+  organizes an active community-fridge project with open tasks in a
+  spread of sizes (one hour-sized, one mid-carry by Marcus so it
+  reads alive), using the template's verbatim task text so tips and
+  the claim-moment first step resolve — plus an upcoming "Fridge
+  build day" with two open shifts. First-run exploration can now walk
+  the whole claimer arc (one small thing → claim → first step →
+  private plan → In my care → resume card → shift → calendar file)
+  without authoring anything first. Dev-only as ever: production
+  nodes still start empty, and the seed rows never federate.
+- **"Add this shift to my calendar (.ics)" on the event page** —
+  appears next to "Remove my signup" the moment a signup lands, the
+  same file In my care offers. The reminder, if any, stays in the
+  member's own calendar app.
 - **"Pick up where you left off"** on the Dashboard — a quiet card
   linking to the last task you touched (claimed, checked a step on,
   or noted), for the moment after an interruption when the hard part

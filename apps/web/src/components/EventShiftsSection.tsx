@@ -23,6 +23,8 @@ import {
   signUpForShift,
 } from "@/db/eventShifts";
 import { humanizeError } from "@/lib/humanizeError";
+import { buildShiftIcs, icsFilename } from "@/lib/eventIcs";
+import { downloadIcs } from "@/lib/ics";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { useToast } from "@/state/ToastContext";
 import type { Event, EventShiftRow, ShiftSignupRow } from "@/types";
@@ -322,6 +324,26 @@ export function EventShiftsSection({
                     onClick={() => void handleRemove(shift.id)}
                   >
                     {t("events.shifts.removeButton")}
+                  </button>
+                  {/* Right where the commitment was just made — the
+                      member's OWN calendar can hold (and, if they
+                      choose, remind about) the clock time; the app
+                      never will. Same file the In-my-care row offers
+                      (lib/eventIcs.ts buildShiftIcs, §11.5a posture:
+                      no VALARM, no roster identities). */}
+                  <button
+                    type="button"
+                    className="text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+                    onClick={() =>
+                      downloadIcs(
+                        icsFilename(`${shift.label} ${event.title}`),
+                        buildShiftIcs(shift, event, {
+                          appUrl: window.location.origin,
+                        }),
+                      )
+                    }
+                  >
+                    {t("events.shifts.addToCalendar")}
                   </button>
                 </div>
               )}

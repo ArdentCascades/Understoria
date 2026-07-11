@@ -10,14 +10,10 @@ import { seedDemoCommunityIfDev, seedDemoCommunityIfEmpty } from "./seed";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 
 async function reset() {
-  await Promise.all([
-    db.members.clear(),
-    db.vouches.clear(),
-    db.outbox.clear(),
-    db.settings.clear(),
-    db.secretKeys.clear(),
-    db.posts.clear(),
-  ]);
+  // Clear EVERY table (the standard suite idiom) — the seed now also
+  // writes projects, tasks, events, and shifts, and a hand-picked
+  // clear list silently leaks rows between tests as the seed grows.
+  await Promise.all(db.tables.map((t) => t.clear()));
 }
 
 describe("seedDemoCommunityIfEmpty", () => {
@@ -47,6 +43,62 @@ describe("seedDemoCommunityIfEmpty", () => {
     // someone to vouch for).
     expect(statuses.filter((s) => s === "trusted").length).toBeGreaterThanOrEqual(4);
     expect(statuses.filter((s) => s === "pending_trust").length).toBe(1);
+  });
+
+  it("seeds a project the founder can actually claim tasks on", async () => {
+    const you = await seedDemoCommunityIfEmpty();
+    const projects = await db.projects.toArray();
+    expect(projects.length).toBe(1);
+    const [project] = projects;
+
+    // Claimable BY the founder: someone else organizes it, and it's
+    // active (planning/paused projects don't accept claims).
+    expect(project.organizerKey).not.toBe(you.publicKey);
+    expect(project.coOrganizerKeys).not.toContain(you.publicKey);
+    expect(project.status).toBe("active");
+    // Template id set + verbatim template titles, so the per-task tips
+    // and the claim-moment "good first step" resolve.
+    expect(project.templateId).toBe("community-fridge");
+
+    const tasks = await db.projectTasks.toArray();
+    const open = tasks.filter((t) => t.status === "open");
+    expect(open.length).toBeGreaterThanOrEqual(4);
+    // At least one hour-sized open task, so the board's "Fits in about
+    // an hour" filter and the one-small-thing picker have a hit.
+    expect(
+      open.some((t) => t.estimatedHours > 0 && t.estimatedHours <= 1),
+    ).toBe(true);
+    // One task mid-carry by a demo member — alive, not staged — and
+    // never by the founder (their In-my-care should start empty).
+    const claimed = tasks.filter((t) => t.status === "claimed");
+    expect(claimed.length).toBe(1);
+    expect(claimed[0].assignedTo).not.toBe(you.publicKey);
+    // Dependencies reference real in-project task ids.
+    const ids = new Set(tasks.map((t) => t.id));
+    for (const t of tasks) {
+      for (const dep of t.dependencies) expect(ids.has(dep)).toBe(true);
+    }
+  });
+
+  it("seeds an upcoming gathering with open shifts and no signups", async () => {
+    const you = await seedDemoCommunityIfEmpty();
+    const events = await db.events.toArray();
+    expect(events.length).toBe(1);
+    const [event] = events;
+    expect(event.createdBy).not.toBe(you.publicKey);
+    expect(event.startsAt).toBeGreaterThan(Date.now());
+    // Demo-local, not federable — same convention as legacy posts.
+    expect(event.signature).toBe("");
+
+    const shifts = await db.eventShifts.toArray();
+    expect(shifts.length).toBeGreaterThanOrEqual(2);
+    for (const s of shifts) {
+      expect(s.eventId).toBe(event.id);
+      expect(s.endsAt).toBeGreaterThan(s.startsAt);
+      expect(s.createdBy).toBe(event.createdBy);
+    }
+    // The founder signs up themself — the seed never volunteers them.
+    expect(await db.shiftSignups.count()).toBe(0);
   });
 
   it("leaves the newcomer one vouch short, so a single vouch tips them to trusted", async () => {
@@ -79,6 +131,10 @@ describe("seedDemoCommunityIfDev", () => {
     expect(await db.posts.count()).toBe(0);
     expect(await db.vouches.count()).toBe(0);
     expect(await db.secretKeys.count()).toBe(0);
+    expect(await db.projects.count()).toBe(0);
+    expect(await db.projectTasks.count()).toBe(0);
+    expect(await db.events.count()).toBe(0);
+    expect(await db.eventShifts.count()).toBe(0);
     expect(await getSetting(SETTING_KEYS.currentMember)).toBeUndefined();
   });
 
