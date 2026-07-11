@@ -2977,6 +2977,17 @@
       "quorumUnknown": "Aún no publicado",
       "view": "Ver propuestas"
     },
+    "source": {
+      "title": "El software mismo",
+      "body": "Understoria es software libre. Este servidor ofrece su propio código fuente, para que la copia de la comunidad no dependa de que nadie más siga en línea.",
+      "version": "Versión {{version}} · commit {{commit}}",
+      "download": "Descargar el código fuente ({{size}})",
+      "bundle": "Paquete con todo el historial ({{size}})",
+      "checksums": "Sumas de verificación",
+      "caution": "Las sumas de verificación prueban que la descarga no se corrompió — no que nadie la haya cambiado. Para comprobarlo, compárala con la copia de otro servidor o con el repositorio público.",
+      "absent": "Esta instalación aún no ofrece la descarga del código. Pide a quien opera el servidor que actualice, o usa el",
+      "repo": "repositorio público"
+    },
     "drills": {
       "title": "Simulacros de desastre",
       "intro": "Practica las dos recuperaciones antes de necesitarlas. Estas listas viven solo en este dispositivo — los manuales enlazados en el repositorio siguen siendo la fuente de verdad.",

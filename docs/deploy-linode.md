@@ -356,6 +356,10 @@ curl -fsS https://<your-domain>/api/config | jq
 
 # Both should return JSON. /api/config should show your OPERATOR_NAME
 # and the systemKey public-key fingerprint (the secret is never echoed).
+
+# The node also serves its own source code (AGPL §13 — see
+# operator-guide.md §7a); confirm the bundle came up with the build:
+curl -fsS https://<your-domain>/source/manifest.json | jq
 ```
 
 Open `https://<your-domain>` in a browser, walk through onboarding,

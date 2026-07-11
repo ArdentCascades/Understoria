@@ -118,6 +118,10 @@ and Docker deployment (see the operator guide above and
 [deploy-linode.md](docs/deploy-linode.md) for the full runbook).
 Prefer rootless Podman, bare metal + systemd, or a proxy other than
 Caddy? See [deploy-alternatives.md](docs/deploy-alternatives.md).
+Every deployed node also serves its own source code at `/source/`
+(AGPL §13 with no third-party dependency — operator guide §7a), so
+communities can inspect, mirror, and bootstrap from each other even
+if this repository's host disappears.
 
 ## Architecture
 

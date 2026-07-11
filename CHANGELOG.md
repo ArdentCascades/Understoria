@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Every node now serves its own source code** at `/source/` — a
+  tarball of the exact tree it was built from, checksums, and a
+  machine-readable manifest, packed automatically at build time
+  (`scripts/pack-source.sh`; a new stage in the web image, or one
+  documented command on bare metal, where a full git clone also
+  yields a clonable full-history bundle). This satisfies the AGPL's
+  network-source obligation (§13) with no dependency on GitHub or
+  any third party, and it means a new community can bootstrap a node
+  from any existing one. Members reach it from **Community
+  infrastructure → The software itself**, which shows the version,
+  commit, and download links — and says plainly that checksums prove
+  integrity, not authenticity (your operator already serves you the
+  running app; independent verification means comparing against
+  another node or the public repository). `.dockerignore` now also
+  excludes `backups/` and database files, so operator data can never
+  ride along in an image build or the served tarball.
 - **Deployment beyond Docker is now documented**
   (`docs/deploy-alternatives.md`). Three supported shapes join the
   Docker Compose reference runbook: rootless **Podman** (a

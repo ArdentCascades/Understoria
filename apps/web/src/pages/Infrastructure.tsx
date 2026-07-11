@@ -319,6 +319,8 @@ export default function InfrastructurePage() {
             {t("infra.governance.view")} →
           </Link>
         </section>
+
+        <SourceCard />
       </div>
 
       {/* Drills */}
@@ -363,6 +365,134 @@ export default function InfrastructurePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+/** Shape of /source/manifest.json, written by scripts/pack-source.sh. */
+interface SourceManifest {
+  version: string;
+  commit: string;
+  generatedAt: string;
+  files: { name: string; bytes: number; sha256: string }[];
+}
+
+const REPO_URL = "https://github.com/ArdentCascades/Understoria";
+
+function formatBytes(bytes: number): string {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+// "The software itself" — the node self-serves its Corresponding
+// Source (AGPL §13; scripts/pack-source.sh) so the community's copy
+// of the app doesn't depend on GitHub or any third party. The card
+// reads /source/manifest.json from THIS deployment; a deployment
+// from before the feature answers the fetch with the SPA fallback
+// (index.html, 200, text/html), so presence is detected by
+// content-type, not just status. Exported for its test.
+export function SourceCard() {
+  const { t } = useTranslation();
+  // undefined = still fetching, null = this deployment doesn't serve it.
+  const [manifest, setManifest] = useState<SourceManifest | null | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/source/manifest.json", {
+          cache: "no-store",
+        });
+        const type = res.headers.get("content-type") ?? "";
+        if (!res.ok || !type.includes("json")) throw new Error("absent");
+        const data = (await res.json()) as SourceManifest;
+        if (!cancelled) setManifest(data);
+      } catch {
+        if (!cancelled) setManifest(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const tarball = manifest?.files.find((f) =>
+    f.name.endsWith("-source.tar.gz"),
+  );
+  const bundle = manifest?.files.find((f) => f.name.endsWith(".bundle"));
+
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        {t("infra.source.title")}
+      </h2>
+      <p className="text-sm text-moss-700 dark:text-moss-200">
+        {t("infra.source.body")}
+      </p>
+      {manifest === undefined ? null : manifest === null ? (
+        <p className="mt-2 text-sm text-moss-600 dark:text-moss-300">
+          {t("infra.source.absent")}{" "}
+          <a
+            href={REPO_URL}
+            className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          >
+            {t("infra.source.repo")}
+          </a>
+        </p>
+      ) : (
+        <>
+          <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+            {t("infra.source.version", {
+              version: manifest.version,
+              commit: manifest.commit,
+            })}
+          </p>
+          <ul className="mt-2 flex flex-col gap-1 text-sm">
+            {tarball && (
+              <li>
+                <a
+                  href={`/source/${tarball.name}`}
+                  download
+                  className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                >
+                  {t("infra.source.download", {
+                    size: formatBytes(tarball.bytes),
+                  })}
+                </a>
+              </li>
+            )}
+            {bundle && (
+              <li>
+                <a
+                  href={`/source/${bundle.name}`}
+                  download
+                  className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                >
+                  {t("infra.source.bundle", {
+                    size: formatBytes(bundle.bytes),
+                  })}
+                </a>
+              </li>
+            )}
+            <li>
+              <a
+                href="/source/SHA256SUMS"
+                download
+                className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              >
+                {t("infra.source.checksums")}
+              </a>
+            </li>
+          </ul>
+          {/* Integrity vs authenticity, said to the member's face —
+              the same honesty rule as the rest of this page. */}
+          <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+            {t("infra.source.caution")}
+          </p>
+        </>
+      )}
+    </section>
   );
 }
 
