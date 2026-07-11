@@ -28,6 +28,24 @@ include breaking changes.
   Cross-linked from the README, the operator guide, and the Linode
   runbook.
 
+### Fixed
+- **Accepting a co-organizer invitation no longer strands the
+  "Accept and sign" button below the fold.** Hitting Accept on the
+  "Needs your attention" rail expanded the what-you're-signing
+  explanation inline, inside the desktop rail — which is sticky, so
+  once it outgrew the viewport the mouse wheel scrolled the board's
+  projects instead, and the sign button was only reachable after
+  scrolling past every project (operator report). Both responses now
+  open the same kind of focus-trapped dialog: the full
+  what-this-means / what-this-does-not-mean comparison with Accept
+  and sign / Cancel always on screen, Esc to back out. Two
+  structural fixes ride along: the attention rail caps at the
+  viewport and scrolls its own content when it's tall (whatever is
+  in it), and every confirm dialog now keeps its buttons on screen
+  at any window height (long content scrolls inside the dialog) and
+  paints above sticky page chrome instead of letting the board's
+  search band bleed through the backdrop.
+
 ### Changed
 - **The calendar's week view is now the view you plan a week in.**
   Event chips lead with their start time (deadlines and expiring

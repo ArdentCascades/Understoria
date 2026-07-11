@@ -325,7 +325,8 @@ describe("ProjectDetail — co-organizer invitations (organizer)", () => {
 
     clickButton("Revoke");
     // ConfirmDialog opens; confirm with the Revoke confirm button.
-    const revokeButtons = Array.from(container.querySelectorAll("button")).filter(
+    // Document-wide lookup: the dialog portals to document.body.
+    const revokeButtons = Array.from(document.querySelectorAll("button")).filter(
       (b) => (b.textContent ?? "").trim() === "Revoke",
     );
     act(() => {

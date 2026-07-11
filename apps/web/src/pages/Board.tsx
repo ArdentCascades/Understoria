@@ -486,9 +486,19 @@ export default function BoardPage() {
         {/* Right rail. Single grid cell in col 3, sticky. With the
             outer grid on one row track + lg:items-start, its height is
             its own concern — a tall attention card no longer drags the
-            middle column's rhythm. */}
+            middle column's rhythm.
+
+            Capped at the viewport (minus the top-4 offset mirrored at
+            the bottom) with its OWN scroll context: an unbounded
+            sticky rail taller than the viewport pins its top and
+            never scrolls itself — the wheel moves the page instead,
+            and the rail's tail is unreachable until the document
+            bottoms out (operator report: the accept-and-sign button
+            hid below the fold until every project had scrolled
+            past). overscroll-contain stops a finished rail scroll
+            from chaining into the page. */}
         <div
-          className={`lg:col-start-3 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden ${
+          className={`lg:col-start-3 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:empty:hidden ${
             // While the post panel is docked, cede the rail's width
             // to it — at exactly 1024px the panel + both rails can't
             // coexist beside a readable card column. The rail is

@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 
 export interface ConfirmDialogProps {
@@ -102,22 +103,33 @@ export function ConfirmDialog({
   // The dismiss paths are Esc (keyboard) and the Cancel button
   // (everyone). Click-outside-to-close was removed in PR 22.3
   // because it had no keyboard equivalent.
-  return (
+  //
+  // Portaled to the document root (same lesson as the me-menu
+  // drawer): callers render this from arbitrary depths, and a
+  // sticky/transformed/backdrop-filtered ancestor traps the z-50 in
+  // its own stacking context — on the Board, the attention rail's
+  // `sticky` let the search band's z-10 paint THROUGH the scrim.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
       className="fixed inset-0 z-50 flex items-end justify-center bg-moss-950/40 p-4 sm:items-center"
     >
+      {/* Capped at the backdrop's padded height with the DESCRIPTION as
+          the scroll region — title and action buttons stay on screen at
+          any viewport. Without this, a long description (the co-org
+          accept comparison) pushed the confirm button below the fold on
+          short viewports with no way to reach it. */}
       <div
         ref={cardRef}
-        className="card w-full max-w-md animate-fade-in"
+        className="card flex max-h-full w-full max-w-md animate-fade-in flex-col"
       >
         <h2 id="confirm-dialog-title" className="text-lg font-semibold">
           {title}
         </h2>
         {description && (
-          <div className="mt-2 text-sm text-moss-600 dark:text-moss-300">
+          <div className="mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain text-sm text-moss-600 dark:text-moss-300">
             {description}
           </div>
         )}
@@ -146,6 +158,7 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

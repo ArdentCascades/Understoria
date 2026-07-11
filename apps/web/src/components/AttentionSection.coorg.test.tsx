@@ -174,8 +174,11 @@ function render(node: ReactNode) {
   });
 }
 
+// Buttons are looked up document-wide, not container-scoped:
+// ConfirmDialog portals to document.body (stacking-context fix), so
+// the dialog's confirm/cancel live outside the render container.
 function clickButton(label: string) {
-  const buttons = Array.from(container.querySelectorAll("button"));
+  const buttons = Array.from(document.querySelectorAll("button"));
   const btn = buttons.find((b) => (b.textContent ?? "").trim() === label);
   if (!btn) throw new Error(`Button not found: ${label}`);
   act(() => {
@@ -202,7 +205,7 @@ describe("AttentionSection — co-organizer invitation", () => {
     render(<AttentionSection />);
     // Expand the comparison card.
     clickButton("Accept");
-    expect(container.textContent ?? "").toContain("What this means");
+    expect(document.body.textContent ?? "").toContain("What this means");
     // Sign.
     clickButton("Accept and sign");
     await flush();
@@ -227,11 +230,27 @@ describe("AttentionSection — co-organizer invitation", () => {
     expect(toastMsg).toContain("What you can do");
   });
 
+  it("the accept comparison is a focus-trapped dialog; Cancel closes without signing", async () => {
+    render(<AttentionSection />);
+    clickButton("Accept");
+    // A real dialog, not an inline card — inside the sticky desktop
+    // rail the inline expansion grew past the viewport and put
+    // "Accept and sign" out of reach (operator report).
+    const dialog = document.querySelector('[role="dialog"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog!.textContent).toContain("What this means");
+    expect(dialog!.textContent).toContain("Accept and sign");
+    clickButton("Cancel");
+    await flush();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(respondMock).not.toHaveBeenCalled();
+  });
+
   it("decline confirms then signs with decision decline", async () => {
     render(<AttentionSection />);
     clickButton("Decline");
     // ConfirmDialog confirm button reuses the Decline label.
-    const dialogButtons = Array.from(container.querySelectorAll("button")).filter(
+    const dialogButtons = Array.from(document.querySelectorAll("button")).filter(
       (b) => (b.textContent ?? "").trim() === "Decline",
     );
     // Two "Decline" buttons now: the row trigger and the dialog confirm.

@@ -280,8 +280,9 @@ function render(initialPath: string) {
   });
 }
 
+// Document-wide: ConfirmDialog portals its buttons to document.body.
 function clickButtonByText(label: string) {
-  const btn = Array.from(container.querySelectorAll("button")).find(
+  const btn = Array.from(document.querySelectorAll("button")).find(
     (b) => (b.textContent ?? "").trim() === label,
   );
   if (!btn) throw new Error(`button "${label}" not found`);
@@ -429,7 +430,7 @@ describe("TaskDetailPage — confirm dialog (organizer side)", () => {
     mockState.currentMember = member(organizerKey, "Olive Organizer");
     render("/project/proj-1/task/t1");
     clickButtonByText("Confirm completion");
-    const text = container.textContent ?? "";
+    const text = document.body.textContent ?? "";
     // Dialog title + the consequence-naming body line.
     expect(text).toContain("Confirm this task?");
     expect(text).toContain("hours move to Cleo Claimer");
@@ -657,7 +658,7 @@ describe("TaskDetailPage — actual hours surface in narrative and dialog", () =
     mockState.currentMember = member(organizerKey, "Olive Organizer");
     render("/project/proj-1/task/t1");
     clickButtonByText("Confirm completion");
-    const text = container.textContent ?? "";
+    const text = document.body.textContent ?? "";
     expect(text).toContain("6h hours move to Cleo Claimer");
     expect(text).toContain("recorded the actual time: 6h");
     expect(text).toContain("estimated at 2h");
