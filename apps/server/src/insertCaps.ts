@@ -85,6 +85,14 @@ export const SURFACES: Record<string, Surface> = {
     keyColumn: "voucher_key",
   },
   "/posts": { table: "posts", keyField: "postedBy", keyColumn: "posted_by" },
+  // Message relay (docs/message-relay.md §4.1): per-sender cap is the
+  // spam backstop; the removed-author guard reuses this entry so a
+  // removed member's pen is out of the DM surface too.
+  "/messages": {
+    table: "messages",
+    keyField: "senderKey",
+    keyColumn: "sender_key",
+  },
   "/claims": {
     table: "claims",
     keyField: "claimerKey",

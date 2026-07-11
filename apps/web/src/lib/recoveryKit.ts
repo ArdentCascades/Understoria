@@ -347,6 +347,10 @@ export async function restoreIdentityCore(identity: {
     void sync.pullFederatedRedemptions();
     void sync.pullFederatedInviteRevocations();
     void sync.pullFederatedVouches();
+    // docs/message-relay.md: messages still on the node's retention
+    // shelf come back too (older ones are gone — the kit restores
+    // identity, not correspondence history).
+    void sync.pullFederatedMessages();
     void sync.pullFederatedProjectStates();
     void sync.pullFederatedTaskStates();
     void sync.pullFederatedEventShifts();

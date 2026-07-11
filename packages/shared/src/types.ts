@@ -968,6 +968,32 @@ export interface DirectMessage {
   createdAt: number;
 }
 
+/**
+ * The wire shape of a direct message — a sealed envelope relayed
+ * through the community node (docs/message-relay.md). Same `id`,
+ * ciphertext, and timestamp as the sender's local DirectMessage row;
+ * `conversationId` deliberately does NOT travel (deterministic from
+ * the two keys — the recipient recomputes it on merge), and the
+ * sender's Ed25519 signature over `canonicalRelayedMessagePayload`
+ * rides along so the node can refuse spoofed senders at ingestion
+ * and the recipient's device can re-verify independently of the
+ * node's honesty. The node stores this row as-is: it can see WHO is
+ * writing to WHOM and WHEN, never WHAT (threat-model §7 /
+ * message-relay.md §6).
+ */
+export interface RelayedMessage {
+  id: string;
+  senderKey: string;
+  recipientKey: string;
+  /** base64, 24-byte NaCl box nonce. */
+  nonce: string;
+  /** base64 NaCl box output — E2E sealed to the recipient. */
+  ciphertext: string;
+  createdAt: number;
+  /** Sender's Ed25519 detached signature, base64. */
+  signature: string;
+}
+
 // ---------------------------------------------------------------------------
 // Task comments — per-task conversation threads
 // ---------------------------------------------------------------------------

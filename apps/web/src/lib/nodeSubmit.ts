@@ -38,6 +38,7 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  RelayedMessage,
   MemberRemoval,
   MemberReinstatement,
   ProposalClosure,
@@ -145,6 +146,21 @@ export async function submitVouchToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/vouches", vouch, config, deps);
+}
+
+/**
+ * Push a sealed direct-message envelope to the community node's relay
+ * shelf (`POST /messages`, docs/message-relay.md). The payload is
+ * ciphertext only — E2E sealed at sendMessage time; the node verifies
+ * the sender's signature and holds the envelope for the recipient's
+ * pull. Same best-effort semantics as the other submitters.
+ */
+export async function submitMessageToNode(
+  message: RelayedMessage,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/messages", message, config, deps);
 }
 
 /**

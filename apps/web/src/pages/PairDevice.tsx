@@ -1072,6 +1072,9 @@ async function adoptCommunityNodeAndSync(
     void sync.pullFederatedRedemptions();
     void sync.pullFederatedInviteRevocations();
     void sync.pullFederatedVouches();
+    // docs/message-relay.md: a linked device should see messages
+    // addressed to this member without waiting for the periodic pull.
+    void sync.pullFederatedMessages();
   });
 }
 

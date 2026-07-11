@@ -135,6 +135,15 @@ export interface Config {
    * matching the design note's pilot recommendation.
    */
   autoConfirmMinHours: number;
+  /**
+   * How long relayed direct-message envelopes stay on the node before
+   * the opportunistic prune removes them (docs/message-relay.md §4.3 —
+   * the shelf, not an archive). A window rather than
+   * delete-on-delivery so a member's several linked devices can each
+   * pull. Default 30 days; 0 disables pruning (not recommended —
+   * routing metadata then accumulates indefinitely).
+   */
+  messageRetentionDays: number;
   /** Co-signature quorum for member removal / reinstatement records
    *  (docs/member-removal.md §2). Fixed and operator-visible so the
    *  rule is auditable by everyone and evaluates identically on
@@ -311,6 +320,11 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       "AUTO_CONFIRM_MIN_HOURS",
       env.AUTO_CONFIRM_MIN_HOURS,
       168,
+    ),
+    messageRetentionDays: asNonNegativeInt(
+      "MESSAGE_RETENTION_DAYS",
+      env.MESSAGE_RETENTION_DAYS,
+      30,
     ),
     removalQuorum: asInt("REMOVAL_QUORUM", env.REMOVAL_QUORUM, 3),
     autoConfirmRequireTransition: asBool(
