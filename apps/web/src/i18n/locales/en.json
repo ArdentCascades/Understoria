@@ -947,7 +947,9 @@
         "firstStep": "A good first step:",
         "tipAbove": "The tip above is a good first step.",
         "planLink": "Open the task to jot your own first steps — only you can see them",
-        "jotHint": "If it helps, jot your own first steps below — only you can see them."
+        "jotHint": "If it helps, jot your own first steps below — only you can see them.",
+        "capacity": "This joins the {{count}} other tasks in your care.",
+        "capacityLink": "See everything in your care"
       },
       "plan": {
         "heading": "Your private plan",
@@ -1302,6 +1304,7 @@
     "empty": "When you claim a task or start a project, it shows up here — your commitments and the projects you organize, in one place.",
     "shiftsTitle": "Shifts you're signed up for",
     "claimedPostsTitle": "Help you're on your way to give",
+    "shiftIcs": "Add this shift to my calendar (.ics)",
     "deskLink": "See everything waiting on you at your desk"
   },
   "bodyDoubling": {
@@ -1976,6 +1979,17 @@
   "board": {
     "title": "Community board",
     "tagline": "Post what you need. Offer what you can.",
+    "oneSmallThing": {
+      "button": "Show me one small thing",
+      "heading": "One small thing",
+      "why": "For low-energy days: skip the choosing. One bounded thing you could pick up — drawn at random from what's open right now, never ranked, never based on your history.",
+      "empty": "Nothing open fits right now — the tabs above have the full picture.",
+      "another": "Show me another",
+      "open": "Open it",
+      "close": "Close",
+      "kindTask": "Project task",
+      "kindNeed": "Need from the board"
+    },
     "tabs": {
       "needs": "Needs",
       "offers": "Offers",
@@ -2046,6 +2060,10 @@
   "dashboard": {
     "title": "Community dashboard",
     "tagline": "The unit of progress is us, not me.",
+    "resume": {
+      "title": "Pick up where you left off",
+      "hint": "The last task you touched — your own navigation memory, kept on this device only."
+    },
     "gatherings": {
       "title": "Coming up",
       "going": "you're going"

@@ -20,6 +20,7 @@ import { describe, expect, it } from "vitest";
 import type { Event } from "@/types";
 import {
   buildEventIcs,
+  buildShiftIcs,
   escapeIcsText,
   foldIcsLine,
   formatIcsUtc,
@@ -218,6 +219,38 @@ describe("escapeIcsText", () => {
     expect(escapeIcsText("a\\nb")).toBe("a\\\\nb");
     expect(escapeIcsText("a\nb")).toBe("a\\nb");
     expect(escapeIcsText("a\r\nb")).toBe("a\\nb");
+  });
+});
+
+describe("buildShiftIcs", () => {
+  const shift = {
+    id: "shift-1",
+    label: "Morning setup",
+    // 2023-11-14T22:13:20.000Z → one hour.
+    startsAt: 1_700_000_000_000,
+    endsAt: 1_700_003_600_000,
+  };
+
+  it("emits a timed VEVENT titled by shift and event, located by the event", () => {
+    const ics = buildShiftIcs(shift, event(), { appUrl: APP_URL });
+    expect(ics).toContain("UID:shift-1@node_test");
+    expect(ics).toContain(`DTSTART:${formatIcsUtc(shift.startsAt)}`);
+    expect(ics).toContain(`DTEND:${formatIcsUtc(shift.endsAt)}`);
+    expect(ics).toContain(
+      "SUMMARY:Morning setup — Community garden work day",
+    );
+    expect(ics).toContain("LOCATION:Community room\\, 3rd floor");
+    expect(ics).toContain(
+      `DESCRIPTION:${APP_URL}/events/evt-1`,
+    );
+    expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
+  });
+
+  it("carries neither VALARM nor attendee/organizer identities — §11.5a posture", () => {
+    const ics = buildShiftIcs(shift, event(), { appUrl: APP_URL });
+    expect(ics).not.toContain("VALARM");
+    expect(ics).not.toContain("ATTENDEE");
+    expect(ics).not.toContain("ORGANIZER");
   });
 });
 

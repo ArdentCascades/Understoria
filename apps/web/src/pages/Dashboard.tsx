@@ -37,6 +37,7 @@ import { ResilienceCard } from "@/components/dashboard/ResilienceCard";
 import { UpcomingGatherings } from "@/components/dashboard/UpcomingGatherings";
 import { WhereHandsAreWelcome } from "@/components/dashboard/WhereHandsAreWelcome";
 import { DeskDoorway } from "@/components/dashboard/DeskDoorway";
+import { ResumeCard } from "@/components/dashboard/ResumeCard";
 import type { AchievementType, Category, Milestone } from "@/types";
 
 export default function DashboardPage() {
@@ -159,6 +160,12 @@ export default function DashboardPage() {
       {/* Quiet "what's coming up" glance — leads the page only when there
           are upcoming events; renders nothing otherwise. */}
       <UpcomingGatherings />
+
+      {/* "Pick up where you left off" sits between Coming up (time-
+          anchored, keeps the lead) and the open invitations: your own
+          in-progress thread beats new work. Same self-hiding doorway
+          contract as its neighbors. */}
+      <ResumeCard />
 
       {/* "Where hands are welcome" sits BELOW Coming up: gatherings are
           time-anchored (they expire and were designed to lead the page);

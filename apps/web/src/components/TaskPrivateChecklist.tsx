@@ -34,6 +34,7 @@ import {
   togglePlanStep,
 } from "@/db/taskPlans";
 import { downloadIcs, plannedDayIcs } from "@/lib/ics";
+import { recordTaskTouch } from "@/lib/lastTouched";
 
 // The claimer's PRIVATE working plan for a task: their own step
 // breakdown plus an optional planned day. The gap this fills is
@@ -87,6 +88,7 @@ export function TaskPrivateChecklist({
   async function saveNote() {
     if (noteDraft === null) return;
     await setPlanNote(taskId, memberKey, noteDraft);
+    touch();
     setNoteDraft(null);
     setNoteSavedFlash(true);
     if (noteFlashTimer.current) clearTimeout(noteFlashTimer.current);
@@ -98,11 +100,20 @@ export function TaskPrivateChecklist({
   const plannedDay = plan?.plannedDay ?? null;
   const dayIsPast = plannedDay !== null && plannedDay < today;
 
+  // Working the plan counts as touching the task — it feeds the
+  // Dashboard's "pick up where you left off" pointer (lib/lastTouched).
+  function touch() {
+    recordTaskTouch(taskId, projectId);
+  }
+
   async function submitDraft() {
     const text = draft.trim();
     if (!text) return;
     const added = await addPlanStep(taskId, memberKey, text);
-    if (added) setDraft("");
+    if (added) {
+      setDraft("");
+      touch();
+    }
   }
 
   // "YYYY-MM-DD" → a friendly local date ("Sat, Jul 12"). Parsed as
@@ -140,7 +151,10 @@ export function TaskPrivateChecklist({
                 <input
                   type="checkbox"
                   checked={step.done}
-                  onChange={() => void togglePlanStep(taskId, memberKey, step.id)}
+                  onChange={() => {
+                    void togglePlanStep(taskId, memberKey, step.id);
+                    touch();
+                  }}
                   className="mt-0.5 h-4 w-4 shrink-0 accent-canopy-600"
                 />
                 <span
@@ -266,9 +280,10 @@ export function TaskPrivateChecklist({
               type="date"
               className="input max-w-[11rem] text-sm"
               value={plannedDay ?? ""}
-              onChange={(e) =>
-                void setPlannedDay(taskId, memberKey, e.target.value || null)
-              }
+              onChange={(e) => {
+                void setPlannedDay(taskId, memberKey, e.target.value || null);
+                touch();
+              }}
             />
             {plannedDay !== today && (
               <button

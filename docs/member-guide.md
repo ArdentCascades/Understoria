@@ -172,6 +172,18 @@ All the filters compose with the search box. Nothing is filtered by
 default — you see every non-archived project until you start
 narrowing. Filter selections don't persist between sessions.
 
+### "Show me one small thing"
+
+Under the board's search box there's a quiet line: **"Show me one
+small thing."** For low-energy days when choosing costs more than
+doing: tap it and the board shows **exactly one** thing you could
+pick up — an open task or an open need, preferring ones that fit in
+about an hour — with **"Show me another"** to cycle. The pick is
+drawn at random from what's open right now. It is deliberately not a
+recommender: nothing is ranked, nothing learns from you, and nothing
+reads your history. Open the pick and claim it on its own page like
+anything else, or close the card and browse normally.
+
 ### The calendar
 
 There's a **Calendar** tab in the bottom row. It's a single place to
@@ -392,7 +404,12 @@ into your balance just like any other exchange.
 The moment your claim lands, the card says **"It's in your care"**
 and — for template tasks that have one — repeats the task's tip as
 **a good first step**, so you leave the moment with something
-concrete to do first rather than a vague commitment.
+concrete to do first rather than a vague commitment. If you're
+already carrying two or more other tasks, the same block adds one
+neutral line — *"This joins the 4 other tasks in your care"* — with
+a link to **In my care**. It's a mirror, never a gate: no warning
+color, no "too many," and the claim goes through identically. Just
+the fact, at the one moment it's useful.
 
 ### Your private plan for a task
 
@@ -424,13 +441,23 @@ Two tools live there:
   file you can open with whatever calendar app you already use.
   Understoria itself never sends reminders — but your own calendar
   can, if *you* choose to set one. The file is generated on your
-  device and nothing about it leaves it.
+  device and nothing about it leaves it. Shifts you've signed up
+  for offer the same thing: an **"Add this shift to my calendar
+  (.ics)"** link under each shift in **In my care** (and events have
+  **Add to calendar** in their page menu) — a shift's clock time,
+  committed weeks ahead, is exactly what's easiest to lose track of.
 
 The planned day is a self-promise, not a deadline. If it passes,
 nothing turns red, nothing counts the days, and nobody is told —
 the task page just says *"You'd planned Thursday. Life happens —
 pick a new day whenever you're ready."* There are deliberately no
 reminders or notifications attached to any of this.
+
+After an interruption, the Dashboard also shows a quiet **"Pick up
+where you left off"** card linking to the last task you touched —
+claimed, checked a step on, or noted. It's your own navigation
+memory, kept only on your device, and it disappears on its own once
+that task is no longer yours to carry.
 
 ### Inviting company — body doubling
 

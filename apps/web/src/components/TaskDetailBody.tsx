@@ -12,6 +12,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import {
   addProjectTask,
@@ -33,6 +34,7 @@ import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { TaskPrivateChecklist } from "@/components/TaskPrivateChecklist";
 import { shareUrl } from "@/lib/share";
 import { matchTaskSkills } from "@/lib/taskSkillMatch";
+import { recordTaskTouch } from "@/lib/lastTouched";
 import { suggestSplitting } from "@/lib/taskPresentation";
 import { getTaskTips } from "@/content/taskTips";
 import { usePendingAction } from "@/lib/usePendingAction";
@@ -133,6 +135,24 @@ export function TaskDetailBody({
   const taskTip = useMemo(
     () => getTaskTips(templateId, task.title, locale),
     [templateId, task.title, locale],
+  );
+
+  // Capacity mirror for the claim-moment block: how many OTHER active
+  // claims the member carries across every project (the `allTasks`
+  // prop is project-scoped, so this reads app state). A neutral fact
+  // the member owns — never a gate, never a warning color, never
+  // "too many" (solidarity-not-shame); shown only from two other
+  // tasks up.
+  const { projectTasks: allMemberTasks } = useApp();
+  const carryingOthers = useMemo(
+    () =>
+      allMemberTasks.filter(
+        (tk) =>
+          tk.assignedTo === currentKey &&
+          (tk.status === "claimed" || tk.status === "awaiting_confirmation") &&
+          tk.id !== task.id,
+      ).length,
+    [allMemberTasks, currentKey, task.id],
   );
 
   // Set the moment THIS render's Claim succeeds — gates the claim-
@@ -531,7 +551,10 @@ export function TaskDetailBody({
                 const claimed = await dispatch(() =>
                   claimProjectTask(task.id, currentKey),
                 );
-                if (claimed) setJustClaimed(true);
+                if (claimed) {
+                  setJustClaimed(true);
+                  recordTaskTouch(task.id, task.projectId);
+                }
               }}
             >
               {pending ? t("common.working") : t("projects.task.claim")}
@@ -721,6 +744,20 @@ export function TaskDetailBody({
           <p className="mt-1 text-xs">
             {t("projects.task.claimMoment.jotHint")}
           </p>
+          {/* Capacity mirror — see the carryingOthers memo. */}
+          {carryingOthers >= 2 && (
+            <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+              {t("projects.task.claimMoment.capacity", {
+                count: carryingOthers,
+              })}{" "}
+              <Link
+                to="/my-work"
+                className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              >
+                {t("projects.task.claimMoment.capacityLink")}
+              </Link>
+            </p>
+          )}
         </div>
       )}
       {/* The claimer's private working plan — their own step breakdown

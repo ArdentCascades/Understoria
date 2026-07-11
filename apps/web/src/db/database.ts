@@ -1246,6 +1246,15 @@ export const SETTING_KEYS = {
    *  drill. The runbooks stay the source of truth; this is only the
    *  tracker. Never federated (settings never are). */
   drillChecklists: "drillChecklists",
+  /** JSON `{taskId, projectId, at}` — the last task the member touched
+   *  (claimed, or worked their private plan on), written by
+   *  lib/lastTouched.ts. Feeds the Dashboard's "Pick up where you left
+   *  off" doorway: after an interruption, the hard part is remembering
+   *  WHICH task you were on; this holds that one pointer. Device-local
+   *  display state only — never federated (settings never are), and
+   *  the doorway re-checks the task is still the member's own active
+   *  claim before rendering anything. */
+  lastTouchedTask: "lastTouchedTask",
   /** JSON `GatheringConfig` (lib/useGatheringConfig.ts): the gathering
    *  screen's device-local curation — category on/off toggles, per-item
    *  pin/hide, dwell seconds, and an optional screen title. Never

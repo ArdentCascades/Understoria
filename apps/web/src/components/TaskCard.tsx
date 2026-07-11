@@ -12,7 +12,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useApp } from "@/state/AppContext";
 import { claimProjectTask } from "@/db/projects";
+import { recordTaskTouch } from "@/lib/lastTouched";
 import { stripMarkdown } from "@/lib/markdown";
 import { formatHours } from "@/lib/format";
 import { creditHoursForTask } from "@/lib/timebank";
@@ -180,6 +182,24 @@ export function TaskCard({
   }, [task.dependencies, allTasks]);
   const hasUnmetDeps = unmetDepTitles.length > 0;
 
+  // Capacity mirror for the claim-moment block: how many OTHER active
+  // claims the member is carrying, across every project. A fact the
+  // member owns, stated neutrally — never a gate, never a warning
+  // color, never "too many" (solidarity-not-shame). Shown only from
+  // two other tasks up: at 0–1 the fact carries no information the
+  // member doesn't have in working memory.
+  const { projectTasks: allMemberTasks } = useApp();
+  const carryingOthers = useMemo(
+    () =>
+      allMemberTasks.filter(
+        (t) =>
+          t.assignedTo === currentKey &&
+          (t.status === "claimed" || t.status === "awaiting_confirmation") &&
+          t.id !== task.id,
+      ).length,
+    [allMemberTasks, currentKey, task.id],
+  );
+
   // The task's authored tip (content/taskTips.ts) — the claim-moment
   // block reuses it as "a good first step" so a new claimer leaves
   // the moment with something concrete to do first.
@@ -302,7 +322,10 @@ export function TaskCard({
                 const claimed = await dispatch(() =>
                   claimProjectTask(task.id, currentKey),
                 );
-                if (claimed) setJustClaimed(true);
+                if (claimed) {
+                  setJustClaimed(true);
+                  recordTaskTouch(task.id, task.projectId);
+                }
               }}
             >
               {pending ? t("common.working") : t("projects.task.claim")}
@@ -369,6 +392,20 @@ export function TaskCard({
                   {t("projects.task.claimMoment.planLink")}
                 </Link>
               </p>
+              {/* Capacity mirror — see the carryingOthers memo. */}
+              {carryingOthers >= 2 && (
+                <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+                  {t("projects.task.claimMoment.capacity", {
+                    count: carryingOthers,
+                  })}{" "}
+                  <Link
+                    to="/my-work"
+                    className="relative z-[2] text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                  >
+                    {t("projects.task.claimMoment.capacityLink")}
+                  </Link>
+                </p>
+              )}
             </div>
           )}
       </div>

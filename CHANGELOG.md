@@ -10,6 +10,31 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **"Pick up where you left off"** on the Dashboard — a quiet card
+  linking to the last task you touched (claimed, checked a step on,
+  or noted), for the moment after an interruption when the hard part
+  is remembering which task you were even on. One device-local
+  pointer, never a history; it validates itself on every render and
+  vanishes once the task is no longer yours to carry.
+- **"Show me one small thing"** on the board — for low-energy days
+  when choosing costs more than doing. One tap shows exactly one
+  claimable thing (open task or open need, hour-sized preferred) with
+  "Show me another" to cycle. Drawn at random from what's open;
+  deliberately not a recommender — nothing ranked, nothing learned,
+  no history read.
+- **"Add this shift to my calendar (.ics)"** under each shift in In
+  my care — the §11.5a event export extended to the slot you actually
+  signed up for, since a clock time committed weeks ahead is where
+  time blindness bites hardest. Same posture as every calendar
+  export: no VALARM, no attendee identities, reminders belong to the
+  member's own calendar. (The planned-day export now shares the same
+  RFC 5545 primitives instead of its own copies.)
+- **A capacity mirror at the claim moment**: claiming while already
+  carrying two or more other tasks adds one neutral line to the
+  "It's in your care" block — "This joins the N other tasks in your
+  care" — with a link to In my care. A fact the member owns, never a
+  gate: no warning color, no "too many," and the claim proceeds
+  identically.
 - **Private task plans grew a "Where things stand" note** — a note to
   future you, written when you put a task down ("waiting on Sam's
   reply; hinges are in the shed") and read when you come back, so
