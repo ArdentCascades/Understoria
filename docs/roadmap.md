@@ -11,6 +11,14 @@ its bullets into `CHANGELOG.md`. When the ordering changes, edit this
 file in the same PR that changes the work — don't let the plan and the
 code drift.
 
+> **Current cycle:** the detailed plans for the next development
+> cycle live in [`next-cycle-plans.md`](./next-cycle-plans.md) — six
+> plans (harvesting the two ratification-ready design notes, the
+> issue #6 credit-model decision, a pilot-readiness package,
+> performance as accessibility, an E2E smoke suite in CI, and a
+> design-only photos framework), each grounded in the code as it
+> stands, with the operator rulings they need collected in its §8.
+
 ## How the work is decomposed
 
 The project is organised into numbered **agents** — work units sized so
