@@ -20,6 +20,7 @@
  */
 import {
   CATEGORIES,
+  PROJECT_CATEGORIES,
   type AwaitingTransition,
   type Category,
   type CoOrganizerInvitation,
@@ -153,6 +154,12 @@ const FLAG_REASONS: ReadonlySet<FlagReason> = new Set([
   "daily_limit_warning",
 ]);
 const CATEGORY_SET: ReadonlySet<Category> = new Set(CATEGORIES);
+// Exchanges carry ProjectCategory: task confirmations legitimately
+// write the three project-only categories onto the signed record.
+// Rejecting them here silently poisoned every such confirmation's
+// outbox delivery — invisible until organizer confirmation worked on
+// real devices at all. Posts keep the narrow set.
+const EXCHANGE_CATEGORY_SET: ReadonlySet<string> = new Set(PROJECT_CATEGORIES);
 
 const STRING_FIELDS = [
   "id",
@@ -182,7 +189,7 @@ export function parseExchange(input: unknown): ParseResult {
   if (typeof r.completedAt !== "number" || !Number.isInteger(r.completedAt) || r.completedAt <= 0) {
     return { ok: false, error: "completedAt must be a positive integer (ms epoch)" };
   }
-  if (typeof r.category !== "string" || !CATEGORY_SET.has(r.category as Category)) {
+  if (typeof r.category !== "string" || !EXCHANGE_CATEGORY_SET.has(r.category)) {
     return { ok: false, error: "category is not a recognized category" };
   }
 
@@ -247,7 +254,7 @@ export function parseExchange(input: unknown): ParseResult {
     helperSignature: r.helperSignature as string,
     helpedSignature: r.helpedSignature as string,
     completedAt: r.completedAt as number,
-    category: r.category as Category,
+    category: r.category as Exchange["category"],
     nodeId: r.nodeId as string,
   };
   if (flaggedForReview) {

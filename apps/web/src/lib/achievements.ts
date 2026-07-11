@@ -21,7 +21,7 @@
 import type {
   Achievement,
   AchievementType,
-  Category,
+  ProjectCategory,
   Exchange,
   Project,
   ProjectTask,
@@ -32,8 +32,10 @@ import { uuid } from "./id";
 export interface MemberRelationContext {
   /** Invitees of this member who have completed at least one exchange. */
   activeInviteeKeys?: string[];
-  /** Categories that had been filled by any prior exchange before this log. */
-  previouslyFilledCategories?: Set<Category>;
+  /** Categories that had been filled by any prior exchange before this
+   *  log. `ProjectCategory` — exchange categories include the three
+   *  project-only ones (see Exchange.category). */
+  previouslyFilledCategories?: Set<ProjectCategory>;
   /** How many distinct location zones this member has reached via the
    *  counterparties of exchanges where they were the helper. Computed
    *  by the caller (it needs Member records, which evaluateAchievements

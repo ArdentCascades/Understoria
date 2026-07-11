@@ -139,7 +139,18 @@ export interface Exchange {
   helperSignature: string;
   helpedSignature: string;
   completedAt: number;
-  category: Category;
+  /**
+   * `ProjectCategory`, not the narrower post `Category`: project-task
+   * confirmations legitimately write the three project-only
+   * categories (infrastructure / organizing / mutual_aid_drive) onto
+   * the signed exchange, and always have — but until organizer
+   * confirmation worked on real devices, no such exchange ever
+   * existed outside dev, so the narrow type (and the server's narrow
+   * validation, and a Dashboard lookup keyed on the narrow map) all
+   * hid the mismatch. Board posts and direct exchanges still only
+   * offer the base `CATEGORIES`.
+   */
+  category: ProjectCategory;
   nodeId: string;
   /**
    * Set by the anti-gaming safeguards (Agent 6 task 6) when an exchange
@@ -488,7 +499,9 @@ export interface CommunityStats {
    *  (answered, posted) lets the UI render a ratio without the
    *  caller recomputing. */
   needsPostedThisWeek: number;
-  categoryBreakdown: Partial<Record<Category, number>>;
+  /** Keyed by ProjectCategory — exchange categories include the
+   *  three project-only ones (see Exchange.category). */
+  categoryBreakdown: Partial<Record<ProjectCategory, number>>;
   milestonesReached: Milestone[];
 }
 
@@ -823,7 +836,9 @@ export interface DisputePayload {
   /** Empty for `postType: "direct"` — there is no post title;
    *  renderers show the recorded-directly copy instead. */
   postTitle: string;
-  category: Category;
+  /** Widened with the project-only categories, matching
+   *  `Exchange.category` — a disputed task exchange snapshots one. */
+  category: ProjectCategory;
   hours: number;
   /** The helper key — whoever was offering the work. */
   helperKey: string | null;

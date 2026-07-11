@@ -23,8 +23,8 @@ import ed2curve from "ed2curve";
 import { b64decode, b64encode, utf8decode, utf8encode } from "./bytes.js";
 import type {
   AwaitingTransition,
+  ProjectCategory,
   AwaitingTransitionPayload,
-  Category,
   CoOrganizerInvitation,
   CoOrganizerInvitationPayload,
   CoOrganizerInvitationResponse,
@@ -114,7 +114,10 @@ export interface ExchangePayload {
   helperKey: string;
   helpedKey: string;
   hours: number;
-  category: Category;
+  /** `ProjectCategory` (type-widening only — the canonical BYTES are
+   *  unchanged): task confirmations sign the three project-only
+   *  categories. See `Exchange.category` in types.ts. */
+  category: ProjectCategory;
   completedAt: number;
 }
 

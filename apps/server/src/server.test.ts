@@ -229,6 +229,47 @@ describe("POST /exchanges", () => {
     expect(res.statusCode).toBe(400);
   });
 
+  it("accepts the project-only categories — task confirmations sign them", async () => {
+    // REGRESSION: exchanges from project-task confirmations carry the
+    // three ProjectCategory-only values. Rejecting them here silently
+    // poisoned every such confirmation's outbox delivery — invisible
+    // until organizer confirmation worked on real devices at all.
+    for (const category of [
+      "infrastructure",
+      "organizing",
+      "mutual_aid_drive",
+    ] as const) {
+      const helper = generateKeyPair();
+      const helped = generateKeyPair();
+      const base = {
+        postId: `project:p1/task:t_${category}`,
+        helperKey: helper.publicKey,
+        helpedKey: helped.publicKey,
+        hours: 2,
+        category,
+        completedAt: Date.now(),
+      };
+      const payload = canonicalExchangePayload(base);
+      const res = await app.inject({
+        method: "POST",
+        url: "/exchanges",
+        payload: {
+          id: `ex_${category}`,
+          postId: base.postId,
+          helperKey: base.helperKey,
+          helpedKey: base.helpedKey,
+          hoursExchanged: base.hours,
+          helperSignature: sign(payload, helper.secretKey),
+          helpedSignature: sign(payload, helped.secretKey),
+          completedAt: base.completedAt,
+          category,
+          nodeId: "node_test",
+        },
+      });
+      expect(res.statusCode).toBe(201);
+    }
+  });
+
   it("rejects completedAt far in the future", async () => {
     const farFuture = Date.now() + 365 * 24 * 60 * 60 * 1000;
     const exchange = makeSignedExchange(farFuture);

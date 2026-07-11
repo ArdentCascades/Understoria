@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats, computeFederationStats } from "@/lib/stats";
 import { computeFlowStats } from "@/lib/flow";
-import { CATEGORY_META } from "@/lib/categories";
+import { PROJECT_CATEGORY_META } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { BreadthBar } from "@/components/BreadthBar";
@@ -38,7 +38,7 @@ import { UpcomingGatherings } from "@/components/dashboard/UpcomingGatherings";
 import { WhereHandsAreWelcome } from "@/components/dashboard/WhereHandsAreWelcome";
 import { DeskDoorway } from "@/components/dashboard/DeskDoorway";
 import { ResumeCard } from "@/components/dashboard/ResumeCard";
-import type { AchievementType, Category, Milestone } from "@/types";
+import type { AchievementType, Milestone, ProjectCategory } from "@/types";
 
 export default function DashboardPage() {
   const {
@@ -93,8 +93,14 @@ export default function DashboardPage() {
   const newlyReached = useNewlyReachedMilestones(stats.milestonesReached);
 
   const topCategories = useMemo(() => {
+    // ProjectCategory, not Category: task-confirmation exchanges carry
+    // the three project-only categories, and indexing the narrow
+    // CATEGORY_META with one crashed this whole screen the moment a
+    // community confirmed its first infrastructure/organizing/
+    // mutual_aid_drive task (Object.entries erases the key type, so
+    // the compiler never saw it).
     const entries = Object.entries(stats.categoryBreakdown) as [
-      Category,
+      ProjectCategory,
       number,
     ][];
     entries.sort(([, a], [, b]) => b - a);
@@ -363,7 +369,7 @@ export default function DashboardPage() {
           <ul className="flex flex-col gap-2">
             {topCategories.map(([cat, h]) => {
               const pct = Math.round((h / totalCategoryHours) * 100);
-              const meta = CATEGORY_META[cat];
+              const meta = PROJECT_CATEGORY_META[cat];
               return (
                 <li key={cat} className="flex items-center gap-3">
                   <span className="w-28 shrink-0 text-sm">

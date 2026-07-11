@@ -29,6 +29,23 @@ include breaking changes.
   page is reachable by URL.
 
 ### Fixed
+- **The Dashboard crashed ("Something went wrong on this screen")
+  after a community's first task confirmation in a project-only
+  category.** Task-confirmation exchanges legitimately carry the
+  three categories that exist for projects but not posts
+  (infrastructure, organizing, mutual aid drive) — but the
+  Dashboard's hours-by-category list looked their labels up in the
+  posts-only category map and threw, and the community node's
+  exchange validation rejected them outright, so the record also sat
+  undeliverable in the sender's outbox. Both layers hid behind the
+  organizer-confirmation bug above: until it was fixed, no such
+  exchange had ever existed outside dev. `Exchange.category` is now
+  honestly typed as `ProjectCategory` end to end (a type-level
+  change only — signed bytes are unchanged, existing signatures
+  stay valid), the server accepts the full set for exchanges (posts
+  keep the narrow one), and the Dashboard renders these categories
+  with their proper labels. The stuck outbox row delivers on its
+  next retry once the node is updated.
 - **Organizers could not confirm completed tasks on real devices.**
   `confirmProjectTaskCompletion` signed both sides of the exchange at
   confirmation time, which required the COMPLETER's secret key on the
