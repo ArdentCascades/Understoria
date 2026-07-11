@@ -1311,6 +1311,25 @@
     "shiftIcs": "Añadir este turno a mi calendario (.ics)",
     "deskLink": "Mira todo lo que te espera en tu escritorio"
   },
+  "plugIn": {
+    "title": "Formas de participar",
+    "subtitle": "Según lo que sabes hacer, esto es lo que está abierto ahora mismo — comparado con tus ofertas abiertas y tus habilidades de perfil, todo en tu propio dispositivo.",
+    "noObligation": "Nada de esto te está asignado, y no se registra nada de lo que miras. Una coincidencia es una oferta para ti, nunca una obligación.",
+    "addSkills": "Las coincidencias vienen de tus ofertas abiertas y de tus habilidades de perfil.",
+    "addSkillsLink": "Añade habilidades para ver más coincidencias",
+    "shiftsTitle": "Turnos abiertos que coinciden",
+    "needsTitle": "Necesidades abiertas que coinciden",
+    "tasksTitle": "Tareas de proyecto abiertas que coinciden",
+    "matchedOn": "Coincidió con tu «{{tokens}}»",
+    "spotsOpen_one": "{{count}} lugar libre",
+    "spotsOpen_other": "{{count}} lugares libres",
+    "follows": "Sigue a: {{titles}}",
+    "remainderTitle": "Todo lo demás que está abierto ({{count}})",
+    "remainderHint": "La coincidencia es una lente, no una puerta: puedes participar donde quieras.",
+    "remainderEmpty": "No hay nada más abierto ahora mismo.",
+    "emptyNoLens": "Aún no hay nada con qué comparar — todo lo que está abierto aparece abajo.",
+    "emptyWithLens": "Nada de lo abierto coincide con tus ofertas y habilidades ahora mismo — todo lo que está abierto aparece abajo."
+  },
   "bodyDoubling": {
     "postTitle": "Acompáñame mientras trabajo en: {{task}}",
     "postDescription": "Tomé \"{{task}}\" ({{project}}) y trabajar junto a alguien hace mucho más fácil empezar — algunas personas lo llaman body doubling. No se necesitan habilidades: trae tu propia tarea, o simplemente hazme compañía mientras trabajo. Elegiremos una hora y un lugar que nos convengan a ambos.\n\nLa tarea: {{url}}",
@@ -2111,7 +2130,8 @@
       "closeShort": "Cerrar",
       "close": "Cerrar panel de la publicación"
     },
-    "printView": "Imprimir esta vista"
+    "printView": "Imprimir esta vista",
+    "plugInLink": "Formas de participar"
   },
   "dashboard": {
     "title": "Panel comunitario",

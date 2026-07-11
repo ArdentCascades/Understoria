@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **"Ways to plug in" — the browsable shelf** (docs/ways-to-plug-in.md,
+  both phases). A member with two free hours no longer hunts across
+  four surfaces: `/plug-in` (a quiet Board link — a link, not a tab,
+  per the design's ruling) answers "given what I can do, what's open
+  right now?" with open shifts, needs, and project tasks matched
+  against the member's own open offers and profile skills. Matching
+  is visibly dumb token overlap — each match names exactly which of
+  your words it hit ("Matched your 'carpentry'") — and it is a lens,
+  never a gate: everything open that didn't match is right there
+  under "Everything else," collapsed but never omitted.
+  Dependency-blocked tasks render last with the standard "Follows:"
+  framing, never hidden. Everything is computed from rows the device
+  already holds: nothing about what you browse, match, or ignore is
+  stored, logged, or federated, no count badges the doorway, and no
+  match ever becomes a nudge. Profiles without skills get a gentle
+  "add skills to see more matches" line on the page itself.
 - **The message relay: direct messages now actually reach the other
   person** (`docs/message-relay.md`). The community node becomes a
   store-and-forward shelf for sealed envelopes: the sender's device
