@@ -47,6 +47,15 @@ include breaking changes.
   search band bleed through the backdrop.
 
 ### Changed
+- **The "My work" tab is now "In my care"** ("A mi cuidado"). "Work"
+  is productivity-suite vocabulary — it frames mutual aid as labor —
+  while the page itself already spoke in care terms: "Tasks you're
+  carrying," "1 project is in your care," "Nothing in your care
+  right now." The title now matches the page's own voice. The tab
+  icon changed with it: a seedling cradled in cupped hands replaces
+  the clipboard-with-check, joining the botanical motif the Board
+  and Dashboard tabs carry. Addresses (`/my-work`) are unchanged —
+  bookmarks and redirects all keep working.
 - **"My work" now lives up to its name.** The tab used to show only
   project tasks and organized projects; two commitment kinds the app
   already stored were invisible on it. Now the carrying column also

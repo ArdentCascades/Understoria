@@ -435,7 +435,7 @@
     "calendar": "Calendario",
     "dashboard": "Panel",
     "messages": "Mensajes",
-    "myWork": "Mi trabajo",
+    "myWork": "A mi cuidado",
     "profile": "Perfil",
     "primaryNav": "Navegación principal",
     "settings": "Ajustes"
@@ -1260,7 +1260,7 @@
     }
   },
   "myWork": {
-    "title": "Mi trabajo",
+    "title": "A mi cuidado",
     "subtitle": "Lo que has tomado y lo que organizas — tareas, turnos, ayuda en camino y tus proyectos, en un solo lugar.",
     "emptyTitle": "Nada a tu cargo por ahora",
     "empty": "Cuando tomes una tarea o inicies un proyecto, aparecerá aquí — tus compromisos y los proyectos que organizas, en un solo lugar.",

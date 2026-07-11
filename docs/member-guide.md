@@ -99,7 +99,7 @@ this device. There is no username or password.
 
 Five tabs sit at the bottom of the screen (on a wide screen they
 become a rail along the left edge): **Board**, **Dashboard**,
-**Calendar**, **Messages**, and **My work** — every task you've
+**Calendar**, **Messages**, and **In my care** — every task you've
 claimed and every project you organize, gathered in one place
 (§9 and §12 say more about what lands there).
 
@@ -396,7 +396,7 @@ small projects), above the task list you'll find:
   carrying — the same affordance organisers use to find their
   own claims quickly.
 
-If you're helping on several projects at once, the **My work** tab
+If you're helping on several projects at once, the **In my care** tab
 (bottom of the screen) gathers every claim of yours in one place,
 grouped by project — along with any event shifts you've signed up
 for and any needs you've claimed from the board, with the projects
@@ -806,7 +806,7 @@ Open the **Menu** (top right) and tap **your own name** to see:
   the small amber chip on its row links to the conversation where
   the community is discussing it.
 - **Tasks you're carrying** and **Projects you organize** — short
-  summary cards that jump to the **My work** tab (`/my-work`),
+  summary cards that jump to the **In my care** tab (`/my-work`),
   where both views live together: every task you've claimed across
   all projects, and every project in your care (as organizer or
   co-organizer) with what's quietly waiting on you — tasks

@@ -186,17 +186,20 @@ export function IconInfrastructure(props: IconProps) {
   );
 }
 
-// A clipboard with a check and a line of writing — the member's own
-// work inventory (tasks carried + projects organized). A familiar
-// "work" shape rather than a botanical one so the tab stays legible
-// to a first-time user, like Messages and Profile.
-export function IconMyWork(props: IconProps) {
+// A seedling cradled in a cupped-hands bowl — the "In my care" tab
+// (tasks carried, shifts promised, help underway, projects tended).
+// Replaced the original clipboard-with-check when the tab was renamed
+// from "My work": a clipboard says productivity; the cradled sprout
+// says care, and joins the botanical motif Board and Dashboard carry.
+export function IconCare(props: IconProps) {
   return (
     <Icon {...props}>
-      <rect x="5" y="4.5" width="14" height="16" rx="2.5" />
-      <rect x="9" y="2.5" width="6" height="3.5" rx="1.25" />
-      <path d="M8.5 12l2.2 2.2 4.8-5" />
-      <path d="M8.5 16.5h7" />
+      {/* Cupped hands / shallow bowl */}
+      <path d="M4.5 13.5c0 4.2 3.2 7 7.5 7s7.5-2.8 7.5-7" />
+      {/* Sprout: stem + two leaves, same leaf grammar as IconBoard */}
+      <path d="M12 16.5v-5.5" />
+      <path d="M12 13c-1.4-2.1-3.4-2.5-5.2-1.7.5 2.1 2.2 3.4 4.4 3.4" />
+      <path d="M12 11c1.4-2.1 3.4-2.5 5.2-1.7-.5 2.1-2.2 3.4-4.4 3.4" />
     </Icon>
   );
 }

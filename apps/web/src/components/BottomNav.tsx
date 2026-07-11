@@ -26,7 +26,7 @@ import {
   IconCalendar,
   IconDashboard,
   IconMessages,
-  IconMyWork,
+  IconCare,
   type IconProps,
 } from "@/components/visual";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
@@ -54,11 +54,12 @@ const ITEMS: NavItem[] = [
   { to: "/dashboard", labelKey: "nav.dashboard", Icon: IconDashboard },
   { to: "/calendar", labelKey: "nav.calendar", Icon: IconCalendar },
   { to: "/messages", labelKey: "nav.messages", Icon: IconMessages },
-  // The fifth slot is "My work" (docs/navigation-shell.md): every tab
-  // is a daily-work surface. Profile — identity, history, the things
-  // you revisit rather than work in — lives in the me-menu (AppHeader,
+  // The fifth slot is "In my care" (docs/navigation-shell.md; shipped
+  // as "My work", renamed — care register, not labor): every tab is a
+  // daily-work surface. Profile — identity, history, the things you
+  // revisit rather than work in — lives in the me-menu (AppHeader,
   // top right), where its row is the member's own name.
-  { to: "/my-work", labelKey: "nav.myWork", Icon: IconMyWork },
+  { to: "/my-work", labelKey: "nav.myWork", Icon: IconCare },
 ];
 
 // Keyboard navigation inside the bottom nav. Tab still moves into
