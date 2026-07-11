@@ -162,8 +162,13 @@ The **Projects** tab has its own filter row above the project list:
 - **Could use more hands** — a toggle that narrows to projects with
   a task that's been waiting on extra help for a while. It points at
   the work, never at a person.
+- **Fits in about an hour** — a toggle that narrows to projects with
+  at least one open task estimated at an hour or less. For the "I
+  have a little energy right now, give me something I can actually
+  finish" scan — a bounded, completable slice is often the difference
+  between starting and not starting.
 
-All three filters compose with the search box. Nothing is filtered by
+All the filters compose with the search box. Nothing is filtered by
 default — you see every non-archived project until you start
 narrowing. Filter selections don't persist between sessions.
 
@@ -383,6 +388,37 @@ app asks **how long it actually took**, and that's what you're
 credited for, not the organizer's estimate (a 2-hour guess that
 took 6 hours credits 6). The organizer confirms; the hours move
 into your balance just like any other exchange.
+
+The moment your claim lands, the card says **"It's in your care"**
+and — for template tasks that have one — repeats the task's tip as
+**a good first step**, so you leave the moment with something
+concrete to do first rather than a vague commitment.
+
+### Your private plan for a task
+
+Every task you've claimed has, on its own page, a section called
+**"Your private plan."** It's yours alone: it lives only on your
+device, never syncs, never federates, is excluded from data exports,
+and no organizer or member can ever see it.
+
+Two tools live there:
+
+- **Your own steps.** Break the task into first steps in your own
+  words ("find the ladder", "text Sam about the key") and check
+  them off as you go. The description tells you what done looks
+  like; this is for how *you* get started — especially useful when
+  executive function, not information, is the hard part.
+- **A planned day.** Pick a day you privately intend to give the
+  task some time (one-tap **Today** / **Tomorrow**, or any date).
+  Tasks with a planned day sort **first** in your **In my care**
+  tab, soonest day on top, with a quiet "You planned Saturday"
+  line on the row.
+
+The planned day is a self-promise, not a deadline. If it passes,
+nothing turns red, nothing counts the days, and nobody is told —
+the task page just says *"You'd planned Thursday. Life happens —
+pick a new day whenever you're ready."* There are deliberately no
+reminders or notifications attached to any of this.
 
 A task list can be **filtered**, **searched**, and (when there's
 enough) reorganised by the organiser. Once a project has enough

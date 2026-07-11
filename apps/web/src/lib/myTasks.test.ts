@@ -174,6 +174,92 @@ describe("myClaimedTasks", () => {
     expect(view.groups[1].tasks.map((t) => t.id)).toEqual(["c", "a"]);
   });
 
+  it("sorts planned-day tasks first (soonest day first), then unplanned by claim recency", () => {
+    const projects = [makeProject({ id: "p1" })];
+    const tasks = [
+      makeTask({
+        id: "unplanned-new",
+        projectId: "p1",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 900,
+      }),
+      makeTask({
+        id: "planned-later",
+        projectId: "p1",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 100,
+      }),
+      makeTask({
+        id: "planned-soon",
+        projectId: "p1",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 50,
+      }),
+    ];
+    const plannedDays = new Map([
+      ["planned-later", "2026-07-20"],
+      ["planned-soon", "2026-07-12"],
+    ]);
+    const view = myClaimedTasks(ME, tasks, projects, plannedDays);
+    expect(view.groups[0].tasks.map((t) => t.id)).toEqual([
+      "planned-soon",
+      "planned-later",
+      "unplanned-new",
+    ]);
+  });
+
+  it("keeps a past planned day sorting first — never buried as a penalty", () => {
+    const projects = [makeProject({ id: "p1" })];
+    const tasks = [
+      makeTask({
+        id: "fresh",
+        projectId: "p1",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 900,
+      }),
+      makeTask({
+        id: "past-plan",
+        projectId: "p1",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 10,
+      }),
+    ];
+    const plannedDays = new Map([["past-plan", "1999-01-01"]]);
+    const view = myClaimedTasks(ME, tasks, projects, plannedDays);
+    expect(view.groups[0].tasks.map((t) => t.id)).toEqual([
+      "past-plan",
+      "fresh",
+    ]);
+  });
+
+  it("floats a group with a planned task above unplanned groups", () => {
+    const projects = [makeProject({ id: "p1" }), makeProject({ id: "p2" })];
+    const tasks = [
+      makeTask({
+        id: "recent-unplanned",
+        projectId: "p1",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 900,
+      }),
+      makeTask({
+        id: "old-planned",
+        projectId: "p2",
+        assignedTo: ME,
+        status: "claimed",
+        claimedAt: 100,
+      }),
+    ];
+    const plannedDays = new Map([["old-planned", "2026-07-15"]]);
+    const view = myClaimedTasks(ME, tasks, projects, plannedDays);
+    expect(view.groups.map((g) => g.project.id)).toEqual(["p2", "p1"]);
+  });
+
   it("falls back to createdAt for legacy rows without claimedAt", () => {
     const projects = [makeProject({ id: "p1" })];
     const tasks = [

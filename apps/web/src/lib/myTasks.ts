@@ -35,12 +35,20 @@ import type { Project, ProjectTask } from "@/types";
 // - Pull-only. Nothing here feeds a badge, count bubble, or
 //   notification (`no-notifications`); the view renders when the
 //   member chooses to open it.
+//
+// - Planned days come first. When the member has privately picked a
+//   day for a task (db/taskPlans.ts), that task sorts ahead of the
+//   unplanned ones — soonest day first — and its group floats up with
+//   it. The member's own stated intention outranks recency-of-claim;
+//   a past planned day still sorts first (it's the most intended
+//   work, not a fault — `solidarity-not-shame`).
 
 export interface MyTaskGroup {
   project: Project;
-  /** The member's active commitments in this project, most recent
-   *  claim first — the newest-first convention `transactionHistory`
-   *  and `pendingBalanceFor` already use. */
+  /** The member's active commitments in this project: planned-day
+   *  tasks first (soonest day first), then the rest by most recent
+   *  claim — the newest-first convention `transactionHistory` and
+   *  `pendingBalanceFor` already use. */
   tasks: ProjectTask[];
 }
 
@@ -65,6 +73,10 @@ export function myClaimedTasks(
   memberKey: string,
   tasks: readonly ProjectTask[],
   projects: readonly Project[],
+  /** taskId → the member's own private "YYYY-MM-DD" planned day
+   *  (db/taskPlans.ts). Optional: callers without the Dexie read
+   *  (Profile's summary card) get the pre-planned-day ordering. */
+  plannedDays?: ReadonlyMap<string, string>,
 ): MyClaimedTasksView {
   const projectById = new Map(projects.map((p) => [p.id, p]));
   const tasksByProject = new Map<string, ProjectTask[]>();
@@ -84,14 +96,36 @@ export function myClaimedTasks(
     taskCount += 1;
   }
 
+  // Planned tasks lead: soonest self-chosen day first ("YYYY-MM-DD"
+  // strings compare correctly), unplanned tasks follow by claim
+  // recency. Days already past keep sorting FIRST, not last — the
+  // member said this mattered most, and burying it would read as a
+  // quiet penalty (`solidarity-not-shame`).
+  const planOf = (t: ProjectTask) => plannedDays?.get(t.id);
+  function compareTasks(a: ProjectTask, b: ProjectTask): number {
+    const dayA = planOf(a);
+    const dayB = planOf(b);
+    if (dayA !== undefined && dayB !== undefined) {
+      if (dayA !== dayB) return dayA < dayB ? -1 : 1;
+      return claimAnchor(b) - claimAnchor(a);
+    }
+    if (dayA !== undefined) return -1;
+    if (dayB !== undefined) return 1;
+    return claimAnchor(b) - claimAnchor(a);
+  }
+
   const groups: MyTaskGroup[] = [];
   for (const [projectId, list] of tasksByProject) {
     const project = projectById.get(projectId);
     if (!project) continue;
-    list.sort((a, b) => claimAnchor(b) - claimAnchor(a));
+    list.sort(compareTasks);
     groups.push({ project, tasks: list });
   }
-  groups.sort((a, b) => claimAnchor(b.tasks[0]) - claimAnchor(a.tasks[0]));
+  // Groups float with their most-intended task: a group whose lead
+  // task carries a planned day sorts before the unplanned groups,
+  // soonest day first; unplanned groups keep the most-recent-claim
+  // ordering.
+  groups.sort((a, b) => compareTasks(a.tasks[0], b.tasks[0]));
 
   return { groups, taskCount, projectCount: groups.length };
 }

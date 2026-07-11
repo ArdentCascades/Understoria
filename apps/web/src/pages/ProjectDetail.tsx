@@ -1822,6 +1822,7 @@ function TaskList({
             allTasks={tasks}
             searchQuery={searchQuery}
             taskCheckInDays={nodeConfig.taskCheckInDays}
+            templateId={project.templateId}
           />
         </li>
       ))}

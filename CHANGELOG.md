@@ -10,6 +10,29 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Private planning tools on claimed tasks** — built for the
+  executive-function gap between claiming a task and starting it
+  (requested for members with ADHD; useful to everyone). Every task
+  you've claimed gets a **"Your private plan"** section on its page:
+  break the task into your own first steps and check them off, and
+  optionally pick a **planned day** (one-tap Today/Tomorrow). Tasks
+  with a planned day sort first in **In my care** with a quiet "You
+  planned Saturday" line; a day that passes gets "Life happens — pick
+  a new day whenever you're ready", never red, never a counter, never
+  a notification. All of it is strictly local-only (new `taskPlans`
+  Dexie table, v34): it never federates, never exports, never rides
+  the device-pairing snapshot, and is cleared by the emergency soft
+  purge — locked by tests at each of those boundaries.
+- **A claim-moment first step** — the instant a claim lands, the
+  task card says "It's in your care" and repeats the task's authored
+  tip as "A good first step: …", with a link to jot your own private
+  steps. Momentum is highest at the moment of claiming; the block is
+  persistent (not a toast) and appears only in that moment.
+- **"Fits in about an hour" filter** on the board's Projects tab —
+  narrows to projects with at least one open task estimated at an
+  hour or less, for the "I have a little energy right now, give me
+  something I can actually finish" scan. Unestimated tasks don't
+  count as hour-sized.
 - **Every node now serves its own source code** at `/source/` — a
   tarball of the exact tree it was built from, checksums, and a
   machine-readable manifest, packed automatically at build time

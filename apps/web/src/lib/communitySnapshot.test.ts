@@ -52,6 +52,9 @@ describe("SNAPSHOT_TABLES", () => {
       "pairingLog",
       "blocks",
       "previouslyBlocked",
+      // Private task plans (db/taskPlans.ts) — one member's process
+      // notes; even the member's own linked device starts fresh.
+      "taskPlans",
     ]) {
       expect(SNAPSHOT_TABLES).not.toContain(excluded);
     }

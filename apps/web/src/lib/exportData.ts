@@ -72,6 +72,13 @@ export const EXPORT_EXCLUDED_TABLES = [
   "eventProjectLinks",
   "eventShifts",
   "shiftSignups",
+  // `taskPlans` — the member's private step breakdowns + planned days
+  // for claimed tasks (db/taskPlans.ts). Verbatim notes about the
+  // member's own process and capacity; the feature's promise is that
+  // they never leave the device, and an export file the member may
+  // hand to someone else would quietly break it. Low-value in a
+  // backup anyway — plans retire with the tasks they annotate.
+  "taskPlans",
 ] as const;
 
 /**

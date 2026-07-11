@@ -41,7 +41,11 @@ import { myClaimedTasks } from "@/lib/myTasks";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { useSlashFocus } from "@/lib/useSlashFocus";
 import { myOrganizedProjects } from "@/lib/myProjects";
-import { hasOpenTasks, projectNeedsMoreHands } from "@/lib/projectFilter";
+import {
+  hasHourSizedTasks,
+  hasOpenTasks,
+  projectNeedsMoreHands,
+} from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
 import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
@@ -127,6 +131,7 @@ export default function BoardPage() {
   >("");
   const [onlyWithOpenTasks, setOnlyWithOpenTasks] = useState(false);
   const [onlyNeedsMoreHands, setOnlyNeedsMoreHands] = useState(false);
+  const [onlyHourSized, setOnlyHourSized] = useState(false);
   const navigate = useNavigate();
   // Whether the docked post panel (the nested /post/:id route) is
   // open. /post/new can't false-positive here: it's a separate
@@ -277,6 +282,7 @@ export default function BoardPage() {
       if (projectStatusFilter && p.status !== projectStatusFilter) return false;
       if (onlyWithOpenTasks && !hasOpenTasks(p.id, projectTasks)) return false;
       if (onlyNeedsMoreHands && !needsMoreHandsIds?.has(p.id)) return false;
+      if (onlyHourSized && !hasHourSizedTasks(p.id, projectTasks)) return false;
       if (q !== "" && !matchesQuery(`${p.title} ${p.description}`, q))
         return false;
       return true;
@@ -288,6 +294,7 @@ export default function BoardPage() {
     projectStatusFilter,
     onlyWithOpenTasks,
     onlyNeedsMoreHands,
+    onlyHourSized,
     needsMoreHandsIds,
     debouncedQuery,
   ]);
@@ -296,7 +303,8 @@ export default function BoardPage() {
     projectCategoryFilter !== "" ||
     projectStatusFilter !== "" ||
     onlyWithOpenTasks ||
-    onlyNeedsMoreHands;
+    onlyNeedsMoreHands ||
+    onlyHourSized;
 
   // How many project-tab filters are narrowing right now — feeds the
   // mobile disclosure trigger's "Filters · N active" variant so a
@@ -305,7 +313,8 @@ export default function BoardPage() {
     (projectCategoryFilter !== "" ? 1 : 0) +
     (projectStatusFilter !== "" ? 1 : 0) +
     (onlyWithOpenTasks ? 1 : 0) +
-    (onlyNeedsMoreHands ? 1 : 0);
+    (onlyNeedsMoreHands ? 1 : 0) +
+    (onlyHourSized ? 1 : 0);
 
   // Whether the member is carrying any task claims across projects —
   // gates the quiet "Tasks you're carrying" jump-off below the
@@ -672,6 +681,8 @@ export default function BoardPage() {
                 setOnlyWithOpenTasks={setOnlyWithOpenTasks}
                 onlyNeedsMoreHands={onlyNeedsMoreHands}
                 setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
+                onlyHourSized={onlyHourSized}
+                setOnlyHourSized={setOnlyHourSized}
               />
             </div>
           </div>
@@ -826,6 +837,8 @@ export default function BoardPage() {
                 setOnlyWithOpenTasks={setOnlyWithOpenTasks}
                 onlyNeedsMoreHands={onlyNeedsMoreHands}
                 setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
+                onlyHourSized={onlyHourSized}
+                setOnlyHourSized={setOnlyHourSized}
               />
             </div>
             )}

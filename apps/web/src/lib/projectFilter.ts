@@ -39,6 +39,28 @@ export function hasOpenTasks(
 }
 
 /**
+ * True iff at least one OPEN task on this project is estimated at an
+ * hour or less — the Board's "Fits in about an hour" filter. Built for
+ * the "I have a little energy right now, give me something I can
+ * actually finish" scan: a bounded, completable slice is often the
+ * difference between starting and not starting at all. Tasks with no
+ * estimate (0 hours) are excluded — "unknown size" is exactly what the
+ * filter exists to avoid promising.
+ */
+export function hasHourSizedTasks(
+  projectId: string,
+  tasks: readonly ProjectTask[],
+): boolean {
+  return tasks.some(
+    (t) =>
+      t.projectId === projectId &&
+      t.status === "open" &&
+      t.estimatedHours > 0 &&
+      t.estimatedHours <= 1,
+  );
+}
+
+/**
  * True iff at least one task on this project is in the
  * `needs_more_hands` state — the same computation that drives the
  * "Could use more hands" chip on the task row

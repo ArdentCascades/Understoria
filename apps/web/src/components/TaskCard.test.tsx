@@ -90,8 +90,8 @@ afterEach(() => {
   container.remove();
 });
 
-function renderCard(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
-  const merged = {
+function buildProps(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
+  return {
     task: task(),
     isOrganizer: false,
     acceptingClaims: true,
@@ -103,10 +103,29 @@ function renderCard(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
     needsMoreHands: false,
     allTasks: [] as ProjectTask[],
     taskCheckInDays: 7,
+    templateId: null as string | null,
     ...props,
   };
+}
+
+function renderCard(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
+  const merged = buildProps(props);
   act(() => {
     root = createRoot(container);
+    root.render(
+      <MemoryRouter>
+        <TaskCard {...merged} />
+      </MemoryRouter>,
+    );
+  });
+}
+
+/** Re-renders into the SAME root, so the TaskCard instance (and its
+ *  `justClaimed` state) survives — the shape of a context refresh
+ *  after a claim lands. */
+function rerenderCard(props: Partial<Parameters<typeof TaskCard>[0]> = {}) {
+  const merged = buildProps(props);
+  act(() => {
     root.render(
       <MemoryRouter>
         <TaskCard {...merged} />
@@ -240,5 +259,80 @@ describe("TaskCard — claim affordance", () => {
       (b) => (b.textContent ?? "").trim() === "Claim this task",
     );
     expect(claim).toBeUndefined();
+  });
+});
+
+describe("TaskCard — claim-moment first step", () => {
+  // The claim-moment block appears when a claim lands in THIS card
+  // instance and the refreshed row comes back claimed-by-viewer. It
+  // reuses the task's authored tip (content/taskTips.ts) as "a good
+  // first step" — matched here via a real template task title so the
+  // test exercises the real resolution path, not a mock.
+  const FRIDGE_TASK_TITLE = "Find a host site with power and foot traffic";
+
+  async function claimAndRefresh(over: Partial<ProjectTask> = {}) {
+    claimProjectTaskMock.mockResolvedValue(
+      task({ status: "claimed", assignedTo: viewerKey, ...over }),
+    );
+    const claim = Array.from(container.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === "Claim this task",
+    );
+    expect(claim).toBeDefined();
+    await act(async () => {
+      claim!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+  }
+
+  it("shows the block with the task's authored tip after a successful claim", async () => {
+    const open = task({ title: FRIDGE_TASK_TITLE, status: "open" });
+    renderCard({
+      task: open,
+      allTasks: [open],
+      templateId: "community-fridge",
+    });
+    await claimAndRefresh({ title: FRIDGE_TASK_TITLE });
+    rerenderCard({
+      task: task({
+        title: FRIDGE_TASK_TITLE,
+        status: "claimed",
+        assignedTo: viewerKey,
+      }),
+      allTasks: [],
+      templateId: "community-fridge",
+    });
+    const text = container.textContent ?? "";
+    expect(text).toContain("It's in your care.");
+    expect(text).toContain("A good first step:");
+    // The community-fridge host-site tip, resolved by title match.
+    expect(text).toContain("dedicated outdoor GFCI");
+    // The doorway to the private plan on the task page.
+    const planLink = Array.from(container.querySelectorAll("a")).find((a) =>
+      (a.textContent ?? "").includes("jot your own first steps"),
+    );
+    expect(planLink?.getAttribute("href")).toBe("/project/proj-1/task/t1");
+  });
+
+  it("still shows the block (sans tip) for tasks without an authored tip", async () => {
+    const open = task({ status: "open" });
+    renderCard({ task: open, allTasks: [open], templateId: null });
+    await claimAndRefresh();
+    rerenderCard({
+      task: task({ status: "claimed", assignedTo: viewerKey }),
+      allTasks: [],
+      templateId: null,
+    });
+    const text = container.textContent ?? "";
+    expect(text).toContain("It's in your care.");
+    expect(text).not.toContain("A good first step:");
+  });
+
+  it("never shows the block on an already-claimed row without a fresh claim", () => {
+    renderCard({
+      task: task({ status: "claimed", assignedTo: viewerKey }),
+      allTasks: [],
+      templateId: "community-fridge",
+    });
+    expect(container.textContent ?? "").not.toContain("It's in your care.");
   });
 });
