@@ -9,6 +9,25 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Deployment beyond Docker is now documented**
+  (`docs/deploy-alternatives.md`). Three supported shapes join the
+  Docker Compose reference runbook: rootless **Podman** (a
+  drop-in for the compose file, with the four rootless traps —
+  low ports, SELinux labels, restart-on-boot, logging — named and
+  fixed), **bare metal + systemd** (build from source, a hardened
+  unit mirroring the container's sandbox, native key generation and
+  online `VACUUM INTO` backups — the whole path verified live:
+  build, boot, health/config, snapshot, graceful SIGTERM), and a
+  six-point **reverse-proxy contract** so nginx / Traefik / Apache
+  can replace Caddy without guessing (prefix stripping,
+  X-Forwarded-For + `TRUST_PROXY`, the CSP hash, SPA fallback).
+  Kubernetes is documented as a deliberate non-goal: a
+  single-writer SQLite file wants one node per community, and
+  resilience comes from mirrors and federation, not replicas.
+  Cross-linked from the README, the operator guide, and the Linode
+  runbook.
+
 ### Changed
 - **The calendar's week view is now the view you plan a week in.**
   Event chips lead with their start time (deadlines and expiring

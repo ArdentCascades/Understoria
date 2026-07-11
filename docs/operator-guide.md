@@ -21,6 +21,12 @@ Pick PWA-only if you want to minimize what you operate. Pick
 PWA + node if you want a community-wide ledger and to be ready to
 peer with other communities once federation lands.
 
+Either path runs with or without Docker. The reference runbook
+([`deploy-linode.md`](./deploy-linode.md)) uses Docker Compose +
+Caddy; [`deploy-alternatives.md`](./deploy-alternatives.md) covers
+rootless Podman, bare metal + systemd, and fronting the node with
+nginx / Traefik / Apache instead of Caddy.
+
 ---
 
 ## 1. What being an operator means right now
