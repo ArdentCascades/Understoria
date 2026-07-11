@@ -10,6 +10,31 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Private task plans grew a "Where things stand" note** — a note to
+  future you, written when you put a task down ("waiting on Sam's
+  reply; hinges are in the shed") and read when you come back, so
+  re-entry starts from your note instead of from memory. Same
+  strictly-local posture as the rest of the plan; explicit Save
+  button so it's always clear when your words are kept.
+- **"Put it on my calendar (.ics)"** on a planned day — downloads a
+  small calendar file for the member's *own* calendar app.
+  Understoria still never sends reminders (and never will); this
+  hands the day to a tool the member already controls, which can
+  remind them if they choose. Generated entirely on-device.
+- **Body doubling — "Invite company from the board"** on any task
+  you've claimed (docs/body-doubling.md). Working alongside someone,
+  even on unrelated things, makes starting much easier for many
+  people. The button opens a ready-to-edit NEED post (under
+  *Emotional support*) that explains the idea to whoever reads the
+  board; nothing is public until the member posts it, and it's an
+  ordinary post from there — claimable, messageable, cancellable.
+  Deliberately built by composing the existing post primitive rather
+  than a new record type or an ambient "looking for company" flag.
+- **A quiet split-this-task hint** on the task add/edit forms: at 4+
+  estimated hours the hours field notes that smaller pieces are
+  easier to pick up (and that hour-sized ones appear under the
+  board's "Fits in about an hour" filter). Guidance only — the form
+  submits identically either way.
 - **Private planning tools on claimed tasks** — built for the
   executive-function gap between claiming a task and starting it
   (requested for members with ADHD; useful to everyone). Every task

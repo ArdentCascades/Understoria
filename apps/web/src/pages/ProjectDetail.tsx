@@ -54,7 +54,7 @@ import {
   shortKey,
 } from "@/lib/format";
 import { taskCheckInState } from "@/lib/taskCheckInState";
-import { capitalize } from "@/lib/taskPresentation";
+import { capitalize, suggestSplitting } from "@/lib/taskPresentation";
 import { useProjectTaskContext } from "@/lib/useProjectTaskContext";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 import { workingAlongsideKeys } from "@/lib/projectRoster";
@@ -1954,6 +1954,13 @@ function AddTaskForm({
               onChange={(e) => setHours(e.target.value)}
               required
             />
+            {/* Authoring-time guidance, never a gate: big tasks are
+                harder to start and slower to get claimed. */}
+            {suggestSplitting(hours) && (
+              <span className="text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.task.addTask.splitHint")}
+              </span>
+            )}
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">

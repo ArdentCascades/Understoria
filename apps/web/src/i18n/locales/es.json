@@ -961,7 +961,21 @@
         "dayToday": "Hoy",
         "dayTomorrow": "Mañana",
         "dayClear": "Quitar",
-        "dayPast": "Habías planeado el {{day}}. La vida pasa — elige otro día cuando estés lista o listo."
+        "dayPast": "Habías planeado el {{day}}. La vida pasa — elige otro día cuando estés lista o listo.",
+        "noteLabel": "Dónde quedaron las cosas — una nota para tu yo futuro",
+        "noteHint": "Cuando dejes esto por hoy, anota qué está hecho y qué esperas. La próxima vez que abras la tarea, empiezas desde tu nota en vez de reconstruirlo de memoria.",
+        "notePlaceholder": "p. ej. Esperando la respuesta de Sam. Las bisagras están en el cobertizo.",
+        "noteSave": "Guardar nota",
+        "noteSaved": "Guardada.",
+        "icsButton": "Ponerlo en mi calendario (.ics)",
+        "icsHint": "Descarga un pequeño archivo de calendario para abrir con tu propia aplicación de calendario. Understoria nunca envía recordatorios — tu calendario puede hacerlo, si tú quieres.",
+        "icsDescription": "Tu día planeado para esta tarea de Understoria — un día que elegiste para ti. Reprograma con libertad."
+      },
+      "company": {
+        "heading": "La compañía facilita empezar",
+        "why": "Trabajar junto a alguien — incluso en cosas completamente distintas — ayuda a muchas personas a empezar y sostener una tarea. Algunas lo llaman body doubling.",
+        "cta": "Invita compañía desde el tablón",
+        "how": "Abre una publicación del tablón lista para editar. Tú eliges cada palabra, y nada se comparte hasta que la publiques."
       },
       "releaseReassurance": "Soltarla ayuda a que quien organiza encuentre a alguien más — sin juicios.",
       "notClaimablePlanning": "Este proyecto sigue en planificación — quien organiza aún no lo ha lanzado.",
@@ -1019,6 +1033,7 @@
         "fieldTitle": "Título de la tarea",
         "fieldDescription": "¿Qué se necesita hacer?",
         "fieldHours": "Horas estimadas",
+        "splitHint": "Las tareas grandes cuestan más de empezar y tardan más en tomarse. Si esta se divide de forma natural, las piezas pequeñas son más fáciles de asumir — las de una hora incluso aparecen bajo el filtro del tablón \"Cabe en una hora, más o menos\".",
         "fieldUrgency": "Urgencia",
         "fieldCategory": "Categoría",
         "fieldSkills": "Habilidades sugeridas (separadas por comas)",
@@ -1288,6 +1303,11 @@
     "shiftsTitle": "Turnos a los que te has apuntado",
     "claimedPostsTitle": "Ayuda que estás en camino de dar",
     "deskLink": "Mira todo lo que te espera en tu escritorio"
+  },
+  "bodyDoubling": {
+    "postTitle": "Acompáñame mientras trabajo en: {{task}}",
+    "postDescription": "Tomé \"{{task}}\" ({{project}}) y trabajar junto a alguien hace mucho más fácil empezar — algunas personas lo llaman body doubling. No se necesitan habilidades: trae tu propia tarea, o simplemente hazme compañía mientras trabajo. Elegiremos una hora y un lugar que nos convengan a ambos.\n\nLa tarea: {{url}}",
+    "formHint": "Esta es una invitación de compañía para una tarea que llevas, prellenada para ahorrarte la página en blanco. Edita lo que quieras — nada es público hasta que la publiques."
   },
   "myTasks": {
     "title": "Tareas que llevas",

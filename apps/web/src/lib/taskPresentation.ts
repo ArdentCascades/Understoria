@@ -41,3 +41,20 @@ export function statusChipClass(status: ProjectTask["status"]): string {
 export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+/** Threshold at which the task add/edit forms show the quiet
+ *  "consider splitting this" hint. */
+export const SPLIT_HINT_HOURS = 4;
+
+/**
+ * Whether the hours a member is typing into a task form warrant the
+ * split-this-task hint. Big tasks are harder to start and slower to
+ * get claimed; smaller pieces also feed the board's "Fits in about an
+ * hour" filter. Guidance at authoring time, never a gate — the form
+ * submits identically either way. Takes the RAW input string so the
+ * hint tracks keystrokes; unparseable input stays quiet.
+ */
+export function suggestSplitting(hoursInput: string): boolean {
+  const h = Number.parseFloat(hoursInput);
+  return Number.isFinite(h) && h >= SPLIT_HINT_HOURS;
+}

@@ -370,6 +370,14 @@ export interface TaskPlanRow {
    *  give this task some time, or null. A self-promise, not a
    *  deadline: nothing turns red when it passes. */
   plannedDay: string | null;
+  /** "Where things stand" — a free-text note to future self, written
+   *  when putting the task down ("waiting on Sam's reply; hinges are
+   *  in the shed"). Re-entry after days away costs context
+   *  reconstruction; this holds the context so working memory doesn't
+   *  have to. Same privacy posture as the rest of the row. Empty
+   *  string when unset. Optional only for rows written before v35;
+   *  readers normalize with `?? ""`. */
+  note?: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -1077,6 +1085,17 @@ export class UnderstoriaDB extends Dexie {
     // cleared whole by soft purge. See the TaskPlanRow doc comment.
     this.version(34).stores({
       taskPlans: "taskId, memberKey, updatedAt",
+    });
+
+    // v35 — "Where things stand" note on private task plans (ADHD
+    // round 2): a free-text re-entry aid on the same local-only row.
+    // No new index — the note is read with its row, never queried.
+    // Backfill "" so the field is never undefined at runtime.
+    this.version(35).stores({}).upgrade(async (tx) => {
+      const plans = tx.table<TaskPlanRow, string>("taskPlans");
+      await plans.toCollection().modify((row) => {
+        if (row.note === undefined) row.note = "";
+      });
     });
   }
 }

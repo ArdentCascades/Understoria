@@ -18,19 +18,22 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
 import {
   addPlanStep,
   localDayString,
+  MAX_NOTE_LENGTH,
   MAX_PLAN_STEPS,
   MAX_STEP_LENGTH,
   removePlanStep,
   setPlannedDay,
+  setPlanNote,
   togglePlanStep,
 } from "@/db/taskPlans";
+import { downloadIcs, plannedDayIcs } from "@/lib/ics";
 
 // The claimer's PRIVATE working plan for a task: their own step
 // breakdown plus an optional planned day. The gap this fills is
@@ -50,12 +53,24 @@ import {
 export function TaskPrivateChecklist({
   taskId,
   memberKey,
+  taskTitle,
+  projectId,
 }: {
   taskId: string;
   memberKey: string;
+  /** For the calendar-file event title. */
+  taskTitle: string;
+  /** For the deep link back to this task inside the calendar file. */
+  projectId: string;
 }) {
   const { t, i18n } = useTranslation();
   const [draft, setDraft] = useState("");
+  // null = not editing (textarea mirrors the stored note); a string =
+  // unsaved edit in progress. Keeps a background live-query refresh
+  // from clobbering half-typed text.
+  const [noteDraft, setNoteDraft] = useState<string | null>(null);
+  const [noteSavedFlash, setNoteSavedFlash] = useState(false);
+  const noteFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const row = useLiveQuery(
     async () => (await db.taskPlans.get(taskId)) ?? null,
     [taskId],
@@ -65,6 +80,18 @@ export function TaskPrivateChecklist({
   const plan = row && row.memberKey === memberKey ? row : null;
   const steps = plan?.steps ?? [];
   const doneCount = steps.filter((s) => s.done).length;
+  const storedNote = plan?.note ?? "";
+  const noteValue = noteDraft ?? storedNote;
+  const noteDirty = noteDraft !== null && noteDraft.trim() !== storedNote;
+
+  async function saveNote() {
+    if (noteDraft === null) return;
+    await setPlanNote(taskId, memberKey, noteDraft);
+    setNoteDraft(null);
+    setNoteSavedFlash(true);
+    if (noteFlashTimer.current) clearTimeout(noteFlashTimer.current);
+    noteFlashTimer.current = setTimeout(() => setNoteSavedFlash(false), 2500);
+  }
 
   const today = localDayString();
   const tomorrow = localDayString(new Date(Date.now() + 24 * 60 * 60 * 1000));
@@ -180,6 +207,51 @@ export function TaskPrivateChecklist({
         </p>
       )}
 
+      {/* "Where things stand" — the re-entry note. Coming back to a
+          task days later means reconstructing context from scratch;
+          this field holds the context instead. Explicit Save (not
+          autosave) so the member knows exactly when their words are
+          kept. */}
+      <div className="mt-3 border-t border-moss-200 pt-2 dark:border-moss-700">
+        <label
+          className="flex flex-col gap-1 text-xs text-moss-700 dark:text-moss-200"
+          htmlFor={`task-plan-note-${taskId}`}
+        >
+          <span className="font-medium">
+            {t("projects.task.plan.noteLabel")}
+          </span>
+          <span className="text-moss-600 dark:text-moss-300">
+            {t("projects.task.plan.noteHint")}
+          </span>
+          <textarea
+            id={`task-plan-note-${taskId}`}
+            className="input min-h-16 text-sm"
+            value={noteValue}
+            maxLength={MAX_NOTE_LENGTH}
+            placeholder={t("projects.task.plan.notePlaceholder")}
+            onChange={(e) => setNoteDraft(e.target.value)}
+          />
+        </label>
+        <div className="mt-1 flex items-center gap-2">
+          <button
+            type="button"
+            className="btn-secondary text-xs"
+            disabled={!noteDirty}
+            onClick={() => void saveNote()}
+          >
+            {t("projects.task.plan.noteSave")}
+          </button>
+          {noteSavedFlash && (
+            <span
+              role="status"
+              className="text-xs text-canopy-700 dark:text-canopy-300"
+            >
+              {t("projects.task.plan.noteSaved")}
+            </span>
+          )}
+        </div>
+      </div>
+
       <div className="mt-3 border-t border-moss-200 pt-2 dark:border-moss-700">
         <label
           className="flex flex-col gap-1 text-xs text-moss-700 dark:text-moss-200"
@@ -236,6 +308,35 @@ export function TaskPrivateChecklist({
               day: formatDay(plannedDay),
             })}
           </p>
+        )}
+        {/* The no-notifications bridge: Understoria never reminds, but
+            the member's OWN calendar can — if they choose to put the
+            day there. A local file download; nothing leaves the
+            device (lib/ics.ts). */}
+        {plannedDay !== null && (
+          <div className="mt-2">
+            <button
+              type="button"
+              className="text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+              onClick={() =>
+                downloadIcs(
+                  "understoria-planned-day.ics",
+                  plannedDayIcs({
+                    uidKey: taskId,
+                    summary: taskTitle,
+                    day: plannedDay,
+                    description: t("projects.task.plan.icsDescription"),
+                    url: `${window.location.origin}/project/${projectId}/task/${taskId}`,
+                  }),
+                )
+              }
+            >
+              {t("projects.task.plan.icsButton")}
+            </button>
+            <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
+              {t("projects.task.plan.icsHint")}
+            </p>
+          </div>
         )}
       </div>
     </section>

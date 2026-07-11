@@ -961,7 +961,21 @@
         "dayToday": "Today",
         "dayTomorrow": "Tomorrow",
         "dayClear": "Clear",
-        "dayPast": "You'd planned {{day}}. Life happens — pick a new day whenever you're ready."
+        "dayPast": "You'd planned {{day}}. Life happens — pick a new day whenever you're ready.",
+        "noteLabel": "Where things stand — a note to future you",
+        "noteHint": "When you put this down, jot what's done and what you're waiting on. Next time you open this task, you start from your note instead of reconstructing it from memory.",
+        "notePlaceholder": "e.g. Waiting on Sam's reply. Hinges are in the shed.",
+        "noteSave": "Save note",
+        "noteSaved": "Saved.",
+        "icsButton": "Put it on my calendar (.ics)",
+        "icsHint": "Downloads a small calendar file to open with your own calendar app. Understoria never sends reminders — your calendar can, if you choose.",
+        "icsDescription": "Your planned day for this Understoria task — a day you picked for yourself. Reschedule freely."
+      },
+      "company": {
+        "heading": "Company makes starting easier",
+        "why": "Working alongside someone — even on completely different things — helps many people start and stick with a task. Some call it body doubling.",
+        "cta": "Invite company from the board",
+        "how": "Opens a ready-to-edit board post. You choose every word, and nothing is shared until you post it."
       },
       "releaseReassurance": "Releasing helps the organizer find another helper — no judgment.",
       "notClaimablePlanning": "This project is still planning — the organizer hasn't launched it yet.",
@@ -1019,6 +1033,7 @@
         "fieldTitle": "Task title",
         "fieldDescription": "What needs doing?",
         "fieldHours": "Estimated hours",
+        "splitHint": "Bigger tasks are harder to start and slower to get claimed. If this splits naturally, smaller pieces are easier to pick up — hour-sized ones even show under the board's \"Fits in about an hour\" filter.",
         "fieldUrgency": "Urgency",
         "fieldCategory": "Category",
         "fieldSkills": "Suggested skills (comma-separated)",
@@ -1288,6 +1303,11 @@
     "shiftsTitle": "Shifts you're signed up for",
     "claimedPostsTitle": "Help you're on your way to give",
     "deskLink": "See everything waiting on you at your desk"
+  },
+  "bodyDoubling": {
+    "postTitle": "Keep me company while I work on: {{task}}",
+    "postDescription": "I've taken on \"{{task}}\" ({{project}}) and working alongside someone makes starting much easier — some call it body doubling. No skills needed: bring your own task, or just keep me company while I work. We'll pick a time and place that suit us both.\n\nThe task: {{url}}",
+    "formHint": "This is a company invitation for a task you're carrying, prefilled to save you the blank page. Edit anything — nothing is public until you post it."
   },
   "myTasks": {
     "title": "Tasks you're carrying",
