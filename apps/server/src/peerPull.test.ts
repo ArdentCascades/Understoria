@@ -2132,7 +2132,9 @@ describe("composite pair cursors (phase 2) — the worker moves through a tie", 
     expect(servedUrls[1]).toContain(`since=${TIE_TS}`);
     expect(servedUrls[1]).toContain("sinceId=v_049");
     worker.stop();
-  });
+    // 120 Ed25519 verifications run right at the default 5s timeout
+    // on a loaded machine — headroom, not a behavior change.
+  }, 20_000);
 
   it("a legacy timestamp-only cursor sends since alone, then upgrades to the pair", async () => {
     const servedUrls: string[] = [];

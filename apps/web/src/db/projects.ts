@@ -26,6 +26,7 @@ import {
   canonicalExchangePayload,
   sign,
   signStateRecord,
+  verify,
 } from "@/lib/crypto";
 import { getSecretKey } from "./secrets";
 import {
@@ -803,6 +804,14 @@ export async function unclaimProjectTask(
         checkInAcknowledgedAt: null,
         completedBy: wasAwaitingConfirmation ? null : task.completedBy,
         actualHours: wasAwaitingConfirmation ? null : task.actualHours,
+        // The walked-back completion's pre-signatures die with it — a
+        // future completion signs fresh figures.
+        completionSignedAt: wasAwaitingConfirmation
+          ? null
+          : task.completionSignedAt,
+        completionSignatures: wasAwaitingConfirmation
+          ? null
+          : task.completionSignatures,
       };
       await db.projectTasks.put(updated);
       const project = await db.projects.get(task.projectId);
@@ -895,14 +904,59 @@ export async function markProjectTaskComplete(
         throw new Error("Task must be claimed before completion.");
       if (task.assignedTo !== memberKey)
         throw new Error("Only the claimer can mark the task complete.");
+      const project = await db.projects.get(task.projectId);
+      const now = Date.now();
+
+      // Pre-sign the eventual Exchange payload, one signature per
+      // organizer who might confirm — THE moment the completer's key
+      // is guaranteed present is right here, on their own device.
+      // Without this, `confirmProjectTaskCompletion` had to read the
+      // completer's secret on the ORGANIZER's device, which only ever
+      // exists in dev profiles: on real one-identity devices the
+      // confirm button could never work (the auto-confirm sweep was
+      // silently the only production path). Every signed field is
+      // known now — the completer just stated their actual hours —
+      // and the map is keyed by helpedKey because the payload names
+      // the organizer the credit moves FROM, so each potential
+      // confirmer needs their own completer-signed bytes.
+      // Soft-degrade like the artifact below: a locked session still
+      // completes the task; the sweep path remains.
+      let completionSignedAt: number | null = null;
+      let completionSignatures: Record<string, string> | null = null;
+      if (completerSecret && project) {
+        const signedHours = creditHoursForTask({
+          actualHours: actual,
+          estimatedHours: task.estimatedHours,
+        });
+        completionSignedAt = now;
+        completionSignatures = {};
+        for (const orgKey of [
+          project.organizerKey,
+          ...project.coOrganizerKeys,
+        ]) {
+          completionSignatures[orgKey] = sign(
+            canonicalExchangePayload({
+              postId: `project:${task.projectId}/task:${taskId}`,
+              helperKey: memberKey,
+              helpedKey: orgKey,
+              hours: signedHours,
+              category: task.category as Exchange["category"],
+              completedAt: now,
+            }),
+            completerSecret,
+          );
+        }
+      }
+
       const updated: ProjectTask = {
         ...task,
         status: "awaiting_confirmation",
         completedBy: memberKey,
         actualHours: actual,
+        completionSignedAt,
+        completionSignatures,
       };
       await db.projectTasks.put(updated);
-      const project = await db.projects.get(task.projectId);
       // Record both numbers so the activity feed can show "took Xh ·
       // estimated Yh" — transparency, the anti-gaming control here
       // (the claimer signs the figure, the organizer countersigns it).
@@ -930,7 +984,7 @@ export async function markProjectTaskComplete(
           helperKey: memberKey,
           helpedKey: project.organizerKey,
           signedBy: memberKey,
-          enteredAt: Date.now(),
+          enteredAt: now,
           nodeId: project.nodeId ?? "",
         };
         await enqueueAwaitingTransition({
@@ -996,23 +1050,79 @@ export async function confirmProjectTaskCompletion(
 
   const helperKey = task.completedBy;
   const helpedKey = organizerKey;
-  const [helperSecret, helpedSecret] = await Promise.all([
-    getSecretKey(helperKey),
-    getSecretKey(helpedKey),
-  ]);
+  // Only the ORGANIZER's own secret is required here. The completer's
+  // signature comes from `completionSignatures` (pre-signed on THEIR
+  // device at mark-complete, keyed by confirming organizer, riding the
+  // TaskState record) — the fix for the one-identity-per-device bug
+  // where this function tried to read the completer's secret locally
+  // and organizer confirmation could never work outside dev profiles.
+  const helpedSecret = await getSecretKey(helpedKey);
 
   const now = Date.now();
   // The signed figure is the claimer-stated actual hours (estimate
   // fallback) — `creditHoursForTask`. The wire shape is unchanged;
   // only the value differs from the old `estimatedHours`.
   const creditHours = creditHoursForTask(task);
+
+  const preSignature = task.completionSignatures?.[organizerKey];
+  let helperSignature: string;
+  let completedAt: number;
+  if (preSignature && task.completionSignedAt) {
+    // The Exchange's completedAt is the moment the completer signed —
+    // when the help actually finished — not the organizer's later
+    // confirmation tap. Re-verify over the CURRENT task figures: if
+    // hours were edited after completion, the bytes no longer match
+    // and we refuse rather than credit a number the completer never
+    // signed.
+    completedAt = task.completionSignedAt;
+    const preSignedPayload = canonicalExchangePayload({
+      postId: `project:${project.id}/task:${task.id}`,
+      helperKey,
+      helpedKey,
+      hours: creditHours,
+      category: task.category as Exchange["category"],
+      completedAt,
+    });
+    if (!verify(preSignedPayload, preSignature, helperKey)) {
+      throw new Error(
+        "The completer's signature no longer matches this task — the hours or category changed after they marked it complete. Ask them to mark it complete again.",
+      );
+    }
+    helperSignature = preSignature;
+  } else {
+    // Legacy path: tasks completed before pre-signing existed (or by
+    // an older client). Signing the helper side needs the completer's
+    // secret on THIS device — true in dev profiles and same-device
+    // setups, impossible on a real one-identity device.
+    completedAt = now;
+    let helperSecret: string;
+    try {
+      helperSecret = await getSecretKey(helperKey);
+    } catch {
+      throw new Error(
+        "This task was completed before signatures traveled with it, so your device can't confirm it directly. It will confirm on its own after the community's waiting window — or the completer can walk it back and mark it complete again.",
+      );
+    }
+    helperSignature = sign(
+      canonicalExchangePayload({
+        postId: `project:${project.id}/task:${task.id}`,
+        helperKey,
+        helpedKey,
+        hours: creditHours,
+        category: task.category as Exchange["category"],
+        completedAt,
+      }),
+      helperSecret,
+    );
+  }
+
   const payload = canonicalExchangePayload({
     postId: `project:${project.id}/task:${task.id}`,
     helperKey,
     helpedKey,
     hours: creditHours,
     category: task.category as Exchange["category"],
-    completedAt: now,
+    completedAt,
   });
   const exchange: Exchange = {
     id: uuid(),
@@ -1020,9 +1130,9 @@ export async function confirmProjectTaskCompletion(
     helperKey,
     helpedKey,
     hoursExchanged: creditHours,
-    helperSignature: sign(payload, helperSecret),
+    helperSignature,
     helpedSignature: sign(payload, helpedSecret),
-    completedAt: now,
+    completedAt,
     category: task.category as Exchange["category"],
     nodeId,
   };

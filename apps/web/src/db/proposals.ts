@@ -26,6 +26,7 @@ import {
 import type {
   DisputePayload,
   CommentDisputePayload,
+  Exchange,
   ImpactReflection,
   Post,
   ProposalCategory,
@@ -160,6 +161,51 @@ export function buildDisputeProposal(input: {
     closedReason: null,
     impactReflection: null,
     disputePostId: post.id,
+  };
+}
+
+/**
+ * Build a `kind: "dispute"` Proposal row from a flagged DIRECT
+ * exchange (docs/direct-exchange-label.md §4) — an exchange with no
+ * post behind it, so the snapshot renders from the exchange's own
+ * signed fields. `disputePostId` carries the exchange's `direct:`
+ * label: unique by construction, and the same idempotence key the
+ * post flow uses, so one exchange can never grow two dispute rows.
+ */
+export function buildDirectDisputeProposal(input: {
+  exchange: Exchange;
+  flaggerKey: string;
+  reason: string | null;
+  now: number;
+}): Proposal {
+  const { exchange, flaggerKey, reason, now } = input;
+  const snapshot: DisputePayload = {
+    postType: "direct",
+    postTitle: "",
+    category: exchange.category,
+    hours: exchange.hoursExchanged,
+    helperKey: exchange.helperKey,
+    recipientKey: exchange.helpedKey,
+    postCreatedAt: exchange.completedAt,
+  };
+  return {
+    id: uuid(),
+    nodeId: exchange.nodeId,
+    kind: "dispute",
+    category: "dispute",
+    reversibilityTier: "easy",
+    // No post title exists; the Decisions surface falls back to the
+    // recorded-directly copy when it sees the direct marker.
+    title: "",
+    description: reason?.trim() || "",
+    payload: JSON.stringify(snapshot),
+    proposerKey: flaggerKey,
+    status: "open",
+    createdAt: now,
+    closedAt: null,
+    closedReason: null,
+    disputePostId: exchange.postId,
+    impactReflection: null,
   };
 }
 

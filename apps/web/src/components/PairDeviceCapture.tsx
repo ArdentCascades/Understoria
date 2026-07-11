@@ -45,6 +45,20 @@ interface PairDeviceCaptureProps {
    *  The member can still switch to scan mode for the two-device
    *  case. */
   samePhone?: boolean;
+  /**
+   * Override the pasted/clipboard-text validation. Defaults to the
+   * pairing-envelope check this component was born with — but the
+   * capture surface is also reused by the exchange ceremonies
+   * (in-person confirm, direct exchange), whose payloads are plain
+   * JSON rather than pairing envelopes; without an override their
+   * paste fallback rejects every valid code. The camera path is
+   * exempt (a decoded QR goes straight to `onCaptured`); this guards
+   * only hand-pasted text against advancing on garbage.
+   */
+  acceptsText?: (raw: string) => boolean;
+  /** Inline error when `acceptsText` rejects — defaults to the
+   *  pairing-specific copy. */
+  invalidMessage?: string;
 }
 
 /**
@@ -65,6 +79,8 @@ export function PairDeviceCapture({
   onCaptured,
   onCancel,
   samePhone = false,
+  acceptsText,
+  invalidMessage,
 }: PairDeviceCaptureProps) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -159,12 +175,14 @@ export function PairDeviceCapture({
     // capture/cancel.
   }, [mode]);
 
-  // Single validated exit: only text that decodes as a pairing
-  // envelope leaves this component. Returns false (and flags the
-  // inline error) otherwise.
+  // Single validated exit for TEXT input: only text the validator
+  // accepts leaves this component (pairing envelope by default; the
+  // exchange ceremonies inject their own). Returns false (and flags
+  // the inline error) otherwise.
+  const accepts = acceptsText ?? ((value: string) => !!decodeEnvelope(value));
   function tryCapture(raw: string): boolean {
     const value = raw.trim();
-    if (!value || !decodeEnvelope(value)) {
+    if (!value || !accepts(value)) {
       setInvalidCode(true);
       return false;
     }
@@ -188,7 +206,7 @@ export function PairDeviceCapture({
   // change handler so the member can still edit it.
   function handleTextareaPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
     const value = e.clipboardData.getData("text").trim();
-    if (value && decodeEnvelope(value)) {
+    if (value && accepts(value)) {
       e.preventDefault();
       tryCapture(value);
     }
@@ -254,7 +272,7 @@ export function PairDeviceCapture({
           role="alert"
           className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800 dark:bg-rose-950/40 dark:text-rose-100"
         >
-          {t("pairDevice.capture.invalidCode")}
+          {invalidMessage ?? t("pairDevice.capture.invalidCode")}
         </p>
       )}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

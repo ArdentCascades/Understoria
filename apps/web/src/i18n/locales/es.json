@@ -1519,6 +1519,58 @@
       "daily_limit": "Esto superaría el límite diario de la comunidad para una misma persona ayudante — espera un día y confirma entonces."
     }
   },
+  "direct": {
+    "title": "Registrar tiempo juntos",
+    "intro": "Para ayuda que ocurrió fuera de cualquier publicación o proyecto — el equipo que montó una reunión, la mano espontánea de una vecina. Ambos firman, teléfono a teléfono, y las horas se mueven como en cualquier intercambio.",
+    "noMember": "Empieza desde la persona: la puerta a este formulario vive en el perfil de un miembro y en un turno ya pasado. Si alguien está registrando tiempo contigo ahora mismo, escanea su código abajo.",
+    "scanLead": "¿La otra persona empezó en su teléfono?",
+    "scanInstead": "Escanear su código",
+    "form": {
+      "direction": "¿Quién ayudó?",
+      "iHelped": "Yo ayudé a {{name}}",
+      "theyHelped": "{{name}} me ayudó",
+      "hours": "Horas que realmente tomó",
+      "hoursHint": "Una hora es una hora — registra lo que la ayuda realmente tomó, no lo que valía.",
+      "category": "Categoría",
+      "day": "Cuándo",
+      "continue": "Continuar"
+    },
+    "consent": {
+      "title": "Antes de firmar",
+      "body": "Esto registra un intercambio firmado de {{hours}} entre tú y {{name}}. Como todo intercambio, quién ayudó a quién, las horas, la categoría y el momento pasan al registro compartido de la comunidad. No hay publicación detrás — el registro dirá «registrado directamente». El crédito se mueve solo cuando ambos han firmado.",
+      "confirm": "Firmar y mostrar el código"
+    },
+    "offerHint": "Muéstrale este código a {{name}}. Su teléfono revisa los detalles, firma, y su pantalla responde con un código de recibo — captúralo abajo y ya quedaron.",
+    "offerQrAlt": "Código de oferta de intercambio directo",
+    "captureReceipt": "Capturar su recibo",
+    "captureReceiptHint": "Apunta la cámara al código de recibo en la pantalla de {{name}}.",
+    "captureOfferHint": "Apunta la cámara al código en el otro teléfono.",
+    "review": {
+      "theyHelpedYou": "{{name}} está registrando {{hours}} de ayuda de {{category}} que te dio — registrado directamente, sin publicación detrás. Firmar mueve {{hours}} fuera de tu saldo.",
+      "youHelpedThem": "{{name}} está registrando {{hours}} de ayuda de {{category}} que le diste — registrado directamente, sin publicación detrás. Firmar suma {{hours}} a tu saldo.",
+      "federates": "Como todo intercambio: quién, horas, categoría y momento pasan al registro compartido de la comunidad cuando ambos firman."
+    },
+    "sign": "Firmar — registrar {{hours}}",
+    "receiptHint": "Muéstrale este recibo a {{name}} para que su teléfono guarde el mismo registro.",
+    "receiptQrAlt": "Código de recibo de intercambio directo",
+    "done": "Registrado. Ambos tienen ahora el mismo intercambio firmado, y llegará al nodo comunitario la próxima vez que estés en línea.",
+    "close": "Cerrar",
+    "error": {
+      "no_identity": "No hay identidad en este dispositivo.",
+      "locked": "Desbloquea la aplicación primero — firmar necesita tu llave.",
+      "self_exchange": "No puedes registrar un intercambio contigo mismo.",
+      "counterparty_unknown": "Tu dispositivo todavía no conoce a este miembro.",
+      "bad_hours": "Escribe las horas que la ayuda realmente tomó.",
+      "bad_time": "Elige un día dentro del último mes.",
+      "not_an_offer": "Ese código no es una oferta de intercambio directo.",
+      "not_direct_label": "Ese código no es un intercambio directo válido.",
+      "wrong_member": "Esta oferta nombra a otro miembro — solo puede firmarla la persona a la que se refiere.",
+      "bad_signature": "La firma de ese código no cuadra.",
+      "daily_limit": "Esto pasaría el límite diario de intercambios de la comunidad — regístralo mañana.",
+      "not_a_receipt": "Ese código no es un recibo de intercambio directo.",
+      "different_record": "Ese recibo describe un intercambio distinto al de la oferta que mostraste."
+    }
+  },
   "lockScreen": {
     "title": "Este dispositivo está bloqueado",
     "introWith": "Introduce tu frase para desbloquear la identidad de {{name}} en este dispositivo.",
@@ -2281,7 +2333,13 @@
       "taskRow": "{{taskTitle}} — {{projectTitle}}",
       "showOlderOne": "Ver {{count}} intercambio anterior",
       "showOlderOther": "Ver {{count}} intercambios anteriores",
-      "showFewer": "Ver menos intercambios"
+      "showFewer": "Ver menos intercambios",
+      "directChip": "registrado directamente",
+      "directInReview": "en revisión comunitaria",
+      "directFlag": "¿algo salió mal?",
+      "directFlagTitle": "Marcar este intercambio para revisión comunitaria",
+      "directFlagBody": "Este intercambio se registró directamente — teléfono a teléfono, sin publicación detrás. Marcarlo lo muestra en la página de Disputas, donde toda la comunidad puede verlo y responder. No hay administradores; esto inicia una conversación, no un castigo.",
+      "directFlagConfirm": "Marcarlo"
     },
     "memberSwitcher": {
       "title": "Cambiar de integrante (modo desarrollo local)",
@@ -2582,6 +2640,8 @@
     "flagChip": "En revisión",
     "typeNeed": "Necesidad",
     "typeOffer": "Oferta",
+    "typeDirect": "Directo",
+    "directTitle": "Registrado directamente — sin publicación",
     "helperLabel": "Ayudante",
     "recipientLabel": "Quien recibe",
     "postedLabel": "Publicado originalmente",

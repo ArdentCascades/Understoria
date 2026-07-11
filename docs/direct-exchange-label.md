@@ -26,7 +26,18 @@ Implementation progress: **PR B (shared) shipped** —
 `isDirectExchangeLabel` with the namespace-grammar lock, the
 `timebank.ts` consumer locks (balance counts a direct exchange like
 any exchange; project attribution never sees one), and the explicit
-`/auto-confirm` refusal test. PRs C and E follow.
+`/auto-confirm` refusal test. **PR C (client) shipped** — the
+recording ceremony (`lib/directExchange.ts` + `/record-direct`),
+which reuses the in-person QR two-signature round trip
+(`lib/inPersonExchange.ts`, whose post-free storage tail it shares)
+with either party able to initiate (`signerRole` rides the offer);
+the §7 honesty card before any signature; safeguards verbatim
+(daily-limit hard stop at co-sign, pattern flags on the record); the
+dispute path (`disputeDirectExchange` → a proposal built from the
+exchange's own signed fields, flagged from the Profile ledger row
+since no post page exists); and the "recorded directly" display
+fallbacks on the Profile ledger, Disputes cards, and Decisions
+surface. PR E (entry points) follows.
 
 ## §2 Why now
 

@@ -176,14 +176,18 @@ function ExchangeDisputeCard({
         <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
           {payload.postType === "NEED"
             ? t("disputes.typeNeed")
-            : t("disputes.typeOffer")}
+            : payload.postType === "direct"
+              ? t("disputes.typeDirect")
+              : t("disputes.typeOffer")}
         </span>
         <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
           {formatHours(payload.hours)}
         </span>
       </div>
       <h2 className="text-lg font-semibold leading-snug">
-        {payload.postTitle}
+        {payload.postType === "direct"
+          ? t("disputes.directTitle")
+          : payload.postTitle}
       </h2>
       {proposal.description && (
         <blockquote className="mt-3 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
@@ -221,7 +225,9 @@ function ExchangeDisputeCard({
         </div>
       </dl>
       <div className="mt-4 flex justify-end gap-2">
-        {proposal.disputePostId && (
+        {/* A direct exchange has no post page — the card above IS the
+            full record (docs/direct-exchange-label.md §4). */}
+        {proposal.disputePostId && payload.postType !== "direct" && (
           <Link
             to={`/post/${proposal.disputePostId}`}
             className="btn-secondary text-sm"

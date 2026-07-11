@@ -38,6 +38,7 @@ import ProfilePage from "@/pages/Profile";
 import SettingsPage from "@/pages/Settings";
 import InvitesPage from "@/pages/Invites";
 import PostFormPage from "@/pages/PostForm";
+import RecordDirectPage from "@/pages/RecordDirect";
 import InviteAcceptPage from "@/pages/InviteAccept";
 import AddDevicePage from "@/pages/AddDevice";
 import PairDevicePage from "@/pages/PairDevice";
@@ -161,6 +162,7 @@ export default function App() {
           <Route path="/invites" element={<InvitesPage />} />
           <Route path="/add-device" element={<AddDevicePage />} />
           <Route path="/post/new" element={<PostFormPage />} />
+          <Route path="/record-direct" element={<RecordDirectPage />} />
           <Route path="/project/new" element={<ProjectNewPage />} />
           <Route path="/project/:id" element={<ProjectDetailPage />} />
           <Route

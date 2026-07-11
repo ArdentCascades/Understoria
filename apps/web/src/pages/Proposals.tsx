@@ -1142,17 +1142,24 @@ function DisputePayloadView({
         <span className="font-semibold">
           {parsed.postType === "NEED"
             ? t("disputes.typeNeed")
-            : t("disputes.typeOffer")}
+            : parsed.postType === "direct"
+              ? t("disputes.typeDirect")
+              : t("disputes.typeOffer")}
         </span>
         <span>·</span>
         <span>{formatHours(parsed.hours)}</span>
-        <span>·</span>
-        <Link
-          to={`/post/${postId}`}
-          className="underline-offset-2 hover:underline"
-        >
-          {t("disputes.viewPost")}
-        </Link>
+        {/* No post page exists behind a direct exchange. */}
+        {parsed.postType !== "direct" && (
+          <>
+            <span>·</span>
+            <Link
+              to={`/post/${postId}`}
+              className="underline-offset-2 hover:underline"
+            >
+              {t("disputes.viewPost")}
+            </Link>
+          </>
+        )}
       </div>
       <div className="text-rose-800 dark:text-rose-200">
         {t("disputes.helperLabel")}:{" "}

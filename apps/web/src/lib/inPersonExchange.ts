@@ -68,13 +68,12 @@ import { uuid } from "@/lib/id";
  * the scanner already holds, and the review step shows the helper's
  * key fingerprint so the human can check WHO they are crediting.
  *
- * v1 scope is deliberately post-attached: the flow hangs off an
- * EXISTING claimed post both members already hold (a NEED claimed by
- * the helper, or an OFFER claimed by the helped member). Post-less
- * "spontaneous help" — minting an exchange for help that was never a
- * post — is the un-ratified direct-exchange-label proposal
- * (docs/proposals/), not this feature; it is intentionally NOT
- * implemented here.
+ * THIS flow is post-attached: it hangs off an EXISTING claimed post
+ * both members already hold (a NEED claimed by the helper, or an
+ * OFFER claimed by the helped member). Post-less "spontaneous help"
+ * is the now-adopted direct-exchange-label design and lives in its
+ * own ceremony, lib/directExchange.ts, which shares this module's
+ * two-QR shape and reuses `recordExchangeRowLocally` below.
  */
 
 const OFFER_KIND = "understoria-exchange-offer";
@@ -589,8 +588,7 @@ async function storeCompletedExchange(
   exchange: Exchange,
   post: Post,
 ): Promise<void> {
-  await db.exchanges.put(exchange);
-  await enqueueExchangeOutbox(exchange);
+  await recordExchangeRowLocally(exchange);
   const updatedPost: Post = {
     ...post,
     status: "completed",
@@ -599,11 +597,24 @@ async function storeCompletedExchange(
     ),
   };
   await db.posts.put(updatedPost);
+}
 
-  // Achievement recompute for both parties — mirrors the tail of
-  // confirmExchange (and applyAutoConfirmedExchange) so a member who
-  // earns a role through an in-person exchange sees it without
-  // waiting for their next online confirmation.
+/**
+ * The post-free storage tail — store the completed record, enqueue
+ * its outbox mirror atomically, and recompute achievements for both
+ * parties (mirroring confirmExchange / applyAutoConfirmedExchange so
+ * a member who earns a role through a phone-to-phone exchange sees
+ * it without waiting for their next online confirmation). Exported
+ * for the direct-exchange ceremony (lib/directExchange.ts), whose
+ * records have no post to complete. Callers run this inside their
+ * own rw transaction covering exchanges/achievements/outbox/
+ * settings/members.
+ */
+export async function recordExchangeRowLocally(
+  exchange: Exchange,
+): Promise<void> {
+  await db.exchanges.put(exchange);
+  await enqueueExchangeOutbox(exchange);
   const allExchanges = await db.exchanges.toArray();
   const allMembers = await db.members.toArray();
   for (const key of [exchange.helperKey, exchange.helpedKey]) {
@@ -632,4 +643,19 @@ async function storeCompletedExchange(
  *  uses. */
 function kickOutbox(): void {
   void flushOutboxNow().catch(() => {});
+}
+
+/** Shallow shape check for the capture surface's paste fallback
+ *  (`PairDeviceCapture.acceptsText`): is this text SOME exchange-
+ *  ceremony payload? Without this, the paste box applies its default
+ *  pairing-envelope validation and rejects every valid offer/receipt
+ *  — the camera path never hit it, which is how the gap hid. Full
+ *  validation stays with parse/collect. */
+export function isExchangeCeremonyText(raw: string): boolean {
+  try {
+    const kind = (JSON.parse(raw) as { kind?: unknown }).kind;
+    return kind === OFFER_KIND || kind === RECEIPT_KIND;
+  } catch {
+    return false;
+  }
 }

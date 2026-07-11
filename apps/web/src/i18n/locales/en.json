@@ -1519,6 +1519,58 @@
       "daily_limit": "This would pass the community's daily limit for one helper — wait a day and confirm then."
     }
   },
+  "direct": {
+    "title": "Record time together",
+    "intro": "For help that happened outside any post or project — a plain gathering's setup crew, a neighbor's spontaneous hand. You both sign, phone to phone, and the hours move like any exchange.",
+    "noMember": "Start from the person: the doorway to this form lives on a member's profile and on a passed shift. If someone is recording time with you right now, scan their code below.",
+    "scanLead": "Did the other person start on their phone?",
+    "scanInstead": "Scan their code",
+    "form": {
+      "direction": "Who helped?",
+      "iHelped": "I helped {{name}}",
+      "theyHelped": "{{name}} helped me",
+      "hours": "Hours it actually took",
+      "hoursHint": "An hour is an hour — record what the help really took, not what it was worth.",
+      "category": "Category",
+      "day": "When",
+      "continue": "Continue"
+    },
+    "consent": {
+      "title": "Before you sign",
+      "body": "This records a signed exchange of {{hours}} between you and {{name}}. Like every exchange, who helped whom, the hours, the category, and the time become part of the community's shared ledger. There is no post behind it — the record will say “recorded directly.” Credit moves only once you have both signed.",
+      "confirm": "Sign and show the code"
+    },
+    "offerHint": "Show this code to {{name}}. Their phone checks the details, they sign, and their screen answers with a receipt code — capture it below and you're both done.",
+    "offerQrAlt": "Direct exchange offer code",
+    "captureReceipt": "Capture their receipt",
+    "captureReceiptHint": "Point the camera at the receipt code on {{name}}'s screen.",
+    "captureOfferHint": "Point the camera at the code on the other phone.",
+    "review": {
+      "theyHelpedYou": "{{name}} is recording {{hours}} of {{category}} help they gave you — recorded directly, no post behind it. Signing moves {{hours}} out of your balance.",
+      "youHelpedThem": "{{name}} is recording {{hours}} of {{category}} help you gave them — recorded directly, no post behind it. Signing adds {{hours}} to your balance.",
+      "federates": "Like every exchange: who, hours, category, and time join the community's shared ledger once you both sign."
+    },
+    "sign": "Sign — record {{hours}}",
+    "receiptHint": "Show this receipt to {{name}} so their phone stores the same record.",
+    "receiptQrAlt": "Direct exchange receipt code",
+    "done": "Recorded. Both of you now hold the same signed exchange, and it will reach the community node when you're next online.",
+    "close": "Close",
+    "error": {
+      "no_identity": "No identity on this device.",
+      "locked": "Unlock the app first — signing needs your key.",
+      "self_exchange": "You can't record an exchange with yourself.",
+      "counterparty_unknown": "This member isn't known on your device yet.",
+      "bad_hours": "Enter the hours the help actually took.",
+      "bad_time": "Pick a day within the last month.",
+      "not_an_offer": "That code isn't a direct-exchange offer.",
+      "not_direct_label": "That code isn't a valid direct exchange.",
+      "wrong_member": "This offer names a different member — it can only be signed by the person it's about.",
+      "bad_signature": "The signature on that code doesn't check out.",
+      "daily_limit": "This would pass the community's daily exchange limit — record it tomorrow.",
+      "not_a_receipt": "That code isn't a direct-exchange receipt.",
+      "different_record": "That receipt describes a different exchange than the offer you showed."
+    }
+  },
   "lockScreen": {
     "title": "This device is locked",
     "introWith": "Enter your passphrase to unlock {{name}}'s identity on this device.",
@@ -2281,7 +2333,13 @@
       "taskRow": "{{taskTitle}} — {{projectTitle}}",
       "showOlderOne": "Show {{count}} older exchange",
       "showOlderOther": "Show {{count}} older exchanges",
-      "showFewer": "Show fewer exchanges"
+      "showFewer": "Show fewer exchanges",
+      "directChip": "recorded directly",
+      "directInReview": "in community review",
+      "directFlag": "something's wrong?",
+      "directFlagTitle": "Flag this exchange for community review",
+      "directFlagBody": "This exchange was recorded directly — phone to phone, with no post behind it. Flagging surfaces it on the Disputes page where the whole community can see it and respond. There are no admins; this starts a conversation, not a punishment.",
+      "directFlagConfirm": "Flag it"
     },
     "memberSwitcher": {
       "title": "Switch member (local dev)",
@@ -2582,6 +2640,8 @@
     "flagChip": "In review",
     "typeNeed": "Need",
     "typeOffer": "Offer",
+    "typeDirect": "Direct",
+    "directTitle": "Recorded directly — no post",
     "helperLabel": "Helper",
     "recipientLabel": "Recipient",
     "postedLabel": "Originally posted",

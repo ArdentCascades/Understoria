@@ -29,6 +29,7 @@ import {
   acceptExchangeOffer,
   collectExchangeReceipt,
   exchangeParties,
+  isExchangeCeremonyText,
   mintExchangeOffer,
   parseExchangeOffer,
   type ExchangeOffer,
@@ -266,6 +267,8 @@ export function InPersonExchange({
         <PairDeviceCapture
           onCaptured={handleReceiptCapture}
           onCancel={() => setCapturingReceipt(false)}
+          acceptsText={isExchangeCeremonyText}
+          invalidMessage={t("inPerson.error.not_a_receipt")}
         />
       </div>
     );
@@ -298,6 +301,8 @@ export function InPersonExchange({
         <PairDeviceCapture
           onCaptured={(text) => void handleOfferCapture(text)}
           onCancel={onClose}
+          acceptsText={isExchangeCeremonyText}
+          invalidMessage={t("inPerson.error.not_an_offer")}
         />
       </div>
     );

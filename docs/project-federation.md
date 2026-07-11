@@ -89,6 +89,18 @@ tool, not a CRDT showcase — the failure mode is a shrug, not a fork.
 - Tasks arriving before their project are rejected 409; the outbox
   retries (the same device queues the project first, so ordering
   self-heals).
+- **Completion pre-signatures ride this record.** At mark-complete
+  the completer signs the eventual Exchange payload once per
+  organizer (`completionSignatures`, keyed by potential confirming
+  organizer, plus `completionSignedAt` — the `completedAt` the
+  Exchange will carry). This is how the completer's signature
+  reaches the organizer's device: without it, organizer-side
+  confirmation needed the completer's secret key locally, which only
+  ever existed in dev profiles. The pass-through server contract
+  above is what lets these fields survive older node versions; the
+  confirm path re-verifies the signature over the CURRENT task
+  figures, so a post-completion hours edit invalidates it rather
+  than crediting an unsigned number.
 
 **Accepted residual, stated plainly:** a claimer can vandalize
 non-claim fields of a task they hold (the server does not diff

@@ -20,7 +20,9 @@
  */
 import { db } from "./database";
 import { BLOCKED_ACTION_MESSAGE, isMutuallyBlocked } from "./blocks";
-import { buildDisputeProposal,
+import {
+  buildDirectDisputeProposal,
+  buildDisputeProposal,
   signProposalIfUnsigned,
 } from "./proposals";
 import { diffAchievements } from "@/lib/achievements";
@@ -31,6 +33,7 @@ import { canonicalExchangePayload, sign } from "@/lib/crypto";
 import {
   canonicalAwaitingTransitionPayload,
   canonicalPostPayload,
+  isDirectExchangeLabel,
 } from "@understoria/shared/crypto";
 import { enqueueClaimOutbox } from "@/lib/outbox";
 import {
@@ -45,7 +48,7 @@ import {
   enqueuePostOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
-import type { Achievement, AvailabilityChip, Category, Exchange, Member, Post, PostType, Urgency } from "@/types";
+import type { Achievement, AvailabilityChip, Category, Exchange, Member, Post, PostType, Proposal, Urgency } from "@/types";
 
 /**
  * Resolve the secret keys for the two parties that need to sign the
@@ -653,6 +656,58 @@ export async function disputeExchange(
     if (proposal) await signProposalIfUnsigned(proposal.id);
     return updated;
   });
+}
+
+/**
+ * Flag a DIRECT exchange (docs/direct-exchange-label.md §4) for
+ * community review. A direct exchange has no post to flip to
+ * `disputed`, so the dispute proposal — built from the exchange's
+ * own signed fields — IS the dispute state; the Profile ledger row
+ * links to it the same way flagged post exchanges do. Idempotent on
+ * the exchange's `direct:` label via `disputePostId`, exactly like
+ * the post flow.
+ */
+export async function disputeDirectExchange(
+  exchangeId: string,
+  memberKey: string,
+  reason: string | null = null,
+): Promise<Proposal> {
+  const proposal = await db.transaction(
+    "rw",
+    db.exchanges,
+    db.proposals,
+    async () => {
+      const exchange = await db.exchanges.get(exchangeId);
+      if (!exchange) throw new Error("Exchange not found");
+      if (!isDirectExchangeLabel(exchange.postId))
+        throw new Error(
+          "Not a direct exchange — dispute it from its post page",
+        );
+      if (
+        memberKey !== exchange.helperKey &&
+        memberKey !== exchange.helpedKey
+      )
+        throw new Error("Only the two parties can dispute this exchange");
+      const existing = await db.proposals
+        .where("disputePostId")
+        .equals(exchange.postId)
+        .first();
+      if (existing) return existing;
+      const row = buildDirectDisputeProposal({
+        exchange,
+        flaggerKey: memberKey,
+        reason,
+        now: Date.now(),
+      });
+      await db.proposals.put(row);
+      return row;
+    },
+  );
+  // Same post-commit signing as disputeExchange (proposal-federation
+  // G2): signing can't run inside the transaction (secretKeys/outbox
+  // out of scope); soft no-op when this device can't sign.
+  await signProposalIfUnsigned(proposal.id);
+  return proposal;
 }
 
 export async function updateMemberProfile(
