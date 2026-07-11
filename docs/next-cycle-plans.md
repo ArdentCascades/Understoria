@@ -521,33 +521,127 @@ Three architectures, two of which can be pre-rejected:
   outright by the storage-budget arithmetic: one photo outweighs a
   thousand records, and every member's phone pays for every photo.
   Phase-3 hash-slices would be a prerequisite even to argue it.
-- **(b) Node-hosted attachments** — the only viable shape. A photo
-  is uploaded once to the community node (a new route with its own
+- **(b) Node-blind hosting** — the recommended shape, upgraded at
+  operator review from plain node-hosting: the photo is encrypted
+  **on the device**, under a community media key, before upload. The
+  node receives only ciphertext (a new route with its own
   `bodyLimit` — the global 64 KB cap stands for everything else),
-  stored outside the record set, and *referenced by content hash*
-  from at most one optional image per post/project/event. Records
-  stay small; the wire protocol is untouched; member-authenticated
-  reads and at-rest encryption already cover the node.
+  stored outside the record set and *referenced by content hash*
+  from at most one optional image per post/project/event. Server
+  seizure yields nothing; the operator's server-side view doesn't
+  grow a photo album (the reader-power discipline extended); blob
+  backups are ciphertext, safe on untrusted storage; mirrors
+  replicate photos without becoming a second photo custodian.
 
-Hard requirements the eventual proposal must satisfy, named now:
+  The media key is held by **every member**, distributed through the
+  paths that already carry shared material (invites, device pairing,
+  the community snapshot). This is deliberate, not a compromise: a
+  photo host *nobody* can inspect strands moderation and the
+  operator's legal standing, while a community-held key keeps every
+  photo visible, disputable, and removable through the same social
+  processes as everything else. **The node is blind; the community
+  is not.** The guarantee, stated precisely: people outside the
+  community cannot see photos — members, including the operator
+  acting as a member through the app, all can.
 
-- **Client-side re-encode at attach time** (canvas → WebP, bounded
-  dimensions, ≤200 KB) — which strips EXIF/GPS *structurally* rather
-  than by policy.
+  Honest limits, named now so nobody oversells it: metadata stays
+  node-readable (uploader, timing, byte sizes, which record
+  references which hash), and the caption beside a photo is an
+  ordinary plaintext record — an encrypted photo is more protected
+  than the text around it, which is defensible (images carry faces
+  and geolocatable detail) but must be said, not discovered. Member
+  removal rotates the key **forward-only**: new photos under a new
+  key, no pretense about old ones a removed member already saw —
+  re-encrypting history would be security theater. On the device the
+  key follows the member-secret discipline: passphrase/passkey
+  envelope, cleared by panic purge, snapshot/export handling
+  explicit and test-locked.
+
+Hard requirements the eventual proposal must satisfy. The first two
+were **decided at operator review (2026-07-11)** and are no longer
+open:
+
+- **Automatic EXIF stripping, unconditional — DECIDED.** The
+  attach-time canvas re-encode (WebP, bounded dimensions, ≤200 KB)
+  is the *only* path a photo can take — never a setting, never a
+  "keep original" option. The strip is structural: there is no code
+  path where the original bytes leave the device, and a test locks
+  that the encoded output carries no EXIF/GPS segments. Encryption
+  does not substitute for this — metadata inside the image would
+  still leak to every member and to anyone a member forwards it to.
+- **The care card, on every upload — DECIDED.** Each upload passes
+  through a consent-card moment in the house style (the shift-signup
+  comparison-card discipline: say it *before*, not after). One
+  blurb, two jobs: it asks the member not to upload faces without
+  the person's consent, sensitive places, or anything else that
+  could put someone in danger — and in the same breath it explains
+  the storage honestly: *the photo is encrypted so the server, and
+  anyone who seizes it, can never see it; everyone in this community
+  holds the key, so upload only what every member may safely see.*
+  Every upload, not first-run-only — the moment of attaching is when
+  the reminder matters. en/es from day one, like all consent copy.
 - **The §2 asset list grows**: images of members, homes, and meeting
   places are a new asset class (faces are identity), with its own
-  threat-model §7 entry answering the §8 reviewer checklist.
+  threat-model §7 entry answering the §8 reviewer checklist — now
+  including the community-media-key custody and rotation story.
 - **Every data-lifecycle surface enumerates the new store**: export
   (own photos included — the export's include-by-default pattern
   makes this automatic, so the *test* is that it round-trips),
   pairing snapshot (excluded; re-fetch by hash), panic purge (blobs
   deleted — test-locked), storage meter (photos counted separately),
   per-member byte quota on the node (the insert caps bound rows, not
-  bytes — photos need the byte-side twin).
+  bytes — photos need the byte-side twin; see §6.4).
 - **No image ever rides an `Exchange`, vouch, vote, or governance
   record** — attachments belong to descriptive surfaces only.
 
-### 6.4 Activation gate
+### 6.4 Disk pressure: the node is a shelf, not an archive
+
+The record set has an absolute rule — nothing is ever deleted, caps
+refuse rather than destroy (`insertCaps.ts`). Photos must NOT inherit
+that rule, or a full disk becomes a crisis with no honest exit.
+Deletion is *safe* here in a way it is nowhere else in the system:
+a blob is not a signed record, deleting one breaks no ledger
+integrity and no federation convergence — the referencing record
+keeps its hash and the UI renders an honest "photo no longer
+available" placeholder. So the design declares photos **ephemeral by
+category** from day one:
+
+1. **The uploader's copy is theirs.** The re-encoded photo stays on
+   the uploader's own device (their local store, their export). The
+   node hosts a *shared working copy* — eviction can never destroy a
+   member's only copy of their own photo.
+2. **Quotas refuse first.** A per-member byte quota and a global
+   blob-store ceiling (env knobs, the byte-side twins of the insert
+   caps). An upload past quota fails *before* upload with honest
+   copy ("the community photo shelf is full — delete one of yours,
+   or ask the operator about disk"), never a silent drop.
+3. **Members delete their own photos any time** — an authenticated
+   request from the uploader key; the blob goes, the placeholder
+   renders. (Removal of *someone else's* photo is a social process —
+   ask, dispute — not a moderator button; the community key means
+   everyone can at least see what they're discussing.)
+4. **Eviction under pressure is oldest-first, settled-first, and
+   ratified.** When the store passes a high-water mark, photos
+   attached to expired/settled/archived records become eligible,
+   oldest first. The retention default (e.g. "photos on settled
+   records may be evicted after 12 months") is a `NodeConfig` value
+   the pilot community ratifies like `autoConfirmHours` — the
+   operator runs the policy, the community owns it. Store usage is
+   visible on the Infrastructure page next to the existing meters,
+   so pressure is seen coming, never discovered.
+5. **The care card says so** (one added sentence): photos are a
+   working shelf, not an archive — they may be removed over time to
+   make room, and your copy stays on your device.
+
+This is also the quiet payoff of §6.3(b): evicting ciphertext is
+operationally trivial, and because references are content hashes, a
+photo someone still holds can even be re-shared later under the same
+reference. Photos become the first place the community practices a
+retention decision — in the safest data class it will ever get to
+practice on, which is exactly the experience the deferred
+pruning-policy roadmap row says it needs.
+
+### 6.5 Activation gate
 
 The proposal doc gets written when the pilot journal (Plan 3)
 produces real photo asks — with the actual use cases quoted in its
