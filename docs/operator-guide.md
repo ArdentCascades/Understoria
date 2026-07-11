@@ -518,6 +518,53 @@ next to the backups.
 snapshots before storing on third-party infrastructure (encrypted
 ones already are).
 
+## 7a. Your node serves its own source code (AGPL §13)
+
+Understoria is AGPL-3.0 licensed. §13 obliges whoever runs it to
+offer the **Corresponding Source** to everyone who uses it over the
+network. Your node satisfies this itself — no GitHub required:
+
+- Every deployment serves `/source/understoria-source.tar.gz`, a
+  `SHA256SUMS` file, and a `manifest.json` (version, commit, sizes,
+  hashes). Members reach it from **Community infrastructure → The
+  software itself**; anyone can `curl` it.
+- **Docker/Podman:** produced automatically at image build time by
+  the web image's `source-pack` stage — nothing to configure.
+  (The build context has no git history, so the container path
+  serves the source *tree*, not the history bundle.)
+- **Bare metal:** run `scripts/pack-source.sh apps/web/dist/source`
+  after each web build (the deploy-alternatives runbook includes
+  it). Run from a full git clone, this also produces
+  `understoria.bundle` — the complete history, clonable with
+  `git clone understoria.bundle` — which makes your node a genuine
+  bootstrap point for new communities with no third party at all.
+
+Two honesty notes to pass on to members who ask:
+
+- The checksums prove **integrity** (the download wasn't
+  corrupted), not **authenticity** — you, the operator, could serve
+  a modified tree. That adds no new trust: you already serve them
+  the running app. Anyone wanting independent verification should
+  compare against another node's bundle, a mirror, or the project's
+  signed tags. The infrastructure card says this in the UI too.
+- The tarball is built from the source tree only. Git-tracked files
+  in Docker builds are scrubbed by `.dockerignore` (which excludes
+  `backups/`, `.env`, and database files), and the git-mode archive
+  packs tracked files exclusively — operator data can't leak into
+  it. Keep it that way: never commit secrets, and keep local
+  backups under `backups/` (the excluded path).
+
+Development-side redundancy is a separate, cheap step: keep a push
+mirror of the repository on a second forge (Codeberg, a self-hosted
+Forgejo) so the project itself never has a single hosting point of
+failure either.
+
+The member-facing walkthrough of the whole loop — download from a
+node, verify, try, deploy, become a seed — is
+[`bootstrap-from-a-node.md`](./bootstrap-from-a-node.md). Point
+people there when they ask "how would I start one for my
+neighborhood?"
+
 ## 8. Things that are NOT yet built (and what to do about it)
 
 | Feature | Status | Operator workaround |

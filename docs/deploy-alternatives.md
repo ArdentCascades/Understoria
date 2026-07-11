@@ -154,10 +154,17 @@ sudo npm ci --workspaces --include-workspace-root --no-audit --no-fund
 #   export NODE_OPTIONS=--max-old-space-size=1536
 sudo npm --workspace @understoria/server run build
 sudo npm --workspace @understoria/web run build
+
+# Pack the Corresponding Source the node serves at /source/ (AGPL
+# §13 — operator-guide.md §7a). From a full git clone this also
+# produces the clonable full-history bundle.
+sudo scripts/pack-source.sh apps/web/dist/source
 ```
 
-You now have `apps/server/dist/` (the node) and `apps/web/dist/`
-(the PWA static bundle).
+You now have `apps/server/dist/` (the node), `apps/web/dist/` (the
+PWA static bundle), and `apps/web/dist/source/` (the self-served
+source download). Re-run the pack script after every rebuild — the
+build wipes `dist/`.
 
 ### 3.3 Generate the system key and write the env file
 
@@ -342,6 +349,7 @@ sudo git fetch origin && sudo git checkout <new-tag>
 sudo npm ci --workspaces --include-workspace-root --no-audit --no-fund
 sudo npm --workspace @understoria/server run build
 sudo npm --workspace @understoria/web run build
+sudo scripts/pack-source.sh apps/web/dist/source
 sudo systemctl restart understoria
 ```
 

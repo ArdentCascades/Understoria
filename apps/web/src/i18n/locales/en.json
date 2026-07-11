@@ -2977,6 +2977,17 @@
       "quorumUnknown": "Not published yet",
       "view": "See proposals"
     },
+    "source": {
+      "title": "The software itself",
+      "body": "Understoria is free software. This server offers its own source code, so the community's copy of the app doesn't depend on anyone else staying online.",
+      "version": "Version {{version}} · commit {{commit}}",
+      "download": "Download the source ({{size}})",
+      "bundle": "Full history bundle ({{size}})",
+      "checksums": "Checksums",
+      "caution": "Checksums prove the download wasn't corrupted — not that nobody changed it. To check that, compare with another server's copy or the public repository.",
+      "absent": "This deployment doesn't offer a source download yet. Ask your operator to redeploy with a current build, or use the",
+      "repo": "public repository"
+    },
     "drills": {
       "title": "Disaster drills",
       "intro": "Practice the two recoveries before you need them. These checklists live only on this device — the linked runbooks in the repository stay the source of truth.",

@@ -35,6 +35,20 @@ ENV NODE_OPTIONS=--max-old-space-size=1536
 RUN npm --workspace @understoria/web run build
 
 # ---------------------------------------------------------------------
+# Source-pack stage: bundle this build's Corresponding Source so the
+# node serves it at /source/ (AGPL §13 with no third-party dependency —
+# see scripts/pack-source.sh and docs/operator-guide.md). The build
+# context has no .git (.dockerignore), so the script runs in tar mode:
+# the context IS the source tree, already scrubbed of node_modules,
+# dist, .env, and operator data by .dockerignore.
+
+FROM node:22-bookworm-slim AS source-pack
+
+WORKDIR /src
+COPY . .
+RUN bash scripts/pack-source.sh /out/source
+
+# ---------------------------------------------------------------------
 # Runtime stage: one-shot copy into a shared volume, then exit. Compose
 # uses `depends_on: { web: { condition: service_completed_successfully } }`
 # on the Caddy service so the static files are present before Caddy
@@ -43,6 +57,7 @@ RUN npm --workspace @understoria/web run build
 FROM busybox:1.37-musl AS runtime
 
 COPY --from=build /workspace/apps/web/dist /dist
+COPY --from=source-pack /out/source /dist/source
 
 # Empty the target then refill it, so a redeploy that removed files
 # (chunk-renamed bundles, deleted routes) doesn't leave stale assets

@@ -11,3 +11,9 @@
 **/.env.*.local
 **/*.tsbuildinfo
 **/.git
+# Operator-side data that must never enter an image build or the
+# self-served source tarball (scripts/pack-source.sh packs the build
+# context in Docker builds).
+backups
+**/*.db
+**/*.db.gz
