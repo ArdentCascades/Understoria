@@ -410,12 +410,54 @@ describe("EventShiftsSection — §9.3 credit bridge (prefill, not plumbing)", (
     expect(container.querySelector('a[href="/project/p1"]')).toBeNull();
   });
 
-  it("shows nothing on a plain event (no credit path — §14 ruling 1)", () => {
+  // §14 ruling 1's deferral is now filled by the ADOPTED direct-
+  // exchange design (docs/direct-exchange-label.md §6.1): a passed
+  // plain-event shift offers the ceremony with FORM-only prefill —
+  // the recorded exchange carries a random `direct:` label and
+  // nothing event-shaped.
+  it("offers the direct-exchange ceremony on a passed plain-event shift to a member on it", () => {
     renderSection(
       [passedShift()],
       [makeSignup({ memberKey: "viewer-key" })],
       { creditHref: null },
     );
-    expect(container.querySelector("a")).toBeNull();
+    const link = container.querySelector('a[href^="/record-direct"]');
+    expect(link).toBeTruthy();
+    const href = link!.getAttribute("href")!;
+    // Counterparty = the event's creator; the 2h the shift ran and
+    // the event's category prefill the FORM only.
+    expect(href).toContain("member=organizer-key");
+    expect(href).toContain("hours=2");
+    expect(href).toContain("category=mutual-aid");
+  });
+
+  it("never offers the direct doorway to the event's creator (they co-sign on their own screen)", () => {
+    renderSection(
+      [passedShift()],
+      [makeSignup({ memberKey: "organizer-key" })],
+      { creditHref: null, memberKey: "organizer-key", isOrganizer: true },
+    );
+    expect(container.querySelector('a[href^="/record-direct"]')).toBeNull();
+  });
+
+  it("shows no direct doorway to a member who was not on the shift, nor before it has passed", () => {
+    renderSection([passedShift()], [makeSignup({ memberKey: "member-a" })], {
+      creditHref: null,
+    });
+    expect(container.querySelector('a[href^="/record-direct"]')).toBeNull();
+    renderSection([makeShift()], [makeSignup({ memberKey: "viewer-key" })], {
+      creditHref: null,
+    });
+    expect(container.querySelector('a[href^="/record-direct"]')).toBeNull();
+  });
+
+  it("prefers the project path on work-day shifts — the direct doorway is plain-event only", () => {
+    renderSection(
+      [passedShift()],
+      [makeSignup({ memberKey: "viewer-key" })],
+      { creditHref: "/project/p1", creditProjectTitle: "Community Fridge" },
+    );
+    expect(container.querySelector('a[href^="/record-direct"]')).toBeNull();
+    expect(container.querySelector('a[href="/project/p1"]')).toBeTruthy();
   });
 });

@@ -672,6 +672,7 @@
       "recorded": "Ya estás en el turno. Guardado en este dispositivo.",
       "removed": "Inscripción quitada.",
       "recordTimeLink": "Registrar el tiempo compartido — {{project}}",
+      "recordDirectLink": "Registrar tiempo juntos",
       "addButton": "Agregar un turno",
       "addConfirm": "Agregar turno",
       "added": "Turno agregado.",
@@ -2239,7 +2240,8 @@
     "cannotVouchUntilTrusted": "Podrás avalar cuando tú misma seas confiable. El aval de quien te invitó cuenta como uno; otra persona de la comunidad puede avalarte para sumar el segundo.",
     "alreadyFullyTrusted": "Esta persona ya es confiable. Otro aval no cambiaría nada.",
     "alreadyVouchedByYou": "Ya has avalado a esta persona.",
-    "backToBoard": "Volver al tablero"
+    "backToBoard": "Volver al tablero",
+    "recordDirectHint": "¿Se ayudaron fuera de cualquier publicación o proyecto? Registren las horas juntos — ambos firman, teléfono a teléfono."
   },
   "settings": {
     "openSettings": "Abrir ajustes",

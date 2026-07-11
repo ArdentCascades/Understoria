@@ -846,7 +846,16 @@ We are not trying to protect against:
   indistinguishable on the wire from one recorded with no shifts
   involved, and nothing may ever reconcile the signup roster against
   exchanges (that comparison is the attendance tracking
-  `community-events.md` §11.6 permanently rejected).
+  `community-events.md` §11.6 permanently rejected). The sanctioned
+  alternative for gathering-adjacent (and spontaneous) credit is the
+  **`direct:` label namespace** (`docs/direct-exchange-label.md`,
+  adopted): `direct:` + a freshly random uuid, derived from NOTHING —
+  the pressure-release valve that makes the boundary livable. The
+  plain-event shift affordance prefills the ceremony FORM only
+  (hours, category); the recorded exchange carries the random label,
+  the grammar is locked by `isDirectExchangeLabel` + tests, and a
+  suffix that smuggles structure (`direct:event-123`) is refused by
+  every consumer.
 
 - **Member blocking is a local-only personal-relief surface.**
   *Shipped — `Block` and `previouslyBlocked` are local Dexie rows;

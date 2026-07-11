@@ -347,6 +347,31 @@ verifying it can see it was a system confirm rather than a mutual
 one. The same auto-confirm sweep covers project tasks, not just
 board posts.
 
+## 8a. Recording time together (no post needed)
+
+Sometimes real help never went through the board at all: a neighbor
+saw you struggling with a fence and spent two hours on it, or you
+were on the setup crew for a potluck. That's still an hour of help,
+and the ledger can record it.
+
+Open the other person's profile and tap **Record time together**
+(passed shifts on a plain gathering offer the same link, with the
+hours prefilled). Say who helped whom, the hours it actually took,
+and when. The app shows you exactly what you're about to sign —
+like every exchange, who helped whom, the hours, category, and time
+join the community's shared ledger, and the record is marked
+"recorded directly" since there's no post behind it. Then it's the
+same phone-to-phone code exchange as confirming in person: you show
+a code, they check the details and your key fingerprint **on their
+own screen**, they sign, and you capture their receipt. Credit moves
+only once you've both signed — nobody can record hours on your
+behalf.
+
+If something about a directly recorded exchange is wrong, your
+Profile's exchange history has a quiet **something's wrong?** next
+to it that raises it with the community, the same as flagging any
+exchange.
+
 ## 9. Projects
 
 A **project** is a collective effort with multiple tasks and (usually)
