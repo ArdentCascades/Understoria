@@ -968,6 +968,8 @@
         "noteLabel": "Where things stand — a note to future you",
         "noteHint": "When you put this down, jot what's done and what you're waiting on. Next time you open this task, you start from your note instead of reconstructing it from memory.",
         "notePlaceholder": "e.g. Waiting on Sam's reply. Hinges are in the shed.",
+        "suggestButton": "Start with {{count}} suggested steps",
+        "suggestHint": "A head start from the same playbook as the tip — one tap adds them, then edit or delete anything. Starting blank works too. Still only visible to you.",
         "noteSave": "Save note",
         "noteSaved": "Saved.",
         "icsButton": "Put it on my calendar (.ics)",

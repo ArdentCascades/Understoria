@@ -425,6 +425,13 @@ Two tools live there:
   them off as you go. The description tells you what done looks
   like; this is for how *you* get started — especially useful when
   executive function, not information, is the hard part.
+- **Suggested starter steps.** On tasks that came from a project
+  template, an empty plan offers **"Start with N suggested steps"**
+  — a head start written by the same playbook as the task's tip,
+  with the first step always something tiny you can do in two
+  minutes. It's an offer, never automatic: one tap adds them as
+  ordinary steps you can edit or delete, starting blank always
+  works, and either way the plan stays visible only to you.
 - **A planned day.** Pick a day you privately intend to give the
   task some time (one-tap **Today** / **Tomorrow**, or any date).
   Tasks with a planned day sort **first** in your **In my care**

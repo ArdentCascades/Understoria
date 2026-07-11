@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Suggested starter steps on template tasks.** A claimed template
+  task's empty private plan now offers **"Start with N suggested
+  steps"** — 3–5 authored, ordered, concrete first moves per task
+  (the first always a two-minute action), covering every task of all
+  54 project templates in English and Spanish
+  (`content/taskSteps.ts`, coverage and parity CI-pinned like the
+  task tips). Deliberately an offer, never an auto-fill: one tap
+  seeds them as ordinary private checklist items — editable,
+  deletable, local-only — and it only ever lands on a plan with no
+  steps, so it can never overwrite the member's own words. Written
+  for the executive-function gap: the description says what done
+  looks like; these say how to begin.
 - **The dev demo community now includes claimable work.** Rosa
   organizes an active community-fridge project with open tasks in a
   spread of sizes (one hour-sized, one mid-carry by Marcus so it

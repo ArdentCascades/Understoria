@@ -968,6 +968,8 @@
         "noteLabel": "Dónde quedaron las cosas — una nota para tu yo futuro",
         "noteHint": "Cuando dejes esto por hoy, anota qué está hecho y qué esperas. La próxima vez que abras la tarea, empiezas desde tu nota en vez de reconstruirlo de memoria.",
         "notePlaceholder": "p. ej. Esperando la respuesta de Sam. Las bisagras están en el cobertizo.",
+        "suggestButton": "Empieza con {{count}} pasos sugeridos",
+        "suggestHint": "Un empujón inicial del mismo manual que el consejo — un toque los añade, y luego edita o borra lo que quieras. Empezar en blanco también funciona. Sigue siendo visible solo para ti.",
         "noteSave": "Guardar nota",
         "noteSaved": "Guardada.",
         "icsButton": "Ponerlo en mi calendario (.ics)",
