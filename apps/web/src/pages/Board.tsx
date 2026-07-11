@@ -630,6 +630,22 @@ export default function BoardPage() {
           />
         )}
 
+        {/* "Ways to plug in" — the browsable shelf's only doorway
+            (docs/ways-to-plug-in.md §8 ruling 1: a link, not a tab —
+            tabs are permanent geography and the pilot should show the
+            surface earns one first). A quiet line, no count badge:
+            §4's never-a-nudge boundary applies to the doorway too. */}
+        {currentMember && (
+          <p className="mb-3 text-sm">
+            <Link
+              to="/plug-in"
+              className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+            >
+              {t("board.plugInLink")}
+            </Link>
+          </p>
+        )}
+
         {/* Mobile-visible filter rail copies. These sit between the
             search input and the list in DOM order, so on mobile
             (where the middle wrapper is `contents`) the page reads

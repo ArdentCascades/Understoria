@@ -1311,6 +1311,25 @@
     "shiftIcs": "Add this shift to my calendar (.ics)",
     "deskLink": "See everything waiting on you at your desk"
   },
+  "plugIn": {
+    "title": "Ways to plug in",
+    "subtitle": "Given what you can do, here's what's open right now — matched against your open offers and profile skills, entirely on your own device.",
+    "noObligation": "Nothing here is assigned to you, and nothing about what you look at is recorded. A match is an offer to you, never an obligation on you.",
+    "addSkills": "Matches come from your open offers and your profile skills.",
+    "addSkillsLink": "Add skills to see more matches",
+    "shiftsTitle": "Open shifts that match",
+    "needsTitle": "Open needs that match",
+    "tasksTitle": "Open project tasks that match",
+    "matchedOn": "Matched your “{{tokens}}”",
+    "spotsOpen_one": "{{count}} spot open",
+    "spotsOpen_other": "{{count}} spots open",
+    "follows": "Follows: {{titles}}",
+    "remainderTitle": "Everything else that's open ({{count}})",
+    "remainderHint": "Matching is a lens, not a gate — you can plug in anywhere.",
+    "remainderEmpty": "Nothing else is open right now.",
+    "emptyNoLens": "Nothing to match against yet — everything that's open is below.",
+    "emptyWithLens": "Nothing open matches your offers and skills right now — everything that's open is below."
+  },
   "bodyDoubling": {
     "postTitle": "Keep me company while I work on: {{task}}",
     "postDescription": "I've taken on \"{{task}}\" ({{project}}) and working alongside someone makes starting much easier — some call it body doubling. No skills needed: bring your own task, or just keep me company while I work. We'll pick a time and place that suit us both.\n\nThe task: {{url}}",
@@ -2111,7 +2130,8 @@
       "closeShort": "Close",
       "close": "Close post panel"
     },
-    "printView": "Print this view"
+    "printView": "Print this view",
+    "plugInLink": "Ways to plug in"
   },
   "dashboard": {
     "title": "Community dashboard",

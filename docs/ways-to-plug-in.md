@@ -1,13 +1,15 @@
 # Understoria — "Ways to plug in" (design note)
 
-> **Status:** **proposed** — design only; no implementation PRs yet.
-> This is the discovery-surface design that shift-signups §14
-> ruling 3 filed ("skill-matched shift discovery — its own design
-> note"). Read alongside `docs/shift-signups.md` §10.4 (the deferral
-> and its stated reason: shipping discovery inside a scheduling
-> feature would smuggle in a recommendation engine),
-> `docs/task-ordering-and-dependencies.md` (whose nudge-cadence
-> discipline this note borrows), and the design-principles ledger
+> **Status:** **adopted and shipped** — PR B (the `lib/plugIn.ts`
+> matcher) and PR C (the `/plug-in` page + Board link) are live; PR D
+> stays LOUDLY SKIPPED per §9. This is the discovery-surface design
+> that shift-signups §14 ruling 3 filed ("skill-matched shift
+> discovery — its own design note"). Read alongside
+> `docs/shift-signups.md` §10.4 (the deferral and its stated reason:
+> shipping discovery inside a scheduling feature would smuggle in a
+> recommendation engine), `docs/task-ordering-and-dependencies.md`
+> (whose nudge-cadence discipline this note borrows), and the
+> design-principles ledger
 > (`apps/web/src/content/design-principles.ts`) — `asking-never-gated`
 > and `no-leaderboards` do the heavy lifting here.
 
@@ -15,8 +17,11 @@
 
 ## §1 Status
 
-Proposed. Two open decisions are marked "Operator ruling needed" in
-§8, each with a recommended default.
+Adopted; both implementation phases shipped (§9 PR B + PR C). The
+two §8 rulings were taken at their recommended defaults: the entry
+point is a Board-level link (not a tab), and the surface shipped
+with existing offer categories + profile skills as the lens, with an
+"add skills to see more matches" line on the page itself.
 
 ## §2 Why now
 

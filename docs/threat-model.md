@@ -1620,6 +1620,12 @@ We are not trying to protect against:
   that roster without per-member consent ceremony — organizer
   authority, same as the local deleteShift guard's intent. (4)
   Locked devices publish late, same as Phase 1.
+  **Discovery surface (docs/ways-to-plug-in.md, shipped):** the
+  `/plug-in` shelf that matches a member against open shifts, needs,
+  and tasks is a LOCAL READ over rows the device already holds —
+  no new wire surface, no new stored rows, no logs; nothing about
+  what a member browsed, matched, or ignored exists anywhere to
+  leak.
 
 - **Member-authenticated reads + at-rest encryption (the
   reader-power review).**

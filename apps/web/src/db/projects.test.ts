@@ -37,7 +37,8 @@ import {
 } from "./projects";
 import type { Exchange, ProjectTask } from "@/types";
 import { balanceFor } from "@/lib/timebank";
-import { canonicalExchangePayload, verify, verifyExchange } from "@/lib/crypto";
+import { canonicalExchangePayload, sign, verify, verifyExchange } from "@/lib/crypto";
+import { getSecretKey } from "./secrets";
 
 const NODE = "node_projects_test";
 
@@ -1792,6 +1793,61 @@ describe("completion pre-signing", () => {
     );
     expect(verifyExchange(result.exchange)).toBe(true);
     expect(result.exchange.helpedKey).toBe(coorg!.publicKey);
+  });
+
+  it("a stale task category folds to 'other' on the signed exchange — renderable and node-acceptable", async () => {
+    const { org, helper, task } = await completedTaskFixture();
+    // Simulate a row from an older build (TaskState federates
+    // verbatim): a category id today's set doesn't include. Confirming
+    // one of these minted an exchange no screen could render (the
+    // second Dashboard category crash) and no node would accept.
+    await db.projectTasks.update(task.id, {
+      category: "gardening" as ProjectTask["category"],
+    });
+    await markProjectTaskComplete(task.id, helper.publicKey, 2);
+    await db.secretKeys.delete(helper.publicKey);
+    const result = await confirmProjectTaskCompletion(
+      task.id,
+      org.publicKey,
+      NODE,
+    );
+    expect(result.exchange.category).toBe("other");
+    expect(verifyExchange(result.exchange)).toBe(true);
+  });
+
+  it("honors a legacy pre-signature that signed the RAW stale category", async () => {
+    const { org, helper, task } = await completedTaskFixture();
+    await db.projectTasks.update(task.id, {
+      category: "gardening" as ProjectTask["category"],
+    });
+    const done = await markProjectTaskComplete(task.id, helper.publicKey, 2);
+    // Overwrite with what the pre-normalization build signed: the raw
+    // category, straight into the payload. The signed bytes are the
+    // completer's word — confirmation must honor them (the exchange
+    // then carries the raw id; read surfaces fold it for display).
+    const sk = await getSecretKey(helper.publicKey);
+    const rawSig = sign(
+      canonicalExchangePayload({
+        postId: `project:${task.projectId}/task:${task.id}`,
+        helperKey: helper.publicKey,
+        helpedKey: org.publicKey,
+        hours: 2,
+        category: "gardening" as Exchange["category"],
+        completedAt: done.completionSignedAt!,
+      }),
+      sk,
+    );
+    await db.projectTasks.update(task.id, {
+      completionSignatures: { [org.publicKey]: rawSig },
+    });
+    await db.secretKeys.delete(helper.publicKey);
+    const result = await confirmProjectTaskCompletion(
+      task.id,
+      org.publicKey,
+      NODE,
+    );
+    expect(result.exchange.category).toBe("gardening");
+    expect(verifyExchange(result.exchange)).toBe(true);
   });
 
   it("an hours edit after completion invalidates the pre-signature instead of crediting an unsigned figure", async () => {

@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **"Ways to plug in" — the browsable shelf** (docs/ways-to-plug-in.md,
+  both phases). A member with two free hours no longer hunts across
+  four surfaces: `/plug-in` (a quiet Board link — a link, not a tab,
+  per the design's ruling) answers "given what I can do, what's open
+  right now?" with open shifts, needs, and project tasks matched
+  against the member's own open offers and profile skills. Matching
+  is visibly dumb token overlap — each match names exactly which of
+  your words it hit ("Matched your 'carpentry'") — and it is a lens,
+  never a gate: everything open that didn't match is right there
+  under "Everything else," collapsed but never omitted.
+  Dependency-blocked tasks render last with the standard "Follows:"
+  framing, never hidden. Everything is computed from rows the device
+  already holds: nothing about what you browse, match, or ignore is
+  stored, logged, or federated, no count badges the doorway, and no
+  match ever becomes a nudge. Profiles without skills get a gentle
+  "add skills to see more matches" line on the page itself.
 - **The message relay: direct messages now actually reach the other
   person** (`docs/message-relay.md`). The community node becomes a
   store-and-forward shelf for sealed envelopes: the sender's device
@@ -46,6 +62,23 @@ include breaking changes.
   page is reachable by URL.
 
 ### Fixed
+- **The Dashboard crashed again — this time on a STALE category id.**
+  The category maps only know today's category set, but stored rows
+  outlive renames and task/project state federates verbatim from
+  older builds, so a task carrying an old category id mints — the
+  moment an organizer confirms it — an exchange no screen could
+  render: the Dashboard's hours-by-category lookup threw on the
+  unknown key and the error boundary ate the whole page (its second
+  category crash; the first was the project-only categories). Every
+  category lookup that touches RUNTIME rows is now total: unknown ids
+  render as "Other" on the Dashboard, the category badge, and all
+  three calendar views, and the stats breakdown folds them before any
+  consumer sees a key. The write layer folds too — task confirmations
+  now sign `other` in place of a category id the current build (and
+  the community node) wouldn't recognize, which also stops those
+  records from poisoning the sender's outbox; a completion pre-signed
+  by the in-between build over the raw stale id is still honored
+  as-signed rather than refused.
 - **Messages never left the sender's device.** `sendMessage`
   encrypted the text and wrote it to local IndexedDB — and that was
   the end of the line: no outbox kind, no server table, no route, no

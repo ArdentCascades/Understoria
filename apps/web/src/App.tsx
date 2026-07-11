@@ -49,6 +49,7 @@ import ProjectDetailPage from "@/pages/ProjectDetail";
 import TaskDetailPage from "@/pages/TaskDetail";
 import ProjectArchivePage from "@/pages/ProjectArchive";
 import MyWorkPage from "@/pages/MyWork";
+import PlugInPage from "@/pages/PlugIn";
 import EventNewPage from "@/pages/EventNew";
 import EventDetailPage from "@/pages/EventDetail";
 import MessagesShell, { MessagesEmptyPane } from "@/pages/Messages";
@@ -171,6 +172,7 @@ export default function App() {
           />
           <Route path="/projects/archive" element={<ProjectArchivePage />} />
           <Route path="/my-work" element={<MyWorkPage />} />
+          <Route path="/plug-in" element={<PlugInPage />} />
           {/* The two standalone pages folded into /my-work (the
               "My work" tab); the routes live on as redirects so
               bookmarks and older in-app links land on the right

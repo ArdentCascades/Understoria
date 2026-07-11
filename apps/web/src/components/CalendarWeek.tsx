@@ -28,11 +28,7 @@ import {
   postEntryDisplay,
   type CalendarEntry,
 } from "@/lib/calendar";
-import {
-  CATEGORY_META,
-  PROJECT_CATEGORY_META,
-  eventCategoryMeta,
-} from "@/lib/categories";
+import { eventCategoryMeta, projectCategoryMeta } from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // Week view of the currently-selected week. Header shows the week's
@@ -526,7 +522,7 @@ function WeekChip({
     );
   }
   if (entry.kind === "project_deadline") {
-    const meta = PROJECT_CATEGORY_META[entry.category];
+    const meta = projectCategoryMeta(entry.category);
     return (
       <Link
         to={`/project/${entry.projectId}`}
@@ -539,7 +535,7 @@ function WeekChip({
       </Link>
     );
   }
-  const meta = CATEGORY_META[entry.category];
+  const meta = projectCategoryMeta(entry.category);
   const { glyph, labelKey } = postEntryDisplay(entry.postType);
   const label = t(labelKey, { title: entry.postTitle });
   return (

@@ -27,6 +27,7 @@ import type {
   Post,
 } from "@/types";
 import { reachedMilestones } from "./milestones";
+import { normalizeExchangeCategory } from "./categories";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -64,8 +65,13 @@ export function computeCommunityStats(
 
   const categoryBreakdown: Partial<Record<ProjectCategory, number>> = {};
   for (const x of exchanges) {
-    categoryBreakdown[x.category] =
-      (categoryBreakdown[x.category] ?? 0) + x.hoursExchanged;
+    // Stored rows outlive category renames (and task/project state
+    // federates verbatim from older builds), so x.category is not
+    // guaranteed to be a key today's maps know. Fold strays into
+    // "other" here so every breakdown consumer sees valid keys — one
+    // stale row crashed the whole Dashboard before this.
+    const cat = normalizeExchangeCategory(x.category);
+    categoryBreakdown[cat] = (categoryBreakdown[cat] ?? 0) + x.hoursExchanged;
   }
 
   const needsFulfilledThisWeek = posts.filter(

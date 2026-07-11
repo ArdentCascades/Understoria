@@ -40,6 +40,7 @@ import { diffAchievements } from "@/lib/achievements";
 import { evaluateSafeguards, exceedsDailyLimit } from "@/lib/safeguards";
 import { getNodeConfig } from "./nodeConfig";
 import { creditHoursForTask } from "@/lib/timebank";
+import { normalizeExchangeCategory } from "@/lib/categories";
 import type {
   Exchange,
   Project,
@@ -940,7 +941,13 @@ export async function markProjectTaskComplete(
               helperKey: memberKey,
               helpedKey: orgKey,
               hours: signedHours,
-              category: task.category as Exchange["category"],
+              // Fold a stale task category into today's set BEFORE
+              // signing (rows outlive renames; TaskState federates
+              // verbatim from older builds), so the exchange this
+              // signature becomes is renderable everywhere and the
+              // community node accepts it instead of poisoning the
+              // outbox. The confirm side normalizes identically.
+              category: normalizeExchangeCategory(task.category),
               completedAt: now,
             }),
             completerSecret,
@@ -1064,6 +1071,15 @@ export async function confirmProjectTaskCompletion(
   // only the value differs from the old `estimatedHours`.
   const creditHours = creditHoursForTask(task);
 
+  // The signed exchange folds a stale task category into today's set
+  // (normalizeExchangeCategory) — the same fold mark-complete applies
+  // before pre-signing — so the record renders everywhere and the
+  // community node accepts it. Rows outlive category renames, and
+  // TaskState federates verbatim from older builds; one confirmed task
+  // carrying an id today's maps don't know crashed the entire
+  // Dashboard (the second category crash on that screen).
+  let exchangeCategory = normalizeExchangeCategory(task.category);
+
   const preSignature = task.completionSignatures?.[organizerKey];
   let helperSignature: string;
   let completedAt: number;
@@ -1075,15 +1091,35 @@ export async function confirmProjectTaskCompletion(
     // and we refuse rather than credit a number the completer never
     // signed.
     completedAt = task.completionSignedAt;
-    const preSignedPayload = canonicalExchangePayload({
-      postId: `project:${project.id}/task:${task.id}`,
+    const payloadFor = (category: Exchange["category"]) =>
+      canonicalExchangePayload({
+        postId: `project:${project.id}/task:${task.id}`,
+        helperKey,
+        helpedKey,
+        hours: creditHours,
+        category,
+        completedAt,
+      });
+    let verified = verify(
+      payloadFor(exchangeCategory),
+      preSignature,
       helperKey,
-      helpedKey,
-      hours: creditHours,
-      category: task.category as Exchange["category"],
-      completedAt,
-    });
-    if (!verify(preSignedPayload, preSignature, helperKey)) {
+    );
+    if (!verified && task.category !== exchangeCategory) {
+      // A pre-sign from the build window that signed the task's RAW
+      // (stale) category. Honor the signed bytes — the exchange must
+      // carry exactly what the completer signed for verifyExchange to
+      // hold; the read surfaces fold it for display, and the node may
+      // refuse it (the outbox row surfaces as poisoned, honestly)
+      // rather than us fabricating a signature over words the
+      // completer never saw.
+      const rawCategory = task.category as Exchange["category"];
+      if (verify(payloadFor(rawCategory), preSignature, helperKey)) {
+        exchangeCategory = rawCategory;
+        verified = true;
+      }
+    }
+    if (!verified) {
       throw new Error(
         "The completer's signature no longer matches this task — the hours or category changed after they marked it complete. Ask them to mark it complete again.",
       );
@@ -1109,7 +1145,7 @@ export async function confirmProjectTaskCompletion(
         helperKey,
         helpedKey,
         hours: creditHours,
-        category: task.category as Exchange["category"],
+        category: exchangeCategory,
         completedAt,
       }),
       helperSecret,
@@ -1121,7 +1157,7 @@ export async function confirmProjectTaskCompletion(
     helperKey,
     helpedKey,
     hours: creditHours,
-    category: task.category as Exchange["category"],
+    category: exchangeCategory,
     completedAt,
   });
   const exchange: Exchange = {
@@ -1133,7 +1169,7 @@ export async function confirmProjectTaskCompletion(
     helperSignature,
     helpedSignature: sign(payload, helpedSecret),
     completedAt,
-    category: task.category as Exchange["category"],
+    category: exchangeCategory,
     nodeId,
   };
 

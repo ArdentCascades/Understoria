@@ -29,11 +29,7 @@ import {
   startOfTodayMs,
   type CalendarEntry,
 } from "@/lib/calendar";
-import {
-  PROJECT_CATEGORY_META,
-  CATEGORY_META,
-  eventCategoryMeta,
-} from "@/lib/categories";
+import { eventCategoryMeta, projectCategoryMeta } from "@/lib/categories";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // Agenda view: chronological list grouped by UTC day, sticky day
@@ -305,7 +301,7 @@ function AgendaEntry({
     );
   }
   if (entry.kind === "project_deadline") {
-    const meta = PROJECT_CATEGORY_META[entry.category];
+    const meta = projectCategoryMeta(entry.category);
     // "Yours" = the viewer organizes / co-organizes this project —
     // derived by the page from its own local rows, never federated.
     const isViewers = viewerProjectIds.has(entry.projectId);
@@ -334,7 +330,7 @@ function AgendaEntry({
     );
   }
   // post_expiring
-  const meta = CATEGORY_META[entry.category];
+  const meta = projectCategoryMeta(entry.category);
   const { glyph, labelKey } = postEntryDisplay(entry.postType);
   const label = t(labelKey, { title: entry.postTitle });
   // "Yours" = the viewer authored this post (postedBy vs own key).

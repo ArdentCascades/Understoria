@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { PROJECT_CATEGORIES } from "@/types";
 import type { Category, ProjectCategory } from "@/types";
 
 export interface CategoryMeta {
@@ -122,6 +123,39 @@ export const PROJECT_CATEGORY_META: Record<ProjectCategory, CategoryMeta> = {
     barColorClass: "bg-moss-800",
   },
 };
+
+/**
+ * Fold a STORED category string into today's closed exchange set.
+ * The type system says rows carry `ProjectCategory`, but the type
+ * system doesn't govern history: `TaskState` / `ProjectState` bodies
+ * federate verbatim (the server deliberately passes them through),
+ * device databases outlive every rename, and a row written by an
+ * older build can carry a category id today's build has never heard
+ * of. Anything unrecognized folds into `other` — the honest bucket —
+ * instead of becoming an undefined-lookup crash or a poisoned outbox
+ * row. Used at the WRITE layer (the exchange a task confirmation
+ * signs) so new signed records always carry a valid id.
+ */
+export function normalizeExchangeCategory(category: string): ProjectCategory {
+  return (PROJECT_CATEGORIES as readonly string[]).includes(category)
+    ? (category as ProjectCategory)
+    : "other";
+}
+
+/**
+ * Total meta lookup for a category on a RUNTIME row — never throws.
+ * The read-layer companion of `normalizeExchangeCategory`: one stale
+ * category id on one old row must degrade to the `other` glyph, not
+ * take down a whole screen (the Dashboard error boundary swallowed
+ * exactly this — twice — before the lookups went total). Same
+ * contract as `eventCategoryMeta` below.
+ */
+export function projectCategoryMeta(category: string): CategoryMeta {
+  return (
+    (PROJECT_CATEGORY_META as Record<string, CategoryMeta>)[category] ??
+    PROJECT_CATEGORY_META.other
+  );
+}
 
 /**
  * Display metadata for an EVENT category. Events carry a FREE-TEXT
