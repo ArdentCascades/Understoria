@@ -42,7 +42,7 @@ import type { ProjectTask } from "@/types";
 
 const viewerKey = "viewer-key";
 
-let mockApp: { blockedKeys: Set<string> };
+let mockApp: { blockedKeys: Set<string>; projectTasks: ProjectTask[] };
 
 function task(overrides: Partial<ProjectTask> = {}): ProjectTask {
   return {
@@ -77,7 +77,7 @@ let root: Root;
 
 beforeEach(() => {
   liveComments = [];
-  mockApp = { blockedKeys: new Set<string>() };
+  mockApp = { blockedKeys: new Set<string>(), projectTasks: [] };
   claimProjectTaskMock.mockReset();
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -192,7 +192,10 @@ describe("TaskCard — whole-card link + comment-count chip", () => {
       { id: "c1", authorKey: "ok-author" },
       { id: "c2", authorKey: "blocked-author" },
     ];
-    mockApp = { blockedKeys: new Set<string>(["blocked-author"]) };
+    mockApp = {
+      blockedKeys: new Set<string>(["blocked-author"]),
+      projectTasks: [],
+    };
     renderCard({ allTasks: [task()] });
     expect(commentChip()!.getAttribute("aria-label")).toBe("1 comment");
   });
@@ -334,5 +337,60 @@ describe("TaskCard — claim-moment first step", () => {
       templateId: "community-fridge",
     });
     expect(container.textContent ?? "").not.toContain("It's in your care.");
+  });
+});
+
+describe("TaskCard — capacity mirror", () => {
+  function carried(id: string): ProjectTask {
+    return task({ id, status: "claimed", assignedTo: viewerKey });
+  }
+
+  async function claimThenRefresh() {
+    claimProjectTaskMock.mockResolvedValue(
+      task({ status: "claimed", assignedTo: viewerKey }),
+    );
+    const claim = Array.from(container.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === "Claim this task",
+    );
+    await act(async () => {
+      claim!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+    rerenderCard({
+      task: task({ status: "claimed", assignedTo: viewerKey }),
+      allTasks: [],
+    });
+  }
+
+  it("mirrors the carrying count as a neutral fact from two other tasks up", async () => {
+    mockApp.projectTasks = [carried("c1"), carried("c2"), carried("c3")];
+    renderCard({ task: task({ status: "open" }), allTasks: [] });
+    await claimThenRefresh();
+    const text = container.textContent ?? "";
+    expect(text).toContain("This joins the 3 other tasks in your care.");
+    const careLink = Array.from(container.querySelectorAll("a")).find((a) =>
+      (a.textContent ?? "").includes("See everything in your care"),
+    );
+    expect(careLink?.getAttribute("href")).toBe("/my-work");
+    // Neutral styling only — no warning/red classes anywhere.
+    expect(container.innerHTML).not.toMatch(/rose-|red-|amber-/);
+  });
+
+  it("stays silent at one other task — no information the member lacks", async () => {
+    mockApp.projectTasks = [carried("c1")];
+    renderCard({ task: task({ status: "open" }), allTasks: [] });
+    await claimThenRefresh();
+    expect(container.textContent ?? "").not.toContain("other tasks in your care");
+  });
+
+  it("never counts completed or others' tasks", async () => {
+    mockApp.projectTasks = [
+      task({ id: "done", status: "completed", assignedTo: viewerKey }),
+      task({ id: "theirs", status: "claimed", assignedTo: "someone-else" }),
+      carried("c1"),
+    ];
+    renderCard({ task: task({ status: "open" }), allTasks: [] });
+    await claimThenRefresh();
+    expect(container.textContent ?? "").not.toContain("other tasks in your care");
   });
 });

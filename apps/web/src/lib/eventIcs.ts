@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { Event } from "@/types";
+import type { Event, EventShiftRow } from "@/types";
 
 /**
  * Single-event `.ics` export — the settled shape from
@@ -192,5 +192,45 @@ export function buildEventIcs(
   // module doc comment for the settled §11.5a reasoning.
   lines.push("END:VEVENT", "END:VCALENDAR");
 
+  return lines.map(foldIcsLine).join(CRLF) + CRLF;
+}
+
+/**
+ * Single-SHIFT `.ics` export — the §11.5a affordance extended to the
+ * slot a member actually signed up for. A shift has a real clock time
+ * the member committed to weeks ahead, which is exactly where time
+ * blindness bites hardest; the file hands that time to the member's
+ * OWN calendar app, which may remind them on their own terms
+ * (`no-notifications` — same posture as `buildEventIcs`, and the same
+ * deliberate absences: no VALARM, no ATTENDEE/ORGANIZER, and NOTHING
+ * about who else signed up).
+ *
+ * The summary reads "<shift label> — <event title>" so the calendar
+ * entry stands alone; location and the link back come from the event.
+ */
+export function buildShiftIcs(
+  shift: Pick<EventShiftRow, "id" | "label" | "startsAt" | "endsAt">,
+  event: Event,
+  opts: { appUrl?: string } = {},
+): string {
+  const lines: string[] = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Understoria//Community Events//EN",
+    "BEGIN:VEVENT",
+    // Shift ids are unique per node, same as event ids — stable UID
+    // so re-downloading updates instead of duplicating.
+    `UID:${escapeIcsText(shift.id)}@${escapeIcsText(event.nodeId)}`,
+    `DTSTAMP:${formatIcsUtc(Date.now())}`,
+    `DTSTART:${formatIcsUtc(shift.startsAt)}`,
+    `DTEND:${formatIcsUtc(shift.endsAt)}`,
+    `SUMMARY:${escapeIcsText(`${shift.label} — ${event.title}`)}`,
+    `LOCATION:${escapeIcsText(event.location)}`,
+  ];
+  const linkBack = opts.appUrl ? `${opts.appUrl}/events/${event.id}` : "";
+  if (linkBack) {
+    lines.push(`DESCRIPTION:${escapeIcsText(linkBack)}`);
+  }
+  lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.map(foldIcsLine).join(CRLF) + CRLF;
 }

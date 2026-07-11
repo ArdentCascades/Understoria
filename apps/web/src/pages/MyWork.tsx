@@ -24,6 +24,8 @@ import {
 } from "@/lib/myCommitments";
 import { MyTasksSection } from "@/pages/MyTasks";
 import { MyProjectsSection } from "@/pages/MyProjects";
+import { buildShiftIcs, icsFilename } from "@/lib/eventIcs";
+import { downloadIcs } from "@/lib/ics";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
@@ -340,11 +342,13 @@ export default function MyWorkPage() {
   );
 }
 
-// One signed-up shift: label + when, the whole row linking to the
-// event page (where withdrawal lives). Times format in the member's
+// One signed-up shift: label + when, the row linking to the event
+// page (where withdrawal lives), plus a quiet calendar-file download
+// — a shift is a real clock time committed weeks ahead, which is
+// where time blindness bites hardest. Times format in the member's
 // locale; start date + start–end times on one quiet line.
 function ShiftRow({ upcoming }: { upcoming: UpcomingShift }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { shift, event } = upcoming;
   const dateFmt = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
@@ -375,6 +379,21 @@ function ShiftRow({ upcoming }: { upcoming: UpcomingShift }) {
           {event.title}
         </span>
       </Link>
+      {/* Outside the row link so a tap can't misfire into navigation.
+          Same contract as every calendar export: the file goes to the
+          member's OWN calendar app; Understoria never reminds. */}
+      <button
+        type="button"
+        className="mt-0.5 text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+        onClick={() =>
+          downloadIcs(
+            icsFilename(`${shift.label} ${event.title}`),
+            buildShiftIcs(shift, event, { appUrl: window.location.origin }),
+          )
+        }
+      >
+        {t("myWork.shiftIcs")}
+      </button>
     </li>
   );
 }

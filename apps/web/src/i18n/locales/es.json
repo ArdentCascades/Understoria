@@ -947,7 +947,9 @@
         "firstStep": "Un buen primer paso:",
         "tipAbove": "El consejo de arriba es un buen primer paso.",
         "planLink": "Abre la tarea para anotar tus propios primeros pasos — solo tú puedes verlos",
-        "jotHint": "Si te ayuda, anota abajo tus propios primeros pasos — solo tú puedes verlos."
+        "jotHint": "Si te ayuda, anota abajo tus propios primeros pasos — solo tú puedes verlos.",
+        "capacity": "Esta se suma a las {{count}} otras tareas a tu cuidado.",
+        "capacityLink": "Ver todo lo que está a tu cuidado"
       },
       "plan": {
         "heading": "Tu plan privado",
@@ -1302,6 +1304,7 @@
     "empty": "Cuando tomes una tarea o inicies un proyecto, aparecerá aquí — tus compromisos y los proyectos que organizas, en un solo lugar.",
     "shiftsTitle": "Turnos a los que te has apuntado",
     "claimedPostsTitle": "Ayuda que estás en camino de dar",
+    "shiftIcs": "Añadir este turno a mi calendario (.ics)",
     "deskLink": "Mira todo lo que te espera en tu escritorio"
   },
   "bodyDoubling": {
@@ -1976,6 +1979,17 @@
   "board": {
     "title": "Tablero comunitario",
     "tagline": "Publica lo que necesitas. Ofrece lo que puedas.",
+    "oneSmallThing": {
+      "button": "Muéstrame una cosa pequeña",
+      "heading": "Una cosa pequeña",
+      "why": "Para días de poca energía: sáltate el elegir. Una cosa acotada que podrías tomar — elegida al azar entre lo que está abierto ahora, nunca clasificada, nunca basada en tu historial.",
+      "empty": "Nada abierto encaja ahora mismo — las pestañas de arriba tienen el panorama completo.",
+      "another": "Muéstrame otra",
+      "open": "Ábrela",
+      "close": "Cerrar",
+      "kindTask": "Tarea de proyecto",
+      "kindNeed": "Necesidad del tablón"
+    },
     "tabs": {
       "needs": "Necesidades",
       "offers": "Ofertas",
@@ -2046,6 +2060,10 @@
   "dashboard": {
     "title": "Panel comunitario",
     "tagline": "La unidad de progreso somos nosotres, no yo.",
+    "resume": {
+      "title": "Retoma donde lo dejaste",
+      "hint": "La última tarea que tocaste — tu propia memoria de navegación, guardada solo en este dispositivo."
+    },
     "gatherings": {
       "title": "Próximamente",
       "going": "vas a ir"

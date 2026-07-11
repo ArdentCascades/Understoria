@@ -19,38 +19,20 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-// Minimal iCalendar (RFC 5545) writer for the "put it on my calendar"
-// affordance on a private planned day. This is the ethos-clean bridge
-// across time blindness: Understoria itself never schedules, pushes,
-// or reminds (`no-notifications`), but a member may hand their OWN
-// calendar app a plain file and let a tool they already control do
-// the reminding — their choice, their tool, their data. The file is
-// generated entirely on-device and downloaded locally; nothing
-// crosses the wire, and the app keeps no record that it was made.
+import { escapeIcsText, foldIcsLine, formatIcsUtc } from "@/lib/eventIcs";
 
-/** Escape text per RFC 5545 §3.3.11: backslash, semicolon, comma,
- *  and newlines. */
-function escapeText(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,")
-    .replace(/\r?\n/g, "\\n");
-}
-
-/** Fold a content line at 75 octets (§3.1) — continuation lines start
- *  with a single space. Folding on characters rather than octets is a
- *  slight over-approximation for multibyte text but always safe (we
- *  fold at 60 to leave headroom). */
-function foldLine(line: string): string[] {
-  const LIMIT = 60;
-  if (line.length <= LIMIT) return [line];
-  const out: string[] = [line.slice(0, LIMIT)];
-  for (let i = LIMIT; i < line.length; i += LIMIT - 1) {
-    out.push(" " + line.slice(i, i + LIMIT - 1));
-  }
-  return out;
-}
+// iCalendar (RFC 5545) writer for the "put it on my calendar"
+// affordance on a private planned day — an ALL-DAY event, unlike the
+// timed community-event/shift exports in `lib/eventIcs.ts`, whose
+// escaping/folding/UTC primitives this module reuses. This is the
+// ethos-clean bridge across time blindness: Understoria itself never
+// schedules, pushes, or reminds (`no-notifications`), but a member
+// may hand their OWN calendar app a plain file and let a tool they
+// already control do the reminding — their choice, their tool, their
+// data. The file is generated entirely on-device and downloaded
+// locally; nothing crosses the wire, and the app keeps no record
+// that it was made. Same deliberate absences as eventIcs: no VALARM,
+// no ATTENDEE/ORGANIZER.
 
 /** "YYYY-MM-DD" → "YYYYMMDD". Assumes the input already passed the
  *  taskPlans day-shape guard. */
@@ -85,8 +67,6 @@ export interface PlannedDayEvent {
 
 /** Build a single all-day VEVENT calendar for a planned day. */
 export function plannedDayIcs(event: PlannedDayEvent, now: Date = new Date()): string {
-  const stamp =
-    now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -94,17 +74,17 @@ export function plannedDayIcs(event: PlannedDayEvent, now: Date = new Date()): s
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:understoria-plan-${event.uidKey}@local`,
-    `DTSTAMP:${stamp}`,
+    `DTSTAMP:${formatIcsUtc(now.getTime())}`,
     `DTSTART;VALUE=DATE:${dayToIcsDate(event.day)}`,
     `DTEND;VALUE=DATE:${nextDay(event.day)}`,
-    `SUMMARY:${escapeText(event.summary)}`,
-    `DESCRIPTION:${escapeText(event.description)}`,
-    `URL:${escapeText(event.url)}`,
+    `SUMMARY:${escapeIcsText(event.summary)}`,
+    `DESCRIPTION:${escapeIcsText(event.description)}`,
+    `URL:${escapeIcsText(event.url)}`,
     "TRANSP:TRANSPARENT",
     "END:VEVENT",
     "END:VCALENDAR",
   ];
-  return lines.flatMap(foldLine).join("\r\n") + "\r\n";
+  return lines.map(foldIcsLine).join("\r\n") + "\r\n";
 }
 
 /** Trigger a local download of an .ics file — same Blob/anchor shape

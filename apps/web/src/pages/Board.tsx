@@ -50,6 +50,7 @@ import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
 import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
+import { OneSmallThing } from "@/components/board/OneSmallThing";
 import type {
   Category,
   Project,
@@ -613,6 +614,21 @@ export default function BoardPage() {
         </div>
         </div>
         {/* end mobile sticky header group */}
+
+        {/* "One small thing" — the choice-paralysis escape hatch: a
+            single quiet line under the search band on every tab;
+            expands to exactly one claimable pick at a time
+            (lib/oneSmallThing.ts — feasibility filters + a shuffle,
+            never a recommender). */}
+        {currentMember && (
+          <OneSmallThing
+            memberKey={currentMember.publicKey}
+            tasks={projectTasks}
+            projects={projects}
+            posts={posts}
+            blockedKeys={blockedKeys}
+          />
+        )}
 
         {/* Mobile-visible filter rail copies. These sit between the
             search input and the list in DOM order, so on mobile
