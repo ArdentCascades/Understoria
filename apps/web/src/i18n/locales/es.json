@@ -489,7 +489,13 @@
     "weekNav": {
       "prev": "Semana anterior",
       "next": "Semana siguiente",
-      "range": "{{start}} – {{end}}"
+      "range": "{{start}} – {{end}}",
+      "today": "Hoy",
+      "thisWeek": "Esta semana"
+    },
+    "week": {
+      "quiet": "No hay nada programado esta semana.",
+      "nextUp": "Lo próximo: {{title}} · {{date}}"
     },
     "monthNav": {
       "prev": "Mes anterior",

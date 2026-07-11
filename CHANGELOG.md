@@ -9,6 +9,23 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **The calendar's week view is now the view you plan a week in.**
+  Event chips lead with their start time (deadlines and expiring
+  posts stay day-granular — they have no clock time to show), so a
+  week is no longer just a skinnier month. On a phone the week
+  renders as seven stacked day rows instead of a 7-column grid —
+  seven columns at phone widths left ~45px per day and truncated
+  every chip to one letter. Paging away from now shows a quiet
+  "Today" jump (the same affordance the month grid has had), the
+  header names the current week and carries the year once you page
+  out of it, and a week with nothing scheduled says so instead of
+  rendering silent blank cells — with a one-tap "Next up" jump to
+  the next scheduled thing when there is one. Multi-day events show
+  their day position (2/3) on continuation days, weekends carry a
+  subtle tint, and the "you're going" ring is easier to see at chip
+  size.
+
 ### Added
 - **A "My work" tab.** The fifth tab (bottom bar and desktop rail)
   is now your own work: every task you're carrying and every project

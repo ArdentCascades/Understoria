@@ -568,8 +568,20 @@ export default function CalendarPage() {
           onNextWeek={() =>
             setWeekOffset((o) => Math.min(o + 1, MAX_WEEK_OFFSET))
           }
+          onJumpToToday={() => setWeekOffset(0)}
+          onJumpToDate={(ms) => {
+            // Both anchors are Sunday midnights, so the difference is
+            // an exact multiple of WEEK_MS; clamp to the paging bounds.
+            const target = Math.round(
+              (startOfUTCWeek(ms) - startOfUTCWeek(now)) / WEEK_MS,
+            );
+            setWeekOffset(
+              Math.max(-MAX_WEEK_OFFSET, Math.min(target, MAX_WEEK_OFFSET)),
+            );
+          }}
           canPrev={weekOffset > -MAX_WEEK_OFFSET}
           canNext={weekOffset < MAX_WEEK_OFFSET}
+          atToday={weekOffset === 0}
         />
       )}
 

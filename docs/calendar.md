@@ -116,7 +116,7 @@ per breakpoint:
 |---|---|---|
 | **Agenda** | < lg (mobile) | Chronological list grouped by day with sticky day headers. Accessible by default, screen-reader friendly, scrollable. This is the minimum viable surface — if month/week views break, agenda still works. |
 | **Month** | lg+ (desktop) | Standard 7×N grid. Markers per day with "+N more" overflow link when a day has more entries than fit. |
-| **Week** | opt-in | 7-column week view for organizers tracking multiple project deadlines in a tight window. |
+| **Week** | opt-in | The planning horizon. Event chips lead with their start time (deadline / expiry chips stay day-granular); at lg+ it's a 7-column grid, below lg the same week renders as seven stacked day rows so chips stay readable at phone widths. A week with nothing scheduled says so and offers a one-tap jump to the next scheduled entry in the loaded window. |
 
 Filtering is scoped to surfaces members already know about:
 
