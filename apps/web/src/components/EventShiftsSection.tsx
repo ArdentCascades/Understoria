@@ -441,6 +441,40 @@ export function EventShiftsSection({
                     </Link>
                   </p>
                 )}
+
+              {/* The adopted direct-exchange doorway
+                  (docs/direct-exchange-label.md §6.1): a passed shift
+                  on a PLAIN event — the case shift-signups §14 ruling
+                  1 deferred — lands on the direct-exchange ceremony
+                  with the shift's duration and the event's category
+                  prefilled. FORM prefill only: the recorded exchange
+                  carries a random `direct:` label and nothing
+                  event-shaped (§3 permanent boundary). Offered to
+                  shift members other than the event's creator (the
+                  named counterparty); the creator co-signs on their
+                  own screen. Same quiet posture as the work-day
+                  bridge above: never a prompt, never a roster diff. */}
+              {passed &&
+                !isCancelled &&
+                !creditHref &&
+                mine &&
+                memberKey !== null &&
+                memberKey !== event.createdBy && (
+                  <p className="mt-2 text-sm">
+                    <Link
+                      to={`/record-direct?member=${encodeURIComponent(
+                        event.createdBy,
+                      )}&hours=${
+                        Math.round(
+                          ((shift.endsAt - shift.startsAt) / 3_600_000) * 4,
+                        ) / 4
+                      }&category=${encodeURIComponent(event.category)}`}
+                      className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                    >
+                      {t("events.shifts.recordDirectLink")}
+                    </Link>
+                  </p>
+                )}
             </li>
           );
         })}

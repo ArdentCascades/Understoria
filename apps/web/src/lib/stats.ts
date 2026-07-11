@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type {
-  Category,
+  ProjectCategory,
   CommunityStats,
   Exchange,
   Member,
@@ -62,7 +62,7 @@ export function computeCommunityStats(
     }
   }
 
-  const categoryBreakdown: Partial<Record<Category, number>> = {};
+  const categoryBreakdown: Partial<Record<ProjectCategory, number>> = {};
   for (const x of exchanges) {
     categoryBreakdown[x.category] =
       (categoryBreakdown[x.category] ?? 0) + x.hoursExchanged;

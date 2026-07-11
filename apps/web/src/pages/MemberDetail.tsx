@@ -34,7 +34,7 @@
  * MemberDetail.test.tsx.
  */
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
@@ -299,6 +299,27 @@ export default function MemberDetailPage() {
           </>
         )}
       </section>
+
+      {/* The direct-exchange doorway (docs/direct-exchange-label.md
+          §6.2, ruling R3): recording help that had no post or task
+          behind it starts FROM THE PERSON — this profile — never
+          from a board surface or a suggestion engine. Both
+          directions land on the one ceremony form; consent stays the
+          mutual signature. Sits above the defensive tools
+          (graduated-tools ordering: connective before protective). */}
+      {!isSelf && currentMember && publicKey && (
+        <section className="card mb-4">
+          <Link
+            to={`/record-direct?member=${encodeURIComponent(publicKey)}`}
+            className="btn-secondary inline-block min-h-[44px]"
+          >
+            {t("direct.title")}
+          </Link>
+          <p className="mt-2 text-sm text-moss-600 dark:text-moss-300">
+            {t("member.recordDirectHint")}
+          </p>
+        </section>
+      )}
 
       {/* Block / Unblock affordance. Hidden on the self-view because
           blocking yourself is meaningless. Per design doc §11.6 +

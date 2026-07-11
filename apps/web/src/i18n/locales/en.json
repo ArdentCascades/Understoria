@@ -672,6 +672,7 @@
       "recorded": "You're signed up. Saved on this device.",
       "removed": "Signup removed.",
       "recordTimeLink": "Record time together — {{project}}",
+      "recordDirectLink": "Record time together",
       "addButton": "Add a shift",
       "addConfirm": "Add shift",
       "added": "Shift added.",
@@ -2239,7 +2240,8 @@
     "cannotVouchUntilTrusted": "Vouching is enabled once you're trusted yourself. Your inviter's vouch is one; another community member can vouch for you to make it two.",
     "alreadyFullyTrusted": "This member is already trusted. Another vouch wouldn't change anything.",
     "alreadyVouchedByYou": "You've already vouched for this member.",
-    "backToBoard": "Back to board"
+    "backToBoard": "Back to board",
+    "recordDirectHint": "Helped each other outside any post or project? Record the hours together — you both sign, phone to phone."
   },
   "settings": {
     "openSettings": "Open settings",
