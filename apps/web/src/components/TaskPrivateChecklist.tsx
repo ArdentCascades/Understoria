@@ -29,10 +29,12 @@ import {
   MAX_PLAN_STEPS,
   MAX_STEP_LENGTH,
   removePlanStep,
+  seedPlanSteps,
   setPlannedDay,
   setPlanNote,
   togglePlanStep,
 } from "@/db/taskPlans";
+import { getTaskSteps } from "@/content/taskSteps";
 import { downloadIcs, plannedDayIcs } from "@/lib/ics";
 import { recordTaskTouch } from "@/lib/lastTouched";
 
@@ -56,16 +58,32 @@ export function TaskPrivateChecklist({
   memberKey,
   taskTitle,
   projectId,
+  templateId,
 }: {
   taskId: string;
   memberKey: string;
-  /** For the calendar-file event title. */
+  /** For the calendar-file event title, and (with `templateId`) for
+   *  resolving the task's suggested starter steps. */
   taskTitle: string;
   /** For the deep link back to this task inside the calendar file. */
   projectId: string;
+  /** The project's template id (null for from-scratch projects) —
+   *  resolves the authored suggested starter steps
+   *  (content/taskSteps.ts) behind the one-tap offer below. */
+  templateId: string | null;
 }) {
   const { t, i18n } = useTranslation();
   const [draft, setDraft] = useState("");
+  // Suggested starter steps for this template task, in the viewer's
+  // language — null for from-scratch/renamed tasks. Offered (never
+  // auto-inserted) only while the plan has no steps: everything in
+  // the plan should have arrived by the member's choice, and starting
+  // blank stays one decision, not an undo.
+  const suggestions = getTaskSteps(
+    templateId,
+    taskTitle,
+    i18n.resolvedLanguage ?? "en",
+  );
   // null = not editing (textarea mirrors the stored note); a string =
   // unsaved edit in progress. Keeps a background live-query refresh
   // from clobbering half-typed text.
@@ -219,6 +237,25 @@ export function TaskPrivateChecklist({
         <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
           {t("projects.task.plan.stepsHint")}
         </p>
+      )}
+      {steps.length === 0 && suggestions && (
+        <div className="mt-2 rounded-md border border-canopy-100 bg-canopy-50/40 p-2 dark:border-canopy-900 dark:bg-canopy-950/20">
+          <button
+            type="button"
+            className="text-sm font-medium text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+            onClick={async () => {
+              const seeded = await seedPlanSteps(taskId, memberKey, suggestions);
+              if (seeded) touch();
+            }}
+          >
+            {t("projects.task.plan.suggestButton", {
+              count: suggestions.length,
+            })}
+          </button>
+          <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
+            {t("projects.task.plan.suggestHint")}
+          </p>
+        </div>
       )}
 
       {/* "Where things stand" — the re-entry note. Coming back to a

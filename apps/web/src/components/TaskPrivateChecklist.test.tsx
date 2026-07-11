@@ -6,9 +6,19 @@
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/db/database";
 import { addPlanStep, localDayString, setPlannedDay } from "@/db/taskPlans";
+
+// The suggested-steps content is mocked so this suite tests the OFFER
+// mechanics (render conditions, seeding, disappearance) independent
+// of what's authored for any real template.
+vi.mock("@/content/taskSteps", () => ({
+  getTaskSteps: (templateId: string | null) =>
+    templateId === "tmpl-with-steps"
+      ? ["Send one text", "Find the tape measure", "Walk the site"]
+      : null,
+}));
 
 import "@/i18n";
 import { TaskPrivateChecklist } from "./TaskPrivateChecklist";
@@ -41,7 +51,7 @@ afterEach(() => {
   container.remove();
 });
 
-async function render(memberKey = ME) {
+async function render(memberKey = ME, templateId: string | null = null) {
   await act(async () => {
     root = createRoot(container);
     root.render(
@@ -50,6 +60,7 @@ async function render(memberKey = ME) {
         memberKey={memberKey}
         taskTitle="Fix the fence"
         projectId="proj-1"
+        templateId={templateId}
       />,
     );
     await Promise.resolve();
@@ -219,5 +230,49 @@ describe("TaskPrivateChecklist", () => {
     expect(container.textContent).toContain(
       "Understoria never sends reminders",
     );
+  });
+});
+
+describe("TaskPrivateChecklist — suggested starter steps", () => {
+  const suggestBtn = () =>
+    Array.from(container.querySelectorAll("button")).find((b) =>
+      (b.textContent ?? "").includes("suggested steps"),
+    );
+
+  it("offers suggestions on an empty plan for a template task, and seeds them on tap", async () => {
+    await render(ME, "tmpl-with-steps");
+    expect(suggestBtn()).toBeDefined();
+    expect(container.textContent).toContain("Start with 3 suggested steps");
+    // The offer explains itself: editable, deletable, blank is fine,
+    // still private.
+    expect(container.textContent).toContain("Starting blank works too");
+
+    await act(async () => {
+      suggestBtn()!.click();
+    });
+    await flushLiveQuery();
+    const text = container.textContent ?? "";
+    expect(text).toContain("Send one text");
+    expect(text).toContain("Walk the site");
+    expect(text).toContain("0 of 3 done");
+    // Offer retires once the plan has steps.
+    expect(suggestBtn()).toBeUndefined();
+    // Seeded steps are ordinary private rows.
+    const stored = await db.taskPlans.get(TASK);
+    expect(stored?.steps.length).toBe(3);
+    expect(stored?.memberKey).toBe(ME);
+  });
+
+  it("never offers on from-scratch tasks or once the member wrote their own step", async () => {
+    await render(ME, null);
+    expect(suggestBtn()).toBeUndefined();
+
+    await act(async () => {
+      root.unmount();
+    });
+    await addPlanStep(TASK, ME, "my own step");
+    await render(ME, "tmpl-with-steps");
+    expect(suggestBtn()).toBeUndefined();
+    expect(container.textContent).toContain("my own step");
   });
 });

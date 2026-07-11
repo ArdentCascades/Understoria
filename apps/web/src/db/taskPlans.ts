@@ -119,6 +119,37 @@ export async function addPlanStep(
   });
 }
 
+/**
+ * Seed the plan with SUGGESTED starter steps (content/taskSteps.ts)
+ * — the one-tap "Start with suggested steps" affordance. Only lands
+ * on a plan that currently has NO steps (the offer renders only
+ * then; racing writes stay safe here), so it can never overwrite
+ * anything the member wrote. Seeded steps become ordinary private
+ * checklist items — same row, same caps, same everything.
+ */
+export async function seedPlanSteps(
+  taskId: string,
+  memberKey: string,
+  texts: readonly string[],
+): Promise<boolean> {
+  const cleaned = texts
+    .map((t) => t.trim().slice(0, MAX_STEP_LENGTH))
+    .filter((t) => t.length > 0)
+    .slice(0, MAX_PLAN_STEPS);
+  if (cleaned.length === 0) return false;
+  return db.transaction("rw", db.taskPlans, async () => {
+    const now = Date.now();
+    const row = baseRow(await db.taskPlans.get(taskId), taskId, memberKey, now);
+    if (row.steps.length > 0) return false;
+    await db.taskPlans.put({
+      ...row,
+      steps: cleaned.map((text) => ({ id: uuid(), text, done: false })),
+      updatedAt: now,
+    });
+    return true;
+  });
+}
+
 export async function togglePlanStep(
   taskId: string,
   memberKey: string,

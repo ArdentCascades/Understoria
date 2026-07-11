@@ -13,6 +13,7 @@ import {
   MAX_NOTE_LENGTH,
   MAX_PLAN_STEPS,
   removePlanStep,
+  seedPlanSteps,
   setPlannedDay,
   setPlanNote,
   togglePlanStep,
@@ -104,6 +105,56 @@ describe("taskPlans — planned day", () => {
   it("localDayString speaks the <input type=date> shape", () => {
     expect(localDayString(new Date(2026, 6, 11))).toBe("2026-07-11");
     expect(localDayString(new Date(2026, 0, 2))).toBe("2026-01-02");
+  });
+});
+
+describe("taskPlans — suggested-step seeding", () => {
+  it("seeds suggestions as ordinary unchecked steps", async () => {
+    const ok = await seedPlanSteps(TASK, ME, [
+      "Send one text",
+      "  Find the tape measure  ",
+      "Walk the site",
+    ]);
+    expect(ok).toBe(true);
+    const plan = await getOwnTaskPlan(TASK, ME);
+    expect(plan?.steps.map((s) => s.text)).toEqual([
+      "Send one text",
+      "Find the tape measure",
+      "Walk the site",
+    ]);
+    expect(plan?.steps.every((s) => !s.done)).toBe(true);
+    // Ordinary steps: toggling and removing work like hand-written ones.
+    await togglePlanStep(TASK, ME, plan!.steps[0].id);
+    expect((await getOwnTaskPlan(TASK, ME))?.steps[0].done).toBe(true);
+  });
+
+  it("never lands on a plan that already has steps — the member's words win", async () => {
+    await addPlanStep(TASK, ME, "my own first step");
+    const ok = await seedPlanSteps(TASK, ME, ["Suggested step"]);
+    expect(ok).toBe(false);
+    const plan = await getOwnTaskPlan(TASK, ME);
+    expect(plan?.steps.map((s) => s.text)).toEqual(["my own first step"]);
+  });
+
+  it("seeds alongside an existing planned day or note without touching them", async () => {
+    await setPlannedDay(TASK, ME, "2026-08-01");
+    await setPlanNote(TASK, ME, "context");
+    expect(await seedPlanSteps(TASK, ME, ["Step one"])).toBe(true);
+    const plan = await getOwnTaskPlan(TASK, ME);
+    expect(plan?.plannedDay).toBe("2026-08-01");
+    expect(plan?.note).toBe("context");
+    expect(plan?.steps.length).toBe(1);
+  });
+
+  it("caps and cleans the input", async () => {
+    const many = Array.from({ length: MAX_PLAN_STEPS + 10 }, (_, i) =>
+      i === 3 ? "   " : `step ${i}`,
+    );
+    await seedPlanSteps(TASK, ME, many);
+    const plan = await getOwnTaskPlan(TASK, ME);
+    expect(plan?.steps.length).toBe(MAX_PLAN_STEPS);
+    expect(await seedPlanSteps("t-empty", ME, ["  ", ""])).toBe(false);
+    expect(await db.taskPlans.get("t-empty")).toBeUndefined();
   });
 });
 

@@ -774,6 +774,7 @@ export function TaskDetailBody({
             memberKey={currentKey}
             taskTitle={task.title}
             projectId={task.projectId}
+            templateId={templateId}
           />
         )}
       {/* Body-doubling doorway (docs/body-doubling.md): working
