@@ -29,7 +29,10 @@ import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import type { Post } from "@/types";
 
-// The "My work" tab (docs/navigation-shell.md): both directions of a
+// The "In my care" tab (docs/navigation-shell.md; shipped as "My
+// work", renamed because the page's own copy — "carrying", "in your
+// care" — was already speaking care, not labor; the /my-work route
+// and code identifiers keep the old name): both directions of a
 // member's involvement — tasks you're carrying (claimer side) and
 // projects you organize (organizer side) — on one primary surface.
 // The two halves shipped as separate pages (/my-tasks, /my-projects)

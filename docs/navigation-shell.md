@@ -8,14 +8,15 @@ reasoning that keeps each tier short, so future additions have to
 argue their way in rather than drift in.
 
 Shipped in two PRs: the header + me-menu (#411, purely additive),
-then the "My work" tab swap and the docs sweep (this one). The old
+then the tab swap and the docs sweep (this one; the tab shipped as
+"My work" and was renamed "In my care" — see below). The old
 desktop-only pinned Settings slot (#399) was the first casualty; the
 Profile tab the second.
 
 ## The three tiers
 
 1. **Tabs (bottom bar / desktop rail)** — daily work. Board,
-   Dashboard, Calendar, Messages, **My work**. Same five items at
+   Dashboard, Calendar, Messages, **In my care**. Same five items at
    every width: the bar's `<ul>` becomes a slim vertical rail at
    `lg+` (`BottomNav.tsx`, one DOM), so nothing exists on desktop
    that a phone can't reach.
@@ -30,16 +31,24 @@ Profile tab the second.
    rail and palette, print pages from their screens' Print buttons,
    Disputes/Proposals from Profile, and so on.
 
-## Why "My work" holds the fifth slot
+## Why "In my care" holds the fifth slot
 
 The tab bar's job is the loop a member actually lives in: see what
 the community needs (Board), see how we're doing (Dashboard), see
 what's happening (Calendar), talk (Messages) — and see what *I've
-taken on* (My work). The Profile page is identity and archive —
+taken on* (In my care). The Profile page is identity and archive —
 balance, history, roles, invites, security — things you *revisit*,
 not things you *work in*. When Profile held the fifth slot, the two
 views members actually returned to daily (tasks you're carrying,
 projects you organize) sat buried two taps behind it.
+
+The tab shipped as "My work" and was renamed **"In my care"** ("A
+mi cuidado"): "work" is productivity-suite vocabulary and frames
+mutual aid as labor, while the page's own copy already spoke in
+care terms ("Tasks you're carrying", "in your care"). The route
+stays `/my-work` — URLs are not member-facing vocabulary — and the
+tab icon changed with the name (a seedling cradled in cupped hands
+instead of a clipboard; `IconCare`).
 
 `/my-work` gathers every commitment kind on one read-only page. The
 claimer half is "Tasks you're carrying" (grouped by project), then
@@ -94,7 +103,7 @@ on the whole chrome; the print pages carry their own sheet chrome).
 
 Locked by tests (`AppHeader.test.tsx`, `BottomNav.test.tsx`) and
 walked in `accessibility-test-runbook.md` (§"Global header +
-me-menu", §"My work", §"Bottom navigation"):
+me-menu", §"In my care", §"Bottom navigation"):
 
 - The drawer is a focus-trapped `role="dialog"`; Escape closes and
   focus returns to the Menu button; scrim tap closes; the slide

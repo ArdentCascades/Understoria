@@ -29,7 +29,7 @@ import {
   IconHelp,
   IconInfrastructure,
   IconMessages,
-  IconMyWork,
+  IconCare,
   IconProfile,
   type IconProps,
 } from "@/components/visual";
@@ -64,7 +64,7 @@ const SECTION_ICONS: Record<string, ComponentType<IconProps>> = {
   community: IconInfrastructure,
   messages: IconMessages,
   events: IconCalendar,
-  projects: IconMyWork,
+  projects: IconCare,
 };
 
 function sectionIcon(id: string): ComponentType<IconProps> {

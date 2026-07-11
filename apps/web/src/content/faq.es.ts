@@ -146,7 +146,7 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Cinco pestañas viven en la parte de abajo de la pantalla " +
             "(una barra a la izquierda en pantallas anchas): Tablero, " +
-            "Panel, Calendario, Mensajes y Mi trabajo — cada tarea que " +
+            "Panel, Calendario, Mensajes y A mi cuidado — cada tarea que " +
             "has tomado y cada proyecto que organizas, reunidos en un " +
             "solo lugar.",
           "Todo lo que trata de TI se movió detrás del botón Menú, en " +

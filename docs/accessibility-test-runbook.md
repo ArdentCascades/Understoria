@@ -245,9 +245,9 @@ onboard — are prioritized; the rest confirm the page is navigable.
   be used." with the reason announced when it's spent/invalid;
   "Continue to the board" is reachable and lands you in onboarding.
 
-### My work
+### In my care
 
-- **Entry:** bottom nav "My work". Route `/my-work` (the old
+- **Entry:** bottom nav "In my care". Route `/my-work` (the old
   `/my-tasks` and `/my-projects` routes redirect to its sections).
 - **Steps:** read-all; jump by heading between the two `<h2>`
   sections, "Tasks you're carrying" and "Projects you organize".
@@ -255,7 +255,7 @@ onboard — are prioritized; the rest confirm the page is navigable.
   task's own page. With nothing claimed or organized, confirm the
   single combined empty state ("Nothing in your care right now")
   and its "Browse projects" action.
-- **Expected:** heading "My work"; each project group under Tasks
+- **Expected:** heading "In my care"; each project group under Tasks
   is a labelled region whose heading links to the project page;
   status reads as text chips ("Claimed" / "Awaiting confirmation");
   nothing on the page is an action — it's a read-only inventory,

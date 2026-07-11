@@ -20,7 +20,7 @@ export {
   IconInvite,
   IconMenu,
   IconMessages,
-  IconMyWork,
+  IconCare,
   IconProfile,
   IconSearch,
   IconSettings,

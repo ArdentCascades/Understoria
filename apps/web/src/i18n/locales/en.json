@@ -435,7 +435,7 @@
     "calendar": "Calendar",
     "dashboard": "Dashboard",
     "messages": "Messages",
-    "myWork": "My work",
+    "myWork": "In my care",
     "profile": "Profile",
     "primaryNav": "Primary navigation",
     "settings": "Settings"
@@ -1260,7 +1260,7 @@
     }
   },
   "myWork": {
-    "title": "My work",
+    "title": "In my care",
     "subtitle": "What you've claimed and what you organize — tasks, shifts, help on the way, and your projects, in one place.",
     "emptyTitle": "Nothing in your care right now",
     "empty": "When you claim a task or start a project, it shows up here — your commitments and the projects you organize, in one place.",

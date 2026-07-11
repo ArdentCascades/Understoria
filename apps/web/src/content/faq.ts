@@ -144,7 +144,7 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "Five tabs sit at the bottom of the screen (a rail on the " +
             "left on a wide screen): Board, Dashboard, Calendar, " +
-            "Messages, and My work — every task you've claimed and " +
+            "Messages, and In my care — every task you've claimed and " +
             "every project you organize, gathered in one place.",
           "Everything about YOU moved behind the Menu button in the " +
             "top right corner: your Profile (listed under your own " +

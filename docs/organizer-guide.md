@@ -462,8 +462,8 @@ once they've accepted).
   every peer, a work day is indistinguishable from any other
   event, and the location field is never pre-filled for you;
   how specific to be stays your call (see §7b).
-- **"Projects you organize" (the My work tab, `/my-work`).** If
-  you steward several projects, the **My work** tab's projects
+- **"Projects you organize" (the In my care tab, `/my-work`).** If
+  you steward several projects, the **In my care** tab's projects
   section gathers them with what's quietly waiting on you — tasks
   awaiting your confirmation, open slots, invitations you've
   issued. (The old `/my-projects` address redirects there.) It's
