@@ -47,6 +47,20 @@ include breaking changes.
   search band bleed through the backdrop.
 
 ### Changed
+- **"My work" now lives up to its name.** The tab used to show only
+  project tasks and organized projects; two commitment kinds the app
+  already stored were invisible on it. Now the carrying column also
+  lists **shifts you're signed up for** (soonest first, with their
+  times — the page's first clock — each linking to its event) and
+  **help you're on your way to give** (needs you claimed from the
+  board and haven't finished; a claimed offer is help you *receive*,
+  so it deliberately stays out). On the organizer side, "N tasks
+  awaiting your confirmation" is now a doorway instead of a fact —
+  it lands on (and highlights) the first awaiting task — and a quiet
+  link under "Projects you organize" opens your desk. Everything
+  stays read-only and own-data-only: no badges, no counts on the
+  tab, no other member's numbers, and signup rows are only ever your
+  own (the never-compare rule is untouched).
 - **The calendar's week view is now the view you plan a week in.**
   Event chips lead with their start time (deadlines and expiring
   posts stay day-granular — they have no clock time to show), so a

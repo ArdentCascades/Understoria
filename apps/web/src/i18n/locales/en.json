@@ -1261,9 +1261,12 @@
   },
   "myWork": {
     "title": "My work",
-    "subtitle": "What you've claimed and what you organize — all of it in one place, across every project.",
+    "subtitle": "What you've claimed and what you organize — tasks, shifts, help on the way, and your projects, in one place.",
     "emptyTitle": "Nothing in your care right now",
-    "empty": "When you claim a task or start a project, it shows up here — your commitments and the projects you organize, in one place."
+    "empty": "When you claim a task or start a project, it shows up here — your commitments and the projects you organize, in one place.",
+    "shiftsTitle": "Shifts you're signed up for",
+    "claimedPostsTitle": "Help you're on your way to give",
+    "deskLink": "See everything waiting on you at your desk"
   },
   "myTasks": {
     "title": "Tasks you're carrying",

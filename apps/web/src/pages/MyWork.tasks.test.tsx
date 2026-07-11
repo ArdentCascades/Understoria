@@ -48,6 +48,9 @@ interface MockState {
   projects: Project[];
   projectTasks: ProjectTask[];
   exchanges: never[];
+  posts: never[];
+  events: never[];
+  eventCancellations: never[];
   coorgInvitations: never[];
   coorgInvitationResponses: never[];
   coorgInvitationRevocations: never[];
@@ -62,6 +65,9 @@ function blankState(): MockState {
     projects: [],
     projectTasks: [],
     exchanges: [],
+    posts: [],
+    events: [],
+    eventCancellations: [],
     coorgInvitations: [],
     coorgInvitationResponses: [],
     coorgInvitationRevocations: [],

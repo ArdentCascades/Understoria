@@ -1261,9 +1261,12 @@
   },
   "myWork": {
     "title": "Mi trabajo",
-    "subtitle": "Lo que has tomado y lo que organizas — todo en un solo lugar, de todos los proyectos.",
+    "subtitle": "Lo que has tomado y lo que organizas — tareas, turnos, ayuda en camino y tus proyectos, en un solo lugar.",
     "emptyTitle": "Nada a tu cargo por ahora",
-    "empty": "Cuando tomes una tarea o inicies un proyecto, aparecerá aquí — tus compromisos y los proyectos que organizas, en un solo lugar."
+    "empty": "Cuando tomes una tarea o inicies un proyecto, aparecerá aquí — tus compromisos y los proyectos que organizas, en un solo lugar.",
+    "shiftsTitle": "Turnos a los que te has apuntado",
+    "claimedPostsTitle": "Ayuda que estás en camino de dar",
+    "deskLink": "Mira todo lo que te espera en tu escritorio"
   },
   "myTasks": {
     "title": "Tareas que llevas",

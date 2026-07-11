@@ -70,6 +70,10 @@ export interface OrganizedProject {
    *  rail's `confirm_task` item uses (excludes self-completed and
    *  blocked completers). */
   awaitingYouCount: number;
+  /** The first such task, so the card's awaiting line can deep-link
+   *  straight to it (`/project/:id#task-:taskId` — ProjectDetail
+   *  scrolls to and highlights the anchor). Null when none await. */
+  firstAwaitingTaskId: string | null;
   /** Outstanding co-organizer invitations the viewer issued for this
    *  project (no response, no revocation, unexpired, invitee not
    *  blocked). Only ever > 0 for the primary, who alone can issue. */
@@ -139,6 +143,7 @@ export function myOrganizedProjects(
     const tasks = tasksByProject.get(project.id) ?? [];
     let openTaskCount = 0;
     let awaitingYouCount = 0;
+    let firstAwaitingTaskId: string | null = null;
     let lastActivityAt = project.createdAt;
     for (const t of tasks) {
       if (t.status === "open") openTaskCount += 1;
@@ -148,6 +153,7 @@ export function myOrganizedProjects(
         !(t.completedBy && blockedKeys.has(t.completedBy))
       ) {
         awaitingYouCount += 1;
+        if (firstAwaitingTaskId === null) firstAwaitingTaskId = t.id;
       }
       lastActivityAt = Math.max(
         lastActivityAt,
@@ -165,6 +171,7 @@ export function myOrganizedProjects(
       tasks,
       openTaskCount,
       awaitingYouCount,
+      firstAwaitingTaskId,
       pendingInviteCount: pendingInvitesByProject.get(project.id) ?? 0,
       lastActivityAt,
     });
