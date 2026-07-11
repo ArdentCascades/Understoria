@@ -788,7 +788,15 @@ export type NodeConfigProposalPayload = NodeConfig;
  * the snapshot is for read-only display on the Decisions surface.
  */
 export interface DisputePayload {
-  postType: PostType;
+  /**
+   * `"direct"` marks a dispute over a `direct:`-labeled exchange
+   * (docs/direct-exchange-label.md) — recorded phone-to-phone with
+   * no post behind it. Renderers must not link to a post page for
+   * these and carry the "recorded directly — no post" framing.
+   */
+  postType: PostType | "direct";
+  /** Empty for `postType: "direct"` — there is no post title;
+   *  renderers show the recorded-directly copy instead. */
   postTitle: string;
   category: Category;
   hours: number;
@@ -796,7 +804,8 @@ export interface DisputePayload {
   helperKey: string | null;
   /** The recipient key — whoever was receiving help. */
   recipientKey: string;
-  /** When the original post was created. */
+  /** When the original post was created; for a direct dispute, when
+   *  the exchange was recorded as completed. */
   postCreatedAt: number;
 }
 

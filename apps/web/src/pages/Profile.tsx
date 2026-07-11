@@ -62,7 +62,8 @@ import {
   formatSignedHours,
   shortKey,
 } from "@/lib/format";
-import { updateMemberProfile } from "@/db/actions";
+import { disputeDirectExchange, updateMemberProfile } from "@/db/actions";
+import { isDirectExchangeLabel } from "@understoria/shared/crypto";
 import { SETTING_KEYS, type InviteRow } from "@/db/database";
 import { issueInvite } from "@/db/invites";
 import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
@@ -83,6 +84,61 @@ import type {
   ProjectTask,
 } from "@/types";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
+
+/**
+ * The dispute doorway for a DIRECT exchange — it has no post page to
+ * host "Something's wrong — flag it", so the ledger row carries it.
+ * Same ConfirmDialog ceremony as the post flow's flag button; on
+ * confirm the dispute proposal (built from the exchange's own signed
+ * fields) lands on the Disputes surface, and this button's slot
+ * becomes the amber in-review link on the next live-query render.
+ */
+function DirectFlagButton({
+  exchangeId,
+  meKey,
+}: {
+  exchangeId: string;
+  meKey: string;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <>
+      <button
+        type="button"
+        className="chip bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+        onClick={() => setOpen(true)}
+      >
+        {t("profile.history.directFlag")}
+      </button>
+      {error && (
+        <span role="alert" className="text-rose-700 dark:text-rose-300">
+          {error}
+        </span>
+      )}
+      <ConfirmDialog
+        open={open}
+        title={t("profile.history.directFlagTitle")}
+        description={t("profile.history.directFlagBody")}
+        confirmLabel={t("profile.history.directFlagConfirm")}
+        cancelLabel={t("common.cancel")}
+        tone="caution"
+        onCancel={() => setOpen(false)}
+        onConfirm={async () => {
+          try {
+            await disputeDirectExchange(exchangeId, meKey);
+            setError(null);
+          } catch (e) {
+            setError(humanizeError(e));
+          } finally {
+            setOpen(false);
+          }
+        }}
+      />
+    </>
+  );
+}
 
 function flagReasonKey(reason: FlagReason | undefined): string {
   switch (reason) {
@@ -486,6 +542,7 @@ function ProfileBody({ member }: { member: Member }) {
             taskMap={taskMap}
             projectMap={projectMap}
             disputeIdByPostId={disputeIdByPostId}
+            meKey={currentMember.publicKey}
           />
 
           {/* Community-participation cluster — the "what you're doing"
@@ -728,6 +785,7 @@ function ExchangeHistorySection({
   taskMap,
   projectMap,
   disputeIdByPostId,
+  meKey,
 }: {
   history: TransactionEntry[];
   pending: PendingBalance;
@@ -736,6 +794,7 @@ function ExchangeHistorySection({
   taskMap: Map<string, ProjectTask>;
   projectMap: Map<string, Project>;
   disputeIdByPostId: Map<string, string>;
+  meKey: string;
 }) {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
@@ -797,6 +856,7 @@ function ExchangeHistorySection({
           })}
           {visibleHistory.map(({ exchange, delta, counterparty }) => {
             const other = memberMap.get(counterparty);
+            const isDirect = isDirectExchangeLabel(exchange.postId);
             return (
               <li
                 key={exchange.id}
@@ -814,6 +874,25 @@ function ExchangeHistorySection({
                   </div>
                   <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
                     <span>{formatRelativeTime(exchange.completedAt)}</span>
+                    {/* A direct exchange has no post behind it — say
+                        so quietly, and host the flag doorway here
+                        since there is no post page to hold it. */}
+                    {isDirect && (
+                      <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+                        {t("profile.history.directChip")}
+                      </span>
+                    )}
+                    {isDirect &&
+                      (disputeIdByPostId.has(exchange.postId) ? (
+                        <Link
+                          to={`/disputes#${disputeIdByPostId.get(exchange.postId)}`}
+                          className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+                        >
+                          {t("profile.history.directInReview")}
+                        </Link>
+                      ) : (
+                        <DirectFlagButton exchangeId={exchange.id} meKey={meKey} />
+                      ))}
                     {/* The chip links to the review conversation it
                         names — anchored to the matching dispute card
                         when one is resolvable, the disputes list

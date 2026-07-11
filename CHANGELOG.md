@@ -10,6 +10,33 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **"Record time together" — the direct-exchange recording ceremony**
+  (PR C of the adopted design). Help that has no post and no project
+  task behind it — a plain gathering's setup crew, a neighbor's
+  spontaneous hand — can now become credit: either member opens
+  `/record-direct`, states who helped whom and the hours it actually
+  took, passes the before-you-sign honesty card (what federates, what
+  the record will say, that credit moves only when both have signed),
+  and the pair completes the same two-QR phone-to-phone round trip
+  the in-person post confirmation uses. The record carries a random
+  `direct:` label — no event, shift, date, or member correlator, per
+  the design's permanent boundary — and every safeguard applies
+  verbatim (daily-limit hard stop, pattern flags). The Profile ledger
+  marks these rows "recorded directly" and hosts their flag doorway
+  (no post page exists to hold it); a flagged direct exchange lands
+  on Disputes rendered from its own signed fields. Doorways from
+  profiles and passed shifts arrive in the next PR — until then the
+  page is reachable by URL.
+
+### Fixed
+- **The in-person confirm flow's paste fallback rejected every valid
+  code.** `PairDeviceCapture` hard-validated pasted text as a
+  device-pairing envelope, so members without a working camera
+  (declined permission, no BarcodeDetector) could never complete the
+  in-person exchange ceremony by paste — the camera path bypassed
+  the check, which is how the gap hid. The validator is now
+  injectable; both exchange ceremonies pass their own payload check
+  and their own error copy.
 - **`direct:` exchange-label namespace — shared foundation** (PR B of
   the adopted [`direct-exchange-label.md`](docs/direct-exchange-label.md)
   design). `isDirectExchangeLabel` in the shared package locks the
