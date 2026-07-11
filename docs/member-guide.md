@@ -866,6 +866,17 @@ contents, and nobody else can read them even if they get a copy.
 
 A few things worth knowing:
 
+- **Messages travel through your community node, sealed.** When you
+  send, your device hands the node a locked envelope; the other
+  person's device picks it up the next time it syncs (within a few
+  minutes when they're online). The node can't open the envelope —
+  it only moves it. Two practical consequences: delivery needs your
+  community node to be reachable (a message sent while you're
+  offline waits on your device and goes out when you reconnect),
+  and the node keeps undelivered envelopes for a limited time
+  (about a month, your operator can tune it) — someone who doesn't
+  open the app for months may miss what was sent in between. Your
+  own copy stays on your device either way.
 - **Conversations start from a post.** To message someone for the
   first time, open one of their posts and tap **Reach out**.
   There's no "search the member list and DM anyone" affordance —

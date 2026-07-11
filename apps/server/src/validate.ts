@@ -34,6 +34,7 @@ import {
   type FlagReason,
   type Post,
   type ProjectState,
+  type RelayedMessage,
   type ShiftSignupState,
   type SeedVaultPledge,
   type SignedVouch,
@@ -143,6 +144,76 @@ export function parseVouch(input: unknown): ParseVouchResult {
       voucheeKey: r.voucheeKey as string,
       createdAt: r.createdAt as number,
       kind: r.kind as SignedVouch["kind"],
+      signature: r.signature as string,
+    },
+  };
+}
+
+export type ParseRelayedMessageResult =
+  | { ok: true; value: RelayedMessage }
+  | { ok: false; error: string };
+
+const MESSAGE_STRING_FIELDS = [
+  "id",
+  "senderKey",
+  "recipientKey",
+  "nonce",
+  "ciphertext",
+  "signature",
+] as const;
+
+/** Composer caps plaintext at 5 000 chars; the envelope JSON plus
+ *  NaCl overhead plus base64 expansion lands well under this. Anything
+ *  bigger is abuse, not conversation. */
+const MESSAGE_CIPHERTEXT_MAX_CHARS = 16_384;
+
+export function parseRelayedMessage(
+  input: unknown,
+): ParseRelayedMessageResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of MESSAGE_STRING_FIELDS) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if ((r.id as string).length > 128) {
+    return { ok: false, error: "id is too long" };
+  }
+  if (r.senderKey === r.recipientKey) {
+    return { ok: false, error: "senderKey and recipientKey must differ" };
+  }
+  if ((r.nonce as string).length > 64) {
+    return { ok: false, error: "nonce is too long" };
+  }
+  if ((r.ciphertext as string).length > MESSAGE_CIPHERTEXT_MAX_CHARS) {
+    return { ok: false, error: "ciphertext is too long" };
+  }
+  if (
+    typeof r.createdAt !== "number" ||
+    !Number.isInteger(r.createdAt) ||
+    r.createdAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "createdAt must be a positive integer (ms epoch)",
+    };
+  }
+  const oneDayFromNow = Date.now() + 24 * 60 * 60 * 1000;
+  if (r.createdAt > oneDayFromNow) {
+    return { ok: false, error: "createdAt is too far in the future" };
+  }
+  return {
+    ok: true,
+    value: {
+      id: r.id as string,
+      senderKey: r.senderKey as string,
+      recipientKey: r.recipientKey as string,
+      nonce: r.nonce as string,
+      ciphertext: r.ciphertext as string,
+      createdAt: r.createdAt,
       signature: r.signature as string,
     },
   };

@@ -46,6 +46,7 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  RelayedMessage,
   ShiftSignupState,
   SignedVouch,
   TaskComment,
@@ -87,6 +88,28 @@ export interface VouchStore {
   list(opts?: { since?: number; sinceId?: string; limit?: number }): SignedVouch[];
   count(): number;
   has(id: string): boolean;
+}
+
+/**
+ * Storage for relayed direct-message envelopes (docs/message-relay.md
+ * §4). Deviates from the sibling stores in two deliberate ways:
+ * `listForRecipient` takes a MANDATORY recipient key (there is no
+ * community-wide message feed — the route serves each member only
+ * their own inbox, so the scoping lives in the query, not the
+ * caller's discipline), and `pruneOlderThan` exists because message
+ * rows expire (the retention window) where every other federation
+ * table is append-only.
+ */
+export interface MessageStore {
+  insert(message: RelayedMessage): void;
+  listForRecipient(
+    recipientKey: string,
+    opts?: { since?: number; sinceId?: string; limit?: number },
+  ): RelayedMessage[];
+  count(): number;
+  has(id: string): boolean;
+  /** Delete rows with `created_at < cutoff`. Returns rows removed. */
+  pruneOlderThan(cutoff: number): number;
 }
 
 /**
@@ -1198,6 +1221,36 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '24')",
     ).run();
   }
+
+  // Schema v25 — the message relay (docs/message-relay.md). Sealed
+  // direct-message envelopes: ciphertext only, E2E to the recipient;
+  // the node stores routing metadata (sender, recipient, timestamps)
+  // and can never read contents. Rows are pruned after the retention
+  // window (MESSAGE_RETENTION_DAYS) — the shelf, not an archive — so
+  // unlike every other federation table this one shrinks. The
+  // recipient-scoped index is the read path: GET /messages serves
+  // only rows whose recipient the caller has cryptographically
+  // proven to be.
+  if (current < 25) {
+    db.exec(`
+      CREATE TABLE messages (
+        id TEXT PRIMARY KEY,
+        sender_key TEXT NOT NULL,
+        recipient_key TEXT NOT NULL,
+        nonce TEXT NOT NULL,
+        ciphertext TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        signature TEXT NOT NULL
+      );
+      CREATE INDEX messages_recipient_created_idx
+        ON messages (recipient_key, created_at);
+      CREATE INDEX messages_created_at_idx ON messages (created_at);
+      CREATE INDEX messages_sender_idx ON messages (sender_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '25')",
+    ).run();
+  }
 }
 
 /**
@@ -1387,6 +1440,106 @@ function rowToVouch(r: VouchRow): SignedVouch {
     voucheeKey: r.vouchee_key,
     createdAt: r.created_at,
     kind: r.kind as SignedVouch["kind"],
+    signature: r.signature,
+  };
+}
+
+export function createMessageStore(db: DatabaseType): MessageStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO messages (
+      id, sender_key, recipient_key, nonce, ciphertext, created_at,
+      signature
+    ) VALUES (
+      @id, @senderKey, @recipientKey, @nonce, @ciphertext, @createdAt,
+      @signature
+    )
+  `);
+  const hasStmt = db.prepare("SELECT 1 FROM messages WHERE id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM messages");
+  const pruneStmt = db.prepare("DELETE FROM messages WHERE created_at < ?");
+  // Recipient-scoped page queries — pagedRows' cursor contract
+  // (docs/composite-federation-cursors.md §2: ASC ordering, exclusive
+  // pair cursor, inclusive legacy `since`) with a recipient_key
+  // predicate in front. pagedRows itself can't express the extra
+  // WHERE, so the three cursor modes are spelled out.
+  const pageBase = `
+    SELECT * FROM messages WHERE recipient_key = @recipientKey
+  `;
+  const pageOrder = "ORDER BY created_at ASC, id ASC LIMIT @limit";
+  const pagePairStmt = db.prepare(`
+    ${pageBase}
+      AND ((created_at > @since) OR (created_at = @since AND id > @sinceId))
+    ${pageOrder}
+  `);
+  const pageSinceStmt = db.prepare(`
+    ${pageBase} AND created_at >= @since ${pageOrder}
+  `);
+  const pageAllStmt = db.prepare(`${pageBase} ${pageOrder}`);
+
+  return {
+    insert(message) {
+      insertStmt.run({
+        id: message.id,
+        senderKey: message.senderKey,
+        recipientKey: message.recipientKey,
+        nonce: message.nonce,
+        ciphertext: message.ciphertext,
+        createdAt: message.createdAt,
+        signature: message.signature,
+      });
+    },
+    listForRecipient(recipientKey, opts = {}) {
+      const limit = Math.max(1, Math.min(opts.limit ?? 200, 1000));
+      let rows: MessageRow[];
+      if (opts.since && opts.sinceId) {
+        rows = pagePairStmt.all({
+          recipientKey,
+          since: opts.since,
+          sinceId: opts.sinceId,
+          limit,
+        }) as MessageRow[];
+      } else if (opts.since) {
+        rows = pageSinceStmt.all({
+          recipientKey,
+          since: opts.since,
+          limit,
+        }) as MessageRow[];
+      } else {
+        rows = pageAllStmt.all({ recipientKey, limit }) as MessageRow[];
+      }
+      return rows.map(rowToMessage);
+    },
+    count() {
+      const r = countStmt.get() as { n: number };
+      return r.n;
+    },
+    has(id) {
+      return hasStmt.get(id) !== undefined;
+    },
+    pruneOlderThan(cutoff) {
+      return pruneStmt.run(cutoff).changes;
+    },
+  };
+}
+
+interface MessageRow {
+  id: string;
+  sender_key: string;
+  recipient_key: string;
+  nonce: string;
+  ciphertext: string;
+  created_at: number;
+  signature: string;
+}
+
+function rowToMessage(r: MessageRow): RelayedMessage {
+  return {
+    id: r.id,
+    senderKey: r.sender_key,
+    recipientKey: r.recipient_key,
+    nonce: r.nonce,
+    ciphertext: r.ciphertext,
+    createdAt: r.created_at,
     signature: r.signature,
   };
 }

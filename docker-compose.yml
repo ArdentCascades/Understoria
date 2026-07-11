@@ -74,6 +74,9 @@ services:
       # rotate. See docs/system-key-rotation.md.
       NODE_SYSTEM_KEY_HISTORY: "${NODE_SYSTEM_KEY_HISTORY:-}"
       AUTO_CONFIRM_MIN_HOURS: "${AUTO_CONFIRM_MIN_HOURS:-168}"
+      # How long sealed DM envelopes wait on the relay shelf before
+      # pruning (docs/message-relay.md §4.3). Days; 0 disables.
+      MESSAGE_RETENTION_DAYS: "${MESSAGE_RETENTION_DAYS:-30}"
       # Comma-separated list of peer node URLs (each MUST include the
       # /api prefix if the peer follows the same single-domain layout).
       # Leave empty for a solo launch.

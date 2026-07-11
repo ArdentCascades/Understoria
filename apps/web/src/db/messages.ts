@@ -7,10 +7,14 @@ import { db } from "./database";
 import { getSecretKey } from "./secrets";
 import { uuid } from "@/lib/id";
 import {
+  canonicalRelayedMessagePayload,
   conversationId,
   decryptMessage,
   encryptMessage,
+  sign,
 } from "@understoria/shared/crypto";
+import { enqueueMessageOutbox, flushOutboxNow } from "@/lib/outbox";
+import type { RelayedMessage } from "@understoria/shared/types";
 import { matchesQuery } from "@/lib/messageSearch";
 import {
   decodeMessageBody,
@@ -58,6 +62,38 @@ export async function sendMessage(
     createdAt: Date.now(),
   };
   await db.messages.put(msg);
+
+  // Delivery (docs/message-relay.md §5): the sealed envelope rides
+  // the outbox to the community node's relay shelf, where the
+  // recipient's devices pull it. Signed by the sender so the node
+  // can refuse spoofed senders and the recipient can re-verify.
+  // Soft-degrade like every publish path: no node configured → the
+  // enqueue no-ops and the message stays local-only (same posture as
+  // posts). For most of this app's life there was NO transport here
+  // at all — messages silently never arrived; the dev demo's shared
+  // database masked it.
+  const envelope: RelayedMessage = {
+    id: msg.id,
+    senderKey,
+    recipientKey,
+    nonce: msg.nonce,
+    ciphertext: msg.ciphertext,
+    createdAt: msg.createdAt,
+    signature: sign(
+      canonicalRelayedMessagePayload({
+        id: msg.id,
+        senderKey,
+        recipientKey,
+        nonce: msg.nonce,
+        ciphertext: msg.ciphertext,
+        createdAt: msg.createdAt,
+      }),
+      sk,
+    ),
+  };
+  const queued = await enqueueMessageOutbox(envelope);
+  if (queued) void flushOutboxNow().catch(() => {});
+
   return msg;
 }
 

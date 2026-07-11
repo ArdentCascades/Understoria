@@ -164,7 +164,14 @@ export interface OutboxRow {
     // Proposal federation G1 (docs/proposal-federation.md).
     | "proposal"
     | "vote"
-    | "proposal_closure";
+    | "proposal_closure"
+    // The message relay (docs/message-relay.md): a sealed
+    // RelayedMessage envelope pushed to POST /messages. Ciphertext
+    // only — the E2E encryption happened at sendMessage time; this
+    // kind exists because messages previously had NO transport at
+    // all (written locally, never delivered — the dev demo's shared
+    // database masked it).
+    | "message";
   // Intentionally NOT a member of this union: "block". BlockRow and
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never
@@ -1222,6 +1229,12 @@ export const SETTING_KEYS = {
    *  and replicated node-to-node but never reached other members'
    *  devices, so trust status diverged per device. */
   federationLastVouchPull: "federationLastVouchPull",
+  /** Message-relay inbox cursor (docs/message-relay.md §5). Unlike
+   *  the sibling cursors this one is ALSO namespaced per member at
+   *  the call site (`:<memberKey>` suffix) — the inbox feed's
+   *  contents depend on who is asking, so a device that switches
+   *  members must not skip the second member's messages. */
+  federationLastMessagePull: "federationLastMessagePull",
   /** The calendar page's last explicitly-picked view: "agenda" |
    *  "month" | "week". Absent or invalid reads as the breakpoint-derived
    *  default. Device-local display state only — never federated. */

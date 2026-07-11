@@ -166,17 +166,34 @@ We are not trying to protect against:
   (`docs/passkey-restore.md`), not built: it would change what the
   node stores and make the member's platform account a recovery
   root, so it awaits a community decision.
-- **E2E direct messaging: IMPLEMENTED.** Messages between members on
-  the same node are encrypted with NaCl box (X25519 + XSalsa20-Poly1305).
-  X25519 encryption keys are derived from Ed25519 identity keys via
-  ed2curve (0.3.0, ~2 KB, depends only on tweetnacl). Each message uses
-  a random 24-byte nonce from a CSPRNG. Messages are stored encrypted at
-  rest in IndexedDB and decrypted on read. No server relay, no
-  federation, no read receipts, no typing indicators — each of these
-  would be a metadata leak. Metadata exposure: `conversationId`
-  (deterministic from two public keys) and message timestamps are
-  visible to anyone with device-level IndexedDB access. Messages are
-  not recoverable if the member's secret key is lost.
+- **E2E direct messaging: IMPLEMENTED, node-relayed**
+  (docs/message-relay.md). Messages between members on the same node
+  are encrypted with NaCl box (X25519 + XSalsa20-Poly1305). X25519
+  encryption keys are derived from Ed25519 identity keys via ed2curve
+  (0.3.0, ~2 KB, depends only on tweetnacl). Each message uses a
+  random 24-byte nonce from a CSPRNG. Messages are stored encrypted
+  at rest in IndexedDB and decrypted on read. Delivery is a
+  store-and-forward relay through the community node: the sender's
+  device pushes the sealed envelope (sender-signed so the node
+  refuses spoofed senders), the node holds it for a bounded retention
+  window (`MESSAGE_RETENTION_DAYS`, default 30, then pruned), and the
+  recipient's devices fetch it via a read that cryptographically
+  proves the recipient key — one member's proof can never fetch
+  another member's envelopes, independent of the READ_AUTH setting.
+  (An earlier revision of this entry said "no server relay, no
+  federation" — that made the feature undeliverable between real
+  devices, which surfaced the moment two pilot members tried it; the
+  in-app FAQ had promised the relay all along.) **Metadata exposure,
+  stated plainly:** the node operator's disk sees who messaged whom,
+  when, how often, and envelope sizes — inherent to any relay and
+  bounded by the retention window plus the minimal-logging policy
+  (§6). Contents and the which-post-is-this-about reference stay
+  sealed (the reference rides inside the ciphertext). Envelopes do
+  NOT mirror-replicate and never cross to peer nodes. Still no read
+  receipts, no typing indicators. `conversationId` (deterministic
+  from two public keys) and message timestamps remain visible to
+  anyone with device-level IndexedDB access. Messages are not
+  recoverable if the member's secret key is lost.
 - **Metadata leakage via federation.** Broadcast of need/offer to peers
   reveals category, zone, timing. Mitigation: opt-in per post, zone is
   already coarsened to neighborhood, no precise location.

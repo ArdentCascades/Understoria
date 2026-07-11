@@ -9,9 +9,11 @@ import {
   conversationId,
   encryptMessage,
   generateKeyPair,
+  verifyRelayedMessage,
   type KeyPair,
 } from "@understoria/shared/crypto";
-import { db } from "./database";
+import type { RelayedMessage } from "@understoria/shared/types";
+import { db, setSetting, SETTING_KEYS } from "./database";
 import {
   getConversation,
   listConversations,
@@ -31,6 +33,8 @@ beforeEach(async () => {
     db.messages.clear(),
     db.secretKeys.clear(),
     db.blocks.clear(),
+    db.outbox.clear(),
+    db.settings.clear(),
   ]);
   alice = generateKeyPair();
   bob = generateKeyPair();
@@ -86,6 +90,34 @@ describe("sendMessage envelope", () => {
       expect(msg.plaintext).toBe("can I help?");
       expect(msg.aboutPostId).toBe("post-9");
     }
+  });
+});
+
+describe("sendMessage delivery (docs/message-relay.md §5)", () => {
+  it("enqueues a sender-signed sealed envelope when a node is configured", async () => {
+    await setSetting(SETTING_KEYS.communityNodeUrl, "http://node.test");
+    const msg = await sendMessage(alice.publicKey, bob.publicKey, "hello");
+
+    const rows = await db.outbox.toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].kind).toBe("message");
+    expect(rows[0].recordId).toBe(msg.id);
+
+    const envelope = JSON.parse(rows[0].payload) as RelayedMessage;
+    // Same sealed bytes as the local row, no conversationId on the
+    // wire, and a signature the node (and recipient) can verify.
+    expect(envelope.ciphertext).toBe(msg.ciphertext);
+    expect(envelope.nonce).toBe(msg.nonce);
+    expect("conversationId" in envelope).toBe(false);
+    expect(verifyRelayedMessage(envelope)).toBe(true);
+    // The envelope never contains the plaintext.
+    expect(rows[0].payload).not.toContain("hello");
+  });
+
+  it("soft-degrades to local-only when no node is configured", async () => {
+    await sendMessage(alice.publicKey, bob.publicKey, "hello");
+    expect(await db.outbox.count()).toBe(0);
+    expect(await db.messages.count()).toBe(1);
   });
 });
 

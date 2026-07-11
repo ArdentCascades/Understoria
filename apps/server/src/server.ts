@@ -47,6 +47,7 @@ import {
   createPeerPullStore,
   createPostStore,
   createInviteRevocationStore,
+  createMessageStore,
   createProjectStateStore,
   createRedemptionStore,
   createTaskCommentStore,
@@ -65,6 +66,7 @@ import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
 import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
+import { registerMessageRoutes } from "./routes/messages.js";
 import { registerAutoConfirmRoutes } from "./routes/autoConfirm.js";
 import { registerCoOrganizerInvitationRoutes } from "./routes/coorgInvitations.js";
 import { registerCoOrganizerInvitationResponseRoutes } from "./routes/coorgInvitationResponses.js";
@@ -246,6 +248,7 @@ export async function buildServer({
   const proposalStore = createProposalStore(db);
   const voteStore = createVoteStore(db);
   const proposalClosureStore = createProposalClosureStore(db);
+  const messageStore = createMessageStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -334,6 +337,16 @@ export async function buildServer({
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store, resolveTrustedSystemKey });
   await registerVouchRoutes(app, { store: vouchStore });
+  // The message relay (docs/message-relay.md): sealed DM envelopes.
+  // The GET is recipient-scoped and self-authenticating regardless of
+  // READ_AUTH; the POST's membership gate mirrors the read-auth
+  // posture so a founder-keys-less node keeps messaging.
+  await registerMessageRoutes(app, {
+    store: messageStore,
+    resolver: membershipResolver,
+    requireSenderMembership: config.readAuth === "on",
+    retentionDays: config.messageRetentionDays,
+  });
   await registerPostRoutes(app, { store: postStore });
   // NOTE: no invite routes. `POST/GET /invites` was removed in the
   // invite-redemption Phase 1 PR — the GET served full SignedInvite

@@ -31,6 +31,7 @@ import {
   submitEventShiftToNode,
   submitEventToNode,
   submitExchangeToNode,
+  submitMessageToNode,
   submitSeedVaultPledgeToNode,
   submitMemberRemovalToNode,
   submitMemberReinstatementToNode,
@@ -61,6 +62,7 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  RelayedMessage,
   MemberRemoval,
   MemberReinstatement,
   ProposalClosure,
@@ -404,6 +406,18 @@ export async function enqueueTaskStateOutbox(
   return enqueueOutbox("task_state", record.id, record);
 }
 
+/**
+ * Insert an outbox row for a sealed direct-message envelope
+ * (docs/message-relay.md §5). The payload is ciphertext only — the
+ * E2E sealing happened in sendMessage; this row just needs delivery.
+ * Append-only dedup on the message id, same as exchanges/vouches.
+ */
+export async function enqueueMessageOutbox(
+  message: RelayedMessage,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("message", message.id, message);
+}
+
 async function enqueueOutbox(
   kind: OutboxRow["kind"],
   recordId: string,
@@ -708,6 +722,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "shift_signup") {
       result = await submitShiftSignupToNode(
         payload as unknown as ShiftSignupState,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "message") {
+      result = await submitMessageToNode(
+        payload as unknown as RelayedMessage,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

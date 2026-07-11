@@ -43,6 +43,7 @@ import type {
   InviteRevocationPayload,
   RedemptionPayload,
   RedemptionReceipt,
+  RelayedMessage,
   SignedInvite,
   SignedVouch,
   TaskComment,
@@ -678,6 +679,56 @@ export function decryptMessage(
 
 export function conversationId(keyA: string, keyB: string): string {
   return keyA < keyB ? `${keyA}|${keyB}` : `${keyB}|${keyA}`;
+}
+
+/**
+ * Canonical serialization of a relayed direct-message envelope
+ * (docs/message-relay.md §3). The sender signs the CIPHERTEXT record
+ * — never the plaintext — so the node can verify who is writing to
+ * whom without any ability to read what. Same field-order discipline
+ * as the other canonical helpers.
+ */
+export interface RelayedMessagePayload {
+  id: string;
+  senderKey: string;
+  recipientKey: string;
+  nonce: string;
+  ciphertext: string;
+  createdAt: number;
+}
+
+export function canonicalRelayedMessagePayload(
+  p: RelayedMessagePayload,
+): string {
+  return JSON.stringify({
+    id: p.id,
+    senderKey: p.senderKey,
+    recipientKey: p.recipientKey,
+    nonce: p.nonce,
+    ciphertext: p.ciphertext,
+    createdAt: p.createdAt,
+  });
+}
+
+/**
+ * Independently verify a relayed message envelope against its
+ * sender's key. Used by the node at ingestion (spoofed-sender
+ * refusal) and by the recipient's device on pull (the response body
+ * is untrusted — same posture as every other federation pull).
+ */
+export function verifyRelayedMessage(m: RelayedMessage): boolean {
+  return verify(
+    canonicalRelayedMessagePayload({
+      id: m.id,
+      senderKey: m.senderKey,
+      recipientKey: m.recipientKey,
+      nonce: m.nonce,
+      ciphertext: m.ciphertext,
+      createdAt: m.createdAt,
+    }),
+    m.signature,
+    m.senderKey,
+  );
 }
 
 /**

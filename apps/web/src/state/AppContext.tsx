@@ -345,6 +345,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           pullFederatedRedemptions,
           pullFederatedInviteRevocations,
           pullFederatedVouches,
+          pullFederatedMessages,
           pullFederatedProjectStates,
           pullFederatedTaskStates,
           pullFederatedEventShifts,
@@ -383,6 +384,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           // invites to one honest state across every device.
           void pullFederatedInviteRevocations();
           void pullFederatedVouches();
+          // docs/message-relay.md: sealed DM envelopes addressed to
+          // the current member.
+          void pullFederatedMessages();
           // docs/project-federation.md: project + task LWW state.
           // Projects first — a task's authority derives from its
           // project, so the task pull skips rows whose project

@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The message relay: direct messages now actually reach the other
+  person** (`docs/message-relay.md`). The community node becomes a
+  store-and-forward shelf for sealed envelopes: the sender's device
+  pushes the E2E-encrypted record (sender-signed, so the node refuses
+  spoofed senders) through the standard outbox, the node holds it for
+  a retention window (`MESSAGE_RETENTION_DAYS`, default 30 days —
+  multi-device members' devices each pull, then the shelf clears),
+  and the recipient's devices fetch it on the normal sync cycle
+  through a read that cryptographically proves the recipient key —
+  nobody can fetch anyone else's inbox, whatever the node's READ_AUTH
+  setting. The node can see who wrote to whom and when (inherent to
+  any relay; stated plainly in the threat model now) but never
+  contents, and never which post a thread is about. Blocks stay
+  silent and client-side: envelopes from a blocked sender are
+  dropped at the recipient's device on arrival. No read receipts
+  anywhere, still: "delivered to the node" is all the sender's
+  outbox ever learns.
 - **"Record time together" — the direct-exchange recording ceremony**
   (PR C of the adopted design). Help that has no post and no project
   task behind it — a plain gathering's setup crew, a neighbor's
@@ -29,6 +46,19 @@ include breaking changes.
   page is reachable by URL.
 
 ### Fixed
+- **Messages never left the sender's device.** `sendMessage`
+  encrypted the text and wrote it to local IndexedDB — and that was
+  the end of the line: no outbox kind, no server table, no route, no
+  pull. Every message ever sent between two real devices silently
+  went nowhere, while the sender's own thread showed it as sent. The
+  dev environment masked the gap completely (all demo members share
+  one browser database, so "delivery" was reading the same table
+  back), and the docs contradicted each other about it — the in-app
+  FAQ promised "the community node passes them along," the threat
+  model recorded "no server relay" as the design. The message relay
+  above closes the gap; the FAQ's promise is now simply true, and
+  the threat model tells the whole story including the routing
+  metadata a relay inevitably sees.
 - **The Dashboard crashed ("Something went wrong on this screen")
   after a community's first task confirmation in a project-only
   category.** Task-confirmation exchanges legitimately carry the

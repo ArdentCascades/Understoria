@@ -71,10 +71,14 @@ import {
   verifyPost,
   verifyProjectState,
   verifyRedemptionReceipt,
+  verifyRelayedMessage,
   verifyStateRecord,
   verifyTaskState,
   verifyVouch,
+  conversationId,
 } from "@understoria/shared/crypto";
+import type { RelayedMessage } from "@understoria/shared/types";
+import { blockedFilter } from "@/db/blocks";
 
 const POST_CURSOR_KEY = "federationLastPostPull";
 const CLAIM_CURSOR_KEY = "federationLastClaimPull";
@@ -1678,6 +1682,140 @@ export async function pullFederatedVouches(): Promise<FederationSyncResult | nul
       ctx.key(SETTING_KEYS.federationLastVouchPull),
       formatCursor(maxCreatedAt),
     );
+  }
+
+  return { inserted, skipped };
+}
+
+/**
+ * Pull sealed direct-message envelopes addressed to the CURRENT
+ * member from the community node's relay shelf
+ * (docs/message-relay.md §5).
+ *
+ * The read signature `authorizedFetch` already attaches is doing
+ * double duty here: on every other feed it proves membership; on
+ * this one it is the RECIPIENT PROOF the route scopes its response
+ * by. No proof, no rows — and the response can only ever contain
+ * this member's own inbox.
+ *
+ * Merge rules, in refusal order:
+ *   - malformed / far-future stamp / bad signature / addressed to
+ *     someone else (a dishonest node ignoring the scope): skipped
+ *     WITHOUT advancing the cursor — the standard poisoned-cursor
+ *     defense;
+ *   - sender currently blocked: dropped silently WITH cursor advance
+ *     (docs/blocking.md §6 — the block is prospective, not a queue;
+ *     unblocking does not resurrect what was dropped);
+ *   - already stored: skipped with advance;
+ *   - otherwise: inserted with the conversationId recomputed from
+ *     the two keys (it deliberately doesn't travel).
+ */
+export async function pullFederatedMessages(): Promise<FederationSyncResult | null> {
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const baseUrl = ctx.baseUrl;
+
+  const myKey = await getSetting(SETTING_KEYS.currentMember);
+  if (!myKey) return null;
+
+  // Per-node AND per-member cursor — the one feed whose contents
+  // depend on who is asking. A device that switches members (dev
+  // profiles; a shared household tablet) must not let member A's
+  // high-water mark skip member B's messages.
+  const cursorKey = `${ctx.key(SETTING_KEYS.federationLastMessagePull)}:${myKey}`;
+  const cursor = parseCursor(await getSetting(cursorKey));
+  const params = new URLSearchParams({ limit: "200" });
+  setCursorParams(params, cursor);
+
+  const url = `${baseUrl.replace(/\/+$/, "")}/messages?${params.toString()}`;
+  let body: { messages?: unknown[] };
+  try {
+    const res = await authorizedFetch(url, baseUrl);
+    if (!res.ok) return null;
+    body = (await res.json()) as { messages?: unknown[] };
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(body.messages)) return null;
+
+  const { keys: blocked } = await blockedFilter(myKey);
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxCreatedAt: CursorPos | null = cursor;
+
+  for (const raw of body.messages) {
+    const r = raw as Record<string, unknown>;
+    if (
+      typeof r.id !== "string" ||
+      typeof r.senderKey !== "string" ||
+      typeof r.recipientKey !== "string" ||
+      typeof r.nonce !== "string" ||
+      typeof r.ciphertext !== "string" ||
+      !plausibleCursorStamp(r.createdAt) ||
+      typeof r.signature !== "string"
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const envelope: RelayedMessage = {
+      id: r.id,
+      senderKey: r.senderKey,
+      recipientKey: r.recipientKey,
+      nonce: r.nonce,
+      ciphertext: r.ciphertext,
+      createdAt: r.createdAt,
+      signature: r.signature,
+    };
+
+    if (envelope.recipientKey !== myKey) {
+      skipped += 1;
+      continue;
+    }
+
+    if (!verifyRelayedMessage(envelope)) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "[understoria] dropped relayed message with bad signature",
+          { id: envelope.id },
+        );
+      }
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      maxCreatedAt = advancePair(maxCreatedAt, envelope.createdAt, envelope.id);
+    };
+
+    if (blocked.has(envelope.senderKey)) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    const existing = await db.messages.get(envelope.id);
+    if (existing) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+
+    await db.messages.put({
+      id: envelope.id,
+      conversationId: conversationId(envelope.senderKey, envelope.recipientKey),
+      senderKey: envelope.senderKey,
+      recipientKey: envelope.recipientKey,
+      nonce: envelope.nonce,
+      ciphertext: envelope.ciphertext,
+      createdAt: envelope.createdAt,
+    });
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxCreatedAt !== null) {
+    await setSetting(cursorKey, formatCursor(maxCreatedAt));
   }
 
   return { inserted, skipped };
