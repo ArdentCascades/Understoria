@@ -69,8 +69,8 @@ export function AttentionSection() {
   const { showToast } = useToast();
   const { pending, run } = usePendingAction();
   // Which co-organizer invitation, if any, has its Accept comparison
-  // card or Decline confirm open. `null` when neither is open. Per §7
-  // the consequences are named before the member signs.
+  // dialog or Decline confirm open. `null` when neither is open. Per
+  // §7 the consequences are named before the member signs.
   const [acceptInvitationId, setAcceptInvitationId] = useState<string | null>(
     null,
   );
@@ -479,10 +479,15 @@ export function AttentionSection() {
           }
           // Co-organizer invitation addressed to the current member.
           // Per §7 the consequences are named in a comparison card
-          // (same discipline as device pairing) before signing. The
-          // card and the decline confirm expand inline.
+          // (same discipline as device pairing) before signing. BOTH
+          // responses open a focus-trapped dialog — the comparison
+          // used to expand inline, but inside the desktop rail
+          // (sticky, 280px) it grew past the viewport and the
+          // "Accept and sign" button could only be reached by
+          // scrolling the whole page to its bottom (operator
+          // report). A dialog keeps the actions on screen at every
+          // viewport and matches the Decline confirm beside it.
           if (item.kind === "coorganizer_invitation_received") {
-            const accepting = acceptInvitationId === item.invitationId;
             return (
               <li
                 key={`coorg_${item.invitationId}`}
@@ -503,83 +508,61 @@ export function AttentionSection() {
                 <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
                   {t("attention.coorgInvitation.hint")}
                 </p>
-                {accepting && (
-                  <div className="mt-1.5 rounded-lg border border-canopy-200 bg-white/60 p-2 text-xs dark:border-canopy-900/50 dark:bg-canopy-950/30">
-                    <p className="font-semibold text-canopy-900 dark:text-canopy-100">
-                      {t("attention.coorgInvitation.accept.title", {
-                        project: item.projectTitle,
-                      })}
-                    </p>
-                    <p className="mt-1 font-medium text-moss-700 dark:text-moss-200">
-                      {t("attention.coorgInvitation.accept.meansTitle")}
-                    </p>
-                    <ul className="mt-0.5 list-disc pl-4 text-[11px] leading-snug text-moss-600 dark:text-moss-300">
-                      <li>{t("attention.coorgInvitation.accept.meansConfirm")}</li>
-                      <li>{t("attention.coorgInvitation.accept.meansSign")}</li>
-                      <li>{t("attention.coorgInvitation.accept.meansVisible")}</li>
-                    </ul>
-                    <p className="mt-2 font-medium text-moss-700 dark:text-moss-200">
-                      {t("attention.coorgInvitation.accept.notTitle")}
-                    </p>
-                    <ul className="mt-0.5 list-disc pl-4 text-[11px] leading-snug text-moss-600 dark:text-moss-300">
-                      <li>{t("attention.coorgInvitation.accept.notObligation")}</li>
-                      <li>{t("attention.coorgInvitation.accept.notDeputy")}</li>
-                    </ul>
-                  </div>
-                )}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {accepting ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void handleRespond(
-                            item.invitationId,
-                            item.projectId,
-                            "accept",
-                          )
-                        }
-                        disabled={pending}
-                        className="inline-flex min-h-[44px] items-center rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
-                      >
-                        {t("attention.coorgInvitation.accept.sign")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAcceptInvitationId(null)}
-                        disabled={pending}
-                        className="inline-flex min-h-[44px] items-center rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
-                      >
-                        {t("common.cancel")}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDeclineInvitationId(null);
-                          setAcceptInvitationId(item.invitationId);
-                        }}
-                        disabled={pending}
-                        className="inline-flex min-h-[44px] items-center rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
-                      >
-                        {t("attention.coorgInvitation.accept.cta")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAcceptInvitationId(null);
-                          setDeclineInvitationId(item.invitationId);
-                        }}
-                        disabled={pending}
-                        className="inline-flex min-h-[44px] items-center rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
-                      >
-                        {t("attention.coorgInvitation.decline.cta")}
-                      </button>
-                    </>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeclineInvitationId(null);
+                      setAcceptInvitationId(item.invitationId);
+                    }}
+                    disabled={pending}
+                    className="inline-flex min-h-[44px] items-center rounded-full bg-canopy-700 px-3 py-1 text-xs font-semibold text-canopy-50 hover:bg-canopy-800 disabled:opacity-50"
+                  >
+                    {t("attention.coorgInvitation.accept.cta")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAcceptInvitationId(null);
+                      setDeclineInvitationId(item.invitationId);
+                    }}
+                    disabled={pending}
+                    className="inline-flex min-h-[44px] items-center rounded-full bg-moss-100 px-3 py-1 text-xs font-semibold text-moss-800 hover:bg-moss-200 disabled:opacity-50 dark:bg-moss-800 dark:text-moss-100"
+                  >
+                    {t("attention.coorgInvitation.decline.cta")}
+                  </button>
                 </div>
+                <ConfirmDialog
+                  open={acceptInvitationId === item.invitationId}
+                  title={t("attention.coorgInvitation.accept.title", {
+                    project: item.projectTitle,
+                  })}
+                  description={
+                    <>
+                      <p className="font-medium text-moss-700 dark:text-moss-200">
+                        {t("attention.coorgInvitation.accept.meansTitle")}
+                      </p>
+                      <ul className="mt-1 list-disc space-y-1 pl-5">
+                        <li>{t("attention.coorgInvitation.accept.meansConfirm")}</li>
+                        <li>{t("attention.coorgInvitation.accept.meansSign")}</li>
+                        <li>{t("attention.coorgInvitation.accept.meansVisible")}</li>
+                      </ul>
+                      <p className="mt-3 font-medium text-moss-700 dark:text-moss-200">
+                        {t("attention.coorgInvitation.accept.notTitle")}
+                      </p>
+                      <ul className="mt-1 list-disc space-y-1 pl-5">
+                        <li>{t("attention.coorgInvitation.accept.notObligation")}</li>
+                        <li>{t("attention.coorgInvitation.accept.notDeputy")}</li>
+                      </ul>
+                    </>
+                  }
+                  confirmLabel={t("attention.coorgInvitation.accept.sign")}
+                  cancelLabel={t("common.cancel")}
+                  onCancel={() => setAcceptInvitationId(null)}
+                  onConfirm={() =>
+                    handleRespond(item.invitationId, item.projectId, "accept")
+                  }
+                />
                 <ConfirmDialog
                   open={declineInvitationId === item.invitationId}
                   title={t("attention.coorgInvitation.decline.confirmTitle", {

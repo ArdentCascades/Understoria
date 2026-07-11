@@ -787,6 +787,27 @@ onboard — are prioritized; the rest confirm the page is navigable.
   collapsing never traps focus inside; the sticky search band
   stays reachable while either disclosure is open.
 
+### Attention rail — co-organizer invitation response
+
+- **Entry:** Board with a pending co-organizer invitation
+  addressed to you (the "Needs your attention" rail / mobile
+  disclosure).
+- **Steps:** activate **Accept**; a focus-trapped dialog opens
+  with the "What this means" / "What this does not mean"
+  comparison and **Accept and sign** / Cancel. Read-all through
+  the two lists; confirm Esc closes without signing. Activate
+  **Decline** and confirm its own dialog. At lg+, with several
+  attention items, shrink the window until the rail is taller
+  than the viewport and confirm the RAIL scrolls its own content
+  under the wheel / arrow keys — the page must not scroll out
+  from under it (the pre-dialog inline card made "Accept and
+  sign" reachable only by scrolling the whole board).
+- **Expected:** both dialogs are `role="dialog"` +
+  `aria-modal="true"` with focus trapped and returned on close;
+  the action buttons are on-screen at any viewport height (the
+  dialog's description region scrolls, never the buttons); the
+  desktop rail is its own scroll container when it overflows.
+
 ### EventNew — two-pane create form + inline validation
 
 - **Entry:** Calendar → Create event. Route `/events/new`
