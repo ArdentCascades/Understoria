@@ -398,9 +398,11 @@ small projects), above the task list you'll find:
 
 If you're helping on several projects at once, the **My work** tab
 (bottom of the screen) gathers every claim of yours in one place,
-grouped by project — with the projects you organize below it. The
-quiet **"Tasks you're carrying"** links at the bottom of the
-Projects tab and on your Profile land on the same view.
+grouped by project — along with any event shifts you've signed up
+for and any needs you've claimed from the board, with the projects
+you organize beside them. The quiet **"Tasks you're carrying"**
+links at the bottom of the Projects tab and on your Profile land on
+the same view.
 
 ### Task dependencies — "Follows:" framing
 

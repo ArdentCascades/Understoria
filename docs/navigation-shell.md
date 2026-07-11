@@ -41,10 +41,18 @@ not things you *work in*. When Profile held the fifth slot, the two
 views members actually returned to daily (tasks you're carrying,
 projects you organize) sat buried two taps behind it.
 
-`/my-work` combines those two views on one read-only page: the
-claimer half ("Tasks you're carrying", grouped by project) above the
-organizer half ("Projects you organize", with what's quietly waiting
-on you). Side-by-side columns at `lg+`. The old standalone routes
+`/my-work` gathers every commitment kind on one read-only page. The
+claimer half is "Tasks you're carrying" (grouped by project), then
+"Shifts you're signed up for" (the member's own signups, soonest
+first, each linking to its event — the only entries here with a
+clock time) and "Help you're on your way to give" (NEED posts the
+member claimed and hasn't finished; a claimed OFFER is help they
+*receive*, which is a plan, not work, so it stays out). The
+organizer half is "Projects you organize", with what's quietly
+waiting on you — the "N tasks awaiting your confirmation" line
+deep-links to the first such task (`#task-<id>`), and a quiet link
+under the section opens the organizer's desk (`/desk`).
+Side-by-side columns at `lg+`. The old standalone routes
 (`/my-tasks`, `/my-projects`) redirect to `/my-work#tasks` /
 `/my-work#projects`, and the quiet entry links on Board's Projects
 tab and Profile still work — they land on the sections.

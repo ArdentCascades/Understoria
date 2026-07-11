@@ -38,14 +38,6 @@ export function MyProjectsSummary({ projectCount }: { projectCount: number }) {
   return <>{t("myProjects.summaryOther", { count: projectCount })}</>;
 }
 
-const PROJECT_STATUS_KEY = {
-  planning: "projects.statusPlanning",
-  active: "projects.statusActive",
-  paused: "projects.statusPaused",
-  completed: "projects.statusCompleted",
-  archived: "projects.statusArchived",
-} as const;
-
 function ProjectCard({
   group,
   exchanges,
@@ -54,8 +46,14 @@ function ProjectCard({
   exchanges: readonly Exchange[];
 }) {
   const { t } = useTranslation();
-  const { project, role, awaitingYouCount, openTaskCount, pendingInviteCount } =
-    group;
+  const {
+    project,
+    role,
+    awaitingYouCount,
+    firstAwaitingTaskId,
+    openTaskCount,
+    pendingInviteCount,
+  } = group;
   // Momentum reads the full exchange log, joined to this project via its
   // tasks' exchangeIds — so we hand the helper the project-scoped task
   // slice the lib layer already grouped, not a second filter pass.
@@ -74,11 +72,10 @@ function ProjectCard({
             {project.title}
           </Link>
         </h2>
-        {project.status !== "active" && (
-          <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
-            {t(PROJECT_STATUS_KEY[project.status])}
-          </span>
-        )}
+        {/* No separate status chip: the momentum chip already names
+            every non-active status verbatim (planning → "Planning",
+            paused → "Paused", …), so the pair rendered as a visible
+            duplicate — caught in live verification. */}
         {/* Honest context for why the invitation line never shows here —
             only the primary can issue co-organizer invitations. */}
         {role === "co" && (
@@ -96,7 +93,17 @@ function ProjectCard({
       <ul className="flex flex-col gap-0.5 text-sm text-moss-600 dark:text-moss-300">
         {awaitingYouCount > 0 && (
           <li className="font-medium text-moss-800 dark:text-moss-100">
-            {t("myProjects.awaiting", { count: awaitingYouCount })}
+            {/* The most actionable line on the card is a doorway, not
+                a fact: it lands on (and highlights) the first awaiting
+                task via ProjectDetail's #task-<id> deep-link handler. */}
+            <Link
+              to={`/project/${project.id}${
+                firstAwaitingTaskId ? `#task-${firstAwaitingTaskId}` : ""
+              }`}
+              className="underline-offset-2 hover:underline focus-visible:underline"
+            >
+              {t("myProjects.awaiting", { count: awaitingYouCount })} ›
+            </Link>
           </li>
         )}
         <li>
