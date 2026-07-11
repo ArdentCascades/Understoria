@@ -22,7 +22,17 @@ include breaking changes.
   Playwright smoke suite in CI, and a design-only photos framework
   honoring the storage-budget doc's standing media rule. The eight
   operator rulings the plans need are collected in the doc's §8;
-  `roadmap.md` links the doc as the current cycle.
+  `roadmap.md` links the doc as the current cycle. Amended at
+  operator review: the photos plan upgrades to **node-blind
+  hosting** — client-side encryption under a community-held media
+  key (the server can never read a photo; every member can), with
+  three decisions recorded: automatic, unconditional EXIF stripping;
+  a per-upload care card (no faces without consent, no sensitive
+  places, plus an honest explanation of the encryption and who holds
+  the key); and a disk-pressure story that declares photos ephemeral
+  by category (uploader keeps their own copy; quotas refuse first;
+  ratified oldest-first eviction from settled records — the record
+  set's never-delete rule deliberately does not extend to blobs).
 - **Suggested starter steps on template tasks.** A claimed template
   task's empty private plan now offers **"Start with N suggested
   steps"** — 3–5 authored, ordered, concrete first moves per task
