@@ -559,6 +559,12 @@ mirror of the repository on a second forge (Codeberg, a self-hosted
 Forgejo) so the project itself never has a single hosting point of
 failure either.
 
+The member-facing walkthrough of the whole loop — download from a
+node, verify, try, deploy, become a seed — is
+[`bootstrap-from-a-node.md`](./bootstrap-from-a-node.md). Point
+people there when they ask "how would I start one for my
+neighborhood?"
+
 ## 8. Things that are NOT yet built (and what to do about it)
 
 | Feature | Status | Operator workaround |

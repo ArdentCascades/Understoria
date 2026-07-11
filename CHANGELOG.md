@@ -25,7 +25,11 @@ include breaking changes.
   running app; independent verification means comparing against
   another node or the public repository). `.dockerignore` now also
   excludes `backups/` and database files, so operator data can never
-  ride along in an image build or the served tarball.
+  ride along in an image build or the served tarball. The whole loop
+  has a plain-language walkthrough —
+  `docs/bootstrap-from-a-node.md`: download from your community's
+  node, verify, try it, deploy it, become a seed for the next
+  community.
 - **Deployment beyond Docker is now documented**
   (`docs/deploy-alternatives.md`). Three supported shapes join the
   Docker Compose reference runbook: rootless **Podman** (a

@@ -121,7 +121,8 @@ Caddy? See [deploy-alternatives.md](docs/deploy-alternatives.md).
 Every deployed node also serves its own source code at `/source/`
 (AGPL §13 with no third-party dependency — operator guide §7a), so
 communities can inspect, mirror, and bootstrap from each other even
-if this repository's host disappears.
+if this repository's host disappears — the step-by-step walkthrough
+is [bootstrap-from-a-node.md](docs/bootstrap-from-a-node.md).
 
 ## Architecture
 
