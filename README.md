@@ -116,6 +116,8 @@ The Node.js community server is shipped: signed-record ingestion
 with verification, the federation pull loop between peer nodes,
 and Docker deployment (see the operator guide above and
 [deploy-linode.md](docs/deploy-linode.md) for the full runbook).
+Prefer rootless Podman, bare metal + systemd, or a proxy other than
+Caddy? See [deploy-alternatives.md](docs/deploy-alternatives.md).
 
 ## Architecture
 
@@ -193,6 +195,7 @@ understoria/
 | Members using the app | [Member Guide](docs/member-guide.md) |
 | People introducing the app to a group | [Organizer's Guide](docs/organizer-guide.md) |
 | Operators deploying a node | [Node Operator Guide](docs/operator-guide.md) |
+| Deploying without Docker (Podman, systemd, nginx…) | [Deploy Alternatives](docs/deploy-alternatives.md) |
 | Anyone — staying safe while using Understoria | [Opsec Guide](docs/opsec-guide.md) |
 | Developers and contributors | [Developer Guide](docs/developer-guide.md), [Contributing](CONTRIBUTING.md) |
 | Understanding the security posture | [Threat Model](docs/threat-model.md) |

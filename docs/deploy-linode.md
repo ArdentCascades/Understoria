@@ -7,7 +7,9 @@ specific bit is the provider UI for spinning up the VM and pointing DNS.
 
 > **Who this is for.** An operator who is comfortable with SSH and
 > `docker compose`. You do not need to know TypeScript; the bundled
-> Dockerfiles handle the build.
+> Dockerfiles handle the build. No Docker, or a different proxy?
+> [`deploy-alternatives.md`](./deploy-alternatives.md) covers rootless
+> Podman, bare metal + systemd, and the reverse-proxy contract.
 
 > **Tldr.** Steps 1-4 spin up the VM, install Docker, clone the
 > repo. Step 5 runs `scripts/setup.sh` which prompts for the rest,
