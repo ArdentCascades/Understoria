@@ -750,15 +750,23 @@ onboard — are prioritized; the rest confirm the page is navigable.
   `aria-live="polite"`, so each page announces the new range
   without moving focus. Page away from today and confirm a
   quiet **Today** button appears (it hides while you're on
-  today); activate it. Page all the way to the bound (±12
-  months; ±52 weeks in Week view) and confirm the button
-  disables rather than paging into permanently empty grids.
+  today — Week view shows a "This week" tag there instead).
+  Activate it. Page all the way to the bound (±12 months;
+  ±52 weeks in Week view) and confirm the button disables
+  rather than paging into permanently empty grids. In Week
+  view, page to a week with nothing scheduled and confirm the
+  quiet-week note reads out, with its "Next up" jump (a real
+  `<button>`) when something is scheduled ahead. Below `lg`
+  the week renders as seven stacked day rows rather than a
+  7-column grid — confirm the grid variant is `display:none`
+  there (only one copy of the week is exposed to the reader).
 - **Expected:** prev / next carry `aria-label`s in both
   locales; at a bound the button is `disabled` +
   `aria-disabled="true"` and skipped or announced dimmed;
   the live heading announces exactly once per page (no
   live-region storm); "Today" returns the view AND the
-  announcement to the current period.
+  announcement to the current period; today's cell / day row
+  carries `aria-current="date"` in both week layouts.
 
 ### Board mobile disclosures (Filters + attention summary)
 
