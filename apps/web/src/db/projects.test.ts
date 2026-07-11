@@ -37,7 +37,7 @@ import {
 } from "./projects";
 import type { Exchange, ProjectTask } from "@/types";
 import { balanceFor } from "@/lib/timebank";
-import { verifyExchange } from "@/lib/crypto";
+import { canonicalExchangePayload, verify, verifyExchange } from "@/lib/crypto";
 
 const NODE = "node_projects_test";
 
@@ -1694,5 +1694,173 @@ describe("recurring tasks re-open on confirmation", () => {
     expect(tasks).toHaveLength(3);
     expect(tasks.filter((t) => t.status === "completed")).toHaveLength(2);
     expect(tasks.filter((t) => t.status === "open")).toHaveLength(1);
+  });
+});
+
+// --- Completion pre-signing (the one-identity-per-device fix) --------
+//
+// `confirmProjectTaskCompletion` used to read the COMPLETER's secret
+// key on the ORGANIZER's device — true only in dev profiles, so on
+// real deployments the confirm button always failed with "No secret
+// key on this device". The fix: the completer pre-signs the exchange
+// payload at mark-complete (their device, their key), once per
+// organizer who might confirm; confirmation then needs only the
+// organizer's own signature. These tests run the REAL topology:
+// the completer's secret is deleted before the organizer confirms.
+describe("completion pre-signing", () => {
+  beforeEach(reset);
+
+  async function completedTaskFixture(withCoorg = false) {
+    const org = await createMember({ displayName: "Org" }, NODE);
+    const coorg = withCoorg
+      ? await createMember({ displayName: "Coorg" }, NODE)
+      : null;
+    const helper = await createMember({ displayName: "Helper" }, NODE);
+    const p = await aProject(org);
+    if (coorg) {
+      await db.projects.update(p.id, {
+        coOrganizerKeys: [coorg.publicKey],
+      });
+    }
+    await launchProject(p.id, org.publicKey);
+    const task = await addProjectTask(p.id, org.publicKey, {
+      title: "Haul soil",
+      description: "",
+      category: "transport",
+      estimatedHours: 2,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task.id, helper.publicKey);
+    return { org, coorg, helper, p, task };
+  }
+
+  it("mark-complete pre-signs the exchange for every organizer, on the completer's device", async () => {
+    const { org, coorg, helper, p, task } = await completedTaskFixture(true);
+    const done = await markProjectTaskComplete(task.id, helper.publicKey, 3);
+    expect(done.completionSignedAt).toBeTruthy();
+    const sigs = done.completionSignatures!;
+    expect(Object.keys(sigs).sort()).toEqual(
+      [org.publicKey, coorg!.publicKey].sort(),
+    );
+    // Each signature verifies over the exact payload confirmation
+    // will rebuild: actual hours, the task category, the signing
+    // moment, and THAT organizer as the debited party.
+    for (const orgKey of [org.publicKey, coorg!.publicKey]) {
+      const payload = canonicalExchangePayload({
+        postId: `project:${p.id}/task:${task.id}`,
+        helperKey: helper.publicKey,
+        helpedKey: orgKey,
+        hours: 3,
+        category: "transport",
+        completedAt: done.completionSignedAt!,
+      });
+      expect(verify(payload, sigs[orgKey], helper.publicKey)).toBe(true);
+    }
+  });
+
+  it("REGRESSION: the organizer confirms without the completer's secret on their device", async () => {
+    const { org, helper, task } = await completedTaskFixture();
+    const done = await markProjectTaskComplete(task.id, helper.publicKey, 3);
+    // The organizer's real device: their own key only.
+    await db.secretKeys.delete(helper.publicKey);
+    const result = await confirmProjectTaskCompletion(
+      task.id,
+      org.publicKey,
+      NODE,
+    );
+    expect(result.task.status).toBe("completed");
+    // Fully member-signed and independently verifiable.
+    expect(verifyExchange(result.exchange)).toBe(true);
+    expect(result.exchange.hoursExchanged).toBe(3);
+    expect(result.exchange.helperKey).toBe(helper.publicKey);
+    expect(result.exchange.helpedKey).toBe(org.publicKey);
+    // completedAt is the moment the help finished (the completer's
+    // signing moment), not the organizer's later confirmation tap.
+    expect(result.exchange.completedAt).toBe(done.completionSignedAt);
+  });
+
+  it("a co-organizer confirms with their own pre-signature", async () => {
+    const { coorg, helper, task } = await completedTaskFixture(true);
+    await markProjectTaskComplete(task.id, helper.publicKey, 1.5);
+    await db.secretKeys.delete(helper.publicKey);
+    const result = await confirmProjectTaskCompletion(
+      task.id,
+      coorg!.publicKey,
+      NODE,
+    );
+    expect(verifyExchange(result.exchange)).toBe(true);
+    expect(result.exchange.helpedKey).toBe(coorg!.publicKey);
+  });
+
+  it("an hours edit after completion invalidates the pre-signature instead of crediting an unsigned figure", async () => {
+    const { org, helper, task } = await completedTaskFixture();
+    await markProjectTaskComplete(task.id, helper.publicKey, 3);
+    await db.projectTasks.update(task.id, { actualHours: 9 });
+    await db.secretKeys.delete(helper.publicKey);
+    await expect(
+      confirmProjectTaskCompletion(task.id, org.publicKey, NODE),
+    ).rejects.toThrow(/no longer matches/i);
+    expect(await db.exchanges.count()).toBe(0);
+  });
+
+  it("legacy tasks (no pre-signatures): both-keys-local still works; otherwise the error explains the waiting-window fallback", async () => {
+    const { org, helper, task } = await completedTaskFixture();
+    await markProjectTaskComplete(task.id, helper.publicKey, 2);
+    // Strip the new fields — a task completed by an older client.
+    await db.projectTasks.update(task.id, {
+      completionSignedAt: null,
+      completionSignatures: null,
+    });
+    // Dev/same-device: both secrets present → the old path still
+    // signs both sides.
+    const result = await confirmProjectTaskCompletion(
+      task.id,
+      org.publicKey,
+      NODE,
+    );
+    expect(verifyExchange(result.exchange)).toBe(true);
+
+    // A second legacy task, this time on a real one-identity device:
+    // the error names the auto-confirm fallback instead of the old
+    // cryptic missing-key message.
+    const helper2 = await createMember({ displayName: "Helper2" }, NODE);
+    const task2 = await addProjectTask(task.projectId, org.publicKey, {
+      title: "Haul more soil",
+      description: "",
+      category: "transport",
+      estimatedHours: 2,
+      urgency: "low",
+      requiredSkills: [],
+      dependencies: [],
+    });
+    await claimProjectTask(task2.id, helper2.publicKey);
+    await markProjectTaskComplete(task2.id, helper2.publicKey, 2);
+    await db.projectTasks.update(task2.id, {
+      completionSignedAt: null,
+      completionSignatures: null,
+    });
+    await db.secretKeys.delete(helper2.publicKey);
+    await expect(
+      confirmProjectTaskCompletion(task2.id, org.publicKey, NODE),
+    ).rejects.toThrow(/waiting window/i);
+  });
+
+  it("a locked completer still marks complete — signatures are simply absent (sweep path remains)", async () => {
+    const { helper, task } = await completedTaskFixture();
+    await db.secretKeys.delete(helper.publicKey);
+    const done = await markProjectTaskComplete(task.id, helper.publicKey, 2);
+    expect(done.status).toBe("awaiting_confirmation");
+    expect(done.completionSignatures).toBeNull();
+    expect(done.completionSignedAt).toBeNull();
+  });
+
+  it("walking a completion back clears the pre-signatures with it", async () => {
+    const { helper, task } = await completedTaskFixture();
+    await markProjectTaskComplete(task.id, helper.publicKey, 2);
+    const reopened = await unclaimProjectTask(task.id, helper.publicKey);
+    expect(reopened.completionSignatures).toBeNull();
+    expect(reopened.completionSignedAt).toBeNull();
   });
 });

@@ -29,6 +29,24 @@ include breaking changes.
   page is reachable by URL.
 
 ### Fixed
+- **Organizers could not confirm completed tasks on real devices.**
+  `confirmProjectTaskCompletion` signed both sides of the exchange at
+  confirmation time, which required the COMPLETER's secret key on the
+  organizer's device — true only in dev profiles (the demo seed keeps
+  every member's key on one device), so on any real deployment the
+  confirm button always failed with "No secret key on this device"
+  and credit only ever moved via the auto-confirm window. Now the
+  completer pre-signs the exchange payload at mark-complete, on their
+  own device, once per organizer who might confirm
+  (`completionSignatures` + `completionSignedAt`, riding the task's
+  federated state record); confirmation needs only the organizer's
+  own signature. The exchange's `completedAt` becomes the moment the
+  help actually finished, the signature is re-verified over the
+  current task figures (an hours edit after completion refuses
+  instead of crediting an unsigned number), a walked-back completion
+  clears its signatures, and tasks completed by older clients get an
+  honest error naming the waiting-window fallback instead of the
+  cryptic missing-key message.
 - **The in-person confirm flow's paste fallback rejected every valid
   code.** `PairDeviceCapture` hard-validated pasted text as a
   device-pairing envelope, so members without a working camera

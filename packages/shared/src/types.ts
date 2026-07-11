@@ -610,6 +610,31 @@ export interface ProjectTask {
    *  `confirmProjectTaskCompletion` writes onto the signed Exchange's
    *  `hoursExchanged` is exactly this (or the estimate fallback). */
   actualHours: number | null;
+  /**
+   * The moment the completer SIGNED the eventual exchange payload —
+   * set at mark-complete alongside `completionSignatures`, and the
+   * `completedAt` the signed Exchange carries when an organizer
+   * confirms against a pre-signature. Absent on legacy rows and on
+   * completions from a locked session.
+   */
+  completionSignedAt?: number | null;
+  /**
+   * Completer-signed exchange signatures, keyed by potential
+   * confirming-organizer key (primary + co-organizers at completion
+   * time). Each is `sign(canonicalExchangePayload({...,
+   * helpedKey: thatOrganizer, completedAt: completionSignedAt}))` by
+   * the completer — produced ON THE COMPLETER'S DEVICE, where their
+   * key actually lives, so the organizer's later confirmation needs
+   * only their own signature. Without this, organizer-side
+   * confirmation required the completer's secret key locally, which
+   * only ever existed in dev profiles — on real one-identity devices
+   * the confirm button could never work. Rides the TaskState record
+   * (the server passes state bodies through verbatim). Anti-tamper:
+   * the confirm path re-verifies the signature over the CURRENT task
+   * figures, so an hours edit after completion invalidates it rather
+   * than crediting an unsigned number.
+   */
+  completionSignatures?: Record<string, string> | null;
   /** Set on confirmation. Mirrors the Exchange record's id. */
   exchangeId: string | null;
   /** Rhythm for genuinely recurring work ("restock rota", "monthly
