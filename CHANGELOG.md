@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Next-cycle plans** (`docs/next-cycle-plans.md`) — six detailed,
+  code-grounded plans for the coming development cycle: implementing
+  the two ratification-ready design notes (ways-to-plug-in shelf,
+  direct-exchange label), the issue #6 credit-model decision
+  (recommending organizer-debit + voluntary backing transfers — a
+  pool without a pool key, zero-sum preserved), a pilot-readiness
+  package (pilot playbook, local-only pilot journal, the
+  auto-confirm enforcement-flip runbook), route-level code splitting
+  with a CI bundle budget (performance as accessibility), a
+  Playwright smoke suite in CI, and a design-only photos framework
+  honoring the storage-budget doc's standing media rule. The eight
+  operator rulings the plans need are collected in the doc's §8;
+  `roadmap.md` links the doc as the current cycle.
 - **Suggested starter steps on template tasks.** A claimed template
   task's empty private plan now offers **"Start with N suggested
   steps"** — 3–5 authored, ordered, concrete first moves per task
