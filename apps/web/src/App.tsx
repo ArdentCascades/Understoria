@@ -54,6 +54,7 @@ import MessagesShell, { MessagesEmptyPane } from "@/pages/Messages";
 import ConversationPage from "@/pages/Conversation";
 import MemberDetailPage from "@/pages/MemberDetail";
 import HelpPage from "@/pages/Help";
+import StartCommunityPage from "@/pages/StartCommunity";
 import DisputesPage from "@/pages/Disputes";
 import ProposalsPage from "@/pages/Proposals";
 import ProposalNewPage from "@/pages/ProposalNew";
@@ -191,6 +192,10 @@ export default function App() {
           </Route>
           <Route path="/member/:publicKey" element={<MemberDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route
+            path="/help/start-a-community"
+            element={<StartCommunityPage />}
+          />
           <Route path="/disputes" element={<DisputesPage />} />
           <Route path="/proposals" element={<ProposalsPage />} />
           <Route path="/proposals/new" element={<ProposalNewPage />} />

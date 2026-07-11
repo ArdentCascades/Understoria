@@ -6,6 +6,13 @@ walks the whole path using **only your community's own server** —
 no GitHub account, no app store, no Docker required, no permission
 from anyone.
 
+> **This guide lives in the app too.** Every node serves a
+> plain-language version at **Menu → Community infrastructure → The
+> software itself → "Start a new community from this download"** —
+> so nobody needs this repository (or any forge) to read it. Keep
+> the two telling the same story; the in-app copy is
+> `apps/web/src/content/startCommunity.ts` (+ `.es.ts`).
+
 > **Who this is for.** Someone comfortable following terminal
 > instructions carefully, but who has never deployed a server.
 > Where this guide hands off to the operator runbooks, it says so

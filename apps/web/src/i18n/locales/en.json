@@ -2501,6 +2501,11 @@
     "collapseAll": "Collapse all",
     "sectionsNav": "Jump to a section"
   },
+  "startCommunity": {
+    "title": "Start a new community",
+    "subtitle": "The whole path from this community's server to your own — no GitHub, no app store, no permission needed.",
+    "toDownloads": "The downloads live on the Community infrastructure page"
+  },
   "disputes": {
     "title": "Disputes",
     "subtitle": "Exchanges someone has flagged for the community to review. Anyone can see this list — there are no admins. The two parties already see the flag on the post itself; this is where it surfaces to everyone else.",
@@ -2986,7 +2991,8 @@
       "checksums": "Checksums",
       "caution": "Checksums prove the download wasn't corrupted — not that nobody changed it. To check that, compare with another server's copy or the public repository.",
       "absent": "This deployment doesn't offer a source download yet. Ask your operator to redeploy with a current build, or use the",
-      "repo": "public repository"
+      "repo": "public repository",
+      "walkthrough": "Start a new community from this download — the full walkthrough"
     },
     "drills": {
       "title": "Disaster drills",

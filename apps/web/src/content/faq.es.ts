@@ -382,6 +382,22 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         ],
       },
       {
+        id: "start-a-community",
+        question: "¿Podría crear una comunidad como esta para mi barrio?",
+        answer: [
+          "Sí — y no necesitas el permiso de nadie, ni cuenta de " +
+            "GitHub, ni una tienda de aplicaciones. Understoria es " +
+            "software libre, y el propio servidor de esta comunidad " +
+            "ofrece su código fuente completo para descargar.",
+          "El camino completo está escrito dentro de la app: abre el " +
+            "Menú (arriba a la derecha) → Infraestructura comunitaria " +
+            "→ la tarjeta 'El software mismo' → 'Crea una comunidad " +
+            "nueva desde esta descarga'. Te lleva desde descargar y " +
+            "verificar el código hasta montar tu propio servidor, en " +
+            "lenguaje sencillo.",
+        ],
+      },
+      {
         id: "invite-someone",
         question: "¿Cómo invito a alguien?",
         answer: [

@@ -492,6 +492,17 @@ export function SourceCard() {
           </p>
         </>
       )}
+      {/* The walkthrough is served by the node too — the download
+          alone still left non-technical members needing a forge to
+          read the instructions. */}
+      <p className="mt-2 text-sm">
+        <Link
+          to="/help/start-a-community"
+          className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("infra.source.walkthrough")} →
+        </Link>
+      </p>
     </section>
   );
 }

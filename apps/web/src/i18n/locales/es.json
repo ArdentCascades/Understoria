@@ -2501,6 +2501,11 @@
     "collapseAll": "Plegar todo",
     "sectionsNav": "Ir a una sección"
   },
+  "startCommunity": {
+    "title": "Crear una comunidad nueva",
+    "subtitle": "El camino completo desde el servidor de esta comunidad hasta el tuyo — sin GitHub, sin tienda de aplicaciones, sin pedir permiso.",
+    "toDownloads": "Las descargas viven en la página de Infraestructura comunitaria"
+  },
   "disputes": {
     "title": "Disputas",
     "subtitle": "Intercambios que alguien señaló para que la comunidad los revise. Cualquier persona puede ver esta lista — no hay administradores. Las dos partes ya ven la marca en la publicación misma; aquí es donde aparece para el resto.",
@@ -2986,7 +2991,8 @@
       "checksums": "Sumas de verificación",
       "caution": "Las sumas de verificación prueban que la descarga no se corrompió — no que nadie la haya cambiado. Para comprobarlo, compárala con la copia de otro servidor o con el repositorio público.",
       "absent": "Esta instalación aún no ofrece la descarga del código. Pide a quien opera el servidor que actualice, o usa el",
-      "repo": "repositorio público"
+      "repo": "repositorio público",
+      "walkthrough": "Crea una comunidad nueva desde esta descarga — la guía completa"
     },
     "drills": {
       "title": "Simulacros de desastre",

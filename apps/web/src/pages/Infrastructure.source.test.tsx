@@ -6,6 +6,7 @@
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // The infrastructure page's "The software itself" card: the node
@@ -40,7 +41,11 @@ afterEach(() => {
 async function render() {
   await act(async () => {
     root = createRoot(container);
-    root.render(<SourceCard />);
+    root.render(
+      <MemoryRouter>
+        <SourceCard />
+      </MemoryRouter>,
+    );
     await Promise.resolve();
   });
   // Let the fetch effect settle.
