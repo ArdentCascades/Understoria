@@ -19,7 +19,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import { PROJECT_CATEGORY_META } from "@/lib/categories";
+import {
+  normalizeExchangeCategory,
+  PROJECT_CATEGORY_META,
+} from "@/lib/categories";
 import type { ProjectCategory } from "@/types";
 
 export function CategoryBadge({
@@ -30,7 +33,12 @@ export function CategoryBadge({
   size?: "sm" | "md";
 }) {
   const { t } = useTranslation();
-  const meta = PROJECT_CATEGORY_META[category];
+  // The parameter type promises ProjectCategory, but rows outlive
+  // renames and task/project state federates verbatim — a stale id on
+  // one old row must render as "Other", not crash the caller's whole
+  // screen (lib/categories.ts, normalizeExchangeCategory).
+  const safeId = normalizeExchangeCategory(category);
+  const meta = PROJECT_CATEGORY_META[safeId];
   const base =
     "inline-flex items-center gap-1.5 rounded-full bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100";
   const sizes = {
@@ -40,7 +48,7 @@ export function CategoryBadge({
   return (
     <span className={`${base} ${sizes[size]}`}>
       <span aria-hidden="true">{meta.emoji}</span>
-      <span>{t(`categories.${category}`)}</span>
+      <span>{t(`categories.${safeId}`)}</span>
     </span>
   );
 }

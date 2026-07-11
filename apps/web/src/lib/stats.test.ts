@@ -115,6 +115,19 @@ describe("computeCommunityStats", () => {
     expect(stats.categoryBreakdown.other).toBe(3.5);
   });
 
+  it("folds a stale category id into 'other' instead of leaking an unknown key", () => {
+    // Rows outlive category renames; one such row's unknown key made
+    // the Dashboard's meta lookup throw and took down the screen.
+    const exchanges = [
+      { ...exchange("1", now - DAY, 2), category: "gardening" as Exchange["category"] },
+      { ...exchange("2", now - DAY, 1), category: "food" as const },
+    ];
+    const stats = computeCommunityStats(exchanges, [member("a")], [], now);
+    expect(stats.categoryBreakdown.other).toBe(2);
+    expect(stats.categoryBreakdown.food).toBe(1);
+    expect(Object.keys(stats.categoryBreakdown)).not.toContain("gardening");
+  });
+
   it("counts active members within the last week", () => {
     const exchanges = [
       exchange("1", now - 2 * DAY),

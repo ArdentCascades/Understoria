@@ -9,7 +9,36 @@ import {
   CATEGORY_META,
   EVENT_CATEGORY_FALLBACK,
   eventCategoryMeta,
+  normalizeExchangeCategory,
+  PROJECT_CATEGORY_META,
+  projectCategoryMeta,
 } from "./categories";
+
+describe("normalizeExchangeCategory / projectCategoryMeta", () => {
+  it("passes through every current category unchanged", () => {
+    expect(normalizeExchangeCategory("food")).toBe("food");
+    expect(normalizeExchangeCategory("organizing")).toBe("organizing");
+    expect(normalizeExchangeCategory("mutual_aid_drive")).toBe(
+      "mutual_aid_drive",
+    );
+  });
+
+  it("folds a stale/unknown id into 'other' — rows outlive renames", () => {
+    // Task/project state federates verbatim, so a row written by an
+    // older build can carry a category today's maps have never heard
+    // of. It must fold, never crash.
+    expect(normalizeExchangeCategory("gardening")).toBe("other");
+    expect(normalizeExchangeCategory("")).toBe("other");
+  });
+
+  it("projectCategoryMeta is total — the twice-crashed-Dashboard guard", () => {
+    expect(projectCategoryMeta("food")).toBe(PROJECT_CATEGORY_META.food);
+    expect(projectCategoryMeta("not-a-category")).toBe(
+      PROJECT_CATEGORY_META.other,
+    );
+    expect(projectCategoryMeta("not-a-category").emoji).not.toBe("");
+  });
+});
 
 describe("eventCategoryMeta", () => {
   it("resolves an event-specific category to its own emoji + colour", () => {

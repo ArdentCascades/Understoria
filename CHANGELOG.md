@@ -62,6 +62,23 @@ include breaking changes.
   page is reachable by URL.
 
 ### Fixed
+- **The Dashboard crashed again — this time on a STALE category id.**
+  The category maps only know today's category set, but stored rows
+  outlive renames and task/project state federates verbatim from
+  older builds, so a task carrying an old category id mints — the
+  moment an organizer confirms it — an exchange no screen could
+  render: the Dashboard's hours-by-category lookup threw on the
+  unknown key and the error boundary ate the whole page (its second
+  category crash; the first was the project-only categories). Every
+  category lookup that touches RUNTIME rows is now total: unknown ids
+  render as "Other" on the Dashboard, the category badge, and all
+  three calendar views, and the stats breakdown folds them before any
+  consumer sees a key. The write layer folds too — task confirmations
+  now sign `other` in place of a category id the current build (and
+  the community node) wouldn't recognize, which also stops those
+  records from poisoning the sender's outbox; a completion pre-signed
+  by the in-between build over the raw stale id is still honored
+  as-signed rather than refused.
 - **Messages never left the sender's device.** `sendMessage`
   encrypted the text and wrote it to local IndexedDB — and that was
   the end of the line: no outbox kind, no server table, no route, no

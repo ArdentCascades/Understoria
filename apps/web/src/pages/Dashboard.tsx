@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats, computeFederationStats } from "@/lib/stats";
 import { computeFlowStats } from "@/lib/flow";
-import { PROJECT_CATEGORY_META } from "@/lib/categories";
+import { projectCategoryMeta } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { BreadthBar } from "@/components/BreadthBar";
@@ -369,7 +369,11 @@ export default function DashboardPage() {
           <ul className="flex flex-col gap-2">
             {topCategories.map(([cat, h]) => {
               const pct = Math.round((h / totalCategoryHours) * 100);
-              const meta = PROJECT_CATEGORY_META[cat];
+              // Total lookup: computeCommunityStats folds stale
+              // category ids into "other" upstream, but this screen
+              // has crashed on an unexpected category twice — never a
+              // third time, whatever the rows hold.
+              const meta = projectCategoryMeta(cat);
               return (
                 <li key={cat} className="flex items-center gap-3">
                   <span className="w-28 shrink-0 text-sm">
