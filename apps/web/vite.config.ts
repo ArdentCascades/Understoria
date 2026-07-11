@@ -90,6 +90,21 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            // Authored content (templates, tips, starter steps) is pure
+            // data and grew the main chunk past workbox's 2 MiB per-file
+            // precache limit. Its own chunk keeps every file precachable
+            // and stops content edits from invalidating the app chunk.
+            { name: "content", test: /src[\\/]content[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
