@@ -663,6 +663,7 @@
       "signedUpChip": "Estás en este turno",
       "signUpButton": "Anotarme",
       "removeButton": "Quitar mi inscripción",
+      "addToCalendar": "Añadir este turno a mi calendario (.ics)",
       "consentHeading": "Anotarte: {{label}}",
       "consentRsvp": "Esto también confirma tu asistencia (“Voy”) al evento.",
       "consentRoster": "Quien organiza y quienes confirmaron asistencia o quizás verán tu nombre en la lista de este turno. El resto de esta comunidad solo ve el número de lugares — otras comunidades no ven nada.",

@@ -443,8 +443,9 @@ Two tools live there:
   can, if *you* choose to set one. The file is generated on your
   device and nothing about it leaves it. Shifts you've signed up
   for offer the same thing: an **"Add this shift to my calendar
-  (.ics)"** link under each shift in **In my care** (and events have
-  **Add to calendar** in their page menu) — a shift's clock time,
+  (.ics)"** link — on the event page the moment you sign up, and
+  under each shift in **In my care** (events themselves have **Add
+  to calendar** in their page menu) — a shift's clock time,
   committed weeks ahead, is exactly what's easiest to lose track of.
 
 The planned day is a self-promise, not a deadline. If it passes,

@@ -24,7 +24,15 @@ import { uuid } from "@/lib/id";
 import { generateKeyPair, sign } from "@/lib/crypto";
 import { canonicalPostPayload } from "@understoria/shared/crypto";
 import { createVouch } from "@/lib/vouch";
-import type { Member, Post, SignedVouch } from "@/types";
+import type {
+  Event,
+  EventShiftRow,
+  Member,
+  Post,
+  Project,
+  ProjectTask,
+  SignedVouch,
+} from "@/types";
 
 // Wraps the immutable subset of a seed Post with a real signature
 // using the poster's freshly-generated secret key. Keeps the seed
@@ -316,6 +324,174 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   });
 
   await db.posts.bulkPut(seedPosts);
+
+  // A JOINABLE project, so first-run exploration can walk the whole
+  // claimer arc — claim → "a good first step" → private plan → In my
+  // care → the resume card — without first authoring a project. Rosa
+  // organizes it (never "You": organizers can't claim their own
+  // tasks, and the point is that YOU can claim these). The task
+  // titles/descriptions/hours are the community-fridge template's
+  // VERBATIM, so the per-task tips and the claim-moment first step
+  // resolve; the 1.5h and 0.5h tasks light up the board's "Fits in
+  // about an hour" filter and the one-small-thing picker. One task is
+  // already claimed by Marcus so the project reads as alive, not
+  // staged. Direct table writes (not createProject/addProjectTask) so
+  // nothing lands in the outbox — the same demo-local, never-federate
+  // posture as the seed posts and vouches above.
+  const fridgeProjectId = uuid();
+  const taskIds = [uuid(), uuid(), uuid(), uuid(), uuid(), uuid()];
+  const fridgeProject: Project = {
+    id: fridgeProjectId,
+    title: "Fridge outside the corner store",
+    description:
+      "A community fridge under the awning at Han's corner store — free food, day and night, no questions asked. The fridge itself is promised; now we make it real.",
+    category: "food",
+    organizerKey: rosa.publicKey,
+    coOrganizerKeys: [],
+    status: "active",
+    targetHours: 18,
+    contributedHours: 0,
+    deadline: null,
+    createdAt: hourAgo(72),
+    completedAt: null,
+    pauseNote: null,
+    locationZone: "East neighborhood",
+    tags: [],
+    nodeId,
+    templateId: "community-fridge",
+  };
+  const openTask = (
+    i: number,
+    fields: Pick<
+      ProjectTask,
+      "title" | "description" | "estimatedHours" | "requiredSkills"
+    > &
+      Partial<ProjectTask>,
+  ): ProjectTask => ({
+    id: taskIds[i],
+    projectId: fridgeProjectId,
+    category: "food",
+    urgency: "low",
+    assignedTo: null,
+    status: "open",
+    dependencies: [],
+    orderIndex: (i + 1) * 1000,
+    createdAt: hourAgo(72),
+    completedAt: null,
+    completedBy: null,
+    exchangeId: null,
+    claimedAt: null,
+    actualHours: null,
+    checkInAcknowledgedAt: null,
+    recurringCadence: null,
+    ...fields,
+  });
+  const fridgeTasks: ProjectTask[] = [
+    openTask(0, {
+      title: "Find a host site with power and foot traffic",
+      description:
+        "Approach small businesses, churches, clinics, or community centers. Ask if they'll let you place a fridge under their awning and plug it in (electricity cost is usually a few dollars a month — offer to cover it). Get a simple written okay.",
+      estimatedHours: 3,
+      requiredSkills: ["outreach"],
+      urgency: "medium",
+    }),
+    openTask(1, {
+      title: "Source a fridge and a weatherproof shelter",
+      description:
+        "Put out a call for a working fridge on local groups. Build or buy a simple wooden cabinet/lean-to around it to protect it from rain and sun. Anchor it so it can't tip. Includes locating, transporting, and building.",
+      estimatedHours: 8,
+      requiredSkills: ["carpentry", "driving"],
+      dependencies: [taskIds[0]],
+      // Marcus is mid-carry so the project reads as alive.
+      status: "claimed",
+      assignedTo: marcus.publicKey,
+      claimedAt: hourAgo(24),
+    }),
+    openTask(2, {
+      title: "Set the ground rules and label everything",
+      description:
+        "Post a clear, multilingual sign: take what you need, leave what you can, no expired/home-canned/raw meat. Add labels and a marker so people can date items.",
+      estimatedHours: 1.5,
+      requiredSkills: ["writing", "translation"],
+      dependencies: [taskIds[1]],
+    }),
+    openTask(3, {
+      title: "Recruit a cleaning and restocking rota",
+      description:
+        "Make a shared weekly schedule. Each shift is ~15 minutes: wipe surfaces, toss anything spoiled or past-date, and note what's running low. Keep cleaning supplies on site.",
+      estimatedHours: 2,
+      requiredSkills: ["organizing"],
+      dependencies: [taskIds[1]],
+      recurringCadence: "month",
+    }),
+    openTask(4, {
+      title: "Build supply relationships",
+      description:
+        "Ask bakeries, grocers, restaurants, and farmers' markets for regular end-of-day donations. Coordinate a pickup volunteer. Track which sources are reliable.",
+      estimatedHours: 3,
+      requiredSkills: ["outreach"],
+    }),
+    openTask(5, {
+      title: "Set up a problem contact",
+      description:
+        'Put one phone number or email on the fridge for "fridge is broken / power is out / question." Decide who answers it and how fast.',
+      estimatedHours: 0.5,
+      requiredSkills: [],
+    }),
+  ];
+  await db.projects.put(fridgeProject);
+  await db.projectTasks.bulkPut(fridgeTasks);
+
+  // An upcoming gathering with open shifts, tied to the same effort:
+  // gives the Calendar and the Dashboard's "Coming up" something to
+  // show, and lets a first-run member walk the shift arc — sign up →
+  // "Add this shift to my calendar". Empty `signature` marks the row
+  // demo-local/not-federable, the same convention as pre-federation
+  // legacy posts.
+  const buildDayId = uuid();
+  const dayFromNow = (d: number) => now + d * 24 * 60 * 60 * 1000;
+  const buildDayStart = dayFromNow(5);
+  const buildDay: Event = {
+    id: buildDayId,
+    kind: "event",
+    title: "Fridge build day",
+    description:
+      "We're building the shelter and setting up the fridge together. Come for an hour or the whole morning — tools and snacks provided.",
+    category: "food",
+    startsAt: buildDayStart,
+    endsAt: buildDayStart + 4 * 60 * 60 * 1000,
+    location: "Behind Han's corner store, East neighborhood",
+    capacity: null,
+    templateId: null,
+    createdAt: hourAgo(48),
+    createdBy: rosa.publicKey,
+    nodeId,
+    signature: "",
+  };
+  const buildDayShifts: EventShiftRow[] = [
+    {
+      id: uuid(),
+      eventId: buildDayId,
+      label: "Morning build crew",
+      startsAt: buildDayStart,
+      endsAt: buildDayStart + 2 * 60 * 60 * 1000,
+      capacity: 4,
+      createdBy: rosa.publicKey,
+      createdAt: hourAgo(48),
+    },
+    {
+      id: uuid(),
+      eventId: buildDayId,
+      label: "Finishing and first stock",
+      startsAt: buildDayStart + 2 * 60 * 60 * 1000,
+      endsAt: buildDayStart + 4 * 60 * 60 * 1000,
+      capacity: 3,
+      createdBy: rosa.publicKey,
+      createdAt: hourAgo(48),
+    },
+  ];
+  await db.events.put(buildDay);
+  await db.eventShifts.bulkPut(buildDayShifts);
 
   return you;
 }

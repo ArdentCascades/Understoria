@@ -663,6 +663,7 @@
       "signedUpChip": "You're on this shift",
       "signUpButton": "Sign up",
       "removeButton": "Remove my signup",
+      "addToCalendar": "Add this shift to my calendar (.ics)",
       "consentHeading": "Sign up: {{label}}",
       "consentRsvp": "This also RSVPs you “Going” to the event.",
       "consentRoster": "The organizer and members who RSVP'd going or maybe will see your name on this shift's roster. Everyone else here sees spot counts only — other communities see neither.",
