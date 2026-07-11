@@ -66,13 +66,18 @@ const VALIDATORS: Record<FieldName, Validator> = {
 };
 
 export default function PostFormPage() {
-  const { currentMember, posts, nodeId } = useApp();
+  const { currentMember, posts, nodeId, projects, projectTasks } = useApp();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const repostId = params.get("repost");
   const repostAgain = params.get("again") === "1";
+  // Body-doubling invitation (docs/body-doubling.md): the task page's
+  // "invite company" doorway lands here with `?company=<taskId>`. The
+  // form seeds an ordinary NEED post the member reviews and edits —
+  // nothing is published until they choose to post it.
+  const companyTaskId = params.get("company");
   const initialType: PostType =
     (params.get("type") as PostType) === "OFFER" ? "OFFER" : "NEED";
 
@@ -140,6 +145,36 @@ export default function PostFormPage() {
       setExpiresInDays(String(daysLeft));
     }
   }, [repostId, posts]);
+
+  // One-shot body-doubling seed — same guard shape as the repost seed
+  // above. Only the task's own claimer gets the prefill (a link with
+  // someone else's task id quietly falls through to a blank form);
+  // everything seeded here is editable before posting.
+  const companySeededRef = useRef(false);
+  const companyTask = companyTaskId
+    ? projectTasks.find((tk) => tk.id === companyTaskId)
+    : undefined;
+  const companySeedable =
+    !!companyTask && companyTask.assignedTo === currentMember?.publicKey;
+  useEffect(() => {
+    if (companySeededRef.current) return;
+    if (!companyTask || !companySeedable) return;
+    companySeededRef.current = true;
+    const project = projects.find((p) => p.id === companyTask.projectId);
+    setType("NEED");
+    setCategory("emotional_support");
+    setHours(String(companyTask.estimatedHours || 1));
+    setTitle(
+      t("bodyDoubling.postTitle", { task: companyTask.title }).slice(0, 120),
+    );
+    setDescription(
+      t("bodyDoubling.postDescription", {
+        task: companyTask.title,
+        project: project?.title ?? "",
+        url: `${window.location.origin}/project/${companyTask.projectId}/task/${companyTask.id}`,
+      }),
+    );
+  }, [companyTask, companySeedable, projects, t]);
 
   // Treat "user has typed something meaningful" as dirty. The
   // defaults (category=other, hours=1, urgency=low) match a fresh
@@ -241,6 +276,15 @@ export default function PostFormPage() {
       {repostId && (
         <p className="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
           {t("postForm.repostBanner")}
+        </p>
+      )}
+
+      {/* Company-invitation explainer: says what the prefill is, that
+          nothing is public until they post, and that everything below
+          is theirs to edit. */}
+      {companySeedable && (
+        <p className="mb-4 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
+          {t("bodyDoubling.formHint")}
         </p>
       )}
 

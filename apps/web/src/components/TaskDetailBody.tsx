@@ -33,6 +33,7 @@ import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { TaskPrivateChecklist } from "@/components/TaskPrivateChecklist";
 import { shareUrl } from "@/lib/share";
 import { matchTaskSkills } from "@/lib/taskSkillMatch";
+import { suggestSplitting } from "@/lib/taskPresentation";
 import { getTaskTips } from "@/content/taskTips";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
@@ -279,6 +280,13 @@ export function TaskDetailBody({
               value={editHours}
               onChange={(e) => setEditHours(e.target.value)}
             />
+            {/* Authoring-time guidance, never a gate: big tasks are
+                harder to start and slower to get claimed. */}
+            {suggestSplitting(editHours) && (
+              <span className="text-xs text-moss-600 dark:text-moss-300">
+                {t("projects.task.addTask.splitHint")}
+              </span>
+            )}
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">
@@ -724,8 +732,41 @@ export function TaskDetailBody({
         isAssignee &&
         (task.status === "claimed" ||
           task.status === "awaiting_confirmation") && (
-          <TaskPrivateChecklist taskId={task.id} memberKey={currentKey} />
+          <TaskPrivateChecklist
+            taskId={task.id}
+            memberKey={currentKey}
+            taskTitle={task.title}
+            projectId={task.projectId}
+          />
         )}
+      {/* Body-doubling doorway (docs/body-doubling.md): working
+          alongside someone — even on unrelated things — makes starting
+          much easier for many people. Deliberately NOT a new record
+          type: the button composes an ordinary NEED post the member
+          reviews and edits before posting, so the invitation is fully
+          consensual, rides the existing post lifecycle, and shares
+          only what the member chooses to publish. */}
+      {currentKey && isAssignee && task.status === "claimed" && (
+        <div className="rounded-md border border-moss-200 bg-moss-50/50 p-3 text-sm dark:border-moss-700 dark:bg-moss-900/40">
+          <p className="font-semibold text-moss-800 dark:text-moss-100">
+            {t("projects.task.company.heading")}
+          </p>
+          <p className="mt-0.5 text-xs text-moss-600 dark:text-moss-300">
+            {t("projects.task.company.why")}
+          </p>
+          <p className="mt-2">
+            <Link
+              to={`/post/new?company=${task.id}`}
+              className="text-sm font-medium text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+            >
+              {t("projects.task.company.cta")}
+            </Link>
+          </p>
+          <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+            {t("projects.task.company.how")}
+          </p>
+        </div>
+      )}
       {/* Claimer-side narrative (PR #226's voice — "credit moves when
           ..."). Visible only to the completer of an awaiting task;
           tells them the plain story while they wait. Mirrors

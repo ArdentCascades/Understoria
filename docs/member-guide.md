@@ -413,12 +413,38 @@ Two tools live there:
   Tasks with a planned day sort **first** in your **In my care**
   tab, soonest day on top, with a quiet "You planned Saturday"
   line on the row.
+- **"Where things stand" — a note to future you.** When you put a
+  task down, jot what's done and what you're waiting on ("waiting
+  on Sam's reply; hinges are in the shed"). Next time you open the
+  task you start from your note instead of reconstructing the
+  context from memory. Explicit **Save note** button, so you know
+  exactly when your words are kept.
+- **Put a planned day on your own calendar.** Once a day is set, a
+  **"Put it on my calendar (.ics)"** link downloads a small calendar
+  file you can open with whatever calendar app you already use.
+  Understoria itself never sends reminders — but your own calendar
+  can, if *you* choose to set one. The file is generated on your
+  device and nothing about it leaves it.
 
 The planned day is a self-promise, not a deadline. If it passes,
 nothing turns red, nothing counts the days, and nobody is told —
 the task page just says *"You'd planned Thursday. Life happens —
 pick a new day whenever you're ready."* There are deliberately no
 reminders or notifications attached to any of this.
+
+### Inviting company — body doubling
+
+Working alongside someone — even on completely different things —
+helps many people start and stick with a task; the practice is
+often called **body doubling**. On any task you've claimed, the
+task page offers **"Invite company from the board."** It opens a
+ready-to-edit board post (a NEED, under *Emotional support*)
+explaining what you're working on and that no skills are needed —
+someone can bring their own task or just keep you company. You
+choose every word, and nothing is shared until you post it. From
+there it's an ordinary post: someone claims it, you message each
+other, and you pick a time together. See
+[`body-doubling.md`](./body-doubling.md) for the design.
 
 A task list can be **filtered**, **searched**, and (when there's
 enough) reorganised by the organiser. Once a project has enough

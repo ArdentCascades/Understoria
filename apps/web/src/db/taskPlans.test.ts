@@ -10,9 +10,11 @@ import {
   addPlanStep,
   getOwnTaskPlan,
   localDayString,
+  MAX_NOTE_LENGTH,
   MAX_PLAN_STEPS,
   removePlanStep,
   setPlannedDay,
+  setPlanNote,
   togglePlanStep,
 } from "./taskPlans";
 import { EXPORT_EXCLUDED_TABLES } from "@/lib/exportData";
@@ -102,6 +104,47 @@ describe("taskPlans — planned day", () => {
   it("localDayString speaks the <input type=date> shape", () => {
     expect(localDayString(new Date(2026, 6, 11))).toBe("2026-07-11");
     expect(localDayString(new Date(2026, 0, 2))).toBe("2026-01-02");
+  });
+});
+
+describe("taskPlans — where-things-stand note", () => {
+  it("sets, trims, and clears the note; a note-only row prunes on clear", async () => {
+    await setPlanNote(TASK, ME, "  waiting on Sam's reply  ");
+    expect((await getOwnTaskPlan(TASK, ME))?.note).toBe(
+      "waiting on Sam's reply",
+    );
+
+    await setPlanNote(TASK, ME, "hinges are in the shed");
+    expect((await getOwnTaskPlan(TASK, ME))?.note).toBe(
+      "hinges are in the shed",
+    );
+
+    await setPlanNote(TASK, ME, "");
+    expect(await getOwnTaskPlan(TASK, ME)).toBeNull();
+    expect(await db.taskPlans.get(TASK)).toBeUndefined();
+  });
+
+  it("keeps the row when steps or a day remain after clearing the note", async () => {
+    await addPlanStep(TASK, ME, "a step");
+    await setPlanNote(TASK, ME, "some context");
+    await setPlanNote(TASK, ME, "");
+    const plan = await getOwnTaskPlan(TASK, ME);
+    expect(plan?.steps.length).toBe(1);
+    expect(plan?.note).toBe("");
+  });
+
+  it("caps the note length", async () => {
+    await setPlanNote(TASK, ME, "x".repeat(MAX_NOTE_LENGTH + 100));
+    expect((await getOwnTaskPlan(TASK, ME))?.note?.length).toBe(
+      MAX_NOTE_LENGTH,
+    );
+  });
+
+  it("a new claimer's note replaces the previous claimer's whole plan", async () => {
+    await setPlanNote(TASK, ME, "my context");
+    await setPlanNote(TASK, OTHER, "their context");
+    expect(await getOwnTaskPlan(TASK, ME)).toBeNull();
+    expect((await getOwnTaskPlan(TASK, OTHER))?.note).toBe("their context");
   });
 });
 

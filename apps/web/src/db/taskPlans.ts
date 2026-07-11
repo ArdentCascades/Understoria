@@ -52,6 +52,7 @@ import { uuid } from "@/lib/id";
 
 export const MAX_PLAN_STEPS = 30;
 export const MAX_STEP_LENGTH = 200;
+export const MAX_NOTE_LENGTH = 500;
 
 /** The viewer's own plan for a task, or null — a row authored by
  *  someone else (the task changed hands on a shared device) reads as
@@ -78,6 +79,7 @@ function baseRow(
     memberKey,
     steps: [],
     plannedDay: null,
+    note: "",
     createdAt: now,
     updatedAt: now,
   };
@@ -85,7 +87,11 @@ function baseRow(
 
 /** Writes the row, or deletes it when the plan has emptied out. */
 async function putOrPrune(row: TaskPlanRow): Promise<void> {
-  if (row.steps.length === 0 && row.plannedDay === null) {
+  if (
+    row.steps.length === 0 &&
+    row.plannedDay === null &&
+    (row.note ?? "") === ""
+  ) {
     await db.taskPlans.delete(row.taskId);
   } else {
     await db.taskPlans.put(row);
@@ -159,6 +165,21 @@ export async function setPlannedDay(
     const now = Date.now();
     const row = baseRow(await db.taskPlans.get(taskId), taskId, memberKey, now);
     await putOrPrune({ ...row, plannedDay: day, updatedAt: now });
+  });
+}
+
+/** "Where things stand" — the note to future self. Empty string
+ *  clears it (and prunes an otherwise-empty row). Stored trimmed. */
+export async function setPlanNote(
+  taskId: string,
+  memberKey: string,
+  note: string,
+): Promise<void> {
+  const trimmed = note.trim().slice(0, MAX_NOTE_LENGTH);
+  await db.transaction("rw", db.taskPlans, async () => {
+    const now = Date.now();
+    const row = baseRow(await db.taskPlans.get(taskId), taskId, memberKey, now);
+    await putOrPrune({ ...row, note: trimmed, updatedAt: now });
   });
 }
 

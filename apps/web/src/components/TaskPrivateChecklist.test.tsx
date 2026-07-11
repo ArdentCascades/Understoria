@@ -44,7 +44,14 @@ afterEach(() => {
 async function render(memberKey = ME) {
   await act(async () => {
     root = createRoot(container);
-    root.render(<TaskPrivateChecklist taskId={TASK} memberKey={memberKey} />);
+    root.render(
+      <TaskPrivateChecklist
+        taskId={TASK}
+        memberKey={memberKey}
+        taskTitle="Fix the fence"
+        projectId="proj-1"
+      />,
+    );
     await Promise.resolve();
   });
   // Let useLiveQuery settle.
@@ -158,5 +165,59 @@ describe("TaskPrivateChecklist", () => {
     await addPlanStep(TASK, "someone-else", "their private note");
     await render(ME);
     expect(container.textContent).not.toContain("their private note");
+  });
+
+  it("saves the where-things-stand note via its explicit Save button", async () => {
+    await render();
+    expect(container.textContent).toContain(
+      "Where things stand — a note to future you",
+    );
+    const textarea = container.querySelector("textarea");
+    expect(textarea).not.toBeNull();
+    const save = Array.from(container.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === "Save note",
+    );
+    expect(save).toBeDefined();
+    expect(save!.disabled).toBe(true);
+
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(textarea, "waiting on Sam's reply");
+      textarea!.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(save!.disabled).toBe(false);
+    await act(async () => {
+      save!.click();
+    });
+    await flushLiveQuery();
+    expect(container.textContent).toContain("Saved.");
+    expect((await db.taskPlans.get(TASK))?.note).toBe(
+      "waiting on Sam's reply",
+    );
+  });
+
+  it("offers the calendar-file download only once a day is planned", async () => {
+    await render();
+    const icsButton = () =>
+      Array.from(container.querySelectorAll("button")).find((b) =>
+        (b.textContent ?? "").includes("Put it on my calendar"),
+      );
+    expect(icsButton()).toBeUndefined();
+
+    const todayBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === "Today",
+    );
+    await act(async () => {
+      todayBtn!.click();
+    });
+    await flushLiveQuery();
+    expect(icsButton()).toBeDefined();
+    // The why/how line rides with the button.
+    expect(container.textContent).toContain(
+      "Understoria never sends reminders",
+    );
   });
 });
