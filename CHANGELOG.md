@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **`direct:` exchange-label namespace — shared foundation** (PR B of
+  the adopted [`direct-exchange-label.md`](docs/direct-exchange-label.md)
+  design). `isDirectExchangeLabel` in the shared package locks the
+  grammar to `direct:` + a lowercase random uuid and nothing else —
+  the §3 permanent boundary (no event, shift, date, or member
+  correlator may ever hide in the suffix) as an executable predicate
+  with structured-suffix rejection tests. Consumer behavior is
+  test-pinned before any UI exists: `balanceFor` counts a direct
+  exchange exactly like any exchange, `projectConfirmationOutflow`
+  never attributes one, `transactionHistory` lists it plainly, and
+  `/auto-confirm` refuses to finalize one — direct exchanges are
+  mutual-signature-only, with no system-key path, by design.
 - **Next-cycle plans** (`docs/next-cycle-plans.md`) — six detailed,
   code-grounded plans for the coming development cycle: implementing
   the two ratification-ready design notes (ways-to-plug-in shelf,

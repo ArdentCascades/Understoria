@@ -14,9 +14,19 @@
 
 ## §1 Status
 
-Proposed. One genuinely open decision is marked "Operator ruling
-needed" in §8, with a recommended default. Everything else here is
-decided, pending ratification.
+**Adopted** (operator review, 2026-07-11, via
+[`next-cycle-plans.md`](./next-cycle-plans.md) Plan 1). The §8 ruling
+landed on the recommended default: **both entry points ship in
+phase 1** (the plain-event shift affordance and the profile
+affordance). A cross-cutting ruling from the same review: the
+ways-to-plug-in shelf does NOT surface `direct:`-creditable moments —
+the shelf reads open work; direct credit is retrospective.
+
+Implementation progress: **PR B (shared) shipped** —
+`isDirectExchangeLabel` with the namespace-grammar lock, the
+`timebank.ts` consumer locks (balance counts a direct exchange like
+any exchange; project attribution never sees one), and the explicit
+`/auto-confirm` refusal test. PRs C and E follow.
 
 ## §2 Why now
 

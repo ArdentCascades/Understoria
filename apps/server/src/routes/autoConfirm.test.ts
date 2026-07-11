@@ -244,6 +244,35 @@ describe("POST /auto-confirm — authority binding (Round-4)", () => {
     expect(body.results[0].reason).toBe("post_not_found");
   });
 
+  it("never finalizes a direct: exchange — mutual-signature-only by design", async () => {
+    // docs/direct-exchange-label.md §4: a `direct:` exchange has no
+    // poster-signed post, so the system key must have NO path to
+    // finalize one. This is the same code path as any absent post,
+    // but the property is load-bearing (direct exchanges are
+    // consensual-signature-only), so it gets its own lock rather than
+    // riding incidentally on the post_not_found behavior above.
+    const helper = generateKeyPair();
+    const helped = generateKeyPair();
+    const payload = {
+      postId: "direct:8a6e0804-2bd0-4672-b79d-d97027f9071a",
+      helperKey: helper.publicKey,
+      helpedKey: helped.publicKey,
+      hours: 1,
+      category: "transport" as const,
+      completedAt: nowMs,
+    };
+    const helperSignature = sign(
+      canonicalExchangePayload(payload),
+      helper.secretKey,
+    );
+    const body = await post([
+      { exchangeId: "ex_direct", awaitingSince: nowMs - 8 * 24 * HOUR, helperSignature, payload },
+    ]);
+    expect(body.results[0].status).toBe("ineligible");
+    expect(body.results[0].reason).toBe("post_not_found");
+    expect(store.get("ex_direct")).toBeUndefined();
+  });
+
   it("rejects hours that do not match the poster-signed post (cannot inflate credit)", async () => {
     const helper = generateKeyPair();
     const helped = generateKeyPair();
