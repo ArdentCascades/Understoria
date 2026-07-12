@@ -31,6 +31,11 @@ nginx / Traefik / Apache instead of Caddy.
 
 ## 1. What being an operator means right now
 
+> **Running a first pilot?** [`pilot-playbook.md`](./pilot-playbook.md)
+> is the start-to-finish procedure — preflight checklist, the knobs to
+> ratify, a week-by-week attention list, stage-E exit criteria, and
+> incident pages that point back into this guide's runbooks.
+
 You are responsible for:
 
 - **Publishing the app** — making sure members can reach a trusted
