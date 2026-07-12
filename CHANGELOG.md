@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The credit-model decision goes to governance**
+  (`docs/proposals/project-credit-model.md`). The proposal that
+  settles issue #6 — whose hours pay for a confirmed project task —
+  written for the modified-consensus process: it argues keeping the
+  organizer-debit mechanism (honest, shipped, zero-sum) and
+  relieving its real cost with **voluntary backing transfers** —
+  ordinary two-signature exchanges labeled
+  `project:<projectId>/backing`, with the project page showing
+  pooled backing so the community can see (and top up) a project
+  running on its organizer's personal hours. Issuance and the keyed
+  community pool are analyzed and rejected on the record: both
+  break either the zero-sum anti-gaming backbone or the bounded-key
+  custody model. Nothing ships from the document without the
+  community's decision; implementation (~2 small PRs) follows
+  adoption.
 - **"Ways to plug in" — the browsable shelf** (docs/ways-to-plug-in.md,
   both phases). A member with two free hours no longer hunts across
   four surfaces: `/plug-in` (a quiet Board link — a link, not a tab,
