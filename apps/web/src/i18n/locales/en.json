@@ -2271,7 +2271,8 @@
     "openSettings": "Open settings",
     "title": "Settings",
     "intro": "How Understoria behaves on this device. Changes here only affect this device — they don't sync across the community.",
-    "back": "← Back to profile"
+    "back": "← Back to profile",
+    "buildStamp": "Build {{stamp}}"
   },
   "invitesPage": {
     "title": "Your invites",

@@ -22,9 +22,33 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+// The build stamp shown in Settings (docs/operator-guide.md §6).
+// Resolution order: an explicit VITE_BUILD_STAMP (the Docker build
+// passes the short commit hash this way — the build context has no
+// .git), then a live git short hash (local/dev builds), then "" so
+// the client falls back to "dev". Failure to read git is never fatal.
+function resolveBuildStamp(): string {
+  const fromEnv = process.env.VITE_BUILD_STAMP?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    return execSync("git rev-parse --short HEAD", {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return "";
+  }
+}
+const BUILD_STAMP = resolveBuildStamp();
+
 export default defineConfig({
+  define: {
+    __UNDERSTORIA_BUILD_STAMP__: JSON.stringify(BUILD_STAMP),
+  },
   plugins: [
     react(),
     VitePWA({

@@ -22,6 +22,7 @@ import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { StorageWindowSection } from "@/components/StorageWindowSection";
 import { exportData } from "@/lib/exportData";
+import { BUILD_STAMP } from "@/lib/buildStamp";
 import {
   formatBytes,
   readStorageStatus,
@@ -121,6 +122,17 @@ export default function SettingsPage() {
           </div>
           <StorageWindowSection />
         </section>
+
+        {/* Build stamp — the short id of the code this device is
+            running (docs/operator-guide.md §6). Quiet, selectable, and
+            deliberately at the very bottom: its one job is to answer
+            "read me your build stamp" during the auto-confirm
+            enforcement flip, not to invite attention. */}
+        <p className="mt-2 text-center text-xs text-moss-600 dark:text-moss-300">
+          <span className="select-all font-mono">
+            {t("settings.buildStamp", { stamp: BUILD_STAMP })}
+          </span>
+        </p>
       </div>
     </div>
   );

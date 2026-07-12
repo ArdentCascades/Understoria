@@ -18,6 +18,10 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        # Build stamp shown in Settings (docs/operator-guide.md §6).
+        # Set it before building: VITE_BUILD_STAMP=$(git rev-parse --short HEAD) docker compose build web
+        VITE_BUILD_STAMP: ${VITE_BUILD_STAMP:-}
     image: understoria/web:${UNDERSTORIA_VERSION:-0.3.0}
     container_name: understoria-web-build
     restart: "no"

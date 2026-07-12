@@ -2271,7 +2271,8 @@
     "openSettings": "Abrir ajustes",
     "title": "Ajustes",
     "intro": "Cómo se comporta Understoria en este dispositivo. Los cambios aquí solo afectan a este dispositivo — no se sincronizan con la comunidad.",
-    "back": "← Volver al perfil"
+    "back": "← Volver al perfil",
+    "buildStamp": "Compilación {{stamp}}"
   },
   "invitesPage": {
     "title": "Tus invitaciones",

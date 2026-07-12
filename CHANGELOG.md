@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **A build stamp in Settings** (`lib/buildStamp.ts`,
+  `docs/operator-guide.md` §6). A short id of the exact code a device
+  is running, shown quietly at the bottom of Settings — injected at
+  build time (the `VITE_BUILD_STAMP` env the Docker build forwards, or
+  a live `git rev-parse --short HEAD` for local builds; empty → "dev").
+  Its one job is operational: during the auto-confirm enforcement flip
+  (`AUTO_CONFIRM_REQUIRE_TRANSITION`), the operator needs "read me your
+  build stamp" to work over any channel to confirm every pilot device
+  activated the artifact-emitting build first. First slice of the
+  pilot-readiness package (`docs/next-cycle-plans.md` Plan 3).
 - **Organizers can adjust a shift's spots after creating it.** The
   `setShiftCapacity` data-layer control (shipped since the shifts
   feature but UI-less) now has an "Edit spots" affordance on each
