@@ -34,11 +34,13 @@ const {
   addShiftMock,
   deleteShiftMock,
   removeSignupMock,
+  setShiftCapacityMock,
   signUpForShiftMock,
 } = vi.hoisted(() => ({
   addShiftMock: vi.fn(async () => ({}) as unknown),
   deleteShiftMock: vi.fn(async () => undefined),
   removeSignupMock: vi.fn(async () => undefined),
+  setShiftCapacityMock: vi.fn(async () => ({}) as unknown),
   signUpForShiftMock: vi.fn(async () => ({}) as unknown),
 }));
 
@@ -49,6 +51,7 @@ vi.mock("@/db/eventShifts", () => ({
   listShiftsForEvent: vi.fn(),
   listSignupsForEvent: vi.fn(),
   removeSignup: removeSignupMock,
+  setShiftCapacity: setShiftCapacityMock,
   signUpForShift: signUpForShiftMock,
 }));
 
@@ -174,6 +177,20 @@ function click(el: Element | null | undefined) {
 
 function buttons(): HTMLButtonElement[] {
   return Array.from(container.querySelectorAll("button"));
+}
+
+// Drive a controlled input the way React expects: use the native
+// value setter so React's internal value tracker sees the change,
+// then dispatch a bubbling input event.
+function setInputValue(input: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value",
+  )?.set;
+  act(() => {
+    setter?.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
 }
 
 // Action buttons only — the WhyTooltip principle affordance is also a
@@ -363,6 +380,91 @@ describe("EventShiftsSection — §5.2 lifecycle surfaces", () => {
     });
     click(buttons().find((b) => b.textContent === "Remove this shift"));
     expect(deleteShiftMock).toHaveBeenCalledWith("shift_1", "organizer-key");
+  });
+});
+
+describe("EventShiftsSection — §11.5 capacity edit (organizer)", () => {
+  it("offers the capacity edit to the organizer on an upcoming shift", () => {
+    renderSection([makeShift({ capacity: 4 })], [], { isOrganizer: true });
+    expect(
+      buttons().find((b) => b.textContent === "Edit spots"),
+    ).toBeTruthy();
+  });
+
+  it("hides it from a non-organizer and on cancelled or passed shifts", () => {
+    renderSection([makeShift()], [], { isOrganizer: false });
+    expect(
+      buttons().find((b) => b.textContent === "Edit spots"),
+    ).toBeUndefined();
+
+    renderSection([makeShift()], [], {
+      isOrganizer: true,
+      isCancelled: true,
+    });
+    expect(
+      buttons().find((b) => b.textContent === "Edit spots"),
+    ).toBeUndefined();
+
+    renderSection(
+      [
+        makeShift({
+          startsAt: NOW - 2 * 60 * 60 * 1000,
+          endsAt: NOW - 60 * 60 * 1000,
+        }),
+      ],
+      [],
+      { isOrganizer: true },
+    );
+    expect(
+      buttons().find((b) => b.textContent === "Edit spots"),
+    ).toBeUndefined();
+  });
+
+  it("seeds the field from the current cap and saves the parsed number", () => {
+    renderSection([makeShift({ capacity: 4 })], [], {
+      isOrganizer: true,
+      memberKey: "organizer-key",
+    });
+    click(buttons().find((b) => b.textContent === "Edit spots"));
+    const input = container.querySelector(
+      'input[type="number"]',
+    ) as HTMLInputElement;
+    expect(input.value).toBe("4");
+    setInputValue(input, "6");
+    click(buttons().find((b) => b.textContent === "Save"));
+    expect(setShiftCapacityMock).toHaveBeenCalledWith(
+      "shift_1",
+      6,
+      "organizer-key",
+    );
+  });
+
+  it("clears the cap (null) when the field is emptied", () => {
+    renderSection([makeShift({ capacity: 4 })], [], {
+      isOrganizer: true,
+      memberKey: "organizer-key",
+    });
+    click(buttons().find((b) => b.textContent === "Edit spots"));
+    const input = container.querySelector(
+      'input[type="number"]',
+    ) as HTMLInputElement;
+    setInputValue(input, "");
+    click(buttons().find((b) => b.textContent === "Save"));
+    expect(setShiftCapacityMock).toHaveBeenCalledWith(
+      "shift_1",
+      null,
+      "organizer-key",
+    );
+  });
+
+  it("shows the roster floor hint while editing a shift with signups", () => {
+    renderSection([makeShift({ capacity: 3 })], [makeSignup(), makeSignup()], {
+      isOrganizer: true,
+    });
+    click(buttons().find((b) => b.textContent === "Edit spots"));
+    expect(container.textContent).toContain(
+      "2 people signed up — you can't set fewer spots than that.",
+    );
   });
 });
 

@@ -722,12 +722,19 @@ actually landed where it drifted from the sketch.
   signed-up state + one-tap removal, organizer add-shift form
   (dates seeded from the event's day, times deliberately empty)
   and empty-shift delete, cancelled-event inert rendering. i18n
-  en/es parity. Two deliberate narrowings: shifts are added from
+  en/es parity. One deliberate narrowing: shifts are added from
   the event page only (`EventNew` navigates there on success, so
   the sketch's "reachable from the success state" is satisfied by
-  navigation, not a second form), and a capacity-EDIT control
-  shipped in the data layer but not the UI — pilot signal will
-  say whether organizers actually reach for it.
+  navigation, not a second form). The capacity-EDIT control — data
+  layer only at first ship — later gained its UI: an organizer,
+  on a live event's UPCOMING shift, gets an "Edit spots" affordance
+  that reveals a number field seeded from the current cap (empty =
+  uncapped). It raises or uncaps freely and lowers only to a value
+  that still fits everyone signed up; the number field's `min`
+  tracks the roster and the write layer (`setShiftCapacity`) is the
+  authority that refuses a below-roster value (§5.2), surfaced via
+  `humanizeError`. Passed shifts show no edit control (signups are
+  closed — a cap change would be meaningless).
 - **PR F — composition + credit prefill.** *Shipped.* The §9.3
   "Record time together" affordance renders on PASSED shifts of a
   project-linked (work-day) event, to the organizer and to each
@@ -762,6 +769,18 @@ inline.
    a direct-exchange label is useful far beyond shifts and
    deserves its own ingestion-scope review rather than riding
    this ladder.
+   **Follow-up SHIPPED:** option (b) landed as the direct-exchange
+   label (`docs/direct-exchange-label.md`; `isDirectExchangeLabel`
+   + `verifyExchangeLabel` ingestion scope). A passed shift on a
+   PLAIN event now renders a quiet "Record time together" doorway
+   to shift members other than the event creator, deep-linking the
+   two-signature `/record-direct` ceremony with the shift's
+   duration and the event's category prefilled — FORM prefill only,
+   the recorded exchange carries a random `direct:` label and
+   nothing event-shaped (§9.2 boundary intact). The phase-1
+   "plain events ship no credit affordance" stance held exactly
+   until that independent design review cleared; it is now
+   superseded.
 2. **Organizer signs up a member who asked aloud (§11.6).**
    **RULED: deferred.** The member tapping on their own device is
    the consent floor, and the in-person workaround costs seconds:
@@ -772,6 +791,13 @@ inline.
    the quiet-pressure risk of recommendation surfaces against
    `asking-never-gated`'s receiving-side twin: browsing stays
    browsing, never a queue assigned to you.
+   **Follow-up SHIPPED:** the design note became the "Ways to plug
+   in" shelf (`docs/ways-to-plug-in.md`; `lib/plugIn.ts`,
+   `pages/PlugIn.tsx`, a quiet Board link). It honors that
+   constraint — a browsable shelf a member opens deliberately, its
+   matches ranked by their own stated offers, never a queue pushed
+   at them and never gated. Open shifts surface there alongside the
+   other doorways.
 4. **Shift authority for project co-organizers (§5.1).**
    **RULED: deferred.** One-organizer-per-event matches the event
    authority model everywhere else; widening it is a coherent

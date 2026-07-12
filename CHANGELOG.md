@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Organizers can adjust a shift's spots after creating it.** The
+  `setShiftCapacity` data-layer control (shipped since the shifts
+  feature but UI-less) now has an "Edit spots" affordance on each
+  upcoming shift of a live event: a number field seeded from the
+  current cap (empty = uncapped) that raises or uncaps freely and
+  lowers only to a value that still fits everyone signed up
+  (`shift-signups.md` §5.2 / §11.5 — the cap is a soft planning
+  aid, never a bouncer, and lowering below the roster is refused so
+  no "overflow" framing can appear). Passed shifts show no control.
+  i18n en/es; component-test coverage added.
 - **The credit-model decision goes to governance**
   (`docs/proposals/project-credit-model.md`). The proposal that
   settles issue #6 — whose hours pay for a confirmed project task —

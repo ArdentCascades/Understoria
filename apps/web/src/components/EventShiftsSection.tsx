@@ -20,6 +20,7 @@ import {
   listShiftsForEvent,
   listSignupsForEvent,
   removeSignup,
+  setShiftCapacity,
   signUpForShift,
 } from "@/db/eventShifts";
 import { humanizeError } from "@/lib/humanizeError";
@@ -145,6 +146,9 @@ export function EventShiftsSection({
   const [pending, setPending] = useState(false);
   /** Shift id whose §6.2 consent card is expanded. */
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  /** Shift id whose capacity-edit field is open (organizer only). */
+  const [editingCapId, setEditingCapId] = useState<string | null>(null);
+  const [capEdit, setCapEdit] = useState("");
 
   // Add-shift form (organizer only). The DATE fields seed from the
   // event's own day — harmless and visible; times start empty, same
@@ -200,6 +204,26 @@ export function EventShiftsSection({
     try {
       await deleteShift(shiftId, memberKey);
       showToast(t("events.shifts.deleted"));
+    } catch (err) {
+      setError(humanizeError(err));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function handleSetCapacity(shiftId: string) {
+    if (!memberKey) return;
+    setError(null);
+    const trimmed = capEdit.trim();
+    // Empty clears the cap (uncapped); otherwise a positive whole
+    // number. The data layer re-validates and refuses a value below
+    // the current roster (§5.2) — surfaced here via humanizeError.
+    const cap = trimmed === "" ? null : Number.parseInt(trimmed, 10);
+    setPending(true);
+    try {
+      await setShiftCapacity(shiftId, cap, memberKey);
+      setEditingCapId(null);
+      showToast(t("events.shifts.capacityUpdated"));
     } catch (err) {
       setError(humanizeError(err));
     } finally {
@@ -407,6 +431,82 @@ export function EventShiftsSection({
                 <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
                   {t("events.shifts.fullHint")}
                 </p>
+              )}
+
+              {/* Capacity edit — organizer, live event, upcoming shift
+                  only (editing the cap on a passed shift is
+                  meaningless; signups are closed). The cap is soft
+                  (§11.5): raise or uncap freely, lower only to a value
+                  that still fits everyone signed up (§5.2). The number
+                  field seeds from the current cap; the write layer is
+                  the authority that refuses a below-roster value. */}
+              {isOrganizer && !isCancelled && !passed && (
+                <div className="mt-2">
+                  {editingCapId !== shift.id ? (
+                    <button
+                      type="button"
+                      className="btn-ghost min-h-[44px] text-xs"
+                      disabled={pending}
+                      onClick={() => {
+                        setError(null);
+                        setCapEdit(
+                          shift.capacity === null
+                            ? ""
+                            : String(shift.capacity),
+                        );
+                        setEditingCapId(shift.id);
+                      }}
+                    >
+                      {t("events.shifts.editCapacityButton")}
+                    </button>
+                  ) : (
+                    <div className="flex flex-col gap-2 rounded-lg border border-moss-200 p-2 dark:border-moss-800">
+                      <label className="flex flex-col gap-1 text-sm">
+                        <span className="font-medium">
+                          {t("events.shifts.capacityLabel")}
+                        </span>
+                        <input
+                          type="number"
+                          className="input"
+                          value={capEdit}
+                          onChange={(e) => setCapEdit(e.target.value)}
+                          min={Math.max(1, roster.length)}
+                          step={1}
+                          placeholder={t(
+                            "events.shifts.capacityPlaceholder",
+                          )}
+                          aria-label={t("events.shifts.capacityLabel")}
+                        />
+                      </label>
+                      {roster.length > 0 && (
+                        <p className="text-xs text-moss-600 dark:text-moss-300">
+                          {t("events.shifts.capacityFloorHint", {
+                            count: roster.length,
+                          })}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="btn-primary min-h-[44px]"
+                          disabled={pending}
+                          aria-busy={pending}
+                          onClick={() => void handleSetCapacity(shift.id)}
+                        >
+                          {t("common.save")}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-ghost min-h-[44px]"
+                          disabled={pending}
+                          onClick={() => setEditingCapId(null)}
+                        >
+                          {t("common.cancel")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
 
               {isOrganizer && !isCancelled && roster.length === 0 && (

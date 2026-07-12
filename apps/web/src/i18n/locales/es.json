@@ -688,6 +688,10 @@
       "endTimeAria": "Hora de fin del turno",
       "capacityLabel": "Lugares (opcional)",
       "capacityPlaceholder": "Vacío = sin límite",
+      "editCapacityButton": "Editar lugares",
+      "capacityUpdated": "Lugares actualizados.",
+      "capacityFloorHint_one": "{{count}} persona se anotó — no puedes poner menos lugares que eso.",
+      "capacityFloorHint_other": "{{count}} personas se anotaron — no puedes poner menos lugares que eso.",
       "timesRequired": "Elige una hora de inicio y de fin para el turno."
     },
     "cancellation": {
