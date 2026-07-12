@@ -68,6 +68,10 @@ export const WINDOW_LOCAL_TABLES = [
   // member chose to plan), never re-downloadable, and active by
   // definition — the walker has no business in them.
   "taskPlans",
+  // Pilot journal (db/journal.ts): the member's own local feedback
+  // notes. Tiny free text, never re-downloadable, and the member's
+  // working record — the walker never evicts it.
+  "journalEntries",
 ] as const;
 
 /**

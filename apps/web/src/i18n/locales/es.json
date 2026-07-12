@@ -2274,6 +2274,20 @@
     "back": "← Volver al perfil",
     "buildStamp": "Compilación {{stamp}}"
   },
+  "pilotJournal": {
+    "title": "Diario del piloto",
+    "back": "← Volver a ayuda",
+    "intro": "Notas para el piloto, guardadas en este dispositivo. Anota cualquier cosa que te haya confundido, fallado o funcionado bien — lo que ayude a quienes dirigen este piloto a mejorarlo.",
+    "privacyNote": "Nada de esto se envía a ningún lado. Se queda en este dispositivo hasta que lo borres, o lo entregues tú: toca «Compartir mi diario» para guardar una copia en texto plano que puedes dar a la organizadora o leer en voz alta en un encuentro.",
+    "newLabel": "Añadir una nota",
+    "placeholder": "p. ej. «Me costó encontrar dónde confirmar una tarea»",
+    "addButton": "Guardar nota",
+    "shareButton": "Compartir mi diario",
+    "empty": "Aún no hay notas. Añade una cuando algo valga la pena recordar.",
+    "deleteButton": "Borrar",
+    "helpDoorway": "Anotar lo que confunde o lo que funciona ayuda al piloto.",
+    "helpDoorwayLink": "Abrir tu diario del piloto"
+  },
   "invitesPage": {
     "title": "Tus invitaciones",
     "back": "← Volver al perfil",

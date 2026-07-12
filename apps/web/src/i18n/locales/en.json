@@ -2274,6 +2274,20 @@
     "back": "← Back to profile",
     "buildStamp": "Build {{stamp}}"
   },
+  "pilotJournal": {
+    "title": "Pilot journal",
+    "back": "← Back to help",
+    "intro": "Notes for the pilot, kept on this device. Jot down anything that confused you, broke, or worked well — whatever would help the people running this pilot make it better.",
+    "privacyNote": "Nothing here is sent anywhere. It stays on this device until you delete it, or hand it over yourself: tap “Share my journal” to save a plain-text copy you can give the organizer or read aloud at a check-in.",
+    "newLabel": "Add a note",
+    "placeholder": "e.g. “Took me a while to find where to confirm a task”",
+    "addButton": "Save note",
+    "shareButton": "Share my journal",
+    "empty": "No notes yet. Add one whenever something's worth remembering.",
+    "deleteButton": "Delete",
+    "helpDoorway": "Keeping a note of what's confusing or what works helps the pilot.",
+    "helpDoorwayLink": "Open your pilot journal"
+  },
   "invitesPage": {
     "title": "Your invites",
     "back": "← Back to profile",
