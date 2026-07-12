@@ -28,6 +28,22 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Capacity forecast — the math** (`apps/server/src/capacityForecast.ts`,
+  `docs/capacity-forecast.md` PR 1 of 4). A pure, dependency-free module
+  that projects when a node's disk runs out and grades disk/RAM/CPU into
+  a green/amber/red pressure band from a trailing series of the node's
+  own samples. Encodes the resolved §11 rulings: disk is the only honest
+  countdown (band from days-to-full — amber < 120 d, red < 45 d — not
+  percent used); RAM/CPU are graded off sustained free headroom
+  (amber < 20%, red < 8%, CPU headroom = `1 − load1m/cores`); overall
+  `pressure` is the worst of the three, with only disk carrying the
+  countdown. Robust by construction — Theil–Sen slope (a single
+  reindex/purge spike can't swing it), EWMA-smoothed "now", a
+  countdown *range* rather than a false-precise date, and a `stabilizeBand`
+  hysteresis primitive for the eventual emit layer. Nothing touches the
+  network, a member record, or the filesystem; no sensor and nothing
+  federated yet (those are later PRs). 20 unit tests over injected
+  series.
 - **Pilot playbook** (`docs/pilot-playbook.md`, linked from
   `operator-guide.md` §1). The capstone of the pilot-readiness package
   (`next-cycle-plans.md` Plan 3): the single operational doc that turns
