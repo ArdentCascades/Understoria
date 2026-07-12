@@ -71,34 +71,37 @@ Three commitments hold the design inside the app's existing values:
 
 1. **The forecast is computed where the data already lives, and the
    raw numbers never leave that machine.** Node disk/RAM/CPU are read
-   on the node and stay on the node (operator-only readout, §5). Only a
-   coarse traffic-light *decision* — never a byte count — is ever
-   shared community-wide (§6). This mirrors `storage-budget.md`'s
+   on the node, forecast on the node, and never leave it. Only a coarse
+   traffic-light *decision* — never a byte count — is shared, and only
+   with the trusted community (§6). This mirrors `storage-budget.md`'s
    standing rule that "the numbers never leave the device" and the
    threat model's refusal of a device census.
 
-2. **Two escalations fall out of one forecast.** *Vertical* — warn the
-   node operator to add resources (the "original account" in the
-   request; there is no owner account, so this is the operator, §5.1).
-   *Horizontal* — prompt trusted members to grow a second root (§5.2).
-   Same threshold ladder, two audiences.
+2. **One signal, owned by the trusted community.** A node running low
+   is a *community* problem, not an operator problem. A single forecast
+   surfaces one coarse signal to the whole trusted cohort (§5), who
+   collectively choose the response — add resources to the node they
+   host, grow a second root (§5.2), or talk it through. The app never
+   singles out the operator: there is **no operator-only surface**, so
+   nothing in the UI marks which account runs the server (§7). That is
+   deliberate — an operator-distinguished surface would paint a target
+   on one member's back.
 
 3. **Everything is pull-only.** The app has no push, no badges, no
    reminders anywhere — `no-notifications` is an enforced principle,
-   not a preference. A capacity warning appears on a surface the
-   operator/member already chooses to open (the Infrastructure page,
-   the Board attention rail, the resilience card). No background alert
-   is in scope, ever.
+   not a preference. A capacity signal appears on a surface a trusted
+   member already chooses to open (the Board attention rail, the
+   resilience card). No background alert is in scope, ever.
 
 ## 2. What exists today (the 70%)
 
 | Piece | Where | Reuse |
 |---|---|---|
-| Per-device storage meter + windowing | `lib/storageBudget.ts`, `lib/storageWindow.ts` (`previewWindow()` per-category counts) | Growth-rate input for the client sampler (§3B) |
+| Per-device storage meter + windowing | `lib/storageBudget.ts`, `lib/storageWindow.ts` (`previewWindow()` per-category counts) | Growth input for the optional client mirror (§3B) |
 | Disk-fill backstop (write-side) | `apps/server/src/insertCaps.ts` (`507 capacity_reached`) | The read-side forecast is its complement; do **not** add the new table to its `SURFACES` map |
-| `/health` opacity contract | `apps/server/src/routes/health.ts:23-28` | Capacity data stays **off** `/health`; it lives on an operator-gated route |
-| Resilience tier + grow-root wizard | `lib/resilience.ts`, `components/dashboard/ResilienceCard.tsx`, `pages/GrowRoot.tsx`, `lib/growRoot.ts` | The horizontal escalation is a new urgency input, not new UI |
-| Trusted-member gate | `lib/vouch.ts` (`MINIMUM_VOUCHES_FOR_TRUST = 2`), `growRoot.ts` (`MIN_VOUCHES_TO_GROW`) | Who sees the recruitment prompt |
+| `/health` opacity contract | `apps/server/src/routes/health.ts:23-28` | Capacity data stays **off** `/health`; the community signal is the coarse posture (§6) and raw numbers never leave the box |
+| Resilience tier + grow-root wizard | `lib/resilience.ts`, `components/dashboard/ResilienceCard.tsx`, `pages/GrowRoot.tsx`, `lib/growRoot.ts` | The "grow a root" response is a new urgency input, not new UI |
+| Trusted-member gate | `lib/vouch.ts` (`MINIMUM_VOUCHES_FOR_TRUST = 2`), `growRoot.ts` (`MIN_VOUCHES_TO_GROW`) | Who sees the capacity signal at all |
 | Attention rail (pull-only, null-when-empty) | `lib/attention.ts`, `components/AttentionSection.tsx` | The member-facing warning surface |
 | Consent/suggest-card no-nag pattern | `components/MirrorSuggestCard.tsx`, `lib/nodeEndpoints.ts` (dismiss persists) | The "grow a root" suggest card |
 | Node system signing key (not a member) | `apps/server/src/systemSigner.ts`, `GET /config.systemKey` | Signs the coarse community attestation without outing the operator (§6) |
@@ -168,21 +171,23 @@ overlap-guard + `timer.unref?.()` shape
 consistent with the "synchronous by design" posture (`db.ts:56-59`),
 off the request path.
 
-### 3B. Community-growth sampler (client-side, no new privacy surface)
+### 3B. Community-growth mirror (optional, client-side)
 
-To forecast *growth* (and to give members a legible sense of the trend
-without the operator token), a once-daily local snapshot of what a
-device already holds: `members.length`, `previewWindow()` per-category
-record counts (`lib/storageWindow.ts`), and the device's own
-`readStorageStatus()`. Stored in a device-local settings-JSON ring
-buffer, modeled on `journalEntries` — **local-only, never enqueued to
-the outbox** (the `OutboxRow.kind` union rejects it at the type level,
-exactly as `journal_entry` is excluded). This never federates; it is a
-per-device convenience, and the authoritative node forecast is §3A.
+The node forecasts from its own samples (§3A), so this layer is a
+*nicety*, not load-bearing: a once-daily device-local snapshot of what a
+device already holds — `members.length`, `previewWindow()` per-category
+counts (`lib/storageWindow.ts`), the device's own `readStorageStatus()`
+— so a member can glance at a coarse growth trend on their own device.
+Stored in a device-local settings-JSON ring buffer, modeled on
+`journalEntries` — **local-only, never enqueued to the outbox** (the
+`OutboxRow.kind` union rejects it at the type level, exactly as
+`journal_entry` is excluded). It never federates and the authoritative
+forecast remains §3A. Cut it if it isn't earning its keep.
 
 ## 4. The forecast (`lib/capacityForecast.ts`, pure + tested)
 
-One pure module consumes either sample stream and is deliberately
+One pure module — running on the node against its §3A samples, and
+reusable client-side for the optional §3B mirror — is deliberately
 simple and robust to noise:
 
 ```
@@ -221,56 +226,75 @@ Every branch is unit-tested with injected sample series (the
 `lib/*.test.ts` beside-the-module convention); `now` is injectable for
 determinism, as `attention.ts` already does.
 
-## 5. The two escalations
+## 5. The response — owned by the trusted community
 
-### 5.1 Vertical — warn the operator to add resources
+A node running low is a *community* problem. One coarse signal — the
+`CapacityPosture` of §6, computed on the node and signed by its system
+key — surfaces to the **whole trusted cohort**, who collectively choose
+the response. There is deliberately **no operator-only surface and no
+operator-authenticated readout**: nothing in the app marks which account
+runs the server, so no one — trusted or not — can read the UI to find
+the operator and lean on them. The `NODE_FOUNDER_KEYS` / operator role
+stays exactly as private as it is today. (An operator-only readout was
+the earlier design; it was cut precisely because "the one account that
+gets capacity warnings" is itself a tell.)
 
-There is no owner/admin account (identity is a keypair; the operator
-has no privileged member identity — founder trust is `NODE_FOUNDER_KEYS`,
-a server env of *member* keys, not the operator's). So "warn the
-original account" becomes a **pull-only operator readout**, on a surface
-the operator already reads.
+### 5.1 What trusted members see
 
-- **Transport.** A new operator-authenticated `GET /capacity` returns
-  the forecast (levels + disk range), **not** raw bytes to anonymous
-  callers. There is no operator identity to sign a challenge, and every
-  existing privileged non-member channel is a shared-secret bearer
-  (`PEER_READ_TOKENS`, the internal token). So: add an `OPERATOR_TOKEN`
-  env (via `nonEmpty`, alongside `operatorContact`, `config.ts:307`);
-  add `"/capacity"` to `OPEN_PATH_PREFIXES` (`readAuth.ts:69`) so the
-  member-read guard doesn't 401 it; the route does its own
-  constant-time bearer check (`crypto.timingSafeEqual`) and, if
-  `OPERATOR_TOKEN` is unset, **the route does not exist** (fail-closed).
-  Do **not** reuse `PEER_READ_TOKENS` (peers would read operator
-  telemetry) or `NODE_FOUNDER_KEYS` (members aren't operators).
-- **Surface.** A new card in the Infrastructure page's 2-col grid
-  (`pages/Infrastructure.tsx`), after Governance / before `SourceCard`.
-  Copy stays inside the page's honesty rules: *"Node disk ~78% used —
-  projected full in ~50 days at current growth. Add storage, or window
-  older records."* with links to storage windowing and
-  [`deploy-alternatives.md`](./deploy-alternatives.md). The page is
-  member-readable by design; the detailed numeric readout is gated to
-  whoever holds the operator token (entered locally, device-stored like
-  the drill-checklist state).
+When the community posture reaches amber/red, a **pull-only attention
+item** appears for every trusted member (mechanics in §5.2). It is
+framed as a shared situation with a menu of responses, none of which
+requires the app to know who hosts:
 
-### 5.2 Horizontal — prompt trusted members to grow a root
+- **"Our community's node is running low on room."** Coarse and honest,
+  no numbers — the posture is a band, not a byte count.
+- **Response A — add resources.** Addressed to *whoever hosts*, without
+  naming them: "If you run this community's server, it may need more
+  storage, memory, or a chance to shed older records." The operator
+  recognizes their own box and acts privately; the app never points at
+  them. The *how much* is an ordinary server-operations question the
+  host answers on the box itself (`df`, `free`, the node's own logs) —
+  the app does not need a networked telemetry readout to tell an
+  operator something they can see by looking at their own machine.
+- **Response B — grow another root.** Anyone trusted can relieve the
+  pressure horizontally by standing up a second node (§5.2). This is the
+  response the app can actively help with, and the one that
+  *distributes* the target rather than concentrating it — so the copy
+  leans toward it.
+
+The two escalations from the earlier draft thus collapse into one
+community signal with a menu, and the app favors the response (B) that
+spreads resilience over the one (A) that would draw attention to a
+single host.
+
+> **Optional, strictly out-of-band.** If a host wants the node to write
+> its own forecast somewhere for their eyes, that is a private
+> server-side diagnostic (a log line, or an opt-in, off-by-default,
+> never-advertised local endpoint) — not a member-facing surface, not
+> part of this flow, and not required. The community flow is 100% the
+> coarse posture. Whether to include even this local diagnostic is
+> ruling R3 (§11).
+
+### 5.2 Growing another root (the response the app helps with)
 
 The recruitment machinery already exists and is already gated
 correctly. The forecast becomes a new **urgency input**, not new UI.
 
 - **The card always offers "grow a root" today** — the dashed `+` and
   CTA in `ResilienceCard.tsx:125-131` render unconditionally. We do not
-  add a new button; we **elevate the copy** when the forecast is red.
+  add a new button; we **elevate the copy** when the posture is red.
 - **Gate the elevation on "no healthy mirror exists,"** so we don't
   nag a community that already failed over. The exact predicate is
   `snapshot.nodesReachable < 2` (equivalently tier `seedling` /
   `taking_root`) from `computeResilience` (`lib/resilience.ts`). If you
   want "a *mirror* specifically is healthy," read the per-endpoint
   `isRecentSuccess` loop in the card effect (`ResilienceCard.tsx:66-74`).
-- **Who sees it: trusted members**, per the operator's ruling — the
-  same cohort the wizard already gates its destination on. Exact check,
-  copied from `GrowRoot.tsx:151-154`:
+- **Who sees it: trusted members** — the whole cohort, the same bar the
+  wizard already gates its destination on. Exact check, copied from
+  `GrowRoot.tsx:151-154`:
   `vouchCountFor(pk, { vouches, invites }) >= MIN_VOUCHES_TO_GROW`.
+  Untrusted members never see the capacity signal at all — which is also
+  what keeps it from being a reconnaissance tool for locating the host.
 - **A pull-only `grow_a_root` attention item** carries it to those
   members. Adding an `AttentionItem` kind is mechanical: extend the
   union (`attention.ts:51`), the two exhaustive maps `KIND_PRIORITY`
@@ -288,12 +312,13 @@ correctly. The forecast becomes a new **urgency input**, not new UI.
 
 ## 6. The community-facing attestation (node-authored, operator stays private)
 
-For trusted members to see "we should grow a root" — even the ones who
-aren't the operator and hold no operator token — the node must say so
-community-wide. The privacy trap: if the operator, as a member, signed
-that statement, it would **out which member runs the server**, which
-the threat model treats as private. The escape is that the repo already
-has a signing key that is *structurally not a member*.
+For the trusted community to see "we're running low" — without any of
+them being singled out as the host — the node must say so
+community-wide, in a form that carries a decision but no measurement and
+no operator identity. The privacy trap: if the operator, as a member,
+signed that statement, it would **out which member runs the server**,
+which the threat model treats as private. The escape is that the repo
+already has a signing key that is *structurally not a member*.
 
 **Sign with the node system key, not a member key.**
 `NODE_SYSTEM_SECRET_KEY` (the auto-confirm system key,
@@ -327,9 +352,9 @@ interface CapacityPosture {
 }
 ```
 
-No bytes, no percentages, no member counts — those stay operator-only
-on `/capacity`. This is the whole privacy bargain: the community learns
-*that* it should grow, never the raw shape of the node.
+No bytes, no percentages, no member counts — those never leave the node
+at all. This is the whole privacy bargain: the community learns *that*
+it should grow, never the raw shape of the node, and never who runs it.
 
 **Flow — a node-authored variation on the `SeedVaultPledge` recipe.**
 Unlike a member-authored record (client → outbox → POST → store),
@@ -374,21 +399,27 @@ list:
   rejects the DHT for exactly this reason and the boundary is inherited
   here.
 - **Numbers never leave the machine that produced them.** Node
-  disk/RAM/CPU stay on the node (operator-token readout only). The only
-  cross-community emission is the three-value `CapacityPosture` bucket —
-  a decision, not a measurement.
-- **Operator anonymity is preserved.** §6's node-key signing is the
-  crux: the community can act on "grow a root" without learning who
-  hosts. Signing the posture with a member key would be a privacy
-  regression and is explicitly rejected.
-- **No notifications.** Every surface is pull-only (attention rail,
-  resilience card, Infrastructure page). No push, no badge, no
-  background alert — enforced, not optional.
+  disk/RAM/CPU stay on the node; nothing serves them over the network.
+  The only cross-community emission is the three-value `CapacityPosture`
+  bucket — a decision, not a measurement.
+- **No operator-distinguished surface — no target on one member's
+  back.** A first-class requirement, not a side effect. There is no
+  operator-only readout, no operator token, nothing in the app that
+  marks which account runs the server; the capacity flow is owned by the
+  whole trusted community, and an untrusted onlooker learns nothing
+  (they never see the signal). §6's node-key signing is the crux: the
+  community acts on "grow a root" without anyone — trusted or not —
+  learning who hosts. Signing the posture with a member key, or adding
+  an operator-labelled readout, would be a privacy regression and is
+  explicitly rejected.
+- **No notifications.** Every surface is pull-only (Board attention
+  rail, resilience card). No push, no badge, no background alert —
+  enforced, not optional.
 - **Honest wording.** Following `resilience.ts`'s "never say more than
-  the code delivers": the operator card states a projection with a
-  range and its assumption ("at current growth"); the member prompt
-  says "the community would be more resilient with another root," not a
-  number.
+  the code delivers": the member prompt says "our community's node is
+  running low on room" and "another root would help," never a fabricated
+  number; the projection's assumption ("at current growth") is only ever
+  something a host reasons about privately on their own box.
 
 ## 8. PR sequence
 
@@ -396,19 +427,20 @@ Each PR is independently shippable and independently verifiable.
 
 | PR | Scope | New/changed |
 |---|---|---|
-| **1** | Forecast lib + client growth sampler | `lib/capacityForecast.ts` (+ tests), local growth ring buffer. Pure, no UI, no privacy surface — proves the math on real data. |
-| **2** | Node self-sampling | v26 table + ring-buffer store, `startCapacitySampler` worker + `index.ts` wiring, `fs.statfs`/`os` reads, env config. |
-| **3** | Operator readout | `OPERATOR_TOKEN`, `GET /capacity`, `OPEN_PATH_PREFIXES` entry, Infrastructure capacity card. The vertical warning. |
-| **4** | Horizontal wiring | `grow_a_root` attention item, `ResilienceCard` copy elevation gated on `nodesReachable < 2` + trust, `GrowRootSuggestCard` + dismiss flag. |
-| **5** | Community attestation | `CapacityPosture` kind, `systemSigner` §2-contract amendment + new signing payload, server emit + `GET /capacity-posture` + mirror replication + client pull. Feeds PR 4's item to non-operator trusted members. |
+| **1** | Forecast lib | `lib/capacityForecast.ts` (pure, shared) + tests. Runs on the node; validates the band/countdown math on injected series. No UI, no sensor, nothing federated. |
+| **2** | Node self-sampling | v26 table + ring-buffer store, `startCapacitySampler` worker + `index.ts` wiring, `fs.statfs`/`os` reads, env config. Raw samples never leave the box. |
+| **3** | Community attestation | The node computes the forecast from §2 and emits the coarse `CapacityPosture`: `systemSigner` §2-contract amendment + new signing payload, `CapacityPosture` kind, server emit on band change + `GET /capacity-posture` + mirror replication + trusted-gated client pull. This IS the community signal. |
+| **4** | Trusted-member surfacing | `grow_a_root` attention item, `ResilienceCard` copy elevation gated on `nodesReachable < 2` + trust, `GrowRootSuggestCard` + dismiss flag, the response copy (A: host adds resources / B: grow a root), i18n en+es. |
 
 Order rationale: PR 1 is decoupled and validates the model before any
-sensor exists; PR 2 gives it real node data; PR 3 delivers operator
-value with nothing federated; PR 4 delivers member value from
-device-local signals; PR 5 (the only new federated data + the only
-`systemSigner` change) is last, so the highest-scrutiny change ships on
-top of a proven stack. PRs 1–4 can ship without ever touching the
-federation or the system key.
+sensor exists; PR 2 gives the node real data to forecast from, with
+nothing leaving the box; PR 3 turns that into the single coarse,
+node-signed community signal (the only federated data + the only
+`systemSigner` change, so the highest-scrutiny work is well-contained);
+PR 4 surfaces it to the trusted community. There is **no operator-readout
+PR** — that path was cut so the app never distinguishes the host. The
+optional local operator diagnostic (§5.1), if ruling R3 keeps it, is a
+small addendum to PR 2, off by default.
 
 ## 9. Verification bar
 
@@ -420,30 +452,35 @@ federation or the system key.
   as the worker skeleton allows) drives `record()`; assert the ring
   buffer never exceeds `keepN` and trims oldest-first; assert the table
   is absent from `insertCaps` `SURFACES` and has no pull leg.
-- **Operator route:** unset token → route absent (fail-closed); wrong
-  token → 401; correct token → forecast; confirm `/health` still
-  returns bare `{status:"ok"}`.
+- **No operator surface:** grep-confirm there is no member-facing route
+  or UI exposing raw node metrics or distinguishing the host; confirm
+  `/health` still returns bare `{status:"ok"}`. If the optional local
+  diagnostic (R3) exists, it is off by default and never a
+  member-visible surface.
 - **Attestation:** a member-key-signed `CapacityPosture` is rejected on
-  ingest (authority check); an unverifiable row never advances the
-  cursor; LWW keeps the newest `generatedAt`; a rotated system key
-  still verifies via `signedAt`; grep-confirm no `peerPull` leg.
+  ingest (authority check — the signer must resolve to the node system
+  key, not a member); an unverifiable row never advances the cursor; LWW
+  keeps the newest `generatedAt`; a rotated system key still verifies via
+  `signedAt`; grep-confirm no `peerPull` leg.
 - **End-to-end drill:** on a two-node test setup, force the disk sample
-  into the red band, confirm the operator card shows the projection,
-  the origin emits a `red` / `growthRecommended` posture, a mirror
-  replicates it, and a trusted member's client raises the `grow_a_root`
-  attention item while a non-trusted member's does not.
+  into the red band, confirm the origin emits a `red` /
+  `growthRecommended` posture, a mirror replicates it, a trusted
+  member's client raises the `grow_a_root` attention item (with both
+  response framings), and a non-trusted member's client shows nothing.
 
-## 10. Threat-model obligations (before PR 5 merges)
+## 10. Threat-model obligations (before PR 3 merges)
 
 - Amend `systemSigner.ts` §2 contract 1 and
   [`auto-confirm-key.md`](./auto-confirm-key.md) §2/§4 to authorize the
   `CapacityPosture` payload as the second thing the system key may
   sign, with its canonical shape and the "coarse buckets only"
   constraint written down.
-- Add a `threat-model.md` §7 entry: the new operator token
-  (shared-secret bearer; rotation = change the env; scope = read-only
-  forecast, no record access), and the assertion that `CapacityPosture`
-  carries no member-identifying or quantitative data.
+- Add a `threat-model.md` §7 entry: that the capacity flow adds **no
+  operator-distinguished surface** (the host is never marked in the UI,
+  and no route serves raw node metrics), that `CapacityPosture` is
+  node-system-key-signed and carries no member-identifying or
+  quantitative data, and that the signal is visible only to trusted
+  members (not a reconnaissance surface for outsiders).
 - Note in `storage-budget.md` and `community-resilience.md` that the
   forecast conditions their surfaces (the cross-link they already
   anticipate).
@@ -459,19 +496,20 @@ Defaults in **bold**; each can be answered in one sitting.
 2. **Sampling cadence & retention.** `capacitySampleIntervalMs` default
    **15 min**, `capacitySampleKeepN` default **2000** (~3 weeks at 15
    min; enough for a robust 30-sample trailing window with headroom)?
-3. **Operator readout entry.** Operator token entered **locally on the
-   Infrastructure page** and stored device-local (like the drill
-   checklist), versus any other channel?
+3. **Local operator diagnostic — keep it at all?** Default: **no
+   networked readout** (the `OPERATOR_TOKEN` / `GET /capacity` path is
+   cut entirely); a host who wants numbers uses ordinary server tooling
+   (`df`/`free`/logs) on their own box. Optionally the node *logs* its
+   forecast locally, off by default. Confirm we are cutting the endpoint.
 4. **Posture emission cadence.** Emit a new `CapacityPosture` **only on
    band transition** (green→amber→red and back, hysteresis-guarded),
    not on every sample — agreed, to keep the federated write rate near
    zero?
-5. **RAM/CPU in the *community* posture, or operator-only?** Default:
-   the community posture's `pressure` is the **worst dimension**
-   (per the "any maxed resource degrades performance" ruling), so a RAM
-   or CPU squeeze can trigger recruitment too — but the *horizon*
-   bucket stays disk-only (the only honest countdown). Confirm this is
-   the intended coupling.
+5. **Which dimensions may trigger *community* recruitment?** Default,
+   per the "any maxed resource degrades performance" ruling: the
+   community posture's `pressure` is the **worst dimension**, so a RAM
+   or CPU squeeze can recommend growth too — but the `horizon` bucket
+   stays disk-only (the only honest countdown). Confirm this coupling.
 
 ---
 
