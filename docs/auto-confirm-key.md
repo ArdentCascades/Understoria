@@ -81,10 +81,20 @@ the "signed by both parties" framing of §6 and must be honest
 about that). The honest case for accepting it rests on four
 bounds, each of which must hold in code and be testable:
 
-1. **The key only signs auto-confirm records.** It cannot sign a
-   fresh exchange, a fresh vouch, a fresh invite, a vote, a
-   proposal, or anything else. Its scope is one record shape,
-   one purpose.
+1. **The key only signs auto-confirm records — and one coarse
+   capacity posture.** It cannot sign a fresh exchange, a fresh
+   vouch, a fresh invite, a vote, a proposal, or anything else. Its
+   original scope was one record shape, one purpose. A second
+   payload has since been **authorized in the open** under this same
+   contract: the coarse `CapacityPosture` of `capacity-forecast.md`
+   §6 — the "node identity attestation" §4 below anticipated, reused
+   rather than duplicated (one key, one audit story). That posture
+   carries only three traffic-light buckets and no quantity, so it
+   cannot leak node metrics; it is the *only* other thing the key may
+   sign, and `apps/server/src/systemSigner.ts`'s §2 header plus its
+   export-surface lock test hold the line at exactly these two
+   payloads. Any third use requires amending that contract and this
+   bound in the open, as this one was.
 2. **It only signs after a community-configured human window.**
    Default 7 days; `autoConfirmHours = 0` disables the sweep
    entirely. The community owns this threshold through the
@@ -180,6 +190,14 @@ key (e.g. for federation-level attestations under Agent 3 / Agent
 duplicated.** Two operator-held signing keys would double the
 surface for misuse and split the audit story. The implementation
 PR must check whether such a key has landed and, if so, reuse it.
+
+> **This reuse has landed (`capacity-forecast.md` §6, PR 3).** The
+> first federation-level attestation — the coarse `CapacityPosture`
+> — signs with this key via `systemSigner.signCapacityPosture`
+> rather than minting a second one, exactly as this paragraph
+> requires. §2 bound 1 above now enumerates both authorized
+> payloads; the `systemSigner.ts` header and its export-lock test
+> enforce that exactly two exist.
 
 ### Sweep
 

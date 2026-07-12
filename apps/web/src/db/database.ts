@@ -47,6 +47,7 @@ import type {
   ProposalClosure,
   RedemptionReceipt,
   SeedVaultPledge,
+  CapacityPosture,
   ShiftSignupRow,
   TaskComment,
   Vote,
@@ -540,6 +541,12 @@ export class UnderstoriaDB extends Dexie {
    *  federates, re-seeds, rides the pairing snapshot, exports; never
    *  windowed (it is itself the coverage signal). */
   seedVaultPledges!: Table<SeedVaultPledge, string>;
+  /** Coarse node-capacity attestations (docs/capacity-forecast.md §6):
+   *  node-system-key-signed LWW records keyed by nodeId, carrying only
+   *  a band/horizon/trigger — never a byte count. Read-only on this
+   *  device (the node emits its own); pulled + verified against the
+   *  node system key, feeds the §5.2 attention surface (PR 4). */
+  capacityPostures!: Table<CapacityPosture, string>;
   /** Quorum removal / reinstatement records (docs/member-removal.md
    *  M1): public, multi-signed governance decisions. Shared
    *  community state — federates, re-seeds, rides the pairing
@@ -1165,6 +1172,14 @@ export class UnderstoriaDB extends Dexie {
     // member's own export (their writing). See the JournalEntryRow doc.
     this.version(36).stores({
       journalEntries: "id, memberKey, createdAt",
+    });
+
+    // v37 — capacity postures (docs/capacity-forecast.md §6): the
+    // coarse, node-system-key-signed community capacity attestation.
+    // Keyed by nodeId (one per node), secondary index on updatedAt for
+    // the LWW cursor.
+    this.version(37).stores({
+      capacityPostures: "nodeId, updatedAt",
     });
   }
 }

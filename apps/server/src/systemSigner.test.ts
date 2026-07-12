@@ -53,10 +53,13 @@ describe("contract 1: system signer module exports only auto-confirm functions",
   // The §2-bound-1 invariant ("the key only signs auto-confirm
   // records") is enforced socially by code review. To make the
   // review mechanical, we assert the module's exported runtime
-  // surface is exactly the two auto-confirm functions plus the
+  // surface is exactly the authorized signing functions plus the
   // construction helper. Types erase at runtime so they don't
   // appear in Object.keys — the runtime surface is what an
-  // attacker can import and call.
+  // attacker can import and call. `signCapacityPosture` is the §2
+  // contract's SECOND authorized payload (docs/capacity-forecast.md
+  // §6 / auto-confirm-key.md §4's anticipated node-identity reuse);
+  // adding it here is the deliberate contract change, not a leak.
   it("exports exactly the bounded surface — no general signer leak", () => {
     const exported = Object.keys(systemSignerModule).sort();
     expect(exported).toEqual(
@@ -64,6 +67,7 @@ describe("contract 1: system signer module exports only auto-confirm functions",
         "autoConfirmExchange",
         "autoConfirmProjectTaskCompletion",
         "createSystemSignerFromSecret",
+        "signCapacityPosture",
       ].sort(),
     );
   });

@@ -82,6 +82,11 @@ export interface CapacitySamplerOptions {
   keepN: number;
   deps?: Partial<CapacitySamplerDeps>;
   log?: Pick<FastifyBaseLogger, "warn">;
+  /** Fired after a sample is recorded, with the row written. The
+   *  posture emitter (PR 3) hangs here so a fresh forecast runs on the
+   *  same fresh data, on one timer. Errors are caught so a downstream
+   *  failure never stops sampling. */
+  onSample?: (sample: CapacitySampleInput) => void;
 }
 
 export interface CapacitySampler {
@@ -166,6 +171,13 @@ export function startCapacitySampler(
     if (!anyReading) return null;
 
     opts.store.record(sample, opts.keepN);
+    if (opts.onSample) {
+      try {
+        opts.onSample(sample);
+      } catch (err) {
+        warn("onSample", err instanceof Error ? err : new Error(String(err)));
+      }
+    }
     return sample;
   }
 

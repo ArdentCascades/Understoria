@@ -1,9 +1,11 @@
 # Capacity forecast — seeing a node fill up before it does
 
-> **Status:** **approved** — design note reviewed by the operator; the
-> five §11 rulings are **resolved (2026-07-12)**. No implementation PRs
-> yet; §8 names the PR sequence, which starts once this note merges.
-> Every code claim below
+> **Status:** **in build** — design note reviewed by the operator; the
+> five §11 rulings are **resolved (2026-07-12)**. §8's four-PR sequence
+> is landing in order: **PR 1 (forecast lib), PR 2 (node self-sampling),
+> and PR 3 (the node-signed `CapacityPosture` — the only federated data
+> + the only `systemSigner` change) are shipped**; **PR 4** (trusted-
+> member surfacing) is the remaining piece. Every code claim below
 > was checked against the tree (2026-07, post pilot-readiness package),
 > not remembered. Companion docs:
 > [`storage-budget.md`](./storage-budget.md) (the per-device budget

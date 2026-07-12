@@ -31,6 +31,7 @@ import {
   type KeyPair,
 } from "@understoria/shared/crypto";
 import type {
+  CapacityPosture,
   Event,
   EventPayload,
   EventRsvpState,
@@ -46,6 +47,7 @@ import { buildServer, type BuiltServer } from "./server.js";
 import { readConfigFromEnv } from "./config.js";
 import {
   createEventShiftStateStore,
+  createCapacityPostureStore,
   createExchangeStore,
   createMirrorPullStore,
   createRedemptionStore,
@@ -121,6 +123,7 @@ function makeWorker(overrides: Partial<MirrorPullWorkerOptions> = {}) {
     intervalMs: 0, // tests drive cycles manually
     cursorStore: createMirrorPullStore(dbLocal),
     exchangeStore: createExchangeStore(dbLocal),
+    capacityPostureStore: createCapacityPostureStore(dbLocal),
     onError: () => {},
     ...overrides,
   });
@@ -739,6 +742,101 @@ describe("auto-confirmed exchanges (§4 via mirrors)", () => {
     const results = await worker.pullAllOnce();
     worker.stop();
     expect(results.find((r) => r.kind === "/exchanges")?.applied).toBe(1);
+  });
+});
+
+function makeSignedPosture(opts: {
+  signSecretKey: string;
+  signerKey: string;
+  nodeId: string;
+  pressure?: CapacityPosture["pressure"];
+  updatedAt?: number;
+}): CapacityPosture {
+  const unsigned: Omit<CapacityPosture, "signature"> = {
+    nodeId: opts.nodeId,
+    pressure: opts.pressure ?? "red",
+    horizon: "weeks",
+    growthRecommended: (opts.pressure ?? "red") === "red",
+    updatedAt: opts.updatedAt ?? 1_700_000_000_000,
+    signerKey: opts.signerKey,
+  };
+  return {
+    ...unsigned,
+    signature: signStateRecord<CapacityPosture>(unsigned, opts.signSecretKey),
+  };
+}
+
+describe("capacity postures (§6 node-system-key, via mirrors)", () => {
+  it("replicates a posture signed by the mirror's published system key", async () => {
+    await mirror.app.close();
+    dbMirror.close();
+    const systemKp = generateKeyPair();
+    ({ built: mirror, db: dbMirror } = await build("node_mirror", {
+      NODE_SYSTEM_SECRET_KEY: systemKp.secretKey,
+    }));
+
+    const posture = makeSignedPosture({
+      signSecretKey: systemKp.secretKey,
+      signerKey: systemKp.publicKey,
+      nodeId: "node_mirror",
+    });
+    createCapacityPostureStore(dbMirror).upsert(posture);
+
+    const worker = makeWorker({ fetcher: proxyFetcher(() => mirror) });
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    const kind = results.find((r) => r.kind === "/capacity-postures");
+    expect(kind?.halted).toBe(false);
+    expect(kind?.applied).toBe(1);
+    const local = createCapacityPostureStore(dbLocal).get("node_mirror");
+    expect(local?.pressure).toBe("red");
+  });
+
+  it("refuses a posture whose signer is not the node's system key", async () => {
+    await mirror.app.close();
+    dbMirror.close();
+    const systemKp = generateKeyPair();
+    ({ built: mirror, db: dbMirror } = await build("node_mirror", {
+      NODE_SYSTEM_SECRET_KEY: systemKp.secretKey,
+    }));
+
+    // Internally-valid signature, but by a stranger key — not the key
+    // node_mirror advertises. Authority fails: refused, cursor advances.
+    const stranger = generateKeyPair();
+    const posture = makeSignedPosture({
+      signSecretKey: stranger.secretKey,
+      signerKey: stranger.publicKey,
+      nodeId: "node_mirror",
+    });
+    createCapacityPostureStore(dbMirror).upsert(posture);
+
+    const worker = makeWorker({ fetcher: proxyFetcher(() => mirror) });
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    const kind = results.find((r) => r.kind === "/capacity-postures");
+    expect(kind?.halted).toBe(false);
+    expect(kind?.applied).toBe(0);
+    expect(kind?.refused).toBe(1);
+    expect(createCapacityPostureStore(dbLocal).get("node_mirror")).toBeNull();
+  });
+
+  it("halts (never skips) a posture for a node whose key is unresolvable", async () => {
+    const stranger = generateKeyPair();
+    const posture = makeSignedPosture({
+      signSecretKey: stranger.secretKey,
+      signerKey: stranger.publicKey,
+      nodeId: "node_elsewhere",
+    });
+    createCapacityPostureStore(dbMirror).upsert(posture);
+
+    const worker = makeWorker({ fetcher: proxyFetcher(() => mirror) });
+    const results = await worker.pullAllOnce();
+    worker.stop();
+    const kind = results.find((r) => r.kind === "/capacity-postures");
+    expect(kind?.halted).toBe(true);
+    expect(kind?.applied).toBe(0);
+    expect(kind?.refused).toBe(0);
+    expect(createCapacityPostureStore(dbLocal).get("node_elsewhere")).toBeNull();
   });
 });
 

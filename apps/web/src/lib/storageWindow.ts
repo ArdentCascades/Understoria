@@ -91,6 +91,10 @@ export const WINDOW_PINNED_TABLES = [
   // The archive-role claims themselves (docs/storage-budget.md Phase
   // 2) — tiny, and the coverage signal windowing is honest about.
   "seedVaultPledges",
+  // Coarse node-capacity attestations (docs/capacity-forecast.md §6):
+  // one node-signed row per node, trivially small; the community's
+  // capacity signal, always freshly pulled — pin it, never window.
+  "capacityPostures",
   // Quorum governance records (docs/member-removal.md) — standing
   // derivation needs the full history; tiny by construction.
   "memberRemovals",

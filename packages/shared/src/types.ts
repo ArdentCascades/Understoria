@@ -1475,3 +1475,38 @@ export interface SeedVaultPledge {
   signerKey: string;
   signature: string;
 }
+
+/**
+ * Coarse node-capacity attestation (docs/capacity-forecast.md §6). The
+ * ONLY capacity data that ever leaves the node: a traffic-light band, a
+ * coarse disk-horizon bucket, and the recruitment trigger — signed by
+ * the node SYSTEM key (not a member), so the trusted community can act
+ * on "grow a root" without anyone learning who hosts. It carries a
+ * *decision*, never a *measurement*: no bytes, no percentages, no
+ * member counts — those never leave the node at all (the raw samples
+ * live only in the operator-local `node_capacity_samples` ring buffer).
+ *
+ * Signed-LWW state record, one row per node (natural key = `nodeId`),
+ * on the same machinery as `SeedVaultPledge`/`ProjectState` — so
+ * `verifyStateRecord` applies unchanged. The authority rule is the
+ * node-key analogue of the member records' `signerKey === memberKey`:
+ * `signerKey` must resolve to the node system pubkey for `nodeId` (the
+ * rotation-aware resolver, never a member key). The design note (§6)
+ * sketches the clock as `generatedAt`; it is implemented as the
+ * standard `updatedAt` every other signed state record uses.
+ */
+export interface CapacityPosture {
+  /** Natural key: one posture per node. */
+  nodeId: string;
+  /** Worst-of-{disk,RAM,CPU} pressure band (§11 ruling 5). */
+  pressure: "green" | "amber" | "red";
+  /** Coarse disk countdown bucket — the only honest clock, disk-only. */
+  horizon: "ample" | "months" | "weeks";
+  /** The recruitment trigger fed to the §5.2 attention item (PR 4). */
+  growthRecommended: boolean;
+  /** LWW clock (the note's `generatedAt`). */
+  updatedAt: number;
+  /** Must resolve to the node system pubkey for `nodeId`, never a member. */
+  signerKey: string;
+  signature: string;
+}

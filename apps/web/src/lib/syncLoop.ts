@@ -68,6 +68,7 @@ export type SyncPulls = Pick<
   | "pullFederatedInviteRevocations"
   | "pullFederatedVouches"
   | "pullFederatedSeedVaultPledges"
+  | "pullCapacityPostures"
   | "pullFederatedMemberRemovals"
   | "pullFederatedMemberReinstatements"
   | "pullFederatedProposals"
@@ -167,6 +168,7 @@ function runCold(p: SyncPulls): void {
   void p.pullFederatedInviteRevocations();
   void p.pullFederatedVouches();
   void p.pullFederatedSeedVaultPledges();
+  void p.pullCapacityPostures();
   void p.pullFederatedMemberRemovals();
   void p.pullFederatedMemberReinstatements();
   void p.pullFederatedProposals().then(() => {

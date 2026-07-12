@@ -51,6 +51,7 @@ import type {
   ProjectState,
   TaskState,
   SeedVaultPledge,
+  CapacityPosture,
   MemberRemoval,
   MemberRemovalPayload,
   MemberReinstatement,
@@ -1085,6 +1086,18 @@ export function verifyTaskState(rec: TaskState): boolean {
 }
 
 export function verifySeedVaultPledge(rec: SeedVaultPledge): boolean {
+  return verifyStateRecord(rec);
+}
+
+/** Cryptographic check only: the signature matches `signerKey` over the
+ *  whole-row canonical payload, with a positive `updatedAt` clock. The
+ *  AUTHORITY rule — `signerKey` must resolve to the node system pubkey
+ *  for `nodeId`, never a member key — is enforced by the caller (the
+ *  server mirror worker via `resolveSystemPubkey`, the client pull via
+ *  its own resolver), exactly as `verifySeedVaultPledge`'s
+ *  `signerKey === memberKey` is checked by its callers, not here.
+ *  (docs/capacity-forecast.md §6.) */
+export function verifyCapacityPosture(rec: CapacityPosture): boolean {
   return verifyStateRecord(rec);
 }
 

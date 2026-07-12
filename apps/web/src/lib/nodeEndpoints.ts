@@ -64,6 +64,76 @@ export const LAST_SEEN_SYSTEM_KEY = "communityNodeLastSeenSystemKey";
  *  hard-coding a number. */
 export const LAST_SEEN_REMOVAL_QUORUM = "communityRemovalQuorum";
 
+/** One day — the future-bound skew grace on a captured key-rotation
+ *  trail, matching the server's peerPull/mirror resolvers. */
+const SYSTEM_KEY_SKEW_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Resolve the node system pubkey needed to verify a system-signed
+ * record (e.g. a `CapacityPosture`, docs/capacity-forecast.md §6) for
+ * `nodeId` as of `signedAt`, from the `/config.systemKey` this device
+ * last captured (`LAST_SEEN_SYSTEM_KEY`). Rotation-aware, mirroring the
+ * server resolver (`peerPull.ts`): the key CURRENT at `signedAt` is the
+ * first history entry retired strictly after it, else `current`.
+ *
+ * Returns null — so the caller REFUSES the record, never labelling an
+ * unverifiable row authentic — when the captured key is absent,
+ * unparseable, or for a DIFFERENT node. A device only ever holds the
+ * key of the node it talks to, so a posture stamped with another node's
+ * id cannot be verified here yet (full multi-node key discovery is
+ * tracked separately); refusing is the safe default.
+ */
+export async function resolveCommunitySystemPubkey(
+  nodeId: string,
+  signedAt: number,
+): Promise<string | null> {
+  let raw: unknown;
+  try {
+    raw = await getSetting(LAST_SEEN_SYSTEM_KEY);
+  } catch {
+    return null;
+  }
+  if (typeof raw !== "string" || raw === "") return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (
+    parsed === null ||
+    typeof parsed !== "object" ||
+    typeof (parsed as { nodeId?: unknown }).nodeId !== "string" ||
+    typeof (parsed as { current?: unknown }).current !== "string"
+  ) {
+    return null;
+  }
+  const captured = parsed as {
+    nodeId: string;
+    current: string;
+    history?: unknown;
+  };
+  if (captured.nodeId !== nodeId) return null;
+
+  const bound = Date.now() + SYSTEM_KEY_SKEW_MS;
+  const history = (Array.isArray(captured.history) ? captured.history : [])
+    .filter(
+      (h): h is { pubkey: string; retiredAt: number } =>
+        h !== null &&
+        typeof h === "object" &&
+        typeof (h as { pubkey?: unknown }).pubkey === "string" &&
+        typeof (h as { retiredAt?: unknown }).retiredAt === "number" &&
+        Number.isInteger((h as { retiredAt: number }).retiredAt) &&
+        (h as { retiredAt: number }).retiredAt > 0 &&
+        (h as { retiredAt: number }).retiredAt <= bound,
+    )
+    .sort((a, b) => a.retiredAt - b.retiredAt);
+  for (const h of history) {
+    if (h.retiredAt > signedAt) return h.pubkey;
+  }
+  return captured.current;
+}
+
 /** How long one active-node resolution is trusted before re-probing.
  *  Short enough that a mid-session outage fails over within a couple
  *  of sync ticks; long enough that one sync cycle's 16 pulls share a

@@ -33,6 +33,7 @@ import {
   createClaimStore,
   createShiftSignupStateStore,
   createSeedVaultPledgeStore,
+  createCapacityPostureStore,
   createMemberRemovalStore,
   createMemberReinstatementStore,
   createProposalStore,
@@ -78,6 +79,7 @@ import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
 import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
+import { registerCapacityPostureRoutes } from "./routes/capacityPostures.js";
 import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
 import { registerGovernanceRoutes } from "./routes/proposals.governance.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
@@ -243,6 +245,7 @@ export async function buildServer({
   const eventShiftStateStore = createEventShiftStateStore(db);
   const shiftSignupStateStore = createShiftSignupStateStore(db);
   const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
+  const capacityPostureStore = createCapacityPostureStore(db);
   const memberRemovalStore = createMemberRemovalStore(db);
   const memberReinstatementStore = createMemberReinstatementStore(db);
   const proposalStore = createProposalStore(db);
@@ -397,6 +400,10 @@ export async function buildServer({
   // Seed-vault pledges (docs/storage-budget.md Phase 2) — a member's
   // public archive-role claim, single-owner LWW like an RSVP.
   await registerSeedVaultPledgeRoutes(app, { store: seedVaultPledgeStore });
+  // Capacity postures (docs/capacity-forecast.md §6) — the coarse,
+  // node-system-key-signed community capacity attestation. READ-ONLY:
+  // the node emits its own posture; there is no member POST path.
+  await registerCapacityPostureRoutes(app, { store: capacityPostureStore });
   // Member removal / reinstatement (docs/member-removal.md M1): the
   // quorum-signed governance records and their feeds.
   await registerMemberRemovalRoutes(app, {
