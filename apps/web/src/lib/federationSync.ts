@@ -30,12 +30,17 @@ import type {
   EventShiftState,
   ProjectState,
   SeedVaultPledge,
+  CapacityPosture,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { authorizedFetch } from "@/lib/authorizedRead";
-import { cursorKeySuffix, getActiveNodeUrl } from "@/lib/nodeEndpoints";
+import {
+  cursorKeySuffix,
+  getActiveNodeUrl,
+  resolveCommunitySystemPubkey,
+} from "@/lib/nodeEndpoints";
 import { windowAdmits } from "@/lib/storageWindow";
 import {
   removalQuorum,
@@ -2717,6 +2722,85 @@ export async function pullFederatedSeedVaultPledges(): Promise<FederationSyncRes
       continue;
     }
     await db.seedVaultPledges.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+const CAPACITY_POSTURE_CURSOR_KEY = "federationLastCapacityPosturePull";
+
+/**
+ * Pull capacity postures (docs/capacity-forecast.md §6) — the coarse,
+ * node-system-key-signed community capacity attestation. LWW by nodeId.
+ *
+ * The one thing that differs from every other state pull: authority is
+ * the NODE SYSTEM key, not a member. A row is accepted only when its
+ * signature verifies AND `signerKey` equals the system pubkey the node
+ * publishes for `record.nodeId` (rotation-aware, via
+ * `resolveCommunitySystemPubkey`) — the node-key analogue of the member
+ * records' `signerKey === memberKey`. A row that can't be verified that
+ * way is refused WITHOUT advancing the cursor, so it can never be
+ * skipped past. (This device only holds its own node's key, so postures
+ * stamped with another node's id refuse for now — the safe default;
+ * full multi-node key discovery is tracked separately.)
+ */
+export async function pullCapacityPostures(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/capacity-postures",
+    "capacityPostures",
+    CAPACITY_POSTURE_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.nodeId !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      (r.pressure !== "green" && r.pressure !== "amber" && r.pressure !== "red") ||
+      (r.horizon !== "ample" &&
+        r.horizon !== "months" &&
+        r.horizon !== "weeks") ||
+      typeof r.growthRecommended !== "boolean" ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as CapacityPosture;
+    const systemKey = await resolveCommunitySystemPubkey(
+      record.nodeId,
+      record.updatedAt,
+    );
+    if (
+      systemKey === null ||
+      record.signerKey !== systemKey ||
+      !verifyStateRecord(record)
+    ) {
+      skipped += 1; // refused — never advance past an unverifiable row
+      continue;
+    }
+
+    const advanceCursor = () => {
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.nodeId);
+    };
+
+    const local = await db.capacityPostures.get(record.nodeId);
+    if (local && record.updatedAt <= local.updatedAt) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.capacityPostures.put(record);
     inserted += 1;
     advanceCursor();
   }

@@ -21,6 +21,7 @@
 import { readConfigFromEnv } from "./config.js";
 import { buildServer } from "./server.js";
 import {
+  createCapacityPostureStore,
   createCapacitySampleStore,
   createCoOrganizerInvitationResponseStore,
   createCoOrganizerInvitationRevocationStore,
@@ -37,6 +38,7 @@ import {
 import { startPeerPullWorker } from "./peerPull.js";
 import { startMirrorPullWorker } from "./mirrorPull.js";
 import { startCapacitySampler } from "./capacitySampler.js";
+import { createCapacityEmitter } from "./capacityEmitter.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 
 async function main(): Promise<void> {
@@ -107,6 +109,7 @@ async function main(): Promise<void> {
     intervalMs: config.mirrorPullIntervalMs,
     cursorStore: createMirrorPullStore(database),
     exchangeStore: createExchangeStore(database),
+    capacityPostureStore: createCapacityPostureStore(database),
     ownSystemKey: ownSigner
       ? {
           nodeId: config.nodeId,
@@ -132,16 +135,42 @@ async function main(): Promise<void> {
   });
 
   // Node capacity self-sampling (docs/capacity-forecast.md §3A): read
-  // this box's own disk/RAM/CPU on a timer into a local ring buffer so
-  // the forecaster (PR 3) has a trailing series. Operator-local — the
-  // numbers never leave the machine, and with interval 0 the sampler is
-  // a no-op. Unref'd, so it never keeps the process alive on its own.
+  // this box's own disk/RAM/CPU on a timer into a local ring buffer.
+  // Operator-local — the numbers never leave the machine, and with
+  // interval 0 the sampler is a no-op. Unref'd, so it never keeps the
+  // process alive on its own.
+  //
+  // When the node holds a system key, the posture emitter (§6) hangs off
+  // each sample: it forecasts over the fresh buffer and, ONLY on a band
+  // transition, signs and stores the coarse `CapacityPosture` — the one
+  // capacity signal the community sees. No key ⇒ no posture (nothing to
+  // sign with), exactly as auto-confirm degrades.
+  const capacityPostureStore = createCapacityPostureStore(database);
+  const capacityEmitter = ownSigner
+    ? createCapacityEmitter({
+        sampleStore: createCapacitySampleStore(database),
+        postureStore: capacityPostureStore,
+        signer: ownSigner,
+        nodeId: config.nodeId,
+      })
+    : null;
   const capacitySampler = startCapacitySampler({
     store: createCapacitySampleStore(database),
     databasePath: config.databasePath,
     intervalMs: config.capacitySampleIntervalMs,
     keepN: config.capacitySampleKeepN,
     log: app.log,
+    onSample: capacityEmitter
+      ? () => {
+          const posture = capacityEmitter.check();
+          if (posture) {
+            app.log.info(
+              { pressure: posture.pressure, horizon: posture.horizon },
+              "capacity posture band transition",
+            );
+          }
+        }
+      : undefined,
   });
 
   const stop = async (signal: string) => {

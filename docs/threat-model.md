@@ -1203,6 +1203,43 @@ We are not trying to protect against:
   original gaming vector for records without artifacts, which is why
   the flip is tracked as a pilot-gated operator action
   (`operator-guide.md` env table) rather than a default.
+  **Capacity-posture reuse (the key's SECOND payload, shipped —
+  `docs/capacity-forecast.md` §6):** the same node system key now also
+  signs one additional shape, a coarse `CapacityPosture`
+  (`apps/server/src/capacityEmitter.ts` → `signCapacityPosture`) — the
+  "node identity attestation" §4 explicitly anticipated, REUSED not
+  duplicated so there is still exactly one operator-held key and one
+  audit story. It is bounded the same way: `systemSigner.ts`'s §2
+  contract header enumerates exactly two authorized payloads and its
+  export-surface lock test fails if a third appears; the posture carries
+  ONLY three coarse buckets (`pressure` green/amber/red, `horizon`
+  ample/months/weeks, `growthRecommended`) plus the LWW clock — no byte
+  count, no percentage, no member data, and the raw samples it derives
+  from never leave the box (they live in the operator-local
+  `node_capacity_samples` ring buffer, which has no route and no pull
+  leg). Verification mirrors the auto-confirm chain: same-community
+  mirrors verify each posture STRICTLY on ingestion against the emitting
+  node's rotation-aware system key (`applyCapacityPosture` →
+  `resolveSystemPubkey`; unresolvable ⇒ halt, never skip), and member
+  clients refuse any posture whose `signerKey` isn't the resolved node
+  system key for its `nodeId` (`resolveCommunitySystemPubkey`), never
+  advancing the cursor past an unverifiable row.
+
+- **No operator-distinguished surface (capacity flow).**
+  *Shipped with the capacity forecast (`docs/capacity-forecast.md`
+  §5/§7).* A node running low on room is surfaced as a *community*
+  signal, never an operator one: nothing in the app marks which account
+  runs the server, there is no operator-only readout and no route that
+  serves raw node metrics (`/health` still returns bare `{status:"ok"}`;
+  the only capacity route, `GET /capacity-postures`, serves the coarse
+  node-signed posture under the normal member read-auth guard). The
+  posture is signed by the node SYSTEM key, not a member key, precisely
+  so the community can act on "grow a root" without anyone — trusted or
+  not — learning who hosts; signing it with a member key, or adding an
+  operator-labelled readout, would be a privacy regression and is
+  rejected. The signal is visible only to members who can already read
+  the community feed, so it is not a reconnaissance surface for
+  outsiders.
 
 - **Server insert ceilings (disk-fill backstop).**
   *Shipped — `apps/server/src/insertCaps.ts`, one `preHandler` over

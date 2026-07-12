@@ -91,9 +91,16 @@
  * pulls run against a malicious node).
  */
 import type { FastifyInstance } from "fastify";
-import { verifyExchangeLabel } from "@understoria/shared/crypto";
-import { parseExchange } from "./validate.js";
-import type { ExchangeStore, MirrorPullStore } from "./db.js";
+import {
+  verifyExchangeLabel,
+  verifyCapacityPosture,
+} from "@understoria/shared/crypto";
+import { parseExchange, parseCapacityPosture } from "./validate.js";
+import type {
+  CapacityPostureStore,
+  ExchangeStore,
+  MirrorPullStore,
+} from "./db.js";
 
 /** Header carrying `BuiltServer.internalBypassToken` on self-injected
  *  requests. Exported so server.ts's rate-limit allowList and the
@@ -324,6 +331,18 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     id: (r) => str(r.id),
     conflict409: "halt",
   },
+  {
+    // Custom apply path — see `applyCapacityPosture` and the module
+    // comment. Node-system-key-signed, so it verifies against the
+    // rotation-aware resolver here (like /exchanges), never by inject.
+    // Cursor tiebreak is the per-node natural key. No referent, so its
+    // position in this array is not load-bearing.
+    path: "/capacity-postures",
+    bodyKey: "capacityPostures",
+    ts: (r) => num(r.updatedAt),
+    id: (r) => str(r.nodeId),
+    conflict409: "skip",
+  },
 ];
 
 export type MirrorFetcher = (
@@ -366,6 +385,10 @@ export interface MirrorPullWorkerOptions {
   cursorStore: MirrorPullStore;
   /** Direct store access for the exchanges custom-apply path only. */
   exchangeStore: ExchangeStore;
+  /** Direct store access for the capacity-postures custom-apply path
+   *  (docs/capacity-forecast.md §6) — node-system-key-signed, so it
+   *  verifies against `resolveSystemPubkey` here, not by inject. */
+  capacityPostureStore: CapacityPostureStore;
   /** This node's own system key (when it holds one) — lets rows this
    *  node auto-confirmed itself verify when they come back around
    *  through a mirror. */
@@ -405,6 +428,7 @@ export function startMirrorPullWorker(
     intervalMs,
     cursorStore,
     exchangeStore,
+    capacityPostureStore,
     ownSystemKey = null,
     fetcher = async (url, headers) => {
       const res = await fetch(url, { headers });
@@ -601,6 +625,44 @@ export function startMirrorPullWorker(
     return { kind: "applied" };
   }
 
+  function applyCapacityPosture(mirrorUrl: string, row: Row): ApplyOutcome {
+    const parsed = parseCapacityPosture(row);
+    if (!parsed.ok) {
+      return { kind: "refused", reason: `invalid posture: ${parsed.error}` };
+    }
+    const posture = parsed.value;
+    // Signature must be internally valid AND signed by the node system
+    // key that `posture.nodeId` advertises (rotation-aware) — the
+    // node-key analogue of a member record's `signerKey === memberKey`.
+    if (!verifyCapacityPosture(posture)) {
+      return { kind: "refused", reason: "posture failed signature check" };
+    }
+    const resolved = resolveSystemPubkey(posture.nodeId, posture.updatedAt);
+    if (resolved === null) {
+      // Can't resolve the emitting node's system key — possibly a
+      // transient key-material gap (its /config not yet seen). Halt so
+      // the cursor never advances past a row we might verify next cycle,
+      // exactly as the exchange path does.
+      return {
+        kind: "halt",
+        reason: `no system key resolvable for ${posture.nodeId} (via ${mirrorUrl}) — is the emitting node in MIRROR_NODE_URLS?`,
+      };
+    }
+    if (posture.signerKey !== resolved) {
+      return {
+        kind: "refused",
+        reason: "posture signer is not the node system key",
+      };
+    }
+    // LWW by nodeId: strictly-newer replaces; a stale copy is a no-op
+    // that still advances the cursor.
+    const stored = capacityPostureStore.get(posture.nodeId);
+    if (!stored || posture.updatedAt > stored.updatedAt) {
+      capacityPostureStore.upsert(posture);
+    }
+    return { kind: "applied" };
+  }
+
   // --- the per-kind pull loop ----------------------------------------
 
   async function pullKind(
@@ -625,7 +687,10 @@ export function startMirrorPullWorker(
     // /config has been seen at least once — rejecting auto-confirmed
     // rows with an empty resolver while OTHER rows advance the cursor
     // would skip them permanently (same rule as peerPull).
-    if (spec.path === "/exchanges" && !systemKeys.has(mirrorUrl)) {
+    if (
+      (spec.path === "/exchanges" || spec.path === "/capacity-postures") &&
+      !systemKeys.has(mirrorUrl)
+    ) {
       return halt(
         configErrors.get(mirrorUrl)?.message ??
           "mirror /config has never been reachable",
@@ -674,7 +739,9 @@ export function startMirrorPullWorker(
         const outcome =
           spec.path === "/exchanges"
             ? applyExchange(mirrorUrl, row)
-            : await applyViaInject(spec, row);
+            : spec.path === "/capacity-postures"
+              ? applyCapacityPosture(mirrorUrl, row)
+              : await applyViaInject(spec, row);
 
         const retryKey = `${mirrorUrl}|${spec.path}|${id}|${ts}`;
         switch (outcome.kind) {

@@ -21,16 +21,25 @@
 /**
  * Node system signer — the privileged signing surface introduced by
  * `docs/auto-confirm-key.md`. The §2 contract is bounded by audit
- * AND by code: this module exports EXACTLY two auto-confirm
- * functions plus the construction helper, and nothing else. If a
- * future caller needs the system key for something else, they MUST
- * amend the design doc (§2 contract 1); they cannot just import
- * something new from here.
+ * AND by code: this module authorizes EXACTLY TWO payload shapes the
+ * node system key may sign, and nothing else. A future caller that
+ * needs the key for a third thing MUST amend the design doc (§2
+ * contract 1) and this header before adding a signing surface here.
  *
- * The key only signs the helped-side signature of an exchange whose
- * helper signature already verifies. It cannot synthesize a record,
- * change the canonical payload, or reach any row that isn't already
- * in `awaiting_confirmation`. See §5 ("What the key cannot do").
+ *   1. **Auto-confirm** (the original, `auto-confirm-key.md`): the
+ *      helped-side signature of an exchange whose helper signature
+ *      already verifies. It cannot synthesize a record, change the
+ *      canonical payload, or reach any row not already in
+ *      `awaiting_confirmation`. See §5 ("What the key cannot do").
+ *   2. **Capacity posture** (`capacity-forecast.md` §6): the coarse,
+ *      per-node `CapacityPosture` attestation — a traffic-light band
+ *      plus a disk-horizon bucket and the recruitment trigger, and
+ *      NOTHING quantitative. This is the "node identity attestation"
+ *      `auto-confirm-key.md` §4 anticipated: the key is REUSED, not
+ *      duplicated, so there is still exactly one operator-held signing
+ *      key with one audit story. `signCapacityPosture` signs only the
+ *      band decision; it cannot leak a byte count (the type carries
+ *      none) and the raw samples never leave the box.
  *
  * Storage: secret bytes come from `NODE_SYSTEM_SECRET_KEY` at boot
  * (held in the immutable Config object) and are never persisted by
@@ -41,10 +50,15 @@ import nacl from "tweetnacl";
 import {
   canonicalExchangePayload,
   sign,
+  stableStringify,
   verify,
 } from "@understoria/shared/crypto";
 import { b64decode, b64encode } from "@understoria/shared/bytes";
-import type { Category, Exchange } from "@understoria/shared/types";
+import type {
+  Category,
+  CapacityPosture,
+  Exchange,
+} from "@understoria/shared/types";
 
 /** Canonical-payload fields the helper signs. */
 export interface AutoConfirmPayload {
@@ -220,4 +234,23 @@ export function autoConfirmProjectTaskCompletion(
   },
 ): AutoConfirmResult {
   return autoConfirmExchange(request, context);
+}
+
+/**
+ * §2 contract payload 2 — sign a coarse `CapacityPosture`
+ * (docs/capacity-forecast.md §6). Takes the whole record minus its
+ * `signature` and signs its stable-canonical form, so the signature
+ * verifies through the generic `verifyStateRecord` /
+ * `canonicalStatePayload` path exactly as every other signed LWW state
+ * record does — no bespoke canonical function. The signing surface
+ * lives here (not scattered `signer.signPayload` calls) so the audit
+ * of "what the system key may sign" stays in one file, per the header
+ * contract. The caller sets `signerKey` to `signer.publicKey` before
+ * passing the record in.
+ */
+export function signCapacityPosture(
+  posture: Omit<CapacityPosture, "signature">,
+  signer: SystemSigner,
+): string {
+  return signer.signPayload(stableStringify(posture));
 }

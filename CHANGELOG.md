@@ -28,6 +28,39 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Capacity forecast — the community sees the band**
+  (`apps/server/src/capacityEmitter.ts`, `routes/capacityPostures.ts`,
+  `apps/web/src/lib/federationSync.ts`,
+  `packages/shared/src/{types,crypto}.ts`,
+  `docs/capacity-forecast.md` §6 / PR 3 of 4). The node now turns its
+  own sample buffer (PR 2) into the one coarse signal the community
+  sees. An emitter forecasts over the trailing samples and — ONLY on a
+  hysteresis-stable band transition (green↔amber↔red) — signs a
+  `CapacityPosture` (schema v27 `capacity_postures`, LWW by nodeId) with
+  the **node system key** and stores it; no transition means no write,
+  so the federated write rate stays near zero. The posture carries a
+  *decision, never a measurement*: `pressure` (worst of disk/RAM/CPU),
+  a coarse disk `horizon` bucket (ample/months/weeks), and
+  `growthRecommended` — no bytes, no percentages, no member data; the
+  raw samples never leave the box. This REUSES the auto-confirm system
+  key rather than minting a second one (the "node identity attestation"
+  `auto-confirm-key.md` §4 anticipated): `systemSigner.ts`'s §2 contract
+  now authorizes exactly two payloads, and its export-surface lock test
+  enforces that. `GET /capacity-postures` serves the feed under the
+  normal member read-auth guard; same-community mirrors replicate it by
+  verifying each posture directly against the emitting node's
+  rotation-aware system key (`resolveSystemPubkey`; unresolvable ⇒ halt,
+  never skip) — the exchange pattern, not member-authored inject — and
+  it is deliberately excluded from `peerPull` (community-internal).
+  Member clients pull + verify against the node system key
+  (`resolveCommunitySystemPubkey` over the captured `/config.systemKey`,
+  rotation-aware), refusing any posture whose signer isn't the node key
+  and never advancing the cursor past an unverifiable row. No
+  operator-distinguished surface: the host is never marked in the UI and
+  no route serves raw node metrics (`docs/threat-model.md` §7 amended).
+  Tests: emitter transition/hysteresis/signature (6), mirror
+  replication authority incl. wrong-key + unresolvable-node (3), GET
+  feed (2), client pull authority + LWW (4).
 - **Capacity forecast — the node samples itself**
   (`apps/server/src/capacitySampler.ts`, `apps/server/src/db.ts` schema
   v26, `docs/capacity-forecast.md` §3A / PR 2 of 4). A periodic

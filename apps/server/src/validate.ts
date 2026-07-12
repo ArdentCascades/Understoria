@@ -37,6 +37,7 @@ import {
   type RelayedMessage,
   type ShiftSignupState,
   type SeedVaultPledge,
+  type CapacityPosture,
   type SignedVouch,
   type TaskComment,
   type TaskState,
@@ -1162,7 +1163,13 @@ export type ParseSeedVaultPledgeResult =
   | { ok: true; value: SeedVaultPledge }
   | { ok: false; error: string };
 
+export type ParseCapacityPostureResult =
+  | { ok: true; value: CapacityPosture }
+  | { ok: false; error: string };
+
 const RSVP_STATUSES = new Set(["going", "maybe", "not_going"]);
+const CAPACITY_PRESSURES = new Set(["green", "amber", "red"]);
+const CAPACITY_HORIZONS = new Set(["ample", "months", "weeks"]);
 const SHIFT_LABEL_MAX = 100;
 
 function checkLwwClock(r: Record<string, unknown>): string | null {
@@ -1233,6 +1240,35 @@ export function parseSeedVaultPledge(
   const clock = checkLwwClock(r);
   if (clock) return { ok: false, error: clock };
   return { ok: true, value: r as unknown as SeedVaultPledge };
+}
+
+export function parseCapacityPosture(
+  input: unknown,
+): ParseCapacityPostureResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["nodeId", "signerKey", "signature"]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.pressure !== "string" || !CAPACITY_PRESSURES.has(r.pressure)) {
+    return { ok: false, error: "pressure must be 'green', 'amber', or 'red'" };
+  }
+  if (typeof r.horizon !== "string" || !CAPACITY_HORIZONS.has(r.horizon)) {
+    return {
+      ok: false,
+      error: "horizon must be 'ample', 'months', or 'weeks'",
+    };
+  }
+  if (typeof r.growthRecommended !== "boolean") {
+    return { ok: false, error: "growthRecommended must be a boolean" };
+  }
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as CapacityPosture };
 }
 
 export function parseEventShiftState(

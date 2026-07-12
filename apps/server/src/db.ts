@@ -41,6 +41,7 @@ import type {
   ProposalClosure,
   Vote,
   SeedVaultPledge,
+  CapacityPosture,
   EventShiftState,
   Post,
   InviteRevocation,
@@ -1280,6 +1281,34 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '26')",
+    ).run();
+  }
+
+  // Schema v27 — the community capacity attestation
+  // (docs/capacity-forecast.md §6). A signed-LWW state record, one row
+  // per node (natural key = `node_id`), carrying ONLY a coarse posture
+  // — a traffic-light band, a disk-horizon bucket, the recruitment
+  // trigger — never a byte count. Unlike the operator-local
+  // `node_capacity_samples` (v26), this row DOES federate to
+  // same-community mirrors, but it is node-system-key-signed, so the
+  // full record is persisted as JSON in `payload` (the signed bytes)
+  // with `node_id`/`updated_at`/`signer_key` lifted out for the natural
+  // key, the cursor, and indexing. Same shape as `seed_vault_pledges`.
+  if (current < 27) {
+    db.exec(`
+      CREATE TABLE capacity_postures (
+        node_id    TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        signer_key TEXT NOT NULL,
+        payload    TEXT NOT NULL,
+        signature  TEXT NOT NULL,
+        PRIMARY KEY (node_id)
+      );
+      CREATE INDEX capacity_postures_updated_idx
+        ON capacity_postures (updated_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '27')",
     ).run();
   }
 }
@@ -3329,6 +3358,77 @@ export function createSeedVaultPledgeStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as SeedVaultPledge);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+// --- Capacity postures (docs/capacity-forecast.md §6) ----------------
+//
+// The community capacity attestation: one signed-LWW row per node
+// (natural key = nodeId), carrying only a coarse band/horizon/trigger.
+// Same participation-state machinery as SeedVaultPledge, except the
+// authority is the NODE SYSTEM KEY (checked by the mirror worker /
+// client via `resolveSystemPubkey`, not here). The cursor tiebreak is
+// `node_id` itself — a per-node singleton needs no separate row id.
+
+export interface CapacityPostureStore {
+  get(nodeId: string): CapacityPosture | null;
+  /** INSERT OR REPLACE by nodeId. The caller (server emitter / mirror
+   *  apply) decides whether to call this — the store never compares
+   *  versions. */
+  upsert(record: CapacityPosture): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): CapacityPosture[];
+  count(): number;
+}
+
+export function createCapacityPostureStore(
+  db: DatabaseType,
+): CapacityPostureStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO capacity_postures (
+      node_id, updated_at, signer_key, payload, signature
+    ) VALUES (
+      @nodeId, @updatedAt, @signerKey, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM capacity_postures WHERE node_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM capacity_postures",
+  );
+
+  return {
+    get(nodeId) {
+      const r = getStmt.get(nodeId) as { payload: string } | undefined;
+      return r ? (JSON.parse(r.payload) as CapacityPosture) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        nodeId: record.nodeId,
+        updatedAt: record.updatedAt,
+        signerKey: record.signerKey,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Composite-cursor paging keyed on (updated_at, node_id) — the
+      // per-node natural key doubles as the tiebreak id.
+      return pagedRows<{ payload: string }>(
+        db,
+        "capacity_postures",
+        "updated_at",
+        "node_id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as CapacityPosture);
     },
     count() {
       return (countStmt.get() as { n: number }).n;
