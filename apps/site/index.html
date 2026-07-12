@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en" class="scroll-pt-20">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Understoria — Grow power from below</title>
+    <meta
+      name="description"
+      content="A federated, encrypted mutual aid timebank for organizing communities. Post what you need, offer what you can, track help in time credits. No landlords, no algorithms, no ads — self-hosted and owned by the community."
+    />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#506b43" />
+    <meta property="og:title" content="Understoria — Grow power from below" />
+    <meta
+      property="og:description"
+      content="A federated, encrypted mutual aid timebank. Post what you need, offer what you can, track help in time credits. Self-hosted and owned by the community."
+    />
+    <meta property="og:type" content="website" />
+    <!-- No-flash theme: set the class before first paint. -->
+    <script>
+      (function () {
+        try {
+          var s = localStorage.getItem("understoria-site-theme");
+          var dark =
+            s === "dark" ||
+            (!s &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-canopy-700 focus:px-4 focus:py-2 focus:text-white"
+      >Skip to content</a
+    >
+
+    <!-- ── Header ─────────────────────────────────────────────── -->
+    <header
+      class="sticky top-0 z-40 border-b border-moss-200/70 bg-moss-50/85 backdrop-blur dark:border-moss-800/70 dark:bg-moss-950/85"
+    >
+      <div class="container-page flex h-16 items-center justify-between gap-4">
+        <a href="#top" class="flex items-center gap-2.5">
+          <img src="./favicon.svg" alt="" class="h-8 w-8" width="32" height="32" />
+          <span class="font-serif text-lg font-semibold tracking-tight"
+            >Understoria</span
+          >
+        </a>
+
+        <nav aria-label="Primary" class="flex items-center gap-1">
+          <div class="hidden items-center gap-1 md:flex">
+            <a href="#what" class="rounded-lg px-3 py-2 text-sm font-medium text-bark-700 hover:bg-moss-100 dark:text-moss-200 dark:hover:bg-moss-900">What it does</a>
+            <a href="#why" class="rounded-lg px-3 py-2 text-sm font-medium text-bark-700 hover:bg-moss-100 dark:text-moss-200 dark:hover:bg-moss-900">Why</a>
+            <a href="#how" class="rounded-lg px-3 py-2 text-sm font-medium text-bark-700 hover:bg-moss-100 dark:text-moss-200 dark:hover:bg-moss-900">How it works</a>
+            <a href="#start" class="rounded-lg px-3 py-2 text-sm font-medium text-bark-700 hover:bg-moss-100 dark:text-moss-200 dark:hover:bg-moss-900">Get started</a>
+          </div>
+          <a
+            href="https://github.com/ArdentCascades/Understoria"
+            class="hidden rounded-lg px-3 py-2 text-sm font-medium text-bark-700 hover:bg-moss-100 sm:inline-block dark:text-moss-200 dark:hover:bg-moss-900"
+            >Source</a
+          >
+          <button
+            type="button"
+            data-theme-toggle
+            aria-pressed="false"
+            class="ml-1 inline-flex h-10 w-10 items-center justify-center rounded-lg text-bark-700 hover:bg-moss-100 dark:text-moss-200 dark:hover:bg-moss-900"
+            title="Toggle light / dark"
+          >
+            <span class="sr-only">Toggle theme</span>
+            <span data-icon-light aria-hidden="true">☀️</span>
+            <span data-icon-dark hidden aria-hidden="true">🌙</span>
+          </button>
+          <button
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-bark-700 hover:bg-moss-100 md:hidden dark:text-moss-200 dark:hover:bg-moss-900"
+          >
+            <span class="sr-only">Menu</span>
+            <span aria-hidden="true">☰</span>
+          </button>
+        </nav>
+      </div>
+      <div
+        data-nav-menu
+        hidden
+        class="container-page grid gap-1 pb-3 md:hidden"
+      >
+        <a href="#what" class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-moss-100 dark:hover:bg-moss-900">What it does</a>
+        <a href="#why" class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-moss-100 dark:hover:bg-moss-900">Why</a>
+        <a href="#how" class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-moss-100 dark:hover:bg-moss-900">How it works</a>
+        <a href="#start" class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-moss-100 dark:hover:bg-moss-900">Get started</a>
+        <a href="https://github.com/ArdentCascades/Understoria" class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-moss-100 dark:hover:bg-moss-900">Source</a>
+      </div>
+    </header>
+
+    <span id="top"></span>
+    <main id="main">
+      <!-- ── Hero ─────────────────────────────────────────────── -->
+      <section class="relative overflow-hidden">
+        <div
+          class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-canopy-50/70 to-transparent dark:from-canopy-950/30"
+        ></div>
+        <div class="container-page grid items-center gap-10 py-16 md:py-24 lg:grid-cols-[1.05fr_1fr]">
+          <div>
+            <p class="eyebrow">Federated · Encrypted · Cooperative</p>
+            <h1
+              class="mt-4 font-serif text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl"
+            >
+              Grow power<br />from below.
+            </h1>
+            <p class="mt-5 max-w-xl text-lg leading-relaxed text-bark-700 dark:text-moss-200">
+              Understoria is a mutual aid timebank for organizing communities.
+              Post what you need, offer what you can, and track help in
+              <strong>time credits</strong> — one hour of help equals one hour
+              of help, whatever the task. No market pricing, no hierarchy, no
+              algorithm deciding who gets support.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="#start" class="btn-primary">Start a community</a>
+              <a
+                href="https://github.com/ArdentCascades/Understoria"
+                class="btn-ghost"
+                >Read the source</a
+              >
+            </div>
+            <p class="mt-5 text-sm text-moss-600 dark:text-moss-300">
+              No landlords, no algorithms, no ads — self-hosted and owned by the
+              people who use it.
+            </p>
+          </div>
+
+          <div class="shot-frame">
+            <img
+              src="./screenshots/board.png"
+              alt="The Understoria community board showing neighbours' needs and offers across categories like transport, food, and childcare."
+              width="1280"
+              height="900"
+              loading="eager"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Trust strip ──────────────────────────────────────── -->
+      <section class="border-y border-moss-200/70 bg-white/50 dark:border-moss-800/70 dark:bg-moss-900/30">
+        <div class="container-page grid gap-6 py-8 sm:grid-cols-3">
+          <div class="text-center sm:text-left">
+            <p class="font-serif text-2xl font-semibold">Owned by the community</p>
+            <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">Each community runs its own node. There is no company in the middle.</p>
+          </div>
+          <div class="text-center sm:text-left">
+            <p class="font-serif text-2xl font-semibold">Private by design</p>
+            <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">Your data is signed, encrypted at rest, and never sold, ranked, or mined.</p>
+          </div>
+          <div class="text-center sm:text-left">
+            <p class="font-serif text-2xl font-semibold">Works offline</p>
+            <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">A local-first app on every device; syncing resumes on its own when a server is back.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── What it does ─────────────────────────────────────── -->
+      <section id="what" class="container-page py-16 md:py-24">
+        <div class="max-w-2xl">
+          <p class="eyebrow">What it does</p>
+          <h2 class="mt-3 font-serif text-3xl font-bold tracking-tight sm:text-4xl">
+            The everyday tools of organizing, in one calm place.
+          </h2>
+          <p class="mt-4 text-lg text-bark-700 dark:text-moss-200">
+            Post what you need. Offer what you can. Build collective power — and
+            see it add up.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-6 lg:grid-cols-2">
+          <!-- Board (with shot) -->
+          <article class="card lg:row-span-2">
+            <div class="flex items-center gap-2">
+              <span aria-hidden="true" class="text-xl">🤝</span>
+              <h3 class="font-serif text-xl font-semibold">Community board</h3>
+            </div>
+            <p class="mt-2 text-bark-700 dark:text-moss-200">
+              Needs and offers across transport, food, childcare, skilled
+              labour, emotional support, education, and more. Descriptions
+              render a safe Markdown subset — no ads, no ranking, no feed.
+            </p>
+            <div class="shot-frame mt-4">
+              <img src="./screenshots/board.png" alt="Board with a mix of needs and offers." width="1280" height="900" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- Projects (with shot) -->
+          <article class="card">
+            <div class="flex items-center gap-2">
+              <span aria-hidden="true" class="text-xl">🌱</span>
+              <h3 class="font-serif text-xl font-semibold">Community projects</h3>
+            </div>
+            <p class="mt-2 text-bark-700 dark:text-moss-200">
+              Collective efforts with task lists, starter templates,
+              co-organizers, shifts, and a discussion thread per task. The
+              <em>In my care</em> tab gathers everything you're carrying.
+            </p>
+            <div class="shot-frame mt-4">
+              <img src="./screenshots/project.png" alt="A community project with its task list." width="1280" height="900" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- Two compact cards -->
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
+            <article class="card">
+              <div class="flex items-center gap-2">
+                <span aria-hidden="true" class="text-xl">⏳</span>
+                <h3 class="font-serif text-lg font-semibold">Timebank credits</h3>
+              </div>
+              <p class="mt-2 text-sm text-bark-700 dark:text-moss-200">
+                Every exchange earns and spends time credits. New members start
+                with seed credits, so asking for help is never gated.
+              </p>
+            </article>
+            <article class="card">
+              <div class="flex items-center gap-2">
+                <span aria-hidden="true" class="text-xl">📅</span>
+                <h3 class="font-serif text-lg font-semibold">Shared calendar</h3>
+              </div>
+              <p class="mt-2 text-sm text-bark-700 dark:text-moss-200">
+                Deadlines, expiries, and federated events — skillshares,
+                potlucks, work days — in one agenda, with per-event
+                <code>.ics</code> export. No tracking URLs, ever.
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <!-- Dashboard band -->
+        <div class="mt-6 grid items-center gap-8 rounded-3xl border border-moss-200 bg-white/60 p-6 md:grid-cols-2 md:p-8 dark:border-moss-800 dark:bg-moss-900/40">
+          <div>
+            <div class="flex items-center gap-2">
+              <span aria-hidden="true" class="text-xl">📊</span>
+              <h3 class="font-serif text-2xl font-semibold">A dashboard where the unit of progress is <em>us</em>.</h3>
+            </div>
+            <p class="mt-3 text-bark-700 dark:text-moss-200">
+              Total hours exchanged, active members, solidarity streaks, and
+              milestones — the community's story, not a personal scoreboard. No
+              leaderboards; no one is ranked against anyone else.
+            </p>
+          </div>
+          <div class="shot-frame">
+            <img src="./screenshots/dashboard.png" alt="The collective dashboard: total hours, members, and milestones." width="1280" height="900" loading="lazy" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Why ──────────────────────────────────────────────── -->
+      <section id="why" class="border-y border-moss-200/70 bg-white/50 py-16 md:py-24 dark:border-moss-800/70 dark:bg-moss-900/30">
+        <div class="container-page">
+          <div class="max-w-2xl">
+            <p class="eyebrow">Why it exists</p>
+            <h2 class="mt-3 font-serif text-3xl font-bold tracking-tight sm:text-4xl">
+              Solidarity, not a marketplace.
+            </h2>
+            <p class="mt-4 text-lg text-bark-700 dark:text-moss-200">
+              Most "community" apps are surveillance with a friendly logo.
+              Understoria is built on the opposite commitments — and they're
+              enforced in the code, not just the copy.
+            </p>
+          </div>
+          <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p class="font-serif text-lg font-semibold">One hour = one hour</p>
+              <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">Care, repairs, tutoring, a ride — all valued the same. No market pricing decides whose time is worth more.</p>
+            </div>
+            <div>
+              <p class="font-serif text-lg font-semibold">No surveillance</p>
+              <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">No feed, no engagement metrics, no attendance graph, no selling of anything. Pull-only: nothing pushes at you.</p>
+            </div>
+            <div>
+              <p class="font-serif text-lg font-semibold">Federated &amp; resilient</p>
+              <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">Communities can mirror each other and grow more roots, so losing one server loses nothing.</p>
+            </div>
+            <div>
+              <p class="font-serif text-lg font-semibold">Free software</p>
+              <p class="mt-1 text-sm text-bark-600 dark:text-moss-300">AGPL-3.0. The complete source ships with every deployment — no lock-in, forkable forever.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── How it works ─────────────────────────────────────── -->
+      <section id="how" class="container-page py-16 md:py-24">
+        <div class="max-w-2xl">
+          <p class="eyebrow">How it works</p>
+          <h2 class="mt-3 font-serif text-3xl font-bold tracking-tight sm:text-4xl">
+            A node, and an app that installs itself.
+          </h2>
+        </div>
+        <ol class="mt-12 grid gap-6 md:grid-cols-3">
+          <li class="card">
+            <p class="font-serif text-3xl font-bold text-canopy-700 dark:text-canopy-300">1</p>
+            <h3 class="mt-2 font-serif text-lg font-semibold">Someone hosts a node</h3>
+            <p class="mt-2 text-sm text-bark-700 dark:text-moss-200">
+              A small server — an old laptop in a closet is enough. It holds the
+              community's signed records and asks nothing of the outside world.
+            </p>
+          </li>
+          <li class="card">
+            <p class="font-serif text-3xl font-bold text-canopy-700 dark:text-canopy-300">2</p>
+            <h3 class="mt-2 font-serif text-lg font-semibold">Members install the app</h3>
+            <p class="mt-2 text-sm text-bark-700 dark:text-moss-200">
+              The app is a Progressive Web App — it installs from the browser,
+              works offline, and keeps each member's own encrypted copy on their
+              device.
+            </p>
+          </li>
+          <li class="card">
+            <p class="font-serif text-3xl font-bold text-canopy-700 dark:text-canopy-300">3</p>
+            <h3 class="mt-2 font-serif text-lg font-semibold">The community grows</h3>
+            <p class="mt-2 text-sm text-bark-700 dark:text-moss-200">
+              Invite by link, vouch for newcomers, and — when you're ready —
+              grow another root or federate with neighbouring communities.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ── Get started ──────────────────────────────────────── -->
+      <section id="start" class="border-t border-moss-200/70 bg-canopy-50/60 py-16 md:py-24 dark:border-moss-800/70 dark:bg-canopy-950/20">
+        <div class="container-page">
+          <div class="max-w-2xl">
+            <p class="eyebrow">Get started</p>
+            <h2 class="mt-3 font-serif text-3xl font-bold tracking-tight sm:text-4xl">
+              Bring it to your community.
+            </h2>
+          </div>
+          <div class="mt-10 grid gap-6 md:grid-cols-3">
+            <article class="card flex flex-col">
+              <h3 class="font-serif text-xl font-semibold">Start a community</h3>
+              <p class="mt-2 flex-1 text-sm text-bark-700 dark:text-moss-200">
+                Stand up a node and invite your first members. The step-by-step
+                guide runs on modest hardware and self-serve hosting.
+              </p>
+              <a
+                href="https://github.com/ArdentCascades/Understoria/blob/main/docs/bootstrap-from-a-node.md"
+                class="btn-primary mt-4"
+                >Read the guide</a
+              >
+            </article>
+            <article class="card flex flex-col">
+              <h3 class="font-serif text-xl font-semibold">Get the source</h3>
+              <p class="mt-2 flex-1 text-sm text-bark-700 dark:text-moss-200">
+                AGPL-3.0-or-later. Read it, audit it, run it, fork it. Every
+                node can hand out its own complete Corresponding Source.
+              </p>
+              <a
+                href="https://github.com/ArdentCascades/Understoria"
+                class="btn-ghost mt-4"
+                >View on GitHub</a
+              >
+            </article>
+            <article class="card flex flex-col">
+              <h3 class="font-serif text-xl font-semibold">Join a community</h3>
+              <p class="mt-2 flex-1 text-sm text-bark-700 dark:text-moss-200">
+                Already have an invite link from an organizer? Open it on your
+                phone — the app installs and connects you to their node.
+              </p>
+              <span class="mt-4 text-sm text-moss-600 dark:text-moss-300"
+                >Invites come from a community you know.</span
+              >
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── Footer ───────────────────────────────────────────── -->
+    <footer class="border-t border-moss-200/70 py-10 dark:border-moss-800/70">
+      <div class="container-page flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="./favicon.svg" alt="" class="h-7 w-7" width="28" height="28" />
+          <div>
+            <p class="font-serif font-semibold">Understoria</p>
+            <p class="text-xs text-moss-600 dark:text-moss-300">Grow power from below.</p>
+          </div>
+        </div>
+        <nav aria-label="Footer" class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <a href="https://github.com/ArdentCascades/Understoria" class="text-bark-700 hover:underline dark:text-moss-200">Source</a>
+          <a href="https://github.com/ArdentCascades/Understoria/tree/main/docs" class="text-bark-700 hover:underline dark:text-moss-200">Docs</a>
+          <a href="https://github.com/ArdentCascades/Understoria/blob/main/LICENSE" class="text-bark-700 hover:underline dark:text-moss-200">AGPL-3.0-or-later</a>
+        </nav>
+      </div>
+      <p class="container-page mt-6 text-xs text-moss-600 dark:text-moss-300">
+        Understoria is free software. Built with solidarity. Screenshots show a
+        sample community with placeholder members and posts.
+      </p>
+    </footer>
+  </body>
+</html>

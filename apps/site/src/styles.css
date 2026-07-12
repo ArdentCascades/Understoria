@@ -1,0 +1,56 @@
+/*
+ * Understoria — SPDX-License-Identifier: AGPL-3.0-or-later
+ * Showcase site styles. Tailwind + a small set of component classes
+ * that echo the app's look (rounded cards, soft leaf shadow).
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  :root.dark {
+    color-scheme: dark;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+  body {
+    @apply bg-moss-50 text-bark-900 antialiased dark:bg-moss-950 dark:text-moss-100;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 focus-visible:ring-offset-2 focus-visible:ring-offset-moss-50 dark:focus-visible:ring-offset-moss-950;
+  }
+  .btn-primary {
+    @apply btn bg-canopy-700 text-white hover:bg-canopy-800 dark:bg-canopy-600 dark:hover:bg-canopy-500;
+  }
+  .btn-ghost {
+    @apply btn border border-moss-300 bg-white/60 text-bark-800 hover:bg-white dark:border-moss-700 dark:bg-moss-900/60 dark:text-moss-100 dark:hover:bg-moss-900;
+  }
+  .card {
+    @apply rounded-2xl border border-moss-200 bg-white p-5 shadow-leaf dark:border-moss-800 dark:bg-moss-900/50;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-canopy-700 dark:text-canopy-300;
+  }
+  .shot-frame {
+    @apply overflow-hidden rounded-2xl border border-moss-200 bg-white shadow-leaf-lg dark:border-moss-800 dark:bg-moss-900;
+  }
+  .shot-frame img {
+    @apply block w-full;
+  }
+}

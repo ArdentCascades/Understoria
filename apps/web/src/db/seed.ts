@@ -22,14 +22,19 @@ import { db, SETTING_KEYS, setSetting, getSetting } from "./database";
 import { persistSecretKey } from "./secrets";
 import { uuid } from "@/lib/id";
 import { generateKeyPair, sign } from "@/lib/crypto";
-import { canonicalPostPayload } from "@understoria/shared/crypto";
+import {
+  canonicalPostPayload,
+  canonicalExchangePayload,
+} from "@understoria/shared/crypto";
 import { createVouch } from "@/lib/vouch";
 import type {
   Event,
   EventShiftRow,
+  Exchange,
   Member,
   Post,
   Project,
+  ProjectCategory,
   ProjectTask,
   SignedVouch,
 } from "@/types";
@@ -324,6 +329,103 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   });
 
   await db.posts.bulkPut(seedPosts);
+
+  // A handful of COMPLETED, mutually-signed exchanges so the demo
+  // Dashboard reads as a living community — real hours exchanged, active
+  // members, a solidarity streak, and a category spread — instead of an
+  // untouched first-run node showing 0h across 0 exchanges. Each row is
+  // signed by BOTH parties over the canonical exchange payload (exactly
+  // as production confirmation does), so they pass `verifyExchange` and
+  // render everywhere real exchanges do, including the Calendar's
+  // exchange-density heat. Like the posts and vouches above, these are
+  // demo-local: never enqueued to the outbox, so they never federate.
+  const dayMs = 24 * 60 * 60 * 1000;
+  // Anchor each on a distinct UTC day ending today, so the solidarity
+  // streak counts an unbroken run rather than a single spike.
+  const daysAgoAt = (d: number) => now - d * dayMs - 3 * 60 * 60 * 1000;
+  const signSeedExchange = (
+    helper: Member,
+    helped: Member,
+    hours: number,
+    category: ProjectCategory,
+    completedAt: number,
+    postId: string,
+  ): Exchange => {
+    const helperSecret = secretByKey.get(helper.publicKey);
+    const helpedSecret = secretByKey.get(helped.publicKey);
+    if (!helperSecret || !helpedSecret) {
+      throw new Error("seed: missing secret for exchange party");
+    }
+    const payload = canonicalExchangePayload({
+      postId,
+      helperKey: helper.publicKey,
+      helpedKey: helped.publicKey,
+      hours,
+      category,
+      completedAt,
+    });
+    return {
+      id: uuid(),
+      postId,
+      helperKey: helper.publicKey,
+      helpedKey: helped.publicKey,
+      hoursExchanged: hours,
+      helperSignature: sign(payload, helperSecret),
+      helpedSignature: sign(payload, helpedSecret),
+      completedAt,
+      category,
+      nodeId,
+    };
+  };
+
+  // One past need that was met, so the Dashboard's "Needs met this week"
+  // isn't a lonely zero. Completed posts drop off the open board tabs, so
+  // this reads as history (a fulfilled ask) without cluttering the board.
+  const metNeedId = uuid();
+  const imaniSecret = memberSecrets.get(imani.publicKey);
+  if (!imaniSecret) throw new Error("seed: missing secret for met-need poster");
+  const metNeed: Post = {
+    ...signSeedPost(
+      {
+        id: metNeedId,
+        type: "NEED",
+        category: "food",
+        title: "Groceries picked up during a rough week",
+        description:
+          "I was down with the flu and couldn't get out. Someone grabbed a few essentials and left them at my door — back on my feet now. Thank you.",
+        estimatedHours: 1,
+        urgency: "medium",
+        postedBy: imani.publicKey,
+        createdAt: daysAgoAt(2) - 60 * 60 * 1000,
+        expiresAt: null,
+        locationZone: "North neighborhood",
+        nodeId,
+      },
+      imaniSecret,
+    ),
+    status: "completed",
+    claimedBy: rosa.publicKey,
+    confirmedBy: [imani.publicKey],
+  };
+  await db.posts.put(metNeed);
+
+  // Exchanges chosen to match each member's skills (Rosa drives, Marcus
+  // fixes bikes, Imani does childcare, Theo helps with computers and
+  // listens), spread one per day across the past week so every member is
+  // "active this week" and the streak is unbroken.
+  const seedExchanges: Exchange[] = [
+    signSeedExchange(rosa, you, 2, "transport", daysAgoAt(0), uuid()),
+    signSeedExchange(you, marcus, 1, "food", daysAgoAt(0), uuid()),
+    signSeedExchange(marcus, imani, 1.5, "skilled_labor", daysAgoAt(1), uuid()),
+    signSeedExchange(imani, theo, 3, "childcare", daysAgoAt(2), uuid()),
+    // The fulfilled need above — helper Rosa, helped Imani (the poster).
+    signSeedExchange(rosa, imani, 1, "food", daysAgoAt(2), metNeedId),
+    signSeedExchange(theo, rosa, 1, "skilled_labor", daysAgoAt(3), uuid()),
+    signSeedExchange(rosa, you, 1.5, "education", daysAgoAt(4), uuid()),
+    signSeedExchange(imani, marcus, 2, "skilled_labor", daysAgoAt(5), uuid()),
+    signSeedExchange(theo, you, 1, "emotional_support", daysAgoAt(6), uuid()),
+  ];
+  await db.exchanges.bulkPut(seedExchanges);
 
   // A JOINABLE project, so first-run exploration can walk the whole
   // claimer arc — claim → "a good first step" → private plan → In my
