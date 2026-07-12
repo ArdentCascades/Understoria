@@ -1,8 +1,9 @@
 # Capacity forecast — seeing a node fill up before it does
 
-> **Status:** **proposed** — design note for operator review and
-> annotation. No implementation PRs yet; §8 names the PR sequence and
-> §11 collects the rulings needed before code. Every code claim below
+> **Status:** **approved** — design note reviewed by the operator; the
+> five §11 rulings are **resolved (2026-07-12)**. No implementation PRs
+> yet; §8 names the PR sequence, which starts once this note merges.
+> Every code claim below
 > was checked against the tree (2026-07, post pilot-readiness package),
 > not remembered. Companion docs:
 > [`storage-budget.md`](./storage-budget.md) (the per-device budget
@@ -485,34 +486,34 @@ small addendum to PR 2, off by default.
   forecast conditions their surfaces (the cross-link they already
   anticipate).
 
-## 11. Open questions — rulings before code
+## 11. Rulings — **resolved 2026-07-12**
 
-Defaults in **bold**; each can be answered in one sitting.
+All five were decided by the operator; recorded here so the
+implementation PRs inherit them without re-litigation.
 
-1. **Alert thresholds.** Disk countdown amber/red at **120 / 45 days**?
-   RAM/CPU pressure bands off sustained trailing headroom (default
-   **amber at <20% sustained free / red at <8%**, load relative to core
-   count)?
-2. **Sampling cadence & retention.** `capacitySampleIntervalMs` default
-   **15 min**, `capacitySampleKeepN` default **2000** (~3 weeks at 15
-   min; enough for a robust 30-sample trailing window with headroom)?
-3. **Local operator diagnostic — keep it at all?** Default: **no
-   networked readout** (the `OPERATOR_TOKEN` / `GET /capacity` path is
-   cut entirely); a host who wants numbers uses ordinary server tooling
-   (`df`/`free`/logs) on their own box. Optionally the node *logs* its
-   forecast locally, off by default. Confirm we are cutting the endpoint.
-4. **Posture emission cadence.** Emit a new `CapacityPosture` **only on
-   band transition** (green→amber→red and back, hysteresis-guarded),
-   not on every sample — agreed, to keep the federated write rate near
-   zero?
-5. **Which dimensions may trigger *community* recruitment?** Default,
-   per the "any maxed resource degrades performance" ruling: the
-   community posture's `pressure` is the **worst dimension**, so a RAM
-   or CPU squeeze can recommend growth too — but the `horizon` bucket
-   stays disk-only (the only honest countdown). Confirm this coupling.
+1. **Alert thresholds — ACCEPTED.** Disk countdown amber/red at
+   **120 / 45 days**. RAM/CPU pressure off sustained trailing headroom:
+   **amber < 20% sustained free / red < 8%**, load judged relative to
+   core count.
+2. **Sampling cadence & retention — ACCEPTED.**
+   `capacitySampleIntervalMs` = **15 min**, `capacitySampleKeepN` =
+   **2000** (~3 weeks; a robust 30-sample trailing window with
+   headroom).
+3. **Local operator diagnostic — CUT.** No networked readout: the
+   `OPERATOR_TOKEN` / `GET /capacity` path is **removed entirely**. A
+   host who wants numbers uses ordinary server tooling (`df` / `free` /
+   logs) on their own box. A node may *log* its own forecast locally,
+   off by default — never a member-facing surface.
+4. **Posture emission cadence — ACCEPTED.** Emit a new `CapacityPosture`
+   **only on a band transition** (green↔amber↔red, hysteresis-guarded),
+   never per-sample, keeping the federated write rate near zero.
+5. **Recruitment-triggering dimensions — ACCEPTED.** The community
+   posture's `pressure` is the **worst of {disk, RAM, CPU}**, so a RAM
+   or CPU squeeze can recommend growth too; the `horizon` (countdown)
+   bucket stays **disk-only**, the only honest clock.
 
 ---
 
-*This note is the blueprint; no code lands until the §11 rulings are
-in. The recommended first move is PR 1 (the forecast lib), which is
-pure, testable, and commits us to nothing federated.*
+*This note is the blueprint, and the §11 rulings are in. The first
+move is PR 1 (the forecast lib) — pure, testable, and committing us to
+nothing federated — which starts once this note has merged.*
