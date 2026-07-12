@@ -32,6 +32,14 @@ COPY apps/web apps/web
 # to back it (see docs/deploy-linode.md §1). Build-stage only — the
 # runtime stage below is busybox and runs no Node at all.
 ENV NODE_OPTIONS=--max-old-space-size=1536
+
+# Build stamp (docs/operator-guide.md §6): the build context has no
+# .git (.dockerignore), so vite can't read the commit hash itself.
+# Pass it in — `docker compose build` forwards VITE_BUILD_STAMP, and
+# the deploy runbook sets it to `git rev-parse --short HEAD`. Absent,
+# it stays empty and Settings shows "dev".
+ARG VITE_BUILD_STAMP=""
+ENV VITE_BUILD_STAMP=$VITE_BUILD_STAMP
 RUN npm --workspace @understoria/web run build
 
 # ---------------------------------------------------------------------
