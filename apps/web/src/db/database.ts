@@ -1252,6 +1252,11 @@ export const SETTING_KEYS = {
    *  per-identity not-joined dismissal lives under a dynamic key —
    *  see lib/notJoinedNudge.ts `notJoinedDismissKey`. */
   nodeOriginSuggestDismissed: "nodeOriginSuggestDismissed",
+  /** Per-device: the trusted member declined the "grow another root"
+   *  suggest card (docs/capacity-forecast.md §5.2). Declining persists
+   *  so the no-nag card never re-asks; the /grow-root wizard stays
+   *  reachable from the nav and the resilience card regardless. */
+  growRootSuggestDismissed: "growRootSuggestDismissed",
   boardHintDismissed: "boardHintDismissed",
   balanceHintDismissed: "balanceHintDismissed",
   inviteHintDismissed: "inviteHintDismissed",

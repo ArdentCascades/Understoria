@@ -25,7 +25,13 @@ import type {
   Proposal,
 } from "@/types";
 import { canClaimTask, isOrganizer } from "@/db/projects";
-import type { SignedVouch } from "@/lib/vouch";
+import type { CapacityPosture } from "@understoria/shared/types";
+import {
+  vouchCountFor,
+  MINIMUM_VOUCHES_FOR_TRUST,
+  type SignedVouch,
+  type RedeemedInviteLike,
+} from "@/lib/vouch";
 import { startOfUTCDay } from "./calendar";
 import { isAuthoritativeCancellation } from "./eventCancellation";
 import { taskCheckInState } from "./taskCheckInState";
@@ -185,6 +191,21 @@ export type AttentionItem =
       projectTitle: string;
       deepLink: string;
       createdAt: number;
+    }
+  | {
+      /**
+       * The community's node is running low on room
+       * (docs/capacity-forecast.md §5). A shared, coarse signal shown to
+       * TRUSTED members only — the whole cohort, never singling out the
+       * host — carrying a menu of responses (a host adds resources, or
+       * anyone grows another root). Derived from the node-signed
+       * `CapacityPosture`, so it carries a band, never a number.
+       */
+      kind: "grow_a_root";
+      pressure: "amber" | "red";
+      /** The strong recruitment trigger (red); amber is a heads-up. */
+      growthRecommended: boolean;
+      createdAt: number;
     };
 
 // Ordering rationale: when a member opens the app, what needs them
@@ -222,6 +243,7 @@ export const KIND_PRIORITY: Record<AttentionItem["kind"], number> = {
   vouch_received: 7,
   project_deadline_approaching: 7,
   project_paused_long: 7,
+  grow_a_root: 7,
 };
 
 export interface AttentionInput {
@@ -269,6 +291,15 @@ export interface AttentionInput {
    *  blocked. Default empty set when omitted (caller doesn't read
    *  blocks or there's no current member). */
   blockedKeys?: ReadonlySet<string>;
+  /** Node-signed capacity postures (docs/capacity-forecast.md §6) —
+   *  feeds the `grow_a_root` item for TRUSTED members when the
+   *  community's node reports amber/red pressure. Optional so callers
+   *  that don't read the table keep their behaviour. */
+  capacityPostures?: readonly CapacityPosture[];
+  /** Redeemed invites — combined with `vouches` to gate `grow_a_root`
+   *  on the current member being trusted (the same bar the grow-root
+   *  wizard uses). Optional; without it the item just doesn't surface. */
+  invites?: readonly RedeemedInviteLike[];
   now?: number;
 }
 
@@ -701,6 +732,37 @@ export function computeAttentionItems(
         // have a moment-it-happened timestamp without tracking each
         // RSVP transition, which we deliberately don't.
         createdAt: ev.createdAt,
+      });
+    }
+  }
+
+  // grow_a_root (docs/capacity-forecast.md §5): a shared community
+  // signal shown ONLY to trusted members — the same bar the grow-root
+  // wizard gates on — when the community's node reports amber/red
+  // pressure. Worst-of across the (verified, tiny) posture set so a
+  // node under pressure surfaces even in a multi-node community; the
+  // trust gate is also what keeps this from being a reconnaissance
+  // tool for locating the host.
+  {
+    const postures = input.capacityPostures ?? [];
+    const worst = postures.reduce<CapacityPosture | null>((acc, p) => {
+      if (p.pressure === "green") return acc;
+      if (acc === null) return p;
+      const rank = (x: CapacityPosture["pressure"]) => (x === "red" ? 2 : 1);
+      return rank(p.pressure) > rank(acc.pressure) ? p : acc;
+    }, null);
+    const trusted =
+      worst !== null &&
+      vouchCountFor(currentMember.publicKey, {
+        vouches: input.vouches ?? [],
+        invites: input.invites ?? [],
+      }) >= MINIMUM_VOUCHES_FOR_TRUST;
+    if (worst !== null && worst.pressure !== "green" && trusted) {
+      items.push({
+        kind: "grow_a_root",
+        pressure: worst.pressure,
+        growthRecommended: worst.growthRecommended,
+        createdAt: worst.updatedAt,
       });
     }
   }

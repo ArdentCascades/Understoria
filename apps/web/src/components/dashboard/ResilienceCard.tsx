@@ -42,7 +42,7 @@ import {
 // Renders entirely from local settings + tables: zero new wire bytes.
 export function ResilienceCard() {
   const { t } = useTranslation();
-  const { members } = useApp();
+  const { members, capacityPostures } = useApp();
   const [snapshot, setSnapshot] = useState<ResilienceSnapshot | null>(null);
   const [leaves, setLeaves] = useState<NodeFreshness[]>([]);
   // Storage windowing (docs/storage-budget.md Phase 1): the replica
@@ -92,6 +92,14 @@ export function ResilienceCard() {
 
   const tierLabel = t(`dashboard.resilience.tier.${snapshot.tier}`);
   const failoverLive = snapshot.tier === "sturdy" || snapshot.tier === "deep_rooted";
+  // Copy elevation (docs/capacity-forecast.md §5.2): when the community's
+  // node reports RED pressure AND no healthy mirror has failed over yet
+  // (nodesReachable < 2), lean the resilience card toward "grow a root"
+  // — the response that distributes the load. Coarse and honest: a band,
+  // never a number, and never a word about who hosts.
+  const capacityRed =
+    capacityPostures.some((p) => p.pressure === "red") &&
+    snapshot.nodesReachable < 2;
   const LEAF_CLASS: Record<NodeFreshness, string> = {
     fresh: "bg-canopy-500",
     lagging: "bg-amber-400",
@@ -178,6 +186,11 @@ export function ResilienceCard() {
       {snapshot.nodeQuiet && (
         <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
           {t("dashboard.resilience.nodeQuiet")}
+        </p>
+      )}
+      {capacityRed && (
+        <p className="mt-2 rounded-lg bg-red-50 px-2 py-1 text-sm font-medium text-red-900 dark:bg-red-950/40 dark:text-red-100">
+          {t("dashboard.resilience.capacityRed")}
         </p>
       )}
 
