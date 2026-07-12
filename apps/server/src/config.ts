@@ -233,6 +233,20 @@ export interface Config {
    *  or failover serves visibly stale data. */
   mirrorPullIntervalMs: number;
   /**
+   * How often the node samples its own disk/RAM/CPU into the local
+   * ring buffer (`CAPACITY_SAMPLE_INTERVAL_MS`) — docs/capacity-forecast.md
+   * §3A. Default 15 min per §11 ruling 2: frequent enough for a robust
+   * trailing window, rare enough to be invisible. `0` disables the
+   * sampler entirely. The raw samples never leave the box; only the
+   * coarse posture (PR 3) is ever shared.
+   */
+  capacitySampleIntervalMs: number;
+  /** How many samples the ring buffer keeps (`CAPACITY_SAMPLE_KEEP_N`,
+   *  default 2000 ≈ 3 weeks at 15 min). The sampler trims to this on
+   *  every insert, so the table is bounded no matter how long the node
+   *  runs. */
+  capacitySampleKeepN: number;
+  /**
    * Re-seed window end (`RESEED_GRACE_UNTIL`, RFC3339 or epoch ms) —
    * docs/community-reseed.md §3. Until this moment, `POST
    * /redemptions` skips its delivery-grace bound and preserves a
@@ -358,6 +372,17 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       "MIRROR_PULL_INTERVAL_MS",
       env.MIRROR_PULL_INTERVAL_MS,
       60_000,
+    ),
+    // Non-negative so 0 cleanly disables the sampler.
+    capacitySampleIntervalMs: asNonNegativeInt(
+      "CAPACITY_SAMPLE_INTERVAL_MS",
+      env.CAPACITY_SAMPLE_INTERVAL_MS,
+      15 * 60 * 1000,
+    ),
+    capacitySampleKeepN: asInt(
+      "CAPACITY_SAMPLE_KEEP_N",
+      env.CAPACITY_SAMPLE_KEEP_N,
+      2000,
     ),
     reseedGraceUntil: parseReseedGraceUntil(env.RESEED_GRACE_UNTIL),
     trustedSystemKeys: parseTrustedSystemKeys(env.TRUSTED_SYSTEM_KEYS),
