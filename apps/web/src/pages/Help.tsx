@@ -369,6 +369,19 @@ export default function HelpPage() {
       <p className="mt-6 text-sm text-moss-600 dark:text-moss-300">
         {t("help.footer")}
       </p>
+
+      {/* Quiet, pull-only doorway to the pilot journal (Plan 3 §3.3).
+          A line, never a prompt — the member walks up to it only if
+          they want to keep a note for the pilot. */}
+      <p className="mt-4 text-sm text-moss-600 dark:text-moss-300">
+        {t("pilotJournal.helpDoorway")}{" "}
+        <Link
+          to="/pilot-journal"
+          className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("pilotJournal.helpDoorwayLink")}
+        </Link>
+      </p>
     </div>
   );
 }

@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Pilot journal** (`db/journal.ts`, `/pilot-journal`, a quiet Help-page
+  doorway). A no-telemetry app has no built-in feedback channel; this
+  is the one the ethos allows — the member writes local, timestamped
+  notes, and the **hand-off is the consent ceremony**: a "Share my
+  journal" plain-text download they physically give the operator (or
+  read at a check-in), with no send button, no prompt, no streak.
+  Stored in a new local-only Dexie table (v36) that mirrors the
+  `taskPlans` privacy pattern — no outbox kind, never in the pairing
+  snapshot, cleared by soft purge, walker-exempt — differing on one
+  axis: it IS in the member's own data export, because it is their
+  writing. Every boundary is test-locked. Part B of the pilot-readiness
+  package (`docs/next-cycle-plans.md` Plan 3 §3.3).
 - **Runbook: turning on auto-confirm window enforcement**
   (`operator-guide.md` §6). The `AUTO_CONFIRM_REQUIRE_TRANSITION` flip
   was one sentence of intent in `auto-confirm-key.md` §7 with no

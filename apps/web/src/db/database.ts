@@ -193,6 +193,15 @@ export interface OutboxRow {
   // never community record. It never enters the outbox, never exports,
   // never rides the pairing snapshot, and is cleared by soft-purge.
   // taskPlans.test.ts asserts the rejection with `// @ts-expect-error`.
+  //
+  // Intentionally NOT a member of this union: "journal_entry".
+  // JournalEntryRow is a member's PRIVATE pilot-feedback writing
+  // (docs/next-cycle-plans.md Plan 3 §3.3). It never enters the outbox
+  // and never rides the pairing snapshot; the ONLY way an entry leaves
+  // the device is the member's own deliberate hand-off (the "Share my
+  // journal" plain-text download, or the general self-export). It is
+  // cleared by soft-purge. journal.test.ts asserts the rejection with
+  // `// @ts-expect-error`.
   /** JSON-stringified signed payload. While the row is `pending` a
    *  re-enqueue of the same record with NEW mutable state (e.g. a
    *  task-comment tombstone) replaces this in place; once delivered
@@ -390,6 +399,38 @@ export interface TaskPlanRow {
 }
 
 /**
+ * A pilot journal entry — a member's own timestamped free-text note
+ * about using the app during a pilot ("the confirm button was hard to
+ * find", "loved that the invite worked offline"). The pilot's feedback
+ * channel in a no-telemetry app: nothing is measured or sent, the
+ * member just writes, and the HAND-OFF is the consent ceremony —
+ * they compose their entries into a plain-text file and physically
+ * give it to the operator (or read it aloud at a check-in). See
+ * `docs/next-cycle-plans.md` Plan 3 §3.3.
+ *
+ * LOCAL-ONLY, same posture as `taskPlans`: never federates (no
+ * `OutboxRow.kind`, no enqueue helper), never rides the pairing
+ * snapshot, cleared whole by soft purge. It DIFFERS from `taskPlans`
+ * on exactly one axis — it IS in the member's own data export, because
+ * it is the member's own writing and a self-backup should not silently
+ * drop it (the export is the member downloading their own data to
+ * their own device; the operator hand-off is the separate, deliberate
+ * "Share my journal" plain-text download).
+ *
+ * `memberKey` guards rendering — on a shared device a member sees only
+ * their own entries. Nothing here ever feeds a prompt, streak, or
+ * reminder (`no-notifications`): the doorway is pull-only.
+ */
+export interface JournalEntryRow {
+  /** UUID — stable identity for delete. */
+  id: string;
+  memberKey: string;
+  /** The member's own words. */
+  text: string;
+  createdAt: number;
+}
+
+/**
  * Community-event cancellation row — see `docs/community-events.md`
  * §4.3. Wraps the federated `EventCancellation` record verbatim.
  * Federates via the outbox `kind: "event_cancellation"` discriminator.
@@ -519,6 +560,16 @@ export class UnderstoriaDB extends Dexie {
    * asserts the rejection with `// @ts-expect-error`.
    */
   taskPlans!: Table<TaskPlanRow, string>;
+  /**
+   * Local-only pilot journal — the member's own timestamped notes for
+   * pilot feedback (see `JournalEntryRow`). Never synced, never rides
+   * the pairing snapshot, cleared by soft purge; the ONE difference
+   * from `taskPlans` is that it IS in the member's own export (their
+   * writing). The `OutboxRow.kind` union rejects `"journal_entry"` at
+   * the type level; journal.test.ts asserts it with `// @ts-expect-error`.
+   * Read and written only by `db/journal.ts`.
+   */
+  journalEntries!: Table<JournalEntryRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -1103,6 +1154,17 @@ export class UnderstoriaDB extends Dexie {
       await plans.toCollection().modify((row) => {
         if (row.note === undefined) row.note = "";
       });
+    });
+
+    // v36 — pilot journal (docs/next-cycle-plans.md Plan 3 §3.3): a
+    // local-only feedback channel for a no-telemetry pilot. Pure new
+    // table, no backfill. Keyed by `id` (uuid); `memberKey` indexed so
+    // the viewer's own entries load in one query, `createdAt` indexed
+    // for newest-first ordering. LOCAL-ONLY — no outbox kind, never in
+    // the pairing snapshot, cleared by soft purge — but INCLUDED in the
+    // member's own export (their writing). See the JournalEntryRow doc.
+    this.version(36).stores({
+      journalEntries: "id, memberKey, createdAt",
     });
   }
 }

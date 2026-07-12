@@ -240,6 +240,9 @@ export async function softPurge(): Promise<PurgeResult> {
   //   - `taskPlans`: the member's private step breakdowns and planned
   //     days for claimed tasks — verbatim free text about their own
   //     process and capacity; nothing structural worth keeping.
+  //   - `journalEntries`: the member's private pilot-feedback notes
+  //     (db/journal.ts) — verbatim free text; a duress wipe must not
+  //     leave it behind.
   await db.transaction(
     "rw",
     [
@@ -252,6 +255,7 @@ export async function softPurge(): Promise<PurgeResult> {
       db.eventShifts,
       db.shiftSignups,
       db.taskPlans,
+      db.journalEntries,
       db.outbox,
       db.invites,
       db.redemptionReceipts,
@@ -270,6 +274,7 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.eventShifts.clear();
       await db.shiftSignups.clear();
       await db.taskPlans.clear();
+      await db.journalEntries.clear();
       await db.outbox.clear();
       await db.invites.clear();
       // The signed membership artifacts (re-seed Phase R0) are the
@@ -299,6 +304,7 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("eventShifts");
   tables.push("shiftSignups");
   tables.push("taskPlans");
+  tables.push("journalEntries");
   tables.push("outbox");
   tables.push("invites");
   tables.push("redemptionReceipts");
