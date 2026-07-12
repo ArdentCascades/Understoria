@@ -2146,7 +2146,8 @@
       "close": "Close post panel"
     },
     "printView": "Print this view",
-    "plugInLink": "Ways to plug in"
+    "plugInLink": "Ways to plug in",
+    "inMyCareHeading": "In my care"
   },
   "dashboard": {
     "title": "Community dashboard",

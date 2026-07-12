@@ -615,35 +615,36 @@ export default function BoardPage() {
         </div>
         {/* end mobile sticky header group */}
 
-        {/* "One small thing" — the choice-paralysis escape hatch: a
-            single quiet line under the search band on every tab;
-            expands to exactly one claimable pick at a time
-            (lib/oneSmallThing.ts — feasibility filters + a shuffle,
-            never a recommender). */}
+        {/* DISCOVERY row — the two "help me find something to do"
+            affordances read as ONE action group (small icons, side by
+            side), distinct from the navigation links below. On every
+            tab, under the search band.
+              • "One small thing" — the choice-paralysis escape hatch;
+                expands to exactly one claimable pick at a time
+                (lib/oneSmallThing.ts — feasibility filters + a shuffle,
+                never a recommender). When opened its card takes the
+                full row and the plug-in link wraps beneath it.
+              • "Ways to plug in" — the browsable shelf's only doorway
+                (docs/ways-to-plug-in.md §8 ruling 1: a link, not a tab).
+                No count badge: §4's never-a-nudge boundary applies here
+                too. */}
         {currentMember && (
-          <OneSmallThing
-            memberKey={currentMember.publicKey}
-            tasks={projectTasks}
-            projects={projects}
-            posts={posts}
-            blockedKeys={blockedKeys}
-          />
-        )}
-
-        {/* "Ways to plug in" — the browsable shelf's only doorway
-            (docs/ways-to-plug-in.md §8 ruling 1: a link, not a tab —
-            tabs are permanent geography and the pilot should show the
-            surface earns one first). A quiet line, no count badge:
-            §4's never-a-nudge boundary applies to the doorway too. */}
-        {currentMember && (
-          <p className="mb-3 text-sm">
+          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2">
+            <OneSmallThing
+              memberKey={currentMember.publicKey}
+              tasks={projectTasks}
+              projects={projects}
+              posts={posts}
+              blockedKeys={blockedKeys}
+            />
             <Link
               to="/plug-in"
-              className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              className="inline-flex items-center gap-1.5 text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
             >
+              <span aria-hidden="true">🔌</span>
               {t("board.plugInLink")}
             </Link>
-          </p>
+          </div>
         )}
 
         {/* Mobile-visible filter rail copies. These sit between the
@@ -875,43 +876,54 @@ export default function BoardPage() {
             </div>
             )}
 
-            {/* Archive link sits below everything at every breakpoint
-                (a rarely-needed jump-off, not a primary control). At
-                lg+ it lands in col 1 below the sticky filter rail (an
-                implicit row created after row 1); at mobile it
-                naturally lands last in the outer grid stack. */}
+            {/* Bottom jump-offs, grouped by JOB into two tiers so they
+                don't read as a pile of identical links. At lg+ they
+                land in col 1 below the sticky filter rail (implicit
+                rows after row 1); at mobile they stack last in the
+                outer grid.
+
+                Tier 1 — "In my care": the member's own cross-project
+                commitments, both deep-linking into the /my-work page.
+                Shown only when there's something to carry / steward —
+                no count bubble, no empty destination (no-notifications;
+                solidarity-not-shame). Grouped under one quiet heading
+                so two links to the same page read as one doorway. */}
+            {(carryingCount > 0 || organizingCount > 0) && (
+              <div className="mt-3 text-center lg:col-start-1 lg:row-start-2 lg:mt-3 lg:text-left">
+                <p className="text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+                  {t("board.inMyCareHeading")}
+                </p>
+                <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 text-sm lg:justify-start">
+                  {carryingCount > 0 && (
+                    <Link
+                      to="/my-work#tasks"
+                      className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                    >
+                      {t("myTasks.boardLink")}
+                    </Link>
+                  )}
+                  {organizingCount > 0 && (
+                    <Link
+                      to="/my-work#projects"
+                      className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+                    >
+                      {t("myProjects.boardLink")}
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tier 2 — the archive: navigation to a rarely-needed
+                place, rendered as the QUIETEST footer link (muted, not
+                a canopy action) so it's clearly the lowest tier and
+                never competes with the controls or the care cluster. */}
             <Link
               to="/projects/archive"
-              className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-2 lg:mt-3 lg:text-left"
+              className="mt-3 block text-center text-xs text-moss-600 underline-offset-2 hover:text-moss-800 hover:underline dark:text-moss-300 dark:hover:text-moss-100 lg:col-start-1 lg:row-start-3 lg:mt-3 lg:text-left"
             >
               {t("projects.archive.viewArchive")}
             </Link>
-
-            {/* Cross-project commitments jump-off, same quiet register
-                as the archive link. Conditional on actually carrying
-                something — no count bubble, no empty destination
-                (no-notifications; solidarity-not-shame). */}
-            {carryingCount > 0 && (
-              <Link
-                to="/my-work#tasks"
-                className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-3 lg:mt-2 lg:text-left"
-              >
-                {t("myTasks.boardLink")}
-              </Link>
-            )}
-
-            {/* Organizer-side jump-off, same quiet register. Conditional
-                on actually stewarding a project so the rail never nudges
-                a non-organizer toward organizing (no-notifications;
-                solidarity-not-shame). */}
-            {organizingCount > 0 && (
-              <Link
-                to="/my-work#projects"
-                className="mt-2 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:col-start-1 lg:row-start-4 lg:mt-2 lg:text-left"
-              >
-                {t("myProjects.boardLink")}
-              </Link>
-            )}
           </>
         )}
       </div>
