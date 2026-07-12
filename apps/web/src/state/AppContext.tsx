@@ -328,89 +328,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // the node is unreachable the Board just shows local records.
   useEffect(() => {
     if (!ready) return;
-    let timer: ReturnType<typeof setInterval> | null = null;
-    const FEDERATION_REPULL_MS = 3 * 60 * 1000;
-    const runPulls = () =>
-      import("@/lib/federationSync").then(
-        ({
-          pullFederatedPosts,
-          pullFederatedClaims,
-          pullFederatedTaskComments,
-          pullFederatedExchanges,
-          pullFederatedCoOrgInvitations,
-          pullFederatedCoOrgResponses,
-          pullFederatedCoOrgRevocations,
-          pullFederatedEvents,
-          pullFederatedEventCancellations,
-          pullFederatedRedemptions,
-          pullFederatedInviteRevocations,
-          pullFederatedVouches,
-          pullFederatedMessages,
-          pullFederatedProjectStates,
-          pullFederatedTaskStates,
-          pullFederatedEventShifts,
-          pullFederatedEventRsvps,
-          pullFederatedShiftSignups,
-          pullFederatedSeedVaultPledges,
-          pullFederatedMemberRemovals,
-          pullFederatedMemberReinstatements,
-          pullFederatedProposals,
-          pullFederatedVotes,
-          pullFederatedProposalClosures,
-        }) => {
-          void pullFederatedPosts();
-          void pullFederatedClaims();
-          void pullFederatedTaskComments();
-          void pullFederatedExchanges();
-          void pullFederatedCoOrgInvitations();
-          void pullFederatedCoOrgResponses();
-          void pullFederatedCoOrgRevocations();
-          // Participation state rides behind the events pull: a
-          // shift's authority is checked against its LOCAL event, a
-          // live signup needs its shift — so events → shifts+RSVPs →
-          // signups (docs/project-federation.md §6).
-          void pullFederatedEvents().then(() => {
-            void pullFederatedEventRsvps();
-            void pullFederatedEventShifts().then(() => {
-              void pullFederatedShiftSignups();
-            });
-          });
-          void pullFederatedEventCancellations();
-          // Phase 1 of docs/invite-redemption.md: redemption receipts
-          // (invite-row flip + roster materialization, §6) and the §9
-          // companion vouch pull (trust-status convergence).
-          void pullFederatedRedemptions();
-          // docs/invite-revocation.md: converge revoked-then-redeemed
-          // invites to one honest state across every device.
-          void pullFederatedInviteRevocations();
-          void pullFederatedVouches();
-          // docs/message-relay.md: sealed DM envelopes addressed to
-          // the current member.
-          void pullFederatedMessages();
-          // docs/project-federation.md: project + task LWW state.
-          // Projects first — a task's authority derives from its
-          // project, so the task pull skips rows whose project
-          // hasn't landed yet and retries next cycle.
-          void pullFederatedProjectStates().then(() => {
-            void pullFederatedTaskStates();
-          });
-          // docs/storage-budget.md Phase 2: archive-role pledges.
-          void pullFederatedSeedVaultPledges();
-          // docs/member-removal.md M1: quorum governance records.
-          void pullFederatedMemberRemovals();
-          void pullFederatedMemberReinstatements();
-          // docs/proposal-federation.md G1: proposals before votes
-          // before closures (referent order).
-          void pullFederatedProposals().then(() => {
-            void pullFederatedVotes();
-            void pullFederatedProposalClosures();
-          });
-        },
-      );
-    void runPulls();
-    timer = setInterval(() => void runPulls(), FEDERATION_REPULL_MS);
+    // The federation pull loop (docs/sync-liveness.md). Live cadence
+    // during active side-by-side use — pull on foregrounding, ~12s
+    // while active, 3 min when idle/background — over the same
+    // node-relayed reads as before (no new surface). See lib/syncLoop.
+    let stop: (() => void) | null = null;
+    let cancelled = false;
+    void import("@/lib/syncLoop").then(({ startSyncLoop }) => {
+      // The effect may have been torn down before the dynamic import
+      // resolved; don't start an orphan loop in that case.
+      if (cancelled) return;
+      stop = startSyncLoop();
+    });
     return () => {
-      if (timer) clearInterval(timer);
+      cancelled = true;
+      if (stop) stop();
     };
   }, [ready]);
 
