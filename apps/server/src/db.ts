@@ -1251,6 +1251,37 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '25')",
     ).run();
   }
+
+  // Schema v26 — node capacity self-sampling
+  // (docs/capacity-forecast.md §3A). A ring buffer of the node's own
+  // disk/RAM/CPU readings so the forecaster (PR 3) can fit a slope and
+  // project when disk fills. This table is OPERATOR-LOCAL by
+  // construction: machine metadata about the box the node runs on — the
+  // equivalent of `df`/`free`, persisted so we can compute a slope —
+  // never a member record. It has no POST route, no peerPull/mirrorPull
+  // leg, and is deliberately absent from insertCaps SURFACES: the
+  // sampler trims it to a fixed keepN itself, so it can neither grow
+  // unbounded nor bounce a member write. Raw numbers never leave the
+  // box; only the coarse posture (PR 3) does.
+  if (current < 26) {
+    db.exec(`
+      CREATE TABLE node_capacity_samples (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sampled_at INTEGER NOT NULL,
+        disk_free_bytes INTEGER,
+        disk_total_bytes INTEGER,
+        db_size_bytes INTEGER,
+        mem_free_bytes INTEGER,
+        mem_total_bytes INTEGER,
+        load_avg_1m REAL
+      );
+      CREATE INDEX node_capacity_samples_sampled_at_idx
+        ON node_capacity_samples (sampled_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '26')",
+    ).run();
+  }
 }
 
 /**
@@ -2699,6 +2730,123 @@ export function createDeviceLinkStore(db: DatabaseType): DeviceLinkStore {
     },
     pruneExpired(now) {
       pruneStmt.run(now);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+// --- Node capacity samples (docs/capacity-forecast.md §3A) -----------
+//
+// A fixed-size ring buffer of the node's own resource readings. The
+// sampler worker (capacitySampler.ts) inserts one row per tick and
+// trims to the newest `keepN` rows by rowid in the same transaction, so
+// the table's footprint is bounded no matter how long the node runs.
+// Operator-local: never a member record, never federated, never served
+// over the network.
+
+export interface CapacitySampleInput {
+  sampledAt: number;
+  diskFreeBytes: number | null;
+  diskTotalBytes: number | null;
+  dbSizeBytes: number | null;
+  memFreeBytes: number | null;
+  memTotalBytes: number | null;
+  loadAvg1m: number | null;
+}
+
+export interface CapacitySampleRow extends CapacitySampleInput {
+  id: number;
+}
+
+export interface CapacitySampleStore {
+  /** Insert one reading, then trim the table to the newest `keepN`
+   *  rows by rowid — both in one transaction. `keepN <= 0` keeps all. */
+  record(sample: CapacitySampleInput, keepN: number): void;
+  /** Rows oldest → newest (the order the forecaster wants). With
+   *  `limit`, the newest `limit` rows in that same order. */
+  recent(limit?: number): CapacitySampleRow[];
+  count(): number;
+}
+
+interface CapacitySampleDbRow {
+  id: number;
+  sampled_at: number;
+  disk_free_bytes: number | null;
+  disk_total_bytes: number | null;
+  db_size_bytes: number | null;
+  mem_free_bytes: number | null;
+  mem_total_bytes: number | null;
+  load_avg_1m: number | null;
+}
+
+function toCapacitySampleRow(r: CapacitySampleDbRow): CapacitySampleRow {
+  return {
+    id: r.id,
+    sampledAt: r.sampled_at,
+    diskFreeBytes: r.disk_free_bytes,
+    diskTotalBytes: r.disk_total_bytes,
+    dbSizeBytes: r.db_size_bytes,
+    memFreeBytes: r.mem_free_bytes,
+    memTotalBytes: r.mem_total_bytes,
+    loadAvg1m: r.load_avg_1m,
+  };
+}
+
+export function createCapacitySampleStore(
+  db: DatabaseType,
+): CapacitySampleStore {
+  const insertStmt = db.prepare(`
+    INSERT INTO node_capacity_samples (
+      sampled_at, disk_free_bytes, disk_total_bytes, db_size_bytes,
+      mem_free_bytes, mem_total_bytes, load_avg_1m
+    ) VALUES (
+      @sampledAt, @diskFreeBytes, @diskTotalBytes, @dbSizeBytes,
+      @memFreeBytes, @memTotalBytes, @loadAvg1m
+    )
+  `);
+  // Trim by rowid: delete everything at least `keepN` rows below the
+  // high-water mark. Monotonic AUTOINCREMENT ids make this exact even
+  // after deletes (ids are never reused), so the buffer holds at most
+  // `keepN` rows.
+  const trimStmt = db.prepare(`
+    DELETE FROM node_capacity_samples
+    WHERE id <= (SELECT MAX(id) FROM node_capacity_samples) - ?
+  `);
+  const SELECT_COLS =
+    "id, sampled_at, disk_free_bytes, disk_total_bytes, db_size_bytes," +
+    " mem_free_bytes, mem_total_bytes, load_avg_1m";
+  const recentAllStmt = db.prepare(
+    `SELECT ${SELECT_COLS} FROM node_capacity_samples ORDER BY id ASC`,
+  );
+  // Newest `limit` by id DESC, reversed in JS to oldest → newest.
+  const recentLimitStmt = db.prepare(
+    `SELECT ${SELECT_COLS} FROM node_capacity_samples ORDER BY id DESC LIMIT ?`,
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM node_capacity_samples",
+  );
+
+  const recordTx = db.transaction(
+    (sample: CapacitySampleInput, keepN: number) => {
+      insertStmt.run(sample);
+      if (keepN > 0) trimStmt.run(keepN);
+    },
+  );
+
+  return {
+    record(sample, keepN) {
+      recordTx(sample, keepN);
+    },
+    recent(limit) {
+      if (limit === undefined) {
+        return (recentAllStmt.all() as CapacitySampleDbRow[]).map(
+          toCapacitySampleRow,
+        );
+      }
+      const rows = recentLimitStmt.all(limit) as CapacitySampleDbRow[];
+      return rows.map(toCapacitySampleRow).reverse();
     },
     count() {
       return (countStmt.get() as { n: number }).n;

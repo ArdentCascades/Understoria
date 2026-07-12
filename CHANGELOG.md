@@ -28,6 +28,29 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Capacity forecast — the node samples itself**
+  (`apps/server/src/capacitySampler.ts`, `apps/server/src/db.ts` schema
+  v26, `docs/capacity-forecast.md` §3A / PR 2 of 4). A periodic
+  server-side worker reads the node's own disk (`fs.statfsSync` on the DB
+  directory + the DB file & its WAL sidecar), RAM (`os.freemem`/
+  `totalmem`), and CPU (`os.loadavg()[0]`) into a new
+  `node_capacity_samples` ring-buffer table, giving the forecaster (PR 3)
+  a trailing series to fit a slope against. The store inserts and trims
+  to the newest `keepN` rows by rowid in one transaction, so the table is
+  bounded no matter how long the node runs; cadence and size are env-tuned
+  (`CAPACITY_SAMPLE_INTERVAL_MS`, default 15 min; `CAPACITY_SAMPLE_KEEP_N`,
+  default 2000 ≈ 3 weeks), and interval `0` disables the sampler. All
+  standard-library, no native module; every platform read is injectable,
+  so the worker is unit-tested without a real disk (a single unreadable
+  dimension degrades to `null` rather than sinking the sample). The table
+  is **operator-local by construction** — machine metadata about the box,
+  the equivalent of `df`/`free` — so it has no route, no peerPull/
+  mirrorPull leg, and is deliberately absent from the `insertCaps` write
+  surfaces; the raw numbers never leave the machine (only the coarse
+  posture, PR 3, is ever shared). Wired after the mirror worker in
+  `index.ts` with a matching `stop()` on shutdown. Tests cover the
+  ring-buffer invariants, the sensor composition, and the
+  stays-operator-local contract.
 - **Capacity forecast — the math** (`apps/server/src/capacityForecast.ts`,
   `docs/capacity-forecast.md` PR 1 of 4). A pure, dependency-free module
   that projects when a node's disk runs out and grades disk/RAM/CPU into
