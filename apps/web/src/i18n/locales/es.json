@@ -2146,7 +2146,8 @@
       "close": "Cerrar panel de la publicación"
     },
     "printView": "Imprimir esta vista",
-    "plugInLink": "Formas de participar"
+    "plugInLink": "Formas de participar",
+    "inMyCareHeading": "A mi cuidado"
   },
   "dashboard": {
     "title": "Panel comunitario",

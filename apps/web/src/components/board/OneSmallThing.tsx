@@ -66,16 +66,18 @@ export function OneSmallThing({
   }
 
   if (deck === null) {
+    // Collapsed: an inline "do this" action, sized to sit in the
+    // Board's discovery row beside "Ways to plug in". No own margin —
+    // the row wrapper owns spacing.
     return (
-      <div className="mb-3">
-        <button
-          type="button"
-          className="text-sm text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
-          onClick={open}
-        >
-          {t("board.oneSmallThing.button")}
-        </button>
-      </div>
+      <button
+        type="button"
+        className="inline-flex items-center gap-1.5 text-sm text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+        onClick={open}
+      >
+        <span aria-hidden="true">🎲</span>
+        {t("board.oneSmallThing.button")}
+      </button>
     );
   }
 
@@ -84,7 +86,10 @@ export function OneSmallThing({
   return (
     <section
       aria-labelledby="one-small-thing-title"
-      className="card mb-3"
+      // w-full so that, once opened inside the Board's flex discovery
+      // row, the card takes its own line and the sibling link wraps
+      // beneath it rather than squeezing alongside.
+      className="card w-full"
     >
       <div className="flex items-start justify-between gap-2">
         <h2
