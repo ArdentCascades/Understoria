@@ -27,6 +27,7 @@ import {
   canonicalExchangePayload,
 } from "@understoria/shared/crypto";
 import { createVouch } from "@/lib/vouch";
+import { IS_DEMO } from "@/lib/demo";
 import type {
   Event,
   EventShiftRow,
@@ -114,20 +115,22 @@ export async function createMember(
 }
 
 /**
- * DEV-MODE-ONLY entry point for the demo seed. The contract (operator
- * ruling R1): dev builds get a demo community so there's something to
- * interact with; real deployments start with an EMPTY node — identities
- * are minted by onboarding (Welcome's profile-setup step, InviteAccept,
- * or PairDevice), never by the seed.
+ * Entry point for the demo seed, gated to the two builds that WANT a
+ * ready-made community: dev builds (something to poke at while working)
+ * and demo/"tour" builds (`VITE_DEMO=1`, the public showcase demo that
+ * should load straight onto a populated board). The contract (operator
+ * ruling R1) is unchanged for everyone else: a REAL deployment starts
+ * with an EMPTY node — identities are minted by onboarding (Welcome's
+ * profile-setup step, InviteAccept, or PairDevice), never by the seed.
  *
- * `isDev` defaults to Vite's build-time flag; tests inject the flag
- * explicitly to exercise both sides of the gate without stubbing the
- * build environment.
+ * `shouldSeed` defaults to Vite's build-time flags (`DEV` or the demo
+ * flag); tests inject it explicitly to exercise both sides of the gate
+ * without stubbing the build environment.
  */
 export async function seedDemoCommunityIfDev(
-  isDev: boolean = import.meta.env.DEV,
+  shouldSeed: boolean = import.meta.env.DEV || IS_DEMO,
 ): Promise<Member | null> {
-  if (!isDev) return null;
+  if (!shouldSeed) return null;
   return seedDemoCommunityIfEmpty();
 }
 

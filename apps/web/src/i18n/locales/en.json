@@ -259,6 +259,16 @@
     "ask_me": "Ask me anytime",
     "summaryLabel": "Availability"
   },
+  "demo": {
+    "banner": "You're exploring a live demo. Everything you do stays in this browser — only you can see it, and nothing is sent anywhere.",
+    "reset": {
+      "cta": "Reset demo",
+      "confirm": "Start over with fresh sample data?",
+      "yes": "Reset",
+      "no": "Keep exploring",
+      "working": "Resetting…"
+    }
+  },
   "offline": {
     "banner": "You're offline. Everything here still works from your device.",
     "guideLink": "What you can still do in an outage",

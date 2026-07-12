@@ -259,6 +259,16 @@
     "ask_me": "Pregúntame cuando quieras",
     "summaryLabel": "Disponibilidad"
   },
+  "demo": {
+    "banner": "Estás explorando una demo. Todo lo que haces se queda en este navegador: solo tú lo ves y no se envía a ningún lado.",
+    "reset": {
+      "cta": "Reiniciar demo",
+      "confirm": "¿Empezar de nuevo con datos de ejemplo?",
+      "yes": "Reiniciar",
+      "no": "Seguir explorando",
+      "working": "Reiniciando…"
+    }
+  },
   "offline": {
     "banner": "Estás sin conexión. Todo aquí sigue funcionando desde tu dispositivo.",
     "guideLink": "Qué puedes hacer durante un corte",

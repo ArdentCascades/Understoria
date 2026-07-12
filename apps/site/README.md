@@ -55,6 +55,38 @@ Notes:
   re-seeds and the screenshots reflect the current seed. If you change the
   demo seed and want the marketing shots to match, re-run `shots`.
 
+## Live demo (the "tour")
+
+The showcase's "See the live demo" buttons point at a **client-only tour**:
+a production build of the PWA (`apps/web`) with `VITE_DEMO=1`, which seeds
+the sample community in the visitor's browser and loads straight onto a
+populated board. It has no backend — every visitor gets their own private
+sandbox in IndexedDB, a thin banner explains that nothing leaves their
+device, and a "Reset demo" button wipes it for the next person. Real
+(non-demo) builds are completely unaffected and still start empty.
+
+Build the demo:
+
+```bash
+npm --workspace @understoria/web run build:demo   # → apps/web/dist
+```
+
+Then host `apps/web/dist` and point the showcase's demo links at it. The
+link target is baked in at build time via `VITE_DEMO_URL` (default
+`./demo/`):
+
+```bash
+# Option A — dedicated subdomain (recommended; the PWA manifest/scope
+# assume a domain root, so this needs no build changes to apps/web):
+VITE_DEMO_URL=https://demo.<domain> npm --workspace @understoria/site run build
+#   …and deploy apps/web's demo build at demo.<domain>.
+
+# Option B — same host, under /demo/ (zero extra DNS):
+npm --workspace @understoria/site run build         # link defaults to ./demo/
+#   …and deploy the demo build under understoria.<domain>/demo/
+#   (build it with `vite build --base=/demo/` so its asset paths resolve).
+```
+
 ## Deploy
 
 `dist/` is a pile of static files — host it anywhere (object storage + CDN,

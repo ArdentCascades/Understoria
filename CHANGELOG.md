@@ -28,6 +28,20 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Client-only "tour" demo** (`apps/web/src/lib/demo.ts`,
+  `components/DemoBanner.tsx`, `db/seed.ts`, `apps/web` `build:demo`
+  script; showcase "See the live demo" buttons in `apps/site`). A build
+  of the PWA produced with `VITE_DEMO=1` seeds the sample community in the
+  visitor's browser and loads straight onto a populated board, so a
+  curious visitor can look around without an invite. It has no backend —
+  each visitor gets their own private IndexedDB sandbox, a thin banner
+  makes clear nothing leaves their device, and "Reset demo" wipes it for
+  the next person. The demo flag is a build-time constant that is **off**
+  in every normal build (a guard test locks this in), so real nodes still
+  start empty (operator ruling R1) and the demo code tree-shakes away. The
+  showcase's demo links are baked at build time via `VITE_DEMO_URL`
+  (default `./demo/`); see `apps/site/README.md` for the subdomain-vs-
+  subpath deploy options.
 - **Showcase site** (`apps/site/**`, new `@understoria/site` workspace).
   A small static marketing / front-door site — plain HTML + Tailwind with
   one script (theme toggle + mobile nav), no framework, no runtime data,
