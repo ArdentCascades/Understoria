@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Runbook: turning on auto-confirm window enforcement**
+  (`operator-guide.md` §6). The `AUTO_CONFIRM_REQUIRE_TRANSITION` flip
+  was one sentence of intent in `auto-confirm-key.md` §7 with no
+  procedure; this makes it a five-step runbook — verify every device's
+  build stamp (reading it aloud over any channel), wait out one full
+  window, run a GO/NO-GO query for auto-confirmed exchanges missing
+  their artifact, flip and confirm the `missing_transition` refusal
+  with a synthetic probe, roll back by unsetting the env. Every
+  operator command was live-verified against the current server: the
+  flip probe (OFF → `bad_helper_signature`, ON → `missing_transition`,
+  both HTTP 200), the artifact-gap query, and the encrypted-DB keyed
+  read. Part C of the pilot-readiness package
+  (`docs/next-cycle-plans.md` Plan 3).
 - **A build stamp in Settings** (`lib/buildStamp.ts`,
   `docs/operator-guide.md` §6). A short id of the exact code a device
   is running, shown quietly at the bottom of Settings — injected at

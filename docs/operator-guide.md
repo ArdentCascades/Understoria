@@ -432,6 +432,102 @@ the community dataset (a fresh node can be repopulated by members'
 outboxes re-pushing, but history convergence is manual work you
 don't want).
 
+### Runbook: turning on auto-confirm window enforcement
+
+By default a node accepts an auto-confirm request even when it holds
+no server-side proof the exchange sat unclaimed for the full window —
+it falls back to the client's *advisory* `awaitingSince`
+(`docs/auto-confirm-key.md` §5, §7). Setting
+`AUTO_CONFIRM_REQUIRE_TRANSITION=1` closes that: the node signs an
+auto-confirmation only when a matching **awaiting-transition
+artifact** — pushed when the exchange first entered its waiting
+state, and aged on the *node's* clock — exists. This is a one-way
+tightening you flip once the pilot's devices are all on a build that
+emits the artifact. Do it deliberately, in this order:
+
+**1. Confirm every device emits the artifact.** The artifact is
+pushed by builds from the awaiting-transition feature onward. With
+`registerType: "prompt"`, a member can be running a months-old build
+until they tap Refresh, so verify rather than assume: ask each member
+to open Settings, tap Refresh if the update prompt shows, then **read
+you the build stamp** at the bottom of Settings. Confirm every stamp
+is the artifact-emitting build (or newer). One un-updated device is
+the whole reason this step exists — its exchanges would be refused
+after the flip.
+
+**2. Wait out one full window.** Leave the flag OFF and let one
+`AUTO_CONFIRM_MIN_HOURS` window pass (default 168h / 7 days) so any
+in-flight confirmations that predate universal artifact coverage
+drain under the legacy path. Flipping mid-window would refuse
+legitimate confirmations whose artifacts never existed.
+
+**3. GO / NO-GO check.** Look for auto-confirmed exchanges on this
+node that have NO artifact — the rows that would have been refused
+had the flag already been on. Run against the node's database (this
+form works whether or not it is encrypted at rest — it applies
+`DATABASE_KEY` when set, which a bare `sqlite3` CLI cannot):
+
+```bash
+node -e "
+const D = require('better-sqlite3-multiple-ciphers');
+const db = new D(process.env.DATABASE_PATH || 'understoria.db', { readonly: true });
+if (process.env.DATABASE_KEY) db.pragma(\`key='\${process.env.DATABASE_KEY}'\`);
+const rows = db.prepare(\`
+  SELECT e.id, e.post_id, e.auto_confirmed_at
+  FROM exchanges e
+  LEFT JOIN awaiting_transitions t ON t.post_id = e.post_id
+  WHERE e.auto_confirmed = 1
+    AND t.post_id IS NULL
+    AND e.auto_confirmed_at > (? - 48 * 3600000)\`).all(Date.now());
+console.log(JSON.stringify(rows, null, 2));
+db.close();
+"
+```
+
+An empty result is GO: every recent auto-confirm on this node had its
+artifact. Rows here are NO-GO — they name devices still on a
+pre-artifact build (return to step 1) — *unless* you accept that
+those specific exchanges predate the window in step 2, in which case
+they are already settled and the flip only affects future ones.
+
+**4. Flip and verify the refusal.** Set `AUTO_CONFIRM_REQUIRE_TRANSITION=1`
+and restart. Confirm enforcement is live with a synthetic probe — a
+request for an artifact-less exchange, carrying a deliberately invalid
+signature so it can *never* create a real confirmation in either
+state:
+
+```bash
+# Uses node's built-in fetch (always in the image) against the node's
+# own port (PORT, default 8787). Under the recommended Docker setup
+# the port isn't published to the host, so run it inside the
+# container: docker compose exec understoria node -e '<the snippet>'
+node -e "
+fetch('http://127.0.0.1:8787/auto-confirm', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ requests: [{
+    exchangeId: 'flip-check',
+    awaitingSince: 1000000000000,
+    helperSignature: 'AAAA-not-a-real-signature-AAAA',
+    payload: { postId: 'project:probe/task:probe', helperKey: 'probe',
+      helpedKey: 'probe', hours: 2, category: 'other',
+      completedAt: 1000000000000 } }] }),
+}).then(r => r.json()).then(b => console.log(JSON.stringify(b.results[0])));
+"
+```
+
+Refusals come back as HTTP **200** with the reason in the body, not a
+4xx. Before the flip you get `{"status":"ineligible","reason":"bad_helper_signature"}`
+(the request reached the signer, which rejected the fake signature);
+after the flip you get `{"status":"ineligible","reason":"missing_transition"}`
+(the request was stopped at the window check, before the signer —
+enforcement is on). Seeing `missing_transition` is the confirmation.
+
+**5. Rollback is trivial.** Unset `AUTO_CONFIRM_REQUIRE_TRANSITION`
+and restart. The flag gates only *acceptance* at request time — no
+row is rewritten either way, so flipping back and forth costs
+nothing and strands no state.
+
 ### Federation pull (optional)
 
 If `PEER_NODE_URLS` is set, the node periodically fetches signed

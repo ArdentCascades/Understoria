@@ -337,9 +337,13 @@ not skip it on a re-read.
 >   `AUTO_CONFIRM_REQUIRE_TRANSITION` unset (the rollout default), a
 >   request with NO artifact falls back to the old advisory
 >   `awaitingSince` so legacy clients keep working — the flip to
->   `missing_transition` refusal is the operator's rollout step, and
->   until it is flipped an attacker can simply omit the artifact. The
->   binding gates (below) hold either way.
+>   `missing_transition` refusal is the operator's rollout step
+>   (procedure: `operator-guide.md` §6, "Runbook: turning on
+>   auto-confirm window enforcement" — verify every device's build
+>   stamp, wait one window, GO/NO-GO query, flip, confirm the
+>   `missing_transition` refusal), and until it is flipped an attacker
+>   can simply omit the artifact. The binding gates (below) hold
+>   either way.
 > - **Project-task auto-confirms are covered by the artifact too.**
 >   Tasks federate as mutable LWW state records, not signed posts
 >   (`docs/project-federation.md` §3), so `bindToPost` still can't
