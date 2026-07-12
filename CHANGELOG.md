@@ -9,6 +9,24 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Sync feels live when two people are together**
+  (`lib/syncLoop.ts`, `docs/sync-liveness.md`). Sending was already
+  prompt, but receiving polled the node only every 3 minutes with no
+  focus/activity awareness, so a co-present collaborator's change could
+  take up to 3 minutes to appear. The pull loop now (1) reconciles
+  immediately on foreground — `visibilitychange`→visible, window
+  `focus`, and reconnect (`online`) — coalesced and in-flight-guarded;
+  (2) runs an activity-aware cadence — ~12s while foregrounded and
+  recently active, backing off when idle and dropping to the old 3-min
+  beat in the background; and (3) splits the fan-out so only
+  collaboration-relevant tables (posts, claims, task-comments,
+  exchanges, messages, project/task state, events+shifts+signups) ride
+  the fast tick, with membership/governance tables on the slow beat.
+  Timing only — every read still goes to the node exactly as before, so
+  functionality and privacy are unchanged (the node already serves
+  every read; backgrounded stays cold, preserving the asleep signal).
+
 ### Added
 - **Pilot journal** (`db/journal.ts`, `/pilot-journal`, a quiet Help-page
   doorway). A no-telemetry app has no built-in feedback channel; this
