@@ -1839,6 +1839,13 @@
     "confirm": "Add backup server",
     "decline": "Not now"
   },
+  "growRootSuggest": {
+    "label": "Our community's node is running low on room",
+    "title": "Our community's node is running low on room",
+    "body": "Growing another root would spread the load. If you run this community's server, it may just need more storage or a chance to shed older records; either way, a second server relieves the pressure and helps everyone. Nothing happens until you decide.",
+    "confirm": "Grow another root",
+    "decline": "Not now"
+  },
   "growRoot": {
     "title": "Grow another root",
     "intro": "Understoria communities get stronger the way trees do — by growing more roots. Pick the way you can help.",
@@ -2022,6 +2029,10 @@
     "vouchReceived": {
       "line": "{{name}} vouched for you.",
       "hint": "Each vouch brings you closer to trusted status."
+    },
+    "growRoot": {
+      "line": "Our community's node is running low on room.",
+      "hint": "Another root would ease the pressure — tap to help."
     },
     "projectDeadline": {
       "line": "{{project}} — deadline in {{days}} days.",
@@ -2211,6 +2222,7 @@
       "seedVaultsOne": "{{count}} member keeps the complete archive on a device of their own — a seed vault.",
       "seedVaultsOther": "{{count}} members keep the complete archive on devices of their own — seed vaults.",
       "nodeQuiet": "No server has answered lately — your copy is safe, and syncing resumes when one is back.",
+      "capacityRed": "Our community's node is running low on room — growing another root would ease the pressure.",
       "leaf": {
         "fresh": "synced today",
         "lagging": "lagging behind",

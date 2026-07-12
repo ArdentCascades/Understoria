@@ -24,6 +24,7 @@ const status: Record<
   | "notJoined"
   | "nodeSuggest"
   | "mirrorSuggest"
+  | "growRoot"
   | "first"
   | "profile"
   | "keepAccess"
@@ -34,6 +35,7 @@ const status: Record<
   notJoined: hidden(),
   nodeSuggest: hidden(),
   mirrorSuggest: hidden(),
+  growRoot: hidden(),
   first: hidden(),
   profile: hidden(),
   keepAccess: hidden(),
@@ -54,6 +56,9 @@ vi.mock("@/components/useNodeOriginSuggestNudge", () => ({
 }));
 vi.mock("@/components/useMirrorSuggestNudge", () => ({
   useMirrorSuggestNudge: () => status.mirrorSuggest,
+}));
+vi.mock("@/components/useGrowRootSuggestNudge", () => ({
+  useGrowRootSuggestNudge: () => status.growRoot,
 }));
 vi.mock("@/components/useFirstActionNudge", () => ({
   useFirstActionNudge: () => status.first,

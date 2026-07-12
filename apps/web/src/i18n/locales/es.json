@@ -1839,6 +1839,13 @@
     "confirm": "Añadir servidor de respaldo",
     "decline": "Ahora no"
   },
+  "growRootSuggest": {
+    "label": "El nodo de nuestra comunidad se está quedando sin espacio",
+    "title": "El nodo de nuestra comunidad se está quedando sin espacio",
+    "body": "Hacer crecer otra raíz repartiría la carga. Si administras el servidor de esta comunidad, quizá solo necesite más almacenamiento o soltar registros antiguos; de cualquier forma, un segundo servidor alivia la presión y ayuda a todos. No pasa nada hasta que decidas.",
+    "confirm": "Hacer crecer otra raíz",
+    "decline": "Ahora no"
+  },
   "growRoot": {
     "title": "Hacer crecer otra raíz",
     "intro": "Las comunidades de Understoria se fortalecen como los árboles: echando más raíces. Elige la forma en que puedes ayudar.",
@@ -2022,6 +2029,10 @@
     "vouchReceived": {
       "line": "{{name}} respondio por ti.",
       "hint": "Cada aval te acerca al estatus de confianza."
+    },
+    "growRoot": {
+      "line": "El nodo de nuestra comunidad se está quedando sin espacio.",
+      "hint": "Otra raíz aliviaría la presión — toca para ayudar."
     },
     "projectDeadline": {
       "line": "{{project}} — fecha limite en {{days}} dias.",
@@ -2211,6 +2222,7 @@
       "seedVaultsOne": "{{count}} integrante guarda el archivo completo en un dispositivo propio — una bóveda de semillas.",
       "seedVaultsOther": "{{count}} integrantes guardan el archivo completo en dispositivos propios — bóvedas de semillas.",
       "nodeQuiet": "Ningún servidor ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando alguno vuelva.",
+      "capacityRed": "El nodo de nuestra comunidad se está quedando sin espacio — hacer crecer otra raíz aliviaría la presión.",
       "leaf": {
         "fresh": "sincronizado hoy",
         "lagging": "quedándose atrás",

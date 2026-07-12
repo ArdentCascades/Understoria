@@ -41,4 +41,5 @@ export const ATTENTION_EMOJI: Record<AttentionItem["kind"], string> = {
   event_cancelled: "\u{1F6AB}", // 🚫
   event_capacity_reached: "\u{1F465}", // 👥
   project_adoption_proposed: "\u{1F91D}", // 🤝
+  grow_a_root: "\u{1F333}", // 🌳
 };

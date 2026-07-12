@@ -1393,3 +1393,78 @@ describe("project_adoption_proposed", () => {
     ).toBe(false);
   });
 });
+
+describe("grow_a_root (docs/capacity-forecast.md §5.2)", () => {
+  const alice = member("alice", "Alice");
+  const posture = (
+    pressure: "green" | "amber" | "red",
+    growthRecommended = pressure === "red",
+  ) => ({
+    nodeId: "node_a",
+    pressure,
+    horizon: pressure === "red" ? ("weeks" as const) : ("ample" as const),
+    growthRecommended,
+    updatedAt: 5000,
+    signerKey: "sys",
+    signature: "sig",
+  });
+  // Two redeemed invites from distinct inviters = trust count 2 = the
+  // MINIMUM_VOUCHES_FOR_TRUST bar the item gates on.
+  const trustedInvites = [
+    { status: "redeemed" as const, inviterKey: "x", redeemedBy: "alice" },
+    { status: "redeemed" as const, inviterKey: "y", redeemedBy: "alice" },
+  ];
+
+  const base = {
+    posts: [],
+    projects: [],
+    projectTasks: [],
+    members: [alice],
+  };
+
+  it("surfaces for a trusted member when the node is red", () => {
+    const items = computeAttentionItems({
+      ...base,
+      currentMember: alice,
+      capacityPostures: [posture("red")],
+      invites: trustedInvites,
+    });
+    const grow = items.find((i) => i.kind === "grow_a_root");
+    expect(grow).toBeDefined();
+    expect(grow).toMatchObject({ pressure: "red", growthRecommended: true });
+  });
+
+  it("does NOT surface for an untrusted member (the reconnaissance guard)", () => {
+    const items = computeAttentionItems({
+      ...base,
+      currentMember: alice,
+      capacityPostures: [posture("red")],
+      invites: [trustedInvites[0]], // only one voucher → not trusted
+    });
+    expect(items.some((i) => i.kind === "grow_a_root")).toBe(false);
+  });
+
+  it("does NOT surface when the node is green", () => {
+    const items = computeAttentionItems({
+      ...base,
+      currentMember: alice,
+      capacityPostures: [posture("green")],
+      invites: trustedInvites,
+    });
+    expect(items.some((i) => i.kind === "grow_a_root")).toBe(false);
+  });
+
+  it("takes the worst posture across nodes and carries amber without the growth flag", () => {
+    const items = computeAttentionItems({
+      ...base,
+      currentMember: alice,
+      capacityPostures: [
+        posture("green"),
+        { ...posture("amber", false), nodeId: "node_b" },
+      ],
+      invites: trustedInvites,
+    });
+    const grow = items.find((i) => i.kind === "grow_a_root");
+    expect(grow).toMatchObject({ pressure: "amber", growthRecommended: false });
+  });
+});

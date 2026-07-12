@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { useNotJoinedNudge } from "@/components/useNotJoinedNudge";
 import { useNodeOriginSuggestNudge } from "@/components/useNodeOriginSuggestNudge";
 import { useMirrorSuggestNudge } from "@/components/useMirrorSuggestNudge";
+import { useGrowRootSuggestNudge } from "@/components/useGrowRootSuggestNudge";
 import { useFirstActionNudge } from "@/components/useFirstActionNudge";
 import { useProfileNudge } from "@/components/useProfileNudge";
 import { useKeepAccessNudge } from "@/components/useKeepAccessNudge";
@@ -48,7 +49,7 @@ import { useInstallCardNudge } from "@/components/useInstallCardNudge";
 // flash this orchestrator exists to prevent. The fallback keeps its
 // own eligibility/dismiss logic; only turn-taking is decided here.
 export function BoardNudges({ fallback }: { fallback?: ReactNode } = {}) {
-  // Rules of Hooks: all eight hooks are called unconditionally, in a
+  // Rules of Hooks: all nine hooks are called unconditionally, in a
   // fixed order, every render. Priority is the array order (index 0 =
   // highest). Do NOT make any of these calls conditional.
   //
@@ -68,11 +69,16 @@ export function BoardNudges({ fallback }: { fallback?: ReactNode } = {}) {
     // suggestion: same informed-consent family, but it improves an
     // already-connected device rather than enabling sync at all.
     useMirrorSuggestNudge(), // 3
-    useFirstActionNudge(), // 4
-    useProfileNudge(), // 5
-    useKeepAccessNudge(), // 6
-    useVouchDiscoveryNudge(), // 7
-    useInstallCardNudge(), // 8 lowest
+    // Capacity response (docs/capacity-forecast.md §5.2) — same
+    // resilience family as the mirror card, one step down: it improves
+    // a community whose node is under real pressure. Trust-gated + red-
+    // only + no-healthy-mirror inside the hook.
+    useGrowRootSuggestNudge(), // 4
+    useFirstActionNudge(), // 5
+    useProfileNudge(), // 6
+    useKeepAccessNudge(), // 7
+    useVouchDiscoveryNudge(), // 8
+    useInstallCardNudge(), // 9 lowest
   ];
 
   for (const s of statuses) {

@@ -28,6 +28,28 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Capacity forecast — trusted members see it, and can act**
+  (`apps/web/src/lib/attention.ts`,
+  `components/{AttentionSection,GrowRootSuggestCard,useGrowRootSuggestNudge,BoardNudges}.tsx`,
+  `components/dashboard/ResilienceCard.tsx`, `state/AppContext.tsx`,
+  `docs/capacity-forecast.md` §5 / PR 4 of 4 — completing the feature).
+  The coarse `CapacityPosture` (PR 3) now reaches the community as a
+  shared, pull-only signal — never an operator one. Three surfaces, all
+  gated on the member being **trusted** (the same ≥2-vouch bar the
+  grow-root wizard uses, which is also what keeps the signal from being
+  a reconnaissance tool for locating the host): (1) a `grow_a_root`
+  attention-rail item when the community's node reports amber/red
+  pressure (worst-of across the verified posture set); (2) a red-tinted
+  copy elevation on the resilience card when pressure is red **and** no
+  healthy mirror has failed over yet (`nodesReachable < 2`); and (3) a
+  no-nag `GrowRootSuggestCard` on the Board (red + growthRecommended +
+  no-mirror), declining persisted to `growRootSuggestDismissed`. Every
+  surface addresses "our community's node," offers the horizontal
+  response (grow another root) the app can actually help with, and says
+  nothing about who hosts. Postures are exposed via `AppContext`
+  (Dexie `capacityPostures`, pinned/never-windowed); the item carries a
+  band, never a number. en/es strings added. Tests: `grow_a_root`
+  trust/pressure/worst-of gating (4) + the BoardNudges + parity guards.
 - **Capacity forecast — the community sees the band**
   (`apps/server/src/capacityEmitter.ts`, `routes/capacityPostures.ts`,
   `apps/web/src/lib/federationSync.ts`,

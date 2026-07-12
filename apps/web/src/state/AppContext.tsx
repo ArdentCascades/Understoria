@@ -64,6 +64,7 @@ import type {
 import type { InviteRow } from "@/db/database";
 import type { BlockRow } from "@/types";
 import type { SignedVouch } from "@/lib/vouch";
+import type { CapacityPosture } from "@understoria/shared/types";
 import {
   currentLockState,
   lockSession,
@@ -112,6 +113,10 @@ export interface AppContextValue {
   projectTasks: ProjectTask[];
   proposals: Proposal[];
   votes: Vote[];
+  /** Coarse node-capacity attestations (docs/capacity-forecast.md §6),
+   *  one node-signed row per node. Feeds the `grow_a_root` attention
+   *  item and the resilience-card copy elevation (PR 4). */
+  capacityPostures: CapacityPosture[];
   /** Co-organizer invitation records (PR C). Feed the invitee-side
    *  attention item and the organizer-side pending / past lists.
    *  See `docs/co-organizer-invitations.md` §6–§7. */
@@ -489,6 +494,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as Vote[],
   );
+  const capacityPostures = useLiveQuery(
+    () => db.capacityPostures.toArray(),
+    [],
+    [] as CapacityPosture[],
+  );
   const coorgInvitations = useLiveQuery(
     () => db.coorgInvitations.toArray(),
     [],
@@ -696,6 +706,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // false for every block.
       proposals: proposals ?? [],
       votes: votes ?? [],
+      capacityPostures: capacityPostures ?? [],
       coorgInvitations: coorgInvitations ?? [],
       coorgInvitationResponses: coorgInvitationResponses ?? [],
       coorgInvitationRevocations: coorgInvitationRevocations ?? [],
@@ -737,6 +748,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       projectTasks,
       proposals,
       votes,
+      capacityPostures,
       coorgInvitations,
       coorgInvitationResponses,
       coorgInvitationRevocations,

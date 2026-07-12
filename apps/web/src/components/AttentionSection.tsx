@@ -63,6 +63,7 @@ export function AttentionSection() {
     coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
     events, eventRsvps, eventCancellations,
     proposals,
+    capacityPostures, invites,
     blockedKeys,
   } = useApp();
   const { t } = useTranslation();
@@ -109,6 +110,8 @@ export function AttentionSection() {
         eventRsvps,
         eventCancellations,
         proposals,
+        capacityPostures,
+        invites,
         config: nodeConfig,
         blockedKeys,
       }),
@@ -116,6 +119,7 @@ export function AttentionSection() {
       currentMember, posts, projects, projectTasks, members, vouches,
       coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
       events, eventRsvps, eventCancellations, proposals,
+      capacityPostures, invites,
       nodeConfig, blockedKeys,
     ],
   );
@@ -377,6 +381,44 @@ export function AttentionSection() {
                     </span>
                     <span className="block text-xs text-moss-600 dark:text-moss-300">
                       {t("attention.vouchReceived.hint")}
+                    </span>
+                  </span>
+                  <RowChevron />
+                </Link>
+              </li>
+            );
+          }
+          if (item.kind === "grow_a_root") {
+            const red = item.pressure === "red";
+            return (
+              <li key={`grow_a_root_${item.createdAt}`}>
+                <Link
+                  to="/grow-root"
+                  className={
+                    red
+                      ? "flex min-h-[44px] items-center gap-2 rounded-lg bg-red-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-red-950/40 dark:hover:bg-red-950/60"
+                      : "flex min-h-[44px] items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+                  }
+                >
+                  <span className="flex-1">
+                    <span
+                      className={
+                        red
+                          ? "block text-sm font-medium text-red-900 dark:text-red-100"
+                          : "block text-sm font-medium text-amber-900 dark:text-amber-100"
+                      }
+                    >
+                      <KindEmoji kind={item.kind} />
+                      {t("attention.growRoot.line")}
+                    </span>
+                    <span
+                      className={
+                        red
+                          ? "block text-xs text-red-800 dark:text-red-200"
+                          : "block text-xs text-amber-800 dark:text-amber-200"
+                      }
+                    >
+                      {t("attention.growRoot.hint")}
                     </span>
                   </span>
                   <RowChevron />
