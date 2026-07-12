@@ -28,6 +28,20 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Pilot playbook** (`docs/pilot-playbook.md`, linked from
+  `operator-guide.md` §1). The capstone of the pilot-readiness package
+  (`next-cycle-plans.md` Plan 3): the single operational doc that turns
+  `roadmap.md` stage E ("do a pilot") into a procedure — a week −2→0
+  preflight checklist (security posture, restore-rehearsed backups,
+  both Infrastructure drills fresh, mirror, off-app reachability,
+  printed offline kit); the three community knobs to ratify
+  (`autoConfirmHours` 168, `proposalDeliberationDays` 3,
+  `proposalMinAffirms` 2) as the pilot's first `/proposals` vote; a
+  week-by-week attention list that names where each signal lives and
+  which deferred roadmap row it un-gates; stage-E exit criteria; and
+  incident pages routing node loss, key loss, member conflict, and the
+  auto-confirm enforcement flip to the existing runbooks. Every knob
+  default, script, drill, and doc anchor verified against the code.
 - **Pilot journal** (`db/journal.ts`, `/pilot-journal`, a quiet Help-page
   doorway). A no-telemetry app has no built-in feedback channel; this
   is the one the ethos allows — the member writes local, timestamped
