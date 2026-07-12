@@ -688,6 +688,10 @@
       "endTimeAria": "Shift end time",
       "capacityLabel": "Spots (optional)",
       "capacityPlaceholder": "Leave empty for no cap",
+      "editCapacityButton": "Edit spots",
+      "capacityUpdated": "Spots updated.",
+      "capacityFloorHint_one": "{{count}} person signed up — you can't set fewer spots than that.",
+      "capacityFloorHint_other": "{{count}} people signed up — you can't set fewer spots than that.",
       "timesRequired": "Pick a start and end time for the shift."
     },
     "cancellation": {
