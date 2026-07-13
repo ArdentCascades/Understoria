@@ -61,7 +61,7 @@ const VALIDATORS: Record<FieldName, Validator> = {
 };
 
 export default function InviteAcceptPage() {
-  const { nodeId, currentMember, setCurrentMember } = useApp();
+  const { nodeId, setNodeId, currentMember, setCurrentMember } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -160,6 +160,13 @@ export default function InviteAcceptPage() {
       setStatus("error");
       setError(result.error);
       return;
+    }
+    // A fresh member adopts the community's nodeId during redeem so the
+    // Dashboard's node-scoped stats reflect the community they just
+    // joined. redeemInvite already persisted the setting; mirror it into
+    // the live app state here so it takes effect without a reload.
+    if (result.value.nodeId) {
+      setNodeId(result.value.nodeId);
     }
     // Attach mode resolves to the same key — the call is a no-op then,
     // and the switch that matters on the mint path.

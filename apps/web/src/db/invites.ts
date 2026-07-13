@@ -21,6 +21,7 @@
 import {
   db,
   getSetting,
+  setSetting,
   SETTING_KEYS,
   type InviteRow,
 } from "./database";
@@ -179,6 +180,13 @@ export interface RedeemSuccess {
   /** How the redemption was recorded — attached to an existing
    *  identity, or minted as a fresh one. See decideRedeemMode. */
   mode: RedeemMode;
+  /** The community `nodeId` this device adopted as part of the redeem,
+   *  or `undefined` if nothing changed. Present only when a brand-new
+   *  member minted on a fresh device took on the inviter's community id
+   *  (see the adoption block in `redeemInvite`). The caller uses it to
+   *  update the in-session nodeId so the Dashboard's node-scoped stats
+   *  reflect the community immediately, without a reload. */
+  nodeId?: string;
 }
 
 export type RedeemResult =
@@ -304,6 +312,24 @@ export async function redeemInvite(
     forceNewIdentity: opts.forceNewIdentity,
   });
 
+  // Adopt the community's nodeId. Every device mints a random nodeId on
+  // first launch, and the Dashboard's headline stats + the local-vs-
+  // federation split are scoped by nodeId (Dashboard.tsx, lib/stats.ts).
+  // A new member who keeps their fresh random id files the community's
+  // pulled exchanges under "another community" and sees zeroed stats —
+  // the same hazard PairDevice already guards against for device linking
+  // (its nodeId-adoption comment). The invite carries the inviter's
+  // community id, so a brand-new member takes it on here.
+  //
+  // Guarded to a genuinely fresh device (no prior identity): we never
+  // clobber the device nodeId out from under an existing member (attach,
+  // or a second identity via forceNewIdentity — a shared device has one
+  // device-global nodeId, and the incumbent's stats must not move). A
+  // legacy invite with an empty nodeId falls back to the device id, i.e.
+  // no change from today's behaviour.
+  const adoptCommunityNode = !currentMemberRow && invite.nodeId !== "";
+  const memberNodeId = adoptCommunityNode ? invite.nodeId : nodeId;
+
   let attachedMember: Member | null = null;
   let signingSecret: string | null = null;
   let mintKp: { publicKey: string; secretKey: string } | null = null;
@@ -361,7 +387,7 @@ export async function redeemInvite(
       if (mintKp) {
         m = await createMember(
           { publicKey: mintKp.publicKey, displayName },
-          nodeId,
+          memberNodeId,
         );
         // createMember skips secret-key generation when a publicKey
         // is supplied, so we persist it explicitly — through
@@ -413,6 +439,14 @@ export async function redeemInvite(
     },
   );
 
+  // Persist the device-global nodeId setting AFTER the transaction — the
+  // settings table is outside its scope, and Dexie would reject a write
+  // to an untracked table mid-transaction. Only when a fresh device
+  // actually adopted the community id (guarded above).
+  if (adoptCommunityNode) {
+    await setSetting(SETTING_KEYS.nodeId, invite.nodeId);
+  }
+
   return {
     ok: true,
     value: {
@@ -420,6 +454,7 @@ export async function redeemInvite(
       inviterKey: invite.inviterKey,
       inviterName: invite.inviterName,
       mode,
+      nodeId: adoptCommunityNode ? invite.nodeId : undefined,
     },
   };
 }

@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Invited members saw a zeroed Dashboard — stats didn't "transfer"**
+  (`db/invites.ts`, `state/AppContext.tsx`, `pages/InviteAccept.tsx`,
+  `docs/invite-redemption.md` §5.4). Every device mints a random
+  `nodeId` on first launch, and the Dashboard scopes its headline stats
+  (hours, active members, streak) and the local-vs-federation split by
+  `nodeId`. A newly-invited member kept their fresh random id, so the
+  community's exchanges — which synced fine — were filed under "another
+  community" and the Dashboard read zero. On a fresh-device mint
+  redemption the member now adopts `invite.nodeId` (the community's id,
+  already in the signed invite) as both their `Member.nodeId` and the
+  device setting, so node-scoped views match immediately. This mirrors
+  the adoption `PairDevice` already does for device linking. Guarded to
+  fresh devices: attach / second-identity redemptions don't move the
+  incumbent's device id, and a legacy invite with an empty `nodeId`
+  keeps prior behavior. (Members who joined before this fix keep a
+  mismatched id until they re-join; a bounded boot-time self-heal is a
+  possible follow-up.)
 - **Sharing an invite could copy the message without the link**
   (`lib/share.ts`). The invite share sheet handed `navigator.share` both
   a `text` (the "I'm inviting you…" sentence) and the `url`. On several

@@ -101,6 +101,11 @@ import {
 export interface AppContextValue {
   ready: boolean;
   nodeId: string;
+  /** Update the in-session nodeId after the data layer has already
+   *  persisted `SETTING_KEYS.nodeId` (e.g. redeeming an invite adopts
+   *  the community's id). Keeps node-scoped views — the Dashboard's
+   *  headline stats above all — correct without a full reload. */
+  setNodeId: (nodeId: string) => void;
   currentMember: Member | null;
   setCurrentMember: (publicKey: string) => Promise<void>;
   members: Member[];
@@ -687,6 +692,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       ready,
       nodeId,
+      setNodeId,
       currentMember,
       setCurrentMember,
       members: members ?? [],
@@ -736,6 +742,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [
       ready,
       nodeId,
+      setNodeId,
       currentMember,
       setCurrentMember,
       members,
