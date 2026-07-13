@@ -9,6 +9,18 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Sharing an invite could copy the message without the link**
+  (`lib/share.ts`). The invite share sheet handed `navigator.share` both
+  a `text` (the "I'm inviting you…" sentence) and the `url`. On several
+  platforms the native share sheet's **Copy** action copies only the
+  `text` and silently drops the `url`, so an invite got copied as a
+  message with no link. The URL is now folded into the shared text (and
+  no separate `url` field is passed for a target to discard), so the link
+  always travels — with whatever app the sharer picks, and with Copy. The
+  per-row "Copy" button was already correct (it writes the bare URL) and
+  is unchanged.
+
 ### Changed
 - **Sync feels live when two people are together**
   (`lib/syncLoop.ts`, `docs/sync-liveness.md`). Sending was already

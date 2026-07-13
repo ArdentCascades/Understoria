@@ -58,10 +58,19 @@ export async function shareUrl(args: ShareUrlArgs): Promise<ShareResult> {
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
   if (nav && typeof nav.share === "function") {
     try {
+      // Web Share footgun: when BOTH `text` and `url` are passed,
+      // several platforms' "Copy" action in the native share sheet
+      // (desktop Chrome/Edge, some Android) copy only the `text` and
+      // silently DROP the `url` — so an invite gets copied as the
+      // message with no link (the reported bug). Fold the URL into the
+      // shared text so it rides along with whatever a target uses, and
+      // don't pass a separate `url` field that "Copy" can discard. The
+      // clipboard fallback below still writes the bare URL, so the
+      // in-app copy path stays a clean link.
+      const text = args.text ? `${args.text}\n\n${args.url}` : args.url;
       await nav.share({
-        url: args.url,
         title: args.title,
-        text: args.text,
+        text,
       });
       return "shared";
     } catch (err) {
