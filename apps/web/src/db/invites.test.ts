@@ -27,7 +27,7 @@ import {
   revokeInvite,
 } from "./invites";
 import { createMember } from "./seed";
-import { db, SETTING_KEYS, setSetting } from "./database";
+import { db, getSetting, SETTING_KEYS, setSetting } from "./database";
 import { generateKeyPair } from "@/lib/crypto";
 import { createVouch, trustStatusWithInvites } from "@/lib/vouch";
 import { verifyRedemptionReceipt } from "@understoria/shared/crypto";
@@ -122,6 +122,92 @@ describe("redeemInvite", () => {
     const [invite] = await db.invites.toArray();
     expect(invite.status).toBe("redeemed");
     expect(invite.redeemedBy).toBe(result.value.member.publicKey);
+  });
+
+  it("a fresh member adopts the community's nodeId (so Dashboard stats aren't zeroed)", async () => {
+    // The invite carries the community's id (NODE). The redeeming device
+    // minted its OWN random id on first launch. Before this fix the new
+    // member kept the device id, and the Dashboard — which scopes its
+    // headline stats by nodeId — filtered every pulled community exchange
+    // out, so stats read zero. They must take on the community id.
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+    const DEVICE = "node_device_random";
+    await setSetting(SETTING_KEYS.nodeId, DEVICE);
+
+    const result = await redeemInvite(encoded, "Newcomer", DEVICE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // Returned id, the member row, and the device-global setting all
+    // become the community's, so the Dashboard filter now matches.
+    expect(result.value.nodeId).toBe(NODE);
+    const member = await db.members.get(result.value.member.publicKey);
+    expect(member?.nodeId).toBe(NODE);
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe(NODE);
+  });
+
+  it("does NOT move the device nodeId when an existing identity attaches", async () => {
+    // Attach mode (a second community, or a shared device): the device
+    // already has an identity and a community. Its one device-global
+    // nodeId must not be yanked out from under the incumbent member.
+    const OTHER = "node_other_community";
+    const MY_NODE = "node_mine";
+    const inviter = await createMember({ displayName: "Rosa" }, OTHER);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: OTHER,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+    const me = await createMember({ displayName: "Me" }, MY_NODE);
+    await setSetting(SETTING_KEYS.currentMember, me.publicKey);
+    await setSetting(SETTING_KEYS.nodeId, MY_NODE);
+
+    const result = await redeemInvite(encoded, "Me", MY_NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("attach");
+    expect(result.value.nodeId).toBeUndefined();
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe(MY_NODE);
+  });
+
+  it("falls back to the device nodeId for a legacy invite that carries no community id", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: "",
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+    const DEVICE = "node_device_random";
+    await setSetting(SETTING_KEYS.nodeId, DEVICE);
+
+    const result = await redeemInvite(encoded, "Newcomer", DEVICE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // No community id to adopt → today's behaviour, no change.
+    expect(result.value.nodeId).toBeUndefined();
+    const member = await db.members.get(result.value.member.publicKey);
+    expect(member?.nodeId).toBe(DEVICE);
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe(DEVICE);
   });
 
   it("persists the SIGNED receipt artifact beside the derived row (re-seed R0)", async () => {

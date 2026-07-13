@@ -258,6 +258,37 @@ When derivation is safe vs. wrong:
 Failure is silent (no error surface) — an unconfigured node is a
 normal state, not a problem to nag about.
 
+### §5.4 Adopting the community `nodeId` on redemption
+
+Every device mints a random `nodeId` on first launch
+(`ensureNodeId`). The Dashboard scopes its headline stats — total
+hours, active members, solidarity streak — and the local-vs-federation
+split by `nodeId` (`pages/Dashboard.tsx`, `lib/stats.ts`): an exchange
+counts as "ours" only when `exchange.nodeId === ours`. A newly-invited
+member who keeps their fresh random id therefore files every pulled
+community exchange under "another community" and sees **zeroed stats**,
+even though the records synced fine. This is the same hazard
+`PairDevice` already guards against for device linking (it adopts the
+source device's `nodeId`).
+
+**Behavior:** on a mint redemption on a **fresh device** (no prior
+identity), the new member adopts `invite.nodeId` — the inviter's
+community id, already carried in the signed invite — as both their
+`Member.nodeId` and the device-global `SETTING_KEYS.nodeId`. Because
+the invite chain roots at the founder, the whole community converges on
+the founder's id and every member's node-scoped view agrees.
+
+**Guards.** Adoption is skipped when the device already holds an
+identity — **attach** mode, or a second identity via
+`forceNewIdentity` — because the one device-global `nodeId` must not
+move out from under the incumbent member. A legacy invite carrying an
+empty `nodeId` falls back to the device id (no change from prior
+behavior). Already-joined members who onboarded before this existed
+keep a mismatched id until they re-join; a bounded boot-time self-heal
+(reconcile only when exactly one redeemed invite exists, its id
+differs, and the member has authored no exchanges) is a possible
+follow-up but is deliberately out of the redemption path.
+
 ---
 
 ## §6 Phase 1 — data model: the `RedemptionReceipt`
