@@ -22,6 +22,7 @@ import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
+import { DemoBanner } from "./DemoBanner";
 import { CommandPalette } from "./CommandPalette";
 import { LockScreen } from "./LockScreen";
 import { OfflineBanner } from "./OfflineBanner";
@@ -80,6 +81,7 @@ export function Layout() {
     <div className="flex h-dvh flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
+      {ready && !locked && <DemoBanner />}
       {ready && !locked && <AppHeader />}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row-reverse print:block print:h-auto print:overflow-visible">
         <main

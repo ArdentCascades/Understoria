@@ -28,6 +28,41 @@ include breaking changes.
   every read; backgrounded stays cold, preserving the asleep signal).
 
 ### Added
+- **Client-only "tour" demo** (`apps/web/src/lib/demo.ts`,
+  `components/DemoBanner.tsx`, `db/seed.ts`, `apps/web` `build:demo`
+  script; showcase "See the live demo" buttons in `apps/site`). A build
+  of the PWA produced with `VITE_DEMO=1` seeds the sample community in the
+  visitor's browser and loads straight onto a populated board, so a
+  curious visitor can look around without an invite. It has no backend —
+  each visitor gets their own private IndexedDB sandbox, a thin banner
+  makes clear nothing leaves their device, and "Reset demo" wipes it for
+  the next person. The demo flag is a build-time constant that is **off**
+  in every normal build (a guard test locks this in), so real nodes still
+  start empty (operator ruling R1) and the demo code tree-shakes away. The
+  showcase's demo links are baked at build time via `VITE_DEMO_URL`
+  (default `./demo/`); see `apps/site/README.md` for the subdomain-vs-
+  subpath deploy options.
+- **Showcase site** (`apps/site/**`, new `@understoria/site` workspace).
+  A small static marketing / front-door site — plain HTML + Tailwind with
+  one script (theme toggle + mobile nav), no framework, no runtime data,
+  never talks to a node. It explains what Understoria is and points to the
+  source (AGPL), the bootstrap guide, and communities to join; because
+  Understoria is self-hosted and not a SaaS, the calls to action are "Start
+  a community" / "Read the source" / "Join a community", never "Sign up".
+  Its screenshots are captured from the **real app** in dev via Playwright
+  (`scripts/capture-screenshots.mjs`), driving the demo-seeded community so
+  they show the app in active use rather than an empty first run. Ships
+  with a suggested `understoria.` / `app.` / `demo.` / `docs.` subdomain
+  layout in the site README, deferring the node's proxy contract to
+  `docs/deploy-alternatives.md`.
+- **Demo seed reads as a living community** (`apps/web/src/db/seed.ts`).
+  The dev demo community now seeds a week of COMPLETED, mutually-signed
+  exchanges (one past need fulfilled, plus skill-matched help among the
+  demo members) so the Dashboard shows real hours, active members, a
+  solidarity streak, and a category spread instead of "0h across 0
+  exchanges". Demo-local like the rest of the seed — signed by both
+  parties (passes `verifyExchange`) but never enqueued to the outbox, so
+  it never federates. Dev-mode only; production nodes still start empty.
 - **Capacity forecast — trusted members see it, and can act**
   (`apps/web/src/lib/attention.ts`,
   `components/{AttentionSection,GrowRootSuggestCard,useGrowRootSuggestNudge,BoardNudges}.tsx`,
