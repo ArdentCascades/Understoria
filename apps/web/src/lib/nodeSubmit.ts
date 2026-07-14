@@ -47,6 +47,7 @@ import type {
   TaskState,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
+import { isDemoBuild } from "@/lib/demo";
 import {
   normalizeNodeUrl,
   readAcceptedMirrors,
@@ -98,6 +99,14 @@ export interface SubmitResult {
 }
 
 export async function readSubmitConfig(): Promise<SubmitConfig> {
+  // Demo builds NEVER submit to a community node, whatever the settings
+  // rows say. The public demo's banner promises "nothing is sent
+  // anywhere" — this chokepoint (with its twins in enqueueOutbox and
+  // listNodeEndpoints) makes that promise structural instead of hoping
+  // no code path ever configures a URL. See lib/demo.ts.
+  if (isDemoBuild()) {
+    return { url: "", enabled: false, fallbackUrls: [] };
+  }
   const [url, enabledRaw, mirrors] = await Promise.all([
     getSetting(SETTING_KEYS.communityNodeUrl),
     getSetting(SETTING_KEYS.communityNodeEnabled),

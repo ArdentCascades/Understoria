@@ -298,9 +298,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDensityPreferenceState(densPref);
       applyDensity(densPref);
       cacheDensity(densPref);
-      // Demo-community seed is DEV-MODE ONLY (operator ruling R1): dev
-      // builds get a demo community to poke at; real deployments start
-      // with an empty node, and the first identity is minted by
+      // Demo-community seed runs in DEV builds (operator ruling R1)
+      // and in the client-only DEMO build (VITE_DEMO=1, which is what
+      // the seed exists to showcase): both get a demo community to
+      // poke at; real production deployments start with an empty
+      // node, and the first identity is minted by
       // onboarding (Welcome's profile-setup step, InviteAccept, or
       // PairDevice) — never by the seed. The seed also only runs when
       // the node isn't locked: it writes plaintext secret keys for demo

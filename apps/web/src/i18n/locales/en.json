@@ -261,6 +261,7 @@
   },
   "demo": {
     "banner": "You're exploring a live demo. Everything you do stays in this browser — only you can see it, and nothing is sent anywhere.",
+    "nodeSection": "This demo runs entirely in your browser — connecting to a community server is switched off, so nothing you do here is ever sent anywhere. In the real app, this section links your device to your community's node.",
     "reset": {
       "cta": "Reset demo",
       "confirm": "Start over with fresh sample data?",

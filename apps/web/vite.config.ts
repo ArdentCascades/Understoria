@@ -45,6 +45,20 @@ function resolveBuildStamp(): string {
 }
 const BUILD_STAMP = resolveBuildStamp();
 
+// A demo build disconnects federation entirely (readSubmitConfig /
+// enqueueOutbox / listNodeEndpoints are hard-disabled) and shows the
+// demo banner — deployed as a real community it would silently never
+// sync. The plain `build` script pins VITE_DEMO to empty so a stray
+// shell export or .env line can't flip a production build; this
+// banner makes the mode unmissable when it IS set (build:demo).
+if (process.env.VITE_DEMO === "1") {
+  console.warn(
+    "\n⚠ VITE_DEMO=1 — building the CLIENT-ONLY DEMO bundle. " +
+      "Federation is disabled in this build; do not deploy it as a " +
+      "real community app.\n",
+  );
+}
+
 export default defineConfig({
   define: {
     __UNDERSTORIA_BUILD_STAMP__: JSON.stringify(BUILD_STAMP),

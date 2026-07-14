@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db, type OutboxRow } from "@/db/database";
+import { isDemoBuild } from "@/lib/demo";
 import { uuid } from "@/lib/id";
 import {
   readSubmitConfig,
@@ -424,6 +425,12 @@ async function enqueueOutbox(
   payload: unknown,
   opts: { requireNodeUrl?: boolean } = {},
 ): Promise<OutboxRow | null> {
+  // Demo builds queue NOTHING — not even the requireNodeUrl:false kinds
+  // (redemption receipts, invite revocations) that would otherwise sit
+  // dormant and ship automatically the moment a node URL appeared. The
+  // demo's "nothing is sent anywhere" promise is enforced here and at
+  // readSubmitConfig/listNodeEndpoints, not by convention.
+  if (isDemoBuild()) return null;
   if (opts.requireNodeUrl !== false) {
     const urlRow = await db.settings.get("communityNodeUrl");
     if (!urlRow?.value?.trim()) return null;

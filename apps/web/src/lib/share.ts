@@ -61,17 +61,26 @@ export async function shareUrl(args: ShareUrlArgs): Promise<ShareResult> {
       // Web Share footgun: when BOTH `text` and `url` are passed,
       // several platforms' "Copy" action in the native share sheet
       // (desktop Chrome/Edge, some Android) copy only the `text` and
-      // silently DROP the `url` — so an invite gets copied as the
-      // message with no link (the reported bug). Fold the URL into the
-      // shared text so it rides along with whatever a target uses, and
-      // don't pass a separate `url` field that "Copy" can discard. The
-      // clipboard fallback below still writes the bare URL, so the
-      // in-app copy path stays a clean link.
-      const text = args.text ? `${args.text}\n\n${args.url}` : args.url;
-      await nav.share({
-        title: args.title,
-        text,
-      });
+      // silently DROP the `url` — so an invite got copied as the
+      // message with no link. The fix is to fold the URL into the
+      // shared text so Copy can never lose it, while STILL passing the
+      // typed `url` field — that field is what iOS surfaces to
+      // URL-consuming targets (Reading List, link previews) and what
+      // Android/PWA share_target manifests bind their `url` param to;
+      // dropping it regressed every url-only share surface. Callers
+      // that pass no `text` keep the original `{title, url}` shape:
+      // with no text to shadow the url, the Copy bug cannot occur, and
+      // adding a text copy of the link would render it twice in
+      // targets that concatenate both.
+      await nav.share(
+        args.text
+          ? {
+              title: args.title,
+              text: `${args.text}\n\n${args.url}`,
+              url: args.url,
+            }
+          : { title: args.title, url: args.url },
+      );
       return "shared";
     } catch (err) {
       // User dismissed the native share sheet — silent path.

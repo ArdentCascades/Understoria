@@ -37,6 +37,65 @@ include breaking changes.
   bespoke plumbing.
 
 ### Fixed
+- **Demo build: "nothing is sent anywhere" is now structural**
+  (`lib/demo.ts`, `lib/nodeSubmit.ts`, `lib/outbox.ts`,
+  `lib/nodeEndpoints.ts`, `components/NodeSection.tsx`,
+  `components/Layout.tsx`). Review of the client-only demo (PR #449)
+  found the promise was held only by "no URL configured by default":
+  a visitor pasting a node URL into Settings → Community node would
+  have connected the throwaway demo to a real community — pulling its
+  posts in and pushing demo records out. All three federation
+  chokepoints are now hard-disabled in demo builds — `readSubmitConfig`
+  (direct submits), `enqueueOutbox` (deferred submits, including the
+  `requireNodeUrl:false` kinds that used to queue dormant and ship the
+  moment a URL appeared), `listNodeEndpoints` (the whole read/sync
+  path) — and NodeSection replaces the connect form with an honest
+  notice. The demo banner also gates at its call site on the build-time
+  constant so production bundles still tree-shake the demo code out
+  entirely, and the plain `build` script now pins `VITE_DEMO` empty so
+  a stray shell export or `.env` line can't flip a production build
+  into demo mode (`vite.config.ts` warns loudly when the flag IS set).
+- **Demo reset: robust against wedged deletes, no longer nukes
+  same-origin storage** (`lib/demo.ts`). `resetDemo` raced no timeout
+  — Dexie's `delete()` pends forever while another tab holds the
+  database, stranding visitors on a dead "Resetting…" button — and
+  called `localStorage.clear()`, which is origin-wide and wiped the
+  showcase site's saved theme under the default same-origin `/demo/`
+  layout. The delete now races a 4s timeout with the reload in
+  `finally` (a timed-out delete reloads into old data — honest,
+  retryable — instead of wedging), and only the app's own
+  `understoria.` dot-namespace keys are cleared.
+- **Demo seed: distinct exchange pairs, empty daily-limit window,
+  pre-celebrated milestones** (`db/seed.ts`). Three staged-data
+  landmines from the demo-seed review: (1) the seed repeated
+  (helper, helped) pairs, so a visitor's first real exchange with that
+  member landed one step from the reciprocal-pattern anti-gaming flag
+  (threshold 3 in 30 days, counted both directions) — the nine
+  exchanges now use nine distinct pairs; (2) exchanges anchored "today"
+  sat inside `assertWithinDailyLimit`'s rolling 24-hour window,
+  pre-consuming daily helper slots — everything now anchors ≥26h back,
+  which keeps the 7-day solidarity streak (a quiet today doesn't break
+  it) while emptying the window; (3) the 14 seeded hours crossed the
+  "10 hours of mutual aid" milestone, popping the Dashboard's animated
+  celebration for fabricated history on every fresh boot and demo
+  reset — every milestone the seed itself reaches is now pre-marked
+  celebrated (derived, not hardcoded).
+- **Web Share: url-only shares regressed by the invite-copy fix**
+  (`lib/share.ts`). PR #450 fixed desktop Chrome/Edge's share-sheet
+  "Copy" dropping the URL by folding the link into `text` — but it
+  removed the typed `url` field entirely, breaking every url-only
+  share surface (post/event/project/task links) for iOS URL-consuming
+  targets and Android/PWA `share_target` manifests. The share now
+  passes BOTH (text with the link embedded + the typed `url` field)
+  when a message is present, and keeps the original `{title, url}`
+  shape when not.
+- **Board: completed posts counted as hidden "claimed" posts**
+  (`lib/boardFilter.ts`). The shared Board/print-sheet predicate
+  excluded only cancelled posts, so a completed exchange kept its
+  `claimedBy` and surfaced as a phantom "Show 1 claimed" toggle that
+  expanded to nothing actionable (the demo seed's fulfilled need made
+  every fresh demo start this way). Completed posts are now excluded
+  as history alongside cancelled ones.
 - **nodeId adoption hardening (review follow-up to the item below)**
   (`db/invites.ts`, `state/AppContext.tsx`, `pages/InviteAccept.tsx`,
   `docs/invite-redemption.md` §5.4). Four fixes from an adversarial

@@ -37,22 +37,29 @@ describe("share — shareUrl", () => {
     vi.restoreAllMocks();
   });
 
-  it("navigator.share resolves → 'shared' (url-only → shares the bare url as text)", async () => {
+  it("url-only callers keep the original typed-url shape (no text to shadow it)", async () => {
+    // Post/event/project/task links pass only url+title. The typed
+    // `url` field is what iOS URL-consuming targets and PWA
+    // share_target manifests bind to — it must be present, and no
+    // redundant text copy should be added (targets that concatenate
+    // both would render the link twice).
     const share = vi.fn().mockResolvedValue(undefined);
     setNavigator({ share });
     const result = await shareUrl({ url: "https://example.test/x" });
     expect(result).toBe("shared");
     expect(share).toHaveBeenCalledWith({
       title: undefined,
-      text: "https://example.test/x",
+      url: "https://example.test/x",
     });
   });
 
-  it("folds the url into the shared text so 'Copy' can't drop the link", async () => {
-    // Regression guard: passing a separate `url` field alongside `text`
-    // let some platforms' share-sheet "Copy" copy only the message and
-    // drop the link. The URL must be embedded in the text, and no bare
-    // `url` field should be passed for a target to discard.
+  it("with a message, the link rides in BOTH text and the typed url field", async () => {
+    // The invariant is "the link always survives", not any particular
+    // field shape: embedding the url in text defeats the share-sheet
+    // Copy actions that read only `text` (desktop Chrome/Edge), while
+    // the typed `url` field keeps link previews and url-only share
+    // targets working. Asserting the absence of `url` here previously
+    // hard-coded a platform regression — never do that again.
     const share = vi.fn().mockResolvedValue(undefined);
     setNavigator({ share });
     const result = await shareUrl({
@@ -62,7 +69,7 @@ describe("share — shareUrl", () => {
     });
     expect(result).toBe("shared");
     const arg = share.mock.calls[0][0] as ShareData;
-    expect(arg.url).toBeUndefined();
+    expect(arg.url).toBe("https://example.test/invite#abc");
     expect(arg.title).toBe("Join my community");
     expect(arg.text).toContain("I'm inviting you to join my community.");
     expect(arg.text).toContain("https://example.test/invite#abc");

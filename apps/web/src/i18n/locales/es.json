@@ -261,6 +261,7 @@
   },
   "demo": {
     "banner": "Estás explorando una demo. Todo lo que haces se queda en este navegador: solo tú lo ves y no se envía a ningún lado.",
+    "nodeSection": "Esta demo funciona por completo en tu navegador: la conexión con un servidor comunitario está desactivada, así que nada de lo que hagas aquí se envía a ningún lado. En la aplicación real, esta sección conecta tu dispositivo con el nodo de tu comunidad.",
     "reset": {
       "cta": "Reiniciar demo",
       "confirm": "¿Empezar de nuevo con datos de ejemplo?",
