@@ -5,15 +5,21 @@
 # What this does:
 #   1. Sanity-checks the environment (Docker, Compose, basic tools).
 #   2. Prompts for the values that go in `.env`: domain, ACME email,
-#      operator name + contact, auto-confirm hours, peer list.
+#      node id, operator name + contact, auto-confirm hours, peer list.
 #   3. Validates each value as it's entered (e-mail shape, domain
 #      shape, optional DNS A-record check vs this host's public IP).
 #   4. Builds the server image so the keygen helper can run in it.
 #   5. Generates the `NODE_SYSTEM_SECRET_KEY` via the existing
 #      `scripts/generate-system-key.mjs` (inside the built image so
-#      there's no Node install required on the host).
-#   6. Writes `.env` with `chmod 600`.
+#      there's no Node install required on the host), plus a
+#      `DATABASE_KEY` (encryption at rest) and a `SETUP_TOKEN` (the
+#      one-time founder-claim code).
+#   6. Writes `.env` with `chmod 600` (TRUST_PROXY=true for the
+#      bundled Caddy stack).
 #   7. Optionally runs `docker compose up -d --build`.
+#   8. Prints the founder-claim walkthrough with YOUR setup code —
+#      the server boots UNCLAIMED (secure by default) until the
+#      founding member claims it from inside the app.
 #
 # Why this exists:
 #   Operators previously had to read the runbook, run the keygen by
@@ -28,9 +34,10 @@
 #
 # Non-interactive mode (for CI / re-runs):
 #   Set the corresponding env vars before running and the script
-#   will not prompt for them: DOMAIN, ACME_EMAIL, OPERATOR_NAME,
-#   OPERATOR_CONTACT, OPERATOR_FUNDING_NOTE, AUTO_CONFIRM_HOURS,
-#   PEER_NODE_URLS, RATE_LIMIT_MAX, LOG_LEVEL.
+#   will not prompt for them: DOMAIN, ACME_EMAIL, NODE_ID,
+#   OPERATOR_NAME, OPERATOR_CONTACT, OPERATOR_FUNDING_NOTE,
+#   AUTO_CONFIRM_HOURS, PEER_NODE_URLS, RATE_LIMIT_MAX, LOG_LEVEL,
+#   DATABASE_KEY, SETUP_TOKEN (the last two are generated when unset).
 
 set -euo pipefail
 
@@ -194,6 +201,15 @@ case "$ACME_EMAIL" in
   *) fail "ACME_EMAIL doesn't look like an e-mail address." ;;
 esac
 
+# Stable per-node id stamped on every federated record. Must be
+# unique across a federation; defaulting from the domain's first
+# label gives a distinct, memorable value without another decision.
+default_node_id="node_$(printf '%s' "$DOMAIN" | cut -d. -f1 | tr -c 'a-zA-Z0-9' '_' | sed 's/_*$//')"
+ask "Node id (unique per federated node)" NODE_ID "$default_node_id"
+case "$NODE_ID" in
+  ''|*[!A-Za-z0-9_-]*) fail "NODE_ID may only contain letters, digits, _ and -." ;;
+esac
+
 if [ "$SKIP_DNS" -eq 0 ]; then
   info "Checking DNS for $DOMAIN..."
   # Resolve A (IPv4) and AAAA (IPv6) separately. Compare against the
@@ -285,6 +301,37 @@ if [ -z "$NODE_SYSTEM_SECRET_KEY" ]; then
 fi
 ok "System key generated. Public key: $sys_pubkey"
 
+# Encryption-at-rest key for the SQLite file, and the one-time
+# founder-claim setup code (the server boots UNCLAIMED — secure by
+# default — until the founding member enters this code in the app).
+# Both honor pre-set env vars for non-interactive runs.
+rand_b64() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -base64 32
+  else
+    head -c 32 /dev/urandom | base64
+  fi
+}
+rand_code() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex 8 | sed 's/\(.\{4\}\)/\1-/g;s/-$//'
+  else
+    head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n' | sed 's/\(.\{4\}\)/\1-/g;s/-$//'
+  fi
+}
+if [ -z "${DATABASE_KEY:-}" ]; then
+  DATABASE_KEY="$(rand_b64)"
+  ok "Generated DATABASE_KEY (encryption at rest)."
+else
+  info "DATABASE_KEY: (from environment)"
+fi
+if [ -z "${SETUP_TOKEN:-}" ]; then
+  SETUP_TOKEN="$(rand_code)"
+  ok "Generated founder-claim setup code."
+else
+  info "SETUP_TOKEN: (from environment)"
+fi
+
 # ─── Write .env ──────────────────────────────────────────────────────
 
 say ""
@@ -297,6 +344,18 @@ cat > .env <<EOF
 
 DOMAIN=$DOMAIN
 ACME_EMAIL=$ACME_EMAIL
+NODE_ID=$NODE_ID
+
+# Bundled Caddy fronts the server on the compose network.
+TRUST_PROXY=true
+
+# Encryption at rest for the SQLite file. Keep a copy of this key
+# AWAY from your database backups.
+DATABASE_KEY=$DATABASE_KEY
+
+# One-time founder-claim code (ignored once the node is claimed).
+# READ_AUTH is not set here on purpose: enforcement is the default.
+SETUP_TOKEN=$SETUP_TOKEN
 
 NODE_SYSTEM_SECRET_KEY=$NODE_SYSTEM_SECRET_KEY
 AUTO_CONFIRM_MIN_HOURS=$AUTO_CONFIRM_HOURS
@@ -425,6 +484,7 @@ fi
 say ""
 say "${c_bold}Summary${c_off}"
 say "  Domain:           $DOMAIN"
+say "  Node id:          $NODE_ID"
 say "  ACME email:       $ACME_EMAIL"
 say "  Operator:         $OPERATOR_NAME"
 say "  Contact:          $OPERATOR_CONTACT"
@@ -517,6 +577,23 @@ verify_config() {
   return "$rc"
 }
 
+print_claim_steps() {
+  say ""
+  say "${c_bold}Claim your node — the last setup step${c_off}"
+  say "  The server starts ${c_bold}unclaimed${c_off}: it refuses every community"
+  say "  surface until its founding member claims it. In your browser:"
+  say ""
+  say "    1. Open  ${c_bold}https://$DOMAIN${c_off}  and create your identity."
+  say "    2. Profile → Community node: URL ${c_bold}https://$DOMAIN/api${c_off},"
+  say "       tick enable, Save."
+  say "    3. Open ${c_bold}Founder setup — claim a fresh node${c_off} and enter"
+  say "       this one-time setup code:"
+  say ""
+  say "         ${c_bold}$SETUP_TOKEN${c_off}"
+  say ""
+  say "  Verify afterwards: curl https://$DOMAIN/api/config → \"claimed\":true"
+}
+
 if confirm "Bring the node up now (docker compose up -d --build)?"; then
   say ""
   info "Starting services..."
@@ -529,10 +606,12 @@ if confirm "Bring the node up now (docker compose up -d --build)?"; then
   if verify_tls; then
     verify_config || true
   fi
+  print_claim_steps
   say ""
   say "Logs:    docker compose logs -f"
   say "Status:  docker compose ps"
 else
+  print_claim_steps
   say ""
   say "Done. When you're ready: ${c_bold}docker compose up -d --build${c_off}"
 fi
@@ -546,9 +625,10 @@ fi
 # encrypted local copy.
 
 say ""
-say "${c_bold}Back up the system key — now${c_off}"
-say "  ${c_dim}.env is the ONLY copy of NODE_SYSTEM_SECRET_KEY on this host.${c_off}"
-say "  ${c_dim}Lose the host, lose the key; auto-confirmed history becomes unverifiable.${c_off}"
+say "${c_bold}Back up your keys — now${c_off}"
+say "  ${c_dim}.env is the ONLY copy of NODE_SYSTEM_SECRET_KEY and DATABASE_KEY on this host.${c_off}"
+say "  ${c_dim}Lose the system key: auto-confirmed history becomes unverifiable.${c_off}"
+say "  ${c_dim}Lose DATABASE_KEY: every database backup becomes an unreadable brick.${c_off}"
 say "  ${c_dim}Rotation procedure: docs/auto-confirm-key.md §6.${c_off}"
 say ""
 say "  Suggested:"

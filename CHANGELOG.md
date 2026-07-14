@@ -41,6 +41,24 @@ include breaking changes.
   new posture, or set `READ_AUTH=off` to keep the old one.
 
 ### Added
+- **Setup wizard covers the whole first run** (`scripts/setup.sh`,
+  `docker-compose.yml`, `apps/server/src/server.ts`, `.env.example`).
+  The interactive setup now finishes what it starts under the
+  secure-by-default posture: it prompts for `NODE_ID` (defaulted from
+  the domain), generates `DATABASE_KEY` (encryption at rest) and the
+  founder-claim `SETUP_TOKEN` alongside the system key, writes
+  `TRUST_PROXY=true` for the bundled Caddy stack, and ends with a
+  claim walkthrough that prints YOUR setup code and exactly where to
+  paste it (Profile → Community node → Founder setup) — no fishing
+  codes out of logs. Supporting fixes: `docker-compose.yml` now
+  actually forwards `SETUP_TOKEN` into the container (it was
+  env-file-only before, so an operator-chosen code never reached the
+  server), and the unclaimed-node banner prints directly to stderr as
+  a readable block instead of being JSON-escaped into one pino log
+  line — the one value an operator must read off the screen is now
+  legible in `docker compose logs`. `.env.example` teaches the claim
+  flow instead of the old copy-your-key-and-restart bootstrap.
+
 - **Server: write-membership gate — the write half of `READ_AUTH=on`**
   (`apps/server/src/readAuth.ts`, `server.ts`,
   `docs/member-authenticated-reads.md`). Review of the federation
