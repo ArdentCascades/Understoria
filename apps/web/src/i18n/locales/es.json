@@ -2564,6 +2564,24 @@
         "title": "¿Enviar tus registros de intercambio a este servidor?",
         "body": "Activar el reflejo envía cada intercambio en el que participas a este servidor, incluyendo la clave pública de la otra persona, la firma, la categoría, las horas y la hora. Un servidor que no controlas puede usar esto para trazar quién-ayuda-a-quién en toda tu comunidad. Activa esto solo para un nodo que tu comunidad gestione y en el que confíe.",
         "confirm": "Sí, reflejar en este nodo"
+      },
+      "claim": {
+        "toggle": "Configuración fundacional — reclamar un nodo nuevo",
+        "statusUnknown": "No se pudo contactar el nodo para comprobar si necesita fundador. Verifica la URL de arriba e inténtalo de nuevo.",
+        "alreadyClaimed": "Este nodo ya tiene su miembro fundador — no hay nada que hacer aquí.",
+        "intro": "Un nodo nuevo arranca bloqueado hasta que su miembro fundador lo reclama. Introduce el código de configuración de un solo uso impreso en el registro de arranque del servidor (la terminal donde lo iniciaste).",
+        "codeLabel": "Código de configuración",
+        "claim": "Reclamar este nodo",
+        "claiming": "Reclamando…",
+        "success": "Nodo reclamado — eres el miembro fundador y la sincronización comienza con la próxima consulta. Bienvenida a casa.",
+        "errors": {
+          "already_claimed": "Alguien ya reclamó este nodo. Si no fuiste tú, habla con quien administra el servidor.",
+          "bad_setup_token": "Ese código no coincide. Cópialo exactamente del registro de arranque del servidor — un reinicio genera uno nuevo.",
+          "stale_claim": "El reloj de este dispositivo parece desfasado por más de unos minutos — corrige la hora e inténtalo de nuevo.",
+          "bad_signature": "No se pudo firmar la reclamación correctamente. Desbloquea la aplicación e inténtalo de nuevo.",
+          "unreachable": "No se pudo contactar el nodo. Verifica la URL y tu conexión.",
+          "rejected": "El nodo rechazó la reclamación. Revisa los registros del servidor para más detalles."
+        }
       }
     },
     "invites": {

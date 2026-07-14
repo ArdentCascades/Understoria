@@ -17,6 +17,7 @@ import Database from "better-sqlite3-multiple-ciphers";
 import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { FastifyInstance } from "fastify";
 import {
+  canonicalFounderClaimMessage,
   canonicalInvitePayload,
   canonicalPostPayload,
   canonicalReadAuthMessage,
@@ -91,22 +92,36 @@ function makeReceipt(inviter: KeyPair, redeemer: KeyPair): RedemptionReceipt {
   };
 }
 
-describe("READ_AUTH=off (default)", () => {
-  it("leaves the feeds open, exactly as before", async () => {
+describe("READ_AUTH default", () => {
+  it("defaults ON — a bare env gets enforcement, not open feeds", () => {
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+    } as NodeJS.ProcessEnv);
+    expect(config.readAuth).toBe("on");
+  });
+
+  it("booting enforcement with no founder keys is UNCLAIMED, not a brick", async () => {
+    // The old behavior threw at config parse; the claim flow replaces
+    // the brick with a node that refuses gated surfaces and waits for
+    // its founder (see the founder-claim describe below).
     const a = await serverWith({});
+    const res = await a.inject({ method: "GET", url: "/posts" });
+    expect(res.statusCode).toBe(401);
+    const cfg = await a.inject({ method: "GET", url: "/config" });
+    expect(cfg.statusCode).toBe(200);
+    expect(cfg.json().claimed).toBe(false);
+  });
+});
+
+describe("READ_AUTH=off (explicit opt-out)", () => {
+  it("leaves the feeds open, exactly as the pre-flip default did", async () => {
+    const a = await serverWith({ READ_AUTH: "off" });
     const res = await a.inject({ method: "GET", url: "/posts" });
     expect(res.statusCode).toBe(200);
   });
 });
 
 describe("READ_AUTH=on", () => {
-  it("refuses to boot without founder keys", () => {
-    expect(() =>
-      readConfigFromEnv({
-        READ_AUTH: "on",
-      } as NodeJS.ProcessEnv),
-    ).toThrow(/NODE_FOUNDER_KEYS/);
-  });
 
   it("401s unsigned reads and 200s a founder-signed read", async () => {
     const founder = generateKeyPair();
@@ -298,10 +313,10 @@ function signedPost(poster: KeyPair, id: string) {
 
 describe("write-membership gate (the write half of READ_AUTH=on)", () => {
   it("READ_AUTH=off keeps the pre-gate behavior: a stranger's valid record lands", async () => {
-    // The staged-rollout posture, unchanged: an operator who has not
-    // turned enforcement on gets exactly the old open-writes node.
+    // The explicit opt-out posture: an operator who turned
+    // enforcement off gets exactly the old open-writes node.
     const stranger = generateKeyPair();
-    const a = await serverWith({});
+    const a = await serverWith({ READ_AUTH: "off" });
     const res = await a.inject({
       method: "POST",
       url: "/posts",
@@ -403,6 +418,158 @@ describe("write-membership gate (the write half of READ_AUTH=on)", () => {
     // 403 from the gate — never reaches the route's shape validation.
     expect(res.statusCode).toBe(403);
     expect(res.json().error).toBe("not_a_member");
+  });
+});
+
+describe("first-run founder claim (POST /claim-founder)", () => {
+  function signedClaim(member: KeyPair, setupToken: string, ts = Date.now()) {
+    return {
+      publicKey: member.publicKey,
+      setupToken,
+      ts,
+      signature: sign(
+        canonicalFounderClaimMessage(member.publicKey, setupToken, ts),
+        member.secretKey,
+      ),
+    };
+  }
+
+  it("full ceremony: unclaimed → claim with the setup code → founder reads and writes", async () => {
+    const founder = generateKeyPair();
+    const a = await serverWith({ SETUP_TOKEN: "test-setup-code-1234" });
+
+    // Unclaimed: gated surfaces refuse even the future founder.
+    const before = await a.inject({
+      method: "GET",
+      url: "/posts",
+      headers: readHeaders(founder, "/posts"),
+    });
+    expect(before.statusCode).toBe(403); // signed fine, but nobody is a member yet
+
+    const claim = await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(founder, "test-setup-code-1234"),
+    });
+    expect(claim.statusCode).toBe(201);
+    expect(claim.json().claimed).toBe(true);
+
+    // /config now reports the node claimed…
+    const cfg = await a.inject({ method: "GET", url: "/config" });
+    expect(cfg.json().claimed).toBe(true);
+
+    // …and the founder is a member for reads AND writes, no restart.
+    const read = await a.inject({
+      method: "GET",
+      url: "/posts",
+      headers: readHeaders(founder, "/posts"),
+    });
+    expect(read.statusCode).toBe(200);
+    const write = await a.inject({
+      method: "POST",
+      url: "/posts",
+      payload: signedPost(founder, "p_claimed"),
+    });
+    expect(write.statusCode).toBe(201);
+  });
+
+  it("refuses a wrong setup code with 401, without leaking timing structure", async () => {
+    const mallory = generateKeyPair();
+    const a = await serverWith({ SETUP_TOKEN: "test-setup-code-1234" });
+    const res = await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(mallory, "wrong-code-entirely"),
+    });
+    expect(res.statusCode).toBe(401);
+    expect(res.json().error).toBe("bad_setup_token");
+  });
+
+  it("is one-shot: a second claim answers 409 even with the right code", async () => {
+    const founder = generateKeyPair();
+    const mallory = generateKeyPair();
+    const a = await serverWith({ SETUP_TOKEN: "test-setup-code-1234" });
+    await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(founder, "test-setup-code-1234"),
+    });
+    const second = await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(mallory, "test-setup-code-1234"),
+    });
+    expect(second.statusCode).toBe(409);
+    expect(second.json().error).toBe("already_claimed");
+  });
+
+  it("a node with env founder keys was never claimable", async () => {
+    const founder = generateKeyPair();
+    const mallory = generateKeyPair();
+    const a = await serverWith({
+      NODE_FOUNDER_KEYS: founder.publicKey,
+      SETUP_TOKEN: "test-setup-code-1234",
+    });
+    const res = await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(mallory, "test-setup-code-1234"),
+    });
+    expect(res.statusCode).toBe(409);
+  });
+
+  it("refuses a stale or forged claim (timestamp window, signature binding)", async () => {
+    const founder = generateKeyPair();
+    const mallory = generateKeyPair();
+    const a = await serverWith({ SETUP_TOKEN: "test-setup-code-1234" });
+
+    const stale = await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(
+        founder,
+        "test-setup-code-1234",
+        Date.now() - 11 * 60 * 1000,
+      ),
+    });
+    expect(stale.statusCode).toBe(401);
+    expect(stale.json().error).toBe("stale_claim");
+
+    // A captured claim body with the KEY swapped: mallory presents
+    // founder's signature under their own key — the signature no
+    // longer verifies, so possession of the code alone (e.g. a
+    // network observer of the claim) cannot install a different key.
+    const legit = signedClaim(founder, "test-setup-code-1234");
+    const swapped = await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: { ...legit, publicKey: mallory.publicKey },
+    });
+    expect(swapped.statusCode).toBe(422);
+    expect(swapped.json().error).toBe("bad_signature");
+  });
+
+  it("claiming admits the founder's invite chain — the community grows normally", async () => {
+    const founder = generateKeyPair();
+    const invitee = generateKeyPair();
+    const a = await serverWith({ SETUP_TOKEN: "test-setup-code-1234" });
+    await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: signedClaim(founder, "test-setup-code-1234"),
+    });
+    const receipt = await a.inject({
+      method: "POST",
+      url: "/redemptions",
+      payload: makeReceipt(founder, invitee),
+    });
+    expect(receipt.statusCode).toBe(201);
+    const read = await a.inject({
+      method: "GET",
+      url: "/exchanges",
+      headers: readHeaders(invitee, "/exchanges"),
+    });
+    expect(read.statusCode).toBe(200);
   });
 });
 

@@ -1515,3 +1515,19 @@ export function canonicalReadAuthMessage(
 ): string {
   return `read|${pathWithQuery}|${timestampMs}`;
 }
+
+/**
+ * Canonical bytes a founding member signs to claim a fresh node
+ * (docs/member-authenticated-reads.md, "Claiming a fresh node").
+ * Binds the claimer's key to the one-time setup code the operator
+ * read off the server terminal, plus a timestamp so a captured claim
+ * body goes stale like a read signature does. Shared so the PWA
+ * signer and the node verifier can never drift.
+ */
+export function canonicalFounderClaimMessage(
+  publicKey: string,
+  setupToken: string,
+  timestampMs: number,
+): string {
+  return `founder-claim|${setupToken}|${publicKey}|${timestampMs}`;
+}

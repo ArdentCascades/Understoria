@@ -104,7 +104,7 @@ services:
       # after every member runs a signing build — rollout runbook in
       # docs/operator-guide.md. "on" requires NODE_FOUNDER_KEYS (boot
       # refuses otherwise).
-      READ_AUTH: "${READ_AUTH:-off}"
+      READ_AUTH: "${READ_AUTH:-on}"
       # Encryption-at-rest key for the SQLite file. Unset keeps
       # plaintext. Keep a copy of the key AWAY from the backups — a
       # backup without its key is a brick, which is the point.

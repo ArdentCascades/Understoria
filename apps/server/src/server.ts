@@ -59,6 +59,7 @@ import {
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerExchangeRoutes } from "./routes/exchanges.js";
 import { registerConfigRoutes } from "./routes/config.js";
+import { registerClaimFounderRoutes } from "./routes/claimFounder.js";
 import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
@@ -279,10 +280,50 @@ export async function buildServer({
   // misconfiguration (the shipped docker-compose once failed to
   // forward NODE_FOUNDER_KEYS at all) — say so loudly instead of
   // letting members discover it as mysterious vote failures.
-  if (config.founderKeys.length === 0) {
-    app.log.warn(
-      "NODE_FOUNDER_KEYS is unset: the membership resolver has no trust roots, so every member-gated write (proposals, votes, closures, member removals) will be refused with 403 not_a_member. Set the founding member(s)' public keys to enable governance.",
-    );
+  // Claim state: the node is UNCLAIMED while it has no trust root at
+  // all — no env founder keys AND no in-band claimed founder. An
+  // unclaimed node under enforcement (the default) refuses every
+  // gated surface until the founding member presents the setup code
+  // (routes/claimFounder.ts).
+  const claimedFounderCount = () =>
+    (
+      db
+        .prepare("SELECT COUNT(*) AS n FROM claimed_founders")
+        .get() as { n: number }
+    ).n;
+  const isClaimed = () =>
+    config.founderKeys.length > 0 || claimedFounderCount() > 0;
+
+  // The one-time setup code, minted only when the node boots
+  // unclaimed: SETUP_TOKEN if the operator chose one, else random
+  // (crypto-strength, ~64 bits — the rate limiter sits on top).
+  // Printed as an unmissable block: the operator is looking at this
+  // terminal right now, having just started the server.
+  let setupToken: string | null = null;
+  if (!isClaimed()) {
+    setupToken =
+      config.setupToken ??
+      randomBytes(8)
+        .toString("hex")
+        .replace(/(.{4})(?=.)/g, "$1-");
+    if (config.readAuth === "on") {
+      app.log.warn(
+        `\n${"=".repeat(64)}\n` +
+          "  THIS NODE IS UNCLAIMED — waiting for its founding member.\n" +
+          "  Every community surface refuses reads and writes until the\n" +
+          "  founder claims it. In the Understoria app: create your\n" +
+          "  identity, connect this node (Profile → Community node),\n" +
+          "  then enter this one-time setup code under Founder setup:\n\n" +
+          `      ${setupToken}\n\n` +
+          "  Docs: docs/member-authenticated-reads.md → Claiming a\n" +
+          "  fresh node. A restart mints a new code.\n" +
+          `${"=".repeat(64)}`,
+      );
+    } else {
+      app.log.warn(
+        "READ_AUTH=off with no founder configured: the node runs OPEN (unauthenticated reads and writes). This is the explicit dev/demo opt-out — production communities should run the default READ_AUTH=on and claim the node with the setup code.",
+      );
+    }
   }
   const membershipResolver = createMembershipResolver(db, config.founderKeys);
   registerReadAuthGuard(app, {
@@ -446,7 +487,14 @@ export async function buildServer({
   // Tap-to-link rendezvous — same non-federating, ephemeral posture
   // as the mailbox above; carries only ephemeral PUBLIC keys.
   await registerLinkRequestRoutes(app, { store: linkRequestStore });
-  await registerConfigRoutes(app, { config, signer });
+  await registerConfigRoutes(app, { config, signer, isClaimed });
+  // First-run founder claim — open by construction (see the route):
+  // it is the step that makes membership exist.
+  await registerClaimFounderRoutes(app, {
+    db,
+    envFounderKeys: config.founderKeys,
+    setupToken,
+  });
   await registerAwaitingTransitionRoutes(app, {
     store: awaitingTransitionStore,
   });

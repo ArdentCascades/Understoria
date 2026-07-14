@@ -98,13 +98,65 @@ could fetch anyway; the bound just expires captured headers.
 
 ### Rollout (`READ_AUTH`)
 
-- `READ_AUTH=off` (default): feeds behave exactly as before. The PWA
-  ALWAYS sends the headers when it has an unlocked identity — they're
-  harmless when off, and it means every member's app is ready before
-  any operator flips.
-- `READ_AUTH=on`: GET feeds require a valid member signature. Boot
-  fails loudly if no `NODE_FOUNDER_KEYS` are set (an "on" node nobody
-  can read is a misconfiguration, not a security posture).
+- `READ_AUTH=on` (**default**): GET feeds require a valid member
+  signature, and the write half below applies. Booting with no
+  founder configured is not an error — it is a fresh **unclaimed**
+  node (next section), which refuses every gated surface and prints
+  a one-time setup code for the founding member.
+- `READ_AUTH=off`: the explicit dev/demo opt-out — feeds and writes
+  behave as the pre-flip default did. The PWA ALWAYS sends the read
+  headers when it has an unlocked identity, so no app-side step ever
+  gates turning enforcement (back) on.
+
+The default was `off` through the staged-rollout era and flipped to
+`on` once every shipped app build signed its reads — a breaking
+change for deployments whose env never set `READ_AUTH` (they gain
+enforcement on upgrade; set `READ_AUTH=off` to keep the old posture,
+or claim the node / set founder keys to adopt the new one).
+
+### Claiming a fresh node (the setup code)
+
+Enforcement needs a trust root, but the founder's key does not exist
+until the founder has minted an identity in the app — the old flow
+resolved this by having the operator copy their public key into
+`NODE_FOUNDER_KEYS` and restart. The claim flow replaces that with
+the first-run pattern self-hosted software already uses:
+
+1. A node that boots with NO trust root (no `NODE_FOUNDER_KEYS`, no
+   previously claimed founder) is **unclaimed**: every gated surface
+   answers 401/403, `GET /config` reports `claimed: false`, and the
+   boot log prints a one-time **setup code** (override it with
+   `SETUP_TOKEN`; a restart mints a fresh random one).
+2. The founding member creates their identity in the app, connects
+   the node (Profile → Community node), and opens **Founder setup**
+   — the card appears when the connected node reports itself
+   unclaimed. They enter the setup code; the app signs
+   `canonicalFounderClaimMessage(publicKey, code, ts)` and POSTs it
+   to `/claim-founder`.
+3. The server verifies the code (timing-safe), the timestamp window
+   (same ±10 min bound as reads), and the signature — so an observer
+   of the claim request cannot re-target it at a different key —
+   then stores the key in `claimed_founders`. The membership
+   resolver unions claimed founders with `NODE_FOUNDER_KEYS`, so
+   the node is fully live immediately, no restart.
+
+The claim is **one-shot**: it answers `409 already_claimed` the
+moment any trust root exists, and everything after the first founder
+uses the ordinary machinery — invites for members, quorum removal to
+retire anyone (claimed founders included), `NODE_FOUNDER_KEYS` for
+additional roots or recovery. `/claim-founder` is open by
+construction, like `/redemptions`: it is the step that makes
+membership exist. The unclaimed window between boot and claim is
+strictly safer than the old open default — an unclaimed node refuses
+reads AND writes, so there is nothing to scrape and no way to
+pre-seed junk; the setup code only decides who gets to be founder,
+and it lives in the operator's terminal.
+
+Mirrors: a mirror of a claimed community should set
+`NODE_FOUNDER_KEYS` to the founder's key (ask the founder — it's
+public, shown on their Profile) rather than being claimed
+separately; the resolver's trust roots MUST match across a mirror
+set, like `NODE_ID`.
 
 Exempt surfaces (open by design, each self-limiting):
 `/health` (liveness; the origin-suggest probe), `GET /config`

@@ -32,6 +32,8 @@ import {
 import { mirrorChangeNeedsConsent } from "@/lib/mirrorConsent";
 import { isDemoBuild } from "@/lib/demo";
 import { flushOutboxNow } from "@/lib/outbox";
+import { claimFounder, fetchClaimStatus } from "@/lib/nodeClaim";
+import { useApp } from "@/state/AppContext";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export function NodeSection() {
@@ -163,6 +165,8 @@ export function NodeSection() {
 
       <Telemetry lastSuccess={lastSuccess?.value} lastError={lastError?.value} />
 
+      <FounderClaimCard url={persisted.url || draft.url} />
+
       <OutboxControls />
 
       {/* The /invite paste-recovery entry point stays reachable from
@@ -195,6 +199,134 @@ export function NodeSection() {
         }}
       />
     </section>
+  );
+}
+
+// First-run founder claim (docs/member-authenticated-reads.md,
+// "Claiming a fresh node"). A fresh server under the default
+// READ_AUTH=on boots UNCLAIMED and refuses every community surface
+// until its founding member presents the one-time setup code from
+// the server's boot log. This card is the app half of that ceremony:
+// it appears only while the CONNECTED node reports `claimed: false`
+// on /config (fetched when the member expands the disclosure — no
+// background probing), takes the code, signs the claim with the
+// member's own key, and reports the node ready. Nothing here renders
+// for the overwhelmingly common case of a long-claimed node.
+function FounderClaimCard({ url }: { url: string }) {
+  const { t } = useTranslation();
+  const { currentMember } = useApp();
+  const [expanded, setExpanded] = useState(false);
+  // null = status unknown (probe pending/failed); boolean = the
+  // node's own answer.
+  const [unclaimed, setUnclaimed] = useState<boolean | null>(null);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<
+    | { kind: "success" }
+    | { kind: "error"; message: string }
+    | null
+  >(null);
+
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl || !currentMember) return null;
+
+  async function handleExpand() {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && unclaimed === null) {
+      setUnclaimed(await fetchClaimStatus(trimmedUrl));
+    }
+  }
+
+  async function handleClaim(e: React.FormEvent) {
+    e.preventDefault();
+    if (!currentMember || busy || !code.trim()) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await claimFounder({
+        url: trimmedUrl,
+        setupToken: code,
+        publicKey: currentMember.publicKey,
+      });
+      if (res.ok) {
+        setResult({ kind: "success" });
+        setUnclaimed(false);
+        setCode("");
+      } else {
+        setResult({
+          kind: "error",
+          message: t(`profile.node.claim.errors.${res.reason}`),
+        });
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        className="text-xs font-medium text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
+        aria-expanded={expanded}
+        onClick={handleExpand}
+      >
+        {t("profile.node.claim.toggle")}
+      </button>
+      {expanded && (
+        <div className="mt-2 rounded-xl border border-bark-200/60 bg-bark-50 p-3 text-sm dark:border-moss-800 dark:bg-moss-900/40">
+          {result?.kind === "success" ? (
+            <p className="text-canopy-700 dark:text-canopy-300">
+              {t("profile.node.claim.success")}
+            </p>
+          ) : unclaimed === null ? (
+            <p className="text-moss-600 dark:text-moss-300">
+              {t("profile.node.claim.statusUnknown")}
+            </p>
+          ) : unclaimed === false ? (
+            <p className="text-moss-600 dark:text-moss-300">
+              {t("profile.node.claim.alreadyClaimed")}
+            </p>
+          ) : (
+            <form onSubmit={handleClaim} className="flex flex-col gap-2">
+              <p className="text-moss-600 dark:text-moss-300">
+                {t("profile.node.claim.intro")}
+              </p>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium">
+                  {t("profile.node.claim.codeLabel")}
+                </span>
+                <input
+                  type="text"
+                  className="input font-mono"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="xxxx-xxxx-xxxx-xxxx"
+                />
+              </label>
+              {result?.kind === "error" && (
+                <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">
+                  {result.message}
+                </p>
+              )}
+              <button
+                type="submit"
+                className="btn-secondary self-start"
+                disabled={busy || !code.trim()}
+                aria-busy={busy}
+              >
+                {busy
+                  ? t("profile.node.claim.claiming")
+                  : t("profile.node.claim.claim")}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

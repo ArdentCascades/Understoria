@@ -45,6 +45,7 @@ async function serverWith(env: Record<string, string>) {
   db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: "node_test",
     RATE_LIMIT_MAX: "10000",
     ...env,

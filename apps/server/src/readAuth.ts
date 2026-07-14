@@ -141,11 +141,20 @@ export function createMembershipResolver(
   const edgesStmt = db.prepare(
     "SELECT inviter_key, redeemed_by, redeemed_at FROM redemptions",
   );
+  // In-band claimed founders (POST /claim-founder) union with the
+  // env-configured NODE_FOUNDER_KEYS as trust roots. Both are
+  // append-only from the resolver's perspective (a claimed founder
+  // is retired via quorum removal, never row deletion), so the count
+  // is a complete change signal here too.
+  const claimedStmt = db.prepare(
+    "SELECT founder_key FROM claimed_founders",
+  );
   const countStmt = db.prepare(`
     SELECT
       (SELECT COUNT(*) FROM redemptions) AS receipts,
       (SELECT COUNT(*) FROM member_removals) AS removals,
-      (SELECT COUNT(*) FROM member_reinstatements) AS reinstatements
+      (SELECT COUNT(*) FROM member_reinstatements) AS reinstatements,
+      (SELECT COUNT(*) FROM claimed_founders) AS claimed
   `);
   const standingStmt = db.prepare(`
     SELECT removed_key AS key, decided_at, 1 AS removal
@@ -173,6 +182,9 @@ export function createMembershipResolver(
     }
 
     const reachable = new Set<string>(founderKeys);
+    for (const row of claimedStmt.all() as { founder_key: string }[]) {
+      reachable.add(row.founder_key);
+    }
     const rows = edgesStmt.all() as {
       inviter_key: string;
       redeemed_by: string;
@@ -207,8 +219,9 @@ export function createMembershipResolver(
       receipts: number;
       removals: number;
       reinstatements: number;
+      claimed: number;
     };
-    const stamp = `${counts.receipts}:${counts.removals}:${counts.reinstatements}`;
+    const stamp = `${counts.receipts}:${counts.removals}:${counts.reinstatements}:${counts.claimed}`;
     if (reachableCache === null || standingCache === null || stamp !== cachedAtCounts) {
       build();
       cachedAtCounts = stamp;
