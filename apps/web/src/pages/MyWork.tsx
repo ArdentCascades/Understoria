@@ -26,6 +26,9 @@ import { MyTasksSection } from "@/pages/MyTasks";
 import { MyProjectsSection } from "@/pages/MyProjects";
 import { buildShiftIcs, icsFilename } from "@/lib/eventIcs";
 import { downloadIcs } from "@/lib/ics";
+import { askedOfYou, type AskedOfYouItem } from "@/lib/mentions";
+import { stripMarkdown } from "@/lib/markdown";
+import { formatRelativeTime } from "@/lib/format";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { WhyTooltip } from "@/components/WhyTooltip";
@@ -55,6 +58,7 @@ import type { Post } from "@/types";
 export default function MyWorkPage() {
   const {
     currentMember,
+    members,
     projects,
     projectTasks,
     posts,
@@ -159,6 +163,29 @@ export default function MyWorkPage() {
     [currentMember, posts, blockedKeys],
   );
 
+  // "Asked of you" — comments that @-mention the viewer, DERIVED live
+  // from the comment/task/project tables (docs/mentions.md: no
+  // notification rows exist anywhere; these predicates ARE the
+  // lifecycle). Comments live in Dexie only, same as the shifts read.
+  const commentRows = useLiveQuery(() => db.taskComments.toArray(), [], []);
+  const memberNames = useMemo(
+    () => new Map(members.map((m) => [m.publicKey, m.displayName])),
+    [members],
+  );
+  const asked = useMemo(
+    () =>
+      currentMember
+        ? askedOfYou({
+            myKey: currentMember.publicKey,
+            comments: commentRows,
+            tasks: projectTasks,
+            projects,
+            blockedKeys,
+          })
+        : [],
+    [currentMember, commentRows, projectTasks, projects, blockedKeys],
+  );
+
   // Redirected /my-tasks and /my-projects arrivals carry a hash;
   // <main> is the scroller (never the document), so the hash needs an
   // explicit scroll once the section exists — Profile#invites idiom.
@@ -176,7 +203,8 @@ export default function MyWorkPage() {
     carrying.taskCount === 0 &&
     organizing.projectCount === 0 &&
     upcomingShifts.length === 0 &&
-    claimedPosts.length === 0;
+    claimedPosts.length === 0 &&
+    asked.length === 0;
 
   return (
     <div className="px-4 pb-8 pt-4">
@@ -223,6 +251,40 @@ export default function MyWorkPage() {
             aria-labelledby="my-work-tasks-heading"
             className="scroll-mt-4"
           >
+            {/* Raised hands first: someone specifically asked for this
+                member, which outranks their standing list in "what
+                would I want to see on walking in?". DERIVED state
+                (docs/mentions.md) — each row exists only while its
+                comment is live, its task/project still wants
+                attention, and the member hasn't replied; there is no
+                unread count and nothing to dismiss, so the section
+                simply isn't there when no hands are up. */}
+            {asked.length > 0 && (
+              <section
+                aria-labelledby="my-work-asked-heading"
+                className="mb-6"
+              >
+                <h2
+                  id="my-work-asked-heading"
+                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+                >
+                  {t("myWork.askedTitle")}
+                  <WhyTooltip principleId="no-notifications" />
+                </h2>
+                <div className="card">
+                  <ul className="divide-y divide-moss-100 dark:divide-moss-800">
+                    {asked.map((item) => (
+                      <AskedRow
+                        key={item.comment.id}
+                        item={item}
+                        memberNames={memberNames}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            )}
+
             <h2
               id="my-work-tasks-heading"
               className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
@@ -339,6 +401,48 @@ export default function MyWorkPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// One raised hand: who asked, on which task, and what they said —
+// linking straight to the task page, where the reply (which lowers
+// the hand) naturally happens. The snippet strips markdown so tokens
+// and syntax never leak into a one-line preview; the asker's CURRENT
+// display name comes from the members table, with the generic
+// fallback for a key this device can't resolve.
+function AskedRow({
+  item,
+  memberNames,
+}: {
+  item: AskedOfYouItem;
+  memberNames: Map<string, string>;
+}) {
+  const { t } = useTranslation();
+  const { comment, task, project } = item;
+  const asker =
+    memberNames.get(comment.authorKey) ?? t("common.memberFallback");
+  return (
+    <li className="py-2">
+      <Link
+        to={`/project/${project.id}/task/${task.id}`}
+        className="-mx-2 block rounded-lg px-2 py-1 hover:bg-moss-50 dark:hover:bg-moss-900"
+      >
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">
+            {task.title}
+          </span>
+          <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
+            {formatRelativeTime(comment.createdAt)}
+          </span>
+        </span>
+        <span className="mt-1 block text-xs text-moss-600 dark:text-moss-300">
+          {t("myWork.askedBy", { name: asker })}
+        </span>
+        <span className="mt-0.5 block truncate text-xs text-bark-700 dark:text-moss-200">
+          {stripMarkdown(comment.body)}
+        </span>
+      </Link>
+    </li>
   );
 }
 

@@ -50,6 +50,7 @@ export type MdInline =
   | { type: "del"; children: MdInline[] }
   | { type: "code"; value: string }
   | { type: "link"; href: string; children: MdInline[] }
+  | { type: "mention"; key: string; label: string }
   | { type: "br" };
 
 /** One item of a list. `checked` is null for ordinary items, true/false for
@@ -124,6 +125,29 @@ export function sanitizeUrl(raw: string): string | null {
   if (UNSAFE_URL_CHAR_RE.test(u)) return null;
   if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u)) return u;
   return null;
+}
+
+// The pseudo-scheme carried inside a mention token's URL slot:
+// `@[Display Name](mention:BASE64KEY)`. Chosen deliberately so that any
+// renderer that does NOT know about mentions — a peer community on an
+// older build, or a surface that never opts into mention resolution —
+// processes the token through the ORDINARY link rules: `mention:` fails
+// sanitizeUrl's http(s)/mailto allow-list, the link is dropped, and the
+// visible label survives as plain text. The reader sees "@Display Name",
+// which is exactly the right degraded rendering, with zero wire-format
+// or schema changes anywhere. See docs/mentions.md §2 (D2).
+export const MENTION_SCHEME = "mention:";
+
+// A plausible base64-encoded Ed25519 public key (44 chars with padding;
+// bounds kept loose so this stays a shape check, not a crypto check).
+// A token whose key fails this never becomes a mention node — it
+// degrades exactly like an unsafe link (label as plain text), so a
+// malformed or hostile token can't smuggle arbitrary strings into the
+// member-key slot that renderers resolve against.
+const MENTION_KEY_RE = /^[A-Za-z0-9+/]{32,88}={0,2}$/;
+
+export function isValidMentionKey(key: string): boolean {
+  return MENTION_KEY_RE.test(key);
 }
 
 // Characters a backslash may escape into a literal. Mirrors the small set of
@@ -266,6 +290,31 @@ export function parseInline(s: string): MdInline[] {
         continue;
       }
       // Not a valid image pattern: `!` is an ordinary character.
+      buf += ch;
+      i += 1;
+      continue;
+    }
+
+    // (3.5) Mention: @[Display Name](mention:BASE64KEY). Only the exact
+    //     shape becomes a mention node: `@` immediately followed by a
+    //     valid bracket pattern whose URL slot is the mention pseudo-
+    //     scheme with a plausible base64 key. Anything else — `@` before
+    //     plain text, `@[..](https://..)`, a malformed key — leaves the
+    //     `@` as a literal character and lets the ordinary link rules
+    //     handle the bracket group (dropping a `mention:` URL as unsafe,
+    //     which degrades the token to its visible label). The label is
+    //     NOT inline-parsed: it is a person's name, not markup.
+    if (ch === "@" && s[i + 1] === "[") {
+      const parsed = tryLink(s, i + 1);
+      if (parsed && parsed.rawUrl.startsWith(MENTION_SCHEME)) {
+        const key = parsed.rawUrl.slice(MENTION_SCHEME.length);
+        if (isValidMentionKey(key)) {
+          flush();
+          out.push({ type: "mention", key, label: parsed.label });
+          i = parsed.end;
+          continue;
+        }
+      }
       buf += ch;
       i += 1;
       continue;
@@ -843,6 +892,10 @@ export function stripMarkdown(text: string): string {
           case "del":
           case "link":
             return inlineText(node.children);
+          case "mention":
+            // Previews show the compose-time label — same degraded
+            // rendering peers get; a one-line preview never resolves.
+            return `@${node.label}`;
           case "br":
             return " ";
         }

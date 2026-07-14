@@ -983,3 +983,60 @@ describe("stripMarkdown", () => {
     expect(stripMarkdown("![a cat](https://e/cat.png)")).toBe("a cat");
   });
 });
+
+// --- Mentions: @[Name](mention:KEY) — see docs/mentions.md §2 (D2) ---------
+
+const KEY_A = "A".repeat(43) + "="; // plausible base64 Ed25519 key shape
+
+describe("parseInline — mentions", () => {
+  it("parses @[Name](mention:KEY) into a mention node", () => {
+    expect(parseInline(`hi @[Rosa](mention:${KEY_A})!`)).toEqual([
+      { type: "text", value: "hi " },
+      { type: "mention", key: KEY_A, label: "Rosa" },
+      { type: "text", value: "!" },
+    ]);
+  });
+
+  it("degrades gracefully when the scheme is not mention: — @ stays literal, link rules apply", () => {
+    // `@[label](https://…)` is an @ before an ordinary link.
+    const nodes = parseInline("@[Rosa](https://example.org)");
+    expect(nodes[0]).toEqual({ type: "text", value: "@" });
+    expect(nodes[1]).toMatchObject({ type: "link", href: "https://example.org" });
+  });
+
+  it("a malformed key degrades to the plain-text label (never a mention node)", () => {
+    // The bracket group hits the ORDINARY link rules: `mention:` fails
+    // sanitizeUrl, the link drops, the label survives as text. This is
+    // the exact degraded rendering an older/peer client shows for ALL
+    // mention tokens — the property D2 buys. Lock it in.
+    const nodes = parseInline("@[Rosa](mention:not-a-key)");
+    // Node boundaries don't matter — what matters is that every node
+    // is plain text, the visible text is exactly "@Rosa", and the
+    // pseudo-URL is gone.
+    expect(nodes.every((n) => n.type === "text")).toBe(true);
+    expect(
+      nodes.map((n) => (n.type === "text" ? n.value : "")).join(""),
+    ).toBe("@Rosa");
+    expect(JSON.stringify(nodes)).not.toContain("mention:");
+  });
+
+  it("a mention token inside a code span stays verbatim code", () => {
+    expect(parseInline(`\`@[Rosa](mention:${KEY_A})\``)).toEqual([
+      { type: "code", value: `@[Rosa](mention:${KEY_A})` },
+    ]);
+  });
+
+  it("plain @word never becomes a mention (emails, handles)", () => {
+    expect(parseInline("mail rosa@example.org")).toEqual([
+      { type: "text", value: "mail rosa@example.org" },
+    ]);
+  });
+});
+
+describe("stripMarkdown — mentions", () => {
+  it("flattens a mention to @label for one-line previews", () => {
+    expect(stripMarkdown(`ping @[Rosa](mention:${KEY_A}) please`)).toBe(
+      "ping @Rosa please",
+    );
+  });
+});

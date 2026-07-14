@@ -36,6 +36,7 @@ interface MockState {
   coorgInvitationResponses: never[];
   coorgInvitationRevocations: never[];
   blockedKeys: Set<string>;
+  members: Member[];
 }
 
 let mockState: MockState;
@@ -112,6 +113,7 @@ beforeEach(async () => {
     coorgInvitationResponses: [],
     coorgInvitationRevocations: [],
     blockedKeys: new Set<string>(),
+    members: [],
   };
   await db.eventShifts.clear();
   await db.shiftSignups.clear();

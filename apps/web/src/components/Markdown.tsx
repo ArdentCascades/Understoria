@@ -9,7 +9,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -19,6 +26,61 @@ import {
   type MdListItem,
   type MdTableAlign,
 } from "@/lib/markdown";
+
+/**
+ * Mention resolution — OPT-IN per surface. A surface that renders
+ * comments (TaskComments) wraps its markdown in
+ * `<MentionResolverContext.Provider>`; every other surface renders a
+ * mention token as its plain "@label" fallback, byte-identical to
+ * what a peer community on an older build sees. Resolution maps a
+ * member KEY to the member's CURRENT display name from the local
+ * members table — the current name always wins over the token's
+ * embedded compose-time label, so a comment can never dress an
+ * arbitrary key up as somebody else (docs/mentions.md §4).
+ */
+export interface MentionResolver {
+  /** Current display name for a member key, or undefined when the
+   *  key isn't in the local members table (e.g. a peer community's
+   *  member arriving via a federated comment). */
+  resolveName: (key: string) => string | undefined;
+  /** The viewing member's own key — their mentions get the "that's
+   *  you" emphasis. */
+  currentMemberKey?: string;
+}
+
+export const MentionResolverContext = createContext<MentionResolver | null>(
+  null,
+);
+
+/**
+ * One rendered mention. Resolvable keys render as a quiet chip
+ * linking to the member's profile (so "who is asking?" is one tap);
+ * unresolvable keys — or surfaces with no resolver — render the
+ * compose-time label as muted text, no link, no implied trust.
+ */
+function MentionChip({ mentionKey, label }: { mentionKey: string; label: string }) {
+  const { t } = useTranslation();
+  const ctx = useContext(MentionResolverContext);
+  const name = ctx?.resolveName(mentionKey);
+  if (name === undefined) {
+    return (
+      <span className="text-moss-600 dark:text-moss-300">
+        @{label || t("common.memberFallback")}
+      </span>
+    );
+  }
+  const isMe = ctx?.currentMemberKey === mentionKey;
+  return (
+    <Link
+      to={`/member/${encodeURIComponent(mentionKey)}`}
+      className={`rounded px-0.5 font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 ${
+        isMe ? "bg-canopy-100 dark:bg-canopy-900/60" : ""
+      }`}
+    >
+      @{name}
+    </Link>
+  );
+}
 
 // Below this character count a collapsible description renders plainly — no
 // clamp, no toggle. Shared/exported so callers and tests reference one number.
@@ -67,6 +129,10 @@ function renderInline(node: MdInline, key: number): ReactNode {
           {node.value}
         </code>
       );
+    case "mention":
+      // A component (not inline JSX) so it can read the resolver
+      // context — renderInline itself is a plain function.
+      return <MentionChip key={key} mentionKey={node.key} label={node.label} />;
     case "link":
       // target=_blank so tapping a link in the installed PWA doesn't navigate
       // the app away; rel=noopener+noreferrer+nofollow because the href came

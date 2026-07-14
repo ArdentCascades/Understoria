@@ -270,6 +270,11 @@
       "working": "Resetting…"
     }
   },
+  "mentions": {
+    "suggestionsLabel": "Mention a member",
+    "willSeeOne": "{{name}} will see this next time they open Understoria — mentions never buzz anyone.",
+    "willSeeMany": "They'll see this next time they open Understoria — mentions never buzz anyone."
+  },
   "offline": {
     "banner": "You're offline. Everything here still works from your device.",
     "guideLink": "What you can still do in an outage",
@@ -1324,7 +1329,9 @@
     "shiftsTitle": "Shifts you're signed up for",
     "claimedPostsTitle": "Help you're on your way to give",
     "shiftIcs": "Add this shift to my calendar (.ics)",
-    "deskLink": "See everything waiting on you at your desk"
+    "deskLink": "See everything waiting on you at your desk",
+    "askedTitle": "Asked of you",
+    "askedBy": "{{name}} mentioned you"
   },
   "plugIn": {
     "title": "Ways to plug in",
