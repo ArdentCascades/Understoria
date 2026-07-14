@@ -98,13 +98,65 @@ could fetch anyway; the bound just expires captured headers.
 
 ### Rollout (`READ_AUTH`)
 
-- `READ_AUTH=off` (default): feeds behave exactly as before. The PWA
-  ALWAYS sends the headers when it has an unlocked identity — they're
-  harmless when off, and it means every member's app is ready before
-  any operator flips.
-- `READ_AUTH=on`: GET feeds require a valid member signature. Boot
-  fails loudly if no `NODE_FOUNDER_KEYS` are set (an "on" node nobody
-  can read is a misconfiguration, not a security posture).
+- `READ_AUTH=on` (**default**): GET feeds require a valid member
+  signature, and the write half below applies. Booting with no
+  founder configured is not an error — it is a fresh **unclaimed**
+  node (next section), which refuses every gated surface and prints
+  a one-time setup code for the founding member.
+- `READ_AUTH=off`: the explicit dev/demo opt-out — feeds and writes
+  behave as the pre-flip default did. The PWA ALWAYS sends the read
+  headers when it has an unlocked identity, so no app-side step ever
+  gates turning enforcement (back) on.
+
+The default was `off` through the staged-rollout era and flipped to
+`on` once every shipped app build signed its reads — a breaking
+change for deployments whose env never set `READ_AUTH` (they gain
+enforcement on upgrade; set `READ_AUTH=off` to keep the old posture,
+or claim the node / set founder keys to adopt the new one).
+
+### Claiming a fresh node (the setup code)
+
+Enforcement needs a trust root, but the founder's key does not exist
+until the founder has minted an identity in the app — the old flow
+resolved this by having the operator copy their public key into
+`NODE_FOUNDER_KEYS` and restart. The claim flow replaces that with
+the first-run pattern self-hosted software already uses:
+
+1. A node that boots with NO trust root (no `NODE_FOUNDER_KEYS`, no
+   previously claimed founder) is **unclaimed**: every gated surface
+   answers 401/403, `GET /config` reports `claimed: false`, and the
+   boot log prints a one-time **setup code** (override it with
+   `SETUP_TOKEN`; a restart mints a fresh random one).
+2. The founding member creates their identity in the app, connects
+   the node (Profile → Community node), and opens **Founder setup**
+   — the card appears when the connected node reports itself
+   unclaimed. They enter the setup code; the app signs
+   `canonicalFounderClaimMessage(publicKey, code, ts)` and POSTs it
+   to `/claim-founder`.
+3. The server verifies the code (timing-safe), the timestamp window
+   (same ±10 min bound as reads), and the signature — so an observer
+   of the claim request cannot re-target it at a different key —
+   then stores the key in `claimed_founders`. The membership
+   resolver unions claimed founders with `NODE_FOUNDER_KEYS`, so
+   the node is fully live immediately, no restart.
+
+The claim is **one-shot**: it answers `409 already_claimed` the
+moment any trust root exists, and everything after the first founder
+uses the ordinary machinery — invites for members, quorum removal to
+retire anyone (claimed founders included), `NODE_FOUNDER_KEYS` for
+additional roots or recovery. `/claim-founder` is open by
+construction, like `/redemptions`: it is the step that makes
+membership exist. The unclaimed window between boot and claim is
+strictly safer than the old open default — an unclaimed node refuses
+reads AND writes, so there is nothing to scrape and no way to
+pre-seed junk; the setup code only decides who gets to be founder,
+and it lives in the operator's terminal.
+
+Mirrors: a mirror of a claimed community should set
+`NODE_FOUNDER_KEYS` to the founder's key (ask the founder — it's
+public, shown on their Profile) rather than being claimed
+separately; the resolver's trust roots MUST match across a mirror
+set, like `NODE_ID`.
 
 Exempt surfaces (open by design, each self-limiting):
 `/health` (liveness; the origin-suggest probe), `GET /config`
@@ -119,6 +171,56 @@ passphrase-locked session sends no headers and, under enforcement,
 pulls silently no-op (the existing `!res.ok → null` path) until the
 member unlocks — then the periodic re-pull catches up. Named in the
 operator runbook so "my app stopped syncing" has a findable answer.
+
+### The write half (same switch)
+
+Joining is invite-gated and, with `READ_AUTH=on`, reading is
+member-gated — but until the write gate, WRITING was not: every
+attributable federation POST (`/posts`, `/vouches`, `/exchanges`,
+`/events`, `/claims`, `/task-comments`, …) accepted any well-formed
+record self-signed by a key the sender generated for free. A
+signature proves key possession, not membership; insert caps bound
+the *volume* of abuse, not its existence — a stranger could still
+seed a community's board with valid-looking posts and vouches that
+would federate like anything else.
+
+`registerMemberWriteGuard` (readAuth.ts) closes this with the same
+resolver, over the same insert-cap `SURFACES` attribution the
+removed-author guard already uses: when `READ_AUTH=on`, the
+surface's attributed signing key must resolve as a member or the
+POST is refused `403 not_a_member` — the identical posture the
+governance routes and the `/messages` sender gate pioneered, now
+uniform across every attributable surface. One switch, not two:
+enabling read enforcement enables write enforcement, and the boot
+guard that requires `NODE_FOUNDER_KEYS` covers both (the gate never
+runs against an empty member universe).
+
+Exemptions, each carrying its own authority:
+
+- **`POST /redemptions`** — the joining ceremony itself. The
+  redeemer is by definition not yet a member; the route's verified
+  invite chain (inviter signature → receipt signature) IS the
+  authority. Gating it would weld the front door shut.
+- **Mirror-internal replication** (per-boot token) — re-POSTs of
+  HISTORICAL records; membership standing is judged where a record
+  first enters the community, not re-litigated per replica hop.
+- **Key-field-null surfaces** (`/member-removals`,
+  `/member-reinstatements`, `/auto-confirm`) — multi-signed or
+  system-signed; their authority rules live in-route.
+
+Coverage note (same as the removed-author guard): the gate checks
+the SIGNING author each surface validates — `/exchanges` gates
+`helperKey`; a record naming a non-member counterparty still lands,
+because the ledger records what happened.
+
+Ordering edge, named for the runbook: a freshly-redeemed member's
+first records 403 until their redemption receipt lands at the node.
+The client enqueues the receipt at redemption time, before anything
+they could author, and the outbox flushes in `nextAttemptAt` order —
+so the receipt ships ahead of their first records and this is a
+non-event in practice. A member who somehow authored records before
+their receipt arrived would see those rows poisoned (403 is
+non-retryable), same as the governance surfaces since G1.
 
 ### Peer nodes (`PEER_READ_TOKENS`)
 
@@ -172,7 +274,10 @@ engineers; linked from the operator guide and privacy policy.
 - ~~No member expulsion / read revocation~~ — shipped since
   (`docs/member-removal.md` M1); the closure section above carries
   the amended definition.
-- No authentication on POSTs beyond the signatures records already
-  carry — writes were never the gap; insert caps bound abuse.
+- ~~No authentication on POSTs beyond the signatures records already
+  carry~~ — this claim did not survive review: a stranger's
+  well-formed self-signed records landed and federated. Shipped
+  since as the write half of `READ_AUTH=on` (§1, "The write half");
+  insert caps remain the volume bound beneath it.
 - No per-record read ACLs. The community reads as one audience;
   finer tiers remain a UI concern (roster visibility tiers etc.).

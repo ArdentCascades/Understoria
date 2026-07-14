@@ -31,6 +31,7 @@ async function freshServer() {
   db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: "node_test",
     // Per-bucket + validation tests fire many requests from one
     // fake address; keep the rate limiter out of the way.

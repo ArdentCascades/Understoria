@@ -2564,6 +2564,24 @@
         "title": "Send your exchange records to this server?",
         "body": "Turning on mirroring sends every exchange you take part in to this server — including the other person's public key, the signature, category, hours, and time. A server you don't control can use this to map who-helps-whom across your community. Only enable this for a node your community runs and trusts.",
         "confirm": "Yes, mirror to this node"
+      },
+      "claim": {
+        "toggle": "Founder setup — claim a fresh node",
+        "statusUnknown": "Couldn't reach the node to check whether it needs a founder. Make sure the URL above is right and try again.",
+        "alreadyClaimed": "This node already has its founding member — nothing to do here.",
+        "intro": "A fresh node starts locked until its founding member claims it. Enter the one-time setup code printed in the server's startup log (the terminal where you ran the server).",
+        "codeLabel": "Setup code",
+        "claim": "Claim this node",
+        "claiming": "Claiming…",
+        "success": "Node claimed — you're the founding member, and syncing starts on the next pull. Welcome home.",
+        "errors": {
+          "already_claimed": "Someone already claimed this node. If that wasn't you, talk to whoever runs the server.",
+          "bad_setup_token": "That code doesn't match. Copy it exactly from the server's startup log — a restart mints a new one.",
+          "stale_claim": "This device's clock looks off by more than a few minutes — fix the time and try again.",
+          "bad_signature": "The claim couldn't be signed correctly. Unlock the app and try again.",
+          "unreachable": "Couldn't reach the node. Check the URL and your connection.",
+          "rejected": "The node refused the claim. Check the server logs for details."
+        }
       }
     },
     "invites": {

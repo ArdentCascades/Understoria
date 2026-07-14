@@ -1311,6 +1311,24 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '27')",
     ).run();
   }
+
+  if (current < 28) {
+    // First-run founder claim (docs/member-authenticated-reads.md,
+    // "Claiming a fresh node"). Founders claimed in-band via
+    // POST /claim-founder land here; the membership resolver unions
+    // these rows with NODE_FOUNDER_KEYS. Append-only, like the other
+    // membership inputs — a claimed founder is retired through the
+    // ordinary quorum-removal path, never by deleting the row.
+    db.exec(`
+      CREATE TABLE claimed_founders (
+        founder_key TEXT PRIMARY KEY,
+        claimed_at  INTEGER NOT NULL
+      );
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '28')",
+    ).run();
+  }
 }
 
 /**

@@ -38,6 +38,7 @@ async function freshServer(
   db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: "node_new",
     RATE_LIMIT_MAX: "10000",
     ...extraEnv,
@@ -203,6 +204,7 @@ describe("RESEED_GRACE_UNTIL — /redemptions recovery window", () => {
     expect(() =>
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         NODE_ID: "n",
         RESEED_GRACE_UNTIL: String(Date.now() + 31 * 24 * 60 * 60 * 1000),
       } as NodeJS.ProcessEnv),
@@ -335,6 +337,7 @@ describe("TRUSTED_SYSTEM_KEYS — re-seeded auto-confirmed exchanges", () => {
     expect(() =>
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         NODE_ID: "n",
         TRUSTED_SYSTEM_KEYS: JSON.stringify([
           { nodeId: "node_a", current: k.publicKey },

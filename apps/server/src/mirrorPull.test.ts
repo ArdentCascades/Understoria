@@ -76,6 +76,7 @@ async function build(
   const db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: nodeId,
     RATE_LIMIT_MAX: "10000",
     ...extraEnv,

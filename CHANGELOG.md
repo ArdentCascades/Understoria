@@ -9,7 +9,58 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING — the server is now secure by default: `READ_AUTH`
+  defaults to `on`, and fresh nodes boot unclaimed**
+  (`apps/server/src/config.ts`, `server.ts`, `db.ts` migration 28,
+  `routes/claimFounder.ts`, `routes/config.ts`, `readAuth.ts`;
+  `apps/web/src/lib/nodeClaim.ts`, `components/NodeSection.tsx`;
+  `docs/member-authenticated-reads.md`, `docs/operator-guide.md`,
+  `docker-compose.yml`). Member-authenticated reads and the
+  member-gated writes that ride the same switch are now the normal
+  posture; `READ_AUTH=off` remains as the explicit dev/demo opt-out.
+  The old "enforcement requires `NODE_FOUNDER_KEYS` or the boot
+  fails" rule is replaced by the first-run pattern self-hosted
+  software already uses: a node with no trust root boots
+  **unclaimed** — every gated surface refuses, `GET /config` reports
+  `claimed: false`, and the boot log prints a one-time **setup code**
+  (`SETUP_TOKEN` to choose your own; restarts mint fresh ones). The
+  founding member claims the node from inside the app: Profile →
+  Community node → **Founder setup**, paste the code — the app signs
+  `canonicalFounderClaimMessage` and POSTs `/claim-founder`; the
+  server verifies code (timing-safe), timestamp window, and
+  signature, stores the key in the new `claimed_founders` table, and
+  the membership resolver (which now unions claimed founders with
+  `NODE_FOUNDER_KEYS`) makes the node fully live with no restart.
+  The claim is one-shot (`409 already_claimed` once any root
+  exists); claimed founders are retired via the ordinary quorum
+  removal, and `NODE_FOUNDER_KEYS` stays as the override for
+  mirrors, recovery, and multi-founder bootstraps. **Upgrade note:**
+  a deployment whose env never set `READ_AUTH` gains enforcement on
+  upgrade — set `NODE_FOUNDER_KEYS` (or claim the node) to adopt the
+  new posture, or set `READ_AUTH=off` to keep the old one.
+
 ### Added
+- **Server: write-membership gate — the write half of `READ_AUTH=on`**
+  (`apps/server/src/readAuth.ts`, `server.ts`,
+  `docs/member-authenticated-reads.md`). Review of the federation
+  surfaces found that while joining is invite-gated and reads are
+  member-gated under enforcement, WRITING was not: `POST /posts`,
+  `/vouches`, `/exchanges` and every other attributable surface
+  accepted any well-formed record self-signed by a key the sender
+  generated for free — a stranger could seed a community's board with
+  valid-looking records that federated like anything else (insert
+  caps bounded the volume, not the existence). With `READ_AUTH=on`,
+  `registerMemberWriteGuard` now requires each surface's attributed
+  signing key to resolve as a member (founder roots + redemption-
+  receipt closure − quorum removals — the same resolver reads use),
+  refusing strangers with `403 not_a_member`, the posture the
+  governance routes and the `/messages` sender gate already
+  established. `POST /redemptions` stays open (it IS the joining
+  ceremony), mirror-internal replication is exempt (history is
+  history), and multi-/system-signed surfaces keep their in-route
+  authority rules. One switch, not two: `READ_AUTH=off` behaves
+  exactly as before for staged rollouts.
 - **@-mentions in task comments — derived, not delivered**
   (`lib/mentions.ts`, `lib/markdown.ts`, `components/Markdown.tsx`,
   `components/TaskComments.tsx`, `pages/MyWork.tsx`,

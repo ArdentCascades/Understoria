@@ -190,9 +190,20 @@ export interface Config {
    * keys of members who joined WITHOUT an invite (the founding
    * member(s)). Everyone else proves membership transitively through
    * verified redemption receipts. Comma-separated via
-   * `NODE_FOUNDER_KEYS`.
+   * `NODE_FOUNDER_KEYS`. Since the founder-claim flow this is the
+   * OVERRIDE path (mirrors, recovery, multi-founder bootstraps) —
+   * a fresh node normally gains its founder via `POST /claim-founder`
+   * instead, and the resolver unions both sources.
    */
   founderKeys: readonly string[];
+  /**
+   * Optional operator-chosen setup code for the first-run founder
+   * claim (`SETUP_TOKEN`). When unset and the node boots UNCLAIMED
+   * (no env founder keys, no claimed founder), a random one-time code
+   * is generated and printed to the boot log instead. Ignored once
+   * the node is claimed.
+   */
+  setupToken: string | null;
   /**
    * Shared read tokens for peer nodes (`PEER_READ_TOKENS`, JSON map of
    * peer base URL → token). Outgoing peer pulls to a mapped URL send
@@ -355,8 +366,9 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       env.PER_KEY_ROW_CEILING,
       10_000,
     ),
-    readAuth: parseReadAuth(env.READ_AUTH, env.NODE_FOUNDER_KEYS),
+    readAuth: parseReadAuth(env.READ_AUTH),
     founderKeys: parseFounderKeys(env.NODE_FOUNDER_KEYS),
+    setupToken: nonEmpty(env.SETUP_TOKEN),
     peerReadTokens: parsePeerReadTokens(env.PEER_READ_TOKENS),
     databaseKey: nonEmpty(env.DATABASE_KEY),
     mirrorNodeUrls: parseUrlList("MIRROR_NODE_URLS", env.MIRROR_NODE_URLS),
@@ -486,23 +498,20 @@ function parseTrustedSystemKeys(
   });
 }
 
-function parseReadAuth(
-  raw: string | undefined,
-  founderRaw: string | undefined,
-): "off" | "on" {
-  const mode = (raw ?? "off").toLowerCase();
+function parseReadAuth(raw: string | undefined): "off" | "on" {
+  // Default ON — enforcement is the normal posture, "off" is the
+  // explicit dev/demo opt-out. This was "off" by default through the
+  // staged rollout era; the flip is a deliberate breaking change
+  // (CHANGELOG) now that every shipped app build signs its reads.
+  // Enforcement with no founder keys is no longer a boot failure:
+  // that state is a fresh UNCLAIMED node, which refuses every gated
+  // surface and prints a one-time setup code so the founding member
+  // can claim it in-band (POST /claim-founder,
+  // docs/member-authenticated-reads.md "Claiming a fresh node").
+  const mode = (raw ?? "on").toLowerCase();
   if (mode !== "off" && mode !== "on") {
     throw new Error(
       `READ_AUTH must be "off" or "on", got ${JSON.stringify(raw)}`,
-    );
-  }
-  if (mode === "on" && parseFounderKeys(founderRaw).length === 0) {
-    // Loud, not lenient: enforcement with an empty member universe
-    // means NOBODY can read the node — always a misconfiguration.
-    throw new Error(
-      "READ_AUTH=on requires at least one NODE_FOUNDER_KEYS entry " +
-        "(the membership resolver's trust root — " +
-        "docs/member-authenticated-reads.md §1)",
     );
   }
   return mode;

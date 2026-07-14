@@ -35,6 +35,7 @@ async function freshServer() {
   db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: "node_test",
   } as NodeJS.ProcessEnv);
   const built = await buildServer({ config, database: db });

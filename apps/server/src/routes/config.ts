@@ -83,13 +83,26 @@ export interface PublicConfigResponse {
    *  (Optional only for the builder's `{}` literal — the route sets
    *  it unconditionally.) */
   removalQuorum?: number;
+  /** Whether this node has a founding trust root (env founder keys
+   *  or an in-band claimed founder). `false` = a fresh node waiting
+   *  for its founder to present the boot-log setup code — the PWA's
+   *  Founder setup card keys off this. Always present; /config is
+   *  the pre-membership surface, and "is this node ready?" must be
+   *  answerable before membership is provable. */
+  claimed?: boolean;
 }
 
 export async function registerConfigRoutes(
   app: FastifyInstance,
-  options: { config: Config; signer: SystemSigner | null },
+  options: {
+    config: Config;
+    signer: SystemSigner | null;
+    /** Live claim state (env founders OR claimed_founders row) —
+     *  a function because the claim can land mid-process. */
+    isClaimed: () => boolean;
+  },
 ): Promise<void> {
-  const { config, signer } = options;
+  const { config, signer, isClaimed } = options;
 
   app.get("/config", async () => {
     const operator = buildOperatorBlock(config);
@@ -106,6 +119,7 @@ export async function registerConfigRoutes(
       response.mirrors = [...config.mirrorAnnounceUrls];
     }
     response.removalQuorum = config.removalQuorum;
+    response.claimed = isClaimed();
     return response;
   });
 }

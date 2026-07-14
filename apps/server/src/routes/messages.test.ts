@@ -31,6 +31,7 @@ async function freshServer(env: Record<string, string> = {}) {
   db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: "node_test",
     ...env,
   } as NodeJS.ProcessEnv);

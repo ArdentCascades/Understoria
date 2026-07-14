@@ -55,6 +55,7 @@ async function freshServer() {
   db = openDatabase(":memory:");
   const config = readConfigFromEnv({
     LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
     NODE_ID: "node_test",
   } as NodeJS.ProcessEnv);
   const built = await buildServer({ config, database: db });
@@ -385,7 +386,7 @@ describe("GET /config", () => {
     expect(res.statusCode).toBe(200);
     // removalQuorum is ALWAYS published (docs/member-removal.md §2 —
     // member devices verify pulled records against it).
-    expect(res.json()).toEqual({ removalQuorum: 3 });
+    expect(res.json()).toEqual({ removalQuorum: 3, claimed: false });
   });
 });
 
@@ -607,6 +608,7 @@ describe("GET /peers with configured peers", () => {
     withPeersDb = openDatabase(":memory:");
     const config = readConfigFromEnv({
       LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
       NODE_ID: "node_test",
       PEER_NODE_URLS:
         "https://peer-a.example, https://peer-b.example/",
@@ -641,6 +643,7 @@ describe("GET /peers with configured peers", () => {
     expect(() =>
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         PEER_NODE_URLS: "ftp://nope.example",
       } as NodeJS.ProcessEnv),
     ).toThrow(/http\(s\)/);
@@ -652,18 +655,21 @@ describe("TRUST_PROXY parsing", () => {
     expect(
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         TRUST_PROXY: "true",
       } as NodeJS.ProcessEnv).trustProxy,
     ).toBe(true);
     expect(
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         TRUST_PROXY: " TRUE ",
       } as NodeJS.ProcessEnv).trustProxy,
     ).toBe(true);
     expect(
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         TRUST_PROXY: "false",
       } as NodeJS.ProcessEnv).trustProxy,
     ).toBe(false);
@@ -679,6 +685,7 @@ describe("TRUST_PROXY parsing", () => {
       expect(
         readConfigFromEnv({
           LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
           TRUST_PROXY: value,
         } as NodeJS.ProcessEnv).trustProxy,
       ).toBe(value);
@@ -689,6 +696,7 @@ describe("TRUST_PROXY parsing", () => {
     const trustDb = openDatabase(":memory:");
     const config = readConfigFromEnv({
       LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
       NODE_ID: "node_test",
       TRUST_PROXY: "true",
     } as NodeJS.ProcessEnv);
@@ -712,6 +720,7 @@ describe("GET /config with operator info", () => {
     withOperatorDb = openDatabase(":memory:");
     const config = readConfigFromEnv({
       LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
       NODE_ID: "node_test",
       OPERATOR_NAME: "Marcus",
       OPERATOR_FUNDING_NOTE: "Hosting donated since 2026-01",
@@ -732,6 +741,7 @@ describe("GET /config with operator info", () => {
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({
       removalQuorum: 3,
+      claimed: false,
       operator: {
         name: "Marcus",
         fundingNote: "Hosting donated since 2026-01",
@@ -750,6 +760,7 @@ describe("GET /config with a system key", () => {
     const kp = generateKeyPair();
     const config = readConfigFromEnv({
       LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
       NODE_ID: "node_keyed",
       NODE_SYSTEM_SECRET_KEY: kp.secretKey,
     } as NodeJS.ProcessEnv);
@@ -784,6 +795,7 @@ describe("GET /config — rotation history (NODE_SYSTEM_KEY_HISTORY)", () => {
     const retired = generateKeyPair();
     const config = readConfigFromEnv({
       LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
       NODE_ID: "node_rotated",
       NODE_SYSTEM_SECRET_KEY: kp.secretKey,
       NODE_SYSTEM_KEY_HISTORY: JSON.stringify([
@@ -810,18 +822,21 @@ describe("GET /config — rotation history (NODE_SYSTEM_KEY_HISTORY)", () => {
     expect(() =>
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         NODE_SYSTEM_KEY_HISTORY: "not json",
       } as NodeJS.ProcessEnv),
     ).toThrow(/NODE_SYSTEM_KEY_HISTORY/);
     expect(() =>
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         NODE_SYSTEM_KEY_HISTORY: JSON.stringify([{ pubkey: "", retiredAt: 1 }]),
       } as NodeJS.ProcessEnv),
     ).toThrow(/entry 0/);
     expect(() =>
       readConfigFromEnv({
         LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
         NODE_SYSTEM_KEY_HISTORY: JSON.stringify([
           { pubkey: "abc", retiredAt: "yesterday" },
         ]),
@@ -832,6 +847,7 @@ describe("GET /config — rotation history (NODE_SYSTEM_KEY_HISTORY)", () => {
   it("sorts history ascending by retiredAt regardless of input order", () => {
     const config = readConfigFromEnv({
       LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
       NODE_SYSTEM_KEY_HISTORY: JSON.stringify([
         { pubkey: "newer_retiree", retiredAt: 2_000 },
         { pubkey: "older_retiree", retiredAt: 1_000 },
