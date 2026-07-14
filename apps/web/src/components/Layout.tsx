@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
 import { DemoBanner } from "./DemoBanner";
+import { IS_DEMO } from "@/lib/demo";
 import { CommandPalette } from "./CommandPalette";
 import { LockScreen } from "./LockScreen";
 import { OfflineBanner } from "./OfflineBanner";
@@ -81,7 +82,12 @@ export function Layout() {
     <div className="flex h-dvh flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
       <ScrollToTop />
       {!locked && <SkipLink targetId="main" />}
-      {ready && !locked && <DemoBanner />}
+      {/* Gated HERE (not just inside the component) so Vite's static
+          replacement of import.meta.env.VITE_DEMO lets Rollup drop the
+          whole DemoBanner module — and the reset/db.delete code behind
+          it — from non-demo bundles, instead of mounting a component
+          that returns null on every render. */}
+      {IS_DEMO && ready && !locked && <DemoBanner />}
       {ready && !locked && <AppHeader />}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row-reverse print:block print:h-auto print:overflow-visible">
         <main

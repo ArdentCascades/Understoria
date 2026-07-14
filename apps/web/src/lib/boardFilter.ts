@@ -43,6 +43,11 @@ export function filterBoardPosts(posts: Post[], f: BoardPostFilter): Post[] {
   return posts.filter((p) => {
     if (p.type !== f.type) return false;
     if (p.status === "cancelled") return false;
+    // Completed posts are history, not board inventory. Leaving them
+    // in made the Board's "Show N claimed" toggle count finished
+    // exchanges as hidden-but-claimed posts — expanding revealed
+    // nothing actionable — and put them on the printable sheet.
+    if (p.status === "completed") return false;
     if (f.category && p.category !== f.category) return false;
     if (f.urgency && p.urgency !== f.urgency) return false;
     if (f.zone && p.locationZone !== f.zone) return false;

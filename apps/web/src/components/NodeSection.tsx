@@ -30,6 +30,7 @@ import {
   type SubmitConfig,
 } from "@/lib/nodeSubmit";
 import { mirrorChangeNeedsConsent } from "@/lib/mirrorConsent";
+import { isDemoBuild } from "@/lib/demo";
 import { flushOutboxNow } from "@/lib/outbox";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -96,6 +97,24 @@ export function NodeSection() {
       return;
     }
     await persist(next);
+  }
+
+  // Demo builds: the federation chokepoints (readSubmitConfig,
+  // enqueueOutbox, listNodeEndpoints) are hard-disabled, so offering
+  // the connect form would be a lie — a URL typed here would never be
+  // used. Say so honestly instead. After the hooks above, so the hook
+  // order stays unconditional.
+  if (isDemoBuild()) {
+    return (
+      <section className="card mb-4">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+          {t("profile.node.title")}
+        </h2>
+        <p className="text-sm text-moss-600 dark:text-moss-300">
+          {t("demo.nodeSection")}
+        </p>
+      </section>
+    );
   }
 
   return (

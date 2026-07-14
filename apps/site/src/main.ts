@@ -8,12 +8,34 @@ import "./styles.css";
 const STORAGE_KEY = "understoria-site-theme";
 const root = document.documentElement;
 
+// Safari private mode (pre-17), storage-disabled browsers, and
+// blocked third-party contexts THROW on localStorage access — even a
+// read. Unguarded, that killed this module at the top level: no theme
+// applied AND a dead hamburger menu. The fallbacks (no saved theme /
+// unsaveable choice) degrade to system-theme-following, which is
+// exactly right for a visitor whose storage doesn't work.
+function safeGet(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSet(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // The choice still applies for this page view; it just won't stick.
+  }
+}
+
 function systemPrefersDark(): boolean {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
 function resolveInitial(): "light" | "dark" {
-  const saved = localStorage.getItem(STORAGE_KEY);
+  const saved = safeGet(STORAGE_KEY);
   if (saved === "light" || saved === "dark") return saved;
   return systemPrefersDark() ? "dark" : "light";
 }
@@ -37,7 +59,7 @@ apply(current);
 window
   .matchMedia("(prefers-color-scheme: dark)")
   .addEventListener("change", (e) => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
+    if (!safeGet(STORAGE_KEY)) {
       current = e.matches ? "dark" : "light";
       apply(current);
     }
@@ -48,7 +70,7 @@ document.addEventListener("click", (e) => {
   const toggle = target.closest("[data-theme-toggle]");
   if (toggle) {
     current = current === "dark" ? "light" : "dark";
-    localStorage.setItem(STORAGE_KEY, current);
+    safeSet(STORAGE_KEY, current);
     apply(current);
     return;
   }
@@ -63,8 +85,13 @@ document.addEventListener("click", (e) => {
     }
     return;
   }
-  // Any in-menu link closes the mobile menu.
+  // Any in-menu link closes the mobile menu. The toggle's
+  // aria-expanded must follow, or a screen reader hears "expanded"
+  // over a menu that's gone.
   if (target.closest("[data-nav-menu] a")) {
     document.querySelector("[data-nav-menu]")?.setAttribute("hidden", "");
+    document
+      .querySelector("[data-nav-toggle]")
+      ?.setAttribute("aria-expanded", "false");
   }
 });

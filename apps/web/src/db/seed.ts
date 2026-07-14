@@ -28,6 +28,7 @@ import {
 } from "@understoria/shared/crypto";
 import { createVouch } from "@/lib/vouch";
 import { IS_DEMO } from "@/lib/demo";
+import { reachedMilestones } from "@/lib/milestones";
 import type {
   Event,
   EventShiftRow,
@@ -343,9 +344,20 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   // exchange-density heat. Like the posts and vouches above, these are
   // demo-local: never enqueued to the outbox, so they never federate.
   const dayMs = 24 * 60 * 60 * 1000;
-  // Anchor each on a distinct UTC day ending today, so the solidarity
-  // streak counts an unbroken run rather than a single spike.
-  const daysAgoAt = (d: number) => now - d * dayMs - 3 * 60 * 60 * 1000;
+  // Anchor each on a distinct UTC day ending YESTERDAY, so the
+  // solidarity streak counts an unbroken run (a quiet "today" doesn't
+  // break it — see computeSolidarityStreak, which buckets by UTC day)
+  // while NO seeded exchange sits inside the rolling 24-hour window
+  // that assertWithinDailyLimit scans: the seed must never pre-consume
+  // a member's daily helper slots or the demo's first real exchange
+  // hits limits early. A fixed "26 hours back" satisfies both ONLY
+  // after 02:00 — seeded between midnight and 02:00 it lands two days
+  // back and the demo boots with a broken streak — so the anchor
+  // clamps to yesterday's UTC midnight (still ≥24h ago at any clock
+  // time) whenever 26h-back would overshoot yesterday.
+  const startOfTodayUtc = Math.floor(now / dayMs) * dayMs;
+  const anchor = Math.max(startOfTodayUtc - dayMs, now - 26 * 60 * 60 * 1000);
+  const daysAgoAt = (d: number) => anchor - d * dayMs;
   const signSeedExchange = (
     helper: Member,
     helped: Member,
@@ -412,10 +424,16 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   };
   await db.posts.put(metNeed);
 
-  // Exchanges chosen to match each member's skills (Rosa drives, Marcus
-  // fixes bikes, Imani does childcare, Theo helps with computers and
-  // listens), spread one per day across the past week so every member is
-  // "active this week" and the streak is unbroken.
+  // Exchanges chosen to match each member's skills (Rosa drives and
+  // tutors, Marcus fixes bikes, Imani does childcare and grant writing,
+  // Theo helps with computers and listens), spread one per day across
+  // the past week so every member is "active this week" and the streak
+  // is unbroken. Every (helper, helped) PAIR appears at most once:
+  // evaluateSafeguards flags a reciprocal_pattern when a pair reaches
+  // reciprocalPairThreshold (default 3, counted both directions) inside
+  // 30 days, so any repeated seed pair would put the demo user's FIRST
+  // real exchange with that member one step from an anti-gaming flag —
+  // an amber moderation chip on a supposedly clean showcase.
   const seedExchanges: Exchange[] = [
     signSeedExchange(rosa, you, 2, "transport", daysAgoAt(0), uuid()),
     signSeedExchange(you, marcus, 1, "food", daysAgoAt(0), uuid()),
@@ -424,11 +442,31 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
     // The fulfilled need above — helper Rosa, helped Imani (the poster).
     signSeedExchange(rosa, imani, 1, "food", daysAgoAt(2), metNeedId),
     signSeedExchange(theo, rosa, 1, "skilled_labor", daysAgoAt(3), uuid()),
-    signSeedExchange(rosa, you, 1.5, "education", daysAgoAt(4), uuid()),
-    signSeedExchange(imani, marcus, 2, "skilled_labor", daysAgoAt(5), uuid()),
+    signSeedExchange(rosa, marcus, 1.5, "education", daysAgoAt(4), uuid()),
+    signSeedExchange(imani, you, 2, "education", daysAgoAt(5), uuid()),
     signSeedExchange(theo, you, 1, "emotional_support", daysAgoAt(6), uuid()),
   ];
   await db.exchanges.bulkPut(seedExchanges);
+
+  // The 14 seeded hours already cross the baseline "10 hours of mutual
+  // aid" milestone. Mark everything the SEED reached as celebrated, or
+  // the Dashboard pops its animated milestone celebration for
+  // fabricated history on every fresh dev database, every first-time
+  // demo visitor, and after every demo reset. Derived (not hardcoded)
+  // so future seed edits that cross new thresholds stay silent too.
+  const totalSeedHours = seedExchanges.reduce(
+    (sum, x) => sum + x.hoursExchanged,
+    0,
+  );
+  const seedReachedLabels = [
+    ...reachedMilestones("hours", totalSeedHours),
+    ...reachedMilestones("exchanges", seedExchanges.length),
+    ...reachedMilestones("members", 1 + demoMembers.length),
+  ].map((m) => m.label);
+  await setSetting(
+    SETTING_KEYS.celebratedMilestones,
+    JSON.stringify(seedReachedLabels),
+  );
 
   // A JOINABLE project, so first-run exploration can walk the whole
   // claimer arc — claim → "a good first step" → private plan → In my

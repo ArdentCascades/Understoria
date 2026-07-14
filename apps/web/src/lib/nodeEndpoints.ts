@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
+import { isDemoBuild } from "@/lib/demo";
 
 /**
  * Multi-node endpoints — docs/community-resilience.md §B.2.
@@ -243,6 +244,11 @@ export interface NodeEndpoints {
 }
 
 export async function listNodeEndpoints(): Promise<NodeEndpoints> {
+  // Demo builds have NO community node, whatever the settings rows say
+  // — this kills the entire read path in one place (sync pulls, config
+  // captures, mirror suggestions, infra probes, nodeId adoption), the
+  // twin of the write-path gates in readSubmitConfig/enqueueOutbox.
+  if (isDemoBuild()) return { primary: null, endpoints: [] };
   const enabled = await getSetting(SETTING_KEYS.communityNodeEnabled);
   const rawUrl = await getSetting(SETTING_KEYS.communityNodeUrl);
   if (enabled !== "1" || !rawUrl?.trim()) {

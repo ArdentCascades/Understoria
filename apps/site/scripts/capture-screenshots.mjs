@@ -82,14 +82,18 @@ const browser = await chromium.launch({
     "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
 });
 
+// deviceScaleFactor 1 / 2 (not 2 / 3): these render in a ~600px-wide
+// shot-frame, so a 2x-DPR 1280px capture (2560px wide, ~300 KB each,
+// >1.2 MB per page view) bought nothing over 1x at that display size.
+// The mobile hero shot keeps 2x — it's small enough that retina
+// crispness is still visible and cheap.
 const desktop = await browser.newContext({
   viewport: DESKTOP,
-  deviceScaleFactor: 2,
+  deviceScaleFactor: 1,
   colorScheme: "light",
 });
 await shoot(desktop, { name: "board", path: "/?tab=needs" });
 await shoot(desktop, { name: "dashboard", path: "/dashboard" });
-await shoot(desktop, { name: "calendar", path: "/calendar" });
 await shoot(desktop, {
   name: "project",
   path: "/?tab=projects",
@@ -99,7 +103,7 @@ await desktop.close();
 
 const mobile = await browser.newContext({
   viewport: MOBILE,
-  deviceScaleFactor: 3,
+  deviceScaleFactor: 2,
   colorScheme: "light",
   isMobile: true,
   hasTouch: true,

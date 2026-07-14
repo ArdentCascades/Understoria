@@ -4,10 +4,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db, getSetting, SETTING_KEYS } from "./database";
 import { seedDemoCommunityIfDev, seedDemoCommunityIfEmpty } from "./seed";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
+import { reachedMilestones } from "@/lib/milestones";
+import { computeSolidarityStreak } from "@/lib/stats";
 
 async function reset() {
   // Clear EVERY table (the standard suite idiom) — the seed now also
@@ -99,6 +101,88 @@ describe("seedDemoCommunityIfEmpty", () => {
     }
     // The founder signs up themself — the seed never volunteers them.
     expect(await db.shiftSignups.count()).toBe(0);
+  });
+
+  it("never repeats a (helper, helped) pair — the reciprocal-pattern safeguard must start at zero", async () => {
+    // evaluateSafeguards flags reciprocal_pattern when a pair reaches
+    // reciprocalPairThreshold (default 3, counted BOTH directions)
+    // within 30 days. The seed used to repeat rosa↔you twice, putting
+    // the demo user's first real exchange with Rosa one step from an
+    // amber anti-gaming chip on a supposedly clean showcase.
+    await seedDemoCommunityIfEmpty();
+    const exchanges = await db.exchanges.toArray();
+    const pairKeys = exchanges.map((x) =>
+      [x.helperKey, x.helpedKey].sort().join("|"),
+    );
+    expect(new Set(pairKeys).size).toBe(pairKeys.length);
+  });
+
+  it("seeds no exchange inside the rolling 24-hour daily-helper window", async () => {
+    // assertWithinDailyLimit scans the last 24 hours per helper
+    // (default cap 3). Seeded history must not pre-consume anyone's
+    // daily slots, or a first real exchange hits limits early.
+    await seedDemoCommunityIfEmpty();
+    const exchanges = await db.exchanges.toArray();
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    for (const x of exchanges) {
+      expect(x.completedAt).toBeLessThan(cutoff);
+    }
+  });
+
+  it("keeps an unbroken solidarity streak alongside the empty daily window", async () => {
+    await seedDemoCommunityIfEmpty();
+    const exchanges = await db.exchanges.toArray();
+    // Seven distinct consecutive days ending yesterday — the demo
+    // Dashboard must show a living streak, not "gathering".
+    expect(computeSolidarityStreak(exchanges)).toBeGreaterThanOrEqual(7);
+  });
+
+  it("holds streak + daily-window even seeded just after midnight UTC", async () => {
+    // A fixed "26 hours back" anchor lands TWO UTC days back when the
+    // seed runs between 00:00 and 02:00 (26h from 01:00 is 23:00 two
+    // days prior), booting the demo with a broken streak. The anchor
+    // clamps to yesterday's UTC midnight in that window — still ≥24h
+    // ago, so the daily-helper limit stays untouched too.
+    vi.useFakeTimers({
+      toFake: ["Date"],
+      now: new Date(Date.UTC(2026, 6, 14, 0, 30)),
+    });
+    try {
+      await seedDemoCommunityIfEmpty();
+      const exchanges = await db.exchanges.toArray();
+      const now = Date.now();
+      const cutoff = now - 24 * 60 * 60 * 1000;
+      for (const x of exchanges) {
+        expect(x.completedAt).toBeLessThan(cutoff);
+      }
+      expect(computeSolidarityStreak(exchanges, now)).toBeGreaterThanOrEqual(7);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("pre-marks every milestone the seeded history already crossed as celebrated", async () => {
+    // The seeded hours cross the "10 hours of mutual aid" baseline;
+    // without this the Dashboard pops its animated celebration for
+    // fabricated history on every fresh demo/dev boot and after
+    // every demo reset.
+    await seedDemoCommunityIfEmpty();
+    const raw = await getSetting(SETTING_KEYS.celebratedMilestones);
+    expect(raw).toBeDefined();
+    const celebrated = JSON.parse(raw!) as string[];
+
+    const exchanges = await db.exchanges.toArray();
+    const totalHours = exchanges.reduce((s, x) => s + x.hoursExchanged, 0);
+    const memberCount = await db.members.count();
+    const expected = [
+      ...reachedMilestones("hours", totalHours),
+      ...reachedMilestones("exchanges", exchanges.length),
+      ...reachedMilestones("members", memberCount),
+    ].map((m) => m.label);
+    // Derived, not hardcoded: future seed growth that crosses new
+    // thresholds must stay silent without this test changing.
+    expect(expected.length).toBeGreaterThan(0);
+    expect(celebrated).toEqual(expect.arrayContaining(expected));
   });
 
   it("leaves the newcomer one vouch short, so a single vouch tips them to trusted", async () => {

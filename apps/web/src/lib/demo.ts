@@ -37,25 +37,63 @@ import { db } from "@/db/database";
 export const IS_DEMO: boolean = import.meta.env.VITE_DEMO === "1";
 
 /**
- * Wipe the in-browser database and cached UI preferences, then reload.
- * On the next boot the app finds an empty database and — because this is
- * a demo build — re-seeds the sample community from scratch, so the
- * visitor gets a clean slate. Only meaningful in a demo build; the
- * demo banner is the only caller.
+ * Function form of the flag for the federation chokepoints (outbox
+ * enqueue, submit config, node endpoints). A call is mockable in unit
+ * tests — the constant is statically inlined and can't be flipped —
+ * and the couple of bytes a branch costs there is irrelevant. UI
+ * call sites keep using `IS_DEMO` directly so a production bundle can
+ * still dead-code-eliminate whole demo components.
+ */
+export function isDemoBuild(): boolean {
+  return IS_DEMO;
+}
+
+/**
+ * Remove this app's own localStorage keys (the `understoria.` dot
+ * namespace: theme, text size, density, language). Deliberately NOT
+ * `localStorage.clear()` — storage is origin-wide, and under the
+ * default deploy layout the demo lives at `/demo/` on the SAME origin
+ * as the showcase site, whose `understoria-site-theme` key (and any
+ * other same-origin storage) must survive a demo reset. Exported for
+ * tests.
+ */
+export function clearUnderstoriaLocalStorage(): void {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("understoria.")) localStorage.removeItem(key);
+    }
+  } catch {
+    // Private-mode / storage-disabled browsers: nothing to clear.
+  }
+}
+
+/**
+ * Wipe the in-browser database and this app's cached preferences, then
+ * reload. On the next boot the app finds an empty database and —
+ * because this is a demo build — re-seeds the sample community from
+ * scratch, so the next visitor gets full defaults (language included).
+ * Only meaningful in a demo build; the demo banner is the only caller.
  *
  * Deleting the Dexie database (rather than clearing each table) also
  * resets the schema/version cleanly and drops the demo members' local
  * secret keys. We do NOT touch service-worker caches — those hold the
  * app CODE, which a reset has no reason to re-download.
+ *
+ * Robustness: the delete can hang indefinitely (Dexie pends forever on
+ * `blocked` when another window holds a frozen connection), so it races
+ * a timeout, and the reload lives in `finally` — the reset button must
+ * NEVER strand a visitor on a dead "Resetting…" state. A timed-out
+ * delete reloads into the old data (honest failure, retryable) rather
+ * than wedging the UI.
  */
 export async function resetDemo(): Promise<void> {
-  await db.delete();
   try {
-    // UI caches only (theme, text size, density, no-FOUC hints). All of
-    // it repopulates from the fresh seed / defaults on reload.
-    localStorage.clear();
-  } catch {
-    // Private-mode / storage-disabled browsers: nothing to clear.
+    await Promise.race([
+      db.delete(),
+      new Promise((resolve) => setTimeout(resolve, 4000)),
+    ]);
+    clearUnderstoriaLocalStorage();
+  } finally {
+    window.location.reload();
   }
-  window.location.reload();
 }
