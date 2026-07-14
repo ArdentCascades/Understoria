@@ -281,13 +281,29 @@ the founder's id and every member's node-scoped view agrees.
 **Guards.** Adoption is skipped when the device already holds an
 identity — **attach** mode, or a second identity via
 `forceNewIdentity` — because the one device-global `nodeId` must not
-move out from under the incumbent member. A legacy invite carrying an
+move out from under the incumbent member. It is also skipped when the
+device holds more than one member row even without a current identity
+(a dangling/cleared `currentMember` beside a community's synced data —
+rewriting the id would silently re-scope every existing record), the
+same member-count guard `PairDevice` uses. A legacy invite carrying an
 empty `nodeId` falls back to the device id (no change from prior
-behavior). Already-joined members who onboarded before this existed
-keep a mismatched id until they re-join; a bounded boot-time self-heal
-(reconcile only when exactly one redeemed invite exists, its id
-differs, and the member has authored no exchanges) is a possible
-follow-up but is deliberately out of the redemption path.
+behavior). The write is atomic with the mint: `db.settings` is inside
+the redemption transaction, so `Member.nodeId` and the device setting
+can never half-commit (the consumed invite would make that divergence
+unrepairable).
+
+**Known gaps (deliberate, tracked).** (1) A member who onboarded via
+Welcome first and *then* redeems an invite attaches, so they keep the
+device id — the adoption never fires. (2) Re-redeeming can NOT heal a
+pre-fix member for the same reason: they attach. (3) Invites issued by
+a pre-fix member carry *that member's* mismatched id, which a fresh
+newcomer would then adopt. (4) Server-authored auto-confirmed
+exchanges carry the server's `NODE_ID`, a third id namespace. All four
+share one real fix — a node-canonical id: every device (founder
+included) adopts the node's published `/config.nodeId` at
+connect/consent time, with a bounded local re-scope. That is the
+planned follow-up; this section's invite-side adoption is the
+fresh-device fast path, not the endgame.
 
 ---
 

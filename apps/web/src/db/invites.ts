@@ -321,13 +321,22 @@ export async function redeemInvite(
   // (its nodeId-adoption comment). The invite carries the inviter's
   // community id, so a brand-new member takes it on here.
   //
-  // Guarded to a genuinely fresh device (no prior identity): we never
-  // clobber the device nodeId out from under an existing member (attach,
-  // or a second identity via forceNewIdentity — a shared device has one
-  // device-global nodeId, and the incumbent's stats must not move). A
-  // legacy invite with an empty nodeId falls back to the device id, i.e.
-  // no change from today's behaviour.
-  const adoptCommunityNode = !currentMemberRow && invite.nodeId !== "";
+  // Guarded to a genuinely fresh device: we never clobber the device
+  // nodeId out from under an existing member (attach, or a second
+  // identity via forceNewIdentity — a shared device has one
+  // device-global nodeId, and the incumbent's stats must not move).
+  // "Fresh" is two checks, not one: no current identity, AND at most
+  // one member row locally. The second check (PairDevice's guard for
+  // the same adoption) covers a dangling/cleared currentMember setting
+  // on a device that still holds a community's members and records —
+  // re-scoping those out from under the data is exactly the clobber
+  // this guard exists to prevent. (At most one, not zero: the redeeming
+  // page may have materialized the inviter's member row.) A legacy
+  // invite with an empty nodeId falls back to the device id, i.e. no
+  // change from prior behaviour.
+  const localMemberCount = await db.members.count();
+  const adoptCommunityNode =
+    !currentMemberRow && localMemberCount <= 1 && invite.nodeId !== "";
   const memberNodeId = adoptCommunityNode ? invite.nodeId : nodeId;
 
   let attachedMember: Member | null = null;
@@ -381,7 +390,19 @@ export async function redeemInvite(
   // await to trigger Dexie's premature commit).
   const member = await db.transaction(
     "rw",
-    [db.invites, db.outbox, db.members, db.secretKeys, db.redemptionReceipts],
+    [
+      db.invites,
+      db.outbox,
+      db.members,
+      db.secretKeys,
+      db.redemptionReceipts,
+      // settings joins the transaction so the nodeId adoption below is
+      // atomic with the mint: a crash must never commit a member row
+      // carrying the community id while the device setting keeps the
+      // old random one — the invite is consumed, so that split state
+      // could not be repaired by redeeming again.
+      db.settings,
+    ],
     async () => {
       let m: Member;
       if (mintKp) {
@@ -435,17 +456,17 @@ export async function redeemInvite(
         // fresh node's membership closure would need re-uploaded.
         await db.redemptionReceipts.put(receipt);
       }
+
+      // The device-global nodeId flips in the SAME transaction as the
+      // mint (settings is in the table list above): member.nodeId and
+      // SETTING_KEYS.nodeId must never diverge, because the consumed
+      // invite makes a half-committed adoption unrepairable.
+      if (adoptCommunityNode) {
+        await setSetting(SETTING_KEYS.nodeId, invite.nodeId);
+      }
       return m;
     },
   );
-
-  // Persist the device-global nodeId setting AFTER the transaction — the
-  // settings table is outside its scope, and Dexie would reject a write
-  // to an untracked table mid-transaction. Only when a fresh device
-  // actually adopted the community id (guarded above).
-  if (adoptCommunityNode) {
-    await setSetting(SETTING_KEYS.nodeId, invite.nodeId);
-  }
 
   return {
     ok: true,

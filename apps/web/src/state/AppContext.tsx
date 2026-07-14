@@ -228,6 +228,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNodeConfig(await getNodeConfig(nodeId));
   }, [nodeId]);
 
+  // Keep nodeConfig keyed to the CURRENT nodeId. Boot loads it once,
+  // but the id can now change mid-session (invite redemption on a
+  // fresh device adopts the community's id via setNodeId) — without
+  // this, every nodeConfig consumer would keep serving the abandoned
+  // random id's defaults until a full reload. Gated on ready so the
+  // boot path stays the single initial loader.
+  useEffect(() => {
+    if (!ready || !nodeId) return;
+    void refreshNodeConfig();
+  }, [ready, nodeId, refreshNodeConfig]);
+
   useEffect(() => {
     let cancelled = false;
     // Storage budget Phase 0 (docs/storage-budget.md): ask the browser

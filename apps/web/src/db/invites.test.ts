@@ -185,6 +185,41 @@ describe("redeemInvite", () => {
     expect(await getSetting(SETTING_KEYS.nodeId)).toBe(MY_NODE);
   });
 
+  it("does NOT adopt when the device holds a community's data but currentMember dangles", async () => {
+    // Clobber guard: a device whose SETTING_KEYS.currentMember is unset
+    // (or points at a removed member) but whose tables still hold a
+    // community's members/records must NOT have its device-global nodeId
+    // rewritten — that would re-scope every existing row's stats to
+    // "another community" with no undo. Mirrors PairDevice's
+    // member-count guard for the same adoption.
+    const OTHER = "node_other_community";
+    const MY_NODE = "node_incumbent";
+    const inviter = await createMember({ displayName: "Rosa" }, OTHER);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: OTHER,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+    // The incumbent community's residue: member rows under MY_NODE, but
+    // no currentMember setting (interrupted onboarding / removal).
+    await createMember({ displayName: "Old Neighbor" }, MY_NODE);
+    await createMember({ displayName: "Old Organizer" }, MY_NODE);
+    await setSetting(SETTING_KEYS.nodeId, MY_NODE);
+
+    const result = await redeemInvite(encoded, "Newcomer", MY_NODE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.mode).toBe("mint");
+    // No adoption: the device id (and the incumbent rows' scoping) stay.
+    expect(result.value.nodeId).toBeUndefined();
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe(MY_NODE);
+  });
+
   it("falls back to the device nodeId for a legacy invite that carries no community id", async () => {
     const inviter = await createMember({ displayName: "Rosa" }, NODE);
     const { shareUrl } = await issueInvite(
