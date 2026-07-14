@@ -55,6 +55,7 @@ interface MockState {
   coorgInvitationResponses: never[];
   coorgInvitationRevocations: never[];
   blockedKeys: Set<string>;
+  members: Member[];
 }
 
 let mockState: MockState = blankState();
@@ -72,6 +73,7 @@ function blankState(): MockState {
     coorgInvitationResponses: [],
     coorgInvitationRevocations: [],
     blockedKeys: new Set<string>(),
+    members: [],
   };
 }
 

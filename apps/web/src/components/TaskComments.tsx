@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -31,7 +31,18 @@ import {
 import { useApp } from "@/state/AppContext";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatRelativeTime } from "@/lib/format";
-import { Markdown } from "@/components/Markdown";
+import {
+  activeMentionQuery,
+  extractMentionKeys,
+  insertMention,
+  matchMembers,
+  type MentionMember,
+} from "@/lib/mentions";
+import {
+  Markdown,
+  MentionResolverContext,
+  type MentionResolver,
+} from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
 
 // Density cap: once a thread has more than this many comments,
@@ -80,6 +91,15 @@ export function TaskComments({
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Mention autocomplete state. `caret` tracks the textarea's cursor
+  // (updated on change AND selection moves) so the "@quer" detection
+  // follows the member around the text; `suggestionIdx` is the
+  // keyboard-highlighted row; `dismissedQuery` remembers an Escape so
+  // the list doesn't pop straight back for the same half-typed name.
+  const [caret, setCaret] = useState(0);
+  const [suggestionIdx, setSuggestionIdx] = useState(0);
+  const [dismissedQuery, setDismissedQuery] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const allComments = useLiveQuery(
     () => listTaskComments(projectId, taskId),
@@ -98,6 +118,92 @@ export function TaskComments({
     return allComments.filter((c) => !blockedKeys.has(c.authorKey));
   }, [allComments, blockedKeys]);
 
+  // The autocomplete pool: the local members table (as the memberMap
+  // the parent already resolves names from), NEVER anything fetched.
+  // This is the mention design's privacy floor — suggestions can only
+  // surface people the member can already see on the Members page
+  // (docs/mentions.md §2 D4). Self is excluded from suggestions; a
+  // hand raised at yourself isn't an ask.
+  const mentionMembers = useMemo<MentionMember[]>(
+    () => Array.from(memberMap, ([key, name]) => ({ key, name })),
+    [memberMap],
+  );
+  const active = activeMentionQuery(body, caret);
+  const suggestions = useMemo(
+    () =>
+      active && active.query !== dismissedQuery
+        ? matchMembers(active.query, mentionMembers, currentKey)
+        : [],
+    [active, dismissedQuery, mentionMembers, currentKey],
+  );
+
+  // Who the draft currently mentions — drives the compose-time honesty
+  // line ("Rosa will see this next time she opens Understoria"), which
+  // is what sets the social contract for a mention with no push behind
+  // it: a raised hand, not a tap on the shoulder.
+  const mentionedNames = useMemo(
+    () =>
+      extractMentionKeys(body)
+        .filter((k) => k !== currentKey)
+        .map((k) => memberMap.get(k))
+        .filter((n): n is string => n !== undefined),
+    [body, currentKey, memberMap],
+  );
+
+  // Resolver for rendering mention chips inside comment bodies: the
+  // key's CURRENT display name (label in the token is only the
+  // fallback for keys we can't resolve — resolver-name-wins is the
+  // anti-impersonation rule, docs/mentions.md §4).
+  const mentionResolver = useMemo<MentionResolver>(
+    () => ({
+      resolveName: (key: string) => memberMap.get(key),
+      currentMemberKey: currentKey,
+    }),
+    [memberMap, currentKey],
+  );
+
+  const pickSuggestion = useCallback(
+    (member: MentionMember) => {
+      if (!active) return;
+      const next = insertMention(body, active, caret, member);
+      setBody(next.text);
+      setCaret(next.caret);
+      setSuggestionIdx(0);
+      setDismissedQuery(null);
+      // Return focus to the textarea with the caret after the token so
+      // typing flows on. rAF: the value must commit before we can seat
+      // the selection.
+      requestAnimationFrame(() => {
+        const el = textareaRef.current;
+        if (el) {
+          el.focus();
+          el.setSelectionRange(next.caret, next.caret);
+        }
+      });
+    },
+    [active, body, caret],
+  );
+
+  const handleComposerKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (suggestions.length === 0) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSuggestionIdx((i) => (i + 1) % suggestions.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSuggestionIdx((i) => (i - 1 + suggestions.length) % suggestions.length);
+      } else if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        pickSuggestion(suggestions[Math.min(suggestionIdx, suggestions.length - 1)]);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setDismissedQuery(active?.query ?? null);
+      }
+    },
+    [suggestions, suggestionIdx, pickSuggestion, active],
+  );
+
   const count = comments.length;
   const hiddenCount = Math.max(0, comments.length - MAX_VISIBLE_COMMENTS);
   // listTaskComments returns oldest → newest, so the newest live at
@@ -114,6 +220,7 @@ export function TaskComments({
       try {
         await postTaskComment(taskId, body, currentKey, nodeId);
         setBody("");
+        setCaret(0);
       } catch (err) {
         setError(humanizeError(err));
       } finally {
@@ -175,6 +282,7 @@ export function TaskComments({
               )}
       </button>
       {expanded && (
+        <MentionResolverContext.Provider value={mentionResolver}>
         <div className="mt-stack-sm space-y-stack-sm">
           {count === 0 && (
             <p className="text-xs italic text-moss-600 dark:text-moss-300">
@@ -261,12 +369,68 @@ export function TaskComments({
               </label>
               <textarea
                 id={`comment-${taskId}`}
+                ref={textareaRef}
                 className="input min-h-16"
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(e) => {
+                  setBody(e.target.value);
+                  setCaret(e.target.selectionStart ?? e.target.value.length);
+                  setSuggestionIdx(0);
+                  setDismissedQuery(null);
+                }}
+                onSelect={(e) =>
+                  setCaret(e.currentTarget.selectionStart ?? 0)
+                }
+                onKeyDown={handleComposerKeyDown}
                 maxLength={MAX_COMMENT_LENGTH}
                 placeholder={t("projects.task.comments.placeholder")}
+                aria-autocomplete="list"
+                aria-controls={`mention-listbox-${taskId}`}
               />
+              {suggestions.length > 0 && (
+                <ul
+                  id={`mention-listbox-${taskId}`}
+                  role="listbox"
+                  aria-label={t("mentions.suggestionsLabel")}
+                  className="overflow-hidden rounded-xl border border-bark-200/60 bg-white text-sm shadow-sm dark:border-moss-800 dark:bg-moss-900"
+                >
+                  {suggestions.map((m, idx) => (
+                    <li
+                      key={m.key}
+                      role="option"
+                      aria-selected={idx === suggestionIdx}
+                    >
+                      <button
+                        type="button"
+                        className={`block w-full px-3 py-1.5 text-left ${
+                          idx === suggestionIdx
+                            ? "bg-canopy-50 text-canopy-900 dark:bg-canopy-950/60 dark:text-canopy-100"
+                            : "hover:bg-moss-50 dark:hover:bg-moss-800"
+                        }`}
+                        // onMouseDown (not onClick) so the pick lands
+                        // before the textarea's blur re-renders the list.
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          pickSuggestion(m);
+                        }}
+                        onMouseEnter={() => setSuggestionIdx(idx)}
+                      >
+                        @{m.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {mentionedNames.length > 0 && (
+                // The social contract for a mention with no push behind
+                // it, stated at the moment of writing: they'll see it
+                // when they next show up, nothing buzzes them.
+                <p className="text-xs text-moss-600 dark:text-moss-300">
+                  {mentionedNames.length === 1
+                    ? t("mentions.willSeeOne", { name: mentionedNames[0] })
+                    : t("mentions.willSeeMany")}
+                </p>
+              )}
               <MarkdownHint />
               {error && (
                 <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">
@@ -286,6 +450,7 @@ export function TaskComments({
             </form>
           )}
         </div>
+        </MentionResolverContext.Provider>
       )}
     </div>
   );

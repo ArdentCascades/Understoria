@@ -270,6 +270,11 @@
       "working": "Reiniciando…"
     }
   },
+  "mentions": {
+    "suggestionsLabel": "Mencionar a un miembro",
+    "willSeeOne": "{{name}} lo verá la próxima vez que abra Understoria — las menciones nunca hacen sonar el teléfono de nadie.",
+    "willSeeMany": "Lo verán la próxima vez que abran Understoria — las menciones nunca hacen sonar el teléfono de nadie."
+  },
   "offline": {
     "banner": "Estás sin conexión. Todo aquí sigue funcionando desde tu dispositivo.",
     "guideLink": "Qué puedes hacer durante un corte",
@@ -1324,7 +1329,9 @@
     "shiftsTitle": "Turnos a los que te has apuntado",
     "claimedPostsTitle": "Ayuda que estás en camino de dar",
     "shiftIcs": "Añadir este turno a mi calendario (.ics)",
-    "deskLink": "Mira todo lo que te espera en tu escritorio"
+    "deskLink": "Mira todo lo que te espera en tu escritorio",
+    "askedTitle": "Te lo pidieron a ti",
+    "askedBy": "{{name}} te mencionó"
   },
   "plugIn": {
     "title": "Formas de participar",

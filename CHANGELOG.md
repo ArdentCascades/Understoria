@@ -10,6 +10,27 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **@-mentions in task comments — derived, not delivered**
+  (`lib/mentions.ts`, `lib/markdown.ts`, `components/Markdown.tsx`,
+  `components/TaskComments.tsx`, `pages/MyWork.tsx`,
+  `docs/mentions.md`). A comment can raise a hand at a specific
+  member ("@Marcus, you know plumbing?"); the mentioned member finds
+  an **Asked of you** section on In my care next time they open the
+  app. There is deliberately NO notification machinery: no push, no
+  badge, no unread rows, no server-side parsing — the list is a pure
+  live query over data that already exists, and each item disappears
+  by itself when the comment is deleted, the task/project finishes,
+  or the member replies (the composer says so at write time: mentions
+  never buzz anyone). The token `@[Name](mention:KEY)` rides inside
+  the already-signed comment body, so the wire format is untouched
+  and every older/peer client already renders the correct "@Name"
+  fallback via the existing unsafe-link-drop rule. Autocomplete
+  matches only the device's own members table (no cross-node people
+  search, nothing typed ever leaves the device); rendering resolves
+  the key's CURRENT display name so a token can never dress one key
+  up as another member; mentions by blocked members never surface.
+  The unusual decisions and their reasoning are recorded in
+  `docs/mentions.md`.
 - **Node-canonical community id** (`lib/nodeIdentity.ts`,
   `lib/nodeEndpoints.ts`, `state/AppContext.tsx`,
   `docs/invite-redemption.md` §5.4). The community's one true id is now
