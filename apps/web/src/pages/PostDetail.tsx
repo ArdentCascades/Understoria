@@ -30,6 +30,7 @@ import {
   disputeExchange,
   unclaimPost,
 } from "@/db/actions";
+import { isOurNode } from "@/lib/nodeIdentity";
 import { humanizeError } from "@/lib/humanizeError";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
@@ -65,8 +66,15 @@ type DialogKind =
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { posts, members, currentMember, nodeId, nodeConfig, proposals } =
-    useApp();
+  const {
+    posts,
+    members,
+    currentMember,
+    nodeId,
+    communityNodeIds,
+    nodeConfig,
+    proposals,
+  } = useApp();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<DialogKind>(null);
@@ -294,7 +302,7 @@ export default function PostDetailPage() {
         )}
         {post.type === "OFFER" &&
           poster &&
-          (post.nodeId === nodeId || post.nodeId === "") &&
+          isOurNode(post.nodeId, communityNodeIds) &&
           (poster.availabilityChips.length > 0 || poster.availability) && (
             <section
               className="mt-3 flex flex-col gap-1"
@@ -450,7 +458,9 @@ export default function PostDetailPage() {
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me &&
-          run(() => claimPost(post.id, me.publicKey, nodeId))
+          run(() =>
+            claimPost(post.id, me.publicKey, nodeId, communityNodeIds),
+          )
         }
       />
 

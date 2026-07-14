@@ -60,6 +60,7 @@ interface MockState {
   vouches: SignedVouch[];
   invites: InviteRow[];
   nodeId: string;
+  communityNodeIds: ReadonlySet<string>;
 }
 
 let mockState: MockState = blankState();
@@ -74,6 +75,7 @@ function blankState(): MockState {
     vouches: [],
     invites: [],
     nodeId: "node-1",
+    communityNodeIds: new Set(["node-1"]),
   };
 }
 

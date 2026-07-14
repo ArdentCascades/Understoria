@@ -203,6 +203,35 @@ describe("pendingMirrorSuggestions", () => {
       }),
     ).toEqual([]);
   });
+
+  it("adopts the primary's published nodeId as the device's canonical id", async () => {
+    // Node-canonical identity (lib/nodeIdentity.ts): the /config fetch
+    // this helper already performs against the CONSENTED primary is the
+    // adoption + self-heal hook. A device holding a random pre-fix id
+    // flips to the published id, keeping the old one as an alias so its
+    // history still reads as "ours".
+    await configureNode();
+    await setSetting(SETTING_KEYS.nodeId, "node_random_device");
+    const withNodeId = (async () =>
+      new Response(JSON.stringify({ nodeId: "node_canonical", mirrors: [] }), {
+        status: 200,
+      })) as typeof fetch;
+    await pendingMirrorSuggestions({ fetchImpl: withNodeId });
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe("node_canonical");
+    const { readNodeIdAliases } = await import("./nodeIdentity");
+    expect(await readNodeIdAliases()).toEqual(["node_random_device"]);
+    // Re-running against the same id is a stable no-op.
+    await pendingMirrorSuggestions({ fetchImpl: withNodeId });
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe("node_canonical");
+    expect(await readNodeIdAliases()).toEqual(["node_random_device"]);
+  });
+
+  it("does not touch the device id when /config omits nodeId", async () => {
+    await configureNode();
+    await setSetting(SETTING_KEYS.nodeId, "node_random_device");
+    await pendingMirrorSuggestions({ fetchImpl: configFetch([MIRROR]) });
+    expect(await getSetting(SETTING_KEYS.nodeId)).toBe("node_random_device");
+  });
 });
 
 describe("recordNodeSuccess", () => {

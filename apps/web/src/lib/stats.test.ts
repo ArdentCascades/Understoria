@@ -237,7 +237,7 @@ describe("computeFederationStats", () => {
   it("returns zeros when every exchange is local", () => {
     const result = computeFederationStats(
       [ex("1", "node_test"), ex("2", "node_test", 2.5)],
-      "node_test",
+      new Set(["node_test"]),
     );
     expect(result.totalExchanges).toBe(0);
     expect(result.totalHoursExchanged).toBe(0);
@@ -252,7 +252,7 @@ describe("computeFederationStats", () => {
         ex("3", "peer_a", 1.5),
         ex("4", "peer_b", 3),
       ],
-      "node_test",
+      new Set(["node_test"]),
     );
     expect(result.totalExchanges).toBe(3);
     expect(result.totalHoursExchanged).toBe(6.5);
@@ -262,9 +262,27 @@ describe("computeFederationStats", () => {
   it("treats an empty nodeId as local (pre-federation rows)", () => {
     const result = computeFederationStats(
       [ex("1", "", 4), ex("2", "peer_x", 1)],
-      "node_test",
+      new Set(["node_test"]),
     );
     expect(result.totalExchanges).toBe(1);
     expect(result.totalHoursExchanged).toBe(1);
+  });
+
+  it("treats every community alias as local, not a foreign peer", () => {
+    // Node-canonical ids (lib/nodeIdentity.ts): exchanges authored
+    // under a member's pre-canonical id, or auto-confirmed under the
+    // server's id before the device converged, must not inflate the
+    // federation rollup as if a peer community produced them.
+    const result = computeFederationStats(
+      [
+        ex("1", "node_canonical", 5),
+        ex("2", "node_old_device", 2),
+        ex("3", "peer_a", 1),
+      ],
+      new Set(["node_canonical", "node_old_device"]),
+    );
+    expect(result.totalExchanges).toBe(1);
+    expect(result.totalHoursExchanged).toBe(1);
+    expect(result.peerNodeIds).toEqual(["peer_a"]);
   });
 });

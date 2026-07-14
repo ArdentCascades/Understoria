@@ -72,6 +72,7 @@ import {
   type LockState,
 } from "@/db/secrets";
 import { ensurePersistentStorage } from "@/lib/storageBudget";
+import { communityNodeIdSet, readNodeIdAliases } from "@/lib/nodeIdentity";
 import {
   applyTheme,
   cacheResolvedTheme,
@@ -106,6 +107,13 @@ export interface AppContextValue {
    *  the community's id). Keeps node-scoped views — the Dashboard's
    *  headline stats above all — correct without a full reload. */
   setNodeId: (nodeId: string) => void;
+  /** Every id that means "this community" on a record: current id +
+   *  this device's prior ids + ids on the community's invite rows.
+   *  Consumers decide "ours vs federated" with
+   *  `isOurNode(record.nodeId, communityNodeIds)` — never by exact
+   *  equality with `nodeId`, which misfiles history authored under a
+   *  pre-canonical id (lib/nodeIdentity.ts). */
+  communityNodeIds: ReadonlySet<string>;
   currentMember: Member | null;
   setCurrentMember: (publicKey: string) => Promise<void>;
   members: Member[];
@@ -485,6 +493,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as InviteRow[],
   );
+  // Node-canonical identity (lib/nodeIdentity.ts): the persisted
+  // nodeId is the source of truth, and it can now change mid-session
+  // from OUTSIDE React (the /config adoption hook in nodeEndpoints,
+  // invite redemption, device pairing). Live-query both settings and
+  // reconcile, so every writer converges the in-session id without
+  // each one needing its own plumbing back into this provider.
+  const persistedNodeId = useLiveQuery(
+    async () => (await getSetting(SETTING_KEYS.nodeId)) ?? null,
+    [],
+    null as string | null,
+  );
+  useEffect(() => {
+    if (!ready || !persistedNodeId) return;
+    if (persistedNodeId !== nodeId) setNodeId(persistedNodeId);
+  }, [ready, persistedNodeId, nodeId]);
+  const nodeIdAliases = useLiveQuery(readNodeIdAliases, [], [] as string[]);
+  // Every id that means "this community" on a record: the current id,
+  // this device's prior ids, and the ids on the community's invite
+  // rows (covers other members' pre-fix ids — invites never cross
+  // communities). Old ids live inside signed payloads forever, so
+  // reads must recognize them; see isOurNode.
+  const communityNodeIds = useMemo(
+    () =>
+      communityNodeIdSet(
+        nodeId,
+        nodeIdAliases ?? [],
+        (invites ?? []).map((i) => i.nodeId),
+      ),
+    [nodeId, nodeIdAliases, invites],
+  );
   const vouches = useLiveQuery(
     () => db.vouches.toArray(),
     [],
@@ -704,6 +742,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ready,
       nodeId,
       setNodeId,
+      communityNodeIds,
       currentMember,
       setCurrentMember,
       members: members ?? [],
@@ -754,6 +793,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ready,
       nodeId,
       setNodeId,
+      communityNodeIds,
       currentMember,
       setCurrentMember,
       members,

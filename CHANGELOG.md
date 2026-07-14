@@ -9,6 +9,33 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Node-canonical community id** (`lib/nodeIdentity.ts`,
+  `lib/nodeEndpoints.ts`, `state/AppContext.tsx`,
+  `docs/invite-redemption.md` §5.4). The community's one true id is now
+  the id its node publishes on `GET /config` (`NODE_ID`), and every
+  device — founder included — converges on it automatically: the
+  `/config` fetch that already runs against the consented primary on
+  each Board visit adopts the published id
+  (`adoptCanonicalNodeId`), recording the device's previous id as an
+  alias. Because old ids are baked into signed records forever, reads
+  never rewrite history — instead every "is this record ours?" decision
+  (Dashboard headline + federation rollup, Board cross-node badge,
+  PostDetail availability, claim federation, Welcome bootstrap count,
+  Infrastructure mismatch probe) now uses one shared predicate,
+  `isOurNode(record.nodeId, communityNodeIds)`, where the id set spans
+  the current id, the device's prior ids, and ids carried on the
+  community's invite rows. This closes every gap the invite-side
+  adoption couldn't reach: founders whose random device id never
+  matched the server's, members who onboarded via Welcome before
+  tapping an invite, members invited by a pre-fix member, existing
+  members healing automatically on their next visit, and server-signed
+  auto-confirmed exchanges (stamped with the server's `NODE_ID`)
+  finally counting toward the community's own stats. AppContext also
+  live-queries the persisted nodeId, so any writer (adoption, invite
+  redemption, device pairing) converges the running session without
+  bespoke plumbing.
+
 ### Fixed
 - **nodeId adoption hardening (review follow-up to the item below)**
   (`db/invites.ts`, `state/AppContext.tsx`, `pages/InviteAccept.tsx`,

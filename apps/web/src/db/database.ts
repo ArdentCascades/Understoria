@@ -1189,6 +1189,13 @@ export const db = new UnderstoriaDB();
 export const SETTING_KEYS = {
   currentMember: "currentMember",
   nodeId: "nodeId",
+  /** JSON array of community ids this device previously used before
+   *  adopting the node's canonical `/config.nodeId`
+   *  (lib/nodeIdentity.ts). Old ids are baked into signed records
+   *  forever, so reads treat any alias as "ours" — see
+   *  `communityNodeIdSet` — while all NEW records carry the canonical
+   *  id. */
+  nodeIdAliases: "nodeIdAliases",
   celebratedMilestones: "celebratedMilestones",
   /** Per-device display state: a JSON array of project ids whose
    *  one-time completion moment has already popped on this device, so

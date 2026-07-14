@@ -75,9 +75,12 @@ export interface EndpointStatus {
 export async function probeEndpoints(input: {
   endpoints: string[];
   primaryUrl: string | null;
-  /** The community id stored on this device (AppContext `nodeId`),
-   *  or null when unknown — disables the mismatch check. */
-  expectedNodeId: string | null;
+  /** Every id that means "this community" on this device (AppContext
+   *  `communityNodeIds`: current id + historical aliases,
+   *  lib/nodeIdentity.ts), or null/empty when unknown — disables the
+   *  mismatch check. A set, not one id: a primary publishing an id
+   *  this device has ever legitimately held is not an anomaly. */
+  expectedNodeIds: ReadonlySet<string> | null;
   fetchImpl?: typeof fetch;
 }): Promise<EndpointStatus[]> {
   const fetchImpl = input.fetchImpl ?? globalThis.fetch;
@@ -122,9 +125,9 @@ export async function probeEndpoints(input: {
         nodeIdMismatch:
           isPrimary &&
           nodeId !== null &&
-          input.expectedNodeId !== null &&
-          input.expectedNodeId !== "" &&
-          nodeId !== input.expectedNodeId,
+          input.expectedNodeIds !== null &&
+          input.expectedNodeIds.size > 0 &&
+          !input.expectedNodeIds.has(nodeId),
       };
     }),
   );

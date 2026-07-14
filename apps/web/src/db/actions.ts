@@ -26,6 +26,7 @@ import {
   signProposalIfUnsigned,
 } from "./proposals";
 import { diffAchievements } from "@/lib/achievements";
+import { isOurNode } from "@/lib/nodeIdentity";
 import { computeZoneReachForHelper } from "@/lib/flow";
 import { getNodeConfig } from "./nodeConfig";
 import { uuid } from "@/lib/id";
@@ -140,6 +141,14 @@ export async function claimPost(
   postId: string,
   memberKey: string,
   localNodeId?: string,
+  /** The community's full id set (current + aliases,
+   *  lib/nodeIdentity.ts). Decides whether the claimed post is OURS
+   *  (claim stays local) or a peer community's (claim federates via
+   *  the outbox). Falls back to exact-match on `localNodeId` for
+   *  callers that predate aliases — matching one id only would
+   *  wrongly federate a claim on our own post authored under a
+   *  pre-canonical id. */
+  communityNodeIds?: ReadonlySet<string>,
 ): Promise<Post> {
   // PR F: Posts (claiming) is a (c) bidirectional gate per
   // docs/blocking.md §6. Pre-load the post outside the transaction
@@ -165,7 +174,9 @@ export async function claimPost(
       status: "claimed",
     };
     await db.posts.put(updated);
-    if (localNodeId && post.nodeId !== localNodeId && post.nodeId !== "") {
+    const ourIds =
+      communityNodeIds ?? new Set(localNodeId ? [localNodeId] : []);
+    if (localNodeId && !isOurNode(post.nodeId, ourIds)) {
       await enqueueClaimOutbox({
         postId: post.id,
         claimerKey: memberKey,

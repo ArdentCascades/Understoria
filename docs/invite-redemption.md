@@ -292,18 +292,37 @@ the redemption transaction, so `Member.nodeId` and the device setting
 can never half-commit (the consumed invite would make that divergence
 unrepairable).
 
-**Known gaps (deliberate, tracked).** (1) A member who onboarded via
-Welcome first and *then* redeems an invite attaches, so they keep the
-device id — the adoption never fires. (2) Re-redeeming can NOT heal a
-pre-fix member for the same reason: they attach. (3) Invites issued by
-a pre-fix member carry *that member's* mismatched id, which a fresh
-newcomer would then adopt. (4) Server-authored auto-confirmed
-exchanges carry the server's `NODE_ID`, a third id namespace. All four
-share one real fix — a node-canonical id: every device (founder
-included) adopts the node's published `/config.nodeId` at
-connect/consent time, with a bounded local re-scope. That is the
-planned follow-up; this section's invite-side adoption is the
-fresh-device fast path, not the endgame.
+**Node-canonical identity (`lib/nodeIdentity.ts`).** The invite-side
+adoption above is only the fresh-device fast path. The community's ONE
+true id is the id its node publishes on `GET /config` (`NODE_ID` env),
+and every device — founder included — converges on it:
+
+- **Adopt-forward.** `pendingMirrorSuggestions` (the `/config` fetch
+  that already runs against the member's consented, enabled primary on
+  every Board visit) calls `adoptCanonicalNodeId(body.nodeId)`. The
+  device id flips to the canonical id; the previous id is recorded in
+  `SETTING_KEYS.nodeIdAliases`. This one hook covers every hole the
+  invite-side adoption could not reach: founders whose random device
+  id never matched the server's `NODE_ID`, members who onboarded via
+  Welcome before tapping an invite (attach mode never adopts), members
+  invited by a pre-fix member (the invite carried a mismatched id),
+  and pre-fix members healing automatically on their next visit. Trust
+  posture: the id is only ever taken from the consented primary — a
+  node the member already trusts with every record they author gains
+  nothing by also naming the community.
+- **Aliases for the past.** Old ids are inside signed payloads (posts,
+  invites, events, state — everything but exchanges and vouches signs
+  its `nodeId`), so history is never rewritten. Instead, every "is
+  this record ours?" read uses `isOurNode(record.nodeId,
+  communityNodeIds)` where `communityNodeIds` (AppContext) is the
+  union of the current id, this device's prior ids, and the ids on the
+  community's redeemed-invite rows (which every member's device
+  materializes — covering OTHER members' pre-fix ids). Consumers:
+  Dashboard headline + federation rollup, Board cross-node badge,
+  PostDetail availability, claim federation, the Welcome bootstrap
+  member count, and the Infrastructure page's nodeId-mismatch probe.
+  Server-authored auto-confirmed exchanges (stamped with the server's
+  `NODE_ID`) match by construction once the device has adopted.
 
 ---
 

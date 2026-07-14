@@ -413,6 +413,26 @@ export async function pendingMirrorSuggestions(
         // Capture is best-effort bookkeeping.
       }
     }
+    // Node-canonical community id (docs/invite-redemption.md §5.4,
+    // lib/nodeIdentity.ts): the primary this fetch just consulted is
+    // the member's CONSENTED node (listNodeEndpoints returns it only
+    // when the member confirmed the URL and enabled sync), so its
+    // published nodeId is the community's one true id — adopt it.
+    // This is the convergence + self-heal path: founders whose random
+    // device id never matched the server's NODE_ID, members who
+    // onboarded via Welcome before an invite, and pre-fix members with
+    // mismatched ids all flip to the canonical id on their next Board
+    // visit, with the old id recorded as an alias so their history
+    // keeps reading as "ours". Best-effort like the captures around
+    // it; a failure simply retries on the next /config fetch.
+    if (typeof body.nodeId === "string" && body.nodeId.trim() !== "") {
+      try {
+        const { adoptCanonicalNodeId } = await import("./nodeIdentity");
+        await adoptCanonicalNodeId(body.nodeId);
+      } catch {
+        // Adoption is best-effort bookkeeping.
+      }
+    }
     // Re-seed Phase R0 (docs/community-reseed.md §1c): capture the
     // node's published auto-confirm key while the node is alive. If
     // the node is ever lost, this is the value the operator of a
