@@ -41,6 +41,7 @@ import type { Member } from "@/types";
 
 interface MockState {
   nodeId: string;
+  setNodeId: ReturnType<typeof vi.fn>;
   currentMember: Member | null;
   setCurrentMember: ReturnType<typeof vi.fn>;
 }
@@ -50,6 +51,7 @@ let mockState: MockState;
 function blankState(): MockState {
   return {
     nodeId: "node-local",
+    setNodeId: vi.fn(),
     currentMember: null,
     setCurrentMember: vi.fn(async () => {}),
   };

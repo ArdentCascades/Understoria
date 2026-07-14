@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **nodeId adoption hardening (review follow-up to the item below)**
+  (`db/invites.ts`, `state/AppContext.tsx`, `pages/InviteAccept.tsx`,
+  `docs/invite-redemption.md` §5.4). Four fixes from an adversarial
+  review of the invite-adoption change: (1) the device-global nodeId
+  write moved INSIDE the redemption transaction (`db.settings` joins the
+  table list, as `revokeInvite` already does) — previously a crash
+  between the commit and the setting write left member row and device id
+  permanently diverged, un-repairable because the invite was consumed;
+  (2) the fresh-device guard also requires at most one local member row
+  (PairDevice's guard), so a dangling `currentMember` beside a synced
+  community's data can no longer have its device id rewritten out from
+  under existing records; (3) `nodeConfig` now refreshes when the nodeId
+  changes mid-session instead of serving the abandoned id's defaults
+  until reload; (4) docs no longer claim re-joining heals a pre-fix
+  member (re-redeeming attaches, which never adopts) — the honest
+  remediation list and the node-canonical `/config.nodeId` follow-up are
+  now written down in §5.4.
 - **Invited members saw a zeroed Dashboard — stats didn't "transfer"**
   (`db/invites.ts`, `state/AppContext.tsx`, `pages/InviteAccept.tsx`,
   `docs/invite-redemption.md` §5.4). Every device mints a random

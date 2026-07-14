@@ -161,16 +161,18 @@ export default function InviteAcceptPage() {
       setError(result.error);
       return;
     }
-    // A fresh member adopts the community's nodeId during redeem so the
-    // Dashboard's node-scoped stats reflect the community they just
-    // joined. redeemInvite already persisted the setting; mirror it into
-    // the live app state here so it takes effect without a reload.
-    if (result.value.nodeId) {
-      setNodeId(result.value.nodeId);
-    }
     // Attach mode resolves to the same key — the call is a no-op then,
     // and the switch that matters on the mint path.
     await setCurrentMember(result.value.member.publicKey);
+    // A fresh member adopts the community's nodeId during redeem so the
+    // Dashboard's node-scoped stats reflect the community they just
+    // joined. redeemInvite already persisted the setting; mirror it into
+    // the live app state here so it takes effect without a reload. After
+    // setCurrentMember, so no consumer renders a frame scoped to the new
+    // community id with no current member.
+    if (result.value.nodeId) {
+      setNodeId(result.value.nodeId);
+    }
     setSuggestion((await suggestionPromise.current) ?? null);
     setStatus("done");
   }
