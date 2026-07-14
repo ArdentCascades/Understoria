@@ -100,11 +100,16 @@ services:
       # MUST match across a mirror set. docs/member-removal.md §2.
       REMOVAL_QUORUM: "${REMOVAL_QUORUM:-3}"
       # ---- Reads & at-rest protection ---------------------------------
-      # Member-authenticated reads ("off" | "on"). Flip to "on" only
-      # after every member runs a signing build — rollout runbook in
-      # docs/operator-guide.md. "on" requires NODE_FOUNDER_KEYS (boot
-      # refuses otherwise).
+      # Member-authenticated reads AND member-gated writes ("on" is
+      # the default; "off" is the explicit dev/demo opt-out). A node
+      # with no founder boots UNCLAIMED and prints a one-time setup
+      # code — docs/member-authenticated-reads.md, "Claiming a fresh
+      # node".
       READ_AUTH: "${READ_AUTH:-on}"
+      # Operator-chosen setup code for the first-run founder claim.
+      # Empty = the server prints a random one-time code in its boot
+      # log. Ignored once the node has a founder.
+      SETUP_TOKEN: "${SETUP_TOKEN:-}"
       # Encryption-at-rest key for the SQLite file. Unset keeps
       # plaintext. Keep a copy of the key AWAY from the backups — a
       # backup without its key is a brick, which is the point.

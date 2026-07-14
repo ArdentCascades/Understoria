@@ -307,17 +307,30 @@ export async function buildServer({
         .toString("hex")
         .replace(/(.{4})(?=.)/g, "$1-");
     if (config.readAuth === "on") {
+      // The banner goes to stderr DIRECTLY, not through pino: the
+      // structured logger JSON-encodes multi-line strings into one
+      // escaped line, which buries the one value the operator must
+      // read off this screen. Container runtimes capture stderr into
+      // `docker compose logs` the same as stdout. Suppressed at
+      // logLevel=fatal (the test suites boot hundreds of unclaimed
+      // nodes); a short structured line still records the state for
+      // log pipelines.
+      if (config.logLevel !== "fatal") {
+        process.stderr.write(
+          `\n${"=".repeat(64)}\n` +
+            "  THIS NODE IS UNCLAIMED — waiting for its founding member.\n" +
+            "  Every community surface refuses reads and writes until the\n" +
+            "  founder claims it. In the Understoria app: create your\n" +
+            "  identity, connect this node (Profile → Community node),\n" +
+            "  then enter this one-time setup code under Founder setup:\n\n" +
+            `      ${setupToken}\n\n` +
+            "  Docs: docs/member-authenticated-reads.md → Claiming a\n" +
+            "  fresh node. A restart mints a new code.\n" +
+            `${"=".repeat(64)}\n\n`,
+        );
+      }
       app.log.warn(
-        `\n${"=".repeat(64)}\n` +
-          "  THIS NODE IS UNCLAIMED — waiting for its founding member.\n" +
-          "  Every community surface refuses reads and writes until the\n" +
-          "  founder claims it. In the Understoria app: create your\n" +
-          "  identity, connect this node (Profile → Community node),\n" +
-          "  then enter this one-time setup code under Founder setup:\n\n" +
-          `      ${setupToken}\n\n` +
-          "  Docs: docs/member-authenticated-reads.md → Claiming a\n" +
-          "  fresh node. A restart mints a new code.\n" +
-          `${"=".repeat(64)}`,
+        "node is UNCLAIMED — setup code printed to the console; waiting for the founder claim (POST /claim-founder)",
       );
     } else {
       app.log.warn(
