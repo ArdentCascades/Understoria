@@ -41,6 +41,18 @@ include breaking changes.
   new posture, or set `READ_AUTH=off` to keep the old one.
 
 ### Added
+- **Setup wizard speaks plain language** (`scripts/setup.sh`). Every
+  step now opens by explaining what it is, why it's being asked, and
+  what to do when unsure (usually: press Enter) — "ACME email"
+  became "the free padlock-certificate service needs an email",
+  auto-confirm hours got its one-sentence human story, the node id
+  explains its permanence, the key-generation step names the three
+  secrets it mints and what each protects, and the firewall/updates
+  prompts say why yes is the right answer. A welcome banner sets the
+  ~10-minute expectation and notes the script is safe to stop and
+  re-run. Field feedback from a real first-time install: the wizard
+  worked but talked like an engineer's checklist.
+
 - **Setup wizard covers the whole first run** (`scripts/setup.sh`,
   `docker-compose.yml`, `apps/server/src/server.ts`, `.env.example`).
   The interactive setup now finishes what it starts under the
