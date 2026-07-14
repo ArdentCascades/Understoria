@@ -72,6 +72,7 @@ export default function BoardPage() {
     communityNodeIds,
     nodeConfig,
     blockedKeys,
+    founderRoots,
   } = useApp();
   const { t } = useTranslation();
   const keyboardOpen = useVirtualKeyboardOpen();
@@ -185,11 +186,11 @@ export default function BoardPage() {
     for (const m of members) {
       map.set(
         m.publicKey,
-        trustStatusWithInvites(m.publicKey, { vouches, invites }),
+        trustStatusWithInvites(m.publicKey, { vouches, invites, founderRoots }),
       );
     }
     return map;
-  }, [members, vouches, invites]);
+  }, [members, vouches, invites, founderRoots]);
 
   const zones = useMemo(() => {
     const set = new Set<string>();

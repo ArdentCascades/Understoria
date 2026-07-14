@@ -63,7 +63,7 @@ export function AttentionSection() {
     coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
     events, eventRsvps, eventCancellations,
     proposals,
-    capacityPostures, invites,
+    capacityPostures, invites, founderRoots,
     blockedKeys,
   } = useApp();
   const { t } = useTranslation();
@@ -112,6 +112,7 @@ export function AttentionSection() {
         proposals,
         capacityPostures,
         invites,
+        founderRoots,
         config: nodeConfig,
         blockedKeys,
       }),
@@ -119,7 +120,7 @@ export function AttentionSection() {
       currentMember, posts, projects, projectTasks, members, vouches,
       coorgInvitations, coorgInvitationResponses, coorgInvitationRevocations,
       events, eventRsvps, eventCancellations, proposals,
-      capacityPostures, invites,
+      capacityPostures, invites, founderRoots,
       nodeConfig, blockedKeys,
     ],
   );

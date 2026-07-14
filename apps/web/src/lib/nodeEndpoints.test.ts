@@ -25,6 +25,10 @@ import {
   removeMirror,
   urlHash,
 } from "./nodeEndpoints";
+import {
+  LAST_SEEN_FOUNDER_HASHES,
+  readFounderHashCapture,
+} from "./founderRoots";
 
 const PRIMARY = "https://primary.example/api";
 const MIRROR = "https://mirror.example/api";
@@ -224,6 +228,46 @@ describe("pendingMirrorSuggestions", () => {
     await pendingMirrorSuggestions({ fetchImpl: withNodeId });
     expect(await getSetting(SETTING_KEYS.nodeId)).toBe("node_canonical");
     expect(await readNodeIdAliases()).toEqual(["node_random_device"]);
+  });
+
+  it("captures published founderKeyHashes (with the nodeId salt); an absent field keeps the prior capture", async () => {
+    await configureNode();
+    const withHashes = (async () =>
+      new Response(
+        JSON.stringify({
+          nodeId: "node_canonical",
+          founderKeyHashes: ["hashA", "hashB", "", 42],
+          mirrors: [],
+        }),
+        { status: 200 },
+      )) as typeof fetch;
+    await pendingMirrorSuggestions({ fetchImpl: withHashes });
+    expect(await readFounderHashCapture()).toEqual({
+      nodeId: "node_canonical",
+      hashes: ["hashA", "hashB"],
+    });
+
+    // An older server (no field) must NOT wipe the capture — the
+    // trust roots a device already learned survive a temporary
+    // downgrade or a mirror that predates the feature.
+    const withoutField = (async () =>
+      new Response(JSON.stringify({ nodeId: "node_canonical", mirrors: [] }), {
+        status: 200,
+      })) as typeof fetch;
+    await pendingMirrorSuggestions({ fetchImpl: withoutField });
+    expect(await readFounderHashCapture()).toEqual({
+      nodeId: "node_canonical",
+      hashes: ["hashA", "hashB"],
+    });
+    // And without a nodeId there is no salt to verify against, so no
+    // capture happens either.
+    await setSetting(LAST_SEEN_FOUNDER_HASHES, "");
+    const hashesNoNodeId = (async () =>
+      new Response(JSON.stringify({ founderKeyHashes: ["hashC"] }), {
+        status: 200,
+      })) as typeof fetch;
+    await pendingMirrorSuggestions({ fetchImpl: hashesNoNodeId });
+    expect(await readFounderHashCapture()).toBeNull();
   });
 
   it("does not touch the device id when /config omits nodeId", async () => {

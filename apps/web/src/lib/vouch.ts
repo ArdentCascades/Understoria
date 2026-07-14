@@ -114,17 +114,45 @@ export interface RedeemedInviteLike {
 export interface TrustContext {
   vouches: readonly SignedVouch[];
   invites: readonly RedeemedInviteLike[];
+  /**
+   * Members recognized as the node's FOUNDING TRUST ROOTS — resolved
+   * locally from the salted `founderKeyHashes` the node publishes on
+   * `GET /config` (lib/founderRoots.ts). A founder is trusted by
+   * construction, with zero vouchers: the whole web of trust is
+   * rooted at them, exactly as the server's membership closure is
+   * rooted at NODE_FOUNDER_KEYS ∪ claimed founders. Without this, a
+   * fresh community deadlocks — the founder has no vouchers, only
+   * trusted members can meaningfully vouch, so nobody can ever reach
+   * trusted. Optional: callers that predate the capture (tests, old
+   * paths) behave exactly as before.
+   */
+  founderRoots?: ReadonlySet<string>;
 }
 
 /**
- * Full trust computation: sum the distinct-voucher set for `memberKey`
- * across both manual vouches and redeemed invites. Becomes `trusted`
- * once the set reaches `MINIMUM_VOUCHES_FOR_TRUST`.
+ * Is `memberKey` one of the node-published founding trust roots?
+ * Feeds both the trust short-circuit below and the "Founding member"
+ * chip (the honest explanation for a trusted member with no
+ * vouchers — the hashes are public, so the status is too).
+ */
+export function isFounderRoot(
+  memberKey: string,
+  ctx: Pick<TrustContext, "founderRoots">,
+): boolean {
+  return ctx.founderRoots?.has(memberKey) ?? false;
+}
+
+/**
+ * Full trust computation: founding trust roots are trusted by
+ * construction; everyone else needs a distinct-voucher set — across
+ * both manual vouches and redeemed invites — of at least
+ * `MINIMUM_VOUCHES_FOR_TRUST`.
  */
 export function trustStatusWithInvites(
   memberKey: string,
   ctx: TrustContext,
 ): TrustStatus {
+  if (isFounderRoot(memberKey, ctx)) return "trusted";
   return vouchersFor(memberKey, ctx).size >= MINIMUM_VOUCHES_FOR_TRUST
     ? "trusted"
     : "pending_trust";

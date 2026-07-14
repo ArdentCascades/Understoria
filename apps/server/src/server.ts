@@ -293,6 +293,18 @@ export async function buildServer({
     ).n;
   const isClaimed = () =>
     config.founderKeys.length > 0 || claimedFounderCount() > 0;
+  // The full founder-key set — env roots ∪ in-band claimed founders —
+  // for /config's salted `founderKeyHashes` publication (the client
+  // side of the vouch bootstrap; see routes/config.ts). Queried live
+  // for the same reason isClaimed is: a claim lands mid-process.
+  const listFounderKeys = (): string[] => {
+    const keys = new Set<string>(config.founderKeys);
+    const rows = db
+      .prepare("SELECT founder_key FROM claimed_founders")
+      .all() as { founder_key: string }[];
+    for (const row of rows) keys.add(row.founder_key);
+    return [...keys];
+  };
 
   // The one-time setup code, minted only when the node boots
   // unclaimed: SETUP_TOKEN if the operator chose one, else random
@@ -500,7 +512,12 @@ export async function buildServer({
   // Tap-to-link rendezvous — same non-federating, ephemeral posture
   // as the mailbox above; carries only ephemeral PUBLIC keys.
   await registerLinkRequestRoutes(app, { store: linkRequestStore });
-  await registerConfigRoutes(app, { config, signer, isClaimed });
+  await registerConfigRoutes(app, {
+    config,
+    signer,
+    isClaimed,
+    listFounderKeys,
+  });
   // First-run founder claim — open by construction (see the route):
   // it is the step that makes membership exist.
   await registerClaimFounderRoutes(app, {

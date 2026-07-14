@@ -1975,7 +1975,9 @@
     "trustedTooltip": "Esta persona tiene al menos dos avales válidos.",
     "pending": "Persona nueva",
     "pendingWithCount": "Persona nueva ({{have}}/{{need}} avales)",
-    "pendingTooltip": "Aún tiene menos de dos avales. Puede publicar necesidades y ofertas igualmente."
+    "pendingTooltip": "Aún tiene menos de dos avales. Puede publicar necesidades y ofertas igualmente.",
+    "founder": "Miembro fundador",
+    "founderTooltip": "El servidor de esta comunidad le nombra miembro fundador: la red de confianza empieza con esta persona, así que cuenta como de confianza sin necesitar avales."
   },
   "achievement": {
     "first_exchange": {

@@ -35,7 +35,7 @@ import {
 // lives in VouchDiscoveryNudgeCard below.
 
 export function useVouchDiscoveryNudge(): BoardNudgeStatus {
-  const { currentMember, vouches, invites } = useApp();
+  const { currentMember, vouches, invites, founderRoots } = useApp();
   const [dismissed, setDismissed] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function useVouchDiscoveryNudge(): BoardNudgeStatus {
 
   const trusted =
     currentMember !== null &&
-    memberIsTrusted(currentMember.publicKey, vouches, invites);
+    memberIsTrusted(currentMember.publicKey, vouches, invites, founderRoots);
 
   const alreadyVouched =
     currentMember !== null &&

@@ -15,7 +15,7 @@ import type { BoardNudgeStatus } from "@/lib/boardNudge";
 import { getSetting, SETTING_KEYS } from "@/db/database";
 import { listNodeEndpoints, nodeSuccessKey } from "@/lib/nodeEndpoints";
 import { isRecentSuccess } from "@/lib/resilience";
-import { vouchCountFor, MINIMUM_VOUCHES_FOR_TRUST } from "@/lib/vouch";
+import { trustStatusWithInvites } from "@/lib/vouch";
 import { GrowRootSuggestCard } from "@/components/GrowRootSuggestCard";
 
 // Board leg of the capacity response (docs/capacity-forecast.md §5.2).
@@ -30,7 +30,8 @@ import { GrowRootSuggestCard } from "@/components/GrowRootSuggestCard";
 //   - the member hasn't declined the card before.
 // Everything is pull-only; the card just opens the existing wizard.
 export function useGrowRootSuggestNudge(): BoardNudgeStatus {
-  const { currentMember, vouches, invites, capacityPostures } = useApp();
+  const { currentMember, vouches, invites, capacityPostures, founderRoots } =
+    useApp();
   // undefined = still resolving the async gates.
   const [gates, setGates] = useState<
     { dismissed: boolean; nodesReachable: number } | undefined
@@ -63,8 +64,11 @@ export function useGrowRootSuggestNudge(): BoardNudgeStatus {
 
   const trusted =
     currentMember !== null &&
-    vouchCountFor(currentMember.publicKey, { vouches, invites }) >=
-      MINIMUM_VOUCHES_FOR_TRUST;
+    trustStatusWithInvites(currentMember.publicKey, {
+      vouches,
+      invites,
+      founderRoots,
+    }) === "trusted";
   // Worst pressure across the (verified, tiny) posture set; the strong
   // push is red + growthRecommended only.
   const redAndGrowing = capacityPostures.some(

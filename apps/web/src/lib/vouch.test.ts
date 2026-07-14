@@ -22,6 +22,7 @@ import { describe, expect, it } from "vitest";
 import { generateKeyPair } from "./crypto";
 import {
   createVouch,
+  isFounderRoot,
   trustStatus,
   trustStatusWithInvites,
   verifyVouch,
@@ -183,6 +184,38 @@ describe("trustStatusWithInvites", () => {
         ],
       }),
     ).toBe("pending_trust");
+  });
+
+  it("a founder root is trusted with ZERO vouchers — the bootstrap fix", () => {
+    // Without a root, a fresh community deadlocks: the founder has no
+    // vouchers, only trusted members can meaningfully vouch, so
+    // nobody ever reaches trusted. The node-published root breaks
+    // the cycle.
+    const founder = generateKeyPair();
+    expect(
+      trustStatusWithInvites(founder.publicKey, {
+        vouches: [],
+        invites: [],
+        founderRoots: new Set([founder.publicKey]),
+      }),
+    ).toBe("trusted");
+  });
+
+  it("founder roots do not leak trust onto anyone else", () => {
+    const founder = generateKeyPair();
+    const stranger = generateKeyPair();
+    const ctx = {
+      vouches: [],
+      invites: [],
+      founderRoots: new Set([founder.publicKey]),
+    };
+    expect(trustStatusWithInvites(stranger.publicKey, ctx)).toBe(
+      "pending_trust",
+    );
+    expect(isFounderRoot(founder.publicKey, ctx)).toBe(true);
+    expect(isFounderRoot(stranger.publicKey, ctx)).toBe(false);
+    // And an absent set behaves exactly as before the feature.
+    expect(isFounderRoot(founder.publicKey, {})).toBe(false);
   });
 });
 

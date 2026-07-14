@@ -39,9 +39,9 @@ import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { BackLink } from "@/components/BackLink";
-import { trustStatusWithInvites } from "@/lib/vouch";
+import { isFounderRoot, trustStatusWithInvites } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
-import { TrustChip } from "@/components/TrustChip";
+import { FounderChip, TrustChip } from "@/components/TrustChip";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
@@ -60,6 +60,7 @@ export default function MemberDetailPage() {
     currentMember,
     vouches,
     invites,
+    founderRoots,
   } = useApp();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,9 +89,13 @@ export default function MemberDetailPage() {
   const trust = useMemo(
     () =>
       member
-        ? trustStatusWithInvites(member.publicKey, { vouches, invites })
+        ? trustStatusWithInvites(member.publicKey, {
+            vouches,
+            invites,
+            founderRoots,
+          })
         : null,
-    [member, vouches, invites],
+    [member, vouches, invites, founderRoots],
   );
   const currentTrust = useMemo(
     () =>
@@ -98,9 +103,10 @@ export default function MemberDetailPage() {
         ? trustStatusWithInvites(currentMember.publicKey, {
             vouches,
             invites,
+            founderRoots,
           })
         : null,
-    [currentMember, vouches, invites],
+    [currentMember, vouches, invites, founderRoots],
   );
   const alreadyVouchedByMe = useMemo(
     () =>
@@ -189,14 +195,20 @@ export default function MemberDetailPage() {
           <p className="text-xs font-mono text-moss-600 dark:text-moss-300">
             {shortKey(member.publicKey)}
           </p>
-          <div className="mt-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {/* Qualitative trust status ONLY — no `count` prop. The
                 chip used to read "Trusted (3 vouches)" / "New here
                 (1/2 vouches)"; a vouch tally on someone else's page
                 is a comparable score, banned by the operator ruling
                 + `no-leaderboards` (see file header). The count
-                variant remains fine on the member's OWN Profile. */}
+                variant remains fine on the member's OWN Profile.
+                FounderChip is fine here: founding-root status is a
+                published fact (salted hashes on /config), not a
+                climbable tally. */}
             {trust && <TrustChip status={trust} />}
+            {isFounderRoot(member.publicKey, { founderRoots }) && (
+              <FounderChip />
+            )}
           </div>
         </div>
       </header>

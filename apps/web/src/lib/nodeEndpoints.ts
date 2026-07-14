@@ -20,6 +20,7 @@
  */
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { isDemoBuild } from "@/lib/demo";
+import { LAST_SEEN_FOUNDER_HASHES } from "@/lib/founderRoots";
 
 /**
  * Multi-node endpoints — docs/community-resilience.md §B.2.
@@ -403,6 +404,7 @@ export async function pendingMirrorSuggestions(
       systemKey?: { current?: unknown; history?: unknown };
       nodeId?: unknown;
       removalQuorum?: unknown;
+      founderKeyHashes?: unknown;
     } | null;
     if (!body || typeof body !== "object") return [];
     // Member removal (docs/member-removal.md §2): capture the node's
@@ -437,6 +439,35 @@ export async function pendingMirrorSuggestions(
         await adoptCanonicalNodeId(body.nodeId);
       } catch {
         // Adoption is best-effort bookkeeping.
+      }
+    }
+    // Founding trust roots (docs/member-authenticated-reads.md,
+    // "Founders are trust roots on member devices too"): capture the
+    // node's salted founder-key hashes so trust computation
+    // (lib/vouch.ts via lib/founderRoots.ts) can recognize the
+    // founder as trusted-by-construction — the fix for the vouch
+    // bootstrap deadlock. The nodeId rides along because it is the
+    // hash salt. An ABSENT field leaves any prior capture in place
+    // (older servers don't publish it); a present list overwrites.
+    if (
+      typeof body.nodeId === "string" &&
+      body.nodeId.trim() !== "" &&
+      Array.isArray(body.founderKeyHashes)
+    ) {
+      const hashes = body.founderKeyHashes.filter(
+        (h): h is string => typeof h === "string" && h.length > 0,
+      );
+      try {
+        await setSetting(
+          LAST_SEEN_FOUNDER_HASHES,
+          JSON.stringify({
+            nodeId: body.nodeId,
+            hashes,
+            capturedAt: new Date().toISOString(),
+          }),
+        );
+      } catch {
+        // Capture is best-effort bookkeeping.
       }
     }
     // Re-seed Phase R0 (docs/community-reseed.md §1c): capture the

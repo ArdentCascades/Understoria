@@ -22,6 +22,7 @@ import {
   canonicalPostPayload,
   canonicalReadAuthMessage,
   canonicalRedemptionPayload,
+  founderKeyHash,
   generateKeyPair,
   sign,
   type KeyPair,
@@ -570,6 +571,67 @@ describe("first-run founder claim (POST /claim-founder)", () => {
       headers: readHeaders(invitee, "/exchanges"),
     });
     expect(read.statusCode).toBe(200);
+  });
+});
+
+describe("GET /config founderKeyHashes (founder trust roots)", () => {
+  it("publishes the salted hash of each env founder key, plus nodeId (the salt)", async () => {
+    const founderA = generateKeyPair();
+    const founderB = generateKeyPair();
+    const a = await serverWith({
+      READ_AUTH: "on",
+      NODE_FOUNDER_KEYS: `${founderA.publicKey},${founderB.publicKey}`,
+    });
+    const res = await a.inject({ method: "GET", url: "/config" });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as {
+      founderKeyHashes?: string[];
+      nodeId?: string;
+    };
+    expect(body.founderKeyHashes).toEqual(
+      [
+        founderKeyHash("node_test", founderA.publicKey),
+        founderKeyHash("node_test", founderB.publicKey),
+      ].sort(),
+    );
+    // The raw keys must NOT appear anywhere in the open response.
+    expect(res.body).not.toContain(founderA.publicKey);
+    expect(res.body).not.toContain(founderB.publicKey);
+    // nodeId is published alongside — it is the hash salt, so a
+    // device can't verify without it (no system key configured here,
+    // so this is the founder-hash publication path specifically).
+    expect(body.nodeId).toBe("node_test");
+  });
+
+  it("omits the field while unclaimed; an in-band claim publishes its hash immediately", async () => {
+    const founder = generateKeyPair();
+    const a = await serverWith({ SETUP_TOKEN: "test-setup-code-1234" });
+
+    const before = await a.inject({ method: "GET", url: "/config" });
+    expect(before.json()).not.toHaveProperty("founderKeyHashes");
+
+    const ts = Date.now();
+    await a.inject({
+      method: "POST",
+      url: "/claim-founder",
+      payload: {
+        publicKey: founder.publicKey,
+        setupToken: "test-setup-code-1234",
+        ts,
+        signature: sign(
+          canonicalFounderClaimMessage(
+            founder.publicKey,
+            "test-setup-code-1234",
+            ts,
+          ),
+          founder.secretKey,
+        ),
+      },
+    });
+
+    const after = await a.inject({ method: "GET", url: "/config" });
+    expect((after.json() as { founderKeyHashes?: string[] }).founderKeyHashes)
+      .toEqual([founderKeyHash("node_test", founder.publicKey)]);
   });
 });
 
