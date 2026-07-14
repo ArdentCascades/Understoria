@@ -134,13 +134,26 @@
           </div>
 
           <div class="shot-frame">
-            <img
-              src="./screenshots/board.png"
-              alt="The Understoria community board showing neighbours' needs and offers across categories like transport, food, and childcare."
-              width="1280"
-              height="900"
-              loading="eager"
-            />
+            <!-- Phones get the phone-sized capture (a fraction of the
+                 desktop shot's bytes, and an honest picture of the app
+                 on the device in hand); the desktop capture only ships
+                 to viewports that can show it. This is the eagerly
+                 loaded above-the-fold image, so it sets mobile LCP. -->
+            <picture>
+              <source
+                media="(max-width: 640px)"
+                srcset="./screenshots/board-mobile.png"
+                width="780"
+                height="1688"
+              />
+              <img
+                src="./screenshots/board.png"
+                alt="The Understoria community board showing neighbours' needs and offers across categories like transport, food, and childcare."
+                width="1280"
+                height="900"
+                loading="eager"
+              />
+            </picture>
           </div>
         </div>
       </section>
