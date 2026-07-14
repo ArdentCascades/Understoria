@@ -10,6 +10,26 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Server: write-membership gate — the write half of `READ_AUTH=on`**
+  (`apps/server/src/readAuth.ts`, `server.ts`,
+  `docs/member-authenticated-reads.md`). Review of the federation
+  surfaces found that while joining is invite-gated and reads are
+  member-gated under enforcement, WRITING was not: `POST /posts`,
+  `/vouches`, `/exchanges` and every other attributable surface
+  accepted any well-formed record self-signed by a key the sender
+  generated for free — a stranger could seed a community's board with
+  valid-looking records that federated like anything else (insert
+  caps bounded the volume, not the existence). With `READ_AUTH=on`,
+  `registerMemberWriteGuard` now requires each surface's attributed
+  signing key to resolve as a member (founder roots + redemption-
+  receipt closure − quorum removals — the same resolver reads use),
+  refusing strangers with `403 not_a_member`, the posture the
+  governance routes and the `/messages` sender gate already
+  established. `POST /redemptions` stays open (it IS the joining
+  ceremony), mirror-internal replication is exempt (history is
+  history), and multi-/system-signed surfaces keep their in-route
+  authority rules. One switch, not two: `READ_AUTH=off` behaves
+  exactly as before for staged rollouts.
 - **@-mentions in task comments — derived, not delivered**
   (`lib/mentions.ts`, `lib/markdown.ts`, `components/Markdown.tsx`,
   `components/TaskComments.tsx`, `pages/MyWork.tsx`,

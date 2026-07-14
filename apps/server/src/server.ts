@@ -86,6 +86,7 @@ import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard, SURFACES } from "./insertCaps.js";
 import {
   createMembershipResolver,
+  registerMemberWriteGuard,
   registerReadAuthGuard,
   registerRemovedAuthorGuard,
 } from "./readAuth.js";
@@ -296,6 +297,20 @@ export async function buildServer({
   // off. Mirror-internal requests are exempt: pre-removal history
   // must keep replicating.
   registerRemovedAuthorGuard(app, {
+    resolver: membershipResolver,
+    surfaces: SURFACES,
+    internalHeader: MIRROR_INTERNAL_HEADER,
+    internalToken: internalBypassToken,
+  });
+
+  // The general write-membership gate (readAuth.ts): with READ_AUTH
+  // on, every attributable federation POST requires its signing
+  // author to be a member — previously /posts, /vouches, /exchanges
+  // and friends accepted any well-formed self-signed record.
+  // /redemptions stays open (it IS the joining ceremony) and mirror-
+  // internal replication is exempt (history is history).
+  registerMemberWriteGuard(app, {
+    enabled: config.readAuth === "on",
     resolver: membershipResolver,
     surfaces: SURFACES,
     internalHeader: MIRROR_INTERNAL_HEADER,

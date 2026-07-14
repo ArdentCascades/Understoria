@@ -285,6 +285,79 @@ export function registerRemovedAuthorGuard(
   });
 }
 
+/**
+ * The general write-membership gate — the write half of
+ * docs/member-authenticated-reads.md, closing the gap that joining is
+ * invite-gated but WRITING was not: every attributable federation
+ * POST (posts, vouches, exchanges, events, claims, comments, …)
+ * accepted any well-formed record self-signed by a key the attacker
+ * generated for free. Signature validity proves key possession, not
+ * community membership; this gate adds the missing half by requiring
+ * the surface's attributed signing key to resolve as a member.
+ *
+ * Posture mirrors READ_AUTH exactly, like the /messages sender gate
+ * and the governance routes that pioneered it: `enabled` is
+ * `readAuth === "on"`, so a founder-keys-less node keeps working
+ * (config.ts already refuses READ_AUTH=on without founder keys, so
+ * this gate never runs against an empty member universe), and the
+ * staged-rollout story is one switch, not two.
+ *
+ * Reuses the insert-cap SURFACES attribution. Exemptions, each
+ * carrying its own authority:
+ *   - `/redemptions`: the redeemer is BECOMING a member via this very
+ *     POST — the verified invite chain in-route is the membership
+ *     ceremony; gating it would weld the front door shut.
+ *   - mirror-internal requests (per-boot token): replication re-POSTs
+ *     HISTORICAL records; membership standing is judged at the edge
+ *     where a record first enters the community, not re-litigated on
+ *     every replica hop.
+ *   - keyField-null surfaces (/member-removals, /member-reinstatements,
+ *     /auto-confirm): multi-signed or system-signed; their authority
+ *     rules live in-route.
+ *
+ * Same coverage note as the removed-author guard: the gate checks the
+ * SIGNING author each surface validates (e.g. /exchanges gates
+ * helperKey; a record naming a non-member counterparty still lands —
+ * the ledger records what happened).
+ *
+ * Refusal is 403 `not_a_member` — byte-identical to the governance
+ * routes and the /messages gate, so the client-side handling posture
+ * is already established.
+ */
+export function registerMemberWriteGuard(
+  app: FastifyInstance,
+  deps: {
+    enabled: boolean;
+    resolver: MembershipResolver;
+    surfaces: Record<string, { keyField: string | null }>;
+    internalHeader: string;
+    internalToken: string;
+  },
+): void {
+  if (!deps.enabled) return;
+  app.addHook("preHandler", async (req, reply) => {
+    if (req.method !== "POST") return;
+    if (req.headers[deps.internalHeader] === deps.internalToken) return;
+    const path = req.url.split("?")[0];
+    if (path === "/redemptions") return;
+    const surface = deps.surfaces[path];
+    if (!surface || !surface.keyField) return;
+    const body = req.body as Record<string, unknown> | null;
+    const key =
+      body && typeof body[surface.keyField] === "string"
+        ? (body[surface.keyField] as string)
+        : null;
+    // A missing/malformed key field falls through to the route's own
+    // shape validation (same opportunistic stance as the insert caps
+    // and the removed-author guard — this gate never invents a
+    // second body-shape contract).
+    if (key && !deps.resolver.isMember(key)) {
+      reply.code(403);
+      return reply.send({ error: "not_a_member" });
+    }
+  });
+}
+
 export interface ReadAuthDeps {
   readAuth: "off" | "on";
   resolver: MembershipResolver;

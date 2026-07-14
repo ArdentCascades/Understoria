@@ -120,6 +120,56 @@ pulls silently no-op (the existing `!res.ok → null` path) until the
 member unlocks — then the periodic re-pull catches up. Named in the
 operator runbook so "my app stopped syncing" has a findable answer.
 
+### The write half (same switch)
+
+Joining is invite-gated and, with `READ_AUTH=on`, reading is
+member-gated — but until the write gate, WRITING was not: every
+attributable federation POST (`/posts`, `/vouches`, `/exchanges`,
+`/events`, `/claims`, `/task-comments`, …) accepted any well-formed
+record self-signed by a key the sender generated for free. A
+signature proves key possession, not membership; insert caps bound
+the *volume* of abuse, not its existence — a stranger could still
+seed a community's board with valid-looking posts and vouches that
+would federate like anything else.
+
+`registerMemberWriteGuard` (readAuth.ts) closes this with the same
+resolver, over the same insert-cap `SURFACES` attribution the
+removed-author guard already uses: when `READ_AUTH=on`, the
+surface's attributed signing key must resolve as a member or the
+POST is refused `403 not_a_member` — the identical posture the
+governance routes and the `/messages` sender gate pioneered, now
+uniform across every attributable surface. One switch, not two:
+enabling read enforcement enables write enforcement, and the boot
+guard that requires `NODE_FOUNDER_KEYS` covers both (the gate never
+runs against an empty member universe).
+
+Exemptions, each carrying its own authority:
+
+- **`POST /redemptions`** — the joining ceremony itself. The
+  redeemer is by definition not yet a member; the route's verified
+  invite chain (inviter signature → receipt signature) IS the
+  authority. Gating it would weld the front door shut.
+- **Mirror-internal replication** (per-boot token) — re-POSTs of
+  HISTORICAL records; membership standing is judged where a record
+  first enters the community, not re-litigated per replica hop.
+- **Key-field-null surfaces** (`/member-removals`,
+  `/member-reinstatements`, `/auto-confirm`) — multi-signed or
+  system-signed; their authority rules live in-route.
+
+Coverage note (same as the removed-author guard): the gate checks
+the SIGNING author each surface validates — `/exchanges` gates
+`helperKey`; a record naming a non-member counterparty still lands,
+because the ledger records what happened.
+
+Ordering edge, named for the runbook: a freshly-redeemed member's
+first records 403 until their redemption receipt lands at the node.
+The client enqueues the receipt at redemption time, before anything
+they could author, and the outbox flushes in `nextAttemptAt` order —
+so the receipt ships ahead of their first records and this is a
+non-event in practice. A member who somehow authored records before
+their receipt arrived would see those rows poisoned (403 is
+non-retryable), same as the governance surfaces since G1.
+
 ### Peer nodes (`PEER_READ_TOKENS`)
 
 Cross-node `peerPull` is server-to-server; peers aren't members.
@@ -172,7 +222,10 @@ engineers; linked from the operator guide and privacy policy.
 - ~~No member expulsion / read revocation~~ — shipped since
   (`docs/member-removal.md` M1); the closure section above carries
   the amended definition.
-- No authentication on POSTs beyond the signatures records already
-  carry — writes were never the gap; insert caps bound abuse.
+- ~~No authentication on POSTs beyond the signatures records already
+  carry~~ — this claim did not survive review: a stranger's
+  well-formed self-signed records landed and federated. Shipped
+  since as the write half of `READ_AUTH=on` (§1, "The write half");
+  insert caps remain the volume bound beneath it.
 - No per-record read ACLs. The community reads as one audience;
   finer tiers remain a UI concern (roster visibility tiers etc.).
