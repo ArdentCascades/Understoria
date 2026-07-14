@@ -28,6 +28,7 @@ interface MockState {
   projectTasks: never[];
   currentMember: Member | null;
   nodeId: string;
+  communityNodeIds: ReadonlySet<string>;
   nodeConfig: {
     customMilestones: never[];
     taskCheckInDays: number;
@@ -103,6 +104,7 @@ function blankState(): MockState {
     projectTasks: [],
     currentMember: me,
     nodeId: "node-1",
+    communityNodeIds: new Set(["node-1"]),
     nodeConfig: {
       customMilestones: [],
       taskCheckInDays: 7,

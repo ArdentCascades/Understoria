@@ -20,6 +20,7 @@ import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
 import { currentInstallEnvironment } from "@/lib/installGuide";
+import { isOurNode } from "@/lib/nodeIdentity";
 import { db } from "@/db/database";
 import { createMember } from "@/db/seed";
 import { useApp } from "@/state/AppContext";
@@ -135,6 +136,7 @@ export default function WelcomePage() {
     refreshOnboarded,
     nodeConfig,
     nodeId,
+    communityNodeIds,
   } = useApp();
   const [stepIndex, setStepIndex] = useState(0);
 
@@ -166,9 +168,12 @@ export default function WelcomePage() {
     [installed],
   );
 
-  // Count members scoped to THIS node (a paired device that brought
-  // identities over from a peer node could have rows under a different
-  // nodeId — those don't satisfy the bootstrap on the LOCAL node).
+  // Count members scoped to THIS community (a paired device that
+  // brought identities over from a peer node could have rows under a
+  // foreign nodeId — those don't satisfy the bootstrap on the LOCAL
+  // node). Alias-aware (lib/nodeIdentity.ts): members materialized
+  // under a pre-canonical community id must still count, or a healed
+  // device would wrongly see the invite-only landing.
   // `undefined` while Dexie is still resolving lets us render a
   // "loading" placeholder rather than flashing the invite-only landing
   // and then flipping to profileSetup once the count comes back as 0.
@@ -180,8 +185,8 @@ export default function WelcomePage() {
   // acceptable risk. This is documented behavior, not a bug.
   const localMemberCount = useLiveQuery<number | undefined>(async () => {
     const all = await db.members.toArray();
-    return all.filter((m) => m.nodeId === nodeId).length;
-  }, [nodeId]);
+    return all.filter((m) => isOurNode(m.nodeId, communityNodeIds)).length;
+  }, [communityNodeIds]);
 
   // Tri-state: `true` allows onboarding, `false` shows the invite-only
   // landing, `"loading"` defers the decision until Dexie resolves the

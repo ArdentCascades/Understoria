@@ -60,6 +60,7 @@ interface MockState {
   vouches: SignedVouch[];
   invites: InviteRow[];
   nodeId: string;
+  communityNodeIds: ReadonlySet<string>;
 }
 
 let mockState: MockState;
@@ -118,6 +119,7 @@ beforeEach(() => {
     vouches: [],
     invites: [],
     nodeId: "node-1",
+    communityNodeIds: new Set(["node-1"]),
   };
   container = document.createElement("div");
   document.body.appendChild(container);

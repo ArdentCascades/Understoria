@@ -69,7 +69,7 @@ const DRILLS = [
 
 export default function InfrastructurePage() {
   const { t } = useTranslation();
-  const { members, proposals, nodeId } = useApp();
+  const { members, proposals, nodeId, communityNodeIds } = useApp();
 
   // --- servers ---------------------------------------------------------
   const [probing, setProbing] = useState(false);
@@ -87,13 +87,13 @@ export default function InfrastructurePage() {
         await probeEndpoints({
           endpoints,
           primaryUrl: primary,
-          expectedNodeId: nodeId || null,
+          expectedNodeIds: communityNodeIds.size > 0 ? communityNodeIds : null,
         }),
       );
     } finally {
       setProbing(false);
     }
-  }, [nodeId]);
+  }, [communityNodeIds]);
 
   useEffect(() => {
     void runProbe();

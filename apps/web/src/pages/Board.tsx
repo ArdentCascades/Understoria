@@ -37,6 +37,7 @@ import { ContextualHint } from "@/components/ContextualHint";
 import { BoardNudges } from "@/components/BoardNudges";
 import { matchesQuery } from "@/lib/messageSearch";
 import { filterBoardPosts } from "@/lib/boardFilter";
+import { isOurNode } from "@/lib/nodeIdentity";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { useSlashFocus } from "@/lib/useSlashFocus";
@@ -68,7 +69,7 @@ export default function BoardPage() {
     projectTasks,
     vouches,
     invites,
-    nodeId,
+    communityNodeIds,
     nodeConfig,
     blockedKeys,
   } = useApp();
@@ -783,7 +784,7 @@ export default function BoardPage() {
                         posterName={memberName.get(p.postedBy) ?? ""}
                         isCurrentMember={p.postedBy === currentMember?.publicKey}
                         posterTrust={trustByKey.get(p.postedBy)}
-                        isCrossNode={p.nodeId !== nodeId && p.nodeId !== ""}
+                        isCrossNode={!isOurNode(p.nodeId, communityNodeIds)}
                         posterAvailabilityChips={availabilityByKey.get(p.postedBy)}
                         searchQuery={debouncedQuery}
                       />

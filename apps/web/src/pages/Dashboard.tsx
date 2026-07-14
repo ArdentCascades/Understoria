@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { computeCommunityStats, computeFederationStats } from "@/lib/stats";
+import { isOurNode } from "@/lib/nodeIdentity";
 import { computeFlowStats } from "@/lib/flow";
 import { projectCategoryMeta } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
@@ -47,21 +48,23 @@ export default function DashboardPage() {
     posts,
     achievements,
     nodeConfig,
-    nodeId,
+    communityNodeIds,
     proposals,
     selfRemoved,
   } = useApp();
   const { t } = useTranslation();
   // Split BEFORE feeding the stats helpers so the headline + flow
-  // reflect only this node's exchanges. The federation rollup
-  // surfaces separately below.
+  // reflect only this community's exchanges. "Ours" is the alias-aware
+  // set (lib/nodeIdentity.ts) — exchanges authored under a member's
+  // pre-canonical id, or auto-confirmed under the server's id, still
+  // belong on the headline. The federation rollup surfaces separately.
   const localExchanges = useMemo(
-    () => exchanges.filter((x) => x.nodeId === nodeId || x.nodeId === ""),
-    [exchanges, nodeId],
+    () => exchanges.filter((x) => isOurNode(x.nodeId, communityNodeIds)),
+    [exchanges, communityNodeIds],
   );
   const federationStats = useMemo(
-    () => computeFederationStats(exchanges, nodeId),
-    [exchanges, nodeId],
+    () => computeFederationStats(exchanges, communityNodeIds),
+    [exchanges, communityNodeIds],
   );
   const stats = useMemo(
     () =>

@@ -49,7 +49,7 @@ describe("probeEndpoints", () => {
     const results = await probeEndpoints({
       endpoints: ["https://a.example", "https://b.example"],
       primaryUrl: "https://a.example",
-      expectedNodeId: "community-1",
+      expectedNodeIds: new Set(["community-1"]),
       fetchImpl: fakeFetch({
         "https://a.example/health": { ok: true },
         "https://a.example/config": { ok: true, body: { nodeId: "community-1" } },
@@ -80,7 +80,7 @@ describe("probeEndpoints", () => {
     const [result] = await probeEndpoints({
       endpoints: ["https://down.example"],
       primaryUrl: "https://down.example",
-      expectedNodeId: "community-1",
+      expectedNodeIds: new Set(["community-1"]),
       fetchImpl: fakeFetch({
         "https://down.example/health": "network-error",
         "https://down.example/config": "network-error",
@@ -96,7 +96,7 @@ describe("probeEndpoints", () => {
     const [result] = await probeEndpoints({
       endpoints: ["https://a.example"],
       primaryUrl: "https://a.example/",
-      expectedNodeId: "community-1",
+      expectedNodeIds: new Set(["community-1"]),
       fetchImpl: fakeFetch({
         "https://a.example/health": { ok: true },
         "https://a.example/config": { ok: true, body: { nodeId: "stranger" } },
@@ -110,7 +110,7 @@ describe("probeEndpoints", () => {
     const [result] = await probeEndpoints({
       endpoints: ["https://a.example"],
       primaryUrl: "https://a.example",
-      expectedNodeId: null,
+      expectedNodeIds: null,
       fetchImpl: fakeFetch({
         "https://a.example/health": { ok: true },
         "https://a.example/config": { ok: true, body: { nodeId: "anything" } },

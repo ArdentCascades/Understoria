@@ -144,9 +144,15 @@ export interface FederationStats {
 
 /**
  * Aggregates the subset of exchanges that originated on a node OTHER
- * than `localNodeId`. Used by the Dashboard to render an "Across
+ * than this community. Used by the Dashboard to render an "Across
  * federation" rollup as a SEPARATE surface from the home-node
  * headline, rather than silently inflating the headline number.
+ *
+ * `localNodeIds` is the community's whole id set — current canonical
+ * id plus historical aliases (lib/nodeIdentity.ts). Matching one id
+ * only would misfile exchanges authored under a member's
+ * pre-canonical id as a foreign peer, inflating the rollup with the
+ * community's own history.
  *
  * Splitting (rather than summing) follows `no-leaderboards` and
  * `community-authority`: a node's own metabolism stays legible
@@ -155,13 +161,13 @@ export interface FederationStats {
  */
 export function computeFederationStats(
   exchanges: readonly Exchange[],
-  localNodeId: string,
+  localNodeIds: ReadonlySet<string>,
 ): FederationStats {
   const peerSet = new Set<string>();
   let hours = 0;
   let count = 0;
   for (const x of exchanges) {
-    if (x.nodeId === localNodeId || x.nodeId === "") continue;
+    if (x.nodeId === "" || localNodeIds.has(x.nodeId)) continue;
     peerSet.add(x.nodeId);
     hours += x.hoursExchanged;
     count += 1;
