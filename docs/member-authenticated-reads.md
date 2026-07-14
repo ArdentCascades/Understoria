@@ -158,6 +158,61 @@ public, shown on their Profile) rather than being claimed
 separately; the resolver's trust roots MUST match across a mirror
 set, like `NODE_ID`.
 
+### Founders are trust roots on member devices too
+
+The server has always rooted its membership closure at the founder
+keys; member devices, until this section's change, rooted NOTHING —
+a member computed as `trusted` only with two distinct vouchers
+(`apps/web/src/lib/vouch.ts`). On a fresh community that is a
+deadlock, not a slow start: the founder has zero vouchers and no
+inviter, so they are `pending_trust`; only trusted members can
+meaningfully vouch, so the founder's invitees cap out at one voucher
+(the invite itself) — **nobody can ever reach trusted**. The demo
+seed masked this (it ships pre-signed vouches); the first real
+deployment hit it on day one.
+
+The fix mirrors the server's own design. `GET /config` (open,
+pre-membership) publishes `founderKeyHashes`: one salted, one-way
+commitment per founder — `founderKeyHash(nodeId, key)` = SHA-512 over
+`founder-root|<nodeId>|<key>` (shared helper in
+`packages/shared/src/crypto.ts`), covering `NODE_FOUNDER_KEYS` ∪
+claimed founders. `nodeId` is always published alongside, because it
+is the salt. Member devices capture the list on the `/config` fetch
+they already make (`lib/nodeEndpoints.ts` → settings key
+`communityFounderKeyHashes`), hash their known member keys against it
+(`lib/founderRoots.ts`), and the trust computation treats a match as
+trusted-by-construction (`TrustContext.founderRoots`). The founder's
+profile shows a "Founding member" chip next to the Trusted chip —
+the honest explanation for trusted-with-zero-vouches.
+
+Why hashes rather than the keys themselves — and what this does and
+does not disclose:
+
+- Publishing raw founder keys would not be a *vulnerability* (public
+  keys are designed to be public, and every member learns them from
+  signed records anyway), but it would hand an unauthenticated
+  stranger a stable, cross-node-correlatable identifier for free.
+- With the salted hash, a stranger holding no keys learns exactly one
+  thing: **how many founders the node has**. They cannot recover a
+  key from a hash, and the nodeId salt makes the same person's
+  founder commitments on two different nodes unrelated values —
+  no cross-node correlation.
+- Someone who already holds a candidate key (i.e. any member) can
+  confirm founder status by hashing — which is precisely the intended
+  verification, and no more than the "Founding member" chip shows
+  them in-app.
+- Trust posture: the capture believes the consented community node,
+  exactly like the mirror announcements, removal quorum, and system
+  key captured on the same fetch. A malicious node could name anyone
+  a founder root — but that node already controls the redemption feed
+  and every record this device pulls; no new power is created.
+
+Devices that never capture the field (demo builds, sync off, servers
+predating it) behave exactly as before — `founderRoots` is optional
+everywhere it flows. An absent field on a later fetch never wipes a
+prior capture, so a temporary failover to an older mirror does not
+strip the founder's trust.
+
 Exempt surfaces (open by design, each self-limiting):
 `/health` (liveness; the origin-suggest probe), `GET /config`
 (operator transparency + system-key discovery — needed BEFORE

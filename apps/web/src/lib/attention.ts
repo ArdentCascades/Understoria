@@ -27,8 +27,7 @@ import type {
 import { canClaimTask, isOrganizer } from "@/db/projects";
 import type { CapacityPosture } from "@understoria/shared/types";
 import {
-  vouchCountFor,
-  MINIMUM_VOUCHES_FOR_TRUST,
+  trustStatusWithInvites,
   type SignedVouch,
   type RedeemedInviteLike,
 } from "@/lib/vouch";
@@ -300,6 +299,12 @@ export interface AttentionInput {
    *  on the current member being trusted (the same bar the grow-root
    *  wizard uses). Optional; without it the item just doesn't surface. */
   invites?: readonly RedeemedInviteLike[];
+  /** Members the node published as founding trust roots
+   *  (lib/founderRoots.ts) — part of the trusted bar above: a founder
+   *  is trusted by construction, so the grow_a_root signal reaches
+   *  them too (on a young node they're often the ONLY one who can act
+   *  on it). Optional like its siblings. */
+  founderRoots?: ReadonlySet<string>;
   now?: number;
 }
 
@@ -753,10 +758,11 @@ export function computeAttentionItems(
     }, null);
     const trusted =
       worst !== null &&
-      vouchCountFor(currentMember.publicKey, {
+      trustStatusWithInvites(currentMember.publicKey, {
         vouches: input.vouches ?? [],
         invites: input.invites ?? [],
-      }) >= MINIMUM_VOUCHES_FOR_TRUST;
+        founderRoots: input.founderRoots,
+      }) === "trusted";
     if (worst !== null && worst.pressure !== "green" && trusted) {
       items.push({
         kind: "grow_a_root",

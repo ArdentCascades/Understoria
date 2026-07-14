@@ -38,6 +38,33 @@ interface TrustChipProps {
   compact?: boolean;
 }
 
+/**
+ * "Founding member" — shown next to the TrustChip for members the
+ * node published as founding trust roots (salted hashes on
+ * GET /config, resolved in lib/founderRoots.ts). It is the honest
+ * explanation for a trusted member with zero vouchers: the web of
+ * trust is rooted at them. Unlike vouch counts this is NOT a
+ * comparable score (there is no ladder to climb — you were either
+ * a root or you weren't), so it is fine on other members' pages.
+ */
+export function FounderChip({ compact = false }: { compact?: boolean }) {
+  const { t } = useTranslation();
+  const sizeClass = compact
+    ? "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[0.625rem] font-medium"
+    : "chip";
+  return (
+    <span
+      className={`${sizeClass} bg-moss-100 text-moss-900 dark:bg-moss-900/60 dark:text-moss-100`}
+      title={t("trust.founderTooltip")}
+    >
+      <span aria-hidden="true" className="mr-1">
+        {"\u{1F331}"}
+      </span>
+      {t("trust.founder")}
+    </span>
+  );
+}
+
 export function TrustChip({ status, count, compact = false }: TrustChipProps) {
   const { t } = useTranslation();
   const sizeClass = compact

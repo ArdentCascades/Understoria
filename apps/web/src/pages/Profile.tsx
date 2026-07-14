@@ -66,9 +66,13 @@ import { disputeDirectExchange, updateMemberProfile } from "@/db/actions";
 import { isDirectExchangeLabel } from "@understoria/shared/crypto";
 import { SETTING_KEYS, type InviteRow } from "@/db/database";
 import { issueInvite } from "@/db/invites";
-import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
+import {
+  isFounderRoot,
+  trustStatusWithInvites,
+  vouchCountFor,
+} from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
-import { TrustChip } from "@/components/TrustChip";
+import { FounderChip, TrustChip } from "@/components/TrustChip";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { DisputesSection } from "@/components/DisputesSection";
 import { ProposalsSection } from "@/components/ProposalsSection";
@@ -289,6 +293,7 @@ function ProfileBody({ member }: { member: Member }) {
     blockedKeys,
     proposals,
     setCurrentMember,
+    founderRoots,
   } = useApp();
   const { t } = useTranslation();
   // `/profile?edit=1` (the Board profile-nudge CTA) means "take me to
@@ -319,11 +324,13 @@ function ProfileBody({ member }: { member: Member }) {
   const trust = trustStatusWithInvites(currentMember.publicKey, {
     vouches,
     invites,
+    founderRoots,
   });
   const trustCount = vouchCountFor(currentMember.publicKey, {
     vouches,
     invites,
   });
+  const isFounder = isFounderRoot(currentMember.publicKey, { founderRoots });
   const myInvites = invites.filter(
     (inv) => inv.inviterKey === currentMember.publicKey,
   );
@@ -482,7 +489,16 @@ function ProfileBody({ member }: { member: Member }) {
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <TrustChip status={trust} count={trustCount} />
+              {/* A founder with zero vouchers is trusted by
+                  construction — showing "Trusted (0 vouches)" would
+                  read as a glitch, so the count appears only once
+                  real vouchers exist. The FounderChip says why the
+                  status is trusted regardless. */}
+              <TrustChip
+                status={trust}
+                count={isFounder && trustCount === 0 ? undefined : trustCount}
+              />
+              {isFounder && <FounderChip />}
               {/* Gear icon → device-local Settings (Language, Appearance,
                   Community Node, Security, Data export). Emergency stays
                   on Profile per the privacy-as-precondition principle. */}

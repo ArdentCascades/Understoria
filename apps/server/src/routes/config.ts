@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type { FastifyInstance } from "fastify";
+import { founderKeyHash } from "@understoria/shared/crypto";
 import type { Config } from "../config.js";
 import type { SystemSigner } from "../systemSigner.js";
 
@@ -23,13 +24,15 @@ import type { SystemSigner } from "../systemSigner.js";
 // - Member or exchange counts (would leak community size to passive
 //   observers; "minimal surface" per docs/threat-model.md §6)
 //
-// `nodeId` IS exposed, but only alongside a published system key: a
-// system-signed exchange carries `autoConfirmedBy: "system:<nodeId>"`,
-// and a verifying peer needs an authenticated binding from that
-// nodeId to the pubkey — which is exactly "this URL, whose records I
-// pull, says it is node N with key K". The id was never a secret (it
-// is stamped on every federated record); without a system key there
-// is no verification need, so it stays unpublished in that case.
+// `nodeId` IS exposed, but only when something published here needs
+// it for verification: a system-signed exchange carries
+// `autoConfirmedBy: "system:<nodeId>"`, and a verifying peer needs an
+// authenticated binding from that nodeId to the pubkey — which is
+// exactly "this URL, whose records I pull, says it is node N with
+// key K". The same applies to `founderKeyHashes`, whose salt is the
+// nodeId. The id was never a secret (it is stamped on every
+// federated record); with neither a system key nor founders there is
+// no verification need, so it stays unpublished in that case.
 //
 // When the operator hasn't set any of the OPERATOR_* env vars, the
 // response is `{}` rather than `{operator: null}`. Empty-object is
@@ -90,6 +93,21 @@ export interface PublicConfigResponse {
    *  the pre-membership surface, and "is this node ready?" must be
    *  answerable before membership is provable. */
   claimed?: boolean;
+  /**
+   * Salted one-way commitments to the node's founding trust roots —
+   * `founderKeyHash(nodeId, key)` for every env founder key and every
+   * in-band claimed founder (see the shared helper's doc for the
+   * disclosure analysis). Member devices capture this on their
+   * regular /config fetch and treat a member whose key hashes to a
+   * published value as trusted-by-construction, which is what breaks
+   * the vouch-bootstrap deadlock: a fresh community's founder has
+   * zero vouchers, and only trusted members can meaningfully vouch —
+   * without a published root, nobody could ever reach trusted.
+   * Sorted for a stable wire shape; omitted while the node is
+   * unclaimed (there are no roots to publish). `nodeId` is always
+   * present alongside, since it is the hash salt.
+   */
+  founderKeyHashes?: string[];
 }
 
 export async function registerConfigRoutes(
@@ -100,9 +118,14 @@ export async function registerConfigRoutes(
     /** Live claim state (env founders OR claimed_founders row) —
      *  a function because the claim can land mid-process. */
     isClaimed: () => boolean;
+    /** The current founder-key set (env NODE_FOUNDER_KEYS ∪
+     *  claimed_founders rows) — a function for the same reason as
+     *  `isClaimed`: a claim can land mid-process and must show up on
+     *  the very next /config fetch. */
+    listFounderKeys: () => readonly string[];
   },
 ): Promise<void> {
-  const { config, signer, isClaimed } = options;
+  const { config, signer, isClaimed, listFounderKeys } = options;
 
   app.get("/config", async () => {
     const operator = buildOperatorBlock(config);
@@ -117,6 +140,15 @@ export async function registerConfigRoutes(
     }
     if (config.mirrorAnnounceUrls.length > 0) {
       response.mirrors = [...config.mirrorAnnounceUrls];
+    }
+    const founderKeys = listFounderKeys();
+    if (founderKeys.length > 0) {
+      response.founderKeyHashes = [
+        ...new Set(founderKeys.map((k) => founderKeyHash(config.nodeId, k))),
+      ].sort();
+      // The hashes are salted with the node id, so the id must ride
+      // along for a device to verify them (see the header comment).
+      response.nodeId = config.nodeId;
     }
     response.removalQuorum = config.removalQuorum;
     response.claimed = isClaimed();

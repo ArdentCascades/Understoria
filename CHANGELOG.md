@@ -40,7 +40,47 @@ include breaking changes.
   upgrade — set `NODE_FOUNDER_KEYS` (or claim the node) to adopt the
   new posture, or set `READ_AUTH=off` to keep the old one.
 
+### Fixed
+- **The vouch bootstrap deadlock: founders are now trust roots on
+  member devices** (`packages/shared/src/crypto.ts` `founderKeyHash`;
+  `apps/server/src/routes/config.ts`, `server.ts`;
+  `apps/web/src/lib/founderRoots.ts`, `lib/vouch.ts`,
+  `lib/nodeEndpoints.ts`, `state/AppContext.tsx`,
+  `components/TrustChip.tsx`, plus every trust-gate call site;
+  `docs/member-authenticated-reads.md` → "Founders are trust roots on
+  member devices too"). A fresh community could never produce its
+  first trusted member: the founder had zero vouchers, only trusted
+  members can meaningfully vouch, so invitees capped at one voucher
+  forever. The node now publishes `founderKeyHashes` on the open
+  `GET /config` — one salted one-way commitment
+  (SHA-512 over `founder-root|<nodeId>|<key>`) per founder, env keys
+  and claimed founders alike, with `nodeId` alongside as the salt.
+  Member devices capture the list on the `/config` fetch they already
+  make, resolve it against known member keys locally, and the trust
+  computation treats a match as trusted-by-construction — the founder
+  shows **Trusted** plus a new **Founding member** chip (en/es), can
+  vouch, and the web of trust grows from there. Deliberately a hash,
+  not the key: an unauthenticated stranger learns only the founder
+  count, and the per-node salt makes commitments incomparable across
+  nodes; someone already holding a key (any member) can confirm it —
+  which is the intended verification. The grow-a-root wizard, its
+  Board nudge, the `grow_a_root` attention item, and the
+  vouch-discovery nudge all gate on the same widened "trusted" bar,
+  so a day-one founder can act on every trusted-member surface.
+
 ### Added
+- **Setup wizard speaks plain language** (`scripts/setup.sh`). Every
+  step now opens by explaining what it is, why it's being asked, and
+  what to do when unsure (usually: press Enter) — "ACME email"
+  became "the free padlock-certificate service needs an email",
+  auto-confirm hours got its one-sentence human story, the node id
+  explains its permanence, the key-generation step names the three
+  secrets it mints and what each protects, and the firewall/updates
+  prompts say why yes is the right answer. A welcome banner sets the
+  ~10-minute expectation and notes the script is safe to stop and
+  re-run. Field feedback from a real first-time install: the wizard
+  worked but talked like an engineer's checklist.
+
 - **Setup wizard covers the whole first run** (`scripts/setup.sh`,
   `docker-compose.yml`, `apps/server/src/server.ts`, `.env.example`).
   The interactive setup now finishes what it starts under the

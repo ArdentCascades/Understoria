@@ -110,7 +110,15 @@ done
 
 say ""
 say "${c_bold}Understoria — node setup${c_off}"
-say "${c_dim}Runs from $REPO_ROOT${c_off}"
+say ""
+say "This sets up your community's server, start to finish. It takes"
+say "about 10 minutes: you'll answer a few questions (each one is"
+say "explained as it comes, and pressing Enter accepts the suggested"
+say "answer shown in [brackets]), then the script builds and starts"
+say "everything and hands you a claim code to finish in the app."
+say ""
+say "It is safe to stop (Ctrl+C) and re-run this script at any time."
+say "${c_dim}Running from $REPO_ROOT${c_off}"
 say ""
 
 # ─── Prereq checks ───────────────────────────────────────────────────
@@ -185,7 +193,15 @@ if [ -f .env ]; then
 fi
 
 say ""
-say "${c_bold}Step 1/4 — Domain and TLS${c_off}"
+say "${c_bold}Step 1 of 4 — Your web address${c_off}"
+say ""
+say "Your community will live at a web address you own (a domain or"
+say "subdomain). Before this step works, that address must already"
+say "point at THIS server in your DNS settings (an 'A record' with"
+say "this machine's IP) — the script checks for you in a moment."
+say "The padlock certificate (HTTPS) is set up automatically for"
+say "free via Let's Encrypt; they just need an email address in case"
+say "a certificate ever has a problem."
 say ""
 
 ask "Domain (e.g. understoria.example.org)" DOMAIN
@@ -201,6 +217,11 @@ case "$ACME_EMAIL" in
   *) fail "ACME_EMAIL doesn't look like an e-mail address." ;;
 esac
 
+say ""
+say "${c_dim}Every record your community creates is stamped with a permanent"
+say "label so other communities can tell where it came from. The"
+say "suggested one is fine — press Enter. (It can never change once"
+say "your community has history, so don't overthink it either way.)${c_off}"
 # Stable per-node id stamped on every federated record. Must be
 # unique across a federation; defaulting from the domain's first
 # label gives a distinct, memorable value without another decision.
@@ -257,8 +278,13 @@ if [ "$SKIP_DNS" -eq 0 ]; then
 fi
 
 say ""
-say "${c_bold}Step 2/4 — Operator identity${c_off}"
-say "${c_dim}Surfaced on GET /api/config so members can see who is running the node.${c_off}"
+say "${c_bold}Step 2 of 4 — Who runs this server${c_off}"
+say ""
+say "Your members can always see who operates their community's"
+say "server and how to reach them — that transparency is part of the"
+say "trust the app is built on. A real name (or your organization's)"
+say "and a reachable address go a long way. You can change these"
+say "later by editing the .env file and restarting."
 say ""
 
 ask "Operator name (organization or community)" OPERATOR_NAME
@@ -266,22 +292,42 @@ ask "Operator contact (e-mail or other reachable address)" OPERATOR_CONTACT
 ask "Operator funding note (optional, press Enter to skip)" OPERATOR_FUNDING_NOTE
 
 say ""
-say "${c_bold}Step 3/4 — Community defaults${c_off}"
+say "${c_bold}Step 3 of 4 — A few community settings${c_off}"
+say "${c_dim}Pressing Enter for each of these is a perfectly good choice.${c_off}"
 say ""
+say "${c_dim}When someone helps a neighbor, both people confirm it in the app."
+say "If one side forgets, the server confirms it FOR them after this"
+say "many hours, so credit never gets stuck. 168 hours = one week.${c_off}"
 
 ask "Auto-confirm hours (168 = 7 days; 0 disables)" AUTO_CONFIRM_HOURS "168"
 case "$AUTO_CONFIRM_HOURS" in
   ''|*[!0-9]*) fail "AUTO_CONFIRM_HOURS must be a non-negative integer." ;;
 esac
 
+say ""
+say "${c_dim}Communities on other servers can link up with yours later."
+say "Starting solo is normal — leave this blank.${c_off}"
 ask "Peer node URLs (comma-separated, leave blank for solo)" PEER_NODE_URLS ""
 
+say ""
+say "${c_dim}The last two are technical dials with sensible defaults —"
+say "just press Enter twice unless you know you want otherwise.${c_off}"
 ask "Rate limit (requests per minute per IP)" RATE_LIMIT_MAX "60"
 ask "Log level (fatal|error|warn|info|debug|trace)" LOG_LEVEL "info"
 
 say ""
-say "${c_bold}Step 4/4 — System key${c_off}"
-say "${c_dim}Builds the server image (~1-2 min), then generates the auto-confirm key inside it.${c_off}"
+say "${c_bold}Step 4 of 4 — Generating your server's keys${c_off}"
+say ""
+say "No questions here — the script now builds the server (1–2"
+say "minutes of scrolling text; on a small server it can be slower —"
+say "that's normal) and generates three secrets for you:"
+say "  - a signing key the server uses when it auto-confirms exchanges"
+say "  - an encryption key that keeps the database unreadable if the"
+say "    disk is ever stolen or copied"
+say "  - your one-time claim code, which you'll use in the app at the"
+say "    very end to become this community's founding member"
+say "All three are saved into the .env file — you'll be reminded to"
+say "back that file up at the end."
 say ""
 
 info "Building understoria/server image..."
@@ -377,8 +423,12 @@ ok ".env written (chmod 600)."
 # ─── Host firewall (optional) ────────────────────────────────────────
 
 say ""
-say "${c_bold}Host firewall${c_off}"
-say "${c_dim}Caddy needs ports 80 and 443 reachable from the public internet to acquire its TLS cert.${c_off}"
+say "${c_bold}Firewall${c_off}"
+say ""
+say "This closes every door on the server except the three it needs:"
+say "SSH (so you can log in) and the two web ports (so browsers and"
+say "the certificate service can reach it). Answering yes here is"
+say "the right call for almost everyone."
 say ""
 
 # Skip entirely if ufw isn't installed; the operator is using
@@ -438,7 +488,9 @@ fi
 # assumed; non-Debian systems get a note instead of a wrong command.
 
 say ""
-say "${c_bold}Unattended security updates${c_off}"
+say "${c_bold}Automatic security updates${c_off}"
+say "${c_dim}The single best thing for a server you won't log into often:"
+say "the operating system patches its own security holes. Say yes.${c_off}"
 if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
   if dpkg -s unattended-upgrades >/dev/null 2>&1; then
     if systemctl is-enabled --quiet unattended-upgrades 2>/dev/null \
@@ -594,6 +646,12 @@ print_claim_steps() {
   say "  Verify afterwards: curl https://$DOMAIN/api/config → \"claimed\":true"
 }
 
+say ""
+say "${c_bold}Ready to launch${c_off}"
+say "${c_dim}Saying yes builds and starts everything (a few minutes of"
+say "scrolling text), then waits up to 3 minutes while the padlock"
+say "certificate is issued — the script watches and tells you the"
+say "moment your address answers securely.${c_off}"
 if confirm "Bring the node up now (docker compose up -d --build)?"; then
   say ""
   info "Starting services..."

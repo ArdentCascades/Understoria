@@ -1531,3 +1531,31 @@ export function canonicalFounderClaimMessage(
 ): string {
   return `founder-claim|${setupToken}|${publicKey}|${timestampMs}`;
 }
+
+/**
+ * Salted one-way commitment to a founder key, published on the open
+ * `GET /config` surface so member devices can recognize the node's
+ * founding trust roots WITHOUT the node disclosing the keys
+ * themselves to unauthenticated strangers
+ * (docs/member-authenticated-reads.md, "Founders are trust roots on
+ * member devices too").
+ *
+ * Why a hash and what it does/doesn't reveal:
+ *   - A stranger with no keys learns only how many founders exist.
+ *   - Someone who already HOLDS a candidate public key (any member —
+ *     keys circulate on every signed record) can confirm founder
+ *     status by hashing, which is exactly the intended use: member
+ *     devices resolve which of their known members are roots.
+ *   - The salt is the node id, so the same person founding two nodes
+ *     publishes two unrelated values — no cross-node correlation.
+ *
+ * SHA-512 via tweetnacl (`nacl.hash`): synchronous and identical in
+ * the Node and browser realms, unlike SubtleCrypto. The domain-
+ * separation prefix keeps these bytes disjoint from every signed
+ * canonical message.
+ */
+export function founderKeyHash(nodeId: string, publicKey: string): string {
+  return b64encode(
+    nacl.hash(utf8encode(`founder-root|${nodeId}|${publicKey}`)),
+  );
+}

@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { BackLink } from "@/components/BackLink";
 import { useApp } from "@/state/AppContext";
-import { vouchCountFor } from "@/lib/vouch";
+import { trustStatusWithInvites, vouchCountFor } from "@/lib/vouch";
 import { listNodeEndpoints } from "@/lib/nodeEndpoints";
 import { useStepFocus } from "@/lib/useStepFocus";
 import {
@@ -110,7 +110,7 @@ function CopyTextButton({ text }: { text: string }) {
 
 export default function GrowRootPage() {
   const { t } = useTranslation();
-  const { currentMember, vouches, invites } = useApp();
+  const { currentMember, vouches, invites, founderRoots } = useApp();
 
   const [step, setStep] = useState<Step>("choose");
   const stepRef = useStepFocus(step);
@@ -151,7 +151,16 @@ export default function GrowRootPage() {
   const have = currentMember
     ? vouchCountFor(currentMember.publicKey, { vouches, invites })
     : 0;
-  const trusted = have >= MIN_VOUCHES_TO_GROW;
+  // The same "trusted" bar as everywhere else — which now includes
+  // founding trust roots (a founder must be able to grow the second
+  // node; they're precisely who the wizard exists for on day one).
+  const trusted =
+    currentMember !== null &&
+    trustStatusWithInvites(currentMember.publicKey, {
+      vouches,
+      invites,
+      founderRoots,
+    }) === "trusted";
 
   useEffect(() => {
     if (!trusted || step !== "settings" || origin !== null) return;

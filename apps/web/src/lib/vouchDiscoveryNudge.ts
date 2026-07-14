@@ -38,10 +38,12 @@ export function memberIsTrusted(
   memberKey: string | null,
   vouches: readonly SignedVouch[],
   invites: readonly InviteRow[],
+  founderRoots?: ReadonlySet<string>,
 ): boolean {
   if (!memberKey) return false;
   return (
-    trustStatusWithInvites(memberKey, { vouches, invites }) === "trusted"
+    trustStatusWithInvites(memberKey, { vouches, invites, founderRoots }) ===
+    "trusted"
   );
 }
 

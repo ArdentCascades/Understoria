@@ -1975,7 +1975,9 @@
     "trustedTooltip": "This member has at least two valid vouches.",
     "pending": "New here",
     "pendingWithCount": "New here ({{have}}/{{need}} vouches)",
-    "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers."
+    "pendingTooltip": "Fewer than two vouches so far. They can still post needs and offers.",
+    "founder": "Founding member",
+    "founderTooltip": "This community's server names them a founding member — the web of trust starts with them, so they count as trusted without needing vouches."
   },
   "achievement": {
     "first_exchange": {

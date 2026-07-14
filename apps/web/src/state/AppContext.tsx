@@ -74,6 +74,11 @@ import {
 import { ensurePersistentStorage } from "@/lib/storageBudget";
 import { communityNodeIdSet, readNodeIdAliases } from "@/lib/nodeIdentity";
 import {
+  LAST_SEEN_FOUNDER_HASHES,
+  parseFounderHashCapture,
+  resolveFounderRoots,
+} from "@/lib/founderRoots";
+import {
   applyTheme,
   cacheResolvedTheme,
   isThemePreference,
@@ -117,6 +122,14 @@ export interface AppContextValue {
   currentMember: Member | null;
   setCurrentMember: (publicKey: string) => Promise<void>;
   members: Member[];
+  /** Members recognized as the node's founding trust roots, resolved
+   *  from the salted `founderKeyHashes` the node publishes on
+   *  GET /config (lib/founderRoots.ts). Feeds trust computation
+   *  (`TrustContext.founderRoots`) so a fresh community's founder
+   *  computes as trusted with zero vouchers — the vouch-bootstrap
+   *  fix. Empty until a capture happens (demo builds, sync off,
+   *  older servers). */
+  founderRoots: ReadonlySet<string>;
   posts: Post[];
   exchanges: Exchange[];
   achievements: Achievement[];
@@ -530,6 +543,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
     [] as SignedVouch[],
   );
+  // Founding trust roots (lib/founderRoots.ts): the salted hashes the
+  // node last published on GET /config, live-queried like the nodeId
+  // setting above because the capture happens OUTSIDE React (the
+  // /config fetch in lib/nodeEndpoints.ts). Resolution hashes each
+  // member key against the capture — cheap (SHA-512 per member) and
+  // recomputed only when the capture or the member list changes.
+  const founderHashCapture = useLiveQuery(
+    async () =>
+      parseFounderHashCapture(await getSetting(LAST_SEEN_FOUNDER_HASHES)),
+    [],
+    null,
+  );
+  const founderRoots = useMemo<ReadonlySet<string>>(
+    () =>
+      resolveFounderRoots(
+        founderHashCapture ?? null,
+        (members ?? []).map((m) => m.publicKey),
+      ),
+    [founderHashCapture, members],
+  );
   const projects = useLiveQuery(
     () => db.projects.orderBy("createdAt").reverse().toArray(),
     [],
@@ -748,6 +781,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentMember,
       setCurrentMember,
       members: members ?? [],
+      founderRoots,
       posts: filteredPosts,
       exchanges: exchanges ?? [],
       achievements: achievements ?? [],
@@ -799,6 +833,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentMember,
       setCurrentMember,
       members,
+      founderRoots,
       filteredPosts,
       exchanges,
       achievements,
