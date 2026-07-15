@@ -129,6 +129,16 @@ export async function writeSubmitConfig(cfg: SubmitConfig): Promise<void> {
       cfg.enabled ? "1" : "0",
     );
   });
+  // Connecting (or re-pointing) a node re-enqueues every self-authored
+  // record already in Dexie — the fix for the invite-onboarding
+  // incident where a founder's pre-connection projects/events existed
+  // only on their own device (lib/outboxBackfill.ts has the full
+  // story). Once per URL; dynamic import to avoid a module cycle
+  // (outbox → nodeSubmit → backfill → outbox).
+  if (cfg.url.trim() !== "") {
+    const { maybeBackfillOutbox } = await import("./outboxBackfill");
+    await maybeBackfillOutbox(cfg.url);
+  }
 }
 
 export interface SubmitDeps {

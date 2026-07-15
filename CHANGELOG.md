@@ -9,6 +9,33 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Content created before connecting to a community node now reaches
+  the node — the "invitee sees nothing" bug**
+  (`apps/web/src/lib/outboxBackfill.ts` new, `lib/nodeSubmit.ts`,
+  `lib/outbox.ts`, locked by `lib/inviteFlow.e2e.test.ts` running the
+  real server binary over real HTTP). Two compounding defects, both
+  hit by any founder who authors projects/events/posts before their
+  server exists (or while pointed at an abandoned one): (1)
+  `enqueueOutbox` is deliberately a no-op with no node URL
+  configured, but nothing ever re-enqueued those records once a node
+  WAS connected — the author's own device showed everything
+  (local-first), every other member saw holes; (2) flush attempts in
+  the window between connecting and the founder claim answered `403
+  not_a_member`, which the outbox treated as permanent poison, so
+  even records that DID enqueue never retried after the claim. Now:
+  `writeSubmitConfig` (the chokepoint behind the invite consent card,
+  the Board suggestion card, and Settings) backfills the outbox from
+  local data — self-authored signed records only, once per node URL,
+  idempotent on both ends — the outbox worker runs the same backfill
+  at startup so already-broken devices self-heal on next app open
+  with no member action, and 403 is retryable ("not a member YET" is
+  a normal transient during bootstrap; genuinely unauthorized writes
+  stay refused server-side, they just retry until pruned). Not yet
+  backfilled (signed state is synthesized at write time, not stored):
+  shift/RSVP/signup states and co-org invitations — the periodic LWW
+  re-publish self-heals those on next edit; tracked as follow-up.
+
 ### Changed
 - **BREAKING — the server is now secure by default: `READ_AUTH`
   defaults to `on`, and fresh nodes boot unclaimed**

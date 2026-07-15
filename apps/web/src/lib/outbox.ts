@@ -520,9 +520,22 @@ export function nextBackoffMs(attempts: number): number {
 export function isPoisonResult(result: SubmitResult): boolean {
   if (result.ok) return false;
   if (result.status === undefined) return false; // network error — retry
-  // 4xx other than 408/429 are permanent. 5xx are retryable.
+  // 4xx other than 408/429/403 are permanent. 5xx are retryable.
+  // 403 is retryable because "not a member YET" is a normal transient
+  // during bootstrap: the window between connecting a node and the
+  // founder claim (or a redemption receipt landing) answers 403, and
+  // membership arrives seconds-to-minutes later — poisoning here
+  // stranded a founder's first records forever (the 2026-07 invite
+  // incident). Backoff caps at 5 minutes, so a genuinely non-member
+  // device retries a handful of rows at a gentle trickle, surfaced
+  // as pending in the UI rather than silently dead.
   if (result.status >= 500) return false;
-  if (result.status === 408 || result.status === 429) return false;
+  if (
+    result.status === 403 ||
+    result.status === 408 ||
+    result.status === 429
+  )
+    return false;
   return true;
 }
 
@@ -901,6 +914,21 @@ export function startOutboxWorker(options: { fetchImpl?: typeof fetch } = {}): v
   if (worker.running) return;
   worker.running = true;
   worker.fetchImpl = options.fetchImpl;
+  // Startup backfill: heals devices that connected a node BEFORE the
+  // backfill existed (the 2026-07 invite incident) — their
+  // pre-connection records re-enqueue on the next app open with no
+  // member action. Once per URL (the done-flag lives in
+  // lib/outboxBackfill.ts); dynamic import to avoid a module cycle.
+  void (async () => {
+    try {
+      const cfg = await readSubmitConfig();
+      if (cfg.url.trim() === "" || !cfg.enabled) return;
+      const { maybeBackfillOutbox } = await import("./outboxBackfill");
+      await maybeBackfillOutbox(cfg.url);
+    } catch {
+      // Best-effort; the writeSubmitConfig chokepoint also triggers it.
+    }
+  })();
   void scheduleNextTick();
 }
 
