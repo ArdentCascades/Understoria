@@ -285,15 +285,48 @@ When `status === "tended"` the detail page re-orders:
 Kebab in tended state: **Retire** (§7), **Return to building**,
 steward management (existing co-organizer items).
 
-### 5.4 "Something needs attention" — for everyone
+### 5.4 "Something needs attention" — for everyone *(settled, 2026-07: Option A)*
 
-One button on the tended view, visible to all members: a steward
-gets "add a care task" (one-off, non-recurring); anyone else gets
-the post composer prefilled as a need linked to the commons ("Tool
-library: gate latch broken") — the event⇄need bridge shape, reused.
-This is what keeps a tended thing from silently rotting between
-scheduled care cycles. *(Phase 3 option: an attention-rail item for
-stewards when a flag lands — a new attention kind, so it can wait.)*
+One button on the tended view, visible to all members. This is what
+keeps a tended thing from silently rotting between scheduled care
+cycles. Resolved shape:
+
+- **A non-steward's tap opens the Board composer as a NEED**, title
+  prefilled ("Tool library: …"), plus a **local-only link row**
+  tying the post to the commons. Precision on lineage: this is the
+  third member of the link-row family whose shipped parent is the
+  event⇄project work-day link (`EventProjectLinkRow` — local-only,
+  zero wire bytes); the event⇄need bridge
+  (`docs/event-need-bridge.md`) is the *proposed* sibling, not
+  shipped code, so the commons link composes with that family
+  rather than reusing a bridge that doesn't exist yet.
+- **Why a need post and not a flag/task:** non-stewards mechanically
+  cannot write tasks (`addProjectTask` requires organizer
+  authority, like every project-row write); a Board need makes the
+  report belong to the *whole community* rather than a steward
+  inbox — anyone can claim and fix the gate latch, possibly before
+  a steward reads it; the fixer's credit falls out of the existing
+  need → claim → confirm → exchange path with zero new machinery
+  (the rota handles *recurring* care; one-off breakage is exactly
+  what the Board exists for); and blocking, moderation,
+  attribution, and federation posture are all inherited from posts.
+- **The indirection dissolves via the link row:** the tended page's
+  amber "needs attention" chip DERIVES from open linked needs, and
+  the page lists them ("1 open need — gate latch broken ↗"). One
+  record, visible on both surfaces; the chip clears itself when the
+  linked need completes.
+- **A steward's tap offers both affordances**: add a one-off care
+  task to the rota (they hold the authority), or post a linked need
+  themselves when the fix wants community hands.
+- **No anonymous flagging.** Reports are signed and attributed like
+  every post — consistent with the transparency decisions elsewhere
+  in this draft, and the app has no anonymous vocabulary anywhere.
+- *Implementation footnote:* `addProjectTask` currently throws for
+  `completed`/`archived` projects; Phase 1 must allow `tended` and
+  refuse `retired`.
+
+*(Phase 3 option: an attention-rail item for stewards when a linked
+need lands — a new attention kind, so it can wait.)*
 
 ### 5.5 In my care / Organizer's desk
 
@@ -427,9 +460,10 @@ project commitment:
    humble version** (§5.1): count + link in the community-as-a-whole
    cluster, hidden at zero, no next-care enrichment. Ships in
    Phase 2.
-5. **"Needs attention" shape** for non-stewards: prefilled need
-   post (proposed) vs. directly opening a task — the post keeps the
-   existing authority model intact.
+5. **"Needs attention" shape — RESOLVED (2026-07): Option A**
+   (§5.4): prefilled need post + local-only commons⇄post link row;
+   the amber chip derives from open linked needs; stewards get both
+   affordances; no anonymous flagging.
 6. **Retired links — RESOLVED (2026-07):** de-anchored to muted
    plain text, with the in-page one-line explanation and the
    un-retire check-links nudge (§7). One principle now covers the
