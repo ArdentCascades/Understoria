@@ -43,14 +43,17 @@ jobs:
       - name: Lint (jsx-a11y)
         run: npm run lint --workspace=@understoria/web
 
+      # The invite-flow E2E (apps/web/src/lib/inviteFlow.e2e.test.ts)
+      # spawns the compiled server binary, so the server must be built
+      # BEFORE the test step runs.
+      - name: Build server
+        run: npm run build:server
+
       - name: Run tests
         run: npm test
 
       - name: Build PWA
         run: npm run build
-
-      - name: Build server
-        run: npm run build:server
 
   audit:
     name: npm audit (informational)

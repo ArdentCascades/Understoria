@@ -87,6 +87,11 @@ describe("isPoisonResult", () => {
     expect(isPoisonResult({ ok: false, status: 408, error: "x" })).toBe(false);
     expect(isPoisonResult({ ok: false, status: 429, error: "x" })).toBe(false);
   });
+  it("does NOT poison on 403 — 'not a member YET' is transient during bootstrap (connect before the founder claim / redemption receipt lands)", () => {
+    expect(
+      isPoisonResult({ ok: false, status: 403, error: "not_a_member" }),
+    ).toBe(false);
+  });
   it("does NOT poison on network errors (no status)", () => {
     expect(isPoisonResult({ ok: false, error: "ECONNREFUSED" })).toBe(false);
   });
