@@ -47,9 +47,20 @@ export interface ShareUrlArgs {
  *  rather than letting them tap into nothing. */
 export function canShareUrl(): boolean {
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
-  if (!nav) return false;
-  if (typeof nav.share === "function") return true;
-  if (nav.clipboard && typeof nav.clipboard.writeText === "function")
+  if (nav && typeof nav.share === "function") return true;
+  if (
+    nav &&
+    nav.clipboard &&
+    typeof nav.clipboard.writeText === "function"
+  )
+    return true;
+  // The synchronous execCommand("copy") path (see copyTextToClipboard)
+  // counts too — it's the one that actually works on iOS installed-PWA
+  // builds where the async Clipboard API silently no-ops.
+  if (
+    typeof document !== "undefined" &&
+    typeof document.execCommand === "function"
+  )
     return true;
   return false;
 }
@@ -91,18 +102,71 @@ export async function shareUrl(args: ShareUrlArgs): Promise<ShareResult> {
       // to clipboard so the link doesn't get lost.
     }
   }
-  return copyToClipboard(args.url);
+  return copyTextToClipboard(args.url);
 }
 
-async function copyToClipboard(url: string): Promise<ShareResult> {
+/**
+ * Copy `text` to the clipboard, reporting HONESTLY whether it worked.
+ *
+ * Order matters and is the fix for a real field report (2026-07, same
+ * device class as the earlier pairing-code incident): on iOS
+ * installed-PWA builds, `navigator.clipboard.writeText` can resolve
+ * successfully WITHOUT writing anything — the app then says "copied"
+ * while the clipboard still holds whatever was there before. The
+ * synchronous `document.execCommand("copy")` path returns a truthful
+ * boolean and works inside the click gesture on those builds, so it
+ * goes FIRST; the async Clipboard API is the fallback, not the
+ * primary. (In non-DOM environments execCommand is absent and we go
+ * straight to the async API, which keeps unit tests and workers
+ * honest too.)
+ */
+export async function copyTextToClipboard(text: string): Promise<ShareResult> {
+  if (legacyCopy(text)) return "copied";
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
   if (nav && nav.clipboard && typeof nav.clipboard.writeText === "function") {
     try {
-      await nav.clipboard.writeText(url);
+      await nav.clipboard.writeText(text);
       return "copied";
     } catch {
       return "failed";
     }
   }
   return "failed";
+}
+
+/** Synchronous textarea + execCommand("copy") copy. Deprecated API,
+ *  but it is the only path that both works during the user gesture in
+ *  iOS standalone PWAs and reports failure truthfully. Restores focus
+ *  afterwards so dialogs' focus traps aren't disturbed. */
+function legacyCopy(text: string): boolean {
+  if (typeof document === "undefined") return false;
+  if (typeof document.execCommand !== "function") return false;
+  const previousFocus =
+    document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  // readonly + off-screen: no keyboard flash, no visible flicker.
+  ta.setAttribute("readonly", "");
+  ta.style.position = "fixed";
+  ta.style.top = "0";
+  ta.style.left = "0";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  let ok = false;
+  try {
+    ta.focus();
+    ta.select();
+    // iOS ignores select() on readonly textareas without an explicit
+    // selection range.
+    ta.setSelectionRange(0, text.length);
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
+  } finally {
+    ta.remove();
+    previousFocus?.focus();
+  }
+  return ok;
 }

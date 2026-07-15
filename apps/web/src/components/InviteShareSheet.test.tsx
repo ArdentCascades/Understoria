@@ -35,14 +35,20 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ShareResult } from "@/lib/share";
 
-const { canShareUrlMock, shareUrlMock } = vi.hoisted(() => ({
-  canShareUrlMock: vi.fn<() => boolean>(() => true),
-  shareUrlMock: vi.fn<() => Promise<ShareResult>>(async () => "shared"),
-}));
+const { canShareUrlMock, shareUrlMock, copyTextToClipboardMock } = vi.hoisted(
+  () => ({
+    canShareUrlMock: vi.fn<() => boolean>(() => true),
+    shareUrlMock: vi.fn<() => Promise<ShareResult>>(async () => "shared"),
+    copyTextToClipboardMock: vi.fn<() => Promise<ShareResult>>(
+      async () => "copied",
+    ),
+  }),
+);
 
 vi.mock("@/lib/share", () => ({
   canShareUrl: canShareUrlMock,
   shareUrl: shareUrlMock,
+  copyTextToClipboard: copyTextToClipboardMock,
 }));
 
 // The QR renderer dynamically imports the `qrcode` package and
@@ -147,14 +153,17 @@ describe("InviteShareSheet — share-without-showing (canShare)", () => {
     expect(document.activeElement).toBe(share);
   });
 
-  it("ships the link off-screen and closes on native-share success", async () => {
+  it("ships the BARE link off-screen and closes on native-share success", async () => {
     shareUrlMock.mockResolvedValue("shared");
     render();
     await click(button(SHARE_LABEL));
+    // No `text` from the gate: several platforms' share-sheet Copy
+    // action copies the text instead of a clean link, so a member
+    // who tapped Copy pasted a prose blob (2026-07 field report).
+    // Url-only survives every target's Copy as a pasteable link.
     expect(shareUrlMock).toHaveBeenCalledWith({
       url: URL,
       title: "Join my community",
-      text: "Come join us.",
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });

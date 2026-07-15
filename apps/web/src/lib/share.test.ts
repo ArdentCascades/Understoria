@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { canShareUrl, shareUrl } from "./share";
+import { canShareUrl, copyTextToClipboard, shareUrl } from "./share";
 
 type NavigatorShape = {
   share?: (data: ShareData) => Promise<void>;
@@ -114,6 +114,80 @@ describe("share — shareUrl", () => {
     setNavigator({});
     const result = await shareUrl({ url: "https://example.test/x" });
     expect(result).toBe("failed");
+  });
+});
+
+describe("share — copyTextToClipboard", () => {
+  // jsdom never implements document.execCommand, so the sync path is
+  // exercised by defining it explicitly and removed again after.
+  function setExecCommand(impl: (() => boolean) | undefined) {
+    if (impl) {
+      Object.defineProperty(document, "execCommand", {
+        value: impl,
+        configurable: true,
+        writable: true,
+      });
+    } else {
+      delete (document as { execCommand?: unknown }).execCommand;
+    }
+  }
+
+  afterEach(() => {
+    setExecCommand(undefined);
+    Object.defineProperty(globalThis, "navigator", {
+      value: ORIGINAL_NAVIGATOR,
+      configurable: true,
+      writable: true,
+    });
+    vi.restoreAllMocks();
+  });
+
+  it("prefers the synchronous execCommand path — the async Clipboard API can lie on iOS PWAs", async () => {
+    // The 2026-07 field report: navigator.clipboard.writeText resolves
+    // OK on iOS installed-PWA builds WITHOUT writing anything, so the
+    // app said "copied" while the clipboard held stale content. The
+    // honest execCommand boolean must win when it's available.
+    const exec = vi.fn(() => true);
+    setExecCommand(exec);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigator({ clipboard: { writeText } });
+
+    expect(await copyTextToClipboard("https://example.test/invite#t")).toBe(
+      "copied",
+    );
+    expect(exec).toHaveBeenCalledWith("copy");
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the async Clipboard API when execCommand refuses", async () => {
+    setExecCommand(() => false);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigator({ clipboard: { writeText } });
+
+    expect(await copyTextToClipboard("hello")).toBe("copied");
+    expect(writeText).toHaveBeenCalledWith("hello");
+  });
+
+  it("reports failure honestly when every path is gone", async () => {
+    setExecCommand(undefined);
+    setNavigator({});
+    expect(await copyTextToClipboard("hello")).toBe("failed");
+  });
+
+  it("puts the text into the selection textarea (what execCommand copies)", async () => {
+    let selectedValue: string | null = null;
+    setExecCommand(function (this: Document) {
+      selectedValue =
+        document.activeElement instanceof HTMLTextAreaElement
+          ? document.activeElement.value
+          : null;
+      return true;
+    });
+    setNavigator({});
+    await copyTextToClipboard("https://example.test/invite#tok");
+    expect(selectedValue).toBe("https://example.test/invite#tok");
+    // The scratch textarea must not linger in the DOM.
+    expect(document.querySelector("textarea")).toBeNull();
   });
 });
 

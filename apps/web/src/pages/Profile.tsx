@@ -54,6 +54,7 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ContextualHint } from "@/components/ContextualHint";
 import { InviteShareSheet } from "@/components/InviteShareSheet";
+import { copyTextToClipboard } from "@/lib/share";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EmptyState } from "@/components/EmptyState";
 import {
@@ -1540,11 +1541,10 @@ function InvitesSection({
   }
 
   async function handleCopy(url: string) {
-    try {
-      await navigator.clipboard.writeText(url);
+    if ((await copyTextToClipboard(url)) === "copied") {
       setCopyStatus(t("common.copied"));
       setTimeout(() => setCopyStatus(null), 3000);
-    } catch {
+    } else {
       setCopyStatus(t("common.copyFailed"));
     }
   }
