@@ -191,6 +191,19 @@ When `status === "tended"` the detail page re-orders:
      — at which point the steward's device signs the updated
      project row and the log records both who suggested and who
      accepted.
+   - **Pending suggestions are visible to everyone — but never as a
+     link (settled, 2026-07).** Transparency and safety separate
+     cleanly here: the danger was never the community *knowing*
+     about a proposed URL, it was the app rendering an unvetted URL
+     as a tappable anchor wearing the community's trust. So a
+     pending suggestion renders in the Resources block for all
+     members as a visibly-distinct row — label, suggester, an amber
+     "pending steward review" chip — with the URL shown as plain
+     non-clickable text. Only a steward's accept turns it into an
+     anchor. Transparency cuts both ways: a steward's **decline is
+     activity-logged just like a removal**, so suggestions can't be
+     silently buried any more than links can be silently deleted —
+     the whole curation process happens in the open.
    - **The task-completion moment carries the doorway.** The person
      who completed a task is usually the one holding the artifact
      (they made the inventory sheet, they drew the map), so marking
@@ -324,14 +337,15 @@ project commitment:
    "In my care" rename.
 2. **Edit authority on resource links — RESOLVED (2026-07):**
    stewards edit directly (logged); any member suggests; a steward
-   accepts before a link renders (§5.2). One sub-question stays
-   open: are *pending* suggestions visible to all members with a
-   "pending" chip (transparent, but gives an unvetted URL screen
-   presence even unlinked) or **visible only to stewards until
-   accepted** (safer — the current lean)? Care-notes edit authority
-   is still open; the steward-direct + member-suggest shape likely
-   transfers, but notes are lower-risk than URLs and could bear the
-   wiki-style answer.
+   accepts before a link renders (§5.2). The pending-visibility
+   sub-question is also **resolved**: pending suggestions are
+   visible to the whole community (transparency), rendered as plain
+   non-clickable text with a pending chip until accepted (safety),
+   and declines are logged like removals so curation happens in the
+   open. Care-notes edit authority is still open; the
+   steward-direct + member-suggest shape likely transfers, but
+   notes are lower-risk than URLs and could bear the wiki-style
+   answer.
 3. **Resource links on active projects too?** §5.2 argues yes;
    confirms scope of phase 2.
 4. **The Dashboard doorway card** — wanted, or clutter? (Cheap
