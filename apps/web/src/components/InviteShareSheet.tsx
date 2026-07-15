@@ -24,7 +24,12 @@ import { useTranslation } from "react-i18next";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { extractInviteToken } from "@/lib/invite";
-import { canShareUrl, shareUrl, type ShareResult } from "@/lib/share";
+import {
+  canShareUrl,
+  copyTextToClipboard,
+  shareUrl,
+  type ShareResult,
+} from "@/lib/share";
 
 // Modal sheet for sharing a freshly-generated invite.
 //
@@ -122,10 +127,19 @@ export function InviteShareSheet({
   }, [open, onClose]);
 
   async function handleShare(fromGate: boolean) {
+    // From the gate, share the BARE url — no message text. The gate's
+    // whole job is moving the link off-device intact, and `text` is
+    // what platforms trip over: several share sheets' "Copy" action
+    // copies the text (or a text+url concatenation) instead of a
+    // clean link, so a member who taps Copy pastes a prose blob — or
+    // worse, a message whose link a URL bar can't use. Url-only
+    // payloads survive every target's Copy as a clean, pasteable
+    // link (2026-07 field report). The revealed view keeps the
+    // friendly message: there the member SEES what's being shared.
     const result: ShareResult = await shareUrl({
       url,
       title: shareTitle,
-      text: shareText,
+      ...(fromGate ? {} : { text: shareText }),
     });
     switch (result) {
       case "shared":
@@ -167,12 +181,14 @@ export function InviteShareSheet({
   }
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(url);
-      setStatus(t("profile.invites.shareSheet.statusCopied"));
-    } catch {
-      setStatus(t("profile.invites.shareSheet.statusFailed"));
-    }
+    const result = await copyTextToClipboard(url);
+    setStatus(
+      t(
+        result === "copied"
+          ? "profile.invites.shareSheet.statusCopied"
+          : "profile.invites.shareSheet.statusFailed",
+      ),
+    );
   }
 
   if (!open) return null;

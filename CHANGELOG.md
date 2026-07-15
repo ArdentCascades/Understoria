@@ -10,6 +10,26 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **"Send the link without showing it" now reliably puts the actual
+  invite link where it's going** (`apps/web/src/lib/share.ts`,
+  `components/InviteShareSheet.tsx`, `pages/Profile.tsx`). Two
+  defects behind the field report "it's not copying the link right":
+  (1) the gate passed the invitation message as share `text`, and
+  several platforms' share-sheet **Copy** action copies the text (or
+  a text+url blend) instead of a clean link — pasting produced a
+  prose blob, or a message a URL bar can't use; the gate now shares
+  the **bare URL** (the revealed view keeps the friendly message —
+  there the member sees what's being sent); (2) the clipboard
+  fallback used `navigator.clipboard.writeText`, which on iOS
+  installed-PWA builds can resolve successfully **without writing
+  anything** — the app said "Link copied" while the clipboard held
+  stale content (same API that caused the earlier pairing-code
+  incident). New `copyTextToClipboard` prefers the synchronous
+  `document.execCommand("copy")` path (honest boolean, works inside
+  the tap gesture on those builds) with the async Clipboard API as
+  fallback; the share sheet's Copy button and the Profile inline
+  Copy button use it too, and `canShareUrl` counts it so the gate's
+  availability check matches reality.
 - **Content created before connecting to a community node now reaches
   the node — the "invitee sees nothing" bug**
   (`apps/web/src/lib/outboxBackfill.ts` new, `lib/nodeSubmit.ts`,
