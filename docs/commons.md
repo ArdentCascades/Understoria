@@ -171,11 +171,51 @@ When `status === "tended"` the detail page re-orders:
    links ("Inventory sheet ↗", "Borrow signup ↗", "Map ↗") rendered
    as **plain outbound anchors only — never fetched, never
    embedded** — so no outside service gets to observe the community
-   through the app. Steward-editable, with one honest hint line
-   under the add-form: outside tools live outside Understoria's
-   privacy model (the mirror-consent register, one line, not a
-   scary dialog). Nothing about this block is graduation-specific;
-   it may ship for active projects too.
+   through the app. One honest hint line under the add-form:
+   outside tools live outside Understoria's privacy model (the
+   mirror-consent register, one line, not a scary dialog). Nothing
+   about this block is graduation-specific; it may ship for active
+   projects too.
+
+   **Who can add links (settled, 2026-07):** stewards edit
+   directly; everyone else suggests; a steward accepts before
+   anything renders as a resource.
+
+   - **Stewards** (organizer + co-organizers) add / edit / remove
+     directly, every change written to the existing activity log —
+     a removal is never silent, which keeps the politics of
+     curation honest.
+   - **Any member** gets a "Suggest a resource" affordance. The
+     suggestion is attributed ("suggested by Rosa") and waits for a
+     one-tap steward accept — ideally right from the attention rail
+     — at which point the steward's device signs the updated
+     project row and the log records both who suggested and who
+     accepted.
+   - **The task-completion moment carries the doorway.** The person
+     who completed a task is usually the one holding the artifact
+     (they made the inventory sheet, they drew the map), so marking
+     a task complete offers a small optional prompt — *"Did this
+     produce something worth keeping? Suggest it as a resource"* —
+     prefilled with which task it came from. The
+     completer-contributes insight is delivered as *context*, not
+     as an earned quota: an earlier "one link slot per completed
+     task" idea was considered and dropped (quota bookkeeping is
+     gamification-adjacent, the slot count doesn't map to the
+     actual need, and it changes nothing mechanically — see below).
+   - **Spam guard:** a small cap (2–3) on outstanding unaccepted
+     suggestions per member; invisible rationing for the
+     pathological case only.
+
+   Two facts force this shape rather than "non-stewards add
+   directly, stewards can remove." *Mechanically*, project rows
+   federate as whole-row records signed by organizer authority — a
+   completer's device cannot produce a valid signed row containing
+   their link, so any direct-add UI would secretly be
+   suggestion-shaped underneath; this design is the honest version.
+   *For safety*, an outbound URL wearing the community's trust
+   ("Borrow signup ↗") is the app's most effective phishing shape —
+   accept-before-render closes the window that add-then-remove
+   leaves open.
 3. **Care rota** — the open recurring tasks with cadence labels
    ("monthly"), claim buttons unchanged. This is the existing task
    list, filtered and renamed.
@@ -282,8 +322,16 @@ project commitment:
 1. **Spanish naming** for "Commons" / "Tended" ("los comunes"?
    "bienes comunes"? "en cuidado"?) — needs the same care as the
    "In my care" rename.
-2. **Edit authority** on resource links and care notes: stewards
-   only, or any trusted member (wiki-style, activity-logged)?
+2. **Edit authority on resource links — RESOLVED (2026-07):**
+   stewards edit directly (logged); any member suggests; a steward
+   accepts before a link renders (§5.2). One sub-question stays
+   open: are *pending* suggestions visible to all members with a
+   "pending" chip (transparent, but gives an unvetted URL screen
+   presence even unlinked) or **visible only to stewards until
+   accepted** (safer — the current lean)? Care-notes edit authority
+   is still open; the steward-direct + member-suggest shape likely
+   transfers, but notes are lower-risk than URLs and could bear the
+   wiki-style answer.
 3. **Resource links on active projects too?** §5.2 argues yes;
    confirms scope of phase 2.
 4. **The Dashboard doorway card** — wanted, or clutter? (Cheap
