@@ -133,6 +133,27 @@ the organizers), glance over the care rota (the recurring tasks and
 their cadences), optionally paste a first resource link. Graduation
 must never feel like a form.
 
+**The graduation announcement nudge (settled, 2026-07):** the
+existing completion moment already gives the organizer a nudge into
+the announcement box ("thanks spoken in the commons over a
+system-generated badge"). Graduation keeps the same card and the
+same button, re-aimed from *gratitude* to *orientation*: "tell the
+community what this is, where it lives, and how to use it." A
+graduated commons needs this MORE than a completed project does — a
+completed project's story is over, but a commons' story is starting,
+and this is the exact moment the community learns the thing exists;
+the nudge converts builders' knowledge into community knowledge
+before it evaporates into "ask Rosa, she knows." Every existing
+discipline holds: organizer-only, one pop per device, silent (the
+moment waits to be seen). Two implementation details decided with
+it: the one-time guard keys on **id + flavor** (not id alone), so a
+project that completed months ago and graduates late via the
+retrofit kebab item still gets its one graduation moment — the path
+real communities will use most in year one; and the announcement box
+suggests what to cover (what it is / where / how to use it / who to
+ask) as **placeholder text, never prefill** — it must arrive in the
+organizer's own voice.
+
 The kebab on a `completed` project gains **"Move to the Commons"**
 so pre-feature projects can graduate late.
 
@@ -402,9 +423,10 @@ project commitment:
    un-retire check-links nudge (§7). One principle now covers the
    whole lifecycle: an anchor exists only while stewards actively
    vouch for the destination.
-7. **Graduation announcement**: should choosing the Commons offer
-   the same announcement nudge the completion moment has ("tell the
-   community what you built")? (Probably yes — cheap and joyful.)
+7. **Graduation announcement — RESOLVED (2026-07): yes** (§4): the
+   completion-moment nudge re-aimed from gratitude to orientation,
+   with the id+flavor celebrated-key (retrofit graduations still get
+   their moment) and placeholder-not-prefill copy.
 
 ## 10. Build order *(suggested)*
 
