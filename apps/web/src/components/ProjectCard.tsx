@@ -23,6 +23,7 @@ export function ProjectCard({
   openTaskCount,
   searchQuery,
   closureLine,
+  careLine,
 }: {
   project: Project;
   organizerName: string;
@@ -37,8 +38,17 @@ export function ProjectCard({
    *  hours, together") shown under the organizer line on the archive.
    *  Board cards never pass it, so they're unchanged. Never names. */
   closureLine?: string;
+  /** Optional "next care" line for a TENDED commons ("Inventory
+   *  check · monthly") — computed at the call site from the soonest
+   *  open recurring task. Rendered only in the tended variant. */
+  careLine?: string;
 }) {
   const { t } = useTranslation();
+  // A commons card drops the progress bar entirely: a progress bar
+  // says "this ends," and a tended thing doesn't (docs/commons.md
+  // §5.2 / §8.2). Retired shares the treatment — its story line
+  // (closureLine) replaces progress on the archive.
+  const isCommons = project.status === "tended" || project.status === "retired";
   const percent =
     project.targetHours > 0
       ? Math.min(
@@ -76,28 +86,37 @@ export function ProjectCard({
           {project.description}
         </p>
       )}
-      <div
-        className="mt-3 h-2 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
-      >
-        <div
-          className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      <div className="mt-2 flex items-center justify-between text-xs text-moss-600 dark:text-moss-300">
-        <span>
-          {t("projects.progressLabel", {
-            contributed: formatHours(project.contributedHours),
-            target: formatHours(project.targetHours),
-            percent,
-          })}
-        </span>
-        <span>{formatRelativeTime(project.createdAt)}</span>
-      </div>
+      {!isCommons && (
+        <>
+          <div
+            className="mt-3 h-2 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+          >
+            <div
+              className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-xs text-moss-600 dark:text-moss-300">
+            <span>
+              {t("projects.progressLabel", {
+                contributed: formatHours(project.contributedHours),
+                target: formatHours(project.targetHours),
+                percent,
+              })}
+            </span>
+            <span>{formatRelativeTime(project.createdAt)}</span>
+          </div>
+        </>
+      )}
+      {project.status === "tended" && careLine && (
+        <p className="mt-3 text-xs text-canopy-700 dark:text-canopy-300">
+          {t("projects.commons.nextCare", { care: careLine })}
+        </p>
+      )}
       <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
         {t("projects.byOrganizer", { name: organizerName })}
       </p>
@@ -128,6 +147,16 @@ function StatusChip({ status }: { status: Project["status"] }) {
     completed: {
       label: t("projects.statusCompleted"),
       cls: "bg-canopy-50 text-canopy-800 dark:bg-canopy-950/40 dark:text-canopy-100",
+    },
+    // The Commons (docs/commons.md): the trusted-chip canopy family,
+    // never completed-gray — a tended thing is alive.
+    tended: {
+      label: t("projects.statusTended"),
+      cls: "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100",
+    },
+    retired: {
+      label: t("projects.statusRetired"),
+      cls: "bg-moss-100 text-moss-600 dark:bg-moss-900 dark:text-moss-300",
     },
     archived: {
       label: t("projects.statusArchived"),

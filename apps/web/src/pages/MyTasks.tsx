@@ -73,6 +73,8 @@ const PROJECT_STATUS_KEY = {
   active: "projects.statusActive",
   paused: "projects.statusPaused",
   completed: "projects.statusCompleted",
+  tended: "projects.statusTended",
+  retired: "projects.statusRetired",
   archived: "projects.statusArchived",
 } as const;
 

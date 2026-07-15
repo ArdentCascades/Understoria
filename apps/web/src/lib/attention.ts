@@ -478,7 +478,15 @@ export function computeAttentionItems(
 
   for (const p of projects) {
     if (!isProjectOrganizer(p, currentMember.publicKey)) continue;
-    if (p.status === "completed" || p.status === "archived") continue;
+    // Tended/retired commons have no meaningful deadline — building
+    // is over; care has no due date to count down to.
+    if (
+      p.status === "completed" ||
+      p.status === "archived" ||
+      p.status === "tended" ||
+      p.status === "retired"
+    )
+      continue;
     if (p.deadline && p.deadline > now && p.deadline - now <= 3 * DAY_MS) {
       items.push({
         kind: "project_deadline_approaching",

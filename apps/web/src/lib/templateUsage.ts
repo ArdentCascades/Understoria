@@ -59,7 +59,11 @@ export function getActiveProjectsForTemplate(
       (p) =>
         p.templateId !== null &&
         p.templateId === templateId &&
-        (p.status === "planning" || p.status === "active"),
+        (p.status === "planning" ||
+          p.status === "active" ||
+          // A tended commons is the template's fullest form of "in
+          // use" — the thing it builds exists and is being cared for.
+          p.status === "tended"),
     )
     .sort((a, b) => b.createdAt - a.createdAt);
 }

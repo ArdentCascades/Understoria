@@ -1,14 +1,28 @@
 # The Commons — projects that graduate into things the community tends
 
-> **Status: DRAFT — for review. Nothing in this document is
-> implemented.** It records a design conversation with the operator
+> **Status: Phase 1 IMPLEMENTED (2026-07); Phases 2–3 pending.**
+> Shipped: the `tended`/`retired` statuses and every §3 transition,
+> the graduation choice in the Mark-complete dialog (+ the retrofit
+> kebab item), the widened respawn/claim gates, the Board
+> "Being built / Tended" scope, the tended detail dressing (chip,
+> provenance subtitle, care-rota heading + ordering, no progress
+> bar), the graduation-flavored completion moment (id+flavor key,
+> orientation copy, tended announcement placeholder), retirement
+> with the why-it-ended note into the archive, and un-retire /
+> return-to-building. Still pending: resource links + care notes +
+> print sheet + Dashboard doorway (Phase 2), the needs-attention
+> bridge + steward attention item (Phase 3), and the §9 Spanish
+> naming review (the shipped es strings are provisional:
+> "bienes comunes" / "en cuidado").
+>
+> This document records the design conversation with the operator
 > (2026-07): what happens to a project that *builds something
 > lasting* — a tool library, a community garden, a phone tree — after
 > its last build task completes. Sibling to
-> `community-stability.md` (also in review); this document stands
+> `community-stability.md` (in review); this document stands
 > alone and is deliberately NOT coupled to that draft's checklist
-> (operator decision). Decisions already made by the operator are
-> marked **settled**; everything else is open (§9).
+> (operator decision). Decisions made by the operator are marked
+> **settled**.
 
 ---
 

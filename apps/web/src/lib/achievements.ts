@@ -130,9 +130,14 @@ export function evaluateAchievements(
   );
   if (halfwayCrossed) earned.add("momentum_maker");
 
-  // Keystone: an organized project actually completed.
+  // Keystone: an organized project actually completed. Graduating to
+  // the Commons IS completing the build (tended/retired both carry a
+  // completedAt), so it must never cost the organizer the moment.
   const completedAProject = organized.some(
-    (p) => p.status === "completed",
+    (p) =>
+      p.status === "completed" ||
+      p.status === "tended" ||
+      p.status === "retired",
   );
   if (completedAProject) earned.add("keystone");
 

@@ -35,6 +35,11 @@ export type MomentumState =
   | "completed" // status === completed
   | "paused" // status === paused
   | "planning" // status === planning (no momentum to speak of yet)
+  // A commons is deliberately NEVER "stalled": tended things are
+  // allowed to be quiet between care cycles, and pace-shaming a
+  // standing asset is exactly what docs/commons.md §8.3 forbids.
+  | "tended" // status === tended (the Commons)
+  | "retired" // status === retired (an ended commons)
   | "archived";
 
 export interface DailyContribution {
@@ -121,6 +126,8 @@ function deriveState(
   if (project.status === "paused") return "paused";
   if (project.status === "archived") return "archived";
   if (project.status === "planning") return "planning";
+  if (project.status === "tended") return "tended";
+  if (project.status === "retired") return "retired";
   // status === "active"
   if (activeDaysInWindow >= Math.ceil(windowDays / 2)) return "humming";
   if (hoursLast7Days > 0) return "active";
