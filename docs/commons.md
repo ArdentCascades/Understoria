@@ -262,11 +262,22 @@ When `status === "tended"` the detail page re-orders:
 3. **Care rota** — the open recurring tasks with cadence labels
    ("monthly"), claim buttons unchanged. This is the existing task
    list, filtered and renamed.
-4. **Care notes** — a steward-editable text block ("how to open the
-   library, where the watering rota lives"), separate from the
-   original description, which remains the build story. With a
-   "Print the how-to sheet" button following the print-surface
-   pattern (a one-pager for the physical site).
+4. **Care notes** — a text block ("how to open the library, where
+   the watering rota lives"), separate from the original
+   description, which remains the build story. With a "Print the
+   how-to sheet" button following the print-surface pattern (a
+   one-pager for the physical site).
+
+   **Edit authority (settled, 2026-07): the links shape, reused
+   verbatim.** Stewards edit directly, activity-logged; any member
+   can suggest an addition or correction, attributed and visible to
+   everyone as a pending suggestion; a steward accept writes it into
+   the notes (their device signs the row — the same mechanical
+   reason as links: project rows carry organizer authority);
+   declines are logged like removals, so curation happens in the
+   open. One authority model for everything members contribute to a
+   commons — links and notes alike — is one model to implement, one
+   to test, and one to explain.
 5. **"How this was built"** — the full original task list, activity
    log, and announcements folded into a collapsed disclosure.
    History browsable, never deleted, never in the way.
@@ -405,10 +416,11 @@ project commitment:
    visible to the whole community (transparency), rendered as plain
    non-clickable text with a pending chip until accepted (safety),
    and declines are logged like removals so curation happens in the
-   open. Care-notes edit authority is still open; the
-   steward-direct + member-suggest shape likely transfers, but
-   notes are lower-risk than URLs and could bear the wiki-style
-   answer.
+   open. **Care-notes edit authority — also RESOLVED (2026-07): the
+   links shape, reused verbatim** (§5.3): stewards direct + logged,
+   members suggest with pending visibility, steward accept writes,
+   declines logged. One authority model for everything members
+   contribute to a commons.
 3. **Resource links on active projects too?** §5.2 argues yes;
    confirms scope of phase 2.
 4. **The Dashboard doorway card — RESOLVED (2026-07): approved, the
