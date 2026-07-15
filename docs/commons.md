@@ -294,8 +294,41 @@ pause-note pattern), because *why it ended* is exactly what the
 community will want to remember, and what a future group reviving
 the idea will want to know. Everything stays browsable on the detail
 page in retired dressing: provenance, care notes, resource links
-(grayed — the spreadsheet may be dead too), the full build-and-care
-history. Nothing is deleted; retirement is a state, not a shredder.
+(de-anchored — next paragraph), the full build-and-care history.
+Nothing is deleted; retirement is a state, not a shredder.
+
+**Retired resource links are de-anchored (settled, 2026-07): shown
+as muted plain text — label and URL visible, nothing tappable.**
+This WILL annoy people, so the reasoning gets stated in full, here
+and in the UI:
+
+- Link rot is an attack surface, not just an inconvenience. A
+  retired page can sit in the archive for years with nobody
+  maintaining the destinations its links point at — and dead
+  destinations don't stay neutral: free-tier pages get recycled,
+  shortener slugs get reissued, and lapsed domains get
+  re-registered, sometimes deliberately by people who buy expired
+  domains *because* old links still point at them. A tappable
+  anchor labeled "Borrow signup" on a page nobody watches would
+  keep lending the community's trust to whatever lives at that
+  address in five years.
+- The rule is the same one pending suggestions follow (§5.2), from
+  the other end of the lifecycle: **a URL renders as an anchor only
+  while stewards actively vouch for it.** Before acceptance → text.
+  While tended → anchor. After retirement → back to text. The
+  anchor is the community's *living* endorsement; the text is the
+  *record*. Someone who wants the old inventory sheet copies the
+  URL deliberately, eyes open.
+- Because the friction is deliberate, **the retired page explains
+  itself in one line** next to the de-anchored list — "Links here
+  are shown but not clickable: nobody tends these destinations
+  anymore, so the app no longer vouches for where they lead" — the
+  same honesty register as the outside-privacy hint. Unexplained
+  friction reads as a bug; explained friction reads as care.
+- **Un-retire restores the anchors** — it is a deliberate steward
+  act, so the re-vouching is real — and the un-retire flow shows a
+  one-line nudge ("Check that these still point where they
+  should"), since the links may have rotted during dormancy.
 
 Two boundaries keep it clean: retired commons **leave the living
 surfaces** (no card in either Board scope, no Dashboard count, and
@@ -364,7 +397,11 @@ project commitment:
 5. **"Needs attention" shape** for non-stewards: prefilled need
    post (proposed) vs. directly opening a task — the post keeps the
    existing authority model intact.
-6. **Retired links** — grayed (proposed) or hidden?
+6. **Retired links — RESOLVED (2026-07):** de-anchored to muted
+   plain text, with the in-page one-line explanation and the
+   un-retire check-links nudge (§7). One principle now covers the
+   whole lifecycle: an anchor exists only while stewards actively
+   vouch for the destination.
 7. **Graduation announcement**: should choosing the Commons offer
    the same announcement nudge the completion moment has ("tell the
    community what you built")? (Probably yes — cheap and joyful.)
