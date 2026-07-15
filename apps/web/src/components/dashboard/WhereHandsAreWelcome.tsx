@@ -52,7 +52,10 @@ export function WhereHandsAreWelcome() {
     const welcomingProjects = projects
       .filter(
         (p) =>
-          p.status === "active" &&
+          // A tended commons' open care tasks are open invitations —
+          // exactly this section's job (docs/commons.md §5.1: the
+          // Dashboard doorway deliberately does NOT duplicate this).
+          (p.status === "active" || p.status === "tended") &&
           projectNeedsMoreHands(p.id, projectTasks, nodeConfig, now),
       )
       .map((p) => ({

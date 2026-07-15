@@ -218,7 +218,15 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
 
   for (const p of input.projects) {
     if (p.deadline === null) continue;
-    if (p.status === "completed" || p.status === "archived") continue;
+    // Tended/retired: building finished; a leftover deadline marker
+    // would be noise on a commons.
+    if (
+      p.status === "completed" ||
+      p.status === "archived" ||
+      p.status === "tended" ||
+      p.status === "retired"
+    )
+      continue;
     if (p.deadline < input.windowStart || p.deadline > input.windowEnd) continue;
     entries.push({
       kind: "project_deadline",

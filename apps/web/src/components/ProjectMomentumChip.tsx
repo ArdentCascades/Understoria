@@ -34,6 +34,12 @@ const COLORS: Record<MomentumState, string> = {
     "bg-moss-50 text-moss-600 dark:bg-moss-900/40 dark:text-moss-300",
   planning:
     "bg-moss-50 text-moss-600 dark:bg-moss-900/40 dark:text-moss-300",
+  // Calm canopy for a living commons — never the amber "Quiet"
+  // treatment (tended things are allowed to be quiet).
+  tended:
+    "bg-canopy-50 text-canopy-700 dark:bg-canopy-900/40 dark:text-canopy-200",
+  retired:
+    "bg-moss-50 text-moss-600 dark:bg-moss-900/40 dark:text-moss-300",
   archived:
     "bg-moss-50 text-moss-600 dark:bg-moss-900/40 dark:text-moss-300",
 };

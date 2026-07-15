@@ -93,6 +93,18 @@ export default function BoardPage() {
     params.set("tab", tabToParam(next));
     setSearchParams(params, { replace: true });
   };
+  // Commons scope within the projects tab (docs/commons.md §5.1):
+  // "Being built" (default) vs "Tended". URL-carried like the tab so
+  // /?tab=projects&scope=tended deep-links; a commons IS a project,
+  // so this is a scope on the existing tab, never a new tab.
+  const scope: "build" | "tended" =
+    searchParams.get("scope") === "tended" ? "tended" : "build";
+  const setScope = (next: "build" | "tended") => {
+    const params = new URLSearchParams(searchParams);
+    if (next === "tended") params.set("scope", "tended");
+    else params.delete("scope");
+    setSearchParams(params, { replace: true });
+  };
   const [categoryFilter, setCategoryFilter] = useState<Category | "">("");
   const [urgencyFilter, setUrgencyFilter] = useState<Urgency | "">("");
   // Live input value (every keystroke) + debounced value (250 ms after
@@ -279,7 +291,11 @@ export default function BoardPage() {
   const visibleProjects = useMemo(() => {
     const q = debouncedQuery.trim();
     return projects.filter((p) => {
-      if (p.status === "archived") return false;
+      // Archived AND retired rest in /projects/archive.
+      if (p.status === "archived" || p.status === "retired") return false;
+      // The Being built / Tended scope split (docs/commons.md §5.1).
+      if (scope === "tended" ? p.status !== "tended" : p.status === "tended")
+        return false;
       if (projectCategoryFilter && p.category !== projectCategoryFilter)
         return false;
       if (projectStatusFilter && p.status !== projectStatusFilter) return false;
@@ -300,6 +316,7 @@ export default function BoardPage() {
     onlyHourSized,
     needsMoreHandsIds,
     debouncedQuery,
+    scope,
   ]);
 
   const projectFiltersActive =
@@ -817,6 +834,25 @@ export default function BoardPage() {
 
         {tab === "PROJECTS" && (
           <div>
+            {/* Being built / Tended scope (docs/commons.md §5.1) —
+                filter-chip pattern, aria-pressed for a11y. */}
+            <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label={t("projects.commons.scopeLabel")}>
+              {(["build", "tended"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={scope === s}
+                  onClick={() => setScope(s)}
+                  className={`chip transition-colors ${
+                    scope === s
+                      ? "bg-canopy-600 text-white dark:bg-canopy-500 dark:text-canopy-950"
+                      : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+                  }`}
+                >
+                  {t(s === "build" ? "projects.commons.scopeBuild" : "projects.commons.scopeTended")}
+                </button>
+              ))}
+            </div>
             <ProjectList
               projects={visibleProjects}
               projectTasks={projectTasks}
@@ -825,6 +861,7 @@ export default function BoardPage() {
               filtersActive={projectFiltersActive}
               onClearFilters={resetProjectFilters}
               panelOpen={postPanelOpen}
+              tendedScope={scope === "tended"}
             />
           </div>
         )}
@@ -1067,6 +1104,7 @@ function ProjectList({
   filtersActive,
   onClearFilters,
   panelOpen,
+  tendedScope,
 }: {
   /** Projects to render. Already filtered by the parent — this
    *  component does NOT re-apply category / status / open-task
@@ -1088,6 +1126,9 @@ function ProjectList({
   /** True while the docked post panel is open — the reading column
    *  is narrower, so the card grid dials its columns back. */
   panelOpen: boolean;
+  /** True when the Tended scope is active — cards get their "next
+   *  care" line (docs/commons.md §5.2). */
+  tendedScope?: boolean;
 }) {
   const { t } = useTranslation();
   const tasksByProject = useMemo(() => {
@@ -1100,6 +1141,25 @@ function ProjectList({
     }
     return map;
   }, [projectTasks]);
+  // "Next care" per tended commons: the first OPEN recurring task,
+  // by orderIndex (rota order). Title + cadence, no due-date math —
+  // care is invited, never counted down (docs/commons.md §8.3).
+  const careByProject = useMemo(() => {
+    if (!tendedScope) return new Map<string, string>();
+    const map = new Map<string, string>();
+    const sorted = [...projectTasks].sort(
+      (a, b) => a.orderIndex - b.orderIndex,
+    );
+    for (const task of sorted) {
+      if (task.status !== "open" || !task.recurringCadence) continue;
+      if (map.has(task.projectId)) continue;
+      map.set(
+        task.projectId,
+        `${task.title} · ${t(`projects.commons.cadence.${task.recurringCadence}`)}`,
+      );
+    }
+    return map;
+  }, [tendedScope, projectTasks, t]);
 
   const trimmedQuery = searchQuery.trim();
 
@@ -1157,6 +1217,7 @@ function ProjectList({
               taskCount={counts.total}
               openTaskCount={counts.open}
               searchQuery={searchQuery}
+              careLine={careByProject.get(p.id)}
             />
           </li>
         );

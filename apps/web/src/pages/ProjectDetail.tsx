@@ -21,6 +21,7 @@ import {
   bulkAddTasks,
   cloneProject,
   completeProject,
+  graduateProject,
   handoffOrganizer,
   launchProject,
   listActivityForProject,
@@ -30,7 +31,10 @@ import {
   postAnnouncement,
   removeCoOrganizer,
   resumeProject,
+  retireCommons,
+  returnToBuilding,
   unarchiveProject,
+  unretireCommons,
 } from "@/db/projects";
 import {
   issueCoOrganizerInvitation,
@@ -108,7 +112,21 @@ export default function ProjectDetailPage() {
   // the same context the per-task page consumes, so the two surfaces
   // can never drift. No fetch; everything is derived from global state.
   const ctx = useProjectTaskContext(id);
-  const { project, tasks, memberMap, isOrg, nodeId, nodeConfig } = ctx;
+  const { project, tasks: rawTasks, memberMap, isOrg, nodeId, nodeConfig } = ctx;
+  // Care-rota ordering on a tended commons (docs/commons.md §5.3):
+  // open recurring care work leads, other live work follows, the
+  // completed build history sinks to the bottom. Everywhere else the
+  // read model's own order is untouched.
+  const tasks = useMemo(() => {
+    if (project?.status !== "tended") return rawTasks;
+    const rank = (t: (typeof rawTasks)[number]) =>
+      t.status === "open" && t.recurringCadence
+        ? 0
+        : t.status !== "completed"
+          ? 1
+          : 2;
+    return [...rawTasks].sort((a, b) => rank(a) - rank(b));
+  }, [rawTasks, project?.status]);
   // Fields the context doesn't cover — read directly from AppContext.
   const {
     members,
@@ -138,6 +156,13 @@ export default function ProjectDetailPage() {
   // drag-and-drop and Move up/down buttons stay in TaskList; only the
   // dialog + its launcher moved up here.
   const [reorderDialogOpen, setReorderDialogOpen] = useState(false);
+  // The Commons (docs/commons.md §4/§7): the two-option completion
+  // choice, the retire-with-note dialog, and the return-to-building
+  // confirm. Un-retire runs directly (reversible, low-stakes).
+  const [completionChoiceOpen, setCompletionChoiceOpen] = useState(false);
+  const [retireDialogOpen, setRetireDialogOpen] = useState(false);
+  const [retireNote, setRetireNote] = useState("");
+  const [returnConfirmOpen, setReturnConfirmOpen] = useState(false);
   // Which management dialog (former "Manage project" disclosure
   // section) is open. Each is a kebab-menu item now — the
   // Reorder-tasks precedent: menu item → focused dialog.
@@ -422,8 +447,41 @@ export default function ProjectDetailPage() {
     projectMenuItems.push({
       key: "complete",
       label: t("projects.detail.markComplete"),
+      // The graduation choice lives INSIDE the moment the app already
+      // owns (docs/commons.md §4): Mark complete opens a two-option
+      // dialog — Complete and close, or Move to the Commons.
+      onSelect: () => setCompletionChoiceOpen(true),
+    });
+  }
+  if (isOrg && project.status === "completed") {
+    // The retrofit hatch: projects that finished before the Commons
+    // existed can graduate late (docs/commons.md §4).
+    projectMenuItems.push({
+      key: "graduate",
+      label: t("projects.commons.moveToCommons"),
       onSelect: () => {
-        void run(() => completeProject(project.id, actorKey));
+        void run(() => graduateProject(project.id, actorKey));
+      },
+    });
+  }
+  if (isOrg && project.status === "tended") {
+    projectMenuItems.push({
+      key: "retire",
+      label: t("projects.commons.retire"),
+      onSelect: () => setRetireDialogOpen(true),
+    });
+    projectMenuItems.push({
+      key: "return-to-building",
+      label: t("projects.commons.returnToBuilding"),
+      onSelect: () => setReturnConfirmOpen(true),
+    });
+  }
+  if (isOrg && project.status === "retired") {
+    projectMenuItems.push({
+      key: "unretire",
+      label: t("projects.commons.unretire"),
+      onSelect: () => {
+        void run(() => unretireCommons(project.id, actorKey));
       },
     });
   }
@@ -550,7 +608,15 @@ export default function ProjectDetailPage() {
                 viewer. */}
             <div className="mb-2 flex items-start justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+                <span
+                  className={`chip ${
+                    // "Tended commons" wears the living canopy family,
+                    // never completed-gray (docs/commons.md §5.3).
+                    project.status === "tended"
+                      ? "bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100"
+                      : "bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200"
+                  }`}
+                >
                   {t(`projects.status${capitalize(project.status)}` as `projects.statusActive`)}
                 </span>
                 <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
@@ -601,27 +667,69 @@ export default function ProjectDetailPage() {
                 </Link>
               </div>
             )}
-            <div className="mt-4">
-              <div
-                className="h-3 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={percent}
-              >
+            {/* No progress bar on a commons: a progress bar says
+                "this ends," and a tended thing doesn't (docs/commons.md
+                §8.2). The provenance line below carries the biography
+                instead. */}
+            {project.status !== "tended" && project.status !== "retired" && (
+              <div className="mt-4">
                 <div
-                  className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
-                  style={{ width: `${percent}%` }}
-                />
+                  className="h-3 overflow-hidden rounded-full bg-moss-100 dark:bg-moss-800"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={percent}
+                >
+                  <div
+                    className="h-full rounded-full bg-canopy-600 transition-[width] duration-500"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+                  {t("projects.progressLabel", {
+                    contributed: formatHours(project.contributedHours),
+                    target: formatHours(project.targetHours),
+                    percent,
+                  })}
+                </p>
               </div>
-              <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
-                {t("projects.progressLabel", {
-                  contributed: formatHours(project.contributedHours),
-                  target: formatHours(project.targetHours),
-                  percent,
-                })}
+            )}
+            {/* The commons biography — aggregate-only provenance as a
+                quiet permanent subtitle (docs/commons.md §5.3), and
+                the retired story with its why-it-ended note (§7). */}
+            {project.status === "tended" && project.completedAt && (
+              <p className="mt-3 text-sm text-canopy-800 dark:text-canopy-200">
+                {closure.contributorCount > 0
+                  ? t("projects.commons.provenance", {
+                      count: closure.contributorCount,
+                      hours: formatHours(closure.hoursMoved),
+                      when: formatRelativeTime(project.completedAt),
+                    })
+                  : t("projects.commons.provenanceNoCrew", {
+                      when: formatRelativeTime(project.completedAt),
+                    })}
               </p>
-            </div>
+            )}
+            {project.status === "retired" && project.retiredAt && (
+              <div className="mt-3 rounded-xl bg-moss-50 p-3 text-sm text-moss-800 dark:bg-moss-900/40 dark:text-moss-100">
+                <p>
+                  {t("projects.commons.retiredStory", {
+                    when: formatRelativeTime(project.retiredAt),
+                  })}
+                </p>
+                {project.retireNote && (
+                  <p className="mt-1 italic">“{project.retireNote}”</p>
+                )}
+                {closure.contributorCount > 0 && (
+                  <p className="mt-1">
+                    {t("projects.completionMoment.summary", {
+                      count: closure.contributorCount,
+                      hours: formatHours(closure.hoursMoved),
+                    })}
+                  </p>
+                )}
+              </div>
+            )}
             {/* Desktop copy of the secondary meta (sparkline + created/
                 area/deadline/contributors grid). On mobile this copy is
                 hidden and the SAME block re-renders after the main
@@ -638,7 +746,11 @@ export default function ProjectDetailPage() {
               />
             </div>
             {showCompletionMoment && (
-              <CompletionMoment closure={closure} isOrg={isOrg} />
+              <CompletionMoment
+                closure={closure}
+                isOrg={isOrg}
+                graduated={project.status === "tended"}
+              />
             )}
             {(project.status === "completed" || project.status === "archived") &&
               project.completedAt && (
@@ -707,7 +819,11 @@ export default function ProjectDetailPage() {
               (announcements and work days follow the list + forms). */}
           <section className="mb-4">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
-              {t("projects.detail.tasks")}
+              {t(
+                project.status === "tended"
+                  ? "projects.commons.careRota"
+                  : "projects.detail.tasks",
+              )}
             </h2>
             {tasks.length === 0 ? (
               <div className="card">
@@ -848,9 +964,73 @@ export default function ProjectDetailPage() {
             />
           )}
 
+          {/* The graduation choice (docs/commons.md §4): Mark complete
+              becomes a two-option moment. The Commons option leads
+              when recurring tasks exist — the built thing clearly has
+              a care loop waiting. */}
+          <CompletionChoiceDialog
+            open={completionChoiceOpen}
+            commonsFirst={tasks.some((tk) => !!tk.recurringCadence)}
+            onClose={() => setCompletionChoiceOpen(false)}
+            onComplete={() => {
+              setCompletionChoiceOpen(false);
+              void run(() => completeProject(project.id, actorKey));
+            }}
+            onGraduate={() => {
+              setCompletionChoiceOpen(false);
+              void run(() => graduateProject(project.id, actorKey));
+            }}
+          />
+
+          {/* Retire: the pause-note pattern — one required sentence of
+              why it ended, kept forever with the archive record
+              (docs/commons.md §7). */}
+          <ConfirmDialog
+            open={retireDialogOpen}
+            title={t("projects.commons.retireTitle")}
+            tone="caution"
+            description={
+              <div>
+                <p className="mb-2 text-sm">
+                  {t("projects.commons.retireBody")}
+                </p>
+                <textarea
+                  className="input min-h-16 w-full"
+                  value={retireNote}
+                  maxLength={300}
+                  onChange={(e) => setRetireNote(e.target.value)}
+                  placeholder={t("projects.commons.retirePlaceholder")}
+                  aria-label={t("projects.commons.retireNoteLabel")}
+                />
+              </div>
+            }
+            confirmLabel={t("projects.commons.retireConfirm")}
+            cancelLabel={t("common.cancel")}
+            onConfirm={() => {
+              if (!retireNote.trim()) return;
+              setRetireDialogOpen(false);
+              void run(() => retireCommons(project.id, actorKey, retireNote));
+            }}
+            onCancel={() => setRetireDialogOpen(false)}
+          />
+
+          <ConfirmDialog
+            open={returnConfirmOpen}
+            title={t("projects.commons.returnTitle")}
+            description={t("projects.commons.returnBody")}
+            confirmLabel={t("projects.commons.returnConfirm")}
+            cancelLabel={t("common.cancel")}
+            onConfirm={() => {
+              setReturnConfirmOpen(false);
+              void run(() => returnToBuilding(project.id, actorKey));
+            }}
+            onCancel={() => setReturnConfirmOpen(false)}
+          />
+
           {isOrg &&
             project.status !== "completed" &&
-            project.status !== "archived" && (
+            project.status !== "archived" &&
+            project.status !== "retired" && (
               <AddTaskForm
                 project={project}
                 actorKey={actorKey}
@@ -1232,10 +1412,22 @@ function useNewlyCompletedProjectMoment(
   const projectId = project?.id ?? null;
   const projectStatus = project?.status ?? null;
   useEffect(() => {
-    if (projectId === null || projectStatus !== "completed" || contributorCount <= 0) {
+    // `tended` gets its own moment: graduation is a completion too
+    // (docs/commons.md §4). The celebrated set keys on id + FLAVOR
+    // (bare id for completed — the legacy entries — and `<id>:tended`
+    // for graduation), so a project that completed months ago and
+    // graduates late via the retrofit kebab item still gets its one
+    // graduation moment.
+    if (
+      projectId === null ||
+      (projectStatus !== "completed" && projectStatus !== "tended") ||
+      contributorCount <= 0
+    ) {
       setShow(false);
       return;
     }
+    const celebratedKey =
+      projectStatus === "tended" ? `${projectId}:tended` : projectId;
     let cancelled = false;
     void (async () => {
       const stored = await getSetting(
@@ -1245,12 +1437,12 @@ function useNewlyCompletedProjectMoment(
       const celebrated = new Set<string>(
         stored ? (JSON.parse(stored) as string[]) : [],
       );
-      if (celebrated.has(projectId)) {
+      if (celebrated.has(celebratedKey)) {
         setShow(false);
         return;
       }
       setShow(true);
-      celebrated.add(projectId);
+      celebrated.add(celebratedKey);
       await setSetting(
         SETTING_KEYS.celebratedProjectCompletions,
         JSON.stringify(Array.from(celebrated)),
@@ -1272,9 +1464,15 @@ function useNewlyCompletedProjectMoment(
 function CompletionMoment({
   closure,
   isOrg,
+  graduated = false,
 }: {
   closure: ProjectClosure;
   isOrg: boolean;
+  /** True when the project graduated to the Commons instead of
+   *  closing — same celebration, and the organizer nudge re-aims
+   *  from GRATITUDE to ORIENTATION: this is the moment the community
+   *  learns the thing exists and how to use it (docs/commons.md §4). */
+  graduated?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -1286,19 +1484,34 @@ function CompletionMoment({
         />
         <div>
           <div className="text-sm font-semibold">
-            {t("projects.completionMoment.title")}
+            {t(
+              graduated
+                ? "projects.commons.momentTitle"
+                : "projects.completionMoment.title",
+            )}
           </div>
           <div className="text-base">
             {t("projects.completionMoment.summary", {
               count: closure.contributorCount,
               hours: formatHours(closure.hoursMoved),
             })}
+            {graduated && (
+              <span className="block">
+                {t("projects.commons.momentTended")}
+              </span>
+            )}
           </div>
         </div>
       </div>
       {isOrg && (
         <div className="mt-3 border-t border-canopy-200/70 pt-3 dark:border-canopy-800/60">
-          <p className="text-sm">{t("projects.completionMoment.thanksHint")}</p>
+          <p className="text-sm">
+            {t(
+              graduated
+                ? "projects.commons.orientHint"
+                : "projects.completionMoment.thanksHint",
+            )}
+          </p>
           <button
             type="button"
             className="btn-secondary mt-2"
@@ -1314,7 +1527,11 @@ function CompletionMoment({
               (el as HTMLTextAreaElement).focus({ preventScroll: true });
             }}
           >
-            {t("projects.completionMoment.thanksCta")}
+            {t(
+              graduated
+                ? "projects.commons.orientCta"
+                : "projects.completionMoment.thanksCta",
+            )}
           </button>
         </div>
       )}
@@ -1536,6 +1753,71 @@ function ManageDialog({
         {children}
       </div>
     </div>
+  );
+}
+
+// The graduation choice (docs/commons.md §4): Mark complete opens a
+// two-option moment instead of firing directly. The Commons option
+// leads when the project has recurring tasks (the built thing clearly
+// has a care loop waiting); otherwise Complete-and-close leads.
+// Graduation must never feel like a form — two labeled choices and a
+// cancel, nothing else.
+function CompletionChoiceDialog({
+  open,
+  commonsFirst,
+  onClose,
+  onComplete,
+  onGraduate,
+}: {
+  open: boolean;
+  commonsFirst: boolean;
+  onClose: () => void;
+  onComplete: () => void;
+  onGraduate: () => void;
+}) {
+  const { t } = useTranslation();
+  if (!open) return null;
+  const options = [
+    {
+      key: "graduate",
+      title: t("projects.commons.choiceCommons"),
+      desc: t("projects.commons.choiceCommonsDesc"),
+      onSelect: onGraduate,
+    },
+    {
+      key: "complete",
+      title: t("projects.commons.choiceComplete"),
+      desc: t("projects.commons.choiceCompleteDesc"),
+      onSelect: onComplete,
+    },
+  ];
+  const ordered = commonsFirst ? options : [...options].reverse();
+  return (
+    <ManageDialog title={t("projects.commons.choiceTitle")} onClose={onClose}>
+      <p className="text-sm text-moss-600 dark:text-moss-300">
+        {t("projects.commons.choiceBody")}
+      </p>
+      {ordered.map((o) => (
+        <button
+          key={o.key}
+          type="button"
+          onClick={o.onSelect}
+          className="rounded-xl border border-moss-200 p-3 text-left transition-colors hover:border-canopy-500 hover:bg-canopy-50 dark:border-moss-700 dark:hover:bg-canopy-950/40"
+        >
+          <span className="block text-sm font-semibold">{o.title}</span>
+          <span className="mt-0.5 block text-sm text-moss-600 dark:text-moss-300">
+            {o.desc}
+          </span>
+        </button>
+      ))}
+      <button
+        type="button"
+        className="btn-secondary self-end"
+        onClick={onClose}
+      >
+        {t("common.cancel")}
+      </button>
+    </ManageDialog>
   );
 }
 
@@ -2314,7 +2596,15 @@ function AnnouncementSection({
               value={body}
               onChange={(e) => setBody(e.target.value)}
               maxLength={2000}
-              placeholder={t("projects.announcements.placeholder")}
+              // Placeholder, never prefill (docs/commons.md §4): the
+              // graduation announcement must arrive in the organizer's
+              // own voice; the tended placeholder just suggests what
+              // to cover.
+              placeholder={t(
+                project.status === "tended"
+                  ? "projects.commons.announcePlaceholder"
+                  : "projects.announcements.placeholder",
+              )}
             />
             <button
               type="submit"

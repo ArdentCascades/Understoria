@@ -25,8 +25,21 @@ export default function ProjectArchivePage() {
   const archived = useMemo(
     () =>
       projects
-        .filter((p) => p.status === "completed" || p.status === "archived")
-        .sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt)),
+        // Retired commons rest here too — the archive is the
+        // community's memory shelf (docs/commons.md §7). Sorted by
+        // when their story ended: retirement date for a retired
+        // commons, completion date otherwise.
+        .filter(
+          (p) =>
+            p.status === "completed" ||
+            p.status === "archived" ||
+            p.status === "retired",
+        )
+        .sort(
+          (a, b) =>
+            (b.retiredAt ?? b.completedAt ?? b.createdAt) -
+            (a.retiredAt ?? a.completedAt ?? a.createdAt),
+        ),
     [projects],
   );
 
@@ -73,13 +86,18 @@ export default function ProjectArchivePage() {
             // Aggregate-only, from the signed ledger; omitted entirely
             // when no one moved hours (a zero tally is shame-shaped).
             const closure = computeProjectClosure({ project: p, exchanges });
+            // A retired commons tells its own story: the why-it-ended
+            // note the Retire dialog captured (docs/commons.md §7),
+            // falling back to the plain closure line.
             const closureLine =
-              closure.contributorCount > 0
-                ? t("projects.completionMoment.cardLine", {
-                    count: closure.contributorCount,
-                    hours: formatHours(closure.hoursMoved),
-                  })
-                : undefined;
+              p.status === "retired" && p.retireNote
+                ? `“${p.retireNote}”`
+                : closure.contributorCount > 0
+                  ? t("projects.completionMoment.cardLine", {
+                      count: closure.contributorCount,
+                      hours: formatHours(closure.hoursMoved),
+                    })
+                  : undefined;
             return (
               <li key={p.id}>
                 <ProjectCard

@@ -740,7 +740,7 @@ describe("handoffOrganizer", () => {
 
     await expect(
       handoffOrganizer(p.id, alice.publicKey, bob.publicKey),
-    ).rejects.toThrow(/completed or archived/i);
+    ).rejects.toThrow(/completed, retired, or archived/i);
   });
 });
 

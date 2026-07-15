@@ -138,7 +138,9 @@ export function myOrganizedProjects(
   const groups: OrganizedProject[] = [];
   let awaitingYouTotal = 0;
   for (const project of projects) {
-    if (project.status === "archived") continue;
+    // Retired commons rest in the archive, like archived projects; a
+    // TENDED commons deliberately stays — stewarding is organizing.
+    if (project.status === "archived" || project.status === "retired") continue;
     if (!isOrganizer(project, memberKey)) continue;
     const tasks = tasksByProject.get(project.id) ?? [];
     let openTaskCount = 0;

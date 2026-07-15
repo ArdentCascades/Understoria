@@ -413,33 +413,202 @@ export async function completeProject(
         p.nodeId,
       );
 
-      // Keystone achievement fires here for the organizer. Use the
-      // freshly-updated project list so the just-completed project is
-      // visible to the evaluator.
-      const allProjectsNow = (await db.projects.toArray()).map((proj) =>
-        proj.id === updated.id ? updated : proj,
-      );
-      const allTasksNow = await db.projectTasks.toArray();
-      const existing = await db.achievements
-        .where("memberKey")
-        .equals(organizerKey)
-        .toArray();
-      const organizedProjects = allProjectsNow.filter(
-        (proj) => proj.organizerKey === organizerKey,
-      );
-      const organizedProjectIds = new Set(organizedProjects.map((p) => p.id));
-      const organizedProjectTasks = allTasksNow.filter((t) =>
-        organizedProjectIds.has(t.projectId),
-      );
-      const diff = diffAchievements(
-        organizerKey,
-        existing.map((a) => a.achievementType),
-        await db.exchanges.toArray(),
-        { organizedProjects, organizedProjectTasks },
-        now,
-      );
-      if (diff.length > 0) await db.achievements.bulkPut(diff);
+      await grantOrganizerCompletionAchievements(updated, organizerKey, now);
 
+      return updated;
+    },
+  );
+  await publishProjectState(projectId, organizerKey);
+  return result;
+}
+
+/**
+ * Keystone-and-friends evaluation at a completion-like transition,
+ * shared by `completeProject` and `graduateProject` — graduating to
+ * the Commons instead of closing must never cost the organizer their
+ * completion achievement (docs/commons.md §3). Runs INSIDE the
+ * caller's transaction; uses the freshly-updated project so the
+ * transition is visible to the evaluator.
+ */
+async function grantOrganizerCompletionAchievements(
+  updated: Project,
+  organizerKey: string,
+  now: number,
+): Promise<void> {
+  const allProjectsNow = (await db.projects.toArray()).map((proj) =>
+    proj.id === updated.id ? updated : proj,
+  );
+  const allTasksNow = await db.projectTasks.toArray();
+  const existing = await db.achievements
+    .where("memberKey")
+    .equals(organizerKey)
+    .toArray();
+  const organizedProjects = allProjectsNow.filter(
+    (proj) => proj.organizerKey === organizerKey,
+  );
+  const organizedProjectIds = new Set(organizedProjects.map((p) => p.id));
+  const organizedProjectTasks = allTasksNow.filter((t) =>
+    organizedProjectIds.has(t.projectId),
+  );
+  const diff = diffAchievements(
+    organizerKey,
+    existing.map((a) => a.achievementType),
+    await db.exchanges.toArray(),
+    { organizedProjects, organizedProjectTasks },
+    now,
+  );
+  if (diff.length > 0) await db.achievements.bulkPut(diff);
+}
+
+// -- The Commons (docs/commons.md) ------------------------------------------
+//
+// A project that built something lasting can GRADUATE to `tended` —
+// "a thing we tend" — instead of closing. Not a new object: the same
+// Project row in a new state, with the recurring-task respawn and
+// task claiming staying live (see the widened gates above). All four
+// writers publish signed project state so mirrors converge.
+
+/**
+ * Graduate a project to the Commons — the organizer's choice at the
+ * completion moment, or the retrofit path from `completed` for
+ * projects that finished before the feature existed. `completedAt`
+ * still means "when building finished": stamped on first transition,
+ * preserved on retrofit.
+ */
+export async function graduateProject(
+  projectId: string,
+  organizerKey: string,
+): Promise<Project> {
+  const result = await db.transaction(
+    "rw",
+    [db.projects, db.projectTasks, db.projectActivity, db.achievements, db.exchanges],
+    async () => {
+      const p = await requireOrganizer(projectId, organizerKey);
+      if (
+        p.status !== "active" &&
+        p.status !== "paused" &&
+        p.status !== "completed"
+      )
+        throw new Error(
+          "Only active, paused, or completed projects can move to the Commons.",
+        );
+      const now = Date.now();
+      const updated: Project = {
+        ...p,
+        status: "tended",
+        completedAt: p.completedAt ?? now,
+        pausedAt: null,
+        pauseNote: null,
+      };
+      await db.projects.put(updated);
+      await logActivity(
+        projectId,
+        "project_graduated",
+        organizerKey,
+        { contributedHours: p.contributedHours },
+        p.nodeId,
+      );
+      // Graduating IS completing the build — same achievement moment
+      // as completeProject (a no-op on the retrofit path, where the
+      // completion already granted it).
+      await grantOrganizerCompletionAchievements(updated, organizerKey, now);
+      return updated;
+    },
+  );
+  await publishProjectState(projectId, organizerKey);
+  return result;
+}
+
+/**
+ * Retire a commons — it ended (the garden lost its lot). The one
+ * required sentence is what the community will want to remember;
+ * everything stays browsable in the archive (docs/commons.md §7).
+ */
+export async function retireCommons(
+  projectId: string,
+  organizerKey: string,
+  note: string,
+): Promise<Project> {
+  const trimmed = note.trim();
+  if (!trimmed) throw new Error("A short why-it-ended note is required.");
+  const result = await db.transaction(
+    "rw",
+    [db.projects, db.projectActivity],
+    async () => {
+      const p = await requireOrganizer(projectId, organizerKey);
+      if (p.status !== "tended")
+        throw new Error("Only a tended commons can be retired.");
+      const updated: Project = {
+        ...p,
+        status: "retired",
+        retiredAt: Date.now(),
+        retireNote: trimmed,
+      };
+      await db.projects.put(updated);
+      await logActivity(
+        projectId,
+        "project_retired",
+        organizerKey,
+        { note: trimmed },
+        p.nodeId,
+      );
+      return updated;
+    },
+  );
+  await publishProjectState(projectId, organizerKey);
+  return result;
+}
+
+/** Un-retire — the garden got its lot back. A deliberate steward act
+ *  (which is why retired resource links may become anchors again in
+ *  Phase 2 — the re-vouching is real). */
+export async function unretireCommons(
+  projectId: string,
+  organizerKey: string,
+): Promise<Project> {
+  const result = await db.transaction(
+    "rw",
+    [db.projects, db.projectActivity],
+    async () => {
+      const p = await requireOrganizer(projectId, organizerKey);
+      if (p.status !== "retired")
+        throw new Error("Only a retired commons can be un-retired.");
+      const updated: Project = {
+        ...p,
+        status: "tended",
+        retiredAt: null,
+        retireNote: null,
+      };
+      await db.projects.put(updated);
+      await logActivity(projectId, "project_unretired", organizerKey, {}, p.nodeId);
+      return updated;
+    },
+  );
+  await publishProjectState(projectId, organizerKey);
+  return result;
+}
+
+/** The mistake hatch / major-rebuild path: tended → active. */
+export async function returnToBuilding(
+  projectId: string,
+  organizerKey: string,
+): Promise<Project> {
+  const result = await db.transaction(
+    "rw",
+    [db.projects, db.projectActivity],
+    async () => {
+      const p = await requireOrganizer(projectId, organizerKey);
+      if (p.status !== "tended")
+        throw new Error("Only a tended commons can return to building.");
+      const updated: Project = { ...p, status: "active" };
+      await db.projects.put(updated);
+      await logActivity(
+        projectId,
+        "project_returned_to_building",
+        organizerKey,
+        {},
+        p.nodeId,
+      );
       return updated;
     },
   );
@@ -677,8 +846,15 @@ export async function addProjectTask(
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
       const p = await requireOrganizer(projectId, organizerKey);
-      if (p.status === "completed" || p.status === "archived")
-        throw new Error("Tasks cannot be added to a completed project.");
+      // `tended` deliberately passes — stewards add one-off care tasks
+      // (the gate broke) alongside the recurring rota
+      // (docs/commons.md §5.4).
+      if (
+        p.status === "completed" ||
+        p.status === "archived" ||
+        p.status === "retired"
+      )
+        throw new Error("Tasks cannot be added to a completed or retired project.");
       const orderIndex = await nextOrderIndexForProject(projectId);
       const task: ProjectTask = {
         id: uuid(),
@@ -739,7 +915,10 @@ export async function claimProjectTask(
       // returns false (the chip change ships in PR F).
       const project = await db.projects.get(task.projectId);
       if (!project) throw new Error("Parent project not found.");
-      if (project.status !== "active")
+      // "tended" claims are the Commons care rota (docs/commons.md §3):
+      // a graduated project's recurring maintenance work stays exactly
+      // as claimable as build work was.
+      if (project.status !== "active" && project.status !== "tended")
         throw new Error("Project isn't accepting claims right now.");
       const updated: ProjectTask = {
         ...task,
@@ -1427,7 +1606,14 @@ async function _writeTaskConfirmation(
       // system-key auto-confirm sweep) because both funnel through
       // this writer.
       let respawnedTask: ProjectTask | undefined;
-      if (freshTask.recurringCadence && freshProject.status === "active") {
+      // "tended" is the single most load-bearing addition of the
+      // Commons (docs/commons.md §3): a graduated project's care rota
+      // keeps regenerating — that is what makes it a tended thing
+      // rather than a finished one.
+      if (
+        freshTask.recurringCadence &&
+        (freshProject.status === "active" || freshProject.status === "tended")
+      ) {
         const openTwin = await db.projectTasks
           .where("[projectId+status]")
           .equals([freshProject.id, "open"])
@@ -1636,8 +1822,12 @@ export async function handoffOrganizer(
       throw new Error("Only the primary organizer can hand off.");
     if (!p.coOrganizerKeys.includes(newPrimaryKey))
       throw new Error("New primary must be a current co-organizer.");
-    if (p.status === "completed" || p.status === "archived")
-      throw new Error("Cannot hand off a completed or archived project.");
+    if (
+      p.status === "completed" ||
+      p.status === "archived" ||
+      p.status === "retired"
+    )
+      throw new Error("Cannot hand off a completed, retired, or archived project.");
     const updated: Project = {
       ...p,
       organizerKey: newPrimaryKey,
@@ -1674,8 +1864,8 @@ export async function postAnnouncement(
     throw new Error("Announcement too long (max 2000 characters).");
   return db.transaction("rw", [db.projects, db.projectActivity], async () => {
     const p = await requireOrganizer(projectId, callerKey);
-    if (p.status === "archived")
-      throw new Error("Cannot post to an archived project.");
+    if (p.status === "archived" || p.status === "retired")
+      throw new Error("Cannot post to an archived or retired project.");
     await logActivity(projectId, "announcement", callerKey, { body: trimmed }, nodeId);
   });
 }
@@ -1785,8 +1975,12 @@ export async function bulkAddTasks(
     [db.projects, db.projectTasks, db.projectActivity],
     async () => {
       const p = await requireOrganizer(projectId, organizerKey);
-      if (p.status === "completed" || p.status === "archived")
-        throw new Error("Tasks cannot be added to a completed project.");
+      if (
+        p.status === "completed" ||
+        p.status === "archived" ||
+        p.status === "retired"
+      )
+        throw new Error("Tasks cannot be added to a completed or retired project.");
       // Compute the starting orderIndex once; each task in the
       // batch gets `start + i * 1000` so they land at the bottom
       // in insertion order.

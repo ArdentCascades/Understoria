@@ -531,6 +531,16 @@ export type ProjectStatus =
   | "active"
   | "paused"
   | "completed"
+  /** A COMMONS (docs/commons.md): the project built something lasting
+   *  and, at the organizer's choice, graduated from "work to finish"
+   *  to "a thing we tend." Recurring care tasks keep respawning and
+   *  stay claimable; `completedAt` still marks when building
+   *  finished. Organizer/co-organizers read as "stewards" in the UI. */
+  | "tended"
+  /** A commons that ended (the garden lost its lot). Terminal like
+   *  `archived` but with its own story: `retiredAt` + `retireNote`
+   *  say when and why. Reversible via un-retire (→ `tended`). */
+  | "retired"
   | "archived";
 
 export interface Project {
@@ -563,6 +573,14 @@ export interface Project {
    * faking precision against `createdAt`).
    */
   pausedAt?: number | null;
+  /** ms-epoch when the commons was retired (docs/commons.md §7).
+   *  `null`/absent outside the retired state. Optional on the wire —
+   *  rows predating the Commons won't carry it. */
+  retiredAt?: number | null;
+  /** One-sentence "why it ended" captured by the Retire dialog — the
+   *  pause-note pattern. What the community will want to remember,
+   *  and what a future group reviving the idea will want to know. */
+  retireNote?: string | null;
   locationZone: string;
   tags: string[];
   nodeId: string;
@@ -681,6 +699,12 @@ export type ProjectActivityType =
   | "project_completed"
   | "project_archived"
   | "project_unarchived"
+  // The Commons lifecycle (docs/commons.md). ProjectActivity never
+  // federates (local Dexie log), so these are not wire-format changes.
+  | "project_graduated"
+  | "project_retired"
+  | "project_unretired"
+  | "project_returned_to_building"
   | "milestone_reached"
   | "organizer_handoff"
   | "coorganizer_stepdown"

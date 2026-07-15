@@ -41,6 +41,39 @@ include breaking changes.
   new posture, or set `READ_AUTH=off` to keep the old one.
 
 ### Added
+- **The Commons, Phase 1: projects can graduate into things the
+  community tends** (docs/commons.md; `packages/shared` ProjectStatus
+  gains `tended` + `retired` and Project gains optional
+  `retiredAt`/`retireNote`; `apps/web` db/projects.ts, Board,
+  ProjectDetail, ProjectCard, ProjectArchive, MyTasks, momentum chip,
+  attention/calendar/achievements/gathering/template consumers; i18n
+  en/es). "Mark project complete" now opens a two-option moment:
+  **Complete and close** (exactly the old behavior) or **Move to the
+  Commons** — the built thing stays alive as a `tended` project whose
+  recurring care tasks keep respawning and stay claimable (the
+  respawn and claim gates widened by one status — care work earns
+  credit through the ordinary exchange path, and graduating grants
+  the keystone achievement exactly like completing). Already-completed
+  projects graduate late via a retrofit kebab item, and still get
+  their one graduation moment (the celebrated set keys on
+  id + flavor); the organizer nudge re-aims from gratitude to
+  orientation with a placeholder (never prefill). The Board's
+  projects tab gains a URL-carried **Being built / Tended** scope;
+  tended cards drop the progress bar (tending has no end state) and
+  show a "next care" line; the tended detail page wears the canopy
+  "Tended commons" chip, an aggregate-only provenance subtitle, and
+  a Care rota ordering (open recurring work first, build history
+  last); a tended commons is never momentum-"stalled" (tended things
+  are allowed to be quiet). **Retirement** asks for one why-it-ended
+  sentence, lands in the existing archive sorted by when the story
+  ended, and is reversible (un-retire; plus a return-to-building
+  hatch). No wire-format changes: the LWW project rows tolerate the
+  new status strings and optional fields on both server validation
+  and client pulls (verified — no status whitelist exists on either
+  side). Phase 2 (resource links, care notes, print sheet, Dashboard
+  doorway) and Phase 3 (needs-attention bridge) are specified in the
+  doc and not yet built; the Spanish naming ("bienes comunes" /
+  "en cuidado") is provisional pending §9 review.
 - **Design draft: the Commons — projects that graduate into things
   the community tends** (`docs/commons.md`). A review draft —
   nothing implemented — for the operator's graduation idea: a

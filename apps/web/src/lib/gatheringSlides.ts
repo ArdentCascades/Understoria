@@ -190,7 +190,11 @@ export function buildGatheringSlides(
   // stay off the wall; a claimed task drops out the moment it's taken
   // (the live re-query on the page keeps the rotation honest).
   const activeProjectIds = new Set(
-    input.projects.filter((p) => p.status === "active").map((p) => p.id),
+    input.projects
+      // Tended commons stay claimable (their care rota) — their open
+      // tasks belong on the wall exactly like build tasks.
+      .filter((p) => p.status === "active" || p.status === "tended")
+      .map((p) => p.id),
   );
   const projectTitle = new Map(input.projects.map((p) => [p.id, p.title]));
   const taskSlides: GatheringSlide[] = !on("tasks")
