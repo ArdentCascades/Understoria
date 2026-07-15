@@ -40,6 +40,46 @@ include breaking changes.
   upgrade — set `NODE_FOUNDER_KEYS` (or claim the node) to adopt the
   new posture, or set `READ_AUTH=off` to keep the old one.
 
+### Added
+- **Design draft: the Commons — projects that graduate into things
+  the community tends** (`docs/commons.md`). A review draft —
+  nothing implemented — for the operator's graduation idea: a
+  project that built something lasting (tool library, garden, phone
+  tree) moves to a new `tended` status at the organizer's choice
+  during the existing completion moment, instead of vanishing into
+  `completed`. Not a new object: two new `ProjectStatus` values
+  (`tended`, `retired`), the already-shipped recurring-task respawn
+  gate widened to include `tended` (the care rota keeps generating
+  claimable, credited work — care work earns credit identically to
+  build work), stewards as re-labeled organizer machinery, labeled
+  external resource links (plain outbound anchors, never fetched),
+  care notes + printable how-to sheet, a Board "Being built /
+  Tended" scope instead of a new tab, and retirement into the
+  existing archive with a why-it-ended note and an un-retire hatch.
+  Nine negative-space commitments — most centrally: the app records
+  who TENDS a commons, never who USES it (no borrower ledgers, no
+  consumption records in the replicated dataset), no progress bars
+  or overdue-shaming on tended things, no commons health scores.
+  Deliberately not coupled to the stability checklist draft.
+- **Design draft: community stability, strike funds, and when to
+  connect communities** (`docs/community-stability.md`; cross-link
+  from `community-resilience.md`). A review draft — nothing
+  implemented — capturing the operator conversation after the first
+  production deployment: stability as a private, local,
+  never-transmitted self-assessment checklist (no score, no
+  ranking); strike funds encouraged by project template while money
+  stays permanently out of the data model; a qualitative
+  "resilience" facet on templates instead of per-project stability
+  scores; and inter-community peering gated on the INITIATING
+  community's own readiness + a passed governance proposal — mutual
+  stable-to-stable verification is explicitly rejected (the
+  verification is itself the leak, self-attestation isn't
+  verification, and it would cut the established-helps-emerging
+  lifeline). Mirrors (more nodes for one community) are never gated.
+  Eight negative-space commitments and seven open review questions
+  are enumerated; the doc is precise about mirror vs. peer vs. new
+  community after an earlier discussion conflated them.
+
 ### Fixed
 - **The vouch bootstrap deadlock: founders are now trust roots on
   member devices** (`packages/shared/src/crypto.ts` `founderKeyHash`;

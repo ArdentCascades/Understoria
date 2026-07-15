@@ -257,4 +257,7 @@ it.
 - **Cross-community resilience pooling** (a neighboring community
   mirroring yours): a real idea (mutual aid between communities'
   infrastructure!) but it re-crosses the participation-data privacy
-  boundary and needs its own values conversation first.
+  boundary and needs its own values conversation first. The
+  values conversation about when communities should CONNECT at all
+  (the narrower peer wire, not mirroring) is now drafted in
+  `community-stability.md`; pooling itself remains deferred.
