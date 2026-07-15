@@ -6,7 +6,7 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
@@ -53,11 +53,17 @@ let server: ChildProcess | null = null;
 let dataDir: string | null = null;
 
 async function startServer(port: number): Promise<string> {
+  const serverEntry = join(__dirname, "../../../server/dist/index.js");
+  if (!existsSync(serverEntry)) {
+    throw new Error(
+      "server binary not built — run `npm run build:server` from the repo root first",
+    );
+  }
   const base = `http://127.0.0.1:${port}`;
   dataDir = mkdtempSync(join(tmpdir(), "understoria-e2e-"));
   server = spawn(
     process.execPath,
-    [join(__dirname, "../../../server/dist/index.js")],
+    [serverEntry],
     {
       env: {
         ...process.env,
