@@ -143,9 +143,18 @@ so pre-feature projects can graduate late.
 The Board's projects tab gets a scope toggle — **"Being built /
 Tended"** — in the existing filter-chip pattern, URL-carried
 (`?tab=projects&scope=tended`) and deep-linkable. A commons IS a
-project; navigation says so. One Dashboard doorway card ("What we
-tend — 3 commons · next care day Saturday") joins the existing
-doorway family. No new nav entries.
+project; navigation says so. No new nav entries.
+
+**Dashboard doorway (settled, 2026-07): the humble version only.**
+One quiet line in the "community as a whole" cluster — *"The
+community tends 3 commons"* — linking to the Tended scope, hidden
+entirely at zero (the Coming-up rule: a community that never
+graduates a project never sees a pixel of it). Deliberately count +
+link and nothing more, the proposals-doorway shape: no "next care"
+enrichment, because actionability already has owners — open care
+tasks belong to "Where hands are welcome" and care work days belong
+to "Coming up," and a Commons card repeating them would be the
+Dashboard disagreeing with itself.
 
 ### 5.2 Commons cards drop the progress bar
 
@@ -348,8 +357,10 @@ project commitment:
    answer.
 3. **Resource links on active projects too?** §5.2 argues yes;
    confirms scope of phase 2.
-4. **The Dashboard doorway card** — wanted, or clutter? (Cheap
-   either way.)
+4. **The Dashboard doorway card — RESOLVED (2026-07): approved, the
+   humble version** (§5.1): count + link in the community-as-a-whole
+   cluster, hidden at zero, no next-care enrichment. Ships in
+   Phase 2.
 5. **"Needs attention" shape** for non-stewards: prefilled need
    post (proposed) vs. directly opening a task — the post keeps the
    existing authority model intact.
