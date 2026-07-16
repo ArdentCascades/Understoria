@@ -134,6 +134,14 @@ export const SURFACES: Record<string, Surface> = {
     keyField: "inviterKey",
     keyColumn: "inviter_key",
   },
+  // Invite announcements (schema v29): hash-only registration at
+  // issue time by the inviter's device. keyField doubles as the
+  // write-membership gate's attribution — only members can announce.
+  "/invite-announcements": {
+    table: "invite_announcements",
+    keyField: "inviterKey",
+    keyColumn: "inviter_key",
+  },
   "/awaiting-transitions": {
     table: "awaiting_transitions",
     keyField: "signedBy",

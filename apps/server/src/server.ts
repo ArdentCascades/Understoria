@@ -48,6 +48,7 @@ import {
   createPeerPullStore,
   createPostStore,
   createInviteRevocationStore,
+  createInviteAnnouncementStore,
   createMessageStore,
   createProjectStateStore,
   createRedemptionStore,
@@ -65,6 +66,7 @@ import { registerPostRoutes } from "./routes/posts.js";
 import { registerClaimRoutes } from "./routes/claims.js";
 import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
+import { registerInviteAnnouncementRoutes } from "./routes/inviteAnnouncements.js";
 import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
@@ -228,6 +230,7 @@ export async function buildServer({
   const postStore = createPostStore(db);
   const redemptionStore = createRedemptionStore(db);
   const inviteRevocationStore = createInviteRevocationStore(db);
+  const inviteAnnouncementStore = createInviteAnnouncementStore(db);
   const claimStore = createClaimStore(db);
   const taskCommentStore = createTaskCommentStore(db);
   const coorgInvitationStore = createCoOrganizerInvitationStore(db);
@@ -435,16 +438,21 @@ export async function buildServer({
   // NOTE: no invite routes. `POST/GET /invites` was removed in the
   // invite-redemption Phase 1 PR — the GET served full SignedInvite
   // rows (a live-credential feed, `docs/invite-redemption.md` §10.1).
-  // Redemption receipts (below) are the only invite-adjacent wire
-  // surface: open invites never cross any wire.
   await registerRedemptionRoutes(app, {
     store: redemptionStore,
     internalToken: internalBypassToken,
     reseedGraceUntil: config.reseedGraceUntil,
+    inviteAnnouncementStore,
   });
   await registerInviteRevocationRoutes(app, {
     store: inviteRevocationStore,
     internalToken: internalBypassToken,
+  });
+  // Invite announcements (schema v29): hash-only registration at
+  // issue time; the redemptions route above flips the row to
+  // `redeemed` when the receipt lands.
+  await registerInviteAnnouncementRoutes(app, {
+    store: inviteAnnouncementStore,
   });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });

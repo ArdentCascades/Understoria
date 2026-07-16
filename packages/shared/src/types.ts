@@ -470,6 +470,35 @@ export interface InviteRevocation extends InviteRevocationPayload {
 }
 
 /**
+ * Server-registered invite ANNOUNCEMENT (operator ruling 2026-07:
+ * issuing an invite sends what the server needs, the moment it is
+ * issued). Deliberately credential-free — the schema-v11 removal of
+ * the original server-side invites table established that a node
+ * must never hold a live, redeemable invite token; this record
+ * carries only a HASH of the token, so the server can recognize the
+ * invite when its redemption receipt arrives (and flip the status
+ * the inviter's devices see) without being able to redeem anything.
+ */
+export interface InviteAnnouncementPayload {
+  /** `inviteTokenHash(token)` — identity key. Never the raw token. */
+  tokenHash: string;
+  /** The inviter's Ed25519 public key (the signer). */
+  inviterKey: string;
+  inviterName: string;
+  /** The community id carried on the invite. */
+  nodeId: string;
+  /** Epoch ms — mirror of the signed invite's own fields. */
+  createdAt: number;
+  expiresAt: number;
+}
+
+export interface InviteAnnouncement extends InviteAnnouncementPayload {
+  /** Ed25519 detached signature by `inviterKey` over
+   *  `canonicalInviteAnnouncementPayload(payload)`. */
+  signature: string;
+}
+
+/**
  * Lightweight claim notification — pushed to the outbox when a member
  * claims a cross-node post so the poster's node learns about it.
  * Unsigned for v1 (the exchange itself is the authoritative signed

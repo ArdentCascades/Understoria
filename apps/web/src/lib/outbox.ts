@@ -41,6 +41,7 @@ import {
   submitProposalClosureToNode,
   submitShiftSignupToNode,
   submitAwaitingTransitionToNode,
+  submitInviteAnnouncementToNode,
   submitInviteRevocationToNode,
   submitPostToNode,
   submitProjectStateToNode,
@@ -64,6 +65,7 @@ import type {
   ProjectState,
   RedemptionReceipt,
   RelayedMessage,
+  InviteAnnouncement,
   MemberRemoval,
   MemberReinstatement,
   ProposalClosure,
@@ -371,6 +373,26 @@ export async function enqueueInviteRevocationOutbox(
   });
 }
 
+/**
+ * Insert an outbox row for an invite announcement (operator ruling
+ * 2026-07: the inviter's device sends what the invitee will need to
+ * the server the moment the invite is issued). Hash-only — the raw
+ * token never rides this row (v11 ruling: the node must not hold a
+ * live credential). Dedup key is the token hash. Enqueued even
+ * without a configured node URL — like the receipt and the
+ * revocation, it ships whenever the device eventually connects.
+ */
+export async function enqueueInviteAnnouncementOutbox(
+  announcement: InviteAnnouncement,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox(
+    "invite_announcement",
+    announcement.tokenHash,
+    announcement,
+    { requireNodeUrl: false },
+  );
+}
+
 
 /**
  * Insert an outbox row for a signed awaiting-transition artifact —
@@ -672,6 +694,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "invite_revocation") {
       result = await submitInviteRevocationToNode(
         payload as InviteRevocation,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "invite_announcement") {
+      result = await submitInviteAnnouncementToNode(
+        payload as unknown as InviteAnnouncement,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

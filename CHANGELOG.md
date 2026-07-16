@@ -9,6 +9,32 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Sending an invite now registers it with the community server;
+  accepting one marks it redeemed there and pulls the community's
+  content immediately** (operator ruling 2026-07: "when someone
+  clicks send an invite, that device needs to send what the invitee
+  will need to the server"). New `invite_announcements` server table
+  (schema v29) + `POST/GET /invite-announcements`
+  (`apps/server/src/routes/inviteAnnouncements.ts`), a new
+  `invite_announcement` outbox kind enqueued by `issueInvite` (and
+  re-enqueued for open invites by the connect-time backfill), and
+  `POST /redemptions` flips the announcement to `redeemed` when the
+  invitee's receipt lands — so every member's device can see,
+  server-side, whether an invite was used. On acceptance the invite
+  screen now also pulls the full community payload (posts, events,
+  project/task state) immediately instead of waiting for the sync
+  loop's next tick. **Deliberately credential-free**: the schema-v11
+  removal of the original server-side invites table (a stored open
+  token is a live credential a compromised node could redeem) stands
+  — announcements carry only a salted HASH of the token
+  (`inviteTokenHash`), signed by the inviter; the raw token never
+  crosses this wire, and the receipt's embedded, inviter-signed
+  invite remains the membership authority (unannounced invites still
+  redeem). Locked end-to-end by the deployment-shape E2E: announced
+  at issue → open on the server → redeemed with the invitee's key
+  after acceptance.
+
 ### Fixed
 - **THE island-account bug: redeeming an invite now marks the device
   onboarded, so the app can never bounce a freshly-invited member

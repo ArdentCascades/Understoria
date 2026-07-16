@@ -21,10 +21,12 @@
 import { db, getSetting, setSetting } from "@/db/database";
 import { isDemoBuild } from "@/lib/demo";
 import { urlHash, normalizeNodeUrl } from "@/lib/nodeEndpoints";
+import { decodeAndVerifyInvite } from "@/lib/invite";
 import {
   enqueueEvent,
   enqueueEventCancellation,
   enqueueExchangeOutbox,
+  enqueueInviteAnnouncementOutbox,
   enqueuePostOutbox,
   enqueueProposalClosureOutbox,
   enqueueProposalOutbox,
@@ -33,7 +35,9 @@ import {
   enqueueVouchOutbox,
   enqueueVoteOutbox,
 } from "@/lib/outbox";
+import { buildInviteAnnouncement } from "@/db/invites";
 import { publishProjectState, publishTaskState } from "@/db/projects";
+import { getSecretKey } from "@/db/secrets";
 
 /**
  * Outbox BACKFILL — the fix for the 2026-07 production incident
@@ -130,6 +134,28 @@ export async function backfillOutboxFromLocalData(): Promise<number> {
   for (const s of await db.seedVaultPledges.toArray()) {
     if (!held.has(s.memberKey)) continue;
     count(await enqueueSeedVaultPledgeOutbox(s));
+  }
+  // Open, unexpired invites this device issued: register them with
+  // the node (operator ruling 2026-07) — the invite is recovered from
+  // the stored share token and re-announced HASH-ONLY (the raw token
+  // never crosses this wire; v11 ruling).
+  const nowMs = Date.now();
+  for (const inv of await db.invites.toArray()) {
+    if (inv.status !== "open" || !held.has(inv.inviterKey)) continue;
+    if (inv.expiresAt <= nowMs || !inv.encoded) continue;
+    const decoded = decodeAndVerifyInvite(inv.encoded);
+    if (!decoded.ok) continue;
+    try {
+      const secret = await getSecretKey(inv.inviterKey);
+      count(
+        await enqueueInviteAnnouncementOutbox(
+          buildInviteAnnouncement(decoded.invite, secret),
+        ),
+      );
+    } catch {
+      // Locked session or missing secret — skip; the next backfill
+      // pass (or the issue-time enqueue) covers it.
+    }
   }
 
   // Project + task state: publish fresh LWW versions signed with an

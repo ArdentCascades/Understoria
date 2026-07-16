@@ -211,6 +211,20 @@ export default function InviteAcceptPage() {
         await writeSubmitConfig({ url: candidate, enabled: true });
         const { flushOutboxNow } = await import("@/lib/outbox");
         void flushOutboxNow();
+        // Receive the payload NOW (operator ruling 2026-07): pull the
+        // community's content immediately instead of waiting for the
+        // sync loop's next tick, so the new member's first Dashboard
+        // render already shows the community they just joined.
+        // Fire-and-forget; live queries fill screens as records land.
+        void import("@/lib/federationSync").then(async (sync) => {
+          await sync.pullFederatedRedemptions().catch(() => {});
+          await Promise.allSettled([
+            sync.pullFederatedPosts(),
+            sync.pullFederatedEvents(),
+            sync.pullFederatedProjectStates(),
+            sync.pullFederatedTaskStates(),
+          ]);
+        });
         cfg = await readSubmitConfig();
       }
     }

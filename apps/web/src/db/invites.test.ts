@@ -31,7 +31,7 @@ import { isOnboarded } from "./onboarding";
 import { db, getSetting, SETTING_KEYS, setSetting } from "./database";
 import { generateKeyPair } from "@/lib/crypto";
 import { createVouch, trustStatusWithInvites } from "@/lib/vouch";
-import { verifyRedemptionReceipt } from "@understoria/shared/crypto";
+import { inviteTokenHash, verifyRedemptionReceipt } from "@understoria/shared/crypto";
 import type { RedemptionReceipt } from "@understoria/shared/types";
 
 const NODE = "node_invites";
@@ -87,6 +87,34 @@ describe("issueInvite", () => {
         nodeId: NODE,
       }),
     ).rejects.toThrow(/secret key/);
+  });
+});
+
+describe("issueInvite — server registration", () => {
+  beforeEach(reset);
+
+  it("queues the signed invite for the server the moment it is issued", async () => {
+    // Operator ruling (2026-07): sending an invite sends what the
+    // invitee will need to the server. Queued even with no node URL
+    // configured — it ships whenever the device connects.
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { row } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const outboxRows = await db.outbox
+      .filter((o) => o.kind === "invite_announcement")
+      .toArray();
+    expect(outboxRows).toHaveLength(1);
+    expect(outboxRows[0].payload).toContain(inviteTokenHash(row.token));
+    expect(outboxRows[0].payload).toContain(inviter.publicKey);
+    // The v11 ruling holds end to end: the raw token never rides the
+    // announcement — the server must not hold a live credential.
+    expect(outboxRows[0].payload).not.toContain(row.token);
   });
 });
 

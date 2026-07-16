@@ -11,10 +11,11 @@
  */
 import type { FastifyInstance } from "fastify";
 import {
+  inviteTokenHash,
   parseRedemption,
   verifyRedemptionReceipt,
 } from "@understoria/shared/crypto";
-import type { RedemptionStore } from "../db.js";
+import type { InviteAnnouncementStore, RedemptionStore } from "../db.js";
 import { MIRROR_INTERNAL_HEADER } from "../mirrorPull.js";
 
 interface Deps {
@@ -54,6 +55,12 @@ interface Deps {
    * this path.
    */
   internalToken?: string;
+  /** Invite announcements (schema v29): when present, an accepted
+   *  receipt flips the announced invite row to `redeemed` (matched by
+   *  token HASH — the node never stores the token itself). Optional
+   *  so existing tests and callers without the store keep working;
+   *  unannounced invites redeem regardless. */
+  inviteAnnouncementStore?: InviteAnnouncementStore;
 }
 
 /**
@@ -105,14 +112,22 @@ export const REDEMPTION_DELIVERY_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
  *     carries its `receivedAt` so clients can advance on it.
  *
  * NOTE: this route pair REPLACES the removed `POST/GET /invites`
- * surface (§8 / §10.1) — open invites never cross any wire; only
- * consummated redemptions do. And there is deliberately no
- * peer-replication leg for receipts: the roster stays off the
- * inter-node wire.
+ * surface (§8 / §10.1) — open invite TOKENS never cross any wire;
+ * only consummated redemptions do. (Since schema v29 a hash-only
+ * announcement of an open invite does — see
+ * routes/inviteAnnouncements.ts — but it carries no credential.)
+ * And there is deliberately no peer-replication leg for receipts:
+ * the roster stays off the inter-node wire.
  */
 export async function registerRedemptionRoutes(
   app: FastifyInstance,
-  { store, now = () => Date.now(), internalToken, reseedGraceUntil = null }: Deps,
+  {
+    store,
+    now = () => Date.now(),
+    internalToken,
+    reseedGraceUntil = null,
+    inviteAnnouncementStore,
+  }: Deps,
 ): Promise<void> {
   app.post("/redemptions", async (req, reply) => {
     const isMirrorApply =
@@ -171,6 +186,17 @@ export async function registerRedemptionRoutes(
     }
 
     store.insert(receipt, receivedAt);
+    // Invite announcements (schema v29): flip the announced invite
+    // row to `redeemed` so the inviter's devices can see the invite
+    // was used — matched by token HASH; the node never stores the
+    // token. Best-effort and idempotent; a receipt for an UNANNOUNCED
+    // invite (issued offline / pre-v29) is still the membership
+    // authority on its own.
+    inviteAnnouncementStore?.markRedeemed(
+      inviteTokenHash(receipt.invite.token),
+      receipt.redeemedBy,
+      receipt.redeemedAt,
+    );
     reply.code(201);
     return { stored: true, token: receipt.invite.token };
   });
