@@ -632,6 +632,31 @@ export async function effectiveCoOrganizerKeys(
  * extension lives next to the data layer for now (PR B will fold
  * these into the regular submitter dispatch).
  */
+/**
+ * Exported enqueue wrappers for the connect-time backfill
+ * (lib/outboxBackfill.ts): stored co-org rows are the full signed
+ * records, so re-registering them with a freshly-connected node is a
+ * straight re-enqueue. The wrappers keep `enqueueOutboxRow` private
+ * and the kind strings in one file.
+ */
+export async function enqueueCoOrganizerInvitationOutbox(
+  record: CoOrganizerInvitation,
+): Promise<OutboxRow | null> {
+  return enqueueOutboxRow("coorg_invitation", record.id, record);
+}
+
+export async function enqueueCoOrganizerInvitationResponseOutbox(
+  record: CoOrganizerInvitationResponse,
+): Promise<OutboxRow | null> {
+  return enqueueOutboxRow("coorg_invitation_response", record.id, record);
+}
+
+export async function enqueueCoOrganizerInvitationRevocationOutbox(
+  record: CoOrganizerInvitationRevocation,
+): Promise<OutboxRow | null> {
+  return enqueueOutboxRow("coorg_invitation_revocation", record.id, record);
+}
+
 async function enqueueOutboxRow(
   kind: OutboxRow["kind"],
   recordId: string,
