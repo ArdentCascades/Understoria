@@ -10,7 +10,7 @@
   "addDevice": {
     "title": "Vincular otro dispositivo",
     "listen": {
-      "starting": "Buscando tu nodo comunitario…",
+      "starting": "Buscando tu nodo comunitario (el servidor compartido que administra tu comunidad)…",
       "emptyTitle": "Todavía nada pide vincularse.",
       "emptyBody": "En tu dispositivo nuevo, abre Understoria y elige \"Traer mi identidad\". Aparecerá aquí solo — mantén esta página abierta.",
       "listening": "Escuchando…",
@@ -24,7 +24,7 @@
       "linkIt": "Vincularlo",
       "safetyLine": "Solo vincula un dispositivo que tengas en la mano. ¿No estás vinculando nada ahora? No toques — alguien en tu red podría estar probando suerte.",
       "badgeAriaLabel": "Emoji de reconocimiento de esta solicitud de vinculación",
-      "noNode": "Este dispositivo no puede contactar tu nodo comunitario, así que vincular con un toque no está disponible ahora. El método QR funciona sin ningún servidor.",
+      "noNode": "Este dispositivo no puede contactar tu nodo comunitario — el servidor compartido que administra tu comunidad — así que vincular con un toque no está disponible ahora. El método QR funciona sin ningún servidor.",
       "useQr": "Mostrar un QR",
       "whatMoves": "Qué pasa al dispositivo nuevo (y qué no)",
       "vpnHint": "¿Todavía nada? Una VPN o iCloud Private Relay puede hacer que tus dos apps parezcan estar en redes distintas, y la solicitud nunca aparece aquí. Páusala un minuto y pide de nuevo desde el dispositivo nuevo — o usa \"Otras formas de vincular\" abajo."
@@ -33,7 +33,7 @@
       "link": "Otras formas de vincular",
       "title": "Otras formas de vincular",
       "wordsTitle": "¿Vinculas un dispositivo que está en otro lugar?",
-      "wordsBody": "Consigue un código de 6 palabras para leer en voz alta — quien tenga el dispositivo nuevo las escribe ahí. Requiere tu nodo comunitario.",
+      "wordsBody": "Obtén un código de 6 palabras para leer en voz alta — quien tenga el dispositivo nuevo lo escribe ahí. Necesita tu nodo comunitario (el servidor compartido) para pasar el código.",
       "qrTitle": "¿Sin servidor comunitario, o prefieres no involucrarlo?",
       "qrBody": "Muestra un QR que el dispositivo nuevo escanea. No se guarda nada en ninguna parte — los dos dispositivos deben estar en la misma habitación."
     },
@@ -57,7 +57,7 @@
       "staysTitle": "Lo que se queda en este dispositivo",
       "stays": {
         "dms": "Mensajes directos",
-        "dmsDetail": "Los DMs están cifrados de extremo a extremo a este dispositivo. El nuevo empieza de cero.",
+        "dmsDetail": "Los mensajes directos están cifrados de extremo a extremo hacia este dispositivo — solo él puede leerlos, ni siquiera el servidor — así que no pueden copiarse. El dispositivo nuevo empieza de cero.",
         "drafts": "Borradores en progreso",
         "draftsDetail": "Locales a propósito. Termina o copia lo que no quieras perder antes de empezar.",
         "themeDensity": "Tema y densidad",
@@ -91,14 +91,14 @@
       "afterImport": "Cuando el otro dispositivo diga que terminó, toca Listo. El QR también desaparecerá solo cuando el temporizador llegue a cero.",
       "done": "Listo",
       "fingerprintLabel": "Confirma en el otro dispositivo",
-      "fingerprintAriaLabel": "Huella de identidad para confirmar en el otro dispositivo"
+      "fingerprintAriaLabel": "Huella de identidad — un código corto de seguridad para comparar en el otro dispositivo"
     },
     "link": {
       "intro": "En tu dispositivo nuevo, abre Understoria y elige la opción sobre ya tener tu identidad. Luego escribe estas 6 palabras ahí, en orden:",
       "warning": "Estas palabras son la llave completa durante los próximos 15 minutos — quien las escriba primero obtiene tu identidad. No las digas cerca de otras personas y nunca las envíes por chat.",
       "afterImport": "Cuando el dispositivo nuevo diga que ya entró, toca Listo. El código muere solo cuando el temporizador termina, y solo funciona una vez.",
-      "qrInstead": "¿El dispositivo nuevo está sin conexión, o prefieres no guardar nada en el nodo? Muestra un QR",
-      "fallbackNotice": "No se pudo contactar tu nodo comunitario ahora — usando el método QR en su lugar."
+      "qrInstead": "¿El dispositivo nuevo está sin conexión, o prefieres que nada quede en el nodo (el servidor de tu comunidad)? Muestra un QR en su lugar",
+      "fallbackNotice": "No pudimos contactar tu nodo comunitario (su servidor compartido) ahora mismo — usando el método QR en su lugar."
     },
     "expired": {
       "title": "Se acabó el tiempo.",
@@ -110,7 +110,7 @@
     "errors": {
       "title": "No se pudo iniciar la vinculación",
       "generic": "Algo salió mal. Intenta otra vez.",
-      "locked": "Desbloquea tu sesión antes de vincular — tu clave de identidad está sellada.",
+      "locked": "Desbloquea tu sesión antes de emparejar — tu clave de identidad (el secreto que demuestra que eres tú) permanece sellada hasta entonces.",
       "retry": "Intentar otra vez"
     },
     "labelSource": {
@@ -123,7 +123,7 @@
     }
   },
   "avatar": {
-    "label": "Avatar de persona para la clave {{shortKey}}"
+    "label": "Avatar del miembro {{shortKey}}"
   },
   "pairDevice": {
     "title": "Vincular este dispositivo",
@@ -141,7 +141,7 @@
       "waitingLine": "Esperando tu aprobación… esta solicitud caduca en {{mmss}}.",
       "expired": "Esta solicitud caducó.",
       "askAgain": "Pedir de nuevo",
-      "noNode": "Este dispositivo no puede contactar un nodo comunitario, así que vincular con un toque no está disponible. El método QR funciona sin nodo.",
+      "noNode": "Este dispositivo no puede contactar un nodo comunitario — el servidor compartido que administra una comunidad — así que vincular con un toque no está disponible. El método QR funciona sin uno.",
       "useQr": "Usar el método QR",
       "busyNode": "Ya hay varios dispositivos pidiendo vincularse desde tu red. Espera un minuto a que caduquen y vuelve a intentar.",
       "nodeError": "El servidor de tu comunidad no responde. Revisa tu conexión e intenta otra vez.",
@@ -170,8 +170,8 @@
       "samePhoneStep2": "Muestra 6 palabras. Vuelve aquí y escríbelas abajo — siguen valiendo 15 minutos, así que cambiar de app no es problema.",
       "submit": "Vincular este dispositivo",
       "notFound": "No hay nada esperando bajo estas palabras. Revisa cada palabra y el orden — y revisa que la otra pantalla todavía las muestre. Los códigos caducan a los 15 minutos y cada código funciona exactamente una vez.",
-      "noNode": "Este dispositivo no puede contactar un nodo comunitario, así que vincular con palabras no está disponible aquí. Usa la opción de QR de abajo.",
-      "scanInstead": "¿Sin nodo comunitario, o el otro dispositivo no puede conectarse? Escanea un QR"
+      "noNode": "Este dispositivo no puede contactar un nodo comunitario (el servidor compartido de tu comunidad), así que vincular por palabras no está disponible aquí. Usa la opción QR de abajo.",
+      "scanInstead": "¿Sin nodo comunitario (servidor compartido), o el otro dispositivo no puede conectarse? Escanea un QR en su lugar"
     },
     "capture": {
       "directions": {
@@ -186,7 +186,7 @@
       "cameraUnavailableHelp": "Tu navegador no tiene lector de QR integrado, o no diste permiso de cámara. Puedes pegar el contenido del QR en su lugar, si el otro dispositivo te lo da.",
       "videoAriaLabel": "Vista en vivo de la cámara, buscando un código QR",
       "pasteLabel": "O pega el contenido del QR",
-      "pastePlaceholder": "Pega el sobre base64 aquí…",
+      "pastePlaceholder": "Pega aquí el código de emparejamiento…",
       "continue": "Continuar",
       "invalidCode": "Eso no parece un código de emparejamiento. Cópialo otra vez desde la otra pantalla — asegúrate de copiarlo completo.",
       "samePhone": {
@@ -219,7 +219,7 @@
       "intro": "Elige una contraseña para proteger tu identidad en este dispositivo. La escribirás cuando la app te pida desbloquear. Déjala en blanco para saltarte el bloqueo en este dispositivo — solo hazlo si nadie más tiene acceso.",
       "passphraseLabel": "Nueva contraseña",
       "confirmLabel": "Confirma la contraseña",
-      "skipHint": "Deja ambos en blanco para saltarte — tu clave queda sin envolver en este dispositivo.",
+      "skipHint": "Deja ambos en blanco para omitir — tu clave de identidad queda desbloqueada en este dispositivo, así que cualquiera que lo tome queda dentro como tú.",
       "mismatch": "La contraseña y la confirmación no coinciden.",
       "finish": "Terminar"
     },
@@ -227,7 +227,7 @@
       "title": "Ya está.",
       "intro": "Algunas cosas con las que este dispositivo empieza vacío:",
       "bullets": {
-        "noDms": "Sin historial de DMs — los mensajes están cifrados de extremo a extremo al dispositivo que los recibió.",
+        "noDms": "Sin historial de mensajes directos — están cifrados de extremo a extremo, legibles solo en el dispositivo que los recibió (ni siquiera el servidor puede), así que no pueden copiarse.",
         "noDrafts": "Sin borradores — el otro dispositivo puede tener publicaciones sin guardar; no viajan.",
         "noPrefs": "Sin preferencias de tema o densidad — ajústalas en Perfil → Configuración si quieres que coincidan."
       },
@@ -261,7 +261,7 @@
   },
   "demo": {
     "banner": "Estás explorando una demo. Todo lo que haces se queda en este navegador: solo tú lo ves y no se envía a ningún lado.",
-    "nodeSection": "Esta demo funciona por completo en tu navegador: la conexión con un servidor comunitario está desactivada, así que nada de lo que hagas aquí se envía a ningún lado. En la aplicación real, esta sección conecta tu dispositivo con el nodo de tu comunidad.",
+    "nodeSection": "Esta demo corre por completo en tu navegador — conectar con un servidor comunitario está apagado, así que nada de lo que hagas aquí se envía a ningún lado. En la app real, esta sección vincula tu dispositivo con el nodo de tu comunidad — el servidor compartido que tu comunidad administra.",
     "reset": {
       "cta": "Reiniciar demo",
       "confirm": "¿Empezar de nuevo con datos de ejemplo?",
@@ -342,13 +342,13 @@
     "message": "Otras personas pueden encontrarte para ayudar en persona si agregas un vecindario o alguna habilidad. Opcional, pero ayuda.",
     "cta": "Agregar detalles",
     "dismiss": "Ahora no",
-    "technical": "Campos de perfil visibles en tus publicaciones y detalle de persona: habilidades (texto libre separado por comas, sin taxonomía), zona (limitada a vecindario — nunca dirección exacta — para que el contexto geográfico no se filtre más allá de lo que compartiste explícitamente), notas libres de disponibilidad, chips de disponibilidad (bloques amplios — días entre semana, tardes entre semana, días de fin de semana, tardes de fin de semana, pregúntame cuando quieras). El recordatorio se descarta cuando llenas cualquiera de estos, o al descartarlo explícitamente. El descarte es por dispositivo, no se federa, y se borra con un reinicio completo."
+    "technical": "Campos del perfil visibles en tus publicaciones y en tu detalle de miembro: habilidades (texto libre, separado por comas — sin lista fija de dónde elegir), zona (redondeada a barrio — nunca dirección exacta — para que el contexto geográfico no revele más de lo que compartiste explícitamente), notas de disponibilidad en texto libre, fichas de disponibilidad (franjas gruesas — días entre semana, tardes entre semana, días de fin de semana, tardes de fin de semana, pregúntame cuando sea). El aviso se descarta al llenar cualquiera de estos campos, o al descartarlo explícitamente. El descarte es por dispositivo — se recuerda solo aquí, nunca se comparte con otras comunidades (no se federa) — y se borra con el borrado duro."
   },
   "firstActionNudge": {
     "label": "Cómo empezar",
     "message": "Dos caminos: toca cualquier publicación que te llame la atención para ver cómo funciona el intercambio, o comparte algo que necesitas o puedes ofrecer. Sin presión por publicar primero — observar también está bien.",
     "dismiss": "Entendido",
-    "technical": "El recordatorio aparece en el tablero hasta que tomas una primera acción — tomar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Una vez que cualquiera de estas pasa, se queda descartado por dispositivo. Un reinicio completo (Perfil → Emergencia → Borrado total) o una instalación nueva trae el recordatorio de vuelta; el estado vive en IndexedDB local, no en el nodo comunitario."
+    "technical": "El aviso aparece en el Tablón hasta que tomes una primera acción — reclamar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Cuando ocurre cualquiera de estas, queda descartado por dispositivo. Un reinicio duro (Perfil → Emergencia → Borrado duro) o una instalación nueva lo hacen volver; el estado vive en IndexedDB local (el almacenamiento propio de tu navegador), no en el nodo comunitario (el servidor de tu comunidad)."
   },
   "vouchNudge": {
     "label": "Avalar está abierto para ti",
@@ -562,11 +562,11 @@
     },
     "new": {
       "workDayBannerTitle": "Programando una jornada de trabajo para {{project}}",
-      "workDayBannerBody": "Este evento aparecerá en la página del proyecto en este nodo. En los nodos pares aparece como un evento comunitario normal: la conexión con el proyecto nunca se federa. El título de abajo es tuyo para editarlo antes de firmar.",
+      "workDayBannerBody": "Este evento aparecerá en la página del proyecto en tu propia comunidad (este nodo). Los servidores de otras comunidades (nodos aliados) lo ven como un evento comunitario normal — la conexión con el proyecto nunca sale de casa. El título de abajo es tuyo para editar antes de firmar.",
       "workDayTitlePrefill": "Jornada de trabajo — {{project}}",
       "workDayDescriptionPrefill": "Una sesión práctica de trabajo para {{project}}. Ven a la parte que puedas.",
       "title": "Crear evento",
-      "subtitle": "Un evento es un registro firmado y federado. Lo que comprometes al firmar se nombra antes de firmar.",
+      "subtitle": "Un evento es un registro firmado y federado — sellado con tu identidad y compartido con las comunidades conectadas. Nombra lo que te comprometes antes de firmar.",
       "titleField": "Título",
       "titlePlaceholder": "Intercambio de saberes del sábado",
       "descriptionField": "Descripción",
@@ -582,19 +582,19 @@
       "location": "Lugar",
       "locationField": "Lugar",
       "locationPlaceholder": "el banco de la biblioteca",
-      "locationHint": "Texto libre. No pongas una dirección literal que no publicarías — cada nodo de la red verá esto.",
+      "locationHint": "Texto libre. No pongas una dirección literal que no publicarías — cada nodo aliado (el servidor de cada comunidad conectada) verá esto.",
       "capacity": "Cupo",
       "capacityField": "Cupo (opcional)",
       "capacityHint": "Déjalo vacío para cupo abierto.",
       "signingHeading": "Lo que estás firmando",
       "signingMeansTitle": "Qué significa esto",
-      "signingMeansOrganizer": "Tu clave pública se publica como organizadora. Cualquiera con acceso a la federación puede ver que tú organizaste esto.",
-      "signingMeansPublic": "El lugar y la hora de inicio que escribas se ven en cada nodo de la red. Elige una descripción acorde a lo que puedes publicar.",
+      "signingMeansOrganizer": "Tu clave pública — la mitad compartible de tu identidad, como un gafete que cualquiera puede leer — se publica como organizadora. Cualquiera en una comunidad conectada puede ver que tú organizaste esto.",
+      "signingMeansPublic": "El lugar y la hora de inicio que ingreses son visibles en cada nodo aliado — cada comunidad conectada a la tuya. Elige una descripción que puedas publicar.",
       "signingMeansPermanent": "Los eventos solo se agregan. Puedes cancelar; no puedes borrar ni editar. La cancelación es a su vez un registro firmado y permanente.",
-      "signingMeansRsvp": "Las confirmaciones de asistencia de este nodo son visibles para ti y para otras personas que confirmen aquí. Quienes están en otros nodos nunca ven la lista.",
+      "signingMeansRsvp": "Las confirmaciones de asistencia de tu propia comunidad (este nodo) son visibles para ti y para quienes confirmaron aquí. Las personas de otras comunidades nunca ven la lista.",
       "signingNotTitle": "Lo que esto NO significa",
       "signingNotEditable": "Editable — para cambiar la hora o el lugar, cancela y vuelve a crear.",
-      "signingNotPrivate": "De alcance privado — en la fase 1 no existe un evento \"sólo para miembros\". Si no debe estar en una red pública, coordínalo por mensaje directo o con una publicación de NECESIDAD/OFERTA.",
+      "signingNotPrivate": "Sin alcance privado — todavía no existe un evento \"solo para miembros\". Si no debería estar a la vista de todas las comunidades conectadas, coordina por mensaje directo o con una publicación de NECESITO/OFREZCO.",
       "submit": "Crear y firmar",
       "submitting": "Firmando…",
       "created": "Evento creado.",
@@ -627,9 +627,9 @@
       "addToCalendarHint": "Descarga un archivo para el calendario de tu dispositivo. Los recordatorios quedan en tus manos y en tu app de calendario.",
       "organizerControlsHeading": "Controles de organizador",
       "cancelButton": "Cancelar evento",
-      "cancelHint": "Cancelar es el único cambio posible después de crear, en la fase 1. La cancelación es a su vez un registro firmado y permanente; quienes confirmaron asistencia verán el motivo en su panel.",
+      "cancelHint": "Cancelar es el único cambio posible después de crear. La cancelación misma es un registro firmado y permanente — sellado con tu identidad, imposible de borrar; quienes confirmaron asistencia verán el motivo en los avisos al inicio de su tablero (el carril de atención).",
       "cancelDialogTitle": "¿Cancelar \"{{title}}\"?",
-      "cancelDialogBody": "Esto firma un registro de cancelación. Se federa a los nodos de la red y no se puede deshacer. Quienes confirmaron asistencia lo verán en su panel.",
+      "cancelDialogBody": "Esto firma un registro de cancelación — un aviso permanente sellado con tu identidad. Viaja a las comunidades conectadas (nodos aliados) y no puede deshacerse. Quienes confirmaron asistencia lo verán en los avisos al inicio de su tablero.",
       "cancelReasonLabel": "Motivo (opcional)",
       "cancelReasonPlaceholder": "¿Por qué cambia? Una frase basta.",
       "cancelConfirm": "Firmar cancelación",
@@ -650,7 +650,7 @@
       "signingHeading": "Si confirmas asistencia",
       "signingBodyGoing": "Si eliges Voy o Tal vez, quien organiza y otras personas que hayan confirmado verán tu nombre en este evento.",
       "signingBodyNotGoing": "Si eliges No voy, tu elección es privada — sólo tú puedes verla.",
-      "signingBodyLocalOnly": "Tu confirmación se queda en este nodo. NO se federa a otros nodos.",
+      "signingBodyLocalOnly": "Tu confirmación de asistencia se queda dentro de tu propia comunidad (este nodo). NO se federa — nunca se comparte con otras comunidades.",
       "going": "Voy",
       "maybe": "Tal vez",
       "notGoing": "No voy",
@@ -1072,12 +1072,12 @@
       "claimerNarrative": {
         "intro": "Marcaste esto como hecho. Una persona organizadora confirma para completar el intercambio — tus {{hours}} horas de crédito se mueven en ese momento.",
         "estimateNote": "Registraste {{actual}} para esta tarea (estimado {{estimate}}).",
-        "autoConfirm_one": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} día.",
-        "autoConfirm_other": "Si nadie llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} días."
+        "autoConfirm_one": "Si nadie llega a hacerlo, el servidor de la comunidad (el nodo) confirma automáticamente en aproximadamente {{count}} día.",
+        "autoConfirm_other": "Si nadie llega a hacerlo, el servidor de la comunidad (el nodo) confirma automáticamente en aproximadamente {{count}} días."
       },
       "confirmDialog": {
         "title": "¿Confirmar esta tarea?",
-        "body": "Confirmar registra un intercambio firmado: {{hours}} horas se mueven hacia {{claimer}}, y {{hours}} horas salen de tu balance — estás firmando como la parte ayudada en nombre del proyecto.",
+        "body": "Confirmar registra un intercambio firmado — sellado con tu clave de identidad para que nadie pueda falsificarlo: {{hours}} horas se mueven hacia {{claimer}}, y {{hours}} horas salen de tu balance — estás firmando como la parte ayudada en nombre del proyecto.",
         "estimateNote": "{{claimer}} registró el tiempo real: {{actual}}. La tarea se estimó en {{estimate}}.",
         "confirmCta": "Confirmar y firmar",
         "confirming": "Firmando…",
@@ -1205,7 +1205,7 @@
       "selectPlaceholder": "Elegir una persona...",
       "invite": {
         "send": "Enviar invitación",
-        "copy": "La verán en su próxima sincronización. Puedes revocarla en cualquier momento antes de que la acepten.",
+        "copy": "Verán tu invitación en su próxima sincronización — cuando su app vuelva a consultar el servidor comunitario. Puedes revocarla en cualquier momento antes de que acepten.",
         "locked": "Desbloquea este dispositivo con tu frase de acceso antes de enviar una invitación."
       },
       "pending": {
@@ -1214,7 +1214,7 @@
         "expires": "vence {{when}}",
         "revoke": "Revocar",
         "revokeConfirmTitle": "¿Cancelar esta invitación?",
-        "revokeConfirmBody": "No la recibirán en su próxima sincronización. Puedes volver a invitar a esta persona más adelante."
+        "revokeConfirmBody": "No la recibirán cuando su app vuelva a sincronizar con el servidor comunitario. Puedes invitarles de nuevo más adelante."
       },
       "past": {
         "title": "Invitaciones anteriores",
@@ -1326,7 +1326,7 @@
       "heading": "Próximas jornadas de trabajo",
       "scheduleButton": "Programar una jornada de trabajo",
       "itemAt": "en {{location}}",
-      "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en este nodo. Los nodos pares ven el evento, nunca la conexión con el proyecto.",
+      "localLinkHint": "Las jornadas de trabajo son eventos comunitarios conectados a este proyecto solo en tu propia comunidad (este nodo). Los servidores de otras comunidades (nodos aliados) ven el evento — nunca la conexión con el proyecto.",
       "nextGlanceHeading": "Próxima jornada de trabajo",
       "templateHint": "La plantilla de este proyecto incluye trabajo recurrente en equipo — una jornada de trabajo con turnos es una forma fácil de reunir manos.",
       "templateHintDismiss": "Entendido"
@@ -1557,8 +1557,8 @@
       "awaitingConfirmation": {
         "viewerOwes": "{{name}} ya confirmó. Tu confirmación completa el intercambio y mueve el crédito.",
         "viewerConfirmed": "Has confirmado. Esperando a {{name}} — el crédito se mueve cuando ambas partes han confirmado.",
-        "autoConfirm_one": "Si no llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} día.",
-        "autoConfirm_other": "Si no llega a hacerlo, el nodo confirma automáticamente en aproximadamente {{count}} días.",
+        "autoConfirm_one": "Si no llegan a hacerlo, el servidor de la comunidad (el nodo) confirma automáticamente en aproximadamente {{count}} día.",
+        "autoConfirm_other": "Si no llegan a hacerlo, el servidor de la comunidad (el nodo) confirma automáticamente en aproximadamente {{count}} días.",
         "thirdParty": "Confirmado por una parte; esperando a la otra."
       },
       "completed": "Este intercambio está completo — el crédito se ha movido.",
@@ -1574,8 +1574,8 @@
     "offerHint": "¿Están juntos? Muéstrale este código a {{name}}. Su teléfono revisa los detalles, firma, y su pantalla responde con un código de recibo — captúralo abajo y ambos habrán terminado.",
     "hoursLine": "{{hours}} de {{category}}",
     "offerQrAlt": "Código de oferta de intercambio en persona — muéstralo a la persona que ayudaste",
-    "fingerprintLabel": "Huella de la llave",
-    "offerFingerprintHint": "El otro teléfono muestra esta misma huella en su pantalla de revisión — léanlas en voz alta juntos antes de firmar.",
+    "fingerprintLabel": "Huella de la clave (un código corto que representa la clave completa)",
+    "offerFingerprintHint": "El otro teléfono muestra esta misma huella en su pantalla de revisión — un código corto que representa la clave completa, fácil de comparar. Léanlas en voz alta juntas antes de firmar, para saber que hablan los teléfonos correctos.",
     "captureReceipt": "Ya firmó — captura su recibo",
     "captureReceiptHint": "Apunta tu cámara al código de recibo en la pantalla de {{name}}.",
     "captureOfferHint": "Apunta tu cámara al código de oferta en la pantalla de quien te ayudó.",
@@ -1600,7 +1600,7 @@
       "post_mismatch": "Esa oferta no coincide con la copia de la publicación en este teléfono — las personas o la categoría difieren. No la firmes.",
       "wrong_member": "Esta oferta no está dirigida a ti — solo quien recibió la ayuda puede firmarla.",
       "different_record": "Ese recibo pertenece a un intercambio distinto de la oferta que hizo este teléfono.",
-      "bad_signature": "Una firma en ese código no se verifica. No lo aceptes.",
+      "bad_signature": "Una firma de ese código no verifica — el sello a prueba de alteraciones no coincide con el contenido, lo que puede significar que el código fue alterado. No lo aceptes.",
       "daily_limit": "Esto superaría el límite diario de la comunidad para una misma persona ayudante — espera un día y confirma entonces."
     }
   },
@@ -1638,11 +1638,11 @@
     "sign": "Firmar — registrar {{hours}}",
     "receiptHint": "Muéstrale este recibo a {{name}} para que su teléfono guarde el mismo registro.",
     "receiptQrAlt": "Código de recibo de intercambio directo",
-    "done": "Registrado. Ambos tienen ahora el mismo intercambio firmado, y llegará al nodo comunitario la próxima vez que estés en línea.",
+    "done": "Registrado. Ambos tienen ahora el mismo intercambio firmado, y llegará al nodo comunitario (el servidor de tu comunidad) la próxima vez que estés en línea.",
     "close": "Cerrar",
     "error": {
       "no_identity": "No hay identidad en este dispositivo.",
-      "locked": "Desbloquea la aplicación primero — firmar necesita tu llave.",
+      "locked": "Desbloquea la app primero — firmar necesita tu clave secreta, el código privado que demuestra que esto realmente vino de ti.",
       "self_exchange": "No puedes registrar un intercambio contigo mismo.",
       "counterparty_unknown": "Tu dispositivo todavía no conoce a este miembro.",
       "bad_hours": "Escribe las horas que la ayuda realmente tomó.",
@@ -1650,7 +1650,7 @@
       "not_an_offer": "Ese código no es una oferta de intercambio directo.",
       "not_direct_label": "Ese código no es un intercambio directo válido.",
       "wrong_member": "Esta oferta nombra a otro miembro — solo puede firmarla la persona a la que se refiere.",
-      "bad_signature": "La firma de ese código no cuadra.",
+      "bad_signature": "La firma de ese código no cuadra — su sello a prueba de alteraciones no coincide con el contenido.",
       "daily_limit": "Esto pasaría el límite diario de intercambios de la comunidad — regístralo mañana.",
       "not_a_receipt": "Ese código no es un recibo de intercambio directo.",
       "different_record": "Ese recibo describe un intercambio distinto al de la oferta que mostraste."
@@ -1660,14 +1660,14 @@
     "title": "Este dispositivo está bloqueado",
     "introWith": "Introduce tu frase para desbloquear la identidad de {{name}} en este dispositivo.",
     "introNone": "Introduce tu frase para desbloquear este dispositivo.",
-    "keyLine": "Clave: {{key}}",
+    "keyLine": "Clave de identidad (el código que representa tu cuenta): {{key}}",
     "passphraseLabel": "Frase",
     "submit": "Desbloquear",
     "submitting": "Desbloqueando…",
     "wrongPassphrase": "Esa frase no coincidió. Inténtalo de nuevo.",
-    "nothingToUnlock": "No hay claves envueltas en este dispositivo — no hay nada que desbloquear. (Si estás viendo esto, recarga la página.)",
+    "nothingToUnlock": "No hay claves envueltas en este dispositivo — ninguna identidad guardada cifrada tras una frase — así que no hay nada que desbloquear. (Si estás viendo esto, recarga la página.)",
     "passkeyButton": "Desbloquear con llave de acceso",
-    "passkeyFailed": "La llave de acceso no pudo desbloquear este dispositivo. Tu frase de abajo siempre funciona.",
+    "passkeyFailed": "La llave de acceso — el desbloqueo por rostro, huella o PIN de tu dispositivo — no pudo abrir esto. Tu frase de abajo siempre funciona.",
     "or": "o",
     "noRecoveryNote": "Las frases de acceso olvidadas no se pueden restablecer aquí — nadie tiene una llave maestra. Pero esto no tiene por qué significar empezar de cero: otro dispositivo vinculado aún guarda tu identidad, y si creaste un kit de recuperación o elegiste guardianes (Ajustes → Kit de recuperación / Guardianes), puedes borrar esta app (Perfil → Emergencia → Purga total) y restaurar desde ellos al empezar de nuevo. Sin ninguno de esos, una identidad nueva es el último recurso."
   },
@@ -1689,10 +1689,10 @@
     },
     "youInvited": "Has sido invitada",
     "wantsYou": "{{name}} te quiere en su red de apoyo mutuo.",
-    "inviterKey": "Clave de quien invita",
+    "inviterKey": "Clave de quien invita (el código que identifica a la persona que te invitó)",
     "expires": "Caduca",
     "expiresOn": "Esta invitación es válida hasta el {{date}}.",
-    "fingerprintReminder": "Antes de aceptar: confirma que la huella de la clave de quien invita coincide con la que {{name}} te compartió en persona o por un canal seguro. Un enlace que llegó por correo no confiable merece una doble verificación.",
+    "fingerprintReminder": "Antes de aceptar: la huella de arriba es una versión corta y fácil de comparar de la clave de quien invita. Confirma que coincide con lo que {{name}} te compartió en persona o por un canal de confianza — así sabes que la invitación realmente viene de esa persona. Un enlace que llegó por correo no confiable merece una doble verificación.",
     "welcome": "Bienvenida. Redirigiendo al tablero…",
     "welcomeStay": "Bienvenida. Una pregunta abajo antes del tablero.",
     "notConnected": {
@@ -1712,7 +1712,7 @@
     "errors": {
       "malformed": "Este enlace de invitación está dañado o incompleto. Suele ser culpa de la aplicación de mensajería, no tuya — algunas alteran los enlaces al tocarlos. Prueba a abrir el enlace en tu navegador habitual, o pega el mensaje original abajo. Si eso no funciona, pídele un enlace nuevo a quien te invitó.",
       "expired": "Esta invitación ha caducado. Pídele un enlace nuevo a quien te invitó — puedes pegarlo abajo.",
-      "bad_signature": "La firma de esta invitación no se verificó. Puede que una aplicación de mensajería alterara el enlace por el camino — prueba a pegar el mensaje original abajo. Si sigue fallando, no la aceptes: puede haber sido manipulada.",
+      "bad_signature": "La firma de esta invitación — el sello a prueba de alteraciones que demuestra quién la hizo — no verificó. Una app de mensajería pudo alterar el enlace en el camino; intenta pegar el mensaje original abajo. Si aún falla, no la aceptes: puede haber sido manipulada.",
       "already_redeemed": "Alguien ya usó esta invitación. Las invitaciones son de un solo uso — pídele un enlace nuevo a quien te invitó y pégalo abajo.",
       "revoked": "Quien te invitó revocó esta invitación. Si te sorprende, pídele un enlace nuevo — puedes pegarlo abajo.",
       "self_redeem": "No puedes canjear una invitación que tú misma emitiste. Comparte el enlace con alguien más."
@@ -1740,13 +1740,13 @@
   "nodeSuggest": {
     "label": "Conectar con el nodo de esta comunidad",
     "title": "¿Conectar con el nodo de esta comunidad?",
-    "body": "Obtuviste esta aplicación de {{origin}}, que tiene un nodo comunitario en marcha. Conectarte permite que lo que compartes — publicaciones, intercambios, avales, incluidas las claves públicas de las personas con quienes intercambias — se sincronice con ese servidor para que el resto de la comunidad lo vea. No se envía nada hasta que confirmes. Confirma solo si esta es la comunidad a la que querías unirte.",
+    "body": "Obtuviste esta app de {{origin}}, que administra un nodo comunitario. Conectarte permite que lo que compartes — publicaciones, intercambios, avales, incluyendo las claves públicas de las personas con quienes intercambias (una clave pública es el código compartible que nombra a cada miembro — seguro de pasar de mano en mano) — se sincronice con ese servidor para que el resto de la comunidad lo vea. No se envía nada hasta que confirmes. Confirma solo si esta es la comunidad a la que querías unirte.",
     "confirm": "Sí, conectar con {{origin}}",
     "decline": "Ahora no"
   },
   "recoveryKit": {
     "title": "Kit de recuperación",
-    "intro": "Un archivo pequeño (o una página impresa) que puede devolver tu cuenta en un dispositivo nuevo si este se pierde y no tienes otro emparejado. Contiene tu clave secreta, protegida con una frase que eliges ahora mismo.",
+    "intro": "Un archivo pequeño (o una página impresa) que puede devolver tu cuenta en un dispositivo nuevo si este se pierde y no tienes otro emparejado. Contiene tu clave secreta — el código privado que ES tu cuenta, lo único que nadie más debería tener — protegida con una frase que eliges ahora mismo.",
     "create": "Crear un kit de recuperación…",
     "passphraseIntro": "Elige una frase de recuperación. Es independiente de cualquier frase que uses a diario — y nadie puede restablecerla: un kit sin su frase es solo papel. Quien tenga AMBOS, el kit y esta frase, puede actuar como tú.",
     "passphraseLabel": "Frase de recuperación",
@@ -1763,7 +1763,7 @@
     "printTitle": "Kit de recuperación de Understoria",
     "printQrAlt": "Código QR que contiene este kit de recuperación — escanéalo desde la pantalla de bienvenida de Understoria para restaurar",
     "printIntro": "Esta página puede restaurar la cuenta de Understoria de {{name}} en un dispositivo nuevo: abre la aplicación, elige \"Tengo un kit de recuperación\", escanea este código con cualquier lector QR y pega el texto, luego escribe la frase de recuperación. Guarda esta página en un lugar seguro — junto con la frase, ES la cuenta.",
-    "printKeyLabel": "Clave pública (tuya, se puede compartir):",
+    "printKeyLabel": "Tu clave pública (el código compartible que nombra tu cuenta — segura de mostrar a cualquiera):",
     "printNodeLabel": "Servidor comunitario:",
     "printFooter": "Ninguna empresa guarda una copia de esto. Esa es la idea — y significa que esta página y su frase son el único camino de vuelta sin otro dispositivo emparejado."
   },
@@ -1800,7 +1800,7 @@
     "none": "Aún no has elegido guardianes.",
     "setup": "Elegir guardianes…",
     "reshard": "Elegir nuevos guardianes…",
-    "reshardHonesty": "Elegir nuevos guardianes no anula el grupo anterior — tu clave no cambia, así que suficientes piezas ANTIGUAS juntas aún podrían recuperarla. Si un antiguo guardián te preocupa, crea una cuenta nueva.",
+    "reshardHonesty": "Elegir nuevas guardianas no cancela al grupo anterior — tu clave en sí no cambia, así que suficientes fragmentos ANTIGUOS (las piezas de tu clave que repartiste antes) juntos aún podrían recuperarla. Si una guardiana anterior te preocupa, crea mejor una cuenta nueva.",
     "needMembers": "Necesitas al menos {{min}} miembros más en tu comunidad para configurar esto.",
     "pickTitle": "¿Quién guarda una pieza?",
     "pickWarning": "Elige a personas que conozcan tu cara y tu voz — su único trabajo en una recuperación es asegurarse de que de verdad eres tú quien pide. Cualquier grupo del tamaño del umbral puede reconstruir tu clave, así que elige a personas que no se confabularían.",
@@ -1846,7 +1846,7 @@
   },
   "removals": {
     "title": "Expulsiones y readmisiones",
-    "intro": "Las decisiones más graves que una comunidad puede tomar, registradas a la vista: quién fue expulsado o readmitido, cuándo, por qué y exactamente quiénes firmaron. Ninguna persona sola — ni siquiera quien opera el servidor — puede crear uno de estos registros; cada uno necesita un quórum de integrantes cofirmando.",
+    "intro": "Las decisiones más graves que una comunidad puede tomar, registradas a la vista: quién fue expulsado o readmitido, cuándo, por qué y exactamente quiénes firmaron. Ninguna persona sola — ni siquiera quien opera el servidor — puede crear uno de estos registros; cada uno necesita un quórum de integrantes cofirmando — un número acordado de integrantes que añaden cada cual su propia firma antes de que cuente.",
     "removedLine": "{{name}} fue expulsado/a por decisión comunitaria {{when}}.",
     "reinstatedLine": "{{name}} fue readmitido/a por decisión comunitaria {{when}}.",
     "signedBy": "Firmado por {{names}}.",
@@ -1866,7 +1866,7 @@
     "captureCosign": "Capturar una cofirma",
     "submitRemoval": "Enviar el registro de expulsión",
     "submitReinstatement": "Enviar el registro de readmisión",
-    "submitted": "Enviado. Cuando el servidor de la comunidad lo acepte, el registro aparecerá abajo y surtirá efecto en el dispositivo de cada integrante en la próxima sincronización.",
+    "submitted": "Enviado. Cuando el servidor de la comunidad lo acepte, el registro aparecerá abajo y tomará efecto en el dispositivo de cada integrante en su próxima sincronización — la consulta regular de la app al servidor.",
     "close": "Cerrar",
     "copyText": "Copiar como texto",
     "cosignButton": "Cofirmar una expulsión o readmisión…",
@@ -1875,7 +1875,7 @@
     "cosignReinstateFriction": "Se te pide cofirmar la READMISIÓN de {{name}}. Tu nombre queda en el registro, permanente y público.",
     "cosignReason": "La razón propuesta: \"{{reason}}\"",
     "cosignConfirm": "Firmar con mi nombre",
-    "cosignShowBack": "Muestra esto a quien lo propone — su dispositivo lo suma al quórum.",
+    "cosignShowBack": "Muestra esto a la persona que propone — su dispositivo lo suma hacia el quórum (el número de firmas necesarias).",
     "cosignQrAlt": "Código de cofirma",
     "reinstateButton": "Iniciar una readmisión…",
     "selfBanner": "Esta comunidad te ha expulsado por decisión de quórum. Todo lo que hay en este dispositivo sigue siendo tuyo y sigue funcionando aquí, pero la sincronización con el servidor de la comunidad fallará hasta que un quórum de integrantes firme una readmisión. La decisión, su razón y sus firmantes están en la página de Decisiones.",
@@ -1895,7 +1895,7 @@
   },
   "reseed": {
     "title": "Restaurar esta comunidad en un nodo",
-    "intro": "Si algún día se pierden todos los servidores comunitarios, este dispositivo aún guarda la historia compartida — cada publicación, intercambio, evento, proyecto y registro de membresía, firmado criptográficamente. Apúntalo a un nodo nuevo y súbelo todo de vuelta. Varias personas pueden hacerlo a la vez; las copias simplemente se combinan.",
+    "intro": "Si algún día se pierden todos los servidores comunitarios, este dispositivo aún guarda la historia compartida — cada publicación, intercambio, evento, proyecto y registro de membresía, firmado criptográficamente (sellado para que nadie pueda falsificar quién escribió qué). Apúntalo a un nodo nuevo (un servidor comunitario recién montado) y súbelo todo de vuelta. Varias personas pueden hacerlo a la vez; las copias simplemente se combinan.",
     "targetLabel": "Nodo donde restaurar",
     "systemKeyNote": "Para quien opere el nodo nuevo — la clave de autoconfirmación del nodo perdido (TRUSTED_SYSTEM_KEYS):",
     "start": "Restaurar la historia comunitaria…",
@@ -1919,7 +1919,7 @@
   },
   "growRootSuggest": {
     "label": "El nodo de nuestra comunidad se está quedando sin espacio",
-    "title": "El nodo de nuestra comunidad se está quedando sin espacio",
+    "title": "El nodo de nuestra comunidad (su servidor) se está quedando sin espacio",
     "body": "Hacer crecer otra raíz repartiría la carga. Si administras el servidor de esta comunidad, quizá solo necesite más almacenamiento o soltar registros antiguos; de cualquier forma, un segundo servidor alivia la presión y ayuda a todos. No pasa nada hasta que decidas.",
     "confirm": "Hacer crecer otra raíz",
     "decline": "Ahora no"
@@ -2132,8 +2132,8 @@
         "title": "Aceptar el rol de co-organizador en \"{{project}}\"",
         "meansTitle": "Qué significa esto",
         "meansConfirm": "Confirmar tareas completadas — cada confirmación mueve horas de tu propio saldo.",
-        "meansSign": "Firmar como organizador del proyecto — los registros que firmes en este rol quedan ligados a tu identidad en el historial federado del proyecto.",
-        "meansVisible": "Visible para la comunidad — la página del proyecto te muestra como co-organizador en la vista de cada nodo.",
+        "meansSign": "Firmar como organizadora del proyecto — los registros que firmes en este rol se rastrean hasta tu identidad dondequiera que viaje la historia del proyecto (su historia federada, compartida entre comunidades conectadas).",
+        "meansVisible": "Visible para la comunidad — la página del proyecto te lista como co-organizadora en la copia de cada integrante, en cada comunidad conectada.",
         "notTitle": "Qué no significa esto",
         "notObligation": "Sin obligación permanente — puedes dejar el rol por tu cuenta en cualquier momento.",
         "notDeputy": "Sin autoridad sobre quien organiza originalmente — esa persona conserva la autoridad de traspaso y remoción. Los co-organizadores son pares, no suplentes.",
@@ -2304,7 +2304,7 @@
       "seedVaultsOne": "{{count}} integrante guarda el archivo completo en un dispositivo propio — una bóveda de semillas.",
       "seedVaultsOther": "{{count}} integrantes guardan el archivo completo en dispositivos propios — bóvedas de semillas.",
       "nodeQuiet": "Ningún servidor ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando alguno vuelva.",
-      "capacityRed": "El nodo de nuestra comunidad se está quedando sin espacio — hacer crecer otra raíz aliviaría la presión.",
+      "capacityRed": "El nodo de nuestra comunidad (su servidor) se está quedando sin espacio — crecer otra raíz aliviaría la presión.",
       "leaf": {
         "fresh": "sincronizado hoy",
         "lagging": "quedándose atrás",
@@ -2315,8 +2315,8 @@
     },
     "federation": {
       "title": "En la federación",
-      "summaryOne": "{{count}} intercambio · {{hours}}h circulando por {{peers}} comunidad aliada",
-      "summaryOther": "{{count}} intercambios · {{hours}}h circulando por {{peers}} comunidades aliadas"
+      "summaryOne": "{{count}} intercambio · {{hours}}h circulando por {{peers}} comunidad aliada — una comunidad vecina vinculada que usa Understoria",
+      "summaryOther": "{{count}} intercambios · {{hours}}h circulando por {{peers}} comunidades aliadas — comunidades vecinas vinculadas que usan Understoria"
     },
     "breadth": {
       "title": "Amplitud, no profundidad",
@@ -2350,10 +2350,10 @@
     "area": "Zona",
     "none": "—",
     "vouchTitle": "Avalar",
-    "vouchIntro": "Avalar es una declaración firmada de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) marcan a una persona como confiable.",
+    "vouchIntro": "Avalar es una declaración firmada — sellada con tu clave para que cualquiera compruebe que realmente vino de ti — de que esta persona forma parte de nuestra comunidad. Dos avales distintos (incluyendo la aceptación de invitación) marcan a una persona como confiable.",
     "vouchButton": "Avalar a esta persona",
     "vouching": "Avalando…",
-    "vouchedJustNow": "Avalado. Tu declaración firmada está en el registro local y (si hay un nodo comunitario configurado) en camino allí.",
+    "vouchedJustNow": "Avalado. Tu declaración firmada quedó guardada en el registro de este dispositivo (su libro de actas) y — si hay un nodo comunitario configurado — va en camino al servidor de la comunidad también.",
     "cannotVouchSelf": "No puedes avalarte a ti misma.",
     "cannotVouchUntilTrusted": "Podrás avalar cuando tú misma seas confiable. El aval de quien te invitó cuenta como uno; otra persona de la comunidad puede avalarte para sumar el segundo.",
     "alreadyFullyTrusted": "Esta persona ya es confiable. Otro aval no cambiaría nada.",
@@ -2409,8 +2409,8 @@
     },
     "pairingLog": {
       "title": "Dispositivos vinculados",
-      "intro": "Vinculaciones que has completado en este dispositivo — para tu memoria. Esta lista vive solo en este dispositivo.",
-      "rotateHint": "Para rotar tu identidad por completo (p. ej. si pierdes un dispositivo), consulta Emergencia más abajo.",
+      "intro": "Emparejamientos completados en este dispositivo — veces que vinculaste otro dispositivo a esta identidad, guardadas para tu memoria. Esta lista vive solo en este dispositivo.",
+      "rotateHint": "Para rotar tu identidad — reemplazarla por completo con una clave nueva, p. ej. si un dispositivo se pierde — mira Emergencia abajo.",
       "sourceTitle": "Dispositivos que autoricé desde aquí",
       "destinationTitle": "Veces que este dispositivo fue autorizado desde otro",
       "unlabeled": "(sin etiqueta)"
@@ -2425,8 +2425,8 @@
       "pendingLine": "{{hours}} pendientes de confirmación",
       "awaitingYouLine": "{{hours}} esperando tu confirmación",
       "pendingWhy": "Cómo funciona la confirmación",
-      "pendingExplainerAuto_one": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario confirma por ella en aproximadamente {{count}} día — nada está atascado.",
-      "pendingExplainerAuto_other": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario confirma por ella en aproximadamente {{count}} días — nada está atascado.",
+      "pendingExplainerAuto_one": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario (el servidor de tu comunidad) confirma por ella en aproximadamente {{count}} día — nada se atasca.",
+      "pendingExplainerAuto_other": "El crédito se mueve cuando ambas partes confirman un intercambio. Si la otra persona no llega a hacerlo, el nodo comunitario (el servidor de tu comunidad) confirma por ella en aproximadamente {{count}} días — nada se atasca.",
       "pendingExplainerManual": "El crédito se mueve cuando ambas partes confirman un intercambio. Nada está atascado — llega en el momento en que sucede la segunda confirmación.",
       "projectOutflowLine": "Incluye {{hours}} que moviste a quienes ayudaron en nombre de {{project}}.",
       "projectOutflowLineMore_one": "Incluye {{hours}} que moviste a quienes ayudaron en nombre de {{project}} y {{count}} proyecto más.",
@@ -2454,7 +2454,7 @@
     "history": {
       "title": "Tu historial de intercambios",
       "emptyTitle": "Tu historia empieza aquí",
-      "empty": "Aún no hay nada aquí. Cuando des o recibas ayuda, cada intercambio aparecerá con un registro firmado que podrás verificar.",
+      "empty": "Nada aquí todavía. Cuando des o recibas ayuda, cada intercambio aparecerá como un registro firmado — sellado con las claves de ambas personas para que cualquiera compruebe que es genuino.",
       "helped": "Ayudaste a",
       "received": "Recibiste ayuda de",
       "flag": "en revisión comunitaria",
@@ -2507,7 +2507,7 @@
         "undoDone": "Este dispositivo volverá a descargar la historia completa en segundo plano. Los registros de actividad de proyectos cerrados hace mucho no vuelven — solo existían en los dispositivos."
       },
       "vault": {
-        "body": "¿Tienes espacio de sobra — un portátil viejo, una tableta en un cajón? Comprométete a guardar el archivo completo en este dispositivo. Es la forma sin mantenimiento de hacer la comunidad más difícil de borrar: sin servidor, sin abrir puertos, solo almacenamiento y solidaridad. Tu compromiso es público para que la comunidad vea cuántas copias completas existen; puedes dejarlo cuando quieras.",
+        "body": "¿Tienes espacio de sobra — una laptop vieja, una tableta en un cajón? Comprométete a guardar el archivo completo en ese dispositivo. Es la forma sin complicaciones de hacer la comunidad más difícil de borrar: sin servidor que administrar, sin configurar la red (sin \"port forwarding\"), solo almacenamiento y solidaridad. Tu compromiso es público para que la comunidad vea cuántas copias completas existen; puedes parar cuando quieras.",
         "enable": "Guardar el archivo completo en este dispositivo",
         "disable": "Retirar el compromiso del archivo",
         "active": "Este dispositivo es una bóveda de semillas — guarda el archivo completo de la comunidad.",
@@ -2609,10 +2609,10 @@
     },
     "node": {
       "title": "Nodo comunitario",
-      "intro": "Opcionalmente refleja tus intercambios finalizados en un nodo comunitario para que aparezcan en el registro de toda la comunidad. El nodo verifica cada firma; nunca guarda tu clave privada.",
+      "intro": "Opcionalmente refleja tus intercambios finalizados — envía una copia — a un nodo comunitario (el servidor compartido de tu comunidad) para que aparezcan en el registro de toda la comunidad, el libro de actas compartido. El nodo verifica cada firma; nunca guarda tu clave privada — la mitad secreta de tu identidad se queda en tu dispositivo.",
       "urlLabel": "URL del nodo",
       "urlPlaceholder": "https://ayuda.nuestro-sindicato.example/api",
-      "enableLabel": "Reflejar los intercambios finalizados en este nodo",
+      "enableLabel": "Reflejar (enviar una copia de) los intercambios finalizados en este nodo",
       "save": "Guardar",
       "saved": "Guardado",
       "lastSuccess": "Último éxito: {{when}}",
@@ -2625,7 +2625,7 @@
       "inviteLink": "¿Tienes un enlace de invitación? Ábrelo aquí.",
       "consent": {
         "title": "¿Enviar tus registros de intercambio a este servidor?",
-        "body": "Activar el reflejo envía cada intercambio en el que participas a este servidor, incluyendo la clave pública de la otra persona, la firma, la categoría, las horas y la hora. Un servidor que no controlas puede usar esto para trazar quién-ayuda-a-quién en toda tu comunidad. Activa esto solo para un nodo que tu comunidad gestione y en el que confíe.",
+        "body": "Activar el reflejo envía cada intercambio en el que participas a este servidor — incluyendo la clave pública de la otra persona (su identificador compartible de miembro), la firma que demuestra que el registro es genuino, la categoría, las horas y la hora. Un servidor que no controlas puede usar esto para mapear quién-ayuda-a-quién en tu comunidad. Actívalo solo para un nodo que tu comunidad administra y en el que confía.",
         "confirm": "Sí, reflejar en este nodo"
       },
       "claim": {
@@ -2710,8 +2710,8 @@
     },
     "security": {
       "title": "Seguridad",
-      "summaryProtected": "Tus claves secretas en este dispositivo están protegidas con una clave derivada de tu frase. Se requiere desbloqueo en cada inicio.",
-      "summaryUnprotected": "Tus claves secretas se guardan en texto plano en este dispositivo. Activa la protección con frase antes de dejar el dispositivo solo en cualquier entorno hostil.",
+      "summaryProtected": "Tus claves secretas en este dispositivo — la mitad privada de tu identidad — están envueltas (guardadas cifradas) con una clave derivada de tu frase. Se requiere desbloqueo en cada inicio.",
+      "summaryUnprotected": "Tus claves secretas se guardan en texto plano — texto legible que cualquiera con el dispositivo podría copiar. Activa la protección con frase antes de dejar el dispositivo solo en cualquier entorno hostil.",
       "enable": "Activar protección con frase",
       "change": "Cambiar frase",
       "disable": "Desactivar protección",
@@ -2721,14 +2721,14 @@
       "passphrase": "Frase",
       "repeat": "Repítela",
       "passphraseHint": "Al menos 8 caracteres. Una frase de cuatro palabras desde un gestor de contraseñas es ideal. No hay recuperación — no podemos devolverte esto.",
-      "disableWarn": "Esto reescribirá tus claves secretas envueltas como texto plano en este dispositivo. Hazlo solo si estás segura de que el dispositivo es seguro.",
+      "disableWarn": "Esto reescribirá tus claves secretas envueltas como texto plano — ya no cifradas tras tu frase — en este dispositivo. Hazlo solo si estás segura de que el dispositivo es seguro.",
       "submitEnable": "Activar",
       "submitChange": "Cambiar",
       "submitDisable": "Desactivar",
       "working": "Trabajando…",
       "successEnable": "Protección con frase activada. Apunta tu frase en un lugar seguro — no se puede recuperar.",
       "successChange": "Frase cambiada. Usa la nueva la próxima vez que desbloquees.",
-      "successDisable": "Protección con frase desactivada. Las claves secretas vuelven a guardarse en texto plano en este dispositivo.",
+      "successDisable": "Protección con frase desactivada. Las claves secretas vuelven a guardarse en texto plano en este dispositivo — cualquiera con el dispositivo puede leerlas.",
       "errorMismatch": "Las dos frases no coincidieron.",
       "errorMismatchNew": "Las dos nuevas frases no coincidieron.",
       "passkey": {
@@ -2741,7 +2741,7 @@
         "addedOn": "Una llave de acceso desbloquea este dispositivo (añadida {{date}}). Tu frase también sigue funcionando.",
         "promptNote": "Tu dispositivo puede pedirte confirmar dos veces — una para crear la llave y otra para prepararla para desbloquear. Es normal.",
         "needUnlock": "Desbloquea este dispositivo primero para cambiar los ajustes de la llave de acceso.",
-        "prfUnsupported": "Este dispositivo creó una llave de acceso pero no puede usarse para desbloquear aquí (su autenticador no tiene la función PRF necesaria). No se cambió nada — puedes borrar la llave sin uso desde el gestor de contraseñas de tu dispositivo.",
+        "prfUnsupported": "Este dispositivo creó una llave de acceso, pero su hardware de seguridad no puede usarla para desbloquear aquí (le falta una función necesaria llamada PRF). Nada cambió — puedes borrar la llave sin usar desde el administrador de contraseñas de tu dispositivo.",
         "failed": "No se pudo configurar la llave de acceso. No se cambió nada — tu frase sigue funcionando.",
         "successAdd": "Llave de acceso añadida. La próxima vez que este dispositivo se bloquee, un toque lo desbloquea — y tu frase siempre funciona también.",
         "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo."
@@ -2750,16 +2750,16 @@
     "emergency": {
       "title": "Emergencia",
       "intro": "Dos opciones de pánico para cuando un dispositivo está en riesgo. Ninguna contacta a un servidor; ambas ocurren completamente en este dispositivo.",
-      "softBullet": "Borrado suave — vacía cada campo de texto identificable (nombres, descripciones, zonas, habilidades) manteniendo el registro firmado de intercambios y tu par de claves. Útil si un dispositivo va a estar brevemente en manos hostiles.",
-      "hardBullet": "Borrado duro — vacía cada tabla incluyendo las claves privadas, rota a una identidad de nodo nueva. Irrecuperable. La página se recargará después.",
-      "federatedNote": "Nota de honestidad: ambas opciones actúan solo en ESTE DISPOSITIVO. Todo lo que ya se sincronizó con tu comunidad — publicaciones, intercambios, avales, votos y otros registros firmados — persiste en el nodo comunitario y en los dispositivos de otros miembros. Un voto público que ya no puedas respaldar se puede volver a emitir: la versión más reciente es la que cuenta.",
+      "softBullet": "Borrado suave — elimina cada campo de texto identificable (nombres, descripciones, zonas, habilidades) conservando el registro firmado de intercambios (el libro de actas) y tu par de claves (las claves que son tu cuenta). Útil si un dispositivo estará brevemente en manos hostiles.",
+      "hardBullet": "Borrado duro — borra todo lo guardado aquí incluyendo las claves privadas, y rota a una identidad nueva (una clave completamente nueva). Irrecuperable. La página se recargará después.",
+      "federatedNote": "Nota de honestidad: ambas opciones actúan solo sobre ESTE DISPOSITIVO. Todo lo que ya se sincronizó con tu comunidad — publicaciones, intercambios, avales, votos y otros registros firmados — persiste en el nodo comunitario (el servidor compartido) y en los dispositivos de otros integrantes. Un voto público que ya no respaldas puede volver a emitirse: la versión más reciente es la que cuenta.",
       "softButton": "Borrado suave (anonimizar)",
       "hardButton": "Borrado duro (eliminar todo)",
       "softTitle": "¿Ejecutar borrado suave?",
-      "softConfirmDescription": "El texto identificable de cada integrante y publicación quedará en blanco. Los registros firmados de intercambios y tu par de claves se conservarán. Esto no es reversible.",
+      "softConfirmDescription": "El texto identificable de cada miembro y publicación quedará en blanco. Los registros firmados de intercambio y tu par de claves (las claves que son tu cuenta) se conservarán. Esto no es reversible.",
       "softConfirm": "Sí, anonimizar",
       "hardTitle": "¿Ejecutar borrado duro?",
-      "hardConfirmDescription": "Cada tabla será vaciada — incluyendo tus claves privadas. Se generará una nueva identidad de nodo y la aplicación se recargará. No hay vuelta atrás.",
+      "hardConfirmDescription": "Todo lo guardado aquí será borrado — incluyendo tus claves privadas. Se generará una identidad nueva (una clave nueva) y la app se recargará. No hay deshacer.",
       "hardConfirm": "Sí, eliminar todo",
       "completedSoft": "Borrado suave completado en {{ms}}ms.",
       "completedHard": "Borrado duro completado en {{ms}}ms."
@@ -2955,7 +2955,7 @@
   "community": {
     "autoConfirmHours": {
       "label": "Confirmar automáticamente tras",
-      "help": "Cuando una parte deja de responder, la llave del sistema del nodo comunitario cierra el intercambio para que los créditos fluyan. Pon 0 para desactivar la confirmación automática por completo. Requiere que la persona operadora tenga una llave del sistema configurada; sin ella el barrido no hace nada.",
+      "help": "Cuando una parte deja de responder, la clave de sistema del nodo comunitario — una clave que pertenece al servidor mismo — firma el cierre del intercambio para que el crédito fluya. Pon 0 para desactivar la confirmación automática por completo. Requiere que el operador tenga configurada una clave de sistema; sin ella este barrido automático simplemente no hace nada.",
       "unit": "horas (0 desactiva)"
     },
     "customMilestones": {
@@ -2986,7 +2986,7 @@
     "start": "Abrir el tablero",
     "nextSteps": "Después: mira qué necesitan tus vecinas, o publica una oferta tuya.",
     "pairDeviceLink": "¿Ya tienes tu identidad en otro dispositivo? Vincula este →",
-    "recoveryKitLink": "¿Perdiste tu dispositivo pero tienes un kit de recuperación? Restaura aquí →",
+    "recoveryKitLink": "¿Perdiste tu dispositivo pero tienes un kit de recuperación — el archivo o impresión de respaldo que puede reconstruir tu identidad? Restaura aquí →",
     "installedArrival": {
       "title": "La app ya está en tu pantalla de inicio",
       "intro": "Una pregunta antes de empezar:",
@@ -3054,8 +3054,8 @@
       "notCommitsHeading": "Qué NO significa esto",
       "notCommits": {
         "dispute": "Esto no presenta una disputa ni avisa a moderación. Para plantear una preocupación comunitaria, ve a Perfil → Disputas.",
-        "deletion": "Esto no borra sus registros firmados de la federación.",
-        "otherNodes": "Esto no le bloquea en otros nodos."
+        "deletion": "Esto no borra sus registros firmados de la federación — los intercambios, votos y avales ya compartidos con tu comunidad y sus comunidades vinculadas se quedan donde están.",
+        "otherNodes": "Esto no bloquea a la persona en otros nodos (los servidores de otras comunidades) — solo aquí, solo para ti."
       },
       "notePlaceholder": "Nota privada (opcional, solo tú la ves)",
       "hideGovernanceCheckbox": "Ocultar también sus propuestas, votos y comentarios en disputas.",
@@ -3077,7 +3077,7 @@
     },
     "settings": {
       "sectionTitle": "Contactos bloqueados",
-      "sectionIntro": "Tu lista personal de bloqueos. Se queda en este dispositivo — nunca se federa, y ningún otro miembro puede verla.",
+      "sectionIntro": "Tu lista personal de bloqueos. Se queda en este dispositivo — nunca se federa (nunca se comparte con ningún servidor ni otro miembro), y nadie más puede verla.",
       "activeHeading": "Bloqueos activos",
       "activeEmpty": "Aún no has bloqueado a nadie. Para bloquear a alguien, abre una conversación con esa persona y pulsa el menú en el encabezado de la conversación.",
       "historyHeading": "Bloqueos anteriores",
@@ -3210,7 +3210,7 @@
       "count_other": "{{count}} por confirmar"
     },
     "posts": {
-      "title": "Intercambios esperando tu firma",
+      "title": "Intercambios esperando que confirmes y firmes",
       "confirm": "Confirmar",
       "someone": "Un miembro"
     },
@@ -3234,11 +3234,11 @@
       "checking": "Comprobando…",
       "none": "Todavía no hay un servidor conectado. Ahora mismo este dispositivo ES la comunidad — todo vive aquí y en los teléfonos de otros miembros.",
       "primary": "Principal",
-      "mirror": "Espejo",
+      "mirror": "Espejo (copia de respaldo)",
       "answered": "Respondió",
       "noAnswer": "No respondió desde aquí",
       "nodeId": "Publica el id de nodo {{nodeId}}",
-      "nodeIdMismatch": "Este servidor publica un id de nodo distinto del id comunitario en este dispositivo ({{expected}}). Vale la pena preguntar a tu operadora — puede significar una dirección cambiada o un servidor reemplazado.",
+      "nodeIdMismatch": "Este servidor publica un id de nodo — su identificador de comunidad — distinto del que este dispositivo espera ({{expected}}). Vale la pena preguntar a quien lo opera — puede significar una dirección cambiada o un servidor reemplazado.",
       "offline": "Estás sin conexión, así que ahora no se puede preguntar a los servidores. \"No respondió\" significa exactamente eso — se preguntó desde este dispositivo y no hubo respuesta — nunca \"caído\".",
       "recheck": "Comprobar de nuevo"
     },
@@ -3259,14 +3259,14 @@
     "governance": {
       "title": "Gobernanza",
       "openProposals": "Propuestas abiertas ahora mismo",
-      "quorum": "Quórum de retiro (regla comunitaria)",
+      "quorum": "Quórum de expulsión (regla comunitaria: cuántos integrantes deben cofirmar una expulsión)",
       "quorumUnknown": "Aún no publicado",
       "view": "Ver propuestas"
     },
     "source": {
       "title": "El software mismo",
       "body": "Understoria es software libre. Este servidor ofrece su propio código fuente, para que la copia de la comunidad no dependa de que nadie más siga en línea.",
-      "version": "Versión {{version}} · commit {{commit}}",
+      "version": "Versión {{version}} · compilación (commit) {{commit}}",
       "download": "Descargar el código fuente ({{size}})",
       "bundle": "Paquete con todo el historial ({{size}})",
       "checksums": "Sumas de verificación",

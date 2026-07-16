@@ -156,13 +156,13 @@ export async function getSecretKey(publicKey: string): Promise<string> {
   const row = await db.secretKeys.get(publicKey);
   if (!row) {
     throw new Error(
-      `No secret key on this device for ${publicKey.slice(0, 8)}… — cannot sign.`,
+      `This device doesn't hold the secret key for ${publicKey.slice(0, 8)}… — the private code that proves things really come from you — so it can't sign this. Use the device you joined on, or restore your recovery kit.`,
     );
   }
   if (row.secretKey) return row.secretKey;
   if (!row.wrapped) {
     throw new Error(
-      "Secret key row is malformed: neither plaintext nor wrapped.",
+      "Your saved identity key looks damaged and can't be read. Try locking and unlocking; if that fails, restore from your recovery kit (the backup you saved when you joined).",
     );
   }
   if (isDirectBlob(row.wrapped)) {
@@ -174,7 +174,7 @@ export async function getSecretKey(publicKey: string): Promise<string> {
     const plaintext = unwrapDirect(row.wrapped, session.dmk);
     if (!plaintext) {
       throw new Error(
-        "The session key can't decrypt this wrapped secret — try locking and re-unlocking.",
+        "We couldn't unscramble your saved identity key with this unlocked session. Lock the app and unlock it again with your passphrase.",
       );
     }
     return plaintext;
@@ -187,7 +187,7 @@ export async function getSecretKey(publicKey: string): Promise<string> {
   const plaintext = unwrap(row.wrapped, session.masterKey);
   if (!plaintext) {
     throw new Error(
-      "The session key can't decrypt this wrapped secret — try locking and re-unlocking.",
+      "We couldn't unscramble your saved identity key with this unlocked session. Lock the app and unlock it again with your passphrase.",
     );
   }
   return plaintext;
@@ -331,7 +331,7 @@ export async function enrollPasskeyWrapper(
     const wrappers = await readWrappers();
     if (!wrappers) {
       throw new Error(
-        "Device key wrappers are missing — lock and unlock, then retry.",
+        "The protected copy of your identity key (the scrambled bundle your passphrase opens) isn't loaded. Lock the app, unlock it, then try again.",
       );
     }
     await writeWrappers({
@@ -364,7 +364,7 @@ export async function enrollPasskeyWrapper(
           : null);
       if (!plaintext) {
         throw new Error(
-          `Could not decrypt an existing wrapped row for ${row.publicKey.slice(0, 8)}….`,
+          `We couldn't unlock one of your saved keys (${row.publicKey.slice(0, 8)}…) while updating this setting. Make sure the app is unlocked with your current passphrase, then try again.`,
         );
       }
       await db.secretKeys.put({
@@ -444,7 +444,7 @@ export async function enablePassphrase(
           : null;
       if (!plaintext) {
         throw new Error(
-          `Could not decrypt an existing wrapped row for ${row.publicKey.slice(0, 8)}….`,
+          `We couldn't unlock one of your saved keys (${row.publicKey.slice(0, 8)}…) while updating this setting. Make sure the app is unlocked with your current passphrase, then try again.`,
         );
       }
       const wrapped = wrap(plaintext, masterKey, salt, DEFAULT_ITERATIONS);
@@ -529,7 +529,7 @@ async function rewrapV1Rows(nextPassphrase: string): Promise<void> {
           : null;
       if (!plaintext) {
         throw new Error(
-          `Could not decrypt an existing wrapped row for ${row.publicKey.slice(0, 8)}….`,
+          `We couldn't unlock one of your saved keys (${row.publicKey.slice(0, 8)}…) while updating this setting. Make sure the app is unlocked with your current passphrase, then try again.`,
         );
       }
       const wrapped = wrap(plaintext, masterKey, salt, DEFAULT_ITERATIONS);
@@ -573,7 +573,7 @@ export async function disablePassphrase(): Promise<void> {
             : null;
         if (!plaintext) {
           throw new Error(
-            `Could not decrypt an existing wrapped row for ${row.publicKey.slice(0, 8)}….`,
+            `We couldn't unlock one of your saved keys (${row.publicKey.slice(0, 8)}…) while updating this setting. Make sure the app is unlocked with your current passphrase, then try again.`,
           );
         }
         await db.secretKeys.put({
@@ -603,7 +603,7 @@ export async function disablePassphrase(): Promise<void> {
           : null;
       if (!plaintext) {
         throw new Error(
-          `Could not decrypt an existing wrapped row for ${row.publicKey.slice(0, 8)}….`,
+          `We couldn't unlock one of your saved keys (${row.publicKey.slice(0, 8)}…) while updating this setting. Make sure the app is unlocked with your current passphrase, then try again.`,
         );
       }
       await db.secretKeys.put({

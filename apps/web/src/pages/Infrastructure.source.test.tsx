@@ -84,7 +84,7 @@ describe("SourceCard", () => {
     });
     await render();
     const text = container.textContent ?? "";
-    expect(text).toContain("Version 0.3.0 · commit abc1234");
+    expect(text).toContain("Version 0.3.0 · build (commit) abc1234");
     expect(text).toContain("Download the source (2.4 MB)");
     expect(text).toContain("Full history bundle (44.8 MB)");
     expect(text).toContain("Checksums");
