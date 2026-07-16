@@ -9,6 +9,27 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Plain-language pass over the whole app** (operator ruling
+  2026-07: technical terms are welcome, but "things should always be
+  explained in easy to understand ways"). Roughly 95 strings across
+  English and Spanish now pair every technical term with an
+  in-place, plain explanation instead of assuming the reader knows
+  it: "node" is consistently glossed as the shared server your
+  community runs; "public key" as the shareable half of your
+  identity; "signed" as stamped with your identity key so it can't
+  be forged; "end-to-end encrypted" as readable only on the
+  receiving device (not even the server); "federated" as shared out
+  to connected communities; plus fingerprint, quorum, wrapped keys,
+  plaintext, passkey, mirror, sync, shards, PRF, and commit. The
+  heaviest clusters were device pairing, event creation/consent
+  screens, the lock screen, security & emergency settings, and the
+  removal ceremony. The raw crypto errors thrown from the data layer
+  (e.g. "The session key can't decrypt this wrapped secret",
+  "Paste base64 envelope here…") were rewritten the same way — a
+  member changing their passphrase now gets an instruction, not a
+  stack-trace sentence.
+
 ### Fixed
 - **The connect-time backfill now covers EVERY federable record
   kind** (`apps/web/src/lib/outboxBackfill.ts` — closing the

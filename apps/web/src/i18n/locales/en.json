@@ -11,7 +11,7 @@
     "title": "Add another device",
     "subtitle": "Use the same identity on a second device. The transfer is sealed end-to-end — no server can read it.",
     "listen": {
-      "starting": "Looking for your community node…",
+      "starting": "Looking for your community node (the shared server your community runs)…",
       "emptyTitle": "Nothing is asking to be linked yet.",
       "emptyBody": "On your new device, open Understoria and choose \"Bring my identity over.\" It will show up here by itself — keep this page open.",
       "listening": "Listening…",
@@ -25,7 +25,7 @@
       "linkIt": "Link it",
       "safetyLine": "Only link a device you're holding. Not trying to link anything right now? Don't tap — someone on your network could be trying their luck.",
       "badgeAriaLabel": "Recognition emoji for this link request",
-      "noNode": "This device can't reach your community node, so tap-to-link isn't available right now. The QR method works without any server.",
+      "noNode": "This device can't reach your community node — the shared server your community runs — so tap-to-link isn't available right now. The QR method works without any server.",
       "useQr": "Show a QR instead",
       "whatMoves": "What moves to the new device (and what doesn't)",
       "vpnHint": "Still nothing? A VPN or iCloud Private Relay can make your two apps look like they're on different networks, so the ask never shows up here. Pause it for a minute and have the new device ask again — or use \"Other ways to link\" below."
@@ -34,7 +34,7 @@
       "link": "Other ways to link",
       "title": "Other ways to link",
       "wordsTitle": "Linking a device that's somewhere else?",
-      "wordsBody": "Get a 6-word code to read out loud — whoever holds the new device types it there. Needs your community node.",
+      "wordsBody": "Get a 6-word code to read out loud — whoever holds the new device types it there. Needs your community node (the shared server) to pass the code along.",
       "qrTitle": "No community server, or don't want it involved?",
       "qrBody": "Show a QR the new device scans. Nothing is stored anywhere — the two devices must be in the same room."
     },
@@ -57,7 +57,7 @@
       "staysTitle": "What stays on this device",
       "stays": {
         "dms": "Direct messages",
-        "dmsDetail": "DMs are end-to-end encrypted to this device. The new device starts fresh.",
+        "dmsDetail": "DMs are end-to-end encrypted to this device — only it can read them, not even the server — so they can't be copied over. The new device starts fresh.",
         "drafts": "Drafts in progress",
         "draftsDetail": "Local-only on purpose. Finish or copy anything you don't want to lose first.",
         "themeDensity": "Theme and density",
@@ -91,14 +91,14 @@
       "afterImport": "When the other device says it's done, tap Done. The QR will also clear on its own when the timer reaches zero.",
       "done": "Done",
       "fingerprintLabel": "Confirm on the other device",
-      "fingerprintAriaLabel": "Identity fingerprint to confirm on the other device"
+      "fingerprintAriaLabel": "Identity fingerprint — a short safety code to compare on the other device"
     },
     "link": {
       "intro": "On your new device, open Understoria and choose the option about already having your identity. Then type these 6 words there, in order:",
       "warning": "These words are the whole key for the next 15 minutes — whoever types them first gets your identity. Don't say them around others and never send them in a chat.",
       "afterImport": "When the new device says it's in, tap Done. The code dies on its own when the timer ends, and it only works once.",
-      "qrInstead": "New device offline, or prefer nothing stored on the node? Show a QR instead",
-      "fallbackNotice": "Couldn't reach your community node just now — using the QR method instead."
+      "qrInstead": "New device offline, or prefer nothing stored on the node (your community's server)? Show a QR instead",
+      "fallbackNotice": "Couldn't reach your community node (its shared server) just now — using the QR method instead."
     },
     "expired": {
       "title": "Time's up.",
@@ -110,7 +110,7 @@
     "errors": {
       "title": "Couldn't start pairing",
       "generic": "Something went wrong. Try again.",
-      "locked": "Unlock your session before pairing — your identity key is sealed.",
+      "locked": "Unlock your session before pairing — your identity key (the secret that proves you're you) stays sealed until then.",
       "retry": "Try again"
     },
     "labelSource": {
@@ -123,7 +123,7 @@
     }
   },
   "avatar": {
-    "label": "Member avatar for key {{shortKey}}"
+    "label": "Avatar for member {{shortKey}}"
   },
   "pairDevice": {
     "title": "Pair this device",
@@ -141,7 +141,7 @@
       "waitingLine": "Waiting for your approval… this ask expires in {{mmss}}.",
       "expired": "This ask expired.",
       "askAgain": "Ask again",
-      "noNode": "This device can't reach a community node, so tap-to-link isn't available. The QR method works without one.",
+      "noNode": "This device can't reach a community node — the shared server a community runs — so tap-to-link isn't available. The QR method works without one.",
       "useQr": "Use the QR method",
       "busyNode": "A few devices are already asking to be linked from your network. Wait a minute for them to expire, then try again.",
       "nodeError": "Your community's server isn't answering. Check your connection and try again.",
@@ -170,8 +170,8 @@
       "samePhoneStep2": "It shows 6 words. Flip back here and type them below — they stay valid for 15 minutes, so switching apps is fine.",
       "submit": "Link this device",
       "notFound": "Nothing waiting under these words. Check each word and the order — and check the other screen is still showing them. Codes expire after 15 minutes and each code works exactly once.",
-      "noNode": "This device can't reach a community node, so word-linking isn't available here. Use the QR option below instead.",
-      "scanInstead": "No community node, or the other device can't connect? Scan a QR instead"
+      "noNode": "This device can't reach a community node (your community's shared server), so word-linking isn't available here. Use the QR option below instead.",
+      "scanInstead": "No community node (shared server), or the other device can't connect? Scan a QR instead"
     },
     "capture": {
       "directions": {
@@ -186,7 +186,7 @@
       "cameraUnavailableHelp": "Your browser doesn't have a built-in QR reader, or you didn't allow camera access. You can paste the QR contents instead, if the other device offered them.",
       "videoAriaLabel": "Live camera view, looking for a QR code",
       "pasteLabel": "Or paste the QR contents",
-      "pastePlaceholder": "Paste base64 envelope here…",
+      "pastePlaceholder": "Paste the pairing code here…",
       "continue": "Continue",
       "invalidCode": "That doesn't look like a pairing code. Copy it again from the other screen — make sure you get the whole thing.",
       "samePhone": {
@@ -219,7 +219,7 @@
       "intro": "Pick a passphrase to protect your identity on this device. You'll type it when the app asks you to unlock. Leave it blank to skip locking on this device — only do that if no one else has access.",
       "passphraseLabel": "New passphrase",
       "confirmLabel": "Confirm passphrase",
-      "skipHint": "Leave both blank to skip — your key stays unwrapped on this device.",
+      "skipHint": "Leave both blank to skip — your identity key stays unlocked on this device, so anyone who picks it up is signed in as you.",
       "mismatch": "Passphrase and confirmation don't match.",
       "finish": "Finish"
     },
@@ -227,7 +227,7 @@
       "title": "You're in.",
       "intro": "A few things this device starts without:",
       "bullets": {
-        "noDms": "No DM history — messages are end-to-end encrypted to whichever device received them.",
+        "noDms": "No DM history — messages are end-to-end encrypted, readable only on the device that received them (not even the server can), so they can't be copied over.",
         "noDrafts": "No drafts — the other device may have unsaved posts; those don't follow.",
         "noPrefs": "No theme or density preferences — set them in Profile → Settings if you want them to match."
       },
@@ -261,7 +261,7 @@
   },
   "demo": {
     "banner": "You're exploring a live demo. Everything you do stays in this browser — only you can see it, and nothing is sent anywhere.",
-    "nodeSection": "This demo runs entirely in your browser — connecting to a community server is switched off, so nothing you do here is ever sent anywhere. In the real app, this section links your device to your community's node.",
+    "nodeSection": "This demo runs entirely in your browser — connecting to a community server is switched off, so nothing you do here is ever sent anywhere. In the real app, this section links your device to your community's node — the shared server your community runs.",
     "reset": {
       "cta": "Reset demo",
       "confirm": "Start over with fresh sample data?",
@@ -342,13 +342,13 @@
     "message": "Members can find you for in-person help if you add a neighborhood or a skill or two. Optional, but it helps.",
     "cta": "Add some details",
     "dismiss": "Not now",
-    "technical": "Profile fields visible on your posts and member detail: skills (free-text comma-separated tokens, no taxonomy), zone (coarsened to neighborhood — never street address — so geographic context doesn't leak past what you explicitly shared), availability free-text notes, availability chips (coarse buckets — weekday days, weekday evenings, weekend days, weekend evenings, ask me anytime). The nudge dismisses when any of these is filled, or on explicit dismissal. Dismissal is per-device, not federated, and clears on hard purge."
+    "technical": "Profile fields visible on your posts and member detail: skills (free text, separated by commas — no fixed list to pick from), zone (coarsened to neighborhood — never street address — so geographic context doesn't leak past what you explicitly shared), availability free-text notes, availability chips (coarse buckets — weekday days, weekday evenings, weekend days, weekend evenings, ask me anytime). The nudge dismisses when any of these is filled, or on explicit dismissal. Dismissal is per-device — remembered only here, never shared to other communities (not federated) — and clears on hard purge."
   },
   "firstActionNudge": {
     "label": "Getting started",
     "message": "Two ways in: tap any post that catches your eye to see how exchange works, or share something you need or can offer. No pressure to post first — lurking is welcome too.",
     "dismiss": "Got it",
-    "technical": "The nudge appears on the Board until you take a first action — claiming a post, posting your own need or offer, or explicitly dismissing it. Once any of these happens, it stays dismissed per-device. A hard reset (Profile → Emergency → Hard purge) or a fresh install brings the nudge back; the state lives in local IndexedDB, not on the community node."
+    "technical": "The nudge appears on the Board until you take a first action — claiming a post, posting your own need or offer, or explicitly dismissing it. Once any of these happens, it stays dismissed per-device. A hard reset (Profile → Emergency → Hard purge) or a fresh install brings the nudge back; the state lives in local IndexedDB (your browser's own storage), not on the community node (your community's server)."
   },
   "vouchNudge": {
     "label": "Vouching is open to you",
@@ -562,11 +562,11 @@
     },
     "new": {
       "workDayBannerTitle": "Scheduling a work day for {{project}}",
-      "workDayBannerBody": "This event will appear on the project page on this node. On peer nodes it appears as a regular community event — the project connection never federates. The title below is yours to edit before you sign.",
+      "workDayBannerBody": "This event will appear on the project page in your own community (this node). Other communities' servers (peer nodes) see it as a regular community event — the project connection never leaves home. The title below is yours to edit before you sign.",
       "workDayTitlePrefill": "Work day — {{project}}",
       "workDayDescriptionPrefill": "A hands-on work session for {{project}}. Come for any part of it.",
       "title": "Create event",
-      "subtitle": "An event is a signed, federated record. Names what you're committing to before you sign.",
+      "subtitle": "An event is a signed, federated record — stamped with your identity and shared out to connected communities. Name what you're committing to before you sign.",
       "titleField": "Title",
       "titlePlaceholder": "Saturday skillshare",
       "descriptionField": "Description",
@@ -582,19 +582,19 @@
       "location": "Location",
       "locationField": "Location",
       "locationPlaceholder": "the library bench",
-      "locationHint": "Free text. Don't put a literal address that you wouldn't publish — every peer node will see this.",
+      "locationHint": "Free text. Don't put a literal address that you wouldn't publish — every peer node (every connected community's server) will see this.",
       "capacity": "Capacity",
       "capacityField": "Capacity (optional)",
       "capacityHint": "Leave empty for uncapped.",
       "signingHeading": "What you're signing",
       "signingMeansTitle": "What this means",
-      "signingMeansOrganizer": "Your public key is published as the organizer. Anyone with federation access can see you organized this.",
-      "signingMeansPublic": "The location and start time you enter are visible on every peer node. Choose a description that matches what you can publish.",
+      "signingMeansOrganizer": "Your public key — the shareable half of your identity, like a name tag anyone can read — is published as the organizer. Anyone in a connected community can see you organized this.",
+      "signingMeansPublic": "The location and start time you enter are visible on every peer node — every community connected to yours. Choose a description that matches what you can publish.",
       "signingMeansPermanent": "Events are append-only. You can cancel; you cannot delete or edit. A cancellation is itself a signed, permanent record.",
-      "signingMeansRsvp": "RSVPs from members on this node are visible to you and to other RSVPs on this node only. Members on other nodes never see the roster.",
+      "signingMeansRsvp": "RSVPs from members of your own community (this node) are visible to you and to the others who RSVP'd here. Members of other communities never see the roster.",
       "signingNotTitle": "What this does NOT mean",
       "signingNotEditable": "Editable — to change the time or location, cancel and re-create.",
-      "signingNotPrivate": "Privately scoped — there is no \"members only\" event in phase 1. If it shouldn't be on a public wire, coordinate over DM or a NEED/OFFER post instead.",
+      "signingNotPrivate": "Privately scoped — there is no \"members only\" event yet. If it shouldn't be out in the open where every connected community can see it, coordinate over DM or a NEED/OFFER post instead.",
       "submit": "Create and sign",
       "submitting": "Signing…",
       "created": "Event created.",
@@ -627,9 +627,9 @@
       "addToCalendarHint": "Downloads a file for your device's calendar. Reminders are up to you and your calendar app.",
       "organizerControlsHeading": "Organizer controls",
       "cancelButton": "Cancel event",
-      "cancelHint": "Cancellation is the only post-create change in phase 1. The cancellation itself is a signed, permanent record; members who RSVP'd will see the reason on their attention rail.",
+      "cancelHint": "Cancelling is the only change possible after creating. The cancellation itself is a signed, permanent record — stamped with your identity, impossible to delete; members who RSVP'd will see the reason in the notices at the top of their dashboard (the attention rail).",
       "cancelDialogTitle": "Cancel \"{{title}}\"?",
-      "cancelDialogBody": "This signs a cancellation record. It federates to peer nodes and cannot be undone. RSVP'd members will see this on their attention rail.",
+      "cancelDialogBody": "This signs a cancellation record — a permanent notice stamped with your identity. It travels out to connected communities (peer nodes) and cannot be undone. RSVP'd members will see it in the notices at the top of their dashboard.",
       "cancelReasonLabel": "Reason (optional)",
       "cancelReasonPlaceholder": "Why is this changing? A sentence is plenty.",
       "cancelConfirm": "Sign cancellation",
@@ -650,7 +650,7 @@
       "signingHeading": "If you RSVP",
       "signingBodyGoing": "If you choose Going or Maybe, the organizer and other RSVP'd members will see your name on this event.",
       "signingBodyNotGoing": "If you choose Not going, your choice is private — only you can see it.",
-      "signingBodyLocalOnly": "Your RSVP stays on this node. It is NOT federated to peer nodes.",
+      "signingBodyLocalOnly": "Your RSVP stays inside your own community (this node). It is NOT federated — never shared out to other communities.",
       "going": "Going",
       "maybe": "Maybe",
       "notGoing": "Not going",
@@ -1072,12 +1072,12 @@
       "claimerNarrative": {
         "intro": "You've marked this done. An organizer confirms to complete the exchange — your {{hours}} hours of credit move then.",
         "estimateNote": "You recorded {{actual}} for this task (estimated {{estimate}}).",
-        "autoConfirm_one": "If no one gets to it, the node confirms automatically within about {{count}} day.",
-        "autoConfirm_other": "If no one gets to it, the node confirms automatically within about {{count}} days."
+        "autoConfirm_one": "If no one gets to it, the community's server (the node) confirms automatically within about {{count}} day.",
+        "autoConfirm_other": "If no one gets to it, the community's server (the node) confirms automatically within about {{count}} days."
       },
       "confirmDialog": {
         "title": "Confirm this task?",
-        "body": "Confirming records a signed exchange: {{hours}} hours move to {{claimer}}, and {{hours}} hours move out of your balance — you're signing as the helped party on behalf of the project.",
+        "body": "Confirming records a signed exchange — stamped with your identity key so no one can forge it: {{hours}} hours move to {{claimer}}, and {{hours}} hours move out of your balance — you're signing as the helped party on behalf of the project.",
         "estimateNote": "{{claimer}} recorded the actual time: {{actual}}. The task was estimated at {{estimate}}.",
         "confirmCta": "Confirm and sign",
         "confirming": "Signing…",
@@ -1205,7 +1205,7 @@
       "selectPlaceholder": "Choose a member...",
       "invite": {
         "send": "Send invitation",
-        "copy": "They'll see your invitation in their next sync. You can revoke any time before they accept.",
+        "copy": "They'll see your invitation on their next sync — when their app next checks in with the community server. You can revoke any time before they accept.",
         "locked": "Unlock this device with your passphrase before sending an invitation."
       },
       "pending": {
@@ -1214,7 +1214,7 @@
         "expires": "expires {{when}}",
         "revoke": "Revoke",
         "revokeConfirmTitle": "Cancel this invitation?",
-        "revokeConfirmBody": "They won't receive it on their next sync. You can invite them again later."
+        "revokeConfirmBody": "They won't receive it when their app next syncs with the community server. You can invite them again later."
       },
       "past": {
         "title": "Past invitations",
@@ -1326,7 +1326,7 @@
       "heading": "Upcoming work days",
       "scheduleButton": "Schedule a work day",
       "itemAt": "at {{location}}",
-      "localLinkHint": "Work days are community events connected to this project on this node only. Peer nodes see the event — never the project connection.",
+      "localLinkHint": "Work days are community events connected to this project in your own community only (this node). Other communities' servers (peer nodes) see the event — never the project connection.",
       "nextGlanceHeading": "Next work day",
       "templateHint": "This project's template has recurring crew work — a work day with shifts is an easy way to gather hands for it.",
       "templateHintDismiss": "Got it"
@@ -1557,8 +1557,8 @@
       "awaitingConfirmation": {
         "viewerOwes": "{{name}} confirmed. Your confirmation completes the exchange and moves the credit.",
         "viewerConfirmed": "You've confirmed. Waiting on {{name}} — credit moves when both sides have confirmed.",
-        "autoConfirm_one": "If they don't get to it, the node confirms automatically within about {{count}} day.",
-        "autoConfirm_other": "If they don't get to it, the node confirms automatically within about {{count}} days.",
+        "autoConfirm_one": "If they don't get to it, the community's server (the node) confirms automatically within about {{count}} day.",
+        "autoConfirm_other": "If they don't get to it, the community's server (the node) confirms automatically within about {{count}} days.",
         "thirdParty": "Confirmed by one side; waiting on the other."
       },
       "completed": "This exchange is complete — credit has moved.",
@@ -1574,8 +1574,8 @@
     "offerHint": "Standing together? Show this code to {{name}}. Their phone checks the details, they sign, and their screen answers with a receipt code — capture it below and you're both done.",
     "hoursLine": "{{hours}} of {{category}}",
     "offerQrAlt": "In-person exchange offer code — show to the member you helped",
-    "fingerprintLabel": "Key fingerprint",
-    "offerFingerprintHint": "The other phone shows this same fingerprint on its review screen — read them aloud together before they sign.",
+    "fingerprintLabel": "Key fingerprint (a short code standing in for the full key)",
+    "offerFingerprintHint": "The other phone shows this same fingerprint on its review screen — a short code standing in for the full key, easy to compare. Read them aloud together before they sign, so you know the right phones are talking.",
     "captureReceipt": "They've signed — capture their receipt",
     "captureReceiptHint": "Point your camera at the receipt code on {{name}}'s screen.",
     "captureOfferHint": "Point your camera at the offer code on your helper's screen.",
@@ -1600,7 +1600,7 @@
       "post_mismatch": "That offer doesn't match this phone's copy of the post — the people or category differ. Don't sign it.",
       "wrong_member": "This offer isn't addressed to you — only the member who received the help can sign it.",
       "different_record": "That receipt belongs to a different exchange than the offer this phone made.",
-      "bad_signature": "A signature on that code doesn't verify. Don't accept it.",
+      "bad_signature": "A signature on that code doesn't verify — the tamper-proof stamp doesn't match the contents, which can mean the code was altered. Don't accept it.",
       "daily_limit": "This would pass the community's daily limit for one helper — wait a day and confirm then."
     }
   },
@@ -1638,11 +1638,11 @@
     "sign": "Sign — record {{hours}}",
     "receiptHint": "Show this receipt to {{name}} so their phone stores the same record.",
     "receiptQrAlt": "Direct exchange receipt code",
-    "done": "Recorded. Both of you now hold the same signed exchange, and it will reach the community node when you're next online.",
+    "done": "Recorded. Both of you now hold the same signed exchange, and it will reach the community node (your community's server) when you're next online.",
     "close": "Close",
     "error": {
       "no_identity": "No identity on this device.",
-      "locked": "Unlock the app first — signing needs your key.",
+      "locked": "Unlock the app first — signing needs your secret key, the private code that proves this really came from you.",
       "self_exchange": "You can't record an exchange with yourself.",
       "counterparty_unknown": "This member isn't known on your device yet.",
       "bad_hours": "Enter the hours the help actually took.",
@@ -1650,7 +1650,7 @@
       "not_an_offer": "That code isn't a direct-exchange offer.",
       "not_direct_label": "That code isn't a valid direct exchange.",
       "wrong_member": "This offer names a different member — it can only be signed by the person it's about.",
-      "bad_signature": "The signature on that code doesn't check out.",
+      "bad_signature": "The signature on that code doesn't check out — its tamper-proof stamp doesn't match the contents.",
       "daily_limit": "This would pass the community's daily exchange limit — record it tomorrow.",
       "not_a_receipt": "That code isn't a direct-exchange receipt.",
       "different_record": "That receipt describes a different exchange than the offer you showed."
@@ -1660,14 +1660,14 @@
     "title": "This device is locked",
     "introWith": "Enter your passphrase to unlock {{name}}'s identity on this device.",
     "introNone": "Enter your passphrase to unlock this device.",
-    "keyLine": "Key: {{key}}",
+    "keyLine": "Identity key (the code that stands for your account): {{key}}",
     "passphraseLabel": "Passphrase",
     "submit": "Unlock",
     "submitting": "Unlocking…",
     "wrongPassphrase": "That passphrase didn't match. Try again.",
-    "nothingToUnlock": "No wrapped keys on this device — nothing to unlock. (If you're seeing this, reload the page.)",
+    "nothingToUnlock": "No wrapped keys on this device — no identity stored scrambled behind a passphrase — so there's nothing to unlock. (If you're seeing this, reload the page.)",
     "passkeyButton": "Unlock with passkey",
-    "passkeyFailed": "The passkey couldn't unlock this device. Your passphrase below always works.",
+    "passkeyFailed": "The passkey — your device's face, fingerprint, or PIN unlock — couldn't open this. Your passphrase below always works.",
     "or": "or",
     "noRecoveryNote": "Forgotten passphrases can't be reset here — nobody holds a master key. But this doesn't have to mean starting over: another linked device still holds your identity, and if you made a recovery kit or chose guardians (Settings → Recovery kit / Guardians), you can wipe this app (Profile → Emergency → Hard purge) and restore from them on the fresh start. With none of those, a fresh identity is the last resort."
   },
@@ -1689,10 +1689,10 @@
     },
     "youInvited": "You've been invited",
     "wantsYou": "{{name}} wants you in their mutual aid network.",
-    "inviterKey": "Inviter key",
+    "inviterKey": "Inviter key (the code identifying who invited you)",
     "expires": "Expires",
     "expiresOn": "This invite is valid until {{date}}.",
-    "fingerprintReminder": "Before accepting: confirm that the inviter-key fingerprint above matches what {{name}} shared with you in person or over a secure channel. A link that reached you via untrusted email is worth a double-check.",
+    "fingerprintReminder": "Before accepting: the fingerprint above is a short, easy-to-compare version of the inviter's key. Confirm it matches what {{name}} shared with you in person or over a channel you trust — that's how you know this invite really came from them. A link that reached you via untrusted email is worth a double-check.",
     "welcome": "Welcome in. Redirecting to the board…",
     "welcomeStay": "Welcome in. One question below before the board.",
     "notConnected": {
@@ -1712,7 +1712,7 @@
     "errors": {
       "malformed": "This invite link is damaged or incomplete. That's usually the messaging app's doing, not yours — some apps mangle links when you tap them. Try opening the link in your regular browser, or paste the original message below. If that doesn't work, ask the person who invited you for a fresh link.",
       "expired": "This invite has expired. Ask the person who invited you for a fresh link — you can paste it below.",
-      "bad_signature": "This invite's signature didn't verify. A messaging app may have altered the link in transit — try pasting the original message below. If it still fails, do not accept: it may have been tampered with.",
+      "bad_signature": "This invite's signature — the tamper-proof stamp proving who made it — didn't verify. A messaging app may have altered the link in transit; try pasting the original message below. If it still fails, do not accept: it may have been tampered with.",
       "already_redeemed": "Someone has already used this invite. Invites are single-use — ask the person who invited you for a fresh link, and paste it below.",
       "revoked": "The person who invited you revoked this invite. If that's a surprise, ask them for a fresh link — you can paste it below.",
       "self_redeem": "You can't redeem an invite you issued yourself. Share the link with someone else."
@@ -1740,13 +1740,13 @@
   "nodeSuggest": {
     "label": "Connect to this community's node",
     "title": "Connect to this community's node?",
-    "body": "You got this app from {{origin}}, which is running a community node. Connecting lets what you share — posts, exchanges, vouches, including the public keys of people you exchange with — sync to that server so the rest of the community can see it. Nothing is sent until you confirm. Only confirm if this is the community you meant to join.",
+    "body": "You got this app from {{origin}}, which is running a community node. Connecting lets what you share — posts, exchanges, vouches, including the public keys of the people you exchange with (a public key is the shareable code that names a member — safe to pass around) — sync to that server so the rest of the community can see it. Nothing is sent until you confirm. Only confirm if this is the community you meant to join.",
     "confirm": "Yes, connect to {{origin}}",
     "decline": "Not now"
   },
   "recoveryKit": {
     "title": "Recovery kit",
-    "intro": "A small file (or printed page) that can bring your account back on a brand-new device if this one is ever lost and you have no paired spare. It holds your secret key, locked under a passphrase you choose right now.",
+    "intro": "A small file (or printed page) that can bring your account back on a brand-new device if this one is ever lost and you have no paired spare. It holds your secret key — the private code that IS your account, the one thing no one else should ever have — locked under a passphrase you choose right now.",
     "create": "Create a recovery kit…",
     "passphraseIntro": "Choose a recovery passphrase. It is separate from any passphrase you use day to day — and there is nobody who can reset it: a kit without its passphrase is just paper. Whoever holds BOTH the kit and this passphrase can act as you.",
     "passphraseLabel": "Recovery passphrase",
@@ -1763,7 +1763,7 @@
     "printTitle": "Understoria recovery kit",
     "printQrAlt": "QR code holding this recovery kit — scan it from the Understoria welcome screen to restore",
     "printIntro": "This page can restore {{name}}'s Understoria account on a new device: open the app, choose \"I have a recovery kit\", scan this code with any QR scanner and paste the text, then enter the recovery passphrase. Keep this page somewhere safe — with the passphrase, it IS the account.",
-    "printKeyLabel": "Public key (yours, shareable):",
+    "printKeyLabel": "Your public key (the shareable code that names your account — safe for anyone to see):",
     "printNodeLabel": "Community server:",
     "printFooter": "No company holds a copy of this. That is the point — and it means this page and its passphrase are the only way back without another paired device."
   },
@@ -1800,7 +1800,7 @@
     "none": "You haven't chosen guardians yet.",
     "setup": "Choose guardians…",
     "reshard": "Choose new guardians…",
-    "reshardHonesty": "Choosing new guardians doesn't cancel the old set — your key itself doesn't change, so enough OLD shards together could still recover it. If a former guardian worries you, make a fresh account instead.",
+    "reshardHonesty": "Choosing new guardians doesn't cancel the old set — your key itself doesn't change, so enough OLD shards (the pieces of your key you handed out before) together could still recover it. If a former guardian worries you, make a fresh account instead.",
     "needMembers": "You need at least {{min}} other members in your community to set this up.",
     "pickTitle": "Who holds a piece?",
     "pickWarning": "Pick people who know your face and voice — their only job in a recovery is to make sure it's really you asking. Any group of them at the threshold size can reconstruct your key, so choose people who wouldn't collude.",
@@ -1846,7 +1846,7 @@
   },
   "removals": {
     "title": "Removals and reinstatements",
-    "intro": "The heaviest decisions a community can make, recorded in the open: who was removed or welcomed back, when, why, and exactly who signed. No single person — not even the server's operator — can create one of these; each needs a quorum of members co-signing.",
+    "intro": "The heaviest decisions a community can make, recorded in the open: who was removed or welcomed back, when, why, and exactly who signed. No single person — not even the server's operator — can create one of these; each needs a quorum of members co-signing — a set number of members each adding their own signature before it counts.",
     "removedLine": "{{name}} was removed by community decision {{when}}.",
     "reinstatedLine": "{{name}} was reinstated by community decision {{when}}.",
     "signedBy": "Signed by {{names}}.",
@@ -1866,7 +1866,7 @@
     "captureCosign": "Capture a co-signature",
     "submitRemoval": "Submit the removal record",
     "submitReinstatement": "Submit the reinstatement record",
-    "submitted": "Submitted. Once the community's server accepts it, the record appears below and takes effect on every member's device on the next sync.",
+    "submitted": "Submitted. Once the community's server accepts it, the record appears below and takes effect on every member's device on their next sync — the app's regular check-in with the server.",
     "close": "Close",
     "copyText": "Copy as text",
     "cosignButton": "Co-sign a removal or reinstatement…",
@@ -1875,7 +1875,7 @@
     "cosignReinstateFriction": "You are being asked to co-sign REINSTATING {{name}}. Your name goes on the record, permanently and publicly.",
     "cosignReason": "The proposed reason: \"{{reason}}\"",
     "cosignConfirm": "Sign my name",
-    "cosignShowBack": "Show this to the proposing member — their device collects it toward the quorum.",
+    "cosignShowBack": "Show this to the proposing member — their device collects it toward the quorum (the number of signatures needed).",
     "cosignQrAlt": "Co-signature code",
     "reinstateButton": "Start a reinstatement…",
     "selfBanner": "This community has removed you by quorum decision. Everything on this device is still yours and keeps working here, but syncing with the community's server will fail until a quorum of members signs a reinstatement. The decision, its reason, and its signers are on the Decisions page.",
@@ -1895,7 +1895,7 @@
   },
   "reseed": {
     "title": "Restore this community onto a node",
-    "intro": "If every community server is ever lost, this device still holds the shared history — every post, exchange, event, project, and membership record, cryptographically signed. Point it at a fresh node and upload it all back. Several members can do this at once; copies simply combine.",
+    "intro": "If every community server is ever lost, this device still holds the shared history — every post, exchange, event, project, and membership record, cryptographically signed (stamped so no one can forge who wrote what). Point it at a fresh node (a newly set-up community server) and upload it all back. Several members can do this at once; copies simply combine.",
     "targetLabel": "Node to restore onto",
     "systemKeyNote": "For the new node's operator — the lost node's auto-confirm key (TRUSTED_SYSTEM_KEYS):",
     "start": "Restore community history…",
@@ -1919,7 +1919,7 @@
   },
   "growRootSuggest": {
     "label": "Our community's node is running low on room",
-    "title": "Our community's node is running low on room",
+    "title": "Our community's node (its server) is running low on room",
     "body": "Growing another root would spread the load. If you run this community's server, it may just need more storage or a chance to shed older records; either way, a second server relieves the pressure and helps everyone. Nothing happens until you decide.",
     "confirm": "Grow another root",
     "decline": "Not now"
@@ -2132,8 +2132,8 @@
         "title": "Accept co-organizer role for \"{{project}}\"",
         "meansTitle": "What this means",
         "meansConfirm": "Confirming task completions — each confirmation moves hours out of your own balance.",
-        "meansSign": "Signing as a project organizer — records you sign in this role trace back to your identity in the project's federated history.",
-        "meansVisible": "Visible to the community — the project page lists you as a co-organizer on every peer's view.",
+        "meansSign": "Signing as a project organizer — records you sign in this role trace back to your identity everywhere the project's history travels (its federated history, shared across connected communities).",
+        "meansVisible": "Visible to the community — the project page lists you as a co-organizer on every member's copy, in every connected community.",
         "notTitle": "What this does not mean",
         "notObligation": "No standing obligation — you can step back from the role yourself at any time.",
         "notDeputy": "No authority over the primary — the primary organizer keeps handoff and removal authority. Co-organizers are peers, not deputies.",
@@ -2304,7 +2304,7 @@
       "seedVaultsOne": "{{count}} member keeps the complete archive on a device of their own — a seed vault.",
       "seedVaultsOther": "{{count}} members keep the complete archive on devices of their own — seed vaults.",
       "nodeQuiet": "No server has answered lately — your copy is safe, and syncing resumes when one is back.",
-      "capacityRed": "Our community's node is running low on room — growing another root would ease the pressure.",
+      "capacityRed": "Our community's node (its server) is running low on room — growing another root would ease the pressure.",
       "leaf": {
         "fresh": "synced today",
         "lagging": "lagging behind",
@@ -2314,9 +2314,9 @@
       "infraLink": "Community infrastructure"
     },
     "federation": {
-      "title": "Across federation",
-      "summaryOne": "{{count}} exchange · {{hours}}h flowing through {{peers}} peer community",
-      "summaryOther": "{{count}} exchanges · {{hours}}h flowing through {{peers}} peer communities"
+      "title": "Across the federation",
+      "summaryOne": "{{count}} exchange · {{hours}}h flowing through {{peers}} peer community — a linked neighbor community running Understoria",
+      "summaryOther": "{{count}} exchanges · {{hours}}h flowing through {{peers}} peer communities — linked neighbor communities running Understoria"
     },
     "breadth": {
       "title": "Breadth, not depth",
@@ -2350,10 +2350,10 @@
     "area": "Area",
     "none": "—",
     "vouchTitle": "Vouch",
-    "vouchIntro": "Vouching is a signed statement that this person is part of our community. Two distinct vouches (including invite redemption) mark a member as trusted.",
+    "vouchIntro": "Vouching is a signed statement — stamped with your key so anyone can check it really came from you — that this person is part of our community. Two distinct vouches (including invite redemption) mark a member as trusted.",
     "vouchButton": "Vouch for this member",
     "vouching": "Vouching…",
-    "vouchedJustNow": "Vouched. Your signed statement is in the local ledger and (if a community node is configured) on its way there.",
+    "vouchedJustNow": "Vouched. Your signed statement is saved in this device's ledger (its record book) and — if a community node is configured — on its way to the community server too.",
     "cannotVouchSelf": "You can't vouch for yourself.",
     "cannotVouchUntilTrusted": "Vouching is enabled once you're trusted yourself. Your inviter's vouch is one; another community member can vouch for you to make it two.",
     "alreadyFullyTrusted": "This member is already trusted. Another vouch wouldn't change anything.",
@@ -2409,8 +2409,8 @@
     },
     "pairingLog": {
       "title": "Paired devices",
-      "intro": "Pair flows you've completed on this device — for your memory. This list lives only on this device.",
-      "rotateHint": "To rotate your identity entirely (e.g. if a device is lost), see Emergency below.",
+      "intro": "Pairings you've completed on this device — times you linked another device to this identity, kept for your memory. This list lives only on this device.",
+      "rotateHint": "To rotate your identity — replace it with a brand-new key entirely, e.g. if a device is lost — see Emergency below.",
       "sourceTitle": "Devices I've authorized from here",
       "destinationTitle": "Times this device was authorized from elsewhere",
       "unlabeled": "(unlabeled)"
@@ -2425,8 +2425,8 @@
       "pendingLine": "{{hours}} pending confirmation",
       "awaitingYouLine": "{{hours}} waiting on your confirmation",
       "pendingWhy": "How confirmation works",
-      "pendingExplainerAuto_one": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node confirms for them within about {{count}} day — nothing is stuck.",
-      "pendingExplainerAuto_other": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node confirms for them within about {{count}} days — nothing is stuck.",
+      "pendingExplainerAuto_one": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node (your community's server) confirms for them within about {{count}} day — nothing is stuck.",
+      "pendingExplainerAuto_other": "Credit moves when both sides confirm an exchange. If a partner doesn't get to it, the community node (your community's server) confirms for them within about {{count}} days — nothing is stuck.",
       "pendingExplainerManual": "Credit moves when both sides confirm an exchange. Nothing is stuck — it lands the moment the second confirmation happens.",
       "projectOutflowLine": "Includes {{hours}} you moved to helpers on behalf of {{project}}.",
       "projectOutflowLineMore_one": "Includes {{hours}} you moved to helpers on behalf of {{project}} and {{count}} other project.",
@@ -2454,7 +2454,7 @@
     "history": {
       "title": "Your exchange history",
       "emptyTitle": "Your story starts here",
-      "empty": "Nothing here yet. When you give or receive help, each exchange shows up with a signed record you can verify.",
+      "empty": "Nothing here yet. When you give or receive help, each exchange shows up as a signed record — stamped with both people's keys so anyone can check it's genuine.",
       "helped": "Helped",
       "received": "Received help from",
       "flag": "in community review",
@@ -2507,7 +2507,7 @@
         "undoDone": "This device will re-download the full history in the background. Activity logs of long-closed projects don't come back — they only ever lived on devices."
       },
       "vault": {
-        "body": "Got room to spare — an old laptop, a tablet in a drawer? Pledge to keep the complete archive on this device. It's the zero-ops way to make the community harder to erase: no server, no port forwarding, just storage and solidarity. Your pledge is public so the community can see how many full copies exist; you can stop any time.",
+        "body": "Got room to spare — an old laptop, a tablet in a drawer? Pledge to keep the complete archive on this device. It's the no-fuss way to make the community harder to erase: no server to run, no network setup (no \"port forwarding\"), just storage and solidarity. Your pledge is public so the community can see how many full copies exist; you can stop any time.",
         "enable": "Keep the complete archive on this device",
         "disable": "Stop pledging the archive",
         "active": "This device is a seed vault — it keeps the community's complete archive.",
@@ -2609,10 +2609,10 @@
     },
     "node": {
       "title": "Community node",
-      "intro": "Optionally mirror your finalized exchanges to a community node so they show up in the community-wide ledger. The node verifies every signature; it never stores your private key.",
+      "intro": "Optionally mirror your finalized exchanges — send a copy — to a community node (your community's shared server) so they show up in the community-wide ledger, the shared record book. The node verifies every signature; it never stores your private key — the secret half of your identity stays on your device.",
       "urlLabel": "Node URL",
       "urlPlaceholder": "https://aid.our-union.example/api",
-      "enableLabel": "Mirror finalized exchanges to this node",
+      "enableLabel": "Mirror (send a copy of) finalized exchanges to this node",
       "save": "Save",
       "saved": "Saved",
       "lastSuccess": "Last success: {{when}}",
@@ -2625,7 +2625,7 @@
       "inviteLink": "Have an invite link? Open it here.",
       "consent": {
         "title": "Send your exchange records to this server?",
-        "body": "Turning on mirroring sends every exchange you take part in to this server — including the other person's public key, the signature, category, hours, and time. A server you don't control can use this to map who-helps-whom across your community. Only enable this for a node your community runs and trusts.",
+        "body": "Turning on mirroring sends every exchange you take part in to this server — including the other person's public key (their shareable member ID), the signature that proves the record is genuine, the category, hours, and time. A server you don't control can use this to map who-helps-whom across your community. Only enable this for a node your community runs and trusts.",
         "confirm": "Yes, mirror to this node"
       },
       "claim": {
@@ -2710,8 +2710,8 @@
     },
     "security": {
       "title": "Security",
-      "summaryProtected": "Your secret keys on this device are wrapped with a passphrase-derived key. Unlock is required at every launch.",
-      "summaryUnprotected": "Your secret keys are stored in plaintext on this device. Enable passphrase protection before leaving the device alone in any hostile environment.",
+      "summaryProtected": "Your secret keys on this device — the private half of your identity — are wrapped (kept scrambled) with a key derived from your passphrase. Unlock is required at every launch.",
+      "summaryUnprotected": "Your secret keys are stored in plaintext — plain readable text anyone holding the device could copy. Enable passphrase protection before leaving the device alone in any hostile environment.",
       "enable": "Enable passphrase protection",
       "change": "Change passphrase",
       "disable": "Disable protection",
@@ -2721,14 +2721,14 @@
       "passphrase": "Passphrase",
       "repeat": "Repeat it",
       "passphraseHint": "At least 8 characters. A four-word pass-phrase from a password manager is ideal. There is no recovery — we cannot get this back for you.",
-      "disableWarn": "This will rewrite your wrapped secret keys as plaintext on this device. Only do this if you're sure the device is safe.",
+      "disableWarn": "This will rewrite your wrapped secret keys as plaintext — no longer scrambled behind your passphrase — on this device. Only do this if you're sure the device is safe.",
       "submitEnable": "Enable",
       "submitChange": "Change",
       "submitDisable": "Disable",
       "working": "Working…",
       "successEnable": "Passphrase protection enabled. Write your passphrase down somewhere safe — it can't be recovered.",
       "successChange": "Passphrase changed. Use the new one next time you unlock.",
-      "successDisable": "Passphrase protection disabled. Secret keys are stored in plaintext on this device again.",
+      "successDisable": "Passphrase protection disabled. Secret keys are stored in plaintext on this device again — anyone holding the device can read them.",
       "errorMismatch": "The two passphrases didn't match.",
       "errorMismatchNew": "The two new passphrases didn't match.",
       "passkey": {
@@ -2741,7 +2741,7 @@
         "addedOn": "A passkey unlocks this device (added {{date}}). Your passphrase also still works.",
         "promptNote": "Your device may ask you to confirm twice — once to create the passkey and once to prepare it for unlocking. That's normal.",
         "needUnlock": "Unlock this device first to change passkey settings.",
-        "prfUnsupported": "This device created a passkey but it can't power unlocking here (its authenticator lacks the required PRF feature). Nothing was changed — you can delete the unused passkey from your device's password manager.",
+        "prfUnsupported": "This device created a passkey, but its security hardware can't power unlocking here (it lacks a needed feature called PRF). Nothing was changed — you can delete the unused passkey from your device's password manager.",
         "failed": "The passkey couldn't be set up. Nothing was changed — your passphrase still works.",
         "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
         "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
@@ -2750,16 +2750,16 @@
     "emergency": {
       "title": "Emergency",
       "intro": "Two panic options for when a device is at risk. Neither contacts a server; both happen entirely on this device.",
-      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger and your keypair. Useful if a device will briefly be handled by a hostile party.",
-      "hardBullet": "Hard purge — wipes every table including private keys, rotates to a fresh node identity. Unrecoverable. The page will reload afterward.",
-      "federatedNote": "Honesty note: both options act on THIS DEVICE only. Anything that already synced with your community — posts, exchanges, vouches, votes, and other signed records — persists on the community node and on other members' devices. A public vote you can no longer stand behind can be re-cast instead: the newest version is what counts.",
+      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger (the record of exchanges) and your keypair (the keys that are your account). Useful if a device will briefly be handled by a hostile party.",
+      "hardBullet": "Hard purge — wipes everything stored here including private keys, and rotates to a fresh identity (a brand-new key). Unrecoverable. The page will reload afterward.",
+      "federatedNote": "Honesty note: both options act on THIS DEVICE only. Anything that already synced with your community — posts, exchanges, vouches, votes, and other signed records — persists on the community node (the shared server) and on other members' devices. A public vote you can no longer stand behind can be re-cast instead: the newest version is what counts.",
       "softButton": "Soft purge (anonymize)",
       "hardButton": "Hard purge (delete everything)",
       "softTitle": "Run soft purge?",
-      "softConfirmDescription": "Identifying text on every member and post will be blanked out. Signed exchange records and your keypair will be preserved. This is not reversible.",
+      "softConfirmDescription": "Identifying text on every member and post will be blanked out. Signed exchange records and your keypair (the keys that are your account) will be preserved. This is not reversible.",
       "softConfirm": "Yes, anonymize",
       "hardTitle": "Run hard purge?",
-      "hardConfirmDescription": "Every table will be wiped — including your private keys. A fresh node identity will be generated and the app will reload. There is no undo.",
+      "hardConfirmDescription": "Everything stored here will be wiped — including your private keys. A brand-new identity (a fresh key) will be generated and the app will reload. There is no undo.",
       "hardConfirm": "Yes, wipe everything",
       "completedSoft": "Soft purge complete in {{ms}}ms.",
       "completedHard": "Hard purge complete in {{ms}}ms."
@@ -2955,7 +2955,7 @@
   "community": {
     "autoConfirmHours": {
       "label": "Auto-confirm after",
-      "help": "When one party stops responding, the community node's system key closes out the exchange so credit can flow. Set to 0 to disable auto-confirm entirely. Requires the operator to have a system key configured; without one the sweep is a no-op.",
+      "help": "When one party stops responding, the community node's system key — a key belonging to the server itself — signs the exchange closed so credit can flow. Set to 0 to disable auto-confirm entirely. Requires the operator to have a system key configured; without one this automatic sweep simply does nothing.",
       "unit": "hours (0 disables)"
     },
     "customMilestones": {
@@ -2986,7 +2986,7 @@
     "start": "Open the board",
     "nextSteps": "Next: browse what neighbors need, or post an offer of your own.",
     "pairDeviceLink": "Already have your identity on another device? Pair this one →",
-    "recoveryKitLink": "Lost your device but have a recovery kit? Restore here →",
+    "recoveryKitLink": "Lost your device but have a recovery kit — the backup file or printout that can rebuild your identity? Restore here →",
     "installedArrival": {
       "title": "The app is on your home screen",
       "intro": "One question before we start:",
@@ -3054,8 +3054,8 @@
       "notCommitsHeading": "What this does NOT mean",
       "notCommits": {
         "dispute": "This does not file a dispute or notify moderators. To raise a community concern, see Profile → Disputes.",
-        "deletion": "This does not delete their signed records from the federation.",
-        "otherNodes": "This does not block them on other nodes."
+        "deletion": "This does not delete their signed records from the federation — exchanges, votes, and vouches already shared with your community and its linked communities stay put.",
+        "otherNodes": "This does not block them on other nodes (other communities' servers) — only here, only for you."
       },
       "notePlaceholder": "Private note (optional, only you see this)",
       "hideGovernanceCheckbox": "Also hide their proposals, votes, and dispute comments from me.",
@@ -3077,7 +3077,7 @@
     },
     "settings": {
       "sectionTitle": "Blocked contacts",
-      "sectionIntro": "Your personal block list. This stays on this device — it never federates, and no other member can see it.",
+      "sectionIntro": "Your personal block list. This stays on this device — it never federates (is never shared to any server or other member), and no one else can see it.",
       "activeHeading": "Active blocks",
       "activeEmpty": "You haven't blocked anyone yet. To block someone, open a conversation with them and tap the menu in the conversation header.",
       "historyHeading": "Previously blocked",
@@ -3210,7 +3210,7 @@
       "count_other": "{{count}} to confirm"
     },
     "posts": {
-      "title": "Exchanges awaiting your signature",
+      "title": "Exchanges waiting for you to confirm and sign",
       "confirm": "Confirm",
       "someone": "A member"
     },
@@ -3234,11 +3234,11 @@
       "checking": "Checking…",
       "none": "No server is connected yet. Right now this device IS the community — everything lives here and on other members' phones.",
       "primary": "Primary",
-      "mirror": "Mirror",
+      "mirror": "Mirror (backup copy)",
       "answered": "Answered",
       "noAnswer": "Didn't answer from here",
       "nodeId": "Publishes node id {{nodeId}}",
-      "nodeIdMismatch": "This server publishes a different node id than the community id on this device ({{expected}}). Worth asking your operator about — it can mean a changed address or a replaced server.",
+      "nodeIdMismatch": "This server publishes a different node id — its community identifier — than the one this device expects ({{expected}}). Worth asking your operator about — it can mean a changed address or a replaced server.",
       "offline": "You're offline, so servers can't be asked right now. \"Didn't answer\" means exactly that — asked from this device, no answer — never \"down\".",
       "recheck": "Check again"
     },
@@ -3259,14 +3259,14 @@
     "governance": {
       "title": "Governance",
       "openProposals": "Proposals open right now",
-      "quorum": "Removal quorum (community rule)",
+      "quorum": "Removal quorum (community rule: how many members must co-sign a removal)",
       "quorumUnknown": "Not published yet",
       "view": "See proposals"
     },
     "source": {
       "title": "The software itself",
       "body": "Understoria is free software. This server offers its own source code, so the community's copy of the app doesn't depend on anyone else staying online.",
-      "version": "Version {{version}} · commit {{commit}}",
+      "version": "Version {{version}} · build (commit) {{commit}}",
       "download": "Download the source ({{size}})",
       "bundle": "Full history bundle ({{size}})",
       "checksums": "Checksums",

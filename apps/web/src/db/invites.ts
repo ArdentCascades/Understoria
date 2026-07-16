@@ -83,7 +83,7 @@ export async function issueInvite(
   } catch (err) {
     throw new Error(
       (err as Error).message ??
-        "You can only issue invites from a device that holds your secret key.",
+        "You can only send invites from a device that holds your secret key — the private code proving invites really come from you. Use the device you joined on.",
     );
   }
   const signed = createInvite({
@@ -163,7 +163,7 @@ export async function revokeInvite(
   token: string,
 ): Promise<void> {
   const row = await db.invites.get(token);
-  if (!row) throw new Error("Invite not found on this node.");
+  if (!row) throw new Error("We couldn't find that invite on your community's server. It may already have been used or removed.");
   if (row.inviterKey !== inviterKey)
     throw new Error("Only the issuing member can revoke this invite.");
   if (
