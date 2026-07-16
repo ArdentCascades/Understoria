@@ -26,6 +26,7 @@ import { useApp } from "@/state/AppContext";
 import {
   getConversation,
   sendMessage,
+  sendReaction,
   type DecryptedMessage,
 } from "@/db/messages";
 import { isBlocked } from "@/db/blocks";
@@ -45,6 +46,15 @@ import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 /** Chat-mode poll cadence — how stale an OPEN thread may go without
  *  a server nudge. Exported for the polling tests. */
 export const CHAT_POLL_MS = 2_500;
+
+/** The reaction palette. Deliberately small — a shared, legible
+ *  vocabulary beats an open-ended emoji keyboard for 1:1 mutual-aid
+ *  threads, and six 44px targets fit a phone-width bubble. */
+export const REACTION_EMOJI = ["❤️", "👍", "😂", "😮", "😢", "🙏"];
+
+/** How long a press must hold before it reads as "react" rather than
+ *  a scroll or an accidental tap. Exported for the reaction tests. */
+export const LONG_PRESS_MS = 450;
 
 /**
  * Route wrapper that REMOUNTS the conversation when `:memberKey`
@@ -82,6 +92,38 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // page only owns the two confirm-dialog open flags.
   const [blockOpen, setBlockOpen] = useState(false);
   const [unblockOpen, setUnblockOpen] = useState(false);
+
+  // Emoji reactions (docs/message-relay.md "Reactions"): which
+  // message's picker is open, plus the long-press timer that opens
+  // it on touch. A reaction is sent as a sealed v2 envelope over the
+  // same E2E relay as a message — the server never sees the emoji.
+  const [reactFor, setReactFor] = useState<string | null>(null);
+  const pressTimer = useRef<number | null>(null);
+  const cancelPress = useCallback(() => {
+    if (pressTimer.current !== null) {
+      window.clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  }, []);
+  const startPress = useCallback(
+    (id: string) => {
+      cancelPress();
+      pressTimer.current = window.setTimeout(() => {
+        pressTimer.current = null;
+        setReactFor(id);
+      }, LONG_PRESS_MS);
+    },
+    [cancelPress],
+  );
+  useEffect(() => cancelPress, [cancelPress]);
+  useEffect(() => {
+    if (reactFor === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setReactFor(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [reactFor]);
 
   const otherKey = memberKey ? decodeURIComponent(memberKey) : "";
   const otherName =
@@ -149,6 +191,28 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   useEffect(() => {
     void loadMessages();
   }, [loadMessages]);
+
+  // Tapping an emoji sends (or, on the same emoji, clears) the
+  // reaction and refreshes the thread. Failures degrade silently to
+  // "nothing happened" — the picker closes either way, and the chip
+  // simply doesn't appear; same soft posture as message send retries.
+  const handleReact = useCallback(
+    async (m: DecryptedMessage, emoji: string) => {
+      if (!currentMember) return;
+      setReactFor(null);
+      const mine = m.reactions?.find(
+        (r) => r.senderKey === currentMember.publicKey,
+      );
+      const next = mine?.emoji === emoji ? "" : emoji;
+      try {
+        await sendReaction(currentMember.publicKey, otherKey, m.id, next);
+        await loadMessages();
+      } catch {
+        // Locked session or blocked party — leave the thread as-is.
+      }
+    },
+    [currentMember, otherKey, loadMessages],
+  );
 
   // Chat-mode polling (docs/sync-liveness.md). An OPEN conversation
   // is the one place the 12s hot cadence feels broken — you're
@@ -456,7 +520,20 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                     if (el) matchRefs.current.set(m.id, el);
                     else matchRefs.current.delete(m.id);
                   }}
-                  className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${baseTone}${ring}`}
+                  // Long press (touch) opens the reaction picker; so
+                  // does right-click / two-finger tap via contextmenu.
+                  // pointercancel fires when the browser claims the
+                  // gesture for scrolling, so a scroll never reacts.
+                  onPointerDown={() => startPress(m.id)}
+                  onPointerUp={cancelPress}
+                  onPointerLeave={cancelPress}
+                  onPointerCancel={cancelPress}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    cancelPress();
+                    setReactFor(reactFor === m.id ? null : m.id);
+                  }}
+                  className={`group relative max-w-[80%] select-none rounded-xl px-3 py-2 text-sm ${baseTone}${ring}`}
                 >
                   {/* Post-context chip: rendered on each message that
                       carried a reference (rather than one sticky
@@ -491,6 +568,89 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                   <p className="mt-1 text-right text-xs opacity-60">
                     {formatRelativeTime(m.createdAt)}
                   </p>
+                  {/* Keyboard/mouse path to the picker — the same
+                      action long-press performs on touch. Invisible
+                      until the bubble is hovered or the button is
+                      focused, but always in the tab order. */}
+                  <button
+                    type="button"
+                    aria-label={t("messages.reactions.open")}
+                    aria-expanded={reactFor === m.id}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={() =>
+                      setReactFor(reactFor === m.id ? null : m.id)
+                    }
+                    className={`absolute -top-2 ${
+                      isMine ? "-left-2" : "-right-2"
+                    } rounded-full border border-moss-200 bg-white px-1.5 py-0.5 text-xs opacity-0 shadow-sm transition-opacity focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-canopy-400 group-hover:opacity-100 dark:border-moss-600 dark:bg-moss-700`}
+                  >
+                    🙂+
+                  </button>
+                  {/* Reaction chips — the CURRENT reaction of each
+                      party (latest wins; clearing removes it). */}
+                  {m.reactions && m.reactions.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {m.reactions.map((r) => (
+                        <span
+                          key={r.senderKey}
+                          aria-label={t("messages.reactions.reactedBy", {
+                            name:
+                              r.senderKey === currentMember.publicKey
+                                ? t("messages.reactions.you")
+                                : otherName,
+                            emoji: r.emoji,
+                          })}
+                          className={`rounded-full px-2 py-0.5 text-sm ${
+                            r.senderKey === currentMember.publicKey
+                              ? "bg-canopy-200 dark:bg-canopy-800"
+                              : "bg-moss-900/10 dark:bg-white/10"
+                          }`}
+                        >
+                          {r.emoji}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* The picker: six 44px emoji, inline under the
+                      bubble. Escape closes (window listener above);
+                      picking sends, picking your current emoji
+                      clears. */}
+                  {reactFor === m.id && (
+                    <div
+                      role="menu"
+                      aria-label={t("messages.reactions.pickerLabel")}
+                      className="mt-1 flex flex-wrap gap-1"
+                    >
+                      {REACTION_EMOJI.map((emoji) => {
+                        const isCurrent = m.reactions?.some(
+                          (r) =>
+                            r.senderKey === currentMember.publicKey &&
+                            r.emoji === emoji,
+                        );
+                        return (
+                          <button
+                            key={emoji}
+                            type="button"
+                            role="menuitem"
+                            aria-label={
+                              isCurrent
+                                ? t("messages.reactions.remove", { emoji })
+                                : t("messages.reactions.reactWith", { emoji })
+                            }
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={() => void handleReact(m, emoji)}
+                            className={`min-h-[44px] min-w-[44px] rounded-full text-xl transition-colors hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:hover:bg-white/10 ${
+                              isCurrent
+                                ? "bg-canopy-200 dark:bg-canopy-800"
+                                : ""
+                            }`}
+                          >
+                            {emoji}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}

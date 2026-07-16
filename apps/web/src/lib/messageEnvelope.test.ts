@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeMessageBody,
   encodeMessageBody,
+  encodeReactionBody,
 } from "./messageEnvelope";
 
 describe("encodeMessageBody", () => {
@@ -74,5 +75,44 @@ describe("decodeMessageBody", () => {
     expect(
       decodeMessageBody('{"v":2,"text":"future words","shiny":true}'),
     ).toEqual({ text: "future words" });
+  });
+});
+
+// Reactions ride the same sealed relay as a v2 envelope
+// (docs/message-relay.md "Reactions"): kind + target + emoji, with a
+// text fallback so pre-reactions clients render the emoji as a tiny
+// message instead of raw JSON.
+describe("reaction envelopes (v2)", () => {
+  it("round-trips a reaction", () => {
+    const encoded = encodeReactionBody("msg-42", "❤️");
+    const body = decodeMessageBody(encoded);
+    expect(body.reaction).toEqual({ reactsTo: "msg-42", emoji: "❤️" });
+    // Graceful degradation: an old client's decode yields the emoji
+    // as visible text (the v>1 fallback keeps `text`).
+    expect(body.text).toBe("❤️");
+  });
+
+  it("a clear (empty emoji) round-trips, with a visible fallback glyph", () => {
+    const body = decodeMessageBody(encodeReactionBody("msg-42", ""));
+    expect(body.reaction).toEqual({ reactsTo: "msg-42", emoji: "" });
+    expect(body.text).toBe("✕");
+  });
+
+  it("rejects malformed reaction fields but keeps the text (future-shape safety)", () => {
+    const noTarget = decodeMessageBody(
+      JSON.stringify({ v: 2, kind: "reaction", text: "❤️", emoji: "❤️" }),
+    );
+    expect(noTarget.reaction).toBeUndefined();
+    expect(noTarget.text).toBe("❤️");
+    const numericEmoji = decodeMessageBody(
+      JSON.stringify({
+        v: 2,
+        kind: "reaction",
+        text: "x",
+        reactsTo: "m1",
+        emoji: 7,
+      }),
+    );
+    expect(numericEmoji.reaction).toBeUndefined();
   });
 });

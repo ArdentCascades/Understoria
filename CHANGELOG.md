@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Emoji reactions on messages** — press and hold a message (or
+  right-click, or use the 🙂+ button that appears on hover and in
+  the keyboard tab order) to react with one of six emoji; pick your
+  current emoji again to remove it. Each person's latest reaction
+  shows as a chip under the message. Privacy shape: a reaction
+  travels as one more sealed end-to-end-encrypted envelope over the
+  existing message relay (`lib/messageEnvelope.ts` v2 body,
+  `sendReaction` in `db/messages.ts`) — the server never sees the
+  emoji, the target, or even that it was a reaction, and there are
+  zero server-side changes. Older app versions show the bare emoji
+  as a tiny message instead of breaking
+  (`docs/message-relay.md` §9).
+
 ### Changed
 - **Plain-language pass over the whole app** (operator ruling
   2026-07: technical terms are welcome, but "things should always be

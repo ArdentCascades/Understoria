@@ -786,6 +786,14 @@
       "next": "Next match",
       "conversationWith": "Conversation with {{name}}",
       "matchedName": "Matched their name"
+    },
+    "reactions": {
+      "open": "React to this message",
+      "pickerLabel": "Pick a reaction",
+      "reactWith": "React with {{emoji}}",
+      "remove": "Remove your {{emoji}} reaction",
+      "reactedBy": "{{name}} reacted {{emoji}}",
+      "you": "You"
     }
   },
   "projects": {

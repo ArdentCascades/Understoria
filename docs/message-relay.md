@@ -192,3 +192,30 @@ there for high-sensitivity coordination).
   advancing past... (rows failing verification never advance the
   cursor), drops blocked senders while advancing, dedups by id, and
   namespaces the cursor per member.
+
+## 9. Reactions (2026-07)
+
+Emoji reactions reuse this relay wholesale. A reaction is a normal
+sealed `RelayedMessage` whose PLAINTEXT (after decryption) is a v2
+envelope — `{"v":2,"kind":"reaction","text":"❤️","reactsTo":"<messageId>","emoji":"❤️"}`
+(`lib/messageEnvelope.ts`). Consequences, all inherited rather than
+re-decided:
+
+- **The node learns nothing new.** It relays one more opaque
+  envelope; that it was a reaction, to what, and which emoji are all
+  inside the ciphertext (§6 unchanged).
+- **No new server surface, kind, table, or cursor.** The retention
+  sweep, membership gate, signature check, and pull path apply as-is.
+- **Old clients degrade gracefully.** The v>1 decode fallback keeps
+  `text`, so a pre-reactions client shows the bare emoji as a tiny
+  message instead of raw JSON.
+- **State model:** the thread folds reaction rows into their target
+  (`foldReactions` in `db/messages.ts`) — latest reaction per sender
+  wins, `emoji: ""` clears. Reaction rows never render as bubbles and
+  never match message search. A reaction whose target is outside the
+  loaded window simply waits until the target is in view.
+- **UI** (`pages/Conversation.tsx`): long-press a bubble (or
+  right-click, or the hover/keyboard 🙂+ button — the accessible
+  path) to open a six-emoji picker; picking sends, picking your
+  current emoji clears. Escape closes. The palette is deliberately
+  small: a shared vocabulary, six 44px targets.

@@ -19,6 +19,7 @@ import {
   listConversations,
   searchAllMessages,
   sendMessage,
+  sendReaction,
 } from "./messages";
 import type { DirectMessage } from "@/types";
 
@@ -172,5 +173,80 @@ describe("searchAllMessages over envelopes", () => {
     expect(await searchAllMessages(bob.publicKey, "aboutPostId")).toEqual([]);
     expect(await searchAllMessages(bob.publicKey, '"v":1')).toEqual([]);
     expect(await searchAllMessages(bob.publicKey, "post-veg")).toEqual([]);
+  });
+});
+
+// Emoji reactions (docs/message-relay.md "Reactions"): sealed v2
+// envelopes over the same relay, folded into their target message by
+// getConversation. Latest per sender wins; empty emoji clears.
+describe("reactions", () => {
+  it("sendReaction rides the outbox as a sealed, signed message envelope", async () => {
+    // The outbox only queues while a node URL is configured.
+    await setSetting("communityNodeUrl", "https://node.test");
+    const target = await sendMessage(alice.publicKey, bob.publicKey, "hola");
+    await db.outbox.clear();
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "❤️");
+    const rows = await db.outbox.toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].kind).toBe("message");
+    const envelope = JSON.parse(rows[0].payload) as RelayedMessage;
+    expect(verifyRelayedMessage(envelope)).toBe(true);
+    // The wire payload is ciphertext only — no emoji, no target id.
+    expect(rows[0].payload).not.toContain("❤️");
+    expect(rows[0].payload).not.toContain(target.id);
+  });
+
+  it("folds reactions into the target: visible to both sides, never as a bubble", async () => {
+    const target = await sendMessage(alice.publicKey, bob.publicKey, "hola");
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "❤️");
+
+    for (const [me, other] of [
+      [alice, bob],
+      [bob, alice],
+    ] as const) {
+      const thread = await getConversation(me.publicKey, other.publicKey);
+      expect(thread).toHaveLength(1); // reaction row is folded, not shown
+      expect(thread[0].id).toBe(target.id);
+      expect(thread[0].reactions).toEqual([
+        { senderKey: bob.publicKey, emoji: "❤️" },
+      ]);
+    }
+  });
+
+  it("a member's newer reaction replaces their old one; empty emoji clears it", async () => {
+    const target = await sendMessage(alice.publicKey, bob.publicKey, "hola");
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "❤️");
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "😂");
+    let [msg] = await getConversation(alice.publicKey, bob.publicKey);
+    expect(msg.reactions).toEqual([
+      { senderKey: bob.publicKey, emoji: "😂" },
+    ]);
+
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "");
+    [msg] = await getConversation(alice.publicKey, bob.publicKey);
+    expect(msg.reactions).toBeUndefined();
+  });
+
+  it("both parties can hold reactions on the same message at once", async () => {
+    const target = await sendMessage(alice.publicKey, bob.publicKey, "hola");
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "❤️");
+    await sendReaction(alice.publicKey, bob.publicKey, target.id, "🙏");
+    const [msg] = await getConversation(alice.publicKey, bob.publicKey);
+    expect(msg.reactions).toHaveLength(2);
+    expect(msg.reactions).toContainEqual({
+      senderKey: bob.publicKey,
+      emoji: "❤️",
+    });
+    expect(msg.reactions).toContainEqual({
+      senderKey: alice.publicKey,
+      emoji: "🙏",
+    });
+  });
+
+  it("reaction rows never surface in message search", async () => {
+    const target = await sendMessage(alice.publicKey, bob.publicKey, "hola");
+    await sendReaction(bob.publicKey, alice.publicKey, target.id, "❤️");
+    const hits = await searchAllMessages(alice.publicKey, "❤️");
+    expect(hits).toHaveLength(0);
   });
 });

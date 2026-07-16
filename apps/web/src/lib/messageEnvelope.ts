@@ -67,6 +67,10 @@
 export interface MessageBody {
   text: string;
   aboutPostId?: string;
+  /** Present when this body is an emoji REACTION to another message
+   *  rather than a chat message (v2 envelope, kind "reaction").
+   *  `emoji: ""` means "clear my reaction". */
+  reaction?: { reactsTo: string; emoji: string };
 }
 
 /**
@@ -80,6 +84,28 @@ export function encodeMessageBody(
 ): string {
   if (!aboutPostId) return text;
   return JSON.stringify({ v: 1, text, aboutPostId });
+}
+
+/**
+ * Encode an emoji reaction to another message (v2 envelope, kind
+ * "reaction"). Rides the SAME sealed E2E relay as a chat message —
+ * the server sees one more opaque envelope, never that it was a
+ * reaction, to what, or which emoji (the privacy posture of the
+ * module doc, unchanged). The `text` field is the graceful-
+ * degradation path: a pre-reactions client decodes v2 via the
+ * future-version fallback below and renders the emoji itself as a
+ * tiny message instead of raw JSON. An empty `emoji` clears the
+ * sender's earlier reaction (text falls back to "✕" so old clients
+ * show something rather than an empty bubble).
+ */
+export function encodeReactionBody(reactsTo: string, emoji: string): string {
+  return JSON.stringify({
+    v: 2,
+    kind: "reaction",
+    text: emoji || "✕",
+    reactsTo,
+    emoji,
+  });
 }
 
 /**
@@ -110,6 +136,16 @@ export function decodeMessageBody(plain: string): MessageBody {
   const body: MessageBody = { text: obj.text };
   if (typeof obj.aboutPostId === "string" && obj.aboutPostId !== "") {
     body.aboutPostId = obj.aboutPostId;
+  }
+  // v2 reaction envelope. Shape-checked like aboutPostId — a future
+  // version that reshapes these fields degrades to a text message.
+  if (
+    obj.kind === "reaction" &&
+    typeof obj.reactsTo === "string" &&
+    obj.reactsTo !== "" &&
+    typeof obj.emoji === "string"
+  ) {
+    body.reaction = { reactsTo: obj.reactsTo, emoji: obj.emoji };
   }
   return body;
 }
