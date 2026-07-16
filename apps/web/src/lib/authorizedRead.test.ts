@@ -56,7 +56,9 @@ describe("authorizedFetch", () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
     await authorizedFetch("https://node.test/posts", "https://node.test");
-    expect(fetchMock.mock.calls[0][1]).toBeUndefined();
+    // No auth headers ride the unsigned path (the passthrough init —
+    // used by the nudge stream for its abort signal — may still).
+    expect(fetchMock.mock.calls[0][1]?.headers).toBeUndefined();
   });
 
   it("degrades to a plain request when the secret key is unavailable", async () => {
@@ -67,7 +69,7 @@ describe("authorizedFetch", () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
     await authorizedFetch("https://node.test/posts", "https://node.test");
-    expect(fetchMock.mock.calls[0][1]).toBeUndefined();
+    expect(fetchMock.mock.calls[0][1]?.headers).toBeUndefined();
   });
 
   it("records a membership rejection when a SIGNED read answers 403, and clears it on the next success", async () => {

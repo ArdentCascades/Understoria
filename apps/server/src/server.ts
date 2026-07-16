@@ -67,6 +67,8 @@ import { registerClaimRoutes } from "./routes/claims.js";
 import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
 import { registerInviteAnnouncementRoutes } from "./routes/inviteAnnouncements.js";
+import { registerNudgeRoutes } from "./routes/nudges.js";
+import { createNudgeBus } from "./nudgeBus.js";
 import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
 import { registerVouchRoutes } from "./routes/vouches.js";
@@ -453,6 +455,21 @@ export async function buildServer({
   // `redeemed` when the receipt lands.
   await registerInviteAnnouncementRoutes(app, {
     store: inviteAnnouncementStore,
+  });
+  // Live delivery (docs/sync-liveness.md, "server push"): a
+  // content-free SSE stream that wakes connected apps whenever this
+  // node accepts a federation write. The broadcast hook fires on any
+  // successful POST to a known federation surface — one place, so a
+  // future route is covered the day it lands in SURFACES.
+  const nudgeBus = createNudgeBus();
+  await registerNudgeRoutes(app, { bus: nudgeBus });
+  app.addHook("onResponse", async (req, reply) => {
+    if (req.method !== "POST") return;
+    if (reply.statusCode >= 300) return;
+    const path = req.url.split("?")[0];
+    if (path in SURFACES || path === "/claim-founder") {
+      nudgeBus.broadcast();
+    }
   });
   await registerClaimRoutes(app, { store: claimStore });
   await registerTaskCommentRoutes(app, { store: taskCommentStore });

@@ -51,9 +51,12 @@ import { recordNodeSuccess } from "@/lib/nodeEndpoints";
 export async function authorizedFetch(
   url: string,
   baseUrl: string,
+  init: Omit<RequestInit, "headers"> = {},
 ): Promise<Response> {
   const headers = await readAuthHeaders(url, baseUrl);
-  const res = headers ? await fetch(url, { headers }) : await fetch(url);
+  const res = headers
+    ? await fetch(url, { ...init, headers })
+    : await fetch(url, init);
   // Per-node reachability telemetry for failover + the resilience card
   // ("reachable" = a successful read in the last 24h, community-
   // resilience.md §B.2). Debounced and best-effort inside

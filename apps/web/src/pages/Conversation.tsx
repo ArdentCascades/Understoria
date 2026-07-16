@@ -29,6 +29,8 @@ import {
   type DecryptedMessage,
 } from "@/db/messages";
 import { isBlocked } from "@/db/blocks";
+import { pullFederatedMessages } from "@/lib/federationSync";
+import { SYNC_KICK_EVENT } from "@/lib/syncLoop";
 import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
 import { BackLink } from "@/components/BackLink";
@@ -39,6 +41,10 @@ import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { OverflowMenu } from "@/components/OverflowMenu";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
+
+/** Chat-mode poll cadence — how stale an OPEN thread may go without
+ *  a server nudge. Exported for the polling tests. */
+export const CHAT_POLL_MS = 2_500;
 
 /**
  * Route wrapper that REMOUNTS the conversation when `:memberKey`
@@ -143,6 +149,50 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   useEffect(() => {
     void loadMessages();
   }, [loadMessages]);
+
+  // Chat-mode polling (docs/sync-liveness.md). An OPEN conversation
+  // is the one place the 12s hot cadence feels broken — you're
+  // staring at the thread waiting for the reply. While this page is
+  // mounted and the tab visible, pull the messages feed every
+  // CHAT_POLL_MS and refresh the local view; the pull is cursor-based
+  // so an empty tick is one cheap authenticated GET. A server nudge
+  // (SYNC_KICK_EVENT) runs the same tick immediately, so with a live
+  // stream the reply lands in ~a second and the interval is just the
+  // fallback. Hidden tab → ticks skip; leaving the page tears it all
+  // down, restoring the normal cadence.
+  useEffect(() => {
+    if (!currentMember || !otherKey) return;
+    let disposed = false;
+    let inFlight = false;
+    const tick = async () => {
+      if (disposed || inFlight) return;
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+      inFlight = true;
+      try {
+        await pullFederatedMessages();
+        if (!disposed) await loadMessages();
+      } finally {
+        inFlight = false;
+      }
+    };
+    const interval = window.setInterval(() => void tick(), CHAT_POLL_MS);
+    // Coming back to a foregrounded tab (or a nudge from the server)
+    // shouldn't wait out the interval remainder.
+    const onWake = () => void tick();
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener(SYNC_KICK_EVENT, onWake);
+    return () => {
+      disposed = true;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener(SYNC_KICK_EVENT, onWake);
+    };
+  }, [currentMember, otherKey, loadMessages]);
 
   // Phase 3.1 — at lg+ the Messages shell renders this page in a
   // side-pane after the member clicks a list item, so move focus to
