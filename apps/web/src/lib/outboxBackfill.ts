@@ -18,15 +18,21 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { db, getSetting, setSetting } from "@/db/database";
+import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { isDemoBuild } from "@/lib/demo";
 import { urlHash, normalizeNodeUrl } from "@/lib/nodeEndpoints";
 import { decodeAndVerifyInvite } from "@/lib/invite";
+import { communityNodeIdSet, isOurNode } from "@/lib/nodeIdentity";
 import {
+  enqueueAwaitingTransition,
+  enqueueClaimOutbox,
   enqueueEvent,
   enqueueEventCancellation,
   enqueueExchangeOutbox,
   enqueueInviteAnnouncementOutbox,
+  enqueueMemberReinstatementOutbox,
+  enqueueMemberRemovalOutbox,
+  enqueueMessageOutbox,
   enqueuePostOutbox,
   enqueueProposalClosureOutbox,
   enqueueProposalOutbox,
@@ -36,8 +42,23 @@ import {
   enqueueVoteOutbox,
 } from "@/lib/outbox";
 import { buildInviteAnnouncement } from "@/db/invites";
+import {
+  enqueueCoOrganizerInvitationOutbox,
+  enqueueCoOrganizerInvitationResponseOutbox,
+  enqueueCoOrganizerInvitationRevocationOutbox,
+} from "@/db/coorgInvitations";
+import {
+  publishEventRsvpState,
+  publishEventShiftState,
+  publishShiftSignupState,
+} from "@/db/participationPublish";
 import { publishProjectState, publishTaskState } from "@/db/projects";
 import { getSecretKey } from "@/db/secrets";
+import {
+  canonicalAwaitingTransitionPayload,
+  canonicalRelayedMessagePayload,
+  sign,
+} from "@understoria/shared/crypto";
 
 /**
  * Outbox BACKFILL — the fix for the 2026-07 production incident
@@ -68,12 +89,19 @@ import { getSecretKey } from "@/db/secrets";
  *
  * Project/task state rides its own publisher (fresh LWW signature at
  * publish time), so those go through publishProjectState/TaskState
- * with whichever authorized key this device holds.
+ * with whichever authorized key this device holds — and the same
+ * pattern covers RSVPs, shift definitions, and shift signups via the
+ * participationPublish helpers. Kinds whose signature is synthesized
+ * at write time (sealed message envelopes, awaiting-transition
+ * artifacts, cross-node claims) are re-synthesized here with the held
+ * key: Ed25519 signing is deterministic, so a re-signed identical
+ * payload dedups cleanly against a previously-delivered copy.
  *
- * Not yet covered (their signed state is synthesized at write time
- * rather than stored): shift/RSVP/signup state records and co-org
- * invitation records. Tracked as follow-up; the periodic LWW
- * re-publish on next edit self-heals those.
+ * With the 2026-07 sweep this walk covers EVERY outbox kind. The two
+ * kinds absent from the walk are absent by design, not omission:
+ * redemption receipts and invite revocations are enqueued even while
+ * NO node is configured (`requireNodeUrl: false` — they were never
+ * droppable), so the queue itself is their backfill.
  */
 
 /** Settings-key prefix marking "backfill already ran for this node
@@ -94,9 +122,75 @@ export async function backfillOutboxFromLocalData(): Promise<number> {
     if (row !== null) enqueued += 1;
   };
 
-  for (const post of await db.posts.toArray()) {
+  const posts = await db.posts.toArray();
+  for (const post of posts) {
     if (!held.has(post.postedBy) || !post.signature) continue;
     count(await enqueuePostOutbox(post));
+  }
+
+  // Cross-node claims — posts from ANOTHER community that a held key
+  // claimed. Same shape claimPost enqueues; `claimedAt` is re-stamped
+  // (the original wasn't stored) which stays within the server's
+  // plausibility bounds and only affects display recency.
+  const localNodeId = (await getSetting(SETTING_KEYS.nodeId)) ?? "";
+  let aliases: string[] = [];
+  try {
+    const raw = await getSetting(SETTING_KEYS.nodeIdAliases);
+    if (raw) aliases = JSON.parse(raw) as string[];
+  } catch {
+    // Malformed aliases — treat as none.
+  }
+  const ourIds = communityNodeIdSet(localNodeId, aliases, []);
+  if (localNodeId) {
+    for (const post of posts) {
+      if (!post.claimedBy || !held.has(post.claimedBy)) continue;
+      if (post.status !== "claimed" && post.status !== "awaiting_confirmation")
+        continue;
+      if (isOurNode(post.nodeId, ourIds)) continue;
+      count(
+        await enqueueClaimOutbox({
+          postId: post.id,
+          claimerKey: post.claimedBy,
+          claimedAt: Date.now(),
+          nodeId: localNodeId,
+        }),
+      );
+    }
+  }
+
+  // Awaiting-transition artifacts (auto-confirm-key.md §5) for posts
+  // stuck in awaiting_confirmation: without the artifact on the node,
+  // the /auto-confirm window is unenforceable. Either party may sign
+  // (the schema's signedBy rule), so use whichever key this device
+  // holds. Re-anchoring is conservative: the node measures the window
+  // from its own received_at, so a late artifact only DELAYS
+  // auto-confirmation, never backdates it.
+  for (const post of posts) {
+    if (post.status !== "awaiting_confirmation" || !post.claimedBy) continue;
+    const helperKey = post.type === "NEED" ? post.claimedBy : post.postedBy;
+    const helpedKey = post.type === "NEED" ? post.postedBy : post.claimedBy;
+    const signer = [helperKey, helpedKey].find((k) => held.has(k));
+    if (!signer) continue;
+    try {
+      const secret = await getSecretKey(signer);
+      const payload = {
+        kind: "awaiting_transition" as const,
+        postId: post.id,
+        helperKey,
+        helpedKey,
+        signedBy: signer,
+        enteredAt: post.awaitingSince ?? Date.now(),
+        nodeId: post.nodeId,
+      };
+      count(
+        await enqueueAwaitingTransition({
+          ...payload,
+          signature: sign(canonicalAwaitingTransitionPayload(payload), secret),
+        }),
+      );
+    } catch {
+      // Locked session — skip; the next pass covers it.
+    }
   }
   for (const x of await db.exchanges.toArray()) {
     if (x.autoConfirmed) continue;
@@ -134,6 +228,71 @@ export async function backfillOutboxFromLocalData(): Promise<number> {
   for (const s of await db.seedVaultPledges.toArray()) {
     if (!held.has(s.memberKey)) continue;
     count(await enqueueSeedVaultPledgeOutbox(s));
+  }
+
+  // Co-organizer records — stored rows ARE the full signed records.
+  // Filter to the record's single signer (design doc §4) and skip the
+  // v21 grandfathered placeholders (their sentinel signature would be
+  // refused on the wire); strip the local-only flag from the payload.
+  for (const inv of await db.coorgInvitations.toArray()) {
+    if (inv.grandfathered || !held.has(inv.inviterKey)) continue;
+    const { grandfathered: _g, ...record } = inv;
+    count(await enqueueCoOrganizerInvitationOutbox(record));
+  }
+  for (const resp of await db.coorgInvitationResponses.toArray()) {
+    if (resp.grandfathered || !held.has(resp.inviteeKey)) continue;
+    const { grandfathered: _g, ...record } = resp;
+    count(await enqueueCoOrganizerInvitationResponseOutbox(record));
+  }
+  for (const rev of await db.coorgInvitationRevocations.toArray()) {
+    if (rev.grandfathered || !held.has(rev.inviterKey)) continue;
+    const { grandfathered: _g, ...record } = rev;
+    count(await enqueueCoOrganizerInvitationRevocationOutbox(record));
+  }
+
+  // Quorum governance records: re-enqueue any assembled removal /
+  // reinstatement carrying one of this device's co-signatures — the
+  // record is complete and immutable, and the node dedups on id, so
+  // several co-signers' devices re-sending the same record is a wire
+  // no-op.
+  for (const r of await db.memberRemovals.toArray()) {
+    if (!r.signatures?.some((s) => held.has(s.signerKey))) continue;
+    count(await enqueueMemberRemovalOutbox(r));
+  }
+  for (const r of await db.memberReinstatements.toArray()) {
+    if (!r.signatures?.some((s) => held.has(s.signerKey))) continue;
+    count(await enqueueMemberReinstatementOutbox(r));
+  }
+
+  // Sealed message envelopes — THE user-facing hole: a message sent
+  // before this device connected sat in Dexie forever, shown to the
+  // sender (local-first) and invisible to the recipient. The row
+  // stores every envelope field except the transport signature, which
+  // is re-derived here; Ed25519 is deterministic, so the payload is
+  // byte-identical to the original enqueue and dedups against
+  // already-delivered copies. Recipients that already pulled a copy
+  // simply never re-pull it (their cursor is past its createdAt).
+  for (const m of await db.messages.toArray()) {
+    if (!held.has(m.senderKey)) continue;
+    try {
+      const secret = await getSecretKey(m.senderKey);
+      const payload = {
+        id: m.id,
+        senderKey: m.senderKey,
+        recipientKey: m.recipientKey,
+        nonce: m.nonce,
+        ciphertext: m.ciphertext,
+        createdAt: m.createdAt,
+      };
+      count(
+        await enqueueMessageOutbox({
+          ...payload,
+          signature: sign(canonicalRelayedMessagePayload(payload), secret),
+        }),
+      );
+    } catch {
+      // Locked session — skip; the next pass covers it.
+    }
   }
   // Open, unexpired invites this device issued: register them with
   // the node (operator ruling 2026-07) — the invite is recovered from
@@ -175,7 +334,8 @@ export async function backfillOutboxFromLocalData(): Promise<number> {
     await publishProjectState(p.id, signer);
     enqueued += 1;
   }
-  for (const t of await db.projectTasks.toArray()) {
+  const tasks = await db.projectTasks.toArray();
+  for (const t of tasks) {
     const orgSigner = signerByProject.get(t.projectId);
     if (orgSigner) {
       await publishTaskState(t.id, orgSigner);
@@ -186,6 +346,64 @@ export async function backfillOutboxFromLocalData(): Promise<number> {
       await publishTaskState(t.id, t.assignedTo);
       enqueued += 1;
     }
+  }
+
+  // Awaiting-transition artifacts for the PROJECT-TASK path — same
+  // enforcement upgrade as the post loop above, same construction as
+  // markProjectTaskComplete (completer signs; helped side is the
+  // project's primary organizer).
+  const projectById = new Map(projects.map((p) => [p.id, p]));
+  for (const t of tasks) {
+    if (
+      t.status !== "awaiting_confirmation" ||
+      !t.completedBy ||
+      !held.has(t.completedBy)
+    ) {
+      continue;
+    }
+    const project = projectById.get(t.projectId);
+    if (!project) continue;
+    try {
+      const secret = await getSecretKey(t.completedBy);
+      const payload = {
+        kind: "awaiting_transition" as const,
+        postId: `project:${t.projectId}/task:${t.id}`,
+        helperKey: t.completedBy,
+        helpedKey: project.organizerKey,
+        signedBy: t.completedBy,
+        enteredAt: t.completionSignedAt ?? Date.now(),
+        nodeId: project.nodeId ?? "",
+      };
+      count(
+        await enqueueAwaitingTransition({
+          ...payload,
+          signature: sign(canonicalAwaitingTransitionPayload(payload), secret),
+        }),
+      );
+    } catch {
+      // Locked session — skip; the next pass covers it.
+    }
+  }
+
+  // Participation state (docs/project-federation.md §6): RSVPs and
+  // signups re-publish under the member's own key, shift definitions
+  // under the organizer's. The publishers re-sign a fresh LWW version
+  // and persist it back onto the row, exactly like the project/task
+  // publishers above; a locked device soft-degrades inside them.
+  for (const r of await db.eventRsvps.toArray()) {
+    if (!held.has(r.memberKey)) continue;
+    await publishEventRsvpState(r.eventId, r.memberKey);
+    enqueued += 1;
+  }
+  for (const s of await db.eventShifts.toArray()) {
+    if (!held.has(s.createdBy)) continue;
+    await publishEventShiftState(s, s.createdBy);
+    enqueued += 1;
+  }
+  for (const s of await db.shiftSignups.toArray()) {
+    if (!held.has(s.memberKey)) continue;
+    await publishShiftSignupState(s, s.memberKey);
+    enqueued += 1;
   }
 
   return enqueued;

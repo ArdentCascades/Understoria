@@ -24,6 +24,14 @@ import { createMember } from "@/db/seed";
 import { createPost } from "@/db/actions";
 import { writeSubmitConfig } from "@/lib/nodeSubmit";
 import {
+  verifyAwaitingTransition,
+  verifyRelayedMessage,
+} from "@understoria/shared/crypto";
+import type {
+  AwaitingTransition,
+  RelayedMessage,
+} from "@understoria/shared/types";
+import {
   backfillOutboxFromLocalData,
   maybeBackfillOutbox,
 } from "./outboxBackfill";
@@ -134,6 +142,238 @@ describe("backfillOutboxFromLocalData", () => {
 
     expect(await backfillOutboxFromLocalData()).toBe(0);
     expect(await db.outbox.count()).toBe(0);
+  });
+});
+
+// 2026-07 completion sweep: the kinds the first backfill deferred
+// ("Not yet covered" in the module doc) are now walked too. Each test
+// seeds the pre-connect broken state directly and asserts the walk
+// re-enqueues ONLY what this device's keys authored.
+describe("backfillOutboxFromLocalData — completion sweep", () => {
+  async function seedMember(name = "Author") {
+    const member = await createMember({ displayName: name }, NODE);
+    await setSetting(SETTING_KEYS.currentMember, member.publicKey);
+    return member;
+  }
+
+  it("re-signs and re-enqueues sealed message envelopes for held senders only", async () => {
+    await connectThenForget(URL_A);
+    const sender = await seedMember("Sender");
+    const recipient = await createMember({ displayName: "Recipient" }, NODE);
+    // The recipient's secret must NOT count as "we authored their
+    // messages" — drop it so only the sender key is held.
+    const { sendMessage } = await import("@/db/messages");
+    const sent = await sendMessage(
+      sender.publicKey,
+      recipient.publicKey,
+      "hola — sent before the node existed",
+    );
+    await db.messages.add({
+      ...sent,
+      id: "msg_foreign",
+      senderKey: recipient.publicKey,
+      recipientKey: sender.publicKey,
+    });
+    await db.secretKeys.delete(recipient.publicKey);
+    await db.outbox.clear(); // sendMessage auto-enqueued; forget it
+
+    await backfillOutboxFromLocalData();
+    const rows = await db.outbox.where("kind").equals("message").toArray();
+    expect(rows).toHaveLength(1);
+    const envelope = JSON.parse(rows[0].payload) as RelayedMessage;
+    expect(envelope.id).toBe(sent.id);
+    // The re-derived transport signature is REAL — the node's
+    // verifier accepts it, so the backfilled message actually lands.
+    expect(verifyRelayedMessage(envelope)).toBe(true);
+  });
+
+  it("re-publishes RSVPs, shift definitions, and signups under held keys", async () => {
+    await connectThenForget(URL_A);
+    const member = await seedMember("Organizer");
+    await db.eventRsvps.put({
+      id: "rsvp_1",
+      eventId: "event_1",
+      memberKey: member.publicKey,
+      status: "going",
+      respondedAt: Date.now(),
+    });
+    await db.eventRsvps.put({
+      id: "rsvp_foreign",
+      eventId: "event_1",
+      memberKey: "pk_someone_else",
+      status: "going",
+      respondedAt: Date.now(),
+    });
+    await db.eventShifts.put({
+      id: "shift_1",
+      eventId: "event_1",
+      label: "Setup crew",
+      startsAt: Date.now(),
+      endsAt: Date.now() + 3_600_000,
+      capacity: null,
+      createdBy: member.publicKey,
+      createdAt: Date.now(),
+    });
+    await db.shiftSignups.put({
+      id: "signup_1",
+      shiftId: "shift_1",
+      eventId: "event_1",
+      memberKey: member.publicKey,
+      signedUpAt: Date.now(),
+    });
+    await db.outbox.clear();
+
+    await backfillOutboxFromLocalData();
+    const kinds = (await db.outbox.toArray()).map((r) => r.kind).sort();
+    expect(kinds).toEqual(["event_rsvp", "event_shift", "shift_signup"]);
+    // The publisher stamped a live signature back onto the local row.
+    const rsvp = await db.eventRsvps.get("rsvp_1");
+    expect((rsvp as { signerKey?: string })?.signerKey).toBe(
+      member.publicKey,
+    );
+  });
+
+  it("re-enqueues stored co-org records for the record's signer, skipping grandfathered rows", async () => {
+    await connectThenForget(URL_A);
+    const inviter = await seedMember("Inviter");
+    const base = {
+      projectId: "proj_1",
+      inviterKey: inviter.publicKey,
+      inviteeKey: "pk_invitee",
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 14 * 24 * 3_600_000,
+      nodeId: NODE,
+    };
+    await db.coorgInvitations.put({ ...base, id: "ci_1", signature: "sig" });
+    await db.coorgInvitations.put({
+      ...base,
+      id: "ci_grandfathered",
+      signature: "legacy",
+      grandfathered: true,
+    });
+    await db.coorgInvitations.put({
+      ...base,
+      id: "ci_foreign",
+      inviterKey: "pk_someone_else",
+      signature: "sig",
+    });
+    await db.outbox.clear();
+
+    await backfillOutboxFromLocalData();
+    const rows = await db.outbox
+      .where("kind")
+      .equals("coorg_invitation")
+      .toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].recordId).toBe("ci_1");
+    // The local-only flag never crosses the wire.
+    expect(rows[0].payload).not.toContain("grandfathered");
+  });
+
+  it("re-synthesizes the awaiting-transition artifact for a post stuck awaiting confirmation", async () => {
+    await connectThenForget(URL_A);
+    const author = await seedMember("Helper");
+    const post = await createPost(author.publicKey, "North", {
+      type: "OFFER",
+      category: "other",
+      title: "Ride to town",
+      description: "Weekly",
+      estimatedHours: 1,
+      urgency: "low",
+      expiresAt: null,
+    }, NODE);
+    await db.posts.update(post.id, {
+      status: "awaiting_confirmation",
+      claimedBy: "pk_helped_member",
+      awaitingSince: 1_700_000_000_000,
+    });
+    await db.outbox.clear();
+
+    await backfillOutboxFromLocalData();
+    const rows = await db.outbox
+      .where("kind")
+      .equals("awaiting_transition")
+      .toArray();
+    expect(rows).toHaveLength(1);
+    const artifact = JSON.parse(rows[0].payload) as AwaitingTransition;
+    // OFFER: the author is the helper; they're the held party, so
+    // they sign. The signature must satisfy the node's verifier.
+    expect(artifact.helperKey).toBe(author.publicKey);
+    expect(artifact.signedBy).toBe(author.publicKey);
+    expect(artifact.enteredAt).toBe(1_700_000_000_000);
+    expect(verifyAwaitingTransition(artifact)).toBe(true);
+  });
+
+  it("re-enqueues cross-node claims by held keys — never same-community ones", async () => {
+    await connectThenForget(URL_A);
+    const claimer = await seedMember("Claimer");
+    const base = await createPost(claimer.publicKey, "North", {
+      type: "NEED",
+      category: "other",
+      title: "template",
+      description: "d",
+      estimatedHours: 1,
+      urgency: "low",
+      expiresAt: null,
+    }, NODE);
+    // A post from ANOTHER community, claimed by our held key.
+    await db.posts.add({
+      ...base,
+      id: "post_crossnode",
+      postedBy: "pk_far_away",
+      nodeId: "node_elsewhere",
+      status: "claimed",
+      claimedBy: claimer.publicKey,
+      signature: "sig_foreign",
+    });
+    // Same-community claims never ride the claim kind (the exchange
+    // record carries them) — this one must be skipped.
+    await db.posts.add({
+      ...base,
+      id: "post_local",
+      postedBy: "pk_neighbor",
+      nodeId: NODE,
+      status: "claimed",
+      claimedBy: claimer.publicKey,
+      signature: "sig_local",
+    });
+    await db.outbox.clear();
+
+    await backfillOutboxFromLocalData();
+    const rows = await db.outbox.where("kind").equals("claim").toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].recordId).toBe("claim_post_crossnode");
+  });
+
+  it("re-enqueues quorum removal records carrying a held co-signature", async () => {
+    await connectThenForget(URL_A);
+    const cosigner = await seedMember("Cosigner");
+    const base = {
+      removedKey: "pk_removed",
+      reason: null,
+      decidedAt: Date.now(),
+      nodeId: NODE,
+      proposalId: null,
+    };
+    await db.memberRemovals.put({
+      ...base,
+      id: "rm_ours",
+      signatures: [{ signerKey: cosigner.publicKey, signature: "s1" }],
+    });
+    await db.memberRemovals.put({
+      ...base,
+      id: "rm_foreign",
+      signatures: [{ signerKey: "pk_other_a", signature: "s2" }],
+    });
+    await db.outbox.clear();
+
+    await backfillOutboxFromLocalData();
+    const rows = await db.outbox
+      .where("kind")
+      .equals("member_removal")
+      .toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].recordId).toBe("rm_ours");
   });
 });
 

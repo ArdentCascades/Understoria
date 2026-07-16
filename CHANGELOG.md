@@ -9,6 +9,25 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The connect-time backfill now covers EVERY federable record
+  kind** (`apps/web/src/lib/outboxBackfill.ts` — closing the
+  "not yet covered" gap the original 2026-07 invite-incident fix
+  documented). When a device connects to a community server (or
+  moves to a new one), it re-sends everything its keys authored
+  before the connection existed. Previously that walk skipped:
+  **direct messages** (a message sent before connecting was shown to
+  the sender forever but never delivered — the envelope is now
+  re-signed and queued), **RSVPs, shift definitions, and shift
+  signups** (event rosters looked empty to everyone else),
+  **co-organizer invitations/responses/revocations**, **cross-node
+  claims**, **awaiting-confirmation artifacts** (the auto-confirm
+  timer never started for pre-connection confirmations), and
+  **quorum removal/reinstatement records**. Same safety contract as
+  the original walk: only records authored by keys this device
+  holds, idempotent re-enqueue, and the node re-verifies every
+  signature.
+
 ### Added
 - **Messages (and everything else) now arrive live while the app is
   open** (pilot report 2026-07: "messages are working but they feel
