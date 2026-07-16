@@ -53,6 +53,7 @@ interface MockState {
   setNodeId: ReturnType<typeof vi.fn>;
   currentMember: Member | null;
   setCurrentMember: ReturnType<typeof vi.fn>;
+  refreshOnboarded: ReturnType<typeof vi.fn>;
 }
 
 let mockState: MockState;
@@ -63,6 +64,7 @@ function blankState(): MockState {
     setNodeId: vi.fn(),
     currentMember: null,
     setCurrentMember: vi.fn(async () => {}),
+    refreshOnboarded: vi.fn(async () => {}),
   };
 }
 
@@ -355,6 +357,14 @@ describe("InviteAccept — redeeming JOINS the server (no extra card)", () => {
     expect(container.textContent).not.toContain(
       "not connected to the community's server",
     );
+
+    // And the device is ONBOARDED, in both the durable flag and the
+    // live context: without this the OnboardingGate bounced the
+    // freshly-invited member into the Welcome flow, whose profile
+    // step could mint a SECOND identity — the "island account".
+    const { isOnboarded } = await import("@/db/onboarding");
+    expect(await isOnboarded()).toBe(true);
+    expect(mockState.refreshOnboarded).toHaveBeenCalled();
   });
 });
 

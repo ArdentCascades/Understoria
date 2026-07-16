@@ -66,7 +66,13 @@ const VALIDATORS: Record<FieldName, Validator> = {
 };
 
 export default function InviteAcceptPage() {
-  const { nodeId, setNodeId, currentMember, setCurrentMember } = useApp();
+  const {
+    nodeId,
+    setNodeId,
+    currentMember,
+    setCurrentMember,
+    refreshOnboarded,
+  } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -174,6 +180,12 @@ export default function InviteAcceptPage() {
     // Attach mode resolves to the same key — the call is a no-op then,
     // and the switch that matters on the mint path.
     await setCurrentMember(result.value.member.publicKey);
+    // redeemInvite marked the device onboarded (a redeemed invite IS a
+    // named identity in a community); pull that into live context
+    // state NOW, or the OnboardingGate bounces this member into the
+    // Welcome flow on the very next navigation — the trap that
+    // manufactured second "island" identities (2026-07 reports).
+    await refreshOnboarded();
     // A fresh member adopts the community's nodeId during redeem so the
     // Dashboard's node-scoped stats reflect the community they just
     // joined. redeemInvite already persisted the setting; mirror it into

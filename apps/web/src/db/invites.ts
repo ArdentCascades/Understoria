@@ -25,6 +25,7 @@ import {
   SETTING_KEYS,
   type InviteRow,
 } from "./database";
+import { markOnboarded } from "./onboarding";
 import { createMember } from "./seed";
 import { generateKeyPair, sign } from "@/lib/crypto";
 import {
@@ -467,6 +468,17 @@ export async function redeemInvite(
       return m;
     },
   );
+
+  // A successful redemption means this device holds a NAMED identity
+  // that just joined a community — the welcome flow has no business
+  // appearing after it. Without this flag the OnboardingGate bounced
+  // freshly-invited members into Welcome's tour + profile step, whose
+  // mint path could produce a SECOND identity with a fresh random
+  // community id — the "island account" of the 2026-07 field reports:
+  // the invited identity (the one the server knew) sat abandoned
+  // while the member used the Welcome-minted one, whose every sync
+  // the server rejected.
+  await markOnboarded();
 
   return {
     ok: true,
