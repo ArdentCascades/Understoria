@@ -7,6 +7,11 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import {
+  createServer,
+  request as httpRequest,
+  type Server,
+} from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
@@ -31,6 +36,12 @@ import {
   pullFederatedRedemptions,
   pullFederatedTaskStates,
 } from "@/lib/federationSync";
+import { suggestNodeUrlFromOrigin } from "@/lib/nodeOriginSuggest";
+import {
+  communityNodeIdSet,
+  isOurNode,
+  readNodeIdAliases,
+} from "@/lib/nodeIdentity";
 
 // END-TO-END invite flow against a REAL server process — the exact
 // production sequence reported broken (2026-07): founder claims the
@@ -90,7 +101,54 @@ async function startServer(port: number): Promise<string> {
   throw new Error("server did not become healthy");
 }
 
+let proxy: Server | null = null;
+
+/** A Caddy-shaped reverse proxy (deploy/Caddyfile): requests to
+ *  `/api/*` forward to the node with the `/api` prefix STRIPPED —
+ *  everything else is where the PWA shell would be. This is the
+ *  topology every member device actually talks to in production. */
+function startApiProxy(port: number, targetPort: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    proxy = createServer((req, res) => {
+      const url = req.url ?? "";
+      if (url !== "/api" && !url.startsWith("/api/")) {
+        res.statusCode = 200;
+        res.setHeader("content-type", "text/html");
+        res.end("<!doctype html><title>PWA shell</title>");
+        return;
+      }
+      const stripped = url.slice("/api".length) || "/";
+      const upstream = httpRequest(
+        {
+          host: "127.0.0.1",
+          port: targetPort,
+          path: stripped,
+          method: req.method,
+          headers: { ...req.headers, host: `127.0.0.1:${targetPort}` },
+        },
+        (up) => {
+          res.writeHead(up.statusCode ?? 502, up.headers);
+          up.pipe(res);
+        },
+      );
+      upstream.on("error", () => {
+        res.statusCode = 502;
+        res.end();
+      });
+      req.pipe(upstream);
+    });
+    proxy.once("error", reject);
+    proxy.listen(port, "127.0.0.1", () =>
+      resolve(`http://127.0.0.1:${port}`),
+    );
+  });
+}
+
 afterEach(async () => {
+  if (proxy) {
+    await new Promise((r) => proxy!.close(r));
+    proxy = null;
+  }
   if (server) {
     server.kill("SIGTERM");
     server = null;
@@ -131,7 +189,10 @@ async function signedReadStatus(base: string, path: string): Promise<number> {
 }
 
 /** The founder's content set, mirroring the production community. */
-async function createFounderContent(founderKey: string) {
+async function createFounderContent(
+  founderKey: string,
+  nodeId: string = COMMUNITY_NODE_ID,
+) {
   const project = await createProject(
     founderKey,
     {
@@ -144,7 +205,7 @@ async function createFounderContent(founderKey: string) {
       tags: [],
       templateId: null,
     },
-    COMMUNITY_NODE_ID,
+    nodeId,
   );
   await launchProject(project.id, founderKey);
   await addProjectTask(project.id, founderKey, {
@@ -167,7 +228,7 @@ async function createFounderContent(founderKey: string) {
     templateId: null,
     organizerKey: founderKey,
     organizerSecretKey: await getSecretKey(founderKey),
-    nodeId: COMMUNITY_NODE_ID,
+    nodeId,
   });
   await createPost(founderKey, "North", {
     type: "OFFER",
@@ -177,7 +238,7 @@ async function createFounderContent(founderKey: string) {
     estimatedHours: 1,
     urgency: "low",
     expiresAt: null,
-  }, COMMUNITY_NODE_ID);
+  }, nodeId);
 }
 
 /** The invitee's whole journey, shared by both orderings: redeem on a
@@ -323,5 +384,136 @@ describe("invite flow, end to end (real server, real HTTP)", () => {
     expect(await inviteeJourney(base, invite.row.encoded!)).toMatchObject(
       EXPECTED,
     );
+  }, 60_000);
+
+  it("FULL DEPLOYMENT SHAPE: /api reverse proxy + device-random ids + the §5.3 consent journey — the invite ACTUALLY joins the community", async () => {
+    // The production topology exactly (deploy/Caddyfile): PWA and API
+    // on one origin, API under /api with the prefix stripped; the
+    // founder's device minted its own random community id at Welcome
+    // (it never saw the server's NODE_ID); the invitee goes through
+    // the REAL page-level journey — redeem, the origin-derived §5.3
+    // suggestion (the consent card), confirm, sync. The invitee must
+    // end up a MEMBER whose screens SHOW the community — the "island
+    // account" report is this test failing.
+    await startServer(8799);
+    const proxyOrigin = await startApiProxy(8899, 8799);
+    const apiUrl = `${proxyOrigin}/api`;
+
+    // Founder: connected + claimed via the /api URL, content authored
+    // under the device-random community id.
+    await freshDevice();
+    const FOUNDER_DEVICE_ID = "node_founder_device_random";
+    const founder = await createMember(
+      { displayName: "Founder" },
+      FOUNDER_DEVICE_ID,
+    );
+    await setSetting(SETTING_KEYS.currentMember, founder.publicKey);
+    await setSetting(SETTING_KEYS.nodeId, FOUNDER_DEVICE_ID);
+    await writeSubmitConfig({ url: apiUrl, enabled: true });
+    expect(
+      await claimFounder({
+        url: apiUrl,
+        setupToken: SETUP_CODE,
+        publicKey: founder.publicKey,
+      }),
+    ).toEqual({ ok: true });
+    await createFounderContent(founder.publicKey, FOUNDER_DEVICE_ID);
+    await drainOutbox();
+    expect(
+      (await db.outbox.filter((o) => o.status !== "delivered").toArray()).map(
+        (o) => `${o.kind}:${o.status}:${o.lastError ?? ""}`,
+      ),
+      "founder content must reach the node through the /api proxy",
+    ).toEqual([]);
+
+    const invite = await issueInvite({
+      inviterKey: founder.publicKey,
+      inviterName: "Founder",
+      nodeId:
+        (await getSetting(SETTING_KEYS.nodeId)) ?? FOUNDER_DEVICE_ID,
+    });
+
+    // INVITEE — the page's own steps, in the page's own order.
+    await freshDevice();
+    await setSetting(SETTING_KEYS.nodeId, "node_fresh_device_random");
+    const redeemed = await redeemInvite(
+      invite.row.encoded!,
+      "Invitee",
+      "node_fresh_device_random",
+    );
+    expect(redeemed.ok).toBe(true);
+    if (!redeemed.ok) throw new Error("unreachable");
+    await setSetting(
+      SETTING_KEYS.currentMember,
+      redeemed.value.member.publicKey,
+    );
+
+    // The origin-derived join URL must resolve — redeeming an invite
+    // JOINS the server automatically (operator ruling, 2026-07), and a
+    // null suggestion would strand the invitee as a standalone
+    // account. The suggest gate excludes loopback origins by design
+    // (dev protection), so we present it a production-shaped hostname
+    // whose fetches the wrapper maps onto the local proxy.
+    const PROD_ORIGIN = "https://community.example";
+    const rewriteFetch: typeof fetch = (input, init) =>
+      globalThis.fetch(
+        String(input).replace(PROD_ORIGIN, proxyOrigin),
+        init,
+      );
+    const suggestion = await suggestNodeUrlFromOrigin({
+      origin: PROD_ORIGIN,
+      fetchImpl: rewriteFetch,
+      isDev: false,
+    });
+    expect(
+      suggestion,
+      "the origin-derived join URL must resolve on the invite success path",
+    ).toBe(`${PROD_ORIGIN}/api`);
+
+    // The invite page auto-connects with exactly this call — no card,
+    // no extra tap. In the test we persist the reachable address the
+    // fake host maps to; production persists the suggestion itself.
+    await writeSubmitConfig({ url: apiUrl, enabled: true });
+    await drainOutbox();
+
+    // Membership: the redemption receipt must have made the invitee a
+    // member — signed reads answer 200, not 403.
+    expect(
+      await signedReadStatus(apiUrl, "/posts?limit=1"),
+      "invitee must be a MEMBER after the receipt lands — not an island",
+    ).toBe(200);
+
+    // One sync cycle, exactly what the app's loop runs.
+    await pullFederatedRedemptions();
+    await pullFederatedPosts();
+    await pullFederatedEvents();
+    await pullFederatedProjectStates();
+    await pullFederatedTaskStates();
+
+    // THE UI TRUTH: what the invitee's screens actually render —
+    // records filtered through the app's own "is this record ours?"
+    // predicate (Dashboard, Board, stats all use it). Content that is
+    // in Dexie but outside this scope is invisible: the island.
+    const communityIds = communityNodeIdSet(
+      (await getSetting(SETTING_KEYS.nodeId)) ?? "",
+      await readNodeIdAliases(),
+      (await db.invites.toArray()).map((i) => i.nodeId),
+    );
+    const visible = {
+      projects: (await db.projects.toArray())
+        .filter((p) => isOurNode(p.nodeId, communityIds))
+        .map((p) => p.title),
+      events: (await db.events.toArray())
+        .filter((e) => isOurNode(e.nodeId, communityIds))
+        .map((e) => e.title),
+      posts: (await db.posts.toArray())
+        .filter((p) => isOurNode(p.nodeId, communityIds))
+        .map((p) => p.title),
+    };
+    expect(visible, "the invitee's screens must SHOW the community").toEqual({
+      projects: ["Tool library"],
+      events: ["Opening day"],
+      posts: ["Ladder to lend"],
+    });
   }, 60_000);
 });

@@ -139,6 +139,11 @@ export async function writeSubmitConfig(cfg: SubmitConfig): Promise<void> {
     const { maybeBackfillOutbox } = await import("./outboxBackfill");
     await maybeBackfillOutbox(cfg.url);
   }
+  // Changing (or disabling) the node is a new context: any recorded
+  // "this node rejected me as a member" verdict belongs to the OLD
+  // configuration and must not haunt the Dashboard banner.
+  const { clearMembershipRejection } = await import("./membershipStatus");
+  await clearMembershipRejection();
 }
 
 export interface SubmitDeps {

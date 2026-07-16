@@ -26,7 +26,6 @@ import { decodeAndVerifyInvite, extractInviteToken } from "@/lib/invite";
 import { redeemInvite, type RedeemError } from "@/db/invites";
 import { db } from "@/db/database";
 import { suggestNodeUrlFromOrigin } from "@/lib/nodeOriginSuggest";
-import { NodeOriginSuggestCard } from "@/components/NodeOriginSuggestCard";
 import { formatDeadline, shortKey } from "@/lib/format";
 import {
   required,
@@ -51,8 +50,14 @@ import {
 //    of minting a ghost second identity; "I'm someone else" keeps the
 //    shared-device mint path one tap away. See db/invites.ts.
 //  - On success, if the PWA was served by a community node and no
-//    node is configured, the §5.3 informed-consent card offers the
-//    origin-derived node URL — explicit confirm, never silent.
+//    node is configured, the device CONNECTS to the origin-derived
+//    node URL automatically. Accepting the invite IS the consent —
+//    the member just chose to join this community, and joining
+//    means joining its server (operator ruling, 2026-07,
+//    superseding the earlier §5.3 card for invite arrivals; the
+//    Board's first-run suggestion keeps its explicit card). When no
+//    server is reachable, the unconnected notice below says so
+//    plainly instead of a silent looks-like-success redirect.
 
 type FieldName = "displayName";
 
@@ -86,11 +91,16 @@ export default function InviteAcceptPage() {
   const [holdsSecret, setHoldsSecret] = useState<boolean | null>(null);
   // §5.2 shared-device escape hatch: "I'm someone else".
   const [asSomeoneElse, setAsSomeoneElse] = useState(false);
-  // §5.3: resolved candidate node URL (null = no suggestion). The
-  // probe starts at mount and is awaited on the success path, so the
-  // consent moment never races the redirect.
-  const [suggestion, setSuggestion] = useState<string | null>(null);
+  // Origin-derived node URL probe (§5.3). Starts at mount and is
+  // awaited on the success path — on redemption the device connects
+  // to it directly, no extra tap.
   const suggestionPromise = useRef<Promise<string | null> | null>(null);
+  // Whether this device ends up with a community node configured —
+  // resolved on the success path (auto-connect included). Redeeming
+  // and NOT being connected means the new member cannot reach the
+  // community: say so plainly instead of redirecting into a silently
+  // empty app (the 2026-07 "island account" reports).
+  const [configured, setConfigured] = useState<boolean | null>(null);
 
   const validation = useFieldValidation<FieldName>(
     { displayName },
@@ -173,17 +183,37 @@ export default function InviteAcceptPage() {
     if (result.value.nodeId) {
       setNodeId(result.value.nodeId);
     }
-    setSuggestion((await suggestionPromise.current) ?? null);
+    // Accepting the invite IS joining the community — server included
+    // (operator ruling, 2026-07: "when someone redeems the invite,
+    // they join the server. Period."). If this device has no node
+    // configured and the serving origin answers like one, connect NOW
+    // and push the join receipt immediately, so the founder's
+    // projects/events/posts start flowing on the very first sync.
+    const { readSubmitConfig, writeSubmitConfig } = await import(
+      "@/lib/nodeSubmit"
+    );
+    let cfg = await readSubmitConfig();
+    if (cfg.url.trim() === "") {
+      const candidate = (await suggestionPromise.current) ?? null;
+      if (candidate) {
+        await writeSubmitConfig({ url: candidate, enabled: true });
+        const { flushOutboxNow } = await import("@/lib/outbox");
+        void flushOutboxNow();
+        cfg = await readSubmitConfig();
+      }
+    }
+    setConfigured(cfg.url.trim() !== "");
     setStatus("done");
   }
 
-  // Auto-redirect only when there is no consent card waiting — the
-  // §5.3 confirm must never be raced off the screen.
+  // Auto-redirect on a CONNECTED success. An unconnected redemption
+  // must never be silently converted into looks-like-success — the
+  // member would land on an empty app with no explanation.
   useEffect(() => {
-    if (status !== "done" || suggestion) return;
+    if (status !== "done" || configured === false) return;
     const id = setTimeout(() => navigate("/"), 1000);
     return () => clearTimeout(id);
-  }, [status, suggestion, navigate]);
+  }, [status, configured, navigate]);
 
   // No fragment at all — the mangled-link arrival (§5.1.1). The same
   // paste input as the error screen, framed calmly rather than as an
@@ -278,15 +308,42 @@ export default function InviteAcceptPage() {
           <>
             <p className="mt-4 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
               {/* "Redirecting…" only when we actually are — with the
-                  consent card below, the member decides first. */}
-              {suggestion ? t("invite.welcomeStay") : t("invite.welcome")}
+                  unconnected notice below, the member decides first. */}
+              {configured === false
+                ? t("invite.welcomeStay")
+                : t("invite.welcome")}
             </p>
-            {suggestion && (
-              <div className="mt-4">
-                <NodeOriginSuggestCard
-                  candidateUrl={suggestion}
-                  onDone={() => navigate("/")}
-                />
+            {/* No reachable node and none configured: the redemption
+                is real but LOCAL-ONLY — this device cannot reach the
+                community's server, so nothing of the community will
+                appear until it's connected. Say it, name the path,
+                and let the member proceed deliberately. */}
+            {configured === false && (
+              <div
+                role="alert"
+                className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+              >
+                <p>
+                  {t("invite.notConnected.body", {
+                    name: invite.inviterName,
+                  })}
+                </p>
+                <div className="mt-3 flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary text-xs"
+                    onClick={() => navigate("/")}
+                  >
+                    {t("invite.notConnected.continue")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary text-xs"
+                    onClick={() => navigate("/profile")}
+                  >
+                    {t("invite.notConnected.goToSettings")}
+                  </button>
+                </div>
               </div>
             )}
           </>

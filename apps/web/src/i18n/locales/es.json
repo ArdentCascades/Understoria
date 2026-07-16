@@ -1695,6 +1695,11 @@
     "fingerprintReminder": "Antes de aceptar: confirma que la huella de la clave de quien invita coincide con la que {{name}} te compartió en persona o por un canal seguro. Un enlace que llegó por correo no confiable merece una doble verificación.",
     "welcome": "Bienvenida. Redirigiendo al tablero…",
     "welcomeStay": "Bienvenida. Una pregunta abajo antes del tablero.",
+    "notConnected": {
+      "body": "Algo importante: este dispositivo aún no está conectado al servidor de la comunidad, así que los proyectos, eventos y publicaciones de {{name}} NO aparecerán hasta que lo esté. Puedes conectarte en cualquier momento desde tu Perfil, en Nodo comunitario — pide a {{name}} la dirección de la comunidad si la necesitas.",
+      "goToSettings": "Abrir ajustes del Perfil",
+      "continue": "Continuar de todos modos"
+    },
     "displayNameLabel": "Tu nombre visible (los seudónimos son bienvenidos)",
     "displayNameRequired": "Elige un nombre visible o seudónimo para continuar.",
     "joiningAs": "Te unes como {{name}}",
@@ -2215,6 +2220,7 @@
   "dashboard": {
     "title": "Panel comunitario",
     "tagline": "La unidad de progreso somos nosotres, no yo.",
+    "membershipRejectedBanner": "Este dispositivo está conectado al servidor de tu comunidad, pero el servidor aún no te reconoce como integrante — así que nada de la comunidad puede aparecer aquí, y nada de lo que hagas sale de este dispositivo. Esto suele significar que tu invitación no llegó al servidor: abre tu enlace de invitación de nuevo en este dispositivo, o pide a quien te invitó que te envíe uno nuevo. Este aviso desaparece solo en cuanto el servidor te reconozca.",
     "resume": {
       "title": "Retoma donde lo dejaste",
       "hint": "La última tarea que tocaste — tu propia memoria de navegación, guardada solo en este dispositivo."

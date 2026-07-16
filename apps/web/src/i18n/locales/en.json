@@ -1695,6 +1695,11 @@
     "fingerprintReminder": "Before accepting: confirm that the inviter-key fingerprint above matches what {{name}} shared with you in person or over a secure channel. A link that reached you via untrusted email is worth a double-check.",
     "welcome": "Welcome in. Redirecting to the board…",
     "welcomeStay": "Welcome in. One question below before the board.",
+    "notConnected": {
+      "body": "One important thing: this device is not connected to the community's server yet, so {{name}}'s projects, events, and board posts will NOT appear until it is. You can connect any time from your Profile, under Community node — ask {{name}} for the community's address if you need it.",
+      "goToSettings": "Open Profile settings",
+      "continue": "Continue anyway"
+    },
     "displayNameLabel": "Your display name (pseudonyms welcome)",
     "displayNameRequired": "Choose a display name or pseudonym to continue.",
     "joiningAs": "Joining as {{name}}",
@@ -2215,6 +2220,7 @@
   "dashboard": {
     "title": "Community dashboard",
     "tagline": "The unit of progress is us, not me.",
+    "membershipRejectedBanner": "This device is connected to your community's server, but the server doesn't recognize you as a member yet — so nothing from the community can appear here, and nothing you make leaves this device. This usually means your invite hasn't reached the server: open your invite link again on this device, or ask the person who invited you to send a fresh one. This notice clears itself the moment the server recognizes you.",
     "resume": {
       "title": "Pick up where you left off",
       "hint": "The last task you touched — your own navigation memory, kept on this device only."
