@@ -1725,6 +1725,18 @@
     "cta": "Open an invite link",
     "dismiss": "Dismiss"
   },
+  "nodeSetup": {
+    "title": "This community's server isn't set up yet",
+    "body": "The server at {{origin}} is running, but no one has claimed it as its founding member. Until that happens, nothing anyone creates here can be saved to the community or shared with anyone — so the app is paused rather than letting you work into thin air.",
+    "founderTitle": "I'm setting up this community",
+    "founderIntro": "Finish setup right here. You'll need the one-time setup code from the server — it's printed in the server's startup log (or it's the SETUP_TOKEN in the server's .env file).",
+    "nameLabel": "Your display name (pseudonyms welcome)",
+    "codeHint": "On the server: docker compose logs understoria | grep -i setup",
+    "claim": "Claim this server and open the community",
+    "waitingTitle": "Just joining this community?",
+    "waitingBody": "Ask the person setting it up to finish claiming the server, then tap the button below — or just re-open your invite link once they're done.",
+    "checkAgain": "Check again"
+  },
   "nodeSuggest": {
     "label": "Connect to this community's node",
     "title": "Connect to this community's node?",

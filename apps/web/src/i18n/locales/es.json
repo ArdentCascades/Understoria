@@ -1725,6 +1725,18 @@
     "cta": "Abrir un enlace de invitación",
     "dismiss": "Descartar"
   },
+  "nodeSetup": {
+    "title": "El servidor de esta comunidad aún no está configurado",
+    "body": "El servidor en {{origin}} está en marcha, pero nadie lo ha reclamado como su integrante fundador. Hasta que eso ocurra, nada de lo que se cree aquí puede guardarse en la comunidad ni compartirse con nadie — así que la app se pausa en lugar de dejarte trabajar en el vacío.",
+    "founderTitle": "Estoy configurando esta comunidad",
+    "founderIntro": "Termina la configuración aquí mismo. Necesitarás el código de configuración de un solo uso del servidor — está impreso en el registro de arranque del servidor (o es el SETUP_TOKEN en el archivo .env del servidor).",
+    "nameLabel": "Tu nombre para mostrar (los seudónimos son bienvenidos)",
+    "codeHint": "En el servidor: docker compose logs understoria | grep -i setup",
+    "claim": "Reclamar este servidor y abrir la comunidad",
+    "waitingTitle": "¿Solo vienes a unirte a esta comunidad?",
+    "waitingBody": "Pide a la persona que la está configurando que termine de reclamar el servidor y luego toca el botón de abajo — o simplemente vuelve a abrir tu enlace de invitación cuando haya terminado.",
+    "checkAgain": "Comprobar de nuevo"
+  },
   "nodeSuggest": {
     "label": "Conectar con el nodo de esta comunidad",
     "title": "¿Conectar con el nodo de esta comunidad?",
