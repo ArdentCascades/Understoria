@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **THE island-account bug: redeeming an invite now marks the device
+  onboarded, so the app can never bounce a freshly-invited member
+  into the Welcome flow** (`apps/web/src/db/invites.ts`,
+  `pages/InviteAccept.tsx`). The root cause of the persistent
+  "invite doesn't actually invite anyone" reports (2026-07): the
+  invite screen never set the `onboarded` flag, so the moment the
+  new member left it, the app-shell OnboardingGate redirected them
+  to the Welcome flow — a concept tour plus a profile step whose
+  mint path can create a SECOND identity with a fresh random
+  community id. The invited identity (the one whose join receipt
+  the server accepted) sat abandoned while the member used the
+  Welcome-minted one, whose every sync the server rejected — and
+  the pulls swallowed those rejections silently. Every piece of the
+  invite machinery worked; the app then walked the new member into
+  a different account. Now `redeemInvite` itself marks the device
+  onboarded (a redeemed invite IS a named identity in a community —
+  correct by construction for every redemption path), and the
+  invite screen refreshes the live gate state so the fix applies
+  without a reload.
 - **The two silent "island account" states now announce themselves**
   (`apps/web/src/lib/membershipStatus.ts` new, `lib/authorizedRead.ts`,
   `lib/nodeSubmit.ts`, `pages/Dashboard.tsx`, `pages/InviteAccept.tsx`;

@@ -27,6 +27,7 @@ import {
   revokeInvite,
 } from "./invites";
 import { createMember } from "./seed";
+import { isOnboarded } from "./onboarding";
 import { db, getSetting, SETTING_KEYS, setSetting } from "./database";
 import { generateKeyPair } from "@/lib/crypto";
 import { createVouch, trustStatusWithInvites } from "@/lib/vouch";
@@ -122,6 +123,31 @@ describe("redeemInvite", () => {
     const [invite] = await db.invites.toArray();
     expect(invite.status).toBe("redeemed");
     expect(invite.redeemedBy).toBe(result.value.member.publicKey);
+  });
+
+  it("marks the device ONBOARDED — the welcome flow must never follow a redemption", async () => {
+    // Without this, the OnboardingGate bounced a freshly-invited
+    // member into Welcome's tour + profile step, whose mint path
+    // could produce a SECOND identity with a fresh random community
+    // id — the 2026-07 "island account": the invited identity (the
+    // one the server knew) sat abandoned while the member used the
+    // Welcome-minted one, whose every sync the server rejected.
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const encoded = shareUrl.split("#")[1];
+    await db.secretKeys.delete(inviter.publicKey);
+    expect(await isOnboarded()).toBe(false);
+
+    const result = await redeemInvite(encoded, "Newcomer", NODE);
+    expect(result.ok).toBe(true);
+    expect(await isOnboarded()).toBe(true);
   });
 
   it("a fresh member adopts the community's nodeId (so Dashboard stats aren't zeroed)", async () => {
