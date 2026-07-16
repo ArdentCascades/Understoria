@@ -10,6 +10,26 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **An unclaimed server now LOCKS the app behind a setup screen —
+  and the founder finishes setup right there**
+  (`apps/web/src/components/NodeSetupGate.tsx`, `App.tsx`,
+  `scripts/setup.sh`). Operator ruling: "if that's not set up it
+  shouldn't let me use the app — people will assume their stuff is
+  saving." Before this, an app served from an unclaimed node behaved
+  like a working community: people onboarded, created content, sent
+  invites — and none of it could ever save or share (the node
+  refuses everything until its founding member claims it). Now, when
+  the serving origin's node answers `claimed: false`, the whole app
+  is replaced by a plain-language setup screen: it says exactly why
+  nothing would be saved, gives the founder a name field + setup-code
+  field + one button that mints their identity, connects, and claims
+  in a single stroke (opening straight into the app, no Welcome
+  detour), and tells everyone else the community isn't ready yet —
+  with a re-check button. Fail-open by construction: dev/demo
+  builds, loopback origins, static hosting, unreachable probes, and
+  claimed nodes all render the app untouched — only an affirmative
+  "unclaimed" gates. `scripts/setup.sh` now ends with a boxed,
+  can't-miss "ONE STEP LEFT" block matching the new in-app flow.
 - **Sending an invite now registers it with the community server;
   accepting one marks it redeemed there and pulls the community's
   content immediately** (operator ruling 2026-07: "when someone

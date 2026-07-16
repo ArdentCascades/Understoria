@@ -64,6 +64,7 @@ import ProposalNewPage from "@/pages/ProposalNew";
 import WelcomePage from "@/pages/Welcome";
 import PresentPage from "@/pages/Present";
 import NotFoundPage from "@/pages/NotFound";
+import { NodeSetupGate } from "@/components/NodeSetupGate";
 import { useApp } from "@/state/AppContext";
 
 // Paths a brand-new device is allowed to reach without going through
@@ -104,6 +105,7 @@ function StandaloneScroll({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <NodeSetupGate>
     <OnboardingGate>
       <Routes>
         <Route
@@ -213,5 +215,6 @@ export default function App() {
         </Route>
       </Routes>
     </OnboardingGate>
+    </NodeSetupGate>
   );
 }
