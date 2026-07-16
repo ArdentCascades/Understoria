@@ -91,6 +91,12 @@ export default function InviteAcceptPage() {
   // consent moment never races the redirect.
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const suggestionPromise = useRef<Promise<string | null> | null>(null);
+  // Whether this device already has a community node configured —
+  // resolved on the success path. Redeeming with NO suggestion and NO
+  // configured node means the new member is NOT connected to the
+  // community's server: say so plainly instead of redirecting into a
+  // silently empty app (the 2026-07 "island account" reports).
+  const [configured, setConfigured] = useState<boolean | null>(null);
 
   const validation = useFieldValidation<FieldName>(
     { displayName },
@@ -174,16 +180,22 @@ export default function InviteAcceptPage() {
       setNodeId(result.value.nodeId);
     }
     setSuggestion((await suggestionPromise.current) ?? null);
+    const { readSubmitConfig } = await import("@/lib/nodeSubmit");
+    const cfg = await readSubmitConfig();
+    setConfigured(cfg.url.trim() !== "");
     setStatus("done");
   }
 
-  // Auto-redirect only when there is no consent card waiting — the
-  // §5.3 confirm must never be raced off the screen.
+  // Auto-redirect only when there is no consent card waiting AND the
+  // device ends up connected — the §5.3 confirm must never be raced
+  // off the screen, and an UNCONNECTED redemption must never be
+  // silently converted into looks-like-success (the member would land
+  // on an empty app with no explanation).
   useEffect(() => {
-    if (status !== "done" || suggestion) return;
+    if (status !== "done" || suggestion || configured === false) return;
     const id = setTimeout(() => navigate("/"), 1000);
     return () => clearTimeout(id);
-  }, [status, suggestion, navigate]);
+  }, [status, suggestion, configured, navigate]);
 
   // No fragment at all — the mangled-link arrival (§5.1.1). The same
   // paste input as the error screen, framed calmly rather than as an
@@ -278,8 +290,11 @@ export default function InviteAcceptPage() {
           <>
             <p className="mt-4 rounded-xl bg-canopy-50 p-3 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100">
               {/* "Redirecting…" only when we actually are — with the
-                  consent card below, the member decides first. */}
-              {suggestion ? t("invite.welcomeStay") : t("invite.welcome")}
+                  consent card (or the unconnected notice) below, the
+                  member decides first. */}
+              {suggestion || configured === false
+                ? t("invite.welcomeStay")
+                : t("invite.welcome")}
             </p>
             {suggestion && (
               <div className="mt-4">
@@ -287,6 +302,39 @@ export default function InviteAcceptPage() {
                   candidateUrl={suggestion}
                   onDone={() => navigate("/")}
                 />
+              </div>
+            )}
+            {/* No suggestion AND no configured node: the redemption
+                is real but LOCAL-ONLY — this device cannot reach the
+                community's server, so nothing of the community will
+                appear until it's connected. Say it, name the path,
+                and let the member proceed deliberately. */}
+            {!suggestion && configured === false && (
+              <div
+                role="alert"
+                className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+              >
+                <p>
+                  {t("invite.notConnected.body", {
+                    name: invite.inviterName,
+                  })}
+                </p>
+                <div className="mt-3 flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary text-xs"
+                    onClick={() => navigate("/")}
+                  >
+                    {t("invite.notConnected.continue")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary text-xs"
+                    onClick={() => navigate("/profile")}
+                  >
+                    {t("invite.notConnected.goToSettings")}
+                  </button>
+                </div>
               </div>
             )}
           </>

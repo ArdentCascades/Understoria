@@ -10,6 +10,31 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **The two silent "island account" states now announce themselves**
+  (`apps/web/src/lib/membershipStatus.ts` new, `lib/authorizedRead.ts`,
+  `lib/nodeSubmit.ts`, `pages/Dashboard.tsx`, `pages/InviteAccept.tsx`;
+  locked by a new full-deployment-shape E2E in
+  `lib/inviteFlow.e2e.test.ts` that runs the real server behind a
+  Caddy-shaped `/api` reverse proxy and drives the invitee's actual
+  §5.3 consent journey — consent card offered, receipt → membership,
+  pulls, and the app's own "is this record ours?" scope predicate
+  showing every project/event/post). The invite mechanism itself
+  passes that test end to end; what failed people in the field was
+  the app SAYING NOTHING when a step silently didn't happen:
+  (1) a device connected to a node that doesn't recognize it as a
+  member gets `403` on every signed read, and every pull swallows
+  that identically to a network blip — an unexplained empty app with
+  a green "connected" chip, forever. `authorizedFetch` now records a
+  membership-rejection flag on a signed 403 (cleared by the next
+  successful read and by any node-config change), and the Dashboard
+  shows a plain-language banner: what's happening, why, and what to
+  do (re-open the invite link / ask for a fresh one).
+  (2) redeeming an invite on a device that ends up with NO node
+  connection (origin suggestion unavailable and nothing configured)
+  used to say "Welcome in" and redirect into that empty app. The
+  success screen now says plainly that the community's content will
+  not appear until the device is connected, names where to do it
+  (Profile → Community node), and stops auto-redirecting.
 - **"Send the link without showing it" now reliably puts the actual
   invite link where it's going** (`apps/web/src/lib/share.ts`,
   `components/InviteShareSheet.tsx`, `pages/Profile.tsx`). Two

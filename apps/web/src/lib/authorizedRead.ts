@@ -21,6 +21,10 @@
 import { getSetting, SETTING_KEYS } from "@/db/database";
 import { getSecretKey } from "@/db/secrets";
 import { canonicalReadAuthMessage, sign } from "@/lib/crypto";
+import {
+  clearMembershipRejection,
+  recordMembershipRejection,
+} from "@/lib/membershipStatus";
 import { recordNodeSuccess } from "@/lib/nodeEndpoints";
 
 /**
@@ -54,7 +58,18 @@ export async function authorizedFetch(
   // ("reachable" = a successful read in the last 24h, community-
   // resilience.md §B.2). Debounced and best-effort inside
   // recordNodeSuccess; never blocks or fails the pull.
-  if (res.ok) void recordNodeSuccess(baseUrl);
+  if (res.ok) {
+    void recordNodeSuccess(baseUrl);
+    void clearMembershipRejection();
+  } else if (res.status === 403 && headers) {
+    // The node REFUSED this member's SIGNED read — "not a member".
+    // Every pull swallows !res.ok identically, so without this signal
+    // a connected-but-unrecognized device is an unexplained empty app
+    // forever (the 2026-07 "island account" reports). The Dashboard
+    // turns the flag into a plain-language banner. Unsigned requests
+    // don't count: those are the locked-session / fresh-device states.
+    void recordMembershipRejection();
+  }
   return res;
 }
 

@@ -303,3 +303,49 @@ describe("InviteAccept — attach, don't mint (§5.2)", () => {
     expect(container.textContent).not.toContain("Joining as");
   });
 });
+
+describe("InviteAccept — the unconnected-success notice", () => {
+  it("says plainly when the redeemed device is NOT connected to the community's server", async () => {
+    // In the test environment the §5.3 origin suggestion is null (dev
+    // gate) and no node is configured — exactly the arrival that used
+    // to redirect into a silently empty app: a real local redemption
+    // that never reaches the community (the "island account" report).
+    setFragment(validInviteToken("Rosa"));
+    render();
+    await flush();
+
+    const name = container.querySelector(
+      "input.input",
+    ) as HTMLInputElement;
+    setInput(name, "New Neighbor");
+    const submit = buttonByText("Accept invite and join")!;
+    await act(async () => {
+      submit.form!.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+    // Redemption does real signature verification + Dexie writes;
+    // wait until the submitting state resolves (bounded).
+    for (
+      let i = 0;
+      i < 100 && !container.textContent?.includes("Welcome in");
+      i++
+    ) {
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 20));
+      });
+    }
+
+    expect(container.textContent).toContain(
+      "not connected to the community's server",
+    );
+    // Named guidance, not a generic shrug — Rosa can supply the URL.
+    expect(container.textContent).toContain(
+      "ask Rosa for the community's address",
+    );
+    expect(buttonByText("Open Profile settings")).not.toBeNull();
+    expect(buttonByText("Continue anyway")).not.toBeNull();
+    // The success copy must NOT claim we're redirecting — we aren't.
+    expect(container.textContent).not.toContain("Redirecting");
+  });
+});

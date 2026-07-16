@@ -28,6 +28,7 @@ import { computeFlowStats } from "@/lib/flow";
 import { projectCategoryMeta } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
+import { readMembershipRejectedAt } from "@/lib/membershipStatus";
 import { BreadthBar } from "@/components/BreadthBar";
 import { ReciprocityPulse } from "@/components/ReciprocityPulse";
 import { EmptyState } from "@/components/EmptyState";
@@ -95,6 +96,31 @@ export default function DashboardPage() {
 
   const newlyReached = useNewlyReachedMilestones(stats.milestonesReached);
 
+  // Membership-rejection banner (lib/membershipStatus.ts): a device
+  // that is connected to a node the node doesn't recognize as a member
+  // gets 403 on every signed read — which every pull swallows
+  // silently. Without this banner that state is an unexplained empty
+  // app with a green "connected" chip (the 2026-07 "island account"
+  // reports). Only meaningful while a node is configured AND enabled;
+  // the flag itself is cleared by the next successful read and by any
+  // node-config change.
+  const [membershipRejected, setMembershipRejected] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const rejectedAt = await readMembershipRejectedAt();
+      if (!rejectedAt) return;
+      const { readSubmitConfig } = await import("@/lib/nodeSubmit");
+      const cfg = await readSubmitConfig();
+      if (!cancelled) {
+        setMembershipRejected(cfg.enabled && cfg.url.trim() !== "");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const topCategories = useMemo(() => {
     // ProjectCategory, not Category: task-confirmation exchanges carry
     // the three project-only categories, and indexing the narrow
@@ -136,6 +162,17 @@ export default function DashboardPage() {
           className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
         >
           {t("removals.selfBanner")}
+        </div>
+      )}
+      {/* Connected-but-not-recognized: say it plainly instead of the
+          silent empty app. selfRemoved wins when both apply — removal
+          is the more specific (and more actionable) explanation. */}
+      {membershipRejected && !selfRemoved && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+        >
+          {t("dashboard.membershipRejectedBanner")}
         </div>
       )}
       <header className="mb-4">
