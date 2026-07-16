@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Messages (and everything else) now arrive live while the app is
+  open** (pilot report 2026-07: "messages are working but they feel
+  slow"). Two layers, both timing-only — no new data crosses any
+  wire. (1) *Server push*: the node now serves `GET /nudges`
+  (`apps/server/src/nudgeBus.ts`, `routes/nudges.ts`), a long-lived
+  Server-Sent-Events stream that emits one **content-free** `nudge`
+  event whenever the node accepts a federation write; the PWA holds
+  one signed connection to it while foregrounded
+  (`apps/web/src/lib/nudgeStream.ts`) and treats each nudge exactly
+  like a focus kick — the normal coalesced pull, so delivery drops
+  from the 12s–3min poll cadence to ~1s. E2E message envelopes stay
+  exactly as private as before: no record, kind, or author ever
+  rides the stream, and recipients still pull ciphertext over the
+  authenticated feed. Hidden tab closes the stream; a broken stream
+  degrades to today's polling — never worse. (2) *Chat-mode
+  polling*: an OPEN conversation additionally pulls the messages
+  feed every 2.5s while visible (`pages/Conversation.tsx`), so
+  replies land mid-stare even where proxies or networks break SSE.
+  Design + presence trade-off recorded in `docs/sync-liveness.md`.
 - **An unclaimed server now LOCKS the app behind a setup screen —
   and the founder finishes setup right there**
   (`apps/web/src/components/NodeSetupGate.tsx`, `App.tsx`,

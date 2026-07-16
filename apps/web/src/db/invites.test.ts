@@ -645,8 +645,12 @@ describe("redeemInvite — redemption receipt (Phase 1)", () => {
     expect(verifyRedemptionReceipt(receipt)).toBe(true);
 
     // The outbox row is keyed on the token so a retry can't
-    // double-enqueue.
-    const [row] = await db.outbox.toArray();
+    // double-enqueue. (issueInvite above also enqueued its own
+    // invite_announcement row — filter to the receipt's kind.)
+    const [row] = await db.outbox
+      .where("kind")
+      .equals("redemption_receipt")
+      .toArray();
     expect(row.recordId).toBe(receipt.invite.token);
   });
 

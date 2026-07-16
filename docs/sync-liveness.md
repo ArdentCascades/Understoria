@@ -2,6 +2,10 @@
 
 > **Status:** shipped. `apps/web/src/lib/syncLoop.ts` (loop),
 > `state/AppContext.tsx` (wiring), `lib/syncLoop.test.ts` (contract).
+> Server push + chat-mode polling (2026-07, pilot "messages feel
+> slow" report): `apps/server/src/nudgeBus.ts` +
+> `routes/nudges.ts` (SSE stream), `lib/nudgeStream.ts` (client),
+> `pages/Conversation.tsx` (chat-mode poll).
 
 ## The problem
 
@@ -79,12 +83,48 @@ live as named constants in `lib/syncLoop.ts`
 natural candidate for a future `nodeConfig` override if an operator
 wants to tune it for a low-power fleet.
 
-## Explicitly not done
+## Chat-mode polling — an open conversation is special
 
-Real server-push (SSE / WebSocket / long-poll) would make delivery
-*truly* instant, but it is a genuine architectural change: a persistent
-connection is a new surface and sharpens presence/online inference at
-the node beyond what polling implies. The three layers above capture
-most of the felt improvement for two co-present people at a fraction of
-the risk. Revisit push only if a pilot still reports lag with the live
-cadence on.
+The one place the 12s hot cadence still *felt* broken was an open
+message thread: you're staring at the screen waiting for the reply.
+`pages/Conversation.tsx` adds a chat-mode poll — while a conversation
+is mounted **and the tab visible**, the page pulls the messages feed
+(`pullFederatedMessages`, one cursor GET) every `CHAT_POLL_MS` (2.5s)
+and refreshes the thread. Ticks are in-flight-guarded, skip while
+hidden, run immediately on re-foregrounding or on a server nudge, and
+tear down completely on leaving the page — the rest of the app never
+pays for it.
+
+## Server push — the nudge stream
+
+The pilot did report lag (2026-07: "messages are working but they
+feel slow"), so the deferred push layer is now shipped — in its
+narrowest possible shape:
+
+- **Server** (`nudgeBus.ts`, `routes/nudges.ts`): `GET /nudges` is a
+  long-lived Server-Sent-Events response. An `onResponse` hook
+  broadcasts one **content-free** `nudge` event to every subscriber
+  after any *accepted* `POST` to a federation surface (the `SURFACES`
+  map — so a future surface is covered the day it lands there). No
+  record, no kind, no author ever rides the stream: E2E message
+  envelopes stay exactly as private as before; the recipient still
+  pulls them over the authenticated feed. The route is covered by the
+  deny-by-default member-read guard the same as every other feed.
+- **Client** (`lib/nudgeStream.ts`, wired in `AppContext`): one
+  fetch-based SSE connection to the primary node while the app is
+  open and foregrounded (fetch, not `EventSource`, because the read
+  guard wants signed headers). Every nudge dispatches
+  `SYNC_KICK_EVENT`, which `syncLoop` treats exactly like a focus
+  kick — the same coalesced full pull. Hidden tab → stream closed;
+  errors → exponential backoff 2s→60s. The poll cadence keeps running
+  underneath, so a broken stream degrades to the polling behavior
+  above — never worse.
+
+Presence trade-off, acknowledged: a persistent connection does tell
+the node "this device has the app open", which is sharper than the
+awake-inference polling already gave it. The stream carries nothing
+else, stops when hidden, and the node already sees every read this
+device makes — the marginal disclosure was judged worth ~1s delivery
+for a mutual-aid app whose members are coordinating in real time
+(`docs/operator-powers.md`, `docs/threat-model.md` §7 unchanged in
+substance: the operator learns timing, never content).

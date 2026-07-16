@@ -377,6 +377,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // while active, 3 min when idle/background — over the same
     // node-relayed reads as before (no new surface). See lib/syncLoop.
     let stop: (() => void) | null = null;
+    let stopNudge: (() => void) | null = null;
     let cancelled = false;
     void import("@/lib/syncLoop").then(({ startSyncLoop }) => {
       // The effect may have been torn down before the dynamic import
@@ -384,9 +385,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       stop = startSyncLoop();
     });
+    // Server push (docs/sync-liveness.md): the nudge stream holds one
+    // SSE connection to the node and turns each content-free nudge
+    // into the same kick a focus event fires — so new messages/posts/
+    // RSVPs land within ~a second while the app is open. Degrades to
+    // the poll cadence above when the stream can't connect.
+    void import("@/lib/nudgeStream").then(({ startNudgeStream }) => {
+      if (cancelled) return;
+      stopNudge = startNudgeStream();
+    });
     return () => {
       cancelled = true;
       if (stop) stop();
+      if (stopNudge) stopNudge();
     };
   }, [ready]);
 

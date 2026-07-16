@@ -88,6 +88,12 @@ export const QUIET_AFTER = 3;
 export const HOT_MAX_MS = 60_000;
 /** Focus + visibilitychange fire together; collapse kicks within this. */
 export const KICK_COALESCE_MS = 1_000;
+
+/** Custom window event that triggers an immediate coalesced sync
+ *  cycle — the nudge stream (lib/nudgeStream.ts) dispatches it when
+ *  the server announces "something changed". Same treatment as a
+ *  focus kick. */
+export const SYNC_KICK_EVENT = "understoria:sync-kick";
 /** ± jitter so a room of devices that foreground together don't stampede. */
 const JITTER = 0.15;
 
@@ -310,6 +316,9 @@ export function startSyncLoop(options: SyncLoopOptions = {}): () => void {
     bind(document, "visibilitychange", onVisibility);
     bind(window, "focus", kick);
     bind(window, "online", kick);
+    // Server push (docs/sync-liveness.md): the nudge stream turns a
+    // content-free SSE event into exactly this kick.
+    bind(window, SYNC_KICK_EVENT, kick);
     bind(window, "pointerdown", onInteraction);
     bind(window, "keydown", onInteraction);
   }
