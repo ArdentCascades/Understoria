@@ -232,18 +232,27 @@ loaded the PWA *from a community node* is holding the node URL in
 `location.origin` already. The manual Settings step is why incident
 finding #4 exists.
 
-**Behavior:** on first run — and again on the invite-accept success
-path if still unconfigured — the app derives a candidate
-`${location.origin}/api` and probes `GET /api/health` (same-origin
-fetch, no third-party request). If the probe answers like an
-Understoria node, the app **prefills** the community-node settings
-and shows the existing informed-consent card (`mirrorConsent.ts`
-posture) naming the origin and what will be sent. One tap confirms.
+**Behavior:** the app derives a candidate `${location.origin}/api`
+and probes `GET /api/health` (same-origin fetch, no third-party
+request). What happens with a healthy candidate depends on how the
+member arrived:
 
-**Never silent.** The threat-model §7 entry "Configurable node URL
-can leak counterparty public keys" made explicit consent
-load-bearing; auto-*enable* would hollow it out. Auto-*suggest*
-keeps the consent gate while removing the transcription step.
+- **Invite redemption** (operator ruling, 2026-07, superseding the
+  earlier card here): accepting the invite **is** the consent — the
+  member just chose to join this community, and joining means
+  joining its server. On redemption success the device connects to
+  the candidate automatically and pushes the join receipt
+  immediately; no card, no extra tap. If no candidate resolves and
+  no node is configured, the success screen says plainly that the
+  community's content will not appear until the device is connected
+  (never a silent looks-like-success redirect).
+- **First run without an invite** (the Board suggestion): the app
+  **prefills** the community-node settings and shows the existing
+  informed-consent card (`mirrorConsent.ts` posture) naming the
+  origin and what will be sent. One tap confirms. Here nothing was
+  accepted yet, so the threat-model §7 entry "Configurable node URL
+  can leak counterparty public keys" keeps explicit consent
+  load-bearing.
 
 When derivation is safe vs. wrong:
 

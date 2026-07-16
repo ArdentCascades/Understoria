@@ -29,6 +29,15 @@ vi.mock("@/state/AppContext", () => ({
   useApp: () => mockState,
 }));
 
+// The origin-derived node probe: null (no reachable node) by default;
+// the auto-connect test dials in a candidate URL.
+const { suggestMock } = vi.hoisted(() => ({
+  suggestMock: vi.fn<() => Promise<string | null>>(async () => null),
+}));
+vi.mock("@/lib/nodeOriginSuggest", () => ({
+  suggestNodeUrlFromOrigin: suggestMock,
+}));
+
 // Pull in i18n side-effects so `t()` returns translated strings — the
 // assertions below match on the English copy.
 import "@/i18n";
@@ -65,6 +74,8 @@ let root: Root;
 
 beforeEach(async () => {
   mockState = blankState();
+  suggestMock.mockReset();
+  suggestMock.mockResolvedValue(null);
   await Promise.all([
     db.members.clear(),
     db.secretKeys.clear(),
@@ -301,6 +312,49 @@ describe("InviteAccept — attach, don't mint (§5.2)", () => {
     render();
     await flush();
     expect(container.textContent).not.toContain("Joining as");
+  });
+});
+
+describe("InviteAccept — redeeming JOINS the server (no extra card)", () => {
+  it("connects to the origin-derived node on redemption, with no consent card and no extra tap", async () => {
+    // Operator ruling (2026-07): accepting the invite IS joining the
+    // community, server included. The old §5.3 consent card between
+    // "Accept invite" and actually being connected is gone.
+    suggestMock.mockResolvedValue("https://community.test/api");
+    setFragment(validInviteToken("Rosa"));
+    render();
+    await flush();
+
+    const name = container.querySelector(
+      "input.input",
+    ) as HTMLInputElement;
+    setInput(name, "New Neighbor");
+    const submit = buttonByText("Accept invite and join")!;
+    await act(async () => {
+      submit.form!.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+    for (
+      let i = 0;
+      i < 100 && !container.textContent?.includes("Welcome in");
+      i++
+    ) {
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 20));
+      });
+    }
+
+    // The device IS connected — no card, no question, no notice.
+    const { readSubmitConfig } = await import("@/lib/nodeSubmit");
+    expect(await readSubmitConfig()).toMatchObject({
+      url: "https://community.test/api",
+      enabled: true,
+    });
+    expect(container.textContent).toContain("Redirecting");
+    expect(container.textContent).not.toContain(
+      "not connected to the community's server",
+    );
   });
 });
 

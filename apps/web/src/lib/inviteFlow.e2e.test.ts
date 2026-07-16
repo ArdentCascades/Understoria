@@ -448,11 +448,12 @@ describe("invite flow, end to end (real server, real HTTP)", () => {
       redeemed.value.member.publicKey,
     );
 
-    // §5.3: the consent card must be OFFERED — a null suggestion means
-    // the invitee silently becomes a standalone account. The suggest
-    // gate excludes loopback origins by design (dev protection), so we
-    // present it a production-shaped hostname whose fetches the
-    // wrapper maps onto the local proxy.
+    // The origin-derived join URL must resolve — redeeming an invite
+    // JOINS the server automatically (operator ruling, 2026-07), and a
+    // null suggestion would strand the invitee as a standalone
+    // account. The suggest gate excludes loopback origins by design
+    // (dev protection), so we present it a production-shaped hostname
+    // whose fetches the wrapper maps onto the local proxy.
     const PROD_ORIGIN = "https://community.example";
     const rewriteFetch: typeof fetch = (input, init) =>
       globalThis.fetch(
@@ -466,12 +467,12 @@ describe("invite flow, end to end (real server, real HTTP)", () => {
     });
     expect(
       suggestion,
-      "the consent card must appear on the invite success screen",
+      "the origin-derived join URL must resolve on the invite success path",
     ).toBe(`${PROD_ORIGIN}/api`);
 
-    // Accepting the card IS writeSubmitConfig (NodeOriginSuggestCard).
-    // In the test we persist the reachable address the fake host maps
-    // to; production persists the suggestion itself.
+    // The invite page auto-connects with exactly this call — no card,
+    // no extra tap. In the test we persist the reachable address the
+    // fake host maps to; production persists the suggestion itself.
     await writeSubmitConfig({ url: apiUrl, enabled: true });
     await drainOutbox();
 

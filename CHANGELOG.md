@@ -16,7 +16,7 @@ include breaking changes.
   locked by a new full-deployment-shape E2E in
   `lib/inviteFlow.e2e.test.ts` that runs the real server behind a
   Caddy-shaped `/api` reverse proxy and drives the invitee's actual
-  §5.3 consent journey — consent card offered, receipt → membership,
+  §5.3 join journey — origin join URL resolves, receipt → membership,
   pulls, and the app's own "is this record ours?" scope predicate
   showing every project/event/post). The invite mechanism itself
   passes that test end to end; what failed people in the field was
@@ -82,6 +82,19 @@ include breaking changes.
   re-publish self-heals those on next edit; tracked as follow-up.
 
 ### Changed
+- **Redeeming an invite now JOINS the community's server
+  automatically — the extra "connect?" card on the invite screen is
+  gone** (`apps/web/src/pages/InviteAccept.tsx`;
+  `docs/invite-redemption.md` §5.3). Operator ruling: accepting the
+  invite IS the consent — the member just chose to join this
+  community, and joining means joining its server. On redemption
+  success the device connects to the origin-derived node URL and
+  pushes the join receipt immediately, so the community's projects,
+  events, and posts start flowing on the first sync. When no server
+  is reachable, the honest unconnected notice (below) still appears
+  instead of a silent redirect. The Board's first-run suggestion
+  card is unchanged — there, nothing has been accepted yet, so
+  explicit consent stays.
 - **BREAKING — the server is now secure by default: `READ_AUTH`
   defaults to `on`, and fresh nodes boot unclaimed**
   (`apps/server/src/config.ts`, `server.ts`, `db.ts` migration 28,
