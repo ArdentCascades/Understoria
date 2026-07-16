@@ -42,6 +42,7 @@ import {
   isOurNode,
   readNodeIdAliases,
 } from "@/lib/nodeIdentity";
+import { inviteTokenHash } from "@understoria/shared/crypto";
 
 // END-TO-END invite flow against a REAL server process — the exact
 // production sequence reported broken (2026-07): founder claims the
@@ -432,6 +433,20 @@ describe("invite flow, end to end (real server, real HTTP)", () => {
       nodeId:
         (await getSetting(SETTING_KEYS.nodeId)) ?? FOUNDER_DEVICE_ID,
     });
+    // Server registration (operator ruling 2026-07): issuing the
+    // invite queues a hash-only announcement for the node; after a
+    // drain the server must KNOW this invite and show it open.
+    await drainOutbox();
+    const tokenHash = inviteTokenHash(invite.row.token);
+    const announced = (await (
+      await authorizedFetch(`${apiUrl}/invite-announcements`, apiUrl)
+    ).json()) as {
+      inviteAnnouncements: Array<{ tokenHash: string; status: string }>;
+    };
+    expect(
+      announced.inviteAnnouncements.find((a) => a.tokenHash === tokenHash),
+      "the invite must be registered on the server at issue time",
+    ).toMatchObject({ status: "open" });
 
     // INVITEE — the page's own steps, in the page's own order.
     await freshDevice();
@@ -514,6 +529,25 @@ describe("invite flow, end to end (real server, real HTTP)", () => {
       projects: ["Tool library"],
       events: ["Opening day"],
       posts: ["Ladder to lend"],
+    });
+
+    // And the server-side record flipped: the community node knows
+    // this invite was used, and by whom.
+    const after = (await (
+      await authorizedFetch(`${apiUrl}/invite-announcements`, apiUrl)
+    ).json()) as {
+      inviteAnnouncements: Array<{
+        tokenHash: string;
+        status: string;
+        redeemedBy: string;
+      }>;
+    };
+    expect(
+      after.inviteAnnouncements.find((a) => a.tokenHash === tokenHash),
+      "acceptance must mark the server-side invite redeemed",
+    ).toMatchObject({
+      status: "redeemed",
+      redeemedBy: redeemed.value.member.publicKey,
     });
   }, 60_000);
 });

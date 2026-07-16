@@ -47,6 +47,7 @@ import type {
   InviteRevocation,
   ProjectState,
   RedemptionReceipt,
+  InviteAnnouncement,
   RelayedMessage,
   ShiftSignupState,
   SignedVouch,
@@ -222,6 +223,37 @@ export interface InviteRevocationStore {
   count(): number;
   has(token: string): boolean;
   getByToken(token: string): StoredInviteRevocation | null;
+}
+
+export interface StoredInviteAnnouncement {
+  announcement: InviteAnnouncement;
+  status: "open" | "redeemed";
+  redeemedBy: string | null;
+  redeemedAt: number | null;
+  receivedAt: number;
+}
+
+/**
+ * Invite announcements (schema v29). Hash-only — see the migration
+ * comment; the node can recognize a redemption but never redeem.
+ */
+export interface InviteAnnouncementStore {
+  insert(announcement: InviteAnnouncement, receivedAt: number): void;
+  getByTokenHash(tokenHash: string): StoredInviteAnnouncement | null;
+  /** Idempotent; first redeemer wins. No-op for unknown hashes (the
+   *  receipt is still the membership authority for unannounced
+   *  invites). */
+  markRedeemed(
+    tokenHash: string,
+    redeemedBy: string,
+    redeemedAt: number,
+  ): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): StoredInviteAnnouncement[];
+  count(): number;
 }
 
 export interface StoredAwaitingTransition {
@@ -1329,6 +1361,43 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '28')",
     ).run();
   }
+
+  if (current < 29) {
+    // Schema v29 — invite ANNOUNCEMENTS (operator ruling 2026-07:
+    // "when someone sends an invite, that device sends what the
+    // invitee will need to the server"). The inviter's device POSTs a
+    // signed, HASH-ONLY announcement at issue time, so the invite
+    // exists somewhere other than one phone and the node can flip it
+    // to 'redeemed' when the receipt lands. Deliberately NOT a
+    // resurrection of the v11-dropped `invites` table: that surface
+    // stored live tokens — redeemable credentials a compromised node
+    // could play. This one stores `inviteTokenHash(token)`; nothing
+    // here can be redeemed. Unannounced redemptions (invites issued
+    // offline or pre-v29) remain valid — the receipt's embedded,
+    // inviter-signed invite is still the membership authority.
+    db.exec(`
+      CREATE TABLE invite_announcements (
+        token_hash TEXT PRIMARY KEY,
+        inviter_key TEXT NOT NULL,
+        inviter_name TEXT NOT NULL,
+        node_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL,
+        signature TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'open',
+        redeemed_by TEXT,
+        redeemed_at INTEGER,
+        received_at INTEGER NOT NULL
+      );
+      CREATE INDEX invite_announcements_received_at_idx
+        ON invite_announcements (received_at);
+      CREATE INDEX invite_announcements_inviter_idx
+        ON invite_announcements (inviter_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '29')",
+    ).run();
+  }
 }
 
 /**
@@ -2287,6 +2356,104 @@ function rowToInviteRevocation(
       signature: r.signature,
     },
     receivedAt: r.received_at,
+  };
+}
+
+interface InviteAnnouncementRowSqlite {
+  token_hash: string;
+  inviter_key: string;
+  inviter_name: string;
+  node_id: string;
+  created_at: number;
+  expires_at: number;
+  signature: string;
+  status: string;
+  redeemed_by: string | null;
+  redeemed_at: number | null;
+  received_at: number;
+}
+
+function rowToStoredInviteAnnouncement(
+  r: InviteAnnouncementRowSqlite,
+): StoredInviteAnnouncement {
+  return {
+    announcement: {
+      tokenHash: r.token_hash,
+      inviterKey: r.inviter_key,
+      inviterName: r.inviter_name,
+      nodeId: r.node_id,
+      createdAt: r.created_at,
+      expiresAt: r.expires_at,
+      signature: r.signature,
+    },
+    status: r.status === "redeemed" ? "redeemed" : "open",
+    redeemedBy: r.redeemed_by,
+    redeemedAt: r.redeemed_at,
+    receivedAt: r.received_at,
+  };
+}
+
+export function createInviteAnnouncementStore(
+  db: DatabaseType,
+): InviteAnnouncementStore {
+  const insertStmt = db.prepare(`
+    INSERT OR IGNORE INTO invite_announcements (
+      token_hash, inviter_key, inviter_name, node_id,
+      created_at, expires_at, signature, status, received_at
+    ) VALUES (
+      @tokenHash, @inviterKey, @inviterName, @nodeId,
+      @createdAt, @expiresAt, @signature, 'open', @receivedAt
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM invite_announcements WHERE token_hash = ?",
+  );
+  // First redeemer wins: the status guard makes a replayed receipt an
+  // idempotent no-op here — the redemptions route already refuses
+  // conflicting receipts.
+  const markRedeemedStmt = db.prepare(`
+    UPDATE invite_announcements
+    SET status = 'redeemed', redeemed_by = @redeemedBy, redeemed_at = @redeemedAt
+    WHERE token_hash = @tokenHash AND status != 'redeemed'
+  `);
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM invite_announcements",
+  );
+
+  return {
+    insert(announcement, receivedAt) {
+      insertStmt.run({
+        tokenHash: announcement.tokenHash,
+        inviterKey: announcement.inviterKey,
+        inviterName: announcement.inviterName,
+        nodeId: announcement.nodeId,
+        createdAt: announcement.createdAt,
+        expiresAt: announcement.expiresAt,
+        signature: announcement.signature,
+        receivedAt,
+      });
+    },
+    getByTokenHash(tokenHash) {
+      const r = getStmt.get(tokenHash) as
+        | InviteAnnouncementRowSqlite
+        | undefined;
+      return r ? rowToStoredInviteAnnouncement(r) : null;
+    },
+    markRedeemed(tokenHash, redeemedBy, redeemedAt) {
+      markRedeemedStmt.run({ tokenHash, redeemedBy, redeemedAt });
+    },
+    list(opts = {}) {
+      return pagedRows<InviteAnnouncementRowSqlite>(
+        db,
+        "invite_announcements",
+        "received_at",
+        "token_hash",
+        opts,
+      ).map(rowToStoredInviteAnnouncement);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
   };
 }
 

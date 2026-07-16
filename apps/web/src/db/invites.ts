@@ -35,18 +35,23 @@ import {
 } from "@/lib/invite";
 import { getSecretKey, persistSecretKey } from "./secrets";
 import {
+  enqueueInviteAnnouncementOutbox,
   enqueueInviteRevocationOutbox,
   enqueueRedemptionReceiptOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
 import {
+  canonicalInviteAnnouncementPayload,
   canonicalInviteRevocationPayload,
   canonicalRedemptionPayload,
+  inviteTokenHash,
 } from "@understoria/shared/crypto";
 import type {
+  InviteAnnouncement,
   InviteRevocation,
   RedemptionPayload,
   RedemptionReceipt,
+  SignedInvite,
 } from "@understoria/shared/types";
 import type { Member } from "@/types";
 
@@ -101,9 +106,45 @@ export async function issueInvite(
     encoded,
   };
   await db.invites.put(row);
+  // Server registration (operator ruling 2026-07): the inviter's
+  // device sends what the node needs to the server the moment the
+  // invite exists, so it lives somewhere other than this phone and
+  // the node can mark it redeemed when the invitee's receipt lands.
+  // HASH-ONLY: the raw token never rides this record (v11 ruling —
+  // a stored open token would be a live credential). Queued even
+  // without a configured node URL — it ships whenever this device
+  // connects. The share link stays fully self-contained: an
+  // unannounced invite still redeems.
+  await enqueueInviteAnnouncementOutbox(
+    buildInviteAnnouncement(signed, secretKey),
+  );
   return {
     row,
     shareUrl: `${origin}/invite#${encoded}`,
+  };
+}
+
+/** Build + sign the hash-only announcement for a signed invite. Used
+ *  at issue time and by the outbox backfill (which re-derives it from
+ *  the stored share token when a device connects later). */
+export function buildInviteAnnouncement(
+  invite: SignedInvite,
+  inviterSecretKey: string,
+): InviteAnnouncement {
+  const payload = {
+    tokenHash: inviteTokenHash(invite.token),
+    inviterKey: invite.inviterKey,
+    inviterName: invite.inviterName,
+    nodeId: invite.nodeId,
+    createdAt: invite.createdAt,
+    expiresAt: invite.expiresAt,
+  };
+  return {
+    ...payload,
+    signature: sign(
+      canonicalInviteAnnouncementPayload(payload),
+      inviterSecretKey,
+    ),
   };
 }
 

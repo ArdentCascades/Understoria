@@ -133,6 +133,13 @@ export interface OutboxRow {
     // to POST /invite-revocations. Like the receipt, enqueued even
     // without a configured node URL.
     | "invite_revocation"
+    // Invite announcements (operator ruling 2026-07): a signed,
+    // HASH-ONLY registration pushed to POST /invite-announcements the
+    // moment an invite is issued, so the invite exists somewhere
+    // other than the inviter's phone and the server can mark it
+    // redeemed when the receipt lands. Never carries the raw token —
+    // the node must not hold a live credential (v11 ruling).
+    | "invite_announcement"
     // docs/auto-confirm-key.md §5: the signed AwaitingTransition
     // pushed to POST /awaiting-transitions when an exchange enters
     // awaiting_confirmation. The node's received_at stamp for it is

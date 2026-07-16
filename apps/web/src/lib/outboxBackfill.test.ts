@@ -101,6 +101,28 @@ describe("backfillOutboxFromLocalData", () => {
     expect(rows[0].payload).toContain(mine.id);
   });
 
+  it("re-enqueues this device's OPEN invites so the node learns about them", async () => {
+    await connectThenForget(URL_A);
+    const { createMember: mkMember } = await import("@/db/seed");
+    const { issueInvite } = await import("@/db/invites");
+    const inviter = await mkMember({ displayName: "Rosa" }, NODE);
+    await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      URL_A,
+    );
+    await db.outbox.clear(); // issueInvite auto-enqueued; forget it
+
+    const n = await backfillOutboxFromLocalData();
+    expect(n).toBe(1);
+    const rows = await db.outbox.toArray();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].kind).toBe("invite_announcement");
+  });
+
   it("is a no-op when this device holds no secret keys", async () => {
     await connectThenForget(URL_A);
     await db.posts.add({

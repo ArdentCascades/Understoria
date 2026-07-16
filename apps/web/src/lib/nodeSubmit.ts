@@ -36,6 +36,7 @@ import type {
   EventRsvpState,
   EventShiftState,
   InviteRevocation,
+  InviteAnnouncement,
   ProjectState,
   RedemptionReceipt,
   RelayedMessage,
@@ -331,6 +332,21 @@ export async function submitInviteRevocationToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/invite-revocations", revocation, config, deps);
+}
+
+/**
+ * Push a signed invite announcement (operator ruling 2026-07): the
+ * inviter's device registers the invite with the server — by token
+ * HASH, never the raw token — the moment it is issued, so the server
+ * can mark it redeemed when the invitee's receipt lands. Idempotent
+ * server-side (200 on replay).
+ */
+export async function submitInviteAnnouncementToNode(
+  announcement: InviteAnnouncement,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/invite-announcements", announcement, config, deps);
 }
 
 /**

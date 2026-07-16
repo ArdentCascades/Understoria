@@ -36,6 +36,8 @@ import type {
   EventCancellationPayload,
   EventPayload,
   Exchange,
+  InviteAnnouncement,
+  InviteAnnouncementPayload,
   InvitePayload,
   Post,
   PostPayload,
@@ -450,17 +452,118 @@ export const MAX_REDEMPTION_DISPLAY_NAME = 60;
  * on the exact same shape check before the shared verifier runs.
  * Cryptographic checks stay separate in `verifyRedemptionReceipt`.
  */
-export function parseRedemption(input: unknown): ParseRedemptionResult {
+// -- Invite announcements (server-registered invites, 2026-07) --------------
+
+/**
+ * One-way hash of an invite token for server registration. The server
+ * must never hold the raw token (schema-v11 ruling: a stored open
+ * token is a live credential a compromised node could redeem); this
+ * hash lets it match the redemption receipt's embedded invite when it
+ * arrives, and nothing else. SHA-512 via tweetnacl, same primitive as
+ * `founderKeyHash`; domain-separated so no other hash in the system
+ * collides with it.
+ */
+export function inviteTokenHash(token: string): string {
+  return b64encode(nacl.hash(utf8encode(`invite-token|${token}`)));
+}
+
+/** Canonical, stable serialization of an invite-announcement payload —
+ *  the bytes the inviter signs. Fixed field order; `signature` is not
+ *  part of the payload. */
+export function canonicalInviteAnnouncementPayload(
+  p: InviteAnnouncementPayload,
+): string {
+  return JSON.stringify({
+    tokenHash: p.tokenHash,
+    inviterKey: p.inviterKey,
+    inviterName: p.inviterName,
+    nodeId: p.nodeId,
+    createdAt: p.createdAt,
+    expiresAt: p.expiresAt,
+  });
+}
+
+export function verifyInviteAnnouncement(a: InviteAnnouncement): boolean {
+  if (!a.signature) return false;
+  return verify(
+    canonicalInviteAnnouncementPayload(a),
+    a.signature,
+    a.inviterKey,
+  );
+}
+
+export type ParseInviteAnnouncementResult =
+  | { ok: true; value: InviteAnnouncement }
+  | { ok: false; error: string };
+
+/** Shape-level validation for an invite announcement — shared so the
+ *  server route and any client gate check identically. */
+export function parseInviteAnnouncement(
+  input: unknown,
+): ParseInviteAnnouncementResult {
   if (typeof input !== "object" || input === null) {
     return { ok: false, error: "body must be a JSON object" };
   }
-  const r = input as Record<string, unknown>;
-
-  const inviteRaw = r.invite;
-  if (typeof inviteRaw !== "object" || inviteRaw === null) {
-    return { ok: false, error: "invite must be an embedded SignedInvite object" };
+  const a = input as Record<string, unknown>;
+  for (const f of [
+    "tokenHash",
+    "inviterKey",
+    "inviterName",
+    "nodeId",
+    "signature",
+  ] as const) {
+    if (typeof a[f] !== "string" || (a[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
   }
-  const inv = inviteRaw as Record<string, unknown>;
+  for (const f of ["createdAt", "expiresAt"] as const) {
+    if (
+      typeof a[f] !== "number" ||
+      !Number.isInteger(a[f]) ||
+      (a[f] as number) <= 0
+    ) {
+      return {
+        ok: false,
+        error: `${f} must be a positive integer (ms epoch)`,
+      };
+    }
+  }
+  return {
+    ok: true,
+    value: {
+      tokenHash: a.tokenHash as string,
+      inviterKey: a.inviterKey as string,
+      inviterName: a.inviterName as string,
+      nodeId: a.nodeId as string,
+      createdAt: a.createdAt as number,
+      expiresAt: a.expiresAt as number,
+      signature: a.signature as string,
+    },
+  };
+}
+
+export type ParseSignedInviteResult =
+  | { ok: true; value: SignedInvite }
+  | { ok: false; error: string };
+
+/**
+ * Shape-level validation for a bare SignedInvite. Shared by
+ * `parseRedemption` (the embedded copy inside a receipt) and the
+ * server's `POST /invites` announcement route — one shape contract,
+ * however the invite arrives. Cryptographic checks stay separate in
+ * `verifyInvite`.
+ */
+export function parseSignedInvite(
+  input: unknown,
+  fieldPrefix = "",
+): ParseSignedInviteResult {
+  if (typeof input !== "object" || input === null) {
+    return {
+      ok: false,
+      error: `${fieldPrefix || "body"} must be a SignedInvite object`,
+    };
+  }
+  const inv = input as Record<string, unknown>;
   for (const f of [
     "token",
     "inviterKey",
@@ -469,7 +572,10 @@ export function parseRedemption(input: unknown): ParseRedemptionResult {
     "signature",
   ] as const) {
     if (typeof inv[f] !== "string" || (inv[f] as string).length === 0) {
-      return { ok: false, error: `invite.${f} must be a non-empty string` };
+      return {
+        ok: false,
+        error: `${fieldPrefix}${f} must be a non-empty string`,
+      };
     }
   }
   for (const f of ["createdAt", "expiresAt"] as const) {
@@ -480,9 +586,33 @@ export function parseRedemption(input: unknown): ParseRedemptionResult {
     ) {
       return {
         ok: false,
-        error: `invite.${f} must be a positive integer (ms epoch)`,
+        error: `${fieldPrefix}${f} must be a positive integer (ms epoch)`,
       };
     }
+  }
+  return {
+    ok: true,
+    value: {
+      token: inv.token as string,
+      inviterKey: inv.inviterKey as string,
+      inviterName: inv.inviterName as string,
+      nodeId: inv.nodeId as string,
+      createdAt: inv.createdAt as number,
+      expiresAt: inv.expiresAt as number,
+      signature: inv.signature as string,
+    },
+  };
+}
+
+export function parseRedemption(input: unknown): ParseRedemptionResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+
+  const parsedInvite = parseSignedInvite(r.invite, "invite.");
+  if (!parsedInvite.ok) {
+    return { ok: false, error: parsedInvite.error };
   }
 
   for (const f of ["redeemedBy", "signature"] as const) {
@@ -520,15 +650,7 @@ export function parseRedemption(input: unknown): ParseRedemptionResult {
   return {
     ok: true,
     value: {
-      invite: {
-        token: inv.token as string,
-        inviterKey: inv.inviterKey as string,
-        inviterName: inv.inviterName as string,
-        nodeId: inv.nodeId as string,
-        createdAt: inv.createdAt as number,
-        expiresAt: inv.expiresAt as number,
-        signature: inv.signature as string,
-      },
+      invite: parsedInvite.value,
       redeemedBy: r.redeemedBy as string,
       displayName,
       redeemedAt: r.redeemedAt as number,
@@ -563,10 +685,11 @@ export function canonicalInviteRevocationPayload(
  *
  * This proves the holder of `inviterKey`'s secret asked to revoke this
  * token while claiming to be its inviter. It does NOT prove
- * `inviterKey` actually issued the token — invites are not registered
- * server-side (`docs/invite-revocation.md` §3.1). The authority
- * binding (matching the redeemed invite's embedded, inviter-signed
- * `inviterKey`) lives in the merge layer, not here.
+ * `inviterKey` actually issued the token — invite registration
+ * (server schema v29) is best-effort, not guaranteed
+ * (`docs/invite-revocation.md` §3.1). The authority binding (matching
+ * the redeemed invite's embedded, inviter-signed `inviterKey`) lives
+ * in the merge layer, not here.
  */
 export function verifyInviteRevocation(rec: InviteRevocation): boolean {
   if (!rec.signature) return false;
