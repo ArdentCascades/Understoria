@@ -99,6 +99,9 @@ export interface Post {
    *  which community a post came from. Posts created before Agent 3
    *  posts federation (schema < v7) get backfilled to the local node id. */
   nodeId: string;
+  /** Voice board (#474): attached recording reference — see
+   *  PostPayload.audio. Optional; text posts omit it. */
+  audio?: { blobId: string; mime: string; durationMs: number };
   /** Ed25519 signature over the canonical immutable payload (see
    *  `canonicalPostPayload` in `@understoria/shared/crypto`). Empty
    *  string for legacy posts created before this field existed; the
@@ -127,6 +130,13 @@ export interface PostPayload {
   expiresAt: number | null;
   locationZone: string;
   nodeId: string;
+  /** Voice board (#474): an attached recording, by reference. The
+   *  blobId is the content address (hash of the audio bytes) served
+   *  by the node's /audio-blobs store, so the SIGNED reference binds
+   *  the exact bytes — a relay can't swap the recording under the
+   *  signature. Absent on text posts; canonicalPostPayload includes
+   *  it only when present, keeping every pre-audio signature valid. */
+  audio?: { blobId: string; mime: string; durationMs: number };
 }
 
 export interface Exchange {

@@ -336,6 +336,18 @@ export function canonicalPostPayload(p: PostPayload): string {
     expiresAt: p.expiresAt,
     locationZone: p.locationZone,
     nodeId: p.nodeId,
+    // Voice board (#474): audio joins the signature ONLY when
+    // present, so every pre-audio post serializes byte-identically
+    // and its existing signature keeps verifying.
+    ...(p.audio
+      ? {
+          audio: {
+            blobId: p.audio.blobId,
+            mime: p.audio.mime,
+            durationMs: p.audio.durationMs,
+          },
+        }
+      : {}),
   });
 }
 
@@ -359,6 +371,9 @@ export function verifyPost(post: Post): boolean {
     expiresAt: post.expiresAt,
     locationZone: post.locationZone,
     nodeId: post.nodeId,
+    // Voice board (#474): carried through only when present, matching
+    // the conditional inclusion in canonicalPostPayload.
+    ...(post.audio ? { audio: post.audio } : {}),
   });
   return verify(payload, post.signature, post.postedBy);
 }
