@@ -53,7 +53,17 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
-- **"Revisit the welcome" opens the welcome tour again.** The link in
+- **The floating buttons stay out of your way on phones.** The green
+  "Post a need / Post an offer" and "Start a project" buttons on the
+  board, and "+ Create event" on the calendar, could park themselves
+  on top of the very thing you were reading — a card title, the
+  "Tended" chip, a calendar row — with no way to move it aside. Both
+  pages now reserve enough room at the bottom of the scroll (and on
+  phones with a home-indicator bar, room that grows with it) so
+  whatever the button is covering can always be scrolled up into the
+  clear. And the search palette no longer shows "↑↓ to move · Enter
+  to open · Esc to close" on a touchscreen — those hints are for
+  keyboards, and now they only appear where there is one.
   Profile → Learn is there so members can re-read the intro (and its
   beta notice) whenever they like, but on an onboarded device it just
   flashed and bounced straight back to the board — the same guard

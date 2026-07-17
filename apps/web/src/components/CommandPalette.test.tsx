@@ -145,6 +145,20 @@ describe("CommandPalette", () => {
     expect(paletteInput().value).toBe("");
   });
 
+  it("keyboard-hint footer is hidden unless the primary pointer is fine", () => {
+    // Class-presence only — jsdom evaluates no media queries. The row
+    // is `hidden` by default and only a fine primary pointer (mouse /
+    // trackpad) reveals it, so touch-primary phones never see
+    // "↑↓ / Enter / Esc" hints.
+    pressCtrlK();
+    const hint = container.querySelector('[role="dialog"] p.border-t');
+    expect(hint).not.toBeNull();
+    expect(hint?.classList.contains("hidden")).toBe(true);
+    expect(hint?.classList.contains("[@media(pointer:fine)]:block")).toBe(
+      true,
+    );
+  });
+
   it("typing filters to local records and Enter navigates", () => {
     pressCtrlK();
     setInputValue("childcare");

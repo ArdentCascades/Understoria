@@ -96,6 +96,24 @@
     min-width: 44px;
   }
 
+  /* Bottom clearance for pages that float a fixed action pill over
+   * their scrollable content (Board, Calendar). One shared reserve
+   * instead of per-page magic numbers: the pill anchors at
+   * 5rem + the safe-area inset above the viewport bottom and is
+   * ~3.25rem tall (p-1 wrapper around the 44px touch-target floor),
+   * so the reserve covers the whole band plus breathing room — and
+   * tracks the safe-area inset exactly like the pill's own anchor,
+   * where a fixed padding fell short on phones with a home-indicator
+   * band (the pill rises with the inset; the old pb-36 didn't).
+   * Rem-based so the text-size preference scales the reserve
+   * together with the pill. The month/week calendar grids have no
+   * inner scroller — the page scrolls as one inside <main>
+   * (Layout.tsx) — so this page-level padding is what lets a
+   * pill-covered grid row scroll clear into view. */
+  .pb-fab-clear {
+    padding-bottom: calc(10rem + env(safe-area-inset-bottom));
+  }
+
   .card {
     @apply rounded-2xl border border-bark-200/60 bg-white p-4 shadow-leaf
            dark:border-moss-800 dark:bg-moss-900;

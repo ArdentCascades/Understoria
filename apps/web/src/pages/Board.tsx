@@ -396,14 +396,15 @@ export default function BoardPage() {
     setOnlyNeedsMoreHands(false);
   };
 
-  // pb-36 (page wrapper) reserves clearance under the fixed FAB —
-  // which sits at 5rem + the safe-area inset (the home-indicator band
-  // also heightens the BottomNav, so a plain 5rem let the nav swallow
-  // the pill's bottom edge) with ≈3rem of its own height — so the
-  // last card in the scroll never tucks behind the floating button on
-  // any tab.
+  // pb-fab-clear (page wrapper, shared with Calendar — see index.css)
+  // reserves clearance under the fixed FAB — which sits at 5rem + the
+  // safe-area inset (the home-indicator band also heightens the
+  // BottomNav, so a plain 5rem let the nav swallow the pill's bottom
+  // edge) with ≈3.25rem of its own height — so every card, chip, and
+  // suggestion in the scroll can always scroll clear of the floating
+  // button on any tab.
   return (
-    <div className="px-4 pb-36 pt-4">
+    <div className="px-4 pb-fab-clear pt-4">
       {/* At lg+ the page is a row: the board column flexes and the
           nested post panel (Outlet) docks on the right when open -
           the board stays mounted, so tab, filters, search, and

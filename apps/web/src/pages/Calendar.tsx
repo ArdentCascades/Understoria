@@ -397,7 +397,7 @@ export default function CalendarPage() {
   }, [posts, myKey]);
 
   return (
-    <div className="px-4 pb-36 pt-stack-md">
+    <div className="px-4 pb-fab-clear pt-stack-md">
       {/* At lg+ the page is a row: the calendar column flexes and the
           nested event panel (Outlet) docks on the right when open -
           the calendar stays mounted, so month and filter state
@@ -588,10 +588,12 @@ export default function CalendarPage() {
       {/* "+" FAB linking to /events/new. Matches the Board FAB's
           anchor (5rem + the safe-area inset, so the home-indicator
           band that also heightens the BottomNav can't swallow the
-          pill's bottom edge) + pb-36 page clearance discipline from
-          PR #181 so the last calendar cell never tucks under the
-          floating button. Hidden while the on-screen keyboard is up —
-          the fixed anchor would float detached mid-screen (see
+          pill's bottom edge) + the shared pb-fab-clear page clearance
+          (index.css; the PR #181 discipline) so any covered grid row
+          — the month and week grids scroll as part of the page, not
+          inside themselves — can always scroll clear of the floating
+          button. Hidden while the on-screen keyboard is up — the
+          fixed anchor would float detached mid-screen (see
           useVirtualKeyboard.ts). */}
       {!keyboardOpen && (
         <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8">
