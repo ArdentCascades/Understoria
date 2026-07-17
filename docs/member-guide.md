@@ -426,6 +426,13 @@ credited for, not the organizer's estimate (a 2-hour guess that
 took 6 hours credits 6). The organizer confirms; the hours move
 into your balance just like any other exchange.
 
+If the organizer thinks there's a bit more to do, they can choose
+**"Not done yet — send it back"** instead of confirming. That isn't
+a rejection and nothing is recorded against you: the task stays
+yours, no credit moves either way, and their note — saying what's
+still needed — appears as an ordinary comment on the task. Finish
+up, mark it complete again, and the confirmation proceeds as usual.
+
 The moment your claim lands, the card says **"It's in your care"**
 and — for template tasks that have one — repeats the task's tip as
 **a good first step**, so you leave the moment with something

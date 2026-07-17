@@ -21,6 +21,7 @@ import {
   confirmProjectTaskCompletion,
   editProjectTask,
   markProjectTaskComplete,
+  sendBackProjectTaskCompletion,
   unclaimProjectTask,
 } from "@/db/projects";
 import { formatHours } from "@/lib/format";
@@ -162,6 +163,9 @@ export function TaskDetailBody({
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [acknowledgmentText, setAcknowledgmentText] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
+  const [sendBackNote, setSendBackNote] = useState("");
+  const [sendBackNoteMissing, setSendBackNoteMissing] = useState(false);
   // Mark-complete inline disclosure: tapping "Mark complete" reveals an
   // hours field (prefilled with the estimate) so the claimer records
   // the time actually given before submitting (equal-time). One extra
@@ -691,15 +695,32 @@ export function TaskDetailBody({
           </div>
         )}
         {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={pending}
-            aria-busy={pending}
-            onClick={() => setConfirmDialogOpen(true)}
-          >
-            {pending ? t("common.working") : t("projects.task.confirm")}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={pending}
+              aria-busy={pending}
+              onClick={() => setConfirmDialogOpen(true)}
+            >
+              {pending ? t("common.working") : t("projects.task.confirm")}
+            </button>
+            {/* The organizer's honest third option ("not done yet").
+                Without it, silence became a yes — the auto-confirm
+                sweep fires after the window — and the only explicit
+                moves were confirming unfinished work or misusing the
+                dispute flag. Deliberately a quiet ghost button next to
+                the primary confirm: sending back is the exception, not
+                a peer action. */}
+            <button
+              type="button"
+              className="btn-ghost"
+              disabled={pending}
+              onClick={() => setSendBackDialogOpen(true)}
+            >
+              {t("projects.task.sendBack")}
+            </button>
+          </>
         )}
         {/* Completer's release path. Until this PR, attempting to
             release an awaiting_confirmation task threw on the db
@@ -901,6 +922,83 @@ export function TaskDetailBody({
                 acknowledgmentText,
               ),
             );
+          }}
+        />
+      )}
+      {/* "Not done yet" — the send-back dialog. The task returns to
+          the claimer (they keep it), the completion attempt clears
+          (which also stops the auto-confirm clock), and the required
+          note ships as an ordinary task comment so it reaches them on
+          every device. Nothing is recorded against anyone. */}
+      {task.status === "awaiting_confirmation" && isOrganizer && !isCompleter && (
+        <ConfirmDialog
+          open={sendBackDialogOpen}
+          title={t("projects.task.sendBackDialog.title", {
+            claimer: memberMap.get(task.completedBy ?? "") ?? "—",
+          })}
+          description={
+            <div className="flex flex-col gap-3">
+              <p>{t("projects.task.sendBackDialog.body")}</p>
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {t("projects.task.sendBackDialog.noteLabel")}
+                </span>
+                <textarea
+                  className="input min-h-16 text-sm"
+                  placeholder={t("projects.task.sendBackDialog.notePlaceholder")}
+                  value={sendBackNote}
+                  onChange={(e) => {
+                    setSendBackNote(e.target.value);
+                    if (e.target.value.trim() !== "")
+                      setSendBackNoteMissing(false);
+                  }}
+                  maxLength={500}
+                  aria-invalid={sendBackNoteMissing || undefined}
+                />
+                {sendBackNoteMissing ? (
+                  <p
+                    role="alert"
+                    className="text-xs text-rose-700 dark:text-rose-300"
+                  >
+                    {t("projects.task.sendBackDialog.noteRequired")}
+                  </p>
+                ) : (
+                  <p className="text-xs text-moss-600 dark:text-moss-300">
+                    {t("projects.task.sendBackDialog.noteHint", {
+                      claimer: memberMap.get(task.completedBy ?? "") ?? "—",
+                    })}
+                  </p>
+                )}
+              </label>
+            </div>
+          }
+          confirmLabel={t("projects.task.sendBackDialog.confirmCta")}
+          confirmingLabel={t("projects.task.sendBackDialog.sending")}
+          cancelLabel={t("projects.task.sendBackDialog.cancelCta")}
+          tone="neutral"
+          onCancel={() => {
+            setSendBackDialogOpen(false);
+            setSendBackNoteMissing(false);
+          }}
+          onConfirm={() => {
+            const note = sendBackNote.trim();
+            if (note === "") {
+              // The note is the whole point — keep the dialog open and
+              // say so inline rather than sending work back wordlessly.
+              setSendBackNoteMissing(true);
+              return;
+            }
+            setSendBackDialogOpen(false);
+            return dispatch(() =>
+              sendBackProjectTaskCompletion(
+                task.id,
+                currentKey!,
+                note,
+                nodeId,
+              ),
+            ).then((r) => {
+              if (r) setSendBackNote("");
+            });
           }}
         />
       )}

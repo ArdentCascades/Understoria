@@ -763,6 +763,12 @@ export type ProjectActivityType =
   | "task_unclaimed"
   | "task_released_after_complete"
   | "task_completed"
+  // Local-only: an organizer sent a completion back to the claimer
+  // with a note ("not done yet"). Deliberately not a decline/reject —
+  // the task returns to `claimed`, the claimer keeps it, and the note
+  // travels as an ordinary task comment. ProjectActivity never
+  // federates, so this is not a wire-format change.
+  | "task_sent_back"
   | "task_confirmed"
   | "project_paused"
   | "project_resumed"
