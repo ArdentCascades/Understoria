@@ -18,7 +18,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -37,6 +44,7 @@ import { pullFederatedMessages } from "@/lib/federationSync";
 import { SYNC_KICK_EVENT } from "@/lib/syncLoop";
 import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
+import { speak } from "@/lib/speak";
 import { BackLink } from "@/components/BackLink";
 import { HighlightedText } from "@/components/HighlightedText";
 import { MemberAvatar } from "@/components/MemberAvatar";
@@ -59,6 +67,21 @@ export const REACTION_EMOJI = ["❤️", "👍", "😂", "😮", "😢", "🙏"]
  *  a scroll or an accidental tap. Exported for the reaction tests. */
 export const LONG_PRESS_MS = 450;
 
+/** Consecutive messages from the same sender within this window read
+ *  as one burst: one timestamp for the group, Signal-style, instead
+ *  of a time line under every bubble. Exported for tests. */
+export const GROUP_WINDOW_MS = 10 * 60 * 1000;
+
+function isSameDay(a: number, b: number): boolean {
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+}
+
 /**
  * Route wrapper that REMOUNTS the conversation when `:memberKey`
  * changes. In the lg+ split pane, React Router reuses the same
@@ -75,7 +98,7 @@ export default function ConversationPage() {
 
 function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   const { currentMember, members, posts, lockState, blockedKeys } = useApp();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [text, setText] = useState("");
@@ -85,6 +108,16 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // only changes when the user pauses typing — debounced below).
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [activeMatchIdx, setActiveMatchIdx] = useState(0);
+  // Search is TUCKED AWAY until asked for (the Signal pattern): the
+  // always-visible box spent the best row of every conversation on a
+  // rarely-used feature. A `?q=` deep link still opens pre-expanded.
+  const [searchOpen, setSearchOpen] = useState(
+    () => (searchParams.get("q") ?? "") !== "",
+  );
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
   const listRef = useRef<HTMLDivElement>(null);
   const lastScrolledIdRef = useRef<string>("");
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -102,6 +135,66 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // it on touch. A reaction is sent as a sealed v2 envelope over the
   // same E2E relay as a message — the server never sees the emoji.
   const [reactFor, setReactFor] = useState<string | null>(null);
+  // Signal-style long-press menu extras: the emoji row grew Copy /
+  // Speak / Info actions. `infoFor` toggles the per-message detail
+  // block; `copiedId` flashes the in-menu "Copied ✓" confirmation
+  // (no toast — feedback stays where the eyes are).
+  const [infoFor, setInfoFor] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const copyTimer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+    },
+    [],
+  );
+  // Closing the menu (however it closes) resets its sub-state so the
+  // next open starts clean.
+  useEffect(() => {
+    if (reactFor === null) {
+      setInfoFor(null);
+      setCopiedId(null);
+    }
+  }, [reactFor]);
+  const speakLang = i18n.language?.startsWith("es") ? "es" : "en";
+  // Day-separator label: Today / Yesterday in the app's language,
+  // otherwise a spelled-out date (with the year only when it isn't
+  // this year's).
+  const dayLabel = useCallback(
+    (ts: number) => {
+      const now = Date.now();
+      if (isSameDay(ts, now)) return t("messages.day.today");
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (isSameDay(ts, yesterday.getTime())) {
+        return t("messages.day.yesterday");
+      }
+      const d = new Date(ts);
+      return new Intl.DateTimeFormat(i18n.language, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        ...(d.getFullYear() !== new Date(now).getFullYear()
+          ? { year: "numeric" }
+          : {}),
+      }).format(d);
+    },
+    [t, i18n.language],
+  );
+  const handleCopy = useCallback(async (m: DecryptedMessage) => {
+    if (m.plaintext === null || !navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(m.plaintext);
+    } catch {
+      return;
+    }
+    setCopiedId(m.id);
+    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => {
+      setCopiedId(null);
+      setReactFor(null);
+    }, 1200);
+  }, []);
   const pressTimer = useRef<number | null>(null);
   const cancelPress = useCallback(() => {
     if (pressTimer.current !== null) {
@@ -452,7 +545,30 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           {t("messages.conversationWith", { name: otherName })}
         </h1>
         {currentMember && otherKey && (
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            {/* Search lives behind this toggle (the Signal pattern) —
+                see the searchOpen state for why. */}
+            <button
+              type="button"
+              className="btn-ghost flex min-h-[44px] min-w-[44px] items-center justify-center text-lg"
+              aria-label={
+                searchOpen
+                  ? t("messages.search.close")
+                  : t("messages.search.inConversation")
+              }
+              aria-expanded={searchOpen}
+              onClick={() => {
+                if (searchOpen) {
+                  setSearchOpen(false);
+                  setQuery("");
+                  setActiveMatchIdx(0);
+                } else {
+                  setSearchOpen(true);
+                }
+              }}
+            >
+              <span aria-hidden="true">🔍</span>
+            </button>
             <OverflowMenu
               label={t("messages.conversation.headerMenuLabel")}
               items={[
@@ -492,12 +608,14 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         </>
       )}
 
+      {searchOpen && (
       <div className="mb-2 flex items-center gap-2">
         <label className="flex-1">
           <span className="sr-only">
             {t("messages.search.inConversation")}
           </span>
           <input
+            ref={searchInputRef}
             type="search"
             className="input w-full"
             value={query}
@@ -550,7 +668,20 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             </button>
           </>
         )}
+        <button
+          type="button"
+          className="btn-ghost px-2 text-sm"
+          aria-label={t("messages.search.close")}
+          onClick={() => {
+            setSearchOpen(false);
+            setQuery("");
+            setActiveMatchIdx(0);
+          }}
+        >
+          {"✕"}
+        </button>
       </div>
+      )}
 
       <p className="mb-2 text-xs text-moss-600 dark:text-moss-300">
         {t("messages.noReadReceipts")}
@@ -567,9 +698,23 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           </p>
         ) : (
           <div className="flex flex-col gap-2">
-            {messages.map((m) => {
+            {messages.map((m, i) => {
               const isMine = m.senderKey === currentMember.publicKey;
               const isActiveMatch = m.id === activeId;
+              // Signal-style thread shape: a day chip where the
+              // calendar day changes, and ONE timestamp per burst of
+              // consecutive same-sender messages (GROUP_WINDOW_MS)
+              // instead of a time line under every bubble.
+              const prev = i > 0 ? messages[i - 1] : null;
+              const next =
+                i < messages.length - 1 ? messages[i + 1] : null;
+              const startsDay =
+                prev === null || !isSameDay(prev.createdAt, m.createdAt);
+              const endsGroup =
+                next === null ||
+                next.senderKey !== m.senderKey ||
+                !isSameDay(next.createdAt, m.createdAt) ||
+                next.createdAt - m.createdAt > GROUP_WINDOW_MS;
               const baseTone = isMine
                 ? "self-end bg-canopy-100 text-canopy-900 dark:bg-canopy-900/40 dark:text-canopy-100"
                 : "self-start bg-white text-moss-800 shadow-sm dark:bg-moss-800 dark:text-moss-100";
@@ -577,8 +722,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                 ? " ring-2 ring-amber-400 dark:ring-amber-300"
                 : "";
               return (
+                <Fragment key={m.id}>
+                {startsDay && (
+                  <div className="self-center rounded-full bg-moss-900/5 px-3 py-0.5 text-xs text-moss-600 dark:bg-white/10 dark:text-moss-300">
+                    {dayLabel(m.createdAt)}
+                  </div>
+                )}
                 <div
-                  key={m.id}
                   ref={(el) => {
                     if (el) matchRefs.current.set(m.id, el);
                     else matchRefs.current.delete(m.id);
@@ -636,9 +786,11 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       )}
                     </p>
                   )}
-                  <p className="mt-1 text-right text-xs opacity-60">
-                    {formatRelativeTime(m.createdAt)}
-                  </p>
+                  {endsGroup && (
+                    <p className="mt-1 text-right text-xs opacity-60">
+                      {formatRelativeTime(m.createdAt)}
+                    </p>
+                  )}
                   {/* Keyboard/mouse path to the picker — the same
                       action long-press performs on touch. Invisible
                       until the bubble is hovered or the button is
@@ -686,12 +838,17 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       bubble. Escape closes (window listener above);
                       picking sends, picking your current emoji
                       clears. */}
+                  {/* The long-press menu (Signal-style): emoji bar on
+                      top, actions below. Copy/Speak only apply to
+                      readable text; Info shows the exact time and the
+                      end-to-end note in plain language. */}
                   {reactFor === m.id && (
                     <div
                       role="menu"
                       aria-label={t("messages.reactions.pickerLabel")}
-                      className="mt-1 flex flex-wrap gap-1"
+                      className="mt-1 flex flex-col gap-1"
                     >
+                    <div className="flex flex-wrap gap-1">
                       {REACTION_EMOJI.map((emoji) => {
                         const isCurrent = m.reactions?.some(
                           (r) =>
@@ -721,8 +878,63 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                         );
                       })}
                     </div>
+                    <div className="flex flex-wrap gap-1">
+                      {m.plaintext !== null && !m.voice && (
+                        <>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={() => void handleCopy(m)}
+                            className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:hover:bg-white/10"
+                          >
+                            {copiedId === m.id
+                              ? t("messages.menu.copied")
+                              : t("messages.menu.copy")}
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={() => speak(m.plaintext!, speakLang)}
+                            className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:hover:bg-white/10"
+                          >
+                            {t("messages.menu.speak")}
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        aria-expanded={infoFor === m.id}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={() =>
+                          setInfoFor(infoFor === m.id ? null : m.id)
+                        }
+                        className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:hover:bg-white/10"
+                      >
+                        {t("messages.menu.info")}
+                      </button>
+                    </div>
+                    {infoFor === m.id && (
+                      <div className="rounded-lg bg-moss-900/5 px-2 py-1.5 text-xs dark:bg-white/10">
+                        <p>
+                          {t("messages.menu.infoSent", {
+                            when: new Intl.DateTimeFormat(i18n.language, {
+                              dateStyle: "full",
+                              timeStyle: "short",
+                            }).format(new Date(m.createdAt)),
+                          })}
+                        </p>
+                        <p className="mt-0.5 opacity-70">
+                          {t("messages.menu.infoSealed", { name: otherName })}
+                        </p>
+                      </div>
+                    )}
+                    </div>
                   )}
                 </div>
+                </Fragment>
               );
             })}
           </div>

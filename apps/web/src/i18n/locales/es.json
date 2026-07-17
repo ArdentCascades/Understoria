@@ -782,10 +782,23 @@
       "matchCount_one": "{{count}} coincidencia",
       "matchCount_other": "{{count}} coincidencias",
       "matchPosition": "{{current}} de {{total}}",
+      "close": "Cerrar la búsqueda",
       "previous": "Coincidencia anterior",
       "next": "Coincidencia siguiente",
       "conversationWith": "Conversación con {{name}}",
       "matchedName": "Coincide con su nombre"
+    },
+    "day": {
+      "today": "Hoy",
+      "yesterday": "Ayer"
+    },
+    "menu": {
+      "copy": "Copiar",
+      "copied": "Copiado ✓",
+      "speak": "Leer en voz alta",
+      "info": "Detalles",
+      "infoSent": "Enviado {{when}}",
+      "infoSealed": "Sellado de extremo a extremo — solo tú y {{name}} pueden leerlo."
     },
     "reactions": {
       "open": "Reaccionar a este mensaje",
