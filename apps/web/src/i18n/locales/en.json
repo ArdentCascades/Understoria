@@ -1616,6 +1616,7 @@
     "exchangeState": {
       "claimed": {
         "party": "{{name}} has claimed this. When the help is done, both of you confirm — credit moves when both sides have confirmed.",
+        "viewerClaimed": "You've claimed this. When the help is done, both of you confirm — credit moves when both sides have confirmed.",
         "thirdParty": "This post is claimed."
       },
       "awaitingConfirmation": {

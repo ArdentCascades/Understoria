@@ -1616,6 +1616,7 @@
     "exchangeState": {
       "claimed": {
         "party": "{{name}} tomó esto. Cuando la ayuda esté hecha, ambas personas confirman — el crédito se mueve cuando ambas partes han confirmado.",
+        "viewerClaimed": "Has tomado esto. Cuando la ayuda esté hecha, ambas personas confirman — el crédito se mueve cuando ambas partes han confirmado.",
         "thirdParty": "Esta publicación ya está tomada."
       },
       "awaitingConfirmation": {

@@ -83,15 +83,15 @@ function renderCase({
 
 describe("ExchangeStateNarrative", () => {
   describe("claimed", () => {
-    it("for a party, says BOTH must confirm and names the other party", () => {
+    it("for the poster, says BOTH must confirm and names the claimer", () => {
       renderCase({ status: "claimed", viewerRole: "poster" });
       const text = container.textContent ?? "";
       // The both-must-confirm requirement is the load-bearing
       // sentence the audit identified as missing. If this assertion
       // ever fails we've lost the fix.
+      expect(text).toContain("Maple has claimed this");
       expect(text).toContain("both of you confirm");
       expect(text).toContain("when both sides have confirmed");
-      expect(text).toContain("Maple");
     });
 
     it("for a third party, says only that the post is claimed", () => {
@@ -100,11 +100,16 @@ describe("ExchangeStateNarrative", () => {
       expect(text).toBe("This post is claimed.");
     });
 
-    it("works symmetrically for poster and claimer", () => {
+    it("for the claimer, says YOU claimed it — never names the other party as the claimer", () => {
       renderCase({ status: "claimed", viewerRole: "claimer" });
       const text = container.textContent ?? "";
+      // The viewer is the claimer: telling them "Maple has claimed
+      // this" would read as someone having beaten them to it.
+      expect(text).toContain("You've claimed this");
+      expect(text).not.toContain("Maple has claimed");
+      // The both-must-confirm framing must survive the role split.
       expect(text).toContain("both of you confirm");
-      expect(text).toContain("Maple");
+      expect(text).toContain("when both sides have confirmed");
     });
   });
 

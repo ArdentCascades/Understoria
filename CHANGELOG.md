@@ -61,6 +61,14 @@ include breaking changes.
   also swallowing the deliberate visit. The link now announces itself,
   and the guard lets it through; accidental returns to /welcome still
   bounce as before.
+- **Claiming a post no longer tells you the other person claimed it.**
+  Right after you claimed someone's post, the status line said
+  "{{name}} has claimed this" — naming the poster as the claimer, as
+  if someone had beaten you to it. When you're the one who claimed,
+  it now says "You've claimed this. When the help is done, both of
+  you confirm — credit moves when both sides have confirmed." The
+  poster still sees their helper named, as before. English and
+  Spanish.
 - **Docs caught up with the code.** A documentation-accuracy sweep
   across this cycle's features: the member guide now covers voice
   notes on posts and in messages, emoji reactions, the long-press
