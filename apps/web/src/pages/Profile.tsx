@@ -56,6 +56,7 @@ import { ContextualHint } from "@/components/ContextualHint";
 import { InviteShareSheet } from "@/components/InviteShareSheet";
 import { copyTextToClipboard } from "@/lib/share";
 import { WhyTooltip } from "@/components/WhyTooltip";
+import { IdentityKey } from "@/components/IdentityKey";
 import { EmptyState } from "@/components/EmptyState";
 import {
   formatDeadline,
@@ -491,8 +492,20 @@ function ProfileBody({ member }: { member: Member }) {
           <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h1 className="page-title">{t("profile.title")}</h1>
+              {/* Canonical identity spot — the key stays visible, and
+                  tapping the line explains what the code is
+                  (IdentityKey.tsx). */}
               <p className="text-xs text-moss-600 dark:text-moss-300">
-                {t("profile.identity", { key: shortKey(currentMember.publicKey) })}
+                <IdentityKey
+                  publicKey={currentMember.publicKey}
+                  name={currentMember.displayName}
+                  isYou
+                  alwaysShown
+                >
+                  {t("profile.identity", {
+                    key: shortKey(currentMember.publicKey),
+                  })}
+                </IdentityKey>
               </p>
               <button
                 type="button"
@@ -1388,8 +1401,18 @@ function ProfileEditor({
         <div className="my-4 flex flex-col items-center gap-2 text-center lg:my-0 lg:items-start lg:text-left [&>svg]:lg:size-24">
           <MemberAvatar publicKey={member.publicKey} size={128} framed />
           <p className="text-title font-semibold">{member.displayName}</p>
+          {/* Canonical identity spot — key visible, tap explains
+              (IdentityKey.tsx). The avatarNote below keeps its own
+              WhyTooltip. */}
           <p className="font-mono text-xs text-moss-600 dark:text-moss-300">
-            {shortKey(member.publicKey)}
+            <IdentityKey
+              publicKey={member.publicKey}
+              name={member.displayName}
+              isYou
+              alwaysShown
+            >
+              {shortKey(member.publicKey)}
+            </IdentityKey>
           </p>
           <p className="mt-2 max-w-sm text-xs text-moss-600 dark:text-moss-300">
             {t("profile.about.avatarNote")}

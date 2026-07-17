@@ -331,6 +331,11 @@
     "trigger": "(por que?)",
     "readMore": "Leer mas"
   },
+  "identity": {
+    "show": "Mostrar código de identidad",
+    "explainer": "Este código es la identidad única de {{name}} — dos personas pueden compartir un nombre, pero nadie puede compartir este código. La aplicación lo usa para comprobar que todo lo que publica {{name}} realmente viene de esa persona.",
+    "explainerYou": "Este código es tu identidad única — dos personas pueden compartir un nombre, pero nadie puede compartir este código. Viaja con todo lo que publicas para que otras personas puedan comprobar que de verdad eres tú."
+  },
   "notFound": {
     "title": "Esta página no está aquí",
     "message": "Puede que el enlace sea antiguo o esté mal escrito. No hiciste nada mal.",
@@ -466,7 +471,7 @@
     "close": "Cerrar el menú",
     "title": "Menú",
     "profile": "Perfil",
-    "profileHint": "Tu perfil · {{key}}",
+    "profileHint": "Tu perfil",
     "settings": "Ajustes",
     "invite": "Invita a alguien",
     "help": "Ayuda",

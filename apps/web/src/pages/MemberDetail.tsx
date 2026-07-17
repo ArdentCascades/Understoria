@@ -48,6 +48,7 @@ import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { isBlocked } from "@/db/blocks";
 import { RemovalCeremony } from "@/components/RemovalCeremony";
+import { IdentityKey } from "@/components/IdentityKey";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
 import { humanizeError } from "@/lib/humanizeError";
@@ -192,8 +193,17 @@ export default function MemberDetailPage() {
         <MemberAvatar publicKey={member.publicKey} size={128} framed />
         <div className="min-w-0 flex-1">
           <h1 className="mb-1 text-2xl font-semibold">{member.displayName}</h1>
+          {/* Canonical identity spot — the key stays visible, and
+              tapping it explains what the code is (IdentityKey.tsx). */}
           <p className="text-xs font-mono text-moss-600 dark:text-moss-300">
-            {shortKey(member.publicKey)}
+            <IdentityKey
+              publicKey={member.publicKey}
+              name={member.displayName}
+              isYou={isSelf}
+              alwaysShown
+            >
+              {shortKey(member.publicKey)}
+            </IdentityKey>
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {/* Qualitative trust status ONLY — no `count` prop. The

@@ -26,6 +26,16 @@ include breaking changes.
   a disclosure, not a consent ceremony. English and Spanish.
 
 ### Changed
+- **Identity codes now stay out of the way until you ask.** The
+  little `(a1b2…c3d4)` code that used to follow every name on
+  casual pages read like a glitch to most people, so those pages
+  now show just the name — with a small ⓘ you can tap to see the
+  code and, at last, a plain sentence about what it is. If two
+  members ever share the same display name, the code reappears
+  beside those names all on its own, so you can always tell them
+  apart. Verification screens keep their codes exactly as before,
+  and the code on your own profile and on member pages now explains
+  itself when tapped too. English and Spanish.
 - **Composer and scrolling polish in conversations** (round two of
   the Signal-informed messaging work). The message box grows as you
   write longer messages (up to about six lines, then scrolls) and

@@ -14,7 +14,6 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
-import { shortKey } from "@/lib/format";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 import { OPEN_PALETTE_EVENT } from "@/components/CommandPalette";
 import {
@@ -133,9 +132,7 @@ export function MeMenu({
                   </span>
                   {currentMember && (
                     <span className="block truncate text-xs font-normal text-moss-600 dark:text-moss-300">
-                      {t("menu.profileHint", {
-                        key: shortKey(currentMember.publicKey),
-                      })}
+                      {t("menu.profileHint")}
                     </span>
                   )}
                 </span>
