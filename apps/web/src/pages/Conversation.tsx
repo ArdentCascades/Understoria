@@ -190,6 +190,14 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // something (and offers a way out). Cleared by speak()'s onDone
   // when the utterance ends or errors.
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  // A Speak tap that produced no speech at all — some phones ship a
+  // speech engine with zero voices: the utterance queues and then
+  // NOTHING fires (lib/speak.ts's start watchdog catches it). The
+  // failed message's item flips to the "can't read aloud" label for
+  // the rest of the menu's lifetime, because a tap must visibly do
+  // SOMETHING even when the device can't. In-menu, like "Copied ✓" —
+  // feedback stays where the eyes are.
+  const [speakFailedId, setSpeakFailedId] = useState<string | null>(null);
   const copyTimer = useRef<number | null>(null);
   useEffect(
     () => () => {
@@ -208,6 +216,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       setInfoFor(null);
       setCopiedId(null);
       setSpeakingId(null);
+      setSpeakFailedId(null);
       stopSpeaking();
     }
   }, [reactFor]);
@@ -253,8 +262,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // Speak toggles: idle → start reading and remember which message;
   // already reading this one → stop. State is set BEFORE speak() so
   // a synchronous synthesis failure (onDone fires inside the call)
-  // still lands on "not speaking"; the functional clear ignores a
-  // stale utterance's onDone after the member moved on to another.
+  // still lands on "not speaking" — and, since that set-then-clear
+  // batches into one paint, the failure flag is what makes the tap
+  // visible at all in that case. The functional clear ignores a
+  // stale utterance's onDone after the member moved on to another;
+  // ok=false only ever means "this device never spoke it" (a
+  // deliberate stop or replacement settles as ok=true), so the
+  // failure label can't appear just because someone tapped Stop.
   const handleSpeak = useCallback(
     (m: DecryptedMessage) => {
       if (m.plaintext === null) return;
@@ -264,9 +278,10 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         return;
       }
       setSpeakingId(m.id);
-      speak(m.plaintext, speakLang, () =>
-        setSpeakingId((cur) => (cur === m.id ? null : cur)),
-      );
+      speak(m.plaintext, speakLang, (ok) => {
+        setSpeakingId((cur) => (cur === m.id ? null : cur));
+        if (!ok) setSpeakFailedId(m.id);
+      });
     },
     [speakingId, speakLang],
   );
@@ -1002,16 +1017,23 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                               speaking", and where the device has no
                               speech at all it stays visible but
                               disabled and says so — a hidden control
-                              can't explain itself. */}
+                              can't explain itself. A tap that turned
+                              out to produce no speech (zero-voices
+                              engine — the watchdog in lib/speak.ts)
+                              lands on the same disabled explanation:
+                              the truth arrived late, but it arrives
+                              where the member is already looking. */}
                           <button
                             type="button"
                             role="menuitem"
-                            disabled={!isSpeechAvailable()}
+                            disabled={
+                              !isSpeechAvailable() || speakFailedId === m.id
+                            }
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={() => handleSpeak(m)}
                             className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 disabled:opacity-60 disabled:hover:bg-transparent dark:hover:bg-white/10 dark:disabled:hover:bg-transparent"
                           >
-                            {!isSpeechAvailable()
+                            {!isSpeechAvailable() || speakFailedId === m.id
                               ? t("messages.menu.speakUnavailable")
                               : speakingId === m.id
                                 ? t("messages.menu.speakStop")

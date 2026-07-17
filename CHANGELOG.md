@@ -120,6 +120,17 @@ include breaking changes.
   without hunting, and the welcome tour tucks its illustration away
   and pins Back / Next / Skip on screen while the words scroll
   between them. Nothing important can sit off-screen anymore.
+- **Speak now tells you when a phone can't read aloud.** Some phones
+  carry a speech engine with no voices installed: it accepts the text
+  and then never says a word — and never admits it. Tapping Speak on
+  a message there used to do nothing at all, silently, no matter how
+  many times you tried. Now the app gives the device about two
+  seconds to actually start talking; if it never does, the menu item
+  flips to "This device can't read messages aloud," so your tap
+  always visibly does something and the silence finally gets an
+  explanation. Phones whose voices are just slow to wake up are
+  unaffected — the moment speech starts, the check stands down.
+  English and Spanish.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

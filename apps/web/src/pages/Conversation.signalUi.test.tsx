@@ -312,15 +312,59 @@ describe("the long-press menu actions", () => {
     // While speaking, the item reads "Stop speaking".
     expect(menuButtonByText("Stop speaking")).not.toBeNull();
     expect(menuButtonByText("Speak")).toBeNull();
-    // The utterance finishing (or erroring — same callback) puts the
-    // label back.
+    // The utterance finishing (ok=true) puts the label back.
     const onDone = vi.mocked(speak).mock.calls.at(-1)![2]!;
     await act(async () => {
-      onDone();
+      onDone(true);
       await vi.advanceTimersByTimeAsync(0);
     });
     expect(menuButtonByText("Stop speaking")).toBeNull();
     expect(menuButtonByText("Speak")).not.toBeNull();
+  });
+
+  it("a Speak that never starts flips the item to the unavailable label and clears the speaking state", async () => {
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(menuButtonByText("Stop speaking")).not.toBeNull();
+    // lib/speak's start watchdog concluded the engine will never
+    // speak (zero voices installed) → onDone(false).
+    const onDone = vi.mocked(speak).mock.calls.at(-1)![2]!;
+    await act(async () => {
+      onDone(false);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    const item = menuButtonByText("This device can't read messages aloud");
+    expect(item).not.toBeNull();
+    expect(item!.disabled).toBe(true);
+    expect(menuButtonByText("Stop speaking")).toBeNull();
+    expect(menuButtonByText("Speak")).toBeNull();
+  });
+
+  it("a synchronous speech failure still shows the unavailable label — the tap is never invisible", async () => {
+    // The engine fails INSIDE the speak() call (throw, or an error
+    // event dispatched synchronously): the optimistic "Stop
+    // speaking" state and its clear batch into one render, so the
+    // failure label is the only feedback the member ever gets.
+    vi.mocked(speak).mockImplementation((_text, _lang, onDone) => {
+      onDone?.(false);
+      return false;
+    });
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(
+      menuButtonByText("This device can't read messages aloud"),
+    ).not.toBeNull();
+    expect(menuButtonByText("Stop speaking")).toBeNull();
   });
 
   it("tapping Stop speaking cancels speech and restores the Speak label", async () => {
