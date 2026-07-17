@@ -64,6 +64,16 @@ include breaking changes.
   clear. And the search palette no longer shows "↑↓ to move · Enter
   to open · Esc to close" on a touchscreen — those hints are for
   keyboards, and now they only appear where there is one.
+- **The app now shows you what just happened.** Three quiet moments
+  that used to leave people guessing now speak up: posting a need (or
+  offer) lands you on the board tab where your new post lives, so you
+  see it appear instead of hunting for it; claiming a post tells you
+  where it went ("You'll find this under In my care" / "Lo
+  encontrarás en A mi cuidado"); and "Add to calendar" — for a whole
+  event or a single shift — names the file it just saved and says to
+  open it to add the event to your phone's calendar, instead of
+  downloading in silence. English and Spanish.
+- **"Revisit the welcome" opens the welcome tour again.** The link in
   Profile → Learn is there so members can re-read the intro (and its
   beta notice) whenever they like, but on an onboarded device it just
   flashed and bounced straight back to the board — the same guard

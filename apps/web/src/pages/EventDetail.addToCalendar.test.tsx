@@ -26,10 +26,13 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Event, EventCancellation, Member } from "@/types";
 
-const { buildEventIcsMock, icsFilenameMock } = vi.hoisted(() => ({
-  buildEventIcsMock: vi.fn(() => "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n"),
-  icsFilenameMock: vi.fn(() => "community-garden-work-day.ics"),
-}));
+const { buildEventIcsMock, icsFilenameMock, showToastMock } = vi.hoisted(
+  () => ({
+    buildEventIcsMock: vi.fn(() => "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n"),
+    icsFilenameMock: vi.fn(() => "community-garden-work-day.ics"),
+    showToastMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/lib/eventIcs", () => ({
   buildEventIcs: buildEventIcsMock,
@@ -54,7 +57,7 @@ vi.mock("dexie-react-hooks", () => ({
 vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
 vi.mock("@/state/ToastContext", () => ({
   useToast: () => ({
-    showToast: vi.fn(),
+    showToast: showToastMock,
     dismissToast: vi.fn(),
     toast: null,
   }),
@@ -174,6 +177,7 @@ beforeEach(() => {
   setLiveQueries(event(), null);
   buildEventIcsMock.mockClear();
   icsFilenameMock.mockClear();
+  showToastMock.mockClear();
   // jsdom implements neither object URLs nor real downloads; stub the
   // seam so the click path runs and the calls are observable.
   createObjectURLMock = vi.fn(() => "blob:understoria/ics");
@@ -269,5 +273,20 @@ describe("EventDetailPage — Add to calendar (§11.5a export)", () => {
     expect(blob.type).toBe("text/calendar");
     expect(anchorClickSpy).toHaveBeenCalledTimes(1);
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:understoria/ics");
+  });
+
+  it("toasts the filename and what it's for after the download", () => {
+    // A silent download reads as "nothing happened" to a non-technical
+    // member — the toast names the file and says what to do with it.
+    render();
+    openMenu();
+    const item = addToCalendarItem();
+    act(() => {
+      item!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(showToastMock).toHaveBeenCalledTimes(1);
+    expect(showToastMock).toHaveBeenCalledWith(
+      "Saved community-garden-work-day.ics — open it to add this event to your phone's calendar.",
+    );
   });
 });

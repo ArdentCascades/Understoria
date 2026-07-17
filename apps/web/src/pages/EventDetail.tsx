@@ -240,15 +240,19 @@ export default function EventDetailPage() {
   // app, per §11.5a) and no ATTENDEE/ORGANIZER properties.
   function handleAddToCalendar() {
     const ics = buildEventIcs(event!, { appUrl: window.location.origin });
+    const file = icsFilename(event!.title);
     const blob = new Blob([ics], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = icsFilename(event!.title);
+    a.download = file;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    // A silent download reads as "nothing happened" — name the file
+    // and say what it's for, right after the tap.
+    showToast(t("toast.icsSaved", { file }));
   }
 
   // Header overflow-menu actions. Copy link and Add to calendar are

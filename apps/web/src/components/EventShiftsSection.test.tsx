@@ -33,16 +33,24 @@ import type { Event, EventShiftRow, ShiftSignupRow } from "@/types";
 const {
   addShiftMock,
   deleteShiftMock,
+  downloadIcsMock,
   removeSignupMock,
   setShiftCapacityMock,
+  showToastMock,
   signUpForShiftMock,
 } = vi.hoisted(() => ({
   addShiftMock: vi.fn(async () => ({}) as unknown),
   deleteShiftMock: vi.fn(async () => undefined),
+  downloadIcsMock: vi.fn(),
   removeSignupMock: vi.fn(async () => undefined),
   setShiftCapacityMock: vi.fn(async () => ({}) as unknown),
+  showToastMock: vi.fn(),
   signUpForShiftMock: vi.fn(async () => ({}) as unknown),
 }));
+
+// jsdom has no object URLs, so the real Blob/anchor download can't
+// run; the seam is the call, same as the EventDetail suite.
+vi.mock("@/lib/ics", () => ({ downloadIcs: downloadIcsMock }));
 
 vi.mock("@/db/eventShifts", () => ({
   SHIFT_LABEL_MAX: 100,
@@ -71,7 +79,7 @@ vi.mock("dexie-react-hooks", () => ({
 
 vi.mock("@/state/ToastContext", () => ({
   useToast: () => ({
-    showToast: vi.fn(),
+    showToast: showToastMock,
     dismissToast: vi.fn(),
     toast: null,
   }),
@@ -561,5 +569,30 @@ describe("EventShiftsSection — §9.3 credit bridge (prefill, not plumbing)", (
     );
     expect(container.querySelector('a[href^="/record-direct"]')).toBeNull();
     expect(container.querySelector('a[href="/project/p1"]')).toBeTruthy();
+  });
+});
+
+describe("EventShiftsSection — shift .ics export feedback", () => {
+  it("downloads the shift file AND toasts its name and purpose", () => {
+    // The member is signed up, so their row carries the calendar
+    // affordance. A silent download reads as "nothing happened" —
+    // the toast names the file and says what to do with it.
+    renderSection(
+      [makeShift()],
+      [makeSignup({ memberKey: "viewer-key" })],
+    );
+    click(
+      buttons().find(
+        (b) => b.textContent === "Add this shift to my calendar (.ics)",
+      ),
+    );
+    expect(downloadIcsMock).toHaveBeenCalledTimes(1);
+    expect(downloadIcsMock).toHaveBeenCalledWith(
+      "setup-crew-build-day.ics",
+      expect.stringContaining("BEGIN:VCALENDAR"),
+    );
+    expect(showToastMock).toHaveBeenCalledWith(
+      "Saved setup-crew-build-day.ics — open it to add this shift to your phone's calendar.",
+    );
   });
 });

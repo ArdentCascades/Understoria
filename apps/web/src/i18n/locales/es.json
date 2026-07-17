@@ -289,7 +289,10 @@
     "projectCreated": "Proyecto creado. Agrega tareas y láncalo cuando estés lista.",
     "exchangeConfirmedPending": "Confirmado. Esperando a que la otra persona confirme también.",
     "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes.",
-    "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron."
+    "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron.",
+    "claimedInMyCare": "Lo encontrarás en A mi cuidado.",
+    "icsSaved": "Se guardó {{file}} — ábrelo para añadir este evento al calendario de tu teléfono.",
+    "icsShiftSaved": "Se guardó {{file}} — ábrelo para añadir este turno al calendario de tu teléfono."
   },
   "a11y": {
     "skipToMain": "Saltar al contenido principal"
