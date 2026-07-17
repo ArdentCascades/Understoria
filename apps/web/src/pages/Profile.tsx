@@ -1041,9 +1041,28 @@ function AddDeviceSection() {
 }
 
 function EmergencySection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [confirming, setConfirming] = useState<null | "soft" | "hard">(null);
   const [status, setStatus] = useState<string | null>(null);
+
+  // Accessible panic (#476): the confirm step SPEAKS what is about
+  // to happen, on-device (lib/speak.ts), so a member who can't read
+  // the dialog still knows exactly what they're confirming. Purely
+  // additive — the visual dialog carries the same meaning alone.
+  useEffect(() => {
+    if (confirming === null) return;
+    void import("@/lib/speak").then(({ speak }) => {
+      speak(
+        confirming === "soft"
+          ? t("profile.emergency.spokenSoft")
+          : t("profile.emergency.spokenHard"),
+        i18n.language?.startsWith("es") ? "es" : "en",
+      );
+    });
+    return () => {
+      void import("@/lib/speak").then(({ stopSpeaking }) => stopSpeaking());
+    };
+  }, [confirming, t, i18n.language]);
 
   async function handleConfirm() {
     if (!confirming) return;
@@ -1071,6 +1090,12 @@ function EmergencySection() {
     <>
       <section className="card border-rose-200 bg-rose-50/30 dark:border-rose-900/50 dark:bg-rose-950/10">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+          {/* The 🆘 glyph is deliberate (#476): a fixed, language-free
+              marker so a non-reader can find the emergency section by
+              icon alone. */}
+          <span aria-hidden="true" className="mr-1">
+            🆘
+          </span>
           {t("profile.emergency.title")}
         </h2>
         <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
