@@ -197,6 +197,10 @@ describe("NodeSetupGate — the UNCLAIMED node blocks the app", () => {
     // Both audiences are addressed.
     expect(container.textContent).toContain("I'm setting up this community");
     expect(container.textContent).toContain("Just joining this community?");
+    // The beta/AI disclosure meets the founder before they invite
+    // anyone else in.
+    expect(container.textContent).toContain("Please know what you're using");
+    expect(container.textContent).toContain("written with AI tools");
   });
 
   it("the founder claims right on the gate: name + code → identity minted, node connected, claim sent, app opens", async () => {

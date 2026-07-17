@@ -413,3 +413,13 @@ describe("InviteAccept — the unconnected-success notice", () => {
     expect(container.textContent).not.toContain("Redirecting");
   });
 });
+
+describe("InviteAccept — beta/AI disclosure on the doorstep", () => {
+  it("the valid-invite screen carries the notice below the invite card", async () => {
+    setFragment(validInviteToken("Rosa"));
+    render();
+    await flush();
+    expect(container.textContent).toContain("Please know what you're using");
+    expect(container.textContent).toContain("written with AI tools");
+  });
+});

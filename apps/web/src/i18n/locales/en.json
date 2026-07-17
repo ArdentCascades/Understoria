@@ -2432,7 +2432,13 @@
     "title": "Settings",
     "intro": "How Understoria behaves on this device. Changes here only affect this device — they don't sync across the community.",
     "back": "← Back to profile",
+    "betaLine": "Understoria is beta software — much of its code was written with AI tools and reviewed by people, with no independent security audit yet. Please keep sensitive data out. The full note is in Help.",
     "buildStamp": "Build {{stamp}}"
+  },
+  "betaNotice": {
+    "title": "Please know what you're using",
+    "body1": "Understoria is beta software. Much of its code was written with AI tools and reviewed by people, and it has not yet had an independent security audit. The protections you'll see — end-to-end encrypted messages, the emergency wipe, signed records — are real and tested, but beta means bugs are possible, including ones we haven't found.",
+    "body2": "It's built for coordinating everyday neighborly help. Please don't put anything in it that would hurt you or someone else if it leaked — government IDs, medical or immigration details, or anything you'd only say off the record. When in doubt, say it in person."
   },
   "pilotJournal": {
     "title": "Pilot journal",

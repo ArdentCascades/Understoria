@@ -548,3 +548,19 @@ describe("WelcomePage — installed-arrival fork", () => {
     );
   });
 });
+
+describe("WelcomePage — beta/AI disclosure on the first screen", () => {
+  it("the first concept screen carries the notice; later screens don't repeat it", () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    // Step 0 — where a brand-new person starts reading.
+    expect(container.textContent).toContain("Please know what you're using");
+    expect(container.textContent).toContain("written with AI tools");
+    // The disclosure is a doorstep card, not a nag: step 1 is clean.
+    clickNextNTimes(1);
+    expect(container.textContent).not.toContain(
+      "Please know what you're using",
+    );
+  });
+});

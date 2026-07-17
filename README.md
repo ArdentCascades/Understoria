@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="#project-status">Project Status</a> •
   <a href="#what-it-does">What It Does</a> •
   <a href="#why-it-exists">Why It Exists</a> •
   <a href="#quick-start">Quick Start</a> •
@@ -26,6 +27,23 @@
 </p>
 
 ---
+
+## Project Status
+
+> **Understoria is beta software, and much of its code was written with AI
+> tools and reviewed by people.** It has not yet had an independent security
+> audit. The protections it ships — end-to-end encrypted messages, signed
+> records, the emergency wipe — are real and covered by tests, but beta means
+> bugs are possible, including ones we haven't found.
+>
+> It's built for coordinating everyday neighborly help. Please don't put
+> anything in it that would hurt you or someone else if it leaked —
+> government IDs, medical or immigration details, or anything you'd only say
+> off the record. This caution is also disclosed inside the app itself (on
+> the welcome tour, the invite screen, and in Help and Settings).
+>
+> Per the [AGPL-3.0-or-later license](LICENSE), the software is provided
+> **without warranty of any kind**.
 
 ## What It Does
 

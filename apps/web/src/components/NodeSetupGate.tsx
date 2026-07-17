@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { BetaNotice } from "@/components/BetaNotice";
 import { isDemoBuild } from "@/lib/demo";
 import {
   deriveCandidateNodeUrl,
@@ -295,6 +296,11 @@ function NodeSetupScreen({
             {t("nodeSetup.checkAgain")}
           </button>
         </div>
+
+        {/* The beta/AI disclosure. A founder standing up a node is
+            about to invite other people into this software — they
+            should read what it is before anyone else does. */}
+        <BetaNotice className="mt-6" />
       </div>
     </div>
   );

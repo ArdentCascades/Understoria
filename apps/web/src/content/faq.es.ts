@@ -523,6 +523,27 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "persona?' en Mensajes para los detalles.",
         ],
       },
+      {
+        id: "beta-status",
+        question:
+          "¿Qué tan terminada está esta aplicación? ¿Qué no debería poner en ella?",
+        answer: [
+          "Understoria es software en fase beta. Gran parte de su " +
+            "código fue escrito con herramientas de IA y revisado " +
+            "por personas, y todavía no ha pasado una auditoría de " +
+            "seguridad independiente.",
+          "Las protecciones que ves son reales y están probadas — " +
+            "los mensajes van cifrados de extremo a extremo, los " +
+            "registros están firmados, el borrado de emergencia " +
+            "funciona. Pero beta significa que puede haber errores, " +
+            "incluidos algunos que nadie ha encontrado todavía.",
+          "Está hecha para coordinar la ayuda vecinal de cada día. " +
+            "No pongas nada que pudiera hacerte daño a ti o a otra " +
+            "persona si se filtrara — documentos de identidad, " +
+            "detalles médicos o migratorios, ni nada que solo dirías " +
+            "fuera de registro. Ante la duda, dilo en persona.",
+        ],
+      },
     ],
   },
   {
