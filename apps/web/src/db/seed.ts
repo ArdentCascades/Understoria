@@ -393,7 +393,7 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
     };
   };
 
-  // One past need that was met, so the Dashboard's "Needs met this week"
+  // One past need that was met, so the Dashboard's "Needs completed this week"
   // isn't a lonely zero. Completed posts drop off the open board tabs, so
   // this reads as history (a fulfilled ask) without cluttering the board.
   const metNeedId = uuid();
@@ -428,16 +428,25 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   // tutors, Marcus fixes bikes, Imani does childcare and grant writing,
   // Theo helps with computers and listens), spread one per day across
   // the past week so every member is "active this week" and the streak
-  // is unbroken. Every (helper, helped) PAIR appears at most once:
-  // evaluateSafeguards flags a reciprocal_pattern when a pair reaches
-  // reciprocalPairThreshold (default 3, counted both directions) inside
-  // 30 days, so any repeated seed pair would put the demo user's FIRST
-  // real exchange with that member one step from an anti-gaming flag —
-  // an amber moderation chip on a supposedly clean showcase.
+  // is unbroken. Every DIRECTED (helper → helped) pair appears at most
+  // once, and exactly one undirected pair flows both ways (Rosa ↔
+  // Marcus below): evaluateSafeguards flags a reciprocal_pattern when a
+  // pair reaches reciprocalPairThreshold (default 3, counted both
+  // directions) inside 30 days, so no seeded pair may reach 2 exchanges
+  // with the demo user — their FIRST real exchange with that member
+  // would sit one step from an anti-gaming flag, an amber moderation
+  // chip on a supposedly clean showcase. A both-ways pair between two
+  // fictional members is safe (the demo user can never be a party to a
+  // Rosa ↔ Marcus exchange) and keeps the Dashboard's Reciprocity
+  // pulse showing a real two-way connection instead of a lonely
+  // one-way-so-far state.
   const seedExchanges: Exchange[] = [
     signSeedExchange(rosa, you, 2, "transport", daysAgoAt(0), uuid()),
     signSeedExchange(you, marcus, 1, "food", daysAgoAt(0), uuid()),
     signSeedExchange(marcus, imani, 1.5, "skilled_labor", daysAgoAt(1), uuid()),
+    // Marcus returns Rosa's tutoring (day 4 below) with a bike fix —
+    // the demo's one reciprocal pair.
+    signSeedExchange(marcus, rosa, 1, "skilled_labor", daysAgoAt(1), uuid()),
     signSeedExchange(imani, theo, 3, "childcare", daysAgoAt(2), uuid()),
     // The fulfilled need above — helper Rosa, helped Imani (the poster).
     signSeedExchange(rosa, imani, 1, "food", daysAgoAt(2), metNeedId),
@@ -448,7 +457,7 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
   ];
   await db.exchanges.bulkPut(seedExchanges);
 
-  // The 14 seeded hours already cross the baseline "10 hours of mutual
+  // The 15 seeded hours already cross the baseline "10 hours of mutual
   // aid" milestone. Mark everything the SEED reached as celebrated, or
   // the Dashboard pops its animated milestone celebration for
   // fabricated history on every fresh dev database, every first-time

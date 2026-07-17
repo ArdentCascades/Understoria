@@ -351,12 +351,14 @@ export default function DashboardPage() {
         <StatCard
           label={t("dashboard.stats.needsMet")}
           value={stats.needsFulfilledThisWeek}
-          sublabel={t("dashboard.stats.andCounting")}
+          sublabel={t("dashboard.stats.needsMetSub")}
         />
-        {/* Doorway, not pressure: the stat copy is unchanged — the card
-            just gains a quiet path to the Board's Needs tab
-            (`/?tab=needs`, see lib/boardTab.ts). No "unmet"/"remaining"
-            framing, no urgency styling. */}
+        {/* Doorway, not pressure: the card carries a quiet path to the
+            Board's Needs tab (`/?tab=needs`, see lib/boardTab.ts). No
+            "unmet"/"remaining" framing, no urgency styling. The label
+            reads "new needs with a helper" so the `ofPosted` sub-line
+            composes into one sentence — and stays distinguishable from
+            the completed-needs card beside it (usability report). */}
         <StatCard
           label={t("dashboard.stats.needsAnswered")}
           value={stats.needsAnsweredThisWeek}

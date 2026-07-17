@@ -10,6 +10,7 @@ import { seedDemoCommunityIfDev, seedDemoCommunityIfEmpty } from "./seed";
 import { trustStatusWithInvites, vouchersFor } from "@/lib/vouch";
 import { reachedMilestones } from "@/lib/milestones";
 import { computeSolidarityStreak } from "@/lib/stats";
+import { computeFlowStats } from "@/lib/flow";
 
 async function reset() {
   // Clear EVERY table (the standard suite idiom) — the seed now also
@@ -103,18 +104,43 @@ describe("seedDemoCommunityIfEmpty", () => {
     expect(await db.shiftSignups.count()).toBe(0);
   });
 
-  it("never repeats a (helper, helped) pair — the reciprocal-pattern safeguard must start at zero", async () => {
+  it("keeps every pair involving the founder one-way — the reciprocal-pattern safeguard must start at zero for them", async () => {
     // evaluateSafeguards flags reciprocal_pattern when a pair reaches
     // reciprocalPairThreshold (default 3, counted BOTH directions)
     // within 30 days. The seed used to repeat rosa↔you twice, putting
     // the demo user's first real exchange with Rosa one step from an
-    // amber anti-gaming chip on a supposedly clean showcase.
-    await seedDemoCommunityIfEmpty();
+    // amber anti-gaming chip on a supposedly clean showcase. Directed
+    // pairs stay unique, and the ONE intentional both-ways pair (for
+    // the Reciprocity pulse) is between two fictional members — the
+    // founder can never be a party to their exchanges, so no pair the
+    // founder CAN touch ever starts above 1.
+    const you = await seedDemoCommunityIfEmpty();
     const exchanges = await db.exchanges.toArray();
-    const pairKeys = exchanges.map((x) =>
+    const directed = exchanges.map((x) => `${x.helperKey}>${x.helpedKey}`);
+    expect(new Set(directed).size).toBe(directed.length);
+
+    const undirected = exchanges.map((x) =>
       [x.helperKey, x.helpedKey].sort().join("|"),
     );
-    expect(new Set(pairKeys).size).toBe(pairKeys.length);
+    const counts = new Map<string, number>();
+    for (const key of undirected) counts.set(key, (counts.get(key) ?? 0) + 1);
+    const repeated = [...counts.entries()].filter(([, n]) => n > 1);
+    // Exactly one two-way pair, at most 2 exchanges (one per direction),
+    // and never involving the founder.
+    expect(repeated.length).toBe(1);
+    expect(repeated[0][1]).toBe(2);
+    expect(repeated[0][0]).not.toContain(you.publicKey);
+  });
+
+  it("shows a real two-way connection on the Reciprocity pulse", async () => {
+    // The showcase must never regress to a big one-way-only state: the
+    // Dashboard's Reciprocity pulse should demonstrate what a two-way
+    // connection looks like, not just describe it.
+    await seedDemoCommunityIfEmpty();
+    const exchanges = await db.exchanges.toArray();
+    const members = await db.members.toArray();
+    const flow = computeFlowStats(exchanges, members);
+    expect(flow.reciprocalPairs).toBeGreaterThanOrEqual(1);
   });
 
   it("seeds no exchange inside the rolling 24-hour daily-helper window", async () => {

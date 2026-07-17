@@ -146,8 +146,9 @@ describe("Dashboard — needs-answered doorway", () => {
     expect(link!.getAttribute("aria-label")).toBe(
       "See open needs on the community board",
     );
-    // The stat copy is exactly what it was before the doorway.
-    expect(container.textContent).toContain("Needs answered this week");
+    // The label names what the number counts: new needs someone has
+    // stepped up for, composing with the "of N posted" sub-line.
+    expect(container.textContent).toContain("New needs with a helper");
     expect(container.textContent).toContain("no needs posted this week");
   });
 });

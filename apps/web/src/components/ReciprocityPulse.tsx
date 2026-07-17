@@ -43,6 +43,15 @@ export function ReciprocityPulse({
           title={t("dashboard.reciprocity.emptyTitle")}
           message={t("dashboard.reciprocity.empty")}
         />
+      ) : reciprocalPairs === 0 ? (
+        // The state every young community lives in for weeks: help is
+        // flowing, just not back along the same pairs yet. A big "0%"
+        // under real exchange totals reads as a broken counter
+        // (usability report), so this renders a warm sentence and no
+        // percent at all.
+        <p className="text-sm">
+          {t("dashboard.reciprocity.oneWaySoFar", { count: totalPairs })}
+        </p>
       ) : (
         <div>
           <div className="flex items-baseline gap-3">
@@ -50,7 +59,7 @@ export function ReciprocityPulse({
               {percent}%
             </span>
             <span className="text-sm text-moss-600 dark:text-moss-300">
-              {t("dashboard.reciprocity.ratio", {
+              {t("dashboard.reciprocity.rate", {
                 reciprocal: reciprocalPairs,
                 total: totalPairs,
               })}
