@@ -264,6 +264,29 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
       skipped += 1;
       continue;
     }
+    // Voice board (#474): the optional signed audio reference. Same
+    // strict-shape stance as above — a present-but-malformed audio
+    // object drops the row rather than getting "repaired", and a
+    // well-formed one MUST be carried through or verifyPost below
+    // would refuse every voice post (the signature covers it).
+    let audio: Post["audio"];
+    if (r.audio !== undefined) {
+      const a = r.audio as Record<string, unknown> | null;
+      if (
+        typeof a !== "object" ||
+        a === null ||
+        typeof a.blobId !== "string" ||
+        !/^[0-9a-f]{64}$/.test(a.blobId) ||
+        typeof a.mime !== "string" ||
+        typeof a.durationMs !== "number" ||
+        !Number.isInteger(a.durationMs) ||
+        a.durationMs <= 0
+      ) {
+        skipped += 1;
+        continue;
+      }
+      audio = { blobId: a.blobId, mime: a.mime, durationMs: a.durationMs };
+    }
     const existing = await db.posts.get(r.id);
     if (existing) {
       skipped += 1;
@@ -286,6 +309,9 @@ export async function pullFederatedPosts(): Promise<FederationSyncResult | null>
       locationZone: r.locationZone,
       confirmedBy: [],
       nodeId: r.nodeId,
+      // Absent key on text posts — verifyPost re-derives the exact
+      // signed bytes, and pre-audio signatures have no audio key.
+      ...(audio ? { audio } : {}),
       signature: r.signature,
     };
     // Same gate the server's POST /posts route and peer pull apply:

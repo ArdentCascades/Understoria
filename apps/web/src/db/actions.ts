@@ -44,11 +44,14 @@ import {
 } from "@/lib/safeguards";
 import { getSecretKey } from "./secrets";
 import {
+  enqueueAudioBlobOutbox,
   enqueueAwaitingTransition,
   enqueueExchangeOutbox,
   enqueuePostOutbox,
   flushOutboxNow,
 } from "@/lib/outbox";
+import { buildVoiceAttachment } from "@/lib/audioBlobs";
+import type { CapturedClip } from "@/components/VoiceRecorder";
 import type { Achievement, AvailabilityChip, Category, Exchange, Member, Post, PostType, Proposal, Urgency } from "@/types";
 
 /**
@@ -88,6 +91,11 @@ export interface CreatePostInput {
   estimatedHours: number;
   urgency: Urgency;
   expiresAt: number | null;
+  /** Voice board (#474): an attached recording. The clip's bytes get
+   *  a content address and ride the outbox to POST /audio-blobs; the
+   *  post signs the {blobId, mime, durationMs} reference, binding the
+   *  exact bytes under the poster's signature. */
+  voice?: CapturedClip;
 }
 
 export async function createPost(
@@ -101,6 +109,9 @@ export async function createPost(
   // will throw from getSecretKey rather than producing an unsigned
   // post or a half-written row.
   const posterSecret = await getSecretKey(memberKey);
+  const attachment = input.voice
+    ? buildVoiceAttachment(input.voice, memberKey, posterSecret)
+    : null;
   const immutable = {
     id: uuid(),
     type: input.type,
@@ -114,6 +125,10 @@ export async function createPost(
     expiresAt: input.expiresAt,
     locationZone,
     nodeId,
+    // Spread keeps the key ABSENT on text posts — the canonical
+    // payload (and thus the signature) treats absent and present
+    // differently, and text posts must keep signing byte-identically.
+    ...(attachment ? { audio: attachment.audio } : {}),
   };
   const signature = sign(canonicalPostPayload(immutable), posterSecret);
   const post: Post = {
@@ -125,6 +140,11 @@ export async function createPost(
   };
   await db.transaction("rw", [db.posts, db.outbox, db.settings], async () => {
     await db.posts.put(post);
+    // Recording before post: a flush walks the queue in insertion
+    // order for fresh rows, so the bytes usually land before the
+    // reference that names them (best-effort — the node tolerates
+    // either order).
+    if (attachment) await enqueueAudioBlobOutbox(attachment.upload);
     await enqueuePostOutbox(post);
   });
   // Kick the outbox worker so a configured node sees this post right

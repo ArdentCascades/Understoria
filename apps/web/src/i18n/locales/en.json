@@ -1491,6 +1491,12 @@
     "expiresToday": "Expires today",
     "expired": "Expired"
   },
+  "voicePost": {
+    "load": "Play voice note ({{seconds}}s)",
+    "loading": "Getting the recording…",
+    "unavailable": "This recording isn't available yet. It may still be on its way to the community server — try again in a moment.",
+    "retry": "Try again"
+  },
   "postForm": {
     "titleNeed": "Post a need",
     "titleOffer": "Post an offer",
@@ -1521,6 +1527,13 @@
     "matchingNeedsAside": {
       "title": "Active needs in this category",
       "seeAll": "See all {{count}}"
+    },
+    "voice": {
+      "field": "Voice note (optional)",
+      "add": "Add a voice note",
+      "hint": "Say it out loud instead of typing — up to 45 seconds. People will see a play button on your post. Typing works exactly as before.",
+      "attach": "Attach to post",
+      "remove": "Remove voice note"
     }
   },
   "postDetail": {

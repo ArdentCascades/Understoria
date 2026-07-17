@@ -30,6 +30,11 @@ import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { MarkdownHint } from "@/components/MarkdownHint";
+import {
+  VoiceRecorder,
+  type CapturedClip,
+} from "@/components/VoiceRecorder";
+import { VoicePlayer } from "@/components/VoicePlayer";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import {
   combine,
@@ -88,6 +93,13 @@ export default function PostFormPage() {
   const [hours, setHours] = useState("1");
   const [urgency, setUrgency] = useState<Urgency>("low");
   const [expiresInDays, setExpiresInDays] = useState("");
+  // Voice board (#474): an attached recording. Local state only until
+  // submit — the clip's bytes and the signed reference both leave the
+  // device inside createPost. Deliberately NOT part of the autosaved
+  // draft: audio is the most identifying content the form can hold,
+  // and drafts persist across sessions.
+  const [voiceClip, setVoiceClip] = useState<CapturedClip | null>(null);
+  const [recordingVoice, setRecordingVoice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [pendingDraft, setPendingDraft] =
@@ -231,6 +243,7 @@ export default function PostFormPage() {
           estimatedHours: parsedHours,
           urgency,
           expiresAt,
+          ...(voiceClip ? { voice: voiceClip } : {}),
         },
         nodeId,
       );
@@ -374,6 +387,57 @@ export default function PostFormPage() {
           />
           <MarkdownHint />
         </label>
+
+        {/* Voice board (#474): say it instead of (or as well as)
+            typing it. The recorder stays fully on-device; the clip
+            only leaves when the member presses Post. The typed path
+            above is untouched — silent use stays first-class. */}
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">
+            {t("postForm.voice.field")}
+          </span>
+          {voiceClip ? (
+            <div className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">
+              <VoicePlayer
+                audioBase64={voiceClip.base64}
+                mime={voiceClip.mime}
+                durationMs={voiceClip.durationMs}
+              />
+              <button
+                type="button"
+                className="btn-ghost mt-2 min-h-[44px] text-sm"
+                onClick={() => setVoiceClip(null)}
+              >
+                {t("postForm.voice.remove")}
+              </button>
+            </div>
+          ) : recordingVoice ? (
+            <VoiceRecorder
+              captureLabel={t("postForm.voice.attach")}
+              onCapture={(clip) => {
+                setVoiceClip(clip);
+                setRecordingVoice(false);
+              }}
+              onCancel={() => setRecordingVoice(false)}
+            />
+          ) : (
+            <div>
+              <button
+                type="button"
+                className="btn-secondary min-h-[44px] text-sm"
+                onClick={() => setRecordingVoice(true)}
+              >
+                <span aria-hidden="true" className="mr-1">
+                  🎙️
+                </span>
+                {t("postForm.voice.add")}
+              </button>
+              <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+                {t("postForm.voice.hint")}
+              </p>
+            </div>
+          )}
+        </div>
 
         <fieldset className="rounded-xl border border-moss-200 p-3 dark:border-moss-800">
           <legend className="px-1 text-xs uppercase tracking-wide text-moss-600 dark:text-moss-300">

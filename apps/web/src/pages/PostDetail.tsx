@@ -36,6 +36,7 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
 import { Markdown } from "@/components/Markdown";
+import { AudioPostPlayer } from "@/components/AudioPostPlayer";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -294,6 +295,13 @@ export default function PostDetailPage() {
           <OverflowMenu label={t("postDetail.menuLabel")} items={menuItems} />
         </div>
         <h1 className="text-2xl font-bold leading-tight">{post.title}</h1>
+        {post.audio && (
+          <div className="mt-2">
+            {/* Voice post (#474): the member opened this post, so load
+                the recording eagerly — it's the post's main content. */}
+            <AudioPostPlayer audio={post.audio} eager />
+          </div>
+        )}
         {post.description && (
           <Markdown
             text={post.description}

@@ -142,12 +142,17 @@ export async function softPurge(): Promise<PurgeResult> {
   await db.transaction("rw", db.posts, async () => {
     const posts = await db.posts.toArray();
     for (const p of posts) {
-      await db.posts.put({
+      const scrubbed = {
         ...p,
         title: "",
         description: "",
         locationZone: "",
-      });
+      };
+      // Voice board (#474): a recording is a VOICE — more identifying
+      // than any title. Drop the whole reference; the bytes live on
+      // the node, and without the blobId this device can't name them.
+      delete scrubbed.audio;
+      await db.posts.put(scrubbed);
     }
     tables.push("posts");
   });
