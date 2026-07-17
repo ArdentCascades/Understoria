@@ -72,6 +72,17 @@ export const LONG_PRESS_MS = 450;
  *  of a time line under every bubble. Exported for tests. */
 export const GROUP_WINDOW_MS = 10 * 60 * 1000;
 
+/** "At the bottom" tolerance for follow-scroll — within this many
+ *  pixels of the end still counts as reading the latest. Exported
+ *  for the chip tests. */
+export const NEAR_BOTTOM_PX = 120;
+
+function isNearBottom(list: HTMLElement): boolean {
+  return (
+    list.scrollHeight - list.scrollTop - list.clientHeight < NEAR_BOTTOM_PX
+  );
+}
+
 function isSameDay(a: number, b: number): boolean {
   const da = new Date(a);
   const db = new Date(b);
@@ -120,6 +131,11 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   }, [searchOpen]);
   const listRef = useRef<HTMLDivElement>(null);
   const lastScrolledIdRef = useRef<string>("");
+  const prevLenRef = useRef(0);
+  // Messages that arrived while the reader was scrolled up — the
+  // count on the "new messages ↓" chip. Cleared on reaching the
+  // bottom (by chip tap or by scrolling there).
+  const [unseen, setUnseen] = useState(0);
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useReducedMotion();
@@ -435,9 +451,28 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       // what the member experienced as "unwanted scrolling" the
       // moment the composer had focus.
       const lastId = messages.length > 0 ? messages[messages.length - 1].id : "";
-      if (lastId === lastScrolledIdRef.current) return;
+      if (lastId === lastScrolledIdRef.current) {
+        prevLenRef.current = messages.length;
+        return;
+      }
+      const firstLoad = lastScrolledIdRef.current === "";
       lastScrolledIdRef.current = lastId;
-      scrollListTo(list.scrollHeight);
+      const lastMsg = messages[messages.length - 1];
+      const mine = lastMsg?.senderKey === currentMember?.publicKey;
+      // Respect the reader's position (the Signal rule): only follow
+      // a NEW message to the bottom when they're already there (or
+      // it's their own send, or the thread just opened). Someone
+      // reading older messages gets the "new messages ↓" chip
+      // instead of being yanked down.
+      if (firstLoad || mine || isNearBottom(list)) {
+        scrollListTo(list.scrollHeight);
+        setUnseen(0);
+      } else {
+        setUnseen(
+          (c) => c + Math.max(1, messages.length - prevLenRef.current),
+        );
+      }
+      prevLenRef.current = messages.length;
       return;
     }
     const id = matchIds[Math.min(activeMatchIdx, matchIds.length - 1)];
@@ -451,7 +486,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       list.scrollTop -
       Math.max(0, (list.clientHeight - el.clientHeight) / 2);
     scrollListTo(top);
-  }, [matchIds, activeMatchIdx, messages, scrollListTo]);
+  }, [matchIds, activeMatchIdx, messages, scrollListTo, currentMember]);
 
   // Voice notes (docs/message-relay.md §10): the composer's mic
   // button swaps in the recorder; a captured clip sends as a sealed
@@ -486,6 +521,8 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         aboutPostId: aboutPostId ?? undefined,
       });
       setText("");
+      // Collapse the auto-grown box back to one line.
+      if (inputRef.current) inputRef.current.style.height = "auto";
       // First message of the visit carried the post reference —
       // disarm so follow-up messages (and a refresh) don't repeat it.
       if (aboutPostId) disarmAbout();
@@ -688,8 +725,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         <WhyTooltip principleId="no-read-receipts" />
       </p>
 
+      <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={listRef}
+        onScroll={() => {
+          const list = listRef.current;
+          if (list && unseen > 0 && isNearBottom(list)) setUnseen(0);
+        }}
         className="flex-1 overflow-y-auto rounded-xl bg-moss-50 p-3 dark:bg-moss-950/30"
       >
         {messages.length === 0 ? (
@@ -940,6 +982,25 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           </div>
         )}
       </div>
+      {/* The "new messages ↓" chip: floats over the thread while the
+          reader is scrolled up and something new arrived. Tapping
+          jumps to the latest; reaching the bottom by hand clears it
+          too (the onScroll handler above). */}
+      {unseen > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            const list = listRef.current;
+            if (list) scrollListTo(list.scrollHeight);
+            setUnseen(0);
+          }}
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-canopy-700 px-3 py-1.5 text-xs font-medium text-white shadow-md hover:bg-canopy-800 focus:outline-none focus:ring-2 focus:ring-canopy-400"
+        >
+          <span aria-hidden="true">{"↓ "}</span>
+          {t("messages.newMessages", { count: unseen })}
+        </button>
+      )}
+      </div>
 
       {/* Pre-send hint while the ?about= param is armed: tells the
           member their next message will carry the post reference,
@@ -980,7 +1041,17 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             className="input w-full resize-none"
             rows={1}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              // Auto-grow (Signal-style): the box follows the text up
+              // to ~6 lines, then scrolls internally. scrollHeight is
+              // 0 in jsdom — skip there rather than pinning to 0px.
+              const el = e.currentTarget;
+              if (el.scrollHeight > 0) {
+                el.style.height = "auto";
+                el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
+              }
+            }}
             placeholder={t("messages.inputPlaceholder")}
             maxLength={5000}
             onKeyDown={(e) => {
@@ -991,27 +1062,34 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             }}
           />
         </label>
-        <button
-          type="button"
-          className="btn-ghost min-h-[44px] min-w-[44px] self-end text-lg"
-          aria-label={
-            recordingVoice
-              ? t("messages.voice.closeRecorder")
-              : t("messages.voice.record")
-          }
-          aria-pressed={recordingVoice}
-          onClick={() => setRecordingVoice((v) => !v)}
-        >
-          🎙️
-        </button>
-        <button
-          type="submit"
-          className="btn-primary self-end"
-          disabled={sending || !text.trim()}
-          aria-busy={sending}
-        >
-          {sending ? t("messages.sending") : t("messages.send")}
-        </button>
+        {/* One slot, two moods (the Signal morph): the mic while the
+            box is empty, Send once there's something to send. Fewer
+            buttons on screen at any moment, and the mic is exactly
+            where the thumb already is. */}
+        {text.trim() === "" && !sending ? (
+          <button
+            type="button"
+            className="btn-ghost min-h-[44px] min-w-[44px] self-end text-lg"
+            aria-label={
+              recordingVoice
+                ? t("messages.voice.closeRecorder")
+                : t("messages.voice.record")
+            }
+            aria-pressed={recordingVoice}
+            onClick={() => setRecordingVoice((v) => !v)}
+          >
+            🎙️
+          </button>
+        ) : (
+          <button
+            type="submit"
+            className="btn-primary self-end"
+            disabled={sending || !text.trim()}
+            aria-busy={sending}
+          >
+            {sending ? t("messages.sending") : t("messages.send")}
+          </button>
+        )}
       </form>
       {error && (
         <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="alert">

@@ -792,6 +792,8 @@
       "today": "Hoy",
       "yesterday": "Ayer"
     },
+    "newMessages_one": "{{count}} mensaje nuevo",
+    "newMessages_other": "{{count}} mensajes nuevos",
     "menu": {
       "copy": "Copiar",
       "copied": "Copiado ✓",
