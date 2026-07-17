@@ -194,6 +194,41 @@ describe("ConversationPage — chat-mode polling", () => {
     expect(pullFederatedMessages).toHaveBeenCalledTimes(1);
   });
 
+  it("a poll tick that changes nothing does not re-scroll the thread (iOS keyboard lurch)", async () => {
+    // The field report: with the composer focused on iOS, the screen
+    // lurched every poll tick. Cause: the auto-scroll keyed on the
+    // messages ARRAY (fresh identity every reload) instead of on the
+    // last message, and used scrollIntoView (which iOS may answer by
+    // panning the whole page). Now the list container scrolls, and
+    // only when the last message actually changed.
+    const msg = {
+      id: "m1",
+      senderKey: "them-key",
+      recipientKey: "me-key",
+      plaintext: "Hey there!",
+      createdAt: 1,
+      reactions: [],
+    };
+    vi.mocked(getConversation).mockResolvedValue([
+      msg,
+    ] as unknown as Awaited<ReturnType<typeof getConversation>>);
+    const scrollToSpy = vi.fn();
+    (
+      Element.prototype as unknown as { scrollTo: typeof scrollToSpy }
+    ).scrollTo = scrollToSpy;
+    try {
+      render();
+      await advance(0);
+      const scrollsAfterMount = scrollToSpy.mock.calls.length;
+
+      // Three ticks, same single message every time.
+      await advance(CHAT_POLL_MS * 3);
+      expect(scrollToSpy.mock.calls.length).toBe(scrollsAfterMount);
+    } finally {
+      delete (Element.prototype as unknown as { scrollTo?: unknown }).scrollTo;
+    }
+  });
+
   it("leaving the conversation stops the polling", async () => {
     render();
     await advance(CHAT_POLL_MS);
