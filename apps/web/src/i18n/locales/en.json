@@ -784,8 +784,21 @@
       "matchPosition": "{{current}} of {{total}}",
       "previous": "Previous match",
       "next": "Next match",
+      "close": "Close search",
       "conversationWith": "Conversation with {{name}}",
       "matchedName": "Matched their name"
+    },
+    "day": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "menu": {
+      "copy": "Copy",
+      "copied": "Copied ✓",
+      "speak": "Speak",
+      "info": "Info",
+      "infoSent": "Sent {{when}}",
+      "infoSealed": "Sealed end to end — only you and {{name}} can read it."
     },
     "reactions": {
       "open": "React to this message",

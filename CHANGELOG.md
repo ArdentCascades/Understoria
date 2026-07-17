@@ -9,6 +9,22 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Conversations read like a familiar messenger now** (a deliberate
+  borrow from Signal's calm thread design). Search tucks behind a 🔍
+  in the conversation header instead of permanently occupying the
+  top row (a `?q=` link still opens it ready to use). Messages sent
+  close together by the same person group into one burst with a
+  single time under the last one, instead of a time line under every
+  bubble, and "Today / Yesterday / date" chips mark where days
+  change. And the long-press menu grew from just emoji into the full
+  set: the emoji row plus **Copy**, **Speak** (the message read
+  aloud by the device's own voice — nothing sent anywhere), and
+  **Info** (the exact send time and a plain-language reminder that
+  only the two of you can read the message). Voice notes offer Info
+  only. Read receipts and typing indicators remain deliberately
+  absent — that's a promise, not a gap.
+
 ### Fixed
 - **Chat no longer lurches while typing on iPhones.** With the
   keyboard open, the conversation screen kept scrolling on its own
