@@ -9,6 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The founder-claim screen could go dead after a successful claim**
+  (seen relaunching a community on a fresh server). Tapping "Claim
+  this server" actually claimed it, but the screen then re-checked
+  the server's status and could get a stale cached "not claimed yet"
+  answer — so it just sat there until a hard refresh. Three fixes:
+  the screen now trusts the successful claim and opens the app
+  directly; the status check is never answered from cache; and any
+  unexpected error during claiming now shows a plain-language
+  message instead of a silently-resetting button. The screen also
+  now explains why it isn't asking for your name when the device
+  already carries a saved identity from a previous install (and what
+  to do if that identity is passphrase-locked or unwanted).
+
 ### Added
 - **Organizers can send a task completion back — "Not done yet."**
   Until now, a project organizer looking at an unfinished completion

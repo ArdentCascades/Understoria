@@ -271,4 +271,72 @@ describe("NodeSetupGate — the UNCLAIMED node blocks the app", () => {
     expect(container.textContent).toContain("That code doesn't match");
     expect(container.textContent).not.toContain("THE APP");
   });
+
+  it("opens the app on claim success even when the status probe would still answer 'unclaimed' (stale cache)", async () => {
+    // The 2026-07 relaunch report: the claim POST succeeded, but the
+    // gate's follow-up /config probe answered from a stale cache and
+    // the founder stayed on a dead setup screen until a hard refresh.
+    // The gate now trusts the claim result directly.
+    fetchClaimStatusMock.mockResolvedValue(true); // stays 'unclaimed' forever
+    render();
+    await flush();
+
+    const inputs = Array.from(
+      container.querySelectorAll("input"),
+    ) as HTMLInputElement[];
+    setInput(inputs[0], "Seth");
+    setInput(inputs[1], "my-setup-code");
+    const claimBtn = buttonByText("Claim this server")!;
+    await act(async () => {
+      claimBtn.form!.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+    await waitFor(() => container.textContent?.includes("THE APP") ?? false);
+    expect(container.textContent).toContain("THE APP");
+  });
+
+  it("an unexpected client-side throw shows a message instead of a dead button", async () => {
+    fetchClaimStatusMock.mockResolvedValue(true);
+    claimFounderMock.mockRejectedValue(new Error("identity locked"));
+    render();
+    await flush();
+
+    const inputs = Array.from(
+      container.querySelectorAll("input"),
+    ) as HTMLInputElement[];
+    setInput(inputs[0], "Seth");
+    setInput(inputs[1], "my-setup-code");
+    const claimBtn = buttonByText("Claim this server")!;
+    await act(async () => {
+      claimBtn.form!.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+    await waitFor(
+      () =>
+        container.textContent?.includes("Something went wrong on this device") ??
+        false,
+    );
+    expect(container.textContent).toContain(
+      "Something went wrong on this device",
+    );
+    // The screen is alive: the button is enabled for another try.
+    expect(buttonByText("Claim this server")!.disabled).toBe(false);
+  });
+
+  it("explains why there is no name field when the device carries a saved identity", async () => {
+    mockState.currentMember = {
+      publicKey: "existing-key",
+      displayName: "Old Me",
+    } as Member;
+    fetchClaimStatusMock.mockResolvedValue(true);
+    render();
+    await flush();
+    expect(container.textContent).toContain(
+      "This device already has a saved identity",
+    );
+    // And indeed no name input — only the code field.
+    expect(container.querySelectorAll("input")).toHaveLength(1);
+  });
 });

@@ -1784,7 +1784,9 @@
     "claim": "Claim this server and open the community",
     "waitingTitle": "Just joining this community?",
     "waitingBody": "Ask the person setting it up to finish claiming the server, then tap the button below — or just re-open your invite link once they're done.",
-    "checkAgain": "Check again"
+    "checkAgain": "Check again",
+    "hasIdentityNote": "This device already has a saved identity, so no name is needed — the claim will use it. If that identity was protected with a passphrase, unlock it first; to start completely fresh instead, clear this website's data in your browser settings and reload.",
+    "unexpectedError": "Something went wrong on this device while claiming — the server may be fine. If your saved identity uses a passphrase, unlock it and try again; a page refresh often helps too."
   },
   "nodeSuggest": {
     "label": "Connect to this community's node",

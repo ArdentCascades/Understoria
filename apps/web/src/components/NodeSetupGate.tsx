@@ -142,7 +142,12 @@ export function NodeSetupGate({
           // named identity that owns a community.
           await markOnboarded();
           await refreshOnboarded();
-          await check();
+          // Trust the claim result and open the app DIRECTLY. The
+          // previous re-probe here could race a cached/stale /config
+          // answer and leave the founder on a dead setup screen with
+          // the server already claimed (2026-07 relaunch report —
+          // only a hard refresh got them in).
+          setState("pass");
           return null;
         }
         return result.reason;
@@ -187,6 +192,12 @@ function NodeSetupScreen({
       if (reason) {
         setError(t(`profile.node.claim.errors.${reason}`));
       }
+    } catch {
+      // An unexpected client-side throw (a locked saved identity is
+      // the known case) previously escaped silently — the button
+      // reset and the founder was left staring at a dead screen.
+      // Whatever happened, SAY something.
+      setError(t("nodeSetup.unexpectedError"));
     } finally {
       setBusy(false);
     }
@@ -219,6 +230,15 @@ function NodeSetupScreen({
             {t("nodeSetup.founderIntro")}
           </p>
           <form onSubmit={handleClaim} className="mt-4 flex flex-col gap-3">
+            {/* Why there's no name field: this device already carries
+                a saved identity (often from a previous install at the
+                same address). Say so — the silent asymmetry confused
+                the first founder who relaunched a community. */}
+            {hasIdentity && (
+              <p className="text-xs text-moss-600 dark:text-moss-300">
+                {t("nodeSetup.hasIdentityNote")}
+              </p>
+            )}
             {!hasIdentity && (
               <label className="flex flex-col gap-1">
                 <span className="text-sm font-medium">
