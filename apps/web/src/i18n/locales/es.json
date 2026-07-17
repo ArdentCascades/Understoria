@@ -1784,7 +1784,9 @@
     "claim": "Reclamar este servidor y abrir la comunidad",
     "waitingTitle": "¿Solo vienes a unirte a esta comunidad?",
     "waitingBody": "Pide a la persona que la está configurando que termine de reclamar el servidor y luego toca el botón de abajo — o simplemente vuelve a abrir tu enlace de invitación cuando haya terminado.",
-    "checkAgain": "Comprobar de nuevo"
+    "checkAgain": "Comprobar de nuevo",
+    "hasIdentityNote": "Este dispositivo ya tiene una identidad guardada, así que no hace falta un nombre — la reclamación la usará. Si esa identidad estaba protegida con una frase de paso, desbloquéala primero; para empezar totalmente de cero, borra los datos de este sitio web en los ajustes de tu navegador y recarga.",
+    "unexpectedError": "Algo falló en este dispositivo al reclamar — puede que el servidor esté bien. Si tu identidad guardada usa una frase de paso, desbloquéala e inténtalo de nuevo; recargar la página también suele ayudar."
   },
   "nodeSuggest": {
     "label": "Conectar con el nodo de esta comunidad",

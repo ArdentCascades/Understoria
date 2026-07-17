@@ -56,6 +56,12 @@ export async function fetchClaimStatus(
   try {
     const res = await fetchImpl(`${normalizeNodeUrl(url)}/config`, {
       headers: { accept: "application/json" },
+      // A status probe must never be answered from cache: the founder
+      // claims and the very next probe decides whether the setup
+      // screen clears — a heuristically-cached "unclaimed" answer
+      // left the founder staring at a stale gate (2026-07 relaunch
+      // report: claim succeeded, screen stayed until a hard refresh).
+      cache: "no-store",
     });
     if (!res.ok) return null;
     const body = (await res.json()) as { claimed?: unknown };
