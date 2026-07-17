@@ -26,6 +26,21 @@ include breaking changes.
   a disclosure, not a consent ceremony. English and Spanish.
 
 ### Changed
+- **The Dashboard now speaks plainly about reciprocity and needs.**
+  A young community whose help all flows one way used to see a big
+  "0% — 0 of 9 pairs" under its real exchange totals, which read
+  like a broken counter. That state now says what's true and warm:
+  "Help is flowing one way so far — 9 connections started," with
+  the percent appearing only once at least one connection flows
+  both ways (and then in plain words: "1 of 9 connections flow
+  both ways," no more "pairs"). The two needs tiles now say what
+  they actually count — "Needs completed this week" (help
+  delivered and confirmed by both people) and "New needs with a
+  helper … of N posted this week" — so they can no longer be
+  mistaken for the same number disagreeing with itself. The demo
+  community also gained a real two-way connection (Marcus returns
+  Rosa's tutoring with a bike fix), so the showcase demonstrates
+  reciprocity instead of only describing it. English and Spanish.
 - **Identity codes now stay out of the way until you ask.** The
   little `(a1b2…c3d4)` code that used to follow every name on
   casual pages read like a glitch to most people, so those pages
