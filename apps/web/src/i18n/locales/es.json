@@ -786,6 +786,14 @@
       "next": "Coincidencia siguiente",
       "conversationWith": "Conversación con {{name}}",
       "matchedName": "Coincide con su nombre"
+    },
+    "reactions": {
+      "open": "Reaccionar a este mensaje",
+      "pickerLabel": "Elige una reacción",
+      "reactWith": "Reaccionar con {{emoji}}",
+      "remove": "Quitar tu reacción {{emoji}}",
+      "reactedBy": "{{name}} reaccionó {{emoji}}",
+      "you": "Tú"
     }
   },
   "projects": {

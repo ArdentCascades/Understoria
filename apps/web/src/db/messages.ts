@@ -19,6 +19,7 @@ import { matchesQuery } from "@/lib/messageSearch";
 import {
   decodeMessageBody,
   encodeMessageBody,
+  encodeReactionBody,
 } from "@/lib/messageEnvelope";
 import {
   BLOCKED_ACTION_MESSAGE,
@@ -105,6 +106,19 @@ export interface DecryptedMessage extends DirectMessage {
   /** Post this message declared itself to be about, if any. Decoded
    *  from the encrypted envelope; absent on legacy/plain messages. */
   aboutPostId?: string;
+  /** Present when this row IS an emoji reaction (v2 envelope) rather
+   *  than a chat message. Reaction rows never render as bubbles —
+   *  getConversation folds them into the target's `reactions`. */
+  reaction?: { reactsTo: string; emoji: string };
+  /** Reactions other rows aimed at THIS message: one entry per
+   *  reacting member, their latest choice winning. Assembled by
+   *  getConversation; empty/absent when nobody has reacted. */
+  reactions?: MessageReaction[];
+}
+
+export interface MessageReaction {
+  senderKey: string;
+  emoji: string;
 }
 
 /** Decrypt a row and unwrap the plaintext envelope in one step, so
@@ -124,7 +138,37 @@ function decryptAndDecode(
     ...m,
     plaintext: body.text,
     ...(body.aboutPostId ? { aboutPostId: body.aboutPostId } : {}),
+    ...(body.reaction ? { reaction: body.reaction } : {}),
   };
+}
+
+/**
+ * Fold reaction rows into their target messages: the thread shows
+ * chat bubbles only, each carrying the CURRENT reaction per member.
+ * Rows arrive chronological, so a member's later reaction (or an
+ * empty-emoji clear) simply overwrites their earlier one. A reaction
+ * whose target fell outside the loaded window is dropped silently —
+ * it re-attaches whenever the target is in view.
+ */
+function foldReactions(msgs: DecryptedMessage[]): DecryptedMessage[] {
+  const latest = new Map<string, Map<string, string>>(); // target → sender → emoji
+  for (const m of msgs) {
+    if (!m.reaction) continue;
+    const bySender = latest.get(m.reaction.reactsTo) ?? new Map();
+    bySender.set(m.senderKey, m.reaction.emoji);
+    latest.set(m.reaction.reactsTo, bySender);
+  }
+  return msgs
+    .filter((m) => !m.reaction)
+    .map((m) => {
+      const bySender = latest.get(m.id);
+      if (!bySender) return m;
+      const reactions: MessageReaction[] = [];
+      for (const [senderKey, emoji] of bySender) {
+        if (emoji !== "") reactions.push({ senderKey, emoji });
+      }
+      return reactions.length > 0 ? { ...m, reactions } : m;
+    });
 }
 
 export async function getConversation(
@@ -146,7 +190,60 @@ export async function getConversation(
   } catch {
     return rows.map((m) => ({ ...m, plaintext: null }));
   }
-  return rows.map((m) => decryptAndDecode(m, sk, otherKey));
+  return foldReactions(rows.map((m) => decryptAndDecode(m, sk, otherKey)));
+}
+
+/**
+ * Send an emoji reaction to a message. Structurally a sendMessage —
+ * same blocked-party gate, same sealed E2E envelope, same relay via
+ * the outbox — with a v2 reaction body instead of chat text. The
+ * server (and anyone watching it) sees only one more opaque
+ * envelope. `emoji: ""` clears this member's earlier reaction.
+ */
+export async function sendReaction(
+  senderKey: string,
+  recipientKey: string,
+  reactsTo: string,
+  emoji: string,
+): Promise<DirectMessage> {
+  if (await isMutuallyBlocked(senderKey, recipientKey)) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
+  const sk = await getSecretKey(senderKey);
+  const body = encodeReactionBody(reactsTo, emoji);
+  const encrypted = encryptMessage(body, sk, recipientKey);
+  const msg: DirectMessage = {
+    id: uuid(),
+    conversationId: conversationId(senderKey, recipientKey),
+    senderKey,
+    recipientKey,
+    nonce: encrypted.nonce,
+    ciphertext: encrypted.ciphertext,
+    createdAt: Date.now(),
+  };
+  await db.messages.put(msg);
+  const envelope: RelayedMessage = {
+    id: msg.id,
+    senderKey,
+    recipientKey,
+    nonce: msg.nonce,
+    ciphertext: msg.ciphertext,
+    createdAt: msg.createdAt,
+    signature: sign(
+      canonicalRelayedMessagePayload({
+        id: msg.id,
+        senderKey,
+        recipientKey,
+        nonce: msg.nonce,
+        ciphertext: msg.ciphertext,
+        createdAt: msg.createdAt,
+      }),
+      sk,
+    ),
+  };
+  const queued = await enqueueMessageOutbox(envelope);
+  if (queued) void flushOutboxNow().catch(() => {});
+  return msg;
 }
 
 export interface ConversationSummary {
@@ -231,6 +328,9 @@ export async function searchAllMessages(
     // text of envelope messages — a query like `"v":1` or a post id
     // must not match envelope JSON syntax.
     const msg = decryptAndDecode(m, sk, otherKey);
+    // Reaction rows aren't thread messages — a search for "✕" or an
+    // emoji must not surface them as hits.
+    if (msg.reaction) continue;
     if (matchesQuery(msg.plaintext, query)) {
       hits.push({ otherKey, message: msg });
     }
