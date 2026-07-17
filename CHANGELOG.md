@@ -76,6 +76,14 @@ include breaking changes.
   start a conversation from a member's profile: there's deliberately
   no message button there — conversations start from a post, and the
   empty-messages screen and the FAQ now say so.
+- **Speak now shows its work.** Tapping Speak in a message's
+  long-press menu used to look like nothing happened — the device
+  started reading (or didn't), and the screen gave no clue either
+  way. The item now switches to "Stop speaking" while the message is
+  being read, tapping it again (or closing the menu, or leaving the
+  conversation) goes quiet, and on a device that can't speak at all
+  the item stays visible but says plainly that it can't — instead of
+  posing as a button that silently does nothing.
 - **Docs caught up with the code.** A documentation-accuracy sweep
   across this cycle's features: the member guide now covers voice
   notes on posts and in messages, emoji reactions, the long-press

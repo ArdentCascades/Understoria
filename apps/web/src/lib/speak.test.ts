@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { speak, stopSpeaking } from "./speak";
+import { isSpeechAvailable, speak, stopSpeaking } from "./speak";
 
 // On-device TTS wrapper (#476). jsdom has no speechSynthesis, which
 // doubles as the soft-degrade test; a stub covers the happy path.
@@ -48,5 +48,54 @@ describe("speak", () => {
       },
     });
     expect(speak("x")).toBe(false);
+  });
+
+  it("calls onDone once whether the utterance ends OR errors", () => {
+    class FakeUtterance {
+      onend?: () => void;
+      onerror?: () => void;
+      constructor(public text: string) {}
+    }
+    let last: FakeUtterance | undefined;
+    vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+    vi.stubGlobal("speechSynthesis", {
+      cancel() {},
+      speak(u: FakeUtterance) {
+        last = u;
+      },
+    });
+    const onDone = vi.fn();
+    expect(speak("hello", "en", onDone)).toBe(true);
+    expect(onDone).not.toHaveBeenCalled();
+    // A platform may fire error then end (or vice versa) — the
+    // caller's "speaking…" state must clear exactly once.
+    last!.onerror!();
+    last!.onend!();
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onDone even when speech is missing or throws", () => {
+    const missing = vi.fn();
+    expect(speak("x", undefined, missing)).toBe(false);
+    expect(missing).toHaveBeenCalledTimes(1);
+
+    vi.stubGlobal("SpeechSynthesisUtterance", class { constructor(_t: string) {} });
+    vi.stubGlobal("speechSynthesis", {
+      cancel() {},
+      speak() {
+        throw new Error("no voices");
+      },
+    });
+    const threw = vi.fn();
+    expect(speak("x", undefined, threw)).toBe(false);
+    expect(threw).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("isSpeechAvailable", () => {
+  it("is false in jsdom (no speechSynthesis) and true once the API exists", () => {
+    expect(isSpeechAvailable()).toBe(false);
+    vi.stubGlobal("speechSynthesis", { cancel() {}, speak() {} });
+    expect(isSpeechAvailable()).toBe(true);
   });
 });

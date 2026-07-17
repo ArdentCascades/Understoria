@@ -799,6 +799,8 @@
       "copy": "Copy",
       "copied": "Copied ✓",
       "speak": "Speak",
+      "speakStop": "Stop speaking",
+      "speakUnavailable": "This device can't read messages aloud",
       "info": "Info",
       "infoSent": "Sent {{when}}",
       "infoSealed": "Sealed end to end — only you and {{name}} can read it."

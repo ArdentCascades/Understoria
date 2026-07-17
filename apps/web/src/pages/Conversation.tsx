@@ -44,7 +44,7 @@ import { pullFederatedMessages } from "@/lib/federationSync";
 import { SYNC_KICK_EVENT } from "@/lib/syncLoop";
 import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
-import { speak } from "@/lib/speak";
+import { isSpeechAvailable, speak, stopSpeaking } from "@/lib/speak";
 import { BackLink } from "@/components/BackLink";
 import { HighlightedText } from "@/components/HighlightedText";
 import { MemberAvatar } from "@/components/MemberAvatar";
@@ -157,19 +157,30 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // (no toast — feedback stays where the eyes are).
   const [infoFor, setInfoFor] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  // Which message the device is reading aloud right now — the Speak
+  // item shows "Stop speaking" for it, so tapping Speak visibly DOES
+  // something (and offers a way out). Cleared by speak()'s onDone
+  // when the utterance ends or errors.
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
   const copyTimer = useRef<number | null>(null);
   useEffect(
     () => () => {
       if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+      // Leaving the conversation silences it — audio must never
+      // outlive the screen it belongs to.
+      stopSpeaking();
     },
     [],
   );
   // Closing the menu (however it closes) resets its sub-state so the
-  // next open starts clean.
+  // next open starts clean — and cuts any in-flight speech, since
+  // the "Stop speaking" control disappears with the menu.
   useEffect(() => {
     if (reactFor === null) {
       setInfoFor(null);
       setCopiedId(null);
+      setSpeakingId(null);
+      stopSpeaking();
     }
   }, [reactFor]);
   const speakLang = i18n.language?.startsWith("es") ? "es" : "en";
@@ -211,6 +222,26 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       setReactFor(null);
     }, 1200);
   }, []);
+  // Speak toggles: idle → start reading and remember which message;
+  // already reading this one → stop. State is set BEFORE speak() so
+  // a synchronous synthesis failure (onDone fires inside the call)
+  // still lands on "not speaking"; the functional clear ignores a
+  // stale utterance's onDone after the member moved on to another.
+  const handleSpeak = useCallback(
+    (m: DecryptedMessage) => {
+      if (m.plaintext === null) return;
+      if (speakingId === m.id) {
+        stopSpeaking();
+        setSpeakingId(null);
+        return;
+      }
+      setSpeakingId(m.id);
+      speak(m.plaintext, speakLang, () =>
+        setSpeakingId((cur) => (cur === m.id ? null : cur)),
+      );
+    },
+    [speakingId, speakLang],
+  );
   const pressTimer = useRef<number | null>(null);
   const cancelPress = useCallback(() => {
     if (pressTimer.current !== null) {
@@ -934,14 +965,25 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                               ? t("messages.menu.copied")
                               : t("messages.menu.copy")}
                           </button>
+                          {/* Speak is stateful, not fire-and-forget:
+                              while reading it becomes "Stop
+                              speaking", and where the device has no
+                              speech at all it stays visible but
+                              disabled and says so — a hidden control
+                              can't explain itself. */}
                           <button
                             type="button"
                             role="menuitem"
+                            disabled={!isSpeechAvailable()}
                             onPointerDown={(e) => e.stopPropagation()}
-                            onClick={() => speak(m.plaintext!, speakLang)}
-                            className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:hover:bg-white/10"
+                            onClick={() => handleSpeak(m)}
+                            className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 disabled:opacity-60 disabled:hover:bg-transparent dark:hover:bg-white/10 dark:disabled:hover:bg-transparent"
                           >
-                            {t("messages.menu.speak")}
+                            {!isSpeechAvailable()
+                              ? t("messages.menu.speakUnavailable")
+                              : speakingId === m.id
+                                ? t("messages.menu.speakStop")
+                                : t("messages.menu.speak")}
                           </button>
                         </>
                       )}

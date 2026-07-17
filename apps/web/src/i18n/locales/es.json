@@ -799,6 +799,8 @@
       "copy": "Copiar",
       "copied": "Copiado ✓",
       "speak": "Leer en voz alta",
+      "speakStop": "Dejar de leer",
+      "speakUnavailable": "Este dispositivo no puede leer mensajes en voz alta",
       "info": "Detalles",
       "infoSent": "Enviado {{when}}",
       "infoSealed": "Sellado de extremo a extremo — solo tú y {{name}} pueden leerlo."
