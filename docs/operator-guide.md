@@ -139,11 +139,17 @@ aid.our-union.example {
     Strict-Transport-Security "max-age=31536000; includeSubDomains"
     X-Content-Type-Options nosniff
     Referrer-Policy no-referrer
-    Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self';"
-    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; media-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self';"
+    Permissions-Policy "geolocation=(), microphone=(self), camera=()"
   }
 }
 ```
+
+Two lines here are load-bearing for voice features: `media-src 'self'
+blob:` (voice notes and voice posts play through in-memory `blob:`
+URLs — without it every player fails with "could not be played on
+this device") and `microphone=(self)` (a bare `microphone=()` blocks
+the recorder outright in Chromium browsers).
 
 Copy `dist/` to `/var/www/understoria/`, start Caddy, and you're live.
 The `try_files` line is what makes client-side routes like
@@ -588,7 +594,7 @@ aid.our-union.example {
     try_files {path} /index.html
     file_server
     header {
-      Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' /api/; img-src 'self' data:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self';"
+      Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' /api/; img-src 'self' data:; media-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self';"
     }
   }
 }
