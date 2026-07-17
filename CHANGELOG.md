@@ -10,6 +10,17 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **Composer and scrolling polish in conversations** (round two of
+  the Signal-informed messaging work). The message box grows as you
+  write longer messages (up to about six lines, then scrolls) and
+  shrinks back after sending. The microphone and Send button now
+  share one spot: the mic shows while the box is empty, Send appears
+  the moment you type — fewer buttons competing for the thumb. And
+  if a message arrives while you're scrolled up reading older ones,
+  the thread no longer yanks you to the bottom: a small
+  "{{n}} new messages ↓" chip appears instead, and tapping it (or
+  scrolling down yourself) takes you there. Your own sends still
+  jump to the bottom, as you'd expect.
 - **Conversations read like a familiar messenger now** (a deliberate
   borrow from Signal's calm thread design). Search tucks behind a 🔍
   in the conversation header instead of permanently occupying the

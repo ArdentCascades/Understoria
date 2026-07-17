@@ -56,7 +56,10 @@ vi.mock("@/lib/speak", () => ({
 }));
 
 import "@/i18n";
-import ConversationPage, { GROUP_WINDOW_MS } from "./Conversation";
+import ConversationPage, {
+  GROUP_WINDOW_MS,
+  NEAR_BOTTOM_PX,
+} from "./Conversation";
 import { speak } from "@/lib/speak";
 import type { DecryptedMessage } from "@/db/messages";
 import type { Member } from "@/types";
@@ -296,6 +299,89 @@ describe("the long-press menu actions", () => {
     });
     expect(container.textContent).toContain("Sent ");
     expect(container.textContent).toContain("Sealed end to end");
+  });
+
+  it("the composer shows the mic when empty and Send once there's text", async () => {
+    mockMessages = [makeMessage({ id: "m1" })];
+    await render();
+    // Empty box → mic occupies the slot, no Send button.
+    expect(buttonByLabel("Record a voice note")).not.toBeNull();
+    expect(
+      Array.from(container.querySelectorAll('button[type="submit"]')),
+    ).toHaveLength(0);
+
+    const ta = container.querySelector("textarea")!;
+    const setter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!;
+    setter.call(ta, "soup at six?");
+    await act(async () => {
+      ta.dispatchEvent(new Event("input", { bubbles: true }));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    // Text present → Send replaces the mic.
+    expect(buttonByLabel("Record a voice note")).toBeNull();
+    expect(
+      Array.from(container.querySelectorAll('button[type="submit"]')),
+    ).toHaveLength(1);
+  });
+
+  it("a new message while scrolled up shows the ↓ chip instead of yanking; tapping it jumps down", async () => {
+    const now = Date.now();
+    mockMessages = [makeMessage({ id: "m1", createdAt: now - 60_000 })];
+    await render();
+
+    // Simulate a reader far from the bottom: give the list real
+    // geometry (jsdom defaults everything to 0 = "at the bottom").
+    const list = Array.from(container.querySelectorAll("div")).find((d) =>
+      d.className.includes("overflow-y-auto"),
+    )! as HTMLDivElement;
+    Object.defineProperty(list, "scrollHeight", {
+      configurable: true,
+      value: 2000,
+    });
+    Object.defineProperty(list, "clientHeight", {
+      configurable: true,
+      value: 400,
+    });
+    Object.defineProperty(list, "scrollTop", {
+      configurable: true,
+      writable: true,
+      value: 0, // 1600px from the bottom — well past NEAR_BOTTOM_PX
+    });
+    expect(2000 - 0 - 400).toBeGreaterThan(NEAR_BOTTOM_PX);
+    const scrollToSpy = vi.fn();
+    (list as unknown as { scrollTo: typeof scrollToSpy }).scrollTo =
+      scrollToSpy;
+
+    // A new incoming message lands on the next poll.
+    mockMessages = [
+      ...mockMessages,
+      makeMessage({ id: "m2", createdAt: now }),
+    ];
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2_500);
+    });
+
+    // Not yanked — the chip appears instead.
+    expect(scrollToSpy).not.toHaveBeenCalled();
+    const chip = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("new message"),
+    );
+    expect(chip).toBeDefined();
+
+    // Tapping the chip jumps to the latest and clears it.
+    await act(async () => {
+      chip!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(scrollToSpy).toHaveBeenCalled();
+    expect(
+      Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("new message"),
+      ),
+    ).toBeUndefined();
   });
 
   it("voice messages get Info but not Copy/Speak", async () => {
