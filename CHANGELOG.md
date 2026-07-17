@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Setup can create the swap file small servers need.** On a host
+  with less than 1.5 GB of memory and no swap, building the app used
+  to die partway through with a cryptic "exit code 134", and the
+  setup script could only print commands for you to run by hand.
+  `scripts/setup.sh` now detects that hardware profile up front and
+  offers to create the 2 GB swap file itself — with a plain-language
+  explanation of what swap is, a free-disk check first, reboot
+  persistence, safe re-runs (it never duplicates the fstab entry or
+  touches an existing `/swapfile`), and handling for filesystems
+  where the simple recipe doesn't work (btrfs needs a special file).
+  Declining still shows the manual recipe, and
+  `docs/deploy-linode.md` §1 now points at the script first.
 - **Voice board** (voice workstream #474). Board posts can now carry a
   recording: pick a category, tap "Add a voice note", record up to 45
   seconds, review, post. Other members see a playable card on the

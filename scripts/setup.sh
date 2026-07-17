@@ -3,7 +3,9 @@
 # Interactive first-run setup for an Understoria community node.
 #
 # What this does:
-#   1. Sanity-checks the environment (Docker, Compose, basic tools).
+#   1. Sanity-checks the environment (Docker, Compose, basic tools),
+#      and on low-memory hosts (< 1.5 GB RAM, no swap) offers to
+#      create the 2 GB swapfile the image build needs.
 #   2. Prompts for the values that go in `.env`: domain, ACME email,
 #      node id, operator name + contact, auto-confirm hours, peer list.
 #   3. Validates each value as it's entered (e-mail shape, domain
@@ -163,17 +165,91 @@ fi
 # Building the web image (tsc + vite) needs more memory than a 1 GB
 # VPS has. Without swap the build aborts with exit code 134 partway
 # through `docker compose build` — a confusing place to discover a
-# provisioning gap. Warn up front instead (deploy-linode.md §1 has
-# the swapfile recipe).
+# provisioning gap. On low-memory hosts the script now OFFERS to
+# create the swapfile itself (the recipe operators previously had to
+# copy from deploy-linode.md §1 by hand), with the same consent-first
+# posture as the firewall and unattended-upgrades steps below.
+
+# create_swapfile <size_mb> — creates /swapfile, activates it, and
+# makes it survive reboots. Root-aware (sudo when needed), idempotent
+# on the fstab line, btrfs-aware (swap needs a no-copy-on-write file
+# there, which fallocate can't produce), with a dd fallback where
+# fallocate is unsupported. Returns non-zero on any failure so the
+# caller can fall back to the manual recipe instead of aborting setup.
+create_swapfile() {
+  local size_mb="$1"
+  local as_root=""
+  [ "$(id -u)" -ne 0 ] && as_root="sudo"
+
+  if [ -e /swapfile ]; then
+    warn "/swapfile already exists but isn't active swap. Not touching it."
+    warn "Inspect it (ls -lh /swapfile; swapon --show) and see deploy-linode.md §1."
+    return 1
+  fi
+  # Need the swap size plus real headroom — filling the root disk to
+  # the brim trades an OOM problem for a no-space one.
+  local avail_mb
+  avail_mb=$(df -Pm / 2>/dev/null | awk 'NR==2{print $4}' || echo 0)
+  if [ "${avail_mb:-0}" -lt $((size_mb + 1024)) ]; then
+    warn "Only ${avail_mb} MB free on / — not enough for a ${size_mb} MB swapfile plus headroom."
+    return 1
+  fi
+
+  local fstype
+  fstype=$(df -PT / 2>/dev/null | awk 'NR==2{print $2}' || echo unknown)
+  info "Creating a ${size_mb} MB swapfile at /swapfile (filesystem: $fstype)..."
+  if [ "$fstype" = "btrfs" ]; then
+    # btrfs swap needs a NOCOW file, set while the file is still
+    # empty; fallocate-then-chattr is too late and mkswap refuses.
+    $as_root touch /swapfile \
+      && $as_root chattr +C /swapfile 2>/dev/null \
+      && $as_root dd if=/dev/zero of=/swapfile bs=1M count="$size_mb" status=none \
+      || { $as_root rm -f /swapfile; return 1; }
+  elif ! $as_root fallocate -l "${size_mb}M" /swapfile 2>/dev/null; then
+    # Some filesystems / older kernels lack fallocate — write it out.
+    $as_root dd if=/dev/zero of=/swapfile bs=1M count="$size_mb" status=none \
+      || { $as_root rm -f /swapfile; return 1; }
+  fi
+  $as_root chmod 600 /swapfile \
+    && $as_root mkswap /swapfile >/dev/null \
+    && $as_root swapon /swapfile \
+    || { $as_root swapoff /swapfile 2>/dev/null; $as_root rm -f /swapfile; return 1; }
+  # Survive reboots — but never append the line twice on a re-run.
+  if ! grep -qE '^\s*/swapfile\s' /etc/fstab 2>/dev/null; then
+    printf '/swapfile none swap sw 0 0\n' | $as_root tee -a /etc/fstab >/dev/null \
+      || warn "Could not update /etc/fstab — swap is active now but won't survive a reboot."
+  fi
+  return 0
+}
+
 mem_kb=$(awk '/^MemTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
 swap_kb=$(awk '/^SwapTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
 if [ "$mem_kb" -gt 0 ] && [ "$mem_kb" -lt 1572864 ] && [ "$swap_kb" -lt 1048576 ]; then
   warn "This host has less than 1.5 GB RAM and little or no swap."
   warn "The web image build will likely die with exit code 134 (out of memory)."
-  warn "Fix (once): add a 2 GB swapfile — see docs/deploy-linode.md §1:"
-  warn "  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
-  warn "  echo '/swapfile none swap sw 0 0' >> /etc/fstab"
-  confirm "Continue without swap anyway?" || exit 1
+  say ""
+  say "The script can fix this for you: it creates a 2 GB swap file"
+  say "(spare disk space the system uses as extra memory when RAM runs"
+  say "out). It's only needed during builds — day-to-day serving never"
+  say "touches it — and it survives reboots. This is the standard cure"
+  say "for small servers; it changes nothing else about your system."
+  if confirm "Create a 2 GB swap file now?"; then
+    if create_swapfile 2048; then
+      swap_kb=$(awk '/^SwapTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
+      ok "Swap active: $((swap_kb / 1024)) MB total (persisted in /etc/fstab)."
+    else
+      warn "Automatic swap creation failed — falling back to the manual recipe"
+      warn "(docs/deploy-linode.md §1):"
+      warn "  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
+      warn "  echo '/swapfile none swap sw 0 0' >> /etc/fstab"
+      confirm "Continue without swap anyway?" || exit 1
+    fi
+  else
+    warn "Skipped. Manual recipe (docs/deploy-linode.md §1):"
+    warn "  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
+    warn "  echo '/swapfile none swap sw 0 0' >> /etc/fstab"
+    confirm "Continue without swap anyway?" || exit 1
+  fi
 else
   ok "Memory + swap look sufficient for the image builds."
 fi
