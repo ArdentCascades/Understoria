@@ -304,6 +304,7 @@
     "you": "You",
     "back": "← Back",
     "cancel": "Cancel",
+    "close": "Close",
     "save": "Save",
     "saving": "Saving...",
     "savedAt": "Saved {{when}}",
@@ -748,7 +749,7 @@
       "emptyPane": "Pick a conversation from the list."
     },
     "emptyTitle": "No conversations yet",
-    "empty": "No messages yet. Start a conversation from any post or member profile.",
+    "empty": "No messages yet. Conversations start from a post — open someone's post and tap Message to reach out.",
     "sendMessage": "Message",
     "messageButton": "Message",
     "messageTarget": "Message {{name}}",

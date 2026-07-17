@@ -69,6 +69,13 @@ include breaking changes.
   you confirm — credit moves when both sides have confirmed." The
   poster still sees their helper named, as before. English and
   Spanish.
+- **Two bits of copy now tell the truth.** If you declined the
+  microphone permission, the dialog's close button showed a raw
+  computer string ("common.close") instead of the word Close — it
+  says Close (Cerrar) now. And the app no longer claims you can
+  start a conversation from a member's profile: there's deliberately
+  no message button there — conversations start from a post, and the
+  empty-messages screen and the FAQ now say so.
 - **Docs caught up with the code.** A documentation-accuracy sweep
   across this cycle's features: the member guide now covers voice
   notes on posts and in messages, emoji reactions, the long-press

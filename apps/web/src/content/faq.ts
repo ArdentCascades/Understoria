@@ -530,8 +530,9 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "Open any post and tap the Message button to reach out — it " +
             "goes to the poster, or, if it's your own post, to the " +
-            "person helping you. You can also start a conversation " +
-            "from a member's page, or open Messages in the navigation " +
+            "person helping you. Conversations deliberately start " +
+            "from a post — that keeps messaging tied to actual help " +
+            "rather than cold contact. Open Messages in the navigation " +
             "to see all your conversations and search through them.",
           "Messages are end-to-end encrypted and travel device to " +
             "device. Only you and the person you're writing to can " +

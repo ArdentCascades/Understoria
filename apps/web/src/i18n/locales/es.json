@@ -304,6 +304,7 @@
     "you": "Tú",
     "back": "← Atrás",
     "cancel": "Cancelar",
+    "close": "Cerrar",
     "save": "Guardar",
     "saving": "Guardando...",
     "savedAt": "Guardado {{when}}",
@@ -748,7 +749,7 @@
       "emptyPane": "Elige una conversación de la lista."
     },
     "emptyTitle": "Aún no hay conversaciones",
-    "empty": "Aun no hay mensajes. Inicia una conversacion desde cualquier publicacion o perfil.",
+    "empty": "Aún no hay mensajes. Las conversaciones empiezan desde una publicación — abre la publicación de alguien y toca Mensaje para escribir.",
     "sendMessage": "Mensaje",
     "messageButton": "Mensaje",
     "messageTarget": "Enviar mensaje a {{name}}",
