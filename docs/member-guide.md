@@ -263,6 +263,15 @@ Fill in:
 - **Urgency** — "When you can" is fine for most things. "Soon" and
   "Urgent" let the community know when timing matters.
 - **Expires in (days)** — optional. Leave blank if there's no deadline.
+- **Voice note** — optional. Tap **Add a voice note** to say it out
+  loud instead of (or as well as) typing — up to 45 seconds, with a
+  chance to listen back and re-record before it attaches. Your post
+  then shows a play button other members can tap. One thing to know:
+  board posts are community content, so the recording lives on the
+  community server and anyone in your community can listen — it is
+  *not* sealed the way voice notes in direct messages are. On a slow
+  connection the play button may briefly say the recording is still
+  on its way to the server.
 
 Tap **Post to the board**. Your need is live.
 
@@ -900,15 +909,39 @@ A few things worth knowing:
 - **No read receipts, no typing indicators, no online/offline
   status.** These are metadata leaks the project explicitly does
   not collect.
+- **Voice notes.** While the message box is empty, a microphone
+  button sits where Send will appear (start typing and it morphs
+  into Send). Tap it to record a voice note — up to 45 seconds,
+  with a listen-back before sending. Voice notes are sealed
+  end-to-end exactly like typed messages: only you and the other
+  person can hear them, never the community node. If a device
+  can't play a particular recording, it says so plainly instead
+  of failing silently.
+- **Press and hold a message** for the quick menu: an emoji row to
+  **react** (your reaction travels sealed, like a message — the
+  other person sees it under the bubble), plus **Copy**, **Speak**
+  (your device reads the message aloud with its own built-in voice
+  — nothing is sent anywhere), and **Info** (the exact send time
+  and a reminder that the message is sealed end to end). Voice
+  notes offer Info only.
+- **The thread reads like a familiar messenger.** Messages sent
+  close together by the same person group into one burst with a
+  single time under the last one, and "Today / Yesterday / date"
+  chips mark where days change. If something arrives while you're
+  scrolled up reading older messages, the thread doesn't yank you
+  down — a small "new messages ↓" chip appears, and tapping it (or
+  scrolling down yourself) takes you there.
 - **Search.** The search box at the top of the Messages tab finds
   messages you've already received. Tap a result to open the
-  conversation with the search term pre-filled — inside a thread,
-  use the up / down arrows next to the search box to jump between
-  matches. Each search result also shows the **conversation
-  context** — who the thread is with, with the matched substring
-  highlighted — so you can tell at a glance whether it's the
-  conversation you meant. Search is local to your device; it never
-  sees the community node and never sees anyone else's messages.
+  conversation with the search ready and the term pre-filled.
+  Inside a thread, search tucks behind the small magnifying-glass
+  button in the header — open it and use the up / down arrows to
+  jump between matches. Each search result also shows the
+  **conversation context** — who the thread is with, with the
+  matched substring highlighted — so you can tell at a glance
+  whether it's the conversation you meant. Search is local to your
+  device; it never sees the community node and never sees anyone
+  else's messages.
 - **Block / unblock from the conversation header.** The header of
   any conversation has a small **⋮** menu — that's where you
   reach Block or Unblock for the person you're talking with,

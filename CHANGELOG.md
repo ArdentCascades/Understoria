@@ -53,6 +53,20 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **Docs caught up with the code.** A documentation-accuracy sweep
+  across this cycle's features: the member guide now covers voice
+  notes on posts and in messages, emoji reactions, the long-press
+  menu (Copy / Speak / Info), the tucked in-thread search, and the
+  calmer thread layout; the organizer guide documents "Not done yet
+  — send it back"; the threat model and privacy policy state the
+  two voice postures plainly (message voice notes sealed end to end;
+  board recordings community-public on the node) and the privacy
+  policy's direct-messages section finally reflects the
+  store-and-forward relay (sealed envelopes, ~30-day retention,
+  metadata named) instead of the pre-relay "the node never stores
+  DMs" claim; `docs/operator-powers.md` drops the same stale
+  no-relay claim and now states that authenticated reads ship ON by
+  default; `docs/voice-board.md` is marked shipped.
 - **Chat no longer lurches while typing on iPhones.** With the
   keyboard open, the conversation screen kept scrolling on its own
   every couple of seconds. Two causes, both fixed: the thread's

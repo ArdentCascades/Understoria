@@ -14,10 +14,18 @@ of leaving them implied.
   a key that never leaves that member's device. The operator cannot
   create, alter, or re-attribute a record. Your app checks every
   signature itself and silently drops anything that doesn't verify.
-- **Read your direct messages.** Messages are end-to-end encrypted
-  — and today they never cross the node at all. They live only on
-  the device that holds them; there is no relay, so there isn't even
-  ciphertext for the operator to sit on.
+- **Read your direct messages.** Messages — typed or voice — are
+  end-to-end encrypted between your device and the other person's.
+  Delivery is a store-and-forward relay through the node
+  (`docs/message-relay.md`): the operator's disk holds the sealed
+  envelope until the recipient's device fetches it (bounded
+  retention, about a month), and can never open it — contents,
+  reactions, and the which-post-is-this-about reference all ride
+  inside the ciphertext. The honest cost of any relay, named in the
+  threat model: the operator *does* see who messaged whom, when, how
+  often, and envelope sizes. (Board posts are different and public
+  by design — a voice recording attached to a board post is
+  community content the operator can play like any member.)
 - **Read a device-link transfer — with one named exception.** When
   you add a device, your identity crosses the node sealed to the new
   device's key; the node holds ciphertext for minutes and hands it
@@ -57,11 +65,12 @@ The community's shared records — the board, events, project state,
 rosters — are readable by every member; that mutual visibility *is*
 the noticeboard. The operator, being a member, reads the same
 records. With authenticated reads enabled
-(`READ_AUTH=on` — it ships off by default, and the operator turns it
-on; `docs/member-authenticated-reads.md`), *non-members* cannot: an
+(`READ_AUTH=on` — the default since the secure-by-default change; an
+operator must explicitly opt out with `READ_AUTH=off` for dev/demo
+use; `docs/member-authenticated-reads.md`), *non-members* cannot: an
 outsider with the node's URL gets `401`, and membership is proven by
 the invite chain, not by an account the operator administers. On a
-node that hasn't enabled it, the feeds remain readable to anyone
+node that has opted out, the feeds remain readable to anyone
 holding the URL.
 
 There is deliberately no dashboard, leaderboard, or per-member

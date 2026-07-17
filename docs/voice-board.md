@@ -1,10 +1,11 @@
 # Voice board — audio posts by content address
 
 Voice workstream **V4** (issue #474), building on the voice-notes
-transport from #471/#472. A member can attach a recording to a board
-post: pick the category icon, record up to 45 seconds, review, post.
-Other members see a playable card. The typed path is untouched — text
-posts remain first-class, and a voice post can carry text too.
+transport from #471/#472. **Status: shipped** (2026-07; server schema
+v30). A member can attach a recording to a board post: pick the
+category icon, record up to 45 seconds, review, post. Other members
+see a playable card. The typed path is untouched — text posts remain
+first-class, and a voice post can carry text too.
 
 ## 1. Shape of a voice post
 

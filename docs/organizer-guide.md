@@ -402,6 +402,16 @@ once they've accepted).
   the same amount comes from your balance"* — so the cost to
   you, as the confirmer, is never surprising. This is the same
   shape as the post-confirmation dialog members already see.
+- **"Not done yet — send it back."** Beside Confirm there's a
+  second, quieter door for when the work genuinely isn't finished.
+  It requires a note — you have to say what still needs doing, and
+  that note posts as an ordinary comment on the task, visible to
+  everyone, before anything else happens. The task returns to
+  *claimed* with the same person still on it (it's a conversation,
+  not a rejection — nobody loses their task), no credit moves, and
+  the auto-confirmation clock stops until they mark it complete
+  again. Use it sparingly and kindly: most of the time a quick chat
+  outside the app resolves the gap before this button needs to.
 - **The activity feed is honest about releases.** When a member
   releases a task they'd claimed (including a task that was in
   *awaiting confirmation*), the activity entry says so plainly

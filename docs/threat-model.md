@@ -194,6 +194,23 @@ We are not trying to protect against:
   from two public keys) and message timestamps remain visible to
   anyone with device-level IndexedDB access. Messages are not
   recoverable if the member's secret key is lost.
+- **Voice content: IMPLEMENTED, two deliberately different postures**
+  (2026-07, voice workstreams V1–V4). *Voice notes in direct
+  messages* ride the same sealed envelopes as text (a v3 plaintext
+  envelope carrying the audio bytes, docs/message-relay.md §10) — the
+  node sees only the relay metadata stated above, though a voice
+  note's larger envelope size makes it distinguishable from a short
+  text message. *Voice posts on the board* are the opposite by
+  design: board content is community-public, so the recording is
+  stored unencrypted in the node's content-addressed blob store
+  (`audio_blobs`, docs/voice-board.md) where the operator — like any
+  member — can listen. A recording carries the member's actual voice,
+  a stronger and less deniable identifier than typed text; the
+  member-guide says this plainly at the point of posting. Audio blobs
+  are size-capped (400 KB), covered by the per-key insert caps, do
+  NOT federate to peer nodes (deferred to workstream V8, #478), and
+  board voice references are scrubbed by the same purge paths as the
+  posts that carry them.
 - **Metadata leakage via federation.** Broadcast of need/offer to peers
   reveals category, zone, timing. Mitigation: opt-in per post, zone is
   already coarsened to neighborhood, no precise location.
