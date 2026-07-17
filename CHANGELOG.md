@@ -53,6 +53,37 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **"Revisit the welcome" opens the welcome tour again.** The link in
+  Profile → Learn is there so members can re-read the intro (and its
+  beta notice) whenever they like, but on an onboarded device it just
+  flashed and bounced straight back to the board — the same guard
+  that rightly stops stale navigations from re-showing the tour was
+  also swallowing the deliberate visit. The link now announces itself,
+  and the guard lets it through; accidental returns to /welcome still
+  bounce as before.
+- **Claiming a post no longer tells you the other person claimed it.**
+  Right after you claimed someone's post, the status line said
+  "{{name}} has claimed this" — naming the poster as the claimer, as
+  if someone had beaten you to it. When you're the one who claimed,
+  it now says "You've claimed this. When the help is done, both of
+  you confirm — credit moves when both sides have confirmed." The
+  poster still sees their helper named, as before. English and
+  Spanish.
+- **Two bits of copy now tell the truth.** If you declined the
+  microphone permission, the dialog's close button showed a raw
+  computer string ("common.close") instead of the word Close — it
+  says Close (Cerrar) now. And the app no longer claims you can
+  start a conversation from a member's profile: there's deliberately
+  no message button there — conversations start from a post, and the
+  empty-messages screen and the FAQ now say so.
+- **Speak now shows its work.** Tapping Speak in a message's
+  long-press menu used to look like nothing happened — the device
+  started reading (or didn't), and the screen gave no clue either
+  way. The item now switches to "Stop speaking" while the message is
+  being read, tapping it again (or closing the menu, or leaving the
+  conversation) goes quiet, and on a device that can't speak at all
+  the item stays visible but says plainly that it can't — instead of
+  posing as a button that silently does nothing.
 - **Docs caught up with the code.** A documentation-accuracy sweep
   across this cycle's features: the member guide now covers voice
   notes on posts and in messages, emoji reactions, the long-press

@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
@@ -140,16 +140,24 @@ export default function WelcomePage() {
     communityNodeIds,
   } = useApp();
   const [stepIndex, setStepIndex] = useState(0);
+  const location = useLocation();
+
+  // `?revisit=1` marks a DELIBERATE re-open of the tour (the
+  // LearnSection "Revisit the welcome" link) — the one entry that must
+  // survive the onboarded guard below.
+  const revisit = new URLSearchParams(location.search).has("revisit");
 
   // An already-onboarded device has no business on the welcome flow —
-  // send it to the board. Belt for the post-link trap (PairDevice now
-  // refreshes the in-memory flag itself, but any stale navigation,
-  // back-button, or bookmark that lands here again must not show a
-  // finished member the fork/tour). Safe against the flow's own
-  // finish(): that navigates away in the same breath it refreshes.
+  // send it to the board — UNLESS it arrived with the explicit revisit
+  // flag. Belt for the post-link trap (PairDevice now refreshes the
+  // in-memory flag itself, but any stale navigation, back-button, or
+  // bookmark that lands here again must not show a finished member the
+  // fork/tour); those paths carry no `?revisit` and still bounce. Safe
+  // against the flow's own finish(): that navigates away in the same
+  // breath it refreshes.
   useEffect(() => {
-    if (onboarded) navigate("/", { replace: true });
-  }, [onboarded, navigate]);
+    if (onboarded && !revisit) navigate("/", { replace: true });
+  }, [onboarded, revisit, navigate]);
 
   // Auto-skip the install step when we're already running as an
   // installed app — offering "add to home screen" inside the installed

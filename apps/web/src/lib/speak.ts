@@ -30,23 +30,49 @@
  * API is missing, so callers layer speech ON TOP of a visual path
  * that must already work by itself.
  */
-export function speak(text: string, lang?: string): boolean {
+export function speak(
+  text: string,
+  lang?: string,
+  onDone?: () => void,
+): boolean {
+  // `onDone` fires exactly once, on BOTH `end` and `error` (and when
+  // synthesis is missing or throws) — a caller rendering a
+  // "speaking…" state must never get stuck in it just because the
+  // platform failed mid-utterance. Success and failure sound the
+  // same to the UI: speech is over, put the label back.
+  let notified = false;
+  const notify = () => {
+    if (notified) return;
+    notified = true;
+    onDone?.();
+  };
   try {
     if (
       typeof speechSynthesis === "undefined" ||
       typeof SpeechSynthesisUtterance === "undefined"
     ) {
+      notify();
       return false;
     }
     // One utterance at a time — a newer prompt replaces a stale one.
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     if (lang) utterance.lang = lang;
+    utterance.onend = notify;
+    utterance.onerror = notify;
     speechSynthesis.speak(utterance);
     return true;
   } catch {
+    notify();
     return false;
   }
+}
+
+/** Whether this device can speak at all — so a UI can SAY it can't
+ *  (a disabled control that explains itself) instead of offering a
+ *  button that silently does nothing. */
+export function isSpeechAvailable(): boolean {
+  return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
 /** Stop any in-flight speech (dialog closed, action taken). */

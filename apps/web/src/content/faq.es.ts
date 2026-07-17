@@ -556,9 +556,10 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Abre cualquier publicación y toca el botón Mensaje para " +
             "escribir — el mensaje va a quien publicó, o, si es tu propia " +
-            "publicación, a quien te está ayudando. También puedes " +
-            "empezar una conversación desde la página de una persona, o " +
-            "abrir Mensajes en la navegación para ver todas tus " +
+            "publicación, a quien te está ayudando. Las conversaciones " +
+            "empiezan deliberadamente desde una publicación — así los " +
+            "mensajes quedan ligados a la ayuda real y no al contacto en " +
+            "frío. Abre Mensajes en la navegación para ver todas tus " +
             "conversaciones y buscar dentro de ellas.",
           "Los mensajes están cifrados de extremo a extremo y viajan de " +
             "dispositivo a dispositivo. Solo tú y la persona a la que " +

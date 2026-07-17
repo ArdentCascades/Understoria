@@ -94,7 +94,10 @@ export function LearnSection() {
           {t("profile.learn.intro")}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Link to="/welcome" className="btn-secondary">
+          {/* `?revisit=1` tells Welcome this is a deliberate re-read:
+              without it, the page's onboarded guard bounces straight
+              back to the board. */}
+          <Link to="/welcome?revisit=1" className="btn-secondary">
             {t("profile.learn.revisitWelcome")}
           </Link>
           <Link to="/help" className="btn-secondary">

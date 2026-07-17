@@ -174,7 +174,15 @@ function narrativeLines({
   const isParty = viewerRole !== "third-party";
 
   if (status === "claimed") {
+    if (viewerRole === "claimer") {
+      // The viewer IS the claimer — naming the other party as the
+      // claimer here ("{{name}} has claimed this") would tell them
+      // someone beat them to it. Speak in second person instead.
+      return [t("postDetail.exchangeState.claimed.viewerClaimed")];
+    }
     if (isParty) {
+      // Viewer is the poster: their counterpart (the claimer) is the
+      // one who claimed it, so naming them is the true sentence.
       return [
         t("postDetail.exchangeState.claimed.party", {
           name: otherPartyName,

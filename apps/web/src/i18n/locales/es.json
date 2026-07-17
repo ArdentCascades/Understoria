@@ -304,6 +304,7 @@
     "you": "Tú",
     "back": "← Atrás",
     "cancel": "Cancelar",
+    "close": "Cerrar",
     "save": "Guardar",
     "saving": "Guardando...",
     "savedAt": "Guardado {{when}}",
@@ -748,7 +749,7 @@
       "emptyPane": "Elige una conversación de la lista."
     },
     "emptyTitle": "Aún no hay conversaciones",
-    "empty": "Aun no hay mensajes. Inicia una conversacion desde cualquier publicacion o perfil.",
+    "empty": "Aún no hay mensajes. Las conversaciones empiezan desde una publicación — abre la publicación de alguien y toca Mensaje para escribir.",
     "sendMessage": "Mensaje",
     "messageButton": "Mensaje",
     "messageTarget": "Enviar mensaje a {{name}}",
@@ -798,6 +799,8 @@
       "copy": "Copiar",
       "copied": "Copiado ✓",
       "speak": "Leer en voz alta",
+      "speakStop": "Dejar de leer",
+      "speakUnavailable": "Este dispositivo no puede leer mensajes en voz alta",
       "info": "Detalles",
       "infoSent": "Enviado {{when}}",
       "infoSealed": "Sellado de extremo a extremo — solo tú y {{name}} pueden leerlo."
@@ -1616,6 +1619,7 @@
     "exchangeState": {
       "claimed": {
         "party": "{{name}} tomó esto. Cuando la ayuda esté hecha, ambas personas confirman — el crédito se mueve cuando ambas partes han confirmado.",
+        "viewerClaimed": "Has tomado esto. Cuando la ayuda esté hecha, ambas personas confirman — el crédito se mueve cuando ambas partes han confirmado.",
         "thirdParty": "Esta publicación ya está tomada."
       },
       "awaitingConfirmation": {

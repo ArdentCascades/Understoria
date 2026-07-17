@@ -304,6 +304,7 @@
     "you": "You",
     "back": "← Back",
     "cancel": "Cancel",
+    "close": "Close",
     "save": "Save",
     "saving": "Saving...",
     "savedAt": "Saved {{when}}",
@@ -748,7 +749,7 @@
       "emptyPane": "Pick a conversation from the list."
     },
     "emptyTitle": "No conversations yet",
-    "empty": "No messages yet. Start a conversation from any post or member profile.",
+    "empty": "No messages yet. Conversations start from a post — open someone's post and tap Message to reach out.",
     "sendMessage": "Message",
     "messageButton": "Message",
     "messageTarget": "Message {{name}}",
@@ -798,6 +799,8 @@
       "copy": "Copy",
       "copied": "Copied ✓",
       "speak": "Speak",
+      "speakStop": "Stop speaking",
+      "speakUnavailable": "This device can't read messages aloud",
       "info": "Info",
       "infoSent": "Sent {{when}}",
       "infoSealed": "Sealed end to end — only you and {{name}} can read it."
@@ -1616,6 +1619,7 @@
     "exchangeState": {
       "claimed": {
         "party": "{{name}} has claimed this. When the help is done, both of you confirm — credit moves when both sides have confirmed.",
+        "viewerClaimed": "You've claimed this. When the help is done, both of you confirm — credit moves when both sides have confirmed.",
         "thirdParty": "This post is claimed."
       },
       "awaitingConfirmation": {

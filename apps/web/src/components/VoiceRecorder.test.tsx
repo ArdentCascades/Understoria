@@ -207,6 +207,9 @@ describe("VoiceRecorder", () => {
       "We could not use the microphone",
     );
     expect(recorderInstances).toHaveLength(0);
+    // The dismiss button must show translated text, not a raw i18n key.
+    expect(button("Close").textContent).toBe("Close");
+    expect(container.textContent).not.toContain("common.close");
   });
 
   it("cancel during recording releases the microphone and tells the caller", async () => {

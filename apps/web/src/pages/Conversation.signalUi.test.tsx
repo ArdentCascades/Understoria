@@ -51,8 +51,11 @@ vi.mock("@/lib/syncLoop", () => ({
   SYNC_KICK_EVENT: "understoria:sync-kick",
 }));
 vi.mock("@/lib/speak", () => ({
-  speak: vi.fn(),
+  // speak "succeeds" by default; tests reach the captured onDone via
+  // vi.mocked(speak).mock.calls to end an utterance on demand.
+  speak: vi.fn(() => true),
   stopSpeaking: vi.fn(),
+  isSpeechAvailable: vi.fn(() => true),
 }));
 
 import "@/i18n";
@@ -60,7 +63,7 @@ import ConversationPage, {
   GROUP_WINDOW_MS,
   NEAR_BOTTOM_PX,
 } from "./Conversation";
-import { speak } from "@/lib/speak";
+import { isSpeechAvailable, speak, stopSpeaking } from "@/lib/speak";
 import type { DecryptedMessage } from "@/db/messages";
 import type { Member } from "@/types";
 
@@ -113,6 +116,10 @@ let root: Root;
 beforeEach(() => {
   vi.useFakeTimers();
   mockMessages = [];
+  // clearAllMocks (afterEach) keeps implementations, so a test that
+  // flips availability off must not leak into its neighbors.
+  vi.mocked(isSpeechAvailable).mockReturnValue(true);
+  vi.mocked(speak).mockReturnValue(true);
   container = document.createElement("div");
   document.body.appendChild(container);
   if (typeof window.matchMedia !== "function") {
@@ -286,7 +293,61 @@ describe("the long-press menu actions", () => {
       menuButtonByText("Speak")!.click();
       await vi.advanceTimersByTimeAsync(0);
     });
-    expect(speak).toHaveBeenCalledWith("soup at six", "en");
+    expect(speak).toHaveBeenCalledWith(
+      "soup at six",
+      "en",
+      expect.any(Function),
+    );
+  });
+
+  it("Speak shows a speaking state and returns to Speak when the utterance ends", async () => {
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    // While speaking, the item reads "Stop speaking".
+    expect(menuButtonByText("Stop speaking")).not.toBeNull();
+    expect(menuButtonByText("Speak")).toBeNull();
+    // The utterance finishing (or erroring — same callback) puts the
+    // label back.
+    const onDone = vi.mocked(speak).mock.calls.at(-1)![2]!;
+    await act(async () => {
+      onDone();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(menuButtonByText("Stop speaking")).toBeNull();
+    expect(menuButtonByText("Speak")).not.toBeNull();
+  });
+
+  it("tapping Stop speaking cancels speech and restores the Speak label", async () => {
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    await act(async () => {
+      menuButtonByText("Stop speaking")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(stopSpeaking).toHaveBeenCalled();
+    expect(menuButtonByText("Stop speaking")).toBeNull();
+    expect(menuButtonByText("Speak")).not.toBeNull();
+  });
+
+  it("where the device can't speak, the item says so and is disabled", async () => {
+    vi.mocked(isSpeechAvailable).mockReturnValue(false);
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    const item = menuButtonByText("This device can't read messages aloud");
+    expect(item).not.toBeNull();
+    expect(item!.disabled).toBe(true);
+    expect(menuButtonByText("Speak")).toBeNull();
   });
 
   it("Info shows the sent time and the sealed note", async () => {
