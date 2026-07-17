@@ -63,10 +63,15 @@ export function VoiceRecorder({
   maxMs = MAX_CLIP_MS,
   onCapture,
   onCancel,
+  captureLabel,
 }: {
   maxMs?: number;
   onCapture: (clip: CapturedClip) => void | Promise<void>;
   onCancel: () => void;
+  /** Text for the review step's confirm button. Defaults to the
+   *  messages surface's "Send voice note"; the post form passes
+   *  "Attach to post" — capture means different things per surface. */
+  captureLabel?: string;
 }) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("requesting");
@@ -256,7 +261,7 @@ export function VoiceRecorder({
             >
               {sending
                 ? t("messages.sending")
-                : t("messages.voice.sendClip")}
+                : captureLabel ?? t("messages.voice.sendClip")}
             </button>
             <button
               type="button"

@@ -179,7 +179,13 @@ export interface OutboxRow {
     // kind exists because messages previously had NO transport at
     // all (written locally, never delivered — the dev demo's shared
     // database masked it).
-    | "message";
+    | "message"
+    // Voice board (#474): a signed AudioBlobUpload pushed to
+    // POST /audio-blobs — the recording a voice post's signed `audio`
+    // reference names by content address. Enqueued in the same
+    // transaction as its post so an offline voice post ships both
+    // halves when the device reconnects.
+    | "audio_blob";
   // Intentionally NOT a member of this union: "block". BlockRow and
   // PreviouslyBlockedRow are local-only personal-relief data per
   // docs/blocking.md §4 + §7; they never enter the outbox, never

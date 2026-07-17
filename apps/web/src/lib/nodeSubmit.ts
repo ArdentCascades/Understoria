@@ -28,6 +28,7 @@ import type {
   Vote,
 } from "@/types";
 import type {
+  AudioBlobUpload,
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
   CoOrganizerInvitationRevocation,
@@ -200,6 +201,22 @@ export async function submitPostToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/posts", post, config, deps);
+}
+
+/**
+ * Push a signed audio-blob upload (voice board, #474) to the node's
+ * content-addressed store (`POST /audio-blobs`). The node recomputes
+ * the content address from the bytes that arrive, so a mismatch is a
+ * permanent 422 (poison), while "already stored" answers 200 like
+ * every idempotent replay. Same best-effort semantics as the other
+ * submitters.
+ */
+export async function submitAudioBlobToNode(
+  upload: AudioBlobUpload,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/audio-blobs", upload, config, deps);
 }
 
 export async function submitClaimToNode(

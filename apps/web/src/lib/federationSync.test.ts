@@ -406,6 +406,73 @@ describe("pullFederatedPosts", () => {
     expect(await pullFederatedPosts()).toEqual({ inserted: 0, skipped: 1 });
     expect(await db.posts.where("id").equals("post_dup").count()).toBe(1);
   });
+
+  it("carries a voice post's signed audio reference through (#474)", async () => {
+    const audio = {
+      blobId: "ab".repeat(32),
+      mime: "audio/webm;codecs=opus",
+      durationMs: 12_000,
+    };
+    const poster = generateKeyPair();
+    const immutable = {
+      id: "post_voice",
+      type: "NEED" as const,
+      category: "other" as const,
+      title: "Voice ask",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low" as const,
+      postedBy: poster.publicKey,
+      createdAt: 1000,
+      expiresAt: null,
+      locationZone: "",
+      nodeId: "peer_node",
+      audio,
+    };
+    const wire = {
+      ...immutable,
+      signature: sign(canonicalPostPayload(immutable), poster.secretKey),
+    };
+    stubPostsResponse([wire]);
+    // Dropping the audio ref on ingest would fail verifyPost (the
+    // signature covers it) and skip every voice post — the insert
+    // below proves the pass-through.
+    expect(await pullFederatedPosts()).toEqual({ inserted: 1, skipped: 0 });
+    expect((await db.posts.get("post_voice"))?.audio).toEqual(audio);
+  });
+
+  it("rejects a voice post whose audio ref was tampered in transit", async () => {
+    const poster = generateKeyPair();
+    const immutable = {
+      id: "post_voice_tampered",
+      type: "NEED" as const,
+      category: "other" as const,
+      title: "Voice ask",
+      description: "",
+      estimatedHours: 1,
+      urgency: "low" as const,
+      postedBy: poster.publicKey,
+      createdAt: 1000,
+      expiresAt: null,
+      locationZone: "",
+      nodeId: "peer_node",
+      audio: {
+        blobId: "ab".repeat(32),
+        mime: "audio/webm;codecs=opus",
+        durationMs: 12_000,
+      },
+    };
+    const wire = {
+      ...immutable,
+      signature: sign(canonicalPostPayload(immutable), poster.secretKey),
+    };
+    // A compromised relay swaps which recording the post points at.
+    stubPostsResponse([
+      { ...wire, audio: { ...wire.audio, blobId: "cd".repeat(32) } },
+    ]);
+    expect(await pullFederatedPosts()).toEqual({ inserted: 0, skipped: 1 });
+    expect(await db.posts.get("post_voice_tampered")).toBeUndefined();
+  });
 });
 
 describe("pullFederatedClaims — cursor advances on every row", () => {

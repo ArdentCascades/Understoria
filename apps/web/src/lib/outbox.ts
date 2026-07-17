@@ -23,6 +23,7 @@ import { isDemoBuild } from "@/lib/demo";
 import { uuid } from "@/lib/id";
 import {
   readSubmitConfig,
+  submitAudioBlobToNode,
   submitClaimToNode,
   submitCoOrganizerInvitationResponseToNode,
   submitCoOrganizerInvitationRevocationToNode,
@@ -52,6 +53,7 @@ import {
   type SubmitResult,
 } from "@/lib/nodeSubmit";
 import type {
+  AudioBlobUpload,
   AwaitingTransition,
   ClaimRecord,
   CoOrganizerInvitation,
@@ -216,9 +218,30 @@ export async function enqueuePostOutbox(
     expiresAt: post.expiresAt,
     locationZone: post.locationZone,
     nodeId: post.nodeId,
+    // Voice board (#474): the signed audio reference rides the wire
+    // when present — canonicalPostPayload includes it, so stripping
+    // it here would 422 every voice post at the node. Spread keeps
+    // the key ABSENT on text posts (signature byte-compat).
+    ...(post.audio ? { audio: post.audio } : {}),
     signature: post.signature,
   };
   return enqueueOutbox("post", post.id, wire);
+}
+
+/**
+ * Insert an outbox row for a voice post's recording (voice board,
+ * #474): the signed AudioBlobUpload bound for POST /audio-blobs.
+ * Enqueued in the same transaction as the post it belongs to, BEFORE
+ * the post row, so a flush usually delivers the bytes first and the
+ * post's audio reference resolves immediately for other members.
+ * (Order is best-effort, not a contract — the node accepts a post
+ * whose blob hasn't arrived yet, and playback retries.) Dedup key is
+ * the content address: the same recording never queues twice.
+ */
+export async function enqueueAudioBlobOutbox(
+  upload: AudioBlobUpload,
+): Promise<OutboxRow | null> {
+  return enqueueOutbox("audio_blob", `audio_${upload.blobId}`, upload);
 }
 
 /**
@@ -776,6 +799,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "message") {
       result = await submitMessageToNode(
         payload as unknown as RelayedMessage,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "audio_blob") {
+      result = await submitAudioBlobToNode(
+        payload as unknown as AudioBlobUpload,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

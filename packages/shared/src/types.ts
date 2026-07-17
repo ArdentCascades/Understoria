@@ -99,6 +99,9 @@ export interface Post {
    *  which community a post came from. Posts created before Agent 3
    *  posts federation (schema < v7) get backfilled to the local node id. */
   nodeId: string;
+  /** Voice board (#474): attached recording reference — see
+   *  PostPayload.audio. Optional; text posts omit it. */
+  audio?: { blobId: string; mime: string; durationMs: number };
   /** Ed25519 signature over the canonical immutable payload (see
    *  `canonicalPostPayload` in `@understoria/shared/crypto`). Empty
    *  string for legacy posts created before this field existed; the
@@ -127,6 +130,13 @@ export interface PostPayload {
   expiresAt: number | null;
   locationZone: string;
   nodeId: string;
+  /** Voice board (#474): an attached recording, by reference. The
+   *  blobId is the content address (hash of the audio bytes) served
+   *  by the node's /audio-blobs store, so the SIGNED reference binds
+   *  the exact bytes — a relay can't swap the recording under the
+   *  signature. Absent on text posts; canonicalPostPayload includes
+   *  it only when present, keeping every pre-audio signature valid. */
+  audio?: { blobId: string; mime: string; durationMs: number };
 }
 
 export interface Exchange {
@@ -495,6 +505,37 @@ export interface InviteAnnouncementPayload {
 export interface InviteAnnouncement extends InviteAnnouncementPayload {
   /** Ed25519 detached signature by `inviterKey` over
    *  `canonicalInviteAnnouncementPayload(payload)`. */
+  signature: string;
+}
+
+/**
+ * Voice-board audio blob upload (#474) — the signed envelope a member's
+ * device POSTs to `/audio-blobs` before publishing a post that
+ * references the recording.
+ *
+ * The signature covers {blobId, uploaderKey, mime} only — NOT the
+ * base64 audio itself. That is deliberate: `blobId` is the content
+ * address (`audioBlobId(bytes)`), so the exact bytes are already bound
+ * transitively — the server recomputes the hash of what actually
+ * arrived and refuses a mismatch. Signing half a megabyte of base64
+ * again would buy nothing.
+ */
+export interface AudioBlobUploadPayload {
+  /** Content address of the audio bytes — `audioBlobId(bytes)`. */
+  blobId: string;
+  /** The uploading member's Ed25519 public key (the signer). */
+  uploaderKey: string;
+  /** Recorded container/codec, e.g. "audio/webm;codecs=opus" or
+   *  "audio/mp4" (iOS Safari records AAC). Allowlisted on the wire. */
+  mime: string;
+}
+
+export interface AudioBlobUpload extends AudioBlobUploadPayload {
+  /** The audio bytes, standard base64. Transport only — bound by
+   *  blobId, not by the signature (see the payload doc above). */
+  audio: string;
+  /** Ed25519 detached signature by `uploaderKey` over
+   *  `canonicalAudioBlobUploadPayload(payload)`. */
   signature: string;
 }
 

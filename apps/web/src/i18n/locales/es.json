@@ -1491,6 +1491,12 @@
     "expiresToday": "Expira hoy",
     "expired": "Expirada"
   },
+  "voicePost": {
+    "load": "Reproducir nota de voz ({{seconds}}s)",
+    "loading": "Obteniendo la grabación…",
+    "unavailable": "Esta grabación todavía no está disponible. Puede que aún esté en camino al servidor comunitario — inténtalo de nuevo en un momento.",
+    "retry": "Reintentar"
+  },
   "postForm": {
     "titleNeed": "Publicar una necesidad",
     "titleOffer": "Publicar una oferta",
@@ -1521,6 +1527,13 @@
     "matchingNeedsAside": {
       "title": "Necesidades activas en esta categoria",
       "seeAll": "Ver todas ({{count}})"
+    },
+    "voice": {
+      "field": "Nota de voz (opcional)",
+      "add": "Añadir una nota de voz",
+      "hint": "Dilo en voz alta en lugar de escribirlo — hasta 45 segundos. La gente verá un botón de reproducir en tu publicación. Escribir funciona igual que siempre.",
+      "attach": "Adjuntar a la publicación",
+      "remove": "Quitar la nota de voz"
     }
   },
   "postDetail": {

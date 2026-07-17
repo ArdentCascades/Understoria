@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Voice board** (voice workstream #474). Board posts can now carry a
+  recording: pick a category, tap "Add a voice note", record up to 45
+  seconds, review, post. Other members see a playable card on the
+  board and in the post panel — so someone who can't read or type can
+  still ask for and offer help by icon and voice. Typed posts work
+  exactly as before. Under the hood the recording is stored on the
+  community server by content address (a fingerprint of the exact
+  audio bytes) and the post's signature covers that fingerprint, so
+  nobody — not even the server — can swap the recording under a
+  post. Your device keeps only the tiny reference, never the audio,
+  so storage windowing and the emergency wipe stay simple: panic
+  drops the reference along with the post's words. The new server
+  surface is member-gated for reads and writes and counts against
+  the same anti-flood ceilings as everything else. Recordings don't
+  travel between communities yet (that's #478); a post from a peer
+  community shows "recording unavailable" until then. See
+  `docs/voice-board.md`.
 - **Read-aloud mode** (spoken interface #473, first slice). A new
   Settings card turns on read-aloud: the app then speaks the name of
   any button, link, or field you touch or focus, using the device's

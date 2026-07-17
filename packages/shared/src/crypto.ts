@@ -22,6 +22,8 @@ import nacl from "tweetnacl";
 import ed2curve from "ed2curve";
 import { b64decode, b64encode, utf8decode, utf8encode } from "./bytes.js";
 import type {
+  AudioBlobUpload,
+  AudioBlobUploadPayload,
   AwaitingTransition,
   ProjectCategory,
   AwaitingTransitionPayload,
@@ -336,6 +338,18 @@ export function canonicalPostPayload(p: PostPayload): string {
     expiresAt: p.expiresAt,
     locationZone: p.locationZone,
     nodeId: p.nodeId,
+    // Voice board (#474): audio joins the signature ONLY when
+    // present, so every pre-audio post serializes byte-identically
+    // and its existing signature keeps verifying.
+    ...(p.audio
+      ? {
+          audio: {
+            blobId: p.audio.blobId,
+            mime: p.audio.mime,
+            durationMs: p.audio.durationMs,
+          },
+        }
+      : {}),
   });
 }
 
@@ -359,6 +373,9 @@ export function verifyPost(post: Post): boolean {
     expiresAt: post.expiresAt,
     locationZone: post.locationZone,
     nodeId: post.nodeId,
+    // Voice board (#474): carried through only when present, matching
+    // the conditional inclusion in canonicalPostPayload.
+    ...(post.audio ? { audio: post.audio } : {}),
   });
   return verify(payload, post.signature, post.postedBy);
 }
@@ -538,6 +555,133 @@ export function parseInviteAnnouncement(
       createdAt: a.createdAt as number,
       expiresAt: a.expiresAt as number,
       signature: a.signature as string,
+    },
+  };
+}
+
+// -- Voice-board audio blobs (#474) ------------------------------------------
+
+/**
+ * Content address of an audio recording — the `blobId` a post's signed
+ * `audio` reference names and the primary key of the node's
+ * `/audio-blobs` store. SHA-512 (tweetnacl, the only hash in the
+ * dependency tree) over domain-separated input, truncated to 32 bytes
+ * and hex-encoded: 64 lowercase hex chars, safe in a URL path segment
+ * with no escaping. Truncated SHA-512 keeps full 256-bit collision
+ * resistance (SHA-512/256 construction), and hex avoids the `+`/`/`
+ * hazards of base64 in `GET /audio-blobs/:id`.
+ */
+export function audioBlobId(bytes: Uint8Array): string {
+  const prefix = utf8encode("understoria-audio-blob|");
+  const input = new Uint8Array(prefix.length + bytes.length);
+  input.set(prefix, 0);
+  input.set(bytes, prefix.length);
+  const hash = nacl.hash(input);
+  let hex = "";
+  for (let i = 0; i < 32; i++) hex += hash[i].toString(16).padStart(2, "0");
+  return hex;
+}
+
+/** Hard ceiling on stored audio bytes. A 45-second clip at the
+ *  recorder's 32 kbps target is ~180 KB; iOS Safari ignores the
+ *  bitrate hint and records AAC at its own rate, so give real
+ *  headroom. Anything larger is abuse, not a voice post. */
+export const AUDIO_BLOB_MAX_BYTES = 400 * 1024;
+
+/** Wire ceiling on a claimed durationMs. Metadata only (the byte
+ *  ceiling above is the real bound) — this just keeps a fabricated
+ *  duration from breaking playback UIs. Client recordings cap at 45 s. */
+export const AUDIO_MAX_DURATION_MS = 10 * 60 * 1000;
+
+/** Base MIME types a node will store. Everything MediaRecorder
+ *  produces across the supported browsers (Opus/WebM on Chromium +
+ *  Firefox, AAC/MP4 on iOS Safari) plus the common fallbacks. */
+const ALLOWED_AUDIO_MIME_BASES: ReadonlySet<string> = new Set([
+  "audio/webm",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/ogg",
+  "audio/aac",
+]);
+
+/** True when `mime` (optionally carrying `;codecs=...` parameters) has
+ *  an allowlisted base type. Shared so the server refusal and any
+ *  client pre-check agree exactly. */
+export function isAllowedAudioMime(mime: string): boolean {
+  if (mime.length > 64) return false;
+  const base = mime.split(";")[0].trim().toLowerCase();
+  return ALLOWED_AUDIO_MIME_BASES.has(base);
+}
+
+/** Canonical serialization of an audio-blob upload — the bytes the
+ *  uploader signs. The base64 audio is NOT part of the payload: the
+ *  blobId content address already binds the exact bytes (the server
+ *  recomputes and compares), so signing it again would only bloat the
+ *  signing input. Fixed field order, as everywhere. */
+export function canonicalAudioBlobUploadPayload(
+  p: AudioBlobUploadPayload,
+): string {
+  return JSON.stringify({
+    blobId: p.blobId,
+    uploaderKey: p.uploaderKey,
+    mime: p.mime,
+  });
+}
+
+export function verifyAudioBlobUpload(u: AudioBlobUpload): boolean {
+  if (!u.signature) return false;
+  return verify(
+    canonicalAudioBlobUploadPayload(u),
+    u.signature,
+    u.uploaderKey,
+  );
+}
+
+export type ParseAudioBlobUploadResult =
+  | { ok: true; value: AudioBlobUpload }
+  | { ok: false; error: string };
+
+/** Shape-level validation for an audio-blob upload — shared so the
+ *  server route and any client gate check identically. Cryptographic
+ *  checks (signature, content-address recomputation) stay separate. */
+export function parseAudioBlobUpload(
+  input: unknown,
+): ParseAudioBlobUploadResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const u = input as Record<string, unknown>;
+  for (const f of [
+    "blobId",
+    "uploaderKey",
+    "mime",
+    "audio",
+    "signature",
+  ] as const) {
+    if (typeof u[f] !== "string" || (u[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (!/^[0-9a-f]{64}$/.test(u.blobId as string)) {
+    return { ok: false, error: "blobId must be 64 lowercase hex chars" };
+  }
+  if (!isAllowedAudioMime(u.mime as string)) {
+    return { ok: false, error: "mime is not an allowed audio type" };
+  }
+  // Base64 expands 3 bytes → 4 chars; anything longer than the
+  // ceiling's encoding (plus padding slack) cannot decode small enough.
+  const maxB64 = Math.ceil(AUDIO_BLOB_MAX_BYTES / 3) * 4 + 4;
+  if ((u.audio as string).length > maxB64) {
+    return { ok: false, error: "audio exceeds the size ceiling" };
+  }
+  return {
+    ok: true,
+    value: {
+      blobId: u.blobId as string,
+      uploaderKey: u.uploaderKey as string,
+      mime: u.mime as string,
+      audio: u.audio as string,
+      signature: u.signature as string,
     },
   };
 }

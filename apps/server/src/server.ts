@@ -25,6 +25,7 @@ import rateLimit from "@fastify/rate-limit";
 import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { Config } from "./config.js";
 import {
+  createAudioBlobStore,
   createAwaitingTransitionStore,
   createDeviceLinkStore,
   createEventRsvpStateStore,
@@ -63,6 +64,7 @@ import { registerConfigRoutes } from "./routes/config.js";
 import { registerClaimFounderRoutes } from "./routes/claimFounder.js";
 import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
+import { registerAudioBlobRoutes } from "./routes/audioBlobs.js";
 import { registerClaimRoutes } from "./routes/claims.js";
 import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
@@ -259,6 +261,7 @@ export async function buildServer({
   const voteStore = createVoteStore(db);
   const proposalClosureStore = createProposalClosureStore(db);
   const messageStore = createMessageStore(db);
+  const audioBlobStore = createAudioBlobStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -437,6 +440,10 @@ export async function buildServer({
     retentionDays: config.messageRetentionDays,
   });
   await registerPostRoutes(app, { store: postStore });
+  // Voice-board audio blobs (#474): the content-addressed store the
+  // posts' signed `audio` references point at. PWA↔node only — blobs
+  // don't ride the peer-pull legs until V8 (#478).
+  await registerAudioBlobRoutes(app, { store: audioBlobStore });
   // NOTE: no invite routes. `POST/GET /invites` was removed in the
   // invite-redemption Phase 1 PR — the GET served full SignedInvite
   // rows (a live-credential feed, `docs/invite-redemption.md` §10.1).

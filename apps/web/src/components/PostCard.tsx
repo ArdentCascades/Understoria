@@ -24,6 +24,7 @@ import type { AvailabilityChip, Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import { stripMarkdown } from "@/lib/markdown";
 import type { TrustStatus } from "@/lib/vouch";
+import { AudioPostPlayer } from "./AudioPostPlayer";
 import { AvailabilityChips } from "./AvailabilityChips";
 import { CategoryBadge } from "./CategoryBadge";
 import { HighlightedText } from "./HighlightedText";
@@ -66,10 +67,15 @@ export function PostCard({
   // card was pure chrome. If PostCard ever gains a mixed-type
   // context (cross-type search results, profile history), reintroduce
   // the label behind a `showTypeLabel` prop defaulting to false.
+  // Voice posts (#474): the player renders as a SIBLING of the Link,
+  // not inside it — interactive content nested in an anchor is
+  // invalid HTML and ambiguous to screen readers. The card div keeps
+  // the visual frame; the whole text area stays one tap target.
   return (
+    <div className="card animate-fade-in transition-shadow hover:shadow-md">
     <Link
       to={{ pathname: `/post/${post.id}`, search }}
-      className="card block animate-fade-in transition-shadow hover:shadow-md
+      className="block rounded-lg
                  focus-visible:ring-2 focus-visible:ring-canopy-600/50"
     >
       <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -123,6 +129,12 @@ export function PostCard({
         </div>
       </div>
     </Link>
+    {post.audio && (
+      <div className="mt-2">
+        <AudioPostPlayer audio={post.audio} />
+      </div>
+    )}
+    </div>
   );
 }
 
