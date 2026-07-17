@@ -291,6 +291,7 @@
     "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you.",
     "autoConfirmed": "Auto-confirmed after {{hours}}h. Credit flowed.",
     "claimedInMyCare": "You'll find this under In my care.",
+    "icsDaySaved": "Saved {{file}} — open it to put this day on your phone's calendar.",
     "icsSaved": "Saved {{file}} — open it to add this event to your phone's calendar.",
     "icsShiftSaved": "Saved {{file}} — open it to add this shift to your phone's calendar."
   },

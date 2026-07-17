@@ -291,6 +291,7 @@
     "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes.",
     "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron.",
     "claimedInMyCare": "Lo encontrarás en A mi cuidado.",
+    "icsDaySaved": "Se guardó {{file}} — ábrelo para poner este día en el calendario de tu teléfono.",
     "icsSaved": "Se guardó {{file}} — ábrelo para añadir este evento al calendario de tu teléfono.",
     "icsShiftSaved": "Se guardó {{file}} — ábrelo para añadir este turno al calendario de tu teléfono."
   },

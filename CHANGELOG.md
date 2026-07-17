@@ -69,10 +69,11 @@ include breaking changes.
   offer) lands you on the board tab where your new post lives, so you
   see it appear instead of hunting for it; claiming a post tells you
   where it went ("You'll find this under In my care" / "Lo
-  encontrarás en A mi cuidado"); and "Add to calendar" — for a whole
-  event or a single shift — names the file it just saved and says to
-  open it to add the event to your phone's calendar, instead of
-  downloading in silence. English and Spanish.
+  encontrarás en A mi cuidado"); and every "Add to calendar" — a
+  whole event, a single shift (on the event page and in In my care),
+  or a task's planned day — names the file it just saved and says to
+  open it to add it to your phone's calendar, instead of downloading
+  in silence. English and Spanish.
 - **The copy now tells the truth about pending things.** Three small
   honesty fixes in one sweep: the RSVP and shift-signup toasts now say
   your community will see your answer once the device syncs (instead of
