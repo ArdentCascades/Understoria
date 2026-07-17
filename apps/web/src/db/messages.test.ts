@@ -20,6 +20,7 @@ import {
   searchAllMessages,
   sendMessage,
   sendReaction,
+  sendVoiceMessage,
 } from "./messages";
 import type { DirectMessage } from "@/types";
 
@@ -248,5 +249,53 @@ describe("reactions", () => {
     await sendReaction(bob.publicKey, alice.publicKey, target.id, "❤️");
     const hits = await searchAllMessages(alice.publicKey, "❤️");
     expect(hits).toHaveLength(0);
+  });
+});
+
+// Voice notes (docs/message-relay.md §10): sealed v3 envelopes.
+describe("voice messages", () => {
+  const CLIP = { base64: "QUJDREVGRw==", mime: "audio/mp4", durationMs: 4200 };
+
+  it("sends sealed — the stored row and wire payload carry no audio markers", async () => {
+    await setSetting("communityNodeUrl", "https://node.test");
+    await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
+    const [row] = await db.messages.toArray();
+    expect(row.ciphertext).not.toContain(CLIP.base64);
+    const [outboxRow] = await db.outbox.toArray();
+    expect(outboxRow.kind).toBe("message");
+    expect(outboxRow.payload).not.toContain(CLIP.base64);
+    expect(outboxRow.payload).not.toContain("audio/mp4");
+    expect(outboxRow.payload).not.toContain("voice");
+    const envelope = JSON.parse(outboxRow.payload) as RelayedMessage;
+    expect(verifyRelayedMessage(envelope)).toBe(true);
+  });
+
+  it("the recipient decrypts and gets the clip; the thread row carries voice, not text", async () => {
+    await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
+    const [msg] = await getConversation(bob.publicKey, alice.publicKey);
+    expect(msg.voice).toEqual({
+      mime: "audio/mp4",
+      durationMs: 4200,
+      audio: CLIP.base64,
+    });
+    // plaintext is the old-client fallback line — display code renders
+    // the player instead.
+    expect(msg.plaintext).toContain("Voice message");
+  });
+
+  it("voice rows never surface in message search", async () => {
+    await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
+    const hits = await searchAllMessages(alice.publicKey, "Voice message");
+    expect(hits).toHaveLength(0);
+  });
+
+  it("reactions attach to voice messages like any other message", async () => {
+    const sent = await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
+    await sendReaction(bob.publicKey, alice.publicKey, sent.id, "🙏");
+    const [msg] = await getConversation(alice.publicKey, bob.publicKey);
+    expect(msg.voice).toBeDefined();
+    expect(msg.reactions).toEqual([
+      { senderKey: bob.publicKey, emoji: "🙏" },
+    ]);
   });
 });

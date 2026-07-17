@@ -298,3 +298,33 @@ describe("GET /messages — the recipient-scoped inbox", () => {
     expect(body.messages.map((m) => m.id)).toEqual(["msg_b"]);
   });
 });
+
+// Voice notes (docs/message-relay.md §10) ride inside the sealed
+// envelope, so a 45s clip arrives as ~300 KB of ciphertext — over
+// the server-wide 64 KB bodyLimit. The route carries a per-route
+// override; this locks it.
+describe("POST /messages — voice-sized envelopes", () => {
+  it("accepts a ~300 KB ciphertext envelope (the 45s voice-note case)", async () => {
+    const big = envelope(sender, recipient.publicKey, {
+      ciphertext: "A".repeat(300 * 1024),
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/messages",
+      payload: big,
+    });
+    expect(res.statusCode).toBe(201);
+  });
+
+  it("still refuses an envelope beyond the per-route limit (413)", async () => {
+    const huge = envelope(sender, recipient.publicKey, {
+      ciphertext: "A".repeat(700 * 1024),
+    });
+    const res = await app.inject({
+      method: "POST",
+      url: "/messages",
+      payload: huge,
+    });
+    expect(res.statusCode).toBe(413);
+  });
+});

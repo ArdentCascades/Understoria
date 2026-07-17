@@ -61,7 +61,12 @@ export async function registerMessageRoutes(
   const now = deps.now ?? Date.now;
   const retentionMs = deps.retentionDays * 24 * 60 * 60 * 1000;
 
-  app.post("/messages", async (req, reply) => {
+  // Voice notes (message-relay.md §10) ride INSIDE the sealed
+  // envelope, so a 45s clip lands here as ~300 KB of ciphertext —
+  // over the server-wide 64 KB bodyLimit. Same per-route override
+  // pattern as /device-link: bounded, no new surface, and the
+  // retention sweep below keeps the shelf from accumulating.
+  app.post("/messages", { bodyLimit: 640 * 1024 }, async (req, reply) => {
     const parsed = parseRelayedMessage(req.body);
     if (!parsed.ok) {
       reply.code(400);

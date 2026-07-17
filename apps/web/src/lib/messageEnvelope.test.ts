@@ -9,6 +9,8 @@ import {
   decodeMessageBody,
   encodeMessageBody,
   encodeReactionBody,
+  encodeVoiceBody,
+  VOICE_FALLBACK_TEXT,
 } from "./messageEnvelope";
 
 describe("encodeMessageBody", () => {
@@ -114,5 +116,53 @@ describe("reaction envelopes (v2)", () => {
       }),
     );
     expect(numericEmoji.reaction).toBeUndefined();
+  });
+});
+
+// Voice notes ride as v3 envelopes (docs/message-relay.md §10):
+// the recording itself, base64, inside the sealed plaintext.
+describe("voice envelopes (v3)", () => {
+  it("round-trips a voice body", () => {
+    const body = decodeMessageBody(
+      encodeVoiceBody("QUJD", "audio/webm;codecs=opus", 12_000),
+    );
+    expect(body.voice).toEqual({
+      mime: "audio/webm;codecs=opus",
+      durationMs: 12_000,
+      audio: "QUJD",
+    });
+    // Old clients (v>1 fallback) show the human fallback line.
+    expect(body.text).toBe(VOICE_FALLBACK_TEXT);
+  });
+
+  it("rejects malformed voice fields but keeps the text", () => {
+    const noAudio = decodeMessageBody(
+      JSON.stringify({ v: 3, kind: "voice", text: "t", mime: "audio/mp4" }),
+    );
+    expect(noAudio.voice).toBeUndefined();
+    expect(noAudio.text).toBe("t");
+    const emptyMime = decodeMessageBody(
+      JSON.stringify({
+        v: 3,
+        kind: "voice",
+        text: "t",
+        mime: "",
+        audio: "QUJD",
+      }),
+    );
+    expect(emptyMime.voice).toBeUndefined();
+  });
+
+  it("defaults a missing duration to 0 rather than dropping the clip", () => {
+    const body = decodeMessageBody(
+      JSON.stringify({
+        v: 3,
+        kind: "voice",
+        text: "t",
+        mime: "audio/mp4",
+        audio: "QUJD",
+      }),
+    );
+    expect(body.voice).toEqual({ mime: "audio/mp4", durationMs: 0, audio: "QUJD" });
   });
 });

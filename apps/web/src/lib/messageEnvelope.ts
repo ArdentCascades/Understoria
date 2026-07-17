@@ -71,7 +71,16 @@ export interface MessageBody {
    *  rather than a chat message (v2 envelope, kind "reaction").
    *  `emoji: ""` means "clear my reaction". */
   reaction?: { reactsTo: string; emoji: string };
+  /** Present when this body is a VOICE NOTE (v3 envelope, kind
+   *  "voice"): the recording itself, base64, riding inside the
+   *  encrypted payload — the server relays ciphertext and never
+   *  learns a message carried audio at all. */
+  voice?: { mime: string; durationMs: number; audio: string };
 }
+
+/** What a pre-voice client shows for a voice note (the v>1 decode
+ *  fallback renders `text`). Deliberately bilingual-ish and short. */
+export const VOICE_FALLBACK_TEXT = "🎙️ Voice message — update the app to listen.";
 
 /**
  * Encode a message body for encryption. Bare string when there is no
@@ -105,6 +114,30 @@ export function encodeReactionBody(reactsTo: string, emoji: string): string {
     text: emoji || "✕",
     reactsTo,
     emoji,
+  });
+}
+
+/**
+ * Encode a voice note (v3 envelope, kind "voice"). The audio bytes
+ * travel base64 INSIDE the plaintext that gets sealed — same posture
+ * as aboutPostId: the ciphertext hides not just the recording but
+ * the fact that any recording exists. A 45s Opus/AAC clip is
+ * ~100–180 KB raw (~240 KB as an envelope), well inside the relay's
+ * per-route body limit. Old clients degrade to VOICE_FALLBACK_TEXT
+ * via the v>1 decode fallback.
+ */
+export function encodeVoiceBody(
+  audioBase64: string,
+  mime: string,
+  durationMs: number,
+): string {
+  return JSON.stringify({
+    v: 3,
+    kind: "voice",
+    text: VOICE_FALLBACK_TEXT,
+    mime,
+    durationMs,
+    audio: audioBase64,
   });
 }
 
@@ -146,6 +179,20 @@ export function decodeMessageBody(plain: string): MessageBody {
     typeof obj.emoji === "string"
   ) {
     body.reaction = { reactsTo: obj.reactsTo, emoji: obj.emoji };
+  }
+  // v3 voice envelope — same shape discipline.
+  if (
+    obj.kind === "voice" &&
+    typeof obj.audio === "string" &&
+    obj.audio !== "" &&
+    typeof obj.mime === "string" &&
+    obj.mime !== ""
+  ) {
+    body.voice = {
+      mime: obj.mime,
+      durationMs: typeof obj.durationMs === "number" ? obj.durationMs : 0,
+      audio: obj.audio,
+    };
   }
   return body;
 }
