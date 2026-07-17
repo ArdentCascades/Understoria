@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BackLink } from "@/components/BackLink";
 import { LanguageSection } from "@/components/LanguageSection";
+import { ReadAloudSection } from "@/components/ReadAloudSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
 import { NodeSection } from "@/components/NodeSection";
 import { ReseedSection } from "@/components/ReseedSection";
@@ -76,6 +77,7 @@ export default function SettingsPage() {
 
       <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
         <LanguageSection />
+        <ReadAloudSection />
 
         <AppearanceSection />
 

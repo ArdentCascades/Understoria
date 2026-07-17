@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Read-aloud mode** (spoken interface #473, first slice). A new
+  Settings card turns on read-aloud: the app then speaks the name of
+  any button, link, or field you touch or focus, using the device's
+  own built-in voice in the app's language — on-device only, nothing
+  sent anywhere, and the visual interface is unchanged. The toggle
+  itself speaks its new state, so a non-reader can operate it. Pairs
+  with the category icon set that already labels every board
+  category with a picture.
 - **Purge-coverage guard + spoken panic confirmation** (voice
   workstream #476). Every local data table now has an explicit,
   build-enforced answer to "what does the emergency wipe do with

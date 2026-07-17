@@ -2788,6 +2788,15 @@
       "completedHard": "Hard purge complete in {{ms}}ms.",
       "spokenSoft": "Warning. This will erase names and personal text from this device. It cannot be undone. Press the confirm button to continue, or cancel.",
       "spokenHard": "Warning. This will erase everything on this device, including your keys, and cannot be undone. Press the confirm button to continue, or cancel."
+    },
+    "readAloud": {
+      "title": "Read aloud",
+      "intro": "When this is on, the app speaks the name of any button or field you touch or focus, using your device's own built-in voice — nothing is sent anywhere. Helpful if reading on a screen is hard.",
+      "turnOn": "Turn read-aloud on",
+      "turnOff": "Turn read-aloud off",
+      "spokenOn": "Read aloud is now on. Touch any button to hear its name.",
+      "spokenOff": "Read aloud is now off.",
+      "unsupported": "This device's browser does not offer built-in speech, so read-aloud is not available here."
     }
   },
   "help": {
