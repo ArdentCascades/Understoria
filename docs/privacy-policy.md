@@ -88,7 +88,8 @@ deliberate exception). The record types are:
 
 | Action | Record | Visible fields |
 |---|---|---|
-| Post a NEED or OFFER | `Post` | Your public key, title, description, category, hours estimate, urgency, post time, your location zone |
+| Post a NEED or OFFER | `Post` | Your public key, title, description, category, hours estimate, urgency, post time, your location zone. If you attach a voice note, the recording itself is stored on the node too (`audio_blobs`) — board posts are community content, so anyone in your community, including the operator, can play it |
+| Send a direct message — text, voice note, or emoji reaction | `RelayedMessage` | The sealed envelope only: sender and recipient public keys, send time, envelope size, your signature. The node holds it until your correspondent's devices fetch it (bounded retention, about a month, then pruned). Everything inside — the text, the audio, the emoji, the which-post-is-this-about reference — is ciphertext the node cannot open. See §7 |
 | Confirm an exchange | `Exchange` | Both members' public keys, hours, category, completion time, signatures |
 | Vouch for another member | `Vouch` | Your public key, their public key, timestamp |
 | Claim a post | `Claim` | Your public key, the post id, claim time. **Unsigned, by design** — a claim is a lightweight heads-up, not an authoritative record. No credit moves on a claim; the exchange it leads to (signed by both parties) is the source of truth |
@@ -269,12 +270,20 @@ they have read.
 
 ## 7. Direct messages
 
-Direct messages are encrypted end-to-end on your device with a key
-derived from the recipient's Ed25519 identity (via `ed2curve`). The
-encrypted ciphertext is stored only on your device and your
-correspondent's device. The community node does not relay or store
-DMs. If you lose your device or run a hard purge (§9), your DM
-history is gone — there is no backup.
+Direct messages — typed text, voice notes, and emoji reactions —
+are encrypted end-to-end on your device with a key derived from the
+recipient's Ed25519 identity (via `ed2curve`). Delivery is a
+store-and-forward relay through your community node
+(`docs/message-relay.md`): the node holds the sealed envelope until
+your correspondent's devices fetch it, for a bounded retention
+window (about a month, operator-tunable), then prunes it. The node
+can never open an envelope — contents stay between the two of you.
+Stated plainly, the metadata the node's disk does see: who messaged
+whom, when, how often, and envelope sizes. Envelopes never
+replicate to mirrors and never cross to peer communities. If you
+lose your device or run a hard purge (§9), your DM history is gone
+— there is no backup, and the node's transient envelope store is
+not one.
 
 ## 8. Disputes, moderation, and governance records
 

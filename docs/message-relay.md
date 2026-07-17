@@ -252,6 +252,9 @@ message carried audio at all — §6 unchanged. Consequences:
 - **Search/preview:** voice rows never match message search; the
   conversations list previews them as the fallback line.
 
-Deliberately NOT here (deferred to the voice tracking issue #479):
-content-addressed blob storage and fetch-by-reference (V8), board
-audio (V4), transcription (V7).
+Deliberately NOT here: board audio (V4) shipped separately and does
+not touch the relay — a board recording lives unencrypted in the
+node's content-addressed blob store, because board posts are
+community-public (docs/voice-board.md). Still deferred on the voice
+tracking issue #479: fetch-by-reference for *message* audio and
+federated blobs (V8), and transcription (V7).
