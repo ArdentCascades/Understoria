@@ -2432,7 +2432,14 @@
     "title": "Ajustes",
     "intro": "Cómo se comporta Understoria en este dispositivo. Los cambios aquí solo afectan a este dispositivo — no se sincronizan con la comunidad.",
     "back": "← Volver al perfil",
+    "betaLine": "Understoria es software en fase beta — gran parte de su código fue escrito con herramientas de IA y revisado por personas, y aún no tiene una auditoría de seguridad independiente. Por favor no guardes datos sensibles aquí. La nota completa está en Ayuda.",
     "buildStamp": "Compilación {{stamp}}"
+  },
+  "betaNotice": {
+    "dismiss": "Entendido",
+    "title": "Conoce lo que estás usando",
+    "body1": "Understoria es software en fase beta. Gran parte de su código fue escrito con herramientas de IA y revisado por personas, y todavía no ha pasado una auditoría de seguridad independiente. Las protecciones que verás — mensajes cifrados de extremo a extremo, el borrado de emergencia, registros firmados — son reales y están probadas, pero beta significa que puede haber errores, incluidos algunos que aún no hemos encontrado.",
+    "body2": "Está hecha para coordinar la ayuda vecinal de cada día. Por favor no pongas nada que pudiera hacerte daño a ti o a otra persona si se filtrara — documentos de identidad, detalles médicos o migratorios, ni nada que solo dirías fuera de registro. Ante la duda, dilo en persona."
   },
   "pilotJournal": {
     "title": "Diario del piloto",

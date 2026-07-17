@@ -1256,6 +1256,13 @@ export const SETTING_KEYS = {
    *  row of either kind); this flag only matters for members who never
    *  pair a second device and want the reassurance gone permanently. */
   keepAccessNudgeDismissed: "keepAccessNudgeDismissed",
+  /** "1" once the member has dismissed the beta/AI disclosure card
+   *  (BetaNotice.tsx). One device-wide flag for every door the card
+   *  appears on — welcome tour, invite acceptance, node setup;
+   *  dismissing it anywhere clears it everywhere. Permanent: the
+   *  always-findable copies live in Help (FAQ "beta-status") and
+   *  Settings. */
+  betaNoticeDismissed: "betaNoticeDismissed",
   /** "1" once the member has dismissed the "Add to home screen"
    *  install card on Board (or once the app reports itself installed,
    *  which writes the same flag). The card self-retires when the PWA

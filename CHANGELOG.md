@@ -9,6 +9,22 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **A beta / AI disclosure, said plainly at every door.** The app now
+  tells people what they're using before they use it: Understoria is
+  beta software, much of its code was written with AI tools and
+  reviewed by people, there's been no independent security audit yet,
+  and nothing that would hurt anyone if leaked belongs in it. The
+  amber notice card appears on the three entry doors — the welcome
+  tour's first screen, the invite-acceptance page, and the founder's
+  node-setup screen — and permanent copies live in Help (FAQ, "How
+  finished is this app?"), in Settings next to the build stamp, in
+  the README's new "Project Status" section, and on the showcase
+  site. Non-blocking, and dismissible with one tap ("Got it") —
+  dismissing it on any door hides it on all of them, permanently,
+  on that device. There's still no forced "I understand" gate: it's
+  a disclosure, not a consent ceremony. English and Spanish.
+
 ### Changed
 - **Composer and scrolling polish in conversations** (round two of
   the Signal-informed messaging work). The message box grows as you

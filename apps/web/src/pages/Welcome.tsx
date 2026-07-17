@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
+import { BetaNotice } from "@/components/BetaNotice";
 import { InstallGuide } from "@/components/InstallGuide";
 import type { ConceptIllustrationName } from "@/components/visual";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
@@ -327,7 +328,9 @@ export default function WelcomePage() {
     // for members who landed here because they want to bring an
     // existing identity onto this device — the design doc §7.1
     // "third path." Members who are genuinely new will scroll past
-    // without engaging.
+    // without engaging. The beta/AI disclosure also lives here: the
+    // first screen a brand-new person reads is the honest place to
+    // say what this software is before they put anything into it.
     const bodyWithPairLink =
       stepIndex === 0 ? (
         <>
@@ -349,6 +352,7 @@ export default function WelcomePage() {
               {t("welcome.recoveryKitLink")}
             </button>
           </div>
+          <BetaNotice className="mt-4" />
         </>
       ) : (
         <>

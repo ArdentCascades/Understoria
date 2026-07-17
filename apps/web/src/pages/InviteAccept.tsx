@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { BetaNotice } from "@/components/BetaNotice";
 import { decodeAndVerifyInvite, extractInviteToken } from "@/lib/invite";
 import { redeemInvite, type RedeemError } from "@/db/invites";
 import { db } from "@/db/database";
@@ -480,6 +481,11 @@ export default function InviteAcceptPage() {
           </form>
         )}
       </div>
+      {/* The beta/AI disclosure — an invite link is most members'
+          very first contact with Understoria, so the honest word
+          about what this software is belongs on this doorstep,
+          before the join decision, not after it. */}
+      <BetaNotice className="mt-4" />
     </div>
   );
 }

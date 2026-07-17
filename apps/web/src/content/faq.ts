@@ -500,6 +500,24 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "Messages for the details.",
         ],
       },
+      {
+        id: "beta-status",
+        question: "How finished is this app? What should I not put in it?",
+        answer: [
+          "Understoria is beta software. Much of its code was " +
+            "written with AI tools and reviewed by people, and it " +
+            "has not yet had an independent security audit.",
+          "The protections you see are real and tested — messages " +
+            "are end-to-end encrypted, records are signed, the " +
+            "emergency wipe works. But beta means bugs are possible, " +
+            "including ones nobody has found yet.",
+          "It's built for coordinating everyday neighborly help. " +
+            "Don't put anything in it that would hurt you or someone " +
+            "else if it leaked — government IDs, medical or " +
+            "immigration details, or anything you'd only say off the " +
+            "record. When in doubt, say it in person.",
+        ],
+      },
     ],
   },
   {

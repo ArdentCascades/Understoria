@@ -125,6 +125,14 @@ export default function SettingsPage() {
           <StorageWindowSection />
         </section>
 
+        {/* The permanent beta/AI disclosure — the always-findable
+            copy of the entry-door BetaNotice card (the other lives
+            in Help, FAQ "beta-status"). Quiet by design; it belongs
+            with the build stamp because both answer "what code am I
+            actually running?" */}
+        <p className="mt-6 text-center text-xs text-moss-600 dark:text-moss-300">
+          {t("settings.betaLine")}
+        </p>
         {/* Build stamp — the short id of the code this device is
             running (docs/operator-guide.md §6). Quiet, selectable, and
             deliberately at the very bottom: its one job is to answer
