@@ -53,6 +53,14 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **"Revisit the welcome" opens the welcome tour again.** The link in
+  Profile → Learn is there so members can re-read the intro (and its
+  beta notice) whenever they like, but on an onboarded device it just
+  flashed and bounced straight back to the board — the same guard
+  that rightly stops stale navigations from re-showing the tour was
+  also swallowing the deliberate visit. The link now announces itself,
+  and the guard lets it through; accidental returns to /welcome still
+  bounce as before.
 - **Docs caught up with the code.** A documentation-accuracy sweep
   across this cycle's features: the member guide now covers voice
   notes on posts and in messages, emoji reactions, the long-press

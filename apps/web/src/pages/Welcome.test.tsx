@@ -41,6 +41,7 @@ interface MockState {
   currentMember: Member | null;
   nodeId: string;
   nodeConfig: NodeConfig;
+  onboarded: boolean;
   setCurrentMember: ReturnType<typeof vi.fn>;
   refreshOnboarded: () => Promise<void>;
 }
@@ -56,6 +57,7 @@ function blankState(): MockState {
     currentMember: null,
     nodeId: "node-local",
     nodeConfig: { ...DEFAULT_NODE_CONFIG },
+    onboarded: false,
     setCurrentMember: vi.fn(async () => {}),
     refreshOnboarded: async () => {},
   };
@@ -114,10 +116,14 @@ function stubStandaloneMatchMedia() {
   });
 }
 
-function render(node: ReactNode) {
+// `initialEntries` lets the onboarded-guard tests below mount the page
+// at `/welcome?revisit=1` — the guard reads the query string.
+function render(node: ReactNode, initialEntries: string[] = ["/welcome"]) {
   act(() => {
     root = createRoot(container);
-    root.render(<MemoryRouter>{node}</MemoryRouter>);
+    root.render(
+      <MemoryRouter initialEntries={initialEntries}>{node}</MemoryRouter>,
+    );
   });
 }
 
@@ -220,6 +226,38 @@ describe("WelcomePage — invite-only gate", () => {
     expect(container.textContent).toContain(
       "One hour of your help is worth one hour",
     );
+  });
+});
+
+describe("WelcomePage — onboarded guard vs. deliberate revisit", () => {
+  // The page is rendered directly here (no <Route>), so the guard's
+  // navigate() can't unmount it — assert the redirect through the
+  // router's location instead of through content absence.
+  it("onboarded device on plain /welcome → redirected to the board", () => {
+    mockState.onboarded = true;
+    lastLocation = "";
+    render(
+      <>
+        <WelcomePage />
+        <LocationProbe />
+      </>,
+      ["/welcome"],
+    );
+    expect(lastLocation).toBe("/");
+  });
+
+  it("onboarded device on /welcome?revisit=1 → the tour shows, no redirect", () => {
+    mockState.onboarded = true;
+    lastLocation = "";
+    render(
+      <>
+        <WelcomePage />
+        <LocationProbe />
+      </>,
+      ["/welcome?revisit=1"],
+    );
+    expect(lastLocation).toBe("/welcome?revisit=1");
+    expect(container.textContent).toContain("This is a timebank");
   });
 });
 
