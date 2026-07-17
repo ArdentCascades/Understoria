@@ -53,6 +53,7 @@ vi.mock("@/lib/outbox", () => ({ flushOutboxNow: vi.fn(async () => {}) }));
 
 import "@/i18n";
 import MemberDetailPage from "./MemberDetail";
+import { shortKey } from "@/lib/format";
 import type { Member } from "@/types";
 import type { RedeemedInviteLike } from "@/lib/vouch";
 
@@ -182,6 +183,32 @@ describe("MemberDetail — functional surface (kept)", () => {
     container.innerHTML = "";
     render(pendingKey);
     expect(container.textContent).toContain("New here");
+  });
+});
+
+describe("MemberDetail — canonical identity key (stays visible, explains itself)", () => {
+  // Casual surfaces hide the key behind a tap (IdentityKey.tsx), but
+  // the member page header is a canonical identity spot: the key
+  // stays put, and tapping it finally says what the code is.
+  it("keeps the short key visible in the header", () => {
+    render(trustedKey);
+    expect(container.textContent).toContain(shortKey(trustedKey));
+  });
+
+  it("tapping the key toggles the explainer sentence", () => {
+    render(trustedKey);
+    const btn = Array.from(container.querySelectorAll("button")).find((b) =>
+      (b.textContent ?? "").includes(shortKey(trustedKey)),
+    );
+    expect(btn).toBeDefined();
+    expect(btn!.getAttribute("aria-expanded")).toBe("false");
+    act(() => {
+      btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(btn!.getAttribute("aria-expanded")).toBe("true");
+    expect(container.textContent).toContain(
+      "This code is Rosa's unique identity",
+    );
   });
 });
 

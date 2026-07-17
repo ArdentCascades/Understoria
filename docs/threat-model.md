@@ -2061,6 +2061,33 @@ We are not trying to protect against:
   public utility in the scenario it exists for — a member who
   prints their HOME WiFi onto a poster has been warned by the
   caveat in the very ink they're posting.
+- **Casual identity display is collision-aware: IMPLEMENTED
+  (2026-07).** The truncated key fingerprint (`shortKey()`) no
+  longer renders beside names on casual surfaces (post-detail
+  parties, the me-menu identity row) — all four pilot personas read
+  the ubiquitous `(a1b2…c3d4)` chrome as a rendering glitch, which
+  taught members to ignore it everywhere, including the one place
+  it mattered. The key now sits behind a subtle tap affordance
+  (`IdentityKey.tsx`) that reveals it together with a one-sentence
+  explanation of what the code is. The inline key's actual
+  protective job in casual chrome — telling two members with the
+  same display name apart — is preserved automatically: when two or
+  more members share a display name (case-insensitive, trimmed —
+  `lib/nameCollisions.ts`), the key renders inline again wherever
+  that name appears, so the name-squatting disambiguator activates
+  exactly when the attack precondition exists. Deliberately
+  unchanged: every verification ceremony (invite fingerprint,
+  in-person exchange, device pairing, cosigned removals, signed
+  records) keeps its always-visible key — there the key IS the
+  content; the canonical identity spots (MemberDetail header, own
+  Profile) keep their visible keys and gain the same tap explainer;
+  and `shortKey()` fallbacks for members with no local display name
+  are untouched (a key is better than nothing). Residual, named:
+  a member who never taps learns the code exists only when a
+  collision or a ceremony shows it — accepted, because ceremonies
+  are where recognition is actually verified, and the avatar
+  (`MemberAvatar`, derived from the same key) still gives every
+  name a visual identity handle at a glance.
 
 ## 8. Guidance for reviewers
 

@@ -22,8 +22,9 @@ Profile tab the second.
    that a phone can't reach.
 2. **Me-menu (header, top right)** — the about-you tier, where tool
    apps keep account things. Six rows, capped: your Profile (rendered
-   as your own display name + short key, so "where did my profile
-   go?" self-answers), Settings, Invite someone, Help, Search (opens
+   as your own display name, so "where did my profile
+   go?" self-answers — the short key lives on the Profile page
+   itself), Settings, Invite someone, Help, Search (opens
    the command palette — the only palette doorway phones have), and
    Community infrastructure. (`AppHeader.tsx` + `MeMenu.tsx`.)
 3. **In-page doorways** — everything else stays discoverable from

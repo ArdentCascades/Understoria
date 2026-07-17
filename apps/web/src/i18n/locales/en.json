@@ -331,6 +331,11 @@
     "trigger": "(why?)",
     "readMore": "Read more"
   },
+  "identity": {
+    "show": "Show identity code",
+    "explainer": "This code is {{name}}'s unique identity — two people can share a name, but no one can share this code. The app uses it to check that everything {{name}} posts really came from them.",
+    "explainerYou": "This code is your unique identity — two people can share a name, but no one can share this code. It travels with everything you post so others can check it's really you."
+  },
   "notFound": {
     "title": "This page isn't here",
     "message": "The link may be old or mistyped. Nothing's wrong on your end.",
@@ -466,7 +471,7 @@
     "close": "Close menu",
     "title": "Menu",
     "profile": "Profile",
-    "profileHint": "Your profile · {{key}}",
+    "profileHint": "Your profile",
     "settings": "Settings",
     "invite": "Invite someone",
     "help": "Help",

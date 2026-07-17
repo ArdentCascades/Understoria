@@ -52,8 +52,12 @@ import {
   formatDeadline,
   formatHours,
   formatRelativeTime,
-  shortKey,
 } from "@/lib/format";
+import { IdentityKey } from "@/components/IdentityKey";
+import {
+  duplicatedNames,
+  normalizeDisplayName,
+} from "@/lib/nameCollisions";
 import type { Achievement, Post } from "@/types";
 
 type DialogKind =
@@ -90,6 +94,10 @@ export default function PostDetailPage() {
     () => new Map(members.map((m) => [m.publicKey, m])),
     [members],
   );
+  // Display names shared by more than one member: the identity key
+  // stays hidden chrome on this page EXCEPT where it's needed to
+  // tell two same-named members apart (see IdentityKey.tsx).
+  const collidingNames = useMemo(() => duplicatedNames(members), [members]);
 
   // If this post is disputed, find the most recent matching dispute
   // proposal so the operational pointer can deep-link to its card on
@@ -359,6 +367,10 @@ export default function PostDetailPage() {
               name={poster?.displayName ?? t("common.anyMember")}
               publicKey={post.postedBy}
               isYou={isPoster}
+              keyRevealed={
+                !!poster &&
+                collidingNames.has(normalizeDisplayName(poster.displayName))
+              }
             />
           </Field>
           {post.claimedBy && (
@@ -373,6 +385,10 @@ export default function PostDetailPage() {
                 name={claimer?.displayName ?? t("common.anyMember")}
                 publicKey={post.claimedBy}
                 isYou={isClaimer}
+                keyRevealed={
+                  !!claimer &&
+                  collidingNames.has(normalizeDisplayName(claimer.displayName))
+                }
               />
             </Field>
           )}
@@ -776,17 +792,24 @@ function PersonInline({
   name,
   publicKey,
   isYou,
+  keyRevealed,
 }: {
   name: string;
   publicKey: string;
   isYou: boolean;
+  keyRevealed: boolean;
 }) {
   const { t } = useTranslation();
   if (isYou) {
     return (
       <span>
         {t("common.you")}{" "}
-        <span className="text-xs text-moss-600 dark:text-moss-300">({shortKey(publicKey)})</span>
+        <IdentityKey
+          publicKey={publicKey}
+          name={name}
+          isYou
+          revealed={keyRevealed}
+        />
       </span>
     );
   }
@@ -798,7 +821,7 @@ function PersonInline({
       >
         {name}
       </Link>{" "}
-      <span className="text-xs text-moss-600 dark:text-moss-300">({shortKey(publicKey)})</span>
+      <IdentityKey publicKey={publicKey} name={name} revealed={keyRevealed} />
     </span>
   );
 }
