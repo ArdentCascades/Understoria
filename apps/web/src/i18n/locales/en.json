@@ -2785,7 +2785,9 @@
       "hardConfirmDescription": "Everything stored here will be wiped — including your private keys. A brand-new identity (a fresh key) will be generated and the app will reload. There is no undo.",
       "hardConfirm": "Yes, wipe everything",
       "completedSoft": "Soft purge complete in {{ms}}ms.",
-      "completedHard": "Hard purge complete in {{ms}}ms."
+      "completedHard": "Hard purge complete in {{ms}}ms.",
+      "spokenSoft": "Warning. This will erase names and personal text from this device. It cannot be undone. Press the confirm button to continue, or cancel.",
+      "spokenHard": "Warning. This will erase everything on this device, including your keys, and cannot be undone. Press the confirm button to continue, or cancel."
     }
   },
   "help": {

@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Purge-coverage guard + spoken panic confirmation** (voice
+  workstream #476). Every local data table now has an explicit,
+  build-enforced answer to "what does the emergency wipe do with
+  this?" — a new CI test fails the moment anyone adds a table
+  without deciding whether soft purge scrubs it, clears it, or
+  deliberately preserves it (the failure mode that once let direct
+  messages survive a wipe). And the panic flow no longer requires
+  reading: the emergency section carries a fixed 🆘 marker, and the
+  confirm step speaks what is about to happen out loud — using the
+  device's own built-in speech, in the app's language, with
+  nothing sent anywhere. The spoken layer is purely additive; the
+  visual dialog is unchanged and sufficient alone.
 - **Voice notes in messages** (voice workstream #471/#472) — tap the
   microphone in a conversation to record up to 45 seconds, review,
   and send. The recording travels INSIDE the sealed end-to-end

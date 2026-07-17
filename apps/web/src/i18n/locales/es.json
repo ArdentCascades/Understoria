@@ -2785,7 +2785,9 @@
       "hardConfirmDescription": "Todo lo guardado aquí será borrado — incluyendo tus claves privadas. Se generará una identidad nueva (una clave nueva) y la app se recargará. No hay deshacer.",
       "hardConfirm": "Sí, eliminar todo",
       "completedSoft": "Borrado suave completado en {{ms}}ms.",
-      "completedHard": "Borrado duro completado en {{ms}}ms."
+      "completedHard": "Borrado duro completado en {{ms}}ms.",
+      "spokenSoft": "Atención. Esto borrará nombres y texto personal de este dispositivo. No se puede deshacer. Presiona el botón de confirmar para continuar, o cancela.",
+      "spokenHard": "Atención. Esto borrará todo en este dispositivo, incluyendo tus claves, y no se puede deshacer. Presiona el botón de confirmar para continuar, o cancela."
     }
   },
   "help": {

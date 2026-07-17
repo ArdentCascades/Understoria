@@ -48,6 +48,76 @@ export interface PurgeResult {
   tablesTouched: string[];
 }
 
+/**
+ * THE PURGE-COVERAGE CONTRACT (voice workstream V6, issue #476).
+ *
+ * Every Dexie table MUST have an entry here, stating what soft purge
+ * does with it (hard purge needs no map — it enumerates `db.tables`
+ * live and wipes everything). `purgeCoverage.test.ts` fails the build
+ * when a table is missing or stale, so adding a store without making
+ * a purge decision is impossible — the exact failure mode that let
+ * ten tables silently survive the "wipe every table" purge once.
+ *
+ *  - "scrubbed": identifying text rewritten in place; structural rows
+ *    (ids, keys, signatures) survive so the ledger stays coherent.
+ *  - "cleared": the row IS the relationship — wiped whole.
+ *  - "preserved": deliberately survives soft purge, with the reason
+ *    noted; the threat-model contract preserves the signed exchange
+ *    ledger, the keypair, and non-linkable configuration.
+ *
+ * If you're adding a table: decide its class, implement it in
+ * softPurge below (for scrubbed/cleared), and add the entry.
+ */
+export const SOFT_PURGE_CLASSIFICATION: Readonly<
+  Record<string, "scrubbed" | "cleared" | "preserved">
+> = {
+  // Scrubbed — identifying text blanked, structure kept.
+  members: "scrubbed",
+  posts: "scrubbed",
+  projects: "scrubbed",
+  projectTasks: "scrubbed",
+  taskComments: "scrubbed",
+  events: "scrubbed",
+  eventCancellations: "scrubbed",
+  proposals: "scrubbed",
+  projectActivity: "scrubbed",
+  // Cleared — the row is the relationship (see the per-table
+  // rationale in softPurge below). Voice notes ride in `messages`,
+  // so audio is covered here with no separate store.
+  blocks: "cleared",
+  previouslyBlocked: "cleared",
+  messages: "cleared",
+  drafts: "cleared",
+  eventRsvps: "cleared",
+  eventProjectLinks: "cleared",
+  eventShifts: "cleared",
+  shiftSignups: "cleared",
+  taskPlans: "cleared",
+  journalEntries: "cleared",
+  outbox: "cleared",
+  invites: "cleared",
+  redemptionReceipts: "cleared",
+  inviteRevocationRecords: "cleared",
+  guardianShards: "cleared",
+  votes: "cleared",
+  pairingLog: "cleared",
+  // Preserved — deliberate survivors of a SOFT purge.
+  exchanges: "preserved", // the signed ledger the contract keeps
+  vouches: "preserved", // signed trust records, keys not linkable text
+  secretKeys: "preserved", // the keypair the contract keeps
+  settings: "preserved", // node identity + display prefs, no free text
+  nodeConfig: "preserved", // node-published config, nothing personal
+  achievements: "preserved", // local milestone flags keyed by public key
+  capacityPostures: "preserved", // node-signed coarse bands, no text
+  seedVaultPledges: "preserved", // public archive-role claims, key + flag
+  memberRemovals: "preserved", // quorum governance records, signed
+  memberReinstatements: "preserved", // same class as removals
+  proposalClosures: "preserved", // signed governance outcomes
+  coorgInvitations: "preserved", // signed key↔key records; free text
+  coorgInvitationResponses: "preserved", // lives in the project rows,
+  coorgInvitationRevocations: "preserved", // which ARE scrubbed
+};
+
 export async function softPurge(): Promise<PurgeResult> {
   const start = performance.now();
   const tables: string[] = [];
