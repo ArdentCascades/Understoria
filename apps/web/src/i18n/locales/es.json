@@ -2471,6 +2471,11 @@
       "title": "Aún no has emitido invitaciones",
       "message": "Genera tu primera invitación desde tu perfil.",
       "cta": "Ir al perfil"
+    },
+    "revokeConfirm": {
+      "title": "¿Revocar esta invitación?",
+      "body": "Al revocarla, este enlace deja de funcionar. Si ya se lo enviaste a alguien, esa persona no podrá unirse con él. Siempre puedes generar una invitación nueva después.",
+      "confirm": "Revocar invitación"
     }
   },
   "profile": {
@@ -2746,9 +2751,14 @@
         "manageAll": "Gestionar todas →"
       },
       "generate": "Generar enlace de invitación",
+      "generateAnother": "Generar otro enlace de invitación",
       "generating": "Generando…",
       "shareTitle": "Comparte este enlace con una sola persona",
+      "openShareTitle": "Tu invitación abierta — nadie la ha usado aún",
+      "openInviteMeta": "Generada {{when}} · Caduca {{date}}",
       "shareNote": "El enlace es de un solo uso y caduca en 14 días. Si se filtra antes de canjearse, revócalo abajo.",
+      "openShareNote": "Este es el mismo enlace de un solo uso que generaste. Compártelo con una persona de confianza — o, si crees que se filtró, revócalo en Gestionar todas y genera uno nuevo.",
+      "generated": "Generada {{when}}",
       "redeemed": "Canjeado {{when}}",
       "redeemedBy": "Canjeada {{when}} por {{name}}",
       "usedAfterRevoke": "Usada {{when}} por {{name}}, después de que la revocaras. Sigue sin admitir a nadie — pero quizá valga una conversación.",

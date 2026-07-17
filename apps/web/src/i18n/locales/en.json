@@ -2471,6 +2471,11 @@
       "title": "No invites issued yet",
       "message": "Generate your first invite from your Profile.",
       "cta": "Go to Profile"
+    },
+    "revokeConfirm": {
+      "title": "Revoke this invite?",
+      "body": "Revoking makes this link stop working. If you've already sent it to someone, they won't be able to join with it. You can always generate a fresh invite afterwards.",
+      "confirm": "Revoke invite"
     }
   },
   "profile": {
@@ -2746,9 +2751,14 @@
         "manageAll": "Manage all →"
       },
       "generate": "Generate invite link",
+      "generateAnother": "Generate another invite link",
       "generating": "Generating…",
       "shareTitle": "Share this link with one person",
+      "openShareTitle": "Your open invite — no one has used it yet",
+      "openInviteMeta": "Generated {{when}} · Expires {{date}}",
       "shareNote": "The link is single-use and expires in 14 days. If it leaks before redemption, revoke it below.",
+      "openShareNote": "This is the same single-use link you generated. Share it with one person you trust — or, if it may have leaked, revoke it under Manage all and generate a fresh one.",
+      "generated": "Generated {{when}}",
       "redeemed": "Redeemed {{when}}",
       "redeemedBy": "Redeemed {{when}} by {{name}}",
       "usedAfterRevoke": "Used {{when}} by {{name}}, after you revoked it. It still admits no one — but it may be worth a conversation.",

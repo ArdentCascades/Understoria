@@ -84,6 +84,22 @@ include breaking changes.
   "your best guess is fine" nudge, and the number springs back if you
   clear it) instead of quietly filling it in after you save. English
   and Spanish.
+- **Your invite doesn't vanish when you leave the page — and Help now
+  answers voice-note questions.** Generating an invite showed the
+  link and QR beautifully, but coming back later showed only a bare
+  Generate button and a "1 open" counter — so people reasonably
+  assumed the invite was lost and made a duplicate. The link was
+  never lost: it's rebuilt from the stored invite, so the Profile
+  section now greets you with your open invite — when it was made,
+  when it expires, and the same Reveal / Copy / QR buttons — and the
+  button honestly says "Generate another". On the Manage-all page,
+  every invite now says when you generated it (two open invites are
+  no longer identical twins), and Revoke asks first, in plain words:
+  the link stops working, and anyone you already sent it to won't be
+  able to join with it. And in Help, a new FAQ entry finally answers
+  the question our mic-denied testers actually had — how voice notes
+  work, why voice on Board posts is heard by the whole community,
+  and how to un-deny a microphone permission. English and Spanish.
 - **"Revisit the welcome" opens the welcome tour again.** The link in
   Profile → Learn is there so members can re-read the intro (and its
   beta notice) whenever they like, but on an onboarded device it just

@@ -58,6 +58,7 @@ import { copyTextToClipboard } from "@/lib/share";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { EmptyState } from "@/components/EmptyState";
 import {
+  formatDeadline,
   formatHours,
   formatRelativeTime,
   formatSignedHours,
@@ -1558,6 +1559,34 @@ function InvitesSection({
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // A freshly issued link lives in `shareUrl` state, but the state
+  // dies with the component — and members read that as the invite
+  // itself being lost, so they generate a duplicate (the round-trip
+  // finding from the 2026-07 usability run). Every invite row
+  // persists its `encoded` token, so the full share link is
+  // reconstructable at any time: on return, resurface the most
+  // recent open invite with the same Reveal / Copy / QR affordances
+  // it had at generation. Newest-first so the box always shows what
+  // the member issued last.
+  const openInvites = useMemo(
+    () =>
+      invites
+        .filter(
+          (inv) => inv.status === "open" && inv.expiresAt > Date.now(),
+        )
+        .sort((a, b) => b.createdAt - a.createdAt),
+    [invites],
+  );
+  const latestOpen: InviteRow | undefined = openInvites[0];
+  // Fresh link wins while it's in state (it's also the newest row —
+  // same URL — but state survives a beat ahead of the live query).
+  const activeUrl =
+    shareUrl ??
+    (latestOpen
+      ? `${window.location.origin}/invite#${latestOpen.encoded}`
+      : null);
+  const isFreshShare = shareUrl !== null;
+
   async function handleIssue() {
     setError(null);
     setIssuing(true);
@@ -1606,20 +1635,35 @@ function InvitesSection({
         >
           {issuing
             ? t("profile.invites.generating")
-            : t("profile.invites.generate")}
+            : latestOpen || shareUrl
+              ? t("profile.invites.generateAnother")
+              : t("profile.invites.generate")}
         </button>
       </div>
 
-      {shareUrl && (
+      {activeUrl && (
         <div className="mt-3 rounded-xl border border-canopy-200 bg-canopy-50 p-3 dark:border-canopy-900/50 dark:bg-canopy-950/20">
           <p className="text-xs font-semibold uppercase tracking-wide text-canopy-800 dark:text-canopy-200">
-            {t("profile.invites.shareTitle")}
+            {isFreshShare
+              ? t("profile.invites.shareTitle")
+              : t("profile.invites.openShareTitle")}
           </p>
+          {/* On return, say when it was made and how long it lives —
+              the two facts that tell a member "this is the one you
+              already generated", not a mystery counter. */}
+          {!isFreshShare && latestOpen && (
+            <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+              {t("profile.invites.openInviteMeta", {
+                when: formatRelativeTime(latestOpen.createdAt),
+                date: formatDeadline(latestOpen.expiresAt),
+              })}
+            </p>
+          )}
           <code
             className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs dark:bg-moss-900"
             aria-live="polite"
           >
-            {linkRevealed ? shareUrl : t("profile.invites.shareLinkHidden")}
+            {linkRevealed ? activeUrl : t("profile.invites.shareLinkHidden")}
           </code>
           {linkRevealed && (
             <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
@@ -1630,7 +1674,7 @@ function InvitesSection({
             <button
               type="button"
               className="btn-secondary text-xs"
-              onClick={() => handleCopy(shareUrl)}
+              onClick={() => handleCopy(activeUrl)}
             >
               {t("common.copy")}
             </button>
@@ -1661,7 +1705,9 @@ function InvitesSection({
             )}
           </div>
           <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
-            {t("profile.invites.shareNote")}
+            {isFreshShare
+              ? t("profile.invites.shareNote")
+              : t("profile.invites.openShareNote")}
           </p>
         </div>
       )}
@@ -1683,8 +1729,8 @@ function InvitesSection({
       )}
 
       <InviteShareSheet
-        open={shareSheetOpen && shareUrl !== null}
-        url={shareUrl ?? ""}
+        open={shareSheetOpen && activeUrl !== null}
+        url={activeUrl ?? ""}
         shareTitle={t("profile.invites.shareSheet.shareTitle")}
         shareText={t("profile.invites.shareSheet.shareText")}
         onClose={() => setShareSheetOpen(false)}
