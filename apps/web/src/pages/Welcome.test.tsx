@@ -550,15 +550,54 @@ describe("WelcomePage — installed-arrival fork", () => {
 });
 
 describe("WelcomePage — beta/AI disclosure on the first screen", () => {
-  it("the first concept screen carries the notice; later screens don't repeat it", () => {
+  // The card reads its dismissed flag from the settings table before
+  // rendering (render-nothing-until-known), so presence assertions
+  // need the microtask/timer queue drained first.
+  async function flushNotice() {
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((r) => setTimeout(r, 0));
+    });
+  }
+
+  it("the first concept screen carries the notice; later screens don't repeat it", async () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
     mockMemberCount = 0;
     render(<WelcomePage />);
+    await flushNotice();
     // Step 0 — where a brand-new person starts reading.
     expect(container.textContent).toContain("Please know what you're using");
     expect(container.textContent).toContain("written with AI tools");
     // The disclosure is a doorstep card, not a nag: step 1 is clean.
     clickNextNTimes(1);
+    expect(container.textContent).not.toContain(
+      "Please know what you're using",
+    );
+  });
+
+  it("'Got it' dismisses the notice permanently on this device", async () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    await flushNotice();
+    const gotIt = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Got it",
+    );
+    expect(gotIt).toBeDefined();
+    act(() => {
+      gotIt!.click();
+    });
+    await flushNotice();
+    expect(container.textContent).not.toContain(
+      "Please know what you're using",
+    );
+    // Permanent: a fresh mount reads the flag and stays clean.
+    act(() => {
+      root.unmount();
+    });
+    render(<WelcomePage />);
+    await flushNotice();
+    expect(container.textContent).toContain("This is a timebank");
     expect(container.textContent).not.toContain(
       "Please know what you're using",
     );

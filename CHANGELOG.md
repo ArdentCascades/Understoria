@@ -20,8 +20,10 @@ include breaking changes.
   node-setup screen — and permanent copies live in Help (FAQ, "How
   finished is this app?"), in Settings next to the build stamp, in
   the README's new "Project Status" section, and on the showcase
-  site. Deliberately non-blocking and non-dismissable: it's a
-  disclosure, not a consent ceremony. English and Spanish.
+  site. Non-blocking, and dismissible with one tap ("Got it") —
+  dismissing it on any door hides it on all of them, permanently,
+  on that device. There's still no forced "I understand" gate: it's
+  a disclosure, not a consent ceremony. English and Spanish.
 
 ### Changed
 - **Composer and scrolling polish in conversations** (round two of
