@@ -546,6 +546,30 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         ],
       },
       {
+        id: "voice-notes",
+        question: "How do voice notes work? My microphone isn't working.",
+        answer: [
+          "In a conversation, the microphone button sits in the " +
+            "message box while it's empty — start typing and it " +
+            "swaps to Send; clear the text and the mic comes back. " +
+            "Tap it to record a voice note up to 45 seconds long, " +
+            "listen back before anything goes out, and send only " +
+            "when you're happy with it. Voice notes are sealed end " +
+            "to end exactly like typed messages — only you and the " +
+            "person you're talking to can hear them.",
+          "Voice on Board posts works differently. Board posts are " +
+            "community content, so a recording you attach to a post " +
+            "is audible to the whole community — the same audience " +
+            "as the words you'd write there.",
+          "If the microphone won't start: your browser or phone " +
+            "asks for permission the first time you record. If that " +
+            "was denied — even by accident — recording stays " +
+            "blocked until you allow the microphone for this site " +
+            "in your browser or phone settings. Once it's allowed, " +
+            "come back and try again.",
+        ],
+      },
+      {
         id: "someone-bothering-me",
         question: "What if someone is bothering me?",
         answer: [

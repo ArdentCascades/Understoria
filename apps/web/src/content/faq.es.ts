@@ -573,6 +573,33 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         ],
       },
       {
+        id: "voice-notes",
+        question:
+          "¿Cómo funcionan las notas de voz? Mi micrófono no funciona.",
+        answer: [
+          "En una conversación, el botón del micrófono está en la " +
+            "caja de mensaje mientras está vacía — al empezar a " +
+            "escribir se convierte en Enviar; borra el texto y el " +
+            "micrófono vuelve. Tócalo para grabar una nota de voz " +
+            "de hasta 45 segundos, escúchala antes de que salga " +
+            "nada, y envíala solo cuando te convenza. Las notas de " +
+            "voz van selladas de extremo a extremo igual que los " +
+            "mensajes escritos — solo tú y la persona con la que " +
+            "hablas pueden oírlas.",
+          "La voz en publicaciones del Tablón funciona distinto. " +
+            "Las publicaciones del tablón son contenido " +
+            "comunitario, así que una grabación adjunta a una " +
+            "publicación puede oírla toda la comunidad — el mismo " +
+            "público que las palabras que escribirías ahí.",
+          "Si el micrófono no arranca: el navegador o el teléfono " +
+            "pide permiso la primera vez que grabas. Si se denegó " +
+            "— aunque fuera sin querer — grabar queda bloqueado " +
+            "hasta que permitas el micrófono para este sitio en " +
+            "los ajustes del navegador o del teléfono. Cuando esté " +
+            "permitido, vuelve e inténtalo de nuevo.",
+        ],
+      },
+      {
         id: "someone-bothering-me",
         question: "¿Qué hago si alguien me está molestando?",
         answer: [

@@ -26,6 +26,7 @@ import { MyTasksSection } from "@/pages/MyTasks";
 import { MyProjectsSection } from "@/pages/MyProjects";
 import { buildShiftIcs, icsFilename } from "@/lib/eventIcs";
 import { downloadIcs } from "@/lib/ics";
+import { useToast } from "@/state/ToastContext";
 import { askedOfYou, type AskedOfYouItem } from "@/lib/mentions";
 import { stripMarkdown } from "@/lib/markdown";
 import { formatRelativeTime } from "@/lib/format";
@@ -453,6 +454,7 @@ function AskedRow({
 // locale; start date + start–end times on one quiet line.
 function ShiftRow({ upcoming }: { upcoming: UpcomingShift }) {
   const { t, i18n } = useTranslation();
+  const { showToast } = useToast();
   const { shift, event } = upcoming;
   const dateFmt = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
@@ -489,12 +491,14 @@ function ShiftRow({ upcoming }: { upcoming: UpcomingShift }) {
       <button
         type="button"
         className="mt-0.5 text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
-        onClick={() =>
+        onClick={() => {
+          const file = icsFilename(`${shift.label} ${event.title}`);
           downloadIcs(
-            icsFilename(`${shift.label} ${event.title}`),
+            file,
             buildShiftIcs(shift, event, { appUrl: window.location.origin }),
-          )
-        }
+          );
+          showToast(t("toast.icsShiftSaved", { file }));
+        }}
       >
         {t("myWork.shiftIcs")}
       </button>

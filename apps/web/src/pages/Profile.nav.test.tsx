@@ -50,7 +50,7 @@ vi.mock("@/db/invites", () => ({ issueInvite: vi.fn() }));
 
 import "@/i18n";
 import ProfilePage from "./Profile";
-import type { Exchange, Member, Proposal } from "@/types";
+import type { Exchange, Member, Post, Proposal } from "@/types";
 
 const nodeId = "node_test";
 const meKey = "me-key";
@@ -85,6 +85,32 @@ function flaggedExchange(overrides: Partial<Exchange> = {}): Exchange {
     nodeId,
     flaggedForReview: true,
     flagReason: "short_duration",
+    ...overrides,
+  };
+}
+
+/** A post whose exchange is half-signed — what PendingHistoryRow renders.
+ *  NEED posted by other, claimed by me ⇒ I'm the helper (delta > 0);
+ *  `confirmedBy: [meKey]` ⇒ the partner owes the confirmation. */
+function awaitingPost(overrides: Partial<Post> = {}): Post {
+  return {
+    id: "post-p1",
+    type: "NEED",
+    category: "food",
+    title: "Groceries run",
+    description: "",
+    estimatedHours: 2,
+    urgency: "low",
+    postedBy: otherKey,
+    claimedBy: meKey,
+    status: "awaiting_confirmation",
+    createdAt: Date.now() - 3 * 60 * 60 * 1000,
+    expiresAt: null,
+    locationZone: "",
+    confirmedBy: [meKey],
+    awaitingSince: Date.now() - 2 * 60 * 1000,
+    nodeId,
+    signature: "",
     ...overrides,
   };
 }
@@ -224,6 +250,59 @@ describe("ProfilePage — flagged-exchange chip links to disputes", () => {
     render();
     expect(flagChip()).toBeUndefined();
     expect(container.textContent).not.toContain("in community review");
+  });
+});
+
+describe("ProfilePage — pending exchange rows tell the truth", () => {
+  it("phrases an unconfirmed helper-side row as 'Helping', never 'Helped'", () => {
+    mockState.posts = [awaitingPost()];
+    render();
+    expect(container.textContent).toContain("Helping Oli Other");
+    expect(container.textContent).not.toContain("Helped Oli Other");
+    expect(container.textContent).toContain("pending");
+  });
+
+  it("phrases the receiving direction as 'Receiving help from'", () => {
+    mockState.posts = [
+      awaitingPost({
+        postedBy: meKey,
+        claimedBy: otherKey,
+        confirmedBy: [otherKey],
+      }),
+    ];
+    render();
+    expect(container.textContent).toContain("Receiving help from Oli Other");
+    expect(container.textContent).not.toContain("Received help from Oli Other");
+  });
+
+  it("shows the waiting-state age (awaitingSince), not the post's age", () => {
+    // Post created 3h ago; confirmation arrived 2 minutes ago.
+    mockState.posts = [awaitingPost()];
+    render();
+    expect(container.textContent).toContain("2m ago");
+    expect(container.textContent).not.toContain("3h ago");
+  });
+
+  it("shows no relative time at all on legacy rows without awaitingSince", () => {
+    mockState.posts = [awaitingPost({ awaitingSince: undefined })];
+    render();
+    const row = Array.from(container.querySelectorAll("li")).find((li) =>
+      (li.textContent ?? "").includes("Helping Oli Other"),
+    );
+    expect(row).toBeDefined();
+    // The row keeps its pending badge but carries no timestamp — better
+    // no time than the post's age masquerading as the exchange's.
+    expect(row!.textContent).toContain("pending");
+    expect(row!.textContent).not.toContain("ago");
+  });
+
+  it("keeps past-tense phrasing and the completion time on settled rows", () => {
+    mockState.exchanges = [
+      flaggedExchange({ flaggedForReview: false, flagReason: undefined }),
+    ];
+    render();
+    expect(container.textContent).toContain("Helped Oli Other");
+    expect(container.textContent).not.toContain("Helping Oli Other");
   });
 });
 

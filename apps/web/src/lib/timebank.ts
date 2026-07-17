@@ -97,6 +97,15 @@ export interface PendingEntry {
   owedBy: "you" | "partner";
   category: Post["category"];
   createdAt: number;
+  /**
+   * When this exchange entered its waiting state — `Post.awaitingSince`,
+   * stamped by confirmExchange on the first party's confirmation. This
+   * is the honest timestamp for a pending row: `createdAt` above is the
+   * POST's age, which read as "the help already happened X ago" before
+   * anything was confirmed. `null` on rows that predate the field —
+   * display should omit the time rather than fall back to the post age.
+   */
+  pendingSince: number | null;
 }
 
 export interface PendingBalance {
@@ -136,6 +145,7 @@ export function pendingBalanceFor(
       owedBy: post.confirmedBy.includes(memberKey) ? "partner" : "you",
       category: post.category,
       createdAt: post.createdAt,
+      pendingSince: post.awaitingSince ?? null,
     });
   }
   entries.sort((a, b) => b.createdAt - a.createdAt);
@@ -184,6 +194,14 @@ export interface PendingTaskEntry {
   delta: number;
   category: ProjectTask["category"];
   createdAt: number;
+  /**
+   * When the claimer marked the task complete — `ProjectTask.completedAt`,
+   * set at the claimed → awaiting_confirmation transition. The honest
+   * timestamp for a pending row (`createdAt` is when the ORGANIZER wrote
+   * the task, which predates the member's involvement entirely). `null`
+   * on legacy rows; display omits the time rather than guessing.
+   */
+  pendingSince: number | null;
 }
 
 export interface PendingTaskCredit {
@@ -223,6 +241,7 @@ export function pendingTaskCreditFor(
       delta: creditHoursForTask(task),
       category: task.category,
       createdAt: task.createdAt,
+      pendingSince: task.completedAt ?? null,
     });
   }
   entries.sort((a, b) => b.createdAt - a.createdAt);

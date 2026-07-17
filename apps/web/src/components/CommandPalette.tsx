@@ -308,7 +308,12 @@ export function CommandPalette() {
             </li>
           ))}
         </ul>
-        <p className="border-t border-moss-100 px-4 py-2 text-xs text-moss-600 dark:border-moss-800 dark:text-moss-300">
+        {/* Keyboard-hint footer. Visual only — the combobox a11y
+            wiring above carries the interaction model — and hidden on
+            touch-primary devices, where "↑↓ / Enter / Esc" is
+            meaningless (Tailwind 3 has no pointer-coarse: variant, so
+            an arbitrary media variant does it). */}
+        <p className="hidden border-t border-moss-100 px-4 py-2 text-xs text-moss-600 dark:border-moss-800 dark:text-moss-300 [@media(pointer:fine)]:block">
           {t("palette.hint")}
         </p>
       </div>

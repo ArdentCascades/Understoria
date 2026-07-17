@@ -289,7 +289,11 @@
     "projectCreated": "Proyecto creado. Agrega tareas y láncalo cuando estés lista.",
     "exchangeConfirmedPending": "Confirmado. Esperando a que la otra persona confirme también.",
     "exchangeConfirmedComplete": "Confirmado. Los créditos han fluido entre ustedes.",
-    "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron."
+    "autoConfirmed": "Confirmado automáticamente tras {{hours}}h. Los créditos fluyeron.",
+    "claimedInMyCare": "Lo encontrarás en A mi cuidado.",
+    "icsDaySaved": "Se guardó {{file}} — ábrelo para poner este día en el calendario de tu teléfono.",
+    "icsSaved": "Se guardó {{file}} — ábrelo para añadir este evento al calendario de tu teléfono.",
+    "icsShiftSaved": "Se guardó {{file}} — ábrelo para añadir este turno al calendario de tu teléfono."
   },
   "a11y": {
     "skipToMain": "Saltar al contenido principal"
@@ -658,7 +662,7 @@
       "currentLabel": "Tu confirmación: {{status}}",
       "changeButton": "Cambiar mi confirmación",
       "withdrawButton": "Retirar mi confirmación",
-      "recorded": "Confirmación guardada en este dispositivo.",
+      "recorded": "Confirmación guardada — tu comunidad la verá cuando este dispositivo sincronice.",
       "status": {
         "going": "Voy",
         "maybe": "Tal vez",
@@ -686,7 +690,7 @@
       "consentRoster": "Quien organiza y quienes confirmaron asistencia o quizás verán tu nombre en la lista de este turno. El resto de esta comunidad solo ve el número de lugares — otras comunidades no ven nada.",
       "consentRemove": "Puedes quitar tu inscripción en cualquier momento, con un toque. Tu nombre desaparece de inmediato. No se notifica a nadie — los planes cambian.",
       "confirmButton": "Anotarme",
-      "recorded": "Ya estás en el turno. Guardado en este dispositivo.",
+      "recorded": "Ya estás en el turno — tu comunidad lo verá cuando este dispositivo sincronice.",
       "removed": "Inscripción quitada.",
       "recordTimeLink": "Registrar el tiempo compartido — {{project}}",
       "recordDirectLink": "Registrar tiempo juntos",
@@ -1155,6 +1159,7 @@
         "fieldTitle": "Título de la tarea",
         "fieldDescription": "¿Qué se necesita hacer?",
         "fieldHours": "Horas estimadas",
+        "fieldHoursHint": "Tu mejor estimación está bien — puedes cambiarla después.",
         "splitHint": "Las tareas grandes cuestan más de empezar y tardan más en tomarse. Si esta se divide de forma natural, las piezas pequeñas son más fáciles de asumir — las de una hora incluso aparecen bajo el filtro del tablón \"Cabe en una hora, más o menos\".",
         "fieldUrgency": "Urgencia",
         "fieldCategory": "Categoría",
@@ -2467,6 +2472,11 @@
       "title": "Aún no has emitido invitaciones",
       "message": "Genera tu primera invitación desde tu perfil.",
       "cta": "Ir al perfil"
+    },
+    "revokeConfirm": {
+      "title": "¿Revocar esta invitación?",
+      "body": "Al revocarla, este enlace deja de funcionar. Si ya se lo enviaste a alguien, esa persona no podrá unirse con él. Siempre puedes generar una invitación nueva después.",
+      "confirm": "Revocar invitación"
     }
   },
   "profile": {
@@ -2534,6 +2544,8 @@
       "empty": "Nada aquí todavía. Cuando des o recibas ayuda, cada intercambio aparecerá como un registro firmado — sellado con las claves de ambas personas para que cualquiera compruebe que es genuino.",
       "helped": "Ayudaste a",
       "received": "Recibiste ayuda de",
+      "helpedPending": "Ayudando a",
+      "receivedPending": "Recibiendo ayuda de",
       "flag": "en revisión comunitaria",
       "flagShort": "Intercambio muy corto — surge para revisión comunitaria.",
       "flagReciprocal": "Intercambio recíproco repetido con la misma persona — surge para revisión comunitaria.",
@@ -2740,9 +2752,14 @@
         "manageAll": "Gestionar todas →"
       },
       "generate": "Generar enlace de invitación",
+      "generateAnother": "Generar otro enlace de invitación",
       "generating": "Generando…",
       "shareTitle": "Comparte este enlace con una sola persona",
+      "openShareTitle": "Tu invitación abierta — nadie la ha usado aún",
+      "openInviteMeta": "Generada {{when}} · Caduca {{date}}",
       "shareNote": "El enlace es de un solo uso y caduca en 14 días. Si se filtra antes de canjearse, revócalo abajo.",
+      "openShareNote": "Este es el mismo enlace de un solo uso que generaste. Compártelo con una persona de confianza — o, si crees que se filtró, revócalo en Gestionar todas y genera uno nuevo.",
+      "generated": "Generada {{when}}",
       "redeemed": "Canjeado {{when}}",
       "redeemedBy": "Canjeada {{when}} por {{name}}",
       "usedAfterRevoke": "Usada {{when}} por {{name}}, después de que la revocaras. Sigue sin admitir a nadie — pero quizá valga una conversación.",

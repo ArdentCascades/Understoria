@@ -36,6 +36,7 @@ import {
 } from "@/db/taskPlans";
 import { getTaskSteps } from "@/content/taskSteps";
 import { downloadIcs, plannedDayIcs } from "@/lib/ics";
+import { useToast } from "@/state/ToastContext";
 import { recordTaskTouch } from "@/lib/lastTouched";
 
 // The claimer's PRIVATE working plan for a task: their own step
@@ -73,6 +74,7 @@ export function TaskPrivateChecklist({
   templateId: string | null;
 }) {
   const { t, i18n } = useTranslation();
+  const { showToast } = useToast();
   const [draft, setDraft] = useState("");
   // Suggested starter steps for this template task, in the viewer's
   // language — null for from-scratch/renamed tasks. Offered (never
@@ -370,7 +372,7 @@ export function TaskPrivateChecklist({
             <button
               type="button"
               className="text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
-              onClick={() =>
+              onClick={() => {
                 downloadIcs(
                   "understoria-planned-day.ics",
                   plannedDayIcs({
@@ -380,8 +382,13 @@ export function TaskPrivateChecklist({
                     description: t("projects.task.plan.icsDescription"),
                     url: `${window.location.origin}/project/${projectId}/task/${taskId}`,
                   }),
-                )
-              }
+                );
+                showToast(
+                  t("toast.icsDaySaved", {
+                    file: "understoria-planned-day.ics",
+                  }),
+                );
+              }}
             >
               {t("projects.task.plan.icsButton")}
             </button>

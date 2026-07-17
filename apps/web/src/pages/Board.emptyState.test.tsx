@@ -199,6 +199,15 @@ describe("Board empty-state differentiation (clarity-copy batch)", () => {
     vi.useRealTimers();
   });
 
+  it("reserves the shared FAB clearance on the page wrapper so covered cards can scroll clear", () => {
+    // Class-presence only — the actual padding lives in index.css
+    // (.pb-fab-clear) and is verified by inspection; jsdom applies no
+    // stylesheet. Guards against the clearance being dropped or
+    // drifting back to a per-page magic number.
+    render(<BoardPage />, "/?tab=needs");
+    expect(container.querySelector(".pb-fab-clear")).not.toBeNull();
+  });
+
   it("NEEDS tab + active search → names the query in the empty state", () => {
     // One in-scope post on the NEEDS tab, but the query won't match.
     mockState.posts = [

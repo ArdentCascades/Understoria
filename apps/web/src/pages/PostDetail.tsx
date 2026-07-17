@@ -191,6 +191,18 @@ export default function PostDetailPage() {
     }
   }
 
+  async function handleClaim() {
+    if (!me) return;
+    const result = await run(() =>
+      claimPost(post!.id, me.publicKey, nodeId, communityNodeIds),
+    );
+    if (result) {
+      // The claimed post leaves the board's open lists immediately —
+      // say where it went so the member doesn't have to hunt for it.
+      showToast(t("toast.claimedInMyCare"));
+    }
+  }
+
   async function handleConfirmComplete() {
     if (!me) return;
     const result = await run(() =>
@@ -464,12 +476,7 @@ export default function PostDetailPage() {
         confirmLabel={t("postDetail.dialogClaimConfirm")}
         confirmingLabel={t("common.working")}
         onCancel={() => setDialog(null)}
-        onConfirm={() =>
-          me &&
-          run(() =>
-            claimPost(post.id, me.publicKey, nodeId, communityNodeIds),
-          )
-        }
+        onConfirm={handleClaim}
       />
 
       <ConfirmDialog

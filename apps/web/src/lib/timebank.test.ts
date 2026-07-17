@@ -167,8 +167,32 @@ describe("timebank.pendingBalanceFor", () => {
         owedBy: "partner",
         category: "other",
         createdAt: 0,
+        pendingSince: null,
       },
     ]);
+  });
+
+  it("carries awaitingSince as pendingSince — the row's own waiting timestamp", () => {
+    // The post is old; the confirmation is recent. The pending row must
+    // expose the WAITING moment, never the post's age (which read as
+    // "the help happened long ago" before anything was confirmed).
+    const posts = [
+      post("1", {
+        postedBy: "a",
+        claimedBy: "b",
+        confirmedBy: ["b"],
+        createdAt: 1_000,
+        awaitingSince: 500_000,
+      }),
+    ];
+    expect(pendingBalanceFor("b", posts).entries[0].pendingSince).toBe(500_000);
+  });
+
+  it("reports pendingSince null on rows that predate awaitingSince", () => {
+    const posts = [
+      post("1", { postedBy: "a", claimedBy: "b", confirmedBy: ["b"] }),
+    ];
+    expect(pendingBalanceFor("b", posts).entries[0].pendingSince).toBeNull();
   });
 
   it("reports credit awaiting the member's own confirmation", () => {
@@ -347,8 +371,27 @@ describe("timebank.pendingTaskCreditFor", () => {
         delta: 2.5,
         category: "other",
         createdAt: 0,
+        pendingSince: null,
       },
     ]);
+  });
+
+  it("carries the mark-complete moment (completedAt) as pendingSince", () => {
+    // createdAt is when the ORGANIZER wrote the task; completedAt is
+    // when this member submitted it. The pending row must expose the
+    // latter (or null on legacy rows — covered by the toEqual above).
+    const tasks = [
+      task("1", {
+        projectId: "p1",
+        assignedTo: "a",
+        status: "awaiting_confirmation",
+        createdAt: 1_000,
+        completedAt: 900_000,
+      }),
+    ];
+    expect(pendingTaskCreditFor("a", tasks).entries[0].pendingSince).toBe(
+      900_000,
+    );
   });
 
   it("sums several awaiting tasks and sorts entries newest first", () => {

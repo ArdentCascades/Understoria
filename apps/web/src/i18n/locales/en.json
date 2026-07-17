@@ -289,7 +289,11 @@
     "projectCreated": "Project created. Add tasks and launch it when you're ready.",
     "exchangeConfirmedPending": "Confirmed. Waiting for the other person to confirm too.",
     "exchangeConfirmedComplete": "Confirmed. Credits have flowed between you.",
-    "autoConfirmed": "Auto-confirmed after {{hours}}h. Credit flowed."
+    "autoConfirmed": "Auto-confirmed after {{hours}}h. Credit flowed.",
+    "claimedInMyCare": "You'll find this under In my care.",
+    "icsDaySaved": "Saved {{file}} — open it to put this day on your phone's calendar.",
+    "icsSaved": "Saved {{file}} — open it to add this event to your phone's calendar.",
+    "icsShiftSaved": "Saved {{file}} — open it to add this shift to your phone's calendar."
   },
   "a11y": {
     "skipToMain": "Skip to main content"
@@ -658,7 +662,7 @@
       "currentLabel": "Your RSVP: {{status}}",
       "changeButton": "Change RSVP",
       "withdrawButton": "Withdraw RSVP",
-      "recorded": "RSVP saved on this device.",
+      "recorded": "RSVP saved — your community will see it once this device syncs.",
       "status": {
         "going": "Going",
         "maybe": "Maybe",
@@ -686,7 +690,7 @@
       "consentRoster": "The organizer and members who RSVP'd going or maybe will see your name on this shift's roster. Everyone else here sees spot counts only — other communities see neither.",
       "consentRemove": "You can remove your signup any time, in one tap. Your name comes off immediately. Nobody is notified — plans change.",
       "confirmButton": "Sign up",
-      "recorded": "You're signed up. Saved on this device.",
+      "recorded": "You're signed up — your community will see it once this device syncs.",
       "removed": "Signup removed.",
       "recordTimeLink": "Record time together — {{project}}",
       "recordDirectLink": "Record time together",
@@ -1155,6 +1159,7 @@
         "fieldTitle": "Task title",
         "fieldDescription": "What needs doing?",
         "fieldHours": "Estimated hours",
+        "fieldHoursHint": "Your best guess is fine — you can change it later.",
         "splitHint": "Bigger tasks are harder to start and slower to get claimed. If this splits naturally, smaller pieces are easier to pick up — hour-sized ones even show under the board's \"Fits in about an hour\" filter.",
         "fieldUrgency": "Urgency",
         "fieldCategory": "Category",
@@ -2467,6 +2472,11 @@
       "title": "No invites issued yet",
       "message": "Generate your first invite from your Profile.",
       "cta": "Go to Profile"
+    },
+    "revokeConfirm": {
+      "title": "Revoke this invite?",
+      "body": "Revoking makes this link stop working. If you've already sent it to someone, they won't be able to join with it. You can always generate a fresh invite afterwards.",
+      "confirm": "Revoke invite"
     }
   },
   "profile": {
@@ -2534,6 +2544,8 @@
       "empty": "Nothing here yet. When you give or receive help, each exchange shows up as a signed record — stamped with both people's keys so anyone can check it's genuine.",
       "helped": "Helped",
       "received": "Received help from",
+      "helpedPending": "Helping",
+      "receivedPending": "Receiving help from",
       "flag": "in community review",
       "flagShort": "Very short exchange — surfaced for community review.",
       "flagReciprocal": "Repeated reciprocal exchange with the same person — surfaced for community review.",
@@ -2740,9 +2752,14 @@
         "manageAll": "Manage all →"
       },
       "generate": "Generate invite link",
+      "generateAnother": "Generate another invite link",
       "generating": "Generating…",
       "shareTitle": "Share this link with one person",
+      "openShareTitle": "Your open invite — no one has used it yet",
+      "openInviteMeta": "Generated {{when}} · Expires {{date}}",
       "shareNote": "The link is single-use and expires in 14 days. If it leaks before redemption, revoke it below.",
+      "openShareNote": "This is the same single-use link you generated. Share it with one person you trust — or, if it may have leaked, revoke it under Manage all and generate a fresh one.",
+      "generated": "Generated {{when}}",
       "redeemed": "Redeemed {{when}}",
       "redeemedBy": "Redeemed {{when}} by {{name}}",
       "usedAfterRevoke": "Used {{when}} by {{name}}, after you revoked it. It still admits no one — but it may be worth a conversation.",

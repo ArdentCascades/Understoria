@@ -358,14 +358,20 @@ export function EventShiftsSection({
                   <button
                     type="button"
                     className="text-xs text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
-                    onClick={() =>
+                    onClick={() => {
+                      const file = icsFilename(
+                        `${shift.label} ${event.title}`,
+                      );
                       downloadIcs(
-                        icsFilename(`${shift.label} ${event.title}`),
+                        file,
                         buildShiftIcs(shift, event, {
                           appUrl: window.location.origin,
                         }),
-                      )
-                    }
+                      );
+                      // Same feedback as the whole-event export: a
+                      // silent download reads as "nothing happened".
+                      showToast(t("toast.icsShiftSaved", { file }));
+                    }}
                   >
                     {t("events.shifts.addToCalendar")}
                   </button>

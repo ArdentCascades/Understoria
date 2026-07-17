@@ -53,6 +53,54 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **The floating buttons stay out of your way on phones.** The green
+  "Post a need / Post an offer" and "Start a project" buttons on the
+  board, and "+ Create event" on the calendar, could park themselves
+  on top of the very thing you were reading — a card title, the
+  "Tended" chip, a calendar row — with no way to move it aside. Both
+  pages now reserve enough room at the bottom of the scroll (and on
+  phones with a home-indicator bar, room that grows with it) so
+  whatever the button is covering can always be scrolled up into the
+  clear. And the search palette no longer shows "↑↓ to move · Enter
+  to open · Esc to close" on a touchscreen — those hints are for
+  keyboards, and now they only appear where there is one.
+- **The app now shows you what just happened.** Three quiet moments
+  that used to leave people guessing now speak up: posting a need (or
+  offer) lands you on the board tab where your new post lives, so you
+  see it appear instead of hunting for it; claiming a post tells you
+  where it went ("You'll find this under In my care" / "Lo
+  encontrarás en A mi cuidado"); and every "Add to calendar" — a
+  whole event, a single shift (on the event page and in In my care),
+  or a task's planned day — names the file it just saved and says to
+  open it to add it to your phone's calendar, instead of downloading
+  in silence. English and Spanish.
+- **The copy now tells the truth about pending things.** Three small
+  honesty fixes in one sweep: the RSVP and shift-signup toasts now say
+  your community will see your answer once the device syncs (instead of
+  "saved on this device", which read as "never sent"); an exchange
+  that's still waiting on a signature reads "Helping Rosa" /
+  "Receiving help from Rosa" with the moment the waiting actually
+  began — never "Helped · 3h ago" for help that hasn't been confirmed
+  yet; and the task form shows its 1-hour estimate up front (with a
+  "your best guess is fine" nudge, and the number springs back if you
+  clear it) instead of quietly filling it in after you save. English
+  and Spanish.
+- **Your invite doesn't vanish when you leave the page — and Help now
+  answers voice-note questions.** Generating an invite showed the
+  link and QR beautifully, but coming back later showed only a bare
+  Generate button and a "1 open" counter — so people reasonably
+  assumed the invite was lost and made a duplicate. The link was
+  never lost: it's rebuilt from the stored invite, so the Profile
+  section now greets you with your open invite — when it was made,
+  when it expires, and the same Reveal / Copy / QR buttons — and the
+  button honestly says "Generate another". On the Manage-all page,
+  every invite now says when you generated it (two open invites are
+  no longer identical twins), and Revoke asks first, in plain words:
+  the link stops working, and anyone you already sent it to won't be
+  able to join with it. And in Help, a new FAQ entry finally answers
+  the question our mic-denied testers actually had — how voice notes
+  work, why voice on Board posts is heard by the whole community,
+  and how to un-deny a microphone permission. English and Spanish.
 - **"Revisit the welcome" opens the welcome tour again.** The link in
   Profile → Learn is there so members can re-read the intro (and its
   beta notice) whenever they like, but on an onboarded device it just

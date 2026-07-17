@@ -391,6 +391,45 @@ describe("ProjectDetail — AddTaskForm disclosure", () => {
     expect(titleInput).not.toBeNull();
     expect(document.activeElement).toBe(titleInput);
   });
+
+  it("shows the default estimate up front and restores it when the field is cleared", async () => {
+    render();
+    await flush();
+    clickButton("+ Add task");
+
+    const heading = Array.from(container.querySelectorAll("h2")).find(
+      (h) => (h.textContent ?? "").trim() === "Add a task",
+    );
+    const section = heading!.closest("section")!;
+    const hoursInput = section.querySelector<HTMLInputElement>(
+      'input[type="number"]',
+    );
+    expect(hoursInput).not.toBeNull();
+
+    // The default is VISIBLE, not a silent save-time guess — the member
+    // sees the "1" before the task is created — and the field carries
+    // the low-friction reassurance hint.
+    expect(hoursInput!.value).toBe("1");
+    expect(section.textContent).toContain(
+      "Your best guess is fine — you can change it later.",
+    );
+
+    // Clearing the field and leaving it restores the visible default
+    // instead of silently writing it back at save time.
+    const setValue = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )!.set!;
+    act(() => {
+      setValue.call(hoursInput, "");
+      hoursInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(hoursInput!.value).toBe("");
+    act(() => {
+      hoursInput!.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    });
+    expect(hoursInput!.value).toBe("1");
+  });
 });
 
 describe("ProjectDetail — announcement compose disclosure", () => {

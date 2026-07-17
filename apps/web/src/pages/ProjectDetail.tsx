@@ -2234,8 +2234,18 @@ function AddTaskForm({
               className="input"
               value={hours}
               onChange={(e) => setHours(e.target.value)}
+              onBlur={() => {
+                // A cleared field must never silently become the stored
+                // default at save time — restore the visible default so
+                // the member sees the number the task will carry.
+                const parsed = Number.parseFloat(hours);
+                if (!Number.isFinite(parsed) || parsed <= 0) setHours("1");
+              }}
               required
             />
+            <span className="text-xs text-moss-600 dark:text-moss-300">
+              {t("projects.task.addTask.fieldHoursHint")}
+            </span>
             {/* Authoring-time guidance, never a gate: big tasks are
                 harder to start and slower to get claimed. */}
             {suggestSplitting(hours) && (

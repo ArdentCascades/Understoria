@@ -648,6 +648,15 @@ describe("CalendarPage", () => {
     expect(fab?.getAttribute("aria-label")).toBe("Create an event");
   });
 
+  it("reserves the shared FAB clearance on the page wrapper so covered rows can scroll clear", () => {
+    // Class-presence only — the actual padding lives in index.css
+    // (.pb-fab-clear) and is verified by inspection; jsdom applies no
+    // stylesheet. Guards against the clearance being dropped or
+    // drifting back to a per-page magic number.
+    render(<CalendarPage />);
+    expect(container.querySelector(".pb-fab-clear")).not.toBeNull();
+  });
+
   // Force the agenda view (jsdom defaults innerWidth to 1024 → month).
   // The agenda lists every entry under day headers, which is what the
   // multi-day cases below assert against.

@@ -17,6 +17,7 @@ import { humanizeError } from "@/lib/humanizeError";
 import { formatDeadline, formatRelativeTime, shortKey } from "@/lib/format";
 import { revokeInvite } from "@/db/invites";
 import type { InviteRow } from "@/db/database";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { InviteShareSheet } from "@/components/InviteShareSheet";
 
@@ -56,6 +57,13 @@ export default function InvitesPage() {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
+  // Revoke asks first (2026-07 usability run: the button fired
+  // instantly, one slip away from killing a link already handed to
+  // someone). Holds the token of the row awaiting confirmation;
+  // null = dialog closed.
+  const [confirmRevokeToken, setConfirmRevokeToken] = useState<
+    string | null
+  >(null);
   // QR re-display state. `qrUrl` is the invite URL to show; null
   // closes the sheet. Per-row Show QR sets it; the sheet's onClose
   // clears it.
@@ -101,6 +109,7 @@ export default function InvitesPage() {
       setError(humanizeError(err));
     } finally {
       setRevokingToken(null);
+      setConfirmRevokeToken(null);
     }
   }
 
@@ -168,6 +177,15 @@ export default function InvitesPage() {
                 <div className="text-sm font-medium">
                   {t(INVITE_STATUS_KEY[inv.status])}
                 </div>
+                {/* When it was generated, on every row — two open
+                    invites with the same expiry were otherwise
+                    indistinguishable, so members couldn't tell which
+                    one they'd handed to whom. */}
+                <div className="text-xs text-moss-600 dark:text-moss-300">
+                  {t("profile.invites.generated", {
+                    when: formatRelativeTime(inv.createdAt),
+                  })}
+                </div>
                 <div className="text-xs text-moss-600 dark:text-moss-300">
                   {inv.status === "redeemed"
                     ? inv.redeemedBy
@@ -215,7 +233,7 @@ export default function InvitesPage() {
                   <button
                     type="button"
                     className="btn-ghost text-xs text-rose-700 dark:text-rose-300"
-                    onClick={() => handleRevoke(inv.token)}
+                    onClick={() => setConfirmRevokeToken(inv.token)}
                     disabled={revokingToken === inv.token}
                     aria-busy={revokingToken === inv.token}
                   >
@@ -236,6 +254,24 @@ export default function InvitesPage() {
         shareTitle={t("profile.invites.shareSheet.shareTitle")}
         shareText={t("profile.invites.shareSheet.shareText")}
         onClose={() => setQrUrl(null)}
+      />
+
+      {/* Revoking is irreversible for the link's holder, so it goes
+          through the house confirm dialog with the consequence in
+          plain words. onConfirm returns the promise so the dialog
+          shows its in-flight state (buttons disabled). */}
+      <ConfirmDialog
+        open={confirmRevokeToken !== null}
+        title={t("invitesPage.revokeConfirm.title")}
+        description={t("invitesPage.revokeConfirm.body")}
+        confirmLabel={t("invitesPage.revokeConfirm.confirm")}
+        confirmingLabel={t("common.working")}
+        cancelLabel={t("common.cancel")}
+        tone="caution"
+        onConfirm={() =>
+          confirmRevokeToken && handleRevoke(confirmRevokeToken)
+        }
+        onCancel={() => setConfirmRevokeToken(null)}
       />
     </div>
   );

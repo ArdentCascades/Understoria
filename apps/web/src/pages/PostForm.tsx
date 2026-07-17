@@ -27,6 +27,7 @@ import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { cancelPost, createPost } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
+import { tabToParam } from "@/lib/boardTab";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { MarkdownHint } from "@/components/MarkdownHint";
@@ -258,7 +259,11 @@ export default function PostFormPage() {
       showToast(
         t(type === "NEED" ? "toast.needPosted" : "toast.offerPosted"),
       );
-      navigate("/");
+      // Land on the board tab that carries what was just posted — a
+      // NEED on the Needs tab, an OFFER on Offers. Seeing your own
+      // post appear IS the confirmation; the board's default landing
+      // tab is Projects, which would hide it.
+      navigate(`/?tab=${tabToParam(type)}`);
     } catch (err) {
       setError(humanizeError(err));
     } finally {
