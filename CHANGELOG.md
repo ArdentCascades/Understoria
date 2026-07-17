@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Voice notes in messages** (voice workstream #471/#472) — tap the
+  microphone in a conversation to record up to 45 seconds, review,
+  and send. The recording travels INSIDE the sealed end-to-end
+  envelope: your community server relays one more opaque encrypted
+  blob and never learns the message carried audio at all. Recording
+  negotiates the right format per platform (Opus/WebM on most
+  browsers, AAC/MP4 on iPhones); playback is a familiar audio
+  player either way. Older app versions show a plain "voice
+  message" line instead of breaking. Server-side, the only changes
+  are size limits (a per-route 640 KB body cap on POST /messages and
+  a matching envelope ceiling) — no new routes, tables, or data
+  kinds. Voice rows are covered by panic purge via the messages
+  table, never appear in message search, and reactions work on them
+  like any message (docs/message-relay.md §10).
 - **Emoji reactions on messages** — press and hold a message (or
   right-click, or use the 🙂+ button that appears on hover and in
   the keyboard tab order) to react with one of six emoji; pick your

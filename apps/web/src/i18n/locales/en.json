@@ -794,6 +794,21 @@
       "remove": "Remove your {{emoji}} reaction",
       "reactedBy": "{{name}} reacted {{emoji}}",
       "you": "You"
+    },
+    "voice": {
+      "record": "Record a voice note",
+      "closeRecorder": "Close the voice recorder",
+      "recorderLabel": "Voice note recorder",
+      "requesting": "Asking for the microphone…",
+      "micDenied": "We could not use the microphone. Check your browser or phone settings and allow the microphone for this site, then try again.",
+      "recording": "Recording… {{elapsed}} / {{max}}",
+      "stop": "Stop",
+      "sendClip": "Send voice note",
+      "reRecord": "Re-record",
+      "discard": "Discard",
+      "playerLabel": "Voice message, about {{seconds}} seconds",
+      "durationLine": "Voice note · about {{seconds}}s",
+      "playbackFailed": "This voice note could not be played on this device."
     }
   },
   "projects": {

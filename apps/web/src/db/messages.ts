@@ -20,6 +20,7 @@ import {
   decodeMessageBody,
   encodeMessageBody,
   encodeReactionBody,
+  encodeVoiceBody,
 } from "@/lib/messageEnvelope";
 import {
   BLOCKED_ACTION_MESSAGE,
@@ -110,6 +111,10 @@ export interface DecryptedMessage extends DirectMessage {
    *  than a chat message. Reaction rows never render as bubbles —
    *  getConversation folds them into the target's `reactions`. */
   reaction?: { reactsTo: string; emoji: string };
+  /** Present when this row is a voice note (v3 envelope): the
+   *  decrypted recording, base64. `plaintext` carries the old-client
+   *  fallback line; the thread renders a player instead. */
+  voice?: { mime: string; durationMs: number; audio: string };
   /** Reactions other rows aimed at THIS message: one entry per
    *  reacting member, their latest choice winning. Assembled by
    *  getConversation; empty/absent when nobody has reacted. */
@@ -139,6 +144,7 @@ function decryptAndDecode(
     plaintext: body.text,
     ...(body.aboutPostId ? { aboutPostId: body.aboutPostId } : {}),
     ...(body.reaction ? { reaction: body.reaction } : {}),
+    ...(body.voice ? { voice: body.voice } : {}),
   };
 }
 
@@ -191,6 +197,58 @@ export async function getConversation(
     return rows.map((m) => ({ ...m, plaintext: null }));
   }
   return foldReactions(rows.map((m) => decryptAndDecode(m, sk, otherKey)));
+}
+
+/**
+ * Send a voice note (docs/message-relay.md §10). Structurally a
+ * sendMessage: the recording rides base64 INSIDE the sealed
+ * envelope, so the relay carries one more opaque blob — the server
+ * never learns the message held audio, let alone what was said.
+ * Same blocked-party gate, same signed relay record, same outbox.
+ */
+export async function sendVoiceMessage(
+  senderKey: string,
+  recipientKey: string,
+  audio: { base64: string; mime: string; durationMs: number },
+): Promise<DirectMessage> {
+  if (await isMutuallyBlocked(senderKey, recipientKey)) {
+    throw new Error(BLOCKED_ACTION_MESSAGE);
+  }
+  const sk = await getSecretKey(senderKey);
+  const body = encodeVoiceBody(audio.base64, audio.mime, audio.durationMs);
+  const encrypted = encryptMessage(body, sk, recipientKey);
+  const msg: DirectMessage = {
+    id: uuid(),
+    conversationId: conversationId(senderKey, recipientKey),
+    senderKey,
+    recipientKey,
+    nonce: encrypted.nonce,
+    ciphertext: encrypted.ciphertext,
+    createdAt: Date.now(),
+  };
+  await db.messages.put(msg);
+  const envelope: RelayedMessage = {
+    id: msg.id,
+    senderKey,
+    recipientKey,
+    nonce: msg.nonce,
+    ciphertext: msg.ciphertext,
+    createdAt: msg.createdAt,
+    signature: sign(
+      canonicalRelayedMessagePayload({
+        id: msg.id,
+        senderKey,
+        recipientKey,
+        nonce: msg.nonce,
+        ciphertext: msg.ciphertext,
+        createdAt: msg.createdAt,
+      }),
+      sk,
+    ),
+  };
+  const queued = await enqueueMessageOutbox(envelope);
+  if (queued) void flushOutboxNow().catch(() => {});
+  return msg;
 }
 
 /**
@@ -329,8 +387,10 @@ export async function searchAllMessages(
     // must not match envelope JSON syntax.
     const msg = decryptAndDecode(m, sk, otherKey);
     // Reaction rows aren't thread messages — a search for "✕" or an
-    // emoji must not surface them as hits.
-    if (msg.reaction) continue;
+    // emoji must not surface them as hits. Voice rows carry only the
+    // old-client fallback line as text; matching on it would surface
+    // every voice note for a query like "voice".
+    if (msg.reaction || msg.voice) continue;
     if (matchesQuery(msg.plaintext, query)) {
       hits.push({ otherKey, message: msg });
     }

@@ -794,6 +794,21 @@
       "remove": "Quitar tu reacción {{emoji}}",
       "reactedBy": "{{name}} reaccionó {{emoji}}",
       "you": "Tú"
+    },
+    "voice": {
+      "record": "Grabar una nota de voz",
+      "closeRecorder": "Cerrar la grabadora de voz",
+      "recorderLabel": "Grabadora de notas de voz",
+      "requesting": "Pidiendo el micrófono…",
+      "micDenied": "No pudimos usar el micrófono. Revisa los ajustes de tu navegador o teléfono, permite el micrófono para este sitio y vuelve a intentar.",
+      "recording": "Grabando… {{elapsed}} / {{max}}",
+      "stop": "Detener",
+      "sendClip": "Enviar nota de voz",
+      "reRecord": "Volver a grabar",
+      "discard": "Descartar",
+      "playerLabel": "Mensaje de voz, aproximadamente {{seconds}} segundos",
+      "durationLine": "Nota de voz · aprox. {{seconds}}s",
+      "playbackFailed": "Esta nota de voz no se pudo reproducir en este dispositivo."
     }
   },
   "projects": {

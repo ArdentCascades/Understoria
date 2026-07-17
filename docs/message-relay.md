@@ -219,3 +219,39 @@ re-decided:
   path) to open a six-emoji picker; picking sends, picking your
   current emoji clears. Escape closes. The palette is deliberately
   small: a shared vocabulary, six 44px targets.
+
+## 10. Voice notes (2026-07, voice workstream V1+V2 — #471/#472)
+
+A voice note is a normal sealed `RelayedMessage` whose PLAINTEXT is a
+v3 envelope — `{"v":3,"kind":"voice","text":"🎙️ …","mime":…,"durationMs":…,"audio":"<base64>"}`
+(`lib/messageEnvelope.ts`). The recording travels INLINE, inside the
+ciphertext: the node relays one more opaque blob and never learns the
+message carried audio at all — §6 unchanged. Consequences:
+
+- **No new server surface.** The only server-side changes are sizing:
+  a per-route `bodyLimit` of 640 KB on `POST /messages` (same
+  pattern as `/device-link`) and the envelope validator's ciphertext
+  cap raised to 512 K chars — sized to a 45-second clip. Membership
+  gate, signature check, retention sweep, recipient-proof GET all
+  apply as-is.
+- **Codec reality:** `MediaRecorder` produces Opus/WebM on
+  Chromium/Firefox and AAC/MP4 on iOS Safari. `pickRecorderMime`
+  (components/VoiceRecorder.tsx) negotiates; the chosen mime travels
+  inside the envelope; playback is a plain `<audio>` element, which
+  handles both.
+- **Length cap:** 45 s, auto-stop keeps the take (review → send).
+  Bitrate is requested at 32 kbps, so a max clip is ~180 KB raw.
+- **Old clients degrade** to the envelope's `text` fallback line via
+  the v>1 decode path.
+- **Purge:** voice rows live in the messages table, which soft purge
+  clears entirely and hard purge wipes — no new store, no new purge
+  surface.
+- **Plaintext exposure:** the decrypted audio exists in the clear
+  only transiently — an in-memory Blob + object URL for the lifetime
+  of the player component, revoked on unmount.
+- **Search/preview:** voice rows never match message search; the
+  conversations list previews them as the fallback line.
+
+Deliberately NOT here (deferred to the voice tracking issue #479):
+content-addressed blob storage and fetch-by-reference (V8), board
+audio (V4), transcription (V7).

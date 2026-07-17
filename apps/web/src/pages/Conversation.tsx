@@ -27,8 +27,11 @@ import {
   getConversation,
   sendMessage,
   sendReaction,
+  sendVoiceMessage,
   type DecryptedMessage,
 } from "@/db/messages";
+import { VoicePlayer } from "@/components/VoicePlayer";
+import { VoiceRecorder, type CapturedClip } from "@/components/VoiceRecorder";
 import { isBlocked } from "@/db/blocks";
 import { pullFederatedMessages } from "@/lib/federationSync";
 import { SYNC_KICK_EVENT } from "@/lib/syncLoop";
@@ -323,6 +326,29 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
     });
   }, [matchIds, activeMatchIdx, messages, reduced]);
 
+  // Voice notes (docs/message-relay.md §10): the composer's mic
+  // button swaps in the recorder; a captured clip sends as a sealed
+  // v3 envelope — same error posture as a text send.
+  const [recordingVoice, setRecordingVoice] = useState(false);
+  const handleVoiceCapture = useCallback(
+    async (clip: CapturedClip) => {
+      if (!currentMember) return;
+      setError(null);
+      try {
+        await sendVoiceMessage(currentMember.publicKey, otherKey, clip);
+        setRecordingVoice(false);
+        await loadMessages();
+      } catch (err) {
+        setError(
+          err instanceof Error && err.message.includes("locked")
+            ? t("messages.lockedError")
+            : t("messages.sendError"),
+        );
+      }
+    },
+    [currentMember, otherKey, loadMessages, t],
+  );
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!currentMember || !text.trim() || sending) return;
@@ -556,15 +582,23 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       {" →"}
                     </Link>
                   )}
-                  <p className="whitespace-pre-wrap">
-                    {m.plaintext === null ? (
-                      t("messages.decryptionFailed")
-                    ) : isSearching ? (
-                      <HighlightedText text={m.plaintext} query={query} />
-                    ) : (
-                      m.plaintext
-                    )}
-                  </p>
+                  {m.voice ? (
+                    <VoicePlayer
+                      audioBase64={m.voice.audio}
+                      mime={m.voice.mime}
+                      durationMs={m.voice.durationMs}
+                    />
+                  ) : (
+                    <p className="whitespace-pre-wrap">
+                      {m.plaintext === null ? (
+                        t("messages.decryptionFailed")
+                      ) : isSearching ? (
+                        <HighlightedText text={m.plaintext} query={query} />
+                      ) : (
+                        m.plaintext
+                      )}
+                    </p>
+                  )}
                   <p className="mt-1 text-right text-xs opacity-60">
                     {formatRelativeTime(m.createdAt)}
                   </p>
@@ -681,6 +715,15 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         </div>
       )}
 
+      {recordingVoice && (
+        <div className="mt-3">
+          <VoiceRecorder
+            onCapture={handleVoiceCapture}
+            onCancel={() => setRecordingVoice(false)}
+          />
+        </div>
+      )}
+
       <form onSubmit={handleSend} className="mt-3 flex gap-2">
         <label className="flex-1">
           <span className="sr-only">{t("messages.inputLabel")}</span>
@@ -700,6 +743,19 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             }}
           />
         </label>
+        <button
+          type="button"
+          className="btn-ghost min-h-[44px] min-w-[44px] self-end text-lg"
+          aria-label={
+            recordingVoice
+              ? t("messages.voice.closeRecorder")
+              : t("messages.voice.record")
+          }
+          aria-pressed={recordingVoice}
+          onClick={() => setRecordingVoice((v) => !v)}
+        >
+          🎙️
+        </button>
         <button
           type="submit"
           className="btn-primary self-end"

@@ -163,10 +163,14 @@ const MESSAGE_STRING_FIELDS = [
   "signature",
 ] as const;
 
-/** Composer caps plaintext at 5 000 chars; the envelope JSON plus
- *  NaCl overhead plus base64 expansion lands well under this. Anything
- *  bigger is abuse, not conversation. */
-const MESSAGE_CIPHERTEXT_MAX_CHARS = 16_384;
+/** Sized for the largest legitimate envelope: a 45-second voice
+ *  note (message-relay.md §10) is ~180 KB of audio → ~240 KB as a
+ *  v3 plaintext envelope → ~330 KB after NaCl overhead and base64
+ *  expansion. 512 K chars gives honest headroom while the per-route
+ *  bodyLimit (640 KB) stays the hard transport ceiling. Text
+ *  messages remain capped far smaller by the composer (5 000 chars);
+ *  anything bigger than this constant is abuse, not conversation. */
+const MESSAGE_CIPHERTEXT_MAX_CHARS = 512 * 1024;
 
 export function parseRelayedMessage(
   input: unknown,
