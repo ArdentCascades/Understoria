@@ -85,6 +85,15 @@ export const SURFACES: Record<string, Surface> = {
     keyColumn: "voucher_key",
   },
   "/posts": { table: "posts", keyField: "postedBy", keyColumn: "posted_by" },
+  // Voice-board audio blobs (#474): the per-key cap is the disk
+  // backstop for the largest rows the node stores (up to 400 KB of
+  // audio each); the keyField doubles as the write-membership gate's
+  // attribution — only members can upload recordings.
+  "/audio-blobs": {
+    table: "audio_blobs",
+    keyField: "uploaderKey",
+    keyColumn: "uploader_key",
+  },
   // Message relay (docs/message-relay.md §4.1): per-sender cap is the
   // spam backstop; the removed-author guard reuses this entry so a
   // removed member's pen is out of the DM surface too.

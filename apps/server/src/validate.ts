@@ -42,6 +42,10 @@ import {
   type TaskComment,
   type TaskState,
 } from "@understoria/shared/types";
+import {
+  AUDIO_MAX_DURATION_MS,
+  isAllowedAudioMime,
+} from "@understoria/shared/crypto";
 import type { PostRecord } from "./db.js";
 
 /**
@@ -454,6 +458,37 @@ export function parsePost(input: unknown): ParsePostResult {
   if ((r.createdAt as number) > oneDayFromNow) {
     return { ok: false, error: "createdAt is too far in the future" };
   }
+  // Voice board (#474): optional signed audio reference. Must be
+  // passed through when present — canonicalPostPayload includes it,
+  // so dropping it here would break every voice post's signature.
+  let audio: PostRecord["audio"];
+  if (r.audio !== undefined) {
+    if (typeof r.audio !== "object" || r.audio === null) {
+      return { ok: false, error: "audio must be an object when present" };
+    }
+    const a = r.audio as Record<string, unknown>;
+    if (typeof a.blobId !== "string" || !/^[0-9a-f]{64}$/.test(a.blobId)) {
+      return {
+        ok: false,
+        error: "audio.blobId must be 64 lowercase hex chars",
+      };
+    }
+    if (typeof a.mime !== "string" || !isAllowedAudioMime(a.mime)) {
+      return { ok: false, error: "audio.mime is not an allowed audio type" };
+    }
+    if (
+      typeof a.durationMs !== "number" ||
+      !Number.isInteger(a.durationMs) ||
+      a.durationMs <= 0 ||
+      a.durationMs > AUDIO_MAX_DURATION_MS
+    ) {
+      return {
+        ok: false,
+        error: "audio.durationMs must be a positive integer within bounds",
+      };
+    }
+    audio = { blobId: a.blobId, mime: a.mime, durationMs: a.durationMs };
+  }
   return {
     ok: true,
     value: {
@@ -469,6 +504,10 @@ export function parsePost(input: unknown): ParsePostResult {
       expiresAt: r.expiresAt as number | null,
       locationZone: r.locationZone as string,
       nodeId: r.nodeId as string,
+      // Spread keeps the key ABSENT on text posts — the canonical
+      // payload (and thus the signature) distinguishes absent from
+      // undefined-valued.
+      ...(audio ? { audio } : {}),
       signature: r.signature as string,
     },
   };

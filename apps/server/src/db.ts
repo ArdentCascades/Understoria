@@ -134,6 +134,7 @@ export type PostRecord = Pick<
   | "expiresAt"
   | "locationZone"
   | "nodeId"
+  | "audio"
   | "signature"
 >;
 
@@ -147,6 +148,28 @@ export interface PostStore {
    *  to finalize (roles / hours / category), so the system key can
    *  never confirm a fabricated exchange against an arbitrary victim. */
   get(id: string): PostRecord | null;
+}
+
+/**
+ * Storage for voice-board audio blobs (#474, schema v30). Content-
+ * addressed: `blobId` is `audioBlobId(bytes)`, recomputed by the route
+ * before insert, so a stored row can never disagree with its bytes and
+ * re-uploads dedup on the primary key. Append-only in this slice —
+ * pruning/GC of unreferenced blobs is a V8 (#478) concern, and the
+ * insert-cap guard bounds growth meanwhile.
+ */
+export interface AudioBlobStore {
+  insert(blob: {
+    blobId: string;
+    uploaderKey: string;
+    mime: string;
+    bytes: Buffer;
+    signature: string;
+    createdAt: number;
+  }): void;
+  get(blobId: string): { mime: string; bytes: Buffer } | null;
+  has(blobId: string): boolean;
+  count(): number;
 }
 
 /**
@@ -1398,6 +1421,43 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '29')",
     ).run();
   }
+
+  if (current < 30) {
+    // Schema v30 — voice board (#474): content-addressed audio blobs
+    // plus the optional audio reference on posts.
+    //
+    // `audio_blobs.blob_id` IS the content address (`audioBlobId(bytes)`
+    // in @understoria/shared/crypto — domain-separated SHA-512/256,
+    // hex), so a row can never disagree with its bytes: the route
+    // recomputes the hash on upload and refuses mismatches, and
+    // identical re-uploads dedup naturally on the primary key. Blobs
+    // do NOT ride the peer-pull legs in this slice — a federated post
+    // that references a recording its node doesn't hold plays as
+    // "recording unavailable" until V8 (issue #478) federates blobs.
+    //
+    // The posts columns store the SIGNED audio reference (blobId +
+    // mime + durationMs). They are nullable — every existing text
+    // post keeps its row and its signature untouched.
+    db.exec(`
+      CREATE TABLE audio_blobs (
+        blob_id      TEXT PRIMARY KEY,
+        uploader_key TEXT NOT NULL,
+        mime         TEXT NOT NULL,
+        bytes        BLOB NOT NULL,
+        byte_length  INTEGER NOT NULL,
+        signature    TEXT NOT NULL,
+        created_at   INTEGER NOT NULL
+      );
+      CREATE INDEX audio_blobs_uploader_idx
+        ON audio_blobs (uploader_key);
+      ALTER TABLE posts ADD COLUMN audio_blob_id TEXT;
+      ALTER TABLE posts ADD COLUMN audio_mime TEXT;
+      ALTER TABLE posts ADD COLUMN audio_duration_ms INTEGER;
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '30')",
+    ).run();
+  }
 }
 
 /**
@@ -1695,10 +1755,12 @@ export function createPostStore(db: DatabaseType): PostStore {
   const insertStmt = db.prepare(`
     INSERT INTO posts (
       id, type, category, title, description, estimated_hours, urgency,
-      posted_by, created_at, expires_at, location_zone, node_id, signature
+      posted_by, created_at, expires_at, location_zone, node_id,
+      audio_blob_id, audio_mime, audio_duration_ms, signature
     ) VALUES (
       @id, @type, @category, @title, @description, @estimatedHours, @urgency,
-      @postedBy, @createdAt, @expiresAt, @locationZone, @nodeId, @signature
+      @postedBy, @createdAt, @expiresAt, @locationZone, @nodeId,
+      @audioBlobId, @audioMime, @audioDurationMs, @signature
     )
   `);
   const hasStmt = db.prepare("SELECT 1 FROM posts WHERE id = ?");
@@ -1720,6 +1782,9 @@ export function createPostStore(db: DatabaseType): PostStore {
         expiresAt: post.expiresAt,
         locationZone: post.locationZone,
         nodeId: post.nodeId,
+        audioBlobId: post.audio?.blobId ?? null,
+        audioMime: post.audio?.mime ?? null,
+        audioDurationMs: post.audio?.durationMs ?? null,
         signature: post.signature,
       });
     },
@@ -1761,6 +1826,9 @@ interface PostRowSqlite {
   expires_at: number | null;
   location_zone: string;
   node_id: string;
+  audio_blob_id: string | null;
+  audio_mime: string | null;
+  audio_duration_ms: number | null;
   signature: string;
 }
 
@@ -1778,7 +1846,60 @@ function rowToPost(r: PostRowSqlite): PostRecord {
     expiresAt: r.expires_at,
     locationZone: r.location_zone,
     nodeId: r.node_id,
+    // The key must be ABSENT (not undefined/null) on text posts so
+    // GET /posts serializes pre-audio rows byte-compatibly and
+    // verifyPost re-derives the exact signed payload.
+    ...(r.audio_blob_id !== null && r.audio_mime !== null
+      ? {
+          audio: {
+            blobId: r.audio_blob_id,
+            mime: r.audio_mime,
+            durationMs: r.audio_duration_ms ?? 0,
+          },
+        }
+      : {}),
     signature: r.signature,
+  };
+}
+
+export function createAudioBlobStore(db: DatabaseType): AudioBlobStore {
+  const insertStmt = db.prepare(`
+    INSERT OR IGNORE INTO audio_blobs (
+      blob_id, uploader_key, mime, bytes, byte_length, signature, created_at
+    ) VALUES (
+      @blobId, @uploaderKey, @mime, @bytes, @byteLength, @signature, @createdAt
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT mime, bytes FROM audio_blobs WHERE blob_id = ?",
+  );
+  const hasStmt = db.prepare("SELECT 1 FROM audio_blobs WHERE blob_id = ?");
+  const countStmt = db.prepare("SELECT COUNT(*) AS n FROM audio_blobs");
+
+  return {
+    insert(blob) {
+      insertStmt.run({
+        blobId: blob.blobId,
+        uploaderKey: blob.uploaderKey,
+        mime: blob.mime,
+        bytes: blob.bytes,
+        byteLength: blob.bytes.length,
+        signature: blob.signature,
+        createdAt: blob.createdAt,
+      });
+    },
+    get(blobId) {
+      const row = getStmt.get(blobId) as
+        | { mime: string; bytes: Buffer }
+        | undefined;
+      return row ? { mime: row.mime, bytes: row.bytes } : null;
+    },
+    has(blobId) {
+      return hasStmt.get(blobId) !== undefined;
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
   };
 }
 

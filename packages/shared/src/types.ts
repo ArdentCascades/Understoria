@@ -509,6 +509,37 @@ export interface InviteAnnouncement extends InviteAnnouncementPayload {
 }
 
 /**
+ * Voice-board audio blob upload (#474) — the signed envelope a member's
+ * device POSTs to `/audio-blobs` before publishing a post that
+ * references the recording.
+ *
+ * The signature covers {blobId, uploaderKey, mime} only — NOT the
+ * base64 audio itself. That is deliberate: `blobId` is the content
+ * address (`audioBlobId(bytes)`), so the exact bytes are already bound
+ * transitively — the server recomputes the hash of what actually
+ * arrived and refuses a mismatch. Signing half a megabyte of base64
+ * again would buy nothing.
+ */
+export interface AudioBlobUploadPayload {
+  /** Content address of the audio bytes — `audioBlobId(bytes)`. */
+  blobId: string;
+  /** The uploading member's Ed25519 public key (the signer). */
+  uploaderKey: string;
+  /** Recorded container/codec, e.g. "audio/webm;codecs=opus" or
+   *  "audio/mp4" (iOS Safari records AAC). Allowlisted on the wire. */
+  mime: string;
+}
+
+export interface AudioBlobUpload extends AudioBlobUploadPayload {
+  /** The audio bytes, standard base64. Transport only — bound by
+   *  blobId, not by the signature (see the payload doc above). */
+  audio: string;
+  /** Ed25519 detached signature by `uploaderKey` over
+   *  `canonicalAudioBlobUploadPayload(payload)`. */
+  signature: string;
+}
+
+/**
  * Lightweight claim notification — pushed to the outbox when a member
  * claims a cross-node post so the poster's node learns about it.
  * Unsigned for v1 (the exchange itself is the authoritative signed
