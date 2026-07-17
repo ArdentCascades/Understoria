@@ -2788,6 +2788,15 @@
       "completedHard": "Borrado duro completado en {{ms}}ms.",
       "spokenSoft": "Atención. Esto borrará nombres y texto personal de este dispositivo. No se puede deshacer. Presiona el botón de confirmar para continuar, o cancela.",
       "spokenHard": "Atención. Esto borrará todo en este dispositivo, incluyendo tus claves, y no se puede deshacer. Presiona el botón de confirmar para continuar, o cancela."
+    },
+    "readAloud": {
+      "title": "Leer en voz alta",
+      "intro": "Cuando está activado, la app dice el nombre de cualquier botón o campo que toques o enfoques, usando la voz integrada de tu propio dispositivo — nada se envía a ningún lado. Útil si leer en pantalla resulta difícil.",
+      "turnOn": "Activar leer en voz alta",
+      "turnOff": "Desactivar leer en voz alta",
+      "spokenOn": "Leer en voz alta está activado. Toca cualquier botón para escuchar su nombre.",
+      "spokenOff": "Leer en voz alta está desactivado.",
+      "unsupported": "El navegador de este dispositivo no ofrece voz integrada, así que leer en voz alta no está disponible aquí."
     }
   },
   "help": {

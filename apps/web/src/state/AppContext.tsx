@@ -394,10 +394,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       stopNudge = startNudgeStream();
     });
+    // Read-aloud mode (#473): honor the per-device preference and
+    // follow live toggles from Settings. On-device speech only.
+    let stopReadAloud: (() => void) | undefined;
+    void import("@/lib/readAloud").then(({ initReadAloud }) => {
+      if (cancelled) return;
+      stopReadAloud = initReadAloud(() =>
+        document.documentElement.lang?.startsWith("es") ? "es" : "en",
+      );
+    });
     return () => {
       cancelled = true;
       if (stop) stop();
       if (stopNudge) stopNudge();
+      if (stopReadAloud) stopReadAloud();
     };
   }, [ready]);
 
