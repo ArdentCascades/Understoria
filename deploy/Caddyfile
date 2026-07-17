@@ -35,12 +35,26 @@
 	# directive doesn't have broad enough browser support yet to be
 	# our floor. CSS injection is materially less weaponizable than
 	# script injection, so this is the right cost.
+	#
+	# media-src includes blob: for voice notes and voice posts
+	# (docs/message-relay.md §10, docs/voice-board.md): audio is
+	# decrypted/fetched into memory and played through a blob: object
+	# URL so the recording never exists at a fetchable same-origin URL.
+	# Without this directive media falls back to default-src 'self' and
+	# every player fails with "could not be played on this device" —
+	# only in production, since dev servers send no CSP.
+	#
+	# Permissions-Policy allows microphone for THIS origin only
+	# (microphone=(self)) — the voice recorder needs getUserMedia.
+	# A bare microphone=() blocks recording outright in Chromium
+	# browsers; iOS Safari ignores the header for top-level pages,
+	# which is how the gap shipped unnoticed.
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-mVpOu/C1dIKbTCswgkrVcbSGV23SQYCVB6nk5bCeuno='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Permissions-Policy "geolocation=(), camera=(), microphone=(self), payment=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-mVpOu/C1dIKbTCswgkrVcbSGV23SQYCVB6nk5bCeuno='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 

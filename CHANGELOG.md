@@ -96,6 +96,21 @@ include breaking changes.
   stack-trace sentence.
 
 ### Fixed
+- **Voice notes said "could not be played on this device" on every
+  deployed instance** — for sender and receiver alike. The cause was
+  never the app: the bundled reverse-proxy config (`deploy/Caddyfile`)
+  sends a Content-Security-Policy with no `media-src`, and voice
+  audio plays through in-memory `blob:` URLs (by design — the
+  decrypted recording never sits at a fetchable URL), which that
+  policy silently blocks. The CSP now includes
+  `media-src 'self' blob:`. The same header block also sent
+  `Permissions-Policy: microphone=()`, which blocks the recorder
+  outright in Chrome-family browsers (iPhones ignored it, which is
+  why recording appeared to work); it is now `microphone=(self)`.
+  **Operators: pull the updated `deploy/Caddyfile` (or apply the two
+  header edits to your own proxy config) and restart the proxy** —
+  no app rebuild needed. The copy-paste examples in
+  `docs/operator-guide.md` carry the same fix.
 - **The connect-time backfill now covers EVERY federable record
   kind** (`apps/web/src/lib/outboxBackfill.ts` — closing the
   "not yet covered" gap the original 2026-07 invite-incident fix
