@@ -179,13 +179,22 @@ function PendingHistoryRow({
       <CategoryBadge category={entry.category} size="sm" />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm italic text-moss-600 dark:text-moss-300">
+          {/* Non-past phrasing on purpose: nothing has been confirmed
+              yet, so "Helped" would claim a thing that hasn't happened
+              (honesty over symmetry with the settled rows below). */}
           {entry.delta > 0
-            ? t("profile.history.helped")
-            : t("profile.history.received")}{" "}
+            ? t("profile.history.helpedPending")
+            : t("profile.history.receivedPending")}{" "}
           <span className="font-medium">{counterpartyName}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
-          <span>{formatRelativeTime(entry.createdAt)}</span>
+          {/* The waiting-state timestamp, not the post's age — a post
+              can sit on the board for days before anyone claims it.
+              Legacy rows without one show no time at all rather than
+              a misleading one. */}
+          {entry.pendingSince !== null && (
+            <span>{formatRelativeTime(entry.pendingSince)}</span>
+          )}
           <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
             {awaitingYou
               ? t("profile.history.awaitingYouBadge")
@@ -247,7 +256,13 @@ function PendingTaskHistoryRow({
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
-            <span>{formatRelativeTime(entry.createdAt)}</span>
+            {/* When the member submitted the task for confirmation —
+                not the task's creation date, which predates their
+                involvement entirely. Legacy rows without a completedAt
+                show no time rather than a misleading one. */}
+            {entry.pendingSince !== null && (
+              <span>{formatRelativeTime(entry.pendingSince)}</span>
+            )}
             <span className="chip bg-moss-100 italic text-moss-700 dark:bg-moss-800 dark:text-moss-200">
               {t("profile.history.pendingBadge")}
             </span>

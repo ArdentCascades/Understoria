@@ -303,6 +303,15 @@ export function TaskDetailBody({
               className="input"
               value={editHours}
               onChange={(e) => setEditHours(e.target.value)}
+              onBlur={() => {
+                // A cleared field silently kept the old estimate at
+                // save time — restore the visible value instead so the
+                // organizer sees the number the task will keep.
+                const parsed = Number.parseFloat(editHours);
+                if (!Number.isFinite(parsed) || parsed <= 0) {
+                  setEditHours(String(task.estimatedHours));
+                }
+              }}
             />
             {/* Authoring-time guidance, never a gate: big tasks are
                 harder to start and slower to get claimed. */}

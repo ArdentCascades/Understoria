@@ -73,6 +73,17 @@ include breaking changes.
   event or a single shift — names the file it just saved and says to
   open it to add the event to your phone's calendar, instead of
   downloading in silence. English and Spanish.
+- **The copy now tells the truth about pending things.** Three small
+  honesty fixes in one sweep: the RSVP and shift-signup toasts now say
+  your community will see your answer once the device syncs (instead of
+  "saved on this device", which read as "never sent"); an exchange
+  that's still waiting on a signature reads "Helping Rosa" /
+  "Receiving help from Rosa" with the moment the waiting actually
+  began — never "Helped · 3h ago" for help that hasn't been confirmed
+  yet; and the task form shows its 1-hour estimate up front (with a
+  "your best guess is fine" nudge, and the number springs back if you
+  clear it) instead of quietly filling it in after you save. English
+  and Spanish.
 - **"Revisit the welcome" opens the welcome tour again.** The link in
   Profile → Learn is there so members can re-read the intro (and its
   beta notice) whenever they like, but on an onboarded device it just
