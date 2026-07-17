@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Chat no longer lurches while typing on iPhones.** With the
+  keyboard open, the conversation screen kept scrolling on its own
+  every couple of seconds. Two causes, both fixed: the thread's
+  auto-scroll used a browser call that iOS is allowed to answer by
+  panning the whole page (it now scrolls only the message list
+  itself), and it re-fired on every background message check — every
+  2.5 seconds — even when nothing new had arrived (it now scrolls
+  only when a genuinely new message lands).
 - **The founder-claim screen could go dead after a successful claim**
   (seen relaunching a community on a fresh server). Tapping "Claim
   this server" actually claimed it, but the screen then re-checked

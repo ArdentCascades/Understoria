@@ -85,7 +85,8 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // only changes when the user pauses typing — debounced below).
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [activeMatchIdx, setActiveMatchIdx] = useState(0);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const lastScrolledIdRef = useRef<string>("");
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useReducedMotion();
@@ -311,20 +312,53 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       .map((m) => m.id);
   }, [messages, query]);
 
+  // Scroll the LIST CONTAINER directly — never scrollIntoView. On
+  // iOS, scrollIntoView may scroll every ancestor INCLUDING the page
+  // itself, and with the on-screen keyboard open Safari answers by
+  // panning the whole layout viewport (the app shell is one screen
+  // tall by design — see Layout.tsx). Combined with the next guard's
+  // old behavior this made the screen lurch while typing.
+  const scrollListTo = useCallback(
+    (top: number) => {
+      const list = listRef.current;
+      if (!list) return;
+      if (typeof list.scrollTo === "function") {
+        list.scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
+      } else {
+        // jsdom has no Element.scrollTo.
+        list.scrollTop = top;
+      }
+    },
+    [reduced],
+  );
+
   useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
     if (matchIds.length === 0) {
-      bottomRef.current?.scrollIntoView({
-        behavior: reduced ? "auto" : "smooth",
-      });
+      // Key the bottom-scroll on the LAST MESSAGE, not on array
+      // identity: the chat-mode poll rebuilds the array every 2.5 s
+      // even when nothing changed, and re-scrolling on every tick is
+      // what the member experienced as "unwanted scrolling" the
+      // moment the composer had focus.
+      const lastId = messages.length > 0 ? messages[messages.length - 1].id : "";
+      if (lastId === lastScrolledIdRef.current) return;
+      lastScrolledIdRef.current = lastId;
+      scrollListTo(list.scrollHeight);
       return;
     }
     const id = matchIds[Math.min(activeMatchIdx, matchIds.length - 1)];
     const el = matchRefs.current.get(id);
-    el?.scrollIntoView({
-      behavior: reduced ? "auto" : "smooth",
-      block: "center",
-    });
-  }, [matchIds, activeMatchIdx, messages, reduced]);
+    if (!el) return;
+    // Center the match within the list (the old block:"center"),
+    // computed against the container so only the container moves.
+    const top =
+      el.getBoundingClientRect().top -
+      list.getBoundingClientRect().top +
+      list.scrollTop -
+      Math.max(0, (list.clientHeight - el.clientHeight) / 2);
+    scrollListTo(top);
+  }, [matchIds, activeMatchIdx, messages, scrollListTo]);
 
   // Voice notes (docs/message-relay.md §10): the composer's mic
   // button swaps in the recorder; a captured clip sends as a sealed
@@ -523,7 +557,10 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         <WhyTooltip principleId="no-read-receipts" />
       </p>
 
-      <div className="flex-1 overflow-y-auto rounded-xl bg-moss-50 p-3 dark:bg-moss-950/30">
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto rounded-xl bg-moss-50 p-3 dark:bg-moss-950/30"
+      >
         {messages.length === 0 ? (
           <p className="py-8 text-center text-sm text-moss-600 dark:text-moss-300">
             {t("messages.empty")}
@@ -688,7 +725,6 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                 </div>
               );
             })}
-            <div ref={bottomRef} />
           </div>
         )}
       </div>
