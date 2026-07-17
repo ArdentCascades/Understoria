@@ -40,7 +40,11 @@ DB and any local backups.
 **Swap (required on a 1 GB box).** RUNNING the node is light;
 BUILDING the images on the box (first launch and every redeploy) is
 not — the web bundle's TypeScript + Vite compile needs more memory
-than 1 GB provides. Add a swapfile once, right after provisioning:
+than 1 GB provides. **`scripts/setup.sh` handles this for you**: it
+detects a host with < 1.5 GB RAM and no swap and offers to create
+the swapfile itself (including the reboot-persistence line). The
+manual recipe below is for anyone skipping the script, or whose
+filesystem the automatic path declined to touch:
 
 ```bash
 fallocate -l 2G /swapfile
@@ -455,8 +459,9 @@ docker compose up -d --build
 
 > **Build dies with exit code 134?** That's Node hitting its heap
 > limit during the web compile — the box has no (or too little)
-> swap. Check with `swapon --show`; if it prints nothing, do the
-> swapfile step from §1, then re-run. On a 1 GB instance it also
+> swap. Check with `swapon --show`; if it prints nothing, re-run
+> `scripts/setup.sh` (it detects the gap and offers to create the
+> swapfile) or do the manual swapfile step from §1, then re-run. On a 1 GB instance it also
 > helps to build the two images one at a time instead of letting
 > `up --build` run both in parallel:
 > `docker compose build understoria && docker compose build web`,
