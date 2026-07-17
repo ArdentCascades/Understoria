@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Organizers can send a task completion back — "Not done yet."**
+  Until now, a project organizer looking at an unfinished completion
+  had no honest option: staying silent let the server auto-confirm
+  it after the waiting window, and the only explicit moves were
+  confirming work that wasn't done or misusing the dispute flag.
+  The task page now offers **"Not done yet — send it back"** next to
+  the confirm button. It is deliberately not a rejection: the task
+  stays with the claimer, no credit moves, nothing is recorded
+  against anyone, and the organizer's required note ("What still
+  needs doing?") is posted as an ordinary comment on the task so the
+  claimer sees it on any of their devices. Sending back also stops
+  the auto-confirm clock while the work continues; marking complete
+  again afterwards works exactly as before. The project history
+  shows a neutral "sent the task back with a note" line, mirroring
+  how a claimer's own step-back has always been logged.
 - **Setup can create the swap file small servers need.** On a host
   with less than 1.5 GB of memory and no swap, building the app used
   to die partway through with a cryptic "exit code 134", and the

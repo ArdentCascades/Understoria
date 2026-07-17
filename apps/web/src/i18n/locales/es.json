@@ -1106,6 +1106,18 @@
         "confirming": "Firmando…",
         "cancelCta": "Cancelar"
       },
+      "sendBack": "Aún no está lista — devolverla",
+      "sendBackDialog": {
+        "title": "¿Devolver esta tarea a {{claimer}}?",
+        "body": "La tarea sigue siendo suya, y tu nota le dice qué falta. No se mueve ningún crédito y no queda nada registrado en contra de nadie — terminar toma el tiempo que tome.",
+        "noteLabel": "¿Qué falta por hacer?",
+        "notePlaceholder": "p. ej. La estantería ya está montada — falta la segunda capa de pintura.",
+        "noteHint": "Tu nota se publica como comentario en la tarea, así {{claimer}} la ve en cualquiera de sus dispositivos.",
+        "noteRequired": "Añade una nota primero — dile qué falta por hacer.",
+        "confirmCta": "Devolverla con la nota",
+        "sending": "Devolviendo…",
+        "cancelCta": "Mejor no"
+      },
       "completedBy": "Completada por {{name}}",
       "claimedBy": "Tomada por {{name}}",
       "statusOpen": "Abierta",
@@ -1327,6 +1339,7 @@
       "task_unclaimed": "Tarea liberada",
       "task_released_after_complete": "{{name}} dio un paso atrás de <taskLink>{{task}}</taskLink>",
       "task_completed": "Tarea marcada como completa",
+      "task_sent_back": "Devolvió la tarea con una nota",
       "task_confirmed": "Tarea confirmada",
       "project_launched": "Proyecto lanzado",
       "project_paused": "Proyecto pausado",

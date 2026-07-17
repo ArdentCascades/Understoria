@@ -39,6 +39,7 @@ import {
 import { diffAchievements } from "@/lib/achievements";
 import { evaluateSafeguards, exceedsDailyLimit } from "@/lib/safeguards";
 import { getNodeConfig } from "./nodeConfig";
+import { postTaskComment } from "./taskComments";
 import { creditHoursForTask } from "@/lib/timebank";
 import { normalizeExchangeCategory } from "@/lib/categories";
 import type {
@@ -1185,6 +1186,96 @@ export async function markProjectTaskComplete(
     },
   );
   await publishTaskState(taskId, memberKey);
+  return result;
+}
+
+/**
+ * Organizer-side "not done yet — send it back" (the counterpart of
+ * the completer's own walk-back in `unclaimProjectTask`). Before this
+ * existed an organizer who thought the work wasn't finished had no
+ * honest move at all: silence became a yes (the auto-confirm sweep
+ * fires after the window), and the only explicit options were
+ * confirming unfinished work or misusing the dispute flag.
+ *
+ * Deliberately NOT a decline/reject: nothing is recorded against
+ * anyone. The task returns to `claimed` — the claimer KEEPS it — the
+ * completion metadata clears (a fresh completion re-signs fresh
+ * figures, and the sweep only considers `awaiting_confirmation`
+ * tasks, so the auto-confirm clock stops while work continues), and
+ * the organizer's note ships as an ordinary TASK COMMENT. The comment
+ * is the altitude decision: comments already federate and render on
+ * the task page, so the words reach the claimer on every device with
+ * zero new record types, and no "rejection" field ever exists.
+ *
+ * The note is REQUIRED — sending work back wordlessly is where
+ * resentment grows, and the note is the whole point. It posts FIRST
+ * (it can throw on a locked session) so a reverted task can never
+ * exist without its explanation; if the revert then fails, a stray
+ * comment is harmless and the organizer simply retries.
+ */
+export async function sendBackProjectTaskCompletion(
+  taskId: string,
+  organizerKey: string,
+  note: string,
+  nodeId: string,
+): Promise<ProjectTask> {
+  const trimmed = note.trim();
+  if (trimmed.length === 0)
+    throw new Error(
+      "A note is required — tell them what still needs doing.",
+    );
+  const preflight = await db.projectTasks.get(taskId);
+  if (!preflight) throw new Error("Task not found.");
+  const project = await db.projects.get(preflight.projectId);
+  if (!project) throw new Error("Parent project not found.");
+  if (!isOrganizer(project, organizerKey))
+    throw new Error("Only project organizers can send a completion back.");
+  if (preflight.status !== "awaiting_confirmation")
+    throw new Error("Task isn't waiting for confirmation.");
+  // Parity with confirmProjectTaskCompletion's self-confirm guard: an
+  // organizer who completed the task themselves walks it back through
+  // their own release path, not this one.
+  if (preflight.completedBy === organizerKey)
+    throw new Error(
+      "You marked this complete yourself — release it instead of sending it back.",
+    );
+
+  await postTaskComment(taskId, trimmed, organizerKey, nodeId);
+
+  const result = await db.transaction(
+    "rw",
+    [db.projectTasks, db.projects, db.projectActivity],
+    async () => {
+      const task = await db.projectTasks.get(taskId);
+      if (!task || task.status !== "awaiting_confirmation")
+        throw new Error("Task isn't waiting for confirmation.");
+      const updated: ProjectTask = {
+        ...task,
+        status: "claimed",
+        // The claimer keeps the task — send-back must never read as
+        // taking it away. Only the completion attempt clears.
+        completedBy: null,
+        actualHours: null,
+        completionSignedAt: null,
+        completionSignatures: null,
+      };
+      await db.projectTasks.put(updated);
+      // Neutral trace, mirroring the completer's own walk-back entry —
+      // transparency without a permanent mark.
+      await logActivity(
+        task.projectId,
+        "task_sent_back",
+        organizerKey,
+        { taskId, taskTitle: task.title },
+        project.nodeId ?? "",
+      );
+      return updated;
+    },
+  );
+  // Organizer-signed LWW state record so every device converges on
+  // the revert (docs/project-federation.md §4 — organizers hold task
+  // edit authority).
+  await publishTaskState(taskId, organizerKey);
   return result;
 }
 

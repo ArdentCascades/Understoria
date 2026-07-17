@@ -1106,6 +1106,18 @@
         "confirming": "Signing…",
         "cancelCta": "Cancel"
       },
+      "sendBack": "Not done yet — send it back",
+      "sendBackDialog": {
+        "title": "Send this back to {{claimer}}?",
+        "body": "They keep the task, and your note tells them what's still needed. No credit moves and nothing is recorded against anyone — finishing takes as long as it takes.",
+        "noteLabel": "What still needs doing?",
+        "notePlaceholder": "e.g. The shelf is up — it still needs the second coat of paint.",
+        "noteHint": "Your note is posted as a comment on the task, so {{claimer}} sees it on any of their devices.",
+        "noteRequired": "Add a note first — tell them what still needs doing.",
+        "confirmCta": "Send it back with the note",
+        "sending": "Sending back…",
+        "cancelCta": "Never mind"
+      },
       "completedBy": "Completed by {{name}}",
       "claimedBy": "Claimed by {{name}}",
       "statusOpen": "Open",
@@ -1327,6 +1339,7 @@
       "task_unclaimed": "Task released",
       "task_released_after_complete": "{{name}} stepped back from <taskLink>{{task}}</taskLink>",
       "task_completed": "Task marked complete",
+      "task_sent_back": "Sent the task back with a note",
       "task_confirmed": "Task confirmed",
       "project_launched": "Project launched",
       "project_paused": "Project paused",
