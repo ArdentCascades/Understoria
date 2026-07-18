@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Turn your phone sideways and the app follows.** In landscape on a
+  phone — where height, not width, is the scarce thing — the bottom
+  tab bar becomes a slim icons-only left rail, so the whole short
+  screen goes to your content instead of chrome: the header slims
+  down, the floating action buttons drop toward the true bottom edge,
+  and pages stop reserving room for a bar that isn't there. The
+  calendar also opens in the stacked agenda view in this orientation
+  (where the month grid's six squashed rows can't breathe) — unless
+  you've picked a view yourself, which always wins.
 - **A beta / AI disclosure, said plainly at every door.** The app now
   tells people what they're using before they use it: Understoria is
   beta software, much of its code was written with AI tools and
@@ -78,6 +87,16 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **Everything important fits a phone held sideways.** Turn your
+  phone to landscape and the tall moments no longer spill off the
+  bottom of the screen with their buttons out of reach: confirmation
+  dialogs cap themselves to the screen and scroll inside, the invite
+  share sheet lays the QR code beside the link instead of above it,
+  the in-person exchange ceremony puts each QR next to its
+  instructions, the add-a-device screen keeps its code scannable
+  without hunting, and the welcome tour tucks its illustration away
+  and pins Back / Next / Skip on screen while the words scroll
+  between them. Nothing important can sit off-screen anymore.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

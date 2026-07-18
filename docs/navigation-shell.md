@@ -32,6 +32,20 @@ Profile tab the second.
    rail and palette, print pages from their screens' Print buttons,
    Disputes/Proposals from Profile, and so on.
 
+The tab tier actually has *three* regimes, all one DOM: the portrait
+phone gets the bottom bar; a phone held **sideways** (landscape and
+≤500px tall — the shared `landscape-short` variant in
+`tailwind.config.js`) gets a compact icons-only left rail, because in
+that posture width is abundant and height is scarce, so a full bar
+would eat a fifth of the screen; and `lg+` gets the wider
+icon-and-label rail described above. Same five links in the same
+order in every regime — the icons-only rail keeps its accessible
+names via `aria-label`s that duplicate the hidden label text. The
+dependent geometry (main's bottom reserve, the floating action pills,
+the offline strip, the header's height) follows the same variant, and
+the calendar defaults to the agenda view there — never overriding a
+stored view choice.
+
 ## Why "In my care" holds the fifth slot
 
 The tab bar's job is the loop a member actually lives in: see what

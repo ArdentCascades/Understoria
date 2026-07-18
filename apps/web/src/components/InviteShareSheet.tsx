@@ -200,7 +200,14 @@ export function InviteShareSheet({
       aria-labelledby="share-sheet-title"
       className="fixed inset-0 z-50 flex items-end justify-center bg-moss-950/40 p-4 sm:items-center"
     >
-      <div ref={cardRef} className="card w-full max-w-md animate-fade-in">
+      {/* Capped at the backdrop's padded height with internal scroll
+          (same pattern as ConfirmDialog) so neither the gate's prose
+          nor the revealed QR view can push its buttons off a short
+          viewport. */}
+      <div
+        ref={cardRef}
+        className="card max-h-full w-full max-w-md animate-fade-in overflow-y-auto overscroll-contain landscape-short:max-w-2xl"
+      >
         {revealed ? (
           <RevealedView
             url={url}
@@ -364,26 +371,33 @@ function RevealedView({
         {t("profile.invites.shareSheet.intro")}
       </p>
 
-      <div className="mt-4 flex justify-center">
-        <InviteQRCode
-          value={url}
-          ariaLabel={t("profile.invites.shareSheet.qrAriaLabel")}
-        />
-      </div>
+      {/* Portrait: QR stacked above the URL (unchanged). Phone held
+          sideways: the two sit side by side and the QR square is
+          clamped to the viewport height, so code + URL + buttons all
+          fit a ~320px-tall screen. */}
+      <div className="landscape-short:flex landscape-short:items-center landscape-short:gap-4">
+        <div className="mt-4 flex justify-center landscape-short:shrink-0">
+          <InviteQRCode
+            value={url}
+            ariaLabel={t("profile.invites.shareSheet.qrAriaLabel")}
+            className="landscape-short:max-h-[min(60vh,16rem)] landscape-short:max-w-[min(60vh,16rem)]"
+          />
+        </div>
 
-      <div className="mt-4">
-        <label
-          htmlFor="share-sheet-url"
-          className="text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
-        >
-          {t("profile.invites.shareSheet.urlLabel")}
-        </label>
-        <code
-          id="share-sheet-url"
-          className="mt-1 block break-all rounded bg-moss-50 px-2 py-1 text-xs dark:bg-moss-900"
-        >
-          {url}
-        </code>
+        <div className="mt-4 landscape-short:min-w-0 landscape-short:flex-1">
+          <label
+            htmlFor="share-sheet-url"
+            className="text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+          >
+            {t("profile.invites.shareSheet.urlLabel")}
+          </label>
+          <code
+            id="share-sheet-url"
+            className="mt-1 block break-all rounded bg-moss-50 px-2 py-1 text-xs dark:bg-moss-900"
+          >
+            {url}
+          </code>
+        </div>
       </div>
 
       {status && (

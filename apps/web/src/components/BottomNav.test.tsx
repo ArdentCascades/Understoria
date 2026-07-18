@@ -84,4 +84,34 @@ describe("BottomNav", () => {
     render();
     expect(container.querySelector('a[href="/profile"]')).toBeNull();
   });
+
+  // jsdom applies no media queries — class presence only. The
+  // landscape-short variant (tailwind.config.js) turns the bottom bar
+  // into a compact icons-only left rail on a phone held sideways.
+  it("carries the landscape-short compact-rail classes", () => {
+    render();
+    const nav = container.querySelector("nav")!;
+    expect(nav.className).toContain("landscape-short:flex-col");
+    expect(nav.className).toContain("landscape-short:w-14");
+    expect(nav.className).toContain("landscape-short:overflow-y-auto");
+    expect(nav.className).toContain(
+      "landscape-short:pl-[env(safe-area-inset-left)]",
+    );
+  });
+
+  it("hides labels in landscape-short but keeps each link's accessible name", () => {
+    render();
+    const links = Array.from(container.querySelectorAll("ul a"));
+    expect(links.length).toBe(5);
+    for (const a of links) {
+      // The label span goes display:none in the icons-only rail…
+      const span = a.querySelector("span");
+      expect(span?.className).toContain("landscape-short:hidden");
+      // …so the accessible name must survive via aria-label, which
+      // duplicates the visible label text exactly (label-in-name).
+      const ariaLabel = a.getAttribute("aria-label") ?? "";
+      expect(ariaLabel).not.toBe("");
+      expect(ariaLabel).toBe(span?.textContent);
+    }
+  });
 });

@@ -43,10 +43,17 @@ export function Layout() {
   // so <main> reserves extra bottom clearance — content scrolled to the
   // very end must never hide behind the strip. Back online, the usual
   // clearance (floating FAB pills) returns.
+  //
+  // Two regimes for the bottom reserve: while the nav is a BOTTOM BAR
+  // (portrait phones) the pad covers bar + FAB band; once the nav is a
+  // LEFT RAIL (lg desktop, or landscape-short — a phone held sideways)
+  // there is no bar to clear, so the reserve shrinks to just the
+  // floating chrome that remains (FAB pill / offline strip) anchored
+  // near the true bottom edge.
   const mainPad =
     !locked && !online
-      ? "pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-36"
-      : "pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-20";
+      ? "pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-36 landscape-short:pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
+      : "pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-20 landscape-short:pb-[calc(1rem+env(safe-area-inset-bottom))]";
   // App-shell layout: the shell is exactly one screen tall (100dvh)
   // and the DOCUMENT NEVER SCROLLS — all scrolling happens inside
   // <main>. The BottomNav is a plain flex footer in normal flow, so
@@ -72,6 +79,12 @@ export function Layout() {
   // content; min-h-0 on the body is what lets the nested flex child
   // (<main>) actually shrink and scroll instead of forcing the shell
   // taller than the screen.
+  // landscape-short (a phone held sideways — tailwind.config.js): the
+  // SAME row-reverse flip applies below lg, because a 390px-tall
+  // screen can't afford a full-height bottom bar. Width is abundant,
+  // height is scarce — the nav becomes a compact icons-only rail on
+  // the left (BottomNav.tsx) and the whole bar's height goes back to
+  // content.
   // print:h-auto/print:overflow-visible (shell, body, and <main>): the
   // one-screen-tall clipped shell exists for iOS keyboard physics,
   // but paper has no keyboard — without these overrides everything
@@ -89,7 +102,7 @@ export function Layout() {
           that returns null on every render. */}
       {IS_DEMO && ready && !locked && <DemoBanner />}
       {ready && !locked && <AppHeader />}
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row-reverse print:block print:h-auto print:overflow-visible">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row-reverse landscape-short:flex-row-reverse print:block print:h-auto print:overflow-visible">
         <main
         id="main"
         // overscroll-contain: reaching the top/bottom of the inner

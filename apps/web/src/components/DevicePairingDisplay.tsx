@@ -130,7 +130,10 @@ export function DevicePairingDisplay({
   const fingerprint = useMemo(() => keyFingerprint(publicKey), [publicKey]);
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    // gap-3 when the phone is held sideways: the pairing page
+    // scrolls, but tighter rhythm keeps words + QR closer to one
+    // screenful on a ~320px-tall viewport.
+    <div className="flex flex-col items-center gap-6 landscape-short:gap-3">
       {/* Live region so the countdown is announced to screen readers
           at meaningful intervals — `polite` so it doesn't interrupt. */}
       <div
@@ -182,6 +185,10 @@ export function DevicePairingDisplay({
         value={encodedEnvelope}
         size={288}
         ariaLabel={t("addDevice.display.qrAriaLabel")}
+        // Sideways phone: clamp the 288px square to the viewport
+        // height so the code is scannable without hunting for it
+        // mid-scroll.
+        className="landscape-short:max-h-[min(60vh,18rem)] landscape-short:max-w-[min(60vh,18rem)]"
       />
 
       {/* The copy hatch — envelope only, behind a disclosure so the

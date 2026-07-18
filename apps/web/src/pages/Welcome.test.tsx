@@ -641,3 +641,29 @@ describe("WelcomePage — beta/AI disclosure on the first screen", () => {
     );
   });
 });
+
+// Landscape-phone pass (class-presence only — jsdom has no layout):
+// on a phone held sideways the tour becomes a fixed-height frame —
+// decorative illustration steps aside, the body scrolls, and the
+// progress dots + Back/Next/Skip controls sit OUTSIDE the scroll
+// region so they stay pinned on screen.
+describe("WelcomePage — short landscape viewports", () => {
+  it("first tour screen: illustration hides, body scrolls, controls pinned outside it", () => {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    expect(container.textContent).toContain("This is a timebank");
+    // The decorative art is aria-hidden and steps aside sideways.
+    const art = container.querySelector(".landscape-short\\:hidden");
+    expect(art).not.toBeNull();
+    expect(art?.getAttribute("aria-hidden")).toBe("true");
+    // The scrolling body holds the content…
+    const body = container.querySelector(".landscape-short\\:overflow-y-auto");
+    expect(body).not.toBeNull();
+    // …but never the tour controls: header (dots/Skip) and footer
+    // (Back/Next) are siblings of the scroll region, i.e. pinned.
+    expect(body?.querySelector("footer")).toBeNull();
+    expect(body?.querySelector("header")).toBeNull();
+    expect(container.querySelector("footer")).not.toBeNull();
+  });
+});

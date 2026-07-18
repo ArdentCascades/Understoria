@@ -248,4 +248,19 @@ describe("InviteShareSheet — reveal + dismissal", () => {
     await click(button(CANCEL_LABEL));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  // Landscape-phone pass: the sheet must survive a ~320px-tall
+  // viewport. Class-presence assertions (jsdom has no layout) —
+  // the card caps at the backdrop height and scrolls internally,
+  // and the revealed view carries the sideways QR-beside-URL row.
+  it("caps the card height with internal scroll and lays the QR beside the URL when sideways", async () => {
+    render();
+    const card = container.querySelector('[role="dialog"] > div');
+    expect(card?.className).toContain("max-h-full");
+    expect(card?.className).toContain("overflow-y-auto");
+    await click(button(REVEAL_LABEL));
+    const row = container.querySelector(".landscape-short\\:flex");
+    expect(row).not.toBeNull();
+    expect(row?.querySelector('[data-testid="qr"]')).not.toBeNull();
+  });
 });

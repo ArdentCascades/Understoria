@@ -56,14 +56,19 @@ export function AppHeader() {
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95 print:hidden"
     >
-      <div className="flex h-11 items-center justify-between pl-4 pr-1">
+      {/* landscape-short (phone held sideways — tailwind.config.js):
+          the band compacts from 44px to 40px, one of the few places
+          the 44px touch-target floor bends — vertical pixels are the
+          scarce resource in this regime, the menu button stays ≥44px
+          wide, and 40px still clears WCAG 2.2 AA's 24px minimum. */}
+      <div className="flex h-11 items-center justify-between pl-4 pr-1 landscape-short:h-10">
         <span className="select-none text-sm font-semibold tracking-tight text-canopy-800 dark:text-canopy-200">
           {"Understoria"}
         </span>
         <button
           ref={buttonRef}
           type="button"
-          className={`touch-target flex items-center justify-center rounded-xl px-3 py-2 text-moss-600 dark:text-moss-300 ${
+          className={`touch-target flex items-center justify-center rounded-xl px-3 py-2 text-moss-600 dark:text-moss-300 landscape-short:min-h-0 landscape-short:py-1.5 ${
             hoverMuted
               ? ""
               : "hover:bg-moss-100 hover:text-moss-900 dark:hover:bg-moss-800 dark:hover:text-moss-50"
