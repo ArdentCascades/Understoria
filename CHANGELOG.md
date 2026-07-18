@@ -131,6 +131,21 @@ include breaking changes.
   explanation. Phones whose voices are just slow to wake up are
   unaffected — the moment speech starts, the check stands down.
   English and Spanish.
+- **The Spanish translation got a native-speaker review pass.** A
+  careful read-through by native Spanish eyes, fixed on screen where
+  each string actually renders: the claim dialog no longer shows an
+  English "Cancel" next to "Sí, tomarla" (shared dialogs now default
+  to localized labels), collective milestones say "50 horas de ayuda
+  mutua" instead of "50 hours of mutual aid", project cards translate
+  their "6 tasks · 5 open" line, and "(¿por qué?)" finally gets its
+  opening question mark. Beyond those: missing accents restored
+  (confirmación, respondió, Quién ayuda), modern "solo" replaces the
+  old "sólo" throughout, status chips agree with their nouns
+  ("Abierta"/"Tomada" beside Necesidad and Oferta), "1 confirmada"
+  pluralizes properly, the FAQ names the real buttons and the real
+  "Tablero" tab, and the register settles into consistent, warm
+  Latin American Spanish — "Cuidado infantil", "somos nosotros",
+  "Retirar mi compromiso". Even the demo's founder is "Tú" now.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

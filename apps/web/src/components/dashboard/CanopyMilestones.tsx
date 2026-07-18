@@ -19,7 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import { milestonesForType, type MilestoneState } from "@/lib/milestones";
+import {
+  milestoneLabel,
+  milestonesForType,
+  type MilestoneState,
+} from "@/lib/milestones";
 import type { NodeConfig } from "@/types";
 
 interface CanopyMilestonesProps {
@@ -111,9 +115,9 @@ function CanopyRow({
                 ariaLabel={
                   leaf === next
                     ? t("dashboard.milestones.next", {
-                        label: milestone.label,
+                        label: milestoneLabel(milestone, t),
                       })
-                    : milestone.label
+                    : milestoneLabel(milestone, t)
                 }
               />
             </li>
@@ -122,7 +126,9 @@ function CanopyRow({
       </ul>
       {next && (
         <div className="mt-1 text-xs text-moss-600 dark:text-moss-300">
-          {t("dashboard.milestones.next", { label: next.milestone.label })}
+          {t("dashboard.milestones.next", {
+            label: milestoneLabel(next.milestone, t),
+          })}
         </div>
       )}
     </div>

@@ -29,6 +29,7 @@ import {
 import { createVouch } from "@/lib/vouch";
 import { IS_DEMO } from "@/lib/demo";
 import { reachedMilestones } from "@/lib/milestones";
+import i18n from "@/i18n";
 import type {
   Event,
   EventShiftRow,
@@ -152,7 +153,11 @@ export async function seedDemoCommunityIfEmpty(): Promise<Member> {
 
   const you = await createMember(
     {
-      displayName: "You",
+      // The demo founder's name in the member's own language — i18n is
+      // initialized (main.tsx imports it) long before this dev/demo
+      // seed runs, so a Spanish session seeds "Tú" instead of a
+      // stray English "You". Demo data only; onboarding renames it.
+      displayName: i18n.isInitialized ? i18n.t("common.you") : "You",
       skills: ["listening", "cooking"],
       availability: "Evenings and weekends",
       locationZone: "North neighborhood",

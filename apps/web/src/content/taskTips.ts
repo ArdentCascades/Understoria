@@ -99,11 +99,11 @@ export const TASK_TIPS: Record<
     },
     {
       "en": "Grab a phone number you'll actually text later, not just a name — the reminder nudge is what gets tools back, and you can't send it to a signature. Confirm the number on the spot.",
-      "es": "Toma un número de teléfono al que de verdad puedas mandar mensaje después, no sólo un nombre — el recordatorio es lo que hace volver las herramientas, y no puedes enviarlo a una firma. Confirma el número en el momento."
+      "es": "Toma un número de teléfono al que de verdad puedas mandar mensaje después, no solo un nombre — el recordatorio es lo que hace volver las herramientas, y no puedes enviarlo a una firma. Confirma el número en el momento."
     },
     {
       "en": "Teach the awkward parts, not just checkout: how to decline a broken donation kindly, and how to note damage on return without making the borrower feel accused. Show them where the first-aid kit and eye protection live.",
-      "es": "Enseña las partes incómodas, no sólo el préstamo: cómo rechazar con amabilidad una donación rota, y cómo anotar un daño en la devolución sin que quien pidió se sienta acusado. Muéstrales dónde están el botiquín y la protección para los ojos."
+      "es": "Enseña las partes incómodas, no solo el préstamo: cómo rechazar con amabilidad una donación rota, y cómo anotar un daño en la devolución sin que quien pidió se sienta acusado. Muéstrales dónde están el botiquín y la protección para los ojos."
     },
     {
       "en": "Log every 'do you have…?' you can't fill — that list, not your guesses, tells you what to buy next. Sharpen and oil on a set date so upkeep doesn't quietly become never.",
@@ -117,7 +117,7 @@ export const TASK_TIPS: Record<
     },
     {
       "en": "Actually call the references — don't just collect them. Two people who'll vouch, plus a firm 'never handle a neighbor's cash or keys alone' rule, screens out the rare bad actor drawn to exactly this access.",
-      "es": "Llama de verdad a las referencias — no sólo las juntes. Dos personas que respondan por alguien, más una regla firme de 'nunca manejar solo el dinero o las llaves de un vecino', filtran al raro mal actor atraído justo por ese acceso."
+      "es": "Llama de verdad a las referencias — no solo las juntes. Dos personas que respondan por alguien, más una regla firme de 'nunca manejar solo el dinero o las llaves de un vecino', filtran al raro mal actor atraído justo por ese acceso."
     },
     {
       "en": "Frame the first pairing as a trial, and give both people a graceful, no-explanation way out — a mismatch that no one can exit becomes an obligation, and obligations get dropped cold.",
@@ -159,7 +159,7 @@ export const TASK_TIPS: Record<
     },
     {
       "en": "Confirm three things a handshake skips: who holds the key at 2 a.m., whether the generator has fuel stored, and if the space is wheelchair-accessible. A safe spot you can't get into is just a building.",
-      "es": "Confirma tres cosas que un acuerdo de palabra salta: quién tiene la llave a las 2 de la mañana, si el generador tiene combustible guardado, y si el espacio es accesible para silla de ruedas. Un lugar seguro al que no puedes entrar es sólo un edificio."
+      "es": "Confirma tres cosas que un acuerdo de palabra salta: quién tiene la llave a las 2 de la mañana, si el generador tiene combustible guardado, y si el espacio es accesible para silla de ruedas. Un lugar seguro al que no puedes entrar es solo un edificio."
     },
     {
       "en": "Have people physically find their gas and water shutoffs and the wrench it takes — reading about it doesn't count. Time the contact tree end to end; you'll find the broken link now instead of during a flood.",
@@ -177,11 +177,11 @@ export const TASK_TIPS: Record<
     },
     {
       "en": "Post the 'no' list at the drop-off door, not just inside — sorting happens too late. Add used car seats, helmets, and mattresses to it: their safety expires invisibly, and a bedbug in one donation can close your store.",
-      "es": "Pon la lista de 'no' en la puerta de recepción de donaciones, no sólo adentro — clasificar ocurre demasiado tarde. Súmale sillas de auto usadas, cascos y colchones: su seguridad caduca de forma invisible, y una chinche en una donación puede cerrar tu tienda."
+      "es": "Pon la lista de 'no' en la puerta de recepción de donaciones, no solo adentro — clasificar ocurre demasiado tarde. Súmale sillas de auto usadas, cascos y colchones: su seguridad caduca de forma invisible, y una chinche en una donación puede cerrar tu tienda."
     },
     {
       "en": "Sort at the door, before anything reaches a table — a broken toaster that makes it to the shelf just becomes your problem twice. Keep a labeled 'onward' bin going all day so the reject pile never becomes a mountain.",
-      "es": "Clasifica en la puerta, antes de que algo llegue a una mesa — un tostador roto que alcanza el estante sólo se vuelve tu problema dos veces. Mantén todo el día un contenedor etiquetado de 'para reenviar' para que la pila de rechazos nunca se vuelva una montaña."
+      "es": "Clasifica en la puerta, antes de que algo llegue a una mesa — un tostador roto que alcanza el estante solo se vuelve tu problema dos veces. Mantén todo el día un contenedor etiquetado de 'para reenviar' para que la pila de rechazos nunca se vuelva una montaña."
     },
     {
       "en": "Put out less than you have and restock from the back as it thins — a half-empty, tidy table reads as dignified shopping; a crammed, dumped pile reads as 'here's our garbage.'",

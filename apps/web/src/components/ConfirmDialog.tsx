@@ -20,6 +20,7 @@
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { useFocusTrap } from "@/lib/a11y/useFocusTrap";
 
 export interface ConfirmDialogProps {
@@ -45,13 +46,20 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = "Confirm",
+  confirmLabel,
   confirmingLabel,
-  cancelLabel = "Cancel",
+  cancelLabel,
   tone = "neutral",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  // Localized defaults — a hardcoded "Cancel"/"Confirm" fallback here
+  // used to leak English into every dialog whose caller didn't pass
+  // its own labels (the post-claim dialog showed "Cancel" next to
+  // "Sí, tomarla" on Spanish screens).
+  const resolvedConfirmLabel = confirmLabel ?? t("common.confirm");
+  const resolvedCancelLabel = cancelLabel ?? t("common.cancel");
   const cardRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const [pending, setPending] = useState(false);
@@ -140,7 +148,7 @@ export function ConfirmDialog({
             onClick={onCancel}
             disabled={pending}
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             ref={confirmRef}
@@ -154,7 +162,7 @@ export function ConfirmDialog({
             disabled={pending}
             aria-busy={pending}
           >
-            {pending && confirmingLabel ? confirmingLabel : confirmLabel}
+            {pending && confirmingLabel ? confirmingLabel : resolvedConfirmLabel}
           </button>
         </div>
       </div>

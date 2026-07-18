@@ -308,6 +308,7 @@
     "you": "You",
     "back": "← Back",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "close": "Close",
     "save": "Save",
     "saving": "Saving...",
@@ -646,7 +647,8 @@
       "cancelDismiss": "Keep event",
       "cancelLocked": "Unlock this device with your passphrase before signing the cancellation.",
       "cancelled": "Event cancelled.",
-      "attendeeCountLabel": "{{count}} going · {{maybe}} maybe",
+      "attendeeCountLabel_one": "{{count}} going · {{maybe}} maybe",
+      "attendeeCountLabel_other": "{{count}} going · {{maybe}} maybe",
       "attendeesHeading": "Who's coming",
       "attendeeFallbackKey": "(member {{shortKey}})",
       "goingRosterHeading": "Going",
@@ -844,6 +846,10 @@
     "emptyTitle": "No active projects",
     "empty": "No active projects yet. A project is a collective goal — multiple tasks, multiple contributors. The first one is always the hardest to start.",
     "byOrganizer": "Organized by {{name}}",
+    "cardTaskCount_one": "{{count}} task",
+    "cardTaskCount_other": "{{count}} tasks",
+    "cardOpenTaskCount_one": "{{count}} open",
+    "cardOpenTaskCount_other": "{{count}} open",
     "progressLabel": "{{contributed}} of {{target}} ({{percent}}%)",
     "sparkline": {
       "label": "Project contributions over the last {{days}} days; {{hours}} hours total.",
@@ -2358,7 +2364,12 @@
       "valueOf": "{{value}} / {{next}}",
       "lastReached": "Last reached: {{label}}",
       "next": "next: {{label}}",
-      "celebration": "We reached a milestone"
+      "celebration": "We reached a milestone",
+      "label": {
+        "hours": "{{count, number}} hours of mutual aid",
+        "exchanges": "{{count, number}} exchanges completed",
+        "members": "{{count, number}} members strong"
+      }
     },
     "categoryBreakdown": {
       "title": "Where help is flowing",

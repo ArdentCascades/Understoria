@@ -70,8 +70,10 @@ export function ProjectCard({
             untranslated `replace(/_/g, " ")` chip. */}
         <CategoryBadge category={project.category} size="sm" />
         <span className="text-xs text-moss-600 dark:text-moss-300">
-          {taskCount} task{taskCount === 1 ? "" : "s"}
-          {openTaskCount > 0 ? ` · ${openTaskCount} open` : ""}
+          {t("projects.cardTaskCount", { count: taskCount })}
+          {openTaskCount > 0
+            ? ` · ${t("projects.cardOpenTaskCount", { count: openTaskCount })}`
+            : ""}
         </span>
       </div>
       <h3 className="text-base font-semibold leading-snug">
