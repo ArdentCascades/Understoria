@@ -19,6 +19,18 @@ include breaking changes.
   calendar also opens in the stacked agenda view in this orientation
   (where the month grid's six squashed rows can't breathe) — unless
   you've picked a view yourself, which always wins.
+- **Sideways, that width now works for you.** On a phone in landscape
+  with room for two panes (about 700px across), opening a post from
+  the board or an event from the calendar docks it in a reading pane
+  beside the list — the page underneath keeps its filters, tab, and
+  scroll, exactly like on a desktop — and rotating back to portrait
+  returns it to a full screen mid-view without losing your place.
+  The calendar's week view spreads into its real seven-day grid, the
+  Dashboard lines its stat tiles up three across and sits its paired
+  cards side by side, and the new-post, new-event, and new-project
+  forms seat their short fields two to a row so less of the form
+  hides behind the keyboard. Reading order never changes — screen
+  readers and keyboards walk the same page in every orientation.
 - **A beta / AI disclosure, said plainly at every door.** The app now
   tells people what they're using before they use it: Understoria is
   beta software, much of its code was written with AI tools and

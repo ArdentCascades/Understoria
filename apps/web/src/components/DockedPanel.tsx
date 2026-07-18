@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useRef, type ReactNode } from "react";
+import { SPLIT_CAPABLE_QUERY, useMediaQuery } from "@/lib/viewport";
 
 // The docked-panel frame shared by the calendar's event panel and the
 // board's post panel (docs/desktop-power-tools.md plan 3 extracted it
@@ -34,6 +35,16 @@ import { useEffect, useRef, type ReactNode } from "react";
 // takes focus on open/swap so keyboard and screen-reader users land
 // in what they asked for, and Escape (from anywhere on the page) or
 // the close button dismisses it.
+//
+// A phone held sideways ALSO docks when the viewport clears the
+// split-capable floor (SPLIT_CAPABLE_QUERY, lib/viewport.ts: short
+// landscape AND ≥700px wide) — width is abundant there, so the
+// two-pane reading posture desktop gets is available too. Below the
+// floor (SE-class phones) or in portrait the full-screen takeover
+// stays. This gate is the JS hook rather than a CSS variant because
+// the panel's siblings (Board/Calendar list columns) also switch
+// their layout on the same boolean, and rotation mid-view must
+// live-switch — the hook tracks the media query.
 export function DockedPanel({
   ariaLabel,
   closeLabel,
@@ -53,6 +64,9 @@ export function DockedPanel({
   children: ReactNode;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
+  // Short-landscape with room for two panes → dock instead of
+  // taking over the viewport (see the header comment).
+  const splitCapable = useMediaQuery(SPLIT_CAPABLE_QUERY);
 
   // Focus the panel when it opens and when the member swaps to a
   // different item from the page behind it.
@@ -90,13 +104,22 @@ export function DockedPanel({
       ref={panelRef}
       tabIndex={-1}
       aria-label={ariaLabel}
-      className="fixed inset-0 z-40 overflow-y-auto bg-white dark:bg-moss-950
+      className={`overflow-y-auto bg-white dark:bg-moss-950 ${
+        splitCapable
+          ? // Sideways dock: ~45% of the row with a tap-target floor,
+            // sticky and viewport-capped like the lg column (top-2:
+            // vertical space is the scarce axis here).
+            `motion-safe:animate-slide-in sticky top-2 w-[45%] min-w-[280px]
+               shrink-0 self-start max-h-[calc(100dvh-1rem)] rounded-2xl
+               border border-moss-200 shadow-leaf dark:border-moss-800`
+          : "fixed inset-0 z-40"
+      }
                  lg:motion-safe:animate-slide-in
                  lg:static lg:z-auto lg:inset-auto lg:w-[26rem] xl:w-[30rem]
                  lg:shrink-0 lg:self-start lg:sticky lg:top-4
                  lg:max-h-[calc(100dvh-7rem)] lg:rounded-2xl
                  lg:border lg:border-moss-200 lg:bg-white lg:shadow-leaf
-                 lg:dark:border-moss-800 lg:dark:bg-moss-950"
+                 lg:dark:border-moss-800 lg:dark:bg-moss-950`}
     >
       <div className="flex justify-end px-4 pt-3 lg:pb-0">
         <button

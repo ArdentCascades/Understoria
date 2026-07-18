@@ -483,7 +483,13 @@ export default function PostFormPage() {
           </p>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* Short-field pairs: hours + urgency share a row from sm up
+            (and in sub-640 short landscape, where width is the
+            abundant axis); the expiry field flows into the same grid
+            as a third cell. Each label is a self-contained grid cell
+            — its hint and validation error live inside it, so the
+            error stays attached to its field in every layout. */}
+        <div className="grid gap-4 sm:grid-cols-2 landscape-short:grid-cols-2">
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">
               {t("postForm.fieldHours")}
@@ -537,41 +543,41 @@ export default function PostFormPage() {
               <option value="high">{t("urgency.high")}</option>
             </select>
           </label>
-        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            {t("postForm.fieldExpiresInDays")}
-          </span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min="1"
-            step="1"
-            className="input"
-            placeholder={t("postForm.expiresPlaceholder")}
-            value={expiresInDays}
-            onChange={(e) => setExpiresInDays(e.target.value)}
-            onBlur={() => validation.onBlur("expiresInDays")}
-            aria-invalid={
-              validation.shouldShowError("expiresInDays") || undefined
-            }
-            aria-describedby={
-              validation.shouldShowError("expiresInDays")
-                ? "expiresInDays-error"
-                : undefined
-            }
-          />
-          {validation.shouldShowError("expiresInDays") && (
-            <p
-              id="expiresInDays-error"
-              role="alert"
-              className="text-xs text-rose-700 dark:text-rose-300"
-            >
-              {t(validation.errors.expiresInDays!.key)}
-            </p>
-          )}
-        </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              {t("postForm.fieldExpiresInDays")}
+            </span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="1"
+              step="1"
+              className="input"
+              placeholder={t("postForm.expiresPlaceholder")}
+              value={expiresInDays}
+              onChange={(e) => setExpiresInDays(e.target.value)}
+              onBlur={() => validation.onBlur("expiresInDays")}
+              aria-invalid={
+                validation.shouldShowError("expiresInDays") || undefined
+              }
+              aria-describedby={
+                validation.shouldShowError("expiresInDays")
+                  ? "expiresInDays-error"
+                  : undefined
+              }
+            />
+            {validation.shouldShowError("expiresInDays") && (
+              <p
+                id="expiresInDays-error"
+                role="alert"
+                className="text-xs text-rose-700 dark:text-rose-300"
+              >
+                {t(validation.errors.expiresInDays!.key)}
+              </p>
+            )}
+          </label>
+        </div>
 
         {error && (
           <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">

@@ -40,6 +40,7 @@ import { filterBoardPosts } from "@/lib/boardFilter";
 import { isOurNode } from "@/lib/nodeIdentity";
 import { myClaimedTasks } from "@/lib/myTasks";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
+import { SPLIT_CAPABLE_QUERY, useMediaQuery } from "@/lib/viewport";
 import { useSlashFocus } from "@/lib/useSlashFocus";
 import { myOrganizedProjects } from "@/lib/myProjects";
 import {
@@ -156,6 +157,12 @@ export default function BoardPage() {
   // the reading column) and the FAB unmounts (its bottom-right perch
   // is where the panel docks; below lg the panel covers it anyway).
   const postPanelOpen = useMatch("/post/:id") !== null;
+  // A phone held sideways with room for two panes: the docked post
+  // panel opens beside the board (DockedPanel docks itself on the
+  // same query), so the viewport-width md: column count lies about
+  // the reading column's real width — the lists dial back below.
+  // Live (rotation mid-view switches the layout with the panel).
+  const splitCapable = useMediaQuery(SPLIT_CAPABLE_QUERY);
 
   // Debounce the visible→filtered transition. 250 ms matches the
   // Messages search debounce; small enough to feel live, long enough
@@ -410,9 +417,15 @@ export default function BoardPage() {
           the board stays mounted, so tab, filters, search, and
           scroll survive opening posts. Below lg the Outlet renders
           as a full-screen takeover and this wrapper is a plain
-          block. Same shape as Calendar's event panel. */}
-      <div className="lg:flex lg:items-start lg:gap-6">
-      <div className="min-w-0 lg:flex-1">
+          block. Same shape as Calendar's event panel.
+
+          landscape-short also rows up: DockedPanel docks itself
+          whenever SPLIT_CAPABLE_QUERY holds (short landscape ≥700px
+          wide), and this wrapper gives it a row to dock into. Below
+          the width floor the panel stays a fixed full-screen
+          takeover, so the flex row is inert there. */}
+      <div className="lg:flex lg:items-start lg:gap-6 landscape-short:flex landscape-short:items-start landscape-short:gap-4">
+      <div className="min-w-0 lg:flex-1 landscape-short:flex-1">
       <header className="mb-4">
         <h1 className="page-title">{t("board.title")}</h1>
         <p className="text-sm text-moss-600 dark:text-moss-300">
@@ -795,7 +808,16 @@ export default function BoardPage() {
                  2. The 1-col dip at lg is the honest tradeoff for
                  gaining both rails. */
               <>
-                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
+                {/* Sideways with the panel docked (splitCapable), the
+                    reading column is ~55% of an md-wide viewport —
+                    two columns would be ~200px cards, so the md pair
+                    is dropped for the panel's lifetime (the same
+                    dial-back ProjectList does below). */}
+                <ul
+                  className={`grid grid-cols-1 gap-3 ${
+                    postPanelOpen && splitCapable ? "" : "md:grid-cols-2"
+                  } lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3`}
+                >
                   {visiblePosts.map((p) => (
                     <li key={p.id}>
                       <PostCard
@@ -1132,6 +1154,10 @@ function ProjectList({
   tendedScope?: boolean;
 }) {
   const { t } = useTranslation();
+  // Same sideways dial-back as the post list: when the docked panel
+  // is open in a split-capable short landscape, the md: column count
+  // overstates the reading column's real width.
+  const splitCapable = useMediaQuery(SPLIT_CAPABLE_QUERY);
   const tasksByProject = useMemo(() => {
     const map = new Map<string, { total: number; open: number }>();
     for (const task of projectTasks) {
@@ -1201,7 +1227,9 @@ function ProjectList({
 
   return (
     <ul
-      className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${
+      className={`grid grid-cols-1 gap-3 ${
+        panelOpen && splitCapable ? "" : "md:grid-cols-2"
+      } ${
         // Panel open: the viewport-based md: breakpoint doesn't know
         // the reading column shrank, so dial the columns back to
         // what the remaining width actually fits.

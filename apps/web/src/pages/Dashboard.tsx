@@ -235,8 +235,14 @@ export default function DashboardPage() {
           auto-placement, so DOM order (and the mobile stack, where
           this wrapper is display:block) is untouched; conditional
           cards simply pack tighter. items-start keeps a short card
-          from being stretched to its row-mate's height. */}
-      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4">
+          from being stretched to its row-mate's height.
+
+          landscape-short gets the same pairing: sideways width is
+          lg-class even though the viewport is a phone, and the
+          stacked cards were burning the scarce height. Source order
+          is untouched — the grid only changes placement, so reading
+          order equals DOM order at every regime (WCAG 2.4.3). */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-stretch landscape-short:gap-x-4">
       <section className="card relative mb-4 overflow-hidden text-center lg:flex lg:flex-col lg:justify-center">
         <div
           aria-hidden="true"
@@ -316,8 +322,11 @@ export default function DashboardPage() {
 
       {/* 5 columns only from xl: the #382 rail narrows the main column
           at lg, where five tiles squeezed "gathering" out of its box
-          (pilot report). */}
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
+          (pilot report). landscape-short pins 3-across: a phone held
+          sideways has md-class width, but the sub-768 landscape
+          phones (SE-class) would otherwise fall back to the portrait
+          2-col stack and burn the scarce height. */}
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 landscape-short:grid-cols-3">
         <StatCard
           label={t("dashboard.stats.activeWeek")}
           value={stats.activeMembersThisWeek}
@@ -382,8 +391,9 @@ export default function DashboardPage() {
       {/* Second desktop pair: milestones beside the category
           breakdown. The divider between them is a mobile-stack
           separator — side by side it would render as a stray leaf in
-          a grid cell, so it hides at lg. */}
-      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4">
+          a grid cell, so it hides wherever the pair goes two-up
+          (lg and landscape-short). */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-stretch landscape-short:gap-x-4">
       <CanopyMilestones
         totalHours={stats.totalHoursExchanged}
         totalExchanges={stats.totalExchanges}
@@ -392,7 +402,7 @@ export default function DashboardPage() {
         nodeConfig={nodeConfig}
       />
 
-      <div className="my-2 lg:hidden">
+      <div className="my-2 lg:hidden landscape-short:hidden">
         <LeafDivider variant="short" />
       </div>
 
@@ -448,8 +458,10 @@ export default function DashboardPage() {
         <LeafDivider variant="short" />
       </div>
 
-      {/* Third desktop pair: the two "flow of help" visualizations. */}
-      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4">
+      {/* Third desktop pair: the two "flow of help" visualizations —
+          the breadth bars with the Reciprocity section beside them
+          (landscape-short pairs them too; source order unchanged). */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-4 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-stretch landscape-short:gap-x-4">
       <div className="relative">
         <BreadthBar entries={flow.breadth} members={members} />
         <div className="-mt-3 mb-4 flex justify-end">

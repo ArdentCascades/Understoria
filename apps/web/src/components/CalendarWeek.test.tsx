@@ -282,4 +282,19 @@ describe("CalendarWeek — stacked narrow layout", () => {
     expect(stack!.textContent).toContain("Repair Café");
     expect(stack!.textContent).toContain("Wednesday");
   });
+
+  it("shows the true 7-column grid in short landscape too", () => {
+    // A phone held sideways has desktop-class width: the same
+    // `landscape-short` variant that moves the nav to a rail flips
+    // the week from stacked rows to the 7-across grid — and the
+    // stacked list hides so screen readers still see the week once.
+    render(<WeekHarness />);
+    const grid = container.querySelector(".lg\\:grid")!;
+    const stack = container.querySelector("ul.lg\\:hidden")!;
+    expect(grid.className).toContain("landscape-short:grid");
+    expect(stack.className).toContain("landscape-short:hidden");
+    // The day cells trim their 120px floor sideways (≤500px tall).
+    const cell = grid.querySelector('[class*="min-h-[120px]"]')!;
+    expect(cell.className).toContain("landscape-short:min-h-[88px]");
+  });
 });
