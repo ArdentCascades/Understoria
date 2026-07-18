@@ -149,6 +149,41 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **The post form speaks Spanish all the way down.** The one-line
+  blurb under each category ("Babysitting, school pickups, kid help"
+  and its eight siblings) was hardcoded English, so a Spanish member
+  saw translated names over untranslated descriptions. Every category
+  blurb now flows through the parity-checked locale files — and the
+  three project categories on the new-project form that still rendered
+  literal English option labels are translated too.
+- **No more desktop install advice on a phone.** The one-tap install
+  prompt titled itself "Install Understoria as an app" (a computer's
+  phrasing) even on Android phones — it now says "Add Understoria to
+  your home screen" whenever the device in hand is a phone. And a
+  phone browsing in "Request desktop site" mode (whose user agent
+  claims to be a computer) is unmasked by its touch-primary pointer
+  and gets the phone steps, never sent hunting for an address-bar
+  install icon that isn't there. In English and Spanish.
+- **The message-search empty state stopped being ironic.** It said
+  "Try the exact spelling — search is simple" right after search
+  learned to forgive accents and quote styles. It now suggests what
+  actually helps: fewer words, or a different word for the same thing.
+- **Spanish copy consistency sweep.** "Integrantes" and "miembros"
+  were used interchangeably; everything now says "miembros" (the
+  dominant term). The profile-setup greeting no longer produces the
+  awkward mid-sentence "Qué bueno verte, Tú" for the demo founder —
+  the name is quoted as the label it is. Vouch strings dropped their
+  clunky clitics ("estás avalándolo", "avalarle") for plain "avalar a
+  esa persona". The Emergency section's "hostile party" is now plain
+  language in both languages ("someone who means you harm" / "alguien
+  que quiera hacerte daño"). And the security note that referenced the
+  "Lock now" button before you'd ever seen it now points at the button
+  below it instead of assuming you know it.
+- **The welcome tour is findable again.** Once skipped, the tour's
+  only way back was buried in Profile → Learn. The Help page — where
+  a lost member actually looks — now links "Take the welcome tour
+  again", and the Profile link says the same thing instead of the
+  vaguer "Revisit the welcome". In English and Spanish.
 - **Everything important fits a phone held sideways.** Turn your
   phone to landscape and the tall moments no longer spill off the
   bottom of the screen with their buttons out of reach: confirmation

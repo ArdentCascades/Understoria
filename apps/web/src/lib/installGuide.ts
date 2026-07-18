@@ -38,7 +38,11 @@ export type DeviceId = "ios" | "android" | "desktop";
  *  device toggle lets the member correct a misdetection. */
 export type InstallEnvironment =
   | { kind: "installed" }
-  | { kind: "promptable" }
+  // One-tap install is live. Carries the device bucket so surfaces can
+  // phrase the moment for the hardware in hand — "home screen" on a
+  // phone, "install as an app" on a computer (a promptable Android
+  // Chrome member was reading desktop copy before this).
+  | { kind: "promptable"; device: DeviceId }
   | { kind: "ios-safari" }
   | { kind: "ios-other" } // iOS on a non-Safari browser — only Safari can install on iOS
   | { kind: "in-app-browser" }
@@ -123,15 +127,24 @@ export function isInAppBrowser(ua: string): boolean {
 
 /** Best-effort device bucket for the manual-steps branch. iOS (incl.
  *  iPadOS-as-Mac) wins first via `isIos`; then an explicit Android
- *  token; everything else is `desktop`, the catch-all. The panel's
- *  device toggle lets the member correct a misdetection. */
+ *  token; then a coarse-pointer catch: a browser whose UA claims
+ *  desktop but whose PRIMARY pointer is a finger is a phone lying
+ *  about itself ("Request desktop site" mode) — it must never be told
+ *  to hunt for an address-bar install icon, so it lands in the
+ *  `android` bucket, whose generic browser-menu steps are the honest
+ *  fit (iOS was already caught above). Touch-screen laptops are safe:
+ *  their primary pointer reports `fine`. Everything else is `desktop`,
+ *  the catch-all; the panel's device toggle lets the member correct a
+ *  misdetection. */
 export function detectDevice(
   ua: string,
   platform: string,
   maxTouchPoints: number,
+  coarsePointer = false,
 ): DeviceId {
   if (isIos(ua, platform, maxTouchPoints)) return "ios";
   if (/Android/i.test(ua)) return "android";
+  if (coarsePointer) return "android";
   return "desktop";
 }
 
@@ -146,8 +159,20 @@ export function detectInstallEnvironment(input: {
   maxTouchPoints: number;
   hasDeferred: boolean;
   standalone: boolean;
+  /** True when the primary pointer is a finger (`(pointer: coarse)`)
+   *  — the UA-independent signal that unmasks a phone browsing in
+   *  "desktop site" mode. Optional so non-DOM callers and older tests
+   *  don't have to care; defaults to false (trust the UA). */
+  coarsePointer?: boolean;
 }): InstallEnvironment {
-  const { ua, platform, maxTouchPoints, hasDeferred, standalone } = input;
+  const {
+    ua,
+    platform,
+    maxTouchPoints,
+    hasDeferred,
+    standalone,
+    coarsePointer = false,
+  } = input;
 
   // 1. Already installed — wins over all. Never prompt.
   if (standalone) return { kind: "installed" };
@@ -157,7 +182,14 @@ export function detectInstallEnvironment(input: {
   if (isInAppBrowser(ua)) return { kind: "in-app-browser" };
 
   // 3. A captured beforeinstallprompt means a one-tap install is live.
-  if (hasDeferred) return { kind: "promptable" };
+  //    Carry the device bucket so the surfaces phrase the moment for
+  //    the hardware in hand (home screen vs. install-as-an-app).
+  if (hasDeferred) {
+    return {
+      kind: "promptable",
+      device: detectDevice(ua, platform, maxTouchPoints, coarsePointer),
+    };
+  }
 
   // 4. iOS Safari — the manual Share flow (no beforeinstallprompt on
   //    iOS). Excludes the WebKit-wrapping iOS browsers via isSafari.
@@ -177,7 +209,7 @@ export function detectInstallEnvironment(input: {
   //    desktop here; the panel's device toggle covers a misdetection.
   //    Desktop additionally carries the browser family, because the
   //    install affordance forks by browser there (see the type).
-  const device = detectDevice(ua, platform, maxTouchPoints);
+  const device = detectDevice(ua, platform, maxTouchPoints, coarsePointer);
   if (device === "desktop") {
     return { kind: "manual", device, desktopBrowser: detectDesktopBrowser(ua) };
   }
@@ -328,6 +360,10 @@ export function currentInstallEnvironment(): InstallEnvironment {
     maxTouchPoints: navigator.maxTouchPoints,
     hasDeferred: getDeferredPrompt() !== null,
     standalone: readStandalone(),
+    coarsePointer:
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches,
   });
 }
 

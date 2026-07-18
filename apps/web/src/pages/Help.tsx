@@ -191,6 +191,18 @@ export default function HelpPage() {
         >
           {t("print.guide.link")}
         </Link>
+        {/* Re-entry into the welcome tour. Once skipped, the tour was
+            nearly impossible to rediscover (the only other door is
+            buried in Profile → Learn) — Help is where a lost member
+            actually looks. `?revisit=1` tells Welcome this is a
+            deliberate re-read, so the onboarded guard lets it render
+            and Skip exits back to the board. */}
+        <Link
+          to="/welcome?revisit=1"
+          className="mt-1 block w-fit text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        >
+          {t("help.tourLink")}
+        </Link>
       </header>
 
       {/* Filter — plain text narrowing, entirely on-device like

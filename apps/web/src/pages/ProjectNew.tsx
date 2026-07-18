@@ -15,7 +15,11 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { createProjectWithTasks } from "@/db/projects";
-import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import {
+  ALL_CATEGORIES,
+  CATEGORY_META,
+  PROJECT_CATEGORY_META,
+} from "@/lib/categories";
 import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
@@ -684,9 +688,13 @@ export default function ProjectNewPage() {
                     {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
                   </option>
                 ))}
-                <option value="infrastructure">🏗️ Infrastructure</option>
-                <option value="organizing">📋 Organizing</option>
-                <option value="mutual_aid_drive">💛 Mutual aid drive</option>
+                {(["infrastructure", "organizing", "mutual_aid_drive"] as const).map(
+                  (c) => (
+                    <option key={c} value={c}>
+                      {PROJECT_CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+                    </option>
+                  ),
+                )}
               </select>
             </label>
             {/* Short-field pair: target hours + deadline share a row

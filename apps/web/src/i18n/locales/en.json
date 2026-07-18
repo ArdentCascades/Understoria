@@ -801,7 +801,7 @@
       "close": "Close search",
       "conversationWith": "Conversation with {{name}}",
       "matchedName": "Matched their name",
-      "noMatchesHint": "Try the exact spelling — search is simple."
+      "noMatchesHint": "Try fewer words, or a different word for the same thing."
     },
     "day": {
       "today": "Today",
@@ -1527,6 +1527,23 @@
     "social": "Social",
     "celebration": "Celebration",
     "learning": "Learning"
+  },
+  "categoryDescriptions": {
+    "transport": "Rides, carpools, moving help",
+    "food": "Meals, groceries, cooking",
+    "childcare": "Babysitting, school pickups, kid help",
+    "skilled_labor": "Repairs, trades, hands-on work",
+    "emotional_support": "Listening, company, care",
+    "education": "Tutoring, teaching, mentoring",
+    "housing": "Shelter, moving, household help",
+    "tech": "Computers, phones, setup help",
+    "other": "Anything else our community needs",
+    "infrastructure": "Building, repair, and shared physical systems",
+    "organizing": "Collective action, unions, time banks",
+    "mutual_aid_drive": "Distributing supplies, funds, or essentials",
+    "social": "Get-togethers and good company",
+    "celebration": "Marking something together",
+    "learning": "Sharing skills and making things"
   },
   "postStatus": {
     "open": "Open",
@@ -2637,7 +2654,7 @@
       "title": "Learn",
       "rowDescription": "Guides, common questions, and design principles — everything works offline.",
       "intro": "The welcome flow, common questions, a condensed member guide, and prompts for study groups. Everything here works offline.",
-      "revisitWelcome": "Revisit the welcome",
+      "revisitWelcome": "Take the welcome tour again",
       "helpFaq": "Common questions",
       "memberGuide": "Member guide",
       "opsecGuide": "Staying safe",
@@ -2873,12 +2890,12 @@
         "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
         "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
       },
-      "whenAsked": "You'll be asked for your passphrase right after you tap Lock now, and again whenever you open the app after it has been closed or reloaded — never on a timer while it stays open."
+      "whenAsked": "You'll be asked for your passphrase whenever you open the app after it has been closed or reloaded, and right after you lock it yourself with the \"Lock now\" button below — never on a timer while it stays open."
     },
     "emergency": {
       "title": "Emergency",
       "intro": "Two panic options for when a device is at risk. Neither contacts a server; both happen entirely on this device.",
-      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger (the record of exchanges) and your keypair (the keys that are your account). Useful if a device will briefly be handled by a hostile party.",
+      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger (the record of exchanges) and your keypair (the keys that are your account). Useful if a device will briefly be in the hands of someone who means you harm.",
       "hardBullet": "Hard purge — wipes everything stored here including private keys, and rotates to a fresh identity (a brand-new key). Unrecoverable. The page will reload afterward.",
       "federatedNote": "Honesty note: both options act on THIS DEVICE only. Anything that already synced with your community — posts, exchanges, vouches, votes, and other signed records — persists on the community node (the shared server) and on other members' devices. A public vote you can no longer stand behind can be re-cast instead: the newest version is what counts.",
       "softButton": "Soft purge (anonymize)",
@@ -2906,7 +2923,8 @@
   },
   "help": {
     "title": "Common questions",
-    "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide or revisit the welcome from your profile.",
+    "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide, or take the welcome tour again below.",
+    "tourLink": "Take the welcome tour again",
     "footer": "Didn't find your question? Most of what isn't here is a community conversation, not an app feature — talk to a member you trust.",
     "filterLabel": "Filter questions",
     "filterPlaceholder": "Type to filter questions…",

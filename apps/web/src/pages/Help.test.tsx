@@ -88,6 +88,34 @@ describe("HelpPage — locale-aware FAQ", () => {
     expect(container.textContent).toContain("Posts and exchanges");
   });
 
+  it("offers a way back into the welcome tour, in both languages", async () => {
+    // Once skipped, the tour was nearly impossible to rediscover — the
+    // only other door is buried in Profile → Learn. Help is where a
+    // lost member actually looks, so the re-entry link lives here and
+    // must carry the deliberate `?revisit=1` flag (without it, the
+    // onboarded guard bounces straight back to the board).
+    await i18n.changeLanguage("en");
+    render(<HelpPage />);
+    let link = [...container.querySelectorAll("a")].find((a) =>
+      (a.textContent ?? "").includes("Take the welcome tour again"),
+    );
+    expect(link).toBeDefined();
+    expect(link?.getAttribute("href")).toBe("/welcome?revisit=1");
+
+    act(() => {
+      root?.unmount();
+    });
+    await i18n.changeLanguage("es");
+    render(<HelpPage />);
+    link = [...container.querySelectorAll("a")].find((a) =>
+      (a.textContent ?? "").includes(
+        "Volver a hacer el recorrido de bienvenida",
+      ),
+    );
+    expect(link).toBeDefined();
+    expect(link?.getAttribute("href")).toBe("/welcome?revisit=1");
+  });
+
   it("uses the same entry ids in both languages (anchor links survive)", async () => {
     await i18n.changeLanguage("es");
     render(<HelpPage />);

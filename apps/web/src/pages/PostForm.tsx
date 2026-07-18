@@ -470,7 +470,7 @@ export default function PostFormPage() {
                     {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
                   </span>{" "}
                   <span className="text-xs text-moss-600 dark:text-moss-300">
-                    — {CATEGORY_META[c].description}
+                    — {t(`categoryDescriptions.${c}`)}
                   </span>
                 </span>
               </label>
