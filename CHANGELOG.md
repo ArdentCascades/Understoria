@@ -146,6 +146,27 @@ include breaking changes.
   "Tablero" tab, and the register settles into consistent, warm
   Latin American Spanish — "Cuidado infantil", "somos nosotros",
   "Retirar mi compromiso". Even the demo's founder is "Tú" now.
+- **Five dialogs now say what actually happens.** Cancelling a post no
+  longer promises it "stays visible" while it vanishes from the board —
+  the dialog now tells the truth (it leaves the board right away; it
+  isn't deleted, its page stays, marked as cancelled), the buttons read
+  "Keep my post" / "Cancel this post" so nobody has to parse "Cancel"
+  next to "Cancel post", the fresh-post sentence moved to where
+  reposting actually lives, and the little "(why?)" explains reposting
+  in plain words instead of cryptography vocabulary. The flag-for-review
+  dialog now answers the question that stopped people cold — a flag
+  isn't one-way; anyone (including you) can close it as withdrawn on the
+  Proposals page and the exchange goes back to where it was. Blocked
+  contacts in Settings are distinguishable at a glance (each collapsed
+  row shows its short key; names still stay hidden until you tap — the
+  over-the-shoulder privacy holds), and opening a conversation you've
+  blocked now says so honestly — "You've blocked this contact", with the
+  path to unblock — instead of "This isn't available right now."
+  Revisiting the welcome tour, "Skip" now simply returns you to the
+  board instead of dropping you into profile setup. And the demo no
+  longer contradicts itself by saying "You haven't joined a community
+  yet" above a fully populated sample community — real devices that
+  really haven't joined still see that card. English and Spanish.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

@@ -259,6 +259,40 @@ describe("WelcomePage — onboarded guard vs. deliberate revisit", () => {
     expect(lastLocation).toBe("/welcome?revisit=1");
     expect(container.textContent).toContain("This is a timebank");
   });
+
+  it("Skip on a revisit exits straight to the board — not to profile setup", () => {
+    // A revisiting member is already onboarded; "Skip" means "I'm done
+    // with the tour". Jumping them into the profile-setup step read as
+    // a trap in the honest-dialog round.
+    mockState.onboarded = true;
+    lastLocation = "";
+    render(
+      <>
+        <WelcomePage />
+        <LocationProbe />
+      </>,
+      ["/welcome?revisit=1"],
+    );
+    expect(container.textContent).toContain("This is a timebank");
+    clickSkip();
+    expect(lastLocation).toBe("/");
+    expect(container.textContent).not.toContain("A little about you");
+  });
+
+  it("Skip mid-tour on a revisit also exits to the board", () => {
+    mockState.onboarded = true;
+    lastLocation = "";
+    render(
+      <>
+        <WelcomePage />
+        <LocationProbe />
+      </>,
+      ["/welcome?revisit=1"],
+    );
+    clickNextNTimes(3);
+    clickSkip();
+    expect(lastLocation).toBe("/");
+  });
 });
 
 // React's controlled inputs ignore direct `.value =` writes; go through

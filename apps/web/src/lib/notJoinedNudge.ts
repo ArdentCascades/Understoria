@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { getSetting, setSetting } from "@/db/database";
+import { isDemoBuild } from "@/lib/demo";
 import type { InviteRow } from "@/db/database";
 
 // The persistent, dismissible not-joined affordance of
@@ -60,6 +61,15 @@ export function isNotJoined(input: {
   invites: Pick<InviteRow, "status" | "redeemedBy">[];
   communityNodeUrl: string;
 }): boolean {
+  // Demo builds never show this card. The sample community is seeded
+  // locally with no node URL and no redeemed invites, so the detection
+  // rule below would fire "you haven't joined a community yet" ABOVE a
+  // fully-populated board — a contradiction three separate usability
+  // personas flagged. The demo's own banner already explains the
+  // situation; on a real build nothing changes and the card stays
+  // correct for genuinely unconnected devices. Function form of the
+  // flag so tests can flip it (see lib/demo.ts).
+  if (isDemoBuild()) return false;
   if (!input.memberKey) return false; // no identity yet — Welcome's job
   if (input.communityNodeUrl.trim() !== "") return false;
   return !input.invites.some(

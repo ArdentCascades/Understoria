@@ -47,8 +47,9 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "En el Tablero, toca el botón verde + Publicar necesidad o " +
             "+ Publicar oferta al pie de la pantalla. Pon un título corto, " +
             "describe qué necesitas o qué puedes dar, y publícalo. Más " +
-            "tarde puedes editarlo o cancelarlo desde la página de detalle " +
-            "de la publicación.",
+            "tarde puedes cancelarla desde la página de detalle de la " +
+            "publicación, o republicarla con cambios desde el menú de la " +
+            "publicación.",
         ],
       },
       {
@@ -102,10 +103,11 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "cancel-post",
         question: "¿Cómo cancelo una publicación que ya no necesito?",
         answer: [
-          "Abre la publicación (desde el Tablero o desde el historial de " +
-            "tu perfil) y toca Cancelar publicación. Las publicaciones " +
-            "canceladas siguen visibles para que la comunidad vea qué se " +
-            "pidió u ofreció, pero ya no se pueden tomar.",
+          "Abre la publicación desde el Tablero y toca Cancelar " +
+            "publicación. La publicación sale del tablero de inmediato, " +
+            "así que nadie podrá tomarla. No se borra — su propia página " +
+            "se conserva, marcada como cancelada, y cualquiera con su " +
+            "enlace aún puede ver qué se pidió u ofreció.",
         ],
       },
     ],

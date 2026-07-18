@@ -23,6 +23,7 @@ vi.mock("@/lib/demo", async (importOriginal) => {
 import { db, setSetting, SETTING_KEYS } from "@/db/database";
 import { readSubmitConfig } from "@/lib/nodeSubmit";
 import { listNodeEndpoints } from "@/lib/nodeEndpoints";
+import { isNotJoined } from "@/lib/notJoinedNudge";
 import {
   enqueueVouchOutbox,
   enqueueInviteRevocationOutbox,
@@ -70,5 +71,21 @@ describe("demo build federation lockdown", () => {
     } as InviteRevocation);
     expect(row).toBeNull();
     expect(await db.outbox.count()).toBe(0);
+  });
+
+  it("suppresses the not-joined Board card — the demo's sample community IS the situation", () => {
+    // The demo seeds a populated community locally with no node URL and
+    // no redeemed invite rows — exactly the "orphan identity" input the
+    // detection rule fires on. Showing "You haven't joined a community
+    // yet" above a full sample board contradicts what the visitor sees;
+    // the demo banner already explains it. Real builds are untouched
+    // (see lib/notJoinedNudge.test.ts for the non-demo truth table).
+    expect(
+      isNotJoined({
+        memberKey: "demo-member",
+        invites: [],
+        communityNodeUrl: "",
+      }),
+    ).toBe(false);
   });
 });

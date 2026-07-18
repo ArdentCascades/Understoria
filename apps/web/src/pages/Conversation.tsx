@@ -614,11 +614,15 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
 
   if (!currentMember) return null;
 
-  // PR F: if the counterparty is in the blocked set, render the
-  // generic not-available copy in place of the conversation. No
-  // block-specific phrasing per docs/blocking.md §6.1 generic-error
-  // discipline; the message is byte-identical to the one any other
-  // unavailable conversation would render.
+  // PR F + honest-dialog round: if the counterparty is in the blocked
+  // set, replace the conversation with an honest "you blocked them"
+  // state. `blockedKeys` is derived ONLY from the current member's own
+  // local block rows (blocks never federate — docs/blocking.md §7), so
+  // this branch renders exclusively on the BLOCKER's own device; the
+  // §6.1 generic-error discipline protects what the BLOCKED party sees
+  // and is untouched by being honest with the blocker about their own
+  // decision. No other unavailability cause routes here — this is the
+  // only consumer of the blocked-conversation state on this page.
   if (otherKey && blockedKeys.has(otherKey)) {
     return (
       <div className="flex h-full flex-col px-4 pb-4 pt-4">
@@ -631,9 +635,15 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             />
           )}
         </header>
-        <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-          {t("errors.generic.notAvailable")}
-        </p>
+        <div className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+          <p>{t("messages.conversation.blockedNotice")}</p>
+          <Link
+            to="/settings"
+            className="mt-2 inline-block font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          >
+            {t("messages.conversation.blockedNoticeLink")}
+          </Link>
+        </div>
       </div>
     );
   }
