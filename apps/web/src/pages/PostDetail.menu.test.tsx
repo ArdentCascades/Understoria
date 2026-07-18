@@ -299,3 +299,37 @@ describe("PostDetailPage — docked panel hides the duplicate Back", () => {
     expect(backButton()).toBeDefined();
   });
 });
+
+// Round-3 papercut: a cancelled post showed only the Cancelled chip —
+// no path forward. The owner now gets "Repost with changes" (menu item
+// AND a visible action link) that pre-fills the post form from this
+// post via the existing ?repost= route; `&again=1` means the cancelled
+// source is left untouched.
+describe("PostDetailPage — cancelled post offers the owner a path forward", () => {
+  it("owner of a CANCELLED post sees Repost with changes as a visible link and a menu item", () => {
+    mockState.posts = [post({ status: "cancelled" })];
+    mockState.currentMember = member(posterKey, "Pat Poster");
+    render();
+    const link = container.querySelector<HTMLAnchorElement>(
+      'a[href="/post/new?repost=post-1&again=1"]',
+    );
+    expect(link).not.toBeNull();
+    expect(link!.textContent).toContain("Repost with changes");
+    // The hint says the fresh-post truth: new post, this one stays
+    // cancelled.
+    expect(container.textContent).toContain("this one stays cancelled");
+    openMenu();
+    expect(menuItemByText("Repost with changes")).toBeDefined();
+  });
+
+  it("a non-owner on a CANCELLED post gets neither the link nor the menu item", () => {
+    mockState.posts = [post({ status: "cancelled" })];
+    mockState.currentMember = member(viewerKey, "Vic Viewer");
+    render();
+    expect(
+      container.querySelector('a[href^="/post/new?repost"]'),
+    ).toBeNull();
+    openMenu();
+    expect(menuItemByText("Repost with changes")).toBeUndefined();
+  });
+});

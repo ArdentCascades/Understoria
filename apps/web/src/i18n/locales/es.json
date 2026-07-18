@@ -778,6 +778,7 @@
       "headerMenuUnblock": "Desbloquear a {{name}}",
       "blockedNotice": "Has bloqueado este contacto.",
       "blockedNoticeLink": "Puedes desbloquearlo en Ajustes → Contactos bloqueados.",
+      "blockedChip": "Bloqueado",
       "aboutPost": "sobre: {{title}}",
       "aboutPostUnknown": "sobre una publicación"
     },
@@ -1592,6 +1593,7 @@
     "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
     "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar.",
     "repostBanner": "Editando una copia — la publicación original se cancelará al enviar.",
+    "repostAgainBanner": "Empezando desde una copia — la publicación original no cambia.",
     "matchingNeeds": "{{count}} necesidades activas en esta categoría — verlas",
     "matchingNeedsAside": {
       "title": "Necesidades activas en esta categoría",
@@ -1649,6 +1651,7 @@
     "dialogReleaseConfirm": "Retirar",
     "repost": "Republicar con cambios",
     "repostHint": "¿Necesitas cambiar algo? «Republicar con cambios», en el menú de la publicación, cancela esta y crea una publicación nueva.",
+    "cancelledOwnerHint": "Esta publicación está cancelada y fuera del tablero. Si los planes cambian otra vez, puedes republicarla con cambios — eso crea una publicación nueva; esta queda cancelada.",
     "stillLooking": "¿Sigues buscando? Agregar más detalles o ajustar las horas estimadas puede ayudar a que la persona adecuada encuentre esto. Puedes republicar con cambios desde el menú de la publicación.",
     "stillOffering": "¿Sigues disponible? Ajustar el horario o los detalles puede ayudar a que se conecte con alguien que lo necesita.",
     "postAgain": "Publicar de nuevo",
@@ -1987,7 +1990,7 @@
     "cosignShowBack": "Muestra esto a la persona que propone — su dispositivo lo suma hacia el quórum (el número de firmas necesarias).",
     "cosignQrAlt": "Código de cofirma",
     "reinstateButton": "Iniciar una readmisión…",
-    "selfBanner": "Esta comunidad te ha expulsado por decisión de quórum. Todo lo que hay en este dispositivo sigue siendo tuyo y sigue funcionando aquí, pero la sincronización con el servidor de la comunidad fallará hasta que un quórum de miembros firme una readmisión. La decisión, su razón y sus firmantes están en la página de Decisiones.",
+    "selfBanner": "Esta comunidad te ha expulsado por decisión de quórum. Todo lo que hay en este dispositivo sigue siendo tuyo y sigue funcionando aquí, pero la sincronización con el servidor de la comunidad fallará hasta que un quórum de miembros firme una readmisión. La decisión, su razón y sus firmantes están en la página de Propuestas.",
     "error": {
       "no_identity": "No hay identidad en este dispositivo.",
       "locked": "Este dispositivo está bloqueado — desbloquéalo primero.",
@@ -2603,7 +2606,10 @@
       "directFlag": "¿algo salió mal?",
       "directFlagTitle": "Marcar este intercambio para revisión comunitaria",
       "directFlagBody": "Este intercambio se registró directamente — teléfono a teléfono, sin publicación detrás. Marcarlo lo muestra en la página de Disputas, donde toda la comunidad puede verlo y responder. No hay administradores; esto inicia una conversación, no un castigo.",
-      "directFlagConfirm": "Marcarlo"
+      "directFlagConfirm": "Marcarlo",
+      "postFlagTitle": "Marcar este intercambio para revisión comunitaria",
+      "postFlagBody": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva. Una señal no es irreversible: si cambias de opinión, cualquier miembro — tú también — puede cerrarla como retirada en la página de Propuestas, y el intercambio vuelve a donde estaba.",
+      "postFlagConfirm": "Marcarlo"
     },
     "memberSwitcher": {
       "title": "Cambiar de miembro (modo desarrollo local)",
@@ -2961,8 +2967,8 @@
     "commentSubjectChip": "Comentario de tarea",
     "commentTitle": "Comentario señalado",
     "commentAuthorLabel": "Autor",
-    "openInDecisions": "Abrir en Decisiones",
-    "footer": "Cada disputa también aparece en Decisiones, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
+    "openInDecisions": "Abrir en Propuestas",
+    "footer": "Cada disputa también aparece en Propuestas, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
     "entry": {
       "title": "Disputas de la comunidad",
       "descriptionNone": "Ningún intercambio está señalado ahora mismo.",
@@ -3254,7 +3260,13 @@
       "blockedAtLabel": "Bloqueado el {{date}}",
       "firstBlockedAtLabel": "Primer bloqueo: {{when}}",
       "unblockedAtLabel": "Desbloqueado: {{when}}",
-      "pubkeyLabel": "Clave {{shortKey}}"
+      "pubkeyLabel": "Clave {{shortKey}}",
+      "noteLabel": "Tu nota privada",
+      "noteEmpty": "Sin nota. Una nota privada puede recordarte el porqué — solo tú puedes verla.",
+      "noteEditButton": "Editar nota",
+      "noteAddButton": "Añadir una nota privada",
+      "noteSave": "Guardar nota",
+      "noteSaved": "Nota guardada."
     },
     "error": {
       "cannotBlockSelf": "No puedes bloquearte a ti mismo.",

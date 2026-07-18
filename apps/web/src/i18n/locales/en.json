@@ -778,6 +778,7 @@
       "headerMenuUnblock": "Unblock {{name}}",
       "blockedNotice": "You've blocked this contact.",
       "blockedNoticeLink": "You can unblock them in Settings → Blocked contacts.",
+      "blockedChip": "Blocked",
       "aboutPost": "about: {{title}}",
       "aboutPostUnknown": "about a post"
     },
@@ -1592,6 +1593,7 @@
     "errorHoursPositive": "Estimated hours must be a positive number.",
     "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire.",
     "repostBanner": "Editing a copy — the original post will be cancelled when you submit.",
+    "repostAgainBanner": "Starting from a copy — the original post isn't changed.",
     "matchingNeeds": "{{count}} active needs in this category — see them",
     "matchingNeedsAside": {
       "title": "Active needs in this category",
@@ -1649,6 +1651,7 @@
     "dialogReleaseConfirm": "Release claim",
     "repost": "Repost with changes",
     "repostHint": "Need to change something? \"Repost with changes\" in the post menu cancels this one and creates a fresh post.",
+    "cancelledOwnerHint": "This post is cancelled and off the board. If plans change again, you can repost it with changes — that makes a fresh post; this one stays cancelled.",
     "stillLooking": "Still looking? Adding more detail or adjusting the hours estimate can help the right person find this. You can repost with changes from the post menu.",
     "stillOffering": "Still available? Adjusting the timing or details can help match you with someone who needs this.",
     "postAgain": "Post this again",
@@ -1987,7 +1990,7 @@
     "cosignShowBack": "Show this to the proposing member — their device collects it toward the quorum (the number of signatures needed).",
     "cosignQrAlt": "Co-signature code",
     "reinstateButton": "Start a reinstatement…",
-    "selfBanner": "This community has removed you by quorum decision. Everything on this device is still yours and keeps working here, but syncing with the community's server will fail until a quorum of members signs a reinstatement. The decision, its reason, and its signers are on the Decisions page.",
+    "selfBanner": "This community has removed you by quorum decision. Everything on this device is still yours and keeps working here, but syncing with the community's server will fail until a quorum of members signs a reinstatement. The decision, its reason, and its signers are on the Proposals page.",
     "error": {
       "no_identity": "No identity on this device.",
       "locked": "This device is locked — unlock it first.",
@@ -2603,7 +2606,10 @@
       "directFlag": "something's wrong?",
       "directFlagTitle": "Flag this exchange for community review",
       "directFlagBody": "This exchange was recorded directly — phone to phone, with no post behind it. Flagging surfaces it on the Disputes page where the whole community can see it and respond. There are no admins; this starts a conversation, not a punishment.",
-      "directFlagConfirm": "Flag it"
+      "directFlagConfirm": "Flag it",
+      "postFlagTitle": "Flag this exchange for community review",
+      "postFlagBody": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved. A flag isn't one-way: if you change your mind, any member — including you — can close it as withdrawn on the Proposals page, and the exchange goes back to where it was.",
+      "postFlagConfirm": "Flag it"
     },
     "memberSwitcher": {
       "title": "Switch member (local dev)",
@@ -2961,8 +2967,8 @@
     "commentSubjectChip": "Task comment",
     "commentTitle": "Flagged comment",
     "commentAuthorLabel": "Author",
-    "openInDecisions": "Open in Decisions",
-    "footer": "Each dispute also shows up in Decisions, where the community can vote on how to respond. Resolution closes the dispute in both places.",
+    "openInDecisions": "Open in Proposals",
+    "footer": "Each dispute also shows up in Proposals, where the community can vote on how to respond. Resolution closes the dispute in both places.",
     "entry": {
       "title": "Community disputes",
       "descriptionNone": "No exchanges are flagged right now.",
@@ -3254,7 +3260,13 @@
       "blockedAtLabel": "Blocked on {{date}}",
       "firstBlockedAtLabel": "First blocked {{when}}",
       "unblockedAtLabel": "Unblocked {{when}}",
-      "pubkeyLabel": "Key {{shortKey}}"
+      "pubkeyLabel": "Key {{shortKey}}",
+      "noteLabel": "Your private note",
+      "noteEmpty": "No note. A private note can remind you why — only you can see it.",
+      "noteEditButton": "Edit note",
+      "noteAddButton": "Add a private note",
+      "noteSave": "Save note",
+      "noteSaved": "Note saved."
     },
     "error": {
       "cannotBlockSelf": "You can't block yourself.",

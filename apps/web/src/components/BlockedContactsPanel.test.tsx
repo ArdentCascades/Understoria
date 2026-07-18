@@ -44,6 +44,7 @@ vi.mock("dexie-react-hooks", () => ({
 
 vi.mock("@/db/blocks", () => ({
   NEVER_UNBLOCKED: 0,
+  BLOCK_NOTE_MAX_LENGTH: 500,
   listBlocks: vi.fn(async () => []),
   listPreviouslyBlocked: vi.fn(async () => []),
   clearPreviouslyBlocked: vi.fn(async () => undefined),
@@ -53,6 +54,7 @@ vi.mock("@/db/blocks", () => ({
 
 import "@/i18n";
 import { BlockedContactsPanel } from "./BlockedContactsPanel";
+import { updateBlockScope } from "@/db/blocks";
 import type { BlockRow, Member, PreviouslyBlockedRow } from "@/types";
 
 const meKey = "me-key";
@@ -190,5 +192,120 @@ describe("BlockedContactsPanel — collapsed rows are distinguishable, names sta
     const text = container.textContent ?? "";
     expect(text).toContain(`Key ${shortOf(blockedKeyA)}`);
     expect(text).not.toContain("Ana Blocked");
+  });
+});
+
+// Round-3 persona finding: the private note captured at block time was
+// WRITE-ONLY — stored, never displayed. It now shows on the expanded
+// row (same tap that reveals the name — §6.2 collapsed anonymity holds
+// for the note too) with an edit affordance backed by updateBlockScope.
+describe("BlockedContactsPanel — private note on the expanded row", () => {
+  function expandRow(key: string): HTMLButtonElement {
+    const rowButton = Array.from(
+      container.querySelectorAll<HTMLButtonElement>(
+        'button[aria-expanded="false"]',
+      ),
+    ).find((b) => (b.textContent ?? "").includes(shortOf(key)));
+    if (!rowButton) throw new Error("row button not found");
+    act(() => {
+      rowButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    return rowButton;
+  }
+
+  function buttonByText(label: string): HTMLButtonElement | undefined {
+    return Array.from(container.querySelectorAll("button")).find(
+      (b) => (b.textContent ?? "").trim() === label,
+    );
+  }
+
+  function setTextareaValue(value: string) {
+    const ta = container.querySelector("textarea");
+    if (!ta) throw new Error("note textarea not found");
+    const setter = Object.getOwnPropertyDescriptor(
+      HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!;
+    act(() => {
+      setter.call(ta, value);
+      ta.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+
+  async function flush() {
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  }
+
+  it("keeps the note hidden while collapsed and shows it after the tap", () => {
+    mockBlocks = [
+      { ...blockRow("b1", blockedKeyA), note: "borrowed my ladder, never returned" },
+    ];
+    render();
+    // Collapsed: the shoulder-surfing posture covers the note too.
+    expect(container.textContent).not.toContain("borrowed my ladder");
+    expandRow(blockedKeyA);
+    expect(container.textContent).toContain("Your private note");
+    expect(container.textContent).toContain(
+      "borrowed my ladder, never returned",
+    );
+    expect(buttonByText("Edit note")).toBeDefined();
+  });
+
+  it("saves an edited note through updateBlockScope, preserving hideGovernance", async () => {
+    mockBlocks = [
+      { ...blockRow("b1", blockedKeyA), note: "old note", hideGovernance: true },
+    ];
+    render();
+    expandRow(blockedKeyA);
+    act(() => {
+      buttonByText("Edit note")!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true }),
+      );
+    });
+    const ta = container.querySelector("textarea");
+    expect(ta).not.toBeNull();
+    // The editor opens seeded with the current note…
+    expect(ta!.value).toBe("old note");
+    // …and enforces the 500-char note ceiling at the input level.
+    expect(ta!.getAttribute("maxlength")).toBe("500");
+    setTextareaValue("actually it was the drill");
+    act(() => {
+      buttonByText("Save note")!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true }),
+      );
+    });
+    await flush();
+    expect(vi.mocked(updateBlockScope)).toHaveBeenCalledWith({
+      blockerKey: meKey,
+      blockedKey: blockedKeyA,
+      hideGovernance: true,
+      note: "actually it was the drill",
+    });
+  });
+
+  it("offers to add a note when there is none, and saves empty text as null", async () => {
+    render(); // default fixture rows have note: null
+    expandRow(blockedKeyA);
+    const add = buttonByText("Add a private note");
+    expect(add).toBeDefined();
+    act(() => {
+      add!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    setTextareaValue("   ");
+    act(() => {
+      buttonByText("Save note")!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true }),
+      );
+    });
+    await flush();
+    expect(vi.mocked(updateBlockScope)).toHaveBeenCalledWith({
+      blockerKey: meKey,
+      blockedKey: blockedKeyA,
+      hideGovernance: false,
+      note: null,
+    });
   });
 });

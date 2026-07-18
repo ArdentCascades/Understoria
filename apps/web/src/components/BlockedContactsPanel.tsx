@@ -18,6 +18,7 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import {
+  BLOCK_NOTE_MAX_LENGTH,
   clearPreviouslyBlocked,
   listBlocks,
   listPreviouslyBlocked,
@@ -97,12 +98,24 @@ export function BlockedContactsPanel() {
     displayName: string;
   } | null>(null);
   const [clearOpen, setClearOpen] = useState(false);
+  // Private-note editing (round-3 persona finding: the note written
+  // at block time was WRITE-ONLY — captured in BlockConfirmCard,
+  // displayed nowhere). It now shows on the expanded row, behind the
+  // same tap that reveals the name, so the §6.2 collapsed-anonymity
+  // posture holds: a shoulder-surfer sees neither the name nor the
+  // note. One row edits at a time.
+  const [noteEditFor, setNoteEditFor] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
 
   function toggleReveal(id: string) {
     setRevealedRows((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+        // Collapsing the row abandons an in-progress note edit —
+        // re-obscuring means re-obscuring everything.
+        setNoteEditFor((cur) => (cur === id ? null : cur));
+      } else next.add(id);
       return next;
     });
   }
@@ -115,6 +128,22 @@ export function BlockedContactsPanel() {
         hideGovernance: next,
         note: row.note,
       });
+    } catch {
+      showToast(t("block.confirm.errorGeneric"), "error");
+    }
+  }
+
+  async function handleSaveNote(row: BlockRow) {
+    const trimmed = noteDraft.trim();
+    try {
+      await updateBlockScope({
+        blockerKey: row.blockerKey,
+        blockedKey: row.blockedKey,
+        hideGovernance: row.hideGovernance,
+        note: trimmed === "" ? null : trimmed,
+      });
+      showToast(t("block.settings.noteSaved"), "success");
+      setNoteEditFor(null);
     } catch {
       showToast(t("block.confirm.errorGeneric"), "error");
     }
@@ -208,6 +237,71 @@ export function BlockedContactsPanel() {
                 </button>
                 {revealed && (
                   <div className="mt-2 flex flex-col gap-2 px-1">
+                    {/* The private note, tap-revealed with the name.
+                        This is the row's distinguisher AND the "why"
+                        the member wrote down at block time — showing
+                        it here closes the write-only loop. */}
+                    {noteEditFor === row.id ? (
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-medium">
+                          {t("block.settings.noteLabel")}
+                          <textarea
+                            className="input mt-1 w-full text-sm font-normal"
+                            rows={3}
+                            maxLength={BLOCK_NOTE_MAX_LENGTH}
+                            value={noteDraft}
+                            onChange={(e) => setNoteDraft(e.target.value)}
+                            placeholder={t("block.confirm.notePlaceholder")}
+                          />
+                        </label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            className="btn-secondary min-h-[44px]"
+                            onClick={() => void handleSaveNote(row)}
+                          >
+                            {t("block.settings.noteSave")}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-ghost min-h-[44px]"
+                            onClick={() => setNoteEditFor(null)}
+                          >
+                            {t("block.confirm.cancel")}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {row.note ? (
+                          <p className="text-xs">
+                            <span className="font-medium">
+                              {t("block.settings.noteLabel")}
+                              {": "}
+                            </span>
+                            <span className="whitespace-pre-wrap italic text-moss-700 dark:text-moss-200">
+                              {row.note}
+                            </span>
+                          </p>
+                        ) : (
+                          <p className="text-xs text-moss-600 dark:text-moss-300">
+                            {t("block.settings.noteEmpty")}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          className="btn-ghost min-h-[44px] self-start text-xs"
+                          onClick={() => {
+                            setNoteEditFor(row.id);
+                            setNoteDraft(row.note ?? "");
+                          }}
+                        >
+                          {row.note
+                            ? t("block.settings.noteEditButton")
+                            : t("block.settings.noteAddButton")}
+                        </button>
+                      </div>
+                    )}
                     <label className="flex min-h-[44px] items-center gap-2 text-xs">
                       <input
                         type="checkbox"

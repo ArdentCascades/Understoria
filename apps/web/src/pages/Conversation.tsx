@@ -40,6 +40,7 @@ import {
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { VoiceRecorder, type CapturedClip } from "@/components/VoiceRecorder";
 import { isBlocked } from "@/db/blocks";
+import { clearDraft, loadDraft, saveDraft } from "@/db/drafts";
 import { pullFederatedMessages } from "@/lib/federationSync";
 import { SYNC_KICK_EVENT } from "@/lib/syncLoop";
 import { formatRelativeTime } from "@/lib/format";
@@ -76,6 +77,28 @@ export const LONG_PRESS_MS = 450;
  *  as one burst: one timestamp for the group, Signal-style, instead
  *  of a time line under every bubble. Exported for tests. */
 export const GROUP_WINDOW_MS = 10 * 60 * 1000;
+
+/** Composer-draft autosave debounce. Long enough that a fast typist
+ *  isn't writing to IndexedDB per keystroke; short enough that a
+ *  surprise app restart loses at most a moment of typing. Exported
+ *  for the draft tests. */
+export const DRAFT_SAVE_DEBOUNCE_MS = 400;
+
+/** Draft-store key for a conversation composer. Scoped to BOTH keys:
+ *  the viewer (a paired/shared device can host more than one local
+ *  member — one member's half-typed message must never surface in
+ *  another's composer) and the counterparty (one draft per thread).
+ *  Exported for the draft tests.
+ *
+ *  Posture note: the drafts table stores the payload as plain text,
+ *  while SENT messages rest encrypted. A draft is pre-send text that
+ *  already sits in component state on this device; persisting it
+ *  rides the same local-only drafts table every other form here uses
+ *  (post/event/project forms). It is cleared on send and expires
+ *  with the store's 7-day draft window. */
+export function messageDraftKey(meKey: string, otherKey: string): string {
+  return `dm-draft:${meKey}:${otherKey}`;
+}
 
 /** "At the bottom" tolerance for follow-scroll — within this many
  *  pixels of the end still counts as reading the latest. Exported
@@ -435,6 +458,55 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
     false,
   );
 
+  // Composer-draft persistence (round-3 stretch: half-typed messages
+  // vanished on an app restart). Same drafts table the post/event
+  // forms use — no schema change. Restore runs once the member +
+  // counterparty keys resolve; the functional setText keeps a read
+  // that resolves late from clobbering anything already typed. The
+  // dirty ref gates persistence on ACTUAL typing, so the mount
+  // render's empty composer never clears a stored draft before the
+  // restore lands. NOTE: state-only — none of this touches the
+  // page's scroll machinery.
+  const draftDirtyRef = useRef(false);
+  const meKeyForDraft = currentMember?.publicKey ?? null;
+  useEffect(() => {
+    if (!meKeyForDraft || !otherKey) return;
+    let cancelled = false;
+    void loadDraft<string>(messageDraftKey(meKeyForDraft, otherKey)).then(
+      (draft) => {
+        if (cancelled || !draft || typeof draft.payload !== "string") return;
+        setText((prev) => (prev === "" ? draft.payload : prev));
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [meKeyForDraft, otherKey]);
+  const pendingDraftRef = useRef<{ key: string; text: string } | null>(null);
+  useEffect(() => {
+    if (!meKeyForDraft || !otherKey || !draftDirtyRef.current) return;
+    const key = messageDraftKey(meKeyForDraft, otherKey);
+    pendingDraftRef.current = { key, text };
+    const handle = window.setTimeout(() => {
+      pendingDraftRef.current = null;
+      if (text.trim() === "") void clearDraft(key);
+      else void saveDraft(key, text);
+    }, DRAFT_SAVE_DEBOUNCE_MS);
+    return () => window.clearTimeout(handle);
+  }, [text, meKeyForDraft, otherKey]);
+  // Unmount flush: edits younger than the debounce window must not
+  // die with the component (switching threads in the split pane
+  // remounts this view; in-app navigation unmounts it).
+  useEffect(
+    () => () => {
+      const pending = pendingDraftRef.current;
+      if (!pending) return;
+      if (pending.text.trim() === "") void clearDraft(pending.key);
+      else void saveDraft(pending.key, pending.text);
+    },
+    [],
+  );
+
   const loadMessages = useCallback(async () => {
     if (!currentMember || !otherKey) return;
     const msgs = await getConversation(
@@ -664,6 +736,10 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         aboutPostId: aboutPostId ?? undefined,
       });
       setText("");
+      // The message left the composer — drop its persisted draft
+      // immediately (don't wait out the debounce window; a restart
+      // right after a send must not resurrect sent text).
+      void clearDraft(messageDraftKey(currentMember.publicKey, otherKey));
       // Collapse the auto-grown box back to one line.
       if (inputRef.current) inputRef.current.style.height = "auto";
       // First message of the visit carried the post reference —
@@ -695,6 +771,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   if (otherKey && blockedKeys.has(otherKey)) {
     return (
       <div className="flex h-full flex-col px-4 pb-4 pt-4">
+        {/* Round-3 papercut: this header used to drop the name
+            entirely, so the member couldn't tell WHOSE thread they
+            were looking at. Keep the honest name + a blocked chip —
+            this branch renders only on the BLOCKER's own device
+            (blocks never federate), so the §6.1 anti-fingerprinting
+            discipline, which protects the BLOCKED party's view, is
+            untouched. */}
         <header className="mb-4 flex items-center gap-2">
           {!splitPane && (
             <BackLink
@@ -703,6 +786,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
               className="btn-ghost -ml-2 text-sm"
             />
           )}
+          <MemberAvatar publicKey={otherKey} size={48} framed />
+          <h1 className="text-lg font-bold">
+            {t("messages.conversationWith", { name: otherName })}
+          </h1>
+          <span className="chip bg-moss-100 text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+            {t("messages.conversation.blockedChip")}
+          </span>
         </header>
         <div className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
           <p>{t("messages.conversation.blockedNotice")}</p>
@@ -1264,6 +1354,9 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             rows={1}
             value={text}
             onChange={(e) => {
+              // Real keystrokes arm the draft autosave (see the
+              // draftDirtyRef effect above).
+              draftDirtyRef.current = true;
               setText(e.target.value);
               // Auto-grow (Signal-style): the box follows the text up
               // to ~6 lines, then scrolls internally. scrollHeight is

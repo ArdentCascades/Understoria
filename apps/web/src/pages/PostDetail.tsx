@@ -286,6 +286,18 @@ export default function PostDetailPage() {
       onSelect: () => navigate(`/post/new?repost=${post.id}&again=1`),
     });
   }
+  if (post.status === "cancelled" && isPoster) {
+    // Round-3 papercut: a cancelled post showed the chip and nothing
+    // else — no path forward. Same prefill route as the open-post
+    // repost; `&again=1` keeps PostForm from re-cancelling the
+    // already-cancelled source (the new post is fresh, this one
+    // stays cancelled).
+    menuItems.push({
+      key: "repost-cancelled",
+      label: t("postDetail.repost"),
+      onSelect: () => navigate(`/post/new?repost=${post.id}&again=1`),
+    });
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-8 pt-4">
@@ -761,6 +773,28 @@ function ActionPanel({
           <p className="text-sm">{t("postDetail.guidance.completed")}</p>
         </div>
         <LeafDivider variant="short" />
+      </Actions>
+    );
+  }
+
+  if (post.status === "cancelled" && isPoster) {
+    // The owner's path forward from a cancelled post (round-3
+    // papercut): a visible "Repost with changes" — the same
+    // affordance as the header-menu item, surfaced where the eye
+    // lands. The link opens the post form pre-filled from this
+    // post; `&again=1` means "don't touch the source", so this post
+    // stays cancelled and the new one starts fresh.
+    return (
+      <Actions>
+        <p className="text-sm text-moss-600 dark:text-moss-300">
+          {t("postDetail.cancelledOwnerHint")}
+        </p>
+        <Link
+          to={`/post/new?repost=${post.id}&again=1`}
+          className="btn-secondary self-start"
+        >
+          {t("postDetail.repost")}
+        </Link>
       </Actions>
     );
   }

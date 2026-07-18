@@ -40,6 +40,30 @@ include breaking changes.
   same thing. Full-screen mobile views are unchanged.
 
 ### Added
+- **Your private block note is no longer write-only.** The note you
+  can write when blocking someone ("why I blocked them") now shows on
+  the blocked contact's expanded row in Settings → Blocked contacts,
+  with an edit affordance — so it finally serves as the memory aid it
+  was collected as, and as the thing that tells two blocked rows
+  apart. It stays behind the same tap that reveals the name, so a
+  glance over your shoulder still shows nothing.
+- **Message drafts survive a restart.** A half-typed message in a
+  conversation now quietly saves on this device as you type and comes
+  back into the compose box when you return — even after the app is
+  closed or the phone restarts. Sending clears it, and drafts expire
+  with the same seven-day window as the other forms' drafts.
+- **A cancelled post now offers a path forward.** The owner of a
+  cancelled post sees "Repost with changes" — as a visible action and
+  in the post menu — which opens the post form pre-filled from the
+  cancelled post. The new post starts fresh; the cancelled one stays
+  cancelled, and the pre-fill banner now says so honestly ("the
+  original post isn't changed") instead of claiming it would be
+  cancelled again.
+- **Flag an exchange right from your history.** A settled exchange in
+  Profile → Your exchange history now carries the same "something's
+  wrong?" doorway direct exchanges already had — no more hunting for
+  the post page to raise a concern. Once flagged, the row shows the
+  amber in-review link to the dispute, same as before.
 - **Turn your phone sideways and the app follows.** In landscape on a
   phone — where height, not width, is the scarce thing — the bottom
   tab bar becomes a slim icons-only left rail, so the whole short
@@ -207,6 +231,16 @@ include breaking changes.
   audibly reading, and still settles on the honest "can't read
   aloud" notice when the engine never starts. Tapping "Starting…"
   bails out, same as stop.
+- **A blocked conversation keeps its name.** Opening an old thread
+  with someone you've blocked no longer drops their name from the
+  header — you see whose thread it is, with a clear "Blocked" chip
+  beside it. This is your own view of your own decision; what the
+  blocked person sees is unchanged.
+- **The governance area is called one thing now.** The pages the app
+  calls "Proposals" and "Disputes" were referred to as "Decisions" in
+  a few places (dispute cards, the removal notice). Those references
+  now say "Proposals" — the name the page actually wears — in both
+  English and Spanish. No links or routes changed.
 - **Everything important fits a phone held sideways.** Turn your
   phone to landscape and the tall moments no longer spill off the
   bottom of the screen with their buttons out of reach: confirmation

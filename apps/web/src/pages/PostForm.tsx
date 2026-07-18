@@ -299,7 +299,11 @@ export default function PostFormPage() {
 
       {repostId && (
         <p className="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          {t("postForm.repostBanner")}
+          {/* Honest banner split: `again=1` flows (post a completed
+              post again, repost a cancelled one) never touch the
+              source post — saying "will be cancelled" there was a
+              small lie. */}
+          {t(repostAgain ? "postForm.repostAgainBanner" : "postForm.repostBanner")}
         </p>
       )}
 
