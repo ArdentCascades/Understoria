@@ -10,6 +10,12 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Tapping a field no longer zooms the page on iPhones.** iOS
+  Safari zooms in whenever a focused input renders below 16px — and
+  leaves you to pinch back out, in the browser and the installed app
+  alike. Form controls are now floored to 16px text on touch-screen
+  devices (a dozen compact fields were below the threshold); desktop
+  keeps its denser field sizes.
 - **Submitting a form with a missed field now takes you to it.** If
   you tap Post (or Save, or Create) with a required field empty or
   invalid, the form now scrolls the first problem field into view and
