@@ -68,7 +68,7 @@ export function DiscoveryLinks({
       />
       <Link
         to="/plug-in"
-        className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+        className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-moss-600 underline-offset-2 hover:text-canopy-700 hover:underline focus-visible:underline dark:text-moss-300 dark:hover:text-canopy-300"
       >
         <span aria-hidden="true">🔌</span>
         {t("board.plugInLink")}

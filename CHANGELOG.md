@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The board is calmer without losing anything.** The filter
+  dropdowns and toggles now sit behind the same "Filters" button
+  phones have always had — at every screen size — and whatever you
+  apply shows up beside the button as small chips ("Food ×",
+  "Fits in about an hour ×") you can remove with one tap, so the
+  applied state is always visible. The "Being built / Tended"
+  switch joins that same line, the discovery links step back to a
+  quieter color, a thin line now separates the pinned controls from
+  the cards, and the search box keeps a readable minimum width
+  (its placeholder could get squeezed into "Search proj…").
+  Also fixed along the way: the "Clear filters" button on the
+  empty-filter screen now clears the "Fits in about an hour"
+  toggle too. Phones held upright keep their exact current layout.
 - **The board's discovery links moved up beside the search box on
   desktop.** "Show me one small thing" and "Ways to plug in" used to
   own a full row; on desktop they now sit in the free space to the

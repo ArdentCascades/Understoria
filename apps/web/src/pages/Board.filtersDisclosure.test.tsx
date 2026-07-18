@@ -170,17 +170,49 @@ function chooseOption(select: HTMLSelectElement, value: string) {
 }
 
 describe("Board mobile Filters disclosure", () => {
-  it("defaults collapsed: trigger says 'Filters', rail wrapper is hidden below sm", () => {
+  it("defaults collapsed at EVERY width: trigger says 'Filters', rail hidden", () => {
     render(<BoardPage />);
     const btn = trigger();
     expect(btn.getAttribute("aria-expanded")).toBe("false");
     expect(btn.textContent).toContain("Filters");
     expect(btn.textContent).not.toContain("active");
-    // Collapsed = hidden on mobile, still shown from sm up (where
-    // the rail was never a space problem and the trigger is hidden).
+    // Board-calm pass: ONE disclosure everywhere — collapsed means
+    // hidden at all widths (no sm:block escape), and the trigger
+    // renders at all widths (no sm:hidden), compacting to a pill
+    // from sm up.
     expect(railWrapper().className).toContain("hidden");
-    expect(railWrapper().className).toContain("sm:block");
-    expect(btn.className).toContain("sm:hidden");
+    expect(railWrapper().className).not.toContain("sm:block");
+    expect(btn.className).not.toContain("sm:hidden");
+    expect(btn.className).toContain("sm:w-auto");
+  });
+
+  it("active filters surface as removable chips while the rail is collapsed", () => {
+    render(<BoardPage />);
+    // Open, apply a category, close — the chip keeps the state
+    // visible and removes it in one tap.
+    act(() => {
+      trigger().dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    const select = container.querySelectorAll<HTMLSelectElement>(
+      "#category-filter",
+    )[0]!;
+    chooseOption(select, "food");
+    act(() => {
+      trigger().dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(railWrapper().className).toContain("hidden");
+    const chip = container.querySelector<HTMLButtonElement>(
+      'button[aria-label^="Remove filter"]',
+    );
+    expect(chip).not.toBeNull();
+    expect(chip!.textContent).toContain("Food");
+    act(() => {
+      chip!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(
+      container.querySelector('button[aria-label^="Remove filter"]'),
+    ).toBeNull();
+    expect(trigger().textContent).not.toContain("active");
   });
 
   it("expands on tap and collapses again on a second tap", () => {

@@ -31,10 +31,12 @@ const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
  *
  * Rendered ONCE on the Board page, inside the reading column
  * between search and list — the same DOM position at every
- * breakpoint. Below sm the controls stack full-width (inside the
- * mobile Filters disclosure); from sm up they lay out as one
- * compact wrap row of intrinsic-width controls (`sm:w-auto`
- * overrides `.input`'s w-full) so the filters spend one row of
+ * breakpoint, collapsed behind the Filters disclosure at every
+ * width (board-calm pass; ActiveFilterChips keep applied state
+ * visible while collapsed). Below sm the controls stack full-width;
+ * from sm up they lay out as one compact wrap row of
+ * intrinsic-width controls (`sm:w-auto` overrides `.input`'s
+ * w-full) so the filters spend one row of
  * height and zero horizontal tracks. The old dedicated 240px
  * desktop rail column is retired — see Board.tsx's layout comment.
  */
