@@ -53,6 +53,11 @@ export function speak(
   text: string,
   lang?: string,
   onDone?: (ok: boolean) => void,
+  /** Fires once when the engine AUDIBLY starts (the utterance's
+   *  `start` event) — the moment a "starting…" interim state can
+   *  honestly become "speaking". Never fires for a zero-voices
+   *  engine; the watchdog's onDone(false) is the answer there. */
+  onStart?: () => void,
 ): boolean {
   // `onDone` fires exactly once — a caller rendering a "speaking…"
   // state must never get stuck in it just because the platform
@@ -99,6 +104,7 @@ export function speak(
       // It's audibly speaking — the watchdog's question is answered.
       started = true;
       clearWatchdog();
+      onStart?.();
     };
     utterance.onend = () => notify(true);
     utterance.onerror = () => notify(started);

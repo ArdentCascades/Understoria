@@ -23,6 +23,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 import type {
   ImpactReflection,
   NodeConfigProposalPayload,
@@ -93,7 +94,12 @@ export default function ProposalNewPage() {
     setError(null);
     validation.markAllTouched();
     if (reversibilityTier === "hard") setShowImpactErrors(true);
-    if (validation.hasErrors || impactIncomplete) return;
+    if (validation.hasErrors || impactIncomplete) {
+      // Short viewports can have the errored field scrolled away —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
 
     const proposedConfig: NodeConfigProposalPayload = {
       ...nodeConfig,

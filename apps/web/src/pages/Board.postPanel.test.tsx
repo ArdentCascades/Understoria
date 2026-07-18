@@ -323,3 +323,21 @@ describe("Board docked post panel — sideways split gate", () => {
     expect(postList()!.className).toContain("md:grid-cols-2");
   });
 });
+
+// ─── FAB placement (round-3 papercut) ───────────────────────────────
+//
+// landscape-short pins the post/offer pill bottom-right: centered, it
+// floated over the middle of an already-short card list (the left nav
+// rail and the reading column never occupy the right edge).
+
+describe("Board FAB placement", () => {
+  it("carries the landscape-short bottom-right classes", () => {
+    renderAt("/?tab=offers");
+    const el = fab();
+    expect(el).not.toBeNull();
+    expect(el!.className).toContain("landscape-short:justify-end");
+    expect(el!.className).toContain(
+      "landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))]",
+    );
+  });
+});

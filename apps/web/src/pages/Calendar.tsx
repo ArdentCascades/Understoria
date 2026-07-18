@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useMatch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import {
@@ -123,6 +123,13 @@ export default function CalendarPage() {
   } = useApp();
   const { t, i18n } = useTranslation();
   const keyboardOpen = useVirtualKeyboardOpen();
+  // The docked event panel (nested /calendar/event/:eventId route).
+  // While it's open the FAB unmounts — same discipline as the Board
+  // FAB: at lg+ and in split-capable short landscape the panel docks
+  // exactly where the pill floats (the pill sat ON the panel's card in
+  // landscape — the round-3 papercut), and below lg the panel is a
+  // full-screen takeover that covers it anyway.
+  const eventPanelOpen = useMatch("/calendar/event/:eventId") !== null;
 
   // Read ONCE at mount (a lazy useState initializer, never re-run):
   // the short-landscape default is a mount-time decision, not a live
@@ -380,6 +387,17 @@ export default function CalendarPage() {
 
   const view = (mode: ViewMode) => () => {
     setOverrideView(true);
+    // Switching INTO a paged view always lands on the period
+    // containing today. The offsets are session-local and relative to
+    // "now", so an offset left behind by an earlier visit (paged back
+    // a week, switched to agenda, came back later) silently reopened
+    // the wrong week — while the header still claimed today was a tap
+    // away. Explicit paging (Prev/Next/jump) inside the view is
+    // untouched; only the view switch re-anchors.
+    if (mode !== viewMode) {
+      if (mode === "week") setWeekOffset(0);
+      else if (mode === "month") setMonthOffset(0);
+    }
     setViewMode(mode);
     // Persist the explicit pick (device-local; see the restore effect).
     void setSetting(SETTING_KEYS.calendarViewMode, mode);
@@ -630,9 +648,16 @@ export default function CalendarPage() {
           inside themselves — can always scroll clear of the floating
           button. Hidden while the on-screen keyboard is up — the
           fixed anchor would float detached mid-screen (see
-          useVirtualKeyboard.ts). */}
-      {!keyboardOpen && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8 landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))]">
+          useVirtualKeyboard.ts) — and while the docked event panel is
+          open (see eventPanelOpen above).
+
+          landscape-short pins the pill bottom-RIGHT (same reasoning
+          as lg): centered, it floated over the middle of an already
+          short list/grid; the right edge is the region the reading
+          column and the left nav rail never occupy. The pr tracks the
+          landscape safe-area inset (notch/home-indicator side). */}
+      {!keyboardOpen && !eventPanelOpen && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8 landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))] landscape-short:justify-end landscape-short:pr-[max(1rem,env(safe-area-inset-right))]">
           <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
             <Link
               to="/events/new"

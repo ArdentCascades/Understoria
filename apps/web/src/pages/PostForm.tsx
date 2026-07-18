@@ -46,6 +46,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 import type { Category, PostType, Urgency } from "@/types";
 
 const DRAFT_KEY = "post-new";
@@ -224,7 +225,12 @@ export default function PostFormPage() {
     e.preventDefault();
     setError(null);
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (validation.hasErrors) {
+      // On a short viewport the errored field may be off-screen —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
     const parsedHours = Number.parseFloat(hours);
     const days = expiresInDays ? Number.parseInt(expiresInDays, 10) : null;
     const expiresAt =
@@ -293,7 +299,11 @@ export default function PostFormPage() {
 
       {repostId && (
         <p className="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          {t("postForm.repostBanner")}
+          {/* Honest banner split: `again=1` flows (post a completed
+              post again, repost a cancelled one) never touch the
+              source post — saying "will be cancelled" there was a
+              small lie. */}
+          {t(repostAgain ? "postForm.repostAgainBanner" : "postForm.repostBanner")}
         </p>
       )}
 
@@ -464,7 +474,7 @@ export default function PostFormPage() {
                     {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
                   </span>{" "}
                   <span className="text-xs text-moss-600 dark:text-moss-300">
-                    — {CATEGORY_META[c].description}
+                    — {t(`categoryDescriptions.${c}`)}
                   </span>
                 </span>
               </label>

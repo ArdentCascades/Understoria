@@ -448,6 +448,20 @@ describe("ConversationPage — blocked conversation (blocker's own view)", () =>
     expect(container.querySelector("textarea")).toBeNull();
   });
 
+  it("keeps the counterparty's name and a Blocked chip in the header (round-3 papercut)", async () => {
+    // The header used to drop the name entirely, leaving the member
+    // unsure whose thread this was. The honest name stays — this
+    // branch only ever renders on the blocker's own device, so
+    // naming names leaks nothing to the blocked party.
+    mockState.blockedKeys = new Set(["them-key"]);
+    render();
+    await flushPromises();
+    const h1 = container.querySelector("h1");
+    expect(h1).not.toBeNull();
+    expect(h1!.textContent).toContain("Riverbend");
+    expect(container.textContent).toContain("Blocked");
+  });
+
   it("renders ONLY for blocks — an unblocked conversation shows the thread, not the blocked state", async () => {
     mockState.blockedKeys = new Set(["someone-else"]);
     render();

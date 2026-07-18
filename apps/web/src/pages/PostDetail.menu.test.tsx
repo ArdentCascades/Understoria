@@ -46,6 +46,7 @@ vi.mock("@/db/actions", () => ({
 
 import "@/i18n";
 import PostDetailPage from "./PostDetail";
+import { DockedPanelDockContext } from "@/components/DockedPanel";
 import type { Member, Post } from "@/types";
 
 const nodeId = "node_test";
@@ -253,6 +254,82 @@ describe("PostDetailPage — header overflow menu", () => {
     expect(menuItemByText("Post this again")).toBeDefined();
     // Repost-with-changes is an open-only action; it must NOT appear on
     // a completed post.
+    expect(menuItemByText("Repost with changes")).toBeUndefined();
+  });
+});
+
+// ─── Docked-panel de-duplication (round-3 papercut) ─────────────────
+//
+// Inside a DOCKED BoardPostPanel column the frame's × Close and this
+// page's own "← Back" did the same thing side by side. The page hides
+// its Back when DockedPanelDockContext is true; the full-screen
+// takeover (context false) keeps it — mobile unchanged.
+
+describe("PostDetailPage — docked panel hides the duplicate Back", () => {
+  function renderDocked(docked: boolean) {
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <MemoryRouter initialEntries={["/post/post-1"]}>
+          <DockedPanelDockContext.Provider value={docked}>
+            <Routes>
+              <Route path="/post/:id" element={<PostDetailPage />} />
+            </Routes>
+          </DockedPanelDockContext.Provider>
+        </MemoryRouter>,
+      );
+    });
+  }
+
+  function backButton(): HTMLButtonElement | undefined {
+    return Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => (b.textContent ?? "").trim() === "← Back");
+  }
+
+  it("hides the Back button when the surrounding panel is docked", () => {
+    renderDocked(true);
+    expect(backButton()).toBeUndefined();
+    // The rest of the page still renders.
+    expect(container.textContent).toContain("Help carrying groceries");
+  });
+
+  it("keeps the Back button in the full-screen takeover (context false)", () => {
+    renderDocked(false);
+    expect(backButton()).toBeDefined();
+  });
+});
+
+// Round-3 papercut: a cancelled post showed only the Cancelled chip —
+// no path forward. The owner now gets "Repost with changes" (menu item
+// AND a visible action link) that pre-fills the post form from this
+// post via the existing ?repost= route; `&again=1` means the cancelled
+// source is left untouched.
+describe("PostDetailPage — cancelled post offers the owner a path forward", () => {
+  it("owner of a CANCELLED post sees Repost with changes as a visible link and a menu item", () => {
+    mockState.posts = [post({ status: "cancelled" })];
+    mockState.currentMember = member(posterKey, "Pat Poster");
+    render();
+    const link = container.querySelector<HTMLAnchorElement>(
+      'a[href="/post/new?repost=post-1&again=1"]',
+    );
+    expect(link).not.toBeNull();
+    expect(link!.textContent).toContain("Repost with changes");
+    // The hint says the fresh-post truth: new post, this one stays
+    // cancelled.
+    expect(container.textContent).toContain("this one stays cancelled");
+    openMenu();
+    expect(menuItemByText("Repost with changes")).toBeDefined();
+  });
+
+  it("a non-owner on a CANCELLED post gets neither the link nor the menu item", () => {
+    mockState.posts = [post({ status: "cancelled" })];
+    mockState.currentMember = member(viewerKey, "Vic Viewer");
+    render();
+    expect(
+      container.querySelector('a[href^="/post/new?repost"]'),
+    ).toBeNull();
+    openMenu();
     expect(menuItemByText("Repost with changes")).toBeUndefined();
   });
 });

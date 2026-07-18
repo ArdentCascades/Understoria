@@ -69,6 +69,7 @@ vi.mock("@/components/EventShiftsSection", () => ({
 
 import "@/i18n";
 import EventDetailPage from "./EventDetail";
+import { DockedPanelDockContext } from "@/components/DockedPanel";
 import type { Member } from "@/types";
 
 const nodeId = "node_test";
@@ -240,5 +241,48 @@ describe("EventDetailPage — history-aware back", () => {
       btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(container.textContent).toContain("project-page-marker");
+  });
+});
+
+// ─── Docked-panel de-duplication (round-3 papercut) ─────────────────
+//
+// Inside a DOCKED CalendarEventPanel column the frame's × Close and
+// this page's own "Back to calendar" did the same thing side by side.
+// The page hides its Back when DockedPanelDockContext is true; the
+// full-screen takeover and the standalone route (context false) keep
+// it — mobile unchanged.
+
+describe("EventDetailPage — docked panel hides the duplicate Back", () => {
+  function renderDocked(docked: boolean) {
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <MemoryRouter initialEntries={["/events/evt-1"]}>
+          <DockedPanelDockContext.Provider value={docked}>
+            <Routes>
+              <Route path="/events/:eventId" element={<EventDetailPage />} />
+            </Routes>
+          </DockedPanelDockContext.Provider>
+        </MemoryRouter>,
+      );
+    });
+  }
+
+  it("hides the Back link when the surrounding panel is docked", () => {
+    renderDocked(true);
+    const back = Array.from(container.querySelectorAll("a")).find((el) =>
+      (el.textContent ?? "").includes("Back to calendar"),
+    );
+    expect(back).toBeUndefined();
+    // The rest of the page still renders.
+    expect(container.textContent).toContain("Community garden work day");
+  });
+
+  it("keeps the Back link in the full-screen takeover (context false)", () => {
+    renderDocked(false);
+    const back = Array.from(container.querySelectorAll("a")).find((el) =>
+      (el.textContent ?? "").includes("Back to calendar"),
+    );
+    expect(back).toBeDefined();
   });
 });

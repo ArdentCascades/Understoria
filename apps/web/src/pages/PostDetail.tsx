@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -33,6 +33,7 @@ import {
 import { isOurNode } from "@/lib/nodeIdentity";
 import { humanizeError } from "@/lib/humanizeError";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { DockedPanelDockContext } from "@/components/DockedPanel";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
 import { Markdown } from "@/components/Markdown";
@@ -85,6 +86,12 @@ export default function PostDetailPage() {
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [error, setError] = useState<string | null>(null);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  // True when rendered inside a DOCKED BoardPostPanel column (lg+ or
+  // split-capable short landscape). The panel frame already shows
+  // × Close there and this page's own Back does the same thing — one
+  // clear close affordance, so the Back hides. In the below-lg
+  // full-screen takeover (false) the Back stays.
+  const inDockedColumn = useContext(DockedPanelDockContext);
 
   const post = useMemo(
     () => posts.find((p) => p.id === id) ?? null,
@@ -279,6 +286,18 @@ export default function PostDetailPage() {
       onSelect: () => navigate(`/post/new?repost=${post.id}&again=1`),
     });
   }
+  if (post.status === "cancelled" && isPoster) {
+    // Round-3 papercut: a cancelled post showed the chip and nothing
+    // else — no path forward. Same prefill route as the open-post
+    // repost; `&again=1` keeps PostForm from re-cancelling the
+    // already-cancelled source (the new post is fresh, this one
+    // stays cancelled).
+    menuItems.push({
+      key: "repost-cancelled",
+      label: t("postDetail.repost"),
+      onSelect: () => navigate(`/post/new?repost=${post.id}&again=1`),
+    });
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-8 pt-4">
@@ -292,13 +311,15 @@ export default function PostDetailPage() {
           honest win for a detail page; the rest of the Layout's
           container is centered empty space at lg+, which is fine
           for an article-style screen. */}
-      <button
-        type="button"
-        className="btn-ghost -ml-2 mb-3 text-sm"
-        onClick={() => navigate(-1)}
-      >
-        {t("common.back")}
-      </button>
+      {!inDockedColumn && (
+        <button
+          type="button"
+          className="btn-ghost -ml-2 mb-3 text-sm"
+          onClick={() => navigate(-1)}
+        >
+          {t("common.back")}
+        </button>
+      )}
 
       <div className="card mb-4">
         <div className="mb-3 flex items-start justify-between gap-2">
@@ -752,6 +773,28 @@ function ActionPanel({
           <p className="text-sm">{t("postDetail.guidance.completed")}</p>
         </div>
         <LeafDivider variant="short" />
+      </Actions>
+    );
+  }
+
+  if (post.status === "cancelled" && isPoster) {
+    // The owner's path forward from a cancelled post (round-3
+    // papercut): a visible "Repost with changes" — the same
+    // affordance as the header-menu item, surfaced where the eye
+    // lands. The link opens the post form pre-filled from this
+    // post; `&again=1` means "don't touch the source", so this post
+    // stays cancelled and the new one starts fresh.
+    return (
+      <Actions>
+        <p className="text-sm text-moss-600 dark:text-moss-300">
+          {t("postDetail.cancelledOwnerHint")}
+        </p>
+        <Link
+          to={`/post/new?repost=${post.id}&again=1`}
+          className="btn-secondary self-start"
+        >
+          {t("postDetail.repost")}
+        </Link>
       </Actions>
     );
   }

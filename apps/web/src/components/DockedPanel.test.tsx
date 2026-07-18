@@ -21,11 +21,11 @@
 //   4. The frame is full-screen below lg and a docked column at lg+
 //      (the class contract both panels rely on).
 //
-import { act } from "react";
+import { act, useContext } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DockedPanel } from "./DockedPanel";
-import { SPLIT_CAPABLE_QUERY } from "@/lib/viewport";
+import { DockedPanel, DockedPanelDockContext } from "./DockedPanel";
+import { DESKTOP_DOCK_QUERY, SPLIT_CAPABLE_QUERY } from "@/lib/viewport";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -202,5 +202,81 @@ describe("DockedPanel", () => {
     });
     pressEscape();
     expect(onClose).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Dock context (round-3 papercut: double Close/Back) ─────────────
+//
+// The panel tells its content whether it is actually DOCKED (side
+// column at lg+ / split-capable short landscape) via
+// DockedPanelDockContext, so detail pages can hide their own Back
+// affordance there — the frame's × Close already does the same thing.
+// In the full-screen takeover the context stays false and the page
+// keeps its Back (mobile unchanged).
+
+function stubMatchMediaMatching(matchingQuery: string) {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string) =>
+      ({
+        matches: query === matchingQuery,
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList,
+  });
+}
+
+function DockProbe() {
+  const docked = useContext(DockedPanelDockContext);
+  return <p>{docked ? "probe-docked" : "probe-overlay"}</p>;
+}
+
+function renderWithProbe() {
+  act(() => {
+    root = createRoot(container);
+    root.render(
+      <DockedPanel
+        ariaLabel="Details"
+        closeLabel="Close panel"
+        closeShortLabel="Close"
+        onClose={vi.fn()}
+        swapKey="item-1"
+      >
+        <DockProbe />
+      </DockedPanel>,
+    );
+  });
+}
+
+describe("DockedPanel dock context", () => {
+  it("full-screen takeover (no docking query matches) → false", () => {
+    renderWithProbe();
+    expect(container.textContent).toContain("probe-overlay");
+  });
+
+  it("split-capable short landscape → true", () => {
+    stubMatchMediaMatching(SPLIT_CAPABLE_QUERY);
+    renderWithProbe();
+    expect(container.textContent).toContain("probe-docked");
+  });
+
+  it("desktop width (lg dock) → true", () => {
+    stubMatchMediaMatching(DESKTOP_DOCK_QUERY);
+    renderWithProbe();
+    expect(container.textContent).toContain("probe-docked");
+  });
+
+  it("outside any DockedPanel the context defaults to false", () => {
+    act(() => {
+      root = createRoot(container);
+      root.render(<DockProbe />);
+    });
+    expect(container.textContent).toContain("probe-overlay");
   });
 });

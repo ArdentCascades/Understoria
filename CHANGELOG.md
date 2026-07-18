@@ -9,7 +9,61 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Submitting a form with a missed field now takes you to it.** If
+  you tap Post (or Save, or Create) with a required field empty or
+  invalid, the form now scrolls the first problem field into view and
+  puts your cursor in it — before, on a short landscape screen the
+  error could render off-screen and the tap looked like it did
+  nothing. Applies to the new-post, new-event, new-project,
+  new-proposal, welcome, and invite-accept forms.
+- **The calendar's Week and Month views always open on today.**
+  Switching from Agenda to Week (or Month) could reopen a week you'd
+  paged to earlier in the session — while the header still implied
+  you were looking at now. Switching views now always lands on the
+  period containing today; paging with Prev/Next inside a view works
+  exactly as before.
+- **Floating action buttons stay out of the way in landscape.** On a
+  phone held sideways the "+ New event" and post/offer pills now sit
+  in the bottom-right corner instead of floating over the middle of
+  the page, and the calendar's pill steps aside entirely while an
+  event is open in the docked side panel (as the board's already
+  did).
+- **The demo banner slims down in landscape.** In a demo build with
+  the phone sideways, the banner compresses to one thin truncated
+  line — the full sentence stays a long-press away and the "Reset
+  demo" button stays visible — instead of eating a tall slice of an
+  already-short screen.
+- **One close button, not two.** When a post or event opens in the
+  docked side panel (desktop or landscape split view), the page's own
+  "Back" no longer appears next to the panel's × Close — they did the
+  same thing. Full-screen mobile views are unchanged.
+
 ### Added
+- **Your private block note is no longer write-only.** The note you
+  can write when blocking someone ("why I blocked them") now shows on
+  the blocked contact's expanded row in Settings → Blocked contacts,
+  with an edit affordance — so it finally serves as the memory aid it
+  was collected as, and as the thing that tells two blocked rows
+  apart. It stays behind the same tap that reveals the name, so a
+  glance over your shoulder still shows nothing.
+- **Message drafts survive a restart.** A half-typed message in a
+  conversation now quietly saves on this device as you type and comes
+  back into the compose box when you return — even after the app is
+  closed or the phone restarts. Sending clears it, and drafts expire
+  with the same seven-day window as the other forms' drafts.
+- **A cancelled post now offers a path forward.** The owner of a
+  cancelled post sees "Repost with changes" — as a visible action and
+  in the post menu — which opens the post form pre-filled from the
+  cancelled post. The new post starts fresh; the cancelled one stays
+  cancelled, and the pre-fill banner now says so honestly ("the
+  original post isn't changed") instead of claiming it would be
+  cancelled again.
+- **Flag an exchange right from your history.** A settled exchange in
+  Profile → Your exchange history now carries the same "something's
+  wrong?" doorway direct exchanges already had — no more hunting for
+  the post page to raise a concern. Once flagged, the row shows the
+  amber in-review link to the dispute, same as before.
 - **Turn your phone sideways and the app follows.** In landscape on a
   phone — where height, not width, is the scarce thing — the bottom
   tab bar becomes a slim icons-only left rail, so the whole short
@@ -119,6 +173,74 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **The post form speaks Spanish all the way down.** The one-line
+  blurb under each category ("Babysitting, school pickups, kid help"
+  and its eight siblings) was hardcoded English, so a Spanish member
+  saw translated names over untranslated descriptions. Every category
+  blurb now flows through the parity-checked locale files — and the
+  three project categories on the new-project form that still rendered
+  literal English option labels are translated too.
+- **No more desktop install advice on a phone.** The one-tap install
+  prompt titled itself "Install Understoria as an app" (a computer's
+  phrasing) even on Android phones — it now says "Add Understoria to
+  your home screen" whenever the device in hand is a phone. And a
+  phone browsing in "Request desktop site" mode (whose user agent
+  claims to be a computer) is unmasked by its touch-primary pointer
+  and gets the phone steps, never sent hunting for an address-bar
+  install icon that isn't there. In English and Spanish.
+- **The message-search empty state stopped being ironic.** It said
+  "Try the exact spelling — search is simple" right after search
+  learned to forgive accents and quote styles. It now suggests what
+  actually helps: fewer words, or a different word for the same thing.
+- **Spanish copy consistency sweep.** "Integrantes" and "miembros"
+  were used interchangeably; everything now says "miembros" (the
+  dominant term). The profile-setup greeting no longer produces the
+  awkward mid-sentence "Qué bueno verte, Tú" for the demo founder —
+  the name is quoted as the label it is. Vouch strings dropped their
+  clunky clitics ("estás avalándolo", "avalarle") for plain "avalar a
+  esa persona". The Emergency section's "hostile party" is now plain
+  language in both languages ("someone who means you harm" / "alguien
+  que quiera hacerte daño"). And the security note that referenced the
+  "Lock now" button before you'd ever seen it now points at the button
+  below it instead of assuming you know it.
+- **The welcome tour is findable again.** Once skipped, the tour's
+  only way back was buried in Profile → Learn. The Help page — where
+  a lost member actually looks — now links "Take the welcome tour
+  again", and the Profile link says the same thing instead of the
+  vaguer "Revisit the welcome". In English and Spanish.
+- **The message menu now opens where you can see it.** On a phone
+  held sideways, long-pressing a message near the bottom of the
+  screen used to unfold its reaction-and-actions menu entirely past
+  the bottom edge — the press looked like it did nothing. The menu
+  now checks where the bubble sits when it opens: with no room
+  below, it opens upward as a small card above the bubble instead,
+  fully on screen, with the same emoji and Copy / Speak / Info
+  actions either way.
+- **The conversation list keeps up with your conversations.** With
+  the list pane open beside a thread (landscape phones, desktop),
+  the list used to freeze at whatever it showed when the page
+  loaded — a brand-new conversation could sit under "No
+  conversations yet", and previews lagged behind the latest
+  message, until a full reload. The list now follows the message
+  store itself: first messages, new threads, and fresh previews
+  appear in the pane the moment they exist.
+- **Speak no longer claims "Stop speaking" before anything speaks.**
+  Between tapping Speak and the voice actually starting (up to two
+  seconds on a slow or voiceless engine), the menu item now reads
+  "Starting…" — it flips to "Stop speaking" only once the device is
+  audibly reading, and still settles on the honest "can't read
+  aloud" notice when the engine never starts. Tapping "Starting…"
+  bails out, same as stop.
+- **A blocked conversation keeps its name.** Opening an old thread
+  with someone you've blocked no longer drops their name from the
+  header — you see whose thread it is, with a clear "Blocked" chip
+  beside it. This is your own view of your own decision; what the
+  blocked person sees is unchanged.
+- **The governance area is called one thing now.** The pages the app
+  calls "Proposals" and "Disputes" were referred to as "Decisions" in
+  a few places (dispute cards, the removal notice). Those references
+  now say "Proposals" — the name the page actually wears — in both
+  English and Spanish. No links or routes changed.
 - **Everything important fits a phone held sideways.** Turn your
   phone to landscape and the tall moments no longer spill off the
   bottom of the screen with their buttons out of reach: confirmation

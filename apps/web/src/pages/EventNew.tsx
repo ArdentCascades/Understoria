@@ -34,6 +34,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 
 const DRAFT_KEY = "event-new";
 
@@ -404,7 +405,12 @@ export default function EventNewPage() {
     // Surface every untouched required field inline before anything
     // else runs.
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (validation.hasErrors) {
+      // Short viewports can have the errored field scrolled away —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
     // The guards below repeat what the inline layer already covers
     // (plus the cross-field checks). They are deliberately kept — the
     // clock moves between field-blur and submit, and a submit-time

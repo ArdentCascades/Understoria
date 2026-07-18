@@ -57,11 +57,13 @@ function InstallGuideCard({ guide }: { guide: UseInstallGuide }) {
   // away") said neither what the card does nor how it varies by
   // device — the title now names the concrete action, and a one-line
   // "why" says what the member gets. "Home screen" phrasing for
-  // mobile states; "install as an app" for desktop (where there is
-  // no home screen) and for the one-tap prompt (Chromium's own verb).
+  // phones; "install as an app" only when the device in hand is
+  // actually a computer. The one-tap prompt follows the same rule:
+  // most promptable members are on Android Chrome phones, and telling
+  // them to "install as an app" was desktop copy on a phone.
   const desktopPhrasing =
-    state.kind === "promptable" ||
-    (state.kind === "manual" && state.device === "desktop");
+    (state.kind === "promptable" || state.kind === "manual") &&
+    state.device === "desktop";
 
   return (
     <div

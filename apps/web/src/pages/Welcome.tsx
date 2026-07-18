@@ -30,6 +30,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 import type { AvailabilityChip } from "@/types";
 
 // Same validation shape as InviteAccept — the display name is the one
@@ -279,7 +280,12 @@ export default function WelcomePage() {
   // founder) — never a second identity for the same person.
   async function saveProfileAndFinish() {
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (validation.hasErrors) {
+      // Short viewports can have the errored field scrolled away —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
     const name = displayName.trim();
     const trimmedZone = zone.trim();
     const parsedSkills = skills

@@ -453,7 +453,7 @@
     },
     "invite": {
       "label": "Hacer crecer la comunidad",
-      "message": "Las comunidades crecen a través de la confianza. Cuando invitas a alguien, estás avalándolo — tu nombre respalda su llegada. Las personas nuevas necesitan dos avales antes de aparecer como 'de confianza' en el tablero. Comparte invitaciones con personas que conoces.",
+      "message": "Las comunidades crecen a través de la confianza. Cuando invitas a alguien, estás avalando a esa persona — tu nombre respalda su llegada. Las personas nuevas necesitan dos avales antes de aparecer como 'de confianza' en el tablero. Comparte invitaciones con personas que conoces.",
       "learnMoreLabel": "Cómo funcionan las invitaciones"
     }
   },
@@ -778,6 +778,7 @@
       "headerMenuUnblock": "Desbloquear a {{name}}",
       "blockedNotice": "Has bloqueado este contacto.",
       "blockedNoticeLink": "Puedes desbloquearlo en Ajustes → Contactos bloqueados.",
+      "blockedChip": "Bloqueado",
       "aboutPost": "sobre: {{title}}",
       "aboutPostUnknown": "sobre una publicación"
     },
@@ -801,7 +802,7 @@
       "next": "Coincidencia siguiente",
       "conversationWith": "Conversación con {{name}}",
       "matchedName": "Coincide con su nombre",
-      "noMatchesHint": "Prueba con la ortografía exacta — la búsqueda es simple."
+      "noMatchesHint": "Prueba con menos palabras, o con otra forma de decir lo mismo."
     },
     "day": {
       "today": "Hoy",
@@ -814,6 +815,7 @@
       "copied": "Copiado ✓",
       "speak": "Leer en voz alta",
       "speakStop": "Dejar de leer",
+      "speakStarting": "Iniciando…",
       "speakUnavailable": "Este dispositivo no puede leer mensajes en voz alta",
       "info": "Detalles",
       "infoSent": "Enviado {{when}}",
@@ -1528,6 +1530,23 @@
     "celebration": "Celebración",
     "learning": "Aprendizaje"
   },
+  "categoryDescriptions": {
+    "transport": "Viajes, transporte compartido, ayuda con mudanzas",
+    "food": "Comidas, compras, cocina",
+    "childcare": "Cuidado de niños, recogidas de la escuela, apoyo con la crianza",
+    "skilled_labor": "Reparaciones, oficios, trabajo manual",
+    "emotional_support": "Escucha, compañía, cuidado",
+    "education": "Clases, tutorías, mentoría",
+    "housing": "Alojamiento, mudanzas, ayuda en el hogar",
+    "tech": "Computadoras, teléfonos, ayuda con la configuración",
+    "other": "Cualquier otra cosa que nuestra comunidad necesite",
+    "infrastructure": "Construcción, reparación y sistemas físicos compartidos",
+    "organizing": "Acción colectiva, sindicatos, bancos de tiempo",
+    "mutual_aid_drive": "Distribución de suministros, fondos o artículos esenciales",
+    "social": "Encuentros y buena compañía",
+    "celebration": "Celebrar algo en comunidad",
+    "learning": "Compartir habilidades y crear cosas"
+  },
   "postStatus": {
     "open": "Abierta",
     "claimed": "Tomada",
@@ -1574,6 +1593,7 @@
     "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
     "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar.",
     "repostBanner": "Editando una copia — la publicación original se cancelará al enviar.",
+    "repostAgainBanner": "Empezando desde una copia — la publicación original no cambia.",
     "matchingNeeds": "{{count}} necesidades activas en esta categoría — verlas",
     "matchingNeedsAside": {
       "title": "Necesidades activas en esta categoría",
@@ -1631,6 +1651,7 @@
     "dialogReleaseConfirm": "Retirar",
     "repost": "Republicar con cambios",
     "repostHint": "¿Necesitas cambiar algo? «Republicar con cambios», en el menú de la publicación, cancela esta y crea una publicación nueva.",
+    "cancelledOwnerHint": "Esta publicación está cancelada y fuera del tablero. Si los planes cambian otra vez, puedes republicarla con cambios — eso crea una publicación nueva; esta queda cancelada.",
     "stillLooking": "¿Sigues buscando? Agregar más detalles o ajustar las horas estimadas puede ayudar a que la persona adecuada encuentre esto. Puedes republicar con cambios desde el menú de la publicación.",
     "stillOffering": "¿Sigues disponible? Ajustar el horario o los detalles puede ayudar a que se conecte con alguien que lo necesita.",
     "postAgain": "Publicar de nuevo",
@@ -1816,7 +1837,7 @@
   },
   "nodeSetup": {
     "title": "El servidor de esta comunidad aún no está configurado",
-    "body": "El servidor en {{origin}} está en marcha, pero nadie lo ha reclamado como su integrante fundador. Hasta que eso ocurra, nada de lo que se cree aquí puede guardarse en la comunidad ni compartirse con nadie — así que la app se pausa en lugar de dejarte trabajar en el vacío.",
+    "body": "El servidor en {{origin}} está en marcha, pero nadie lo ha reclamado como su miembro fundador. Hasta que eso ocurra, nada de lo que se cree aquí puede guardarse en la comunidad ni compartirse con nadie — así que la app se pausa en lugar de dejarte trabajar en el vacío.",
     "founderTitle": "Estoy configurando esta comunidad",
     "founderIntro": "Termina la configuración aquí mismo. Necesitarás el código de configuración de un solo uso del servidor — está impreso en el registro de arranque del servidor (o es el SETUP_TOKEN en el archivo .env del servidor).",
     "nameLabel": "Tu nombre para mostrar (los seudónimos son bienvenidos)",
@@ -1937,7 +1958,7 @@
   },
   "removals": {
     "title": "Expulsiones y readmisiones",
-    "intro": "Las decisiones más graves que una comunidad puede tomar, registradas a la vista: quién fue expulsado o readmitido, cuándo, por qué y exactamente quiénes firmaron. Ninguna persona sola — ni siquiera quien opera el servidor — puede crear uno de estos registros; cada uno necesita un quórum de integrantes cofirmando — un número acordado de integrantes que añaden cada cual su propia firma antes de que cuente.",
+    "intro": "Las decisiones más graves que una comunidad puede tomar, registradas a la vista: quién fue expulsado o readmitido, cuándo, por qué y exactamente quiénes firmaron. Ninguna persona sola — ni siquiera quien opera el servidor — puede crear uno de estos registros; cada uno necesita un quórum de miembros cofirmando — un número acordado de miembros que añaden cada cual su propia firma antes de que cuente.",
     "removedLine": "{{name}} fue expulsado/a por decisión comunitaria {{when}}.",
     "reinstatedLine": "{{name}} fue readmitido/a por decisión comunitaria {{when}}.",
     "signedBy": "Firmado por {{names}}.",
@@ -1951,13 +1972,13 @@
     "linkedProposal": "Vinculada a la propuesta comunitaria: \"{{title}}\"",
     "linkedProposalMissing": "Este borrador hace referencia a una propuesta comunitaria que aún no está en este dispositivo.",
     "beginCollecting": "Empezar a reunir firmas",
-    "draftHint": "Muestra esto a cada integrante que esté de acuerdo, en persona. Su dispositivo firma y responde con un código — captúralo abajo. Nada se envía hasta que haya firmas suficientes; puedes parar en cualquier momento y no habrá pasado nada.",
+    "draftHint": "Muestra esto a cada miembro que esté de acuerdo, en persona. Su dispositivo firma y responde con un código — captúralo abajo. Nada se envía hasta que haya firmas suficientes; puedes parar en cualquier momento y no habrá pasado nada.",
     "draftQrAlt": "Código del borrador — muéstralo a cada cofirmante",
     "progress": "{{have}} de {{need}} firmas reunidas.",
     "captureCosign": "Capturar una cofirma",
     "submitRemoval": "Enviar el registro de expulsión",
     "submitReinstatement": "Enviar el registro de readmisión",
-    "submitted": "Enviado. Cuando el servidor de la comunidad lo acepte, el registro aparecerá abajo y tomará efecto en el dispositivo de cada integrante en su próxima sincronización — la consulta regular de la app al servidor.",
+    "submitted": "Enviado. Cuando el servidor de la comunidad lo acepte, el registro aparecerá abajo y tomará efecto en el dispositivo de cada miembro en su próxima sincronización — la consulta regular de la app al servidor.",
     "close": "Cerrar",
     "copyText": "Copiar como texto",
     "cosignButton": "Cofirmar una expulsión o readmisión…",
@@ -1969,7 +1990,7 @@
     "cosignShowBack": "Muestra esto a la persona que propone — su dispositivo lo suma hacia el quórum (el número de firmas necesarias).",
     "cosignQrAlt": "Código de cofirma",
     "reinstateButton": "Iniciar una readmisión…",
-    "selfBanner": "Esta comunidad te ha expulsado por decisión de quórum. Todo lo que hay en este dispositivo sigue siendo tuyo y sigue funcionando aquí, pero la sincronización con el servidor de la comunidad fallará hasta que un quórum de integrantes firme una readmisión. La decisión, su razón y sus firmantes están en la página de Decisiones.",
+    "selfBanner": "Esta comunidad te ha expulsado por decisión de quórum. Todo lo que hay en este dispositivo sigue siendo tuyo y sigue funcionando aquí, pero la sincronización con el servidor de la comunidad fallará hasta que un quórum de miembros firme una readmisión. La decisión, su razón y sus firmantes están en la página de Propuestas.",
     "error": {
       "no_identity": "No hay identidad en este dispositivo.",
       "locked": "Este dispositivo está bloqueado — desbloquéalo primero.",
@@ -2049,7 +2070,7 @@
     },
     "helper": {
       "title": "Ayudar sin administrar un servidor",
-      "body": "El dispositivo de cada integrante ya lleva una copia firmada de la comunidad, pero los teléfonos recortan registros antiguos cuando falta espacio. Comprometerte como bóveda de semillas significa que uno de tus dispositivos guarda el archivo completo: sin abrir puertos, sin poderes de operador, solo almacenamiento y solidaridad. Si algún día se perdieran todos los servidores, las bóvedas de semillas son los dispositivos desde los que la comunidad se restaura.",
+      "body": "El dispositivo de cada miembro ya lleva una copia firmada de la comunidad, pero los teléfonos recortan registros antiguos cuando falta espacio. Comprometerte como bóveda de semillas significa que uno de tus dispositivos guarda el archivo completo: sin abrir puertos, sin poderes de operador, solo almacenamiento y solidaridad. Si algún día se perdieran todos los servidores, las bóvedas de semillas son los dispositivos desde los que la comunidad se restaura.",
       "link": "Abrir los ajustes de datos para comprometerte"
     },
     "needs": {
@@ -2103,7 +2124,7 @@
         "unknown": "no se pudo determinar"
       },
       "notYet": "Aún no está todo en verde — completamente normal en el primer intento. Ajusta lo que nombra la fila, reinicia el servidor y ejecuta las comprobaciones otra vez; reintentar no rompe nada.",
-      "allGreen": "La aplicación de cada integrante ofrecerá ahora la nueva raíz en una tarjeta de consentimiento — incluida la tuya. Tu comunidad acaba de volverse más difícil de tumbar.",
+      "allGreen": "La aplicación de cada miembro ofrecerá ahora la nueva raíz en una tarjeta de consentimiento — incluida la tuya. Tu comunidad acaba de volverse más difícil de tumbar.",
       "dashboardLink": "Volver al Panel"
     }
   },
@@ -2157,7 +2178,7 @@
     },
     "weaver": {
       "label": "Tejedora",
-      "description": "Tus intercambios han conectado a integrantes de 3 o más zonas de nuestra comunidad."
+      "description": "Tus intercambios han conectado a miembros de 3 o más zonas de nuestra comunidad."
     },
     "groundbreaker": {
       "label": "Iniciadora",
@@ -2224,7 +2245,7 @@
         "meansTitle": "Qué significa esto",
         "meansConfirm": "Confirmar tareas completadas — cada confirmación mueve horas de tu propio saldo.",
         "meansSign": "Firmar como organizadora del proyecto — los registros que firmes en este rol se rastrean hasta tu identidad dondequiera que viaje la historia del proyecto (su historia federada, compartida entre comunidades conectadas).",
-        "meansVisible": "Visible para la comunidad — la página del proyecto te lista como co-organizadora en la copia de cada integrante, en cada comunidad conectada.",
+        "meansVisible": "Visible para la comunidad — la página del proyecto te lista como co-organizadora en la copia de cada miembro, en cada comunidad conectada.",
         "notTitle": "Qué no significa esto",
         "notObligation": "Sin obligación permanente — puedes dejar el rol por tu cuenta en cualquier momento.",
         "notDeputy": "Sin autoridad sobre quien organiza originalmente — esa persona conserva la autoridad de traspaso y remoción. Los co-organizadores son pares, no suplentes.",
@@ -2323,7 +2344,7 @@
   "dashboard": {
     "title": "Panel comunitario",
     "tagline": "La unidad de progreso somos nosotros, no yo.",
-    "membershipRejectedBanner": "Este dispositivo está conectado al servidor de tu comunidad, pero el servidor aún no te reconoce como integrante — así que nada de la comunidad puede aparecer aquí, y nada de lo que hagas sale de este dispositivo. Esto suele significar que tu invitación no llegó al servidor: abre tu enlace de invitación de nuevo en este dispositivo, o pide a quien te invitó que te envíe uno nuevo. Este aviso desaparece solo en cuanto el servidor te reconozca.",
+    "membershipRejectedBanner": "Este dispositivo está conectado al servidor de tu comunidad, pero el servidor aún no te reconoce como miembro — así que nada de la comunidad puede aparecer aquí, y nada de lo que hagas sale de este dispositivo. Esto suele significar que tu invitación no llegó al servidor: abre tu enlace de invitación de nuevo en este dispositivo, o pide a quien te invitó que te envíe uno nuevo. Este aviso desaparece solo en cuanto el servidor te reconozca.",
     "resume": {
       "title": "Retoma donde lo dejaste",
       "hint": "La última tarea que tocaste — tu propia memoria de navegación, guardada solo en este dispositivo."
@@ -2346,7 +2367,7 @@
     "stats": {
       "activeWeek": "Activas esta semana",
       "activeMonth": "Activas este mes",
-      "ofMembers": "de {{count}} integrantes",
+      "ofMembers": "de {{count}} miembros",
       "streak": "Racha de solidaridad",
       "streakUnitOne": "día",
       "streakUnitOther": "días seguidos",
@@ -2364,7 +2385,7 @@
       "title": "Hitos colectivos",
       "hours": "Horas de apoyo mutuo",
       "exchanges": "Intercambios completados",
-      "members": "Personas integrantes activas",
+      "members": "Miembros de la comunidad",
       "topReached": " — máximo hito alcanzado",
       "valueOf": "{{value}} / {{next}}",
       "lastReached": "Último alcanzado: {{label}}",
@@ -2391,14 +2412,14 @@
         "deep_rooted": "De raíces profundas"
       },
       "bodySeedling": "Ahora mismo esta comunidad vive solo en este dispositivo. Conectarse a un servidor comunitario — o crear uno — mantiene las copias de todas las personas al día.",
-      "bodyOne": "Un servidor sostiene esta comunidad — y {{count}} integrante también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "bodyOther": "Un servidor sostiene esta comunidad — y cada una de sus {{count}} integrantes también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "bodyMultiOne": "{{nodes}} servidores sostienen esta comunidad — y {{count}} integrante también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
-      "bodyMultiOther": "{{nodes}} servidores sostienen esta comunidad — y cada una de sus {{count}} integrantes también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyOne": "Un servidor sostiene esta comunidad — y {{count}} miembro también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyOther": "Un servidor sostiene esta comunidad — y cada uno de sus {{count}} miembros también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyMultiOne": "{{nodes}} servidores sostienen esta comunidad — y {{count}} miembro también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
+      "bodyMultiOther": "{{nodes}} servidores sostienen esta comunidad — y cada uno de sus {{count}} miembros también la lleva en su propio dispositivo. Nada de esto se puede quitar llevándose una máquina.",
       "bodyFailover": "Si un servidor desaparece, tus aplicaciones cambian a los demás por su cuenta. No se pierde nada.",
       "windowedNote": "Este dispositivo guarda el último {{years}} año(s) más todo lo activo y lo tuyo — los servidores guardan la historia completa.",
-      "seedVaultsOne": "{{count}} integrante guarda el archivo completo en un dispositivo propio — una bóveda de semillas.",
-      "seedVaultsOther": "{{count}} integrantes guardan el archivo completo en dispositivos propios — bóvedas de semillas.",
+      "seedVaultsOne": "{{count}} miembro guarda el archivo completo en un dispositivo propio — una bóveda de semillas.",
+      "seedVaultsOther": "{{count}} miembros guardan el archivo completo en dispositivos propios — bóvedas de semillas.",
       "nodeQuiet": "Ningún servidor ha respondido últimamente — tu copia está a salvo, y la sincronización se reanuda cuando alguno vuelva.",
       "capacityRed": "El nodo de nuestra comunidad (su servidor) se está quedando sin espacio — crecer otra raíz aliviaría la presión.",
       "leaf": {
@@ -2420,8 +2441,8 @@
       "empty": "Aún no hay intercambios. El primero iniciará el patrón.",
       "rowLabel": "{{name}} ha ayudado a {{count}} personas distintas",
       "moreNote": "{{count}} {{noun}} más han llegado al menos a una persona — si listáramos a toda la comunidad, cada nombre estaría aquí.",
-      "personSingular": "integrante",
-      "personPlural": "integrantes"
+      "personSingular": "miembro",
+      "personPlural": "miembros"
     },
     "reciprocity": {
       "title": "Reciprocidad",
@@ -2585,10 +2606,13 @@
       "directFlag": "¿algo salió mal?",
       "directFlagTitle": "Marcar este intercambio para revisión comunitaria",
       "directFlagBody": "Este intercambio se registró directamente — teléfono a teléfono, sin publicación detrás. Marcarlo lo muestra en la página de Disputas, donde toda la comunidad puede verlo y responder. No hay administradores; esto inicia una conversación, no un castigo.",
-      "directFlagConfirm": "Marcarlo"
+      "directFlagConfirm": "Marcarlo",
+      "postFlagTitle": "Marcar este intercambio para revisión comunitaria",
+      "postFlagBody": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva. Una señal no es irreversible: si cambias de opinión, cualquier miembro — tú también — puede cerrarla como retirada en la página de Propuestas, y el intercambio vuelve a donde estaba.",
+      "postFlagConfirm": "Marcarlo"
     },
     "memberSwitcher": {
-      "title": "Cambiar de integrante (modo desarrollo local)",
+      "title": "Cambiar de miembro (modo desarrollo local)",
       "note": "En un despliegue real cada dispositivo tiene una sola identidad. Este selector existe para que puedas recorrer el flujo completo de intercambio mientras pruebas.",
       "noAreaSet": "sin zona definida"
     },
@@ -2637,7 +2661,7 @@
       "title": "Aprender",
       "rowDescription": "Guías, preguntas frecuentes y principios de diseño — todo funciona sin conexión.",
       "intro": "La bienvenida, preguntas frecuentes, una guía breve para miembros, y preguntas para grupos de estudio. Todo funciona sin conexión.",
-      "revisitWelcome": "Volver a ver la bienvenida",
+      "revisitWelcome": "Volver a hacer el recorrido de bienvenida",
       "helpFaq": "Preguntas frecuentes",
       "memberGuide": "Guía de miembros",
       "opsecGuide": "Mantenerse seguro",
@@ -2665,7 +2689,7 @@
       },
       "reciprocal": {
         "label": "Umbral de patrón recíproco",
-        "hint": "Cuando dos mismas integrantes intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
+        "hint": "Cuando los mismos dos miembros intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
       },
       "taskCheckInDays": {
         "label": "Chequeo de tarea (días)",
@@ -2760,7 +2784,7 @@
     },
     "invites": {
       "title": "Invitaciones que has emitido",
-      "intro": "Una nueva persona necesita dos avales para volverse de confianza. Tu invitación cuenta como el primero — alguien más tendrá que avalarle después de unirse.",
+      "intro": "Una nueva persona necesita dos avales para volverse de confianza. Tu invitación cuenta como el primero — alguien más tendrá que avalar a esa persona después de que se una.",
       "empty": "Aún no has invitado a nadie. Cuando lo hagas, el enlace aparecerá aquí para que puedas volver a compartirlo o revocarlo.",
       "summary": {
         "open_one": "1 abierta",
@@ -2873,14 +2897,14 @@
         "successAdd": "Llave de acceso añadida. La próxima vez que este dispositivo se bloquee, un toque lo desbloquea — y tu frase siempre funciona también.",
         "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo."
       },
-      "whenAsked": "Se te pedirá la frase justo después de tocar «Bloquear ahora», y cada vez que abras la aplicación tras haberla cerrado o recargado — nunca por un temporizador mientras siga abierta."
+      "whenAsked": "Se te pedirá la frase cada vez que abras la aplicación tras haberla cerrado o recargado, y justo después de bloquearla tú misma con el botón «Bloquear ahora» de aquí abajo — nunca por un temporizador mientras siga abierta."
     },
     "emergency": {
       "title": "Emergencia",
       "intro": "Dos opciones de pánico para cuando un dispositivo está en riesgo. Ninguna contacta a un servidor; ambas ocurren completamente en este dispositivo.",
-      "softBullet": "Borrado suave — elimina cada campo de texto identificable (nombres, descripciones, zonas, habilidades) conservando el registro firmado de intercambios (el libro de actas) y tu par de claves (las claves que son tu cuenta). Útil si un dispositivo estará brevemente en manos hostiles.",
+      "softBullet": "Borrado suave — elimina cada campo de texto identificable (nombres, descripciones, zonas, habilidades) conservando el registro firmado de intercambios (el libro de actas) y tu par de claves (las claves que son tu cuenta). Útil si un dispositivo va a estar un rato en manos de alguien que quiera hacerte daño.",
       "hardBullet": "Borrado duro — borra todo lo guardado aquí incluyendo las claves privadas, y rota a una identidad nueva (una clave completamente nueva). Irrecuperable. La página se recargará después.",
-      "federatedNote": "Nota de honestidad: ambas opciones actúan solo sobre ESTE DISPOSITIVO. Todo lo que ya se sincronizó con tu comunidad — publicaciones, intercambios, avales, votos y otros registros firmados — persiste en el nodo comunitario (el servidor compartido) y en los dispositivos de otros integrantes. Un voto público que ya no respaldas puede volver a emitirse: la versión más reciente es la que cuenta.",
+      "federatedNote": "Nota de honestidad: ambas opciones actúan solo sobre ESTE DISPOSITIVO. Todo lo que ya se sincronizó con tu comunidad — publicaciones, intercambios, avales, votos y otros registros firmados — persiste en el nodo comunitario (el servidor compartido) y en los dispositivos de otros miembros. Un voto público que ya no respaldas puede volver a emitirse: la versión más reciente es la que cuenta.",
       "softButton": "Borrado suave (anonimizar)",
       "hardButton": "Borrado duro (eliminar todo)",
       "softTitle": "¿Ejecutar borrado suave?",
@@ -2906,7 +2930,8 @@
   },
   "help": {
     "title": "Preguntas frecuentes",
-    "subtitle": "Respuestas rápidas a las cosas que aparecen al usar la app. ¿Buscas el panorama más amplio? Mira la guía de miembros o vuelve a ver la bienvenida desde tu perfil.",
+    "subtitle": "Respuestas rápidas a las cosas que aparecen al usar la app. ¿Buscas el panorama más amplio? Mira la guía de miembros, o vuelve a hacer el recorrido de bienvenida aquí abajo.",
+    "tourLink": "Volver a hacer el recorrido de bienvenida",
     "footer": "¿No encontraste tu pregunta? Casi todo lo que no está aquí es una conversación de comunidad, no una función de la app — habla con alguien de confianza.",
     "filterLabel": "Filtrar preguntas",
     "filterPlaceholder": "Escribe para filtrar preguntas…",
@@ -2942,8 +2967,8 @@
     "commentSubjectChip": "Comentario de tarea",
     "commentTitle": "Comentario señalado",
     "commentAuthorLabel": "Autor",
-    "openInDecisions": "Abrir en Decisiones",
-    "footer": "Cada disputa también aparece en Decisiones, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
+    "openInDecisions": "Abrir en Propuestas",
+    "footer": "Cada disputa también aparece en Propuestas, donde la comunidad puede votar cómo responder. La resolución cierra la disputa en ambos lugares.",
     "entry": {
       "title": "Disputas de la comunidad",
       "descriptionNone": "Ningún intercambio está señalado ahora mismo.",
@@ -2989,7 +3014,7 @@
     "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier persona puede cerrar esta propuesta.",
     "closeAsPassed": "Cerrar como aprobada",
     "closedReason": {
-      "consensus": "Cerrada por acción de integrante después de cumplir las condiciones de consenso."
+      "consensus": "Cerrada por acción de un miembro después de cumplir las condiciones de consenso."
     },
     "payloadHeader": "Configuración propuesta",
     "status": {
@@ -3164,7 +3189,7 @@
     "profileSetup": {
       "title": "Un poco sobre ti",
       "intro": "Elige el nombre que verán tus vecinas. Todo lo demás es opcional — ayuda a que otras personas te encuentren cuando necesitan a alguien cercano o con una habilidad concreta. Puedes cambiar cualquier cosa más adelante en Perfil.",
-      "introExisting": "Qué bueno verte, {{name}} — ese es el nombre que elegiste, y puedes ajustarlo aquí. Todo lo demás es opcional y ayuda a que tus vecinas te encuentren. Puedes cambiar cualquier cosa más adelante en Perfil.",
+      "introExisting": "Qué bueno verte. Aquí apareces como «{{name}}» — ese es el nombre que elegiste, y puedes ajustarlo. Todo lo demás es opcional y ayuda a que tus vecinas te encuentren. Puedes cambiar cualquier cosa más adelante en Perfil.",
       "nameLabel": "Tu nombre visible (los seudónimos son bienvenidos)",
       "nameRequired": "Elige un nombre visible o seudónimo para continuar.",
       "hint": "Nada de esto es privado en la red — comparte solo lo que compartirías con una persona vecina."
@@ -3235,7 +3260,13 @@
       "blockedAtLabel": "Bloqueado el {{date}}",
       "firstBlockedAtLabel": "Primer bloqueo: {{when}}",
       "unblockedAtLabel": "Desbloqueado: {{when}}",
-      "pubkeyLabel": "Clave {{shortKey}}"
+      "pubkeyLabel": "Clave {{shortKey}}",
+      "noteLabel": "Tu nota privada",
+      "noteEmpty": "Sin nota. Una nota privada puede recordarte el porqué — solo tú puedes verla.",
+      "noteEditButton": "Editar nota",
+      "noteAddButton": "Añadir una nota privada",
+      "noteSave": "Guardar nota",
+      "noteSaved": "Nota guardada."
     },
     "error": {
       "cannotBlockSelf": "No puedes bloquearte a ti mismo.",
@@ -3398,7 +3429,7 @@
     "governance": {
       "title": "Gobernanza",
       "openProposals": "Propuestas abiertas ahora mismo",
-      "quorum": "Quórum de expulsión (regla comunitaria: cuántos integrantes deben cofirmar una expulsión)",
+      "quorum": "Quórum de expulsión (regla comunitaria: cuántos miembros deben cofirmar una expulsión)",
       "quorumUnknown": "Aún no publicado",
       "view": "Ver propuestas"
     },

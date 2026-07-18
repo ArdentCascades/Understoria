@@ -149,6 +149,24 @@ describe("speak", () => {
     expect(onDone).toHaveBeenCalledWith(true);
   });
 
+  it("onStart fires exactly when the utterance audibly starts — never for a swallowed one", () => {
+    vi.useFakeTimers();
+    const { utterance } = stubSilentEngine();
+    const onDone = vi.fn();
+    const onStart = vi.fn();
+    expect(speak("hello", "en", onDone, onStart)).toBe(true);
+    // Queued but not yet audible: no start signal.
+    expect(onStart).not.toHaveBeenCalled();
+    utterance().onstart!();
+    expect(onStart).toHaveBeenCalledTimes(1);
+    // …and the swallowed-utterance path: a fresh call whose start
+    // never comes only ever reports through onDone(false).
+    const neverStarts = vi.fn();
+    speak("again", "en", onDone, neverStarts);
+    vi.advanceTimersByTime(SPEAK_START_TIMEOUT_MS);
+    expect(neverStarts).not.toHaveBeenCalled();
+  });
+
   it("an error BEFORE start reports false; an error AFTER start reports true", () => {
     vi.useFakeTimers();
     const engine = stubSilentEngine();

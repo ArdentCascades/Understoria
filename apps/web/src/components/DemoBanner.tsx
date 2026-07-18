@@ -41,16 +41,24 @@ export function DemoBanner() {
   if (!IS_DEMO) return null;
 
   return (
+    // landscape-short (a phone held sideways — tailwind.config.js):
+    // the viewport is ~400px tall, so the banner slims to a single
+    // truncated line (title attr keeps the full sentence a long-press
+    // away) with tighter padding and a smaller font. The reset /
+    // confirm affordances stay visible — only the prose compresses.
     <div
       role="note"
-      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-ember-600 px-4 py-1.5 text-center text-sm text-white print:hidden"
+      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-ember-600 px-4 py-1.5 text-center text-sm text-white print:hidden landscape-short:flex-nowrap landscape-short:gap-x-2 landscape-short:px-3 landscape-short:py-0.5 landscape-short:text-xs"
     >
-      <p className="font-medium">
+      <p
+        className="font-medium landscape-short:min-w-0 landscape-short:truncate"
+        title={t("demo.banner")}
+      >
         <span aria-hidden="true">🌱 </span>
         {t("demo.banner")}
       </p>
       {confirming ? (
-        <span className="inline-flex items-center gap-2">
+        <span className="inline-flex items-center gap-2 landscape-short:shrink-0">
           <span>{t("demo.reset.confirm")}</span>
           <button
             type="button"
@@ -76,7 +84,7 @@ export function DemoBanner() {
         <button
           type="button"
           onClick={() => setConfirming(true)}
-          className="rounded-md bg-white/20 px-2 py-0.5 font-semibold hover:bg-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="rounded-md bg-white/20 px-2 py-0.5 font-semibold hover:bg-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white landscape-short:shrink-0 landscape-short:whitespace-nowrap"
         >
           {t("demo.reset.cta")}
         </button>

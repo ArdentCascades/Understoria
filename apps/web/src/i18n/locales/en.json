@@ -778,6 +778,7 @@
       "headerMenuUnblock": "Unblock {{name}}",
       "blockedNotice": "You've blocked this contact.",
       "blockedNoticeLink": "You can unblock them in Settings → Blocked contacts.",
+      "blockedChip": "Blocked",
       "aboutPost": "about: {{title}}",
       "aboutPostUnknown": "about a post"
     },
@@ -801,7 +802,7 @@
       "close": "Close search",
       "conversationWith": "Conversation with {{name}}",
       "matchedName": "Matched their name",
-      "noMatchesHint": "Try the exact spelling — search is simple."
+      "noMatchesHint": "Try fewer words, or a different word for the same thing."
     },
     "day": {
       "today": "Today",
@@ -814,6 +815,7 @@
       "copied": "Copied ✓",
       "speak": "Speak",
       "speakStop": "Stop speaking",
+      "speakStarting": "Starting…",
       "speakUnavailable": "This device can't read messages aloud",
       "info": "Info",
       "infoSent": "Sent {{when}}",
@@ -1528,6 +1530,23 @@
     "celebration": "Celebration",
     "learning": "Learning"
   },
+  "categoryDescriptions": {
+    "transport": "Rides, carpools, moving help",
+    "food": "Meals, groceries, cooking",
+    "childcare": "Babysitting, school pickups, kid help",
+    "skilled_labor": "Repairs, trades, hands-on work",
+    "emotional_support": "Listening, company, care",
+    "education": "Tutoring, teaching, mentoring",
+    "housing": "Shelter, moving, household help",
+    "tech": "Computers, phones, setup help",
+    "other": "Anything else our community needs",
+    "infrastructure": "Building, repair, and shared physical systems",
+    "organizing": "Collective action, unions, time banks",
+    "mutual_aid_drive": "Distributing supplies, funds, or essentials",
+    "social": "Get-togethers and good company",
+    "celebration": "Marking something together",
+    "learning": "Sharing skills and making things"
+  },
   "postStatus": {
     "open": "Open",
     "claimed": "Claimed",
@@ -1574,6 +1593,7 @@
     "errorHoursPositive": "Estimated hours must be a positive number.",
     "errorExpiresInDays": "Days must be a whole number greater than 0, or blank to never expire.",
     "repostBanner": "Editing a copy — the original post will be cancelled when you submit.",
+    "repostAgainBanner": "Starting from a copy — the original post isn't changed.",
     "matchingNeeds": "{{count}} active needs in this category — see them",
     "matchingNeedsAside": {
       "title": "Active needs in this category",
@@ -1631,6 +1651,7 @@
     "dialogReleaseConfirm": "Release claim",
     "repost": "Repost with changes",
     "repostHint": "Need to change something? \"Repost with changes\" in the post menu cancels this one and creates a fresh post.",
+    "cancelledOwnerHint": "This post is cancelled and off the board. If plans change again, you can repost it with changes — that makes a fresh post; this one stays cancelled.",
     "stillLooking": "Still looking? Adding more detail or adjusting the hours estimate can help the right person find this. You can repost with changes from the post menu.",
     "stillOffering": "Still available? Adjusting the timing or details can help match you with someone who needs this.",
     "postAgain": "Post this again",
@@ -1969,7 +1990,7 @@
     "cosignShowBack": "Show this to the proposing member — their device collects it toward the quorum (the number of signatures needed).",
     "cosignQrAlt": "Co-signature code",
     "reinstateButton": "Start a reinstatement…",
-    "selfBanner": "This community has removed you by quorum decision. Everything on this device is still yours and keeps working here, but syncing with the community's server will fail until a quorum of members signs a reinstatement. The decision, its reason, and its signers are on the Decisions page.",
+    "selfBanner": "This community has removed you by quorum decision. Everything on this device is still yours and keeps working here, but syncing with the community's server will fail until a quorum of members signs a reinstatement. The decision, its reason, and its signers are on the Proposals page.",
     "error": {
       "no_identity": "No identity on this device.",
       "locked": "This device is locked — unlock it first.",
@@ -2585,7 +2606,10 @@
       "directFlag": "something's wrong?",
       "directFlagTitle": "Flag this exchange for community review",
       "directFlagBody": "This exchange was recorded directly — phone to phone, with no post behind it. Flagging surfaces it on the Disputes page where the whole community can see it and respond. There are no admins; this starts a conversation, not a punishment.",
-      "directFlagConfirm": "Flag it"
+      "directFlagConfirm": "Flag it",
+      "postFlagTitle": "Flag this exchange for community review",
+      "postFlagBody": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved. A flag isn't one-way: if you change your mind, any member — including you — can close it as withdrawn on the Proposals page, and the exchange goes back to where it was.",
+      "postFlagConfirm": "Flag it"
     },
     "memberSwitcher": {
       "title": "Switch member (local dev)",
@@ -2637,7 +2661,7 @@
       "title": "Learn",
       "rowDescription": "Guides, common questions, and design principles — everything works offline.",
       "intro": "The welcome flow, common questions, a condensed member guide, and prompts for study groups. Everything here works offline.",
-      "revisitWelcome": "Revisit the welcome",
+      "revisitWelcome": "Take the welcome tour again",
       "helpFaq": "Common questions",
       "memberGuide": "Member guide",
       "opsecGuide": "Staying safe",
@@ -2873,12 +2897,12 @@
         "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
         "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
       },
-      "whenAsked": "You'll be asked for your passphrase right after you tap Lock now, and again whenever you open the app after it has been closed or reloaded — never on a timer while it stays open."
+      "whenAsked": "You'll be asked for your passphrase whenever you open the app after it has been closed or reloaded, and right after you lock it yourself with the \"Lock now\" button below — never on a timer while it stays open."
     },
     "emergency": {
       "title": "Emergency",
       "intro": "Two panic options for when a device is at risk. Neither contacts a server; both happen entirely on this device.",
-      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger (the record of exchanges) and your keypair (the keys that are your account). Useful if a device will briefly be handled by a hostile party.",
+      "softBullet": "Soft purge — strips every identifying text field (names, descriptions, areas, skills) while keeping the signed exchange ledger (the record of exchanges) and your keypair (the keys that are your account). Useful if a device will briefly be in the hands of someone who means you harm.",
       "hardBullet": "Hard purge — wipes everything stored here including private keys, and rotates to a fresh identity (a brand-new key). Unrecoverable. The page will reload afterward.",
       "federatedNote": "Honesty note: both options act on THIS DEVICE only. Anything that already synced with your community — posts, exchanges, vouches, votes, and other signed records — persists on the community node (the shared server) and on other members' devices. A public vote you can no longer stand behind can be re-cast instead: the newest version is what counts.",
       "softButton": "Soft purge (anonymize)",
@@ -2906,7 +2930,8 @@
   },
   "help": {
     "title": "Common questions",
-    "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide or revisit the welcome from your profile.",
+    "subtitle": "Quick answers for the things members hit while using the app. Looking for the bigger picture? Check the member guide, or take the welcome tour again below.",
+    "tourLink": "Take the welcome tour again",
     "footer": "Didn't find your question? Most of what isn't here is a community conversation, not an app feature — talk to a member you trust.",
     "filterLabel": "Filter questions",
     "filterPlaceholder": "Type to filter questions…",
@@ -2942,8 +2967,8 @@
     "commentSubjectChip": "Task comment",
     "commentTitle": "Flagged comment",
     "commentAuthorLabel": "Author",
-    "openInDecisions": "Open in Decisions",
-    "footer": "Each dispute also shows up in Decisions, where the community can vote on how to respond. Resolution closes the dispute in both places.",
+    "openInDecisions": "Open in Proposals",
+    "footer": "Each dispute also shows up in Proposals, where the community can vote on how to respond. Resolution closes the dispute in both places.",
     "entry": {
       "title": "Community disputes",
       "descriptionNone": "No exchanges are flagged right now.",
@@ -3235,7 +3260,13 @@
       "blockedAtLabel": "Blocked on {{date}}",
       "firstBlockedAtLabel": "First blocked {{when}}",
       "unblockedAtLabel": "Unblocked {{when}}",
-      "pubkeyLabel": "Key {{shortKey}}"
+      "pubkeyLabel": "Key {{shortKey}}",
+      "noteLabel": "Your private note",
+      "noteEmpty": "No note. A private note can remind you why — only you can see it.",
+      "noteEditButton": "Edit note",
+      "noteAddButton": "Add a private note",
+      "noteSave": "Save note",
+      "noteSaved": "Note saved."
     },
     "error": {
       "cannotBlockSelf": "You can't block yourself.",

@@ -113,9 +113,14 @@ describe("detectInstallEnvironment", () => {
       expect: { kind: "ios-safari" },
     },
     {
-      name: "Chrome Android with deferred prompt → promptable",
+      name: "Chrome Android with deferred prompt → promptable, android bucket",
       in: input({ ua: UA.chromeAndroid, hasDeferred: true }),
-      expect: { kind: "promptable" },
+      expect: { kind: "promptable", device: "android" },
+    },
+    {
+      name: "Chrome desktop with deferred prompt → promptable, desktop bucket",
+      in: input({ ua: UA.chromeDesktop, hasDeferred: true }),
+      expect: { kind: "promptable", device: "desktop" },
     },
     {
       name: "Chrome Android without prompt → manual android",
@@ -171,6 +176,19 @@ describe("detectInstallEnvironment", () => {
       name: "unrecognized UA → manual desktop (the catch-all device + family)",
       in: input({ ua: "SomeRandomCrawler/1.0" }),
       expect: { kind: "manual", device: "desktop", desktopBrowser: "chromium-like" },
+    },
+    {
+      // A phone in "Request desktop site" mode sends a desktop UA, but
+      // the primary pointer is still a finger. It must get phone steps
+      // (browser menu), never the address-bar-icon hunt.
+      name: "desktop-mode phone (desktop UA + coarse pointer) → manual android, not desktop",
+      in: input({ ua: UA.chromeDesktop, coarsePointer: true }),
+      expect: { kind: "manual", device: "android" },
+    },
+    {
+      name: "desktop-mode phone with deferred prompt → promptable, android bucket",
+      in: input({ ua: UA.chromeDesktop, coarsePointer: true, hasDeferred: true }),
+      expect: { kind: "promptable", device: "android" },
     },
   ];
 
@@ -253,6 +271,17 @@ describe("detectDevice", () => {
       expect(detectDevice(ua, platform, touch)).toBe(expected);
     });
   }
+
+  it("coarse pointer unmasks a desktop-mode phone → android bucket", () => {
+    expect(detectDevice(UA.chromeDesktop, "Win32", 0, true)).toBe("android");
+  });
+
+  it("a touch-screen laptop (fine primary pointer) stays desktop", () => {
+    // Windows convertibles report maxTouchPoints > 0, but their PRIMARY
+    // pointer is a mouse/trackpad — `(pointer: coarse)` is false, so
+    // the desktop steps (which are correct there) stay.
+    expect(detectDevice(UA.chromeDesktop, "Win32", 10, false)).toBe("desktop");
+  });
 });
 
 describe("beforeinstallprompt capture", () => {

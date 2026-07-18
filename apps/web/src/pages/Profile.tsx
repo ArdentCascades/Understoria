@@ -65,7 +65,11 @@ import {
   formatSignedHours,
   shortKey,
 } from "@/lib/format";
-import { disputeDirectExchange, updateMemberProfile } from "@/db/actions";
+import {
+  disputeDirectExchange,
+  disputeExchange,
+  updateMemberProfile,
+} from "@/db/actions";
 import { isDirectExchangeLabel } from "@understoria/shared/crypto";
 import { SETTING_KEYS, type InviteRow } from "@/db/database";
 import { issueInvite } from "@/db/invites";
@@ -87,25 +91,35 @@ import type {
   AvailabilityChip,
   FlagReason,
   Member,
+  Post,
   Project,
   ProjectTask,
 } from "@/types";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 
 /**
- * The dispute doorway for a DIRECT exchange — it has no post page to
- * host "Something's wrong — flag it", so the ledger row carries it.
- * Same ConfirmDialog ceremony as the post flow's flag button; on
- * confirm the dispute proposal (built from the exchange's own signed
- * fields) lands on the Disputes surface, and this button's slot
- * becomes the amber in-review link on the next live-query render.
+ * The dispute doorway on a ledger row. Originally built for DIRECT
+ * exchanges (no post page to host "Something's wrong — flag it");
+ * round 3 found the same dead end for POST-BACKED exchanges — the
+ * history row named the exchange but offered no way to flag it, and
+ * the member had to rediscover the post page. One shared component
+ * now hosts both: same ConfirmDialog ceremony, same trigger chip;
+ * the caller supplies the dialog copy and the action (`disputeDirect
+ * Exchange` for direct rows, `disputeExchange` for post rows). On
+ * confirm the dispute proposal lands on the Disputes surface, and
+ * this button's slot becomes the amber in-review link on the next
+ * live-query render.
  */
-function DirectFlagButton({
-  exchangeId,
-  meKey,
+function ExchangeFlagButton({
+  title,
+  body,
+  confirmLabel,
+  onFlag,
 }: {
-  exchangeId: string;
-  meKey: string;
+  title: string;
+  body: string;
+  confirmLabel: string;
+  onFlag: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -126,15 +140,15 @@ function DirectFlagButton({
       )}
       <ConfirmDialog
         open={open}
-        title={t("profile.history.directFlagTitle")}
-        description={t("profile.history.directFlagBody")}
-        confirmLabel={t("profile.history.directFlagConfirm")}
+        title={title}
+        description={body}
+        confirmLabel={confirmLabel}
         cancelLabel={t("common.cancel")}
         tone="caution"
         onCancel={() => setOpen(false)}
         onConfirm={async () => {
           try {
-            await disputeDirectExchange(exchangeId, meKey);
+            await onFlag();
             setError(null);
           } catch (e) {
             setError(humanizeError(e));
@@ -440,6 +454,14 @@ function ProfileBody({ member }: { member: Member }) {
     () => new Map(members.map((m) => [m.publicKey, m])),
     [members],
   );
+  // Post lookup for the history rows' flag doorway — a settled row
+  // can only be flagged while its post is still `completed` (the
+  // dispute action's own gate), so the section needs each post's
+  // live status.
+  const postById = useMemo(
+    () => new Map(posts.map((p) => [p.id, p])),
+    [posts],
+  );
   const myAchievements = useMemo(
     () =>
       achievements
@@ -587,6 +609,7 @@ function ProfileBody({ member }: { member: Member }) {
             memberMap={memberMap}
             taskMap={taskMap}
             projectMap={projectMap}
+            postById={postById}
             disputeIdByPostId={disputeIdByPostId}
             meKey={currentMember.publicKey}
           />
@@ -830,6 +853,7 @@ function ExchangeHistorySection({
   memberMap,
   taskMap,
   projectMap,
+  postById,
   disputeIdByPostId,
   meKey,
 }: {
@@ -839,6 +863,7 @@ function ExchangeHistorySection({
   memberMap: Map<string, Member>;
   taskMap: Map<string, ProjectTask>;
   projectMap: Map<string, Project>;
+  postById: Map<string, Post>;
   disputeIdByPostId: Map<string, string>;
   meKey: string;
 }) {
@@ -903,6 +928,20 @@ function ExchangeHistorySection({
           {visibleHistory.map(({ exchange, delta, counterparty }) => {
             const other = memberMap.get(counterparty);
             const isDirect = isDirectExchangeLabel(exchange.postId);
+            // Round-3 papercut: post-backed rows offered no flag
+            // doorway — only direct rows did. A settled post-backed
+            // exchange (post still completed, not yet disputed) now
+            // carries the same "something's wrong?" chip, reusing
+            // the post flow's dispute action + dialog copy. A
+            // post-backed row whose post has moved to disputed gets
+            // the amber in-review link instead (unless the
+            // flaggedForReview chip below already provides it).
+            const post = isDirect
+              ? null
+              : postById.get(exchange.postId) ?? null;
+            const canFlagPost = post?.status === "completed";
+            const postInReview =
+              post?.status === "disputed" && !exchange.flaggedForReview;
             return (
               <li
                 key={exchange.id}
@@ -937,8 +976,38 @@ function ExchangeHistorySection({
                           {t("profile.history.directInReview")}
                         </Link>
                       ) : (
-                        <DirectFlagButton exchangeId={exchange.id} meKey={meKey} />
+                        <ExchangeFlagButton
+                          title={t("profile.history.directFlagTitle")}
+                          body={t("profile.history.directFlagBody")}
+                          confirmLabel={t("profile.history.directFlagConfirm")}
+                          onFlag={() =>
+                            disputeDirectExchange(exchange.id, meKey)
+                          }
+                        />
                       ))}
+                    {/* Post-backed rows: the same doorway the direct
+                        rows had. The action is the post flow's own
+                        disputeExchange — no forked flag logic. */}
+                    {canFlagPost && post && (
+                      <ExchangeFlagButton
+                        title={t("profile.history.postFlagTitle")}
+                        body={t("profile.history.postFlagBody")}
+                        confirmLabel={t("profile.history.postFlagConfirm")}
+                        onFlag={() => disputeExchange(post.id, meKey)}
+                      />
+                    )}
+                    {postInReview && (
+                      <Link
+                        to={
+                          disputeIdByPostId.has(exchange.postId)
+                            ? `/disputes#${disputeIdByPostId.get(exchange.postId)}`
+                            : "/disputes"
+                        }
+                        className="chip bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
+                      >
+                        {t("profile.history.directInReview")}
+                      </Link>
+                    )}
                     {/* The chip links to the review conversation it
                         names — anchored to the matching dispute card
                         when one is resolvable, the disputes list

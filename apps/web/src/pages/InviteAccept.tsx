@@ -33,6 +33,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 
 // Invite redemption — the honest-exits shape of
 // `docs/invite-redemption.md` §5.1 + §5.2 + §5.3 (Phase 0):
@@ -168,7 +169,12 @@ export default function InviteAcceptPage() {
     e.preventDefault();
     if (!encoded) return;
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (validation.hasErrors) {
+      // Short viewports can have the errored field scrolled away —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
     setStatus("submitting");
     const result = await redeemInvite(encoded, displayName.trim(), nodeId, {
       forceNewIdentity: asSomeoneElse,

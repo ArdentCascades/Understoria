@@ -363,14 +363,14 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Dos cosas, y son el corazón de por qué Understoria está " +
             "construida de otra manera que los servicios corporativos. " +
-            "Primero: el dispositivo de cada integrante ya guarda una " +
+            "Primero: el dispositivo de cada miembro ya guarda una " +
             "copia completa y firmada de la comunidad — el tablero, el " +
             "registro, los proyectos, todo. Confiscar el servidor no " +
             "se lleva nada que no esté ya en los teléfonos de todo el " +
             "mundo, y un servidor nuevo se puede rellenar desde esas " +
             "copias.",
           "Segundo: el servidor no tiene que ser una sola máquina, ni " +
-            "la máquina de una sola persona. Cualquier integrante " +
+            "la máquina de una sola persona. Cualquier miembro " +
             "puede correr un nodo comunitario — un portátil viejo en " +
             "un armario es de verdad suficiente. Cada nodo adicional " +
             "significa que no existe una sola persona a la que un " +

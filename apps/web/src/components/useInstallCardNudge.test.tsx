@@ -149,7 +149,7 @@ describe("useInstallCardNudge", () => {
   });
 
   it("promptable → shows the one-tap button and replays the prompt on click", async () => {
-    mockEnv.current = { kind: "promptable" };
+    mockEnv.current = { kind: "promptable", device: "android" };
     deferredPrompt.current = {
       prompt: promptMock,
       userChoice: Promise.resolve({ outcome: "dismissed", platform: "" }),
@@ -166,6 +166,25 @@ describe("useInstallCardNudge", () => {
       await Promise.resolve();
     });
     expect(promptMock).toHaveBeenCalledOnce();
+  });
+
+  it("promptable on a phone → home-screen title, not desktop 'install as an app'", async () => {
+    mockEnv.current = { kind: "promptable", device: "android" };
+    render();
+    await flushAsync();
+    expect(container.textContent).toContain(
+      "Add Understoria to your home screen",
+    );
+    expect(container.textContent).not.toContain(
+      "Install Understoria as an app",
+    );
+  });
+
+  it("promptable on a computer → the install-as-an-app title", async () => {
+    mockEnv.current = { kind: "promptable", device: "desktop" };
+    render();
+    await flushAsync();
+    expect(container.textContent).toContain("Install Understoria as an app");
   });
 
   it("card ios-safari → the one-line Share hint and the Share glyph, no <ol>", async () => {
