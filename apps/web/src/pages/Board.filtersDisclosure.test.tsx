@@ -218,6 +218,27 @@ describe("Board mobile Filters disclosure", () => {
     expect(trigger().textContent).not.toContain("active");
   });
 
+  it("opens as a card panel and 'Done' closes it, returning focus to the trigger", () => {
+    render(<BoardPage />);
+    act(() => {
+      trigger().dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    // The open drawer is a contained card panel (board-calm drawer
+    // pass), not loose page rows.
+    expect(railWrapper().className).toContain("card");
+    const done = Array.from(
+      railWrapper().querySelectorAll("button"),
+    ).find((b) => (b.textContent ?? "").trim() === "Done")!;
+    expect(done).toBeTruthy();
+    act(() => {
+      done.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    // Closed, and focus returned to the trigger (not dropped to body).
+    expect(trigger().getAttribute("aria-expanded")).toBe("false");
+    expect(railWrapper().className).toContain("hidden");
+    expect(document.activeElement).toBe(trigger());
+  });
+
   it("expands on tap and collapses again on a second tap", () => {
     render(<BoardPage />);
     act(() => {

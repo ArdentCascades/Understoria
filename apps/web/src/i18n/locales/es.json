@@ -2281,7 +2281,6 @@
     },
     "openCount": "({{count}})",
     "showClaimed": "Mostrar {{count}} tomadas",
-    "hideClaimed": "Ocultar tomadas",
     "filters": {
       "toggle": "Filtros",
       "toggleActive": "Filtros · {{count}} activos",
@@ -2292,7 +2291,8 @@
       "allUrgencies": "Todas las urgencias",
       "allZones": "Todas las zonas",
       "removeFilter": "Quitar filtro: {{label}}",
-      "claimedShown": "Tomadas visibles"
+      "claimedShown": "Tomadas visibles",
+      "done": "Listo"
     },
     "projectFilters": {
       "category": {

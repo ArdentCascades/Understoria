@@ -20,6 +20,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import { ToggleChip } from "@/components/board/ToggleChip";
 import type { Project, ProjectCategory } from "@/types";
 
 /**
@@ -65,7 +66,11 @@ export function ProjectFilterRail({
 }: ProjectFilterRailProps) {
   const { t } = useTranslation();
   return (
-    <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
+    // Phones: selects stack full-width (good dropdown targets), then
+    // the toggles wrap as chips on their own row (`sm:contents`
+    // flattens that group back into one wrap row from sm up, so the
+    // desktop layout is byte-identical to before the drawer pass).
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <label className="sr-only" htmlFor="project-category-filter">
         {t("board.projectFilters.category.ariaLabel")}
       </label>
@@ -126,49 +131,37 @@ export function ProjectFilterRail({
             projects are reached only via the "View archive"
             link below; the Projects tab never lists them. */}
       </select>
-      <button
-        type="button"
-        onClick={() => setOnlyWithOpenTasks((v) => !v)}
-        aria-pressed={onlyWithOpenTasks}
-        className={`rounded-full px-3 py-1 text-xs font-medium ${
-          onlyWithOpenTasks
-            ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
-            : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-        }`}
-      >
-        {t("board.projectFilters.openTasks.toggle")}
-      </button>
-      {/* Points members at projects whose tasks have surfaced the
-          "could use more hands" chip — framed at the task/project,
-          never at a person (the chip's own wording, reused). */}
-      <button
-        type="button"
-        onClick={() => setOnlyNeedsMoreHands((v) => !v)}
-        aria-pressed={onlyNeedsMoreHands}
-        className={`rounded-full px-3 py-1 text-xs font-medium ${
-          onlyNeedsMoreHands
-            ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
-            : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-        }`}
-      >
-        {t("board.projectFilters.needsMoreHands.toggle")}
-      </button>
-      {/* Projects with at least one open task of an hour or less
-          (lib/projectFilter.ts hasHourSizedTasks) — a bounded,
-          finishable slice for a member with a little energy right
-          now. Filters the work, never profiles the member. */}
-      <button
-        type="button"
-        onClick={() => setOnlyHourSized((v) => !v)}
-        aria-pressed={onlyHourSized}
-        className={`rounded-full px-3 py-1 text-xs font-medium ${
-          onlyHourSized
-            ? "bg-canopy-100 text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100"
-            : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-        }`}
-      >
-        {t("board.projectFilters.hourSized.toggle")}
-      </button>
+      {/* Toggle group. On phones these wrap as chips on their own
+          row under the two full-width selects; `sm:contents` dissolves
+          the wrapper from sm up so the three chips flow into the outer
+          wrap row exactly as they did before the drawer pass.
+            • openTasks — projects with unclaimed work.
+            • needsMoreHands — projects whose tasks surfaced the
+              "could use more hands" chip (framed at the work, never a
+              person — the chip's own wording, reused).
+            • hourSized — projects with ≥1 open task of an hour or less
+              (lib/projectFilter.ts hasHourSizedTasks): a bounded,
+              finishable slice; filters the work, never the member. */}
+      <div className="flex flex-wrap gap-2 sm:contents">
+        <ToggleChip
+          pressed={onlyWithOpenTasks}
+          onToggle={() => setOnlyWithOpenTasks((v) => !v)}
+        >
+          {t("board.projectFilters.openTasks.toggle")}
+        </ToggleChip>
+        <ToggleChip
+          pressed={onlyNeedsMoreHands}
+          onToggle={() => setOnlyNeedsMoreHands((v) => !v)}
+        >
+          {t("board.projectFilters.needsMoreHands.toggle")}
+        </ToggleChip>
+        <ToggleChip
+          pressed={onlyHourSized}
+          onToggle={() => setOnlyHourSized((v) => !v)}
+        >
+          {t("board.projectFilters.hourSized.toggle")}
+        </ToggleChip>
+      </div>
     </div>
   );
 }

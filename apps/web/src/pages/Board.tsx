@@ -134,6 +134,14 @@ export default function BoardPage() {
   // most, matching the filter values themselves. Shared across tabs
   // (one control; which rail it reveals follows the tab).
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  // The Filters trigger (only one tab's renders at a time). The
+  // panel's "Done" button focuses it on close so keyboard / SR
+  // members return to the trigger, not the top of the document.
+  const filtersToggleRef = useRef<HTMLButtonElement>(null);
+  const closeFilters = () => {
+    setMobileFiltersOpen(false);
+    filtersToggleRef.current?.focus();
+  };
   // Project-tab filters. Deliberately separate from the post-tab
   // category / urgency / zone filters above: a member might filter
   // Needs by `food` and want their Projects-tab category-filter to
@@ -810,12 +818,17 @@ export default function BoardPage() {
                 activeCount={activePostFilterCount}
                 controlsId="board-post-filters"
                 onToggle={() => setMobileFiltersOpen((v) => !v)}
+                buttonRef={filtersToggleRef}
               />
               <ActiveFilterChips entries={postFilterChips} />
             </div>
+            {/* Open drawer: a card panel (board-calm drawer pass) so
+                the controls read as one contained object under the
+                Filters pill instead of loose page rows, with a Done
+                footer that closes + refocuses the trigger. */}
             <div
               id="board-post-filters"
-              className={mobileFiltersOpen ? "mt-2" : "hidden"}
+              className={mobileFiltersOpen ? "card mt-2" : "hidden"}
             >
               <PostFilterRail
                 categoryFilter={categoryFilter}
@@ -829,6 +842,7 @@ export default function BoardPage() {
                 showClaimed={showClaimed}
                 setShowClaimed={setShowClaimed}
               />
+              <FilterPanelDone onDone={closeFilters} />
             </div>
           </div>
         )}
@@ -841,6 +855,7 @@ export default function BoardPage() {
                 activeCount={activeProjectFilterCount}
                 controlsId="board-project-filters"
                 onToggle={() => setMobileFiltersOpen((v) => !v)}
+                buttonRef={filtersToggleRef}
               />
               <ActiveFilterChips entries={projectFilterChips} />
               {/* Being built / Tended scope (docs/commons.md §5.1) —
@@ -873,9 +888,11 @@ export default function BoardPage() {
                 ))}
               </div>
             </div>
+            {/* Open drawer: card panel + Done footer — see the post-tab
+                copy above for the rationale. */}
             <div
               id="board-project-filters"
-              className={mobileFiltersOpen ? "mt-2" : "hidden"}
+              className={mobileFiltersOpen ? "card mt-2" : "hidden"}
             >
               <ProjectFilterRail
                 projectCategoryFilter={projectCategoryFilter}
@@ -889,6 +906,7 @@ export default function BoardPage() {
                 onlyHourSized={onlyHourSized}
                 setOnlyHourSized={setOnlyHourSized}
               />
+              <FilterPanelDone onDone={closeFilters} />
             </div>
           </div>
         )}
@@ -1179,17 +1197,41 @@ const PROJECT_EXTENSION_CATEGORY_LABELS: Record<string, string> = {
   mutual_aid_drive: "\u{1F49B} Mutual aid drive",
 };
 
+/** Bottom-right "Done" inside the open filter drawer — closes the
+ *  disclosure without reaching back up to the pill and returns focus
+ *  to the trigger (handled by the caller's onDone). Right-aligned,
+ *  quiet register; the drawer's controls are the loud content. */
+function FilterPanelDone({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="mt-3 flex justify-end">
+      <button
+        type="button"
+        onClick={onDone}
+        className="touch-target inline-flex items-center px-2 text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+      >
+        {t("board.filters.done")}
+      </button>
+    </div>
+  );
+}
+
 function FiltersToggle({
   open,
   activeCount,
   controlsId,
   onToggle,
+  buttonRef,
 }: {
   open: boolean;
   activeCount: number;
   /** id of the collapsible rail wrapper this trigger controls. */
   controlsId: string;
   onToggle: () => void;
+  /** The panel's "Done" button returns focus here on close, so
+   *  keyboard / screen-reader members land back on the trigger
+   *  rather than at the top of <body>. */
+  buttonRef?: React.Ref<HTMLButtonElement>;
 }) {
   const { t } = useTranslation();
   // ONE disclosure at every width (board-calm pass): a compact pill
@@ -1205,6 +1247,7 @@ function FiltersToggle({
   // ("Filters · 2 active").
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-expanded={open}
       aria-controls={controlsId}
