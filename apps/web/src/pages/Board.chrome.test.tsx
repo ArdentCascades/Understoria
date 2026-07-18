@@ -136,20 +136,36 @@ describe("Board command band", () => {
     expect(tab.className).toContain("landscape-short:px-4");
   });
 
-  it("discovery links and the filter row share one line at lg/landscape-short", () => {
+  it("discovery links: desktop copy rides the band, phone copy stays in the flow", () => {
     render(<BoardPage />);
-    const filters = container.querySelector("#board-post-filters")!;
-    // The shared line wrapper sits above the per-tab filter block.
-    const line = filters.parentElement!.parentElement as HTMLElement;
-    expect(line.className).toContain("lg:flex");
-    expect(line.className).toContain("lg:justify-between");
+    const tablist = container.querySelector('[role="tablist"]')!;
+    const band = tablist.parentElement!;
+    // Two DiscoveryLinks render sites (the deliberate two-site
+    // pattern documented in the component): the band copy is
+    // desktop-only — the band must stay minimal on phones, where
+    // every sticky row is viewport permanently lost.
+    const plugIns = container.querySelectorAll('a[href="/plug-in"]');
+    expect(plugIns.length).toBe(2);
+    const bandCopy = Array.from(plugIns).find((a) => band.contains(a))!;
+    const flowCopy = Array.from(plugIns).find((a) => !band.contains(a))!;
+    expect(bandCopy).toBeTruthy();
+    expect(flowCopy).toBeTruthy();
+    const bandSlot = bandCopy.parentElement as HTMLElement;
+    expect(bandSlot.className).toContain("hidden");
+    expect(bandSlot.className).toContain("lg:flex");
+    // The band wraps so an expanded One-small-thing card gets a
+    // second band row instead of clipping beside the search.
+    expect(band.className).toContain("lg:flex-wrap");
+    const flowSlot = flowCopy.parentElement as HTMLElement;
+    expect(flowSlot.className).toContain("lg:hidden");
+    // The flow copy still shares the landscape-short line with the
+    // filter row (discovery left, filters right).
+    expect(flowSlot.className).toContain("landscape-short:flex-auto");
+    const line = flowSlot.parentElement as HTMLElement;
     expect(line.className).toContain("landscape-short:flex");
-    // Discovery block is the line's first child (DOM order = visual
-    // order, discovery left / filters right) and may grow when the
-    // One-small-thing card expands.
-    const discovery = line.firstElementChild as HTMLElement;
-    expect(discovery.textContent).toContain("plug in");
-    expect(discovery.className).toContain("lg:flex-auto");
-    expect(discovery.className).toContain("lg:mb-0");
+    expect(line.className).toContain("landscape-short:justify-between");
+    expect(line.contains(container.querySelector("#board-post-filters")!)).toBe(
+      true,
+    );
   });
 });

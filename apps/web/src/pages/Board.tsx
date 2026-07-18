@@ -52,7 +52,7 @@ import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
 import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
-import { OneSmallThing } from "@/components/board/OneSmallThing";
+import { DiscoveryLinks } from "@/components/board/DiscoveryLinks";
 import type {
   Category,
   Project,
@@ -572,7 +572,7 @@ export default function BoardPage() {
             search, matching visual order at every breakpoint
             (WCAG 2.4.3). z-10 keeps the band under the FAB (z-20)
             and modal layers. */}
-        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:top-4 lg:mx-0 lg:flex lg:items-center lg:gap-3 lg:px-0">
+        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:top-4 lg:mx-0 lg:flex lg:flex-wrap lg:items-center lg:gap-x-5 lg:gap-y-2 lg:px-0">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}
@@ -635,50 +635,52 @@ export default function BoardPage() {
             />
           </label>
         </div>
-        </div>
-        {/* end mobile sticky header group */}
 
-        {/* DISCOVERY row — the two "help me find something to do"
-            affordances read as ONE action group (small icons, side by
-            side), distinct from the navigation links below. On every
-            tab, under the search band.
-              • "One small thing" — the choice-paralysis escape hatch;
-                expands to exactly one claimable pick at a time
-                (lib/oneSmallThing.ts — feasibility filters + a shuffle,
-                never a recommender). When opened its card takes the
-                full row and the plug-in link wraps beneath it.
-              • "Ways to plug in" — the browsable shelf's only doorway
-                (docs/ways-to-plug-in.md §8 ruling 1: a link, not a tab).
-                No count badge: §4's never-a-nudge boundary applies here
-                too.
-
-            At lg+ and landscape-short the discovery links and the
-            filter row below share ONE line (discovery left, filters
-            right via justify-between) — each used to own a full-width
-            row of mostly-empty space. DOM order stays discovery →
-            filters, matching the left→right visual order, so focus
-            and reading order are untouched. flex-wrap + the
-            discovery block's flex-1 mean an expanded One-small-thing
-            card grows into the line and gracefully wraps the filters
-            beneath it. On phones portrait the wrapper is display:
-            block and everything stacks exactly as before. */}
-        <div className="landscape-short:flex landscape-short:flex-wrap landscape-short:items-start landscape-short:justify-between landscape-short:gap-x-6 lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-6 lg:gap-y-2">
+        {/* Desktop-visible discovery copy (DiscoveryLinks — see the
+            component's two-render-site rationale). The search input
+            caps at max-w-md, so at lg the band has free width to its
+            right; the links live there instead of owning a whole row
+            (field report). `hidden lg:flex` — on phones the band
+            must stay minimal (only tabs + search stick; every sticky
+            row is viewport lost), so the flow copy below serves
+            portrait and landscape-short. lg:min-w-0 + the band's
+            lg:flex-wrap let an expanded One-small-thing card wrap
+            into a second band row and shrink its prose instead of
+            clipping; the card stays pinned with the band while open
+            — deliberate: your pick shouldn't scroll away while you
+            read it. */}
         {currentMember && (
-          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2 landscape-short:mb-0 landscape-short:flex-auto lg:mb-0 lg:flex-auto">
-            <OneSmallThing
+          <div className="hidden lg:flex lg:min-w-0 lg:flex-wrap lg:items-center lg:gap-x-5 lg:gap-y-2">
+            <DiscoveryLinks
               memberKey={currentMember.publicKey}
               tasks={projectTasks}
               projects={projects}
               posts={posts}
               blockedKeys={blockedKeys}
             />
-            <Link
-              to="/plug-in"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-            >
-              <span aria-hidden="true">🔌</span>
-              {t("board.plugInLink")}
-            </Link>
+          </div>
+        )}
+        </div>
+        {/* end sticky command band */}
+
+        {/* Phone-visible DISCOVERY row (the lg copy lives in the
+            command band above). The two links read as ONE action
+            group, distinct from the navigation links below. At
+            landscape-short this row shares a line with the filter
+            row below (discovery left, filters right via the
+            justify-between wrapper); on portrait everything stacks
+            exactly as before. DOM order stays discovery → filters,
+            matching the left→right visual order. */}
+        <div className="landscape-short:flex landscape-short:flex-wrap landscape-short:items-start landscape-short:justify-between landscape-short:gap-x-6 lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-6 lg:gap-y-2">
+        {currentMember && (
+          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2 landscape-short:mb-0 landscape-short:flex-auto lg:hidden">
+            <DiscoveryLinks
+              memberKey={currentMember.publicKey}
+              tasks={projectTasks}
+              projects={projects}
+              posts={posts}
+              blockedKeys={blockedKeys}
+            />
           </div>
         )}
 

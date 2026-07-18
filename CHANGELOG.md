@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The board's discovery links moved up beside the search box on
+  desktop.** "Show me one small thing" and "Ways to plug in" used to
+  own a full row; on desktop they now sit in the free space to the
+  right of the search box, inside the pinned bar — so they're always
+  a click away, and the filter dropdowns get a whole line to
+  themselves. Opening "one small thing" unfolds your pick right in
+  the pinned bar, where it stays put while you read it. Phones are
+  unchanged.
 - **The board's tabs and search share one slim bar on desktop and
   landscape.** Needs / Offers / Projects used to stretch as three
   huge pills across the whole page with the search box on its own
