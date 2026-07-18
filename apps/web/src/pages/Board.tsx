@@ -49,6 +49,7 @@ import {
   projectNeedsMoreHands,
 } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
+import { CATEGORY_META } from "@/lib/categories";
 import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
@@ -124,15 +125,14 @@ export default function BoardPage() {
   // (not across reloads); a member who wants always-on can flip
   // it each session.
   const [showClaimed, setShowClaimed] = useState(false);
-  // Mobile-only "Filters" disclosure. Below sm (640px) the filter
-  // rail's selects stack full-width between the sticky search and the
-  // first card (~150px of chrome), so the rail collapses behind a
-  // loud full-width trigger there. At sm+ the rail lays out as a
-  // compact wrap row and is always visible (the trigger is `sm:hidden`),
-  // so this state has no effect at wider viewports. Default
-  // collapsed; deliberately NOT persisted — session-local at most,
-  // matching the filter values themselves. Shared across tabs (the
-  // disclosure is one control; which rail it reveals follows the tab).
+  // The "Filters" disclosure — ONE affordance at every width since
+  // the board-calm pass: the rail's controls collapse behind the
+  // FiltersToggle button everywhere (full-width card trigger below
+  // sm, compact pill from sm up), with ActiveFilterChips keeping the
+  // applied state visible and one-tap removable while collapsed.
+  // Default collapsed; deliberately NOT persisted — session-local at
+  // most, matching the filter values themselves. Shared across tabs
+  // (one control; which rail it reveals follows the tab).
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   // Project-tab filters. Deliberately separate from the post-tab
   // category / urgency / zone filters above: a member might filter
@@ -401,7 +401,99 @@ export default function BoardPage() {
     setProjectStatusFilter("");
     setOnlyWithOpenTasks(false);
     setOnlyNeedsMoreHands(false);
+    // Was missing before the board-calm pass: "Clear filters" left
+    // the hour-sized toggle narrowing the list invisibly.
+    setOnlyHourSized(false);
   };
+
+  // Chips describing every applied filter (board-calm pass): with the
+  // rail collapsed behind the Filters button at every width, these
+  // keep the applied state VISIBLE and one-tap removable. Labels
+  // reuse exactly the translations the rail's own controls render.
+  const postFilterChips = [
+    ...(categoryFilter !== ""
+      ? [
+          {
+            id: "category",
+            label: `${CATEGORY_META[categoryFilter].emoji} ${t(`categories.${categoryFilter}`)}`,
+            onRemove: () => setCategoryFilter(""),
+          },
+        ]
+      : []),
+    ...(urgencyFilter !== ""
+      ? [
+          {
+            id: "urgency",
+            label: t(`urgency.${urgencyFilter}`),
+            onRemove: () => setUrgencyFilter(""),
+          },
+        ]
+      : []),
+    ...(zoneFilter !== ""
+      ? [{ id: "zone", label: zoneFilter, onRemove: () => setZoneFilter("") }]
+      : []),
+    ...(showClaimed
+      ? [
+          {
+            id: "claimed",
+            label: t("board.filters.claimedShown"),
+            onRemove: () => setShowClaimed(() => false),
+          },
+        ]
+      : []),
+  ];
+  const projectFilterChips = [
+    ...(projectCategoryFilter !== ""
+      ? [
+          {
+            id: "projectCategory",
+            // The three project-only extension categories mirror the
+            // inline <option> labels in ProjectFilterRail (they have
+            // no categories.* keys — see the note there).
+            label:
+              PROJECT_EXTENSION_CATEGORY_LABELS[projectCategoryFilter] ??
+              `${CATEGORY_META[projectCategoryFilter as Category].emoji} ${t(`categories.${projectCategoryFilter}`)}`,
+            onRemove: () => setProjectCategoryFilter(""),
+          },
+        ]
+      : []),
+    ...(projectStatusFilter !== ""
+      ? [
+          {
+            id: "projectStatus",
+            label: t(`board.projectFilters.status.${projectStatusFilter}`),
+            onRemove: () => setProjectStatusFilter(""),
+          },
+        ]
+      : []),
+    ...(onlyWithOpenTasks
+      ? [
+          {
+            id: "openTasks",
+            label: t("board.projectFilters.openTasks.toggle"),
+            onRemove: () => setOnlyWithOpenTasks(() => false),
+          },
+        ]
+      : []),
+    ...(onlyNeedsMoreHands
+      ? [
+          {
+            id: "needsMoreHands",
+            label: t("board.projectFilters.needsMoreHands.toggle"),
+            onRemove: () => setOnlyNeedsMoreHands(() => false),
+          },
+        ]
+      : []),
+    ...(onlyHourSized
+      ? [
+          {
+            id: "hourSized",
+            label: t("board.projectFilters.hourSized.toggle"),
+            onRemove: () => setOnlyHourSized(() => false),
+          },
+        ]
+      : []),
+  ];
 
   // pb-fab-clear (page wrapper, shared with Calendar — see index.css)
   // reserves clearance under the fixed FAB — which sits at 5rem + the
@@ -572,7 +664,7 @@ export default function BoardPage() {
             search, matching visual order at every breakpoint
             (WCAG 2.4.3). z-10 keeps the band under the FAB (z-20)
             and modal layers. */}
-        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:top-4 lg:mx-0 lg:flex lg:flex-wrap lg:items-center lg:gap-x-5 lg:gap-y-2 lg:px-0">
+        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 band-hairline landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:top-4 lg:mx-0 lg:flex lg:flex-wrap lg:items-center lg:gap-x-5 lg:gap-y-2 lg:px-0">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}
@@ -612,7 +704,7 @@ export default function BoardPage() {
             the content-sized tablist. The input itself still caps
             at max-w-md — a km-wide search box reads as a form, not
             a tool. */}
-        <div className="mt-2 min-w-0 landscape-short:mt-0 landscape-short:flex-1 lg:mt-0 lg:flex-1">
+        <div className="mt-2 landscape-short:mt-0 landscape-short:min-w-[10rem] landscape-short:flex-1 lg:mt-0 lg:min-w-[14rem] lg:flex-1">
           <label className="block md:max-w-md">
             <span className="sr-only">
               {t(
@@ -702,15 +794,18 @@ export default function BoardPage() {
             a line with the discovery links (the wrapper above). */}
         {tab !== "PROJECTS" && (
           <div>
-            <MobileFiltersToggle
-              open={mobileFiltersOpen}
-              activeCount={activePostFilterCount}
-              controlsId="board-post-filters"
-              onToggle={() => setMobileFiltersOpen((v) => !v)}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <FiltersToggle
+                open={mobileFiltersOpen}
+                activeCount={activePostFilterCount}
+                controlsId="board-post-filters"
+                onToggle={() => setMobileFiltersOpen((v) => !v)}
+              />
+              <ActiveFilterChips entries={postFilterChips} />
+            </div>
             <div
               id="board-post-filters"
-              className={mobileFiltersOpen ? "mt-2 sm:mt-0" : "hidden sm:block"}
+              className={mobileFiltersOpen ? "mt-2" : "hidden"}
             >
               <PostFilterRail
                 categoryFilter={categoryFilter}
@@ -730,15 +825,18 @@ export default function BoardPage() {
 
         {tab === "PROJECTS" && (
           <div>
-            <MobileFiltersToggle
-              open={mobileFiltersOpen}
-              activeCount={activeProjectFilterCount}
-              controlsId="board-project-filters"
-              onToggle={() => setMobileFiltersOpen((v) => !v)}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <FiltersToggle
+                open={mobileFiltersOpen}
+                activeCount={activeProjectFilterCount}
+                controlsId="board-project-filters"
+                onToggle={() => setMobileFiltersOpen((v) => !v)}
+              />
+              <ActiveFilterChips entries={projectFilterChips} />
+            </div>
             <div
               id="board-project-filters"
-              className={mobileFiltersOpen ? "mt-2 sm:mt-0" : "hidden sm:block"}
+              className={mobileFiltersOpen ? "mt-2" : "hidden"}
             >
               <ProjectFilterRail
                 projectCategoryFilter={projectCategoryFilter}
@@ -753,6 +851,37 @@ export default function BoardPage() {
                 setOnlyHourSized={setOnlyHourSized}
               />
             </div>
+          </div>
+        )}
+        {/* Being built / Tended scope (docs/commons.md §5.1) —
+            filter-chip pattern, aria-pressed for a11y. Lives on the
+            filters line (board-calm pass): it IS a kind of filter,
+            though fundamental enough to stay visible rather than
+            collapse into the disclosure. The wrapper's
+            justify-between right-aligns it at lg/landscape-short;
+            on portrait it stacks after the Filters button, same
+            visible sequence as before. */}
+        {tab === "PROJECTS" && (
+          <div
+            className="mb-3 flex flex-wrap gap-2 landscape-short:mb-0 lg:mb-0"
+            role="group"
+            aria-label={t("projects.commons.scopeLabel")}
+          >
+            {(["build", "tended"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={scope === s}
+                onClick={() => setScope(s)}
+                className={`chip transition-colors ${
+                  scope === s
+                    ? "bg-canopy-600 text-white dark:bg-canopy-500 dark:text-canopy-950"
+                    : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+                }`}
+              >
+                {t(s === "build" ? "projects.commons.scopeBuild" : "projects.commons.scopeTended")}
+              </button>
+            ))}
           </div>
         )}
         </div>
@@ -865,25 +994,6 @@ export default function BoardPage() {
 
         {tab === "PROJECTS" && (
           <div>
-            {/* Being built / Tended scope (docs/commons.md §5.1) —
-                filter-chip pattern, aria-pressed for a11y. */}
-            <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label={t("projects.commons.scopeLabel")}>
-              {(["build", "tended"] as const).map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  aria-pressed={scope === s}
-                  onClick={() => setScope(s)}
-                  className={`chip transition-colors ${
-                    scope === s
-                      ? "bg-canopy-600 text-white dark:bg-canopy-500 dark:text-canopy-950"
-                      : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-                  }`}
-                >
-                  {t(s === "build" ? "projects.commons.scopeBuild" : "projects.commons.scopeTended")}
-                </button>
-              ))}
-            </div>
             <ProjectList
               projects={visibleProjects}
               projectTasks={projectTasks}
@@ -1053,7 +1163,15 @@ function boardPrintParams(
  * disappears — the disclosure exists only where the rail's selects
  * stack full-width and cost real screen estate.
  */
-function MobileFiltersToggle({
+// Project-only extension categories (no `categories.*` i18n keys —
+// they mirror ProjectFilterRail's inline <option> labels).
+const PROJECT_EXTENSION_CATEGORY_LABELS: Record<string, string> = {
+  infrastructure: "\u{1F3D7}\uFE0F Infrastructure",
+  organizing: "\u{1F4CB} Organizing",
+  mutual_aid_drive: "\u{1F49B} Mutual aid drive",
+};
+
+function FiltersToggle({
   open,
   activeCount,
   controlsId,
@@ -1066,13 +1184,21 @@ function MobileFiltersToggle({
   onToggle: () => void;
 }) {
   const { t } = useTranslation();
+  // ONE disclosure at every width (board-calm pass): the full-width
+  // card trigger phones always had, compacting to a quiet pill from
+  // sm up. The rail's five controls collapse behind it everywhere —
+  // the active-filter CHIPS beside this button keep applied state
+  // visible and one-tap removable, so collapsing costs a click only
+  // when actually changing filters. aria-expanded/aria-controls
+  // carry the disclosure semantics; the count is announced in the
+  // label ("Filters · 2 active").
   return (
     <button
       type="button"
       aria-expanded={open}
       aria-controls={controlsId}
       onClick={onToggle}
-      className="card flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-sm font-semibold text-canopy-800 transition-colors hover:bg-moss-50 active:bg-moss-100 dark:text-canopy-200 dark:hover:bg-moss-800 sm:hidden"
+      className="card flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-sm font-semibold text-canopy-800 transition-colors hover:bg-moss-50 active:bg-moss-100 dark:text-canopy-200 dark:hover:bg-moss-800 sm:w-auto sm:gap-2 sm:rounded-full sm:py-1.5"
     >
       <span>
         {activeCount > 0
@@ -1084,6 +1210,36 @@ function MobileFiltersToggle({
         {open ? "▾" : "▸"}
       </span>
     </button>
+  );
+}
+
+/** Active-filter chips beside the Filters toggle: the applied state
+ *  stays visible while the controls themselves are collapsed, and
+ *  each chip removes its filter in one tap. Every chip carries an
+ *  explicit accessible name ("Remove filter: …") and the 44px
+ *  touch-target floor. */
+function ActiveFilterChips({
+  entries,
+}: {
+  entries: Array<{ id: string; label: string; onRemove: () => void }>;
+}) {
+  const { t } = useTranslation();
+  if (entries.length === 0) return null;
+  return (
+    <>
+      {entries.map((e) => (
+        <button
+          key={e.id}
+          type="button"
+          onClick={e.onRemove}
+          aria-label={t("board.filters.removeFilter", { label: e.label })}
+          className="touch-target inline-flex items-center gap-1 rounded-full bg-canopy-100 px-3 py-1 text-sm font-medium text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100 dark:hover:bg-canopy-900"
+        >
+          {e.label}
+          <span aria-hidden="true">×</span>
+        </button>
+      ))}
+    </>
   );
 }
 

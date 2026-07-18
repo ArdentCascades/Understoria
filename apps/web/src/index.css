@@ -131,6 +131,30 @@
     padding-bottom: calc(10rem + env(safe-area-inset-bottom));
   }
 
+  /* Hairline under the Board's sticky command band in its row modes
+   * (lg / landscape-short) so "the controls" read as one object
+   * against the content below (board-calm pass). Lives here as a
+   * component class rather than border-* utilities on the element:
+   * the Board's WCAG order-* regression test scans class attributes
+   * for the substring "order-", which "border-" contains. Portrait
+   * keeps the borderless blur band. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .band-hairline {
+      border-bottom: 1px solid theme("colors.moss.200 / 70%");
+    }
+    .dark .band-hairline {
+      border-bottom-color: theme("colors.moss.800 / 70%");
+    }
+  }
+  @media (min-width: 1024px) {
+    .band-hairline {
+      border-bottom: 1px solid theme("colors.moss.200 / 70%");
+    }
+    .dark .band-hairline {
+      border-bottom-color: theme("colors.moss.800 / 70%");
+    }
+  }
+
   /* landscape-short (a phone held sideways — the shared variant in
    * tailwind.config.js): the bottom tab bar is a left rail, so the
    * pill anchors at 1rem + the inset instead of 5rem + inset

@@ -2290,7 +2290,9 @@
       "zoneAriaLabel": "Filter by zone",
       "allCategories": "All categories",
       "allUrgencies": "All urgencies",
-      "allZones": "All zones"
+      "allZones": "All zones",
+      "removeFilter": "Remove filter: {{label}}",
+      "claimedShown": "Claimed shown"
     },
     "projectFilters": {
       "category": {
