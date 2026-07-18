@@ -72,7 +72,7 @@ export function OneSmallThing({
     return (
       <button
         type="button"
-        className="inline-flex items-center gap-1.5 text-sm text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
+        className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-canopy-700 underline decoration-canopy-300 underline-offset-2 hover:text-canopy-900 dark:text-canopy-300 dark:decoration-canopy-700 dark:hover:text-canopy-100"
         onClick={open}
       >
         <span aria-hidden="true">🎲</span>

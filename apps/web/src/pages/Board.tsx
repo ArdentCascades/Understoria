@@ -553,25 +553,30 @@ export default function BoardPage() {
             order matches visual order natively at every breakpoint —
             no `order-*` utilities required. */}
         <div className="contents min-w-0 lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
-        {/* Mobile sticky header group: tablist + search stick TOGETHER
-            at top-0 so a member can flip NEED↔OFFER or search from
-            anywhere in a long scroll — previously only the search
-            stuck and switching tabs meant scrolling back up. ONE
-            container carries the shared backdrop-blur band so the
-            treatment is continuous across both rows. The mobile
-            Filters disclosure below is deliberately OUTSIDE this
-            group — only tablist + search stick. At lg+ the wrapper
-            dissolves (`lg:contents`) and the two children return to
-            being direct flex-column children, so the desktop sticky
-            story (search alone at top-4) is untouched. DOM order
-            inside the group is tablist → search, matching visual
-            order at every breakpoint (WCAG 2.4.3, PR #199). z-10
-            keeps the band under the FAB (z-20) and modal layers. */}
-        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 lg:contents">
+        {/* Sticky command band: tablist + search stick TOGETHER at
+            every width so a member can flip NEED↔OFFER or search from
+            anywhere in a long scroll. ONE container carries the
+            shared backdrop-blur band. The Filters disclosure below is
+            deliberately OUTSIDE this group — only tablist + search
+            stick.
+
+            Phone portrait: the two stack (full-width tabs are the
+            right thumb targets). At lg+ and landscape-short the band
+            lays them out as ONE ROW — the tablist shrinks to content
+            width (a segmented control instead of three pills
+            stretched across a ~990px column, the desktop-waste
+            report) and the search sits beside it. This also upgrades
+            desktop: the tabs used to scroll away while only search
+            stuck (mobile solved that in PR #199; the row brings the
+            same fix to lg). DOM order inside the band is tablist →
+            search, matching visual order at every breakpoint
+            (WCAG 2.4.3). z-10 keeps the band under the FAB (z-20)
+            and modal layers. */}
+        <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:top-4 lg:mx-0 lg:flex lg:items-center lg:gap-3 lg:px-0">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}
-          className="grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900"
+          className="grid grid-cols-3 rounded-full bg-moss-100 p-1 dark:bg-moss-900 landscape-short:flex landscape-short:w-fit landscape-short:shrink-0 lg:flex lg:w-fit lg:shrink-0"
         >
           {(["NEED", "OFFER", "PROJECTS"] as const).map((tt) => (
             <button
@@ -579,7 +584,7 @@ export default function BoardPage() {
               role="tab"
               aria-selected={tab === tt}
               onClick={() => setTab(tt)}
-              className={`touch-target rounded-full text-sm font-semibold transition-colors ${
+              className={`touch-target rounded-full text-sm font-semibold transition-colors landscape-short:px-4 lg:px-5 ${
                 tab === tt
                   ? "bg-white text-canopy-800 shadow-sm dark:bg-moss-950 dark:text-canopy-200"
                   : "text-moss-700 dark:text-moss-300"
@@ -599,16 +604,15 @@ export default function BoardPage() {
           ))}
         </div>
 
-        {/* Search row. On mobile it lives inside (and sticks with)
-            the sticky header group above — the group's wrapper
-            carries the backdrop band, so this row only needs its
-            mobile spacing. At lg+ the group wrapper is `contents`,
-            so this row is a flex-column child again and re-acquires
-            its own sticky-at-top-4 + backdrop treatment to match
-            the other rails (filters + AttentionSection) — the lg
-            behavior is byte-for-byte what shipped before the mobile
-            group existed. */}
-        <div className="mt-2 lg:sticky lg:top-4 lg:z-10 lg:mx-0 lg:mt-0 lg:bg-white/95 lg:px-0 lg:py-2 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/70 lg:dark:bg-moss-950/95 lg:dark:supports-[backdrop-filter]:bg-moss-950/70">
+        {/* Search. Inside (and sticking with) the command band at
+            every width — the band's wrapper carries the sticky +
+            backdrop treatment, so this element only needs its
+            portrait stacking margin and, in the band's row modes
+            (lg / landscape-short), to fill the width left beside
+            the content-sized tablist. The input itself still caps
+            at max-w-md — a km-wide search box reads as a form, not
+            a tool. */}
+        <div className="mt-2 min-w-0 landscape-short:mt-0 landscape-short:flex-1 lg:mt-0 lg:flex-1">
           <label className="block md:max-w-md">
             <span className="sr-only">
               {t(
@@ -646,9 +650,21 @@ export default function BoardPage() {
               • "Ways to plug in" — the browsable shelf's only doorway
                 (docs/ways-to-plug-in.md §8 ruling 1: a link, not a tab).
                 No count badge: §4's never-a-nudge boundary applies here
-                too. */}
+                too.
+
+            At lg+ and landscape-short the discovery links and the
+            filter row below share ONE line (discovery left, filters
+            right via justify-between) — each used to own a full-width
+            row of mostly-empty space. DOM order stays discovery →
+            filters, matching the left→right visual order, so focus
+            and reading order are untouched. flex-wrap + the
+            discovery block's flex-1 mean an expanded One-small-thing
+            card grows into the line and gracefully wraps the filters
+            beneath it. On phones portrait the wrapper is display:
+            block and everything stacks exactly as before. */}
+        <div className="landscape-short:flex landscape-short:flex-wrap landscape-short:items-start landscape-short:justify-between landscape-short:gap-x-6 lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-6 lg:gap-y-2">
         {currentMember && (
-          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2">
+          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2 landscape-short:mb-0 landscape-short:flex-auto lg:mb-0 lg:flex-auto">
             <OneSmallThing
               memberKey={currentMember.publicKey}
               tasks={projectTasks}
@@ -658,7 +674,7 @@ export default function BoardPage() {
             />
             <Link
               to="/plug-in"
-              className="inline-flex items-center gap-1.5 text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
             >
               <span aria-hidden="true">🔌</span>
               {t("board.plugInLink")}
@@ -679,8 +695,9 @@ export default function BoardPage() {
             renders as a compact wrap row with no trigger. Trigger
             precedes rail in DOM — DOM order equals visual order in
             every disclosure state (WCAG 2.4.3). This block is NOT
-            part of the sticky header group above on purpose: only
-            tablist + search stick. */}
+            part of the sticky command band above on purpose: only
+            tablist + search stick. At lg+/landscape-short it shares
+            a line with the discovery links (the wrapper above). */}
         {tab !== "PROJECTS" && (
           <div>
             <MobileFiltersToggle
@@ -736,6 +753,8 @@ export default function BoardPage() {
             </div>
           </div>
         )}
+        </div>
+        {/* end discovery + filters line */}
 
         {/* Per-tab LIST lives inside the middle wrapper (col 2). At
             mobile the wrapper is `contents`, so this list participates
