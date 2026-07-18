@@ -49,13 +49,27 @@ import { useEffect, useState } from "react";
 //    over the shell's bottom edge anyway.
 //
 // Detection: the visual viewport is substantially shorter than the
-// window. `height * scale` normalizes pinch-zoom — zooming in shrinks
-// `visualViewport.height` by exactly the zoom factor, so the product
-// stays ≈ `innerHeight` and zoom alone never reads as a keyboard.
-// The 150px floor ignores small chrome (URL-bar collapse, keyboard
-// accessory bars) while every real phone keyboard is ≥ ~40% of the
-// screen. External/hardware keyboards never shrink the viewport, so
-// the nav correctly stays put for those members.
+// window AND a text field actually has focus. `height * scale`
+// normalizes pinch-zoom — zooming in shrinks `visualViewport.height`
+// by exactly the zoom factor, so the product stays ≈ `innerHeight`
+// and zoom alone never reads as a keyboard. The 150px floor ignores
+// small chrome (URL-bar collapse, keyboard accessory bars) while
+// every real phone keyboard is ≥ ~40% of the screen. External /
+// hardware keyboards never shrink the viewport, so the nav correctly
+// stays put for those members.
+//
+// The FOCUS gate exists for iOS rotation (field report: "no nav bar
+// in landscape"). On rotation Safari fires the visualViewport
+// `resize` BEFORE `window.innerHeight` has updated, so the math
+// briefly compares landscape visual height against portrait window
+// height (844 − 390 = 454 > 150 → "keyboard open") — and since no
+// later visualViewport event need fire, the false positive could
+// stick for the entire landscape session, unmounting the nav, FABs,
+// and banners. A keyboard can only be up while an editable element
+// has focus, so gating on focus makes every no-typing false positive
+// structurally impossible; the hook also re-evaluates on `window`
+// resize / orientationchange so the math itself heals once
+// innerHeight settles.
 //
 // SSR / pre-mount / no-VisualViewport-API default is `false` (nav
 // visible) — the API is universal on the mobile browsers that have
@@ -63,6 +77,16 @@ import { useEffect, useState } from "react";
 // keyboard.
 
 export const KEYBOARD_MIN_OVERLAP_PX = 150;
+
+/** True for elements whose focus can summon an on-screen keyboard
+ *  (or, for `<select>`, the picker panel some platforms size like
+ *  one — included so its behavior matches the pre-gate hook). */
+export function isEditableElement(el: Element | null | undefined): boolean {
+  if (!el) return false;
+  const tag = el.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+  return (el as HTMLElement).isContentEditable === true;
+}
 
 export function isKeyboardViewport(
   viewport: { height: number; scale: number } | null | undefined,
@@ -83,13 +107,30 @@ export function useVirtualKeyboardOpen(): boolean {
     const viewport = window.visualViewport;
     if (!viewport) return;
     const update = () =>
-      setOpen(isKeyboardViewport(viewport, window.innerHeight));
+      setOpen(
+        isEditableElement(document.activeElement) &&
+          isKeyboardViewport(viewport, window.innerHeight),
+      );
     update();
-    // `resize` fires on keyboard open/close and on pinch-zoom; the
-    // scale correction in isKeyboardViewport keeps zoom from hiding
-    // the nav.
+    // visualViewport `resize` fires on keyboard open/close and on
+    // pinch-zoom (scale-corrected in isKeyboardViewport). `window`
+    // resize + orientationchange re-run the math after rotation,
+    // when innerHeight settles LATER than the visualViewport event
+    // (the iOS ordering quirk documented above). focusin/focusout
+    // keep the editable-focus gate current — blurring a field drops
+    // the "open" state even if a final viewport event never comes.
     viewport.addEventListener("resize", update);
-    return () => viewport.removeEventListener("resize", update);
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    window.addEventListener("focusin", update);
+    window.addEventListener("focusout", update);
+    return () => {
+      viewport.removeEventListener("resize", update);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+      window.removeEventListener("focusin", update);
+      window.removeEventListener("focusout", update);
+    };
   }, []);
 
   return open;

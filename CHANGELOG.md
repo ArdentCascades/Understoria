@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **The navigation bar no longer vanishes when you turn your phone
+  sideways.** Rotating to landscape could hide the whole left rail —
+  plus the post buttons and banners — for the rest of the landscape
+  session. The app's "is the keyboard open?" check compared two
+  viewport numbers that iOS updates in the wrong order during
+  rotation, so turning the phone briefly looked identical to a
+  keyboard opening, and nothing ever re-checked. The check now also
+  requires that a text field actually has focus (a keyboard can't be
+  open otherwise) and re-runs once the rotation settles.
 - **Tapping a field no longer zooms the page on iPhones.** iOS
   Safari zooms in whenever a focused input renders below 16px — and
   leaves you to pinch back out, in the browser and the installed app
