@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The board's tabs and search share one slim bar on desktop and
+  landscape.** Needs / Offers / Projects used to stretch as three
+  huge pills across the whole page with the search box on its own
+  row beneath; they now sit together on one line — tabs sized to
+  their labels, search beside them — and the whole bar stays pinned
+  while you scroll, so you can switch tabs or search from anywhere
+  in the list (previously only search stuck on desktop). The
+  discovery links and the filter dropdowns share the next line the
+  same way. Phones held upright are unchanged.
 - **Page headers get out of the way on a phone held sideways.** In
   landscape on a phone (≤500px tall), the big serif page title now
   renders markedly smaller and the explanatory sentence under it
