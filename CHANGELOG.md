@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The Filters drawer feels like one thing now.** Opening Filters
+  used to spill five full-width rows loose onto the page. It now
+  opens as a tidy card panel under the Filters button: the two
+  dropdowns stay full-width, but the on/off toggles ("Only with open
+  tasks," etc.) became small chips that wrap two-to-a-row — so the
+  drawer is about 40% shorter and you can see the list react to what
+  you tapped. Active toggles show a ✓, and a "Done" link at the
+  bottom closes the drawer.
 - **A magnifying glass now sits in the board's search box** — a
   small visual cue to the left of "Search projects" / "Search
   posts", visible whether the field is empty or you've started

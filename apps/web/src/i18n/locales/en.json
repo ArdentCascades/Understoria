@@ -2281,7 +2281,6 @@
     },
     "openCount": "({{count}})",
     "showClaimed": "Show {{count}} claimed",
-    "hideClaimed": "Hide claimed",
     "filters": {
       "toggle": "Filters",
       "toggleActive": "Filters · {{count}} active",
@@ -2292,7 +2291,8 @@
       "allUrgencies": "All urgencies",
       "allZones": "All zones",
       "removeFilter": "Remove filter: {{label}}",
-      "claimedShown": "Claimed shown"
+      "claimedShown": "Claimed shown",
+      "done": "Done"
     },
     "projectFilters": {
       "category": {

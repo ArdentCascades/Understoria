@@ -20,6 +20,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import { ToggleChip } from "@/components/board/ToggleChip";
 import type { Category, Urgency } from "@/types";
 
 const URGENCY_VALUES: Array<"" | Urgency> = ["", "high", "medium", "low"];
@@ -70,8 +71,11 @@ export function PostFilterRail({
 }: PostFilterRailProps) {
   const { t } = useTranslation();
   return (
-    <>
-      <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
+    // Phones: selects stack full-width, then the "show claimed"
+    // toggle wraps as a chip; `sm:contents` flattens both groups into
+    // one wrap row from sm up (desktop unchanged). See ProjectFilterRail.
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="grid gap-2 sm:contents">
         <label className="sr-only" htmlFor="category-filter">
           {t("board.filters.categoryAriaLabel")}
         </label>
@@ -122,24 +126,23 @@ export function PostFilterRail({
           ))}
         </select>
       </div>
-
-      {/* Below sm the toggle keeps its own right-aligned row under
-          the stacked selects; from sm it joins the wrap row as one
-          more inline chip (mt-2 sm:mt-0 keeps the row rhythm). */}
+      {/* "Show claimed" is an on/off filter like the project toggles;
+          it wraps as a chip on its own phone row and joins the wrap
+          row from sm up (`sm:contents`). The label reads as an action
+          when off ("Show 3 claimed") and confirms state when on
+          ("✓ Claimed shown", reusing the active-chip copy). */}
       {claimedInScope > 0 && (
-        <div className="mt-2 flex justify-end sm:mt-2 sm:justify-start">
-          <button
-            type="button"
-            onClick={() => setShowClaimed((v) => !v)}
-            aria-pressed={showClaimed}
-            className="rounded-full bg-moss-100 px-3 py-1 text-xs font-medium text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+        <div className="flex flex-wrap gap-2 sm:contents">
+          <ToggleChip
+            pressed={showClaimed}
+            onToggle={() => setShowClaimed((v) => !v)}
           >
             {showClaimed
-              ? t("board.hideClaimed", { count: claimedInScope })
+              ? t("board.filters.claimedShown")
               : t("board.showClaimed", { count: claimedInScope })}
-          </button>
+          </ToggleChip>
         </div>
       )}
-    </>
+    </div>
   );
 }
