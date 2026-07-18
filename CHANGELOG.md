@@ -10,6 +10,10 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **A magnifying glass now sits in the board's search box** — a
+  small visual cue to the left of "Search projects" / "Search
+  posts", visible whether the field is empty or you've started
+  typing.
 - **The board is calmer without losing anything.** The filter
   dropdowns and toggles now sit behind the same "Filters" button
   phones have always had — at every screen size — and whatever you

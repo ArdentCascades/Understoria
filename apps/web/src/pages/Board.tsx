@@ -705,7 +705,7 @@ export default function BoardPage() {
             at max-w-md — a km-wide search box reads as a form, not
             a tool. */}
         <div className="mt-2 landscape-short:mt-0 landscape-short:min-w-[10rem] landscape-short:flex-1 lg:mt-0 lg:min-w-[14rem] lg:flex-1">
-          <label className="block md:max-w-md">
+          <label className="relative block md:max-w-md">
             <span className="sr-only">
               {t(
                 tab === "PROJECTS"
@@ -713,10 +713,20 @@ export default function BoardPage() {
                   : "board.search.placeholderPosts",
               )}
             </span>
+            {/* Decorative magnifying glass, always visible (not in the
+                placeholder, which vanishes once you type). aria-hidden
+                because the field already carries its accessible name
+                above; pl-9 on the input reserves its gutter. */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm opacity-70"
+            >
+              🔍
+            </span>
             <input
               ref={searchRef}
               type="search"
-              className="input"
+              className="input pl-9"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t(
