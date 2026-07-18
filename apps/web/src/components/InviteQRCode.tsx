@@ -40,12 +40,18 @@ export interface InviteQRCodeProps {
   /** ARIA label for the SVG. Required because the visual is the
    *  payload — screen readers need a description. */
   ariaLabel: string;
+  /** Extra layout classes on the QR's sizing wrapper (both the
+   *  placeholder and the rendered code, so the sheet never jumps).
+   *  Used by short-landscape callers to clamp the square below its
+   *  pixel `size` — `max-h`/`max-w` win over the inline style. */
+  className?: string;
 }
 
 export function InviteQRCode({
   value,
   size = 256,
   ariaLabel,
+  className = "",
 }: InviteQRCodeProps) {
   const { t } = useTranslation();
   const [svg, setSvg] = useState<string | null>(null);
@@ -94,7 +100,7 @@ export function InviteQRCode({
     return (
       <div
         style={{ width: size, height: size }}
-        className="rounded-xl bg-moss-100 dark:bg-moss-800"
+        className={`rounded-xl bg-moss-100 dark:bg-moss-800 ${className}`}
         aria-hidden="true"
       />
     );
@@ -109,7 +115,7 @@ export function InviteQRCode({
       role="img"
       aria-label={ariaLabel}
       style={{ width: size, height: size }}
-      className="rounded-xl bg-white p-2"
+      className={`rounded-xl bg-white p-2 ${className}`}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

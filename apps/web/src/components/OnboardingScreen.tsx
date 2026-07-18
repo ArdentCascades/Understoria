@@ -68,8 +68,15 @@ export function OnboardingScreen({
 }: OnboardingScreenProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-[calc(100dvh-5rem)] flex-col px-6 pb-6 pt-8">
-      <header className="mb-6 flex items-center justify-between">
+    // Phone held sideways (landscape-short): the screen becomes a
+    // fixed-height frame — progress dots and the Back/Next/Skip
+    // footer stay pinned on screen, the body scrolls between them,
+    // and the decorative illustration steps aside. h-dvh is exact
+    // because the only mount is /welcome's StandaloneScroll wrapper
+    // (h-dvh, no app chrome). Portrait keeps the roomy min-height
+    // stack unchanged.
+    <div className="flex min-h-[calc(100dvh-5rem)] flex-col px-6 pb-6 pt-8 landscape-short:h-dvh landscape-short:min-h-0 landscape-short:pb-3 landscape-short:pt-3">
+      <header className="mb-6 flex items-center justify-between landscape-short:mb-2">
         <ProgressDots current={stepIndex} total={stepCount} />
         {onSkip ? (
           <button
@@ -87,30 +94,30 @@ export function OnboardingScreen({
         )}
       </header>
 
-      <div className="flex flex-1 flex-col items-center justify-center text-center">
+      <div className="flex flex-1 flex-col items-center justify-center text-center landscape-short:min-h-0 landscape-short:justify-start landscape-short:overflow-y-auto landscape-short:overscroll-contain">
         {/* Precedence: named illustration > legacy emoji > nothing.
             The SVG carries its own 96x96 viewBox; the concept's
             meaning lives in the title + body below (the illustration
             is hidden under prefers-contrast: more). */}
         {illustration ? (
-          <div className="mb-6" aria-hidden="true">
+          <div className="mb-6 landscape-short:hidden" aria-hidden="true">
             <ConceptIllustration
               name={illustration}
               className="text-canopy-700 dark:text-canopy-300"
             />
           </div>
         ) : icon ? (
-          <div className="mb-6 text-6xl" aria-hidden="true">
+          <div className="mb-6 text-6xl landscape-short:hidden" aria-hidden="true">
             {icon}
           </div>
         ) : null}
-        <h1 className="page-title mb-4">{title}</h1>
+        <h1 className="page-title mb-4 landscape-short:mb-2">{title}</h1>
         <div className="w-full max-w-md space-y-3 text-base text-moss-700 dark:text-moss-200">
           {body}
         </div>
       </div>
 
-      <footer className="mt-8 flex items-center justify-between gap-3">
+      <footer className="mt-8 flex items-center justify-between gap-3 landscape-short:mt-3">
         {onBack ? (
           <button
             type="button"

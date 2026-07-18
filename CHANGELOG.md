@@ -87,6 +87,16 @@ include breaking changes.
   absent — that's a promise, not a gap.
 
 ### Fixed
+- **Everything important fits a phone held sideways.** Turn your
+  phone to landscape and the tall moments no longer spill off the
+  bottom of the screen with their buttons out of reach: confirmation
+  dialogs cap themselves to the screen and scroll inside, the invite
+  share sheet lays the QR code beside the link instead of above it,
+  the in-person exchange ceremony puts each QR next to its
+  instructions, the add-a-device screen keeps its code scannable
+  without hunting, and the welcome tour tucks its illustration away
+  and pins Back / Next / Skip on screen while the words scroll
+  between them. Nothing important can sit off-screen anymore.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

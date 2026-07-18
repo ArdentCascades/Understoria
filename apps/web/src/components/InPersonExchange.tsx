@@ -70,7 +70,14 @@ function QrImage({ text, alt }: { text: string; alt: string }) {
   return (
     <div className="flex flex-col items-center gap-2">
       {dataUrl && (
-        <img src={dataUrl} alt={alt} className="h-56 w-56 rounded-lg" />
+        <img
+          src={dataUrl}
+          alt={alt}
+          // Phone held sideways: clamp the square to the viewport
+          // height so the code, its instructions, and the buttons
+          // share a ~320px-tall screen. Portrait keeps 224px.
+          className="h-56 w-56 rounded-lg landscape-short:h-[min(55vh,14rem)] landscape-short:w-[min(55vh,14rem)]"
+        />
       )}
       <button
         type="button"
@@ -234,21 +241,29 @@ export function InPersonExchange({
                 category: t(`categories.${offer.category}`),
               })}
             </p>
-            <QrImage text={offer.offerText} alt={t("inPerson.offerQrAlt")} />
-            <Fingerprint
-              value={keyFingerprint(offer.helperKey)}
-              label={t("inPerson.fingerprintLabel")}
-            />
-            <p className="text-xs text-moss-600 dark:text-moss-300">
-              {t("inPerson.offerFingerprintHint")}
-            </p>
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={() => setCapturingReceipt(true)}
-            >
-              {t("inPerson.captureReceipt")}
-            </button>
+            {/* Portrait: QR above fingerprint + button (unchanged
+                stack). Phone held sideways: QR on the left, the
+                fingerprint/hint/button column beside it, so nothing
+                sits below the fold of a ~320px-tall screen. */}
+            <div className="flex flex-col gap-3 landscape-short:flex-row landscape-short:items-center landscape-short:gap-6">
+              <QrImage text={offer.offerText} alt={t("inPerson.offerQrAlt")} />
+              <div className="flex flex-col gap-3">
+                <Fingerprint
+                  value={keyFingerprint(offer.helperKey)}
+                  label={t("inPerson.fingerprintLabel")}
+                />
+                <p className="text-xs text-moss-600 dark:text-moss-300">
+                  {t("inPerson.offerFingerprintHint")}
+                </p>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => setCapturingReceipt(true)}
+                >
+                  {t("inPerson.captureReceipt")}
+                </button>
+              </div>
+            </div>
           </>
         )}
         {errorLine}
@@ -353,17 +368,26 @@ export function InPersonExchange({
             name: parsed?.helperName ?? t("common.anyMember"),
           })}
         </p>
-        <QrImage text={receiptText} alt={t("inPerson.receiptQrAlt")} />
-        <p role="status" className="text-sm text-moss-700 dark:text-moss-200">
-          {t("inPerson.done")}
-        </p>
-        <button
-          type="button"
-          className="btn-secondary self-start text-xs"
-          onClick={onClose}
-        >
-          {t("inPerson.close")}
-        </button>
+        {/* Same stack → row swap as the offer step: sideways, the
+            receipt QR sits beside its status + Close. */}
+        <div className="flex flex-col gap-3 landscape-short:flex-row landscape-short:items-center landscape-short:gap-6">
+          <QrImage text={receiptText} alt={t("inPerson.receiptQrAlt")} />
+          <div className="flex flex-col gap-3">
+            <p
+              role="status"
+              className="text-sm text-moss-700 dark:text-moss-200"
+            >
+              {t("inPerson.done")}
+            </p>
+            <button
+              type="button"
+              className="btn-secondary self-start text-xs"
+              onClick={onClose}
+            >
+              {t("inPerson.close")}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
