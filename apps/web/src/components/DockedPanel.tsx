@@ -18,8 +18,23 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useRef, type ReactNode } from "react";
-import { SPLIT_CAPABLE_QUERY, useMediaQuery } from "@/lib/viewport";
+import { createContext, useEffect, useRef, type ReactNode } from "react";
+import {
+  DESKTOP_DOCK_QUERY,
+  SPLIT_CAPABLE_QUERY,
+  useMediaQuery,
+} from "@/lib/viewport";
+
+// True while the surrounding DockedPanel is actually DOCKED (a side
+// column at lg+ or in split-capable short landscape) rather than a
+// full-screen takeover. Detail pages that carry their own Back
+// affordance (EventDetail, PostDetail) read this to hide it in docked
+// mode — the panel's × Close already does the same thing, and two
+// adjacent controls that both "go back" read as a bug (round-3
+// papercut). Defaults to false, so a page rendered standalone (or in
+// the below-lg takeover, which reads exactly like the standalone
+// page) keeps its Back untouched.
+export const DockedPanelDockContext = createContext(false);
 
 // The docked-panel frame shared by the calendar's event panel and the
 // board's post panel (docs/desktop-power-tools.md plan 3 extracted it
@@ -67,6 +82,11 @@ export function DockedPanel({
   // Short-landscape with room for two panes → dock instead of
   // taking over the viewport (see the header comment).
   const splitCapable = useMediaQuery(SPLIT_CAPABLE_QUERY);
+  // The lg dock is pure CSS (the lg: classes below); this JS twin
+  // only feeds DockedPanelDockContext so the content can tell docked
+  // column from full-screen takeover.
+  const desktopDocked = useMediaQuery(DESKTOP_DOCK_QUERY);
+  const docked = splitCapable || desktopDocked;
 
   // Focus the panel when it opens and when the member swaps to a
   // different item from the page behind it.
@@ -134,7 +154,9 @@ export function DockedPanel({
           <span className="ml-1 text-sm">{closeShortLabel}</span>
         </button>
       </div>
-      {children}
+      <DockedPanelDockContext.Provider value={docked}>
+        {children}
+      </DockedPanelDockContext.Provider>
     </aside>
   );
 }

@@ -46,6 +46,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 import type { Category, PostType, Urgency } from "@/types";
 
 const DRAFT_KEY = "post-new";
@@ -224,7 +225,12 @@ export default function PostFormPage() {
     e.preventDefault();
     setError(null);
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (validation.hasErrors) {
+      // On a short viewport the errored field may be off-screen —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
     const parsedHours = Number.parseFloat(hours);
     const days = expiresInDays ? Number.parseInt(expiresInDays, 10) : null;
     const expiresAt =

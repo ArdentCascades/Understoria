@@ -46,6 +46,7 @@ vi.mock("@/db/actions", () => ({
 
 import "@/i18n";
 import PostDetailPage from "./PostDetail";
+import { DockedPanelDockContext } from "@/components/DockedPanel";
 import type { Member, Post } from "@/types";
 
 const nodeId = "node_test";
@@ -254,5 +255,47 @@ describe("PostDetailPage — header overflow menu", () => {
     // Repost-with-changes is an open-only action; it must NOT appear on
     // a completed post.
     expect(menuItemByText("Repost with changes")).toBeUndefined();
+  });
+});
+
+// ─── Docked-panel de-duplication (round-3 papercut) ─────────────────
+//
+// Inside a DOCKED BoardPostPanel column the frame's × Close and this
+// page's own "← Back" did the same thing side by side. The page hides
+// its Back when DockedPanelDockContext is true; the full-screen
+// takeover (context false) keeps it — mobile unchanged.
+
+describe("PostDetailPage — docked panel hides the duplicate Back", () => {
+  function renderDocked(docked: boolean) {
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <MemoryRouter initialEntries={["/post/post-1"]}>
+          <DockedPanelDockContext.Provider value={docked}>
+            <Routes>
+              <Route path="/post/:id" element={<PostDetailPage />} />
+            </Routes>
+          </DockedPanelDockContext.Provider>
+        </MemoryRouter>,
+      );
+    });
+  }
+
+  function backButton(): HTMLButtonElement | undefined {
+    return Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => (b.textContent ?? "").trim() === "← Back");
+  }
+
+  it("hides the Back button when the surrounding panel is docked", () => {
+    renderDocked(true);
+    expect(backButton()).toBeUndefined();
+    // The rest of the page still renders.
+    expect(container.textContent).toContain("Help carrying groceries");
+  });
+
+  it("keeps the Back button in the full-screen takeover (context false)", () => {
+    renderDocked(false);
+    expect(backButton()).toBeDefined();
   });
 });

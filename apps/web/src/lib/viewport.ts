@@ -30,6 +30,10 @@ export const SHORT_LANDSCAPE_QUERY =
   "(orientation: landscape) and (max-height: 500px)";
 export const SPLIT_CAPABLE_QUERY =
   "(orientation: landscape) and (max-height: 500px) and (min-width: 700px)";
+// The JS twin of Tailwind's default `lg:` breakpoint — the width at
+// which DockedPanel's CSS docks it as a side column. Keep in lockstep
+// with tailwind's screens config (default: lg = 1024px).
+export const DESKTOP_DOCK_QUERY = "(min-width: 1024px)";
 
 /** Live media-query hook: tracks rotation/resize, safe under jsdom
  *  (no matchMedia → always false). */

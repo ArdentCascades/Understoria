@@ -1008,9 +1008,15 @@ export default function BoardPage() {
           the panel occupies exactly the bottom-right region the FAB
           floats over, and below lg the panel is a full-screen
           takeover that covers it anyway. Closing the panel brings
-          the FAB straight back. */}
+          the FAB straight back.
+
+          landscape-short pins the pill bottom-RIGHT for the same
+          reason as lg: centered, it floated over the middle of an
+          already short card list; the right edge is the one region
+          the reading column and the left nav rail never occupy. The
+          pr tracks the landscape safe-area inset. */}
       {!keyboardOpen && !postPanelOpen && (
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8 landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8 landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))] landscape-short:justify-end landscape-short:pr-[max(1rem,env(safe-area-inset-right))]">
         <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
           {tab === "PROJECTS" ? (
             <button

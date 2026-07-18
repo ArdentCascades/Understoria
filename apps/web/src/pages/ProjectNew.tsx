@@ -40,6 +40,7 @@ import {
   useFieldValidation,
   type Validator,
 } from "@/lib/validation";
+import { focusFirstInvalidField } from "@/lib/focusFirstInvalid";
 import type { Project, ProjectCategory } from "@/types";
 
 const DRAFT_KEY = "project-new";
@@ -276,7 +277,12 @@ export default function ProjectNewPage() {
     e.preventDefault();
     setError(null);
     validation.markAllTouched();
-    if (validation.hasErrors) return;
+    if (validation.hasErrors) {
+      // Short viewports can have the errored field scrolled away —
+      // bring it into view so the blocked submit is never silent.
+      focusFirstInvalidField();
+      return;
+    }
     const hours = Number.parseFloat(targetHours);
     const days = deadlineDays ? Number.parseInt(deadlineDays, 10) : null;
     const deadline =

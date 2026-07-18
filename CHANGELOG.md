@@ -9,6 +9,36 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Submitting a form with a missed field now takes you to it.** If
+  you tap Post (or Save, or Create) with a required field empty or
+  invalid, the form now scrolls the first problem field into view and
+  puts your cursor in it — before, on a short landscape screen the
+  error could render off-screen and the tap looked like it did
+  nothing. Applies to the new-post, new-event, new-project,
+  new-proposal, welcome, and invite-accept forms.
+- **The calendar's Week and Month views always open on today.**
+  Switching from Agenda to Week (or Month) could reopen a week you'd
+  paged to earlier in the session — while the header still implied
+  you were looking at now. Switching views now always lands on the
+  period containing today; paging with Prev/Next inside a view works
+  exactly as before.
+- **Floating action buttons stay out of the way in landscape.** On a
+  phone held sideways the "+ New event" and post/offer pills now sit
+  in the bottom-right corner instead of floating over the middle of
+  the page, and the calendar's pill steps aside entirely while an
+  event is open in the docked side panel (as the board's already
+  did).
+- **The demo banner slims down in landscape.** In a demo build with
+  the phone sideways, the banner compresses to one thin truncated
+  line — the full sentence stays a long-press away and the "Reset
+  demo" button stays visible — instead of eating a tall slice of an
+  already-short screen.
+- **One close button, not two.** When a post or event opens in the
+  docked side panel (desktop or landscape split view), the page's own
+  "Back" no longer appears next to the panel's × Close — they did the
+  same thing. Full-screen mobile views are unchanged.
+
 ### Added
 - **Turn your phone sideways and the app follows.** In landscape on a
   phone — where height, not width, is the scarce thing — the bottom

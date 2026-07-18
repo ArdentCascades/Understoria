@@ -1115,3 +1115,136 @@ describe("CalendarPage short-landscape default view", () => {
     expect(selectedTab()).toMatch(/week/i);
   });
 });
+
+// ─── View switching re-anchors paging (round-3 confusion fix) ───────
+//
+// The paging offsets are session-local and RELATIVE TO NOW, kept one
+// per view. Before this fix, an offset left behind by an earlier
+// visit to the week/month view (paged back, switched to agenda, came
+// back later) silently reopened the wrong week — with a "Today" pill
+// implying today was on screen. Switching INTO a paged view now
+// always lands on the period containing today; explicit paging
+// INSIDE the view is untouched.
+
+describe("CalendarPage view switching re-anchors paging", () => {
+  function viewPill(name: RegExp): HTMLButtonElement {
+    const pill = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => name.test(b.textContent ?? ""));
+    if (!pill) throw new Error(`view pill ${name} not found`);
+    return pill;
+  }
+
+  function navButton(label: RegExp): HTMLButtonElement {
+    const btn = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((b) => label.test(b.getAttribute("aria-label") ?? ""));
+    if (!btn) throw new Error(`nav button ${label} not found`);
+    return btn;
+  }
+
+  // The week header's atToday signal: a quiet "This week" tag when
+  // the rendered week contains now, a "Today" jump button otherwise.
+  const onThisWeek = () => (container.textContent ?? "").includes("This week");
+
+  function seedEntries() {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 5, 15, 12))); // Mon 2026-06-15
+    mockState.events = [
+      makeEvent({ id: "near", startsAt: Date.UTC(2026, 5, 16, 18) }),
+    ];
+  }
+
+  it("Agenda → Week lands on the week containing today despite a stale offset", () => {
+    seedEntries();
+    render(<CalendarPage />);
+    act(() => viewPill(/week/i).click());
+    expect(onThisWeek()).toBe(true);
+
+    // Page back a week — the member's explicit navigation.
+    act(() => navButton(/previous week/i).click());
+    expect(onThisWeek()).toBe(false);
+
+    // Wander off to Agenda, then come back to Week: the stale -1
+    // offset must NOT reopen last week under a "Today" pill.
+    act(() => viewPill(/agenda/i).click());
+    act(() => viewPill(/week/i).click());
+    expect(onThisWeek()).toBe(true);
+    vi.useRealTimers();
+  });
+
+  it("clicking the already-active Week pill keeps the paged-to week", () => {
+    seedEntries();
+    render(<CalendarPage />);
+    act(() => viewPill(/week/i).click());
+    act(() => navButton(/previous week/i).click());
+    expect(onThisWeek()).toBe(false);
+
+    // Re-clicking the active pill is not a view switch — the member's
+    // place survives.
+    act(() => viewPill(/week/i).click());
+    expect(onThisWeek()).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it("Agenda → Month lands on the month containing today despite a stale offset", () => {
+    seedEntries();
+    render(<CalendarPage />);
+    // Default jsdom innerWidth (1024) already selects month view;
+    // page it away, detour through agenda, and return.
+    expect(container.textContent).toContain("June 2026");
+    act(() => navButton(/next month/i).click());
+    expect(container.textContent).toContain("July 2026");
+    act(() => viewPill(/agenda/i).click());
+    act(() => viewPill(/month/i).click());
+    expect(container.textContent).toContain("June 2026");
+    vi.useRealTimers();
+  });
+});
+
+// ─── FAB placement (round-3 papercut) ───────────────────────────────
+//
+// landscape-short pins the "+ New event" pill bottom-right (centered,
+// it floated over the middle of an already-short page) and the pill
+// unmounts entirely while the docked event panel is open — in
+// split-capable short landscape the panel docks exactly where a
+// centered pill floats, and below lg the panel's full-screen takeover
+// covers it anyway (same discipline as the Board FAB).
+
+describe("CalendarPage FAB placement", () => {
+  const fab = () => container.querySelector("div.pointer-events-none.fixed");
+
+  it("carries the landscape-short bottom-right classes", () => {
+    render(<CalendarPage />);
+    const el = fab();
+    expect(el).not.toBeNull();
+    expect(el!.className).toContain("landscape-short:justify-end");
+    expect(el!.className).toContain(
+      "landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))]",
+    );
+  });
+
+  it("unmounts the FAB while the docked event panel route is open", () => {
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <MemoryRouter initialEntries={["/calendar/event/evt-1"]}>
+          <CalendarPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(fab()).toBeNull();
+  });
+
+  it("keeps the FAB on the plain /calendar route", () => {
+    act(() => {
+      root = createRoot(container);
+      root.render(
+        <MemoryRouter initialEntries={["/calendar"]}>
+          <CalendarPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(fab()).not.toBeNull();
+  });
+});

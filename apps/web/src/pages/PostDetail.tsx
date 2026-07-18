@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -33,6 +33,7 @@ import {
 import { isOurNode } from "@/lib/nodeIdentity";
 import { humanizeError } from "@/lib/humanizeError";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { DockedPanelDockContext } from "@/components/DockedPanel";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
 import { Markdown } from "@/components/Markdown";
@@ -85,6 +86,12 @@ export default function PostDetailPage() {
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [error, setError] = useState<string | null>(null);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  // True when rendered inside a DOCKED BoardPostPanel column (lg+ or
+  // split-capable short landscape). The panel frame already shows
+  // × Close there and this page's own Back does the same thing — one
+  // clear close affordance, so the Back hides. In the below-lg
+  // full-screen takeover (false) the Back stays.
+  const inDockedColumn = useContext(DockedPanelDockContext);
 
   const post = useMemo(
     () => posts.find((p) => p.id === id) ?? null,
@@ -292,13 +299,15 @@ export default function PostDetailPage() {
           honest win for a detail page; the rest of the Layout's
           container is centered empty space at lg+, which is fine
           for an article-style screen. */}
-      <button
-        type="button"
-        className="btn-ghost -ml-2 mb-3 text-sm"
-        onClick={() => navigate(-1)}
-      >
-        {t("common.back")}
-      </button>
+      {!inDockedColumn && (
+        <button
+          type="button"
+          className="btn-ghost -ml-2 mb-3 text-sm"
+          onClick={() => navigate(-1)}
+        >
+          {t("common.back")}
+        </button>
+      )}
 
       <div className="card mb-4">
         <div className="mb-3 flex items-start justify-between gap-2">
