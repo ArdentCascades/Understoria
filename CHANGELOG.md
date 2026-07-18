@@ -51,6 +51,11 @@ include breaking changes.
   desktop are unchanged.
 
 ### Fixed
+- **"Filters" is now a compact button on phones too.** The
+  full-width Filters bar squeezed the "Being built / Tended" switch
+  flush against its edge on the Projects tab; the button now sizes
+  to its label everywhere, so on a phone the whole row reads
+  Filters · Being built · Tended on one line with proper spacing.
 - **The navigation bar no longer vanishes when you turn your phone
   sideways.** Rotating to landscape could hide the whole left rail —
   plus the post buttons and banners — for the rest of the landscape
