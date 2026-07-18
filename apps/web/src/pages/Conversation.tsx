@@ -53,6 +53,11 @@ import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { OverflowMenu } from "@/components/OverflowMenu";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
+import {
+  SHORT_LANDSCAPE_QUERY,
+  SPLIT_CAPABLE_QUERY,
+  useMediaQuery,
+} from "@/lib/viewport";
 
 /** Chat-mode poll cadence — how stale an OPEN thread may go without
  *  a server nudge. Exported for the polling tests. */
@@ -76,6 +81,22 @@ export const GROUP_WINDOW_MS = 10 * 60 * 1000;
  *  pixels of the end still counts as reading the latest. Exported
  *  for the chip tests. */
 export const NEAR_BOTTOM_PX = 120;
+
+/** Composer auto-grow ceiling, read at the cap site on each input.
+ *  ~6 lines (144px) normally; in the short-landscape regime
+ *  (SHORT_LANDSCAPE_QUERY — phone sideways, viewport ~400px tall) a
+ *  144px composer eats over a third of the screen, so the ceiling
+ *  drops to ~4 lines (96px). A module-level imperative read — NOT a
+ *  hook/effect — because the input handler runs on every keystroke
+ *  anyway and this component's scroll machinery must stay untouched.
+ *  Exported for the composer auto-grow tests. */
+export function composerHeightCapPx(): number {
+  const short =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia(SHORT_LANDSCAPE_QUERY).matches;
+  return short ? 96 : 144;
+}
 
 function isNearBottom(list: HTMLElement): boolean {
   return (
@@ -139,6 +160,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const reduced = useReducedMotion();
+  // Sideways-phone split (Messages.tsx renders the conversation list
+  // in a pane beside this thread): the back-to-Messages link is
+  // redundant there — the list it leads to is already on screen —
+  // and header rows are precious at ~400px tall. Presentation-only:
+  // the hook just re-renders on rotation; no scroll/poll machinery
+  // is involved.
+  const splitPane = useMediaQuery(SPLIT_CAPABLE_QUERY);
 
   // Header "More actions" menu (block / unblock affordance). The
   // trigger/popover/a11y now live in the reusable <OverflowMenu>; this
@@ -580,11 +608,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
     return (
       <div className="flex h-full flex-col px-4 pb-4 pt-4">
         <header className="mb-4 flex items-center gap-2">
-          <BackLink
-            to="/messages"
-            label={t("common.back")}
-            className="btn-ghost -ml-2 text-sm"
-          />
+          {!splitPane && (
+            <BackLink
+              to="/messages"
+              label={t("common.back")}
+              className="btn-ghost -ml-2 text-sm"
+            />
+          )}
         </header>
         <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
           {t("errors.generic.notAvailable")}
@@ -603,11 +633,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   return (
     <div className="flex h-full flex-col px-4 pb-4 pt-4">
       <header className="mb-4 flex items-center gap-2">
-        <BackLink
-          to="/messages"
-          label={t("common.back")}
-          className="btn-ghost -ml-2 text-sm"
-        />
+        {!splitPane && (
+          <BackLink
+            to="/messages"
+            label={t("common.back")}
+            className="btn-ghost -ml-2 text-sm"
+          />
+        )}
         {otherKey && <MemberAvatar publicKey={otherKey} size={48} framed />}
         <h1 className="text-lg font-bold">
           {t("messages.conversationWith", { name: otherName })}
@@ -1091,7 +1123,10 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
               const el = e.currentTarget;
               if (el.scrollHeight > 0) {
                 el.style.height = "auto";
-                el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
+                el.style.height = `${Math.min(
+                  el.scrollHeight,
+                  composerHeightCapPx(),
+                )}px`;
               }
             }}
             placeholder={t("messages.inputPlaceholder")}

@@ -31,6 +31,17 @@ include breaking changes.
   forms seat their short fields two to a row so less of the form
   hides behind the keyboard. Reading order never changes — screen
   readers and keyboards walk the same page in every orientation.
+- **Sideways, Messages becomes a real messenger.** Turn a phone on
+  its side and the Messages tab now shows the conversation list in a
+  slim pane beside the open thread — the same list-beside-thread
+  layout every messenger uses on a tablet — instead of one pane
+  swallowing the whole screen. The open conversation is highlighted
+  in the list, the now-redundant back link steps aside, and the
+  compose box stops eating half the screen: it grows to about four
+  lines sideways rather than six. Rotating mid-conversation switches
+  layouts live without losing a half-typed draft, and on narrower
+  phones where two panes wouldn't leave room for real tap targets,
+  the single-pane view stays exactly as it was.
 - **A beta / AI disclosure, said plainly at every door.** The app now
   tells people what they're using before they use it: Understoria is
   beta software, much of its code was written with AI tools and
