@@ -63,6 +63,11 @@ include breaking changes.
   desktop are unchanged.
 
 ### Fixed
+- **Landscape phones: the Filters button and "Being built / Tended"
+  no longer stack on the right.** They shared a line with the "Show
+  me one small thing" links, which squeezed them into the right half
+  and wrapped the scope buttons under the Filters pill. The filter
+  row now gets its own full-width line, left-aligned like desktop.
 - **"Filters" is now a compact button on phones too.** The
   full-width Filters bar squeezed the "Being built / Tended" switch
   flush against its edge on the Projects tab; the button now sizes

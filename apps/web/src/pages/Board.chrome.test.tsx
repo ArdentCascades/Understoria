@@ -158,12 +158,18 @@ describe("Board command band", () => {
     expect(band.className).toContain("lg:flex-wrap");
     const flowSlot = flowCopy.parentElement as HTMLElement;
     expect(flowSlot.className).toContain("lg:hidden");
-    // The flow copy still shares the landscape-short line with the
-    // filter row (discovery left, filters right).
-    expect(flowSlot.className).toContain("landscape-short:flex-auto");
+    // Below lg (portrait AND landscape) the flow discovery copy and
+    // the filter row STACK — the wrapper is lg-only flex. An earlier
+    // pass shared them on the landscape line, but the Projects scope
+    // chips wrapped beneath Filters there (field report), so the
+    // filter row now gets its own full width and Filters left-aligns
+    // like desktop. The wrapper carries no landscape-short flex hint.
+    expect(flowSlot.className).not.toContain("landscape-short:flex-auto");
     const line = flowSlot.parentElement as HTMLElement;
-    expect(line.className).toContain("landscape-short:flex");
-    expect(line.className).toContain("landscape-short:justify-between");
+    expect(line.className).not.toContain("landscape-short:flex");
+    expect(line.className).toContain("lg:flex");
+    // Filter row is still a sibling of the discovery copy under the
+    // same wrapper (DOM order discovery → filters unchanged).
     expect(line.contains(container.querySelector("#board-post-filters")!)).toBe(
       true,
     );
