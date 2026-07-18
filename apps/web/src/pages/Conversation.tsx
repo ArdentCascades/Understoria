@@ -104,6 +104,44 @@ function isNearBottom(list: HTMLElement): boolean {
   );
 }
 
+/** Vertical room the long-press menu wants below a bubble — the
+ *  emoji row plus the action row (two 44px rows, gaps, padding).
+ *  Only used to pick the menu's open DIRECTION; the menu itself
+ *  still sizes to its content. Exported for the placement tests. */
+export const MENU_ESTIMATE_PX = 176;
+
+/**
+ * Should the long-press menu open UPWARD (overlaying the thread
+ * above the bubble) instead of flowing below it?
+ *
+ * On a landscape phone (~844×390) a bubble in the lower part of the
+ * screen has no room below — the in-flow menu rendered entirely past
+ * the bottom edge and the long-press looked like it did nothing
+ * (round-3 persona blocker). Decided from real geometry at OPEN
+ * time: the visible band is the intersection of the list box and the
+ * window (the list container is not always the live scrollport —
+ * page-level scrolling clips at the viewport instead), and the menu
+ * flips up only when the room below is too small AND there is more
+ * room above. Pure and layout-only: no scroll effect is read or
+ * written here. Under jsdom every rect is 0 → always false, which
+ * preserves the in-flow menu all existing tests exercise.
+ */
+export function menuOpensUpward(
+  bubble: HTMLElement | null | undefined,
+  list: HTMLElement | null,
+): boolean {
+  if (!bubble || !list || typeof window === "undefined") return false;
+  const viewportH = window.innerHeight || 0;
+  if (viewportH <= 0) return false;
+  const b = bubble.getBoundingClientRect();
+  const l = list.getBoundingClientRect();
+  const visibleTop = Math.max(0, l.top);
+  const visibleBottom = Math.min(viewportH, l.bottom);
+  const spaceBelow = visibleBottom - b.bottom;
+  const spaceAbove = b.top - visibleTop;
+  return spaceBelow < MENU_ESTIMATE_PX && spaceAbove > spaceBelow;
+}
+
 function isSameDay(a: number, b: number): boolean {
   const da = new Date(a);
   const db = new Date(b);
@@ -179,6 +217,11 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // it on touch. A reaction is sent as a sealed v2 envelope over the
   // same E2E relay as a message — the server never sees the emoji.
   const [reactFor, setReactFor] = useState<string | null>(null);
+  // Open direction for the long-press menu, decided once per open
+  // from the bubble's on-screen position (menuOpensUpward above).
+  // Every open path goes through openMenuFor so the decision is
+  // never stale geometry from a previous open.
+  const [menuUp, setMenuUp] = useState(false);
   // Signal-style long-press menu extras: the emoji row grew Copy /
   // Speak / Info actions. `infoFor` toggles the per-message detail
   // block; `copiedId` flashes the in-menu "Copied ✓" confirmation
@@ -190,6 +233,14 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // something (and offers a way out). Cleared by speak()'s onDone
   // when the utterance ends or errors.
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  // …and whether that message's speech has AUDIBLY started (the
+  // utterance's `start` event). Until it does, the menu item reads
+  // "Starting…" instead of "Stop speaking" — during the up-to-2s
+  // start watchdog (lib/speak.ts) claiming there is something to
+  // stop would be a lie on a zero-voices device where nothing will
+  // ever play. Keyed by message id so a stale utterance's start
+  // can't light up a different message's item.
+  const [speakStartedId, setSpeakStartedId] = useState<string | null>(null);
   // A Speak tap that produced no speech at all — some phones ship a
   // speech engine with zero voices: the utterance queues and then
   // NOTHING fires (lib/speak.ts's start watchdog catches it). The
@@ -216,6 +267,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       setInfoFor(null);
       setCopiedId(null);
       setSpeakingId(null);
+      setSpeakStartedId(null);
       setSpeakFailedId(null);
       stopSpeaking();
     }
@@ -275,13 +327,21 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       if (speakingId === m.id) {
         stopSpeaking();
         setSpeakingId(null);
+        setSpeakStartedId(null);
         return;
       }
       setSpeakingId(m.id);
-      speak(m.plaintext, speakLang, (ok) => {
-        setSpeakingId((cur) => (cur === m.id ? null : cur));
-        if (!ok) setSpeakFailedId(m.id);
-      });
+      setSpeakStartedId(null);
+      speak(
+        m.plaintext,
+        speakLang,
+        (ok) => {
+          setSpeakingId((cur) => (cur === m.id ? null : cur));
+          setSpeakStartedId((cur) => (cur === m.id ? null : cur));
+          if (!ok) setSpeakFailedId(m.id);
+        },
+        () => setSpeakStartedId(m.id),
+      );
     },
     [speakingId, speakLang],
   );
@@ -292,15 +352,24 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       pressTimer.current = null;
     }
   }, []);
+  // The one gate every menu-open path goes through (long-press,
+  // contextmenu, the 🙂+ button, your own reaction chip): measure
+  // where the bubble sits RIGHT NOW and pick the open direction,
+  // then open. matchRefs doubles as the bubble-element registry —
+  // it already tracks every rendered bubble by message id.
+  const openMenuFor = useCallback((id: string) => {
+    setMenuUp(menuOpensUpward(matchRefs.current.get(id), listRef.current));
+    setReactFor(id);
+  }, []);
   const startPress = useCallback(
     (id: string) => {
       cancelPress();
       pressTimer.current = window.setTimeout(() => {
         pressTimer.current = null;
-        setReactFor(id);
+        openMenuFor(id);
       }, LONG_PRESS_MS);
     },
-    [cancelPress],
+    [cancelPress, openMenuFor],
   );
   useEffect(() => cancelPress, [cancelPress]);
   useEffect(() => {
@@ -874,7 +943,8 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                   onContextMenu={(e) => {
                     e.preventDefault();
                     cancelPress();
-                    setReactFor(reactFor === m.id ? null : m.id);
+                    if (reactFor === m.id) setReactFor(null);
+                    else openMenuFor(m.id);
                   }}
                   className={`group relative max-w-[80%] select-none rounded-xl px-3 py-2 text-sm ${baseTone}${ring}`}
                 >
@@ -930,9 +1000,10 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                     aria-label={t("messages.reactions.open")}
                     aria-expanded={reactFor === m.id}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={() =>
-                      setReactFor(reactFor === m.id ? null : m.id)
-                    }
+                    onClick={() => {
+                      if (reactFor === m.id) setReactFor(null);
+                      else openMenuFor(m.id);
+                    }}
                     className={`absolute -top-2 ${
                       isMine ? "-left-2" : "-right-2"
                     } rounded-full border border-moss-200 bg-white px-1.5 py-0.5 text-xs opacity-0 shadow-sm transition-opacity focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-canopy-400 group-hover:opacity-100 dark:border-moss-600 dark:bg-moss-700`}
@@ -967,9 +1038,8 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                               // bubble press.
                               e.stopPropagation();
                               cancelPress();
-                              setReactFor(
-                                reactFor === m.id ? null : m.id,
-                              );
+                              if (reactFor === m.id) setReactFor(null);
+                              else openMenuFor(m.id);
                             }}
                             className="rounded-full bg-canopy-200 px-2 py-0.5 text-sm hover:bg-canopy-300 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:bg-canopy-800 dark:hover:bg-canopy-700"
                           >
@@ -998,11 +1068,25 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       top, actions below. Copy/Speak only apply to
                       readable text; Info shows the exact time and the
                       end-to-end note in plain language. */}
+                  {/* When the bubble sits near the bottom of the
+                      visible thread the in-flow menu would land past
+                      the screen edge (landscape phones made this a
+                      hard blocker: long-press "did nothing"). In that
+                      case the menu becomes a card OVERLAY anchored to
+                      the bubble's top edge, opening upward over
+                      already-read messages — a pure positioning swap,
+                      identical menu tree either way. */}
                   {reactFor === m.id && (
                     <div
                       role="menu"
                       aria-label={t("messages.reactions.pickerLabel")}
-                      className="mt-1 flex flex-col gap-1"
+                      className={
+                        menuUp
+                          ? `absolute bottom-full ${
+                              isMine ? "right-0" : "left-0"
+                            } z-10 mb-1 flex w-max max-w-[min(20rem,calc(100vw_-_2rem))] flex-col gap-1 rounded-xl border border-moss-200 bg-white p-2 shadow-lg dark:border-moss-600 dark:bg-moss-800`
+                          : "mt-1 flex flex-col gap-1"
+                      }
                     >
                     <div className="flex flex-wrap gap-1">
                       {REACTION_EMOJI.map((emoji) => {
@@ -1049,8 +1133,12 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                               : t("messages.menu.copy")}
                           </button>
                           {/* Speak is stateful, not fire-and-forget:
-                              while reading it becomes "Stop
-                              speaking", and where the device has no
+                              until speech audibly starts it reads
+                              "Starting…" (claiming there's something
+                              to stop during the start watchdog would
+                              be a lie on a zero-voices device), while
+                              reading it becomes "Stop speaking", and
+                              where the device has no
                               speech at all it stays visible but
                               disabled and says so — a hidden control
                               can't explain itself. A tap that turned
@@ -1072,7 +1160,9 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                             {!isSpeechAvailable() || speakFailedId === m.id
                               ? t("messages.menu.speakUnavailable")
                               : speakingId === m.id
-                                ? t("messages.menu.speakStop")
+                                ? speakStartedId === m.id
+                                  ? t("messages.menu.speakStop")
+                                  : t("messages.menu.speakStarting")
                                 : t("messages.menu.speak")}
                           </button>
                         </>

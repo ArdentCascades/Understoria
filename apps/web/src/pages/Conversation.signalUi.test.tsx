@@ -51,9 +51,23 @@ vi.mock("@/lib/syncLoop", () => ({
   SYNC_KICK_EVENT: "understoria:sync-kick",
 }));
 vi.mock("@/lib/speak", () => ({
-  // speak "succeeds" by default; tests reach the captured onDone via
-  // vi.mocked(speak).mock.calls to end an utterance on demand.
-  speak: vi.fn(() => true),
+  // speak "succeeds" by default AND starts immediately (the onStart
+  // hook fires inside the call), so the menu shows "Stop speaking"
+  // right away in these tests; tests reach the captured onDone /
+  // onStart via vi.mocked(speak).mock.calls to end (or start) an
+  // utterance on demand. The interim "Starting…" state has its own
+  // tests below with a not-yet-started implementation.
+  speak: vi.fn(
+    (
+      _text: string,
+      _lang?: string,
+      _onDone?: (ok: boolean) => void,
+      onStart?: () => void,
+    ) => {
+      onStart?.();
+      return true;
+    },
+  ),
   stopSpeaking: vi.fn(),
   isSpeechAvailable: vi.fn(() => true),
 }));
@@ -120,7 +134,10 @@ beforeEach(() => {
   // clearAllMocks (afterEach) keeps implementations, so a test that
   // flips availability off must not leak into its neighbors.
   vi.mocked(isSpeechAvailable).mockReturnValue(true);
-  vi.mocked(speak).mockReturnValue(true);
+  vi.mocked(speak).mockImplementation((_text, _lang, _onDone, onStart) => {
+    onStart?.();
+    return true;
+  });
   container = document.createElement("div");
   document.body.appendChild(container);
   if (typeof window.matchMedia !== "function") {
@@ -298,6 +315,7 @@ describe("the long-press menu actions", () => {
       "soup at six",
       "en",
       expect.any(Function),
+      expect.any(Function),
     );
   });
 
@@ -320,6 +338,70 @@ describe("the long-press menu actions", () => {
     });
     expect(menuButtonByText("Stop speaking")).toBeNull();
     expect(menuButtonByText("Speak")).not.toBeNull();
+  });
+
+  it("until speech audibly starts the item reads Starting…, then flips to Stop speaking", async () => {
+    // A real engine takes a beat (sometimes the full 2s watchdog
+    // window) before the utterance's `start` event — during that
+    // beat "Stop speaking" would claim there is something to stop.
+    vi.mocked(speak).mockImplementation(() => true); // queued, not started
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(menuButtonByText("Starting…")).not.toBeNull();
+    expect(menuButtonByText("Stop speaking")).toBeNull();
+    // The engine's start event arrives → the honest stop control.
+    const onStart = vi.mocked(speak).mock.calls.at(-1)![3]!;
+    await act(async () => {
+      onStart();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(menuButtonByText("Stop speaking")).not.toBeNull();
+    expect(menuButtonByText("Starting…")).toBeNull();
+  });
+
+  it("a Starting… item can still be tapped to bail out before speech begins", async () => {
+    vi.mocked(speak).mockImplementation(() => true); // queued, not started
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    await act(async () => {
+      menuButtonByText("Starting…")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(stopSpeaking).toHaveBeenCalled();
+    expect(menuButtonByText("Starting…")).toBeNull();
+    expect(menuButtonByText("Speak")).not.toBeNull();
+  });
+
+  it("a Starting… that never starts settles on the unavailable label", async () => {
+    vi.mocked(speak).mockImplementation(() => true); // queued, not started
+    mockMessages = [makeMessage({ id: "m1", plaintext: "soup at six" })];
+    await render();
+    await openMenu();
+    await act(async () => {
+      menuButtonByText("Speak")!.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(menuButtonByText("Starting…")).not.toBeNull();
+    // The start watchdog gives up (zero-voices engine).
+    const onDone = vi.mocked(speak).mock.calls.at(-1)![2]!;
+    await act(async () => {
+      onDone(false);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    const item = menuButtonByText("This device can't read messages aloud");
+    expect(item).not.toBeNull();
+    expect(item!.disabled).toBe(true);
+    expect(menuButtonByText("Starting…")).toBeNull();
   });
 
   it("a Speak that never starts flips the item to the unavailable label and clears the speaking state", async () => {

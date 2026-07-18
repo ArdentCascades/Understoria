@@ -21,6 +21,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Outlet, useMatch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { liveQuery } from "dexie";
 import { useApp } from "@/state/AppContext";
 import {
   listConversations,
@@ -94,12 +95,42 @@ export default function MessagesShell() {
 
   useEffect(() => {
     if (!currentMember) return;
-    // `blockedKeys` is in the deps so a new block (e.g., from the
-    // Conversation header menu in PR #211) reactively drops the
-    // blocked counterparty from the list without a page reload.
-    // `listConversations` reads the same set internally — see
-    // db/messages.ts §"PR F: filter blocked counterparties".
-    void listConversations(currentMember.publicKey).then(setConversations);
+    // LIVE list, not a one-shot load. The shell stays mounted while
+    // the split-pane thread sends/receives (round-3 persona report:
+    // the list pane showed "No conversations yet" beside an active
+    // conversation until a full reload), so the list must follow the
+    // messages table itself. Dexie's liveQuery tracks the tables
+    // listConversations reads (messages + blocks — all its Dexie
+    // reads happen before any non-Dexie await, so tracking holds)
+    // and re-emits on every write: a first send, an incoming pull,
+    // a new thread. `blockedKeys` stays in the deps as a belt-and-
+    // braces resubscribe — see db/messages.ts §"PR F: filter
+    // blocked counterparties".
+    let disposed = false;
+    let liveEmitted = false;
+    // Immediate first paint (the pre-live one-shot, unchanged
+    // timing), then the subscription keeps it fresh. liveQuery's
+    // initial emission arrives a beat later than a direct call; the
+    // one-shot covers that beat and is ignored once the live stream
+    // has spoken, so it can never overwrite fresher rows.
+    void listConversations(currentMember.publicKey).then((rows) => {
+      if (!disposed && !liveEmitted) setConversations(rows);
+    });
+    const sub = liveQuery(() =>
+      listConversations(currentMember.publicKey),
+    ).subscribe({
+      next: (rows) => {
+        liveEmitted = true;
+        setConversations(rows);
+      },
+      // A torn-down db mid-navigation must not take the page down;
+      // the list simply keeps its last known rows.
+      error: () => {},
+    });
+    return () => {
+      disposed = true;
+      sub.unsubscribe();
+    };
   }, [currentMember, blockedKeys]);
 
   // Debounce the query so each keystroke doesn't run a full

@@ -814,6 +814,7 @@
       "copied": "Copied ✓",
       "speak": "Speak",
       "speakStop": "Stop speaking",
+      "speakStarting": "Starting…",
       "speakUnavailable": "This device can't read messages aloud",
       "info": "Info",
       "infoSent": "Sent {{when}}",

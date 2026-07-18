@@ -814,6 +814,7 @@
       "copied": "Copiado ✓",
       "speak": "Leer en voz alta",
       "speakStop": "Dejar de leer",
+      "speakStarting": "Iniciando…",
       "speakUnavailable": "Este dispositivo no puede leer mensajes en voz alta",
       "info": "Detalles",
       "infoSent": "Enviado {{when}}",

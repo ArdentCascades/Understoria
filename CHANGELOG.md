@@ -184,6 +184,29 @@ include breaking changes.
   a lost member actually looks — now links "Take the welcome tour
   again", and the Profile link says the same thing instead of the
   vaguer "Revisit the welcome". In English and Spanish.
+- **The message menu now opens where you can see it.** On a phone
+  held sideways, long-pressing a message near the bottom of the
+  screen used to unfold its reaction-and-actions menu entirely past
+  the bottom edge — the press looked like it did nothing. The menu
+  now checks where the bubble sits when it opens: with no room
+  below, it opens upward as a small card above the bubble instead,
+  fully on screen, with the same emoji and Copy / Speak / Info
+  actions either way.
+- **The conversation list keeps up with your conversations.** With
+  the list pane open beside a thread (landscape phones, desktop),
+  the list used to freeze at whatever it showed when the page
+  loaded — a brand-new conversation could sit under "No
+  conversations yet", and previews lagged behind the latest
+  message, until a full reload. The list now follows the message
+  store itself: first messages, new threads, and fresh previews
+  appear in the pane the moment they exist.
+- **Speak no longer claims "Stop speaking" before anything speaks.**
+  Between tapping Speak and the voice actually starting (up to two
+  seconds on a slow or voiceless engine), the menu item now reads
+  "Starting…" — it flips to "Stop speaking" only once the device is
+  audibly reading, and still settles on the honest "can't read
+  aloud" notice when the engine never starts. Tapping "Starting…"
+  bails out, same as stop.
 - **Everything important fits a phone held sideways.** Turn your
   phone to landscape and the tall moments no longer spill off the
   bottom of the screen with their buttons out of reach: confirmation
