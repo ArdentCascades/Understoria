@@ -308,6 +308,7 @@
     "you": "You",
     "back": "← Back",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "close": "Close",
     "save": "Save",
     "saving": "Saving...",
@@ -646,7 +647,8 @@
       "cancelDismiss": "Keep event",
       "cancelLocked": "Unlock this device with your passphrase before signing the cancellation.",
       "cancelled": "Event cancelled.",
-      "attendeeCountLabel": "{{count}} going · {{maybe}} maybe",
+      "attendeeCountLabel_one": "{{count}} going · {{maybe}} maybe",
+      "attendeeCountLabel_other": "{{count}} going · {{maybe}} maybe",
       "attendeesHeading": "Who's coming",
       "attendeeFallbackKey": "(member {{shortKey}})",
       "goingRosterHeading": "Going",
@@ -774,6 +776,8 @@
       "headerMenuLabel": "More actions",
       "headerMenuBlock": "Block contact",
       "headerMenuUnblock": "Unblock {{name}}",
+      "blockedNotice": "You've blocked this contact.",
+      "blockedNoticeLink": "You can unblock them in Settings → Blocked contacts.",
       "aboutPost": "about: {{title}}",
       "aboutPostUnknown": "about a post"
     },
@@ -796,7 +800,8 @@
       "next": "Next match",
       "close": "Close search",
       "conversationWith": "Conversation with {{name}}",
-      "matchedName": "Matched their name"
+      "matchedName": "Matched their name",
+      "noMatchesHint": "Try the exact spelling — search is simple."
     },
     "day": {
       "today": "Today",
@@ -820,7 +825,8 @@
       "reactWith": "React with {{emoji}}",
       "remove": "Remove your {{emoji}} reaction",
       "reactedBy": "{{name}} reacted {{emoji}}",
-      "you": "You"
+      "you": "You",
+      "changeOwn": "Your {{emoji}} reaction — tap to change or remove it"
     },
     "voice": {
       "record": "Record a voice note",
@@ -844,6 +850,10 @@
     "emptyTitle": "No active projects",
     "empty": "No active projects yet. A project is a collective goal — multiple tasks, multiple contributors. The first one is always the hardest to start.",
     "byOrganizer": "Organized by {{name}}",
+    "cardTaskCount_one": "{{count}} task",
+    "cardTaskCount_other": "{{count}} tasks",
+    "cardOpenTaskCount_one": "{{count}} open",
+    "cardOpenTaskCount_other": "{{count}} open",
     "progressLabel": "{{contributed}} of {{target}} ({{percent}}%)",
     "sparkline": {
       "label": "Project contributions over the last {{days}} days; {{hours}} hours total.",
@@ -1610,17 +1620,18 @@
     "dialogCompleteDescription": "Confirm that the help actually happened. Credit moves once you've both confirmed. If something went wrong, you can flag it instead.",
     "dialogCompleteConfirm": "Yes, it's complete",
     "dialogDisputeTitle": "Flag this exchange for community review?",
-    "dialogDisputeDescription": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved.",
+    "dialogDisputeDescription": "This surfaces the exchange on the Disputes page, where anyone in the community can weigh in — there are no admins. Credit doesn't move until it's resolved. A flag isn't one-way: if you change your mind, any member — including you — can close it as withdrawn on the Proposals page, and the exchange goes back to where it was.",
     "dialogDisputeConfirm": "Flag it",
     "dialogCancelTitle": "Cancel this post?",
-    "dialogCancelDescription": "Cancelled posts stay visible but can't be claimed.",
-    "dialogCancelConfirm": "Cancel post",
+    "dialogCancelDescription": "Your post leaves the board right away, so nobody can claim it. It isn't deleted — this page stays, marked as cancelled, and you can still open it from its link.",
+    "dialogCancelConfirm": "Cancel this post",
+    "dialogCancelDismiss": "Keep my post",
     "dialogReleaseTitle": "Release your claim?",
     "dialogReleaseDescription": "This will reopen the post so someone else can step in.",
     "dialogReleaseConfirm": "Release claim",
     "repost": "Repost with changes",
-    "repostHint": "This will cancel the original and create a fresh post.",
-    "stillLooking": "Still looking? Adding more detail or adjusting the hours estimate can help the right person find this. You can repost with changes below.",
+    "repostHint": "Need to change something? \"Repost with changes\" in the post menu cancels this one and creates a fresh post.",
+    "stillLooking": "Still looking? Adding more detail or adjusting the hours estimate can help the right person find this. You can repost with changes from the post menu.",
     "stillOffering": "Still available? Adjusting the timing or details can help match you with someone who needs this.",
     "postAgain": "Post this again",
     "guidance": {
@@ -2358,7 +2369,12 @@
       "valueOf": "{{value}} / {{next}}",
       "lastReached": "Last reached: {{label}}",
       "next": "next: {{label}}",
-      "celebration": "We reached a milestone"
+      "celebration": "We reached a milestone",
+      "label": {
+        "hours": "{{count, number}} hours of mutual aid",
+        "exchanges": "{{count, number}} exchanges completed",
+        "members": "{{count, number}} members strong"
+      }
     },
     "categoryBreakdown": {
       "title": "Where help is flowing",
@@ -2798,20 +2814,31 @@
           "title": "Look around before you show this",
           "body": "Security cameras and webcams can read QR codes from across a room. Once it's on screen, anyone in camera view can save it and use it to join your community themselves.",
           "followup": "This prompt comes up every time — your surroundings can change between one share and the next.",
-          "reveal": "Show the invite",
+          "cancel": "Not now",
+          "confirm": "Show it now"
+        },
+        "printPoster": "Print poster",
+        "gate": {
+          "title": "Share this invite link",
+          "body": "Anyone with this link can join your community — send it to one person you trust.",
           "shareWithoutShowing": "Send the link without showing it",
+          "reveal": "Show the invite",
           "cancel": "Not now",
           "notAvailable": "Your browser can't share or copy without showing the link. Tap \"Show the invite\" and copy it by hand instead.",
           "statusCopied": "Link copied to your clipboard. Paste it into Signal, Messages, or wherever you want to send it — the link is not on screen.",
           "statusFailed": "Your browser blocked the share and the clipboard. Tap \"Show the invite\" to copy it by hand."
-        },
-        "printPoster": "Print poster"
-      }
+        }
+      },
+      "noteLabel": "Who is this for? (only you see this)",
+      "notePlaceholder": "e.g. Carol from the garden — stays on this device, never sent with the link",
+      "noteFor": "For: {{note}}",
+      "noteAdd": "Add note",
+      "noteEdit": "Edit note"
     },
     "security": {
       "title": "Security",
-      "summaryProtected": "Your secret keys on this device — the private half of your identity — are wrapped (kept scrambled) with a key derived from your passphrase. Unlock is required at every launch.",
-      "summaryUnprotected": "Your secret keys are stored in plaintext — plain readable text anyone holding the device could copy. Enable passphrase protection before leaving the device alone in any hostile environment.",
+      "summaryProtected": "Your secret keys on this device — the private half of your identity — are wrapped (kept scrambled) with a key derived from your passphrase.",
+      "summaryUnprotected": "Your secret keys are stored in plaintext — plain readable text anyone holding the device could copy. Enable passphrase protection before leaving the device alone anywhere someone else might pick up your phone.",
       "enable": "Enable passphrase protection",
       "change": "Change passphrase",
       "disable": "Disable protection",
@@ -2845,7 +2872,8 @@
         "failed": "The passkey couldn't be set up. Nothing was changed — your passphrase still works.",
         "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
         "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
-      }
+      },
+      "whenAsked": "You'll be asked for your passphrase right after you tap Lock now, and again whenever you open the app after it has been closed or reloaded — never on a timer while it stays open."
     },
     "emergency": {
       "title": "Emergency",

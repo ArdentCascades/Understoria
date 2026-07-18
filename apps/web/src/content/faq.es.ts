@@ -47,20 +47,24 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "En el Tablero, toca el botón verde + Publicar necesidad o " +
             "+ Publicar oferta al pie de la pantalla. Pon un título corto, " +
             "describe qué necesitas o qué puedes dar, y publícalo. Más " +
-            "tarde puedes editarlo o cancelarlo desde la página de detalle " +
-            "de la publicación.",
+            "tarde puedes cancelarla desde la página de detalle de la " +
+            "publicación, o republicarla con cambios desde el menú de la " +
+            "publicación.",
         ],
       },
       {
         id: "claim-post",
         question: "¿Cómo tomo la publicación de otra persona?",
         answer: [
-          "Toca cualquier publicación del Tablero para abrir su detalle " +
-            "y luego toca Tomar. La publicación pasa al estado 'esperando " +
-            "confirmación' y quien la publicó tiene la oportunidad de " +
-            "confirmar antes de que se mueva crédito alguno.",
-          "Si cambias de idea, puedes soltar la publicación desde la " +
-            "misma página — vuelve a quedar abierta para otra persona.",
+          "Toca cualquier publicación del Tablero para abrir su detalle. " +
+            "En una necesidad, toca Ofrecerme a ayudar; en una oferta, " +
+            "toca Tomar esta oferta. La publicación pasa al estado " +
+            "'esperando confirmación' y quien la publicó tiene la " +
+            "oportunidad de confirmar antes de que se mueva crédito " +
+            "alguno.",
+          "Si cambias de idea, toca Retirar mi compromiso en la misma " +
+            "página — la publicación vuelve a quedar abierta para otra " +
+            "persona.",
         ],
       },
       {
@@ -68,10 +72,11 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         question: "¿Cómo funciona confirmar un intercambio?",
         answer: [
           "Una vez que la ayuda realmente ocurrió, ambas personas tocan " +
-            "Confirmar en la página de detalle de la publicación. El " +
-            "crédito solo se mueve cuando las dos han confirmado.",
+            "Confirmar que está hecho en la página de detalle de la " +
+            "publicación. El crédito solo se mueve cuando las dos han " +
+            "confirmado.",
           "El orden no importa — una confirma primero, la otra ve que la " +
-            "publicación queda esperándole, y confirma cuando tiene un " +
+            "publicación sigue a la espera, y confirma cuando tiene un " +
             "momento.",
         ],
       },
@@ -98,10 +103,11 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "cancel-post",
         question: "¿Cómo cancelo una publicación que ya no necesito?",
         answer: [
-          "Abre la publicación (desde el Tablero o desde el historial de " +
-            "tu perfil) y toca Cancelar publicación. Las publicaciones " +
-            "canceladas siguen visibles para que la comunidad vea qué se " +
-            "pidió u ofreció, pero ya no se pueden tomar.",
+          "Abre la publicación desde el Tablero y toca Cancelar " +
+            "publicación. La publicación sale del tablero de inmediato, " +
+            "así que nadie podrá tomarla. No se borra — su propia página " +
+            "se conserva, marcada como cancelada, y cualquiera con su " +
+            "enlace aún puede ver qué se pidió u ofreció.",
         ],
       },
     ],
@@ -315,7 +321,7 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Más de lo que crees, porque la app entera se construyó " +
             "exactamente para esto. Tu dispositivo ya lleva todo: el " +
-            "tablón, el registro, la lista de miembros, tu identidad. " +
+            "tablero, el registro, la lista de miembros, tu identidad. " +
             "Puedes seguir leyendo, publicando y confirmando — cada " +
             "cambio se guarda en cola y se envía solo en cuanto vuelvas " +
             "a conectarte. Nada se pierde mientras no hay internet.",
@@ -358,7 +364,7 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "Dos cosas, y son el corazón de por qué Understoria está " +
             "construida de otra manera que los servicios corporativos. " +
             "Primero: el dispositivo de cada integrante ya guarda una " +
-            "copia completa y firmada de la comunidad — el tablón, el " +
+            "copia completa y firmada de la comunidad — el tablero, el " +
             "registro, los proyectos, todo. Confiscar el servidor no " +
             "se lleva nada que no esté ya en los teléfonos de todo el " +
             "mundo, y un servidor nuevo se puede rellenar desde esas " +
@@ -424,8 +430,8 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         answer: [
           "Un aval es una declaración pública y firmada de que " +
             "conoces a esta persona y respaldas su lugar en la " +
-            "comunidad. Alguien pasa a ser 'de confianza' cuando dos " +
-            "miembros distintos le han avalado — e invitar a alguien " +
+            "comunidad. Alguien pasa a ser 'de confianza' cuando ha " +
+            "recibido el aval de dos miembros distintos — e invitar a alguien " +
             "cuenta automáticamente como tu aval, así que avalar a " +
             "mano es la forma de respaldar a una persona que trajo " +
             "otra gente.",
@@ -586,8 +592,8 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "voz van selladas de extremo a extremo igual que los " +
             "mensajes escritos — solo tú y la persona con la que " +
             "hablas pueden oírlas.",
-          "La voz en publicaciones del Tablón funciona distinto. " +
-            "Las publicaciones del tablón son contenido " +
+          "La voz en publicaciones del Tablero funciona distinto. " +
+            "Las publicaciones del tablero son contenido " +
             "comunitario, así que una grabación adjunta a una " +
             "publicación puede oírla toda la comunidad — el mismo " +
             "público que las palabras que escribirías ahí.",

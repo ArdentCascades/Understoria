@@ -56,6 +56,15 @@ include breaking changes.
   dismissing it on any door hides it on all of them, permanently,
   on that device. There's still no forced "I understand" gate: it's
   a disclosure, not a consent ceremony. English and Spanish.
+- **A private label for each invite you make.** When you generate an
+  invite you can now jot down who it's for — "Carol from the garden"
+  — and the label follows the invite onto the open-invite card and
+  the Manage invites list, so two open links are never
+  indistinguishable again. You can add or edit the label later from
+  Manage invites. It's for your eyes only: the note is stored on
+  this device and nowhere else — never sent to the server, never
+  woven into the link itself — and the form says so right where you
+  type it. English and Spanish.
 
 ### Changed
 - **The Dashboard now speaks plainly about reciprocity and needs.**
@@ -120,6 +129,88 @@ include breaking changes.
   without hunting, and the welcome tour tucks its illustration away
   and pins Back / Next / Skip on screen while the words scroll
   between them. Nothing important can sit off-screen anymore.
+- **Speak now tells you when a phone can't read aloud.** Some phones
+  carry a speech engine with no voices installed: it accepts the text
+  and then never says a word — and never admits it. Tapping Speak on
+  a message there used to do nothing at all, silently, no matter how
+  many times you tried. Now the app gives the device about two
+  seconds to actually start talking; if it never does, the menu item
+  flips to "This device can't read messages aloud," so your tap
+  always visibly does something and the silence finally gets an
+  explanation. Phones whose voices are just slow to wake up are
+  unaffected — the moment speech starts, the check stands down.
+  English and Spanish.
+- **The Spanish translation got a native-speaker review pass.** A
+  careful read-through by native Spanish eyes, fixed on screen where
+  each string actually renders: the claim dialog no longer shows an
+  English "Cancel" next to "Sí, tomarla" (shared dialogs now default
+  to localized labels), collective milestones say "50 horas de ayuda
+  mutua" instead of "50 hours of mutual aid", project cards translate
+  their "6 tasks · 5 open" line, and "(¿por qué?)" finally gets its
+  opening question mark. Beyond those: missing accents restored
+  (confirmación, respondió, Quién ayuda), modern "solo" replaces the
+  old "sólo" throughout, status chips agree with their nouns
+  ("Abierta"/"Tomada" beside Necesidad and Oferta), "1 confirmada"
+  pluralizes properly, the FAQ names the real buttons and the real
+  "Tablero" tab, and the register settles into consistent, warm
+  Latin American Spanish — "Cuidado infantil", "somos nosotros",
+  "Retirar mi compromiso". Even the demo's founder is "Tú" now.
+- **Five dialogs now say what actually happens.** Cancelling a post no
+  longer promises it "stays visible" while it vanishes from the board —
+  the dialog now tells the truth (it leaves the board right away; it
+  isn't deleted, its page stays, marked as cancelled), the buttons read
+  "Keep my post" / "Cancel this post" so nobody has to parse "Cancel"
+  next to "Cancel post", the fresh-post sentence moved to where
+  reposting actually lives, and the little "(why?)" explains reposting
+  in plain words instead of cryptography vocabulary. The flag-for-review
+  dialog now answers the question that stopped people cold — a flag
+  isn't one-way; anyone (including you) can close it as withdrawn on the
+  Proposals page and the exchange goes back to where it was. Blocked
+  contacts in Settings are distinguishable at a glance (each collapsed
+  row shows its short key; names still stay hidden until you tap — the
+  over-the-shoulder privacy holds), and opening a conversation you've
+  blocked now says so honestly — "You've blocked this contact", with the
+  path to unblock — instead of "This isn't available right now."
+  Revisiting the welcome tour, "Skip" now simply returns you to the
+  board instead of dropping you into profile setup. And the demo no
+  longer contradicts itself by saying "You haven't joined a community
+  yet" above a fully populated sample community — real devices that
+  really haven't joined still see that card. English and Spanish.
+- **Message search now forgives quotes and accents.** Searching for
+  "don't" used to miss a message typed as "don’t" with a phone
+  keyboard's curly apostrophe, and "cafe" couldn't find "café" (or
+  the other way round). Search in the Messages tab and inside a
+  conversation now treats curly and straight quotes as the same,
+  matches with or without accents in either the search box or the
+  message, and ignores case — while the highlight still lands on
+  exactly what was written, curls and accents intact. One deliberate
+  exception: ñ stays its own letter, as it is in Spanish — "año"
+  finds "año" however it was typed, but "ano" never matches it. And
+  when nothing turns up, the empty-results line now offers a gentle
+  hint instead of a dead end. English and Spanish.
+- **Tap your own reaction to change it.** The little emoji chip under
+  a message you'd reacted to used to be a dead decoration — the
+  habit of tapping it to change or take back a reaction (the way
+  other messengers work) did nothing. Your own chip is now a real
+  button that opens the same reaction menu as a long-press, without
+  ever triggering the bubble's long-press by accident. The other
+  person's chip stays as it was — you can't operate on someone
+  else's reaction. English and Spanish.
+- **The "look around" camera warning now comes when it's needed.**
+  It used to appear the moment you generated an invite — before
+  anything was on screen to photograph — which made it easy to
+  dismiss as noise. Now generating an invite opens a plain share
+  menu (anyone with the link can join; send it to one person you
+  trust), and the camera warning appears exactly when you ask to
+  show the QR code or link on screen, the moment it's actually
+  about. English and Spanish.
+- **Security settings now say when the passphrase is asked for.** One
+  honest sentence: right after you tap Lock now, and whenever you
+  open the app after it's been closed or reloaded — never on a timer
+  while it stays open. It appears both in the security summary and
+  right before you turn protection on, so there are no surprises.
+  And "hostile environment" is gone in favor of plain words: anywhere
+  someone else might pick up your phone. English and Spanish.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

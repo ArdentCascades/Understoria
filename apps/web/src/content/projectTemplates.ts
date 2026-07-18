@@ -4362,7 +4362,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "el sitio anfitrión pide en voz baja que se lo lleven. Pon " +
       "nombres en la rotación antes del día de apertura, y cuida " +
       "la relación con el sitio anfitrión como lo que realmente " +
-      "estás manteniendo, no sólo el aparato.",
+      "estás manteniendo, no solo el aparato.",
     pairsWith: ["gleaning-network", "food-preservation", "community-meal"],
     learnMore: ["community-events"],
     tasks: [
@@ -5267,7 +5267,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "el desequilibrio de créditos, donde las mismas familias " +
       "siempre reciben en casa hasta resentirlo, y las reglas de " +
       "seguridad que se aflojan conforme crece la confianza — la " +
-      "excepción de sólo por esta vez a la regla de nunca a solas " +
+      "excepción de solo por esta vez a la regla de nunca a solas " +
       "es exactamente como se destruye la confianza. Lleven el " +
       "balance a la vista y tomen las reglas de seguridad más en " +
       "serio justamente con las familias que mejor conocen.",
@@ -5703,7 +5703,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       {
         name: "Crea un formulario de solicitud sencillo y de pocas barreras",
         description:
-          "Hagan un formulario corto y privado que pida sólo lo necesario. Ofrezcan varias formas de aplicar (en línea, por teléfono, en persona) y protejan la privacidad de quienes solicitan.",
+          "Hagan un formulario corto y privado que pida solo lo necesario. Ofrezcan varias formas de aplicar (en línea, por teléfono, en persona) y protejan la privacidad de quienes solicitan.",
         hours: 2,
         skills: ["redacción"],
         follows: [2],
@@ -5914,14 +5914,14 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       {
         name: "Mapea servicios y aliadas y aliados locales",
         description:
-          "Arma un directorio de clínicas, escuelas, asistencia legal, clases de ESL, recursos alimentarios y organizaciones que sirven a personas migrantes. A menudo, las personas recién llegadas sólo necesitan saber qué existe y cómo llegar.",
+          "Arma un directorio de clínicas, escuelas, asistencia legal, clases de ESL, recursos alimentarios y organizaciones que sirven a personas migrantes. A menudo, las personas recién llegadas solo necesitan saber qué existe y cómo llegar.",
         hours: 5,
         skills: ["difusión", "captura de datos"],
       },
       {
         name: "Arma un sistema de solicitudes y emparejamientos",
         description:
-          "Crea una forma sencilla para que las personas recién llegadas pidan ayuda y se les empareje con alguien voluntario por idioma y necesidad. Ofrezcan opciones por teléfono y en persona, no sólo en línea.",
+          "Crea una forma sencilla para que las personas recién llegadas pidan ayuda y se les empareje con alguien voluntario por idioma y necesidad. Ofrezcan opciones por teléfono y en persona, no solo en línea.",
         hours: 3,
         skills: ["organización", "soporte técnico"],
         follows: [0],
@@ -6675,7 +6675,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Hogares rurales y de bajos ingresos que se calientan con leña, y personas mayores que no pueden cortar o partir la suya.",
     whatYoullNeed:
-      "Una fuente de leña, un sitio de procesamiento y almacenamiento, equipo, una cuadrilla capacitada y un plan de entrega. Las motosierras y las hendidoras son peligrosas — permitan operar sólo a personas capacitadas, exijan equipo de protección y hagan una charla de seguridad antes de cada sesión.",
+      "Una fuente de leña, un sitio de procesamiento y almacenamiento, equipo, una cuadrilla capacitada y un plan de entrega. Las motosierras y las hendidoras son peligrosas — permitan operar solo a personas capacitadas, exijan equipo de protección y hagan una charla de seguridad antes de cada sesión.",
     setupHours: 24,
     defaultCategory: "mutual_aid_drive",
     suggestsWorkDays: true,
@@ -6722,7 +6722,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       {
         name: "Convoquen y capaciten a la cuadrilla de leña",
         description:
-          "Armen la cuadrilla y aseguren que sólo personas debidamente capacitadas operen motosierras y hendidoras. Hagan una charla de seguridad antes de cada día de trabajo.",
+          "Armen la cuadrilla y aseguren que solo personas debidamente capacitadas operen motosierras y hendidoras. Hagan una charla de seguridad antes de cada día de trabajo.",
         hours: 4,
         skills: ["enseñanza", "difusión"],
       },
@@ -7014,7 +7014,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       "este proyecto nunca debe cruzar es que personas sin " +
       "certificación preparen impuestos. Los fracasos más suaves: " +
       "lanzar en marzo cuando la certificación toma meses, y que " +
-      "alguien haga todo el viaje sólo para ser rechazado por un " +
+      "alguien haga todo el viaje solo para ser rechazado por un " +
       "documento que nadie le dijo que trajera.",
     pairsWith: ["legal-aid-clinic", "solidarity-fund"],
     learnMore: ["community-events"],
@@ -7402,7 +7402,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Personas residentes elegibles, especialmente quienes históricamente han estado subrepresentadas en las urnas.",
     whatYoullNeed:
-      "Personas voluntarias capacitadas, materiales de registro, reglas precisas y buenas ubicaciones. Mantengan la campaña estrictamente apartidista y sigan al pie de la letra todas las leyes electorales y de registro — entreguen sólo información precisa y nunca aboguen por un partido o candidatura.",
+      "Personas voluntarias capacitadas, materiales de registro, reglas precisas y buenas ubicaciones. Mantengan la campaña estrictamente apartidista y sigan al pie de la letra todas las leyes electorales y de registro — entreguen solo información precisa y nunca aboguen por un partido o candidatura.",
     setupHours: 16,
     defaultCategory: "organizing",
     firstSteps:
@@ -7522,7 +7522,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       {
         name: "Armen un sistema de solicitud y admisión",
         description:
-          "Creen una forma privada y de baja barrera para que la gente pida ayuda y describa su situación, con opciones por teléfono y en persona, no sólo en línea.",
+          "Creen una forma privada y de baja barrera para que la gente pida ayuda y describa su situación, con opciones por teléfono y en persona, no solo en línea.",
         hours: 3,
         skills: ["organización"],
       },
@@ -8291,7 +8291,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
     whoItServes:
       "Todas las personas del programa — quienes buscan ayuda, quienes la ofrecen y quienes lideran proyectos y necesitan coordinación.",
     whatYoullNeed:
-      "Un sistema de admisión, un listado de personas voluntarias y recursos, personas coordinadoras y un directorio maestro. El centro guarda información sensible sobre la vida de vecinas y vecinos — recojan sólo lo necesario, cuídenla bien y compartan los detalles únicamente con quienes los necesitan para ayudar.",
+      "Un sistema de admisión, un listado de personas voluntarias y recursos, personas coordinadoras y un directorio maestro. El centro guarda información sensible sobre la vida de vecinas y vecinos — recojan solo lo necesario, cuídenla bien y compartan los detalles únicamente con quienes los necesitan para ayudar.",
     setupHours: 27,
     defaultCategory: "organizing",
     firstSteps:
@@ -8362,7 +8362,7 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
       {
         name: "Registren necesidades no atendidas y brechas",
         description:
-          "Anoten las solicitudes que no pudieron cubrir. Las brechas recurrentes revelan dónde el programa debería arrancar su próximo proyecto — convirtiendo al centro en una herramienta de planeación, no sólo una central de despacho.",
+          "Anoten las solicitudes que no pudieron cubrir. Las brechas recurrentes revelan dónde el programa debería arrancar su próximo proyecto — convirtiendo al centro en una herramienta de planeación, no solo una central de despacho.",
         hours: 3,
         recurringCadence: "month",
         skills: ["captura de datos"],

@@ -232,7 +232,7 @@
         "noPrefs": "Sin preferencias de tema o densidad — ajústalas en Perfil → Configuración si quieres que coincidan."
       },
       "outro": "Los logros se reconstruyen solos a medida que este dispositivo sincronice con la comunidad.",
-      "continue": "Ir al Tablón"
+      "continue": "Ir al Tablero"
     },
     "errors": {
       "lostEnvelope": "Faltan los datos del QR. Captúralo de nuevo.",
@@ -308,6 +308,7 @@
     "you": "Tú",
     "back": "← Atrás",
     "cancel": "Cancelar",
+    "confirm": "Confirmar",
     "close": "Cerrar",
     "save": "Guardar",
     "saving": "Guardando...",
@@ -328,8 +329,8 @@
     "markdownHint": "Formato: **negrita**, _cursiva_, - listas y enlaces"
   },
   "why": {
-    "trigger": "(por que?)",
-    "readMore": "Leer mas"
+    "trigger": "(¿por qué?)",
+    "readMore": "Leer más"
   },
   "identity": {
     "show": "Mostrar código de identidad",
@@ -358,7 +359,7 @@
     "label": "Cómo empezar",
     "message": "Dos caminos: toca cualquier publicación que te llame la atención para ver cómo funciona el intercambio, o comparte algo que necesitas o puedes ofrecer. Sin presión por publicar primero — observar también está bien.",
     "dismiss": "Entendido",
-    "technical": "El aviso aparece en el Tablón hasta que tomes una primera acción — reclamar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Cuando ocurre cualquiera de estas, queda descartado por dispositivo. Un reinicio duro (Perfil → Emergencia → Borrado duro) o una instalación nueva lo hacen volver; el estado vive en IndexedDB local (el almacenamiento propio de tu navegador), no en el nodo comunitario (el servidor de tu comunidad)."
+    "technical": "El aviso aparece en el Tablero hasta que tomes una primera acción — reclamar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Cuando ocurre cualquiera de estas, queda descartado por dispositivo. Un reinicio duro (Perfil → Emergencia → Borrado duro) o una instalación nueva lo hacen volver; el estado vive en IndexedDB local (el almacenamiento propio de tu navegador), no en el nodo comunitario (el servidor de tu comunidad)."
   },
   "vouchNudge": {
     "label": "Avalar está abierto para ti",
@@ -441,7 +442,7 @@
   },
   "hints": {
     "board": {
-      "label": "Orientacion del tablero",
+      "label": "Orientación del tablero",
       "message": "Tres pestañas arriba: Necesidades (lo que la gente pide), Ofertas (lo que la gente puede compartir) y Proyectos (metas grupales). Toca cualquier publicación para ver más o para tomarla. El tablero oculta las publicaciones que alguien ya tomó, así ves lo que aún necesita ayuda.",
       "learnMoreLabel": "Cómo publicar algo"
     },
@@ -646,12 +647,13 @@
       "cancelDismiss": "Mantener el evento",
       "cancelLocked": "Desbloquea este dispositivo con tu frase de acceso antes de firmar la cancelación.",
       "cancelled": "Evento cancelado.",
-      "attendeeCountLabel": "{{count}} confirmadas · {{maybe}} tal vez",
+      "attendeeCountLabel_one": "{{count}} confirmada · {{maybe}} tal vez",
+      "attendeeCountLabel_other": "{{count}} confirmadas · {{maybe}} tal vez",
       "attendeesHeading": "Quién viene",
       "attendeeFallbackKey": "(miembro {{shortKey}})",
       "goingRosterHeading": "Vienen",
       "maybeRosterHeading": "Tal vez",
-      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. El resto ve sólo el conteo.",
+      "rosterHiddenHint": "Confirma \"Voy\" o \"Tal vez\" para ver quién más viene. El resto ve solo el conteo.",
       "printFlyer": "Imprimir cartel",
       "printRoster": "Imprimir hoja de registro"
     },
@@ -659,7 +661,7 @@
       "heading": "Confirmar asistencia",
       "signingHeading": "Si confirmas asistencia",
       "signingBodyGoing": "Si eliges Voy o Tal vez, quien organiza y otras personas que hayan confirmado verán tu nombre en este evento.",
-      "signingBodyNotGoing": "Si eliges No voy, tu elección es privada — sólo tú puedes verla.",
+      "signingBodyNotGoing": "Si eliges No voy, tu elección es privada — solo tú puedes verla.",
       "signingBodyLocalOnly": "Tu confirmación de asistencia se queda dentro de tu propia comunidad (este nodo). NO se federa — nunca se comparte con otras comunidades.",
       "going": "Voy",
       "maybe": "Tal vez",
@@ -737,7 +739,7 @@
     "calendar": {
       "entryKindLabel": "Evento",
       "entryKindLabelGoing": "Evento al que vas",
-      "eventsOnlyChip": "Sólo eventos",
+      "eventsOnlyChip": "Solo eventos",
       "fabAriaLabel": "Crear un evento",
       "multiDay": {
         "continues": "Continúa",
@@ -767,13 +769,15 @@
     "send": "Enviar",
     "sending": "Enviando...",
     "decryptionFailed": "(no se pudo descifrar)",
-    "lockedError": "Desbloquea tu sesion para enviar mensajes.",
+    "lockedError": "Desbloquea tu sesión para enviar mensajes.",
     "sendError": "No se pudo enviar el mensaje. Intenta de nuevo.",
     "conversationWith": "{{name}}",
     "conversation": {
       "headerMenuLabel": "Más acciones",
       "headerMenuBlock": "Bloquear contacto",
       "headerMenuUnblock": "Desbloquear a {{name}}",
+      "blockedNotice": "Has bloqueado este contacto.",
+      "blockedNoticeLink": "Puedes desbloquearlo en Ajustes → Contactos bloqueados.",
       "aboutPost": "sobre: {{title}}",
       "aboutPostUnknown": "sobre una publicación"
     },
@@ -782,7 +786,7 @@
       "aboutHintUnknown": "Estás escribiendo sobre una publicación",
       "aboutDismiss": "No adjuntar esta publicación"
     },
-    "noReadReceipts": "Los mensajes son privados. Sin confirmacion de lectura.",
+    "noReadReceipts": "Los mensajes son privados. Sin confirmación de lectura.",
     "search": {
       "placeholder": "Busca en tus mensajes",
       "inConversation": "Busca en esta conversación",
@@ -796,7 +800,8 @@
       "previous": "Coincidencia anterior",
       "next": "Coincidencia siguiente",
       "conversationWith": "Conversación con {{name}}",
-      "matchedName": "Coincide con su nombre"
+      "matchedName": "Coincide con su nombre",
+      "noMatchesHint": "Prueba con la ortografía exacta — la búsqueda es simple."
     },
     "day": {
       "today": "Hoy",
@@ -820,7 +825,8 @@
       "reactWith": "Reaccionar con {{emoji}}",
       "remove": "Quitar tu reacción {{emoji}}",
       "reactedBy": "{{name}} reaccionó {{emoji}}",
-      "you": "Tú"
+      "you": "Tú",
+      "changeOwn": "Tu reacción {{emoji}} — toca para cambiarla o quitarla"
     },
     "voice": {
       "record": "Grabar una nota de voz",
@@ -844,6 +850,10 @@
     "emptyTitle": "Aún no hay proyectos activos",
     "empty": "Aún no hay proyectos activos. Un proyecto es una meta colectiva — varias tareas, varias personas. El primero siempre es el más difícil de empezar.",
     "byOrganizer": "Organizado por {{name}}",
+    "cardTaskCount_one": "{{count}} tarea",
+    "cardTaskCount_other": "{{count}} tareas",
+    "cardOpenTaskCount_one": "{{count}} abierta",
+    "cardOpenTaskCount_other": "{{count}} abiertas",
     "progressLabel": "{{contributed}} de {{target}} ({{percent}}%)",
     "sparkline": {
       "label": "Contribuciones al proyecto durante los últimos {{days}} días; {{hours}} horas en total.",
@@ -1093,15 +1103,15 @@
       "company": {
         "heading": "La compañía facilita empezar",
         "why": "Trabajar junto a alguien — incluso en cosas completamente distintas — ayuda a muchas personas a empezar y sostener una tarea. Algunas lo llaman body doubling.",
-        "cta": "Invita compañía desde el tablón",
-        "how": "Abre una publicación del tablón lista para editar. Tú eliges cada palabra, y nada se comparte hasta que la publiques."
+        "cta": "Invita compañía desde el tablero",
+        "how": "Abre una publicación del tablero lista para editar. Tú eliges cada palabra, y nada se comparte hasta que la publiques."
       },
-      "releaseReassurance": "Soltarla ayuda a que quien organiza encuentre a alguien más — sin juicios.",
+      "releaseReassurance": "Retirar tu compromiso ayuda a que quien organiza encuentre a alguien más — sin juicios.",
       "notClaimablePlanning": "Este proyecto sigue en planificación — quien organiza aún no lo ha lanzado.",
       "notClaimablePaused": "Este proyecto está en pausa — no acepta nuevas tomas por ahora.",
       "notClaimableOther": "Este proyecto no acepta tomas en este momento.",
       "claimableAfterLaunch": "Las personas podrán tomar esta tarea cuando lances el proyecto.",
-      "release": "Soltar mi compromiso",
+      "release": "Retirar mi compromiso",
       "markDone": "Marcar completada",
       "confirm": "Confirmar completada",
       "awaitingConfirmation": "Esperando que quien organiza confirme",
@@ -1165,7 +1175,7 @@
         "fieldDescription": "¿Qué se necesita hacer?",
         "fieldHours": "Horas estimadas",
         "fieldHoursHint": "Tu mejor estimación está bien — puedes cambiarla después.",
-        "splitHint": "Las tareas grandes cuestan más de empezar y tardan más en tomarse. Si esta se divide de forma natural, las piezas pequeñas son más fáciles de asumir — las de una hora incluso aparecen bajo el filtro del tablón \"Cabe en una hora, más o menos\".",
+        "splitHint": "Las tareas grandes cuestan más de empezar y tardan más en tomarse. Si esta se divide de forma natural, las piezas pequeñas son más fáciles de asumir — las de una hora incluso aparecen bajo el filtro del tablero \"Cabe en una hora, más o menos\".",
         "fieldUrgency": "Urgencia",
         "fieldCategory": "Categoría",
         "fieldSkills": "Habilidades sugeridas (separadas por comas)",
@@ -1181,9 +1191,9 @@
         "cadenceHint": "Una tarea recurrente se reabre automáticamente al confirmarse."
       },
       "acknowledgment": {
-        "toggle": "Agregar una nota para quien contribuyo",
+        "toggle": "Agregar una nota para quien contribuyó",
         "placeholder": "Gracias por...",
-        "hint": "Opcional. Visible para la comunidad en la pagina del proyecto."
+        "hint": "Opcional. Visible para la comunidad en la página del proyecto."
       },
       "follows": "Sigue a: {{titles}}",
       "followsMore": "Sigue a: {{titles}} +{{count}} más",
@@ -1325,8 +1335,8 @@
     },
     "bulkTask": {
       "toggle": "Agregar varias",
-      "placeholder": "Una tarea por linea",
-      "hint": "Cada linea se convierte en una tarea con valores predeterminados. Edita individualmente despues.",
+      "placeholder": "Una tarea por línea",
+      "hint": "Cada línea se convierte en una tarea con valores predeterminados. Edita individualmente después.",
       "submit": "Agregar todas",
       "submitting": "Agregando...",
       "success": "Se agregaron {{count}} tareas."
@@ -1434,7 +1444,7 @@
     "emptyTitle": "Nada a tu cargo por ahora",
     "empty": "Cuando tomes una tarea o inicies un proyecto, aparecerá aquí — tus compromisos y los proyectos que organizas, en un solo lugar.",
     "shiftsTitle": "Turnos a los que te has apuntado",
-    "claimedPostsTitle": "Ayuda que estás en camino de dar",
+    "claimedPostsTitle": "Ayuda en camino",
     "shiftIcs": "Añadir este turno a mi calendario (.ics)",
     "deskLink": "Mira todo lo que te espera en tu escritorio",
     "askedTitle": "Te lo pidieron a ti",
@@ -1504,7 +1514,7 @@
   "categories": {
     "transport": "Transporte",
     "food": "Comida",
-    "childcare": "Cuidado de niñes",
+    "childcare": "Cuidado infantil",
     "skilled_labor": "Trabajo especializado",
     "emotional_support": "Apoyo emocional",
     "education": "Educación",
@@ -1519,16 +1529,16 @@
     "learning": "Aprendizaje"
   },
   "postStatus": {
-    "open": "Abierto",
-    "claimed": "Tomado",
+    "open": "Abierta",
+    "claimed": "Tomada",
     "awaiting_confirmation": "Esperando confirmación",
-    "completed": "Completado",
-    "cancelled": "Cancelado",
+    "completed": "Completada",
+    "cancelled": "Cancelada",
     "disputed": "En revisión comunitaria"
   },
   "postCard": {
     "peerCommunity": "Comunidad vecina",
-    "expiresIn": "Expira en {{count}} dias",
+    "expiresIn": "Expira en {{count}} días",
     "expiresToday": "Expira hoy",
     "expired": "Expirada"
   },
@@ -1563,10 +1573,10 @@
     "errorNeedTitle": "Dale un título corto a tu publicación para que la gente sepa de qué se trata.",
     "errorHoursPositive": "Las horas estimadas tienen que ser un número positivo.",
     "errorExpiresInDays": "Los días deben ser un número entero mayor que 0, o en blanco para no caducar.",
-    "repostBanner": "Editando una copia — la publicacion original se cancelara al enviar.",
-    "matchingNeeds": "{{count}} necesidades activas en esta categoria — verlas",
+    "repostBanner": "Editando una copia — la publicación original se cancelará al enviar.",
+    "matchingNeeds": "{{count}} necesidades activas en esta categoría — verlas",
     "matchingNeedsAside": {
-      "title": "Necesidades activas en esta categoria",
+      "title": "Necesidades activas en esta categoría",
       "seeAll": "Ver todas ({{count}})"
     },
     "voice": {
@@ -1587,7 +1597,7 @@
     "fieldPosted": "Publicada",
     "fieldPostedBy": "Publicada por",
     "fieldOfferedBy": "Ofrecida por",
-    "fieldHelper": "Quien ayuda",
+    "fieldHelper": "Quién ayuda",
     "fieldClaimedBy": "Tomada por",
     "fieldArea": "Zona",
     "fieldExpires": "Caduca",
@@ -1598,7 +1608,7 @@
     "actionsOfferToHelp": "Ofrecerme a ayudar",
     "actionsConfirmComplete": "Confirmar que está hecho",
     "actionsFlag": "Algo no va bien — señalar",
-    "actionsRelease": "Soltar mi compromiso",
+    "actionsRelease": "Retirar mi compromiso",
     "actionsClaimedBy": "Esta publicación ya está tomada. {{helper}} está ayudando a {{helped}}.",
     "actionsCompleted": "Completado. {{hours}} de crédito fluyeron de {{helped}} a {{helper}}. Gracias a las dos personas.",
     "dialogClaimNeedTitle": "¿Tomar esta publicación?",
@@ -1610,21 +1620,22 @@
     "dialogCompleteDescription": "Confirma que la ayuda realmente ocurrió. El crédito se mueve cuando ambas personas confirman. Si algo salió mal, puedes señalarlo en su lugar.",
     "dialogCompleteConfirm": "Sí, está completo",
     "dialogDisputeTitle": "¿Señalar este intercambio para revisión comunitaria?",
-    "dialogDisputeDescription": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva.",
+    "dialogDisputeDescription": "Esto lleva el intercambio a la página de Disputas, donde cualquier persona de la comunidad puede opinar — no hay administradores. El crédito no se mueve hasta que se resuelva. Una señal no es irreversible: si cambias de opinión, cualquier miembro — tú también — puede cerrarla como retirada en la página de Propuestas, y el intercambio vuelve a donde estaba.",
     "dialogDisputeConfirm": "Señalar",
     "dialogCancelTitle": "¿Cancelar esta publicación?",
-    "dialogCancelDescription": "Las publicaciones canceladas siguen visibles pero ya no pueden tomarse.",
-    "dialogCancelConfirm": "Cancelar publicación",
-    "dialogReleaseTitle": "¿Soltar tu compromiso?",
+    "dialogCancelDescription": "Tu publicación sale del tablero de inmediato, así que nadie podrá tomarla. No se borra — esta página se conserva, marcada como cancelada, y podrás seguir abriéndola desde su enlace.",
+    "dialogCancelConfirm": "Cancelar esta publicación",
+    "dialogCancelDismiss": "Conservar mi publicación",
+    "dialogReleaseTitle": "¿Retirar tu compromiso?",
     "dialogReleaseDescription": "Esto reabrirá la publicación para que alguien más pueda tomarla.",
-    "dialogReleaseConfirm": "Soltar",
+    "dialogReleaseConfirm": "Retirar",
     "repost": "Republicar con cambios",
-    "repostHint": "Esto cancelara la original y creara una publicacion nueva.",
-    "stillLooking": "Sigues buscando? Agregar mas detalles o ajustar las horas estimadas puede ayudar a que la persona adecuada encuentre esto. Puedes republicar con cambios abajo.",
-    "stillOffering": "Sigues disponible? Ajustar el horario o los detalles puede ayudar a que se conecte con alguien que lo necesita.",
+    "repostHint": "¿Necesitas cambiar algo? «Republicar con cambios», en el menú de la publicación, cancela esta y crea una publicación nueva.",
+    "stillLooking": "¿Sigues buscando? Agregar más detalles o ajustar las horas estimadas puede ayudar a que la persona adecuada encuentre esto. Puedes republicar con cambios desde el menú de la publicación.",
+    "stillOffering": "¿Sigues disponible? Ajustar el horario o los detalles puede ayudar a que se conecte con alguien que lo necesita.",
     "postAgain": "Publicar de nuevo",
     "guidance": {
-      "completed": "Los creditos se han transferido. Gracias a ambas personas por fortalecer la comunidad."
+      "completed": "Los créditos se han transferido. Gracias a ambas personas por fortalecer la comunidad."
     },
     "exchangeState": {
       "claimed": {
@@ -2184,10 +2195,10 @@
     "postClaimed": {
       "needLine": "{{name}} se ofrece a tu necesidad: {{title}}",
       "offerLine": "{{name}} acepta tu oferta: {{title}}",
-      "hint": "Alguien viene a ayudar. Toca para ver la publicacion."
+      "hint": "Alguien viene a ayudar. Toca para ver la publicación."
     },
     "vouchReceived": {
-      "line": "{{name}} respondio por ti.",
+      "line": "{{name}} respondió por ti.",
       "hint": "Cada aval te acerca al estatus de confianza."
     },
     "growRoot": {
@@ -2195,7 +2206,7 @@
       "hint": "Otra raíz aliviaría la presión — toca para ayudar."
     },
     "projectDeadline": {
-      "line": "{{project}} — fecha limite en {{days}} dias.",
+      "line": "{{project}} — fecha límite en {{days}} días.",
       "hint": "Toca para ver el avance."
     },
     "projectPaused": {
@@ -2238,7 +2249,7 @@
       "open": "Ábrela",
       "close": "Cerrar",
       "kindTask": "Tarea de proyecto",
-      "kindNeed": "Necesidad del tablón"
+      "kindNeed": "Necesidad del tablero"
     },
     "tabs": {
       "needs": "Necesidades",
@@ -2311,7 +2322,7 @@
   },
   "dashboard": {
     "title": "Panel comunitario",
-    "tagline": "La unidad de progreso somos nosotres, no yo.",
+    "tagline": "La unidad de progreso somos nosotros, no yo.",
     "membershipRejectedBanner": "Este dispositivo está conectado al servidor de tu comunidad, pero el servidor aún no te reconoce como integrante — así que nada de la comunidad puede aparecer aquí, y nada de lo que hagas sale de este dispositivo. Esto suele significar que tu invitación no llegó al servidor: abre tu enlace de invitación de nuevo en este dispositivo, o pide a quien te invitó que te envíe uno nuevo. Este aviso desaparece solo en cuanto el servidor te reconozca.",
     "resume": {
       "title": "Retoma donde lo dejaste",
@@ -2353,12 +2364,17 @@
       "title": "Hitos colectivos",
       "hours": "Horas de apoyo mutuo",
       "exchanges": "Intercambios completados",
-      "members": "Integrantes activas",
+      "members": "Personas integrantes activas",
       "topReached": " — máximo hito alcanzado",
       "valueOf": "{{value}} / {{next}}",
       "lastReached": "Último alcanzado: {{label}}",
       "next": "siguiente: {{label}}",
-      "celebration": "Alcanzamos un hito"
+      "celebration": "Alcanzamos un hito",
+      "label": {
+        "hours": "{{count, number}} horas de ayuda mutua",
+        "exchanges": "{{count, number}} intercambios completados",
+        "members": "{{count, number}} personas en la comunidad"
+      }
     },
     "categoryBreakdown": {
       "title": "Por dónde fluye el apoyo",
@@ -2623,11 +2639,11 @@
       "intro": "La bienvenida, preguntas frecuentes, una guía breve para miembros, y preguntas para grupos de estudio. Todo funciona sin conexión.",
       "revisitWelcome": "Volver a ver la bienvenida",
       "helpFaq": "Preguntas frecuentes",
-      "memberGuide": "Guia de miembros",
+      "memberGuide": "Guía de miembros",
       "opsecGuide": "Mantenerse seguro",
-      "opsecIntro": "El trabajo de ayuda mutua conlleva riesgos reales. Esta guia breve cubre lo basico para protegerte a ti y a tu comunidad. Leela una vez; vuelve cuando algo cambie.",
-      "designPrinciples": "Principios de diseno",
-      "principlesIntro": "Cada decision de diseno en Understoria tiene una razon. Estos principios explican por que la aplicacion funciona como funciona, con ejemplos de lo que ocurrio cuando otros proyectos lo intentaron de otra manera.",
+      "opsecIntro": "El trabajo de ayuda mutua conlleva riesgos reales. Esta guía breve cubre lo básico para protegerte a ti y a tu comunidad. Léela una vez; vuelve cuando algo cambie.",
+      "designPrinciples": "Principios de diseño",
+      "principlesIntro": "Cada decisión de diseño en Understoria tiene una razón. Estos principios explican por qué la aplicación funciona como funciona, con ejemplos de lo que ocurrió cuando otros proyectos lo intentaron de otra manera.",
       "studyPrompts": "Preguntas para grupos de estudio",
       "addToPhone": "Añadir a tu teléfono",
       "promptCopy": "Copiar para una reunión",
@@ -2652,24 +2668,24 @@
         "hint": "Cuando dos mismas integrantes intercambian esta cantidad de veces en 30 días, el último intercambio recibe una marca de aviso."
       },
       "taskCheckInDays": {
-        "label": "Chequeo de tarea (dias)",
-        "hint": "Despues de tantos dias, quien tomo una tarea de proyecto recibe un aviso privado de 'sigues con esto?' en su lista de pendientes. Puede liberarla sin que nadie lo vea."
+        "label": "Chequeo de tarea (días)",
+        "hint": "Después de tantos días, quien tomó una tarea de proyecto recibe un aviso privado de '¿sigues con esto?' en su lista de pendientes. Puede liberarla sin que nadie lo vea."
       },
       "taskNeedsHelpDays": {
-        "label": "Tarea 'le vendrian bien mas manos' (dias)",
-        "hint": "Despues de tantos dias, una tarea tomada se marca publicamente como necesitada de mas manos. Enmarcado hacia la tarea, no hacia la persona. Debe ser al menos igual al umbral de chequeo."
+        "label": "Tarea 'le vendrían bien más manos' (días)",
+        "hint": "Después de tantos días, una tarea tomada se marca públicamente como necesitada de más manos. Enmarcado hacia la tarea, no hacia la persona. Debe ser al menos igual al umbral de chequeo."
       },
       "taskCheckInGraceDays": {
-        "label": "Margen tras el chequeo de tarea (dias)",
-        "hint": "Despues de que quien tomo la tarea reconozca el aviso privado, suspende el indicador publico 'le vendrian bien mas manos' durante estos dias. Permite que una persona que responde mantenga la tarea fuera de la senal comunitaria. Manten un valor bajo (1-3) para que el silencio prolongado siga apareciendo."
+        "label": "Margen tras el chequeo de tarea (días)",
+        "hint": "Después de que quien tomó la tarea reconozca el aviso privado, suspende el indicador público 'le vendrían bien más manos' durante estos días. Permite que una persona que responde mantenga la tarea fuera de la señal comunitaria. Mantén un valor bajo (1-3) para que el silencio prolongado siga apareciendo."
       },
       "deliberationDays": {
-        "label": "Periodo de deliberacion de propuestas (dias)",
-        "hint": "Dias minimos que una propuesta debe permanecer abierta antes de aprobarse automaticamente por consenso. Evita votaciones apresuradas."
+        "label": "Periodo de deliberación de propuestas (días)",
+        "hint": "Días mínimos que una propuesta debe permanecer abierta antes de aprobarse automáticamente por consenso. Evita votaciones apresuradas."
       },
       "minAffirms": {
-        "label": "Votos a favor minimos",
-        "hint": "Votos a favor distintos necesarios para que una propuesta se apruebe automaticamente. Incluso con la deliberacion completa, una propuesta que solo una persona ha avalado no deberia pasar en silencio."
+        "label": "Votos a favor mínimos",
+        "hint": "Votos a favor distintos necesarios para que una propuesta se apruebe automáticamente. Incluso con la deliberación completa, una propuesta que solo una persona ha avalado no debería pasar en silencio."
       },
       "inviteOnly": {
         "label": "Ingreso solo por invitación",
@@ -2766,7 +2782,7 @@
       "shareNote": "El enlace es de un solo uso y caduca en 14 días. Si se filtra antes de canjearse, revócalo abajo.",
       "openShareNote": "Este es el mismo enlace de un solo uso que generaste. Compártelo con una persona de confianza — o, si crees que se filtró, revócalo en Gestionar todas y genera uno nuevo.",
       "generated": "Generada {{when}}",
-      "redeemed": "Canjeado {{when}}",
+      "redeemed": "Canjeada {{when}}",
       "redeemedBy": "Canjeada {{when}} por {{name}}",
       "usedAfterRevoke": "Usada {{when}} por {{name}}, después de que la revocaras. Sigue sin admitir a nadie — pero quizá valga una conversación.",
       "expires": "Caduca {{date}}",
@@ -2798,20 +2814,31 @@
           "title": "Mira a tu alrededor antes de mostrar esto",
           "body": "Las cámaras de seguridad y las cámaras web pueden leer códigos QR desde el otro lado de una habitación. Una vez en pantalla, cualquiera al alcance de la cámara puede guardarlo y usarlo para unirse a tu comunidad.",
           "followup": "Este aviso aparece cada vez — tu entorno puede cambiar entre una invitación y la siguiente.",
-          "reveal": "Mostrar la invitación",
+          "cancel": "Ahora no",
+          "confirm": "Mostrarla ahora"
+        },
+        "printPoster": "Imprimir cartel",
+        "gate": {
+          "title": "Comparte este enlace de invitación",
+          "body": "Cualquiera con este enlace puede unirse a tu comunidad — envíalo a una persona de confianza.",
           "shareWithoutShowing": "Enviar el enlace sin mostrarlo",
+          "reveal": "Mostrar la invitación",
           "cancel": "Ahora no",
           "notAvailable": "Tu navegador no puede compartir ni copiar sin mostrar el enlace. Toca «Mostrar la invitación» y cópialo a mano.",
           "statusCopied": "Enlace copiado al portapapeles. Pégalo en Signal, Mensajes, o donde quieras enviarlo — el enlace no está en pantalla.",
           "statusFailed": "Tu navegador bloqueó la opción de compartir y el portapapeles. Toca «Mostrar la invitación» para copiarlo a mano."
-        },
-        "printPoster": "Imprimir cartel"
-      }
+        }
+      },
+      "noteLabel": "¿Para quién es? (solo tú lo ves)",
+      "notePlaceholder": "p. ej. Carol, la del huerto — se queda en este dispositivo, nunca viaja con el enlace",
+      "noteFor": "Para: {{note}}",
+      "noteAdd": "Añadir nota",
+      "noteEdit": "Editar nota"
     },
     "security": {
       "title": "Seguridad",
-      "summaryProtected": "Tus claves secretas en este dispositivo — la mitad privada de tu identidad — están envueltas (guardadas cifradas) con una clave derivada de tu frase. Se requiere desbloqueo en cada inicio.",
-      "summaryUnprotected": "Tus claves secretas se guardan en texto plano — texto legible que cualquiera con el dispositivo podría copiar. Activa la protección con frase antes de dejar el dispositivo solo en cualquier entorno hostil.",
+      "summaryProtected": "Tus claves secretas en este dispositivo — la mitad privada de tu identidad — están envueltas (guardadas cifradas) con una clave derivada de tu frase.",
+      "summaryUnprotected": "Tus claves secretas se guardan en texto plano — texto legible que cualquiera con el dispositivo podría copiar. Activa la protección con frase antes de dejar el dispositivo solo en cualquier lugar donde otra persona pueda tomar tu teléfono.",
       "enable": "Activar protección con frase",
       "change": "Cambiar frase",
       "disable": "Desactivar protección",
@@ -2845,7 +2872,8 @@
         "failed": "No se pudo configurar la llave de acceso. No se cambió nada — tu frase sigue funcionando.",
         "successAdd": "Llave de acceso añadida. La próxima vez que este dispositivo se bloquee, un toque lo desbloquea — y tu frase siempre funciona también.",
         "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo."
-      }
+      },
+      "whenAsked": "Se te pedirá la frase justo después de tocar «Bloquear ahora», y cada vez que abras la aplicación tras haberla cerrado o recargado — nunca por un temporizador mientras siga abierta."
     },
     "emergency": {
       "title": "Emergencia",
@@ -2944,7 +2972,7 @@
     "localOnly": "Registrado solo en este dispositivo — se creó antes de que las decisiones comunitarias se sincronizaran entre dispositivos, así que otros miembros no pueden verlo.",
     "footer": "Las votaciones aquí son abiertas: tu voto lleva tu nombre, es visible dentro de la comunidad y se sincroniza con el dispositivo de cada miembro. Puedes cambiarlo mientras la propuesta esté abierta — la versión más reciente es la que cuenta. Cuando la comunidad llega a su decisión, cualquier miembro puede registrar el resultado, y surte efecto en todas partes.",
     "proposerLabel": "Propuesta por",
-    "backfillProposer": "(historica, persona que reporto desconocida)",
+    "backfillProposer": "(histórica, persona que reportó desconocida)",
     "proposedLabel": "Iniciada",
     "closedLabel": "Cerrada",
     "outcomeReasonLabel": "Por qué",
@@ -2961,7 +2989,7 @@
     "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier persona puede cerrar esta propuesta.",
     "closeAsPassed": "Cerrar como aprobada",
     "closedReason": {
-      "consensus": "Cerrada por accion de integrante despues de cumplir las condiciones de consenso."
+      "consensus": "Cerrada por acción de integrante después de cumplir las condiciones de consenso."
     },
     "payloadHeader": "Configuración propuesta",
     "status": {
@@ -3039,7 +3067,7 @@
       "tierHeader": "Reversibilidad",
       "tierIntro": "¿Qué tan difícil sería deshacer esto? El default es fácil porque la config puede revertirse con otra propuesta — sube a moderada o difícil si el impacto cultural es mayor que la reversión técnica.",
       "impactHeader": "Reflexión de impacto",
-      "impactIntro": "Las decisiones dificiles de revertir merecen una pausa. Los cuatro campos son obligatorios para propuestas de nivel dificil — el objetivo es detenerse y pensar en cada dimension antes de algo mas dificil de deshacer.",
+      "impactIntro": "Las decisiones difíciles de revertir merecen una pausa. Los cuatro campos son obligatorios para propuestas de nivel difícil — el objetivo es detenerse y pensar en cada dimensión antes de algo más difícil de deshacer.",
       "impactFooter": "Estas notas serán visibles para tu comunidad junto a la propuesta.",
       "impact": {
         "yearOneLabel": "¿Qué cambia en el primer año?",
@@ -3049,8 +3077,8 @@
         "reversalPathLabel": "¿Cómo se desharía si resulta equivocado?",
         "reversalPathPlaceholder": "¿Cuál es el camino de vuelta? ¿Quién tendría que estar de acuerdo?",
         "vulnerableImpactLabel": "¿A quién afecta más — especialmente a las personas más vulnerables?",
-        "vulnerableImpactPlaceholder": "¿Quien carga con el peso si esto sale mal?",
-        "required": "Obligatorio para propuestas de nivel dificil."
+        "vulnerableImpactPlaceholder": "¿Quién carga con el peso si esto sale mal?",
+        "required": "Obligatorio para propuestas de nivel difícil."
       },
       "submit": "Iniciar la propuesta",
       "submitting": "Iniciando…"
@@ -3255,7 +3283,7 @@
       "eyebrow": "Bienvenida",
       "title": "Construir poder desde abajo",
       "hint": "Escanea cualquier código con tu teléfono para sumarte.",
-      "empty": "Nada programado por ahora — revisa el tablón."
+      "empty": "Nada programado por ahora — revisa el tablero."
     },
     "event": {
       "eyebrow": "Próximamente",
@@ -3428,8 +3456,8 @@
       "invalid": "Esto no parece un enlace de invitación válido, así que no hay nada seguro que imprimir."
     },
     "board": {
-      "titleNeeds": "Tablón comunitario — cosas que la gente necesita",
-      "titleOffers": "Tablón comunitario — ayuda que se ofrece",
+      "titleNeeds": "Tablero comunitario — cosas que la gente necesita",
+      "titleOffers": "Tablero comunitario — ayuda que se ofrece",
       "filtered": "mostrando: {{filters}}",
       "empty": "Nada coincide con esta vista ahora mismo.",
       "qrAria": "Código QR de la publicación \"{{title}}\""

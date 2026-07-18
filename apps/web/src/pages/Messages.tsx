@@ -344,7 +344,8 @@ function SearchResults({
   if (groups.length === 0) {
     return (
       <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-        {noMatches}
+        {noMatches}{" "}
+        {t("messages.search.noMatchesHint")}
       </p>
     );
   }

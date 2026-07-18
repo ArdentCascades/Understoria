@@ -1556,6 +1556,18 @@ function InvitesSection({
   const [issuing, setIssuing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  // How the sheet was opened decides its first screen: freshly issued
+  // → the share menu (no camera warning yet); an explicit "Show QR
+  // code" tap → straight to the look-around check, which is that
+  // warning's natural moment (2026-07 usability round).
+  const [sheetIntent, setSheetIntent] = useState<"share" | "show">(
+    "share",
+  );
+  // Optional local-only "who is this for?" label typed before
+  // generating. Stored on the Dexie invite row only — never in the
+  // link, never announced to the server (see db/invites.ts).
+  const [noteInput, setNoteInput] = useState("");
+  const [issuedNote, setIssuedNote] = useState("");
   // The me-menu's "Invite someone" deep-links here as /profile#invites.
   // The shell's ScrollToTop resets the main scroller on navigation, so
   // the hash needs an explicit scroll once the section exists.
@@ -1617,13 +1629,16 @@ function InvitesSection({
       const { shareUrl: url } = await issueInvite({
         inviterKey: member.publicKey,
         inviterName: member.displayName,
-        // The post-issuance UX opens the share sheet right away so
-        // the QR is visible the moment the invite exists — that's
-        // when a member is most likely to want to hand it off in
-        // person.
+        // The post-issuance UX opens the share sheet right away —
+        // on its share menu, not the camera warning; that warning
+        // waits for an explicit "show" choice.
         nodeId,
+        note: noteInput,
       });
       setShareUrl(url);
+      setIssuedNote(noteInput.trim());
+      setNoteInput("");
+      setSheetIntent("share");
       setShareSheetOpen(true);
     } catch (err) {
       setError(humanizeError(err));
@@ -1649,6 +1664,19 @@ function InvitesSection({
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
         {t("profile.invites.intro")}
       </p>
+      <label className="mb-2 block text-sm">
+        <span className="font-medium">
+          {t("profile.invites.noteLabel")}
+        </span>
+        <input
+          type="text"
+          className="input mt-1"
+          value={noteInput}
+          maxLength={120}
+          onChange={(e) => setNoteInput(e.target.value)}
+          placeholder={t("profile.invites.notePlaceholder")}
+        />
+      </label>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -1682,6 +1710,17 @@ function InvitesSection({
               })}
             </p>
           )}
+          {/* The local-only label, so a returning member knows WHICH
+              link this is ("Carol from the garden"). Only-you copy
+              travels with it — the note itself never leaves this
+              device. */}
+          {(isFreshShare ? issuedNote : latestOpen?.note) ? (
+            <p className="mt-1 text-xs font-medium text-canopy-800 dark:text-canopy-200">
+              {t("profile.invites.noteFor", {
+                note: isFreshShare ? issuedNote : latestOpen?.note,
+              })}
+            </p>
+          ) : null}
           <code
             className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs dark:bg-moss-900"
             aria-live="polite"
@@ -1714,7 +1753,12 @@ function InvitesSection({
             <button
               type="button"
               className="btn-secondary text-xs"
-              onClick={() => setShareSheetOpen(true)}
+              onClick={() => {
+                // Explicit "Show QR code" — the camera check is the
+                // natural first screen here.
+                setSheetIntent("show");
+                setShareSheetOpen(true);
+              }}
             >
               {t("profile.invites.showShareSheet")}
             </button>
@@ -1756,6 +1800,7 @@ function InvitesSection({
         url={activeUrl ?? ""}
         shareTitle={t("profile.invites.shareSheet.shareTitle")}
         shareText={t("profile.invites.shareSheet.shareText")}
+        intent={sheetIntent}
         onClose={() => setShareSheetOpen(false)}
       />
     </section>

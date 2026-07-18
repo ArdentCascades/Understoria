@@ -329,7 +329,15 @@ export default function WelcomePage() {
   // identity creation is not. Nobody is trapped — Back and leaving the
   // page both still work; the device just isn't "onboarded" until a
   // named identity exists.
-  const skipToProfileSetup = () => setStepIndex(visibleSteps.length - 1);
+  //
+  // EXCEPT on a deliberate revisit (`?revisit=1`, the LearnSection
+  // link): the member is already onboarded, so "Skip" means "I'm done
+  // with the tour", not "take me to profile setup" — it exits straight
+  // back to the board. The last step's own "Open the board" button is
+  // unchanged; only Skip differs for revisitors.
+  const handleSkip = revisit
+    ? () => navigate("/", { replace: true })
+    : () => setStepIndex(visibleSteps.length - 1);
 
   if (step.kind === "concept") {
     // On the FIRST concept screen only, surface a small affordance
@@ -380,7 +388,7 @@ export default function WelcomePage() {
         // profileSetup step always follows — so Next only ever
         // advances; finishing happens exclusively from profileSetup.
         onNext={() => setStepIndex(stepIndex + 1)}
-        onSkip={skipToProfileSetup}
+        onSkip={handleSkip}
         nextLabel={t("welcome.next")}
       />
     );
@@ -463,7 +471,7 @@ export default function WelcomePage() {
         stepCount={visibleSteps.length}
         onBack={onBack}
         onNext={() => setStepIndex(stepIndex + 1)}
-        onSkip={skipToProfileSetup}
+        onSkip={handleSkip}
         nextLabel={t("welcome.next")}
       />
     );

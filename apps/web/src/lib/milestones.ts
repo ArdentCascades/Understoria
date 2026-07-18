@@ -37,6 +37,31 @@ export const MILESTONES: Milestone[] = [
 ];
 
 /**
+ * Display-layer localization for milestone labels. Baseline milestones
+ * (the shipped `MILESTONES` above) are authored in English and their
+ * `label` doubles as a stable identity string (celebration bookkeeping
+ * keys off it), so the stored shape never changes — instead, anything
+ * that RENDERS a milestone label goes through this helper, which maps
+ * a baseline milestone to an interpolated i18n string
+ * (`dashboard.milestones.label.<type>` with `count` = threshold).
+ * Community-authored custom milestones keep their own label verbatim:
+ * that text was written by a person, not by us, and is not ours to
+ * translate.
+ */
+export function milestoneLabel(
+  milestone: Milestone,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  const isBaseline = MILESTONES.some(
+    (m) => m.type === milestone.type && m.threshold === milestone.threshold,
+  );
+  if (!isBaseline) return milestone.label;
+  return t(`dashboard.milestones.label.${milestone.type}`, {
+    count: milestone.threshold,
+  });
+}
+
+/**
  * Returns the effective milestone set for a community: the baseline
  * `MILESTONES` plus the community's `customMilestones`, deduped by
  * `(type, threshold)`. Baseline wins on collision — a community can't

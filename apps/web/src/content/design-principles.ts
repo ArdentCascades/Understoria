@@ -86,9 +86,9 @@ export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
     id: "no-post-editing",
     title: "Why repost instead of edit",
     statement:
-      "Posts are cryptographically signed at creation. Editing would break the signature that lets any node verify the post independently.",
+      "Once a post is shared with the community, it can't be quietly edited or erased — the record of what was asked stays trustworthy for everyone who saw it.",
     example:
-      "Platforms that allow silent edits to posts create deniability problems — 'I never said that' becomes unresolvable. Immutable signed records plus a repost flow preserves both flexibility and accountability.",
+      "Platforms that allow silent edits to posts create deniability problems — 'I never said that' becomes unresolvable. Keeping the original as it was, plus a repost flow for changes, preserves both flexibility and accountability.",
   },
   {
     id: "no-read-receipts",

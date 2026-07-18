@@ -27,6 +27,7 @@ import { isOurNode } from "@/lib/nodeIdentity";
 import { computeFlowStats } from "@/lib/flow";
 import { projectCategoryMeta } from "@/lib/categories";
 import { formatHours } from "@/lib/format";
+import { milestoneLabel } from "@/lib/milestones";
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { readMembershipRejectedAt } from "@/lib/membershipStatus";
 import { BreadthBar } from "@/components/BreadthBar";
@@ -572,7 +573,7 @@ function MilestoneCelebration({ milestone }: { milestone: Milestone }) {
         <div className="text-sm font-semibold">
           {t("dashboard.milestones.celebration")}
         </div>
-        <div className="text-base">{milestone.label}</div>
+        <div className="text-base">{milestoneLabel(milestone, t)}</div>
       </div>
     </div>
   );

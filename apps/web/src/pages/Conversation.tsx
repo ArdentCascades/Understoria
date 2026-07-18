@@ -190,6 +190,14 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // something (and offers a way out). Cleared by speak()'s onDone
   // when the utterance ends or errors.
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  // A Speak tap that produced no speech at all — some phones ship a
+  // speech engine with zero voices: the utterance queues and then
+  // NOTHING fires (lib/speak.ts's start watchdog catches it). The
+  // failed message's item flips to the "can't read aloud" label for
+  // the rest of the menu's lifetime, because a tap must visibly do
+  // SOMETHING even when the device can't. In-menu, like "Copied ✓" —
+  // feedback stays where the eyes are.
+  const [speakFailedId, setSpeakFailedId] = useState<string | null>(null);
   const copyTimer = useRef<number | null>(null);
   useEffect(
     () => () => {
@@ -208,6 +216,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       setInfoFor(null);
       setCopiedId(null);
       setSpeakingId(null);
+      setSpeakFailedId(null);
       stopSpeaking();
     }
   }, [reactFor]);
@@ -253,8 +262,13 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // Speak toggles: idle → start reading and remember which message;
   // already reading this one → stop. State is set BEFORE speak() so
   // a synchronous synthesis failure (onDone fires inside the call)
-  // still lands on "not speaking"; the functional clear ignores a
-  // stale utterance's onDone after the member moved on to another.
+  // still lands on "not speaking" — and, since that set-then-clear
+  // batches into one paint, the failure flag is what makes the tap
+  // visible at all in that case. The functional clear ignores a
+  // stale utterance's onDone after the member moved on to another;
+  // ok=false only ever means "this device never spoke it" (a
+  // deliberate stop or replacement settles as ok=true), so the
+  // failure label can't appear just because someone tapped Stop.
   const handleSpeak = useCallback(
     (m: DecryptedMessage) => {
       if (m.plaintext === null) return;
@@ -264,9 +278,10 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         return;
       }
       setSpeakingId(m.id);
-      speak(m.plaintext, speakLang, () =>
-        setSpeakingId((cur) => (cur === m.id ? null : cur)),
-      );
+      speak(m.plaintext, speakLang, (ok) => {
+        setSpeakingId((cur) => (cur === m.id ? null : cur));
+        if (!ok) setSpeakFailedId(m.id);
+      });
     },
     [speakingId, speakLang],
   );
@@ -599,11 +614,15 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
 
   if (!currentMember) return null;
 
-  // PR F: if the counterparty is in the blocked set, render the
-  // generic not-available copy in place of the conversation. No
-  // block-specific phrasing per docs/blocking.md §6.1 generic-error
-  // discipline; the message is byte-identical to the one any other
-  // unavailable conversation would render.
+  // PR F + honest-dialog round: if the counterparty is in the blocked
+  // set, replace the conversation with an honest "you blocked them"
+  // state. `blockedKeys` is derived ONLY from the current member's own
+  // local block rows (blocks never federate — docs/blocking.md §7), so
+  // this branch renders exclusively on the BLOCKER's own device; the
+  // §6.1 generic-error discipline protects what the BLOCKED party sees
+  // and is untouched by being honest with the blocker about their own
+  // decision. No other unavailability cause routes here — this is the
+  // only consumer of the blocked-conversation state on this page.
   if (otherKey && blockedKeys.has(otherKey)) {
     return (
       <div className="flex h-full flex-col px-4 pb-4 pt-4">
@@ -616,9 +635,15 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             />
           )}
         </header>
-        <p className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
-          {t("errors.generic.notAvailable")}
-        </p>
+        <div className="rounded-xl bg-moss-50 p-4 text-center text-sm text-moss-600 dark:bg-moss-950/30 dark:text-moss-300">
+          <p>{t("messages.conversation.blockedNotice")}</p>
+          <Link
+            to="/settings"
+            className="mt-2 inline-block font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          >
+            {t("messages.conversation.blockedNoticeLink")}
+          </Link>
+        </div>
       </div>
     );
   }
@@ -915,28 +940,54 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                     🙂+
                   </button>
                   {/* Reaction chips — the CURRENT reaction of each
-                      party (latest wins; clearing removes it). */}
+                      party (latest wins; clearing removes it). YOUR
+                      OWN chip is a button: tapping it opens the same
+                      long-press menu for this message, the WhatsApp
+                      habit of tapping a reaction to change or remove
+                      it (2026-07 usability round). The other party's
+                      chip stays display-only — you can't operate on
+                      someone else's reaction. The pointerdown stop
+                      keeps a chip tap from ALSO arming the bubble's
+                      long-press timer (same interplay guard as the
+                      🙂+ button above). */}
                   {m.reactions && m.reactions.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
-                      {m.reactions.map((r) => (
-                        <span
-                          key={r.senderKey}
-                          aria-label={t("messages.reactions.reactedBy", {
-                            name:
-                              r.senderKey === currentMember.publicKey
-                                ? t("messages.reactions.you")
-                                : otherName,
-                            emoji: r.emoji,
-                          })}
-                          className={`rounded-full px-2 py-0.5 text-sm ${
-                            r.senderKey === currentMember.publicKey
-                              ? "bg-canopy-200 dark:bg-canopy-800"
-                              : "bg-moss-900/10 dark:bg-white/10"
-                          }`}
-                        >
-                          {r.emoji}
-                        </span>
-                      ))}
+                      {m.reactions.map((r) =>
+                        r.senderKey === currentMember.publicKey ? (
+                          <button
+                            key={r.senderKey}
+                            type="button"
+                            aria-label={t("messages.reactions.changeOwn", {
+                              emoji: r.emoji,
+                            })}
+                            aria-expanded={reactFor === m.id}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              // A chip tap must never double as a
+                              // bubble press.
+                              e.stopPropagation();
+                              cancelPress();
+                              setReactFor(
+                                reactFor === m.id ? null : m.id,
+                              );
+                            }}
+                            className="rounded-full bg-canopy-200 px-2 py-0.5 text-sm hover:bg-canopy-300 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:bg-canopy-800 dark:hover:bg-canopy-700"
+                          >
+                            {r.emoji}
+                          </button>
+                        ) : (
+                          <span
+                            key={r.senderKey}
+                            aria-label={t("messages.reactions.reactedBy", {
+                              name: otherName,
+                              emoji: r.emoji,
+                            })}
+                            className="rounded-full bg-moss-900/10 px-2 py-0.5 text-sm dark:bg-white/10"
+                          >
+                            {r.emoji}
+                          </span>
+                        ),
+                      )}
                     </div>
                   )}
                   {/* The picker: six 44px emoji, inline under the
@@ -1002,16 +1053,23 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                               speaking", and where the device has no
                               speech at all it stays visible but
                               disabled and says so — a hidden control
-                              can't explain itself. */}
+                              can't explain itself. A tap that turned
+                              out to produce no speech (zero-voices
+                              engine — the watchdog in lib/speak.ts)
+                              lands on the same disabled explanation:
+                              the truth arrived late, but it arrives
+                              where the member is already looking. */}
                           <button
                             type="button"
                             role="menuitem"
-                            disabled={!isSpeechAvailable()}
+                            disabled={
+                              !isSpeechAvailable() || speakFailedId === m.id
+                            }
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={() => handleSpeak(m)}
                             className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 disabled:opacity-60 disabled:hover:bg-transparent dark:hover:bg-white/10 dark:disabled:hover:bg-transparent"
                           >
-                            {!isSpeechAvailable()
+                            {!isSpeechAvailable() || speakFailedId === m.id
                               ? t("messages.menu.speakUnavailable")
                               : speakingId === m.id
                                 ? t("messages.menu.speakStop")

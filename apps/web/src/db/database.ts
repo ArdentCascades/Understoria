@@ -283,6 +283,17 @@ export interface InviteRow {
    * rows never revoked and on rows pre-dating this feature.
    */
   revokedAt?: number | null;
+  /**
+   * Optional "who is this for?" note the inviter writes for
+   * themselves — the 2026-07 usability run: two open invites were
+   * indistinguishable rows, so members couldn't tell which link
+   * they'd handed to whom. STRICTLY LOCAL-ONLY: never sent to the
+   * server (the invite announcement is built from the signed invite,
+   * which has no note field), never encoded into the share link, and
+   * only ever rendered on this device's own invite surfaces. Empty
+   * string when the member wrote nothing (v38 backfills "").
+   */
+  note?: string;
 }
 
 /**
@@ -1193,6 +1204,19 @@ export class UnderstoriaDB extends Dexie {
     // the LWW cursor.
     this.version(37).stores({
       capacityPostures: "nodeId, updatedAt",
+    });
+
+    // v38 — local-only "who is this for?" note on issued invites
+    // (2026-07 usability round: open invites were indistinguishable
+    // rows). No new index — the note is read with its row, never
+    // queried. LOCAL-ONLY: never announced to the server, never in
+    // the share link. Backfill "" so the field is never undefined at
+    // runtime (same posture as v35's plan note).
+    this.version(38).stores({}).upgrade(async (tx) => {
+      const invites = tx.table<InviteRow, string>("invites");
+      await invites.toCollection().modify((row) => {
+        if (row.note === undefined) row.note = "";
+      });
     });
   }
 }

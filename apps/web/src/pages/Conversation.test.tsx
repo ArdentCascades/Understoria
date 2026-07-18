@@ -421,3 +421,38 @@ describe("ConversationPage — post-context chips on messages", () => {
     expect(chip!.textContent).toContain("about a post");
   });
 });
+
+describe("ConversationPage — blocked conversation (blocker's own view)", () => {
+  // `blockedKeys` is derived only from the viewer's OWN local block
+  // rows (blocks never federate), so this state renders exclusively on
+  // the blocker's device — being honest here leaks nothing to the
+  // blocked party, whose generic-error discipline lives in the action
+  // layer (docs/blocking.md §6.1).
+  it("names the block honestly and links to Settings → Blocked contacts", async () => {
+    mockState.blockedKeys = new Set(["them-key"]);
+    render();
+    await flushPromises();
+    expect(container.textContent).toContain("You've blocked this contact.");
+    const link = container.querySelector(
+      'a[href="/settings"]',
+    ) as HTMLAnchorElement | null;
+    expect(link).not.toBeNull();
+    expect(link!.textContent).toContain(
+      "You can unblock them in Settings → Blocked contacts.",
+    );
+    // The old evasive copy is gone from the blocker's own view…
+    expect(container.textContent).not.toContain(
+      "This isn't available right now.",
+    );
+    // …and the conversation itself does not render (no composer).
+    expect(container.querySelector("textarea")).toBeNull();
+  });
+
+  it("renders ONLY for blocks — an unblocked conversation shows the thread, not the blocked state", async () => {
+    mockState.blockedKeys = new Set(["someone-else"]);
+    render();
+    await flushPromises();
+    expect(container.textContent).not.toContain("You've blocked this contact.");
+    expect(container.querySelector("textarea")).not.toBeNull();
+  });
+});

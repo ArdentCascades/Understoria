@@ -46,8 +46,9 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         answer: [
           "On the Board, tap the green + Post a need or + Post an offer " +
             "button at the bottom of the screen. Add a short title, " +
-            "describe what you need or can give, and post it. You can " +
-            "edit or cancel it later from the post's detail page.",
+            "describe what you need or can give, and post it. Later you " +
+            "can cancel it from the post's detail page, or repost it " +
+            "with changes from the post menu.",
         ],
       },
       {
@@ -97,10 +98,11 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "cancel-post",
         question: "How do I cancel a post I no longer need?",
         answer: [
-          "Open the post (from the Board or from your profile's " +
-            "history) and tap Cancel post. Cancelled posts stay visible " +
-            "so the community can see what was asked or offered, but " +
-            "they can't be claimed.",
+          "Open the post from the Board and tap Cancel post. The post " +
+            "leaves the board right away, so nobody can claim it. It " +
+            "isn't deleted — its own page stays, marked as cancelled, " +
+            "and anyone with its link can still see what was asked or " +
+            "offered.",
         ],
       },
     ],

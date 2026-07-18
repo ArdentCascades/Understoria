@@ -534,9 +534,13 @@ blocker is not nagged toward the very person they blocked. Cited:
 tap-to-reveal).** The Settings → Blocked contacts panel — covering
 both the active `blocks` list and the `previouslyBlocked` history
 — renders each row with a generic avatar, the literal copy
-"Blocked contact," and the block date by default. The display
-name and truncated pubkey for any row are revealed only by tapping
-that row; a second tap re-obscures. Reveal state is per-row and
+"Blocked contact," the block date, and the truncated pubkey by
+default. The display name for any row is revealed only by tapping
+that row; a second tap re-obscures. (The truncated pubkey moved to
+the collapsed state after a usability round found two blocked
+contacts indistinguishable without expanding each row — a short
+key distinguishes rows without telling a shoulder-surfer who
+anyone is, so the posture holds.) Reveal state is per-row and
 ephemeral — never persisted. The threat model for this row is
 **device-access from over the shoulder**: someone glancing at the
 blocker's screen while they scroll Settings, or a borrowed device

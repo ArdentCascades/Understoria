@@ -518,6 +518,12 @@ export default function PostDetailPage() {
         }
       />
 
+      {/* The dismiss label is "Keep my post", not the default
+          "Cancel" — a "Cancel" / "Cancel post" button pair forces a
+          double-take in exactly the moment someone is deciding
+          whether to withdraw an ask (honest-dialog round: a member
+          cancelling because her appointment moved read them twice).
+          Same pattern as EventDetail's "Keep event". */}
       <ConfirmDialog
         open={dialog?.type === "cancel"}
         tone="caution"
@@ -525,6 +531,7 @@ export default function PostDetailPage() {
         description={t("postDetail.dialogCancelDescription")}
         confirmLabel={t("postDetail.dialogCancelConfirm")}
         confirmingLabel={t("common.working")}
+        cancelLabel={t("postDetail.dialogCancelDismiss")}
         onCancel={() => setDialog(null)}
         onConfirm={() =>
           me && run(() => cancelPost(post.id, me.publicKey))
@@ -599,6 +606,10 @@ function ActionPanel({
               {t("postDetail.actionsCancelPost")}
             </button>
           </div>
+          {/* The fresh-post sentence belongs to the REPOST affordance
+              (the "Repost with changes" item in the header menu), not
+              to the cancel flow — the hint points there instead of
+              implying that cancelling itself creates a new post. */}
           <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("postDetail.repostHint")}
             <WhyTooltip principleId="no-post-editing" />

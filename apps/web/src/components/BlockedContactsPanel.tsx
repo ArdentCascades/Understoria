@@ -36,7 +36,12 @@ import type { BlockRow, PreviouslyBlockedRow } from "@/types";
  * history) per design doc §13 PR E, with the tap-to-reveal posture
  * from §6 "Block-list rendering" — every row obscured by default,
  * a generic-avatar SVG + the literal copy "Blocked contact" + the
- * date.
+ * date + the truncated pubkey. The display NAME stays behind the
+ * tap; the short key is shown collapsed so two blocked contacts are
+ * distinguishable without expanding each row (honest-dialog round:
+ * identical "Blocked contact" rows forced expand-and-check). A
+ * short key means nothing to a shoulder-surfer, which is the threat
+ * this posture defends against — see §6.2.
  *
  * Reveal state is per-row + ephemeral (component state, never
  * persisted). Tapping again re-obscures. This is privacy-from-over-
@@ -191,14 +196,10 @@ export function BlockedContactsPanel() {
                       {t("block.settings.blockedAtLabel", {
                         date: formatAbsoluteDate(row.createdAt),
                       })}
-                      {revealed && (
-                        <>
-                          {" · "}
-                          {t("block.settings.pubkeyLabel", {
-                            shortKey: shortKey(row.blockedKey),
-                          })}
-                        </>
-                      )}
+                      {" · "}
+                      {t("block.settings.pubkeyLabel", {
+                        shortKey: shortKey(row.blockedKey),
+                      })}
                     </span>
                   </span>
                   <span aria-hidden="true" className="ml-auto text-moss-400 dark:text-moss-300">
@@ -289,15 +290,15 @@ export function BlockedContactsPanel() {
                       {t("block.settings.unblockedAtLabel", {
                         when: formatRelativeTime(row.lastUnblockedAt),
                       })}
+                      {" · "}
+                      {t("block.settings.pubkeyLabel", {
+                        shortKey: shortKey(row.blockedKey),
+                      })}
                       {revealed && (
                         <>
                           {" · "}
                           {t("block.settings.firstBlockedAtLabel", {
                             when: formatRelativeTime(row.firstBlockedAt),
-                          })}
-                          {" · "}
-                          {t("block.settings.pubkeyLabel", {
-                            shortKey: shortKey(row.blockedKey),
                           })}
                         </>
                       )}

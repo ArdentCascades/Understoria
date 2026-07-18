@@ -8,7 +8,7 @@ import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import "@/i18n";
+import i18n from "@/i18n";
 import { CanopyMilestones } from "./CanopyMilestones";
 
 let container: HTMLDivElement;
@@ -72,5 +72,30 @@ describe("CanopyMilestones — next-leaf label", () => {
     expect(text).toContain("next: 10 hours of mutual aid");
     expect(text).toContain("next: 100 exchanges completed");
     expect(text).toContain("next: 50 members strong");
+  });
+
+  it("renders milestone labels in Spanish under the es locale", async () => {
+    // Milestone labels are display-layer i18n over stable English
+    // identity strings (lib/milestones.ts) — a Spanish screen must
+    // never show "50 hours of mutual aid".
+    await i18n.changeLanguage("es");
+    try {
+      render(
+        <CanopyMilestones
+          totalHours={12}
+          totalExchanges={0}
+          totalMembers={0}
+          newlyReachedLabels={new Set()}
+        />,
+      );
+      const text = container.textContent ?? "";
+      expect(text).toContain("siguiente: 50 horas de ayuda mutua");
+      expect(text).not.toContain("hours");
+      expect(
+        container.querySelector('svg[aria-label="10 horas de ayuda mutua"]'),
+      ).not.toBeNull();
+    } finally {
+      await i18n.changeLanguage("en");
+    }
   });
 });
