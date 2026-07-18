@@ -36,6 +36,23 @@
     min-width: 52px;
   }
 
+  /* iOS Safari (browser tab AND installed PWA) zooms the whole page
+   * when a focused form control renders below 16px — and leaves it
+   * zoomed. Floor every control to 16px on touch-primary devices so
+   * tapping a field never zooms; the compact text-sm/text-xs field
+   * sizes still apply on fine-pointer (desktop) devices. !important
+   * is load-bearing: base-layer importants outrank the normal
+   * text-sm/text-xs utility declarations that caused the zoom.
+   * max(1em, 16px) keeps inherited larger sizes (text-size setting,
+   * large-text containers) instead of pinning everything to 16px. */
+  @media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+      font-size: max(1em, 16px) !important;
+    }
+  }
+
   /* The app is a non-scrolling 100dvh shell (see Layout.tsx) — all
    * scrolling happens inside <main>. `overflow: clip` on the root is
    * the hard backstop: even if some element escapes the shell (an
