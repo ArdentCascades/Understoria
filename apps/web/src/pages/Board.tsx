@@ -824,7 +824,7 @@ export default function BoardPage() {
         )}
 
         {tab === "PROJECTS" && (
-          <div>
+          <div className="landscape-short:flex-1 lg:flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <FiltersToggle
                 open={mobileFiltersOpen}
@@ -833,6 +833,35 @@ export default function BoardPage() {
                 onToggle={() => setMobileFiltersOpen((v) => !v)}
               />
               <ActiveFilterChips entries={projectFilterChips} />
+              {/* Being built / Tended scope (docs/commons.md §5.1) —
+                  filter-chip pattern, aria-pressed for a11y. Shares
+                  the toggle's row (board-calm pass): it IS a kind of
+                  filter, though fundamental enough to stay visible
+                  rather than collapse into the disclosure. One line
+                  with the Filters pill on phones; ml-auto pushes it
+                  to the right edge at lg/landscape-short (the block
+                  above is flex-1 there so the row spans the line). */}
+              <div
+                className="flex flex-wrap gap-2 landscape-short:ml-auto lg:ml-auto"
+                role="group"
+                aria-label={t("projects.commons.scopeLabel")}
+              >
+                {(["build", "tended"] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    aria-pressed={scope === s}
+                    onClick={() => setScope(s)}
+                    className={`chip transition-colors ${
+                      scope === s
+                        ? "bg-canopy-600 text-white dark:bg-canopy-500 dark:text-canopy-950"
+                        : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
+                    }`}
+                  >
+                    {t(s === "build" ? "projects.commons.scopeBuild" : "projects.commons.scopeTended")}
+                  </button>
+                ))}
+              </div>
             </div>
             <div
               id="board-project-filters"
@@ -851,37 +880,6 @@ export default function BoardPage() {
                 setOnlyHourSized={setOnlyHourSized}
               />
             </div>
-          </div>
-        )}
-        {/* Being built / Tended scope (docs/commons.md §5.1) —
-            filter-chip pattern, aria-pressed for a11y. Lives on the
-            filters line (board-calm pass): it IS a kind of filter,
-            though fundamental enough to stay visible rather than
-            collapse into the disclosure. The wrapper's
-            justify-between right-aligns it at lg/landscape-short;
-            on portrait it stacks after the Filters button, same
-            visible sequence as before. */}
-        {tab === "PROJECTS" && (
-          <div
-            className="mb-3 flex flex-wrap gap-2 landscape-short:mb-0 lg:mb-0"
-            role="group"
-            aria-label={t("projects.commons.scopeLabel")}
-          >
-            {(["build", "tended"] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                aria-pressed={scope === s}
-                onClick={() => setScope(s)}
-                className={`chip transition-colors ${
-                  scope === s
-                    ? "bg-canopy-600 text-white dark:bg-canopy-500 dark:text-canopy-950"
-                    : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700"
-                }`}
-              >
-                {t(s === "build" ? "projects.commons.scopeBuild" : "projects.commons.scopeTended")}
-              </button>
-            ))}
           </div>
         )}
         </div>
@@ -1184,21 +1182,24 @@ function FiltersToggle({
   onToggle: () => void;
 }) {
   const { t } = useTranslation();
-  // ONE disclosure at every width (board-calm pass): the full-width
-  // card trigger phones always had, compacting to a quiet pill from
-  // sm up. The rail's five controls collapse behind it everywhere —
-  // the active-filter CHIPS beside this button keep applied state
-  // visible and one-tap removable, so collapsing costs a click only
-  // when actually changing filters. aria-expanded/aria-controls
-  // carry the disclosure semantics; the count is announced in the
-  // label ("Filters · 2 active").
+  // ONE disclosure at every width (board-calm pass): a compact pill
+  // trigger — including on phones, where the old full-width card
+  // stopped earning its row once the Being-built/Tended scope chips
+  // moved beside it (field report: they collided flush under the
+  // card; a pill lets [Filters][scope] share one line). The rail's
+  // controls collapse behind it everywhere — the active-filter CHIPS
+  // beside this button keep applied state visible and one-tap
+  // removable, so collapsing costs a click only when actually
+  // changing filters. aria-expanded/aria-controls carry the
+  // disclosure semantics; the count is announced in the label
+  // ("Filters · 2 active").
   return (
     <button
       type="button"
       aria-expanded={open}
       aria-controls={controlsId}
       onClick={onToggle}
-      className="card flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-sm font-semibold text-canopy-800 transition-colors hover:bg-moss-50 active:bg-moss-100 dark:text-canopy-200 dark:hover:bg-moss-800 sm:w-auto sm:gap-2 sm:rounded-full sm:py-1.5"
+      className="card flex min-h-[44px] items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-canopy-800 transition-colors hover:bg-moss-50 active:bg-moss-100 dark:text-canopy-200 dark:hover:bg-moss-800"
     >
       <span>
         {activeCount > 0

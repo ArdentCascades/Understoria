@@ -183,7 +183,10 @@ describe("Board mobile Filters disclosure", () => {
     expect(railWrapper().className).toContain("hidden");
     expect(railWrapper().className).not.toContain("sm:block");
     expect(btn.className).not.toContain("sm:hidden");
-    expect(btn.className).toContain("sm:w-auto");
+    // Compact pill at every width — the full-width mobile card is
+    // retired so the Being-built/Tended scope shares its line.
+    expect(btn.className).toContain("rounded-full");
+    expect(btn.className).not.toContain("w-full");
   });
 
   it("active filters surface as removable chips while the rail is collapsed", () => {
