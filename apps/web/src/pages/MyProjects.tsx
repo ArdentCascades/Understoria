@@ -134,7 +134,7 @@ export function MyProjectsSection({
 }) {
   return (
     <>
-      <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
+      <p className="mb-4 text-sm text-moss-600 dark:text-moss-300 landscape-short:mb-2">
         <MyProjectsSummary projectCount={view.projectCount} />
       </p>
       <div className="flex flex-col gap-3">

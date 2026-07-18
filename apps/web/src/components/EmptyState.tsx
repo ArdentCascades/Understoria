@@ -53,10 +53,15 @@ export function EmptyState({
   action,
   variant = "card",
 }: EmptyStateProps) {
+  // landscape-short (a phone held sideways — the shared variant in
+  // tailwind.config.js): height is the scarce axis, so the empty
+  // state compresses — illustration hidden, padding and stack gap
+  // reduced, the message allowed the full line length instead of
+  // wrapping at max-w-sm. Same copy, fewer lines.
   const container =
     variant === "card"
-      ? "card flex flex-col items-center gap-stack-sm py-10 text-center"
-      : "flex flex-col items-center gap-stack-sm py-6 text-center";
+      ? "card flex flex-col items-center gap-stack-sm py-10 text-center landscape-short:gap-1 landscape-short:py-3"
+      : "flex flex-col items-center gap-stack-sm py-6 text-center landscape-short:gap-1 landscape-short:py-2";
 
   // Precedence: explicit illustration > legacy icon > default sapling.
   // illustration="none" suppresses the graphic even if `icon` is set.
@@ -74,10 +79,10 @@ export function EmptyState({
       {resolved ? (
         <Illustration
           name={resolved}
-          className="text-canopy-700 dark:text-canopy-300"
+          className="text-canopy-700 dark:text-canopy-300 landscape-short:hidden"
         />
       ) : icon && illustration !== "none" ? (
-        <div className="text-4xl" aria-hidden="true">
+        <div className="text-4xl landscape-short:hidden" aria-hidden="true">
           {icon}
         </div>
       ) : null}
@@ -86,11 +91,11 @@ export function EmptyState({
           {title}
         </h3>
       ) : null}
-      <p className="max-w-sm text-sm text-moss-600 dark:text-moss-300">
+      <p className="max-w-sm text-sm text-moss-600 dark:text-moss-300 landscape-short:max-w-none">
         {message}
       </p>
       {action ? (
-        <Link to={action.to} className="btn-primary mt-2">
+        <Link to={action.to} className="btn-primary mt-2 landscape-short:mt-0">
           {action.label}
         </Link>
       ) : null}

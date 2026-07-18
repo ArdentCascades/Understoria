@@ -1486,6 +1486,7 @@
     "plannedFor": "You planned {{day}}",
     "plannedPast": "You'd planned {{day}} — whenever you're ready",
     "empty": "When you claim a task in a community project it shows up here, so you can see your commitments without opening each project one by one.",
+    "emptyShort": "Nothing claimed yet",
     "browseProjects": "Browse projects",
     "seeAll": "See all your tasks",
     "boardLink": "Tasks you're carrying"
@@ -1503,6 +1504,7 @@
     "pendingInvites_other": "{{count}} co-organizer invitations waiting on a reply",
     "coOrganizerChip": "Co-organizer",
     "empty": "When you start a project, or accept a co-organizer invitation, it shows up here — so you can see everything in your care without opening each one.",
+    "emptyShort": "No projects in your care yet",
     "startProject": "Start a project",
     "seeAll": "See all projects you organize",
     "boardLink": "Projects you organize"

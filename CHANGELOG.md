@@ -147,6 +147,22 @@ include breaking changes.
   type it. English and Spanish.
 
 ### Changed
+- **"In my care", the Dashboard, and Help now use a sideways phone's
+  width instead of stacking one long column.** Held in landscape, a
+  phone has desktop-class width but very little height — yet these
+  pages kept stacking full-width sections a sentence tall. Now "In
+  my care" shows your commitments beside the projects you organize,
+  the Dashboard's doorway cards pair up two-across (its stat tiles
+  and card pairs already did), and Help's FAQ sections sit two to a
+  row. Reading and screen-reader order are untouched — the columns
+  only change placement — and portrait phones and desktops are
+  unchanged.
+- **Empty sections shrink to one line when a phone is sideways.** An
+  empty half of "In my care" used to spend three lines explaining
+  itself; in landscape it now says just the essence with its action
+  link ("Nothing claimed yet · Browse projects"), and the shared
+  empty-state card drops its illustration and tightens its padding
+  so a mostly-empty page still fits the short screen.
 - **The community board's filters moved out of their own column and
   into one compact row.** On desktop the three filter dropdowns used
   to occupy a fixed 240px column — about a quarter of the page —

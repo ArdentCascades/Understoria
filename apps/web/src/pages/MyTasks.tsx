@@ -234,7 +234,7 @@ export function MyTasksSection({
 }) {
   return (
     <>
-      <p className="mb-4 text-sm text-moss-600 dark:text-moss-300">
+      <p className="mb-4 text-sm text-moss-600 dark:text-moss-300 landscape-short:mb-2">
         <MyTasksSummary
           taskCount={view.taskCount}
           projectCount={view.projectCount}

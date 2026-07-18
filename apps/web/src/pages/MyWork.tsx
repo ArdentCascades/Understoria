@@ -245,7 +245,15 @@ export default function MyWorkPage() {
         // Stacked on a phone; side-by-side columns at lg+ (Layout's
         // content well widens to screen-lg there) so the two halves
         // read as one workbench instead of a long scroll.
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
+        //
+        // A phone held sideways (landscape-short) gets the same two
+        // columns: width is lg-class while height is the scarce axis,
+        // and the stacked halves were burning it. Column grouping is
+        // the existing DOM order — everything the member claimed
+        // (asked-of-you, tasks, shifts, help on the way) left, the
+        // projects they organize right — so reading order equals DOM
+        // order in every regime (WCAG 2.4.3).
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-start landscape-short:gap-x-6">
           <section
             id="tasks"
             ref={tasksRef}
@@ -263,11 +271,11 @@ export default function MyWorkPage() {
             {asked.length > 0 && (
               <section
                 aria-labelledby="my-work-asked-heading"
-                className="mb-6"
+                className="mb-6 landscape-short:mb-4"
               >
                 <h2
                   id="my-work-asked-heading"
-                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-1"
                 >
                   {t("myWork.askedTitle")}
                   <WhyTooltip principleId="no-notifications" />
@@ -288,15 +296,24 @@ export default function MyWorkPage() {
 
             <h2
               id="my-work-tasks-heading"
-              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-1"
             >
               {t("myTasks.title")}
             </h2>
             {carrying.taskCount === 0 ? (
               // One side populated, this one not: a quiet sentence,
               // not a second EmptyState — the page isn't empty.
+              // Sideways (landscape-short) the explanatory sentence
+              // gives way to a one-line short form — same door, the
+              // essence of the message, none of the prose (height is
+              // the scarce axis there).
               <p className="text-sm text-moss-600 dark:text-moss-300">
-                {t("myTasks.empty")}{" "}
+                <span className="landscape-short:hidden">
+                  {t("myTasks.empty")}{" "}
+                </span>
+                <span className="hidden landscape-short:inline">
+                  {t("myTasks.emptyShort")} {"·"}{" "}
+                </span>
                 <Link
                   to="/?tab=projects"
                   className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
@@ -319,11 +336,11 @@ export default function MyWorkPage() {
             {upcomingShifts.length > 0 && (
               <section
                 aria-labelledby="my-work-shifts-heading"
-                className="mt-6"
+                className="mt-6 landscape-short:mt-4"
               >
                 <h2
                   id="my-work-shifts-heading"
-                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-1"
                 >
                   {t("myWork.shiftsTitle")}
                 </h2>
@@ -340,11 +357,11 @@ export default function MyWorkPage() {
             {claimedPosts.length > 0 && (
               <section
                 aria-labelledby="my-work-claimed-heading"
-                className="mt-6"
+                className="mt-6 landscape-short:mt-4"
               >
                 <h2
                   id="my-work-claimed-heading"
-                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+                  className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-1"
                 >
                   {t("myWork.claimedPostsTitle")}
                 </h2>
@@ -367,13 +384,20 @@ export default function MyWorkPage() {
           >
             <h2
               id="my-work-projects-heading"
-              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+              className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-1"
             >
               {t("myProjects.title")}
             </h2>
             {organizing.projectCount === 0 ? (
+              // Same landscape-short short-form swap as the tasks
+              // half: one line, essence + door.
               <p className="text-sm text-moss-600 dark:text-moss-300">
-                {t("myProjects.empty")}{" "}
+                <span className="landscape-short:hidden">
+                  {t("myProjects.empty")}{" "}
+                </span>
+                <span className="hidden landscape-short:inline">
+                  {t("myProjects.emptyShort")} {"·"}{" "}
+                </span>
                 <Link
                   to="/project/new"
                   className="text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"

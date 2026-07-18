@@ -278,7 +278,12 @@ export default function HelpPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        // A phone held sideways (landscape-short): the section cards
+        // pair up two-across instead of one long stack — plain grid
+        // auto-placement, so DOM (= reading) order is untouched and
+        // the chips' scrollIntoView jumps still land. space-y must be
+        // zeroed where the grid takes over (gap owns the rhythm).
+        <div className="space-y-6 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-start landscape-short:gap-4 landscape-short:space-y-0">
           {visibleSections.map((section: FaqSection) => {
             const Icon = sectionIcon(section.id);
             return (
