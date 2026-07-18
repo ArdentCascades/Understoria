@@ -57,10 +57,11 @@ vi.mock("@/pages/PostDetail", () => ({
 import "@/i18n";
 import BoardPage from "./Board";
 import { BoardPostPanel } from "@/components/BoardPostPanel";
-import type { Member } from "@/types";
+import { SPLIT_CAPABLE_QUERY } from "@/lib/viewport";
+import type { Member, Post } from "@/types";
 
 const mockState = {
-  posts: [],
+  posts: [] as Post[],
   members: [] as Member[],
   currentMember: null as Member | null,
   projects: [],
@@ -70,7 +71,30 @@ const mockState = {
   nodeId: "node-1",
   nodeConfig: null,
   blockedKeys: new Set<string>(),
+  communityNodeIds: new Set(["node-1"]),
+  founderRoots: new Set<string>(),
 };
+
+function makePost(id: string): Post {
+  return {
+    id,
+    type: "NEED",
+    category: "other",
+    title: `Post ${id}`,
+    description: "",
+    estimatedHours: 1,
+    urgency: "low",
+    postedBy: "me-key",
+    claimedBy: null,
+    status: "open",
+    createdAt: 0,
+    expiresAt: null,
+    locationZone: "",
+    confirmedBy: [],
+    nodeId: "node-1",
+    signature: "sig",
+  } as Post;
+}
 
 function makeMember(publicKey: string): Member {
   return {
@@ -102,6 +126,7 @@ function LocationProbe() {
 beforeEach(() => {
   mockState.currentMember = makeMember("me-key");
   mockState.members = [mockState.currentMember];
+  mockState.posts = [];
   lastLocation = null;
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -228,5 +253,73 @@ describe("Board docked post panel", () => {
       "lg:grid-cols-[240px_minmax(0,1fr)_auto]",
     );
     expect(desktopRail()).not.toBeNull();
+  });
+});
+
+// Sideways split (SPLIT_CAPABLE_QUERY, lib/viewport.ts): a phone held
+// landscape with ≥700px of width docks the panel beside the board —
+// same two-pane posture as lg+, gated by the live media-query hook so
+// rotation mid-view switches layouts without a remount.
+describe("Board docked post panel — sideways split gate", () => {
+  function stubMatchMedia(matches: boolean) {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: (query: string) =>
+        ({
+          matches: query === SPLIT_CAPABLE_QUERY ? matches : false,
+          media: query,
+          onchange: null,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          addListener: () => {},
+          removeListener: () => {},
+          dispatchEvent: () => false,
+        }) as unknown as MediaQueryList,
+    });
+  }
+
+  afterEach(() => {
+    // Restore jsdom's native matchMedia-less window.
+    delete (window as { matchMedia?: unknown }).matchMedia;
+  });
+
+  const postList = () =>
+    container.querySelector('ul[class*="grid grid-cols-1 gap-3"]');
+
+  it("docks the panel and dials the post list to one column while open", () => {
+    stubMatchMedia(true);
+    mockState.posts = [makePost("p1"), makePost("p2")];
+    renderAt("/post/p1?tab=needs");
+
+    // The panel is a docked column, not a full-screen takeover…
+    expect(panel()).not.toBeNull();
+    expect(panel()!.className).toContain("w-[45%]");
+    expect(panel()!.className).not.toContain("fixed");
+
+    // …and the board's list gives up the md: pair for its lifetime
+    // (the reading column is ~55% of the viewport).
+    expect(postList()!.className).not.toContain("md:grid-cols-2");
+
+    const close = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Close post panel"]',
+    )!;
+    act(() => {
+      close.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(panel()).toBeNull();
+    expect(postList()!.className).toContain("md:grid-cols-2");
+  });
+
+  it("keeps today's full-screen takeover below the width floor", () => {
+    stubMatchMedia(false);
+    mockState.posts = [makePost("p1"), makePost("p2")];
+    renderAt("/post/p1?tab=needs");
+
+    expect(panel()).not.toBeNull();
+    expect(panel()!.className).toContain("fixed");
+    expect(panel()!.className).not.toContain("w-[45%]");
+    // The list keeps its normal responsive columns.
+    expect(postList()!.className).toContain("md:grid-cols-2");
   });
 });

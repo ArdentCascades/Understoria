@@ -432,9 +432,15 @@ export default function CalendarPage() {
           nested event panel (Outlet) docks on the right when open -
           the calendar stays mounted, so month and filter state
           survive opening events. Below lg the Outlet renders as a
-          full-screen takeover and this wrapper is a plain block. */}
-      <div className="lg:flex lg:items-start lg:gap-6">
-      <div className="min-w-0 lg:flex-1">
+          full-screen takeover and this wrapper is a plain block.
+
+          landscape-short also rows up: DockedPanel docks itself
+          whenever SPLIT_CAPABLE_QUERY holds (lib/viewport.ts — short
+          landscape ≥700px wide), and this wrapper gives it a row to
+          dock into. Below the width floor the panel stays a fixed
+          full-screen takeover, so the flex row is inert there. */}
+      <div className="lg:flex lg:items-start lg:gap-6 landscape-short:flex landscape-short:items-start landscape-short:gap-4">
+      <div className="min-w-0 lg:flex-1 landscape-short:flex-1">
       <header className="mb-stack-md">
         <h1 className="page-title">{t("calendar.title")}</h1>
         <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">

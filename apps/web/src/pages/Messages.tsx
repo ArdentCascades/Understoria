@@ -30,6 +30,7 @@ import {
 } from "@/db/messages";
 import { formatRelativeTime } from "@/lib/format";
 import { matchesQuery } from "@/lib/messageSearch";
+import { SPLIT_CAPABLE_QUERY, useMediaQuery } from "@/lib/viewport";
 import { EmptyState } from "@/components/EmptyState";
 import { HighlightedText } from "@/components/HighlightedText";
 import { MemberAvatar } from "@/components/MemberAvatar";
@@ -47,6 +48,18 @@ interface SearchGroup {
 // when on `/messages` the list shows; when on `/messages/:memberKey`
 // the conversation takes the full screen — matching pre-3.1 behavior
 // for small viewports.
+//
+// Landscape pass 2b: a phone held sideways is also split-capable —
+// SPLIT_CAPABLE_QUERY (lib/viewport.ts) is short landscape with a
+// ~700px width floor. When it matches, the same shell renders the
+// classic messenger tablet layout (narrow list pane + thread) even
+// though the viewport is far below lg. The regime is applied via a
+// live media-query HOOK rather than more responsive classes because
+// it must override the md/lg breakpoints in both directions, and
+// because the <Outlet /> must stay at the SAME tree position in both
+// modes — only class strings change on a rotate, so the mounted
+// Conversation (its draft, poll loop, scroll position) survives the
+// switch untouched.
 //
 // Read receipts, presence dots, typing indicators, and unread badges
 // are deliberately absent — the no-read-receipts and
@@ -69,6 +82,10 @@ export default function MessagesShell() {
     ? decodeURIComponent(conversationMatch.params.memberKey)
     : null;
   const hasConversation = selectedKey !== null;
+
+  // Sideways-phone split regime — see the header comment. Re-renders
+  // live on rotation, so the layout switches both ways mid-thread.
+  const splitCapable = useMediaQuery(SPLIT_CAPABLE_QUERY);
 
   const nameByKey = useMemo(
     () => new Map(members.map((m) => [m.publicKey, m.displayName])),
@@ -149,12 +166,26 @@ export default function MessagesShell() {
   const locked = lockState === "locked";
   const isSearching = debounced.trim() !== "";
 
+  // In the sideways split the pane widths come from the JS regime,
+  // not breakpoint classes (the viewport is well below lg): a ~280px
+  // list column and the thread taking the rest. Both branches keep
+  // the exact same element tree — ONLY the class strings differ.
   return (
-    <div className="flex h-full flex-col lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">
+    <div
+      className={
+        splitCapable
+          ? "grid h-full grid-cols-[280px_minmax(0,1fr)]"
+          : "flex h-full flex-col lg:grid lg:grid-cols-[320px_minmax(0,1fr)]"
+      }
+    >
       <div
-        className={`min-h-0 lg:h-full lg:overflow-y-auto lg:border-r lg:border-moss-200 lg:dark:border-moss-800 ${
-          hasConversation ? "hidden lg:block" : ""
-        }`}
+        className={
+          splitCapable
+            ? "min-h-0 h-full min-w-[260px] overflow-y-auto border-r border-moss-200 dark:border-moss-800"
+            : `min-h-0 lg:h-full lg:overflow-y-auto lg:border-r lg:border-moss-200 lg:dark:border-moss-800 ${
+                hasConversation ? "hidden lg:block" : ""
+              }`
+        }
       >
         <div className="px-4 pb-8 pt-4">
           <header className="mb-4">
@@ -195,6 +226,7 @@ export default function MessagesShell() {
               memberFallback={t("common.memberFallback")}
               noMatches={t("messages.search.noMatches")}
               selectedKey={selectedKey}
+              singleColumn={splitCapable}
             />
           ) : conversations.length === 0 ? (
             <EmptyState
@@ -203,7 +235,16 @@ export default function MessagesShell() {
               message={t("messages.empty")}
             />
           ) : (
-            <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1">
+            /* md widens the LIST-ONLY page to two columns; inside the
+               ~280px split pane that md match is a lie (the viewport
+               is md-wide but the pane isn't), so split forces one. */
+            <ul
+              className={
+                splitCapable
+                  ? "grid grid-cols-1 gap-2"
+                  : "grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1"
+              }
+            >
               {conversations.map((c) => {
                 const isSelected = c.otherKey === selectedKey;
                 return (
@@ -245,9 +286,11 @@ export default function MessagesShell() {
       </div>
 
       <div
-        className={`min-h-0 lg:h-full ${
-          !hasConversation ? "hidden lg:block" : ""
-        }`}
+        className={
+          splitCapable
+            ? "min-h-0 h-full"
+            : `min-h-0 lg:h-full ${!hasConversation ? "hidden lg:block" : ""}`
+        }
       >
         <Outlet />
       </div>
@@ -255,9 +298,11 @@ export default function MessagesShell() {
   );
 }
 
-// Index route placeholder shown in the right pane at lg+ when no
-// conversation is selected. Hidden at <lg because the list takes the
-// whole viewport there (member hasn't picked a conversation yet).
+// Index route placeholder shown in the right pane when no
+// conversation is selected and the shell is split — at lg+, and in
+// the sideways-phone split regime. Hidden in single-pane mode because
+// the list takes the whole viewport there (member hasn't picked a
+// conversation yet).
 export function MessagesEmptyPane() {
   const { t } = useTranslation();
   return (
@@ -283,6 +328,7 @@ function SearchResults({
   memberFallback,
   noMatches,
   selectedKey,
+  singleColumn,
 }: {
   groups: SearchGroup[] | null;
   query: string;
@@ -290,6 +336,8 @@ function SearchResults({
   memberFallback: string;
   noMatches: string;
   selectedKey: string | null;
+  /** True in the sideways split pane — see the list ul's comment. */
+  singleColumn: boolean;
 }) {
   const { t } = useTranslation();
   if (groups === null) return null;
@@ -301,7 +349,13 @@ function SearchResults({
     );
   }
   return (
-    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1">
+    <ul
+      className={
+        singleColumn
+          ? "grid grid-cols-1 gap-2"
+          : "grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-1"
+      }
+    >
       {groups.map((g) => {
         const name = nameByKey.get(g.otherKey) ?? memberFallback;
         const isSelected = g.otherKey === selectedKey;

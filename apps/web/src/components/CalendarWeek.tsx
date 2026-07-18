@@ -273,13 +273,18 @@ export function CalendarWeek({
         </button>
       </div>
 
-      {/* lg+: the 7-column grid. display:none below lg (so the
-          stacked layout below is the only one screen readers see on
-          narrow viewports, and vice versa). */}
+      {/* lg+ AND landscape-short: the 7-column grid. A phone held
+          sideways has desktop-class width — ~110px per day column at
+          844px — so the true week grid reads across there too
+          (shorter day cells than desktop: height is the scarce axis).
+          display:none everywhere else (so the stacked layout below is
+          the only one screen readers see on narrow viewports, and
+          vice versa). */}
       <div
         className="hidden grid-cols-7 gap-px overflow-hidden rounded-xl
                    border border-moss-200 bg-moss-200
-                   dark:border-moss-800 dark:bg-moss-800 lg:grid"
+                   dark:border-moss-800 dark:bg-moss-800 lg:grid
+                   landscape-short:grid"
       >
         {days.map((day) => {
           const isToday = day.key === todayKey;
@@ -306,11 +311,14 @@ export function CalendarWeek({
               key={`cell-${day.key}`}
               aria-current={isToday ? "date" : undefined}
               className={
+                // landscape-short trims the cell floor: 120px-deep
+                // cells on a ≤500px-tall viewport push the second
+                // half of the week below the fold for no content.
                 isToday
-                  ? "min-h-[120px] bg-canopy-50 p-1 text-canopy-700 dark:bg-canopy-950 dark:text-canopy-300"
+                  ? "min-h-[120px] landscape-short:min-h-[88px] bg-canopy-50 p-1 text-canopy-700 dark:bg-canopy-950 dark:text-canopy-300"
                   : day.isWeekend
-                    ? "min-h-[120px] bg-moss-50/60 p-1 dark:bg-moss-900/30"
-                    : "min-h-[120px] bg-white p-1 dark:bg-moss-950"
+                    ? "min-h-[120px] landscape-short:min-h-[88px] bg-moss-50/60 p-1 dark:bg-moss-900/30"
+                    : "min-h-[120px] landscape-short:min-h-[88px] bg-white p-1 dark:bg-moss-950"
               }
             >
               {day.densityCount !== null ? (
@@ -330,12 +338,14 @@ export function CalendarWeek({
         })}
       </div>
 
-      {/* Below lg: the same week as seven stacked day rows — full
-          chip width, so titles and times stay readable on a phone. */}
+      {/* Below lg (and not landscape-short): the same week as seven
+          stacked day rows — full chip width, so titles and times stay
+          readable on a portrait phone. */}
       <ul
         className="flex flex-col overflow-hidden rounded-xl border
                    border-moss-200 bg-white
-                   dark:border-moss-800 dark:bg-moss-950 lg:hidden"
+                   dark:border-moss-800 dark:bg-moss-950 lg:hidden
+                   landscape-short:hidden"
       >
         {days.map((day) => {
           const isToday = day.key === todayKey;

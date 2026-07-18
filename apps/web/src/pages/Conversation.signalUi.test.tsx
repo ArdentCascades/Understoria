@@ -64,6 +64,7 @@ import ConversationPage, {
   NEAR_BOTTOM_PX,
 } from "./Conversation";
 import { isSpeechAvailable, speak, stopSpeaking } from "@/lib/speak";
+import { SHORT_LANDSCAPE_QUERY } from "@/lib/viewport";
 import type { DecryptedMessage } from "@/db/messages";
 import type { Member } from "@/types";
 
@@ -458,5 +459,75 @@ describe("the long-press menu actions", () => {
     expect(menuButtonByText("Copy")).toBeNull();
     expect(menuButtonByText("Speak")).toBeNull();
     expect(menuButtonByText("Info")).not.toBeNull();
+  });
+});
+
+// Landscape pass 2b: the auto-grow ceiling is read imperatively from
+// composerHeightCapPx() on each input — ~6 lines (144px) normally,
+// ~4 lines (96px) when the short-landscape media query matches, so
+// the composer stops eating half of a ~400px-tall viewport.
+describe("composer auto-grow cap", () => {
+  async function typeWithScrollHeight(
+    value: string,
+    scrollHeight: number,
+  ): Promise<HTMLTextAreaElement> {
+    const ta = container.querySelector("textarea")!;
+    // jsdom reports scrollHeight 0 (the handler deliberately skips
+    // then); give the box real-looking geometry.
+    Object.defineProperty(ta, "scrollHeight", {
+      configurable: true,
+      value: scrollHeight,
+    });
+    const setter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!;
+    setter.call(ta, value);
+    await act(async () => {
+      ta.dispatchEvent(new Event("input", { bubbles: true }));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    return ta;
+  }
+
+  it("follows the content below the cap", async () => {
+    mockMessages = [makeMessage({ id: "m1" })];
+    await render();
+    const ta = await typeWithScrollHeight("soup at six?", 60);
+    expect(ta.style.height).toBe("60px");
+  });
+
+  it("caps at 144px in the normal regime", async () => {
+    mockMessages = [makeMessage({ id: "m1" })];
+    await render();
+    const ta = await typeWithScrollHeight("a very long draft", 500);
+    expect(ta.style.height).toBe("144px");
+  });
+
+  it("caps at 96px when the short-landscape query matches", async () => {
+    const original = window.matchMedia;
+    (
+      window as unknown as { matchMedia: (q: string) => MediaQueryList }
+    ).matchMedia = (query: string) =>
+      ({
+        matches: query === SHORT_LANDSCAPE_QUERY,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList;
+    try {
+      mockMessages = [makeMessage({ id: "m1" })];
+      await render();
+      const ta = await typeWithScrollHeight("a very long draft", 500);
+      expect(ta.style.height).toBe("96px");
+    } finally {
+      (
+        window as unknown as { matchMedia: typeof window.matchMedia }
+      ).matchMedia = original;
+    }
   });
 });

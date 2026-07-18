@@ -198,3 +198,29 @@ describe("Dashboard — proposals doorway", () => {
     expect(link!.textContent).toContain("2 proposals open for discussion");
   });
 });
+
+describe("Dashboard — landscape-short columns", () => {
+  it("pins the stat tiles 3-across in short landscape", () => {
+    render(<DashboardPage />);
+    const tiles = container.querySelector('[class*="xl:grid-cols-5"]')!;
+    expect(tiles.className).toContain("landscape-short:grid-cols-3");
+  });
+
+  it("pairs the lg two-column card wrappers sideways too, source order intact", () => {
+    render(<DashboardPage />);
+    // All three desktop pairs — the community rollups, milestones +
+    // category breakdown, and the flow-of-help pair (BreadthBar with
+    // the Reciprocity section beside it) — go two-up in short
+    // landscape via the same wrappers, so DOM/reading order never
+    // changes with the viewport (WCAG 2.4.3).
+    const pairs = container.querySelectorAll(
+      '[class*="lg:grid-cols-2"][class*="landscape-short:grid-cols-2"]',
+    );
+    expect(pairs.length).toBe(3);
+    // The mobile-stack divider inside the second pair hides wherever
+    // the pair goes two-up.
+    const divider = container.querySelector('div[class*="my-2 lg:hidden"]');
+    expect(divider).not.toBeNull();
+    expect(divider!.className).toContain("landscape-short:hidden");
+  });
+});

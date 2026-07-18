@@ -548,6 +548,13 @@ export default function EventNewPage() {
         <MarkdownHint />
       </label>
 
+      {/* Short-field pair: category + the starts-at fieldset share a
+          row in short landscape (width is the abundant axis there);
+          everywhere else this wrapper is an inert flex column with
+          the form's own gap. Both children are self-contained cells —
+          the fieldset's validation error lives inside it, so errors
+          stay attached to their fields in both layouts. */}
+      <div className="flex flex-col gap-4 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-start">
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">
           {t("events.new.category")}
@@ -623,6 +630,8 @@ export default function EventNewPage() {
           </p>
         )}
       </fieldset>
+      </div>
+      {/* end category + starts-at pair */}
 
       <div className="flex flex-col gap-2">
         <label className="inline-flex items-center gap-2 text-sm font-medium">
@@ -709,8 +718,9 @@ export default function EventNewPage() {
 
       {/* Location + capacity share a row at sm+: location is the
           flexible column, capacity is a short numeric. Below sm both
-          stay stacked full-width (thumb-friendly). */}
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+          stay stacked full-width (thumb-friendly) — except in short
+          landscape, where the row layout applies at any width. */}
+      <div className="grid gap-4 sm:grid-cols-[1fr_auto] landscape-short:grid-cols-[1fr_auto]">
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">
             {t("events.new.locationField")}

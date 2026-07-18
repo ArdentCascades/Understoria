@@ -683,7 +683,11 @@ export default function ProjectNewPage() {
                 <option value="mutual_aid_drive">💛 Mutual aid drive</option>
               </select>
             </label>
-            <div className="grid gap-4 sm:grid-cols-2">
+            {/* Short-field pair: target hours + deadline share a row
+                from sm up, and in sub-640 short landscape too (width
+                is the abundant axis there). Each label carries its
+                own hint/error, so they stay attached in the grid. */}
+            <div className="grid gap-4 sm:grid-cols-2 landscape-short:grid-cols-2">
               <label className="flex flex-col gap-1">
                 <span className="text-sm font-medium">
                   {t("projects.create.fieldTargetHours")}
@@ -757,28 +761,33 @@ export default function ProjectNewPage() {
                 )}
               </label>
             </div>
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">
-                {t("projects.create.fieldArea")}
-              </span>
-              <input
-                className="input"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                maxLength={80}
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">
-                {t("projects.create.fieldTags")}
-              </span>
-              <input
-                className="input"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder={t("projects.create.fieldTagsPlaceholder")}
-              />
-            </label>
+            {/* Area + tags: two short free-text fields — paired in
+                short landscape, stacked (this wrapper is an inert
+                flex column) everywhere else. */}
+            <div className="flex flex-col gap-4 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-start">
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {t("projects.create.fieldArea")}
+                </span>
+                <input
+                  className="input"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  maxLength={80}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-sm font-medium">
+                  {t("projects.create.fieldTags")}
+                </span>
+                <input
+                  className="input"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder={t("projects.create.fieldTagsPlaceholder")}
+                />
+              </label>
+            </div>
             {error && (
               <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
                 {error}

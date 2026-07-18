@@ -46,6 +46,20 @@ the offline strip, the header's height) follows the same variant, and
 the calendar defaults to the agenda view there — never overriding a
 stored view choice.
 
+Sideways, the pages put the abundant width to work, too. When the
+short-landscape viewport also clears a ~700px width floor (the
+`SPLIT_CAPABLE_QUERY` in `apps/web/src/lib/viewport.ts` — the JS twin
+of the CSS variant, tracked live so mid-view rotation switches
+layouts), the board's post panel and the calendar's event panel dock
+beside their page exactly as they do at `lg+` — the page stays
+mounted with its filters and scroll alive — at ~45% of the row with a
+280px floor; below that width (SE-class phones) or in portrait they
+keep today's full-screen takeover. The calendar's week view renders
+its true 7-column grid instead of the stacked day rows, the Dashboard
+pins its stat tiles 3-across and pairs its `lg` two-column card
+wrappers, and the long forms (new post / event / project) sit their
+short fields two across — titles and descriptions stay full-width.
+
 ## Why "In my care" holds the fifth slot
 
 The tab bar's job is the loop a member actually lives in: see what
