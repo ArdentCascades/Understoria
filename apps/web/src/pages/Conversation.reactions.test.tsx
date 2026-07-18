@@ -258,6 +258,65 @@ describe("ConversationPage — emoji reactions", () => {
     );
   });
 
+  it("tapping YOUR OWN reaction chip opens the picker menu", async () => {
+    mockMessages = [
+      makeMessage({
+        id: "m1",
+        reactions: [{ senderKey: "me-key", emoji: "❤️" }],
+      }),
+    ];
+    await render();
+    const chip = container.querySelector(
+      'button[aria-label="Your ❤️ reaction — tap to change or remove it"]',
+    ) as HTMLButtonElement;
+    expect(chip).not.toBeNull();
+    expect(pickerButtons()).toHaveLength(0);
+    await act(async () => {
+      chip.click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    // The same long-press menu, ready to change or remove.
+    expect(pickerButtons().length).toBeGreaterThan(0);
+    expect(chip.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("the OTHER party's chip stays display-only (not a button)", async () => {
+    mockMessages = [
+      makeMessage({
+        id: "m1",
+        reactions: [{ senderKey: "them-key", emoji: "🙏" }],
+      }),
+    ];
+    await render();
+    const theirChip = container.querySelector(
+      '[aria-label="Riverbend reacted 🙏"]',
+    );
+    expect(theirChip).not.toBeNull();
+    expect(theirChip!.tagName).not.toBe("BUTTON");
+  });
+
+  it("a press on your chip does not arm the bubble's long-press timer", async () => {
+    mockMessages = [
+      makeMessage({
+        id: "m1",
+        reactions: [{ senderKey: "me-key", emoji: "❤️" }],
+      }),
+    ];
+    await render();
+    const chip = container.querySelector(
+      'button[aria-label="Your ❤️ reaction — tap to change or remove it"]',
+    ) as HTMLButtonElement;
+    // Pointer goes down on the chip and stays there past the
+    // long-press threshold: stopPropagation must keep the bubble's
+    // timer from ever starting, so nothing opens from the HOLD —
+    // only the click (tested above) opens the menu.
+    await act(async () => {
+      chip.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+      await vi.advanceTimersByTimeAsync(LONG_PRESS_MS + 100);
+    });
+    expect(pickerButtons()).toHaveLength(0);
+  });
+
   it("renders both parties' reaction chips, Escape closes the picker", async () => {
     mockMessages = [
       makeMessage({

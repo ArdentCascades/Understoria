@@ -800,7 +800,8 @@
       "next": "Next match",
       "close": "Close search",
       "conversationWith": "Conversation with {{name}}",
-      "matchedName": "Matched their name"
+      "matchedName": "Matched their name",
+      "noMatchesHint": "Try the exact spelling — search is simple."
     },
     "day": {
       "today": "Today",
@@ -824,7 +825,8 @@
       "reactWith": "React with {{emoji}}",
       "remove": "Remove your {{emoji}} reaction",
       "reactedBy": "{{name}} reacted {{emoji}}",
-      "you": "You"
+      "you": "You",
+      "changeOwn": "Your {{emoji}} reaction — tap to change or remove it"
     },
     "voice": {
       "record": "Record a voice note",
@@ -2812,20 +2814,31 @@
           "title": "Look around before you show this",
           "body": "Security cameras and webcams can read QR codes from across a room. Once it's on screen, anyone in camera view can save it and use it to join your community themselves.",
           "followup": "This prompt comes up every time — your surroundings can change between one share and the next.",
-          "reveal": "Show the invite",
+          "cancel": "Not now",
+          "confirm": "Show it now"
+        },
+        "printPoster": "Print poster",
+        "gate": {
+          "title": "Share this invite link",
+          "body": "Anyone with this link can join your community — send it to one person you trust.",
           "shareWithoutShowing": "Send the link without showing it",
+          "reveal": "Show the invite",
           "cancel": "Not now",
           "notAvailable": "Your browser can't share or copy without showing the link. Tap \"Show the invite\" and copy it by hand instead.",
           "statusCopied": "Link copied to your clipboard. Paste it into Signal, Messages, or wherever you want to send it — the link is not on screen.",
           "statusFailed": "Your browser blocked the share and the clipboard. Tap \"Show the invite\" to copy it by hand."
-        },
-        "printPoster": "Print poster"
-      }
+        }
+      },
+      "noteLabel": "Who is this for? (only you see this)",
+      "notePlaceholder": "e.g. Carol from the garden — stays on this device, never sent with the link",
+      "noteFor": "For: {{note}}",
+      "noteAdd": "Add note",
+      "noteEdit": "Edit note"
     },
     "security": {
       "title": "Security",
-      "summaryProtected": "Your secret keys on this device — the private half of your identity — are wrapped (kept scrambled) with a key derived from your passphrase. Unlock is required at every launch.",
-      "summaryUnprotected": "Your secret keys are stored in plaintext — plain readable text anyone holding the device could copy. Enable passphrase protection before leaving the device alone in any hostile environment.",
+      "summaryProtected": "Your secret keys on this device — the private half of your identity — are wrapped (kept scrambled) with a key derived from your passphrase.",
+      "summaryUnprotected": "Your secret keys are stored in plaintext — plain readable text anyone holding the device could copy. Enable passphrase protection before leaving the device alone anywhere someone else might pick up your phone.",
       "enable": "Enable passphrase protection",
       "change": "Change passphrase",
       "disable": "Disable protection",
@@ -2859,7 +2872,8 @@
         "failed": "The passkey couldn't be set up. Nothing was changed — your passphrase still works.",
         "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
         "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
-      }
+      },
+      "whenAsked": "You'll be asked for your passphrase right after you tap Lock now, and again whenever you open the app after it has been closed or reloaded — never on a timer while it stays open."
     },
     "emergency": {
       "title": "Emergency",

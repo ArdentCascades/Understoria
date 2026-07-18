@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatDeadline, formatRelativeTime, shortKey } from "@/lib/format";
-import { revokeInvite } from "@/db/invites";
+import { revokeInvite, setInviteNote } from "@/db/invites";
 import type { InviteRow } from "@/db/database";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
@@ -68,6 +68,14 @@ export default function InvitesPage() {
   // closes the sheet. Per-row Show QR sets it; the sheet's onClose
   // clears it.
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  // Inline editor for the local-only "who is this for?" note. Holds
+  // the token of the row being edited; the draft is the input value.
+  // The note lives on the local Dexie row only — never sent to the
+  // server, never encoded in the link (db/invites.ts).
+  const [editingNoteToken, setEditingNoteToken] = useState<
+    string | null
+  >(null);
+  const [noteDraft, setNoteDraft] = useState("");
 
   const myInvites = useMemo(
     () =>
@@ -115,6 +123,17 @@ export default function InvitesPage() {
 
   function inviteUrl(inv: InviteRow): string {
     return `${window.location.origin}/invite#${inv.encoded}`;
+  }
+
+  async function handleSaveNote(token: string) {
+    setError(null);
+    try {
+      await setInviteNote(currentMember!.publicKey, token, noteDraft);
+      setEditingNoteToken(null);
+      setNoteDraft("");
+    } catch (err) {
+      setError(humanizeError(err));
+    }
   }
 
   // Who redeemed — resolvable since Phase 1 of
@@ -186,6 +205,44 @@ export default function InvitesPage() {
                     when: formatRelativeTime(inv.createdAt),
                   })}
                 </div>
+                {/* The local-only "who is this for?" label — the fix
+                    for two open invites being indistinguishable.
+                    Absent note → nothing renders. */}
+                {inv.note ? (
+                  <div className="text-xs font-medium text-canopy-800 dark:text-canopy-200">
+                    {t("profile.invites.noteFor", { note: inv.note })}
+                  </div>
+                ) : null}
+                {editingNoteToken === inv.token && (
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <input
+                      type="text"
+                      className="input max-w-xs text-xs"
+                      value={noteDraft}
+                      maxLength={120}
+                      onChange={(e) => setNoteDraft(e.target.value)}
+                      placeholder={t("profile.invites.notePlaceholder")}
+                      aria-label={t("profile.invites.noteLabel")}
+                    />
+                    <button
+                      type="button"
+                      className="btn-secondary text-xs"
+                      onClick={() => void handleSaveNote(inv.token)}
+                    >
+                      {t("common.save")}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost text-xs"
+                      onClick={() => {
+                        setEditingNoteToken(null);
+                        setNoteDraft("");
+                      }}
+                    >
+                      {t("common.cancel")}
+                    </button>
+                  </div>
+                )}
                 <div className="text-xs text-moss-600 dark:text-moss-300">
                   {inv.status === "redeemed"
                     ? inv.redeemedBy
@@ -216,6 +273,18 @@ export default function InvitesPage() {
               </div>
               {inv.status === "open" && (
                 <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs"
+                    onClick={() => {
+                      setEditingNoteToken(inv.token);
+                      setNoteDraft(inv.note ?? "");
+                    }}
+                  >
+                    {inv.note
+                      ? t("profile.invites.noteEdit")
+                      : t("profile.invites.noteAdd")}
+                  </button>
                   <button
                     type="button"
                     className="btn-ghost text-xs"
@@ -253,6 +322,9 @@ export default function InvitesPage() {
         url={qrUrl ?? ""}
         shareTitle={t("profile.invites.shareSheet.shareTitle")}
         shareText={t("profile.invites.shareSheet.shareText")}
+        // Per-row "Show QR code" is an explicit show — open on the
+        // camera check, its natural moment.
+        intent="show"
         onClose={() => setQrUrl(null)}
       />
 

@@ -56,6 +56,15 @@ include breaking changes.
   dismissing it on any door hides it on all of them, permanently,
   on that device. There's still no forced "I understand" gate: it's
   a disclosure, not a consent ceremony. English and Spanish.
+- **A private label for each invite you make.** When you generate an
+  invite you can now jot down who it's for — "Carol from the garden"
+  — and the label follows the invite onto the open-invite card and
+  the Manage invites list, so two open links are never
+  indistinguishable again. You can add or edit the label later from
+  Manage invites. It's for your eyes only: the note is stored on
+  this device and nowhere else — never sent to the server, never
+  woven into the link itself — and the form says so right where you
+  type it. English and Spanish.
 
 ### Changed
 - **The Dashboard now speaks plainly about reciprocity and needs.**
@@ -167,6 +176,41 @@ include breaking changes.
   longer contradicts itself by saying "You haven't joined a community
   yet" above a fully populated sample community — real devices that
   really haven't joined still see that card. English and Spanish.
+- **Message search now forgives quotes and accents.** Searching for
+  "don't" used to miss a message typed as "don’t" with a phone
+  keyboard's curly apostrophe, and "cafe" couldn't find "café" (or
+  the other way round). Search in the Messages tab and inside a
+  conversation now treats curly and straight quotes as the same,
+  matches with or without accents in either the search box or the
+  message, and ignores case — while the highlight still lands on
+  exactly what was written, curls and accents intact. One deliberate
+  exception: ñ stays its own letter, as it is in Spanish — "año"
+  finds "año" however it was typed, but "ano" never matches it. And
+  when nothing turns up, the empty-results line now offers a gentle
+  hint instead of a dead end. English and Spanish.
+- **Tap your own reaction to change it.** The little emoji chip under
+  a message you'd reacted to used to be a dead decoration — the
+  habit of tapping it to change or take back a reaction (the way
+  other messengers work) did nothing. Your own chip is now a real
+  button that opens the same reaction menu as a long-press, without
+  ever triggering the bubble's long-press by accident. The other
+  person's chip stays as it was — you can't operate on someone
+  else's reaction. English and Spanish.
+- **The "look around" camera warning now comes when it's needed.**
+  It used to appear the moment you generated an invite — before
+  anything was on screen to photograph — which made it easy to
+  dismiss as noise. Now generating an invite opens a plain share
+  menu (anyone with the link can join; send it to one person you
+  trust), and the camera warning appears exactly when you ask to
+  show the QR code or link on screen, the moment it's actually
+  about. English and Spanish.
+- **Security settings now say when the passphrase is asked for.** One
+  honest sentence: right after you tap Lock now, and whenever you
+  open the app after it's been closed or reloaded — never on a timer
+  while it stays open. It appears both in the security summary and
+  right before you turn protection on, so there are no surprises.
+  And "hostile environment" is gone in favor of plain words: anywhere
+  someone else might pick up your phone. English and Spanish.
 - **The floating buttons stay out of your way on phones.** The green
   "Post a need / Post an offer" and "Start a project" buttons on the
   board, and "+ Create event" on the calendar, could park themselves

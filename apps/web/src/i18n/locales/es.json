@@ -800,7 +800,8 @@
       "previous": "Coincidencia anterior",
       "next": "Coincidencia siguiente",
       "conversationWith": "Conversación con {{name}}",
-      "matchedName": "Coincide con su nombre"
+      "matchedName": "Coincide con su nombre",
+      "noMatchesHint": "Prueba con la ortografía exacta — la búsqueda es simple."
     },
     "day": {
       "today": "Hoy",
@@ -824,7 +825,8 @@
       "reactWith": "Reaccionar con {{emoji}}",
       "remove": "Quitar tu reacción {{emoji}}",
       "reactedBy": "{{name}} reaccionó {{emoji}}",
-      "you": "Tú"
+      "you": "Tú",
+      "changeOwn": "Tu reacción {{emoji}} — toca para cambiarla o quitarla"
     },
     "voice": {
       "record": "Grabar una nota de voz",
@@ -2812,20 +2814,31 @@
           "title": "Mira a tu alrededor antes de mostrar esto",
           "body": "Las cámaras de seguridad y las cámaras web pueden leer códigos QR desde el otro lado de una habitación. Una vez en pantalla, cualquiera al alcance de la cámara puede guardarlo y usarlo para unirse a tu comunidad.",
           "followup": "Este aviso aparece cada vez — tu entorno puede cambiar entre una invitación y la siguiente.",
-          "reveal": "Mostrar la invitación",
+          "cancel": "Ahora no",
+          "confirm": "Mostrarla ahora"
+        },
+        "printPoster": "Imprimir cartel",
+        "gate": {
+          "title": "Comparte este enlace de invitación",
+          "body": "Cualquiera con este enlace puede unirse a tu comunidad — envíalo a una persona de confianza.",
           "shareWithoutShowing": "Enviar el enlace sin mostrarlo",
+          "reveal": "Mostrar la invitación",
           "cancel": "Ahora no",
           "notAvailable": "Tu navegador no puede compartir ni copiar sin mostrar el enlace. Toca «Mostrar la invitación» y cópialo a mano.",
           "statusCopied": "Enlace copiado al portapapeles. Pégalo en Signal, Mensajes, o donde quieras enviarlo — el enlace no está en pantalla.",
           "statusFailed": "Tu navegador bloqueó la opción de compartir y el portapapeles. Toca «Mostrar la invitación» para copiarlo a mano."
-        },
-        "printPoster": "Imprimir cartel"
-      }
+        }
+      },
+      "noteLabel": "¿Para quién es? (solo tú lo ves)",
+      "notePlaceholder": "p. ej. Carol, la del huerto — se queda en este dispositivo, nunca viaja con el enlace",
+      "noteFor": "Para: {{note}}",
+      "noteAdd": "Añadir nota",
+      "noteEdit": "Editar nota"
     },
     "security": {
       "title": "Seguridad",
-      "summaryProtected": "Tus claves secretas en este dispositivo — la mitad privada de tu identidad — están envueltas (guardadas cifradas) con una clave derivada de tu frase. Se requiere desbloqueo en cada inicio.",
-      "summaryUnprotected": "Tus claves secretas se guardan en texto plano — texto legible que cualquiera con el dispositivo podría copiar. Activa la protección con frase antes de dejar el dispositivo solo en cualquier entorno hostil.",
+      "summaryProtected": "Tus claves secretas en este dispositivo — la mitad privada de tu identidad — están envueltas (guardadas cifradas) con una clave derivada de tu frase.",
+      "summaryUnprotected": "Tus claves secretas se guardan en texto plano — texto legible que cualquiera con el dispositivo podría copiar. Activa la protección con frase antes de dejar el dispositivo solo en cualquier lugar donde otra persona pueda tomar tu teléfono.",
       "enable": "Activar protección con frase",
       "change": "Cambiar frase",
       "disable": "Desactivar protección",
@@ -2859,7 +2872,8 @@
         "failed": "No se pudo configurar la llave de acceso. No se cambió nada — tu frase sigue funcionando.",
         "successAdd": "Llave de acceso añadida. La próxima vez que este dispositivo se bloquee, un toque lo desbloquea — y tu frase siempre funciona también.",
         "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo."
-      }
+      },
+      "whenAsked": "Se te pedirá la frase justo después de tocar «Bloquear ahora», y cada vez que abras la aplicación tras haberla cerrado o recargado — nunca por un temporizador mientras siga abierta."
     },
     "emergency": {
       "title": "Emergencia",

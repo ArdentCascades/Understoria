@@ -157,6 +157,16 @@ export function SecuritySection() {
           ? t("profile.security.summaryProtected")
           : t("profile.security.summaryUnprotected")}
       </p>
+      {/* WHEN the passphrase gets asked for — printed from what the
+          code actually does: the unlocked session lives in module
+          memory only (db/secrets.ts), so the lock screen appears
+          right after "Lock now" and on every launch after the app
+          was closed or reloaded. There is no idle timeout. */}
+      {protectionOn && (
+        <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+          {t("profile.security.whenAsked")}
+        </p>
+      )}
 
       {success && (
         <p
@@ -338,6 +348,14 @@ export function SecuritySection() {
               <p className="text-xs text-moss-600 dark:text-moss-300">
                 {t("profile.security.passphraseHint")}
               </p>
+              {/* Someone turning protection ON deserves to know when
+                  the passphrase will actually be demanded, before
+                  they commit. */}
+              {mode === "enable" && (
+                <p className="text-xs text-moss-600 dark:text-moss-300">
+                  {t("profile.security.whenAsked")}
+                </p>
+              )}
             </>
           )}
           {mode === "disable" && (

@@ -25,10 +25,13 @@ vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
 vi.mock("@/components/InviteShareSheet", () => ({
   InviteShareSheet: () => null,
 }));
-vi.mock("@/db/invites", () => ({ revokeInvite: vi.fn() }));
+vi.mock("@/db/invites", () => ({
+  revokeInvite: vi.fn(),
+  setInviteNote: vi.fn(),
+}));
 
 import "@/i18n";
-import { revokeInvite } from "@/db/invites";
+import { revokeInvite, setInviteNote } from "@/db/invites";
 import InvitesPage from "./Invites";
 import type { InviteRow } from "@/db/database";
 import type { Member } from "@/types";
@@ -81,6 +84,7 @@ let root: Root;
 
 beforeEach(() => {
   vi.mocked(revokeInvite).mockReset().mockResolvedValue(undefined);
+  vi.mocked(setInviteNote).mockReset().mockResolvedValue(undefined);
   mockState = {
     currentMember: me,
     invites: [
@@ -175,5 +179,85 @@ describe("InvitesPage — Revoke asks before acting", () => {
     expect(revokeInvite).toHaveBeenCalledTimes(1);
     expect(revokeInvite).toHaveBeenCalledWith(meKey, "tok-2");
     expect(dialog()).toBeNull();
+  });
+});
+
+describe("InvitesPage — local-only 'who is this for?' notes", () => {
+  it("renders the note on a labeled row; an unlabeled row shows nothing", () => {
+    mockState.invites = [
+      openInvite({ note: "Carol from the garden" }),
+      openInvite({
+        token: "tok-2",
+        createdAt: Date.now() - 5 * DAY,
+        encoded: "encoded-2",
+      }),
+    ];
+    render();
+    const items = container.querySelectorAll("li");
+    expect(items[0].textContent).toContain("For: Carol from the garden");
+    // Absent note → the label line simply isn't there.
+    expect(items[1].textContent).not.toContain("For:");
+  });
+
+  it("offers Edit note on labeled rows and Add note on unlabeled ones", () => {
+    mockState.invites = [
+      openInvite({ note: "Carol from the garden" }),
+      openInvite({
+        token: "tok-2",
+        createdAt: Date.now() - 5 * DAY,
+        encoded: "encoded-2",
+      }),
+    ];
+    render();
+    expect(buttons("Edit note")).toHaveLength(1);
+    expect(buttons("Add note")).toHaveLength(1);
+  });
+
+  it("Add note opens the inline editor and Save writes through setInviteNote", async () => {
+    render();
+    click(buttons("Add note")[0]);
+    const input = container.querySelector(
+      'input[aria-label="Who is this for? (only you see this)"]',
+    ) as HTMLInputElement;
+    expect(input).not.toBeNull();
+    // The placeholder carries the privacy promise.
+    expect(input.placeholder).toContain("never sent with the link");
+    // Type into the controlled input the React way.
+    const valueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value",
+    )!.set!;
+    act(() => {
+      valueSetter.call(input, "Carol from the garden");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    click(buttons("Save")[0]);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(setInviteNote).toHaveBeenCalledTimes(1);
+    expect(setInviteNote).toHaveBeenCalledWith(
+      meKey,
+      "tok-1",
+      "Carol from the garden",
+    );
+    // Editor closes after a successful save.
+    expect(
+      container.querySelector(
+        'input[aria-label="Who is this for? (only you see this)"]',
+      ),
+    ).toBeNull();
+  });
+
+  it("Cancel closes the editor without writing", () => {
+    render();
+    click(buttons("Add note")[0]);
+    click(buttons("Cancel")[0]);
+    expect(setInviteNote).not.toHaveBeenCalled();
+    expect(
+      container.querySelector(
+        'input[aria-label="Who is this for? (only you see this)"]',
+      ),
+    ).toBeNull();
   });
 });

@@ -940,28 +940,54 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                     🙂+
                   </button>
                   {/* Reaction chips — the CURRENT reaction of each
-                      party (latest wins; clearing removes it). */}
+                      party (latest wins; clearing removes it). YOUR
+                      OWN chip is a button: tapping it opens the same
+                      long-press menu for this message, the WhatsApp
+                      habit of tapping a reaction to change or remove
+                      it (2026-07 usability round). The other party's
+                      chip stays display-only — you can't operate on
+                      someone else's reaction. The pointerdown stop
+                      keeps a chip tap from ALSO arming the bubble's
+                      long-press timer (same interplay guard as the
+                      🙂+ button above). */}
                   {m.reactions && m.reactions.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
-                      {m.reactions.map((r) => (
-                        <span
-                          key={r.senderKey}
-                          aria-label={t("messages.reactions.reactedBy", {
-                            name:
-                              r.senderKey === currentMember.publicKey
-                                ? t("messages.reactions.you")
-                                : otherName,
-                            emoji: r.emoji,
-                          })}
-                          className={`rounded-full px-2 py-0.5 text-sm ${
-                            r.senderKey === currentMember.publicKey
-                              ? "bg-canopy-200 dark:bg-canopy-800"
-                              : "bg-moss-900/10 dark:bg-white/10"
-                          }`}
-                        >
-                          {r.emoji}
-                        </span>
-                      ))}
+                      {m.reactions.map((r) =>
+                        r.senderKey === currentMember.publicKey ? (
+                          <button
+                            key={r.senderKey}
+                            type="button"
+                            aria-label={t("messages.reactions.changeOwn", {
+                              emoji: r.emoji,
+                            })}
+                            aria-expanded={reactFor === m.id}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              // A chip tap must never double as a
+                              // bubble press.
+                              e.stopPropagation();
+                              cancelPress();
+                              setReactFor(
+                                reactFor === m.id ? null : m.id,
+                              );
+                            }}
+                            className="rounded-full bg-canopy-200 px-2 py-0.5 text-sm hover:bg-canopy-300 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:bg-canopy-800 dark:hover:bg-canopy-700"
+                          >
+                            {r.emoji}
+                          </button>
+                        ) : (
+                          <span
+                            key={r.senderKey}
+                            aria-label={t("messages.reactions.reactedBy", {
+                              name: otherName,
+                              emoji: r.emoji,
+                            })}
+                            className="rounded-full bg-moss-900/10 px-2 py-0.5 text-sm dark:bg-white/10"
+                          >
+                            {r.emoji}
+                          </span>
+                        ),
+                      )}
                     </div>
                   )}
                   {/* The picker: six 44px emoji, inline under the

@@ -6,24 +6,30 @@
  */
 /**
  * InviteShareSheet gate contract (docs/threat-model.md §7 —
- * "QR codes are camera-surveillance targets"):
+ * "QR codes are camera-surveillance targets", timing refined in the
+ * 2026-07 usability round — the camera warning fires at the SHOW
+ * moment, not at generation):
  *
- *   - The sheet opens on the GATE, never on the reveal. The raw
- *     invite URL / token is NOT on screen until the member makes
- *     the explicit "show the invite" choice.
+ *   - intent="share" (the post-generation default) opens on the
+ *     share MENU: plain link-safety copy, NO camera warning. The
+ *     raw invite URL / token is NOT on screen.
+ *   - "Show the invite" moves to the CAMERA CHECK — the look-around
+ *     warning at its natural moment — which takes one more explicit
+ *     tap ("Show it now") before anything renders.
+ *   - intent="show" (the explicit Show-QR buttons) opens directly
+ *     on the camera check.
  *   - When the browser CAN share/copy, "Send the link without
- *     showing it" is the visually-primary action and holds focus,
- *     so a stray Enter ships the link off-framebuffer instead of
- *     revealing it. Clicking it routes through shareUrl(); a
- *     native-share success closes the sheet, a clipboard-copy
- *     keeps it open with a status that says the link is NOT on
- *     screen, and a hard failure points back at the reveal path.
+ *     showing it" is the visually-primary menu action and holds
+ *     focus, so a stray Enter ships the link off-framebuffer
+ *     instead of revealing it. Clipboard-copy keeps the sheet open
+ *     with a status that says the link is NOT on screen; a hard
+ *     failure points back at the reveal path.
  *   - When the browser CANNOT share/copy, that button is disabled
  *     with an inline note, "Show the invite" takes the primary
  *     slot, and focus falls to Cancel (Enter closes, never
- *     reveals).
- *   - "Show the invite" is the only path that puts the URL + QR on
- *     screen. Escape closes from either state.
+ *     reveals). On the camera check, focus is on Cancel too.
+ *   - "Show it now" is the only path that puts the URL + QR on
+ *     screen. Escape closes from every state.
  *
  * lib/share.ts behavior (native-vs-clipboard branch, AbortError →
  * cancelled) is covered in lib/share.test.ts; this suite mocks the
@@ -70,7 +76,7 @@ let container: HTMLDivElement;
 let root: Root;
 let onClose: ReturnType<typeof vi.fn<() => void>>;
 
-function render(open = true) {
+function render(open = true, intent: "share" | "show" = "share") {
   act(() => {
     root.render(
       <MemoryRouter>
@@ -79,6 +85,7 @@ function render(open = true) {
           url={URL}
           shareTitle="Join my community"
           shareText="Come join us."
+          intent={intent}
           onClose={onClose}
         />
       </MemoryRouter>,
@@ -103,7 +110,17 @@ function button(name: string): HTMLButtonElement | undefined {
 
 const SHARE_LABEL = "Send the link without showing it";
 const REVEAL_LABEL = "Show the invite";
+const CONFIRM_LABEL = "Show it now";
 const CANCEL_LABEL = "Not now";
+const CAMERA_TITLE = "Look around before you show this";
+
+/** Menu reveal → camera check → confirm. */
+async function revealThroughCameraCheck() {
+  await click(button(REVEAL_LABEL));
+  expect(container.textContent).toContain(CAMERA_TITLE);
+  expect(container.textContent).not.toContain(TOKEN);
+  await click(button(CONFIRM_LABEL));
+}
 
 beforeEach(() => {
   container = document.createElement("div");
@@ -122,22 +139,42 @@ afterEach(() => {
 });
 
 describe("InviteShareSheet — gate hides the invite", () => {
-  it("opens on the gate with the URL/token off screen", () => {
+  it("opens on the share menu — link-safety copy, NO camera warning yet", () => {
     render();
-    expect(container.textContent).toContain("Look around before you show this");
+    expect(container.textContent).toContain("Share this invite link");
+    // The camera warning waits for the member to ask to SHOW —
+    // the 2026-07 finding: it used to fire at generation.
+    expect(container.textContent).not.toContain(CAMERA_TITLE);
     // The whole point: nothing token-shaped is on the framebuffer yet.
     expect(container.textContent).not.toContain(TOKEN);
     expect(container.querySelector('[data-testid="qr"]')).toBeNull();
   });
 
-  it("re-prompts the gate every time it re-opens", async () => {
+  it("shows the camera check when 'Show the invite' is tapped, before any reveal", async () => {
     render();
     await click(button(REVEAL_LABEL));
+    expect(container.textContent).toContain(CAMERA_TITLE);
+    // Still nothing on screen until the confirming tap.
+    expect(container.textContent).not.toContain(TOKEN);
+    expect(container.querySelector('[data-testid="qr"]')).toBeNull();
+    // Focus parked on Cancel: Enter closes, never reveals.
+    expect(document.activeElement).toBe(button(CANCEL_LABEL));
+  });
+
+  it("opens directly on the camera check with intent='show' (Show QR buttons)", () => {
+    render(true, "show");
+    expect(container.textContent).toContain(CAMERA_TITLE);
+    expect(container.textContent).not.toContain(TOKEN);
+  });
+
+  it("re-prompts the flow every time it re-opens", async () => {
+    render();
+    await revealThroughCameraCheck();
     expect(container.textContent).toContain(TOKEN); // revealed
-    // Close and re-open: back to the gate, URL hidden again.
+    // Close and re-open: back to the menu, URL hidden again.
     render(false);
     render(true);
-    expect(container.textContent).toContain("Look around before you show this");
+    expect(container.textContent).toContain("Share this invite link");
     expect(container.textContent).not.toContain(TOKEN);
   });
 });
@@ -188,13 +225,14 @@ describe("InviteShareSheet — share-without-showing (canShare)", () => {
     expect(container.textContent).not.toContain(TOKEN);
   });
 
-  it("stays on the gate when the native share is cancelled", async () => {
+  it("stays on the menu when the native share is cancelled", async () => {
     shareUrlMock.mockResolvedValue("cancelled");
     render();
     await click(button(SHARE_LABEL));
     expect(onClose).not.toHaveBeenCalled();
     expect(container.textContent).not.toContain(TOKEN);
   });
+
 });
 
 describe("InviteShareSheet — no share/copy available", () => {
@@ -225,16 +263,23 @@ describe("InviteShareSheet — no share/copy available", () => {
 });
 
 describe("InviteShareSheet — reveal + dismissal", () => {
-  it("reveals the URL and QR only after the explicit choice", async () => {
+  it("reveals the URL and QR only after the camera-check confirm", async () => {
     render();
     expect(container.textContent).not.toContain(TOKEN);
-    await click(button(REVEAL_LABEL));
+    await revealThroughCameraCheck();
     expect(container.textContent).toContain("Share this invite");
     expect(container.textContent).toContain(TOKEN); // the <code> URL
     expect(container.querySelector('[data-testid="qr"]')).not.toBeNull();
   });
 
-  it("closes on Escape from the gate without revealing", () => {
+  it("reveals from intent='show' after the single confirming tap", async () => {
+    render(true, "show");
+    await click(button(CONFIRM_LABEL));
+    expect(container.textContent).toContain(TOKEN);
+    expect(container.querySelector('[data-testid="qr"]')).not.toBeNull();
+  });
+
+  it("closes on Escape from the menu without revealing", () => {
     render();
     act(() => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -243,7 +288,14 @@ describe("InviteShareSheet — reveal + dismissal", () => {
     expect(container.textContent).not.toContain(TOKEN);
   });
 
-  it("closes when the gate Cancel is clicked", async () => {
+  it("closes from the camera check via Cancel, without revealing", async () => {
+    render(true, "show");
+    await click(button(CANCEL_LABEL));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(container.textContent).not.toContain(TOKEN);
+  });
+
+  it("closes when the menu Cancel is clicked", async () => {
     render();
     await click(button(CANCEL_LABEL));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -258,7 +310,10 @@ describe("InviteShareSheet — reveal + dismissal", () => {
     const card = container.querySelector('[role="dialog"] > div');
     expect(card?.className).toContain("max-h-full");
     expect(card?.className).toContain("overflow-y-auto");
+    // The reveal now routes through the camera check — walk both
+    // taps to reach the revealed view.
     await click(button(REVEAL_LABEL));
+    await click(button("Show it now"));
     const row = container.querySelector(".landscape-short\\:flex");
     expect(row).not.toBeNull();
     expect(row?.querySelector('[data-testid="qr"]')).not.toBeNull();

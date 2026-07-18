@@ -25,6 +25,7 @@ import {
   listInvitesFrom,
   redeemInvite,
   revokeInvite,
+  setInviteNote,
 } from "./invites";
 import { createMember } from "./seed";
 import { isOnboarded } from "./onboarding";
@@ -115,6 +116,106 @@ describe("issueInvite — server registration", () => {
     // The v11 ruling holds end to end: the raw token never rides the
     // announcement — the server must not hold a live credential.
     expect(outboxRows[0].payload).not.toContain(row.token);
+  });
+});
+
+describe("invite notes — local-only 'who is this for?' label", () => {
+  beforeEach(reset);
+
+  it("stores the trimmed note on the Dexie row, surviving a re-read", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { row } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+        note: "  Carol from the garden  ",
+      },
+      ORIGIN,
+    );
+    // "Survives reload": read back from the database, not from the
+    // return value the UI happened to hold in memory.
+    const stored = await db.invites.get(row.token);
+    expect(stored?.note).toBe("Carol from the garden");
+    const listed = await listInvitesFrom(inviter.publicKey);
+    expect(listed[0].note).toBe("Carol from the garden");
+  });
+
+  it("defaults to the empty string when no note is written", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { row } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    const stored = await db.invites.get(row.token);
+    expect(stored?.note).toBe("");
+  });
+
+  it("NEVER leaves the device: absent from the link and the announcement", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { shareUrl, row } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+        note: "Carol from the garden",
+      },
+      ORIGIN,
+    );
+    // Not in the share link or its encoded payload…
+    expect(shareUrl).not.toContain("Carol");
+    expect(decodeURIComponent(row.encoded)).not.toContain("Carol");
+    // …and not in the JSON the server will be sent.
+    const outboxRows = await db.outbox
+      .filter((o) => o.kind === "invite_announcement")
+      .toArray();
+    expect(outboxRows).toHaveLength(1);
+    expect(outboxRows[0].payload).not.toContain("Carol");
+    expect(outboxRows[0].payload).not.toContain("note");
+  });
+
+  it("setInviteNote updates the stored note (trimmed) for the issuer", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const { row } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    await setInviteNote(inviter.publicKey, row.token, "  Dave next door ");
+    const stored = await db.invites.get(row.token);
+    expect(stored?.note).toBe("Dave next door");
+    // Editing the note queues NOTHING for the server — it's a pure
+    // local write.
+    const outboxRows = await db.outbox.toArray();
+    expect(
+      outboxRows.filter((o) => o.payload.includes("Dave")),
+    ).toHaveLength(0);
+  });
+
+  it("refuses to label someone else's invite", async () => {
+    const inviter = await createMember({ displayName: "Rosa" }, NODE);
+    const other = await createMember({ displayName: "Sam" }, NODE);
+    const { row } = await issueInvite(
+      {
+        inviterKey: inviter.publicKey,
+        inviterName: inviter.displayName,
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    await expect(
+      setInviteNote(other.publicKey, row.token, "mine now"),
+    ).rejects.toThrow(/issuing member/);
+    await expect(
+      setInviteNote(inviter.publicKey, "no-such-token", "x"),
+    ).rejects.toThrow(/find that invite/);
   });
 });
 

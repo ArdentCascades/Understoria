@@ -31,34 +31,37 @@ import {
   type ShareResult,
 } from "@/lib/share";
 
-// Modal sheet for sharing a freshly-generated invite.
+// Modal sheet for sharing an invite.
 //
-// Two states:
+// Three states, entered according to what the member actually asked
+// for (2026-07 usability round: the camera warning used to fire the
+// moment an invite was GENERATED, before anyone asked to show a QR —
+// it now waits for the explicit "show" choice, its natural moment):
 //
-//  1. Gate. The sheet opens with the QR + URL hidden behind a
-//     prompt that names the threat (cameras CAN read QR codes;
-//     device-level malware can ALSO read whatever the app
-//     renders). The visually-primary action is the "send the
-//     link without showing it" path — it routes through
-//     navigator.share / clipboard so the URL never lands on
-//     the framebuffer at all. The on-screen reveal is the
-//     secondary path, the explicit "I trust this device and
-//     this room" choice — not the default. When the share-
-//     without-showing path is unavailable on the browser, the
-//     button is disabled with an inline note and Show-the-
-//     invite takes the primary slot by default (the member
-//     still has to choose it, just from a smaller menu).
+//  1. Menu (intent="share", the post-generation default). Plain
+//     link-safety copy — anyone with the link can join — plus the
+//     two paths in deliberate hierarchy: "send the link without
+//     showing it" primary (routes through navigator.share /
+//     clipboard so the URL never lands on the framebuffer at all),
+//     "show the invite" secondary. No camera warning yet: nothing
+//     is about to go on screen.
 //
-//  2. Revealed. QR + URL + Copy / Share / Done, same as before.
+//  2. Camera check. Reached by tapping "Show the invite" from the
+//     menu, or immediately when the sheet opens with intent="show"
+//     (the "Show QR code" buttons — the member just asked to put
+//     the QR on screen). Names the threat (cameras CAN read QR
+//     codes from across a room) and asks for one confirming tap.
 //
-// The gate re-prompts every time the sheet opens (no persistent
+//  3. Revealed. QR + URL + Copy / Share / Done, same as before.
+//
+// The flow re-prompts every time the sheet opens (no persistent
 // dismissal): the member's surroundings can change between
-// sessions and the deliberate pause is per-share, not per-device.
+// sessions and the deliberate pause is per-show, not per-device.
 //
-// Autofocus tracks the safest available action: the share-
-// without-showing button when available (Enter ships safely),
-// otherwise Cancel (Enter closes, never reveals). The unsafe
-// path always requires an explicit click.
+// Autofocus tracks the safest available action: on the menu, the
+// share-without-showing button when available (Enter ships safely),
+// otherwise Cancel; on the camera check, Cancel (Enter closes,
+// never reveals). The reveal always requires an explicit click.
 //
 // See docs/threat-model.md §7 — "QR codes are camera-surveillance
 // targets" and "Device-level compromise is out of scope."
@@ -70,14 +73,24 @@ export interface InviteShareSheetProps {
   shareTitle: string;
   /** Used as the text in the native share sheet, if shown. */
   shareText: string;
+  /**
+   * What the member asked for. "share" (default) opens on the share
+   * menu; "show" — the explicit Show-QR buttons — skips straight to
+   * the camera check, because that IS the moment before the QR goes
+   * on screen.
+   */
+  intent?: "share" | "show";
   onClose: () => void;
 }
+
+type Stage = "menu" | "camera" | "revealed";
 
 export function InviteShareSheet({
   open,
   url,
   shareTitle,
   shareText,
+  intent = "share",
   onClose,
 }: InviteShareSheetProps) {
   const { t } = useTranslation();
@@ -85,37 +98,39 @@ export function InviteShareSheet({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const shareWithoutShowingRef = useRef<HTMLButtonElement>(null);
   const doneRef = useRef<HTMLButtonElement>(null);
-  const [revealed, setRevealed] = useState(false);
+  const [stage, setStage] = useState<Stage>("menu");
   const [status, setStatus] = useState<string | null>(null);
 
   useFocusTrap(cardRef, open);
 
   useEffect(() => {
     if (open) {
-      // Fresh open → re-prompt the gate. A member's surroundings
-      // can change between two share sessions on the same device.
-      setRevealed(false);
+      // Fresh open → restart the flow at the intent's first screen.
+      // A member's surroundings can change between two sessions on
+      // the same device, so the camera check never stays dismissed.
+      setStage(intent === "show" ? "camera" : "menu");
       setStatus(null);
     }
-  }, [open]);
+  }, [open, intent]);
 
   useEffect(() => {
     if (!open) return;
     // Autofocus tracks the safest available action so a stray
     // Enter never reveals the invite:
     //   - revealed: Done (closes the sheet)
-    //   - gate, canShare: the share-without-showing button
+    //   - menu, canShare: the share-without-showing button
     //     (Enter ships the link without putting it on screen)
-    //   - gate, !canShare: Cancel (Enter closes; the unsafe
+    //   - menu, !canShare: Cancel (Enter closes; the unsafe
     //     reveal still needs an explicit click)
-    if (revealed) {
+    //   - camera check: Cancel (Enter closes, never reveals)
+    if (stage === "revealed") {
       doneRef.current?.focus();
-    } else if (canShareUrl()) {
+    } else if (stage === "menu" && canShareUrl()) {
       shareWithoutShowingRef.current?.focus();
     } else {
       cancelRef.current?.focus();
     }
-  }, [open, revealed]);
+  }, [open, stage]);
 
   useEffect(() => {
     if (!open) return;
@@ -127,15 +142,16 @@ export function InviteShareSheet({
   }, [open, onClose]);
 
   async function handleShare(fromGate: boolean) {
-    // From the gate, share the BARE url — no message text. The gate's
-    // whole job is moving the link off-device intact, and `text` is
-    // what platforms trip over: several share sheets' "Copy" action
-    // copies the text (or a text+url concatenation) instead of a
-    // clean link, so a member who taps Copy pastes a prose blob — or
-    // worse, a message whose link a URL bar can't use. Url-only
-    // payloads survive every target's Copy as a clean, pasteable
-    // link (2026-07 field report). The revealed view keeps the
-    // friendly message: there the member SEES what's being shared.
+    // From the pre-reveal stages, share the BARE url — no message
+    // text. The gate's whole job is moving the link off-device
+    // intact, and `text` is what platforms trip over: several share
+    // sheets' "Copy" action copies the text (or a text+url
+    // concatenation) instead of a clean link, so a member who taps
+    // Copy pastes a prose blob — or worse, a message whose link a
+    // URL bar can't use. Url-only payloads survive every target's
+    // Copy as a clean, pasteable link (2026-07 field report). The
+    // revealed view keeps the friendly message: there the member
+    // SEES what's being shared.
     const result: ShareResult = await shareUrl({
       url,
       title: shareTitle,
@@ -153,26 +169,26 @@ export function InviteShareSheet({
       case "cancelled":
         break;
       case "copied":
-        // Copy: keep the sheet open with a status. From the gate
-        // we need different copy than the revealed view because
+        // Copy: keep the sheet open with a status. Pre-reveal we
+        // need different copy than the revealed view because
         // "the link" isn't visible — the message should tell
         // the member what to do next.
         setStatus(
           t(
             fromGate
-              ? "profile.invites.shareSheet.cameraGate.statusCopied"
+              ? "profile.invites.shareSheet.gate.statusCopied"
               : "profile.invites.shareSheet.statusCopied",
           ),
         );
         break;
       case "failed":
-        // Failure from the gate: don't tell the member to "select
+        // Failure pre-reveal: don't tell the member to "select
         // the link" — it isn't on screen. Suggest the revealed
         // path instead.
         setStatus(
           t(
             fromGate
-              ? "profile.invites.shareSheet.cameraGate.statusFailed"
+              ? "profile.invites.shareSheet.gate.statusFailed"
               : "profile.invites.shareSheet.statusFailed",
           ),
         );
@@ -208,7 +224,7 @@ export function InviteShareSheet({
         ref={cardRef}
         className="card max-h-full w-full max-w-md animate-fade-in overflow-y-auto overscroll-contain landscape-short:max-w-2xl"
       >
-        {revealed ? (
+        {stage === "revealed" ? (
           <RevealedView
             url={url}
             status={status}
@@ -218,11 +234,19 @@ export function InviteShareSheet({
             doneRef={doneRef}
             t={t}
           />
+        ) : stage === "camera" ? (
+          <CameraCheckView
+            status={status}
+            onConfirm={() => setStage("revealed")}
+            onCancel={onClose}
+            cancelRef={cancelRef}
+            t={t}
+          />
         ) : (
-          <GateView
+          <MenuView
             status={status}
             canShare={canShareUrl()}
-            onReveal={() => setRevealed(true)}
+            onShowRequested={() => setStage("camera")}
             onShareWithoutShowing={() => void handleShare(true)}
             onCancel={onClose}
             cancelRef={cancelRef}
@@ -235,24 +259,24 @@ export function InviteShareSheet({
   );
 }
 
-// Pre-reveal state. Names the threat (cameras + on-device
-// software) and offers two paths in deliberate hierarchy:
+// Post-generation menu. Plain link-safety framing and two paths in
+// deliberate hierarchy:
 //
 //   - Primary: send the link without showing it (canShare=true)
 //     — URL never lands on the framebuffer, defends against
 //     both camera surveillance and screen-reading malware.
-//   - Secondary: show the invite — the explicit "I trust this
-//     device and this room" choice, not the default.
+//   - Secondary: show the invite — which routes through the
+//     camera check before anything appears on screen.
 //
 // When canShare is false, the primary button is disabled (with
 // an inline note explaining why) and "show the invite" takes
 // over the primary visual slot. The visual order of the
 // buttons stays the same so the *teaching* is consistent —
 // the safer path is always listed first.
-function GateView({
+function MenuView({
   status,
   canShare,
-  onReveal,
+  onShowRequested,
   onShareWithoutShowing,
   onCancel,
   cancelRef,
@@ -261,11 +285,89 @@ function GateView({
 }: {
   status: string | null;
   canShare: boolean;
-  onReveal: () => void;
+  onShowRequested: () => void;
   onShareWithoutShowing: () => void;
   onCancel: () => void;
   cancelRef: React.RefObject<HTMLButtonElement>;
   shareWithoutShowingRef: React.RefObject<HTMLButtonElement>;
+  t: (key: string) => string;
+}) {
+  return (
+    <>
+      <h2
+        id="share-sheet-title"
+        className="text-center text-lg font-semibold"
+      >
+        {t("profile.invites.shareSheet.gate.title")}
+      </h2>
+      <p className="mt-3 text-sm text-moss-700 dark:text-moss-200">
+        {t("profile.invites.shareSheet.gate.body")}
+      </p>
+
+      {status && (
+        <p
+          role="status"
+          className="mt-3 rounded-xl bg-canopy-50 px-3 py-2 text-sm text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100"
+        >
+          {status}
+        </p>
+      )}
+
+      <div className="mt-5 flex flex-col gap-2">
+        <button
+          ref={shareWithoutShowingRef}
+          type="button"
+          className={canShare ? "btn-primary" : "btn-secondary"}
+          onClick={onShareWithoutShowing}
+          disabled={!canShare}
+          aria-describedby={
+            !canShare ? "share-without-showing-note" : undefined
+          }
+        >
+          {t("profile.invites.shareSheet.gate.shareWithoutShowing")}
+        </button>
+        {!canShare && (
+          <p
+            id="share-without-showing-note"
+            className="text-xs text-moss-600 dark:text-moss-300"
+          >
+            {t("profile.invites.shareSheet.gate.notAvailable")}
+          </p>
+        )}
+        <button
+          type="button"
+          className={canShare ? "btn-secondary" : "btn-primary"}
+          onClick={onShowRequested}
+        >
+          {t("profile.invites.shareSheet.gate.reveal")}
+        </button>
+        <button
+          ref={cancelRef}
+          type="button"
+          className="btn-ghost"
+          onClick={onCancel}
+        >
+          {t("profile.invites.shareSheet.gate.cancel")}
+        </button>
+      </div>
+    </>
+  );
+}
+
+// The look-around moment — shown only once the member has asked to
+// put the QR/link on screen (never at generation). Names the threat
+// (cameras + on-device software) and takes one confirming tap.
+function CameraCheckView({
+  status,
+  onConfirm,
+  onCancel,
+  cancelRef,
+  t,
+}: {
+  status: string | null;
+  onConfirm: () => void;
+  onCancel: () => void;
+  cancelRef: React.RefObject<HTMLButtonElement>;
   t: (key: string) => string;
 }) {
   return (
@@ -304,31 +406,11 @@ function GateView({
 
       <div className="mt-5 flex flex-col gap-2">
         <button
-          ref={shareWithoutShowingRef}
           type="button"
-          className={canShare ? "btn-primary" : "btn-secondary"}
-          onClick={onShareWithoutShowing}
-          disabled={!canShare}
-          aria-describedby={
-            !canShare ? "share-without-showing-note" : undefined
-          }
+          className="btn-primary"
+          onClick={onConfirm}
         >
-          {t("profile.invites.shareSheet.cameraGate.shareWithoutShowing")}
-        </button>
-        {!canShare && (
-          <p
-            id="share-without-showing-note"
-            className="text-xs text-moss-600 dark:text-moss-300"
-          >
-            {t("profile.invites.shareSheet.cameraGate.notAvailable")}
-          </p>
-        )}
-        <button
-          type="button"
-          className={canShare ? "btn-secondary" : "btn-primary"}
-          onClick={onReveal}
-        >
-          {t("profile.invites.shareSheet.cameraGate.reveal")}
+          {t("profile.invites.shareSheet.cameraGate.confirm")}
         </button>
         <button
           ref={cancelRef}

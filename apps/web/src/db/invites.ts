@@ -60,6 +60,11 @@ export interface IssueInviteInput {
   inviterName: string;
   nodeId: string;
   expiresInMs?: number;
+  /** Optional "who is this for?" label, e.g. "Carol from the garden".
+   *  LOCAL-ONLY: stored on the local Dexie row for the inviter's own
+   *  eyes — never part of the signed invite, never in the share link,
+   *  never in the server announcement. */
+  note?: string;
 }
 
 export interface IssuedInvite {
@@ -104,6 +109,10 @@ export async function issueInvite(
     redeemedBy: null,
     redeemedAt: null,
     encoded,
+    // The personal label stays HERE and only here — the signed invite
+    // (and thus the encoded link) and the announcement below are built
+    // without it, so it can never leave this device.
+    note: input.note?.trim() ?? "",
   };
   await db.invites.put(row);
   // Server registration (operator ruling 2026-07): the inviter's
@@ -156,6 +165,23 @@ export async function listInvitesFrom(
     .equals(inviterKey)
     .reverse()
     .sortBy("createdAt");
+}
+
+/**
+ * Update the local-only "who is this for?" note on an invite the
+ * member issued. Pure local write — the note never federates, so
+ * there is no outbox leg here and never will be.
+ */
+export async function setInviteNote(
+  inviterKey: string,
+  token: string,
+  note: string,
+): Promise<void> {
+  const row = await db.invites.get(token);
+  if (!row) throw new Error("We couldn't find that invite on this device.");
+  if (row.inviterKey !== inviterKey)
+    throw new Error("Only the issuing member can label this invite.");
+  await db.invites.update(token, { note: note.trim() });
 }
 
 export async function revokeInvite(
