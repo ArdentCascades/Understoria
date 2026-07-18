@@ -174,7 +174,7 @@ export default function ProposalsPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         {/* Reached from Profile's governance cluster (and from
             cross-links between the governance pages), so back follows
             in-app history when there is any and falls back to
@@ -189,7 +189,7 @@ export default function ProposalsPage() {
         <h1 className="page-title mt-2">
           {t("proposals.title")}
         </h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("proposals.subtitle")}
         </p>
       </header>

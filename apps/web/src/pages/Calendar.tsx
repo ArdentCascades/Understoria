@@ -459,9 +459,9 @@ export default function CalendarPage() {
           full-screen takeover, so the flex row is inert there. */}
       <div className="lg:flex lg:items-start lg:gap-6 landscape-short:flex landscape-short:items-start landscape-short:gap-4">
       <div className="min-w-0 lg:flex-1 landscape-short:flex-1">
-      <header className="mb-stack-md">
+      <header className="mb-stack-md landscape-short:mb-2">
         <h1 className="page-title">{t("calendar.title")}</h1>
-        <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle mt-1 text-sm text-moss-600 dark:text-moss-300">
           {t("calendar.tagline")}
         </p>
       </header>

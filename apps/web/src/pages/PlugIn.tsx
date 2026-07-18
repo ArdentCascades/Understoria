@@ -103,14 +103,14 @@ export default function PlugInPage() {
 
   return (
     <div className="mx-auto max-w-screen-md px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <h1 className="page-title">{t("plugIn.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("plugIn.subtitle")}
           <WhyTooltip principleId="asking-never-gated" />
         </p>
         {/* §4 rendered as copy: the shelf never walks up to you. */}
-        <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle mt-1 text-xs text-moss-600 dark:text-moss-300">
           {t("plugIn.noObligation")}
         </p>
       </header>

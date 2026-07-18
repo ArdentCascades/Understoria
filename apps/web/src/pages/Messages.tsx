@@ -219,7 +219,7 @@ export default function MessagesShell() {
         }
       >
         <div className="px-4 pb-8 pt-4">
-          <header className="mb-4">
+          <header className="mb-4 landscape-short:mb-2">
             <h1 className="page-title">
               {t("messages.title")}
               <WhyTooltip principleId="no-read-receipts" />

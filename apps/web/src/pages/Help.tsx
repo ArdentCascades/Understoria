@@ -169,7 +169,7 @@ export default function HelpPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
           className="btn-ghost -ml-2 text-sm"
@@ -180,7 +180,7 @@ export default function HelpPage() {
         <h1 className="page-title mt-2">
           {t("help.title")}
         </h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("help.subtitle")}
         </p>
         {/* Paper systems P5: the tabling one-pager, projected from
@@ -278,7 +278,12 @@ export default function HelpPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        // A phone held sideways (landscape-short): the section cards
+        // pair up two-across instead of one long stack — plain grid
+        // auto-placement, so DOM (= reading) order is untouched and
+        // the chips' scrollIntoView jumps still land. space-y must be
+        // zeroed where the grid takes over (gap owns the rhythm).
+        <div className="space-y-6 landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-start landscape-short:gap-4 landscape-short:space-y-0">
           {visibleSections.map((section: FaqSection) => {
             const Icon = sectionIcon(section.id);
             return (

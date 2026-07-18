@@ -442,7 +442,7 @@ export default function AddDevicePage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
           className="btn-ghost -ml-2 text-sm"
@@ -451,7 +451,7 @@ export default function AddDevicePage() {
           {t("common.back")}
         </button>
         <h1 className="page-title mt-2">{t("addDevice.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("addDevice.subtitle")}
         </p>
       </header>

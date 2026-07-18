@@ -426,9 +426,9 @@ export default function BoardPage() {
           takeover, so the flex row is inert there. */}
       <div className="lg:flex lg:items-start lg:gap-6 landscape-short:flex landscape-short:items-start landscape-short:gap-4">
       <div className="min-w-0 lg:flex-1 landscape-short:flex-1">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <h1 className="page-title">{t("board.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("board.tagline")}
         </p>
       </header>

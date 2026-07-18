@@ -233,4 +233,23 @@ describe("HelpPage — accordion, filter, deep links", () => {
     expect(nav).not.toBeNull();
     expect(nav.querySelectorAll("button").length).toBe(7);
   });
+
+  // landscape-short (a phone held sideways — the shared variant in
+  // tailwind.config.js): the section cards pair up two-across.
+  // jsdom can't evaluate the media query, so pin the class contract.
+  it("the section list carries the landscape-short two-column classes", () => {
+    render(<HelpPage />);
+    const list = container.querySelector(
+      "#faq-section-posts",
+    )!.parentElement!;
+    for (const cls of [
+      "landscape-short:grid",
+      "landscape-short:grid-cols-2",
+      "landscape-short:items-start",
+      "landscape-short:gap-4",
+      "landscape-short:space-y-0",
+    ]) {
+      expect(list.className).toContain(cls);
+    }
+  });
 });

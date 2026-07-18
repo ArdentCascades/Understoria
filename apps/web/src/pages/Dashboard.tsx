@@ -176,13 +176,13 @@ export default function DashboardPage() {
           {t("dashboard.membershipRejectedBanner")}
         </div>
       )}
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <div className="flex items-center gap-2 text-canopy-700 dark:text-canopy-300">
           <Sprig size={20} />
           <h1 className="page-title min-w-0">{t("dashboard.title")}</h1>
           <Sprig size={20} className="-scale-x-100" />
         </div>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           <em>{t("dashboard.tagline")}</em>
           <WhyTooltip principleId="no-leaderboards" />
         </p>
@@ -203,7 +203,11 @@ export default function DashboardPage() {
           on a calm week both cards render null and the main column
           takes the full width instead of framing a dead rail. */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
-      <div className="contents lg:col-start-2 lg:row-start-1 lg:block lg:w-[320px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden">
+      {/* landscape-short: no room for a sticky rail on a ~390px-tall
+          viewport, so instead the doorway cards pair up two-across in
+          their existing DOM order (Coming up + Resume, then Hands +
+          Desk) — half the vertical cost, reading order untouched. */}
+      <div className="contents lg:col-start-2 lg:row-start-1 lg:block lg:w-[320px] lg:self-start lg:sticky lg:top-4 lg:empty:hidden landscape-short:grid landscape-short:grid-cols-2 landscape-short:items-start landscape-short:gap-x-4">
       {/* Quiet "what's coming up" glance — leads the page only when there
           are upcoming events; renders nothing otherwise. */}
       <UpcomingGatherings />
@@ -317,7 +321,7 @@ export default function DashboardPage() {
       )}
       </div>
 
-      <div className="my-2">
+      <div className="my-2 landscape-short:my-1">
         <LeafDivider variant="short" />
       </div>
 
@@ -385,7 +389,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="my-2">
+      <div className="my-2 landscape-short:my-1">
         <LeafDivider variant="short" />
       </div>
 
@@ -408,7 +412,7 @@ export default function DashboardPage() {
       </div>
 
       <section className="card mb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-2">
           {t("dashboard.categoryBreakdown.title")}
         </h2>
         {totalCategoryHours === 0 ? (
@@ -455,7 +459,7 @@ export default function DashboardPage() {
       </section>
       </div>
 
-      <div className="my-2">
+      <div className="my-2 landscape-short:my-1">
         <LeafDivider variant="short" />
       </div>
 
@@ -482,7 +486,7 @@ export default function DashboardPage() {
             <LeafDivider variant="short" />
           </div>
           <section className="card">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300 landscape-short:mb-2">
             {t("dashboard.rolesThisMonth.title")}
           </h2>
           <ul className="flex flex-col gap-2 text-sm">
